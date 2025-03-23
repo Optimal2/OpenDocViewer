@@ -1,0 +1,55 @@
+<!-- File: public/index.html -->
+
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <meta name="theme-color" content="#000000" />
+    <meta name="description" content="OpenDocViewer – React JavaScript Document Viewer" />
+    <meta name="keywords" content="document viewer, React, JavaScript, OpenDocViewer" />
+    <meta property="og:title" content="OpenDocViewer" />
+    <meta property="og:description" content="OpenDocViewer – React JavaScript Document Viewer" />
+    <meta property="og:image" content="%PUBLIC_URL%/logo192.png" />
+    <meta property="og:url" content="https://your-website-url.com" />
+    <link rel="icon" href="%PUBLIC_URL%/favicon.ico" />
+    <link rel="apple-touch-icon" href="%PUBLIC_URL%/logo192.png" />
+    <link rel="manifest" href="%PUBLIC_URL%/manifest.json" />
+    <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+    <link 
+      rel="preload" 
+      href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" 
+      as="style" 
+      onload="this.onload=null;this.rel='stylesheet'" 
+    />
+    <noscript>
+      <link 
+        rel="stylesheet" 
+        href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200" 
+      />
+    </noscript>
+    <title>OpenDocViewer</title>
+    <style>
+      body {
+        margin: 0;
+        padding: 0;
+        font-family: Arial, sans-serif;
+      }
+      #root {
+        height: 100vh;
+        width: 100vw;
+        display: flex;
+        flex-direction: column;
+      }
+    </style>
+  </head>
+  <body>
+    <noscript>
+      <div style="text-align: center; margin-top: 20%;">
+        <h1>JavaScript is disabled</h1>
+        <p>You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page.</p>
+      </div>
+    </noscript>
+    <div id="root" aria-live="polite"></div>
+  </body>
+</html>

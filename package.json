@@ -1,0 +1,85 @@
+{
+  "name": "opendocviewer",
+  "version": "0.1.0",
+  "private": true,
+  "dependencies": {
+    "@testing-library/jest-dom": "^6.6.3",
+    "@testing-library/react": "^16.2.0",
+    "@testing-library/user-event": "^14.6.1",
+    "axios": "^1.8.4",
+    "concurrently": "^9.1.2",
+    "cors": "^2.8.5",
+    "file-type": "^20.4.1",
+    "helmet": "^8.1.0",
+    "jspdf": "^3.0.1",
+    "morgan": "^1.10.0",
+    "pdfjs-dist": "^5.0.375",
+    "react": "^19.0.0",
+    "react-dom": "^19.0.0",
+    "react-scripts": "5.0.1",
+    "react-window": "^1.8.11",
+    "utif2": "^4.1.0",
+    "web-vitals": "^4.2.4"
+  },
+  "devDependencies": {
+    "@babel/plugin-transform-private-property-in-object": "^7.25.9",
+    "@svgr/webpack": "^8.1.0",
+    "@typescript-eslint/eslint-plugin": "^8.27.0",
+    "@typescript-eslint/parser": "^8.27.0",
+    "@typescript-eslint/utils": "^8.27.0",
+    "cross-env": "^7.0.3",
+    "docdash": "^2.0.2",
+    "eslint-config-prettier": "^10.1.1",
+    "eslint-config-react-app": "^7.0.1",
+    "eslint-plugin-jest": "^28.11.0",
+    "eslint-plugin-react": "^7.37.4",
+    "jsdoc": "^4.0.4",
+    "postcss": "^8.5.3",
+    "prettier": "^3.5.3"
+  },
+  "overrides": {
+    "@typescript-eslint/utils": "^8.27.0",
+    "@svgr/webpack": "^8.1.0",
+    "postcss": "^8.5.3",
+    "dompurify": "^3.2.4",
+    "serialize-javascript": "^6.0.2"
+  },
+  "scripts": {
+    "start": "cross-env NODE_OPTIONS=--no-deprecation react-scripts start",
+    "build": "react-scripts build",
+    "test": "react-scripts test",
+    "eject": "react-scripts eject",
+    "lint": "eslint 'src/**/*.{js,jsx}'",
+    "lint:fix": "eslint 'src/**/*.{js,jsx}' --fix",
+    "format": "prettier --write 'src/**/*.{js,jsx,css,scss,md}'",
+    "doc": "jsdoc -c jsdoc.json",
+    "start:log-server": "node server.js",
+    "start:both": "concurrently \"npm run start\" \"npm run start:log-server\""
+  },
+  "eslintConfig": {
+    "extends": [
+      "react-app",
+      "react-app/jest",
+      "plugin:react/recommended",
+      "prettier"
+    ],
+    "plugins": [
+      "react"
+    ],
+    "rules": {
+      "react/prop-types": "off"
+    }
+  },
+  "browserslist": {
+    "production": [
+      ">0.2%",
+      "not dead",
+      "not op_mini all"
+    ],
+    "development": [
+      "last 1 chrome version",
+      "last 1 firefox version",
+      "last 1 safari version"
+    ]
+  }
+}
