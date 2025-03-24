@@ -16,7 +16,7 @@ import { handleWorkerMessage } from './WorkerHandler';
 export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, isMounted) => {
   try {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.0.375/pdf.worker.min.mjs';
 
     const pdf = await pdfjsLib.getDocument({ data: job.arrayBuffer }).promise;
     for (let i = job.pageStartIndex + 1; i <= job.pageStartIndex + job.pagesInvolved; i++) {

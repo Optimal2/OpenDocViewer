@@ -49,7 +49,7 @@ export const getTotalPages = async (arrayBuffer, fileExtension) => {
   const fileExtLower = fileExtension.toLowerCase();
   if (fileExtLower === 'pdf') {
     const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/4.4.168/pdf.worker.min.mjs';
+    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.0.375/pdf.worker.min.mjs';
     const arrayBufferCopy = arrayBuffer.slice(0);
     const pdf = await pdfjsLib.getDocument({ data: arrayBufferCopy }).promise;
     logger.debug('PDF document loaded', { numPages: pdf.numPages });

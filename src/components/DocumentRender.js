@@ -21,23 +21,26 @@ const getCurrentPage = (allPages, pageNumber) => {
 
 /**
  * DocumentRender component.
- * Renders the document page with the provided properties and controls.
+ * Initially displays a loading indicator until all pages are loaded in the background.
+ * Once all pages are loaded, it automatically displays the current page and applies "fit to screen" zoom.
  *
+ * @component
  * @param {Object} props - Component props.
  * @param {number} props.pageNumber - The current page number.
  * @param {number} props.zoom - The current zoom level.
- * @param {function} props.initialRenderDone - Callback for initial render done.
- * @param {function} props.onRender - Callback for render.
- * @param {Object} props.viewerContainerRef - Reference to the viewer container.
- * @param {function} props.setZoom - Function to set the zoom level.
- * @param {function} props.setPageNumber - Function to set the page number.
+ * @param {Function} [props.initialRenderDone] - Callback for initial render completion.
+ * @param {Function} [props.onRender] - Callback to signal render completion.
+ * @param {Object} props.viewerContainerRef - Ref to the viewer container.
+ * @param {Function} props.setZoom - Function to set the zoom level.
+ * @param {Function} props.setPageNumber - Function to set the page number.
  * @param {boolean} props.isCompareMode - Flag indicating compare mode.
- * @param {Object} props.imageProperties - Image properties (brightness, contrast, rotation).
+ * @param {Object} props.imageProperties - Image properties (rotation, brightness, contrast).
  * @param {boolean} props.isCanvasEnabled - Flag indicating if canvas rendering is enabled.
- * @param {boolean} props.forceRender - Flag to force rendering.
+ * @param {boolean} props.forceRender - Flag to force re-rendering.
  * @param {Array} props.allPages - Array of all pages.
- * @param {Object} props.thumbnailsContainerRef - Reference to the thumbnails container.
- * @param {Object} ref - Reference object.
+ * @param {Object} props.thumbnailsContainerRef - Ref to the thumbnails container.
+ * @param {Object} ref - React ref.
+ * @returns {JSX.Element} The rendered document.
  */
 const DocumentRender = React.forwardRef(({
   pageNumber,
@@ -58,24 +61,38 @@ const DocumentRender = React.forwardRef(({
   const imgRef = useRef(null);
   const initialRenderRef = useRef(false);
   const [lastRendered, setLastRendered] = useState(null);
-  const [previousStatus, setPreviousStatus] = useState(getCurrentPage(allPages, pageNumber)?.status);
   const [shouldForceRender, setShouldForceRender] = useState(forceRender);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
+  // Controls whether to display the image page; initially false.
+  const [showPage, setShowPage] = useState(false);
 
   const currentPage = useMemo(() => getCurrentPage(allPages, pageNumber), [allPages, pageNumber]);
 
   /**
-   * Draws the image on the canvas with the specified properties.
+   * Helper to get the "real" dimensions of the image.
+   * Uses currentPage.realWidth/realHeight if available; otherwise falls back to the image's natural dimensions.
    *
-   * @param {HTMLImageElement} image - The image element to draw.
+   * @param {HTMLImageElement} image - The loaded image element.
+   * @returns {{width: number, height: number}} The dimensions object.
+   */
+  const getImageDimensions = useCallback((image) => {
+    const realWidth = currentPage.realWidth || image.naturalWidth;
+    const realHeight = currentPage.realHeight || image.naturalHeight;
+    logger.info('Using image dimensions', { realWidth, realHeight });
+    return { width: realWidth, height: realHeight };
+  }, [currentPage]);
+
+  /**
+   * Draws the image on the canvas using the "real" dimensions.
+   *
+   * @param {HTMLImageElement} image - The loaded image element.
    */
   const drawImageOnCanvas = useCallback((image) => {
     const canvas = canvasRef.current;
     const context = canvas?.getContext('2d');
-
     if (!canvas || !image || !context) return;
 
-    const { width, height } = image;
+    const { width, height } = getImageDimensions(image);
     const { rotation, brightness, contrast } = imageProperties;
 
     if (rotation === 90 || rotation === 270) {
@@ -93,9 +110,23 @@ const DocumentRender = React.forwardRef(({
     context.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     context.drawImage(image, -width / 2, -height / 2, width, height);
     context.restore();
-  }, [imageProperties]);
+  }, [imageProperties, getImageDimensions]);
 
+  // Automatically set showPage to true once all pages are loaded.
   useEffect(() => {
+    if (
+      !showPage &&
+      allPages &&
+      allPages.length > 0 &&
+      allPages.every(page => page.status === 1)
+    ) {
+      setShowPage(true);
+    }
+  }, [allPages, showPage]);
+
+  // Load the current image when showPage is true.
+  useEffect(() => {
+    if (!showPage) return;
     if (!currentPage || (pageNumber === lastRendered && !shouldForceRender)) return;
 
     const loadCurrentImage = () => {
@@ -104,30 +135,64 @@ const DocumentRender = React.forwardRef(({
       imgRef.current = image;
 
       image.onload = () => {
-        if (isCanvasEnabled) drawImageOnCanvas(image);
-        if (!initialRenderRef.current) {
-          initialRenderDone();
-          initialRenderRef.current = true;
-        }
-        onRender();
-        setLastRendered(pageNumber);
-        setShouldForceRender(false);
-
-        if (isInitialLoad) {
-          setIsInitialLoad(false);
-          calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isCompareMode);
-        }
-
-        if (thumbnailsContainerRef.current) {
-          const anchor = document.getElementById(`thumbnail-anchor-${pageNumber}`);
-          if (anchor) {
-            thumbnailsContainerRef.current.scrollTop = anchor.offsetTop - thumbnailsContainerRef.current.offsetTop;
-            logger.info('DocumentRender: Scrolled to current page', { pageNumber, offsetTop: anchor.offsetTop });
-          } else {
-            logger.warn('DocumentRender: Anchor not found', { pageNumber });
+        setTimeout(() => {
+          if (isCanvasEnabled) {
+            drawImageOnCanvas(image);
           }
-        }
+          if (!initialRenderRef.current) {
+            initialRenderDone();
+            initialRenderRef.current = true;
+          }
+          onRender();
+          setLastRendered(pageNumber);
+          setShouldForceRender(false);
+
+          if (isInitialLoad) {
+            setIsInitialLoad(false);
+            // Calculate available space using viewer container dimensions.
+            const topMenuHeight = 0;
+            const thumbnailsWidth = 0;
+            const container = viewerContainerRef.current;
+            if (container) {
+              const rect = container.getBoundingClientRect();
+              let availableWidth = rect.width - thumbnailsWidth;
+              let availableHeight = rect.height - topMenuHeight;
+              if (isCompareMode) {
+                availableWidth = availableWidth / 2;
+              }
+              const { width: imgWidth, height: imgHeight } = getImageDimensions(image);
+              const widthRatio = availableWidth / imgWidth;
+              const heightRatio = availableHeight / imgHeight;
+              const newZoom = Math.min(widthRatio, heightRatio);
+              logger.info('Calculated fit-to-screen zoom', {
+                containerRect: rect,
+                availableWidth,
+                availableHeight,
+                imgWidth,
+                imgHeight,
+                widthRatio,
+                heightRatio,
+                newZoom
+              });
+              setTimeout(() => {
+                setZoom(newZoom);
+              }, 0);
+            }
+          }
+
+          if (thumbnailsContainerRef.current) {
+            const anchor = document.getElementById(`thumbnail-anchor-${pageNumber}`);
+            if (anchor) {
+              thumbnailsContainerRef.current.scrollTop =
+                anchor.offsetTop - thumbnailsContainerRef.current.offsetTop;
+              logger.info('Scrolled to current page', { pageNumber, offsetTop: anchor.offsetTop });
+            } else {
+              logger.warn('Anchor not found', { pageNumber });
+            }
+          }
+        }, 0);
       };
+
       image.onerror = () => {
         logger.error(`Failed to load image for page ${pageNumber}`);
       };
@@ -135,20 +200,30 @@ const DocumentRender = React.forwardRef(({
     };
 
     loadCurrentImage();
-  }, [currentPage, pageNumber, initialRenderDone, onRender, lastRendered, drawImageOnCanvas, isCanvasEnabled, setZoom, shouldForceRender, isInitialLoad, viewerContainerRef, isCompareMode, thumbnailsContainerRef]);
+  }, [
+    showPage,
+    currentPage,
+    pageNumber,
+    initialRenderDone,
+    onRender,
+    lastRendered,
+    drawImageOnCanvas,
+    isCanvasEnabled,
+    setZoom,
+    shouldForceRender,
+    isInitialLoad,
+    viewerContainerRef,
+    isCompareMode,
+    thumbnailsContainerRef,
+    getImageDimensions
+  ]);
 
+  // Redraw the canvas when zoom or image properties change.
   useEffect(() => {
-    if (currentPage?.status !== previousStatus && currentPage?.status === 1) {
-      setPreviousStatus(currentPage.status);
-      setTimeout(() => setPageNumber(pageNumber), 0);
-    }
-  }, [currentPage?.status, previousStatus, setPageNumber, pageNumber]);
-
-  useEffect(() => {
-    if (isCanvasEnabled) {
+    if (isCanvasEnabled && showPage) {
       drawImageOnCanvas(imgRef.current);
     }
-  }, [zoom, imageProperties, drawImageOnCanvas, isCanvasEnabled]);
+  }, [zoom, imageProperties, drawImageOnCanvas, isCanvasEnabled, showPage]);
 
   useEffect(() => {
     if (forceRender) {
@@ -190,14 +265,31 @@ const DocumentRender = React.forwardRef(({
 
   React.useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);
 
+  // While showPage is false, display a centered loading indicator.
+  if (!showPage) {
+    return (
+      <div className="document-render-container" style={{
+        height: '100%',
+        position: 'relative',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center'
+      }}>
+        <div className="loading-progress" style={{ fontSize: '1.5rem' }}>
+          Loading pages… Please wait.
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="document-render-container" style={{ height: '100%', position: 'relative' }}>
       {currentPage && currentPage.status === 1 ? (
         isCanvasEnabled ? (
           <CanvasRenderer
             ref={canvasRef}
-            naturalWidth={imgRef.current?.naturalWidth || 0}
-            naturalHeight={imgRef.current?.naturalHeight || 0}
+            naturalWidth={imgRef.current?.naturalWidth || (currentPage.realWidth || 0)}
+            naturalHeight={imgRef.current?.naturalHeight || (currentPage.realHeight || 0)}
             zoom={zoom}
             pageNumber={pageNumber}
           />
