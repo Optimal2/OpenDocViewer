@@ -1,6 +1,7 @@
 # OpenDocViewer
 
-OpenDocViewer is an open-source, MIT-licensed document viewer built with React. It supports multiple document formats, including images and PDFs, and provides intuitive features like zoom, rotation, brightness/contrast adjustments, and side-by-side document comparison.
+OpenDocViewer is an open‑source, MIT‑licensed document viewer built with **React + Vite**.  
+It supports images (JPG/PNG/TIFF) and PDFs, offers zoom/rotation/brightness/contrast, and can show documents side‑by‑side with thumbnails and printing.
 
 ## Table of Contents
 - [Getting Started](#getting-started)
@@ -9,112 +10,103 @@ OpenDocViewer is an open-source, MIT-licensed document viewer built with React. 
 - [Logging](#logging)
 - [Documentation](#documentation)
 - [Features](#features)
-- [Contributing](#contributing)
 - [License](#license)
 
 ## Getting Started
 
 ### Prerequisites
-- [Node.js](https://nodejs.org/) (v14.x or higher)
-- [npm](https://www.npmjs.com/) (v6.x or higher)
+- [Node.js](https://nodejs.org/) (v18+ recommended)
+- npm (comes with Node)
 
 ### Installation
-Clone the repository:
 ```sh
-git clone https://github.com/Optimal2/OpenDocViewer/OpenDocViewer.git
-```
-
-Navigate to the project directory:
-```sh
+git clone https://github.com/Optimal2/OpenDocViewer.git
 cd OpenDocViewer
-```
-
-Install dependencies:
-```sh
 npm install
-```
+````
 
-### Running the App
-Start the development server:
+### Run (development)
+
 ```sh
-npm start
+npm run dev
 ```
 
-Open [http://localhost:3000](http://localhost:3000) in your browser. The page reloads automatically upon changes, and any lint errors will appear in the console.
+Open the URL Vite prints (default: [http://localhost:5173](http://localhost:5173)).
+
+### Build (production)
+
+```sh
+npm run build
+```
+
+Preview the production build:
+
+```sh
+npm run preview
+```
 
 ## Available Scripts
 
-In the project directory, you can use:
+* `npm run dev` — start Vite dev server with HMR.
+* `npm run build` — build to `dist/`.
+* `npm run preview` — preview the production build locally.
+* `npm run start:log-server` — start the logging backend (`server.js`).
+* `npm run dev:both` — run Vite dev server **and** the log server together.
+* `npm run lint` / `npm run lint:fix` — ESLint checks / auto‑fixes.
+* `npm run format` — format with Prettier.
+* `npm run doc` — generate JSDoc to `docs/`.
 
-### `npm start`
-Runs the application in development mode.
-
-### `npm test`
-Runs tests in watch mode. See [running tests](https://facebook.github.io/create-react-app/docs/running-tests) for more details.
-
-### `npm run build`
-Creates a production-ready build in the `build` directory, optimized for performance.
-
-### `npm run eject`
-**Caution:** This action is irreversible. It moves all configurations (webpack, Babel, ESLint, etc.) directly into your project for manual control.
-
-### `npm run lint`
-Checks code for linting issues using ESLint.
-
-### `npm run lint:fix`
-Automatically fixes linting errors.
-
-### `npm run format`
-Formats code consistently with Prettier.
-
-### `npm run start:log-server`
-Starts the logging backend.
-
-### `npm run start:both`
-Starts both the React app and logging backend concurrently.
-
-### `npm run doc`
-Generates documentation using JSDoc in the `docs` directory.
+> If `dev:both` isn’t in your `package.json` yet, add:
+>
+> ```json
+> "start:log-server": "node server.js",
+> "dev:both": "concurrently \"npm run dev\" \"npm run start:log-server\""
+> ```
 
 ## Configuration
 
-Adjust application settings directly within the code. Common configurations include log levels and backend URLs, set in the `LogController.js` file.
+Common settings (log level, endpoints, etc.) live in `src/LogController.js`.
+Public assets (e.g., `placeholder.png`, `lost.png`) are served from `/public`.
+
+**PDF rendering:** the project uses `pdfjs-dist` with the worker URL resolved at build time to ensure the **API and worker versions match**.
 
 ## Logging
 
-OpenDocViewer integrates a custom logging solution. Configure logging levels and backend URLs in `LogController.js`.
+A tiny Express server receives log events.
 
-Start the logging backend separately:
-```sh
-npm run start:log-server
-```
+* Start only the backend:
 
-Start the app and logging backend together:
-```sh
-npm run start:both
-```
+  ```sh
+  npm run start:log-server
+  ```
+* Or start both UI + backend:
+
+  ```sh
+  npm run dev:both
+  ```
+
+Logs are written to `logs/` (and ignored by git).
 
 ## Documentation
 
-Generate project documentation with JSDoc:
+Generate API docs with JSDoc:
+
 ```sh
 npm run doc
 ```
-Documentation outputs to the `docs` folder.
+
+Output goes to `docs/`.
 
 ## Features
-- **Document Viewing:** Supports PDFs and images.
-- **Zoom & Pan:** Smoothly navigate documents.
-- **Adjustments:** Easily rotate, adjust brightness, and contrast.
-- **Comparison Mode:** View documents side-by-side.
-- **Thumbnails:** Quick navigation via thumbnails.
-- **Printing:** Print documents directly.
-- **Logging:** Tracks application events and errors effectively.
 
-## Contributing
-
-Contributions are welcome! Please open issues or submit pull requests.
+* **Document viewing:** PDFs, JPG, PNG, TIFF.
+* **Zoom & pan**
+* **Rotate, brightness, contrast**
+* **Comparison mode (side‑by‑side)**
+* **Thumbnails + quick navigation**
+* **Printing**
+* **Structured logging (frontend → backend)**
 
 ## License
 
-Distributed under the MIT License. See `LICENSE` for details.
+MIT — see `LICENSE`.

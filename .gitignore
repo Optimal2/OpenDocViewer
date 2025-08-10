@@ -1,79 +1,47 @@
-# See https://help.github.com/articles/ignoring-files/ for more about ignoring files.
-
-# dependencies
-/docs
-/node_modules
-/.pnp
-.pnp.js
-
-# testing
-/coverage
-
-# production
-/build
-/dist
-
-# logging
+# Logs
+logs/
 *.log
-
-# misc
-.DS_Store
-.env*
 npm-debug.log*
 yarn-debug.log*
 yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
 
-# Editor directories and files
-.idea/
-.vscode/
-*.sublime-project
-*.sublime-workspace
+# Dependencies
+node_modules/
+.pnp
+.pnp.js
 
-# OS generated files
-Thumbs.db
-ehthumbs.db
-*.stackdump
-*.swp
-*.swo
-*~
-__MACOSX/
-.cache
-*.lock
-*.tmp
-*.bak
-*.backup
-*.ori
-*.original
+# Build output
+dist/
+dist-ssr/
+build/
 
-# Compiled binary addons (node-gyp)
-/build/Release
+# Coverage & generated docs
+coverage/
+docs/
 
-# ESLint cache
+# Env & local overrides
+.env*
+*.local
+
+# Caches
 .eslintcache
-
-# REPL history
-.node_repl_history
-
-# Parcel cache
-.cache
-
-# Next.js build output
-.next
-
-# Gatsby cache
+.stylelintcache
+*.tsbuildinfo
 .cache/
 
-# JSPM packages
-jspm_packages/
+# Misc / OS
+.DS_Store
+Thumbs.db
+ehthumbs.db
 
-# TypeScript cache
-*.tsbuildinfo
-
-# Stylelint cache
-.stylelintcache
-
-# Grunt intermediate files
-.grunt
-
-# ZIP files
-*.zip
+# Editors / IDEs
+.vscode/*
+!.vscode/extensions.json
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?
