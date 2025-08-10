@@ -1,5 +1,4 @@
 // File: src/components/DocumentLoader/DocumentLoader.js
-
 import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
 import { ViewerContext } from '../../ViewerContext';
 import logger from '../../LogController';
@@ -17,7 +16,7 @@ const enableMetadataLogging = false; // Toggle TIFF metadata logging
 /**
  * DocumentLoader component.
  * Loads and processes documents for rendering.
- * 
+ *
  * @param {Object} props - Component props.
  * @param {string} props.folder - The folder containing the documents.
  * @param {string} props.extension - The extension of the document files.
@@ -35,13 +34,17 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
   const batchQueue = useRef([]);
   const currentPageIndex = useRef(0);
 
-  // Initialize image workers based on the maximum number of workers
+  // Create workers ONCE (render-safe). Do NOT set state here.
   const imageWorkers = useMemo(() => {
     const numWorkers = getNumberOfWorkers(maxWorkers);
     logger.debug(`Using ${numWorkers} workers.`);
-    setWorkerCount(numWorkers);
     return Array.from({ length: numWorkers }, () => createWorker());
-  }, [setWorkerCount]);
+  }, []);
+
+  // Set workerCount AFTER render (fixes the React warning)
+  useEffect(() => {
+    setWorkerCount(imageWorkers.length);
+  }, [imageWorkers.length, setWorkerCount]);
 
   // Preload placeholder images for better user experience
   const preloadPlaceholderImage = useCallback((index) => {
@@ -68,7 +71,7 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
       loaded: false,
       status: -1,
       fileExtension: 'png',
-      fileIndex: fileIndex,
+      fileIndex,
       pageIndex: 0,
     };
     insertPageAtIndex(failedPage, currentPageIndex.current);
@@ -99,12 +102,11 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
       }
 
       const fileExtension = fileType.ext;
-
       const totalPages = await getTotalPages(arrayBuffer, fileExtension);
       logger.debug(`Total pages detected`, { totalPages });
 
       if (fileExtension === 'pdf') {
-
+        // Process PDF on main thread
         mainThreadJobQueue.current.push({
           arrayBuffer: arrayBuffer.slice(0),
           fileExtension,
@@ -113,7 +115,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
           pagesInvolved: totalPages,
           allPagesStartingIndex: currentPageIndex.current,
         });
-
         currentPageIndex.current += totalPages;
 
       } else if (['tiff', 'tif'].includes(fileExtension)) {
@@ -121,12 +122,9 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
           const metadata = getTiffMetadata(arrayBuffer);
           logger.debug(`TIFF metadata detected`, { metadata });
         }
-
         for (let pageIndex = 0; pageIndex < totalPages; pageIndex += batchSize) {
           const pagesInvolved = Math.min(batchSize, totalPages - pageIndex);
           if (pagesInvolved > 0) {
-            for (let i = 0; i < pagesInvolved; i++) {
-            }
             const job = {
               arrayBuffer: arrayBuffer.slice(0),
               fileExtension,
@@ -140,7 +138,8 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber }) =>
             currentPageIndex.current += pagesInvolved;
           }
         }
-      } else { // Handling other image types
+      } else {
+        // Other single-image types
         const job = {
           arrayBuffer: arrayBuffer.slice(0),
           fileExtension,

@@ -3,6 +3,13 @@
 import logger from '../../LogController';
 import { decode as decodeUTIF } from 'utif2';
 
+// Use the same pdf.js API and worker that are bundled with your app
+import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+
+// Ensure API ↔ worker versions match
+pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+
 /**
  * Generates a list of document file paths.
  *
@@ -47,18 +54,20 @@ export const fetchAndArrayBuffer = async (url) => {
  */
 export const getTotalPages = async (arrayBuffer, fileExtension) => {
   const fileExtLower = fileExtension.toLowerCase();
+
   if (fileExtLower === 'pdf') {
-    const pdfjsLib = await import('pdfjs-dist/legacy/build/pdf');
-    pdfjsLib.GlobalWorkerOptions.workerSrc = 'https://cdnjs.cloudflare.com/ajax/libs/pdf.js/5.0.375/pdf.worker.min.mjs';
     const arrayBufferCopy = arrayBuffer.slice(0);
     const pdf = await pdfjsLib.getDocument({ data: arrayBufferCopy }).promise;
     logger.debug('PDF document loaded', { numPages: pdf.numPages });
     return pdf.numPages;
-  } else if (['tiff', 'tif'].includes(fileExtLower)) {
+  }
+
+  if (['tiff', 'tif'].includes(fileExtLower)) {
     const ifds = decodeUTIF(arrayBuffer);
     logger.debug('TIFF document loaded', { numPages: ifds.length });
     return ifds.length;
   }
+
   return 1;
 };
 
@@ -71,15 +80,15 @@ export const getTotalPages = async (arrayBuffer, fileExtension) => {
 export const getTiffMetadata = (arrayBuffer) => {
   try {
     const ifds = decodeUTIF(arrayBuffer);
-    const metadata = ifds.map(ifd => {
-      const compressionType = ifd["t259"] ? ifd["t259"][0] : 1; // Default to 1 (no compression) if not found
+    const metadata = ifds.map((ifd) => {
+      const compressionType = ifd['t259'] ? ifd['t259'][0] : 1; // default: no compression
       return {
         compressionType,
-        photometricInterpretation: ifd["t262"] ? ifd["t262"][0] : 'unknown',
-        bitsPerSample: ifd["t258"] ? ifd["t258"] : 'unknown',
-        samplesPerPixel: ifd["t277"] ? ifd["t277"][0] : 'unknown',
-        planarConfiguration: ifd["t284"] ? ifd["t284"][0] : 'unknown',
-        extraSamples: ifd["t338"] ? ifd["t338"] : 'none'
+        photometricInterpretation: ifd['t262'] ? ifd['t262'][0] : 'unknown',
+        bitsPerSample: ifd['t258'] ? ifd['t258'] : 'unknown',
+        samplesPerPixel: ifd['t277'] ? ifd['t277'][0] : 'unknown',
+        planarConfiguration: ifd['t284'] ? ifd['t284'][0] : 'unknown',
+        extraSamples: ifd['t338'] ? ifd['t338'] : 'none',
       };
     });
     return metadata;

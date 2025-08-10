@@ -1,45 +1,43 @@
-// File: logger.js
+// File: logger.js (ESM)
 
-const fs = require('fs').promises;
-const path = require('path');
+import { promises as fs } from 'node:fs';
+import path from 'node:path';
+import { fileURLToPath } from 'node:url';
+
+const __filename = fileURLToPath(import.meta.url);
+const __dirname = path.dirname(__filename);
+const LOG_DIR = path.join(__dirname, 'logs');
+
+async function ensureLogDir() {
+  await fs.mkdir(LOG_DIR, { recursive: true });
+}
 
 /**
  * Logs incoming requests to a log file.
- *
- * @param {Object} req - The Express request object.
- * @param {Object} res - The Express response object.
+ * Body shape: { level: "info"|"warn"|"error", message: string, context?: object }
  */
-const logRequest = async (req, res) => {
+export async function logRequest(req, res) {
   try {
-    const { level, message, context } = req.body;
+    await ensureLogDir();
+    const { level = 'info', message = '', context = {} } = req.body || {};
     const timestamp = new Date().toISOString();
-    const logMessage = `[${timestamp}] [${level.toUpperCase()}] ${message} ${JSON.stringify(context)}`;
-
-    await fs.appendFile(path.join(__dirname, 'logs', 'app.log'), logMessage + '\n');
-    res.status(200).send('Log written successfully');
+    const line = `[${timestamp}] [${String(level).toUpperCase()}] ${message} ${JSON.stringify(context)}\n`;
+    await fs.appendFile(path.join(LOG_DIR, 'access.log'), line, 'utf8');
+    res.status(204).end();
   } catch (err) {
-    console.error('Failed to write log to file', err);
+    console.error('Failed to write access log', err);
     res.status(500).send('Failed to write log');
   }
-};
+}
 
-/**
- * Logs errors to a separate error log file.
- *
- * @param {Error} err - The error object to log.
- */
-const logError = async (err) => {
+/** Logs server-side errors to error.log */
+export async function logError(err) {
   try {
+    await ensureLogDir();
     const timestamp = new Date().toISOString();
-    const errorMessage = `[${timestamp}] [ERROR] ${err.stack}`;
-
-    await fs.appendFile(path.join(__dirname, 'logs', 'error.log'), errorMessage + '\n');
-  } catch (error) {
-    console.error('Failed to write error log to file', error);
+    const line = `[${timestamp}] [ERROR] ${err && err.stack ? err.stack : String(err)}\n`;
+    await fs.appendFile(path.join(LOG_DIR, 'error.log'), line, 'utf8');
+  } catch (e) {
+    console.error('Failed to write error log', e);
   }
-};
-
-module.exports = {
-  logRequest,
-  logError,
-};
+}
