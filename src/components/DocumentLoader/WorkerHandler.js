@@ -9,7 +9,9 @@ import { generateThumbnail } from './Utils';
  * 
  * @returns {Worker} A new web worker.
  */
-export const createWorker = () => new Worker(new URL('../../workers/imageWorker.js', import.meta.url));
+export const createWorker = () =>
+  new Worker(new URL('../../workers/imageWorker.js', import.meta.url), { type: 'module' });
+
 
 /**
  * Gets the number of workers to create based on the number of CPU cores and a maximum limit.
