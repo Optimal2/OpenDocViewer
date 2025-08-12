@@ -22,6 +22,9 @@ export default defineConfig(({ mode }) => ({
     include: /src\/.*\.[jt]sx?$/, // explicitly include all js, jsx, ts, tsx in src
     jsx: 'automatic',
   },
+  worker: {
+    format: 'es', // Ensure workers are built as ES modules
+  },
   define: {
     'process.env.NODE_ENV': JSON.stringify(mode),
     'process.env.PUBLIC_URL': JSON.stringify('/'),
