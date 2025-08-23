@@ -10,6 +10,8 @@ import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 // Ensure API ↔ worker versions match
 pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
 
+const TRANSPARENT_1x1 = 'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAQAAAC1HAwCAAAAC0lEQVR42mP8Xw8AAn8B9Wt3m1QAAAAASUVORK5CYII=';
+
 /**
  * Generates a list of document file paths.
  *
@@ -22,7 +24,8 @@ export const generateDocumentList = (folder, extension, endNumber = 300) => {
   const documents = [];
   for (let i = 1; i <= endNumber; i++) {
     const fileName = i.toString().padStart(3, '0') + `.${extension}`;
-    const filePath = `/${folder}/${fileName}`;
+    // Use relative path (no leading slash) so it honors <base href> and virtual app path
+    const filePath = `${folder}/${fileName}`;
     documents.push(filePath);
   }
   logger.debug('Generated document list', { documents });
@@ -110,27 +113,42 @@ export const generateThumbnail = (imageUrl, maxWidth, maxHeight) => {
   logger.debug('Generating thumbnail', { imageUrl });
   return new Promise((resolve) => {
     const img = new Image();
-    img.src = imageUrl;
-    img.onload = () => {
-      const aspectRatio = img.width / img.height;
-      let width = maxWidth;
-      let height = maxHeight;
+    // If you serve cross-origin assets with proper CORS, uncomment:
+    // img.crossOrigin = 'anonymous';
 
-      if (img.width > img.height) {
-        height = Math.min(maxHeight, maxWidth / aspectRatio);
-        width = height * aspectRatio;
-      } else {
-        width = Math.min(maxWidth, maxHeight * aspectRatio);
-        height = width / aspectRatio;
-      }
-
-      const canvas = document.createElement('canvas');
-      canvas.width = width;
-      canvas.height = height;
-      const ctx = canvas.getContext('2d');
-      ctx.drawImage(img, 0, 0, width, height);
-      const thumbnail = canvas.toDataURL();
-      resolve(thumbnail);
+    const resolveFallback = () => {
+      logger.debug('Thumbnail generation fallback used', { imageUrl });
+      resolve(TRANSPARENT_1x1); // or use 'placeholder.png' via toDataURL if you prefer
     };
+
+    img.onerror = resolveFallback;
+    img.onload = () => {
+      try {
+        const aspectRatio = img.width / img.height;
+        let width = maxWidth, height = maxHeight;
+
+        if (img.width > img.height) {
+          height = Math.min(maxHeight, Math.floor(maxWidth / aspectRatio));
+          width = Math.floor(height * aspectRatio);
+        } else {
+          width = Math.min(maxWidth, Math.floor(maxHeight * aspectRatio));
+          height = Math.floor(width / aspectRatio);
+        }
+
+        const canvas = document.createElement('canvas');
+        canvas.width = width;
+        canvas.height = height;
+        const ctx = canvas.getContext('2d');
+        ctx.drawImage(img, 0, 0, width, height);
+
+        // Export may throw on tainted canvas
+        const thumbnail = canvas.toDataURL();
+        resolve(thumbnail);
+      } catch {
+        resolveFallback();
+      }
+    };
+
+    img.src = imageUrl;
   });
 };

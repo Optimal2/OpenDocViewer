@@ -1,106 +1,104 @@
 // File: src/components/DocumentLoader/BatchHandler.js
-
 import logger from '../../LogController';
 
 /**
- * Handles the creation and dispatching of batches for image processing.
- *
- * @param {Object} jobQueue - The queue of jobs to process.
- * @param {Object} batchQueue - The queue of batches to process.
- * @param {number} batchSize - The size of each batch.
- * @param {Array} imageWorkers - Array of image workers.
- * @param {function} handleWorkerMessage - Function to handle worker messages.
- * @param {function} insertPageAtIndex - Function to insert a page at a specific index.
- * @param {boolean} sameBlob - Flag indicating if the same blob should be used.
- * @param {Object} isMounted - Ref indicating if the component is mounted.
+ * En mycket enkel scheduler:
+ * - Gör varje jobb till en 1-jobbs-batch (ingen batchSize)
+ * - Delar ut batchar till lediga workers i korta "pumpar"
+ * - När en worker blir klar, kör vi nästa pump (ingen tight while-loop)
  */
 export const batchHandler = (
-  jobQueue, 
-  batchQueue, 
-  batchSize,
-  imageWorkers, 
-  handleWorkerMessage, 
-  insertPageAtIndex, 
-  sameBlob, 
+  jobQueue,
+  batchQueue,
+  _batchSize,                 // ignoreras medvetet
+  imageWorkers,
+  handleWorkerMessage,
+  insertPageAtIndex,
+  sameBlob,
   isMounted
 ) => {
-  const batches = {};
-
-  // Group jobs by file extension
+  // Flytta över alla jobb i batchQueue som 1-jobbs-batchar
   while (jobQueue.current.length > 0) {
     const job = jobQueue.current.shift();
-    if (!batches[job.fileExtension]) {
-      batches[job.fileExtension] = [];
-    }
-    batches[job.fileExtension].push(job);
+    batchQueue.current.push({ jobs: [job], fileExtension: job.fileExtension });
   }
 
-  // Create batches based on file extension and batch size
-  Object.keys(batches).forEach(ext => {
-    const batchGroup = batches[ext];
-
-    while (batchGroup.length > 0) {
-      let currentBatch = [];
-      let currentPages = 0;
-
-      // Add the first job to the current batch
-      const firstJob = batchGroup.shift();
-      currentBatch.push(firstJob);
-      currentPages += firstJob.pagesInvolved;
-
-      // Add additional jobs to the current batch while currentPages < batchSize and batchGroup is not empty
-      while (currentPages < batchSize && batchGroup.length > 0) {
-        const nextJob = batchGroup[0];
-        if (currentPages + nextJob.pagesInvolved > batchSize) {
-          break;
-        }
-        currentBatch.push(nextJob);
-        currentPages += nextJob.pagesInvolved;
-        batchGroup.shift();
-      }
-
-      // Push the current batch to the batch queue
-      batchQueue.current.push({ jobs: currentBatch, fileExtension: ext });
-    }
+  logger.debug('BatchHandler: queued single-job batches', {
+    queued: batchQueue.current.length
   });
 
-  logger.debug('Batch handler completed', { batchQueue: batchQueue.current });
-
-  // Start dispatching batches
-  batchDispatcher(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
+  // Starta utdelningen
+  pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
 };
 
 /**
- * Dispatches batches to available image workers.
- *
- * @param {Array} imageWorkers - Array of image workers.
- * @param {Object} batchQueue - The queue of batches to process.
- * @param {function} handleWorkerMessage - Function to handle worker messages.
- * @param {function} insertPageAtIndex - Function to insert a page at a specific index.
- * @param {boolean} sameBlob - Flag indicating if the same blob should be used.
- * @param {Object} isMounted - Ref indicating if the component is mounted.
+ * En "pump" som gör EN kort utdelnings-pass: tilldela batchar endast till lediga workers.
+ * När en worker blir klar, anropas pump() igen. Ingen tight while-loop.
  */
-export const batchDispatcher = (
-  imageWorkers, 
-  batchQueue, 
-  handleWorkerMessage, 
-  insertPageAtIndex, 
-  sameBlob, 
+function pump(
+  imageWorkers,
+  batchQueue,
+  handleWorkerMessage,
+  insertPageAtIndex,
+  sameBlob,
   isMounted
-) => {
-  while (batchQueue.current.length > 0) {
-    imageWorkers.forEach(worker => {
-      if (!worker.busy && batchQueue.current.length > 0) {
-        const batch = batchQueue.current.shift();
-        logger.debug('Dispatching batch to worker', { batch });
-        worker.busy = true;
-        worker.postMessage(batch);
-        worker.onmessage = (event) => {
-          handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
-          worker.busy = false;
-          batchDispatcher(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
-        };
+) {
+  if (!isMounted?.current) return;
+  if (batchQueue.current.length === 0) return;
+
+  let dispatched = 0;
+
+  imageWorkers.forEach((worker) => {
+    if (batchQueue.current.length === 0) return;
+    if (worker.__busy) return;
+
+    const batch = batchQueue.current.shift();
+    worker.__busy = true;
+
+    // Viktigt: sätt handlers innan postMessage
+    worker.onmessage = (event) => {
+      try {
+        handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
+      } finally {
+        worker.__busy = false;
+        // Låt eventloopen andas innan nästa pass
+        setTimeout(() => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted), 0);
       }
-    });
-  }
-};
+    };
+
+    worker.onerror = (err) => {
+      try {
+        // Skicka tillbaka tomma resultat så UI får placeholders via handlern
+        handleWorkerMessage(
+          { data: { jobs: batch.jobs.map(j => ({
+            fullSizeUrl: null,
+            fileIndex: j.index,
+            pageIndex: j.pageStartIndex || 0,
+            fileExtension: j.fileExtension,
+            allPagesIndex: j.allPagesStartingIndex
+          }))}},
+          insertPageAtIndex,
+          sameBlob,
+          isMounted
+        );
+      } finally {
+        worker.__busy = false;
+        setTimeout(() => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted), 0);
+      }
+    };
+
+    logger.debug('Dispatching batch to worker', { jobs: batch.jobs.length, ext: batch.fileExtension });
+	const transfer = [];
+	if (batch?.jobs) {
+	  for (const j of batch.jobs) {
+		if (j?.arrayBuffer instanceof ArrayBuffer && j.arrayBuffer.byteLength) {
+		  transfer.push(j.arrayBuffer);
+		}
+	  }
+	}
+	worker.postMessage(batch, transfer);
+    dispatched++;
+  });
+
+  // Om inga workers var lediga just nu, gör inget mer. onmessage/onerror triggar nästa pump.
+}

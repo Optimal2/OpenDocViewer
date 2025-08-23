@@ -1,4 +1,4 @@
-// File: src/components/DocumentLoader/WorkerHandler.js
+﻿// File: src/components/DocumentLoader/WorkerHandler.js
 
 import logger from '../../LogController';
 import { renderTIFFInMainThread } from './MainThreadRenderer';
@@ -6,18 +6,12 @@ import { generateThumbnail } from './Utils';
 
 /**
  * Creates a new web worker.
- * 
- * @returns {Worker} A new web worker.
  */
 export const createWorker = () =>
   new Worker(new URL('../../workers/imageWorker.js', import.meta.url), { type: 'module' });
 
-
 /**
  * Gets the number of workers to create based on the number of CPU cores and a maximum limit.
- * 
- * @param {number} maxWorkers - The maximum number of workers.
- * @returns {number} The number of workers to create.
  */
 export const getNumberOfWorkers = (maxWorkers) => {
   const cores = navigator.hardwareConcurrency || 4;
@@ -26,69 +20,94 @@ export const getNumberOfWorkers = (maxWorkers) => {
 
 /**
  * Handles messages received from a web worker.
- * 
- * @param {MessageEvent} event - The message event from the worker.
- * @param {Function} insertPageAtIndex - Function to insert a page at a specific index.
- * @param {boolean} sameBlob - Flag indicating if the same blob should be used for thumbnails.
- * @param {Object} isMounted - Ref object to check if the component is mounted.
+ *
+ * Supports:
+ *  - { jobs: [{ blob? | fullSizeUrl?, ... }], fileExtension }
+ *  - { error, jobs: [shape without big buffers], ... }
  */
 export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounted) => {
-  logger.debug('Worker message received', event.data);
+  const { data } = event;
+  // Avoid logging large payloads/blobs
+  logger.debug('Worker message received', {
+    jobs: Array.isArray(data?.jobs) ? data.jobs.length : 0,
+    error: !!data?.error
+  });
 
-  if (event.data.error) {
-    logger.info('Error in Worker', { error: event.data.error }); // log level info since we expect this to happen often
-    const { jobs } = event.data;
+  if (data?.error) {
+    logger.info('Error in Worker', { error: data.error }); // expected sometimes; keep as info
+    const { jobs = [] } = data;
+
+    // Ensure main-thread fallback where applicable (TIFF)
     jobs.forEach(job => {
       job.handleInMainThread = true;
-    });
-    logger.debug('Jobs marked for handling in main thread', { jobs });
-    jobs.forEach(job => {
       if (['tiff', 'tif'].includes(job.fileExtension)) {
         renderTIFFInMainThread(job, insertPageAtIndex, sameBlob, isMounted);
       }
     });
-  } else if (event.data.handleInMainThread) {
-    if (['tiff', 'tif'].includes(event.data.job?.fileExtension)) {
-      logger.debug('Main thread processing TIFF job', { job: event.data.job });
-      renderTIFFInMainThread(event.data.job, insertPageAtIndex, sameBlob, isMounted);
-    } else {
-      event.data.jobs.forEach(job => {
+    return;
+  }
+
+  if (data?.handleInMainThread) {
+    // Back-compat path (single job or array)
+    if (['tiff', 'tif'].includes(data.job?.fileExtension)) {
+      logger.debug('Main thread processing TIFF job', { job: data.job });
+      renderTIFFInMainThread(data.job, insertPageAtIndex, sameBlob, isMounted);
+    } else if (Array.isArray(data.jobs)) {
+      data.jobs.forEach(job => {
         if (['tiff', 'tif'].includes(job.fileExtension)) {
           logger.debug('Main thread processing TIFF job', { job });
           renderTIFFInMainThread(job, insertPageAtIndex, sameBlob, isMounted);
         }
       });
     }
-  } else if (event.data.jobs) {
-    event.data.jobs.forEach(async (job) => {
-      const { fullSizeUrl, fileIndex, pageIndex, fileExtension, allPagesIndex } = job;
-      if (fullSizeUrl) {
-        const page = {
-          fullSizeUrl,
-          thumbnailUrl: sameBlob ? fullSizeUrl : await generateThumbnail(fullSizeUrl, 200, 200),
-          loaded: true,
-          status: 1,
-          fileExtension,
-          fileIndex,
-          pageIndex,
-          allPagesIndex,
-        };
-        logger.debug('Inserting page', { allPagesIndex, page });
-        insertPageAtIndex(page, allPagesIndex);
-      } else {
-        const placeholderImageUrl = `${process.env.PUBLIC_URL}/placeholder.png`;
-        const placeholderPage = {
-          fullSizeUrl: placeholderImageUrl,
-          thumbnailUrl: placeholderImageUrl,
-          loaded: false,
-          status: -1,
-          fileExtension,
-          fileIndex,
-          pageIndex,
-          allPagesIndex,
-        };
-        logger.debug('Inserting placeholder page', { allPagesIndex, placeholderPage });
-        insertPageAtIndex(placeholderPage, allPagesIndex);
+    return;
+  }
+
+  if (Array.isArray(data?.jobs)) {
+    data.jobs.forEach(async (job) => {
+      try {
+        const { fileIndex, pageIndex, fileExtension, allPagesIndex } = job;
+
+        // New: prefer blob from worker; fall back to fullSizeUrl if present
+        let fullSizeUrl = job.fullSizeUrl || null;
+        if (!fullSizeUrl && job.blob instanceof Blob) {
+          fullSizeUrl = URL.createObjectURL(job.blob);
+          // NOTE: Consider revoking this URL when the page is destroyed/unloaded to avoid leaks.
+        }
+
+        if (fullSizeUrl) {
+          const page = {
+            fullSizeUrl,
+            thumbnailUrl: sameBlob
+              ? fullSizeUrl
+              : await generateThumbnail(fullSizeUrl, 200, 200),
+            loaded: true,
+            status: 1,
+            fileExtension,
+            fileIndex,
+            pageIndex,
+            allPagesIndex,
+          };
+          logger.debug('Inserting page', { allPagesIndex });
+          insertPageAtIndex(page, allPagesIndex);
+        } else {
+          // Placeholder if the worker couldn’t produce an image
+          const placeholderImageUrl = 'placeholder.png';
+          const placeholderPage = {
+            fullSizeUrl: placeholderImageUrl,
+            thumbnailUrl: placeholderImageUrl,
+            loaded: false,
+            status: -1,
+            fileExtension,
+            fileIndex,
+            pageIndex,
+            allPagesIndex,
+          };
+          logger.debug('Inserting placeholder page', { allPagesIndex });
+          insertPageAtIndex(placeholderPage, allPagesIndex);
+        }
+      } catch (e) {
+        logger.error('handleWorkerMessage: per-job failure', { error: String(e) });
       }
     });
   }

@@ -10,21 +10,14 @@ import DocumentConsumerWrapper from './components/DocumentConsumerWrapper';
 
 /**
  * Main viewer component for OpenDocViewer.
- * Manages theme, responsive layout, and initializes document viewing contexts.
- *
- * @param {Object} props - Component properties.
- * @param {string} props.folder - Directory path containing documents.
- * @param {string} props.extension - File extension of documents to view.
- * @param {number} props.endNumber - Total number of documents to load.
- * @returns {JSX.Element} Rendered OpenDocViewer component.
+ * Supports two input styles:
+ *  1) Folder pattern: { folder, extension, endNumber }
+ *  2) Explicit source list: { sourceList, bundle }
  */
-const OpenDocViewer = ({ folder, extension, endNumber }) => {
+const OpenDocViewer = ({ folder, extension, endNumber, sourceList, bundle }) => {
   const [initialized, setInitialized] = useState(false);
   const [isMobileView, setIsMobileView] = useState(window.innerWidth < 600);
 
-  /**
-   * Updates mobile view state based on window width.
-   */
   const handleResize = useCallback(() => {
     const mobileView = window.innerWidth < 600;
     setIsMobileView(mobileView);
@@ -37,11 +30,11 @@ const OpenDocViewer = ({ folder, extension, endNumber }) => {
     logger.info('OpenDocViewer initialization complete');
 
     window.addEventListener('resize', handleResize);
-    handleResize(); // Perform initial size check
-
+    handleResize();
     return () => window.removeEventListener('resize', handleResize);
   }, [handleResize]);
 
+  // Pass-through: existing props AND new explicit-list props (if present).
   return (
     <ThemeProvider>
       <ViewerProvider>
@@ -49,6 +42,8 @@ const OpenDocViewer = ({ folder, extension, endNumber }) => {
           folder={folder}
           extension={extension}
           endNumber={endNumber}
+          sourceList={sourceList || null}  // <- tiny seam to forward to DocumentLoader
+          bundle={bundle || null}          // optional (metadata later)
           isMobileView={isMobileView}
           initialized={initialized}
         />
@@ -59,9 +54,17 @@ const OpenDocViewer = ({ folder, extension, endNumber }) => {
 };
 
 OpenDocViewer.propTypes = {
-  folder: PropTypes.string.isRequired,
-  extension: PropTypes.string.isRequired,
-  endNumber: PropTypes.number.isRequired,
+  // Pattern mode (legacy/demo)
+  folder: PropTypes.string,
+  extension: PropTypes.string,
+  endNumber: PropTypes.number,
+  // Explicit-list mode
+  sourceList: PropTypes.arrayOf(PropTypes.shape({
+    url: PropTypes.string.isRequired,
+    ext: PropTypes.string,
+    fileIndex: PropTypes.number
+  })),
+  bundle: PropTypes.object
 };
 
 export default OpenDocViewer;

@@ -11,17 +11,19 @@ const DocumentLoader = lazy(() => import('./DocumentLoader/DocumentLoader'));
 const DocumentThumbnailList = lazy(() => import('./DocumentThumbnailList'));
 
 /**
- * DocumentConsumerWrapper component.
- * Wraps the DocumentLoader and DocumentViewer components and handles their initialization and rendering.
- * 
- * @param {Object} props - Component props.
- * @param {string} props.folder - The folder containing the documents.
- * @param {string} props.extension - The extension of the document files.
- * @param {number} props.endNumber - The number of documents to load.
- * @param {boolean} props.isMobileView - Indicates if the mobile view is enabled.
- * @param {boolean} props.initialized - Indicates if the component is initialized.
+ * DocumentConsumerWrapper
+ * Wraps DocumentLoader + DocumentViewer and passes through either:
+ *  - Pattern mode: { folder, extension, endNumber }
+ *  - Explicit-list mode: { sourceList }  (array of { url, ext?, fileIndex? })
  */
-const DocumentConsumerWrapper = ({ folder, extension, endNumber, isMobileView, initialized }) => {
+const DocumentConsumerWrapper = ({
+  folder,
+  extension,
+  endNumber,
+  sourceList, // optional
+  isMobileView,
+  initialized,
+}) => {
   const { allPages } = useContext(ViewerContext);
 
   useEffect(() => {
@@ -35,9 +37,10 @@ const DocumentConsumerWrapper = ({ folder, extension, endNumber, isMobileView, i
           <DocumentLoader
             folder={folder}
             extension={extension}
+            endNumber={endNumber}
+            sourceList={sourceList || null}
             placeholderImage="placeholder.png"
             sameBlob={true}
-            endNumber={endNumber}
           >
             {isMobileView ? (
               <div className="thumbnail-only-view">
@@ -51,9 +54,9 @@ const DocumentConsumerWrapper = ({ folder, extension, endNumber, isMobileView, i
                       pageIndex: page.pageIndex,
                     }))}
                     pageNumber={1}
-                    setPageNumber={() => {}} // No-op function for mobile view
+                    setPageNumber={() => {}}
                     thumbnailsContainerRef={React.createRef()}
-                    width={window.innerWidth} // Set the width to full window width for mobile view
+                    width={window.innerWidth}
                   />
                 ) : (
                   <div>No documents loaded</div>
@@ -70,9 +73,16 @@ const DocumentConsumerWrapper = ({ folder, extension, endNumber, isMobileView, i
 };
 
 DocumentConsumerWrapper.propTypes = {
-  folder: PropTypes.string.isRequired,
-  extension: PropTypes.string.isRequired,
-  endNumber: PropTypes.number.isRequired,
+  // Pattern mode (optional when explicit-list mode is used)
+  folder: PropTypes.string,
+  extension: PropTypes.string,
+  endNumber: PropTypes.number,
+  // Explicit-list mode (optional)
+  sourceList: PropTypes.arrayOf(PropTypes.shape({
+    url: PropTypes.string.isRequired,
+    ext: PropTypes.string,
+    fileIndex: PropTypes.number,
+  })),
   isMobileView: PropTypes.bool.isRequired,
   initialized: PropTypes.bool.isRequired,
 };

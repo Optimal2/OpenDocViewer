@@ -95,7 +95,7 @@ const DocumentThumbnailList = React.memo(({
               <div className="thumbnail-number">{index + 1}</div>
               <div className="thumbnail-image">
                 {status === 0 && <LoadingSpinner />}
-                {status === -1 && <img src="/lost.png" alt="Page not found" className="thumbnail" />}
+                {status === -1 && <img src="lost.png" alt="Page not found" className="thumbnail" />}
                 {status === 1 && <img src={thumbnailUrl} alt={`Page ${index + 1}`} className="thumbnail" />}
               </div>
             </div>
