@@ -1,4 +1,4 @@
-// File: src/components/LoadingMessage.js
+﻿// File: src/components/LoadingMessage.js
 
 import React from 'react';
 import PropTypes from 'prop-types';
@@ -14,11 +14,11 @@ import PropTypes from 'prop-types';
  */
 const LoadingMessage = ({ pageStatus }) => {
   let displayMessage = 'Please wait, pages are still loading.';
-  let imageUrl = `${process.env.PUBLIC_URL}/placeholder.png`;
+  let imageUrl = 'placeholder.png';
 
   if (pageStatus === -1) {
     displayMessage = 'Error: The document is corrupted, missing, or in an unsupported format.';
-    imageUrl = `${process.env.PUBLIC_URL}/lost.png`;
+    imageUrl = 'lost.png';
   }
 
   return (
@@ -34,3 +34,4 @@ LoadingMessage.propTypes = {
 };
 
 export default LoadingMessage;
+

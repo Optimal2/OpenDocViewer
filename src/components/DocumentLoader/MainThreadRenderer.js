@@ -1,4 +1,4 @@
-// File: src/components/DocumentLoader/MainThreadRenderer.js
+﻿// File: src/components/DocumentLoader/MainThreadRenderer.js
 import logger from '../../LogController';
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
 import { generateThumbnail } from './Utils';
@@ -32,10 +32,13 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       canvas.height = viewport.height;
       canvas.width = viewport.width;
 
-      await page.render({ canvasContext: context, viewport }).promise;
+	  await page.render({ canvasContext: context, viewport }).promise;
 
-      canvas.toBlob((blob) => {
-        const url = URL.createObjectURL(blob);
+	  // Ge event-loopen en chans att jobba (speciellt viktigt på 1–2 kärnor)
+	  await new Promise(r => setTimeout(r, 0));
+
+	  canvas.toBlob((blob) => {
+	  const url = URL.createObjectURL(blob);
         logger.debug(`Main thread processed PDF page`, {
           url,
           fileIndex: job.index,
@@ -62,7 +65,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       }, 'image/png');
     }
   } catch (error) {
-    const placeholderImageUrl = `${process.env.PUBLIC_URL}/placeholder.png`;
+    const placeholderImageUrl = 'placeholder.png';
     const placeholderPage = {
       fullSizeUrl: placeholderImageUrl,
       thumbnailUrl: placeholderImageUrl,
@@ -94,9 +97,9 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
       const planarConfiguration = ifd['t284'] ? ifd['t284'][0] : 'unknown';
       const extraSamples = ifd['t338'] ? ifd['t338'] : 'none';
 
-      logger.info(
-        `Processing TIFF page ${i}, Compression: ${compression}, PhotometricInterpretation: ${photometricInterpretation}, BitsPerSample: ${bitsPerSample}, SamplesPerPixel: ${samplesPerPixel}, PlanarConfiguration: ${planarConfiguration}, ExtraSamples: ${extraSamples}, File Index: ${job.index}, Page Index: ${i}, All Pages Index: ${job.allPagesStartingIndex + (i - job.pageStartIndex)}`
-      );
+	  logger.debug(
+	    `Processing TIFF page ${i}, Compression: ${compression},... Index: ${job.allPagesStartingIndex + (i - job.pageStartIndex)}`
+	  );
 
       decodeUTIFImage(job.arrayBuffer, ifd);
       const rgba = toRGBA8(ifd);
@@ -112,31 +115,36 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
       const blob = await new Promise((resolve) => canvas.toBlob(resolve));
       const url = URL.createObjectURL(blob);
 
-      if (blob) {
-        logger.debug(`Main thread processed TIFF page`, {
-          url,
-          fileIndex: job.index,
-          pageIndex: i,
-        });
-        insertPageAtIndex(
-          {
-            fullSizeUrl: url,
-            thumbnailUrl: sameBlob ? url : await generateThumbnail(url, 200, 200),
-            loaded: true,
-            status: 1,
-            fileExtension: 'tiff',
-            fileIndex: job.index,
-            pageIndex: i,
-            allPagesIndex: job.allPagesStartingIndex + (i - job.pageStartIndex),
-          },
-          job.allPagesStartingIndex + (i - job.pageStartIndex)
-        );
-      } else {
-        throw new Error('Failed to create blob URL');
-      }
+	  if (blob) {
+	    logger.debug(`Main thread processed TIFF page`, {
+		  url,
+		  fileIndex: job.index,
+		  pageIndex: i,
+	    });
+	    insertPageAtIndex(
+		  {
+		    fullSizeUrl: url,
+		    thumbnailUrl: sameBlob ? url : await generateThumbnail(url, 200, 200),
+		    loaded: true,
+		    status: 1,
+		    fileExtension: 'tiff',
+		    fileIndex: job.index,
+		    pageIndex: i,
+		    allPagesIndex: job.allPagesStartingIndex + (i - job.pageStartIndex),
+		  },
+		  job.allPagesStartingIndex + (i - job.pageStartIndex)
+	    );
+
+	    // Liten yield varannan sida för att undvika “hung” på lågkärniga maskiner
+	    if ((i - job.pageStartIndex) % 2 === 1) {
+		  await new Promise(r => setTimeout(r, 0));
+	    }
+	  } else {
+	  throw new Error('Failed to create blob URL');
+	}
     }
   } catch (error) {
-    const placeholderImageUrl = `${process.env.PUBLIC_URL}/placeholder.png`;
+    const placeholderImageUrl = 'placeholder.png';
     const placeholderPage = {
       fullSizeUrl: placeholderImageUrl,
       thumbnailUrl: placeholderImageUrl,
@@ -151,3 +159,4 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
     insertPageAtIndex(placeholderPage, job.allPagesStartingIndex + (job.pageIndex - job.pageStartIndex));
   }
 };
+
