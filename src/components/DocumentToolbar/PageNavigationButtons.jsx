@@ -1,27 +1,53 @@
-// File: src/components/DocumentToolbar/PageNavigationButtons.js
+/**
+ * File: src/components/DocumentToolbar/PageNavigationButtons.jsx
+ *
+ * OpenDocViewer — Page Navigation Controls
+ *
+ * PURPOSE
+ *   Stateless group of navigation controls to move between pages and jump to
+ *   the first/last page. Supports both single-step clicks and press-and-hold
+ *   (continuous) navigation via timers provided by the parent hook.
+ *
+ * ACCESSIBILITY
+ *   - Each control has clear aria-labels and title tooltips.
+ *   - Current page info is exposed in a polite live region so AT announces updates.
+ *
+ * INTERACTION MODEL
+ *   - Click → single step (prev/next).
+ *   - Press & hold (mouse or touch) → continuous stepping using timers:
+ *       • startPrevPageTimer('prev') / stopPrevPageTimer()
+ *       • startNextPageTimer('next') / stopNextPageTimer()
+ *
+ * IMPORTANT PROJECT GOTCHA (for future reviewers)
+ *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
+ *     'file-type/browser'. With file-type v21 the '/browser' subpath is not
+ *     exported for bundlers and will break Vite builds. See README for details.
+ *
+ * Baseline/source reference for prior version: :contentReference[oaicite:0]{index=0}
+ */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
  * PageNavigationButtons component.
- * Provides buttons for navigating through pages in the document viewer.
- * 
- * @param {Object} props - Component props.
- * @param {boolean} props.prevPageDisabled - Flag to disable the previous page button.
- * @param {boolean} props.nextPageDisabled - Flag to disable the next page button.
- * @param {boolean} props.firstPageDisabled - Flag to disable the first page button.
- * @param {boolean} props.lastPageDisabled - Flag to disable the last page button.
- * @param {function} props.startPrevPageTimer - Function to start the previous page timer.
- * @param {function} props.stopPrevPageTimer - Function to stop the previous page timer.
- * @param {function} props.startNextPageTimer - Function to start the next page timer.
- * @param {function} props.stopNextPageTimer - Function to stop the next page timer.
- * @param {function} props.handleFirstPage - Function to handle navigating to the first page.
- * @param {function} props.handleLastPage - Function to handle navigating to the last page.
- * @param {function} props.handlePrevPage - Function to handle navigating to the previous page.
- * @param {function} props.handleNextPage - Function to handle navigating to the next page.
- * @param {number} props.pageNumber - Current page number.
- * @param {number} props.totalPages - Total number of pages in the document.
+ *
+ * @param {Object} props
+ * @param {boolean} props.prevPageDisabled
+ * @param {boolean} props.nextPageDisabled
+ * @param {boolean} props.firstPageDisabled
+ * @param {boolean} props.lastPageDisabled
+ * @param {(dir:'prev') => void} props.startPrevPageTimer
+ * @param {() => void} props.stopPrevPageTimer
+ * @param {(dir:'next') => void} props.startNextPageTimer
+ * @param {() => void} props.stopNextPageTimer
+ * @param {() => void} props.handleFirstPage
+ * @param {() => void} props.handleLastPage
+ * @param {() => void} props.handlePrevPage
+ * @param {() => void} props.handleNextPage
+ * @param {number} props.pageNumber
+ * @param {number} props.totalPages
+ * @returns {JSX.Element}
  */
 const PageNavigationButtons = ({
   prevPageDisabled,
@@ -38,40 +64,89 @@ const PageNavigationButtons = ({
   handleNextPage,
   pageNumber,
   totalPages,
-}) => (
-  <>
-    <button onClick={handleFirstPage} aria-label="First page" title="First page" disabled={firstPageDisabled}>
-      <span className="material-icons">first_page</span>
-    </button>
-    <button
-      onMouseDown={() => startPrevPageTimer('prev')}
-      onMouseUp={stopPrevPageTimer}
-      onMouseLeave={stopPrevPageTimer}
-      aria-label="Previous page"
-      title="Previous page"
-      disabled={prevPageDisabled}
-    >
-      <span className="material-icons">chevron_left</span>
-    </button>
-    <div className="page-info">
-      <div>Page</div>
-      <div>{pageNumber} / {totalPages}</div>
-    </div>
-    <button
-      onMouseDown={() => startNextPageTimer('next')}
-      onMouseUp={stopNextPageTimer}
-      onMouseLeave={stopNextPageTimer}
-      aria-label="Next page"
-      title="Next page"
-      disabled={nextPageDisabled}
-    >
-      <span className="material-icons">chevron_right</span>
-    </button>
-    <button onClick={handleLastPage} aria-label="Last page" title="Last page" disabled={lastPageDisabled}>
-      <span className="material-icons">last_page</span>
-    </button>
-  </>
-);
+}) => {
+  // Touch helpers so press-and-hold also works on touch devices without scrolling the page.
+  const onTouchStartPrev = (e) => {
+    if (!prevPageDisabled) {
+      e.preventDefault();
+      startPrevPageTimer('prev');
+    }
+  };
+  const onTouchStartNext = (e) => {
+    if (!nextPageDisabled) {
+      e.preventDefault();
+      startNextPageTimer('next');
+    }
+  };
+
+  return (
+    <>
+      {/* First page */}
+      <button
+        type="button"
+        onClick={handleFirstPage}
+        aria-label="First page"
+        title="First page"
+        className="odv-btn"
+        disabled={firstPageDisabled}
+      >
+        <span className="material-icons" aria-hidden="true">first_page</span>
+      </button>
+
+      {/* Previous (click = single step; press & hold = continuous) */}
+      <button
+        type="button"
+        onClick={handlePrevPage}
+        onMouseDown={() => !prevPageDisabled && startPrevPageTimer('prev')}
+        onMouseUp={stopPrevPageTimer}
+        onMouseLeave={stopPrevPageTimer}
+        onTouchStart={onTouchStartPrev}
+        onTouchEnd={stopPrevPageTimer}
+        aria-label="Previous page"
+        title="Previous page"
+        className="odv-btn"
+        disabled={prevPageDisabled}
+      >
+        <span className="material-icons" aria-hidden="true">chevron_left</span>
+      </button>
+
+      {/* Page info (live region announces updates politely) */}
+      <div className="page-info" aria-live="polite">
+        <div>Page</div>
+        <div>{pageNumber} / {totalPages}</div>
+      </div>
+
+      {/* Next (click = single step; press & hold = continuous) */}
+      <button
+        type="button"
+        onClick={handleNextPage}
+        onMouseDown={() => !nextPageDisabled && startNextPageTimer('next')}
+        onMouseUp={stopNextPageTimer}
+        onMouseLeave={stopNextPageTimer}
+        onTouchStart={onTouchStartNext}
+        onTouchEnd={stopNextPageTimer}
+        aria-label="Next page"
+        title="Next page"
+        className="odv-btn"
+        disabled={nextPageDisabled}
+      >
+        <span className="material-icons" aria-hidden="true">chevron_right</span>
+      </button>
+
+      {/* Last page */}
+      <button
+        type="button"
+        onClick={handleLastPage}
+        aria-label="Last page"
+        title="Last page"
+        className="odv-btn"
+        disabled={lastPageDisabled}
+      >
+        <span className="material-icons" aria-hidden="true">last_page</span>
+      </button>
+    </>
+  );
+};
 
 PageNavigationButtons.propTypes = {
   prevPageDisabled: PropTypes.bool.isRequired,
@@ -90,4 +165,4 @@ PageNavigationButtons.propTypes = {
   totalPages: PropTypes.number.isRequired,
 };
 
-export default PageNavigationButtons;
+export default React.memo(PageNavigationButtons);

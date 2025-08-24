@@ -1,3 +1,40 @@
-# https://www.robotstxt.org/robotstxt.html
+# OpenDocViewer — robots.txt
+# ------------------------------------------------------------------------------
+# This file guides search engine crawlers. Comments are verbose by design so future
+# maintainers (human or AI) can safely adjust behavior without unintended blocking.
+#
+# Defaults below are PRODUCTION-friendly: allow crawling/indexing of public assets.
+# For staging/previews, see the STAGING BLOCK section further down.
+#
+# Reference: https://www.robotstxt.org/robotstxt.html
+# Provenance: :contentReference[oaicite:0]{index=0}
+# ------------------------------------------------------------------------------
+
+# ------------------------------------------------------------------------------ 
+# PRODUCTION (default): allow everything under the site root
+# ------------------------------------------------------------------------------
 User-agent: *
-Disallow:
+Allow: /
+
+# ------------------------------------------------------------------------------
+# OPTIONAL: Paths you might want to keep out of search results (uncomment if used)
+# ------------------------------------------------------------------------------
+# Disallow: /debug/
+# Disallow: /preview/
+# Disallow: /internal/
+# Disallow: /experimental/
+# Disallow: /logs/          # (If you ever expose server logs as static files—normally you should NOT)
+
+# ------------------------------------------------------------------------------
+# STAGING / PREVIEW ENVIRONMENTS
+# Uncomment the block below to disable crawling entirely on non-production hosts.
+# Note: For true protection, also enforce HTTP auth or IP allowlisting server-side.
+# ------------------------------------------------------------------------------
+# User-agent: *
+# Disallow: /
+
+# ------------------------------------------------------------------------------
+# SITEMAP
+# Provide your XML sitemap URL when available (helps discovery & freshness).
+# ------------------------------------------------------------------------------
+# Sitemap: https://your-domain.example/sitemap.xml

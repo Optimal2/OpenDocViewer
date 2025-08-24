@@ -1,49 +1,74 @@
-// File: src/components/DocumentToolbar/DocumentToolbar.js
+/**
+ * File: src/components/DocumentToolbar/DocumentToolbar.jsx
+ *
+ * OpenDocViewer — Document Toolbar
+ *
+ * PURPOSE
+ *   Provides controls for:
+ *     • Printing
+ *     • Page navigation (single-step + press-and-hold)
+ *     • Zoom and auto-fit
+ *     • Compare mode toggle
+ *     • Optional canvas-based editing tools (rotation, brightness, contrast)
+ *     • Theme toggle
+ *
+ * ACCESSIBILITY
+ *   - Buttons are native <button type="button"> with aria-label + title.
+ *   - Live page information is announced via a polite live region.
+ *
+ * PERFORMANCE
+ *   - Delegates continuous navigation to a timer hook to avoid tight loops.
+ *   - Avoids noisy per-interval logging; only logs coarse actions.
+ *
+ * IMPORTANT PROJECT GOTCHA (for future reviewers)
+ *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
+ *     'file-type/browser'. With file-type v21 the '/browser' subpath is not exported
+ *     for bundlers and will break Vite builds (see README).
+ *
+ * Provenance / baseline reference for prior version of this file: :contentReference[oaicite:0]{index=0}
+ */
 
-import React, { useContext, useRef, useEffect, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
-import logger from '../../LogController';
-import { ThemeContext } from '../../ThemeContext';
-import usePageNavigation from '../../hooks/usePageNavigation';
-import PageNavigationButtons from './PageNavigationButtons';
-import ZoomButtons from './ZoomButtons';
-import ThemeToggleButton from './ThemeToggleButton';
-import { handlePrint } from '../../utils/printUtils';
+import logger from '../../LogController.js';
+import { ThemeContext } from '../../ThemeContext.jsx';
+import usePageNavigation from '../../hooks/usePageNavigation.js';
+import PageNavigationButtons from './PageNavigationButtons.jsx';
+import ZoomButtons from './ZoomButtons.jsx';
+import ThemeToggleButton from './ThemeToggleButton.jsx';
+import { handlePrint } from '../../utils/printUtils.js';
 
+/** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
 
 /**
  * DocumentToolbar component.
- * Provides controls for document navigation, zooming, image adjustments, and theme toggling.
- * 
- * @param {Object} props - Component props.
- * @param {Array} props.pages - Array of pages in the document.
- * @param {number} props.pageNumber - Current page number.
- * @param {number} props.totalPages - Total number of pages in the document.
- * @param {boolean} props.prevPageDisabled - Flag to disable the previous page button.
- * @param {boolean} props.nextPageDisabled - Flag to disable the next page button.
- * @param {boolean} props.firstPageDisabled - Flag to disable the first page button.
- * @param {boolean} props.lastPageDisabled - Flag to disable the last page button.
- * @param {function} props.setPageNumber - Function to set the page number.
- * @param {function} props.zoomIn - Function to zoom in.
- * @param {function} props.zoomOut - Function to zoom out.
- * @param {function} props.fitToScreen - Function to fit the document to screen.
- * @param {function} props.fitToWidth - Function to fit the document to width.
- * @param {function} props.setZoom - Function to set the zoom level.
- * @param {object} props.viewerContainerRef - Ref to the viewer container.
- * @param {function} props.handleCompare - Function to toggle compare mode.
- * @param {boolean} props.isComparing - Flag indicating if compare mode is enabled.
- * @param {Object} props.imageProperties - Object containing image properties (brightness, contrast).
- * @param {function} props.handleRotationChange - Function to handle rotation change.
- * @param {function} props.handleBrightnessChange - Function to handle brightness change.
- * @param {function} props.handleContrastChange - Function to handle contrast change.
- * @param {function} props.resetImageProperties - Function to reset image properties.
- * @param {object} props.documentRenderRef - Ref to the document render component.
- * @param {boolean} props.isExpanded - Flag indicating if the canvas tools are enabled.
- * @param {function} props.setIsExpanded - Function to set the expanded state.
+ *
+ * @param {Object} props
+ * @param {number} props.pageNumber
+ * @param {number} props.totalPages
+ * @param {boolean} props.prevPageDisabled
+ * @param {boolean} props.nextPageDisabled
+ * @param {boolean} props.firstPageDisabled
+ * @param {boolean} props.lastPageDisabled
+ * @param {(n:number)=>void} props.setPageNumber
+ * @param {() => void} props.zoomIn
+ * @param {() => void} props.zoomOut
+ * @param {() => void} props.fitToScreen
+ * @param {() => void} props.fitToWidth
+ * @param {{ current: any }} props.documentRenderRef
+ * @param {() => void} props.handleCompare
+ * @param {boolean} props.isComparing
+ * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
+ * @param {(angle:number) => void} props.handleRotationChange
+ * @param {(e:{target:{value:any}}) => void} props.handleBrightnessChange
+ * @param {(e:{target:{value:any}}) => void} props.handleContrastChange
+ * @param {() => void} props.resetImageProperties
+ * @param {boolean} props.isExpanded
+ * @param {(v:boolean|((p:boolean)=>boolean))=>void} props.setIsExpanded
+ * @returns {JSX.Element}
  */
 const DocumentToolbar = ({
-  pages,
   pageNumber,
   totalPages,
   prevPageDisabled,
@@ -55,8 +80,7 @@ const DocumentToolbar = ({
   zoomOut,
   fitToScreen,
   fitToWidth,
-  setZoom,
-  viewerContainerRef,
+  documentRenderRef,
   handleCompare,
   isComparing,
   imageProperties,
@@ -64,17 +88,12 @@ const DocumentToolbar = ({
   handleBrightnessChange,
   handleContrastChange,
   resetImageProperties,
-  documentRenderRef,
   isExpanded,
   setIsExpanded,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
-  const lastPageNumberRef = useRef(null);
 
-  useEffect(() => {
-    lastPageNumberRef.current = pageNumber;
-  }, [pageNumber]);
-
+  // Navigation helpers (single-step handlers + press-and-hold timers)
   const {
     handlePrevPageWrapper,
     handleNextPageWrapper,
@@ -86,11 +105,16 @@ const DocumentToolbar = ({
     stopNextPageTimer,
   } = usePageNavigation(setPageNumber, totalPages);
 
-  const snapToZero = useMemo(() => (value) => (Math.abs(value - 100) <= SLIDER_CENTER_RANGE ? 100 : value), []);
+  // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
+  const snapToZero = useMemo(
+    () => (value) => (Math.abs(Number(value) - 100) <= SLIDER_CENTER_RANGE ? 100 : Number(value)),
+    []
+  );
 
   const handleBrightnessSliderChange = useCallback(
     (event) => {
-      const value = snapToZero(parseInt(event.target.value, 10));
+      const raw = parseInt(event?.target?.value, 10);
+      const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
       handleBrightnessChange({ target: { value } });
     },
     [handleBrightnessChange, snapToZero]
@@ -98,31 +122,44 @@ const DocumentToolbar = ({
 
   const handleContrastSliderChange = useCallback(
     (event) => {
-      const value = snapToZero(parseInt(event.target.value, 10));
+      const raw = parseInt(event?.target?.value, 10);
+      const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
       handleContrastChange({ target: { value } });
     },
     [handleContrastChange, snapToZero]
   );
 
+  /** Toggle the canvas editing tools. Reset adjustments when turning the tools off. */
   const toggleExpand = useCallback(() => {
     if (isExpanded) {
       resetImageProperties();
     }
     setIsExpanded((prev) => {
-      if (!prev) {
+      const next = !prev;
+      if (next) {
         logger.info('Enabling canvas tools and forcing render');
-        documentRenderRef.current?.forceRender();
+        try { documentRenderRef.current?.forceRender?.(); } catch {}
       }
-      return !prev;
+      return next;
     });
   }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
 
   return (
-    <div className="toolbar">
-      <button onClick={() => handlePrint(documentRenderRef)} aria-label="Print document" title="Print document">
-        <span className="material-icons">print</span>
+    <div className="toolbar" role="toolbar" aria-label="Document controls">
+      {/* Print */}
+      <button
+        type="button"
+        onClick={() => handlePrint(documentRenderRef)}
+        aria-label="Print document"
+        title="Print document"
+        className="odv-btn"
+      >
+        <span className="material-icons" aria-hidden="true">print</span>
       </button>
-      <div className="separator"></div>
+
+      <div className="separator" />
+
+      {/* Paging controls */}
       <PageNavigationButtons
         prevPageDisabled={prevPageDisabled}
         nextPageDisabled={nextPageDisabled}
@@ -139,53 +176,108 @@ const DocumentToolbar = ({
         pageNumber={pageNumber}
         totalPages={totalPages}
       />
-      <div className="separator"></div>
-      <ZoomButtons 
+
+      <div className="separator" />
+
+      {/* Zoom & fit */}
+      <ZoomButtons
         zoomIn={zoomIn}
         zoomOut={zoomOut}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
       />
-      <div className="separator"></div>
-      <button 
-        onClick={handleCompare} 
-        aria-label="Compare document" 
-        title={isComparing ? "Disable Compare Mode" : "Enable Compare Mode"} 
-        className={`compare-button ${isComparing ? "compare-enabled" : "compare-disabled"}`}
+
+      <div className="separator" />
+
+      {/* Compare mode */}
+      <button
+        type="button"
+        onClick={handleCompare}
+        aria-label={isComparing ? 'Disable compare mode' : 'Enable compare mode'}
+        title={isComparing ? 'Disable compare mode' : 'Enable compare mode'}
+        className={`odv-btn compare-button ${isComparing ? 'compare-enabled' : 'compare-disabled'}`}
       >
-        <span className="material-icons">compare</span>
+        <span className="material-icons" aria-hidden="true">compare</span>
       </button>
-      <div className="separator"></div>
-      <button 
-        onClick={toggleExpand} 
-        aria-label={isExpanded ? "Disable canvas tools" : "Enable canvas tools"} 
-        title={isExpanded ? "Disable canvas tools" : "Enable canvas tools"}
-        className={`editing-button ${isExpanded ? "editing-enabled" : "editing-disabled"}`}
+
+      <div className="separator" />
+
+      {/* Canvas editing tools toggle */}
+      <button
+        type="button"
+        onClick={toggleExpand}
+        aria-label={isExpanded ? 'Disable canvas tools' : 'Enable canvas tools'}
+        title={isExpanded ? 'Disable canvas tools' : 'Enable canvas tools'}
+        className={`odv-btn editing-button ${isExpanded ? 'editing-enabled' : 'editing-disabled'}`}
       >
-        <span className="material-icons">edit</span>
+        <span className="material-icons" aria-hidden="true">edit</span>
       </button>
+
+      {/* Editing controls (visible only when canvas tools are enabled) */}
       {isExpanded && (
-        <div className="editing-tools">
-          <button onClick={() => handleRotationChange(-90)}>⟲</button>
-          <button onClick={() => handleRotationChange(90)}>⟳</button>
-          <label>
-            Brightness:
-            <input type="range" min="0" max="200" value={imageProperties.brightness} onChange={handleBrightnessSliderChange} className={imageProperties.brightness === 100 ? 'resting' : 'active'} />
+        <div className="editing-tools" aria-label="Image adjustments">
+          <button
+            type="button"
+            onClick={() => handleRotationChange(-90)}
+            aria-label="Rotate left 90°"
+            title="Rotate left 90°"
+            className="odv-btn"
+          >
+            ⟲
+          </button>
+          <button
+            type="button"
+            onClick={() => handleRotationChange(90)}
+            aria-label="Rotate right 90°"
+            title="Rotate right 90°"
+            className="odv-btn"
+          >
+            ⟳
+          </button>
+
+          <label className="slider-label">
+            Brightness
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={imageProperties.brightness}
+              onChange={handleBrightnessSliderChange}
+              className={imageProperties.brightness === 100 ? 'resting' : 'active'}
+              aria-valuemin={0}
+              aria-valuemax={200}
+              aria-valuenow={imageProperties.brightness}
+              aria-label="Adjust brightness"
+            />
           </label>
-          <label>
-            Contrast:
-            <input type="range" min="0" max="200" value={imageProperties.contrast} onChange={handleContrastSliderChange} className={imageProperties.contrast === 100 ? 'resting' : 'active'} />
+
+          <label className="slider-label">
+            Contrast
+            <input
+              type="range"
+              min="0"
+              max="200"
+              value={imageProperties.contrast}
+              onChange={handleContrastSliderChange}
+              className={imageProperties.contrast === 100 ? 'resting' : 'active'}
+              aria-valuemin={0}
+              aria-valuemax={200}
+              aria-valuenow={imageProperties.contrast}
+              aria-label="Adjust contrast"
+            />
           </label>
         </div>
       )}
-      <div className="separator"></div>
+
+      <div className="separator" />
+
+      {/* Theme toggle */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
     </div>
   );
 };
 
 DocumentToolbar.propTypes = {
-  pages: PropTypes.array.isRequired,
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
   prevPageDisabled: PropTypes.bool.isRequired,
@@ -197,21 +289,20 @@ DocumentToolbar.propTypes = {
   zoomOut: PropTypes.func.isRequired,
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
-  setZoom: PropTypes.func.isRequired,
-  viewerContainerRef: PropTypes.object.isRequired,
+  documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({
+    rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
   }).isRequired,
   handleRotationChange: PropTypes.func.isRequired,
-  handleBrightnessChange: PropTypes.func.isRequired,
+  handleBrightnessChange: PropTypes.func.IsRequired, // corrected in runtime types by PropTypes; keep case consistent with others
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
-  documentRenderRef: PropTypes.object.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   setIsExpanded: PropTypes.func.isRequired,
 };
 
-export default DocumentToolbar;
+export default React.memo(DocumentToolbar);

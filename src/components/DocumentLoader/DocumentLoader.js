@@ -1,83 +1,138 @@
-﻿// File: src/components/DocumentLoader/DocumentLoader.js
-import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
-import { ViewerContext } from '../../ViewerContext';
-import logger from '../../LogController';
-import { generateDocumentList, getTotalPages, getTiffMetadata } from './Utils';
-import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './WorkerHandler';
-import { batchHandler } from './BatchHandler';
-import { renderPDFInMainThread, renderTIFFInMainThread } from './MainThreadRenderer';
-import { fileTypeFromBuffer } from 'file-type';
+﻿/**
+ * File: src/components/DocumentLoader/DocumentLoader.js
+ *
+ * OpenDocViewer — Orchestrates document fetching, type detection, paging, and rendering.
+ *
+ * MODES
+ *   1) Pattern mode (legacy/demo): { folder, extension, endNumber }
+ *   2) Explicit-list mode:        { sourceList: [{ url, ext?, fileIndex? }, ...] }
+ *
+ * PIPELINE (high level)
+ *   - For each input entry → fetch bytes (ArrayBuffer)
+ *   - Detect content type via `file-type` (buffer first, then blob fallback)
+ *   - Decide execution path:
+ *       • PDF/TIFF → push a single job to the main-thread renderer queue
+ *       • Other images → push a single job to the worker queue
+ *   - Schedule work:
+ *       • Low-core devices (≤3 logical cores) → sequential scheduler; yields to UI between jobs
+ *       • Others → batched, multi-worker processing via `batchHandler`
+ *
+ * PERFORMANCE & STABILITY NOTES
+ *   - We reuse one ArrayBuffer per file (PDF/TIFF) to avoid N× buffer duplication for multi-page formats.
+ *   - We transfer ArrayBuffers to workers when possible to reduce GC pressure.
+ *   - We install per-fetch AbortControllers and abort them on unmount to avoid leaks.
+ *   - We pre-insert lightweight placeholders so the UI can lay out while decoding occurs.
+ *
+ * IMPORTANT PROJECT GOTCHA (for future reviewers)
+ *   - We intentionally import from the **root** 'file-type' package, NOT 'file-type/browser'.
+ *     With `file-type` v21 the '/browser' subpath is not exported for bundlers and will break Vite builds.
+ *     (See README for more context.)
+ *
+ * Provenance / baseline reference for prior version of this module: :contentReference[oaicite:0]{index=0}
+ */
 
-// -----------------------------
-// Adaptiv worker-tuning
-// -----------------------------
+import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
+import { ViewerContext } from '../../ViewerContext.jsx';
+import logger from '../../LogController.js';
+import { generateDocumentList, getTotalPages, getTiffMetadata } from './Utils.js';
+import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './WorkerHandler.js';
+import { batchHandler } from './BatchHandler.js';
+import { renderPDFInMainThread, renderTIFFInMainThread } from './MainThreadRenderer.js';
+// Browser-safe: use file-type top-level ESM with Uint8Array/Blob
+import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
+
+/* ------------------------------------------------------------------------------------------------
+ * Adaptive worker tuning
+ * ------------------------------------------------------------------------------------------------ */
+
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
+
 const isMobile = (() => {
-  // UA-CH om möjligt, annars enkel UA-test
+  // Prefer UA-CH when available; fallback to a simple UA test.
   try {
     // @ts-ignore
     if (navigator?.userAgentData?.mobile != null) return navigator.userAgentData.mobile;
   } catch {}
   try {
     return /Android|iPhone|iPad|iPod/i.test(navigator?.userAgent || '');
-  } catch { return false; }
+  } catch {
+    return false;
+  }
 })();
 
 /**
- * Beräknar en bra startkonfiguration för workers + batchstorlek.
- * - ≤3 logiska kärnor: strikt sekventiellt (1 worker) och ingen splitting.
- * - Lämnar alltid 1 kärna åt UI när möjligt.
- * - Tar hänsyn till minne och mobil för hårda capar.
+ * Compute a starting config for worker count and batch size.
+ * - ≤3 logical cores → strictly sequential (1 worker) to preserve responsiveness.
+ * - Always leave 1 core for the UI when possible.
+ * - Constrain by device memory and mobile caps.
+ *
+ * @param {{ cpuBound?: boolean, ioHeavy?: boolean, desiredCap?: number }} [opts]
  */
 function computeWorkerTuning({ cpuBound = true, ioHeavy = false, desiredCap } = {}) {
   const cores = Math.max(1, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2));
-  // deviceMemory finns i Chromium; annars fallback
+  // Chromium-only; otherwise default
   const memGB = Number((typeof navigator !== 'undefined' && navigator.deviceMemory) || 4);
 
-  const lowCore = cores <= 3; // 1–3 kärnor: seriellt
+  const lowCore = cores <= 3; // 1–3 logical cores → sequential
   const leaveForMain = cores > 1 ? 1 : 0;
 
-  // Hård cap för att undvika oversubscription och märkliga maskiner
+  // Hard cap to avoid oversubscription on quirky machines
   let hardCap = desiredCap ?? (isMobile ? 8 : 16);
   if (memGB <= 3) hardCap = Math.min(hardCap, isMobile ? 4 : 8);
 
-  // Bas: 1:1 mot logiska kärnor men lämna 1 för UI
+  // Base: 1:1 with cores but leave one for the main thread
   const base = clamp(cores - leaveForMain, 1, hardCap);
 
-  // CPU-bundet: håll dig nära 1:1. I/O: tillåt lite översubscription.
-  let maxWorkers = cpuBound
-    ? base
-    : clamp(Math.ceil(base * (ioHeavy ? 1.5 : 1.2)), 1, hardCap);
+  // CPU-bound → keep near 1:1; IO-heavy → allow slight oversubscription
+  let maxWorkers = cpuBound ? base : clamp(Math.ceil(base * (ioHeavy ? 1.5 : 1.2)), 1, hardCap);
 
-  if (lowCore) maxWorkers = 1; // strikt sekventiellt
+  if (lowCore) maxWorkers = 1; // strict sequential
 
-  // BatchSize: Infinity = ingen splitting (mer explicit än MAX_SAFE_INTEGER)
+  // BatchSize: Infinity = no splitting (more explicit than MAX_SAFE_INTEGER)
   const batchSize = lowCore ? Infinity : (cpuBound ? 24 : 64);
 
   return { maxWorkers, batchSize, lowCore };
 }
 
-// Konfig: CPU-bundet läge (bild/PDF m.m.); justera vid behov
+// Default config for our workload (mostly CPU-bound image/PDF decoding)
 const { maxWorkers, batchSize, lowCore } = computeWorkerTuning({ cpuBound: true });
-// Toggle TIFF metadata logging
+
+// Toggle verbose TIFF metadata logging (costs a bit of CPU)
 const enableMetadataLogging = false;
 
+/* ------------------------------------------------------------------------------------------------
+ * React component
+ * ------------------------------------------------------------------------------------------------ */
+
 /**
- * DocumentLoader
- * Loads and processes documents for rendering.
+ * DocumentLoader — Loads and processes documents for rendering.
  *
- * Props support two modes:
- *  - Pattern mode: { folder, extension, endNumber }
- *  - Explicit-list mode: { sourceList: [{ url, ext?, fileIndex? }, ...] }
+ * @param {Object} props
+ * @param {string} [props.folder]            Pattern mode: base folder/path for assets
+ * @param {string} [props.extension]         Pattern mode: file extension (e.g., "png", "tiff")
+ * @param {number} [props.endNumber]         Pattern mode: last page/file number (1..N)
+ * @param {{ url:string, ext?:string, fileIndex?:number }[]} [props.sourceList]
+ *        Explicit-list mode: ordered list of source items
+ * @param {boolean} [props.sameBlob=true]    Reuse full-size blob URL for thumbnails when possible
+ * @param {any} props.children               Render prop subtree (viewer UI)
+ * @returns {JSX.Element}
  */
-const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sourceList }) => {
+const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumber, sourceList }) => {
   const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
+
+  /** Idempotence & lifecycle guards */
   const hasStarted = useRef(false);
   const isMounted = useRef(true);
-  const jobQueue = useRef([]);
-  const mainThreadJobQueue = useRef([]);
-  const batchQueue = useRef([]);
+
+  /** Work queues */
+  const jobQueue = useRef([]);           // single-image jobs (workers)
+  const mainThreadJobQueue = useRef([]); // multi-page or fallback jobs (PDF/TIFF)
+  const batchQueue = useRef([]);         // used by batchHandler
+
+  /** Global page index across all inputs (for ViewerContext ordering) */
   const currentPageIndex = useRef(0);
+
+  /** Track inflight fetches for cleanup on unmount */
   const fetchControllers = useRef(new Set());
 
   // Create workers ONCE (render-safe). Do NOT set state here.
@@ -87,12 +142,12 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
     return Array.from({ length: numWorkers }, () => createWorker());
   }, []);
 
-  // Set workerCount AFTER render (fixes the React warning)
+  // Publish the number of workers AFTER first render (avoids React state-in-render warnings)
   useEffect(() => {
     setWorkerCount(imageWorkers.length);
   }, [imageWorkers.length, setWorkerCount]);
 
-  // Preload placeholder images for better user experience
+  // Preload placeholder images for better UX while decoding
   const preloadPlaceholderImage = useCallback((index) => {
     const placeholderImageUrl = 'placeholder.png';
     const placeholderPage = {
@@ -108,7 +163,7 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
     insertPageAtIndex(placeholderPage, index);
   }, [insertPageAtIndex]);
 
-  // Handle failed document load
+  // Minimal failure placeholder insertion
   const handleFailedDocumentLoad = useCallback((url, fileIndex) => {
     logger.error(`Failed to load document at ${url}`);
     const failedPage = {
@@ -124,114 +179,155 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
     currentPageIndex.current += 1;
   }, [insertPageAtIndex]);
 
-  // Load document asynchronously based on bytes (type-sniffed)
-  const loadDocumentAsync = useCallback(async (url, index) => {	  
-  // create controller per fetch
-  const controller = new AbortController();
-  fetchControllers.current.add(controller);
+  /**
+   * Fetch + detect + enqueue a single document.
+   * Uses `file-type` with buffer-first, then a blob-based fallback.
+   */
+  const loadDocumentAsync = useCallback(async (url, index) => {
+    // Per-fetch controller
+    const controller = new AbortController();
+    fetchControllers.current.add(controller);
 
-  try {
-    logger.debug(`Loading document`, { url, index });
-    const response = await fetch(url, { signal: controller.signal });
-    logger.debug(`Fetch response`, { url, status: response.status });
+    try {
+      logger.debug('Loading document', { url, index });
 
-    if (!response.ok) {
-      throw new Error(`Failed to fetch document at ${url} with status ${response.status}`);
-    }
+      const response = await fetch(url, { signal: controller.signal });
+      logger.debug('Fetch response', { url, status: response.status });
 
-    const arrayBuffer = await response.arrayBuffer();
-    // fetch completed successfully — remove controller
-    fetchControllers.current.delete(controller);
+      if (!response.ok) {
+        throw new Error(`Failed to fetch document at ${url} with status ${response.status}`);
+      }
 
-    if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-      throw new Error(`Invalid or empty ArrayBuffer for document at ${url}`);
-    }
+      let arrayBuffer = await response.arrayBuffer();
 
-      // Verify file type using `file-type`
-      const fileType = await fileTypeFromBuffer(arrayBuffer);
+      // Fetch completed successfully → remove controller
+      fetchControllers.current.delete(controller);
+
+      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
+        throw new Error(`Invalid or empty ArrayBuffer for document at ${url}`);
+      }
+
+      // Robust content-type detection (browser-safe)
+      let fileType;
+      try {
+        // file-type expects Uint8Array for buffer-based detection
+        fileType = await fileTypeFromBuffer(new Uint8Array(arrayBuffer));
+      } catch {
+        /* ignore and try fallback */
+      }
+
       if (!fileType) {
+        try {
+          // Fallback path (works well in browsers)
+          fileType = await fileTypeFromBlob(new Blob([arrayBuffer]));
+        } catch {
+          /* ignore; we’ll infer below */
+        }
+      }
+
+      // Infer extension if signatures are unknown (e.g., some TIFFs/PDFs with odd headers)
+      let fileExtension = fileType?.ext;
+      if (!fileExtension) {
+        // Try server header first
+        const ct = (typeof response !== 'undefined' && response.headers?.get?.('content-type')) || '';
+        if (/pdf/i.test(ct)) fileExtension = 'pdf';
+        else if (/tiff?/i.test(ct)) fileExtension = 'tiff';
+        else {
+          // Last-ditch: guess from URL (may include querystring)
+          const m = String(url).toLowerCase().match(/\.(pdf|tiff?|png|jpe?g|bmp|gif)(?:$|\?)/i);
+          fileExtension = m ? m[1].toLowerCase() : null;
+        }
+      }
+
+      if (!fileExtension) {
         throw new Error(`Unexpected file type for document at ${url}: unknown`);
       }
 
-      const fileExtension = fileType.ext;
       const totalPages = await getTotalPages(arrayBuffer, fileExtension);
-      logger.debug(`Total pages detected`, { totalPages });
+      logger.debug('Total pages detected', { totalPages });
 
+      // Decide processing path
       if (fileExtension === 'pdf') {
-        // Process PDF on main thread
+        // Process PDF on main thread (reuse the original buffer)
         mainThreadJobQueue.current.push({
-          arrayBuffer: arrayBuffer.slice(0),
+          arrayBuffer,
           fileExtension,
           index,
           pageStartIndex: 0,
           pagesInvolved: totalPages,
           allPagesStartingIndex: currentPageIndex.current,
         });
+        arrayBuffer = null;
         currentPageIndex.current += totalPages;
-
       } else if (['tiff', 'tif'].includes(fileExtension)) {
         if (enableMetadataLogging) {
           const metadata = getTiffMetadata(arrayBuffer);
-          logger.debug(`TIFF metadata detected`, { metadata });
+          logger.debug('TIFF metadata detected', { metadata });
         }
-        for (let pageIndex = 0; pageIndex < totalPages; pageIndex += batchSize) {
-          const pagesInvolved = Math.min(batchSize, totalPages - pageIndex);
-          if (pagesInvolved > 0) {
-            const job = {
-              arrayBuffer: arrayBuffer.slice(0),
-              fileExtension,
-              index,
-              pageStartIndex: pageIndex,
-              pagesInvolved,
-              allPagesStartingIndex: currentPageIndex.current,
-            };
-            logger.debug(`Queueing job`, { job, currentPageIndex: currentPageIndex.current });
-            jobQueue.current.push(job);
-            currentPageIndex.current += pagesInvolved;
-          }
-        }
-      } else {
-        // Other single-image types
+        // Process TIFF entirely on the main thread to avoid duplicating the buffer per page.
         const job = {
-          arrayBuffer: arrayBuffer.slice(0),
+          arrayBuffer, // reuse one buffer
+          fileExtension,
+          index,
+          pageStartIndex: 0,
+          pagesInvolved: totalPages,
+          allPagesStartingIndex: currentPageIndex.current,
+        };
+        mainThreadJobQueue.current.push(job);
+        arrayBuffer = null;
+        currentPageIndex.current += totalPages;
+      } else {
+        // Other single-image types (reuse original buffer so it can be transferred)
+        const job = {
+          arrayBuffer,
           fileExtension,
           index,
           pageStartIndex: 0,
           pagesInvolved: 1,
           allPagesStartingIndex: currentPageIndex.current,
         };
-        logger.debug(`Queueing job for image type`, { job, currentPageIndex: currentPageIndex.current });
+        logger.debug('Queueing job for image type', { job, currentPageIndex: currentPageIndex.current });
         jobQueue.current.push(job);
+        arrayBuffer = null; // help GC
         currentPageIndex.current += 1;
       }
-  } catch (error) {
-    // Always remove controller on exit (including aborts)
-    fetchControllers.current.delete(controller);
+    } catch (error) {
+      // Always remove controller on exit (including aborts)
+      fetchControllers.current.delete(controller);
 
-    // If unmounted or aborted, do nothing noisy
-    if (error?.name === 'AbortError') {
-      logger.debug('Fetch aborted', { url });
-      return;
-    }
+      // If unmounted or aborted, do nothing noisy
+      if (error?.name === 'AbortError') {
+        logger.debug('Fetch aborted', { url });
+        return;
+      }
 
-    handleFailedDocumentLoad(url, index);
-    if (isMounted.current) {
-      setError(error.message);
-      logger.error(`Error loading document: ${error.message}`);
+      handleFailedDocumentLoad(url, index);
+      if (isMounted.current) {
+        setError(error.message);
+        logger.error('Error loading document', { error: error.message });
+      }
     }
-  }
-}, [setError, handleFailedDocumentLoad]);
+  }, [setError, handleFailedDocumentLoad]);
 
   // Process batches of jobs using workers
   const processBatches = useCallback(() => {
-    batchHandler(jobQueue, batchQueue, batchSize, imageWorkers, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
+    batchHandler(
+      jobQueue,
+      batchQueue,
+      batchSize,
+      imageWorkers,
+      handleWorkerMessage,
+      insertPageAtIndex,
+      sameBlob,
+      isMounted
+    );
   }, [imageWorkers, sameBlob, insertPageAtIndex]);
 
-  // NEW: Low-core sekventiell scheduler (1 jobb i taget; yield till UI mellan jobben)
+  // Low-core sequential scheduler (1 job at a time; yield to UI between jobs)
   const processSequential = useCallback(() => {
     if (!isMounted.current) return;
 
-    // 1) Vanliga jobb: skicka nästa till enda workern
+    // 1) Worker job: send next to the single worker
     const next = jobQueue.current.shift();
     if (next) {
       const w = imageWorkers[0];
@@ -239,23 +335,29 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
 
       w.onmessage = (evt) => {
         handleWorkerMessage(evt, insertPageAtIndex, sameBlob, isMounted);
-        // Ge huvudtråden andrum innan nästa jobb
+        // Give the main thread a breather before the next job
         setTimeout(processSequential, 0);
       };
       w.onerror = () => {
-        // Fallback: TIFF i main thread, annars placeholder
+        // Fallback: TIFF in main thread; otherwise a placeholder
         if (['tiff', 'tif'].includes(next.fileExtension)) {
           renderTIFFInMainThread(next, insertPageAtIndex, sameBlob, isMounted)
             .then(() => setTimeout(processSequential, 0));
         } else {
           handleWorkerMessage(
-            { data: { jobs: [{
-              fullSizeUrl: null,
-              fileIndex: next.index,
-              pageIndex: next.pageStartIndex || 0,
-              fileExtension: next.fileExtension,
-              allPagesIndex: next.allPagesStartingIndex
-            }] } },
+            {
+              data: {
+                jobs: [
+                  {
+                    fullSizeUrl: null,
+                    fileIndex: next.index,
+                    pageIndex: next.pageStartIndex || 0,
+                    fileExtension: next.fileExtension,
+                    allPagesIndex: next.allPagesStartingIndex,
+                  },
+                ],
+              },
+            },
             insertPageAtIndex,
             sameBlob,
             isMounted
@@ -264,17 +366,16 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
         }
       };
 
-      const transfer = (next?.arrayBuffer instanceof ArrayBuffer) ? [next.arrayBuffer] : [];
-	  w.postMessage({ jobs: [next], fileExtension: next.fileExtension }, transfer);
-      return; // vänta på onmessage innan vi går vidare
+      const transfer = next?.arrayBuffer instanceof ArrayBuffer ? [next.arrayBuffer] : [];
+      w.postMessage({ jobs: [next], fileExtension: next.fileExtension }, transfer);
+      return; // wait for onmessage before proceeding
     }
 
-    // 2) Dränera main-thread-jobb (PDF/TIFF) ett i taget
+    // 2) Drain main-thread jobs (PDF/TIFF) one at a time
     const mt = mainThreadJobQueue.current.shift();
     if (mt) {
-      const run = (mt.fileExtension === 'pdf') ? renderPDFInMainThread : renderTIFFInMainThread;
-      run(mt, insertPageAtIndex, sameBlob, isMounted)
-        .then(() => setTimeout(processSequential, 0));
+      const run = mt.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
+      run(mt, insertPageAtIndex, sameBlob, isMounted).then(() => setTimeout(processSequential, 0));
     }
   }, [imageWorkers, handleWorkerMessage, insertPageAtIndex, sameBlob]);
 
@@ -283,15 +384,18 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
     hasStarted.current = true;
 
     const loadDocuments = async () => {
+      // Insert the very first placeholder now so the UI can layout immediately.
       preloadPlaceholderImage(currentPageIndex.current);
 
-      // NEW: choose source list or pattern
+      // Choose explicit-list or pattern
       let entries = [];
       if (Array.isArray(sourceList) && sourceList.length > 0) {
-        entries = sourceList.map((it, i) => ({
-          url: it?.url,
-          fileIndex: (typeof it?.fileIndex === 'number') ? it.fileIndex : i
-        })).filter(e => !!e.url);
+        entries = sourceList
+          .map((it, i) => ({
+            url: it?.url,
+            fileIndex: typeof it?.fileIndex === 'number' ? it.fileIndex : i,
+          }))
+          .filter((e) => !!e.url);
         logger.debug('Using explicit sourceList', { count: entries.length });
       } else {
         const documentUrls = generateDocumentList(folder, extension, endNumber);
@@ -300,17 +404,19 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
       }
 
       try {
+        // Fetch sequentially to avoid overwhelming the network in constrained environments.
         for (let i = 0; i < entries.length; i++) {
           const { url, fileIndex } = entries[i];
-          logger.debug(`Processing document URL`, { url, index: fileIndex });
+          logger.debug('Processing document URL', { url, index: fileIndex });
           await loadDocumentAsync(url, fileIndex);
         }
 
+        // Backfill placeholders for any remaining pages
         for (let i = 1; i < currentPageIndex.current; i++) {
           preloadPlaceholderImage(i);
         }
 
-        // Low-core: sekventiellt; annars parallellt
+        // Low-core: strictly sequential; otherwise: batched workers + drain main-thread queue
         if (lowCore) {
           processSequential();
         } else {
@@ -324,7 +430,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
             }
           }
         }
-
       } catch (error) {
         if (isMounted.current) {
           setError(error.message);
@@ -335,19 +440,34 @@ const DocumentLoader = ({ folder, extension, children, sameBlob, endNumber, sour
 
     loadDocuments();
 
-return () => {
-  isMounted.current = false;
-  // abort any in-flight fetches
-  fetchControllers.current.forEach(ctrl => {
-    try { ctrl.abort(); } catch {}
-  });
-  fetchControllers.current.clear();
+    return () => {
+      isMounted.current = false;
 
-  imageWorkers.forEach(worker => worker.terminate());
-};
-  }, [folder, extension, endNumber, sourceList, setError, imageWorkers,
-      loadDocumentAsync, insertPageAtIndex, sameBlob, processBatches, processSequential,
-      preloadPlaceholderImage]);
+      // Abort any in-flight fetches
+      fetchControllers.current.forEach((ctrl) => {
+        try {
+          ctrl.abort();
+        } catch {}
+      });
+      fetchControllers.current.clear();
+
+      // Terminate workers
+      imageWorkers.forEach((worker) => worker.terminate());
+    };
+  }, [
+    folder,
+    extension,
+    endNumber,
+    sourceList,
+    setError,
+    imageWorkers,
+    loadDocumentAsync,
+    insertPageAtIndex,
+    sameBlob,
+    processBatches,
+    processSequential,
+    preloadPlaceholderImage,
+  ]);
 
   return children;
 };

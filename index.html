@@ -1,21 +1,47 @@
+<!--
+  OpenDocViewer — index.html
+  Notes for maintainers (safe to keep in production; these are HTML comments only):
+
+  - Runtime config MUST load BEFORE the main bundle so toggles like `showPerfOverlay`
+    and `exposeStackTraces` are available at startup. See /odv.config.js.
+  - Do NOT long-cache this file or /odv.config.js. On IIS, web.config sets Cache-Control: no-store
+    for both. Other hosts should do the same.
+  - External fonts (Google) can reveal client IP/UA and add latency. Consider self-hosting if needed.
+  - The root app container uses aria-live="polite". This is broad; keep usage of live regions minimal
+    inside the app to avoid noisy screen reader announcements.
+  - If deploying under a subpath, build with `vite build --base=/YourPath/` (also see vite.config.js).
+
+  Source for this file (traceability): :contentReference[oaicite:0]{index=0}
+-->
 <!doctype html>
 <html lang="en">
   <head>
+    <!-- Basic document metadata -->
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
+
+    <!-- SEO / Sharing -->
     <meta name="description" content="OpenDocViewer – React JavaScript Document Viewer" />
-    <meta name="keywords" content="document viewer, React, JavaScript, OpenDocViewer" />
+    <meta name="keywords" content="document viewer, React, JavaScript, OpenDocViewer, PDF, TIFF" />
     <meta property="og:title" content="OpenDocViewer" />
     <meta property="og:description" content="OpenDocViewer – React JavaScript Document Viewer" />
     <meta property="og:image" content="/logo192.png" />
     <meta property="og:url" content="https://your-website-url.com" />
 
+    <!-- Icons / Manifest -->
     <link rel="icon" href="/favicon.ico" />
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
 
+    <!-- Performance hints for fonts (optional; safe if you keep Google-hosted fonts) -->
+    <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+
+    <!-- Material Icons (classic) -->
     <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+
+    <!-- Material Symbols (preload pattern with onload swap; noscript fallback below) -->
     <link
       rel="preload"
       href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined:opsz,wght,FILL,GRAD@20..48,100..700,0..1,-50..200"
@@ -30,7 +56,10 @@
     </noscript>
 
     <title>OpenDocViewer</title>
+
+    <!-- Minimal baseline styles; the app provides its own styling -->
     <style>
+      html, body { height: 100%; }
       body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
       #root { height: 100vh; width: 100vw; display: flex; flex-direction: column; }
     </style>
@@ -42,7 +71,15 @@
         <p>You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page.</p>
       </div>
     </noscript>
+
+    <!-- Root app container.
+         aria-live=polite is broad; keep app-level announcements minimal to avoid SR noise. -->
     <div id="root" aria-live="polite"></div>
+
+    <!-- Runtime config MUST load before the main bundle. See README for details. -->
+    <script src="/odv.config.js"></script>
+
+    <!-- Main entry (Vite/ESM). Note: base path is controlled by the Vite build flag `--base`. -->
     <script type="module" src="/src/index.jsx"></script>
   </body>
 </html>

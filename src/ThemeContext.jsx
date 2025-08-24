@@ -1,89 +1,217 @@
-// File: src/ThemeContext.js
+/**
+ * src/ThemeContext.jsx
+ *
+ * OpenDocViewer — Theme state context (React)
+ *
+ * PURPOSE
+ *   Centralize light/dark theme handling with:
+ *     - robust initialization (localStorage → system preference → fallback)
+ *     - resilient DOM updates (SSR-safe, try/catch)
+ *     - live reaction to `prefers-color-scheme` changes (with Safari fallback)
+ *     - memoized context value for predictable renders
+ *
+ * NOTES & GOTCHAS
+ *   - We set `data-theme="light|dark"` on <html>. Keep CSS keyed to this attribute.
+ *   - Do **not** throw on storage failures (Safari private mode, quota, etc.).
+ *   - Avoid noisy logs in hot paths; theme changes are infrequent so info-level logs are OK.
+ *   - Historical trap (elsewhere in the app): we import `file-type` from the **root** package,
+ *     not "file-type/browser", because v21 does not export that subpath for bundlers.
+ *
+ * Provenance (original baseline): :contentReference[oaicite:0]{index=0}
+ */
 
 import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
 import logger from './LogController';
 
-// Create the Theme context
-export const ThemeContext = createContext();
+/**
+ * Theme identifier.
+ * @typedef {'light' | 'dark'} ThemeName
+ */
+
+/**
+ * Context value shape for the theme.
+ * @typedef {Object} ThemeContextValue
+ * @property {ThemeName} theme               Current theme name ("light" | "dark")
+ * @property {() => void} toggleTheme        Toggle between light/dark
+ * @property {(next: ThemeName) => void} setThemeExplicit  Explicitly set a theme
+ */
+
+/** Storage key for persisting theme choice. */
+const LS_KEY = 'theme';
+
+/**
+ * Try to read a string value from localStorage.
+ * @param {string} key
+ * @returns {string|null}
+ */
+function lsGet(key) {
+  try {
+    if (typeof window === 'undefined') return null;
+    return window.localStorage.getItem(key);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Try to write a string value to localStorage.
+ * @param {string} key
+ * @param {string} value
+ * @returns {boolean} success
+ */
+function lsSet(key, value) {
+  try {
+    if (typeof window === 'undefined') return false;
+    window.localStorage.setItem(key, value);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
+/**
+ * Detect system preferred color scheme (SSR-safe; defaults to light).
+ * @returns {ThemeName}
+ */
+function detectSystemTheme() {
+  try {
+    if (typeof window === 'undefined' || typeof window.matchMedia !== 'function') return 'light';
+    return window.matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light';
+  } catch {
+    return 'light';
+  }
+}
+
+/**
+ * Apply the theme to the DOM (SSR-safe).
+ * - Sets <html data-theme="..."> for CSS selectors: [data-theme="dark"] { ... }
+ * - Sets `color-scheme` to hint UA form controls, scrollbars, etc.
+ * @param {ThemeName} newTheme
+ */
+function applyThemeToDocument(newTheme) {
+  try {
+    if (typeof document === 'undefined') return;
+    const root = document.documentElement;
+    root.setAttribute('data-theme', newTheme);
+    root.style.colorScheme = newTheme; // helps native widgets match theme
+  } catch {
+    // ignore; DOM not available or locked down
+  }
+}
+
+/**
+ * Create the Theme context with a safe default to avoid undefined access
+ * if a consumer is mounted outside the provider by mistake.
+ * Consumers should still wrap with <ThemeProvider>.
+ * @type {React.Context<ThemeContextValue>}
+ */
+export const ThemeContext = createContext(
+  /** @type {ThemeContextValue} */ ({
+    theme: 'light',
+    toggleTheme: () => {},
+    setThemeExplicit: () => {},
+  })
+);
 
 /**
  * ThemeProvider component to manage and provide theme-related state and functions.
- * @param {Object} props - Component props.
- * @param {React.ReactNode} props.children - The child components that will consume the theme context.
- * @returns {JSX.Element} The ThemeProvider component.
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @returns {JSX.Element}
  */
 export const ThemeProvider = ({ children }) => {
-  // Initialize theme state, loading from localStorage or using system preference
-  const [theme, setTheme] = useState(() => {
-    try {
-      const savedTheme = localStorage.getItem('theme');
-      if (savedTheme) {
-        logger.info('Theme loaded from localStorage', { theme: savedTheme });
-        return savedTheme;
-      }
-      const prefersDarkScheme = window.matchMedia("(prefers-color-scheme: dark)").matches;
-      const initialTheme = prefersDarkScheme ? 'dark' : 'light';
-      logger.info('Theme set based on system preference', { theme: initialTheme });
-      return initialTheme;
-    } catch (error) {
-      logger.error('Error initializing theme from localStorage', { error: error.toString() });
-      return 'light';
+  /**
+   * Initialize theme state:
+   *  1) localStorage "theme" if valid
+   *  2) system preference via matchMedia
+   *  3) 'light' fallback
+   */
+  const [theme, setTheme] = useState/** @type {() => ThemeName} */(() => {
+    const saved = lsGet(LS_KEY);
+    if (saved === 'light' || saved === 'dark') {
+      logger.info('Theme loaded from localStorage', { theme: saved });
+      return /** @type {ThemeName} */ (saved);
     }
+    const sys = detectSystemTheme();
+    logger.info('Theme set from system preference', { theme: sys });
+    return sys;
   });
 
   /**
-   * Apply the given theme to the document and save it in localStorage.
-   * @param {string} newTheme - The new theme to apply ('light' or 'dark').
+   * Apply a given theme and persist it.
+   * @param {ThemeName} next
    */
-  const applyTheme = useCallback((newTheme) => {
-    document.documentElement.setAttribute('data-theme', newTheme);
-    localStorage.setItem('theme', newTheme);
-    logger.info('Theme applied', { theme: newTheme });
-  }, []);
-
-  useEffect(() => {
-    try {
-      // Apply the current theme when the component mounts
-      applyTheme(theme);
-
-      // Handle system theme changes
-      const handleSystemThemeChange = (e) => {
-        const newTheme = e.matches ? 'dark' : 'light';
-        setTheme(newTheme);
-        applyTheme(newTheme);
-      };
-
-      const darkSchemeMediaQuery = window.matchMedia("(prefers-color-scheme: dark)");
-      darkSchemeMediaQuery.addEventListener('change', handleSystemThemeChange);
-
-      // Clean up the event listener on component unmount
-      return () => {
-        darkSchemeMediaQuery.removeEventListener('change', handleSystemThemeChange);
-      };
-    } catch (error) {
-      logger.error('Error applying theme', { error: error.toString() });
+  const setThemeExplicit = useCallback((next) => {
+    const value = next === 'dark' ? 'dark' : 'light';
+    applyThemeToDocument(value);
+    const ok = lsSet(LS_KEY, value);
+    if (!ok) {
+      // Storage might be unavailable; not fatal.
+      logger.debug('Theme persist skipped or failed (storage unavailable)', { theme: value });
     }
-  }, [theme, applyTheme]);
+    setTheme(value);
+    logger.info('Theme applied', { theme: value });
+  }, []);
 
   /**
    * Toggle between light and dark themes.
    */
   const toggleTheme = useCallback(() => {
+    setThemeExplicit(theme === 'light' ? 'dark' : 'light');
+  }, [theme, setThemeExplicit]);
+
+  /**
+   * On mount and when theme changes, apply to document (idempotent).
+   * Also subscribe to system theme changes (media query).
+   */
+  useEffect(() => {
+    // Apply current theme
+    applyThemeToDocument(theme);
+
+    // Listen for system dark-mode changes (Chromium/Firefox)
+    let mq;
+    const onChange = (e) => {
+      const next = e.matches ? 'dark' : 'light';
+      // Only auto-switch if the user hasn't explicitly chosen a theme before.
+      // If you want user settings to always override, uncomment the guard below:
+      // if (lsGet(LS_KEY)) return;
+      setThemeExplicit(next);
+    };
+
     try {
-      const newTheme = theme === 'light' ? 'dark' : 'light';
-      setTheme(newTheme);
-      applyTheme(newTheme);
-      logger.info('Theme toggled', { theme: newTheme });
-    } catch (error) {
-      logger.error('Error toggling theme', { error: error.toString() });
+      if (typeof window !== 'undefined' && typeof window.matchMedia === 'function') {
+        mq = window.matchMedia('(prefers-color-scheme: dark)');
+        // Modern browsers
+        if (typeof mq.addEventListener === 'function') mq.addEventListener('change', onChange);
+        // Safari fallback
+        else if (typeof mq.addListener === 'function') mq.addListener(onChange);
+      }
+    } catch {
+      // ignore
     }
-  }, [theme, applyTheme]);
 
-  const contextValue = useMemo(() => ({ theme, toggleTheme }), [theme, toggleTheme]);
+    return () => {
+      try {
+        if (mq) {
+          if (typeof mq.removeEventListener === 'function') mq.removeEventListener('change', onChange);
+          else if (typeof mq.removeListener === 'function') mq.removeListener(onChange);
+        }
+      } catch {
+        // ignore
+      }
+    };
+  }, [theme, setThemeExplicit]);
 
-  return (
-    <ThemeContext.Provider value={contextValue}>
-      {children}
-    </ThemeContext.Provider>
+  /** Memoized context value. */
+  const contextValue = useMemo(
+    () =>
+      /** @type {ThemeContextValue} */ ({
+        theme,
+        toggleTheme,
+        setThemeExplicit,
+      }),
+    [theme, toggleTheme, setThemeExplicit]
   );
+
+  return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };

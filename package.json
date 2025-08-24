@@ -1,8 +1,30 @@
 {
   "name": "opendocviewer",
-  "private": true,
   "version": "0.0.0",
+  "private": true,
+  "description": "Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite, with a token-gated log server and runtime configuration.",
+  "license": "MIT",
   "type": "module",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Optimal2/OpenDocViewer.git"
+  },
+  "homepage": "https://github.com/Optimal2/OpenDocViewer#readme",
+  "bugs": {
+    "url": "https://github.com/Optimal2/OpenDocViewer/issues"
+  },
+  "keywords": [
+    "pdf",
+    "tiff",
+    "viewer",
+    "react",
+    "vite",
+    "document",
+    "opendocviewer"
+  ],
+  "engines": {
+    "node": ">=18.0.0"
+  },
   "scripts": {
     "dev": "vite",
     "build": "vite build",

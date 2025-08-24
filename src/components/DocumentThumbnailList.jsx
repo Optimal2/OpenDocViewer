@@ -1,65 +1,105 @@
-// File: src/components/DocumentThumbnailList.js
+/**
+ * File: src/components/DocumentThumbnailList.jsx
+ *
+ * OpenDocViewer — Document Thumbnail List
+ *
+ * PURPOSE
+ *   Render a scrollable, accessible list of page thumbnails that allows users to
+ *   jump to a specific page via mouse or keyboard. The component remembers its
+ *   scroll position across re-renders for a stable UX.
+ *
+ * ACCESSIBILITY
+ *   - Uses a listbox/option pattern so the currently selected page can be announced.
+ *   - The container exposes `aria-activedescendant` pointing at the selected option.
+ *   - Each thumbnail is keyboard-activatable via Enter/Space.
+ *
+ * PERFORMANCE
+ *   - Wrapped in React.memo to avoid unnecessary re-renders when props are stable.
+ *   - Keeps scroll position in a ref (no state churn).
+ *
+ * LOGGING
+ *   - Logs user thumbnail clicks at `info` level with the target page number.
+ *
+ * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
+ *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
+ *     'file-type/browser'. With `file-type` v21 the '/browser' subpath is not exported
+ *     for bundlers and will break Vite builds. See README “Design notes & gotchas”.
+ *
+ * Provenance / previous baseline for this component: :contentReference[oaicite:0]{index=0}
+ */
 
-import React, { useEffect, useRef, useCallback } from 'react';
+import React, { useEffect, useRef, useCallback, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import logger from '../LogController';
 import LoadingSpinner from './LoadingSpinner';
 
 /**
- * DocumentThumbnailList component.
- * Renders a list of document thumbnails.
- *
- * @param {Object} props - Component props.
- * @param {Array} props.allPages - Array of all pages.
- * @param {number} props.pageNumber - Current page number.
- * @param {function} props.setPageNumber - Function to set the page number.
- * @param {Object} props.thumbnailsContainerRef - Reference to the thumbnails container.
- * @param {number} props.width - Width of the thumbnails container.
+ * @typedef {Object} PageItem
+ * @property {string} thumbnailUrl  - URL for the page thumbnail image (when loaded).
+ * @property {number} status        - Load status (0=loading, 1=ready, -1=failed).
  */
-const DocumentThumbnailList = React.memo(({
+
+/**
+ * DocumentThumbnailList component.
+ *
+ * @param {Object} props
+ * @param {PageItem[]} props.allPages
+ * @param {number} props.pageNumber
+ * @param {(page: number) => void} props.setPageNumber
+ * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef
+ * @param {number} props.width
+ * @returns {JSX.Element}
+ */
+const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   allPages,
   pageNumber,
   setPageNumber,
   thumbnailsContainerRef,
   width,
-}) => {
+}) {
   const scrollPosition = useRef(0);
 
-  /**
-   * Handles thumbnail click to set the current page number.
-   *
-   * @param {number} pageNum - The page number to set.
-   */
-  const handleThumbnailClick = useCallback((pageNum) => {
-    setPageNumber(pageNum);
-    logger.info('Thumbnail clicked', { pageNum });
-  }, [setPageNumber]);
+  /** Selected option id for aria-activedescendant (only valid when in range). */
+  const activeDescendantId = useMemo(() => {
+    const inRange = Number.isFinite(pageNumber) && pageNumber >= 1 && pageNumber <= allPages.length;
+    return inRange ? `thumbnail-${pageNumber}` : undefined;
+  }, [pageNumber, allPages.length]);
 
   /**
-   * Handles scroll event to save the current scroll position.
+   * Handle a thumbnail activation (click or key).
+   * Uses a stable callback so children don't re-render unnecessarily.
+   * @param {number} pageNum
    */
-  const handleScroll = useCallback(() => {
-    if (thumbnailsContainerRef.current) {
-      scrollPosition.current = thumbnailsContainerRef.current.scrollTop;
-    }
-  }, [thumbnailsContainerRef]);
-
-  useEffect(() => {
-    if (thumbnailsContainerRef.current) {
-      thumbnailsContainerRef.current.scrollTop = scrollPosition.current;
-    }
-  }, [thumbnailsContainerRef]);
-
-  useEffect(() => {
-    const currentRef = thumbnailsContainerRef.current;
-    if (currentRef) {
-      currentRef.addEventListener('scroll', handleScroll);
-    }
-    return () => {
-      if (currentRef) {
-        currentRef.removeEventListener('scroll', handleScroll);
+  const handleActivate = useCallback(
+    (pageNum) => {
+      try {
+        setPageNumber(pageNum);
+        logger.info('Thumbnail activated', { pageNum });
+      } catch (error) {
+        logger.error('Failed to set page from thumbnail', { error: String(error?.message || error), pageNum });
       }
-    };
+    },
+    [setPageNumber]
+  );
+
+  /** Remember scroll position on container scroll. */
+  const handleScroll = useCallback(() => {
+    const el = thumbnailsContainerRef?.current;
+    if (el) scrollPosition.current = el.scrollTop;
+  }, [thumbnailsContainerRef]);
+
+  /** Restore scroll position when the container ref changes or on mount. */
+  useEffect(() => {
+    const el = thumbnailsContainerRef?.current;
+    if (el) el.scrollTop = scrollPosition.current;
+  }, [thumbnailsContainerRef]);
+
+  /** Attach/detach a passive scroll handler (imperative for perf/compat). */
+  useEffect(() => {
+    const el = thumbnailsContainerRef?.current;
+    if (!el) return undefined;
+    el.addEventListener('scroll', handleScroll, { passive: true });
+    return () => el.removeEventListener('scroll', handleScroll);
   }, [thumbnailsContainerRef, handleScroll]);
 
   return (
@@ -68,35 +108,61 @@ const DocumentThumbnailList = React.memo(({
       ref={thumbnailsContainerRef}
       role="listbox"
       aria-label="Document Thumbnails"
-      style={{ width: `${width}px` }}
+      aria-activedescendant={activeDescendantId}
+      style={{ width: `${Number(width) || 0}px` }}
     >
       <div className="thumbnails-list">
         {allPages.map((page, index) => {
+          const itemIndex = index + 1;
+          const isSelected = pageNumber === itemIndex;
+          const optionId = `thumbnail-${itemIndex}`;
           const { thumbnailUrl, status } = page;
+
+          /** Keyboard: activate on Enter/Space; keep focus on the option. */
+          const onKeyDown = (e) => {
+            if (e.key === 'Enter' || e.key === ' ') {
+              e.preventDefault();
+              handleActivate(itemIndex);
+            }
+          };
 
           return (
             <div
-              id={`thumbnail-${index + 1}`}
-              key={`${index + 1}`}
-              className={`thumbnail-wrapper ${pageNumber === index + 1 ? 'selected' : ''}`}
-              onClick={() => handleThumbnailClick(index + 1)}
+              id={optionId}
+              key={optionId}
+              className={`thumbnail-wrapper ${isSelected ? 'selected' : ''}`}
+              onClick={() => handleActivate(itemIndex)}
+              onKeyDown={onKeyDown}
               role="option"
-              tabIndex={0}
-              onKeyPress={(e) => {
-                if (e.key === 'Enter' || e.key === ' ') {
-                  handleThumbnailClick(index + 1);
-                }
-              }}
-              aria-label={`Go to page ${index + 1}`}
-              aria-selected={pageNumber === index + 1}
-              title={`Go to page ${index + 1}`}
+              tabIndex={isSelected ? 0 : -1}
+              aria-label={`Go to page ${itemIndex}`}
+              aria-selected={isSelected}
+              title={`Go to page ${itemIndex}`}
             >
-              <div id={`thumbnail-anchor-${index + 1}`} className="thumbnail-anchor"></div>
-              <div className="thumbnail-number">{index + 1}</div>
+              <div id={`thumbnail-anchor-${itemIndex}`} className="thumbnail-anchor" />
+              <div className="thumbnail-number">{itemIndex}</div>
               <div className="thumbnail-image">
                 {status === 0 && <LoadingSpinner />}
-                {status === -1 && <img src="lost.png" alt="Page not found" className="thumbnail" />}
-                {status === 1 && <img src={thumbnailUrl} alt={`Page ${index + 1}`} className="thumbnail" />}
+                {status === -1 && (
+                  <img
+                    src="lost.png"
+                    alt={`Page ${itemIndex} failed to load`}
+                    className="thumbnail"
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                )}
+                {status === 1 && (
+                  <img
+                    src={thumbnailUrl}
+                    alt={`Page ${itemIndex}`}
+                    className="thumbnail"
+                    loading="lazy"
+                    decoding="async"
+                    draggable={false}
+                  />
+                )}
               </div>
             </div>
           );
@@ -118,10 +184,7 @@ DocumentThumbnailList.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   setPageNumber: PropTypes.func.isRequired,
   thumbnailsContainerRef: PropTypes.shape({
-    current: PropTypes.oneOfType([
-      PropTypes.instanceOf(Element),
-      PropTypes.object,
-    ]),
+    current: PropTypes.any, // HTMLElement|null (loosened to avoid SSR PropTypes issues)
   }).isRequired,
   width: PropTypes.number.isRequired,
 };
