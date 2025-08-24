@@ -1,19 +1,46 @@
-// File: src/components/DocumentViewer/DocumentViewerThumbnails.js
+/**
+ * File: src/components/DocumentViewer/DocumentViewerThumbnails.jsx
+ *
+ * OpenDocViewer — Document Viewer Thumbnails (Wrapper)
+ *
+ * PURPOSE
+ *   Thin, typed wrapper that wires the viewer’s thumbnail-related props to the
+ *   generic <DocumentThumbnailList />. Keeping this as a separate component
+ *   lets the parent viewer keep concerns clean and focused.
+ *
+ * ACCESSIBILITY
+ *   - All ARIA roles/labels and keyboard interaction live inside
+ *     <DocumentThumbnailList />; this wrapper is purely a pass-through.
+ *
+ * PERFORMANCE
+ *   - Wrapped in React.memo to avoid unnecessary re-renders when inputs are stable.
+ *
+ * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
+ *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
+ *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
+ *
+ * Provenance / prior baseline of this module: :contentReference[oaicite:0]{index=0}
+ */
 
 import React from 'react';
-import DocumentThumbnailList from '../DocumentThumbnailList';
+import PropTypes from 'prop-types';
+import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
 
 /**
- * Renders the list of document thumbnails.
+ * Renders the document thumbnail list for navigation.
  *
- * @param {Object} props - Component props
- * @param {Array} props.allPages - List of all pages in the document
- * @param {number} props.pageNumber - Current page number
- * @param {Function} props.setPageNumber - Function to set the page number
- * @param {Object} props.thumbnailsContainerRef - Ref to the thumbnails container
- * @param {number} props.width - Width of the thumbnails container
- *
- * @returns {React.Element} - The rendered component
+ * @param {Object} props
+ * @param {{ thumbnailUrl: string, status: number }[]} props.allPages
+ *        Array of page entries with thumbnail URL and load status.
+ * @param {number} props.pageNumber
+ *        Current 1-based page number (selected thumbnail).
+ * @param {(n: number) => void} props.setPageNumber
+ *        Setter to change the current page number.
+ * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef
+ *        Ref to the scrollable thumbnails container element.
+ * @param {number} props.width
+ *        Pixel width to apply to the thumbnails pane.
+ * @returns {JSX.Element}
  */
 const DocumentViewerThumbnails = ({
   allPages,
@@ -21,14 +48,31 @@ const DocumentViewerThumbnails = ({
   setPageNumber,
   thumbnailsContainerRef,
   width,
-}) => (
-  <DocumentThumbnailList
-    allPages={allPages}
-    pageNumber={pageNumber}
-    setPageNumber={setPageNumber}
-    thumbnailsContainerRef={thumbnailsContainerRef}
-    width={width}
-  />
-);
+}) => {
+  return (
+    <DocumentThumbnailList
+      allPages={allPages}
+      pageNumber={pageNumber}
+      setPageNumber={setPageNumber}
+      thumbnailsContainerRef={thumbnailsContainerRef}
+      width={width}
+    />
+  );
+};
 
-export default DocumentViewerThumbnails;
+DocumentViewerThumbnails.propTypes = {
+  allPages: PropTypes.arrayOf(
+    PropTypes.shape({
+      thumbnailUrl: PropTypes.string.isRequired,
+      status: PropTypes.number.isRequired, // 0=loading, 1=ready, -1=failed
+    })
+  ).isRequired,
+  pageNumber: PropTypes.number.isRequired,
+  setPageNumber: PropTypes.func.isRequired,
+  thumbnailsContainerRef: PropTypes.shape({
+    current: PropTypes.any, // HTMLElement|null (loosened for SSR)
+  }).isRequired,
+  width: PropTypes.number.isRequired,
+};
+
+export default React.memo(DocumentViewerThumbnails);

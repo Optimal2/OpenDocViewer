@@ -1,14 +1,47 @@
-// File: src/components/DocumentViewer/DocumentViewer.js
+/**
+ * File: src/components/DocumentViewer/DocumentViewer.jsx
+ *
+ * OpenDocViewer — Document Viewer (Container)
+ *
+ * PURPOSE
+ *   Tie together:
+ *     • Toolbar (actions, zoom, adjustments)
+ *     • Thumbnails (navigation)
+ *     • Main renderer (canvas/img)
+ *   This component wires ViewerContext state into the viewer UI and delegates
+ *   heavy logic to the dedicated hook `useDocumentViewer`.
+ *
+ * ACCESSIBILITY
+ *   - The scrollable viewer container is focusable (tabIndex=0) so that
+ *     keyboard navigation (PageUp/PageDown/Home/End) works immediately after click.
+ *
+ * PERFORMANCE
+ *   - Minimizes logs in the hot path (debug-level only).
+ *   - Defers image/canvas work to child components.
+ *
+ * IMPORTANT PROJECT GOTCHA (for future reviewers)
+ *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT
+ *     'file-type/browser'. With `file-type` v21 that subpath is not exported and will
+ *     break Vite builds. See README “Design notes & gotchas” for details.
+ *
+ * Provenance (baseline prior to this revision): :contentReference[oaicite:0]{index=0}
+ */
 
 import React, { useContext } from 'react';
-import DocumentViewerToolbar from './DocumentViewerToolbar';
-import DocumentViewerThumbnails from './DocumentViewerThumbnails';
-import DocumentViewerRender from './DocumentViewerRender';
-import Resizer from '../Resizer';
-import logger from '../../LogController';
-import { ViewerContext } from '../../ViewerContext';
-import { useDocumentViewer } from './useDocumentViewer';
+import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
+import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
+import DocumentViewerRender from './DocumentViewerRender.jsx';
+import Resizer from '../Resizer.jsx';
+import logger from '../../LogController.js';
+import { ViewerContext } from '../../ViewerContext.jsx';
+import { useDocumentViewer } from './useDocumentViewer.js';
 
+/**
+ * Top-level viewer container.
+ * Pulls data from ViewerContext and composes the toolbar, thumbnails, and renderer.
+ *
+ * @returns {JSX.Element}
+ */
 const DocumentViewer = () => {
   const { allPages } = useContext(ViewerContext);
 
@@ -39,9 +72,9 @@ const DocumentViewer = () => {
     resetImageProperties,
     handleMouseDown,
     setIsExpanded,
-  } = useDocumentViewer({  });
+  } = useDocumentViewer(); // no args; hook owns its own state and pulls totals from context
 
-  const totalPages = allPages.length;
+  const totalPages = Array.isArray(allPages) ? allPages.length : 0;
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
@@ -51,6 +84,7 @@ const DocumentViewer = () => {
 
   return (
     <div className="document-viewer-container" onClick={handleContainerClick}>
+      {/* Toolbar with navigation and image adjustment controls */}
       <DocumentViewerToolbar
         pages={allPages}
         pageNumber={pageNumber}
@@ -77,7 +111,16 @@ const DocumentViewer = () => {
         firstPageDisabled={firstPageDisabled}
         lastPageDisabled={lastPageDisabled}
       />
-      <div className="document-viewer-wrapper" ref={viewerContainerRef} id="viewerContainer" tabIndex="0">
+
+      {/* Main area: thumbnails + resizer + page renderer(s) */}
+      <div
+        className="document-viewer-wrapper"
+        ref={viewerContainerRef}
+        id="viewerContainer"
+        tabIndex={0}
+        aria-label="Document viewer"
+      >
+        {/* Sidebar: thumbnails with resizer */}
         <div style={{ display: 'flex', width: `${thumbnailWidth}px`, flexShrink: 0 }}>
           <DocumentViewerThumbnails
             allPages={allPages}
@@ -88,6 +131,8 @@ const DocumentViewer = () => {
           />
           <Resizer onMouseDown={handleMouseDown} />
         </div>
+
+        {/* Main/compare rendering */}
         <DocumentViewerRender
           pageNumber={pageNumber}
           zoom={zoom}
@@ -108,4 +153,4 @@ const DocumentViewer = () => {
   );
 };
 
-export default DocumentViewer;
+export default React.memo(DocumentViewer);

@@ -1,17 +1,42 @@
 ﻿// File: src/components/AppBootstrap.jsx
 
+/**
+ * File: src/components/AppBootstrap.jsx
+ *
+ * OpenDocViewer — Application Bootstrapper
+ *
+ * PURPOSE
+ *   Detect how the viewer should start (demo, URL params, parent page, session token, or JS API)
+ *   and render <OpenDocViewer /> with the appropriate props:
+ *     • Pattern mode:     { folder, extension, endNumber }
+ *     • Explicit-list:    { sourceList, bundle }
+ */
+
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
-import logger from '../LogController';
-import ErrorBoundary from '../ErrorBoundary';
-import OpenDocViewer from '../OpenDocViewer';
-import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integration/Bootstrap';
-import { makeExplicitSource } from './DocumentLoader/sources/ExplicitListSource';
+import logger from '../LogController.js';
+import ErrorBoundary from '../ErrorBoundary.jsx';
+import OpenDocViewer from '../OpenDocViewer.jsx';
+import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/Bootstrap.js';
+import { makeExplicitSource } from './DocumentLoader/sources/ExplicitListSource.js';
 
-const DEMO_DEFAULT = { endNumber: 300 };
+/** @typedef {{ id: string, userId?: string, issuedAt?: string }} SessionShape */
+/** @typedef {{ url: string, ext?: string, fileIndex?: number }} ExplicitItem */
+/** @typedef {{ session: SessionShape, documents: any[] }} PortableDocumentBundle */
+/** @typedef {{ folder: string, extension: string, endNumber: number }} UrlConfig */
 
+const DEMO_DEFAULT = Object.freeze({ endNumber: 300 });
+
+/**
+ * Top-level bootstrapper component.
+ * Detects environment, prepares props, and mounts the main viewer.
+ * @returns {JSX.Element}
+ */
 export default function AppBootstrap() {
+  /** @type {[keyof typeof ODV_BOOTSTRAP_MODES, Function]} */
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
+  /** @type {[PortableDocumentBundle|null, Function]} */
   const [bundle, setBundle] = useState(null);
+  /** @type {[UrlConfig|null, Function]} */
   const [urlConfig, setUrlConfig] = useState(null);
   const [demo, setDemo] = useState({ folder: '', extension: '', endNumber: DEMO_DEFAULT.endNumber });
   const [startApp, setStartApp] = useState(false);
@@ -19,63 +44,101 @@ export default function AppBootstrap() {
   // Detect once on mount
   useEffect(() => {
     let mounted = true;
+
     (async () => {
-      const res = await bootstrapDetect();
-      if (!mounted) return;
-      setMode(res.mode);
-      if (res.bundle) setBundle(res.bundle);
-      if (res.urlConfig) {
-        setUrlConfig(res.urlConfig);
-        setStartApp(true);
-      } else if (res.bundle) {
-        setStartApp(true);
-      } else {
-        // demo mode stays idle until user clicks
+      try {
+        const res = await bootstrapDetect();
+        if (!mounted) return;
+
+        setMode(res.mode);
+        if (res.bundle) setBundle(res.bundle);
+        if (res.urlConfig) setUrlConfig(res.urlConfig);
+
+        // Auto-start for everything except demo (demo waits for user click)
+        if (res.bundle || res.urlConfig) setStartApp(true);
+
+        logger.info('Bootstrap detection', {
+          mode: res.mode,
+          hasBundle: !!res.bundle,
+          hasUrlConfig: !!res.urlConfig,
+        });
+      } catch (error) {
+        logger.error('Bootstrap detection failed', { error: String(error?.message || error) });
       }
-      logger.info('Bootstrap detection', res);
     })();
-    return () => { mounted = false; };
+
+    return () => {
+      mounted = false;
+    };
   }, []);
 
-  // Reuse the existing demo launcher UI when mode === DEMO
+  // Demo inputs
   const handleDemoEndChange = useCallback((e) => {
-    const val = Number(e.target.value);
+    const val = Number(e?.target?.value);
     setDemo((p) => ({ ...p, endNumber: Number.isFinite(val) ? val : DEMO_DEFAULT.endNumber }));
-    logger.info('End number changed', { value: val });
+    logger.info('Demo endNumber changed', { value: val });
   }, []);
 
   const handleDemoClick = useCallback((type) => {
     setDemo((p) => ({ ...p, folder: type, extension: type }));
     setStartApp(true);
-    logger.info('Button clicked', { type });
+    logger.info('Demo type selected', { type });
   }, []);
 
-  // Compute sourceList for explicit bundle mode
+  // Build explicit source list from bundle (if present)
   const sourceList = useMemo(() => {
     if (!bundle) return null;
-    const src = makeExplicitSource(bundle);
-    return src.items; // array of { url, ext?, fileIndex }
+    try {
+      const src = makeExplicitSource(bundle);
+      return src.items; // array of { url, ext?, fileIndex }
+    } catch (error) {
+      logger.error('Failed to create explicit source from bundle', { error: String(error?.message || error) });
+      return null;
+    }
   }, [bundle]);
 
-  // Decide final props for OpenDocViewer
-  const props = useMemo(() => {
+  // Decide final props for <OpenDocViewer />
+  const viewerProps = useMemo(() => {
+    // 1) URL params → pattern mode
     if (mode === ODV_BOOTSTRAP_MODES.URL_PARAMS && urlConfig) {
-      return { folder: urlConfig.folder, extension: urlConfig.extension, endNumber: urlConfig.endNumber };
+      return {
+        folder: urlConfig.folder,
+        extension: urlConfig.extension,
+        endNumber: urlConfig.endNumber,
+      };
     }
-    if ((mode === ODV_BOOTSTRAP_MODES.PARENT_PAGE || mode === ODV_BOOTSTRAP_MODES.SESSION_TOKEN || mode === ODV_BOOTSTRAP_MODES.JS_API) && sourceList?.length) {
-      return { sourceList, bundle }; // <- requires tiny seam to pass through to DocumentLoader
+
+    // 2) Bundle-backed modes → explicit-list mode
+    if (
+      (mode === ODV_BOOTSTRAP_MODES.PARENT_PAGE ||
+        mode === ODV_BOOTSTRAP_MODES.SESSION_TOKEN ||
+        mode === ODV_BOOTSTRAP_MODES.JS_API) &&
+      Array.isArray(sourceList) &&
+      sourceList.length > 0
+    ) {
+      return { sourceList, bundle };
     }
+
+    // 3) Demo (after user picks a type)
     if (mode === ODV_BOOTSTRAP_MODES.DEMO && startApp) {
-      return { folder: demo.folder, extension: demo.extension, endNumber: demo.endNumber };
+      return {
+        folder: demo.folder,
+        extension: demo.extension,
+        endNumber: demo.endNumber,
+      };
     }
+
+    // No props yet → show demo launcher
     return null;
   }, [mode, urlConfig, sourceList, bundle, demo, startApp]);
 
-  // Render
-  if (!props) {
-    // Demo chooser UI (existing behavior)
+  // Render the demo launcher if we don't have props to start the viewer yet
+  if (!viewerProps) {
     return (
-      <div className="button-container">
+      <div className="button-container" role="region" aria-label="OpenDocViewer demo launcher">
+        <label htmlFor="endNumber" style={{ marginRight: 8 }}>
+          Total pages/files:
+        </label>
         <input
           type="number"
           id="endNumber"
@@ -83,10 +146,16 @@ export default function AppBootstrap() {
           onChange={handleDemoEndChange}
           placeholder="Enter end number"
           min="1"
-          max="300"
+          max={DEMO_DEFAULT.endNumber}
+          aria-label="Total pages/files to load"
         />
         {['jpg', 'png', 'tif', 'pdf'].map((type) => (
-          <button key={type} onClick={() => handleDemoClick(type)}>
+          <button
+            key={type}
+            onClick={() => handleDemoClick(type)}
+            type="button"
+            aria-label={`Start ${type.toUpperCase()} demo`}
+          >
             {type.toUpperCase()}
           </button>
         ))}
@@ -94,9 +163,10 @@ export default function AppBootstrap() {
     );
   }
 
+  // Normal path: render the viewer within an error boundary
   return (
     <ErrorBoundary>
-      <OpenDocViewer {...props} />
+      <OpenDocViewer {...viewerProps} />
     </ErrorBoundary>
   );
 }

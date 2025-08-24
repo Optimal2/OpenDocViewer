@@ -1,75 +1,176 @@
-// File: src/hooks/usePageNavigation.js
+/**
+ * File: src/hooks/usePageNavigation.js
+ *
+ * OpenDocViewer — Page Navigation Hook (React)
+ *
+ * PURPOSE
+ *   Provide memoized handlers for page navigation (first/prev/next/last) and
+ *   continuous navigation timers suitable for press-and-hold UI (e.g., mousedown).
+ *
+ * DESIGN NOTES
+ *   - Page indices are 1-based in the viewer.
+ *   - Logging:
+ *       • Wrapper handlers log user-initiated actions (single-step).
+ *       • Timer-driven handlers avoid logging at high frequency to prevent noise.
+ *   - Safety:
+ *       • All handlers are wrapped in try/catch to prevent UI crashes.
+ *       • totalPages is validated by utilities prior to changing page.
+ *
+ * USAGE
+ *   const {
+ *     handlePrevPageWrapper,
+ *     handleNextPageWrapper,
+ *     handleFirstPageWrapper,
+ *     handleLastPageWrapper,
+ *     startPrevPageTimer,
+ *     stopPrevPageTimer,
+ *     startNextPageTimer,
+ *     stopNextPageTimer,
+ *   } = usePageNavigation(setPageNumber, totalPages);
+ *
+ *   // Example (press & hold "Next" button):
+ *   <button
+ *     onMouseDown={() => startNextPageTimer('next')}
+ *     onMouseUp={stopNextPageTimer}
+ *     onMouseLeave={stopNextPageTimer}
+ *     onClick={handleNextPageWrapper}
+ *   >
+ *     Next
+ *   </button>
+ *
+ * IMPORTANT PROJECT REMINDER
+ *   Elsewhere in the app we import from the **root** 'file-type' package, NOT
+ *   'file-type/browser'. With file-type v21 the '/browser' subpath is not
+ *   exported for bundlers and will break Vite builds.
+ *
+ * Provenance / source reference for previous baseline: :contentReference[oaicite:0]{index=0}
+ */
 
 import { useCallback } from 'react';
 import logger from '../LogController';
 import usePageTimer from './usePageTimer';
-import { handlePrevPage, handleNextPage, handleFirstPage, handleLastPage } from '../utils/navigationUtils';
+import {
+  handlePrevPage,
+  handleNextPage,
+  handleFirstPage,
+  handleLastPage,
+} from '../utils/navigationUtils';
 
 /**
- * Custom hook to handle document page navigation with keyboard and mouse.
- * @param {function} setPageNumber - Function to set the current page number.
- * @param {number} totalPages - Total number of pages.
- * @returns {Object} Navigation handlers and timers for continuous navigation.
+ * @typedef {(update: number | ((prev: number) => number)) => void} SetPageNumber
+ */
+
+/**
+ * Custom hook to handle document page navigation with keyboard/mouse.
+ *
+ * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
+ * @param {number} totalPages            Total number of pages (must be >= 1 for next/last).
+ * @returns {{
+ *   handlePrevPageWrapper: () => void,
+ *   handleNextPageWrapper: () => void,
+ *   handleFirstPageWrapper: () => void,
+ *   handleLastPageWrapper: () => void,
+ *   startPrevPageTimer: (direction: 'prev') => void,
+ *   stopPrevPageTimer: () => void,
+ *   startNextPageTimer: (direction: 'next') => void,
+ *   stopNextPageTimer: () => void,
+ * }}
  */
 const usePageNavigation = (setPageNumber, totalPages) => {
+  // Initial delay before the timer begins repeating (ms).
+  // Subsequent cadence is controlled inside usePageTimer (e.g., ~20 Hz).
   const initialDelay = 500;
 
   /**
-   * Wrapper function to handle previous page navigation with logging.
+   * Wrapper: go to previous page (logs once per user action).
    */
   const handlePrevPageWrapper = useCallback(() => {
     logger.info('Handling previous page navigation');
     try {
       handlePrevPage(setPageNumber);
     } catch (error) {
-      logger.error('Error during previous page navigation', { error });
+      logger.error('Error during previous page navigation', { error: String(error?.message || error) });
     }
   }, [setPageNumber]);
 
   /**
-   * Wrapper function to handle next page navigation with logging.
+   * Wrapper: go to next page (logs once per user action).
    */
   const handleNextPageWrapper = useCallback(() => {
     logger.info('Handling next page navigation');
     try {
       handleNextPage(setPageNumber, totalPages);
     } catch (error) {
-      logger.error('Error during next page navigation', { error });
+      logger.error('Error during next page navigation', { error: String(error?.message || error) });
     }
   }, [setPageNumber, totalPages]);
 
   /**
-   * Wrapper function to handle first page navigation with logging.
+   * Wrapper: go to first page.
    */
   const handleFirstPageWrapper = useCallback(() => {
     logger.info('Handling first page navigation');
     try {
       handleFirstPage(setPageNumber);
     } catch (error) {
-      logger.error('Error during first page navigation', { error });
+      logger.error('Error during first page navigation', { error: String(error?.message || error) });
     }
   }, [setPageNumber]);
 
   /**
-   * Wrapper function to handle last page navigation with logging.
+   * Wrapper: go to last page.
    */
   const handleLastPageWrapper = useCallback(() => {
     logger.info('Handling last page navigation');
     try {
       handleLastPage(setPageNumber, totalPages);
     } catch (error) {
-      logger.error('Error during last page navigation', { error });
+      logger.error('Error during last page navigation', { error: String(error?.message || error) });
     }
   }, [setPageNumber, totalPages]);
 
-  // Timer hooks for continuous navigation
-  const { startPageTimer: startPrevPageTimer, stopPageTimer: stopPrevPageTimer } = usePageTimer(initialDelay, (direction) => {
-    if (direction === 'prev') handlePrevPageWrapper();
-  });
+  // ---------------------------------------------------------------------------
+  // Timer-driven navigation (non-logging to avoid console spam at high frequency)
+  // ---------------------------------------------------------------------------
 
-  const { startPageTimer: startNextPageTimer, stopPageTimer: stopNextPageTimer } = usePageTimer(initialDelay, (direction) => {
-    if (direction === 'next') handleNextPageWrapper();
-  });
+  /** Fast step: previous (used by timers). */
+  const fastPrev = useCallback(() => {
+    try {
+      handlePrevPage(setPageNumber);
+    } catch (error) {
+      logger.error('Error during fast previous page navigation', { error: String(error?.message || error) });
+    }
+  }, [setPageNumber]);
+
+  /** Fast step: next (used by timers). */
+  const fastNext = useCallback(() => {
+    try {
+      handleNextPage(setPageNumber, totalPages);
+    } catch (error) {
+      logger.error('Error during fast next page navigation', { error: String(error?.message || error) });
+    }
+  }, [setPageNumber, totalPages]);
+
+  /**
+   * Timer for "prev" press-and-hold.
+   * `usePageTimer` invokes our callback with a direction argument; we route accordingly.
+   */
+  const { startPageTimer: startPrevPageTimer, stopPageTimer: stopPrevPageTimer } = usePageTimer(
+    initialDelay,
+    (direction) => {
+      if (direction === 'prev') fastPrev();
+    }
+  );
+
+  /**
+   * Timer for "next" press-and-hold.
+   */
+  const { startPageTimer: startNextPageTimer, stopPageTimer: stopNextPageTimer } = usePageTimer(
+    initialDelay,
+    (direction) => {
+      if (direction === 'next') fastNext();
+    }
+  );
 
   return {
     handlePrevPageWrapper,

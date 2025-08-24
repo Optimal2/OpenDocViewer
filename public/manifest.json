@@ -1,25 +1,36 @@
 {
+  "name": "OpenDocViewer",
   "short_name": "OpenDocViewer",
-  "name": "OpenDocViewer Document Viewer",
+  "description": "Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite.",
+  "start_url": ".",
+  "scope": "./",
+  "display": "standalone",
+  "theme_color": "#000000",
+  "background_color": "#ffffff",
   "icons": [
     {
       "src": "favicon.ico",
-      "sizes": "64x64 32x32 24x24 16x16",
+      "sizes": "16x16 24x24 32x32 64x64",
       "type": "image/x-icon"
     },
     {
       "src": "logo192.png",
       "type": "image/png",
-      "sizes": "192x192"
+      "sizes": "192x192",
+      "purpose": "any"
     },
     {
       "src": "logo512.png",
       "type": "image/png",
-      "sizes": "512x512"
+      "sizes": "512x512",
+      "purpose": "any maskable"
     }
   ],
-  "start_url": ".",
-  "display": "standalone",
-  "theme_color": "#000000",
-  "background_color": "#ffffff"
+  "categories": ["productivity", "utilities"],
+  "lang": "en",
+  "dir": "ltr",
+  "orientation": "any",
+  "prefer_related_applications": false,
+  "_comment": "Keep index.html and odv.config.js uncached (no-store). Manifest itself may be cached with normal policy.",
+  "_source": ":contentReference[oaicite:0]{index=0}"
 }

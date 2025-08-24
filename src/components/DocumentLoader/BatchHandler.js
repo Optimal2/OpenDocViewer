@@ -1,39 +1,64 @@
-// File: src/components/DocumentLoader/BatchHandler.js
-import logger from '../../LogController';
-
 /**
- * En mycket enkel scheduler:
- * - Gör varje jobb till en 1-jobbs-batch (ingen batchSize)
- * - Delar ut batchar till lediga workers i korta "pumpar"
- * - När en worker blir klar, kör vi nästa pump (ingen tight while-loop)
+ * File: src/components/DocumentLoader/BatchHandler.js
+ *
+ * OpenDocViewer — Minimal, fair worker-batch scheduler
+ *
+ * PURPOSE
+ *   Distribute image-decoding jobs across a pool of Web Workers without
+ *   monopolizing the main thread. We intentionally keep batching simple:
+ *     • Every job is turned into a single-job batch.
+ *     • We only dispatch to idle workers during short “pump” passes.
+ *     • Each worker completion schedules the next pump via setTimeout(…, 0)
+ *       to yield back to the event loop (keeps UI responsive).
+ *
+ * DESIGN CHOICES
+ *   - Simplicity over micro-optimizations: one job == one batch. This avoids the
+ *     memory overhead of duplicating large ArrayBuffers across pages/jobs.
+ *   - No tight while-loops: the pump is event-driven and breathes between passes.
+ *   - Transferables: any ArrayBuffer on a job is transferred to the worker to
+ *     reduce GC pressure and copies.
+ *
+ * IMPORTANT PROJECT GOTCHA (history)
+ *   - Elsewhere in the project we import from the **root** 'file-type' package,
+ *     NOT 'file-type/browser'. With `file-type` v21 the '/browser' subpath is
+ *     not exported and will break Vite builds. This scheduler doesn’t use it,
+ *     but the reminder here helps future reviewers keep things consistent.
+ *
+ * Provenance / baseline reference (previous content of this module):
+ *   :contentReference[oaicite:0]{index=0}
  */
-export const batchHandler = (
-  jobQueue,
-  batchQueue,
-  _batchSize,                 // ignoreras medvetet
-  imageWorkers,
-  handleWorkerMessage,
-  insertPageAtIndex,
-  sameBlob,
-  isMounted
-) => {
-  // Flytta över alla jobb i batchQueue som 1-jobbs-batchar
-  while (jobQueue.current.length > 0) {
-    const job = jobQueue.current.shift();
-    batchQueue.current.push({ jobs: [job], fileExtension: job.fileExtension });
-  }
 
-  logger.debug('BatchHandler: queued single-job batches', {
-    queued: batchQueue.current.length
-  });
-
-  // Starta utdelningen
-  pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
-};
+import logger from '../../LogController.js';
 
 /**
- * En "pump" som gör EN kort utdelnings-pass: tilldela batchar endast till lediga workers.
- * När en worker blir klar, anropas pump() igen. Ingen tight while-loop.
+ * @typedef {Object} WorkerJob
+ * @property {ArrayBuffer} [arrayBuffer]   Optional bytes to transfer
+ * @property {string} fileExtension        Detected extension (e.g., 'png'|'jpg'|'tif'|'pdf')
+ * @property {number} index                File index in the input list
+ * @property {number} pageStartIndex       First page index inside the file (0-based)
+ * @property {number} pagesInvolved        Number of pages represented by this job
+ * @property {number} allPagesStartingIndex Global page offset (into the flat viewer list)
+ */
+
+/**
+ * @typedef {{ jobs: WorkerJob[], fileExtension: string }} Batch
+ */
+
+/** Small delay so the event loop can breathe between pumps (ms). */
+const PUMP_DELAY_MS = 0;
+
+/**
+ * Schedule a short, fair distribution pass:
+ *   - Assigns at most one batch per idle worker.
+ *   - Installs onmessage/onerror handlers before dispatch.
+ *   - When any worker completes, schedules the next pump tick.
+ *
+ * @param {Worker[]} imageWorkers
+ * @param {{ current: Batch[] }} batchQueue
+ * @param {(event: MessageEvent, insertPageAtIndex: Function, sameBlob: boolean, isMounted?: { current: boolean }) => void} handleWorkerMessage
+ * @param {(page: any, index: number) => void} insertPageAtIndex
+ * @param {boolean} sameBlob
+ * @param {{ current: boolean }} [isMounted]
  */
 function pump(
   imageWorkers,
@@ -43,62 +68,123 @@ function pump(
   sameBlob,
   isMounted
 ) {
-  if (!isMounted?.current) return;
-  if (batchQueue.current.length === 0) return;
+  if (isMounted && isMounted.current === false) return;
+  if (!batchQueue?.current || batchQueue.current.length === 0) return;
 
   let dispatched = 0;
 
   imageWorkers.forEach((worker) => {
-    if (batchQueue.current.length === 0) return;
+    if (!batchQueue.current.length) return;
     if (worker.__busy) return;
 
+    /** @type {Batch|undefined} */
     const batch = batchQueue.current.shift();
+    if (!batch) return;
+
+    // Mark busy before sending work; ensures single in-flight batch per worker.
     worker.__busy = true;
 
-    // Viktigt: sätt handlers innan postMessage
+    // Install handlers before postMessage to avoid races.
     worker.onmessage = (event) => {
       try {
         handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
       } finally {
         worker.__busy = false;
-        // Låt eventloopen andas innan nästa pass
-        setTimeout(() => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted), 0);
+        // Schedule the next short pass; yield to the event loop first.
+        setTimeout(
+          () => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted),
+          PUMP_DELAY_MS
+        );
       }
     };
 
     worker.onerror = (err) => {
       try {
-        // Skicka tillbaka tomma resultat så UI får placeholders via handlern
-        handleWorkerMessage(
-          { data: { jobs: batch.jobs.map(j => ({
-            fullSizeUrl: null,
-            fileIndex: j.index,
-            pageIndex: j.pageStartIndex || 0,
-            fileExtension: j.fileExtension,
-            allPagesIndex: j.allPagesStartingIndex
-          }))}},
-          insertPageAtIndex,
-          sameBlob,
-          isMounted
-        );
+        // Fall back to placeholders so UI stays consistent; let the central
+        // handler map these to “failed” insertions.
+        const jobs = (batch.jobs || []).map((j) => ({
+          fullSizeUrl: null,
+          fileIndex: j.index,
+          pageIndex: j.pageStartIndex || 0,
+          fileExtension: j.fileExtension,
+          allPagesIndex: j.allPagesStartingIndex,
+        }));
+        handleWorkerMessage({ data: { jobs } }, insertPageAtIndex, sameBlob, isMounted);
+        logger.error('Worker error; inserted placeholders for batch', { error: String(err?.message || err) });
       } finally {
         worker.__busy = false;
-        setTimeout(() => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted), 0);
+        setTimeout(
+          () => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted),
+          PUMP_DELAY_MS
+        );
       }
     };
 
-    logger.debug('Dispatching batch to worker', { jobs: batch.jobs.length, ext: batch.fileExtension });
-	const transfer = [];
-	if (batch?.jobs) {
-	  for (const j of batch.jobs) {
-		if (j?.arrayBuffer instanceof ArrayBuffer && j.arrayBuffer.byteLength) {
-		  transfer.push(j.arrayBuffer);
-		}
-	  }
-	}
-	worker.postMessage(batch, transfer);
+    // Collect transferable ArrayBuffers to avoid structured clone overhead.
+    /** @type {Transferable[]} */
+    const transfer = [];
+    if (batch?.jobs) {
+      for (const j of batch.jobs) {
+        if (j?.arrayBuffer instanceof ArrayBuffer && j.arrayBuffer.byteLength) {
+          transfer.push(j.arrayBuffer);
+        }
+      }
+    }
+
+    logger.debug('Dispatching batch to worker', {
+      jobs: batch.jobs?.length || 0,
+      ext: batch.fileExtension,
+      transferables: transfer.length,
+    });
+
+    worker.postMessage(batch, transfer);
     dispatched++;
   });
 
-  // Om inga workers var lediga just nu, gör inget mer. onmessage/onerror triggar nästa pump.
+  // If no workers were idle, do nothing here; the next pump is triggered by
+  // whichever worker finishes first (onmessage/onerror).
 }
+
+/**
+ * Batch scheduler entry point.
+ *
+ * NOTE ON BATCH SIZE:
+ *   We deliberately ignore the passed `batchSize` and convert every job into a
+ *   single-job batch. This avoids duplicating large ArrayBuffers for multi-page
+ *   formats and keeps memory usage predictable. If you later introduce chunking,
+ *   make sure to **slice** or **re-derive** buffer segments rather than copying.
+ *
+ * @param {{ current: WorkerJob[] }} jobQueue
+ * @param {{ current: Batch[] }} batchQueue
+ * @param {number} _batchSize                          // intentionally unused (see note above)
+ * @param {Worker[]} imageWorkers
+ * @param {(event: MessageEvent, insertPageAtIndex: Function, sameBlob: boolean, isMounted?: { current: boolean }) => void} handleWorkerMessage
+ * @param {(page: any, index: number) => void} insertPageAtIndex
+ * @param {boolean} sameBlob
+ * @param {{ current: boolean }} [isMounted]
+ * @returns {void}
+ */
+export const batchHandler = (
+  jobQueue,
+  batchQueue,
+  _batchSize, // ignored by design (see JSDoc)
+  imageWorkers,
+  handleWorkerMessage,
+  insertPageAtIndex,
+  sameBlob,
+  isMounted
+) => {
+  // Move all pending jobs into the batchQueue as single-job batches.
+  while (jobQueue.current.length > 0) {
+    const job = jobQueue.current.shift();
+    if (!job) continue;
+    batchQueue.current.push({ jobs: [job], fileExtension: job.fileExtension });
+  }
+
+  logger.debug('BatchHandler: queued single-job batches', {
+    queued: batchQueue.current.length,
+  });
+
+  // Start the first distribution pass.
+  pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted);
+};

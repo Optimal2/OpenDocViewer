@@ -1,12 +1,31 @@
-/* File: src/styles.css */
+/**
+ * File: src/styles.css
+ * OpenDocViewer — Application Stylesheet (Light/Dark theming via CSS variables)
+ *
+ * PURPOSE
+ *   - Provide a clean, minimal base for the viewer UI, thumbnails, toolbar, and canvases.
+ *   - Support light/dark themes using CSS custom properties defined on :root and [data-theme='dark'].
+ *   - Keep layout predictable: app uses full viewport height/width with controlled overflow.
+ *
+ * GOTCHAS & NOTES
+ *   - Dark mode is toggled by setting `data-theme="dark"` on <html> (see ThemeContext.jsx).
+ *   - Avoid global resets that affect embedded apps; we intentionally keep the base minimal.
+ *   - Keep variable usage consistent so theme swaps remain fast and flicker-free.
+ *   - Do not rename class hooks used by components without updating the React code.
+ *
+ * Provenance / reference for this revision:
+ *   :contentReference[oaicite:0]{index=0}
+ */
 
-/* Root Variables for Light Theme */
+/* =============================================================================
+   Root Variables — Light Theme
+   ========================================================================== */
 :root {
   /* Primary Colors */
   --primary-color: #4a4a4a;
   --primary-color-hover: #333;
   --primary-color-active: #000;
-  
+
   /* Background Colors */
   --background-color: #f7f7f7;
   --canvas-background-color: #ffffff;
@@ -17,14 +36,16 @@
   --thumbnail-border-color: #bdbdbd;
   --focus-shadow: rgba(74, 74, 74, 0.5);
   --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
-  
-  /* Miscellaneous Colors */
+
+  /* Miscellaneous */
   --disabled-color: #9e9e9e;
   --warning-color: #f44336;
   --border-radius: 4px;
 }
 
-/* Root Variables for Dark Theme */
+/* =============================================================================
+   Root Variables — Dark Theme
+   ========================================================================== */
 [data-theme='dark'] {
   /* Primary Colors */
   --primary-color: #bbbbbb;
@@ -42,19 +63,21 @@
   --focus-shadow: rgba(187, 187, 187, 0.5);
   --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
 
-  /* Miscellaneous Colors */
+  /* Miscellaneous */
   --disabled-color: #555;
   --warning-color: #cf6679;
 }
 
-/* Global Styles */
+/* =============================================================================
+   Global Layout / Base Elements
+   ========================================================================== */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
   background-color: var(--background-color);
   color: var(--primary-color-active);
-  user-select: none;
+  user-select: none; /* Prevent drag-select on large canvases/images */
 }
 
 #root {
@@ -64,7 +87,9 @@ body {
   flex-direction: column;
 }
 
-/* App Container */
+/* =============================================================================
+   App Container
+   ========================================================================== */
 .app-container {
   display: flex;
   flex-direction: column;
@@ -73,7 +98,9 @@ body {
   overflow: hidden;
 }
 
-/* Document Viewer */
+/* =============================================================================
+   Document Viewer Shell
+   ========================================================================== */
 .document-viewer-container {
   display: flex;
   flex-direction: column;
@@ -101,6 +128,9 @@ body {
   padding: 15px;
 }
 
+/* =============================================================================
+   Loading Message (initial / transient)
+   ========================================================================== */
 .loading-message {
   position: absolute;
   top: 15px;
@@ -125,7 +155,9 @@ body {
   margin-bottom: 20px;
 }
 
-/* Document Render Containers */
+/* =============================================================================
+   Render Containers (single / comparison) and Canvas/Image
+   ========================================================================== */
 .document-render-container-single,
 .document-render-container-comparison {
   display: block;
@@ -172,7 +204,9 @@ canvas {
   background-color: var(--canvas-background-color);
 }
 
-/* Thumbnail List */
+/* =============================================================================
+   Thumbnails
+   ========================================================================== */
 .thumbnails-list-wrapper,
 .thumbnails-container {
   width: 200px;
@@ -238,7 +272,9 @@ canvas {
   font-weight: bold;
 }
 
-/* Toolbar */
+/* =============================================================================
+   Toolbar
+   ========================================================================== */
 .toolbar {
   display: flex;
   justify-content: flex-start;
@@ -262,7 +298,7 @@ canvas {
   font-size: 1.1rem;
   cursor: pointer;
   background-color: var(--primary-color);
-  color: white;
+  color: #ffffff;
   border: none;
   border-radius: var(--border-radius);
   transition: background-color 0.3s, transform 0.3s;
@@ -363,7 +399,9 @@ input[type="range"].active {
   transform: rotate(0deg);
 }
 
-/* Resizer */
+/* =============================================================================
+   Resizer (drag handle between panes)
+   ========================================================================== */
 .resizer {
   width: 5px;
   background-color: var(--primary-color);
@@ -371,7 +409,9 @@ input[type="range"].active {
   flex-shrink: 0;
 }
 
-/* Loading */
+/* =============================================================================
+   Loading States
+   ========================================================================== */
 .loading-text {
   position: absolute;
   top: 50%;
@@ -398,7 +438,9 @@ input[type="range"].active {
   color: var(--primary-color);
 }
 
-/* Button Container */
+/* =============================================================================
+   Buttons (generic container used on the demo page)
+   ========================================================================== */
 .button-container {
   display: flex;
   justify-content: center;
@@ -413,7 +455,9 @@ input[type="range"].active {
   cursor: pointer;
 }
 
-/* Error Boundary */
+/* =============================================================================
+   Error Boundary
+   ========================================================================== */
 .error-boundary {
   text-align: center;
   padding: 2rem;
@@ -428,7 +472,9 @@ input[type="range"].active {
   margin-top: 1rem;
 }
 
-/* Mobile View Specific Styles */
+/* =============================================================================
+   Mobile View Overrides
+   ========================================================================== */
 .OpenDocViewer.mobile-view .thumbnails-container {
   width: 100% !important;
 }
@@ -457,6 +503,9 @@ input[type="range"].active {
   object-fit: contain;
 }
 
+/* =============================================================================
+   Spinner (generic)
+   ========================================================================== */
 .spinner {
   border: 8px solid rgba(0, 0, 0, 0.1);
   border-left-color: #22a6b3;
@@ -467,6 +516,6 @@ input[type="range"].active {
 }
 
 @keyframes spin {
-  0% { transform: rotate(0deg); }
+  0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
 }

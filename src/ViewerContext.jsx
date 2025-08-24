@@ -1,58 +1,119 @@
-// File: src/ViewerContext.js
+/**
+ * src/ViewerContext.jsx
+ *
+ * OpenDocViewer — Viewer state context (React)
+ *
+ * PURPOSE
+ *   Centralized, minimal state for the viewer:
+ *     - `allPages`: array of page entries (sparse allowed; indexes map to visual order)
+ *     - `error`: fatal/operational error string (UI decides how to present)
+ *     - `workerCount`: number of active workers (for diagnostics/perf HUD)
+ *     - `messageQueue`: transient messages (perf overlay / debug console)
+ *
+ * IMPORTANT IMPLEMENTATION NOTES
+ *   - We deliberately allow **sparse arrays** in `allPages`. A loader may insert
+ *     page entries out-of-order; consumers must tolerate `undefined` slots.
+ *   - Logging inside hot paths (e.g., `insertPageAtIndex`) is set to **info** by default.
+ *     This is useful in development but can become noisy if you enable backend logging.
+ *     Consider lowering to `debug` in production (`LogController` honors levels).
+ *   - Do **not** mutate `allPages` in-place; always copy before insert to play nicely with React.
+ *
+ * GOTCHAS (project-wide reminders):
+ *   - `file-type` import: elsewhere we import from `'file-type'` (root), *not* `'file-type/browser'`,
+ *     because v21 does not export that subpath for bundlers. Changing this will break builds.
+ *
+ * Source reference (for traceability):
+ *   :contentReference[oaicite:0]{index=0}
+ */
 
 import React, { createContext, useState, useCallback, useMemo } from 'react';
 import logger from './LogController';
 
-// Create the Viewer context
-export const ViewerContext = createContext();
+/**
+ * @typedef {Object} PageEntry
+ * @property {string}  fullSizeUrl       Object URL or absolute URL to the rendered page image
+ * @property {string}  thumbnailUrl      Object URL or absolute URL to a small preview
+ * @property {boolean} loaded            Whether the page content is fully ready
+ * @property {number}  status            1=ok, 0=placeholder/pending, -1=failed
+ * @property {string}  fileExtension     'pdf' | 'tiff' | 'tif' | 'png' | 'jpg' | 'jpeg' | ...
+ * @property {number}  fileIndex         Index of the source file within the document set
+ * @property {number}  pageIndex         Page index within the source file (0-based)
+ * @property {number}  [allPagesIndex]   Global index in the flattened page list (0-based)
+ */
 
 /**
- * ViewerProvider component to manage and provide viewer-related state and functions.
- * @param {Object} props - Component props.
- * @param {React.ReactNode} props.children - The child components that will consume the viewer context.
- * @returns {JSX.Element} The ViewerProvider component.
+ * @typedef {Object} ViewerContextValue
+ * @property {Array<PageEntry|undefined>} allPages
+ * @property {(page: PageEntry, index: number) => void} insertPageAtIndex
+ * @property {string|null} error
+ * @property {(err: string|null) => void} setError
+ * @property {number} workerCount
+ * @property {(n: number) => void} setWorkerCount
+ * @property {string[]} messageQueue
+ * @property {(message: string) => void} addMessage
+ */
+
+/** Create the Viewer context (default value is narrowed at runtime by the Provider). */
+export const ViewerContext = createContext(/** @type {ViewerContextValue} */ (/** @type {unknown} */ ({})));
+
+/**
+ * ViewerProvider
+ *
+ * @param {{ children: React.ReactNode }} props
+ * @returns {JSX.Element}
  */
 export const ViewerProvider = ({ children }) => {
+  /** @type {[Array<PageEntry|undefined>, React.Dispatch<React.SetStateAction<Array<PageEntry|undefined>>>]} */
   const [allPages, setAllPages] = useState([]);
+  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} */
   const [error, setError] = useState(null);
+  /** @type {[number, React.Dispatch<React.SetStateAction<number>>]} */
   const [workerCount, setWorkerCount] = useState(0);
+  /** @type {[string[], React.Dispatch<React.SetStateAction<string[]>>]} */
   const [messageQueue, setMessageQueue] = useState([]);
 
   /**
-   * Insert a page at the specified index in the allPages array.
-   * @param {Object} page - The page object to insert.
-   * @param {number} index - The index at which to insert the page.
+   * Insert a page at the specified global index.
+   * NOTE: This may create a sparse array if `index` skips ahead (by design).
+   *
+   * @param {PageEntry} page
+   * @param {number} index
    */
   const insertPageAtIndex = useCallback((page, index) => {
     setAllPages((prevPages) => {
-      const updatedPages = [...prevPages];
+      const updatedPages = prevPages.slice();
       updatedPages[index] = page;
       return updatedPages;
     });
-    logger.info(`Inserted page at index: ${index}`);
+    // INFO: This is intentionally chatty for dev visibility; consider lowering to debug in prod.
+    logger.info('Inserted page at index', { index, ext: page?.fileExtension, fileIndex: page?.fileIndex, pageIndex: page?.pageIndex });
   }, []);
 
   /**
-   * Add a message to the message queue.
-   * @param {string} message - The message to add to the queue.
+   * Enqueue a UI/diagnostic message.
+   * Keep messages short; consumers may cap list length if displaying in a HUD.
+   *
+   * @param {string} message
    */
   const addMessage = useCallback((message) => {
-    setMessageQueue((prevQueue) => [...prevQueue, message]);
-    logger.info(`Message added to queue: ${message}`);
+    setMessageQueue((prevQueue) => [...prevQueue, String(message)]);
+    // INFO: Timer-driven callers should prefer a non-logging fast path (see usePageNavigation).
+    logger.info('Message added to queue', { message });
   }, []);
 
-  const contextValue = useMemo(() => ({
-    allPages,
-    insertPageAtIndex,
-    error,
-    setError,
-    workerCount,
-    setWorkerCount,
-    messageQueue,
-    addMessage,
-  }), [
-    allPages, insertPageAtIndex, error, workerCount, messageQueue, addMessage
-  ]);
+  /** Memoize the context shape to avoid unnecessary re-renders in consumers. */
+  const contextValue = useMemo(() => (
+    /** @type {ViewerContextValue} */ ({
+      allPages,
+      insertPageAtIndex,
+      error,
+      setError,
+      workerCount,
+      setWorkerCount,
+      messageQueue,
+      addMessage,
+    })
+  ), [allPages, insertPageAtIndex, error, workerCount, messageQueue, addMessage]);
 
   return (
     <ViewerContext.Provider value={contextValue}>

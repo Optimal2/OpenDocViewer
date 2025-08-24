@@ -1,45 +1,86 @@
-// File: src/components/Resizer.js
+/**
+ * File: src/components/Resizer.jsx
+ *
+ * OpenDocViewer — Resizer
+ *
+ * PURPOSE
+ *   Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content)
+ *   via mouse drag or keyboard interaction. This component is deliberately “dumb”: it simply
+ *   exposes interaction hooks and ARIA semantics; the actual resizing logic lives in the parent.
+ *
+ * ACCESSIBILITY
+ *   - role="separator" with aria-orientation="vertical" (default) or "horizontal".
+ *   - Keyboard: Enter/Space triggers the same handler as a mouse down, allowing the parent to
+ *     start a keyboard-based resize routine if desired.
+ *   - Focus styles are toggled with a helper class ('resizer-focused') for clear visibility.
+ *
+ * API
+ *   Props:
+ *     - onMouseDown (required): (e: MouseEvent | KeyboardEvent) => void
+ *         Called when the user initiates a resize with mouse (or via Enter/Space).
+ *     - orientation (optional): 'vertical' | 'horizontal' (default: 'vertical')
+ *     - ariaLabel  (optional): string — accessible name for assistive tech
+ *     - className  (optional): string — additional class names
+ *
+ * NOTES / FUTURE:
+ *   - Consider upgrading to Pointer Events (onPointerDown) if you implement touch/pen resize
+ *     in the parent logic. Avoid attaching both pointer and mouse handlers simultaneously,
+ *     as many browsers will fire both, causing duplicate starts.
+ *
+ * PROJECT GOTCHA (reminder for future reviewers)
+ *   - In other modules we import from the **root** 'file-type' package, NOT 'file-type/browser'.
+ *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
+ *
+ * Source file reviewed from repository: :contentReference[oaicite:0]{index=0}
+ */
 
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 
 /**
  * Resizer component.
- * Allows users to resize elements by clicking and dragging or using the keyboard.
- *
- * @param {function} onMouseDown - Function to handle mouse down event.
- * @returns {JSX.Element} The resizer component.
+ * @param {{ onMouseDown: (e: any) => void, orientation?: 'vertical'|'horizontal', ariaLabel?: string, className?: string }} props
+ * @returns {JSX.Element}
  */
-const Resizer = React.memo(({ onMouseDown }) => {
+const Resizer = React.memo(({ onMouseDown, orientation = 'vertical', ariaLabel = 'Resize panel', className = '' }) => {
   /**
-   * Handles key down events for accessibility.
-   * Allows resizing using the Enter or Space keys.
-   *
-   * @param {object} e - The keyboard event.
+   * Keyboard handler (Enter/Space) to initiate the same flow as mouse down.
+   * Parent components may listen for this to start a keyboard resize routine.
    */
-  const handleKeyDown = useCallback((e) => {
-    if (e.key === 'Enter' || e.key === ' ') {
-      e.preventDefault();
-      onMouseDown(e);
-    }
-  }, [onMouseDown]);
+  const handleKeyDown = useCallback(
+    (e) => {
+      if (e.key === 'Enter' || e.key === ' ') {
+        e.preventDefault();
+        onMouseDown?.(e);
+      }
+    },
+    [onMouseDown]
+  );
 
   return (
-    <div 
-      className="resizer" 
-      onMouseDown={onMouseDown} 
-      role="separator" 
-      aria-orientation="vertical" 
-      tabIndex={0} 
+    <div
+      className={`resizer${className ? ` ${className}` : ''}`}
+      onMouseDown={onMouseDown}
+      role="separator"
+      aria-orientation={orientation}
+      aria-label={ariaLabel}
+      tabIndex={0}
       onKeyDown={handleKeyDown}
-      onFocus={(e) => e.target.classList.add('resizer-focused')}
-      onBlur={(e) => e.target.classList.remove('resizer-focused')}
+      onFocus={(e) => e.currentTarget.classList.add('resizer-focused')}
+      onBlur={(e) => e.currentTarget.classList.remove('resizer-focused')}
     />
   );
 });
 
 Resizer.propTypes = {
+  /** Initiates resize in the parent (mouse or keyboard-initiated). */
   onMouseDown: PropTypes.func.isRequired,
+  /** Visual/semantic orientation of the separator. */
+  orientation: PropTypes.oneOf(['vertical', 'horizontal']),
+  /** Accessible name for assistive technologies. */
+  ariaLabel: PropTypes.string,
+  /** Extra class names to append to the root element. */
+  className: PropTypes.string,
 };
 
 Resizer.displayName = 'Resizer';
