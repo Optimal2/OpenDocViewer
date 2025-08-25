@@ -1,3 +1,4 @@
+// File: src/components/ImageRenderer.jsx
 /**
  * File: src/components/ImageRenderer.jsx
  *
@@ -25,6 +26,13 @@ import React from 'react';
 import PropTypes from 'prop-types';
 
 /**
+ * Image load/error handler.
+ * @callback ImgEventHandler
+ * @param {*} e
+ * @returns {void}
+ */
+
+/**
  * ImageRenderer component.
  *
  * @param {Object} props
@@ -32,15 +40,13 @@ import PropTypes from 'prop-types';
  * @param {number} props.zoom                    Zoom factor (1 = 100%).
  * @param {number} props.pageNumber              1-based page number for alt text and data attribute.
  * @param {string} [props.className]             Optional extra class names.
- * @param {React.CSSProperties} [props.style]    Optional style overrides (merged last).
- * @param {'anonymous'|'use-credentials'} [props.crossOrigin] Optional CORS mode.
+ * @param {*} [props.style]                      Optional style overrides (merged last).
+ * @param {('anonymous'|'use-credentials')} [props.crossOrigin] Optional CORS mode.
  * @param {string} [props.referrerPolicy]        Optional referrer policy for the request.
- * @param {(e: React.SyntheticEvent<HTMLImageElement>) => void} [props.onLoad]  Load handler.
- * @param {(e: React.SyntheticEvent<HTMLImageElement>) => void} [props.onError] Error handler.
+ * @param {ImgEventHandler} [props.onLoad]       Load handler.
+ * @param {ImgEventHandler} [props.onError]      Error handler.
  * @param {boolean} [props.draggable=false]      Whether the image is draggable.
- * @param {string} [props['data-testid']]        Testing hook.
- * @param {React.Ref<HTMLImageElement>} ref      Forwarded ref to the underlying <img>.
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const ImageRenderer = React.forwardRef(function ImageRenderer(
   {
@@ -54,14 +60,16 @@ const ImageRenderer = React.forwardRef(function ImageRenderer(
     onLoad,
     onError,
     draggable = false,
-    'data-testid': testId,
+    // Note: not documenting dashed prop names (e.g., 'data-testid') in JSDoc to keep Closure parser happy.
+    ...rest
   },
   ref
 ) {
   // Defensive: ensure a sane, positive zoom
   const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
-  const baseStyle = /** @type {React.CSSProperties} */ ({
+  /** @type {React.CSSProperties} */
+  const baseStyle = {
     position: 'absolute',
     top: 0,
     left: 0,
@@ -71,7 +79,7 @@ const ImageRenderer = React.forwardRef(function ImageRenderer(
     objectFit: 'contain',
     willChange: 'transform',
     imageRendering: 'auto',
-  });
+  };
 
   return (
     <img
@@ -87,7 +95,7 @@ const ImageRenderer = React.forwardRef(function ImageRenderer(
       decoding="async"
       onLoad={onLoad}
       onError={onError}
-      data-testid={testId}
+      {...rest}
     />
   );
 });
@@ -105,7 +113,6 @@ ImageRenderer.propTypes = {
   onLoad: PropTypes.func,
   onError: PropTypes.func,
   draggable: PropTypes.bool,
-  'data-testid': PropTypes.string,
 };
 
 export default ImageRenderer;

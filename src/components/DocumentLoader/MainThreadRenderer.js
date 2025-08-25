@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/components/DocumentLoader/MainThreadRenderer.js
+/**
  * File: src/components/DocumentLoader/MainThreadRenderer.js
  *
  * OpenDocViewer — Main-thread renderers for PDF & TIFF
@@ -33,6 +34,7 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 
 /**
+ * Render job passed to the main-thread renderer.
  * @typedef {Object} RenderJob
  * @property {ArrayBuffer} arrayBuffer
  * @property {number} index
@@ -40,10 +42,13 @@ import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
  * @property {number} pagesInvolved
  * @property {number} allPagesStartingIndex
  * @property {string} fileExtension
- * @property {number} [pageIndex] // used in error paths
+ * @property {(number|undefined)} pageIndex // used in error paths
  */
 
-/** @typedef {(page:any, index:number) => void} InsertPageAtIndex */
+/**
+ * Signature for inserting a page structure into the page list at an index.
+ * @typedef {function(*, number): void} InsertPageAtIndex
+ */
 
 /* ------------------------------------------------------------------------------------------------
  * Global URL registry + unload cleanup to prevent memory leaks
@@ -71,6 +76,11 @@ import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
   }
 })(globalThis);
 
+/**
+ * Track a created object URL so it can be revoked later.
+ * @param {string} url
+ * @returns {void}
+ */
 function addToUrlRegistry(url) {
   try { globalThis.__odv_url_registry?.add(url); } catch {}
 }

@@ -1,3 +1,4 @@
+// File: src/OpenDocViewer.jsx
 /**
  * src/OpenDocViewer.jsx
  *
@@ -79,16 +80,24 @@ function readFlag(name, envVar, metaName, fallback = false) {
 }
 
 /**
+ * Item in the explicit source list mode.
+ * @typedef {Object} SourceItem
+ * @property {string} url
+ * @property {(string|undefined)} ext
+ * @property {(number|undefined)} fileIndex
+ */
+
+/**
  * OpenDocViewer — Top-level component.
  *
  * @param {Object} props
  * @param {string} [props.folder]    Pattern mode: base folder path for images
  * @param {string} [props.extension] Pattern mode: file extension (e.g., "jpg")
  * @param {number} [props.endNumber] Pattern mode: number of files to load
- * @param {Array<{url:string, ext?:string, fileIndex?:number}>} [props.sourceList]
+ * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit list mode: ordered list of document sources
  * @param {Object} [props.bundle]    Optional metadata object (reserved for future)
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const OpenDocViewer = ({ folder, extension, endNumber, sourceList, bundle }) => {
   const [initialized, setInitialized] = useState(false);
@@ -179,10 +188,10 @@ OpenDocViewer.propTypes = {
     PropTypes.shape({
       url: PropTypes.string.isRequired,
       ext: PropTypes.string,
-      fileIndex: PropTypes.number,
+      fileIndex: PropTypes.number
     })
   ),
-  bundle: PropTypes.object,
+  bundle: PropTypes.object
 };
 
 export default OpenDocViewer;

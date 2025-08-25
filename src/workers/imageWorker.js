@@ -1,7 +1,6 @@
+// File: src/workers/imageWorker.js
 /* eslint-disable no-restricted-globals */
 /**
- * File: src/workers/imageWorker.js
- *
  * OpenDocViewer — Image/ TIFF Worker
  *
  * PURPOSE
@@ -29,24 +28,24 @@
  * @property {ArrayBuffer} arrayBuffer             Raw bytes for this file
  * @property {string}      fileExtension           Source file extension (e.g., 'pdf','tiff','png')
  * @property {number}      index                   Index of the source file within the batch
- * @property {number}      [pageStartIndex=0]      For multi-page formats, first page in this slice
- * @property {number}      [pagesInvolved=1]       Number of pages to process from pageStartIndex
+ * @property {(number|undefined)} pageStartIndex   For multi-page formats, first page in this slice (default 0)
+ * @property {(number|undefined)} pagesInvolved    Number of pages to process from pageStartIndex (default 1)
  * @property {number}      allPagesStartingIndex   Global start index for output pages
  */
 
 /**
  * @typedef {Object} WorkerResult
- * @property {Blob}        [blob]                  Resulting raster image (PNG for TIFF, or original type)
- * @property {number}      fileIndex               Job's file index (1:1 with input)
- * @property {number}      pageIndex               Page number within the source file
- * @property {string}      fileExtension           Normalized extension of the produced blob
- * @property {number}      allPagesIndex           Global page index for placement
- * @property {boolean}     [handleInMainThread]    True if worker cannot process (fallback hint)
+ * @property {(Blob|undefined)}   blob             Resulting raster image (PNG for TIFF, or original type)
+ * @property {number}             fileIndex        Job's file index (1:1 with input)
+ * @property {number}             pageIndex        Page number within the source file
+ * @property {string}             fileExtension    Normalized extension of the produced blob
+ * @property {number}             allPagesIndex    Global page index for placement
+ * @property {(boolean|undefined)} handleInMainThread  True if worker cannot process (fallback hint)
  */
 
 // --- Worker global -----------------------------------------------------------
 
-/** @type {ServiceWorkerGlobalScope | DedicatedWorkerGlobalScope | SharedWorkerGlobalScope | any} */
+/** @type {(ServiceWorkerGlobalScope|DedicatedWorkerGlobalScope|SharedWorkerGlobalScope|*)} */
 const ctx = self;
 
 // --- Shared OffscreenCanvas cache -------------------------------------------
@@ -61,7 +60,7 @@ let sharedCtx = null;
  * Returns null if OffscreenCanvas or 2D context are unsupported in this worker.
  * @param {number} w
  * @param {number} h
- * @returns {OffscreenCanvasRenderingContext2D|null}
+ * @returns {(OffscreenCanvasRenderingContext2D|null)}
  */
 function getCanvas(w, h) {
   try {
@@ -94,8 +93,9 @@ function mimeFromExt(ext) {
 
 /**
  * Post a "handle in main thread" result for each job (used when we lack capabilities).
- * @param {WorkerJob[]} jobs
+ * @param {Array.<WorkerJob>} jobs
  * @param {string} fileExtension
+ * @returns {void}
  */
 function postMainThreadFallback(jobs, fileExtension) {
   const safeJobs = jobs.map((j) => ({
@@ -110,7 +110,8 @@ function postMainThreadFallback(jobs, fileExtension) {
 
 /**
  * Main message handler.
- * @param {MessageEvent<{ jobs: WorkerJob[], fileExtension: string }>} event
+ * @param {MessageEvent} event
+ * @returns {void}
  */
 ctx.onmessage = async (event) => {
   const { jobs, fileExtension } = event.data || {};
@@ -152,8 +153,9 @@ ctx.onmessage = async (event) => {
 /**
  * Decode TIFF pages using utif2, draw to OffscreenCanvas, and return PNG blobs.
  * Falls back to main thread if utif2 cannot be imported at runtime.
- * @param {WorkerJob[]} jobs
- * @param {WorkerResult[]} jobResults
+ * @param {Array.<WorkerJob>} jobs
+ * @param {Array.<WorkerResult>} jobResults
+ * @returns {Promise.<void>}
  */
 async function processTiff(jobs, jobResults) {
   let decode, toRGBA8, decodeImage;
@@ -227,9 +229,10 @@ async function processTiff(jobs, jobResults) {
 
 /**
  * Wrap single-frame image bytes in a Blob (no decoding work needed here).
- * @param {WorkerJob[]} jobs
+ * @param {Array.<WorkerJob>} jobs
  * @param {string} fileExtensionLower
- * @param {WorkerResult[]} jobResults
+ * @param {Array.<WorkerResult>} jobResults
+ * @returns {Promise.<void>}
  */
 async function processImage(jobs, fileExtensionLower, jobResults) {
   const mime = mimeFromExt(fileExtensionLower);

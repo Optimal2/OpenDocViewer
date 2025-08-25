@@ -1,3 +1,4 @@
+// File: src/components/DocumentViewer/DocumentViewerRender.jsx
 /**
  * File: src/components/DocumentViewer/DocumentViewerRender.jsx
  *
@@ -34,18 +35,18 @@ import DocumentRender from '../DocumentRender.jsx';
  * @param {Object} props
  * @param {number} props.pageNumber                            Current (1-based) page for the primary pane
  * @param {number} props.zoom                                  Current zoom factor (shared across panes)
- * @param {{ current: HTMLElement|null }} props.viewerContainerRef  Ref to the scrollable viewer container
- * @param {(z:number|((prev:number)=>number))=>void} props.setZoom  Zoom setter
- * @param {(n:number|((prev:number)=>number))=>void} props.setPageNumber Page setter
+ * @param {RefLike} props.viewerContainerRef                   Ref to the scrollable viewer container
+ * @param {SetNumberState} props.setZoom                       Zoom setter (number or updater fn)
+ * @param {SetPageNumber} props.setPageNumber                  Page setter (number or updater fn)
  * @param {boolean} props.isComparing                          Whether compare mode is active
  * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties Image adjustments
  * @param {boolean} props.isExpanded                           Whether to render via <canvas> (true) or <img> (false)
- * @param {{ current: any }} props.documentRenderRef           Imperative ref for the primary <DocumentRender />
- * @param {number|null} props.comparePageNumber                Page number for the comparison pane, when enabled
- * @param {{ current: any }} props.compareRef                  Imperative ref for the comparison <DocumentRender />
+ * @param {RefLike} props.documentRenderRef                    Imperative ref for the primary <DocumentRender />
+ * @param {(number|null)} props.comparePageNumber              Page number for the comparison pane, when enabled
+ * @param {RefLike} props.compareRef                           Imperative ref for the comparison <DocumentRender />
  * @param {Array} props.allPages                               Full page list (shared by panes)
- * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef Ref to thumbnails container (for scroll sync)
- * @returns {JSX.Element}
+ * @param {RefLike} props.thumbnailsContainerRef               Ref to thumbnails container (for scroll sync)
+ * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
   pageNumber,

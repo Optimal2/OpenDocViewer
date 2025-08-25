@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/schemas/portableBundle.js
+/**
  * File: src/schemas/portableBundle.js
  *
  * OpenDocViewer — Portable Document Bundle Schema & Helpers (ESM)
@@ -22,6 +23,14 @@
 export const __portableBundleSchemaVersion = 1;
 
 /**
+ * Session context for a bundle.
+ * @typedef {Object} PortableSession
+ * @property {string} id
+ * @property {(string|undefined)} userId
+ * @property {(string|undefined)} issuedAt
+ */
+
+/**
  * A single file reference inside a document.
  * When a string is provided in input, it is normalized to `{ url: string }`.
  *
@@ -36,19 +45,34 @@ export const __portableBundleSchemaVersion = 1;
  * A single document entry containing one or more files.
  *
  * @typedef {Object} PortableDocumentEntry
- * @property {string} documentId             - Required stable ID for the document.
- * @property {string} [created]              - ISO timestamp when created.
- * @property {string} [modified]             - ISO timestamp when last modified.
- * @property {any}    [meta]                 - Arbitrary metadata bag (client-defined).
- * @property {(string|PortableDocumentFile)[]} files - Required list of file refs.
+ * @property {string} documentId                                   - Required stable ID for the document.
+ * @property {string} [created]                                    - ISO timestamp when created.
+ * @property {string} [modified]                                   - ISO timestamp when last modified.
+ * @property {*} [meta]                                            - Arbitrary metadata bag (client-defined).
+ * @property {Array.<(string|PortableDocumentFile)>} files         - Required list of file refs.
  */
 
 /**
  * A portable bundle groups a session and an array of document entries.
  *
  * @typedef {Object} PortableDocumentBundle
- * @property {{ id: string, userId?: string, issuedAt?: string }} session - Session context.
- * @property {PortableDocumentEntry[]} documents                         - Ordered documents.
+ * @property {PortableSession} session
+ * @property {Array.<PortableDocumentEntry>} documents
+ */
+
+/**
+ * Validation report for a bundle.
+ * @typedef {Object} ValidateReport
+ * @property {boolean} ok
+ * @property {Array.<string>} errors
+ * @property {number} version
+ */
+
+/**
+ * Result object for createPortableBundle
+ * @typedef {Object} CreateBundleResult
+ * @property {PortableDocumentBundle} bundle
+ * @property {(ValidateReport|undefined)} report
  */
 
 /* ========================================================================== *
@@ -57,17 +81,17 @@ export const __portableBundleSchemaVersion = 1;
 
 /**
  * Coerce unknown input to a plain object (or return null).
- * @param {unknown} v
- * @returns {Record<string, any> | null}
+ * @param {*} v
+ * @returns {Object.<string, *>|null}
  */
 function toObject(v) {
-  return (v && typeof v === 'object' && !Array.isArray(v)) ? /** @type {Record<string, any>} */ (v) : null;
+  return (v && typeof v === 'object' && !Array.isArray(v)) ? /** @type {Object.<string, *>} */ (v) : null;
 }
 
 /**
  * Extract lowercase file extension from a string (best-effort).
  * @param {string} s
- * @returns {string|undefined}
+ * @returns {(string|undefined)}
  */
 function extFromString(s) {
   try {
@@ -85,7 +109,7 @@ function extFromString(s) {
  * Normalize a file entry. Strings become `{ url }`. Missing `ext` is inferred best-effort.
  * Unknown properties are preserved.
  *
- * @param {string|PortableDocumentFile} input
+ * @param {(string|PortableDocumentFile)} input
  * @returns {PortableDocumentFile}
  */
 export function normalizeDocumentFile(input) {
@@ -113,7 +137,7 @@ export function normalizeDocumentFile(input) {
 /**
  * Normalize a single document entry.
  *
- * @param {unknown} input
+ * @param {*} input
  * @returns {PortableDocumentEntry}
  */
 export function normalizeDocumentEntry(input) {
@@ -140,7 +164,7 @@ export function normalizeDocumentEntry(input) {
  *  - Normalizes documents and files.
  *  - Does NOT throw; always returns an object (possibly with empty arrays/fields).
  *
- * @param {unknown} input
+ * @param {*} input
  * @returns {PortableDocumentBundle}
  */
 export function normalizePortableBundle(input) {
@@ -169,12 +193,12 @@ export function normalizePortableBundle(input) {
  *  - each document.documentId: non-empty string
  *  - each document.files: non-empty array of normalized file objects
  *
- * @param {unknown} input
- * @returns {{ ok: boolean, errors: string[], version: number }}
+ * @param {*} input
+ * @returns {ValidateReport}
  */
 export function validatePortableBundle(input) {
   const b = normalizePortableBundle(input);
-  const errors = /** @type {string[]} */([]);
+  const errors = /** @type {Array.<string>} */([]);
 
   if (!b.session || typeof b.session.id !== 'string' || b.session.id.trim() === '') {
     errors.push('session.id must be a non-empty string');
@@ -211,7 +235,7 @@ export function validatePortableBundle(input) {
  * @returns {PortableDocumentBundle}
  */
 export function freezePortableBundle(bundle) {
-  /** @type {any} */ (bundle.documents).forEach((d) => {
+  /** @type {*} */ (bundle.documents).forEach((d) => {
     Object.freeze(d.files);
     Object.freeze(d);
   });
@@ -223,9 +247,9 @@ export function freezePortableBundle(bundle) {
 /**
  * Convenience constructor: normalize → (optionally validate) → freeze.
  *
- * @param {unknown} input
- * @param {{ validate?: boolean, freeze?: boolean }} [opts]
- * @returns {{ bundle: PortableDocumentBundle, report?: { ok: boolean, errors: string[], version: number } }}
+ * @param {*} input
+ * @param {{ validate: (boolean|undefined), freeze: (boolean|undefined) }} [opts]
+ * @returns {CreateBundleResult}
  */
 export function createPortableBundle(input, opts = {}) {
   const { validate = true, freeze = false } = opts;

@@ -1,3 +1,4 @@
+// File: logger.js
 /**
  * logger.js — Rolling, structured logging for OpenDocViewer (ESM)
  *
@@ -51,7 +52,7 @@ const RETENTION_DAYS = Number(process.env.LOG_RETENTION_DAYS || 14);
 
 /**
  * In-memory registry of active day-bound streams per prefix.
- * @type {Map<string, { date: string, stream: fs.WriteStream }>}
+ * @type {Map.<string, { date: string, stream: fs.WriteStream }>}
  */
 const streams = new Map();
 
@@ -63,24 +64,24 @@ let initStarted = false;
  * -------------------------------------------------------------------------- */
 
 /**
- * @typedef {'debug'|'info'|'warn'|'error'} LogLevel
+ * @typedef {('debug'|'info'|'warn'|'error')} LogLevel
  */
 
 /**
  * @typedef {Object} IngestionRecord
  * @property {string} ts             ISO timestamp
  * @property {LogLevel} level        Normalized level
- * @property {string|undefined} ip   Client IP (per trust proxy)
- * @property {string|undefined} ua   User-Agent
+ * @property {(string|undefined)} ip Client IP (per trust proxy)
+ * @property {(string|undefined)} ua User-Agent
  * @property {string} message        Sanitized, single-line message
- * @property {any} [context]         Optional JSON-serializable context
+ * @property {*} [context]           Optional JSON-serializable context
  */
 
 /**
  * @typedef {Object} ErrorRecord
  * @property {string} ts
- * @property {'error'} level
- * @property {{ name: string, message: string, stack?: string[] }} error
+ * @property {('error')} level
+ * @property {{ name: string, message: string, stack: (Array.<string>|undefined) }} error
  */
 
 /* ----------------------------------------------------------------------------
@@ -90,7 +91,7 @@ let initStarted = false;
 /**
  * Ensure log directory exists and prune old rotated files.
  * Best-effort; failures are swallowed to avoid crashing the app.
- * @returns {Promise<void>}
+ * @returns {Promise.<void>}
  * @private
  */
 async function initOnce() {
@@ -135,7 +136,7 @@ function ymd(date = new Date()) {
  * Automatically rotates when the day changes, and attaches an error handler
  * so stream errors do not crash the process.
  *
- * @param {'access'|'ingestion'|'error'} prefix
+ * @param {('access'|'ingestion'|'error')} prefix
  * @returns {fs.WriteStream}
  * @private
  */
@@ -163,7 +164,7 @@ function getRollingStream(prefix) {
 
 /**
  * Append one line to a prefix's daily file.
- * @param {'access'|'ingestion'|'error'} prefix
+ * @param {('access'|'ingestion'|'error')} prefix
  * @param {string} line
  * @private
  */
@@ -174,7 +175,7 @@ function writeRolling(prefix, line) {
 
 /**
  * Clamp a string to `max` characters.
- * @param {unknown} str
+ * @param {*} str
  * @param {number} [max=4000]
  * @returns {string}
  * @private
@@ -187,7 +188,7 @@ function truncate(str, max = 4000) {
 /**
  * Remove CR/LF + ASCII control characters (except TAB) and coerce to single-line.
  * Prevents log-forging by newline injection and improves parser safety.
- * @param {unknown} str
+ * @param {*} str
  * @returns {string}
  * @private
  */
@@ -199,7 +200,7 @@ function sanitizeString(str) {
 
 /**
  * Sanitize and clamp strings to a safe length.
- * @param {unknown} str
+ * @param {*} str
  * @param {number} [max=4000]
  * @returns {string}
  * @private
@@ -213,7 +214,7 @@ function safeString(str, max = 4000) {
  *  - Clamps long strings
  *  - Converts BigInt
  *  - Replaces circular references
- * @param {any} obj
+ * @param {*} obj
  * @returns {string}
  * @private
  */
@@ -255,15 +256,15 @@ function safeJson(obj) {
  *  - Message is sanitized/clamped to prevent log-forging and runaway size.
  *  - Context is serialized with `safeJson` (circulars handled).
  *
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @returns {Promise<void>}
+ * @param {*} req
+ * @param {*} res
+ * @returns {Promise.<void>}
  */
 export async function logRequest(req, res) {
   try {
     await initOnce();
 
-    /** @type {Set<LogLevel>} */
+    /** @type {Set.<LogLevel>} */
     const allowed = new Set(['debug', 'info', 'warn', 'error']);
     const { level = 'info', message = '', context = undefined } = req.body || {};
 
@@ -296,8 +297,8 @@ export async function logRequest(req, res) {
  * Write a server-side error record to logs/error-YYYY-MM-DD.log.
  * Intended for use by the final Express error handler and internal catch blocks.
  *
- * @param {unknown} err
- * @returns {Promise<void>}
+ * @param {*} err
+ * @returns {Promise.<void>}
  */
 export async function logError(err) {
   try {
@@ -331,6 +332,7 @@ export async function logError(err) {
 export const accessLogStream = {
   /**
    * @param {string} str - One complete access log line (includes trailing '\n')
+   * @returns {void}
    */
   write: (str) => {
     writeRolling('access', str);

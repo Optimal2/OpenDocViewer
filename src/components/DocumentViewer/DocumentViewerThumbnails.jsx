@@ -1,3 +1,4 @@
+// File: src/components/DocumentViewer/DocumentViewerThumbnails.jsx
 /**
  * File: src/components/DocumentViewer/DocumentViewerThumbnails.jsx
  *
@@ -30,17 +31,17 @@ import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
  * Renders the document thumbnail list for navigation.
  *
  * @param {Object} props
- * @param {{ thumbnailUrl: string, status: number }[]} props.allPages
+ * @param {Array.<{ thumbnailUrl: string, status: number }>} props.allPages
  *        Array of page entries with thumbnail URL and load status.
  * @param {number} props.pageNumber
  *        Current 1-based page number (selected thumbnail).
- * @param {(n: number) => void} props.setPageNumber
+ * @param {function(number): void} props.setPageNumber
  *        Setter to change the current page number.
- * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef
+ * @param {RefLike} props.thumbnailsContainerRef
  *        Ref to the scrollable thumbnails container element.
  * @param {number} props.width
  *        Pixel width to apply to the thumbnails pane.
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const DocumentViewerThumbnails = ({
   allPages,

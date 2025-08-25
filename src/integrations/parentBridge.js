@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/integrations/parentBridge.js
+/**
  * File: src/integrations/parentBridge.js
  *
  * OpenDocViewer — Same-Origin Parent Bridge
@@ -14,7 +15,7 @@
  *   3) parent.model             — legacy: plain object (auto-cloned)
  *
  * RETURNS
- *   { source: 'parent', data: any } on success, or null if nothing usable is found.
+ *   A normalized object on success or null when nothing usable is found.
  *
  * SSR / SAFETY
  *   - All window/parent access is guarded in try/catch to avoid cross-origin DOM exceptions.
@@ -24,8 +25,13 @@
  *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
  *     See README “Design notes & gotchas” before changing that import anywhere.
- *
- * Provenance / baseline reference for this module: :contentReference[oaicite:0]{index=0}
+ */
+
+/**
+ * Result object when data is obtained from a same-origin parent.
+ * @typedef {Object} ParentBootstrapResult
+ * @property {'parent'} source
+ * @property {*} data
  */
 
 /**
@@ -34,7 +40,7 @@
  *   - There is no parent (top-level window), or
  *   - The parent is cross-origin (any property access throws).
  *
- * @returns {Window|null}
+ * @returns {(Window|null)}
  */
 function getSameOriginParent() {
   try {
@@ -58,7 +64,7 @@ function getSameOriginParent() {
  *
  * @template T
  * @param {T} obj
- * @returns {T|null}
+ * @returns {(T|null)}
  */
 function safeClone(obj) {
   try {
@@ -73,7 +79,7 @@ function safeClone(obj) {
  * Decode a base64-encoded Unicode string into text (handles UTF-8).
  *
  * @param {string} str
- * @returns {string|null}
+ * @returns {(string|null)}
  */
 function b64DecodeUnicode(str) {
   try {
@@ -94,7 +100,7 @@ function b64DecodeUnicode(str) {
  *   1) parent.ODV_BOOTSTRAP   (generic, recommended)
  *   2) parent.modelRaw/model  (legacy compatibility)
  *
- * @returns {{ source: 'parent', data: any } | null}
+ * @returns {(ParentBootstrapResult|null)}
  */
 export function readFromParent() {
   const p = getSameOriginParent();

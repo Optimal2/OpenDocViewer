@@ -1,3 +1,4 @@
+// File: src/ThemeContext.jsx
 /**
  * src/ThemeContext.jsx
  *
@@ -16,8 +17,6 @@
  *   - Avoid noisy logs in hot paths; theme changes are infrequent so info-level logs are OK.
  *   - Historical trap (elsewhere in the app): we import `file-type` from the **root** package,
  *     not "file-type/browser", because v21 does not export that subpath for bundlers.
- *
- * Provenance (original baseline): :contentReference[oaicite:0]{index=0}
  */
 
 import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
@@ -25,15 +24,15 @@ import logger from './LogController';
 
 /**
  * Theme identifier.
- * @typedef {'light' | 'dark'} ThemeName
+ * @typedef {('light'|'dark')} ThemeName
  */
 
 /**
  * Context value shape for the theme.
  * @typedef {Object} ThemeContextValue
- * @property {ThemeName} theme               Current theme name ("light" | "dark")
- * @property {() => void} toggleTheme        Toggle between light/dark
- * @property {(next: ThemeName) => void} setThemeExplicit  Explicitly set a theme
+ * @property {ThemeName} theme                       Current theme name ("light" | "dark")
+ * @property {function(): void} toggleTheme          Toggle between light/dark
+ * @property {function(ThemeName): void} setThemeExplicit  Explicitly set a theme
  */
 
 /** Storage key for persisting theme choice. */
@@ -42,7 +41,7 @@ const LS_KEY = 'theme';
 /**
  * Try to read a string value from localStorage.
  * @param {string} key
- * @returns {string|null}
+ * @returns {(string|null)}
  */
 function lsGet(key) {
   try {
@@ -87,6 +86,7 @@ function detectSystemTheme() {
  * - Sets <html data-theme="..."> for CSS selectors: [data-theme="dark"] { ... }
  * - Sets `color-scheme` to hint UA form controls, scrollbars, etc.
  * @param {ThemeName} newTheme
+ * @returns {void}
  */
 function applyThemeToDocument(newTheme) {
   try {
@@ -103,13 +103,13 @@ function applyThemeToDocument(newTheme) {
  * Create the Theme context with a safe default to avoid undefined access
  * if a consumer is mounted outside the provider by mistake.
  * Consumers should still wrap with <ThemeProvider>.
- * @type {React.Context<ThemeContextValue>}
+ * @type {React.Context.<ThemeContextValue>}
  */
 export const ThemeContext = createContext(
   /** @type {ThemeContextValue} */ ({
     theme: 'light',
-    toggleTheme: () => {},
-    setThemeExplicit: () => {},
+    toggleTheme: function () {},
+    setThemeExplicit: function (_next) {}
   })
 );
 
@@ -117,7 +117,7 @@ export const ThemeContext = createContext(
  * ThemeProvider component to manage and provide theme-related state and functions.
  *
  * @param {{ children: React.ReactNode }} props
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 export const ThemeProvider = ({ children }) => {
   /**
@@ -126,7 +126,7 @@ export const ThemeProvider = ({ children }) => {
    *  2) system preference via matchMedia
    *  3) 'light' fallback
    */
-  const [theme, setTheme] = useState/** @type {() => ThemeName} */(() => {
+  const [theme, setTheme] = useState/** @type {function(): ThemeName} */(() => {
     const saved = lsGet(LS_KEY);
     if (saved === 'light' || saved === 'dark') {
       logger.info('Theme loaded from localStorage', { theme: saved });
@@ -140,6 +140,7 @@ export const ThemeProvider = ({ children }) => {
   /**
    * Apply a given theme and persist it.
    * @param {ThemeName} next
+   * @returns {void}
    */
   const setThemeExplicit = useCallback((next) => {
     const value = next === 'dark' ? 'dark' : 'light';
@@ -155,6 +156,7 @@ export const ThemeProvider = ({ children }) => {
 
   /**
    * Toggle between light and dark themes.
+   * @returns {void}
    */
   const toggleTheme = useCallback(() => {
     setThemeExplicit(theme === 'light' ? 'dark' : 'light');
@@ -169,7 +171,12 @@ export const ThemeProvider = ({ children }) => {
     applyThemeToDocument(theme);
 
     // Listen for system dark-mode changes (Chromium/Firefox)
+    /** @type {*|undefined} */
     let mq;
+    /**
+     * @param {*} e
+     * @returns {void}
+     */
     const onChange = (e) => {
       const next = e.matches ? 'dark' : 'light';
       // Only auto-switch if the user hasn't explicitly chosen a theme before.
@@ -206,9 +213,9 @@ export const ThemeProvider = ({ children }) => {
   const contextValue = useMemo(
     () =>
       /** @type {ThemeContextValue} */ ({
-        theme,
-        toggleTheme,
-        setThemeExplicit,
+        theme: theme,
+        toggleTheme: toggleTheme,
+        setThemeExplicit: setThemeExplicit
       }),
     [theme, toggleTheme, setThemeExplicit]
   );

@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/components/DocumentLoader/DocumentLoader.js
+/**
  * File: src/components/DocumentLoader/DocumentLoader.js
  *
  * OpenDocViewer — Orchestrates document fetching, type detection, paging, and rendering.
@@ -31,6 +32,14 @@
  * Provenance / baseline reference for prior version of this module: :contentReference[oaicite:0]{index=0}
  */
 
+/**
+ * Explicit-list source item.
+ * @typedef {Object} ExplicitSourceItem
+ * @property {string} url
+ * @property {(string|undefined)} ext
+ * @property {(number|undefined)} fileIndex
+ */
+
 import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
 import { ViewerContext } from '../../ViewerContext.jsx';
 import logger from '../../LogController.js';
@@ -45,6 +54,13 @@ import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
  * Adaptive worker tuning
  * ------------------------------------------------------------------------------------------------ */
 
+/**
+ * Clamp a number into the inclusive range [lo, hi].
+ * @param {number} n
+ * @param {number} lo
+ * @param {number} hi
+ * @returns {number}
+ */
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 const isMobile = (() => {
@@ -66,7 +82,8 @@ const isMobile = (() => {
  * - Always leave 1 core for the UI when possible.
  * - Constrain by device memory and mobile caps.
  *
- * @param {{ cpuBound?: boolean, ioHeavy?: boolean, desiredCap?: number }} [opts]
+ * @param {{ cpuBound: (boolean|undefined), ioHeavy: (boolean|undefined), desiredCap: (number|undefined) }} [opts]
+ * @returns {{ maxWorkers: number, batchSize: (number|Infinity), lowCore: boolean }}
  */
 function computeWorkerTuning({ cpuBound = true, ioHeavy = false, desiredCap } = {}) {
   const cores = Math.max(1, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2));
@@ -108,14 +125,14 @@ const enableMetadataLogging = false;
  * DocumentLoader — Loads and processes documents for rendering.
  *
  * @param {Object} props
- * @param {string} [props.folder]            Pattern mode: base folder/path for assets
- * @param {string} [props.extension]         Pattern mode: file extension (e.g., "png", "tiff")
- * @param {number} [props.endNumber]         Pattern mode: last page/file number (1..N)
- * @param {{ url:string, ext?:string, fileIndex?:number }[]} [props.sourceList]
+ * @param {(string|undefined)} [props.folder]           Pattern mode: base folder/path for assets
+ * @param {(string|undefined)} [props.extension]        Pattern mode: file extension (e.g., "png", "tiff")
+ * @param {(number|undefined)} [props.endNumber]        Pattern mode: last page/file number (1..N)
+ * @param {Array.<ExplicitSourceItem>} [props.sourceList]
  *        Explicit-list mode: ordered list of source items
- * @param {boolean} [props.sameBlob=true]    Reuse full-size blob URL for thumbnails when possible
- * @param {any} props.children               Render prop subtree (viewer UI)
- * @returns {JSX.Element}
+ * @param {(boolean|undefined)} [props.sameBlob=true]   Reuse full-size blob URL for thumbnails when possible
+ * @param {React.ReactNode} props.children              Render prop subtree (viewer UI)
+ * @returns {React.ReactElement}
  */
 const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumber, sourceList }) => {
   const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
@@ -125,9 +142,9 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   const isMounted = useRef(true);
 
   /** Work queues */
-  const jobQueue = useRef([]);           // single-image jobs (workers)
-  const mainThreadJobQueue = useRef([]); // multi-page or fallback jobs (PDF/TIFF)
-  const batchQueue = useRef([]);         // used by batchHandler
+  /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // single-image jobs (workers)
+  /** @type {React.MutableRefObject.<Array.<*>>} */ const mainThreadJobQueue = useRef([]); // multi-page or fallback jobs (PDF/TIFF)
+  /** @type {React.MutableRefObject.<Array.<*>>} */ const batchQueue = useRef([]);         // used by batchHandler
 
   /** Global page index across all inputs (for ViewerContext ordering) */
   const currentPageIndex = useRef(0);
@@ -148,6 +165,11 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   }, [imageWorkers.length, setWorkerCount]);
 
   // Preload placeholder images for better UX while decoding
+  /**
+   * Insert a placeholder page at a global index.
+   * @param {number} index
+   * @returns {void}
+   */
   const preloadPlaceholderImage = useCallback((index) => {
     const placeholderImageUrl = 'placeholder.png';
     const placeholderPage = {
@@ -164,6 +186,11 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   }, [insertPageAtIndex]);
 
   // Minimal failure placeholder insertion
+  /**
+   * @param {string} url
+   * @param {number} fileIndex
+   * @returns {void}
+   */
   const handleFailedDocumentLoad = useCallback((url, fileIndex) => {
     logger.error(`Failed to load document at ${url}`);
     const failedPage = {
@@ -182,6 +209,10 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   /**
    * Fetch + detect + enqueue a single document.
    * Uses `file-type` with buffer-first, then a blob-based fallback.
+   *
+   * @param {string} url
+   * @param {number} index
+   * @returns {Promise.<void>}
    */
   const loadDocumentAsync = useCallback(async (url, index) => {
     // Per-fetch controller
@@ -310,6 +341,10 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   }, [setError, handleFailedDocumentLoad]);
 
   // Process batches of jobs using workers
+  /**
+   * Start/continue batched worker processing.
+   * @returns {void}
+   */
   const processBatches = useCallback(() => {
     batchHandler(
       jobQueue,
@@ -324,6 +359,10 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   }, [imageWorkers, sameBlob, insertPageAtIndex]);
 
   // Low-core sequential scheduler (1 job at a time; yield to UI between jobs)
+  /**
+   * Sequentially process worker and main-thread jobs for low-core devices.
+   * @returns {void}
+   */
   const processSequential = useCallback(() => {
     if (!isMounted.current) return;
 

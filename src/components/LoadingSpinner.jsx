@@ -1,3 +1,4 @@
+// File: src/components/LoadingSpinner.jsx
 /**
  * File: src/components/LoadingSpinner.jsx
  *
@@ -14,16 +15,14 @@
  * API
  *   <LoadingSpinner size={24} label="Loading" className="my-extra-class" />
  *
- *   - size?: number | string   → Optional width/height (e.g., 24 or "2rem"). If omitted,
- *                                dimensions are controlled purely by CSS.
- *   - label?: string           → Accessible label for screen readers (default: "Loading").
- *   - className?: string       → Extra classes to append to the root element.
+ *   - size: (number|string)   → Optional width/height (e.g., 24 or "2rem"). If omitted,
+ *                               dimensions are controlled purely by CSS.
+ *   - label: string           → Accessible label for screen readers (default: "Loading").
+ *   - className: string       → Extra classes to append to the root element.
  *
  * PROJECT GOTCHA (for future reviewers):
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- *
- * Provenance / previous baseline reference for this component: :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';
@@ -46,8 +45,11 @@ const srOnlyStyle = {
  * LoadingSpinner component.
  * Displays a CSS-driven spinner with accessible labeling.
  *
- * @param {{ size?: number|string, label?: string, className?: string }} props
- * @returns {JSX.Element}
+ * @param {Object} props
+ * @param {(number|string)} [props.size]  Optional width/height; if omitted, CSS controls dimensions.
+ * @param {string} [props.label]          Accessible label for assistive technologies.
+ * @param {string} [props.className]      Extra classes to append to the root element.
+ * @returns {React.ReactElement}
  */
 const LoadingSpinner = ({ size, label = 'Loading', className = '' }) => {
   const style =

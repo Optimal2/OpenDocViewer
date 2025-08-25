@@ -1,3 +1,4 @@
+// File: src/components/DocumentToolbar/ZoomButtons.jsx
 /**
  * File: src/components/DocumentToolbar/ZoomButtons.jsx
  *
@@ -21,9 +22,7 @@
  * IMPORTANT PROJECT GOTCHA (for future reviewers)
  *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT
  *     'file-type/browser'. With `file-type` v21 that subpath is not exported and
- *     will break Vite builds. See README “Design notes & gotchas”.
- *
- * Provenance / baseline reference for earlier version of this component: :contentReference[oaicite:0]{index=0}
+ *     will break the Vite build. See README “Design notes & gotchas”.
  */
 
 import React from 'react';
@@ -33,14 +32,14 @@ import PropTypes from 'prop-types';
  * ZoomButtons
  *
  * @param {Object} props
- * @param {() => void} props.zoomIn        Increase zoom level (clamped by caller).
- * @param {() => void} props.zoomOut       Decrease zoom level (clamped by caller).
- * @param {() => void} props.fitToScreen   Compute and apply “fit to screen” zoom.
- * @param {() => void} props.fitToWidth    Compute and apply “fit to width” zoom.
- * @param {boolean} [props.disableZoomOut] Optional: disable the zoom-out action.
- * @param {boolean} [props.disableZoomIn]  Optional: disable the zoom-in action.
- * @param {boolean} [props.disableFits]    Optional: disable both fit actions.
- * @returns {JSX.Element}
+ * @param {function(): void} props.zoomIn        Increase zoom level (clamped by caller).
+ * @param {function(): void} props.zoomOut       Decrease zoom level (clamped by caller).
+ * @param {function(): void} props.fitToScreen   Compute and apply “fit to screen” zoom.
+ * @param {function(): void} props.fitToWidth    Compute and apply “fit to width” zoom.
+ * @param {boolean} [props.disableZoomOut]       Optional: disable the zoom-out action.
+ * @param {boolean} [props.disableZoomIn]        Optional: disable the zoom-in action.
+ * @param {boolean} [props.disableFits]          Optional: disable both fit actions.
+ * @returns {React.ReactElement}
  */
 const ZoomButtons = ({
   zoomIn,

@@ -1,5 +1,4 @@
 ﻿// File: src/components/AppBootstrap.jsx
-
 /**
  * File: src/components/AppBootstrap.jsx
  *
@@ -19,25 +18,45 @@ import OpenDocViewer from '../OpenDocViewer.jsx';
 import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/Bootstrap.js';
 import { makeExplicitSource } from './DocumentLoader/sources/ExplicitListSource.js';
 
-/** @typedef {{ id: string, userId?: string, issuedAt?: string }} SessionShape */
-/** @typedef {{ url: string, ext?: string, fileIndex?: number }} ExplicitItem */
-/** @typedef {{ session: SessionShape, documents: any[] }} PortableDocumentBundle */
-/** @typedef {{ folder: string, extension: string, endNumber: number }} UrlConfig */
+/**
+ * @typedef {Object} SessionShape
+ * @property {string} id
+ * @property {(string|undefined)} userId
+ * @property {(string|undefined)} issuedAt
+ */
+/**
+ * @typedef {Object} ExplicitItem
+ * @property {string} url
+ * @property {(string|undefined)} ext
+ * @property {(number|undefined)} fileIndex
+ */
+/**
+ * @typedef {Object} PortableDocumentBundle
+ * @property {SessionShape} session
+ * @property {Array.<*>} documents
+ */
+/**
+ * @typedef {Object} UrlConfig
+ * @property {string} folder
+ * @property {string} extension
+ * @property {number} endNumber
+ */
 
 const DEMO_DEFAULT = Object.freeze({ endNumber: 300 });
 
 /**
  * Top-level bootstrapper component.
  * Detects environment, prepares props, and mounts the main viewer.
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 export default function AppBootstrap() {
-  /** @type {[keyof typeof ODV_BOOTSTRAP_MODES, Function]} */
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
-  /** @type {[PortableDocumentBundle|null, Function]} */
-  const [bundle, setBundle] = useState(null);
-  /** @type {[UrlConfig|null, Function]} */
-  const [urlConfig, setUrlConfig] = useState(null);
+  const [bundle, setBundle] = useState(
+    /** @type {(PortableDocumentBundle|null)} */ (null)
+  );
+  const [urlConfig, setUrlConfig] = useState(
+    /** @type {(UrlConfig|null)} */ (null)
+  );
   const [demo, setDemo] = useState({ folder: '', extension: '', endNumber: DEMO_DEFAULT.endNumber });
   const [startApp, setStartApp] = useState(false);
 

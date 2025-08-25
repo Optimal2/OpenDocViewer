@@ -1,3 +1,4 @@
+// File: src/components/DocumentToolbar/ThemeToggleButton.jsx
 /**
  * File: src/components/DocumentToolbar/ThemeToggleButton.jsx
  *
@@ -19,9 +20,7 @@
  * IMPORTANT PROJECT NOTE (future reviewers)
  *   - Elsewhere in this project we import from the **root** 'file-type' package, NOT
  *     'file-type/browser'. With file-type v21 the '/browser' subpath is not exported
- *     for bundlers and will break Vite builds. See README “Design notes & gotchas”.
- *
- * Baseline source reference: :contentReference[oaicite:0]{index=0}
+ *     for bundlers and will break the Vite build. See README “Design notes & gotchas”.
  */
 
 import React, { useContext, useMemo } from 'react';
@@ -32,9 +31,9 @@ import { ThemeContext } from '../../ThemeContext.jsx';
  * ThemeToggleButton
  *
  * @param {Object}   props
- * @param {() => void} [props.toggleTheme]  Optional override; if omitted, uses ThemeContext.toggleTheme.
- * @param {string}   [props.className]      Optional extra class names for the button.
- * @returns {JSX.Element}
+ * @param {function(): void} [props.toggleTheme]  Optional override; if omitted, uses ThemeContext.toggleTheme.
+ * @param {string}   [props.className]            Optional extra class names for the button.
+ * @returns {React.ReactElement}
  */
 const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
   const ctx = useContext(ThemeContext);

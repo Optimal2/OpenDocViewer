@@ -1,3 +1,4 @@
+// File: src/components/DocumentToolbar/PageNavigationButtons.jsx
 /**
  * File: src/components/DocumentToolbar/PageNavigationButtons.jsx
  *
@@ -21,9 +22,26 @@
  * IMPORTANT PROJECT GOTCHA (for future reviewers)
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
  *     'file-type/browser'. With file-type v21 the '/browser' subpath is not
- *     exported for bundlers and will break Vite builds. See README for details.
- *
- * Baseline/source reference for prior version: :contentReference[oaicite:0]{index=0}
+ *     exported for bundlers and will break the Vite build. See README for details.
+ */
+
+/**
+ * Direction token for page timers/navigation.
+ * Prefer reusing the central typedef if available in jsdoc-types.js.
+ * @typedef {'prev'|'next'} PageDirection
+ */
+
+/**
+ * Start a continuous page-timer in the given direction.
+ * @callback StartPageTimer
+ * @param {PageDirection} dir
+ * @returns {void}
+ */
+
+/**
+ * Stop a running page-timer.
+ * @callback StopPageTimer
+ * @returns {void}
  */
 
 import React from 'react';
@@ -37,17 +55,17 @@ import PropTypes from 'prop-types';
  * @param {boolean} props.nextPageDisabled
  * @param {boolean} props.firstPageDisabled
  * @param {boolean} props.lastPageDisabled
- * @param {(dir:'prev') => void} props.startPrevPageTimer
- * @param {() => void} props.stopPrevPageTimer
- * @param {(dir:'next') => void} props.startNextPageTimer
- * @param {() => void} props.stopNextPageTimer
- * @param {() => void} props.handleFirstPage
- * @param {() => void} props.handleLastPage
- * @param {() => void} props.handlePrevPage
- * @param {() => void} props.handleNextPage
+ * @param {StartPageTimer} props.startPrevPageTimer
+ * @param {StopPageTimer} props.stopPrevPageTimer
+ * @param {StartPageTimer} props.startNextPageTimer
+ * @param {StopPageTimer} props.stopNextPageTimer
+ * @param {function(): void} props.handleFirstPage
+ * @param {function(): void} props.handleLastPage
+ * @param {function(): void} props.handlePrevPage
+ * @param {function(): void} props.handleNextPage
  * @param {number} props.pageNumber
  * @param {number} props.totalPages
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const PageNavigationButtons = ({
   prevPageDisabled,

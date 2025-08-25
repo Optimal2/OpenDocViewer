@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/integrations/sessionToken.js
+/**
  * File: src/integrations/sessionToken.js
  *
  * OpenDocViewer — Session Token Reader (Browser-only)
@@ -35,6 +36,13 @@ const MAX_B64_LEN = 200_000;
 const MAX_RAW_LEN = 150_000;
 
 /**
+ * Session token read result.
+ * @typedef {Object} SessionTokenResult
+ * @property {'sessiondata'} source
+ * @property {*} data
+ */
+
+/**
  * Normalize a Base64 string to a decodable form:
  *  - Trim whitespace
  *  - Convert URL-safe chars '-' → '+', '_' → '/'
@@ -62,7 +70,7 @@ function normalizeBase64(s) {
  * Falls back to best-effort ANSI decoding when UTF-8 decode fails.
  *
  * @param {string} str
- * @returns {string|null}
+ * @returns {(string|null)}
  */
 export function b64DecodeUnicode(str) {
   try {
@@ -90,7 +98,7 @@ export function b64DecodeUnicode(str) {
  * Example:
  *   https://host/app?sessiondata=eyJzZXNzaW9uIjp7ImlkIjoiMTIzIn19  (base64-JSON)
  *
- * @returns {{ source: 'sessiondata', data: any } | null}
+ * @returns {(SessionTokenResult|null)}
  *          `{ source, data }` on success; otherwise `null` if no/invalid token.
  */
 export function readFromSessionToken() {

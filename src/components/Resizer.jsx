@@ -1,3 +1,4 @@
+// File: src/components/Resizer.jsx
 /**
  * File: src/components/Resizer.jsx
  *
@@ -16,8 +17,7 @@
  *
  * API
  *   Props:
- *     - onMouseDown (required): (e: MouseEvent | KeyboardEvent) => void
- *         Called when the user initiates a resize with mouse (or via Enter/Space).
+ *     - onMouseDown (required): ResizeStartHandler
  *     - orientation (optional): 'vertical' | 'horizontal' (default: 'vertical')
  *     - ariaLabel  (optional): string — accessible name for assistive tech
  *     - className  (optional): string — additional class names
@@ -30,8 +30,23 @@
  * PROJECT GOTCHA (reminder for future reviewers)
  *   - In other modules we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- *
- * Source file reviewed from repository: :contentReference[oaicite:0]{index=0}
+ *     See README “Design notes & gotchas” before changing this.
+ */
+
+/**
+ * Handler invoked when a resize interaction is initiated.
+ * @callback ResizeStartHandler
+ * @param {*} e
+ * @returns {void}
+ */
+
+/**
+ * Props for <Resizer/>.
+ * @typedef {Object} ResizerProps
+ * @property {ResizeStartHandler} onMouseDown
+ * @property {('vertical'|'horizontal'|undefined)} orientation
+ * @property {(string|undefined)} ariaLabel
+ * @property {(string|undefined)} className
  */
 
 import React, { useCallback } from 'react';
@@ -39,19 +54,21 @@ import PropTypes from 'prop-types';
 
 /**
  * Resizer component.
- * @param {{ onMouseDown: (e: any) => void, orientation?: 'vertical'|'horizontal', ariaLabel?: string, className?: string }} props
- * @returns {JSX.Element}
+ * @param {ResizerProps} props
+ * @returns {React.ReactElement}
  */
 const Resizer = React.memo(({ onMouseDown, orientation = 'vertical', ariaLabel = 'Resize panel', className = '' }) => {
   /**
    * Keyboard handler (Enter/Space) to initiate the same flow as mouse down.
    * Parent components may listen for this to start a keyboard resize routine.
+   * @param {*} e
+   * @returns {void}
    */
   const handleKeyDown = useCallback(
     (e) => {
       if (e.key === 'Enter' || e.key === ' ') {
         e.preventDefault();
-        onMouseDown?.(e);
+        if (typeof onMouseDown === 'function') onMouseDown(e);
       }
     },
     [onMouseDown]

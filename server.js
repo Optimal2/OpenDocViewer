@@ -1,3 +1,4 @@
+// File: server.js
 /**
  * OpenDocViewer — Log Ingestion Server (ESM)
  *
@@ -156,18 +157,20 @@ if (ALLOW_CORS_FOR_LOG) {
 /* ------------------------------- Auth guard ------------------------------- */
 
 /**
- * @callback NextFunction
- * @param {import('express').Request} req
- * @param {import('express').Response} res
- * @param {import('express').NextFunction} next
+ * @callback NextFn
+ * @param {*} req
+ * @param {*} res
+ * @param {function(): void} next
+ * @returns {void}
  */
 
 /**
  * Simple token authentication for /log.
  *
- * @param {import('express').Request} req  Express request
- * @param {import('express').Response} res Express response
- * @param {import('express').NextFunction} next Next middleware
+ * @param {*} req  Express request
+ * @param {*} res  Express response
+ * @param {function(): void} next Next middleware
+ * @returns {void}
  */
 function requireLogToken(req, res, next) {
   const token = req.get('x-log-token');

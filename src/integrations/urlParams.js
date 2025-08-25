@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/integrations/urlParams.js
+/**
  * File: src/integrations/urlParams.js
  *
  * OpenDocViewer — URL Parameter Reader (Browser-only)
@@ -9,12 +10,12 @@
  *   an extension, and a page/file count.
  *
  * ACCEPTED ALIASES (first match wins; case-sensitive)
- *   - folder:   ["folder", "path", "dir"]
- *   - extension:["extension", "ext", "type", "format"]
- *   - endNumber:["endNumber", "pages", "total", "end", "count", "n"]
+ *   - folder:    ["folder", "path", "dir"]
+ *   - extension: ["extension", "ext", "type", "format"]
+ *   - endNumber: ["endNumber", "pages", "total", "end", "count", "n"]
  *
  * RETURN SHAPE
- *   { source: 'url-params', data: { folder, extension, endNumber } } | null
+ *   A normalized object when enough data is present, otherwise null.
  *
  * SSR / SAFETY
  *   - No-ops gracefully when window / URLSearchParams is unavailable.
@@ -29,10 +30,23 @@
 import logger from '../LogController';
 
 /**
+ * @typedef {Object} UrlParamsData
+ * @property {string} folder
+ * @property {string} extension
+ * @property {number} endNumber
+ */
+
+/**
+ * @typedef {Object} UrlParamsResult
+ * @property {'url-params'} source
+ * @property {UrlParamsData} data
+ */
+
+/**
  * Pick the first non-empty value among a list of candidate query keys.
  * @param {URLSearchParams} q
- * @param {string[]} keys
- * @returns {string|null}
+ * @param {Array.<string>} keys
+ * @returns {(string|null)}
  */
 function pick(q, keys) {
   for (const k of keys) {
@@ -44,8 +58,8 @@ function pick(q, keys) {
 
 /**
  * Parse a positive integer from a string. Returns null on failure.
- * @param {string|null} s
- * @returns {number|null}
+ * @param {(string|null)} s
+ * @returns {(number|null)}
  */
 function parsePositiveInt(s) {
   if (s == null || s === '') return null;
@@ -64,7 +78,7 @@ function parsePositiveInt(s) {
  *   const r = readFromUrlParams();
  *   // -> { source:'url-params', data: { folder:'/images/', extension:'png', endNumber:12 } }
  *
- * @returns {{ source:'url-params', data:{ folder:string, extension:string, endNumber:number } } | null}
+ * @returns {(UrlParamsResult|null)}
  */
 export function readFromUrlParams() {
   if (typeof window === 'undefined' || typeof URLSearchParams === 'undefined') {

@@ -1,5 +1,4 @@
 ﻿// File: src/integrations/Bootstrap.js
-
 /**
  * File: src/integrations/Bootstrap.js
  *
@@ -21,14 +20,29 @@ import { normalizeToPortableBundle } from './normalizeBundle.js';
 
 /**
  * Canonical bootstrap modes.
+ * @readonly
  */
 export const ODV_BOOTSTRAP_MODES = Object.freeze({
   PARENT_PAGE: 'parent-page',
   SESSION_TOKEN: 'session-token',
   URL_PARAMS: 'url-params',
   JS_API: 'js-api',
-  DEMO: 'demo',
+  DEMO: 'demo'
 });
+
+/**
+ * @typedef {{ mode: ('parent-page'|'session-token'|'js-api'), bundle: PortableDocumentBundle }} BootstrapFromHost
+ * @typedef {{ mode: 'url-params', urlConfig: { folder: string, extension: string, endNumber: number } }} BootstrapFromUrlParams
+ * @typedef {{ mode: 'demo' }} BootstrapDemo
+ * @typedef {(BootstrapFromHost|BootstrapFromUrlParams|BootstrapDemo)} BootstrapAny
+ */
+
+/**
+ * Host API shape exposed on window.ODV.
+ * @typedef {Object} ODVHostApi
+ * @property {(function(*): void|undefined)} start
+ * @property {(*|undefined)} __pending
+ */
 
 // Expose a tiny host API on window.ODV
 (function exposeApi() {
@@ -36,10 +50,16 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
     if (typeof window === 'undefined') return;
     if (window.ODV?.start) return;
 
-    /** @type {{ start?: (payload?: any) => void, __pending?: any }} */
-    const api = (window.ODV = window.ODV || {});
-    api.__pending = null;
+    /** @type {ODVHostApi} */
+    // @ts-ignore - allow assigning onto window
+    const api = (window.ODV = window.ODV || /** @type {*} */ ({}));
+    api.__pending = undefined;
 
+    /**
+     * Queue a start payload to be consumed by bootstrapDetect().
+     * @param {*} payload
+     * @returns {void}
+     */
     api.start = (payload = {}) => {
       api.__pending = payload; // consumed once by bootstrapDetect
     };
@@ -50,8 +70,8 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
 
 /**
  * Try to normalize a candidate payload into a bundle with documents.
- * @param {any} candidate
- * @returns {import('./normalizeBundle.js').PortableDocumentBundle | null}
+ * @param {*} candidate
+ * @returns {(PortableDocumentBundle|null)}
  */
 function tryNormalizeBundle(candidate) {
   try {
@@ -67,11 +87,7 @@ function tryNormalizeBundle(candidate) {
 
 /**
  * Detect the best available bootstrap mode.
- * @returns {Promise<
- *   | { mode: 'parent-page'|'session-token'|'js-api', bundle: any }
- *   | { mode: 'url-params', urlConfig: { folder:string, extension:string, endNumber:number } }
- *   | { mode: 'demo' }
- * >}
+ * @returns {Promise.<BootstrapAny>}
  */
 export async function bootstrapDetect() {
   // 1) Parent page (same-origin bridge)
@@ -108,7 +124,7 @@ export async function bootstrapDetect() {
   try {
     if (typeof window !== 'undefined' && window.ODV?.__pending) {
       const p = window.ODV.__pending;
-      window.ODV.__pending = null; // consume once
+      window.ODV.__pending = undefined; // consume once
 
       // Try bundle first
       const bundle = tryNormalizeBundle(p?.bundle ?? p);
@@ -121,8 +137,8 @@ export async function bootstrapDetect() {
           urlConfig: {
             folder: String(p.folder),
             extension: String(p.extension),
-            endNumber: Number(p.endNumber),
-          },
+            endNumber: Number(p.endNumber)
+          }
         };
       }
     }

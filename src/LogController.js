@@ -1,3 +1,4 @@
+// File: src/LogController.js
 /**
  * src/LogController.js
  *
@@ -37,7 +38,7 @@ import axios from 'axios';
 /** @typedef {'debug'|'info'|'warn'|'error'} LogLevel */
 
 /** Valid log levels in ascending verbosity. */
-const LOG_LEVELS /** @type {LogLevel[]} */ = ['debug', 'info', 'warn', 'error'];
+const LOG_LEVELS /** @type {Array.<LogLevel>} */ = ['debug', 'info', 'warn', 'error'];
 
 /** No-op function used when we want to swallow calls cleanly. */
 const NOOP = () => {};
@@ -60,7 +61,7 @@ function readMeta(name) {
 /**
  * Resolve a boolean from a meta tag content.
  * @param {string} name
- * @returns {boolean|null} true/false if present, otherwise null
+ * @returns {(boolean|null)} true/false if present, otherwise null
  */
 function readMetaBool(name) {
   const raw = readMeta(name);
@@ -71,12 +72,14 @@ function readMetaBool(name) {
 
 /**
  * Resolve a runtime config snapshot from window.__ODV_CONFIG__ (SSR-safe).
- * @returns {{ logEndpoint?: string, logToken?: string, logEnabled?: boolean }}
+ * @returns {{ logEndpoint: (string|undefined), logToken: (string|undefined), logEnabled: (boolean|undefined) }}
  */
 function readRuntimeConfig() {
   try {
     if (typeof window !== 'undefined' && window.__ODV_CONFIG__) {
-      return /** @type {*} */ (window.__ODV_CONFIG__) || {};
+      return /** @type {{ logEndpoint: (string|undefined), logToken: (string|undefined), logEnabled: (boolean|undefined) }} */ (
+        /** @type {*} */ (window.__ODV_CONFIG__)
+      ) || {};
     }
   } catch {
     // ignore
@@ -135,7 +138,7 @@ function resolveAuthToken() {
 
 /**
  * Resolve an explicit "enabled" boolean if one exists.
- * @returns {boolean|null} true/false if present in runtime or meta, otherwise null
+ * @returns {(boolean|null)} true/false if present in runtime or meta, otherwise null
  */
 function resolveEnabledOverride() {
   const cfg = readRuntimeConfig();
@@ -146,7 +149,7 @@ function resolveEnabledOverride() {
 
 /**
  * Normalize and validate a log level.
- * @param {unknown} level
+ * @param {*} level
  * @returns {LogLevel}
  */
 function normalizeLevel(level) {
@@ -168,7 +171,7 @@ function levelGte(a, b) {
  * Create a JSON replacer that:
  *  - prevents circular references
  *  - leaves values otherwise intact
- * @returns {(this:any, key:string, value:any) => any}
+ * @returns {function(string, *): *}
  */
 function circularReplacer() {
   const seen = new Set();
@@ -215,6 +218,7 @@ class LogController {
   /**
    * Enable/disable HTTP forwarding at runtime.
    * @param {boolean} value
+   * @returns {void}
    */
   setLogToBackend = (value) => {
     this.logToBackend = !!value;
@@ -223,6 +227,7 @@ class LogController {
   /**
    * Set the backend ingestion URL (absolute or relative).
    * @param {string} url
+   * @returns {void}
    */
   setBackendUrl = (url) => {
     try {
@@ -236,6 +241,7 @@ class LogController {
   /**
    * Set the current log level. Messages below this level are ignored.
    * @param {LogLevel} level
+   * @returns {void}
    */
   setLogLevel = (level) => {
     const lvl = normalizeLevel(level);
@@ -245,6 +251,7 @@ class LogController {
   /**
    * Set retry limit for backend forwarding.
    * @param {number} limit
+   * @returns {void}
    */
   setRetryLimit = (limit) => {
     this.retryLimit = Math.max(0, Number(limit) || 0);
@@ -253,6 +260,7 @@ class LogController {
   /**
    * Set retry interval (ms) for backend forwarding.
    * @param {number} interval
+   * @returns {void}
    */
   setRetryInterval = (interval) => {
     this.retryInterval = Math.max(0, Number(interval) || 0);
@@ -261,6 +269,7 @@ class LogController {
   /**
    * Set axios timeout (ms) for backend posts.
    * @param {number} ms
+   * @returns {void}
    */
   setHttpTimeout = (ms) => {
     this.httpTimeout = Math.max(0, Number(ms) || 0);
@@ -269,6 +278,7 @@ class LogController {
   /**
    * Update/replace the auth token used in 'x-log-token'.
    * @param {string} token
+   * @returns {void}
    */
   setAuthToken = (token) => {
     this.authToken = String(token || '');
@@ -294,7 +304,8 @@ class LogController {
    *
    * @param {LogLevel} level
    * @param {string} message
-   * @param {Record<string, any>} [context={}]
+   * @param {Object.<string, *>} [context={}]
+   * @returns {Promise.<void>}
    */
   log = async (level, message, context = {}) => {
     const lvl = normalizeLevel(level);
@@ -323,9 +334,9 @@ class LogController {
    *
    * @param {LogLevel} level
    * @param {string} message
-   * @param {Record<string, any>} context
+   * @param {Object.<string, *>} context
    * @param {number} attempt
-   * @returns {Promise<void>}
+   * @returns {Promise.<void>}
    */
   sendLogToBackend = async (level, message, context, attempt) => {
     if (!this.logToBackend || !this.backendUrl) return;
@@ -353,16 +364,16 @@ class LogController {
   };
 
   /** Convenience wrappers */
-  /** @param {string} message @param {Record<string, any>} [context] */
+  /** @param {string} message @param {Object.<string, *>} [context] @returns {Promise.<void>} */
   debug = (message, context = {}) => this.log('debug', message, context);
 
-  /** @param {string} message @param {Record<string, any>} [context] */
+  /** @param {string} message @param {Object.<string, *>} [context] @returns {Promise.<void>} */
   info = (message, context = {}) => this.log('info', message, context);
 
-  /** @param {string} message @param {Record<string, any>} [context] */
+  /** @param {string} message @param {Object.<string, *>} [context] @returns {Promise.<void>} */
   warn = (message, context = {}) => this.log('warn', message, context);
 
-  /** @param {string} message @param {Record<string, any>} [context] */
+  /** @param {string} message @param {Object.<string, *>} [context] @returns {Promise.<void>} */
   error = (message, context = {}) => this.log('error', message, context);
 }
 

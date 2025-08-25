@@ -1,3 +1,4 @@
+// File: src/components/DocumentLoader/Utils.js
 /**
  * File: src/components/DocumentLoader/Utils.js
  *
@@ -19,8 +20,6 @@
  * IMPORTANT PROJECT GOTCHA (for future reviewers)
  *   - In other modules we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With `file-type` v21 the '/browser' subpath is not exported and will break Vite builds.
- *
- * Provenance / baseline reference for prior version of this module: :contentReference[oaicite:0]{index=0}
  */
 
 import logger from '../../LogController.js';
@@ -53,7 +52,7 @@ const TRANSPARENT_1x1 =
  * @param {string} folder          Base folder/path for assets (relative so <base href> is honored).
  * @param {string} extension       File extension (e.g., "jpg", "png", "tiff").
  * @param {number} [endNumber=300] Inclusive upper bound (1..N).
- * @returns {string[]} Ordered list of relative URLs.
+ * @returns {Array.<string>}       Ordered list of relative URLs.
  */
 export const generateDocumentList = (folder, extension, endNumber = 300) => {
   const documents = [];
@@ -72,18 +71,24 @@ export const generateDocumentList = (folder, extension, endNumber = 300) => {
 };
 
 /**
+ * Options for fetchAndArrayBuffer.
+ * @typedef {Object} FetchOptions
+ * @property {(AbortSignal|undefined)} signal
+ */
+
+/**
  * Fetch a resource and return its ArrayBuffer.
  *
- * @param {string} url                       Resource URL.
- * @param {{ signal?: AbortSignal }} [opts]  Optional fetch options (AbortSignal supported).
- * @returns {Promise<ArrayBuffer>}
+ * @param {string} url                 Resource URL.
+ * @param {FetchOptions} [opts]        Optional fetch options (AbortSignal supported).
+ * @returns {Promise.<ArrayBuffer>}
  * @throws {Error} On non-2xx responses.
  */
 export const fetchAndArrayBuffer = async (url, opts = {}) => {
   logger.debug('Fetching array buffer', { url });
   const res = await fetch(url, { signal: opts.signal });
   if (!res.ok) {
-    throw new Error(`Failed to fetch document at ${url} (status ${res.status})`);
+    throw new Error('Failed to fetch document at ' + url + ' (status ' + res.status + ')');
   }
   return res.arrayBuffer();
 };
@@ -98,7 +103,7 @@ export const fetchAndArrayBuffer = async (url, opts = {}) => {
  *
  * @param {ArrayBuffer} arrayBuffer  Document bytes.
  * @param {string} fileExtension     File extension (case-insensitive).
- * @returns {Promise<number>}        Total pages detected.
+ * @returns {Promise.<number>}       Total pages detected.
  */
 export const getTotalPages = async (arrayBuffer, fileExtension) => {
   const fileExtLower = String(fileExtension || '').toLowerCase();
@@ -124,7 +129,7 @@ export const getTotalPages = async (arrayBuffer, fileExtension) => {
  * Extract light-weight metadata from a TIFF buffer (best-effort).
  *
  * @param {ArrayBuffer} arrayBuffer
- * @returns {Array<Object>|'unknown'} List of per-page metadata objects, or 'unknown' if parsing fails.
+ * @returns {(Array.<Object>|'unknown')} List of per-page metadata objects, or 'unknown' if parsing fails.
  */
 export const getTiffMetadata = (arrayBuffer) => {
   try {
@@ -160,7 +165,7 @@ export const getTiffMetadata = (arrayBuffer) => {
  * @param {string} imageUrl
  * @param {number} maxWidth
  * @param {number} maxHeight
- * @returns {Promise<string>} Data URL (PNG) for the thumbnail (or a transparent fallback).
+ * @returns {Promise.<string>} Data URL (PNG) for the thumbnail (or a transparent fallback).
  */
 export const generateThumbnail = (imageUrl, maxWidth, maxHeight) => {
   logger.debug('Generating thumbnail', { imageUrl });

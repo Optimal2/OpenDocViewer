@@ -1,3 +1,4 @@
+// File: src/components/DocumentRender.jsx
 /**
  * File: src/components/DocumentRender.jsx
  *
@@ -42,17 +43,17 @@ import {
 /**
  * @typedef {Object} PageEntry
  * @property {string} fullSizeUrl           Resolved URL for the full-size raster image
- * @property {string} [thumbnailUrl]        Optional URL for the thumbnail
+ * @property {(string|undefined)} thumbnailUrl        Optional URL for the thumbnail
  * @property {number} status                Load status: 0=loading, 1=ready, -1=failed
- * @property {number} [realWidth]           Optional source width hint (pre-sniffed)
- * @property {number} [realHeight]          Optional source height hint (pre-sniffed)
+ * @property {(number|undefined)} realWidth           Optional source width hint (pre-sniffed)
+ * @property {(number|undefined)} realHeight          Optional source height hint (pre-sniffed)
  */
 
 /**
  * Get the current page (1-based index) or null.
- * @param {PageEntry[]} allPages
+ * @param {Array.<PageEntry>} allPages
  * @param {number} pageNumber
- * @returns {PageEntry|null}
+ * @returns {(PageEntry|null)}
  */
 function getCurrentPage(allPages, pageNumber) {
   if (!Array.isArray(allPages) || allPages.length === 0) return null;
@@ -60,14 +61,16 @@ function getCurrentPage(allPages, pageNumber) {
 }
 
 /**
- * @typedef {Object} DocumentRenderHandle
- * @property {() => void} updateImageSourceAndFit   Reload current page and (re)draw
- * @property {() => HTMLCanvasElement|HTMLImageElement|null} getActiveCanvas
- * @property {() => void} fitToScreen               Compute “fit to screen” zoom and apply
- * @property {() => void} fitToWidth                Compute “fit to width” zoom and apply
- * @property {() => void} zoomIn                    Increase zoom (clamped)
- * @property {() => void} zoomOut                   Decrease zoom (clamped)
- * @property {() => void} forceRender               Flag to force a re-render on next effect
+ * Imperative API exposed by this renderer.
+ * @typedef {Object} DocumentRenderAPI
+ * @property {function(): void} updateImageSourceAndFit   Reload current page and (re)draw
+ * @property {function(): (HTMLCanvasElement|HTMLImageElement|null)} getActiveCanvas
+ * @property {function(): void} fitToScreen               Compute “fit to screen” zoom and apply
+ * @property {function(): void} fitToWidth                Compute “fit to width” zoom and apply
+ * @property {function(): void} zoomIn                    Increase zoom (clamped)
+ * @property {function(): void} zoomOut                   Decrease zoom (clamped)
+ * @property {function(): void} forceRender               Flag to force a re-render on next effect
+ * @property {function(): !Array<string>} getAllPrintableDataUrls   // NEW: list of full-size URLs for ALL pages in order
  */
 
 /**
@@ -76,19 +79,19 @@ function getCurrentPage(allPages, pageNumber) {
  * @param {Object} props
  * @param {number} props.pageNumber
  * @param {number} props.zoom
- * @param {() => void} [props.initialRenderDone]  Callback when the very first page finishes rendering
- * @param {() => void} [props.onRender]           Callback on each render completion
- * @param {{ current: HTMLElement|null }} props.viewerContainerRef
- * @param {(z: number|((prev: number) => number)) => void} props.setZoom
- * @param {(n: number|((prev: number) => number)) => void} props.setPageNumber
+ * @param {function(): void} [props.initialRenderDone]  Callback when the very first page finishes rendering
+ * @param {function(): void} [props.onRender]           Callback on each render completion
+ * @param {RefLike} props.viewerContainerRef
+ * @param {SetNumberState} props.setZoom
+ * @param {SetPageNumber} props.setPageNumber
  * @param {boolean} props.isCompareMode
  * @param {{ rotation: number, brightness: number, contrast: number }} props.imageProperties
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean} props.forceRender
- * @param {PageEntry[]} props.allPages
- * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef
- * @param {React.Ref<DocumentRenderHandle>} ref
- * @returns {JSX.Element}
+ * @param {Array.<PageEntry>} props.allPages
+ * @param {RefLike} props.thumbnailsContainerRef
+ * @param {*} ref
+ * @returns {React.ReactElement}
  */
 const DocumentRender = React.forwardRef(function DocumentRender(
   {
@@ -114,7 +117,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   // Internal state/flags
   const initialRenderRef = useRef(false);
-  const [lastRendered, setLastRendered] = useState(/** @type {number|null} */ (null));
+  const [lastRendered, setLastRendered] = useState(/** @type {(number|null)} */ (null));
   const [shouldForceRender, setShouldForceRender] = useState(!!forceRender);
   const [isInitialLoad, setIsInitialLoad] = useState(true);
   const [showPage, setShowPage] = useState(false); // becomes true when all pages are status===1
@@ -143,6 +146,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   /**
    * Draw a loaded image onto the canvas with rotation/filters.
    * @param {HTMLImageElement} image
+   * @returns {void}
    */
   const drawImageOnCanvas = useCallback(
     (image) => {
@@ -311,7 +315,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   // Imperative API exposed to parent components (toolbar, print, etc.)
   const imperativeHandle = useMemo(
     () =>
-      /** @type {DocumentRenderHandle} */ ({
+      /** @type {DocumentRenderAPI} */ ({
         updateImageSourceAndFit() {
           const url = currentPage?.fullSizeUrl;
           if (!url || !imgRef.current) return;
@@ -342,8 +346,42 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         forceRender() {
           setShouldForceRender(true);
         },
+        /**
+         * Return full-size URLs for ALL pages in order (for printing all pages).
+         * This avoids relying on the DOM (which may be virtualized) and prevents
+         * capturing duplicates like the first page twice.
+         * @returns {!Array<string>}
+         */
+        getAllPrintableDataUrls() {
+          try {
+            if (!Array.isArray(allPages) || allPages.length === 0) return [];
+            /** @type {!Array<string>} */
+            const urls = [];
+            for (let i = 0; i < allPages.length; i++) {
+              const p = allPages[i];
+              const u = p && typeof p.fullSizeUrl === 'string' ? p.fullSizeUrl : '';
+              // Exclude obvious placeholders/failures if present
+              if (u && !/placeholder|lost/i.test(u)) {
+                urls.push(u);
+              }
+            }
+            logger.info('Collected printable URLs for all pages', { count: urls.length });
+            return urls;
+          } catch (e) {
+            logger.error('getAllPrintableDataUrls failed', { error: String(e?.message || e) });
+            return [];
+          }
+        },
       }),
-    [currentPage, isCanvasEnabled, drawImageOnCanvas, viewerContainerRef, setZoom, isCompareMode]
+    [
+      currentPage,
+      isCanvasEnabled,
+      drawImageOnCanvas,
+      viewerContainerRef,
+      setZoom,
+      isCompareMode,
+      allPages,
+    ]
   );
 
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);

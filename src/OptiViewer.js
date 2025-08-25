@@ -1,3 +1,4 @@
+// File: src/OptiViewer.js
 /**
  * src/OptiViewer.js
  *
@@ -18,9 +19,6 @@
  *   - file-type import trap: Elsewhere we import from 'file-type' (root), NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break the Vite build.
  *     See README “Design notes & gotchas” before changing this.
- *
- * Provenance for earlier baseline (traceability):
- *   :contentReference[oaicite:0]{index=0}
  */
 
 import React, { useState, useEffect, useCallback } from 'react';
@@ -33,7 +31,7 @@ import DocumentConsumerWrapper from './components/DocumentConsumerWrapper';
 
 /**
  * Read a stable snapshot of runtime config without exposing a mutable reference.
- * @returns {{ showPerfOverlay?: boolean, exposeStackTraces?: boolean }} config
+ * @returns {{ showPerfOverlay: (boolean|undefined), exposeStackTraces: (boolean|undefined) }}
  */
 function readRuntimeConfig() {
   try {
@@ -57,16 +55,16 @@ function readRuntimeConfig() {
  *  - Tracks a mobile-view boolean (breakpoint-driven)
  *  - Forwards props to the document consumer wrapper
  *
- * @param {Object} props                                 Component props
- * @param {string} [props.folder]                         Pattern mode: base folder for images
- * @param {string} [props.extension]                      Pattern mode: file extension (e.g., "jpg")
- * @param {number} [props.endNumber]                      Pattern mode: number of files to load
- * @param {Array<{url:string, ext?:string, fileIndex?:number}>} [props.sourceList]
+ * @param {Object} props                                    Component props
+ * @param {string} [props.folder]                            Pattern mode: base folder for images
+ * @param {string} [props.extension]                         Pattern mode: file extension (e.g., "jpg")
+ * @param {number} [props.endNumber]                         Pattern mode: number of files to load
+ * @param {Array.<{ url: string, ext: (string|undefined), fileIndex: (number|undefined) }>} [props.sourceList]
  *        Explicit list mode: ordered list of document sources
- * @param {Object} [props.bundle]                         Optional metadata object (reserved for future)
- * @param {boolean} [props.sameBlob=false]                Use the same blob URL for thumbnail & full image
- * @param {number} [props.mobileBreakpoint=600]           Width threshold for mobile layout
- * @returns {JSX.Element}
+ * @param {Object} [props.bundle]                            Optional metadata object (reserved for future)
+ * @param {boolean} [props.sameBlob=false]                   Use the same blob URL for thumbnail & full image
+ * @param {number} [props.mobileBreakpoint=600]              Width threshold for mobile layout
+ * @returns {React.ReactElement}
  */
 const OptiViewer = ({
   folder,

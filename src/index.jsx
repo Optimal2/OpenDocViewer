@@ -1,3 +1,4 @@
+// File: src/index.jsx
 /**
  * File: src/index.jsx
  *
@@ -14,8 +15,6 @@
  *   - The optional Performance HUD is controlled elsewhere via runtime config (odv.config.js).
  *   - Project-wide gotcha: we import from 'file-type' (root) *not* 'file-type/browser';
  *     v21 does not export that subpath for bundlers and builds will fail if changed.
- *
- * Source reference for this entrypoint (traceability): :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';

@@ -1,3 +1,4 @@
+// File: src/components/DocumentConsumerWrapper.jsx
 /**
  * File: src/components/DocumentConsumerWrapper.jsx
  *
@@ -18,6 +19,7 @@
  * IMPORTANT PROJECT GOTCHA
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
+ *     See README “Design notes & gotchas” before changing that import.
  *
  * Provenance / previous baseline for this module: :contentReference[oaicite:0]{index=0}
  */
@@ -39,6 +41,14 @@ const DocumentLoader = lazy(() => import('./DocumentLoader/DocumentLoader'));
 const DocumentThumbnailList = lazy(() => import('./DocumentThumbnailList'));
 
 /**
+ * An item for explicit-list mode.
+ * @typedef {Object} SourceItem
+ * @property {string} url
+ * @property {(string|undefined)} ext
+ * @property {(number|undefined)} fileIndex
+ */
+
+/**
  * DocumentConsumerWrapper
  * Wraps DocumentLoader + DocumentViewer and switches between full viewer and a
  * thumbnail-only presentation on small/mobile layouts.
@@ -47,11 +57,11 @@ const DocumentThumbnailList = lazy(() => import('./DocumentThumbnailList'));
  * @param {string} [props.folder]                Pattern mode: base folder/path for assets
  * @param {string} [props.extension]             Pattern mode: file extension (e.g., "png", "tiff")
  * @param {number} [props.endNumber]             Pattern mode: last page/file number (1..N)
- * @param {{ url:string, ext?:string, fileIndex?:number }[]} [props.sourceList]
+ * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit-list mode: ordered list of source items
  * @param {boolean} props.isMobileView           Whether to render the thumbnail-only view
  * @param {boolean} props.initialized            Delay mounting until basic app init completes
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const DocumentConsumerWrapper = ({
   folder,

@@ -1,3 +1,4 @@
+// File: src/PerformanceMonitor.jsx
 /**
  * src/PerformanceMonitor.jsx
  *
@@ -28,14 +29,14 @@ import { ViewerContext } from './ViewerContext';
 
 /**
  * @typedef {Object} MemorySnapshot
- * @property {number} totalJSHeapSize  // MB
- * @property {number} usedJSHeapSize   // MB
- * @property {number} jsHeapSizeLimit  // MB
+ * @property {number} totalJSHeapSize  Memory in MB
+ * @property {number} usedJSHeapSize   Memory in MB
+ * @property {number} jsHeapSizeLimit  Memory in MB
  */
 
 /**
  * Read a stable snapshot of runtime config without exposing a mutable reference.
- * @returns {{ showPerfOverlay?: boolean }} config
+ * @returns {{ showPerfOverlay: (boolean|undefined) }} config
  */
 function readRuntimeConfig() {
   try {
@@ -68,7 +69,7 @@ function toMB(bytes) {
  * PerformanceMonitor component.
  * Renders nothing unless showPerfOverlay=true in runtime config.
  *
- * @returns {JSX.Element|null}
+ * @returns {(React.ReactElement|null)}
  */
 const PerformanceMonitor = () => {
   const { allPages, error, workerCount, messageQueue } = useContext(ViewerContext);
@@ -79,14 +80,14 @@ const PerformanceMonitor = () => {
   // Early exit to keep costs at absolute minimum when disabled
   if (!showPerfOverlay) return null;
 
-  /** @type {[MemorySnapshot, React.Dispatch<React.SetStateAction<MemorySnapshot>>]} */
-  const [memory, setMemory] = useState({
-    totalJSHeapSize: 0,
-    usedJSHeapSize: 0,
-    jsHeapSizeLimit: 0,
-  });
+  const [memory, setMemory] = useState(
+    /** @type {MemorySnapshot} */ ({
+      totalJSHeapSize: 0,
+      usedJSHeapSize: 0,
+      jsHeapSizeLimit: 0
+    })
+  );
 
-  /** @type {[number, React.Dispatch<React.SetStateAction<number>>]} */
   const [hardwareConcurrency, setHardwareConcurrency] = useState(() => {
     try {
       return typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 1) : 1;
@@ -95,7 +96,6 @@ const PerformanceMonitor = () => {
     }
   });
 
-  /** @type {[number, React.Dispatch<React.SetStateAction<number>>]} */
   const [deviceMemory, setDeviceMemory] = useState(() => {
     try {
       // Non-standard; Chromium only; returns GB
@@ -107,16 +107,18 @@ const PerformanceMonitor = () => {
 
   // FPS sampling (simple moving average)
   const [fps, setFps] = useState(0);
-  /** @type {React.MutableRefObject<number | undefined>} */
+  /** @type {{ current: (number|undefined) }} */
   const rafRef = useRef(undefined);
-  /** @type {React.MutableRefObject<number | undefined>} */
+  /** @type {{ current: (number|undefined) }} */
   const lastFrameTime = useRef(undefined);
-  /** @type {React.MutableRefObject<number[]>} */
+  /** @type {{ current: Array.<number> }} */
   const smaWindow = useRef([]); // last N instantaneous FPS values
   const SMA_SIZE = 30;
 
   /**
    * rAF loop to estimate instantaneous FPS and expose a short moving average.
+   * @param {number} t
+   * @returns {void}
    */
   const tick = useCallback((t) => {
     if (typeof t === 'number') {
@@ -138,6 +140,7 @@ const PerformanceMonitor = () => {
   /**
    * Memory stats (1 Hz, Chromium-only).
    * Falls back gracefully on engines that omit performance.memory.
+   * @returns {void}
    */
   const updateMemory = useCallback(() => {
     try {
@@ -148,7 +151,7 @@ const PerformanceMonitor = () => {
         setMemory({
           totalJSHeapSize: toMB(mem.totalJSHeapSize),
           usedJSHeapSize: toMB(mem.usedJSHeapSize),
-          jsHeapSizeLimit: toMB(mem.jsHeapSizeLimit),
+          jsHeapSizeLimit: toMB(mem.jsHeapSizeLimit)
         });
       }
     } catch {
@@ -193,7 +196,7 @@ const PerformanceMonitor = () => {
     lineHeight: 1.5,
     borderTopLeftRadius: '6px',
     boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 6px 24px rgba(0,0,0,0.35)',
-    backdropFilter: 'blur(2px)',
+    backdropFilter: 'blur(2px)'
   };
 
   const h3Style = { margin: '0 0 6px 0', fontSize: '12px', letterSpacing: '0.02em', opacity: 0.9 };
