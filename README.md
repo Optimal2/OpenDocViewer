@@ -17,7 +17,6 @@ OpenDocViewer is a fast, lightweight, MIT-licensed document viewer built with **
 * [JSDoc (API docs)](#jsdoc-api-docs)
 * [Linting & formatting](#linting--formatting)
 * [Project structure](#project-structure)
-* [Repo tree audit (PowerShell)](#repo-tree-audit-powershell)
 * [Design notes & gotchas](#design-notes--gotchas)
 * [License](#license)
 
@@ -25,19 +24,19 @@ OpenDocViewer is a fast, lightweight, MIT-licensed document viewer built with **
 
 ## Features
 
-* **PDF, TIFF, JPG/PNG** viewing with main-thread fallbacks when workers are unavailable.
-* **Thumbnail list** with keyboard and mouse navigation.
-* **Zoom, fit-to-screen/width**, and **comparison mode**.
-* **Portable build** (static assets in `dist/`) that runs on any static host.
-* **Runtime configuration** via `/odv.config.js` (no rebuild required).
-* **Structured logging** (frontend → backend) with rotation and token-gated ingestion.
+* **PDF, TIFF, JPG/PNG** viewing with main-thread fallbacks when workers are unavailable
+* **Thumbnail list** with keyboard and mouse navigation
+* **Zoom, fit-to-screen/width**, and **comparison mode**
+* **Portable build** (static assets in `dist/`) that runs on any static host
+* **Runtime configuration** via `/odv.config.js` (no rebuild required)
+* **Structured logging** (frontend → backend) with rotation and token-gated ingestion
 
 ---
 
 ## Requirements
 
 * **Node.js 18+** and npm
-* Modern browser (Chromium / Firefox / Safari)
+* A modern browser (Chromium / Firefox / Safari)
 
 ---
 
@@ -48,7 +47,7 @@ git clone https://github.com/Optimal2/OpenDocViewer.git
 cd OpenDocViewer
 npm install
 npm run dev
-````
+```
 
 Open the URL printed by Vite (typically `http://localhost:5173`).
 
@@ -72,8 +71,8 @@ These scripts are preconfigured in `package.json`.
 
 The production build is static. Deploy the `dist/` folder to any static host (IIS, Nginx, Apache, S3/CloudFront, GitHub Pages, etc.).
 
-* **SPA routing:** configure a fallback so unknown routes serve `index.html`.
-* **Caching:** long-cache hashed assets; **do not** long-cache `index.html` or `odv.config.js`. Recommended header for both: `Cache-Control: no-store`.
+* **SPA routing:** Configure a fallback so unknown routes serve `index.html`.
+* **Caching:** Long-cache hashed assets; **do not** long-cache `index.html` or `odv.config.js`. Recommended header for both: `Cache-Control: no-store`.
 
 > **IIS example:** Use URL Rewrite for SPA fallback and set a `no-store` cache policy for `index.html` and `odv.config.js`. The supplied `web.config` demonstrates this pattern.
 
@@ -181,7 +180,7 @@ This runs JSDoc with the provided `jsdoc.json` and the **docdash** template, sca
 
 ## Linting & formatting
 
-* **ESLint** (React + hooks + Vite refresh configs). Run:
+* **ESLint** (React + hooks + Vite refresh configs)
 
   ```bash
   npm run lint
@@ -190,7 +189,7 @@ This runs JSDoc with the provided `jsdoc.json` and the **docdash** template, sca
 
   The ESLint setup extends `@eslint/js` recommended rules, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`; it ignores `dist/`.
 
-* **Prettier** formatting:
+* **Prettier** formatting
 
   ```bash
   npm run format
@@ -213,9 +212,11 @@ OpenDocViewer/
 │  │  │  ├─ MainThreadRenderer.js
 │  │  │  ├─ Utils.js
 │  │  │  └─ WorkerHandler.js
-│  │  ├─ DocumentToolbar/           # toolbar UI (paging, zoom, theme)
+│  │  ├─ DocumentToolbar/           # toolbar UI (paging, zoom, theme, printing)
 │  │  │  ├─ DocumentToolbar.jsx
 │  │  │  ├─ PageNavigationButtons.jsx
+│  │  │  ├─ PrintRangeDialog.jsx
+│  │  │  ├─ PrintRangeDialog.module.css
 │  │  │  ├─ ThemeToggleButton.jsx
 │  │  │  └─ ZoomButtons.jsx
 │  │  ├─ DocumentViewer/            # container + layout for viewer panes
@@ -282,22 +283,19 @@ OpenDocViewer/
 ## Design notes & gotchas
 
 * **File type detection (very important):**
-  We intentionally import from `'file-type'` **not** `'file-type/browser'`. With our current version (`^21`), the `/browser` entry is **not** exported in the package’s exports map and will fail bundling in Vite. Using the root import is compatible in the browser build and our bundler includes only what’s needed. If you upgrade `file-type`, re-validate the exports and adjust imports accordingly.
+  Import from `'file-type'` (root) rather than `'file-type/browser'` to match the package’s exports and avoid bundling failures in Vite with the current version (`^21`). If you upgrade `file-type`, re-validate the exports and adjust imports accordingly.
 
 * **PDF worker versioning:**
-  We use `pdfjs-dist` and ensure the **API and worker versions match**. The Vite config builds web workers as **ES modules** to avoid interop issues.
+  `pdfjs-dist` API and worker versions must match. Vite is configured to build web workers as ES modules.
 
 * **TIFF rendering strategy:**
-  Multi-page TIFFs are processed in the **main thread** to avoid duplicating buffers per page, which reduces peak memory usage on large inputs.
+  Multi-page TIFFs are processed in the **main thread** to avoid duplicating buffers per page, reducing peak memory usage on large inputs.
 
 * **Adaptive workers & batch size:**
-  We compute worker counts from `navigator.hardwareConcurrency`, leaving one logical core for the UI when possible, and clamp the maximum on low-memory/mobile devices. On ≤3 cores, we switch to a sequential scheduler for smoother UX.
+  Worker counts are derived from `navigator.hardwareConcurrency`, typically leaving one logical core for the UI and clamping on low-memory/mobile devices. On ≤ 3 cores, the scheduler prefers sequential processing for smoother UX.
 
 * **Security / diagnostics toggles:**
-
-  * `exposeStackTraces` (default **false**): hides stack traces from end users in production; turn it on only for trusted dev environments.
-  * `showPerfOverlay` (default **false**): performance HUD; useful for profiling, should remain off in prod unless needed.
-    Both toggles live in **runtime config** (`/odv.config.js`) so you can change them post-deploy.
+  `exposeStackTraces` and `showPerfOverlay` live in **runtime config** (`/odv.config.js`), so you can change them post-deploy.
 
 * **Caching guidance:**
   Keep `index.html` and `odv.config.js` **uncached** (`Cache-Control: no-store`), and long-cache hashed assets generated by Vite.
