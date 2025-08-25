@@ -1,34 +1,16 @@
+// File: src/components/DocumentToolbar/DocumentToolbar.jsx
 /**
  * File: src/components/DocumentToolbar/DocumentToolbar.jsx
  *
  * OpenDocViewer — Document Toolbar
  *
- * PURPOSE
- *   Provides controls for:
- *     • Printing
- *     • Page navigation (single-step + press-and-hold)
- *     • Zoom and auto-fit
- *     • Compare mode toggle
- *     • Optional canvas-based editing tools (rotation, brightness, contrast)
- *     • Theme toggle
- *
- * ACCESSIBILITY
- *   - Buttons are native <button type="button"> with aria-label + title.
- *   - Live page information is announced via a polite live region.
- *
- * PERFORMANCE
- *   - Delegates continuous navigation to a timer hook to avoid tight loops.
- *   - Avoids noisy per-interval logging; only logs coarse actions.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With file-type v21 the '/browser' subpath is not exported
- *     for bundlers and will break Vite builds (see README).
- *
- * Provenance / baseline reference for prior version of this file: :contentReference[oaicite:0]{index=0}
+ * NOTE: Single print entry point with a dialog that supports:
+ *  - Active page (default)
+ *  - All pages
+ *  - Page range (inclusive)
  */
 
-import React, { useContext, useCallback, useMemo } from 'react';
+import React, { useContext, useCallback, useMemo, useState } from 'react';
 import PropTypes from 'prop-types';
 import logger from '../../LogController.js';
 import { ThemeContext } from '../../ThemeContext.jsx';
@@ -36,7 +18,8 @@ import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import ThemeToggleButton from './ThemeToggleButton.jsx';
-import { handlePrint } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintRange } from '../../utils/printUtils.js';
+import PrintRangeDialog from './PrintRangeDialog.jsx';
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
@@ -51,22 +34,23 @@ const SLIDER_CENTER_RANGE = 20;
  * @param {boolean} props.nextPageDisabled
  * @param {boolean} props.firstPageDisabled
  * @param {boolean} props.lastPageDisabled
- * @param {(n:number)=>void} props.setPageNumber
- * @param {() => void} props.zoomIn
- * @param {() => void} props.zoomOut
- * @param {() => void} props.fitToScreen
- * @param {() => void} props.fitToWidth
- * @param {{ current: any }} props.documentRenderRef
- * @param {() => void} props.handleCompare
+ * @param {SetPageNumber} props.setPageNumber
+ * @param {function(): void} props.zoomIn
+ * @param {function(): void} props.zoomOut
+ * @param {function(): void} props.fitToScreen
+ * @param {function(): void} props.fitToWidth
+ * @param {RefLike} props.documentRenderRef
+ * @param {RefLike} props.viewerContainerRef
+ * @param {function(): void} props.handleCompare
  * @param {boolean} props.isComparing
  * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
- * @param {(angle:number) => void} props.handleRotationChange
- * @param {(e:{target:{value:any}}) => void} props.handleBrightnessChange
- * @param {(e:{target:{value:any}}) => void} props.handleContrastChange
- * @param {() => void} props.resetImageProperties
+ * @param {function(number): void} props.handleRotationChange
+ * @param {function({target:{value:*}}): void} props.handleBrightnessChange
+ * @param {function({target:{value:*}}): void} props.handleContrastChange
+ * @param {function(): void} props.resetImageProperties
  * @param {boolean} props.isExpanded
- * @param {(v:boolean|((p:boolean)=>boolean))=>void} props.setIsExpanded
- * @returns {JSX.Element}
+ * @param {SetBooleanState} props.setIsExpanded
+ * @returns {React.ReactElement}
  */
 const DocumentToolbar = ({
   pageNumber,
@@ -81,6 +65,7 @@ const DocumentToolbar = ({
   fitToScreen,
   fitToWidth,
   documentRenderRef,
+  viewerContainerRef,
   handleCompare,
   isComparing,
   imageProperties,
@@ -104,6 +89,9 @@ const DocumentToolbar = ({
     startNextPageTimer,
     stopNextPageTimer,
   } = usePageNavigation(setPageNumber, totalPages);
+
+  // Print dialog state
+  const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
   const snapToZero = useMemo(
@@ -144,14 +132,30 @@ const DocumentToolbar = ({
     });
   }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
 
+  /** Callback when the print dialog submits. */
+  const handlePrintSubmit = useCallback((detail /* {mode:'active'|'all'|'range', from?:number, to?:number} */) => {
+    setPrintDialogOpen(false);
+    if (!detail || detail.mode === 'active') {
+      handlePrint(documentRenderRef, { viewerContainerRef });
+      return;
+    }
+    if (detail.mode === 'all') {
+      handlePrintAll(documentRenderRef, { viewerContainerRef });
+      return;
+    }
+    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+      handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
+    }
+  }, [documentRenderRef, viewerContainerRef]);
+
   return (
     <div className="toolbar" role="toolbar" aria-label="Document controls">
-      {/* Print */}
+      {/* Single Print button → opens dialog (Active | All | Range) */}
       <button
         type="button"
-        onClick={() => handlePrint(documentRenderRef)}
-        aria-label="Print document"
-        title="Print document"
+        onClick={() => setPrintDialogOpen(true)}
+        aria-label="Print"
+        title="Print"
         className="odv-btn"
       >
         <span className="material-icons" aria-hidden="true">print</span>
@@ -273,6 +277,14 @@ const DocumentToolbar = ({
 
       {/* Theme toggle */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
+
+      {/* Modal for print selection */}
+      <PrintRangeDialog
+        isOpen={isPrintDialogOpen}
+        onClose={() => setPrintDialogOpen(false)}
+        onSubmit={handlePrintSubmit}
+        totalPages={totalPages}
+      />
     </div>
   );
 };
@@ -290,6 +302,7 @@ DocumentToolbar.propTypes = {
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({
@@ -298,7 +311,7 @@ DocumentToolbar.propTypes = {
     contrast: PropTypes.number.isRequired,
   }).isRequired,
   handleRotationChange: PropTypes.func.isRequired,
-  handleBrightnessChange: PropTypes.func.IsRequired, // corrected in runtime types by PropTypes; keep case consistent with others
+  handleBrightnessChange: PropTypes.func.isRequired,
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,

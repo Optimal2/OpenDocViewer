@@ -1,3 +1,4 @@
+// File: src/utils/zoomUtils.js
 /**
  * File: src/utils/zoomUtils.js
  *
@@ -19,8 +20,6 @@
  *   - These functions log at `info` level when actions occur and `warn` when inputs
  *     are missing. In production, the default log level is `warn`, so the info logs
  *     are typically suppressed unless you increase verbosity.
- *
- * Provenance / source reference for this revision: :contentReference[oaicite:0]{index=0}
  */
 
 import logger from '../LogController';
@@ -52,14 +51,16 @@ function clamp(value, min, max) {
 }
 
 /**
- * Get the current viewer container element from a React ref.
+ * Get the current viewer container element from a React-like ref.
  * Best-effort — returns null if the ref is not attached yet.
- * @param {React.RefObject<HTMLElement>} viewerContainerRef
- * @returns {HTMLElement|null}
+ * @param {RefLike} viewerContainerRef
+ * @returns {(HTMLElement|null)}
  */
 function getContainer(viewerContainerRef) {
   try {
-    return viewerContainerRef?.current ?? null;
+    return viewerContainerRef && /** @type {*} */ (viewerContainerRef).current
+      ? /** @type {HTMLElement} */ (viewerContainerRef.current)
+      : null;
   } catch {
     return null;
   }
@@ -68,7 +69,7 @@ function getContainer(viewerContainerRef) {
 /**
  * Safely read natural image dimensions. Returns null if invalid/zero.
  * @param {HTMLImageElement} image
- * @returns {{w: number, h: number} | null}
+ * @returns {{ w: number, h: number } | null}
  */
 function getNaturalSize(image) {
   if (!image) return null;
@@ -100,8 +101,9 @@ function getViewportSize(container, isComparing) {
 
 /**
  * Set a new zoom value using the provided setter, clamped to [MIN_ZOOM, MAX_ZOOM].
- * @param {(next: number | ((prev: number) => number)) => void} setZoom
+ * @param {SetNumberState} setZoom
  * @param {number} next
+ * @returns {void}
  */
 function applyZoom(setZoom, next) {
   const clamped = clamp(next, MIN_ZOOM, MAX_ZOOM);
@@ -112,10 +114,11 @@ function applyZoom(setZoom, next) {
  * Calculates and sets the zoom level so that the image fits within both the width
  * and height of the viewer container (i.e., “Fit to Screen”).
  *
- * @param {HTMLImageElement} image                        The image element to be zoomed.
- * @param {React.RefObject<HTMLElement>} viewerContainerRef  Reference to the viewer container element.
- * @param {(next: number | ((prev: number) => number)) => void} setZoom  React state setter for zoom.
+ * @param {HTMLImageElement} image                         The image element to be zoomed.
+ * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
+ * @param {SetNumberState} setZoom                         React-like state setter for zoom.
  * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
+ * @returns {void}
  */
 export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isComparing) {
   logger.info('Calculating fit-to-screen zoom', { isComparing });
@@ -128,7 +131,7 @@ export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isC
       imageExists: !!image,
       viewerContainerExists: !!container,
       naturalWidth: image?.naturalWidth ?? null,
-      naturalHeight: image?.naturalHeight ?? null,
+      naturalHeight: image?.naturalHeight ?? null
     });
     return;
   }
@@ -152,10 +155,11 @@ export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isC
  * Calculates and sets the zoom level to fit the image width within the viewer container
  * (i.e., “Fit to Width”). Height is allowed to overflow/scroll.
  *
- * @param {HTMLImageElement} image                        The image element to be zoomed.
- * @param {React.RefObject<HTMLElement>} viewerContainerRef  Reference to the viewer container element.
- * @param {(next: number | ((prev: number) => number)) => void} setZoom  React state setter for zoom.
+ * @param {HTMLImageElement} image                         The image element to be zoomed.
+ * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
+ * @param {SetNumberState} setZoom                         React-like state setter for zoom.
  * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
+ * @returns {void}
  */
 export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isComparing) {
   logger.info('Calculating fit-to-width zoom', { isComparing });
@@ -167,7 +171,7 @@ export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isCo
     logger.warn('Image or viewer container unavailable for fit-to-width', {
       imageExists: !!image,
       viewerContainerExists: !!container,
-      naturalWidth: image?.naturalWidth ?? null,
+      naturalWidth: image?.naturalWidth ?? null
     });
     return;
   }
@@ -187,12 +191,14 @@ export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isCo
 /**
  * Increases the zoom level by 10% (multiplicative), clamped to the safe range.
  *
- * @param {(next: number | ((prev: number) => number)) => void} setZoom  React state setter for zoom.
+ * @param {SetNumberState} setZoom  React-like state setter for zoom.
+ * @returns {void}
  */
 export function handleZoomIn(setZoom) {
   logger.info('Zooming in');
-  setZoom((prevZoom) => {
-    const next = clamp((Number(prevZoom) || 1) * ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
+  setZoom(function (prevZoom) {
+    const current = Number(prevZoom) || 1;
+    const next = clamp(current * ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
     return next;
   });
 }
@@ -200,12 +206,14 @@ export function handleZoomIn(setZoom) {
 /**
  * Decreases the zoom level by ~9.09% (inverse of +10%), clamped to the safe range.
  *
- * @param {(next: number | ((prev: number) => number)) => void} setZoom  React state setter for zoom.
+ * @param {SetNumberState} setZoom  React-like state setter for zoom.
+ * @returns {void}
  */
 export function handleZoomOut(setZoom) {
   logger.info('Zooming out');
-  setZoom((prevZoom) => {
-    const next = clamp((Number(prevZoom) || 1) / ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
+  setZoom(function (prevZoom) {
+    const current = Number(prevZoom) || 1;
+    const next = clamp(current / ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
     return next;
   });
 }

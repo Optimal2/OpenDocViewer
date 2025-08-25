@@ -1,3 +1,4 @@
+// File: src/components/DocumentViewer/DocumentViewerToolbar.jsx
 /**
  * File: src/components/DocumentViewer/DocumentViewerToolbar.jsx
  *
@@ -23,33 +24,46 @@ import PropTypes from 'prop-types';
 import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 
 /**
+ * Image adjustments passed to the toolbar.
+ * @typedef {Object} ImageAdjustments
+ * @property {number} rotation
+ * @property {number} brightness
+ * @property {number} contrast
+ */
+
+/**
+ * Props for DocumentViewerToolbar.
+ * (Function types use Closure-style `function(...)` notation or project-wide callbacks.)
+ * @typedef {Object} DocumentViewerToolbarProps
+ * @property {Array} pages
+ * @property {number} pageNumber
+ * @property {number} totalPages
+ * @property {SetPageNumber} setPageNumber
+ * @property {function(): void} zoomIn
+ * @property {function(): void} zoomOut
+ * @property {function(): void} fitToScreen
+ * @property {function(): void} fitToWidth
+ * @property {SetNumberState} setZoom
+ * @property {RefLike} viewerContainerRef
+ * @property {function(): void} handleCompare
+ * @property {boolean} isComparing
+ * @property {ImageAdjustments} imageProperties
+ * @property {function(number): void} handleRotationChange
+ * @property {function(*): void} handleBrightnessChange
+ * @property {function(*): void} handleContrastChange
+ * @property {function(): void} resetImageProperties
+ * @property {RefLike} documentRenderRef
+ * @property {boolean} isExpanded
+ * @property {SetBooleanState} setIsExpanded
+ * @property {boolean} prevPageDisabled
+ * @property {boolean} nextPageDisabled
+ * @property {boolean} firstPageDisabled
+ * @property {boolean} lastPageDisabled
+ */
+
+/**
  * Renders the toolbar for the document viewer by delegating to <DocumentToolbar />.
- *
- * @param {Object} props
- * @param {Array} props.pages                          List of all page entries (for totals, etc.)
- * @param {number} props.pageNumber                    Current 1-based page number
- * @param {number} props.totalPages                    Total number of pages
- * @param {(n: number) => void} props.setPageNumber    Setter for current page number
- * @param {() => void} props.zoomIn                    Increase zoom (clamped in callee)
- * @param {() => void} props.zoomOut                   Decrease zoom (clamped in callee)
- * @param {() => void} props.fitToScreen               Fit page to available screen
- * @param {() => void} props.fitToWidth                Fit page width to container width
- * @param {(z: number|((prev:number)=>number)) => void} props.setZoom  Raw zoom setter (rarely used directly)
- * @param {{ current: HTMLElement|null }} props.viewerContainerRef   Ref to the main viewer container
- * @param {() => void} props.handleCompare             Toggle compare mode
- * @param {boolean} props.isComparing                  Whether compare mode is active
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties  Current image adjustments
- * @param {(angle:number) => void} props.handleRotationChange        Adjust rotation (degrees)
- * @param {(e:any) => void} props.handleBrightnessChange             Adjust brightness (%)
- * @param {(e:any) => void} props.handleContrastChange               Adjust contrast (%)
- * @param {() => void} props.resetImageProperties       Reset all image adjustments
- * @param {{ current: any }} props.documentRenderRef    Imperative handle to the page renderer
- * @param {boolean} props.isExpanded                    Whether viewer is expanded (sidebar collapsed)
- * @param {(v:boolean|((p:boolean)=>boolean))=>void} props.setIsExpanded  Toggle expanded state
- * @param {boolean} props.prevPageDisabled              Disable "previous page" action
- * @param {boolean} props.nextPageDisabled              Disable "next page" action
- * @param {boolean} props.firstPageDisabled             Disable "first page" action
- * @param {boolean} props.lastPageDisabled              Disable "last page" action
+ * @param {DocumentViewerToolbarProps} props
  * @returns {JSX.Element}
  */
 const DocumentViewerToolbar = ({

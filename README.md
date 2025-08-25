@@ -17,6 +17,7 @@ OpenDocViewer is a fast, lightweight, MIT-licensed document viewer built with **
 * [JSDoc (API docs)](#jsdoc-api-docs)
 * [Linting & formatting](#linting--formatting)
 * [Project structure](#project-structure)
+* [Repo tree audit (PowerShell)](#repo-tree-audit-powershell)
 * [Design notes & gotchas](#design-notes--gotchas)
 * [License](#license)
 
@@ -25,18 +26,18 @@ OpenDocViewer is a fast, lightweight, MIT-licensed document viewer built with **
 ## Features
 
 * **PDF, TIFF, JPG/PNG** viewing with main-thread fallbacks when workers are unavailable.
-* **Virtualized thumbnail list** for large documents.
-* **Zoom, fit-to-screen/width**, keyboard navigation, and **comparison mode**.
+* **Thumbnail list** with keyboard and mouse navigation.
+* **Zoom, fit-to-screen/width**, and **comparison mode**.
 * **Portable build** (static assets in `dist/`) that runs on any static host.
 * **Runtime configuration** via `/odv.config.js` (no rebuild required).
-* **Structured logging** (frontend → backend) with daily rotation, rate limiting, and token-gated ingestion.
+* **Structured logging** (frontend → backend) with rotation and token-gated ingestion.
 
 ---
 
 ## Requirements
 
 * **Node.js 18+** and npm
-* Modern browser (Chromium / Firefox / Safari) for best performance
+* Modern browser (Chromium / Firefox / Safari)
 
 ---
 
@@ -47,7 +48,7 @@ git clone https://github.com/Optimal2/OpenDocViewer.git
 cd OpenDocViewer
 npm install
 npm run dev
-```
+````
 
 Open the URL printed by Vite (typically `http://localhost:5173`).
 
@@ -116,9 +117,9 @@ import OpenDocViewer from './src/OpenDocViewer.jsx';
 
 export default function Demo() {
   const files = [
-    { url: '/docs/spec.pdf' },           // PDF (auto-detected)
-    { url: '/scans/scan01.tif' },        // single-page TIFF
-    { url: '/images/page-01.png' },      // PNG
+    { url: '/docs/spec.pdf' },      // PDF (auto-detected)
+    { url: '/scans/scan01.tif' },   // single-page TIFF
+    { url: '/images/page-01.png' }, // PNG
   ];
 
   return (
@@ -142,7 +143,7 @@ export default function Demo() {
 
 ## Logging backend
 
-A tiny Express app receives logs (structured NDJSON) with daily rotation and retention.
+A tiny Express app receives logs (structured JSON/NDJSON) with rotation and retention.
 
 ```bash
 # Start the log server only
@@ -160,6 +161,7 @@ npm run dev:both
 * `TRUST_PROXY` — set to your proxy hops (e.g., `1`) if behind a reverse proxy
 * `LOG_RETENTION_DAYS` — rotate/delete logs after N days (default `14`)
 * `JSON_LIMIT` — max JSON body size (default `64kb`)
+* **Log files directory:** `./logs/` (created automatically)
 
 **Frontend hookup:** Set `logEndpoint` and `logToken` in `/odv.config.js`, a `<meta name="odv-log-endpoint" ...>`, or Vite env (`VITE_LOG_ENDPOINT`, `VITE_LOG_TOKEN`). The viewer posts logs to `/log` with the token header.
 
@@ -186,7 +188,7 @@ This runs JSDoc with the provided `jsdoc.json` and the **docdash** template, sca
   npm run lint:fix
   ```
 
-  The ESLint setup extends `@eslint/js` recommended rules, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`; it ignores `dist/` and treats UPPER\_SNAKE\_CASE globals as intentionally unused.
+  The ESLint setup extends `@eslint/js` recommended rules, `eslint-plugin-react-hooks`, and `eslint-plugin-react-refresh`; it ignores `dist/`.
 
 * **Prettier** formatting:
 
@@ -200,23 +202,80 @@ This runs JSDoc with the provided `jsdoc.json` and the **docdash** template, sca
 
 ```
 OpenDocViewer/
-├─ public/                 # static assets (placeholder.png, lost.png, favicon, ...)
+├─ public/                          # static assets (placeholder.png, lost.png, favicon, ...)
+│  ├─ jpg/ mix/ pdf/ png/ tif/      # sample/demo content (optional)
 ├─ src/
-│  ├─ components/          # UI (viewer, toolbar, thumbnails, renderers)
-│  ├─ integrations/        # bootstrap, parent bridge, URL/session token readers
-│  ├─ hooks/               # navigation, timers
-│  ├─ workers/             # image/PDF processing workers
-│  ├─ utils/               # zoom/print/navigation utils
-│  ├─ OpenDocViewer.jsx    # main viewer component
-│  ├─ index.jsx            # app entry
-│  └─ styles.css
-├─ server.js               # Express log server
-├─ vite.config.js          # Vite + React + SVGR; workers built as ES modules
-├─ jsdoc.json              # JSDoc config (docdash)
-├─ eslint.config.js        # ESLint config (React, hooks, Vite refresh)
-├─ package.json            # scripts, deps, devDeps
-└─ README.md               # this file
+│  ├─ components/
+│  │  ├─ DocumentLoader/            # fetch, detect types, schedule workers or main-thread renderers
+│  │  │  ├─ sources/ExplicitListSource.js
+│  │  │  ├─ BatchHandler.js
+│  │  │  ├─ DocumentLoader.js
+│  │  │  ├─ MainThreadRenderer.js
+│  │  │  ├─ Utils.js
+│  │  │  └─ WorkerHandler.js
+│  │  ├─ DocumentToolbar/           # toolbar UI (paging, zoom, theme)
+│  │  │  ├─ DocumentToolbar.jsx
+│  │  │  ├─ PageNavigationButtons.jsx
+│  │  │  ├─ ThemeToggleButton.jsx
+│  │  │  └─ ZoomButtons.jsx
+│  │  ├─ DocumentViewer/            # container + layout for viewer panes
+│  │  │  ├─ DocumentViewer.jsx
+│  │  │  ├─ DocumentViewerRender.jsx
+│  │  │  ├─ DocumentViewerThumbnails.jsx
+│  │  │  ├─ DocumentViewerToolbar.jsx
+│  │  │  └─ useDocumentViewer.js
+│  │  ├─ AppBootstrap.jsx
+│  │  ├─ CanvasRenderer.jsx
+│  │  ├─ DocumentConsumerWrapper.jsx
+│  │  ├─ DocumentRender.jsx
+│  │  ├─ DocumentThumbnailList.jsx
+│  │  ├─ ImageRenderer.jsx
+│  │  ├─ LoadingMessage.jsx
+│  │  ├─ LoadingSpinner.jsx
+│  │  └─ Resizer.jsx
+│  ├─ hooks/
+│  │  ├─ usePageNavigation.js
+│  │  └─ usePageTimer.js
+│  ├─ integrations/                  # bootstrap modes, session/URL, parent bridge
+│  │  ├─ Bootstrap.js
+│  │  ├─ events.js
+│  │  ├─ normalizeBundle.js
+│  │  ├─ parentBridge.js
+│  │  ├─ sessionToken.js
+│  │  └─ urlParams.js
+│  ├─ schemas/
+│  │  └─ portableBundle.js
+│  ├─ types/
+│  │  └─ jsdoc-types.js
+│  ├─ utils/
+│  │  ├─ navigationUtils.js
+│  │  ├─ printUtils.js
+│  │  └─ zoomUtils.js
+│  ├─ workers/
+│  │  └─ imageWorker.js
+│  ├─ ErrorBoundary.jsx
+│  ├─ index.jsx
+│  ├─ LogController.js
+│  ├─ OpenDocViewer.jsx
+│  ├─ OptiViewer.js
+│  ├─ PerformanceMonitor.jsx
+│  ├─ styles.css
+│  ├─ ThemeContext.jsx
+│  └─ ViewerContext.jsx
+├─ logs/                            # log server output (rotated)
+├─ server.js                        # Express log server
+├─ vite.config.js                   # Vite + React; workers built as ES modules
+├─ jsdoc.json                       # JSDoc config (docdash)
+├─ eslint.config.js                 # ESLint config (React, hooks, Vite refresh)
+├─ index.html
+├─ logger.js                        # legacy/simple client for log server (standalone)
+├─ LICENSE
+├─ package.json
+├─ package-lock.json
+└─ README.md
 ```
+
+> **Note:** The `dist/`, `docs/`, and `node_modules/` folders are generated/installed and typically excluded from source control. The `public/*` subfolders may contain demo assets.
 
 ---
 
@@ -226,7 +285,7 @@ OpenDocViewer/
   We intentionally import from `'file-type'` **not** `'file-type/browser'`. With our current version (`^21`), the `/browser` entry is **not** exported in the package’s exports map and will fail bundling in Vite. Using the root import is compatible in the browser build and our bundler includes only what’s needed. If you upgrade `file-type`, re-validate the exports and adjust imports accordingly.
 
 * **PDF worker versioning:**
-  We use `pdfjs-dist` and ensure the **API and worker versions match**. The Vite config builds web workers as **ES modules** (`worker.format = 'es'`) to avoid interop issues.
+  We use `pdfjs-dist` and ensure the **API and worker versions match**. The Vite config builds web workers as **ES modules** to avoid interop issues.
 
 * **TIFF rendering strategy:**
   Multi-page TIFFs are processed in the **main thread** to avoid duplicating buffers per page, which reduces peak memory usage on large inputs.
@@ -237,22 +296,11 @@ OpenDocViewer/
 * **Security / diagnostics toggles:**
 
   * `exposeStackTraces` (default **false**): hides stack traces from end users in production; turn it on only for trusted dev environments.
-  * `showPerfOverlay` (default **false**): performance HUD mount; useful for profiling, should remain off in prod unless needed.
-  * Both toggles live in **runtime config** (`/odv.config.js`) so you can change them post-deploy.
+  * `showPerfOverlay` (default **false**): performance HUD; useful for profiling, should remain off in prod unless needed.
+    Both toggles live in **runtime config** (`/odv.config.js`) so you can change them post-deploy.
 
 * **Caching guidance:**
   Keep `index.html` and `odv.config.js` **uncached** (`Cache-Control: no-store`), and long-cache hashed assets generated by Vite.
-
----
-
-## Available npm scripts (reference)
-
-* `dev`, `build`, `preview` — Vite lifecycle
-* `start:log-server` — start the log server (`server.js`)
-* `dev:both` — run dev server + log server concurrently
-* `lint`, `lint:fix`, `format` — quality & formatting
-* `doc` — generate JSDoc to `docs/`
-  (See `package.json` for the authoritative list.)
 
 ---
 

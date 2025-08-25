@@ -1,0 +1,90 @@
+/* File: src/components/DocumentToolbar/PrintRangeDialog.module.css */
+
+.backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.42);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 9999;
+}
+
+.dialog {
+  background: var(--odv-surface, #ffffff);
+  color: inherit;
+  border-radius: 12px;
+  padding: 16px;
+  width: min(520px, 92vw);
+  max-width: 92vw;
+  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+}
+
+.title {
+  margin: 0 0 6px 0;
+  font-size: 18px;
+}
+
+.desc {
+  margin: 0 0 12px 0;
+}
+
+.section {
+  margin-top: 4px;
+}
+
+.radioRow {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  margin-top: 8px;
+}
+
+.rangeRow {
+  display: flex;
+  gap: 12px;
+  align-items: center;
+  margin-top: 10px;
+  transition: opacity 120ms ease-in-out;
+  flex-wrap: wrap;
+}
+
+.disabled {
+  opacity: 0.5;
+}
+
+.label {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.input,
+.select {
+  width: 120px;
+  padding: 6px 8px;
+  border-radius: 8px;
+  border: 1px solid var(--odv-border, #ccc);
+  font-size: 14px;
+  background: var(--odv-surface, #fff);
+  color: inherit;
+}
+
+.hint {
+  margin-left: auto;
+  font-size: 12px;
+  opacity: 0.8;
+}
+
+.error {
+  color: #b00020;
+  margin-top: 8px;
+  font-size: 13px;
+}
+
+.footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+  margin-top: 16px;
+}

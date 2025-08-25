@@ -1,3 +1,4 @@
+// File: src/ViewerContext.jsx
 /**
  * src/ViewerContext.jsx
  *
@@ -21,9 +22,6 @@
  * GOTCHAS (project-wide reminders):
  *   - `file-type` import: elsewhere we import from `'file-type'` (root), *not* `'file-type/browser'`,
  *     because v21 does not export that subpath for bundlers. Changing this will break builds.
- *
- * Source reference (for traceability):
- *   :contentReference[oaicite:0]{index=0}
  */
 
 import React, { createContext, useState, useCallback, useMemo } from 'react';
@@ -38,38 +36,34 @@ import logger from './LogController';
  * @property {string}  fileExtension     'pdf' | 'tiff' | 'tif' | 'png' | 'jpg' | 'jpeg' | ...
  * @property {number}  fileIndex         Index of the source file within the document set
  * @property {number}  pageIndex         Page index within the source file (0-based)
- * @property {number}  [allPagesIndex]   Global index in the flattened page list (0-based)
+ * @property {(number|undefined)} allPagesIndex   Global index in the flattened page list (0-based)
  */
 
 /**
  * @typedef {Object} ViewerContextValue
- * @property {Array<PageEntry|undefined>} allPages
- * @property {(page: PageEntry, index: number) => void} insertPageAtIndex
- * @property {string|null} error
- * @property {(err: string|null) => void} setError
+ * @property {Array.<(PageEntry|undefined)>} allPages
+ * @property {function(PageEntry, number): void} insertPageAtIndex
+ * @property {(string|null)} error
+ * @property {function((string|null)): void} setError
  * @property {number} workerCount
- * @property {(n: number) => void} setWorkerCount
- * @property {string[]} messageQueue
- * @property {(message: string) => void} addMessage
+ * @property {function(number): void} setWorkerCount
+ * @property {Array.<string>} messageQueue
+ * @property {function(string): void} addMessage
  */
 
 /** Create the Viewer context (default value is narrowed at runtime by the Provider). */
-export const ViewerContext = createContext(/** @type {ViewerContextValue} */ (/** @type {unknown} */ ({})));
+export const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({}));
 
 /**
  * ViewerProvider
  *
  * @param {{ children: React.ReactNode }} props
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 export const ViewerProvider = ({ children }) => {
-  /** @type {[Array<PageEntry|undefined>, React.Dispatch<React.SetStateAction<Array<PageEntry|undefined>>>]} */
   const [allPages, setAllPages] = useState([]);
-  /** @type {[string|null, React.Dispatch<React.SetStateAction<string|null>>]} */
-  const [error, setError] = useState(null);
-  /** @type {[number, React.Dispatch<React.SetStateAction<number>>]} */
+  const [error, setError] = useState(/** @type {(string|null)} */(null));
   const [workerCount, setWorkerCount] = useState(0);
-  /** @type {[string[], React.Dispatch<React.SetStateAction<string[]>>]} */
   const [messageQueue, setMessageQueue] = useState([]);
 
   /**
@@ -78,6 +72,7 @@ export const ViewerProvider = ({ children }) => {
    *
    * @param {PageEntry} page
    * @param {number} index
+   * @returns {void}
    */
   const insertPageAtIndex = useCallback((page, index) => {
     setAllPages((prevPages) => {
@@ -94,6 +89,7 @@ export const ViewerProvider = ({ children }) => {
    * Keep messages short; consumers may cap list length if displaying in a HUD.
    *
    * @param {string} message
+   * @returns {void}
    */
   const addMessage = useCallback((message) => {
     setMessageQueue((prevQueue) => [...prevQueue, String(message)]);

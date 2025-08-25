@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/components/DocumentLoader/WorkerHandler.js
+/**
  * File: src/components/DocumentLoader/WorkerHandler.js
  *
  * OpenDocViewer — Worker orchestration & message handling
@@ -16,9 +17,7 @@
  *
  * IMPORTANT PROJECT GOTCHA (for future reviewers)
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With `file-type` v21 the '/browser' subpath is not exported for bundlers and will break Vite builds.
- *
- * Provenance / baseline for this module: :contentReference[oaicite:0]{index=0}
+ *     With `file-type` v21 the '/browser' subpath is not exported and will break Vite builds.
  */
 
 import logger from '../../LogController.js';
@@ -26,25 +25,35 @@ import { renderTIFFInMainThread } from './MainThreadRenderer.js';
 import { generateThumbnail } from './Utils.js';
 
 /**
+ * A single job/result entry communicated between worker and main thread.
  * @typedef {Object} WorkerJob
- * @property {ArrayBuffer|Blob|undefined} [blob]          // optional blob produced by worker
- * @property {string|undefined} [fullSizeUrl]             // optional pre-made object URL
- * @property {number} fileIndex                           // original document index
- * @property {number} pageIndex                           // page within the file (0-based)
- * @property {number} allPagesIndex                       // global index in the flat page list
- * @property {string} fileExtension                       // 'png' | 'jpg' | 'pdf' | 'tif' | 'tiff' | ...
- * @property {number} [pagesInvolved]                     // for multi-page jobs (tiff/pdf)
- * @property {number} [pageStartIndex]                    // for multi-page jobs (tiff/pdf)
- * @property {boolean} [handleInMainThread]               // worker requests main-thread handling
+ * @property {(ArrayBuffer|Blob|undefined)} [blob]          optional blob produced by worker
+ * @property {(string|undefined)} [fullSizeUrl]             optional pre-made object URL
+ * @property {number} fileIndex                             original document index
+ * @property {number} pageIndex                             page within the file (0-based)
+ * @property {number} allPagesIndex                         global index in the flat page list
+ * @property {string} fileExtension                         'png' | 'jpg' | 'pdf' | 'tif' | 'tiff' | ...
+ * @property {(number|undefined)} [pagesInvolved]           for multi-page jobs (tiff/pdf)
+ * @property {(number|undefined)} [pageStartIndex]          for multi-page jobs (tiff/pdf)
+ * @property {(boolean|undefined)} [handleInMainThread]     worker requests main-thread handling
  */
 
 /**
+ * Worker → main message envelope.
  * @typedef {Object} WorkerMessage
- * @property {string} [error]
- * @property {WorkerJob[]} [jobs]
- * @property {WorkerJob} [job]
- * @property {boolean} [handleInMainThread]
- * @property {string} [fileExtension]
+ * @property {(string|undefined)} [error]
+ * @property {(Array.<WorkerJob>|undefined)} [jobs]
+ * @property {(WorkerJob|undefined)} [job]
+ * @property {(boolean|undefined)} [handleInMainThread]
+ * @property {(string|undefined)} [fileExtension]
+ */
+
+/**
+ * Signature for inserting a page structure into the page list at an index.
+ * @callback InsertPageAtIndex
+ * @param {*} page
+ * @param {number} index
+ * @returns {void}
  */
 
 /* ------------------------------------------------------------------------------------------------
@@ -54,7 +63,7 @@ import { generateThumbnail } from './Utils.js';
 /** Create / get a global URL registry and install unload cleanup once. */
 function addToUrlRegistry(url) {
   try {
-    const w = /** @type {any} */ (globalThis);
+    const w = /** @type {*} */ (globalThis);
     if (!w.__odv_url_registry) w.__odv_url_registry = new Set();
     w.__odv_url_registry.add(url);
 
@@ -114,19 +123,20 @@ export const getNumberOfWorkers = (maxWorkers) => {
  * Handle a message payload from an image worker and insert resulting page(s).
  *
  * CONTRACT
- *   - On success: { jobs: WorkerJob[] } where each job contains either:
+ *   - On success: { jobs: Array.<WorkerJob> } where each job contains either:
  *       • `blob`  (we will create an object URL), or
  *       • `fullSizeUrl` (pre-made, e.g., from main-thread processing)
- *   - On error: { error: string, jobs?: WorkerJob[] } ; for TIFF jobs we invoke
+ *   - On error: { error: string, jobs?: Array.<WorkerJob> } ; for TIFF jobs we invoke
  *                main-thread fallback rendering to avoid losing output entirely.
- *   - Fallback request: { handleInMainThread: true, job?: WorkerJob, jobs?: WorkerJob[] }
+ *   - Fallback request: { handleInMainThread: true, job?: WorkerJob, jobs?: Array.<WorkerJob> }
  *
- * @param {MessageEvent<WorkerMessage>} event
- * @param {(page: any, index: number) => void} insertPageAtIndex
+ * @param {MessageEvent} event
+ *        The worker message event. Its `data` is interpreted as a WorkerMessage.
+ * @param {InsertPageAtIndex} insertPageAtIndex
  *        Callback from ViewerContext to place a page at a given global index.
  * @param {boolean} sameBlob
  *        If true, reuse the full-size blob URL for thumbnail (no extra canvas work).
- * @param {{ current: boolean }|{ current: any }} [isMounted]
+ * @param {({ current: boolean }|{ current: * })} [isMounted]
  *        Optional ref flag — if present and false, handler becomes a no-op.
  * @returns {void}
  */

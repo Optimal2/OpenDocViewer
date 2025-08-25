@@ -8,15 +8,15 @@
  *   that the loader can process deterministically. The resulting list preserves
  *   document order and file order as provided by the host.
  *
- * OUTPUT SHAPE
- *   {
- *     total: number,
- *     items: Array<{
- *       url: string,
- *       ext?: string,     // optional extension hint; loader will still sniff bytes
- *       fileIndex: number // 0-based, stable order index across the whole bundle
- *     }>
- *   }
+ * OUTPUT SHAPE (Closure-style)
+ *   @typedef {Object} ExplicitSourceItem
+ *   @property {string} url
+ *   @property {(string|undefined)} ext
+ *   @property {number} fileIndex
+ *
+ *   @typedef {Object} ExplicitSourceList
+ *   @property {number} total
+ *   @property {Array.<ExplicitSourceItem>} items
  *
  * DESIGN NOTES
  *   - We deliberately do *not* try to deduplicate URLs; order is authoritative.
@@ -29,22 +29,32 @@
  *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT
  *     'file-type/browser'. With `file-type` v21 that subpath is not exported for
  *     bundlers and will break Vite builds. Keep this in mind when editing loaders.
- *
- * Provenance / baseline reference for earlier version of this module:
- * :contentReference[oaicite:0]{index=0}
  */
 
 /**
- * @typedef {{ url: string, ext?: string }} PortableFile
- * @typedef {{ files?: PortableFile[] }} PortableDoc
- * @typedef {{ documents?: PortableDoc[] }} PortableDocumentBundle
+ * A single file reference in a portable document.
+ * @typedef {Object} PortableFile
+ * @property {string} url
+ * @property {(string|undefined)} ext
+ */
+
+/**
+ * Portable document containing a list of files.
+ * @typedef {Object} PortableDoc
+ * @property {(Array.<PortableFile>|undefined)} files
+ */
+
+/**
+ * Bundle containing multiple portable documents.
+ * @typedef {Object} PortableDocumentBundle
+ * @property {(Array.<PortableDoc>|undefined)} documents
  */
 
 /**
  * Infer a lowercase extension from a URL if present.
  * Query strings and hashes are ignored.
  * @param {string} url
- * @returns {string|undefined}
+ * @returns {(string|undefined)}
  */
 function inferExtFromUrl(url) {
   try {
@@ -61,14 +71,14 @@ function inferExtFromUrl(url) {
  * We preserve the document order and file order given, and assign a stable,
  * continuous `fileIndex` across the entire bundle.
  *
- * @param {PortableDocumentBundle|null|undefined} bundle
- * @returns {{ total: number, items: Array<{ url: string, ext?: string, fileIndex: number }> }}
+ * @param {(PortableDocumentBundle|null|undefined)} bundle
+ * @returns {ExplicitSourceList}
  */
 export function makeExplicitSource(bundle) {
   const docs = Array.isArray(bundle?.documents) ? bundle.documents : [];
   if (docs.length === 0) return { total: 0, items: [] };
 
-  /** @type {Array<{ url: string, ext?: string, fileIndex: number }>} */
+  /** @type {Array.<ExplicitSourceItem>} */
   const items = [];
   let idx = 0;
 

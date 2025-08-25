@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/integrations/normalizeBundle.js
+/**
  * File: src/integrations/normalizeBundle.js
  *
  * OpenDocViewer — Normalize many incoming shapes to a neutral PortableDocumentBundle v1
@@ -33,6 +34,16 @@
  */
 
 /**
+ * Session info stored on a bundle.
+ * @typedef {Object} PortableSession
+ * @property {string} id
+ * @property {(string|undefined)} userId
+ */
+
+/**
+ * A single file reference inside a document.
+ * When a string is provided in input, it is normalized to `{ url: string }`.
+ *
  * @typedef {Object} PortableDocumentFile
  * @property {string} [id]            Caller-defined identifier (optional).
  * @property {string} [ext]           File extension (lowercase, no dot), best-effort inferred.
@@ -41,18 +52,22 @@
  */
 
 /**
+ * A single document entry containing one or more files.
+ *
  * @typedef {Object} PortableDocumentEntry
  * @property {string} documentId
  * @property {string} [created]
  * @property {string} [modified]
- * @property {any}    [meta]          Caller-defined metadata bag (kept as-is).
- * @property {(string|PortableDocumentFile)[]} files
+ * @property {*}      [meta]          Caller-defined metadata bag (kept as-is).
+ * @property {Array.<(string|PortableDocumentFile)>} files
  */
 
 /**
+ * A portable bundle groups a session and an array of document entries.
+ *
  * @typedef {Object} PortableDocumentBundle
- * @property {{ id: string, userId?: string }} session
- * @property {PortableDocumentEntry[]} documents
+ * @property {PortableSession} session
+ * @property {Array.<PortableDocumentEntry>} documents
  */
 
 /* ========================================================================== *
@@ -62,25 +77,25 @@
 /**
  * Normalize many incoming shapes to a neutral PortableDocumentBundle v1.
  *
- * @param {unknown} input
- * @returns {PortableDocumentBundle|null} A sanitized bundle or null if input is null/undefined.
+ * @param {*} input
+ * @returns {(PortableDocumentBundle|null)} A sanitized bundle or null if input is null/undefined.
  */
 export function normalizeToPortableBundle(input) {
   if (!input) return null;
 
   // 1) Already in neutral form
-  if (isObject(input) && hasNeutralShape(/** @type {any} */ (input))) {
-    return sanitizeBundle(/** @type {any} */ (input));
+  if (isObject(input) && hasNeutralShape(/** @type {*} */ (input))) {
+    return sanitizeBundle(/** @type {*} */ (input));
   }
 
   // 2) Legacy-like parent-page model → neutral
-  if (isObject(input) && looksLikeLegacyParentModel(/** @type {any} */ (input))) {
-    return fromLegacyParentModel(/** @type {any} */ (input));
+  if (isObject(input) && looksLikeLegacyParentModel(/** @type {*} */ (input))) {
+    return fromLegacyParentModel(/** @type {*} */ (input));
   }
 
   // 3) Array of URLs or ticket objects/strings
   if (Array.isArray(input)) {
-    return fromUrlArray(/** @type {any[]} */ (input));
+    return fromUrlArray(/** @type {Array.<*>} */ (input));
   }
 
   // 4) Single URL string?
@@ -91,8 +106,8 @@ export function normalizeToPortableBundle(input) {
   // 5) Unknown shape; coerce minimally to a sanitized bundle with empty docs.
   return sanitizeBundle({
     session: {
-      id: String(/** @type {any} */ (input)?.sessionId || /** @type {any} */ (input)?.SessionId || nowId()),
-      userId: /** @type {any} */ (input)?.userId || /** @type {any} */ (input)?.UserId || '',
+      id: String(/** @type {*} */ (input)?.sessionId || /** @type {*} */ (input)?.SessionId || nowId()),
+      userId: /** @type {*} */ (input)?.userId || /** @type {*} */ (input)?.UserId || '',
     },
     documents: [],
   });
@@ -104,8 +119,8 @@ export function normalizeToPortableBundle(input) {
 
 /**
  * Is a plain object (and not an array / null).
- * @param {unknown} v
- * @returns {v is Record<string, any>}
+ * @param {*} v
+ * @returns {boolean}
  */
 function isObject(v) {
   return !!v && typeof v === 'object' && !Array.isArray(v);
@@ -121,7 +136,8 @@ function nowId() {
 
 /**
  * Determine if an input object appears to already have the neutral shape.
- * @param {any} obj
+ * @param {*} obj
+ * @returns {boolean}
  */
 function hasNeutralShape(obj) {
   return isObject(obj?.session) && Array.isArray(obj?.documents);
@@ -129,7 +145,8 @@ function hasNeutralShape(obj) {
 
 /**
  * Determine if an input object resembles the legacy parent-page model.
- * @param {any} obj
+ * @param {*} obj
+ * @returns {boolean}
  */
 function looksLikeLegacyParentModel(obj) {
   return (
@@ -145,7 +162,7 @@ function looksLikeLegacyParentModel(obj) {
  * If the string begins with "/", treat it as app-relative (strip the slash)
  * so "/images/a.png" becomes "<base>/images/a.png" instead of site-root.
  *
- * @param {unknown} u
+ * @param {*} u
  * @returns {string}
  */
 function absUrl(u) {
@@ -165,7 +182,7 @@ function absUrl(u) {
 /**
  * Best-effort extension extraction from a url/path string.
  * @param {string} s
- * @returns {string|undefined}
+ * @returns {(string|undefined)}
  */
 function extFromString(s) {
   try {
@@ -183,7 +200,7 @@ function extFromString(s) {
  * Convert a "ticket" (string or object) into a normalized PortableDocumentFile (minimal).
  * Strings may be raw URLs or "id|ext|path" triples; objects may contain { id, ext, path, url }.
  *
- * @param {unknown} objOrStr
+ * @param {*} objOrStr
  * @returns {PortableDocumentFile}
  */
 function toTicket(objOrStr) {
@@ -198,7 +215,7 @@ function toTicket(objOrStr) {
   }
 
   if (isObject(objOrStr)) {
-    const { id, ext, path, url } = /** @type {Record<string, any>} */ (objOrStr);
+    const { id, ext, path, url } = /** @type {Object.<string, *>} */ (objOrStr);
     const resolved = url ? absUrl(url) : (path ? absUrl(path) : undefined);
     return {
       id: id != null ? String(id) : undefined,
@@ -206,7 +223,7 @@ function toTicket(objOrStr) {
       path: path != null ? String(path) : undefined,
       url: resolved,
       // Preserve unknown fields (non-destructive shaping)
-      ...spreadUnknown(objOrStr, ['id', 'ext', 'path', 'url']),
+      ...spreadUnknown(/** @type {Object.<string, *>} */ (objOrStr), ['id', 'ext', 'path', 'url']),
     };
   }
 
@@ -215,11 +232,12 @@ function toTicket(objOrStr) {
 
 /**
  * Return a shallow copy of obj without the listed keys (for preserving unknown fields).
- * @param {Record<string, any>} obj
- * @param {string[]} exclude
+ * @param {Object.<string, *>} obj
+ * @param {Array.<string>} exclude
+ * @returns {Object.<string, *>}
  */
 function spreadUnknown(obj, exclude) {
-  /** @type {Record<string, any>} */
+  /** @type {Object.<string, *>} */
   const out = {};
   for (const k in obj) {
     if (!exclude.includes(k)) out[k] = obj[k];
@@ -229,7 +247,7 @@ function spreadUnknown(obj, exclude) {
 
 /**
  * Build a neutral bundle from an array of tickets/URLs.
- * @param {unknown[]} arr
+ * @param {Array.<*>} arr
  * @returns {PortableDocumentBundle}
  */
 function fromUrlArray(arr) {
@@ -256,14 +274,14 @@ function fromUrlArray(arr) {
  *     }
  *   }
  *
- * @param {Record<string, any>} model
+ * @param {Object.<string, *>} model
  * @returns {PortableDocumentBundle}
  */
 function fromLegacyParentModel(model) {
   const sessId = String(model.SessionId ?? model.sessionId ?? nowId());
   const userId = model.UserId ?? model.userId ?? '';
 
-  /** @type {PortableDocumentEntry[]} */
+  /** @type {Array.<PortableDocumentEntry>} */
   const documents = [];
 
   // Shape: PortableDocuments is an object keyed by documentId
@@ -271,10 +289,10 @@ function fromLegacyParentModel(model) {
     if (docKey === '$id') continue;
 
     const md = (docVal.MetaDataCollection && docVal.MetaDataCollection[docKey]) || {};
-    const created = pickMeta(md, '500');
-    const modified = pickMeta(md, '502');
+    const created = pickMeta(/** @type {Object.<string, *>} */ (md), '500');
+    const modified = pickMeta(/** @type {Object.<string, *>} */ (md), '502');
 
-    /** @type {PortableDocumentFile[]} */
+    /** @type {Array.<PortableDocumentFile>} */
     const files = [];
 
     for (const [fileKey, f] of Object.entries(docVal.FileCollection || {})) {
@@ -314,9 +332,9 @@ function fromLegacyParentModel(model) {
 
 /**
  * Pick a metadata value by key (best-effort).
- * @param {Record<string, any>} md
+ * @param {Object.<string, *>} md
  * @param {string} key
- * @returns {string|undefined}
+ * @returns {(string|undefined)}
  */
 function pickMeta(md, key) {
   if (!md || !md[key]) return undefined;
@@ -332,7 +350,7 @@ function pickMeta(md, key) {
  *
  * Unknown keys are preserved at both bundle and document/file levels.
  *
- * @param {any} b
+ * @param {*} b
  * @returns {PortableDocumentBundle}
  */
 function sanitizeBundle(b) {

@@ -1,3 +1,4 @@
+// File: src/hooks/usePageTimer.js
 /**
  * File: src/hooks/usePageTimer.js
  *
@@ -14,11 +15,11 @@
  *   usePageTimer(initialDelay, handlePageChange) -> { startPageTimer, stopPageTimer }
  *
  *   - initialDelay: number (ms) — wait time before repeating kicks in.
- *   - handlePageChange: (direction: 'prev'|'next') => void
+ *   - handlePageChange: function(PageDirection): void
  *       Called once immediately (leading edge) and then repeatedly.
  *
  *   Returned functions:
- *     - startPageTimer(direction: 'prev'|'next'): void
+ *     - startPageTimer(direction: PageDirection): void
  *     - stopPageTimer(): void
  *
  * SAFETY & LOGGING
@@ -26,35 +27,38 @@
  *   - We log only coarse events (start/stop), never per-interval (avoid spam).
  *
  * IMPORTANT PROJECT REMINDER
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With file-type v21 the '/browser' subpath is not
- *     exported for bundlers and will break the Vite build.
- *
- * Source input (baseline) for this file: :contentReference[oaicite:0]{index=0}
+ *   Elsewhere in the app we import from the **root** 'file-type' package, NOT
+ *   'file-type/browser'. With file-type v21 the '/browser' subpath is not
+ *   exported for bundlers and will break Vite builds.
  */
 
 import { useRef, useEffect, useCallback } from 'react';
 import logger from '../LogController';
 
-/** @typedef {'prev'|'next'} PageDirection */
-
 /** Default repeat cadence (ms). Keep modest to balance CPU and responsiveness. */
 const DEFAULT_REPEAT_INTERVAL_MS = 50;
+
+/**
+ * API returned by usePageTimer.
+ * @typedef {Object} PageTimerAPI
+ * @property {function(PageDirection): void} startPageTimer
+ * @property {function(): void} stopPageTimer
+ */
 
 /**
  * Custom hook to handle page change with a timer for continuous navigation.
  *
  * @param {number} initialDelay
  *        Initial delay before continuous navigation starts, in milliseconds.
- * @param {(direction: PageDirection) => void} handlePageChange
+ * @param {function(PageDirection): void} handlePageChange
  *        Function that performs a single page step in the given direction.
- * @returns {{ startPageTimer: (direction: PageDirection) => void, stopPageTimer: () => void }}
+ * @returns {PageTimerAPI}
  *        Functions to start and stop the page timer.
  */
 const usePageTimer = (initialDelay, handlePageChange) => {
-  /** @type {React.MutableRefObject<number | null>} */
+  /** @type {React.MutableRefObject.<(number|null)>} */
   const delayTimerRef = useRef(null);
-  /** @type {React.MutableRefObject<number | null>} */
+  /** @type {React.MutableRefObject.<(number|null)>} */
   const intervalRef = useRef(null);
 
   /**
@@ -62,11 +66,12 @@ const usePageTimer = (initialDelay, handlePageChange) => {
    * Leading-edge behavior: we invoke the handler once immediately.
    *
    * @param {PageDirection} direction
+   * @returns {void}
    */
   const startPageTimer = useCallback(
     (direction) => {
-      // If a timer is already running, stop it before starting a new one.
       try {
+        // If a timer is already running, stop it before starting a new one.
         if (delayTimerRef.current != null || intervalRef.current != null) {
           logger.info('Restarting page timer', { direction });
           clearTimeout(delayTimerRef.current);
@@ -91,7 +96,6 @@ const usePageTimer = (initialDelay, handlePageChange) => {
             try {
               handlePageChange(direction);
             } catch (error) {
-              // Log once and keep going; consumers can stop the timer externally if desired.
               logger.error('Error during repeated page step', { error: String(error?.message || error), direction });
             }
           }, DEFAULT_REPEAT_INTERVAL_MS);
@@ -105,6 +109,7 @@ const usePageTimer = (initialDelay, handlePageChange) => {
 
   /**
    * Stop any active delay or interval timer (idempotent).
+   * @returns {void}
    */
   const stopPageTimer = useCallback(() => {
     if (delayTimerRef.current != null || intervalRef.current != null) {
@@ -117,6 +122,7 @@ const usePageTimer = (initialDelay, handlePageChange) => {
       logger.error('Error stopping page timer', { error: String(error?.message || error) });
     } finally {
       delayTimerRef.current = null;
+      // BUGFIX: we must null the *ref's current*, not the ref object.
       intervalRef.current = null;
     }
   }, []);

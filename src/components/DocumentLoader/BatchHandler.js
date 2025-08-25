@@ -1,3 +1,4 @@
+// File: src/components/DocumentLoader/BatchHandler.js
 /**
  * File: src/components/DocumentLoader/BatchHandler.js
  *
@@ -31,17 +32,39 @@
 import logger from '../../LogController.js';
 
 /**
+ * A single decoding/rendering unit handed to a worker.
  * @typedef {Object} WorkerJob
- * @property {ArrayBuffer} [arrayBuffer]   Optional bytes to transfer
- * @property {string} fileExtension        Detected extension (e.g., 'png'|'jpg'|'tif'|'pdf')
- * @property {number} index                File index in the input list
- * @property {number} pageStartIndex       First page index inside the file (0-based)
- * @property {number} pagesInvolved        Number of pages represented by this job
- * @property {number} allPagesStartingIndex Global page offset (into the flat viewer list)
+ * @property {(ArrayBuffer|undefined)} arrayBuffer   Optional bytes to transfer
+ * @property {string} fileExtension                  Detected extension (e.g., 'png'|'jpg'|'tif'|'pdf')
+ * @property {number} index                          File index in the input list
+ * @property {number} pageStartIndex                 First page index inside the file (0-based)
+ * @property {number} pagesInvolved                  Number of pages represented by this job
+ * @property {number} allPagesStartingIndex          Global page offset (into the flat viewer list)
  */
 
 /**
- * @typedef {{ jobs: WorkerJob[], fileExtension: string }} Batch
+ * A batch groups one or more jobs of the same file type.
+ * @typedef {Object} Batch
+ * @property {Array.<WorkerJob>} jobs
+ * @property {string} fileExtension
+ */
+
+/**
+ * Signature for the function that inserts a page record at a specific index.
+ * @callback InsertPageAtIndex
+ * @param {*} page
+ * @param {number} index
+ * @returns {void}
+ */
+
+/**
+ * Handle a worker's message and insert results.
+ * @callback WorkerMessageHandler
+ * @param {MessageEvent} event
+ * @param {InsertPageAtIndex} insertPageAtIndex
+ * @param {boolean} sameBlob
+ * @param {{ current: boolean }} [isMounted]
+ * @returns {void}
  */
 
 /** Small delay so the event loop can breathe between pumps (ms). */
@@ -53,10 +76,10 @@ const PUMP_DELAY_MS = 0;
  *   - Installs onmessage/onerror handlers before dispatch.
  *   - When any worker completes, schedules the next pump tick.
  *
- * @param {Worker[]} imageWorkers
- * @param {{ current: Batch[] }} batchQueue
- * @param {(event: MessageEvent, insertPageAtIndex: Function, sameBlob: boolean, isMounted?: { current: boolean }) => void} handleWorkerMessage
- * @param {(page: any, index: number) => void} insertPageAtIndex
+ * @param {Array.<Worker>} imageWorkers
+ * @param {{ current: Array.<Batch> }} batchQueue
+ * @param {WorkerMessageHandler} handleWorkerMessage
+ * @param {InsertPageAtIndex} insertPageAtIndex
  * @param {boolean} sameBlob
  * @param {{ current: boolean }} [isMounted]
  */
@@ -75,13 +98,15 @@ function pump(
 
   imageWorkers.forEach((worker) => {
     if (!batchQueue.current.length) return;
+    // @ts-ignore - annotate a private busy flag onto the Worker instance
     if (worker.__busy) return;
 
-    /** @type {Batch|undefined} */
+    /** @type {(Batch|undefined)} */
     const batch = batchQueue.current.shift();
     if (!batch) return;
 
     // Mark busy before sending work; ensures single in-flight batch per worker.
+    // @ts-ignore
     worker.__busy = true;
 
     // Install handlers before postMessage to avoid races.
@@ -89,6 +114,7 @@ function pump(
       try {
         handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
       } finally {
+        // @ts-ignore
         worker.__busy = false;
         // Schedule the next short pass; yield to the event loop first.
         setTimeout(
@@ -112,6 +138,7 @@ function pump(
         handleWorkerMessage({ data: { jobs } }, insertPageAtIndex, sameBlob, isMounted);
         logger.error('Worker error; inserted placeholders for batch', { error: String(err?.message || err) });
       } finally {
+        // @ts-ignore
         worker.__busy = false;
         setTimeout(
           () => pump(imageWorkers, batchQueue, handleWorkerMessage, insertPageAtIndex, sameBlob, isMounted),
@@ -121,7 +148,7 @@ function pump(
     };
 
     // Collect transferable ArrayBuffers to avoid structured clone overhead.
-    /** @type {Transferable[]} */
+    /** @type {Array.<Transferable>} */
     const transfer = [];
     if (batch?.jobs) {
       for (const j of batch.jobs) {
@@ -154,12 +181,12 @@ function pump(
  *   formats and keeps memory usage predictable. If you later introduce chunking,
  *   make sure to **slice** or **re-derive** buffer segments rather than copying.
  *
- * @param {{ current: WorkerJob[] }} jobQueue
- * @param {{ current: Batch[] }} batchQueue
+ * @param {{ current: Array.<WorkerJob> }} jobQueue
+ * @param {{ current: Array.<Batch> }} batchQueue
  * @param {number} _batchSize                          // intentionally unused (see note above)
- * @param {Worker[]} imageWorkers
- * @param {(event: MessageEvent, insertPageAtIndex: Function, sameBlob: boolean, isMounted?: { current: boolean }) => void} handleWorkerMessage
- * @param {(page: any, index: number) => void} insertPageAtIndex
+ * @param {Array.<Worker>} imageWorkers
+ * @param {WorkerMessageHandler} handleWorkerMessage
+ * @param {InsertPageAtIndex} insertPageAtIndex
  * @param {boolean} sameBlob
  * @param {{ current: boolean }} [isMounted]
  * @returns {void}

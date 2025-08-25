@@ -1,3 +1,4 @@
+// File: src/components/CanvasRenderer.jsx
 /**
  * File: src/components/CanvasRenderer.jsx
  *
@@ -21,8 +22,6 @@
  *   - Project-wide reminder: when type-sniffing elsewhere we import from the
  *     **root** 'file-type' package, NOT 'file-type/browser' (v21 does not export
  *     that subpath for bundlers and builds will fail if changed).
- *
- * Provenance / source reference for prior baseline: :contentReference[oaicite:0]{index=0}
  */
 
 import React, { useMemo } from 'react';
@@ -36,8 +35,7 @@ import PropTypes from 'prop-types';
  * @param {number} props.naturalHeight   The natural (unscaled) raster height.
  * @param {number} props.zoom            Zoom factor where 1 = 100%.
  * @param {number} props.pageNumber      1-based page number for data attributes.
- * @param {React.Ref<HTMLCanvasElement>} ref Forwarded ref to the <canvas> element.
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const CanvasRenderer = React.forwardRef(function CanvasRenderer(
   { naturalWidth, naturalHeight, zoom, pageNumber },

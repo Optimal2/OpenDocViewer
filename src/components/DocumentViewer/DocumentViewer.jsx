@@ -1,3 +1,4 @@
+// File: src/components/DocumentViewer/DocumentViewer.jsx
 /**
  * File: src/components/DocumentViewer/DocumentViewer.jsx
  *
@@ -13,20 +14,10 @@
  *
  * ACCESSIBILITY
  *   - The scrollable viewer container is focusable (tabIndex=0) so that
- *     keyboard navigation (PageUp/PageDown/Home/End) works immediately after click.
+ *     keyboard navigation (PageUp/Down, Home/End) works when the user focuses it.
  *
- * PERFORMANCE
- *   - Minimizes logs in the hot path (debug-level only).
- *   - Defers image/canvas work to child components.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With `file-type` v21 that subpath is not exported and will
- *     break Vite builds. See README “Design notes & gotchas” for details.
- *
- * Provenance (baseline prior to this revision): :contentReference[oaicite:0]{index=0}
+ * @returns {React.ReactElement}
  */
-
 import React, { useContext } from 'react';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
@@ -36,12 +27,6 @@ import logger from '../../LogController.js';
 import { ViewerContext } from '../../ViewerContext.jsx';
 import { useDocumentViewer } from './useDocumentViewer.js';
 
-/**
- * Top-level viewer container.
- * Pulls data from ViewerContext and composes the toolbar, thumbnails, and renderer.
- *
- * @returns {JSX.Element}
- */
 const DocumentViewer = () => {
   const { allPages } = useContext(ViewerContext);
 
@@ -64,7 +49,7 @@ const DocumentViewer = () => {
     zoomOut,
     fitToScreen,
     fitToWidth,
-    handleContainerClick,
+    handleContainerClick, // accepts the click event (optional)
     handleCompare,
     handleRotationChange,
     handleBrightnessChange,
@@ -72,7 +57,7 @@ const DocumentViewer = () => {
     resetImageProperties,
     handleMouseDown,
     setIsExpanded,
-  } = useDocumentViewer(); // no args; hook owns its own state and pulls totals from context
+  } = useDocumentViewer();
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
   const prevPageDisabled = pageNumber <= 1;
@@ -83,7 +68,10 @@ const DocumentViewer = () => {
   logger.debug('Rendering DocumentViewer', { totalPages });
 
   return (
-    <div className="document-viewer-container" onClick={handleContainerClick}>
+    <div
+      className="document-viewer-container"
+      onClick={(e) => handleContainerClick(e)}
+    >
       {/* Toolbar with navigation and image adjustment controls */}
       <DocumentViewerToolbar
         pages={allPages}

@@ -1,3 +1,4 @@
+// File: src/hooks/usePageNavigation.js
 /**
  * File: src/hooks/usePageNavigation.js
  *
@@ -28,22 +29,12 @@
  *     stopNextPageTimer,
  *   } = usePageNavigation(setPageNumber, totalPages);
  *
- *   // Example (press & hold "Next" button):
- *   <button
- *     onMouseDown={() => startNextPageTimer('next')}
- *     onMouseUp={stopNextPageTimer}
- *     onMouseLeave={stopNextPageTimer}
- *     onClick={handleNextPageWrapper}
- *   >
- *     Next
- *   </button>
- *
  * IMPORTANT PROJECT REMINDER
  *   Elsewhere in the app we import from the **root** 'file-type' package, NOT
  *   'file-type/browser'. With file-type v21 the '/browser' subpath is not
  *   exported for bundlers and will break Vite builds.
  *
- * Provenance / source reference for previous baseline: :contentReference[oaicite:0]{index=0}
+ * Source: :contentReference[oaicite:0]{index=0}
  */
 
 import { useCallback } from 'react';
@@ -57,7 +48,16 @@ import {
 } from '../utils/navigationUtils';
 
 /**
- * @typedef {(update: number | ((prev: number) => number)) => void} SetPageNumber
+ * API returned by usePageNavigation.
+ * @typedef {Object} PageNavigationAPI
+ * @property {function(): void} handlePrevPageWrapper
+ * @property {function(): void} handleNextPageWrapper
+ * @property {function(): void} handleFirstPageWrapper
+ * @property {function(): void} handleLastPageWrapper
+ * @property {function(PageDirection): void} startPrevPageTimer
+ * @property {function(): void} stopPrevPageTimer
+ * @property {function(PageDirection): void} startNextPageTimer
+ * @property {function(): void} stopNextPageTimer
  */
 
 /**
@@ -65,16 +65,7 @@ import {
  *
  * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
  * @param {number} totalPages            Total number of pages (must be >= 1 for next/last).
- * @returns {{
- *   handlePrevPageWrapper: () => void,
- *   handleNextPageWrapper: () => void,
- *   handleFirstPageWrapper: () => void,
- *   handleLastPageWrapper: () => void,
- *   startPrevPageTimer: (direction: 'prev') => void,
- *   stopPrevPageTimer: () => void,
- *   startNextPageTimer: (direction: 'next') => void,
- *   stopNextPageTimer: () => void,
- * }}
+ * @returns {PageNavigationAPI}
  */
 const usePageNavigation = (setPageNumber, totalPages) => {
   // Initial delay before the timer begins repeating (ms).
@@ -83,6 +74,7 @@ const usePageNavigation = (setPageNumber, totalPages) => {
 
   /**
    * Wrapper: go to previous page (logs once per user action).
+   * @returns {void}
    */
   const handlePrevPageWrapper = useCallback(() => {
     logger.info('Handling previous page navigation');
@@ -95,6 +87,7 @@ const usePageNavigation = (setPageNumber, totalPages) => {
 
   /**
    * Wrapper: go to next page (logs once per user action).
+   * @returns {void}
    */
   const handleNextPageWrapper = useCallback(() => {
     logger.info('Handling next page navigation');
@@ -107,6 +100,7 @@ const usePageNavigation = (setPageNumber, totalPages) => {
 
   /**
    * Wrapper: go to first page.
+   * @returns {void}
    */
   const handleFirstPageWrapper = useCallback(() => {
     logger.info('Handling first page navigation');
@@ -119,6 +113,7 @@ const usePageNavigation = (setPageNumber, totalPages) => {
 
   /**
    * Wrapper: go to last page.
+   * @returns {void}
    */
   const handleLastPageWrapper = useCallback(() => {
     logger.info('Handling last page navigation');

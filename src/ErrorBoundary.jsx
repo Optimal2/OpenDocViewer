@@ -1,3 +1,4 @@
+// File: src/ErrorBoundary.jsx
 /**
  * File: src/ErrorBoundary.jsx
  *
@@ -36,7 +37,7 @@ const IS_DEV =
 
 /**
  * Coerce unknown values to boolean using common string/number forms.
- * @param {unknown} v
+ * @param {*} v
  * @param {boolean} fallback
  * @returns {boolean}
  */
@@ -58,7 +59,7 @@ function toBool(v, fallback) {
  * - Finally, checks a matching <meta> tag: e.g., name="odv-exposeStackTraces".
  *
  * @param {string} name
- * @param {boolean} fallback
+ * @param {boolean} [fallback=false]
  * @returns {boolean}
  */
 function readConfigFlag(name, fallback = false) {
@@ -70,7 +71,7 @@ function readConfigFlag(name, fallback = false) {
     }
     // Direct global
     if (typeof window !== 'undefined' && window.__ODV_CONFIG__) {
-      const v = /** @type {any} */ (window.__ODV_CONFIG__)[name];
+      const v = /** @type {*} */ (window.__ODV_CONFIG__)[name];
       if (typeof v !== 'undefined') return toBool(v, fallback);
     }
     // Meta tag fallback (e.g., <meta name="odv-exposeStackTraces" content="true">)
@@ -85,19 +86,23 @@ function readConfigFlag(name, fallback = false) {
 }
 
 /**
+ * Props for the ErrorBoundary component.
  * @typedef {Object} ErrorBoundaryProps
- * @property {React.ReactNode} children      Descendant elements to protect.
- * @property {React.ReactNode | ((args: { error: any, errorInfo: React.ErrorInfo | null, reset: () => void }) => React.ReactNode)} [fallback]
- *           Optional custom fallback UI. May be a node or a render function. The function receives the current error, React errorInfo and a reset handler.
- * @property {() => void} [onReset]          Optional callback when the user clicks "Try again".
- * @property {boolean} [showDetailsByDefault] If true, expands the details section initially (when stacks are hidden).
+ * @property {React.ReactNode} children
+ * @property {(React.ReactNode|FallbackRenderer|undefined)} fallback
+ *           Optional custom fallback UI. May be a node or a render function (see FallbackRenderer typedef in src/types/jsdoc-types.js).
+ * @property {(function(): void|undefined)} onReset
+ *           Optional callback when the user clicks "Try again".
+ * @property {(boolean|undefined)} showDetailsByDefault
+ *           If true, expands the details section initially (when stacks are hidden).
  */
 
 /**
+ * Internal state for the ErrorBoundary.
  * @typedef {Object} ErrorBoundaryState
  * @property {boolean} hasError
- * @property {any} error
- * @property {React.ErrorInfo | null} errorInfo
+ * @property {*} error
+ * @property {(React.ErrorInfo|null)} errorInfo
  * @property {boolean} showDetails
  */
 
@@ -115,7 +120,7 @@ export default class ErrorBoundary extends React.Component {
     this.state = { hasError: false, error: null, errorInfo: null, showDetails: !!props?.showDetailsByDefault };
   }
 
-  /** @param {any} error */
+  /** @param {*} error */
   static getDerivedStateFromError(error) {
     /** @type {ErrorBoundaryState} */
     const next = { hasError: true, error, errorInfo: null, showDetails: false };
@@ -125,8 +130,9 @@ export default class ErrorBoundary extends React.Component {
   /**
    * Log error details for diagnostics. We always log full details (message, stack, componentStack)
    * to the console/backend, regardless of whether we expose stacks to end users.
-   * @param {any} error
+   * @param {*} error
    * @param {React.ErrorInfo} errorInfo
+   * @returns {void}
    */
   componentDidCatch(error, errorInfo) {
     this.setState({ errorInfo });
@@ -140,6 +146,7 @@ export default class ErrorBoundary extends React.Component {
   /**
    * Reset the boundary and optionally call the external onReset handler.
    * Prefer this over full page reloads so stateful parents can recover.
+   * @returns {void}
    */
   reset = () => {
     this.setState({ hasError: false, error: null, errorInfo: null, showDetails: !!this.props?.showDetailsByDefault });
@@ -150,6 +157,7 @@ export default class ErrorBoundary extends React.Component {
 
   /**
    * Copy a concise diagnostic bundle to the clipboard (best effort).
+   * @returns {Promise.<void>}
    */
   copyDetails = async () => {
     try {
@@ -167,6 +175,9 @@ export default class ErrorBoundary extends React.Component {
     }
   };
 
+  /**
+   * @returns {React.ReactNode}
+   */
   render() {
     if (!this.state.hasError) return this.props.children;
 
@@ -175,8 +186,8 @@ export default class ErrorBoundary extends React.Component {
     // Support a custom fallback (node or render function)
     if (this.props.fallback) {
       if (typeof this.props.fallback === 'function') {
-        return /** @type {Function} */ (this.props.fallback)({
-          error: this.state.error,
+        return /** @type {FallbackRenderer} */ (this.props.fallback)({
+          error: /** @type {*} */ (this.state.error),
           errorInfo: this.state.errorInfo,
           reset: this.reset,
         });

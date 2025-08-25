@@ -77,7 +77,15 @@ body {
   font-family: Arial, sans-serif;
   background-color: var(--background-color);
   color: var(--primary-color-active);
+  -webkit-user-select: none;
   user-select: none; /* Prevent drag-select on large canvases/images */
+}
+
+/* NEW: Re-enable selection/caret for form controls (fixes flicker/closing of selects & caret issues) */
+input, textarea, select, label, button, [contenteditable="true"], .odv-allow-select {
+  -webkit-user-select: text;
+  user-select: text;
+  caret-color: auto;
 }
 
 #root {
@@ -518,4 +526,53 @@ input[type="range"].active {
 @keyframes spin {
   0%   { transform: rotate(0deg); }
   100% { transform: rotate(360deg); }
+}
+
+/* =============================================================================
+   Print Rules (keep 1 image => 1 physical page in Chrome/Edge)
+   ========================================================================== */
+@media print {
+  /* A4 by default. Switch to `size: Letter` if you target US Letter. */
+  @page { margin: 0; size: A4 portrait; }
+  html, body { margin: 0 !important; padding: 0 !important; }
+
+  /* Preferred: wrap each page in .odv-print-page or [data-odv-print-page] */
+  .odv-print-page,
+  [data-odv-print-page] {
+    page-break-after: always;
+    break-after: page;
+    break-inside: avoid;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+
+    /* Safety margin so Edge doesn’t spill into a second page if headers/footers are on */
+    box-sizing: border-box;
+    padding: 8mm;
+
+    /* Explicit page box (A4). For Letter use: width: 8.5in; height: 11in; */
+    width: 210mm;
+    height: 297mm;
+  }
+
+  .odv-print-page img,
+  .odv-print-page canvas,
+  [data-odv-print-page] img,
+  [data-odv-print-page] canvas {
+    display: block;
+    max-width: 100%;
+    max-height: calc(100% - 0mm);
+    object-fit: contain;
+  }
+
+  /* Fallback: if the print view renders images directly inside the viewer container */
+  .document-render-container img {
+    page-break-after: always;
+    break-inside: avoid;
+    display: block;
+    margin: 0 auto;
+    max-width: calc(100% - 10mm);
+    max-height: 95vh;
+    object-fit: contain;
+  }
 }

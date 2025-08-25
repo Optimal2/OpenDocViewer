@@ -1,3 +1,4 @@
+// File: src/utils/navigationUtils.js
 /**
  * File: src/utils/navigationUtils.js
  *
@@ -6,7 +7,7 @@
  * PURPOSE
  *   Centralized helpers for page navigation in the document viewer.
  *   All functions are UI-agnostic and operate purely through a provided
- *   React state setter (`setPageNumber`) and optional `totalPages`.
+ *   React-like state setter (`setPageNumber`) and optional `totalPages`.
  *
  * DESIGN NOTES
  *   - Page numbers are 1-based.
@@ -17,19 +18,13 @@
  * PROJECT GOTCHA (reminder for future reviewers):
  *   - Elsewhere in the app we import from the **root** 'file-type' package, not
  *     'file-type/browser' (v21 does not export that subpath for bundlers, which breaks Vite).
- *
- * Provenance / source reference for previous baseline: :contentReference[oaicite:0]{index=0}
  */
 
 import logger from '../LogController';
 
 /**
- * @typedef {(update: number | ((prev: number) => number)) => void} SetPageNumber
- */
-
-/**
  * Coerce a value to a positive integer (minimum 1).
- * @param {unknown} n
+ * @param {*} n
  * @param {number} fallback
  * @returns {number}
  */
@@ -42,7 +37,7 @@ function toPositiveInt(n, fallback = 1) {
 
 /**
  * Check whether totalPages looks valid (>= 1).
- * @param {unknown} totalPages
+ * @param {*} totalPages
  * @returns {boolean}
  */
 function isValidTotalPages(totalPages) {
@@ -68,7 +63,8 @@ function clampPage(page, totalPages) {
 /**
  * Navigate to the previous page (no-op if already at page 1).
  *
- * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
+ * @param {SetPageNumber} setPageNumber  React-like state setter for the current page (1-based).
+ * @returns {void}
  */
 export const handlePrevPage = (setPageNumber) => {
   if (typeof setPageNumber !== 'function') {
@@ -76,7 +72,7 @@ export const handlePrevPage = (setPageNumber) => {
     return;
   }
 
-  setPageNumber((prev) => {
+  setPageNumber(function (prev) {
     const curr = toPositiveInt(prev, 1);
     if (curr > 1) {
       const next = curr - 1;
@@ -91,8 +87,9 @@ export const handlePrevPage = (setPageNumber) => {
 /**
  * Navigate to the next page (no-op if already at the last page).
  *
- * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
+ * @param {SetPageNumber} setPageNumber  React-like state setter for the current page (1-based).
  * @param {number} totalPages            Total number of pages (must be >= 1).
+ * @returns {void}
  */
 export const handleNextPage = (setPageNumber, totalPages) => {
   if (typeof setPageNumber !== 'function') {
@@ -106,7 +103,7 @@ export const handleNextPage = (setPageNumber, totalPages) => {
 
   const t = Math.floor(totalPages);
 
-  setPageNumber((prev) => {
+  setPageNumber(function (prev) {
     const curr = toPositiveInt(prev, 1);
     if (curr < t) {
       const next = curr + 1;
@@ -121,7 +118,8 @@ export const handleNextPage = (setPageNumber, totalPages) => {
 /**
  * Navigate to the first page (always sets page to 1).
  *
- * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
+ * @param {SetPageNumber} setPageNumber  React-like state setter for the current page (1-based).
+ * @returns {void}
  */
 export const handleFirstPage = (setPageNumber) => {
   if (typeof setPageNumber !== 'function') {
@@ -129,7 +127,7 @@ export const handleFirstPage = (setPageNumber) => {
     return;
   }
 
-  setPageNumber((prev) => {
+  setPageNumber(function (prev) {
     const next = 1;
     const curr = toPositiveInt(prev, 1);
     if (curr !== next) {
@@ -144,8 +142,9 @@ export const handleFirstPage = (setPageNumber) => {
 /**
  * Navigate to the last page (no-op if totalPages invalid).
  *
- * @param {SetPageNumber} setPageNumber  React state setter for the current page (1-based).
+ * @param {SetPageNumber} setPageNumber  React-like state setter for the current page (1-based).
  * @param {number} totalPages            Total number of pages (must be >= 1).
+ * @returns {void}
  */
 export const handleLastPage = (setPageNumber, totalPages) => {
   if (typeof setPageNumber !== 'function') {
@@ -159,7 +158,7 @@ export const handleLastPage = (setPageNumber, totalPages) => {
 
   const last = Math.floor(totalPages);
 
-  setPageNumber((prev) => {
+  setPageNumber(function (prev) {
     const curr = toPositiveInt(prev, 1);
     const next = clampPage(last, last);
     if (curr !== next) {

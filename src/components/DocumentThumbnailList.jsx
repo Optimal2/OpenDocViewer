@@ -1,3 +1,4 @@
+// File: src/components/DocumentThumbnailList.jsx
 /**
  * File: src/components/DocumentThumbnailList.jsx
  *
@@ -43,12 +44,12 @@ import LoadingSpinner from './LoadingSpinner';
  * DocumentThumbnailList component.
  *
  * @param {Object} props
- * @param {PageItem[]} props.allPages
+ * @param {Array.<PageItem>} props.allPages
  * @param {number} props.pageNumber
- * @param {(page: number) => void} props.setPageNumber
- * @param {{ current: HTMLElement|null }} props.thumbnailsContainerRef
+ * @param {SetPageNumber} props.setPageNumber
+ * @param {{ current: (HTMLElement|null) }} props.thumbnailsContainerRef
  * @param {number} props.width
- * @returns {JSX.Element}
+ * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   allPages,
@@ -69,6 +70,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
    * Handle a thumbnail activation (click or key).
    * Uses a stable callback so children don't re-render unnecessarily.
    * @param {number} pageNum
+   * @returns {void}
    */
   const handleActivate = useCallback(
     (pageNum) => {

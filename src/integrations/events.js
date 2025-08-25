@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/integrations/events.js
+/**
  * File: src/integrations/events.js
  *
  * OpenDocViewer — Tiny Event Emitter/Listener Utilities (Browser-only)
@@ -27,9 +28,30 @@
 import logger from '../LogController';
 
 /**
+ * Listener signature for ODV events.
+ * @callback ODVEventHandler
+ * @param {Event} event
+ * @param {*} detail
+ * @returns {void}
+ */
+
+/**
+ * Options for onceODVEvent.
+ * @typedef {Object} OnceOptions
+ * @property {(number|undefined)} timeoutMs
+ */
+
+/**
+ * Result returned by onceODVEvent when the event fires.
+ * @typedef {Object} OnceEventResult
+ * @property {Event} event
+ * @property {*} detail
+ */
+
+/**
  * Create a CustomEvent with best-effort fallback for older browsers.
  * @param {string} name
- * @param {any} detail
+ * @param {*} detail
  * @returns {CustomEvent}
  */
 function createCustomEvent(name, detail) {
@@ -57,7 +79,7 @@ function createCustomEvent(name, detail) {
  *   emitODVEvent('odv:page-change', { page: 7 });
  *
  * @param {string} name    Event name (recommend a namespace like "odv:*").
- * @param {Record<string, any>} [detail={}]  Structured payload for listeners.
+ * @param {Object.<string, *>} [detail={}]  Structured payload for listeners.
  * @returns {boolean}       True if dispatched, false if `window` unavailable.
  */
 export function emitODVEvent(name, detail = {}) {
@@ -87,15 +109,15 @@ export function emitODVEvent(name, detail = {}) {
  *   off();
  *
  * @param {string} name
- * @param {(ev: Event, detail: any) => void} handler
- * @param {AddEventListenerOptions|boolean} [options]  addEventListener options (e.g., { passive: true })
- * @returns {() => void} Unsubscribe function
+ * @param {ODVEventHandler} handler
+ * @param {(*|boolean)} [options]  addEventListener options (e.g., { passive: true })
+ * @returns {function(): void} Unsubscribe function
  */
 export function onODVEvent(name, handler, options) {
-  if (typeof window === 'undefined') return () => {};
+  if (typeof window === 'undefined') return function () {};
   if (typeof handler !== 'function') {
     logger.warn('onODVEvent called without a valid handler', { name });
-    return () => {};
+    return function () {};
   }
 
   const wrapped = (ev) => {
@@ -116,7 +138,7 @@ export function onODVEvent(name, handler, options) {
     try { window.addEventListener(name, wrapped); } catch {}
   }
 
-  return () => {
+  return function () {
     try { window.removeEventListener(name, wrapped, options ?? { passive: true }); }
     catch { try { window.removeEventListener(name, wrapped); } catch {} }
   };
@@ -130,8 +152,8 @@ export function onODVEvent(name, handler, options) {
  *   await onceODVEvent('odv:ready', { timeoutMs: 5000 });
  *
  * @param {string} name
- * @param {{ timeoutMs?: number }} [opts]
- * @returns {Promise<{ event: Event, detail: any }>}
+ * @param {OnceOptions} [opts]
+ * @returns {Promise.<OnceEventResult>}
  */
 export function onceODVEvent(name, opts = {}) {
   const { timeoutMs = 0 } = opts;
@@ -157,7 +179,7 @@ export function onceODVEvent(name, opts = {}) {
         if (done) return;
         done = true;
         off();
-        reject(new Error(`Event "${name}" timed out after ${timeoutMs} ms`));
+        reject(new Error('Event "' + name + '" timed out after ' + timeoutMs + ' ms'));
       }, timeoutMs);
     }
   });
@@ -165,7 +187,8 @@ export function onceODVEvent(name, opts = {}) {
 
 /**
  * Clear a timer if it exists (tiny helper).
- * @param {any} t
+ * @param {*} t
+ * @returns {void}
  */
 function clearTimeoutSafe(t) {
   try { if (t) clearTimeout(t); } catch {}

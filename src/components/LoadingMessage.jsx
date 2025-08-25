@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/components/LoadingMessage.jsx
+/**
  * File: src/components/LoadingMessage.jsx
  *
  * OpenDocViewer — Loading / Error Message
@@ -20,8 +21,6 @@
  *   - Elsewhere in the app we import from the **root** 'file-type' package — NOT
  *     'file-type/browser'. With file-type v21 the '/browser' subpath is not exported
  *     for bundlers and will break Vite builds. See README for details.
- *
- * Source baseline for this component: :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';
@@ -39,14 +38,13 @@ const DEFAULTS = Object.freeze({
  * LoadingMessage component.
  *
  * @param {Object} props
- * @param {number} props.pageStatus               Status of the page loading. (-1 => error; otherwise "loading")
- * @param {string} [props.loadingText]            Override: text shown while loading.
- * @param {string} [props.errorText]              Override: text shown on error.
- * @param {string} [props.loadingImageSrc]        Override: image shown while loading.
- * @param {string} [props.errorImageSrc]          Override: image shown on error.
- * @param {string} [props.className]              Optional extra class names for the root container.
- * @param {string} [props['data-testid']]         Optional test id.
- * @returns {JSX.Element}
+ * @param {number} props.pageStatus                Status of the page loading. (-1 => error; otherwise "loading")
+ * @param {string} [props.loadingText]             Override: text shown while loading.
+ * @param {string} [props.errorText]               Override: text shown on error.
+ * @param {string} [props.loadingImageSrc]         Override: image shown while loading.
+ * @param {string} [props.errorImageSrc]           Override: image shown on error.
+ * @param {string} [props.className]               Optional extra class names for the root container.
+ * @returns {React.ReactElement}
  */
 const LoadingMessage = ({
   pageStatus,
@@ -55,6 +53,7 @@ const LoadingMessage = ({
   loadingImageSrc = DEFAULTS.loadingImg,
   errorImageSrc = DEFAULTS.errorImg,
   className = '',
+  // Note: React supports 'data-testid' as a prop, but we omit it from JSDoc to avoid Closure parser issues with dashed names.
   'data-testid': testId,
 }) => {
   const isError = pageStatus === -1;
