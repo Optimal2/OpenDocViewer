@@ -73,3 +73,4 @@ lerna-debug.log*
 # If you decide to track a lockfile for reproducible installs across CI/clients,
 # keep it committed. If you choose not to track a lockfile, add it here explicitly.
 # ------------------------------------------------------------------------------
+*.zip
