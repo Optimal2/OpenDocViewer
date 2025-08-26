@@ -1,50 +1,60 @@
 // File: src/components/DocumentToolbar/PrintRangeDialog.jsx
 /**
- * Safe, shielded print dialog for OpenDocViewer.
- * - Modes: Active | All | Range (dropdowns 1..N)
- * - Validate only on submit.
- * - Modal shield blocks only OUTSIDE events; nothing is blocked inside the form.
+ * Print dialog with a subtle Basic/Advanced link switch and radio-based choices.
+ * - Basic mode:
+ *     • Active page (default)
+ *     • All pages
+ * - Advanced mode:
+ *     • Simple range (default) — supports ascending (2→5) and descending (5→2)
+ *     • Custom pages — free-form sequence (accepts 2-5 and 5-2, spaces/commas)
+ *
+ * NOTE: For descending "Simple range" (from > to), we convert to a sequence on submit,
+ *       so downstream code doesn't need special handling.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import styles from './PrintRangeDialog.module.css';
-
-const DEBUG_BLOCKERS = false;
+import { parsePrintSequence } from '../../utils/printUtils.js';
 
 /**
- * Mode for printing.
- * @typedef {'active'|'all'|'range'} PrintMode
+ * @typedef {'active'|'all'|'range'|'advanced'} PrintMode
  */
 
 /**
- * Payload delivered on submit.
  * @typedef {Object} PrintSubmitDetail
  * @property {PrintMode} mode
- * @property {(number|undefined)} from
- * @property {(number|undefined)} to
+ * @property {number} [from]
+ * @property {number} [to]
+ * @property {Array.<number>} [sequence]
  */
 
-/** Print CSS injected once per document. */
+/**
+ * Called when the dialog submits a choice.
+ * @callback PrintSubmitHandler
+ * @param {PrintSubmitDetail} detail
+ * @returns {void}
+ */
+
+/** Injected once (kept minimal and scoped to print only). */
 const ODV_PRINT_CSS = `
 @media print {
-  @page { margin: 0; }
+  @page { margin: 0; size: A4 portrait; }
   html, body { margin: 0 !important; padding: 0 !important; }
-  #odv-print-root, [data-odv-print-root] { margin: 0 !important; padding: 0 !important; }
+
+  #odv-print-root, [data-odv-print-root] { width: 100vw; height: 100vh; }
+
   .odv-print-page, [data-odv-print-page] {
-    page-break-after: always;
-    break-after: page;
-    break-inside: avoid;
-    display: grid;
-    place-items: center;
-    overflow: hidden;
-    box-sizing: border-box;
-    padding: 8mm;
+    page-break-after: always; break-after: page; break-inside: avoid;
+    display: grid; place-items: center;
+    box-sizing: border-box; width: 100vw; height: 100vh; padding: 8mm; overflow: hidden;
   }
+
   .odv-print-page img, .odv-print-page canvas,
   [data-odv-print-page] img, [data-odv-print-page] canvas {
-    display: block; max-width: 100%; max-height: calc(100% - 0mm); object-fit: contain;
+    display: block; max-width: 100%; max-height: 100%; object-fit: contain;
   }
+
   img[data-odv-print-page], canvas[data-odv-print-page] {
     page-break-after: always; break-inside: avoid; display: block; margin: 0 auto;
     max-width: calc(100% - 10mm); max-height: 95vh; object-fit: contain;
@@ -63,24 +73,31 @@ function ensureODVPrintCSS() {
 }
 
 /**
- * Print dialog component.
- *
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
- * @param {function(PrintSubmitDetail): void} props.onSubmit
+ * @param {PrintSubmitHandler} props.onSubmit
  * @param {number} props.totalPages
- * @returns {React.ReactElement|null}
  */
 export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages }) {
-  const [mode, setMode] = useState('active');
+  /** @type {'basic'|'advanced'} */
+  const [modeGroup, setModeGroup] = useState('basic');
+
+  /** @type {'active'|'all'} */
+  const [basicChoice, setBasicChoice] = useState('active');
+
+  /** @type {'range'|'custom'} */
+  const [advancedChoice, setAdvancedChoice] = useState('range');
+
   const [fromValue, setFromValue] = useState('1');
   const [toValue, setToValue] = useState(String(totalPages || 1));
+  const [customText, setCustomText] = useState('');
   const [error, setError] = useState('');
-  const dialogRef = useRef(/** @type {HTMLFormElement|null} */ (null));
-  const backdropRef = useRef(/** @type {HTMLDivElement|null} */ (null));
 
-  const options = useMemo(() => {
+  const dialogRef = useRef(/** @type {HTMLFormElement|null} */(null));
+  const backdropRef = useRef(/** @type {HTMLDivElement|null} */(null));
+
+  const pageOptions = useMemo(() => {
     const n = Math.max(1, Number(totalPages) || 1);
     return Array.from({ length: n }, (_, i) => String(i + 1));
   }, [totalPages]);
@@ -89,43 +106,26 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
 
   useEffect(() => {
     if (!isOpen) return;
-    setMode('active');
+    setModeGroup('basic');
+    setBasicChoice('active');      // default in Basic
+    setAdvancedChoice('range');    // default in Advanced
     setFromValue('1');
     setToValue(String(totalPages || 1));
+    setCustomText('');
     setError('');
   }, [isOpen, totalPages]);
 
-  // -------- Modal shield (block ONLY outside events) -------------------------
+  // Block pointer/keyboard events outside dialog only (prevents flicker of <select>)
   useEffect(() => {
     if (!isOpen) return;
-
-    const dialogEl = dialogRef.current;
-    const backdropEl = backdropRef.current;
-    const isInsideDialog = (node) => {
-      if (!node || !dialogEl) return false;
-      try { return node === dialogEl || (node instanceof Node && dialogEl.contains(node)); }
-      catch { return false; }
-    };
-    const isBackdrop = (node) => (backdropEl && node === backdropEl);
-
-    const blockPointer = (ev) => {
-      if (isInsideDialog(ev.target) || isBackdrop(ev.target)) return; // allow inside + backdrop
-      if (DEBUG_BLOCKERS) console.debug('[PrintRangeDialog] blocked pointer:', ev.type, ev.target);
-      ev.stopPropagation();
-    };
-    const blockKeys = (ev) => {
-      if (ev.key === 'Escape' || ev.key === 'Tab') return;
-      const active = document.activeElement;
-      if (isInsideDialog(active) || isInsideDialog(ev.target)) return; // allow keys inside
-      if (DEBUG_BLOCKERS) console.debug('[PrintRangeDialog] blocked key:', ev.key);
-      ev.stopPropagation();
-    };
-
+    const isInside = (node) => dialogRef.current && (node === dialogRef.current || dialogRef.current.contains(node));
+    const isBackdrop = (node) => backdropRef.current && node === backdropRef.current;
+    const blockPointer = (ev) => { const t=ev.target; if (isInside(t) || isBackdrop(t)) return; ev.stopPropagation(); };
+    const blockKeys = (ev) => { if (ev.key === 'Escape' || ev.key === 'Tab') return; const t=ev.target; if (isInside(t) || isInside(document.activeElement)) return; ev.stopPropagation(); };
     document.addEventListener('pointerdown', blockPointer, true);
     document.addEventListener('mousedown', blockPointer, true);
     document.addEventListener('click', blockPointer, true);
     window.addEventListener('keydown', blockKeys, true);
-
     return () => {
       document.removeEventListener('pointerdown', blockPointer, true);
       document.removeEventListener('mousedown', blockPointer, true);
@@ -134,33 +134,57 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
     };
   }, [isOpen]);
 
-  const resetAndClose = useCallback(() => { setError(''); onClose(); }, [onClose]);
+  const makeDescendingSequence = useCallback((from, to) => {
+    /** @type {Array.<number>} */
+    const seq = [];
+    for (let n = from; n >= to; n--) seq.push(n);
+    return seq;
+  }, []);
 
   const validateRange = useCallback(() => {
     const from = parseInt(fromValue, 10);
     const to = parseInt(toValue, 10);
     if (!Number.isFinite(from) || !Number.isFinite(to)) return { ok: false, msg: 'Select valid pages.' };
     if (from < 1 || to < 1) return { ok: false, msg: 'Values must be positive.' };
-    if (from > to) return { ok: false, msg: '"From" must be ≤ "To".' };
-    if (to > totalPages) return { ok: false, msg: 'The highest allowed page is ' + totalPages + '.' };
-    return { ok: true, from, to };
+    if (from > totalPages || to > totalPages) return { ok: false, msg: 'The highest allowed page is ' + totalPages + '.' };
+    return { ok: true, from, to }; // from may be > to (descending)
   }, [fromValue, toValue, totalPages]);
 
   const submit = useCallback((e) => {
-    if (e?.preventDefault) e.preventDefault();
-    if (mode === 'active') { setError(''); onSubmit({ mode: 'active' }); return; }
-    if (mode === 'all')    { setError(''); onSubmit({ mode: 'all' });    return; }
-    const v = validateRange();
-    if (!v.ok) { setError(v.msg || 'Invalid range.'); return; }
+    e?.preventDefault?.();
+
+    // BASIC
+    if (modeGroup === 'basic') {
+      setError('');
+      onSubmit({ mode: basicChoice === 'active' ? 'active' : 'all' });
+      return;
+    }
+
+    // ADVANCED
+    if (advancedChoice === 'range') {
+      const v = validateRange();
+      if (!v.ok) { setError(v.msg || 'Invalid range.'); return; }
+      setError('');
+      if (v.from > v.to) {
+        // Convert descending simple range into a sequence so no console error downstream.
+        onSubmit({ mode: 'advanced', sequence: makeDescendingSequence(v.from, v.to) });
+      } else {
+        onSubmit({ mode: 'range', from: v.from, to: v.to });
+      }
+      return;
+    }
+
+    // advancedChoice === 'custom'
+    const { ok, error: err, sequence } = parsePrintSequence(customText, totalPages);
+    if (!ok || !sequence?.length) { setError(err || 'Invalid custom pages input.'); return; }
     setError('');
-    onSubmit({ mode: 'range', from: v.from, to: v.to });
-  }, [mode, onSubmit, validateRange]);
+    onSubmit({ mode: 'advanced', sequence });
+  }, [modeGroup, basicChoice, advancedChoice, validateRange, customText, totalPages, onSubmit, makeDescendingSequence]);
 
   if (!isOpen) return null;
+  const onBackdropMouseDown = (e) => { if (e.target === e.currentTarget) { e.stopPropagation(); onClose(); } };
 
-  const onBackdropMouseDown = (e) => {
-    if (e.target === e.currentTarget) { e.stopPropagation(); onClose(); }
-  };
+  const titleSuffix = modeGroup === 'basic' ? 'Basic mode' : 'Advanced mode';
 
   return (
     <div
@@ -168,70 +192,144 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
       className={styles.backdrop}
       role="dialog"
       aria-modal="true"
-      aria-labelledby="print-range-title"
+      aria-labelledby="print-title"
       onMouseDown={onBackdropMouseDown}
     >
-      <form
-        ref={dialogRef}
-        onSubmit={submit}
-        className={styles.dialog}
-        noValidate
-        /* IMPORTANT: no on*Capture here — let events reach radios/selects */
-      >
-        <h3 id="print-range-title" className={styles.title}>Print</h3>
-        <p className={styles.desc}>Choose what to print. Default is <strong>Active page</strong>.</p>
+      <form ref={dialogRef} onSubmit={submit} className={styles.dialog} noValidate>
+        <h3 id="print-title" className={styles.title}>Print – {titleSuffix}</h3>
+        <p className={styles.desc}>Pick what to print. Default is <strong>Active page</strong>.</p>
 
-        <div className={styles.section}>
-          <label className={styles.radioRow}>
-            <input type="radio" name="mode" checked={mode === 'active'} onChange={() => setMode('active')} />
-            <span>Active page</span>
-          </label>
+        {/* Text-link mode switch */}
+        {modeGroup === 'basic' ? (
+          <p className={styles.modeSwitch}>
+            Switch to{' '}
+            <button type="button" className={styles.linkBtn} onClick={() => setModeGroup('advanced')}>
+              advanced mode
+            </button>
+            .
+          </p>
+        ) : (
+          <p className={styles.modeSwitch}>
+            Switch back to{' '}
+            <button type="button" className={styles.linkBtn} onClick={() => setModeGroup('basic')}>
+              basic mode
+            </button>
+            .
+          </p>
+        )}
 
-          <label className={styles.radioRow}>
-            <input type="radio" name="mode" checked={mode === 'all'} onChange={() => setMode('all')} />
-            <span>All pages</span>
-          </label>
-
-          <label className={styles.radioRow}>
-            <input type="radio" name="mode" checked={mode === 'range'} onChange={() => setMode('range')} />
-            <span>Page range</span>
-          </label>
-
-          <div className={styles.rangeRow + ' ' + (mode === 'range' ? '' : styles.disabled)}>
-            <label className={styles.label}>
-              From
-              <select
-                value={fromValue}
-                onChange={(e) => setFromValue(e.target.value)}
-                disabled={mode !== 'range'}
-                className={styles.select}
-                aria-label="From page"
-              >
-                {options.map((v) => <option key={'from-' + v} value={v}>{v}</option>)}
-              </select>
-            </label>
-
-            <label className={styles.label}>
-              To
-              <select
-                value={toValue}
-                onChange={(e) => setToValue(e.target.value)}
-                disabled={mode !== 'range'}
-                className={styles.select}
-                aria-label="To page"
-              >
-                {options.map((v) => <option key={'to-' + v} value={v}>{v}</option>)}
-              </select>
-            </label>
-
-            <span className={styles.hint}>1–{totalPages}</span>
+        {/* BASIC */}
+        {modeGroup === 'basic' && (
+          <div className={styles.section} role="group" aria-label="Basic choices">
+            <div className={styles.radioList}>
+              <label className={styles.radioRow}>
+                <input
+                  type="radio"
+                  name="basicChoice"
+                  value="active"
+                  checked={basicChoice === 'active'}
+                  onChange={() => setBasicChoice('active')}
+                />
+                <span>Active page</span>
+              </label>
+              <label className={styles.radioRow}>
+                <input
+                  type="radio"
+                  name="basicChoice"
+                  value="all"
+                  checked={basicChoice === 'all'}
+                  onChange={() => setBasicChoice('all')}
+                />
+                <span>All pages</span>
+              </label>
+            </div>
           </div>
+        )}
 
-          {error ? <div role="alert" className={styles.error}>{error}</div> : null}
-        </div>
+        {/* ADVANCED */}
+        {modeGroup === 'advanced' && (
+          <div className={styles.section} role="group" aria-label="Advanced choices">
+            <div className={styles.radioList}>
+              <label className={styles.radioRow}>
+                <input
+                  type="radio"
+                  name="advancedChoice"
+                  value="range"
+                  checked={advancedChoice === 'range'}
+                  onChange={() => setAdvancedChoice('range')}
+                />
+                <span>Simple range</span>
+              </label>
+              <label className={styles.radioRow}>
+                <input
+                  type="radio"
+                  name="advancedChoice"
+                  value="custom"
+                  checked={advancedChoice === 'custom'}
+                  onChange={() => setAdvancedChoice('custom')}
+                />
+                <span>Custom pages</span>
+              </label>
+            </div>
+
+            {/* Simple range controls — only visible when selected */}
+            {advancedChoice === 'range' && (
+              <div className={styles.rangeRow}>
+                <label className={styles.label}>
+                  From
+                  <select
+                    value={fromValue}
+                    onChange={(e) => setFromValue(e.target.value)}
+                    className={styles.select}
+                    aria-label="From page"
+                  >
+                    {pageOptions.map((v) => <option key={'from-' + v} value={v}>{v}</option>)}
+                  </select>
+                </label>
+
+                <label className={styles.label}>
+                  To
+                  <select
+                    value={toValue}
+                    onChange={(e) => setToValue(e.target.value)}
+                    className={styles.select}
+                    aria-label="To page"
+                  >
+                    {pageOptions.map((v) => <option key={'to-' + v} value={v}>{v}</option>)}
+                  </select>
+                </label>
+
+                <span className={styles.hint}>
+                  Allowed: 1–{totalPages}. Ascending (<code>2→5</code>) or descending (<code>5→2</code>).
+                </span>
+              </div>
+            )}
+
+            {/* Custom pages controls — only visible when selected */}
+            {advancedChoice === 'custom' && (
+              <div className={styles.advancedRow}>
+                <label className={styles.label} style={{ width: '100%' }}>
+                  <span className={styles.visuallyHidden}>Custom pages</span>
+                  <input
+                    type="text"
+                    className={styles.inputWide}
+                    placeholder="e.g. 7 6 5 4 2   or   1-3, 2, 2, 5-2"
+                    value={customText}
+                    onChange={(e) => setCustomText(e.target.value)}
+                    aria-label="Custom pages input"
+                    inputMode="numeric"
+                  />
+                </label>
+                <span className={styles.hint}>Spaces or commas. Ranges can ascend (<code>2-5</code>) or descend (<code>5-2</code>).</span>
+              </div>
+            )}
+          </div>
+        )}
+
+        {error ? <div role="alert" className={styles.error}>{error}</div> : null}
 
         <div className={styles.footer}>
-          <button type="button" className="odv-btn" onClick={resetAndClose} aria-label="Cancel">Cancel</button>
+          <button type="button" className="odv-btn" onClick={() => { setError(''); onClose(); }} aria-label="Cancel">Cancel</button>
           <button type="submit" className="odv-btn" aria-label="Continue to print">Continue</button>
         </div>
       </form>

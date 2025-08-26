@@ -18,7 +18,7 @@ import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import ThemeToggleButton from './ThemeToggleButton.jsx';
-import { handlePrint, handlePrintAll, handlePrintRange } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -133,7 +133,7 @@ const DocumentToolbar = ({
   }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
 
   /** Callback when the print dialog submits. */
-  const handlePrintSubmit = useCallback((detail /* {mode:'active'|'all'|'range', from?:number, to?:number} */) => {
+  const handlePrintSubmit = useCallback((detail /* {mode:'active'|'all'|'range'|'advanced', from?:number, to?:number, sequence?:number[]} */) => {
     setPrintDialogOpen(false);
     if (!detail || detail.mode === 'active') {
       handlePrint(documentRenderRef, { viewerContainerRef });
@@ -143,10 +143,15 @@ const DocumentToolbar = ({
       handlePrintAll(documentRenderRef, { viewerContainerRef });
       return;
     }
-    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
-      handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
+     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+       handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
+      return;
     }
-  }, [documentRenderRef, viewerContainerRef]);
+    if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
+      handlePrintSequence(documentRenderRef, detail.sequence, { viewerContainerRef });
+       return;
+     }
+   }, [documentRenderRef, viewerContainerRef]);
 
   return (
     <div className="toolbar" role="toolbar" aria-label="Document controls">
