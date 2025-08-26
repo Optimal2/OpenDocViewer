@@ -37,18 +37,18 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * Aggregate return type for the viewer hook.
  * @typedef {Object} UseDocumentViewerReturn
  * @property {number} pageNumber
- * @property {SetPageNumber} setPageNumber
+ * @property {function(number): void} setPageNumber
  * @property {number} zoom
- * @property {SetNumber} setZoom
+ * @property {function(number): void} setZoom
  * @property {boolean} isComparing
  * @property {(number|null)} comparePageNumber
  * @property {ImageProperties} imageProperties
  * @property {boolean} isExpanded
  * @property {number} thumbnailWidth
- * @property {RefLike} viewerContainerRef
- * @property {RefLike} thumbnailsContainerRef
- * @property {RefLike} documentRenderRef
- * @property {RefLike} compareRef
+ * @property {Object} viewerContainerRef
+ * @property {Object} thumbnailsContainerRef
+ * @property {Object} documentRenderRef
+ * @property {Object} compareRef
  * @property {function(number, boolean=): void} handlePageNumberChange
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
@@ -61,7 +61,8 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * @property {function(*): void} handleContrastChange
  * @property {function(): void} resetImageProperties
  * @property {function(MouseEvent): void} handleMouseDown
- * @property {SetBooleanState} setIsExpanded
+ * @property {function(number): void} selectForCompare
+ * @property {function(boolean): void} setIsExpanded
  */
 
 /**
@@ -111,88 +112,110 @@ export function useDocumentViewer() {
   const [thumbnailWidth, setThumbnailWidth] = useState(200);
 
   // Refs
-  /** @type {RefLike} */ const viewerContainerRef = useRef(/** @type {*} */ (null));
-  /** @type {RefLike} */ const thumbnailsContainerRef = useRef(/** @type {*} */ (null));
-  /** @type {RefLike} */ const documentRenderRef = useRef(/** @type {*} */ (null));
-  /** @type {RefLike} */ const compareRef = useRef(/** @type {*} */ (null));
+  /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
+  /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
+  /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
+  /** @type {{ current: any }} */ const compareRef = useRef(null);
 
-  // Navigation helpers
-  const handlePageNumberChange = useCallback((next, fromThumbnail = false) => {
+  /**
+   * Change the current page number safely (clamped).
+   * NOTE: While compare mode is active, the right-hand "locked" page (comparePageNumber)
+   *       is NOT modified here. It is set only when compare mode is toggled ON, or via
+   *       selectForCompare().
+   *
+   * @param {number} next
+   * @param {boolean} [fromThumbnail=false]
+   * @returns {void}
+   */
+  const handlePageNumberChange = useCallback((next, _fromThumbnail = false) => {
     const clamped = clampPage(next, totalPages);
     if (clamped !== pageNumber) {
       setPageNumber(clamped);
-      if (isComparing && fromThumbnail) {
-        // If user clicked a thumbnail while comparing, sync the compare page to the new main page.
-        setComparePageNumber(clamped);
-      }
+      // Intentionally do NOT touch comparePageNumber here; the right pane stays locked.
     }
-  }, [pageNumber, totalPages, isComparing]);
+  }, [pageNumber, totalPages]);
 
   // Zoom helpers
   const zoomIn = useCallback(() => {
     try {
-      if (documentRenderRef.current?.zoomIn) {
+      if (documentRenderRef.current && typeof documentRenderRef.current.zoomIn === 'function') {
         documentRenderRef.current.zoomIn();
         return;
       }
     } catch {}
-    setZoom((z) => Math.min(8, Math.round((z + 0.1) * 100) / 100));
+    setZoom(function (z) { return Math.min(8, Math.round((z + 0.1) * 100) / 100); });
   }, []);
 
   const zoomOut = useCallback(() => {
     try {
-      if (documentRenderRef.current?.zoomOut) {
+      if (documentRenderRef.current && typeof documentRenderRef.current.zoomOut === 'function') {
         documentRenderRef.current.zoomOut();
         return;
       }
     } catch {}
-    setZoom((z) => Math.max(0.1, Math.round((z - 0.1) * 100) / 100));
+    setZoom(function (z) { return Math.max(0.1, Math.round((z - 0.1) * 100) / 100); });
   }, []);
 
   const fitToScreen = useCallback(() => {
-    try { documentRenderRef.current?.fitToScreen?.(); } catch {}
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToScreen === 'function') documentRenderRef.current.fitToScreen(); } catch {}
   }, []);
 
   const fitToWidth = useCallback(() => {
-    try { documentRenderRef.current?.fitToWidth?.(); } catch {}
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToWidth === 'function') documentRenderRef.current.fitToWidth(); } catch {}
   }, []);
 
-  // Compare toggle
+  // Compare toggle (toolbar button)
   const handleCompare = useCallback(() => {
-    setIsComparing((prev) => {
+    setIsComparing(function (prev) {
       const next = !prev;
-      if (next) {
-        setComparePageNumber(pageNumber);
-      }
+      if (next) setComparePageNumber(pageNumber);
       return next;
     });
   }, [pageNumber]);
 
+  /**
+   * Select a page for the right-hand compare pane.
+   * - If compare mode is OFF, enables it and locks the given page on the right.
+   * - If compare mode is ON, simply replaces the right-hand page.
+   * Left pane (pageNumber) is never changed by this function.
+   * @param {number} page
+   * @returns {void}
+   */
+  const selectForCompare = useCallback((page) => {
+    const clamped = clampPage(page, totalPages);
+    setComparePageNumber(clamped);
+    setIsComparing(true);
+    logger.info('Compare selection updated', { comparePage: clamped });
+  }, [totalPages]);
+
   // Image adjustments
   const handleRotationChange = useCallback((delta) => {
-    setImageProperties((s) => ({ ...s, rotation: Math.round((s.rotation + Number(delta || 0)) % 360) }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    const d = Number(delta || 0);
+    setImageProperties(function (s) {
+      return { ...s, rotation: Math.round((s.rotation + d) % 360) };
+    });
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleBrightnessChange = useCallback((e) => {
-    const raw = Number(e?.target?.value);
+    const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((s) => ({ ...s, brightness: v }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    setImageProperties(function (s) { return { ...s, brightness: v }; });
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleContrastChange = useCallback((e) => {
-    const raw = Number(e?.target?.value);
+    const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((s) => ({ ...s, contrast: v }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    setImageProperties(function (s) { return { ...s, contrast: v }; });
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
   const resetImageProperties = useCallback(() => {
     setImageProperties({ rotation: 0, brightness: 100, contrast: 100 });
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
   // Keyboard navigation on the viewer container
@@ -200,20 +223,19 @@ export function useDocumentViewer() {
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
       if (!viewerContainerRef.current) return;
-      const isInside =
-        e.target instanceof Node && viewerContainerRef.current.contains(/** @type {Node} */ (e.target));
-      if (!isInside) return;
+      const inside = e.target instanceof Node && viewerContainerRef.current.contains(/** @type {Node} */(e.target));
+      if (!inside) return;
 
       switch (e.key) {
         case 'PageDown':
         case 'ArrowRight':
         case 'ArrowDown':
-          setPageNumber((p) => stepPage(p, 1, totalPages));
+          setPageNumber(function (p) { return stepPage(p, 1, totalPages); });
           break;
         case 'PageUp':
         case 'ArrowLeft':
         case 'ArrowUp':
-          setPageNumber((p) => stepPage(p, -1, totalPages));
+          setPageNumber(function (p) { return stepPage(p, -1, totalPages); });
           break;
         case 'Home':
           setPageNumber(1);
@@ -226,24 +248,24 @@ export function useDocumentViewer() {
       }
     }
     window.addEventListener('keydown', onKeyDown);
-    return () => { window.removeEventListener('keydown', onKeyDown); };
+    return function cleanup() { window.removeEventListener('keydown', onKeyDown); };
   }, [totalPages]);
 
   // Optional: auto-fit after first mount if renderer supports it.
   useEffect(() => {
-    let t = setTimeout(() => {
-      try { documentRenderRef.current?.fitToScreen?.(); } catch {}
+    const t = setTimeout(function () {
+      try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToScreen === 'function') documentRenderRef.current.fitToScreen(); } catch {}
     }, 0);
-    return () => { clearTimeout(t); };
+    return function cleanup() { clearTimeout(t); };
   }, []);
 
   /**
    * Handle container clicks. If a modal/dialog is open we may ignore the click.
-   * @param {*} [event]
+   * @param {*} _event
    * @returns {void}
    */
-  const handleContainerClick = useCallback((_event) => {
-    // No-op placeholder: kept for future behaviors (focus management, deselection, etc.)
+  const handleContainerClick = useCallback(function (_event) {
+    // Placeholder for future focus/selection behaviors.
   }, []);
 
   /**
@@ -304,6 +326,7 @@ export function useDocumentViewer() {
     handleContrastChange,
     resetImageProperties,
     handleMouseDown,
+    selectForCompare,
     setIsExpanded
   };
 }
