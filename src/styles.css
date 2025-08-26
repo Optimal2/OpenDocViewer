@@ -1,5 +1,5 @@
+/* File: src/styles.css */
 /**
- * File: src/styles.css
  * OpenDocViewer — Application Stylesheet (Light/Dark theming via CSS variables)
  *
  * PURPOSE
@@ -8,13 +8,9 @@
  *   - Keep layout predictable: app uses full viewport height/width with controlled overflow.
  *
  * GOTCHAS & NOTES
- *   - Dark mode is toggled by setting `data-theme="dark"` on <html> (see ThemeContext.jsx).
+ *   - Dark mode is toggled by setting `data-theme="dark"` on <html>.
  *   - Avoid global resets that affect embedded apps; we intentionally keep the base minimal.
- *   - Keep variable usage consistent so theme swaps remain fast and flicker-free.
  *   - Do not rename class hooks used by components without updating the React code.
- *
- * Provenance / reference for this revision:
- *   :contentReference[oaicite:0]{index=0}
  */
 
 /* =============================================================================
@@ -81,7 +77,8 @@ body {
   user-select: none; /* Prevent drag-select on large canvases/images */
 }
 
-/* NEW: Re-enable selection/caret for form controls (fixes flicker/closing of selects & caret issues) */
+/* Re-enable text selection/caret for typical form controls (intentionally includes <button>
+   for non-toolbar UIs; the toolbar overrides below will disable selection again). */
 input, textarea, select, label, button, [contenteditable="true"], .odv-allow-select {
   -webkit-user-select: text;
   user-select: text;
@@ -313,6 +310,24 @@ canvas {
   box-shadow: var(--box-shadow);
 }
 
+/* Prevent text selection and the native selection menu on toolbar buttons/icons */
+.toolbar,
+.toolbar button,
+.toolbar .odv-btn,
+.toolbar .toggle-collapse,
+.toolbar .material-icons,
+.toolbar .material-symbols-outlined {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+}
+
+/* Ensure clicks hit the button, not the glyph span */
+.toolbar .material-icons,
+.toolbar .material-symbols-outlined {
+  pointer-events: none;
+}
+
 .toolbar button:hover,
 .toolbar button:focus,
 .toolbar .toggle-collapse:hover,
@@ -333,8 +348,18 @@ canvas {
   cursor: not-allowed;
 }
 
+/* Keep "enabled" toggle buttons visually sticky across hover/active/focus */
 .compare-button.compare-enabled,
-.editing-button.editing-enabled {
+.compare-button.compare-enabled:hover,
+.compare-button.compare-enabled:focus,
+.compare-button.compare-enabled:active {
+  background-color: var(--warning-color);
+}
+
+.editing-button.editing-enabled,
+.editing-button.editing-enabled:hover,
+.editing-button.editing-enabled:focus,
+.editing-button.editing-enabled:active {
   background-color: var(--warning-color);
 }
 
@@ -532,11 +557,11 @@ input[type="range"].active {
    Print Rules (keep 1 image => 1 physical page in Chrome/Edge)
    ========================================================================== */
 @media print {
-  /* A4 by default. Switch to `size: Letter` if you target US Letter. */
+  /* Keep, but Edge may still show headers/footers depending on user setting */
   @page { margin: 0; size: A4 portrait; }
   html, body { margin: 0 !important; padding: 0 !important; }
 
-  /* Preferred: wrap each page in .odv-print-page or [data-odv-print-page] */
+  /* Wrapper used by multi-page printing (All/Range) */
   .odv-print-page,
   [data-odv-print-page] {
     page-break-after: always;
@@ -545,14 +570,15 @@ input[type="range"].active {
     display: grid;
     place-items: center;
     overflow: hidden;
-
-    /* Safety margin so Edge doesn’t spill into a second page if headers/footers are on */
     box-sizing: border-box;
     padding: 8mm;
 
-    /* Explicit page box (A4). For Letter use: width: 8.5in; height: 11in; */
-    width: 210mm;
-    height: 297mm;
+    /* Do NOT force fixed physical size here.
+       Fixed 210x297mm + padding can overflow if Edge keeps headers/footers,
+       causing a second sheet per image. Let the printable area dictate size. */
+    width: auto;
+    height: auto;
+    min-height: calc(100vh - 8mm); /* small safety so content doesn't spill */
   }
 
   .odv-print-page img,
@@ -561,11 +587,11 @@ input[type="range"].active {
   [data-odv-print-page] canvas {
     display: block;
     max-width: 100%;
-    max-height: calc(100% - 0mm);
+    max-height: 100%;
     object-fit: contain;
   }
 
-  /* Fallback: if the print view renders images directly inside the viewer container */
+  /* Fallback for the single "Active page" path (kept as-is) */
   .document-render-container img {
     page-break-after: always;
     break-inside: avoid;

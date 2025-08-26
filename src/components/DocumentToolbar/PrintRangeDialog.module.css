@@ -13,44 +13,71 @@
 .dialog {
   background: var(--odv-surface, #ffffff);
   color: inherit;
-  border-radius: 12px;
-  padding: 16px;
-  width: min(520px, 92vw);
+  border-radius: 16px;
+  padding: 18px;
+  width: min(560px, 92vw);
   max-width: 92vw;
-  box-shadow: 0 12px 32px rgba(0, 0, 0, 0.3);
+  box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
 .title {
-  margin: 0 0 6px 0;
+  margin: 0 0 4px 0;
   font-size: 18px;
 }
 
 .desc {
-  margin: 0 0 12px 0;
+  margin: 0 0 10px 0;
+  opacity: 0.9;
+}
+
+.modeSwitch {
+  margin: 0 0 8px 0;
+  font-size: 13px;
+  opacity: 0.9;
+}
+
+/* IMPORTANT: true text-link look, not a button */
+.linkBtn {
+  background: none !important;
+  border: none !important;
+  padding: 0 !important;
+  margin: 0 !important;
+  font: inherit !important;
+  color: var(--odv-link, #3b82f6) !important;
+  text-decoration: underline !important;
+  cursor: pointer !important;
+  box-shadow: none !important;
+}
+.linkBtn:hover { text-decoration: none !important; }
+.linkBtn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
 }
 
 .section {
-  margin-top: 4px;
-}
-
-.radioRow {
-  display: flex;
-  gap: 8px;
-  align-items: center;
   margin-top: 8px;
 }
 
-.rangeRow {
+/* Radios */
+.radioList {
+  display: grid;
+  gap: 10px;
+}
+.radioRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 14px;
+}
+
+/* Inputs shown only when relevant */
+.rangeRow,
+.advancedRow {
   display: flex;
   gap: 12px;
   align-items: center;
-  margin-top: 10px;
-  transition: opacity 120ms ease-in-out;
+  margin-top: 14px;
   flex-wrap: wrap;
-}
-
-.disabled {
-  opacity: 0.5;
 }
 
 .label {
@@ -64,7 +91,17 @@
   width: 120px;
   padding: 6px 8px;
   border-radius: 8px;
-  border: 1px solid var(--odv-border, #ccc);
+  border: 1px solid var(--odv-border, #ccd1d8);
+  font-size: 14px;
+  background: var(--odv-surface, #fff);
+  color: inherit;
+}
+
+.inputWide {
+  width: min(460px, 82vw);
+  padding: 8px 10px;
+  border-radius: 10px;
+  border: 1px solid var(--odv-border, #ccd1d8);
   font-size: 14px;
   background: var(--odv-surface, #fff);
   color: inherit;
@@ -73,12 +110,12 @@
 .hint {
   margin-left: auto;
   font-size: 12px;
-  opacity: 0.8;
+  opacity: 0.85;
 }
 
 .error {
   color: #b00020;
-  margin-top: 8px;
+  margin-top: 10px;
   font-size: 13px;
 }
 
@@ -86,5 +123,18 @@
   display: flex;
   gap: 12px;
   justify-content: flex-end;
-  margin-top: 16px;
+  margin-top: 18px;
+}
+
+/* Accessibility helper */
+.visuallyHidden {
+  position: absolute;
+  width: 1px;
+  height: 1px;
+  margin: -1px;
+  padding: 0;
+  border: 0;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
 }

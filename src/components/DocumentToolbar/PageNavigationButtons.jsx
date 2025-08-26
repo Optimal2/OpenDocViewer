@@ -15,9 +15,7 @@
  *
  * INTERACTION MODEL
  *   - Click → single step (prev/next).
- *   - Press & hold (mouse or touch) → continuous stepping using timers:
- *       • startPrevPageTimer('prev') / stopPrevPageTimer()
- *       • startNextPageTimer('next') / stopNextPageTimer()
+ *   - Press & hold (mouse or touch) → continuous stepping using timers provided by the parent.
  *
  * IMPORTANT PROJECT GOTCHA (for future reviewers)
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
@@ -44,7 +42,7 @@
  * @returns {void}
  */
 
-import React from 'react';
+import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
 
 /**
@@ -83,18 +81,39 @@ const PageNavigationButtons = ({
   pageNumber,
   totalPages,
 }) => {
+  // Suppress the subsequent onClick if a pointer press already caused a leading-edge step.
+  const suppressNextClickRef = useRef(false);
+
   // Touch helpers so press-and-hold also works on touch devices without scrolling the page.
   const onTouchStartPrev = (e) => {
     if (!prevPageDisabled) {
       e.preventDefault();
+      suppressNextClickRef.current = true; // leading-edge step will occur via timer
       startPrevPageTimer('prev');
     }
   };
   const onTouchStartNext = (e) => {
     if (!nextPageDisabled) {
       e.preventDefault();
+      suppressNextClickRef.current = true;
       startNextPageTimer('next');
     }
+  };
+
+  // Click handlers that respect suppression (so a press that already stepped once won’t step again).
+  const onClickPrev = () => {
+    if (suppressNextClickRef.current) {
+      suppressNextClickRef.current = false;
+      return; // skip duplicate step
+    }
+    handlePrevPage();
+  };
+  const onClickNext = () => {
+    if (suppressNextClickRef.current) {
+      suppressNextClickRef.current = false;
+      return;
+    }
+    handleNextPage();
   };
 
   return (
@@ -114,10 +133,19 @@ const PageNavigationButtons = ({
       {/* Previous (click = single step; press & hold = continuous) */}
       <button
         type="button"
-        onClick={handlePrevPage}
-        onMouseDown={() => !prevPageDisabled && startPrevPageTimer('prev')}
+        onClick={onClickPrev}
+        onMouseDown={() => {
+          if (!prevPageDisabled) {
+            suppressNextClickRef.current = true; // leading-edge step via timer
+            startPrevPageTimer('prev');
+          }
+        }}
         onMouseUp={stopPrevPageTimer}
-        onMouseLeave={stopPrevPageTimer}
+        onMouseLeave={() => {
+          stopPrevPageTimer();
+          // If the pointer left the button, a click won’t follow; clear suppression to avoid stickiness.
+          suppressNextClickRef.current = false;
+        }}
         onTouchStart={onTouchStartPrev}
         onTouchEnd={stopPrevPageTimer}
         aria-label="Previous page"
@@ -137,10 +165,18 @@ const PageNavigationButtons = ({
       {/* Next (click = single step; press & hold = continuous) */}
       <button
         type="button"
-        onClick={handleNextPage}
-        onMouseDown={() => !nextPageDisabled && startNextPageTimer('next')}
+        onClick={onClickNext}
+        onMouseDown={() => {
+          if (!nextPageDisabled) {
+            suppressNextClickRef.current = true;
+            startNextPageTimer('next');
+          }
+        }}
         onMouseUp={stopNextPageTimer}
-        onMouseLeave={stopNextPageTimer}
+        onMouseLeave={() => {
+          stopNextPageTimer();
+          suppressNextClickRef.current = false;
+        }}
         onTouchStart={onTouchStartNext}
         onTouchEnd={stopNextPageTimer}
         aria-label="Next page"
