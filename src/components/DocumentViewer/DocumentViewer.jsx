@@ -14,7 +14,7 @@
  *
  * ACCESSIBILITY
  *   - The scrollable viewer container is focusable (tabIndex=0) so that
- *     keyboard navigation (PageUp/Down, Home/End) works when the user focuses it.
+ *     keyboard navigation (PageUp/PageDown/Arrows, Home/End) works when the user focuses it.
  *
  * @returns {React.ReactElement}
  */
@@ -56,6 +56,7 @@ const DocumentViewer = () => {
     handleContrastChange,
     resetImageProperties,
     handleMouseDown,
+    selectForCompare,
     setIsExpanded,
   } = useDocumentViewer();
 
@@ -70,23 +71,19 @@ const DocumentViewer = () => {
   return (
     <div
       className="document-viewer-container"
-      onClick={(e) => handleContainerClick(e)}
+      onClick={handleContainerClick}
+      role="region"
+      aria-label="Document viewer container"
     >
-      {/* Toolbar with navigation and image adjustment controls */}
       <DocumentViewerToolbar
-        pages={allPages}
         pageNumber={pageNumber}
-        totalPages={totalPages}
         setPageNumber={setPageNumber}
-        zoomIn={zoomIn}
-        zoomOut={zoomOut}
+        zoom={zoom}
+        setZoom={setZoom}
+        isComparing={isComparing}
+        handleCompare={handleCompare}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
-        setZoom={setZoom}
-        viewerContainerRef={viewerContainerRef}
-        handleCompare={handleCompare}
-        isComparing={isComparing}
-        imageProperties={imageProperties}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
@@ -116,11 +113,12 @@ const DocumentViewer = () => {
             setPageNumber={(newPageNumber) => handlePageNumberChange(newPageNumber, true)}
             thumbnailsContainerRef={thumbnailsContainerRef}
             width={thumbnailWidth}
+            selectForCompare={selectForCompare}
           />
           <Resizer onMouseDown={handleMouseDown} />
         </div>
 
-        {/* Main/compare rendering */}
+        {/* Main renderer(s) */}
         <DocumentViewerRender
           pageNumber={pageNumber}
           zoom={zoom}

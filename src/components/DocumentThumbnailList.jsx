@@ -13,42 +13,19 @@
  *   - Uses a listbox/option pattern so the currently selected page can be announced.
  *   - The container exposes `aria-activedescendant` pointing at the selected option.
  *   - Each thumbnail is keyboard-activatable via Enter/Space.
- *
- * PERFORMANCE
- *   - Wrapped in React.memo to avoid unnecessary re-renders when props are stable.
- *   - Keeps scroll position in a ref (no state churn).
- *
- * LOGGING
- *   - Logs user thumbnail clicks at `info` level with the target page number.
- *
- * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With `file-type` v21 the '/browser' subpath is not exported
- *     for bundlers and will break Vite builds. See README “Design notes & gotchas”.
- *
- * Provenance / previous baseline for this component: :contentReference[oaicite:0]{index=0}
  */
-
-import React, { useEffect, useRef, useCallback, useMemo } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
-import logger from '../LogController';
-import LoadingSpinner from './LoadingSpinner';
+import logger from '../LogController.js';
 
 /**
- * @typedef {Object} PageItem
- * @property {string} thumbnailUrl  - URL for the page thumbnail image (when loaded).
- * @property {number} status        - Load status (0=loading, 1=ready, -1=failed).
- */
-
-/**
- * DocumentThumbnailList component.
- *
  * @param {Object} props
- * @param {Array.<PageItem>} props.allPages
+ * @param {Array.<{ thumbnailUrl: string, status: number }>} props.allPages
  * @param {number} props.pageNumber
- * @param {SetPageNumber} props.setPageNumber
+ * @param {function(number): void} props.setPageNumber
  * @param {{ current: (HTMLElement|null) }} props.thumbnailsContainerRef
  * @param {number} props.width
+ * @param {function(number): void} [props.selectForCompare]  Optional SHIFT-click handler
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -57,6 +34,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   setPageNumber,
   thumbnailsContainerRef,
   width,
+  selectForCompare,
 }) {
   const scrollPosition = useRef(0);
 
@@ -67,38 +45,69 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, [pageNumber, allPages.length]);
 
   /**
-   * Handle a thumbnail activation (click or key).
-   * Uses a stable callback so children don't re-render unnecessarily.
+   * Handle a thumbnail activation from click (supports SHIFT to select for compare).
    * @param {number} pageNum
+   * @param {MouseEvent|React.MouseEvent} [evt]
    * @returns {void}
    */
   const handleActivate = useCallback(
-    (pageNum) => {
+    (pageNum, evt) => {
       try {
-        setPageNumber(pageNum);
-        logger.info('Thumbnail activated', { pageNum });
+        const useCompare = !!(evt && evt.shiftKey) && typeof selectForCompare === 'function';
+        if (useCompare) {
+          // SHIFT-click: select for compare (right pane) without changing the left page.
+          evt.preventDefault && evt.preventDefault();
+          evt.stopPropagation && evt.stopPropagation();
+          selectForCompare(pageNum);
+          logger.info('Thumbnail SHIFT-activated for compare', { pageNum });
+        } else {
+          // Normal click: navigate left pane only.
+          setPageNumber(pageNum);
+          logger.info('Thumbnail activated', { pageNum });
+        }
       } catch (error) {
-        logger.error('Failed to set page from thumbnail', { error: String(error?.message || error), pageNum });
+        logger.error('Failed to handle thumbnail activation', {
+          error: String(error && error.message ? error.message : error),
+          pageNum,
+        });
       }
     },
-    [setPageNumber]
+    [setPageNumber, selectForCompare]
+  );
+
+  /** Keyboard activation: Enter/Space to navigate; SHIFT+Enter/Space selects for compare. */
+  const handleKeyDown = useCallback(
+    (e, pageNum) => {
+      const key = e.key || '';
+      if (key === 'Enter' || key === ' ') {
+        e.preventDefault();
+        if (e.shiftKey && typeof selectForCompare === 'function') {
+          selectForCompare(pageNum);
+          logger.info('Thumbnail SHIFT-key activated for compare', { pageNum });
+        } else {
+          setPageNumber(pageNum);
+          logger.info('Thumbnail key activated', { pageNum });
+        }
+      }
+    },
+    [setPageNumber, selectForCompare]
   );
 
   /** Remember scroll position on container scroll. */
   const handleScroll = useCallback(() => {
-    const el = thumbnailsContainerRef?.current;
+    const el = thumbnailsContainerRef && thumbnailsContainerRef.current;
     if (el) scrollPosition.current = el.scrollTop;
   }, [thumbnailsContainerRef]);
 
   /** Restore scroll position when the container ref changes or on mount. */
   useEffect(() => {
-    const el = thumbnailsContainerRef?.current;
+    const el = thumbnailsContainerRef && thumbnailsContainerRef.current;
     if (el) el.scrollTop = scrollPosition.current;
   }, [thumbnailsContainerRef]);
 
   /** Attach/detach a passive scroll handler (imperative for perf/compat). */
   useEffect(() => {
-    const el = thumbnailsContainerRef?.current;
+    const el = thumbnailsContainerRef && thumbnailsContainerRef.current;
     if (!el) return undefined;
     el.addEventListener('scroll', handleScroll, { passive: true });
     return () => el.removeEventListener('scroll', handleScroll);
@@ -111,30 +120,22 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       role="listbox"
       aria-label="Document Thumbnails"
       aria-activedescendant={activeDescendantId}
-      style={{ width: `${Number(width) || 0}px` }}
+      style={{ width: String(Number(width) || 0) + 'px' }}
     >
       <div className="thumbnails-list">
         {allPages.map((page, index) => {
           const itemIndex = index + 1;
           const isSelected = pageNumber === itemIndex;
-          const optionId = `thumbnail-${itemIndex}`;
-          const { thumbnailUrl, status } = page;
-
-          /** Keyboard: activate on Enter/Space; keep focus on the option. */
-          const onKeyDown = (e) => {
-            if (e.key === 'Enter' || e.key === ' ') {
-              e.preventDefault();
-              handleActivate(itemIndex);
-            }
-          };
+          const thumbnailUrl = page && page.thumbnailUrl ? page.thumbnailUrl : '';
+          const status = page && typeof page.status === 'number' ? page.status : 0;
 
           return (
             <div
-              id={optionId}
-              key={optionId}
+              key={itemIndex}
+              id={`thumbnail-${itemIndex}`}
               className={`thumbnail-wrapper ${isSelected ? 'selected' : ''}`}
-              onClick={() => handleActivate(itemIndex)}
-              onKeyDown={onKeyDown}
+              onClick={(e) => handleActivate(itemIndex, e)}
+              onKeyDown={(e) => handleKeyDown(e, itemIndex)}
               role="option"
               tabIndex={isSelected ? 0 : -1}
               aria-label={`Go to page ${itemIndex}`}
@@ -144,7 +145,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
               <div id={`thumbnail-anchor-${itemIndex}`} className="thumbnail-anchor" />
               <div className="thumbnail-number">{itemIndex}</div>
               <div className="thumbnail-image">
-                {status === 0 && <LoadingSpinner />}
+                {/* 0=loading, -1=failed, 1=ready */}
+                {status === 0 && (typeof LoadingSpinner !== 'undefined' ? <LoadingSpinner /> : <div className="loading-spinner" />)}
                 {status === -1 && (
                   <img
                     src="lost.png"
@@ -174,8 +176,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   );
 });
 
-DocumentThumbnailList.displayName = 'DocumentThumbnailList';
-
 DocumentThumbnailList.propTypes = {
   allPages: PropTypes.arrayOf(
     PropTypes.shape({
@@ -189,6 +189,7 @@ DocumentThumbnailList.propTypes = {
     current: PropTypes.any, // HTMLElement|null (loosened to avoid SSR PropTypes issues)
   }).isRequired,
   width: PropTypes.number.isRequired,
+  selectForCompare: PropTypes.func,
 };
 
 export default DocumentThumbnailList;

@@ -15,14 +15,7 @@
  *
  * PERFORMANCE
  *   - Wrapped in React.memo to avoid unnecessary re-renders when inputs are stable.
- *
- * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- *
- * Provenance / prior baseline of this module: :contentReference[oaicite:0]{index=0}
  */
-
 import React from 'react';
 import PropTypes from 'prop-types';
 import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
@@ -37,10 +30,12 @@ import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
  *        Current 1-based page number (selected thumbnail).
  * @param {function(number): void} props.setPageNumber
  *        Setter to change the current page number.
- * @param {RefLike} props.thumbnailsContainerRef
+ * @param {Object} props.thumbnailsContainerRef
  *        Ref to the scrollable thumbnails container element.
  * @param {number} props.width
  *        Pixel width to apply to the thumbnails pane.
+ * @param {function(number): void} [props.selectForCompare]
+ *        Handler to select a page for the right-hand compare pane (SHIFT-click).
  * @returns {React.ReactElement}
  */
 const DocumentViewerThumbnails = ({
@@ -49,6 +44,7 @@ const DocumentViewerThumbnails = ({
   setPageNumber,
   thumbnailsContainerRef,
   width,
+  selectForCompare,
 }) => {
   return (
     <DocumentThumbnailList
@@ -57,6 +53,7 @@ const DocumentViewerThumbnails = ({
       setPageNumber={setPageNumber}
       thumbnailsContainerRef={thumbnailsContainerRef}
       width={width}
+      selectForCompare={selectForCompare}
     />
   );
 };
@@ -74,6 +71,7 @@ DocumentViewerThumbnails.propTypes = {
     current: PropTypes.any, // HTMLElement|null (loosened for SSR)
   }).isRequired,
   width: PropTypes.number.isRequired,
+  selectForCompare: PropTypes.func, // optional
 };
 
 export default React.memo(DocumentViewerThumbnails);
