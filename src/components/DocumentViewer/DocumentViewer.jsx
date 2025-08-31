@@ -49,7 +49,7 @@ const DocumentViewer = () => {
     zoomOut,
     fitToScreen,
     fitToWidth,
-    handleContainerClick, // accepts the click event (optional)
+    handleContainerClick,
     handleCompare,
     handleRotationChange,
     handleBrightnessChange,
@@ -76,21 +76,33 @@ const DocumentViewer = () => {
       aria-label="Document viewer container"
     >
       <DocumentViewerToolbar
+        /* page + totals */
         pageNumber={pageNumber}
         setPageNumber={setPageNumber}
+        totalPages={totalPages}
+        allPages={allPages}
+
+        /* zoom controls */
         zoom={zoom}
         setZoom={setZoom}
-        isComparing={isComparing}
-        handleCompare={handleCompare}
+        zoomIn={zoomIn}
+        zoomOut={zoomOut}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
+
+        /* compare + editing */
+        isComparing={isComparing}
+        handleCompare={handleCompare}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
         resetImageProperties={resetImageProperties}
-        documentRenderRef={documentRenderRef}
+        imageProperties={imageProperties}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
+        documentRenderRef={documentRenderRef}
+
+        /* nav button disabled states */
         prevPageDisabled={prevPageDisabled}
         nextPageDisabled={nextPageDisabled}
         firstPageDisabled={firstPageDisabled}
