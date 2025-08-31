@@ -15,7 +15,7 @@
   color: inherit;
   border-radius: 16px;
   padding: 18px;
-  width: min(560px, 92vw);
+  width: min(640px, 92vw);
   max-width: 92vw;
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
@@ -36,7 +36,7 @@
   opacity: 0.9;
 }
 
-/* IMPORTANT: true text-link look, not a button */
+/* true text-link look */
 .linkBtn {
   background: none !important;
   border: none !important;
@@ -54,15 +54,23 @@
   outline-offset: 2px;
 }
 
-.section {
-  margin-top: 8px;
+.section { margin-top: 8px; }
+
+/* Section headers & divider for clearer grouping */
+.sectionHeader {
+  margin: 14px 0 6px 0;
+  font-size: 14px;
+  font-weight: 600;
+  opacity: 0.95;
+}
+.divider {
+  margin: 12px 0;
+  border: 0;
+  border-top: 1px solid var(--odv-border, #d5dae1);
 }
 
 /* Radios */
-.radioList {
-  display: grid;
-  gap: 10px;
-}
+.radioList { display: grid; gap: 10px; }
 .radioRow {
   display: inline-flex;
   align-items: center;
@@ -70,7 +78,7 @@
   font-size: 14px;
 }
 
-/* Inputs shown only when relevant */
+/* Conditional input rows */
 .rangeRow,
 .advancedRow {
   display: flex;
@@ -80,11 +88,10 @@
   flex-wrap: wrap;
 }
 
-.label {
-  display: flex;
-  align-items: center;
-  gap: 6px;
-}
+.label { display: flex; align-items: center; gap: 6px; }
+.labelBlock { display: flex; flex-direction: column; gap: 6px; }
+
+.fieldCol { display: grid; gap: 10px; margin-top: 8px; }
 
 .input,
 .select {
@@ -98,7 +105,7 @@
 }
 
 .inputWide {
-  width: min(460px, 82vw);
+  width: min(520px, 86vw);
   padding: 8px 10px;
   border-radius: 10px;
   border: 1px solid var(--odv-border, #ccd1d8);
@@ -108,9 +115,11 @@
 }
 
 .hint {
-  margin-left: auto;
+  margin-left: 0;
   font-size: 12px;
   opacity: 0.85;
+  display: block;
+  margin-top: 6px;
 }
 
 .error {
@@ -126,7 +135,7 @@
   margin-top: 18px;
 }
 
-/* Accessibility helper */
+/* a11y helper */
 .visuallyHidden {
   position: absolute;
   width: 1px;

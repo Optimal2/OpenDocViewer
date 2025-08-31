@@ -1,88 +1,157 @@
 /**
  * OpenDocViewer — Runtime Configuration (public/odv.config.js)
  *
- * PURPOSE
- *   - Provide a small, portable configuration object that ops can change **without rebuilding**.
- *   - Must be loaded **before** the app bundle (see index.html).
- *   - Keep this file as **pure JavaScript**. Do **NOT** wrap it in <script> tags.
+ * Works under an IIS application folder (e.g., /OpenDocViewer).
+ * The script computes basePath from its own <script src=".../odv.config.js"> URL.
  *
- * CACHING
- *   - Configure your server to send `Cache-Control: no-store` for this file so changes take effect immediately.
- *   - The provided IIS web.config already includes a <location path="odv.config.js"> override.
+ * DESIGN (mode-less):
+ *   This file exposes ALL knobs at all times. You enable/disable features by
+ *   flipping booleans (no comment/uncomment “modes” needed here).
  *
- * SAFETY
- *   - Do not put real secrets here; anything in client-side JS is visible to end users.
- *   - The log token is a capability guard for the log endpoint, not a secret; rotate it as needed.
+ * UI Logic (used by the print dialog):
+ *   - Show "Reason" / "For whom" inputs when (userLog.enabled || printHeader.enabled),
+ *     unless you force visibility via ui.showReasonWhen / ui.showForWhomWhen.
+ *   - Validation (required, maxLen, regex) comes from userLog.ui.fields.*.
+ *   - Reason dropdown can be inline (options[]) or loaded from source.url.
+ *   - A reason option may request extra free text via allowFreeText + input{...}.
  *
- * GOTCHAS
- *   - This file runs in the global window scope; avoid global pollution.
- *   - We intentionally import `file-type` from its root elsewhere in the app (not "file-type/browser")
- *     due to the package's exports map in v21. See README's design notes before changing that.
- *
- * Source reference for audit tooling: :contentReference[oaicite:0]{index=0}
+ * CACHING:
+ *   Keep this file uncached (web.config sets Cache-Control: no-store).
  */
 
-/* global window */
+(function (w, d) {
+  function toBool(v, def) { return typeof v === 'boolean' ? v : def; }
 
-(function (w) {
-  // Existing values (e.g., if server-side templating injected something earlier)
-  const existing = w.__ODV_CONFIG__ || {};
-
-  /**
-   * Coerce various forms (boolean, "true"/"false", "1"/"0") to booleans.
-   * @param {unknown} v
-   * @param {boolean} fallback
-   * @returns {boolean}
-   */
-  function toBool(v, fallback) {
-    if (typeof v === 'boolean') return v;
-    if (typeof v === 'string') {
-      const s = v.toLowerCase();
-      if (s === 'true' || s === '1') return true;
-      if (s === 'false' || s === '0') return false;
+  // Compute app base from THIS file's URL (robust for virtual directories).
+  var scriptEl = d.currentScript || (function () {
+    var all = d.getElementsByTagName('script');
+    for (var i = all.length - 1; i >= 0; i--) {
+      var s = all[i].getAttribute && all[i].getAttribute('src');
+      if (s && /odv\.config\.js(\?|$)/i.test(s)) return all[i];
     }
-    return fallback;
+    return null;
+  })();
+
+  var cfgSrc = scriptEl ? scriptEl.getAttribute('src') : '';
+  var abs;
+  try { abs = new URL(cfgSrc, d.baseURI || w.location.href); } catch { abs = null; }
+
+  // E.g.: /OpenDocViewer/odv.config.js  -> baseHref: /OpenDocViewer/
+  var baseHref = '/';
+  if (abs && abs.pathname) {
+    baseHref = abs.pathname.replace(/\/odv\.config\.js(?:\?.*)?$/i, '/');
+  } else {
+    // Fallback: use the directory of the current location
+    baseHref = (w.location.pathname || '/').replace(/[^/]+$/, '/');
   }
+  if (!/\/$/.test(baseHref)) baseHref += '/';
+  var basePath = baseHref.replace(/\/$/, ''); // without trailing slash, e.g. "/OpenDocViewer"
 
-  /**
-   * Coerce to string, otherwise return empty string.
-   * @param {unknown} v
-   * @returns {string}
-   */
-  function toStr(v) {
-    return typeof v === 'string' ? v : '';
-  }
+  // If a previous config exists, allow it to seed a few booleans (ops can inline something before us).
+  var existing = w.__ODV_CONFIG__ || {};
 
-  /**
-   * @typedef {Object} ODVRuntimeConfig
-   * @property {boolean} exposeStackTraces  Show detailed error info in the UI (recommended false in prod).
-   * @property {boolean} showPerfOverlay    Show performance HUD overlay (recommended false in prod).
-   * @property {string}  logEndpoint        Absolute or relative URL to the log server /log endpoint.
-   * @property {string}  logToken           Shared token sent as the 'x-log-token' header.
-   */
-
-  /** @type {ODVRuntimeConfig} */
-  const cfg = Object.freeze({
-    // UI & diagnostics (safe defaults)
+  // ========================= ACTIVE (mode-less) CONFIG =========================
+  var ACTIVE_CONFIG = {
+    // UI & diagnostics
     exposeStackTraces: toBool(existing.exposeStackTraces, false),
-    showPerfOverlay: toBool(existing.showPerfOverlay, false),
+    showPerfOverlay:   toBool(existing.showPerfOverlay,   false),
 
-    // Logging backend integration (optional)
-    logEndpoint: toStr(existing.logEndpoint),
-    logToken: toStr(existing.logToken),
-  });
+    // Where the app is mounted (derived above); useful for building URLs.
+    basePath: basePath,    // e.g. "/OpenDocViewer"
+    baseHref: baseHref,    // e.g. "/OpenDocViewer/"
 
-  // Publish a read-only snapshot. Assigning a new object will replace the whole config,
-  // which is intentional (ops can ship a different file); properties on this object are frozen.
+    // ---- USER LOG -------------------------------------------------------------
+    // Default: ENABLED — proxied via a dedicated IIS app at /ODVProxy/.
+    userLog: {
+      enabled:  true,
+      endpoint: "/ODVProxy/userlog/record", // IIS proxy to http://localhost:3002/userlog/record
+      transport: "form",
+
+      // Print dialog UI/validation knobs.
+      // The dialog will show inputs only when (userLog.enabled || printHeader.enabled),
+      // unless you force visibility with "always"/"never" below.
+      ui: {
+        showReasonWhen:  "auto",  // "auto" | "always" | "never"
+        showForWhomWhen: "auto",  // "auto" | "always" | "never"
+
+        fields: {
+          reason: {
+            required: true,
+            maxLen: 255,
+            // regex: null → viewer uses a permissive default that caps to maxLen
+            regex: null,          // or e.g. "^([\\s\\S]{0,255})$"
+            regexFlags: "",
+            placeholder: "Select reason…",
+            source: {
+              // Inline options (used if no URL is provided)
+              options: [
+                { value: "Patient copy" },
+                { value: "Internal review" },
+                { value: "Legal request" },
+                // Example of an option that requests additional free text:
+                { value: "Other", allowFreeText: true,
+                  input: {
+                    required: true,
+                    maxLen: 140,
+                    regex: null,       // or "^([\\s\\S]{0,140})$"
+                    regexFlags: "",
+                    placeholder: "Type other reason…",
+                    prefix: "",        // prepend to the user's text
+                    suffix: ""         // append after the user's text
+                  }
+                }
+              ],
+              // To load reasons at runtime instead, set a same-origin URL and (optionally) a small cache TTL:
+              // url: basePath + "/userlog/reasons.json",
+              // cacheTtlSec: 300
+            },
+            default: null          // e.g., "Patient copy"
+          },
+
+          forWhom: {
+            required: false,
+            maxLen: 120,
+            regex: null,           // or "^([\\s\\S]{0,120})$"
+            regexFlags: "",
+            placeholder: "Who requested this?"
+          }
+        }
+      }
+    },
+
+    // ---- PRINT HEADER ---------------------------------------------------------
+    // When enabled, a header/footer band is added to printed pages.
+    printHeader: {
+      enabled: false,            // keep off by default; turn on if you want stamping
+      position: "top",           // "top" | "bottom"
+      heightPx: 32,              // reserved space; dialog may warn if too small
+      applyTo: "all",            // "all" | "first" | "last"
+      // Tokenized template (simple ${...} substitution).
+      // Available tokens: now, page, totalPages, reason, forWhom, user.id, user.name,
+      // doc.id, doc.title, doc.pageCount, viewer.version
+      template:
+        "${now} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
+      // Optional CSS injected only for print media; scoping class provided by viewer
+      css: [
+        ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444; }",
+        ".odv-print-header strong{ color:#000; }"
+      ].join("\n")
+    },
+
+    // ---- SYSTEM LOG -----------------------------------------------------------
+    // Default: ENABLED — proxied via the IIS app at /ODVProxy/.
+    systemLog: {
+      enabled:  true,
+      endpoint: "/ODVProxy/log",   // IIS proxy to http://localhost:3001/log
+      token:    "REPLACE_WITH_SYSTEM_LOG_TOKEN" // paste the token generated by Manage-ODV-LogServers.ps1
+    }
+  };
+
+  // Freeze & publish
+  var cfg = Object.freeze(ACTIVE_CONFIG);
   w.__ODV_CONFIG__ = cfg;
-
-  // Helper getter for debugging/tools without exposing a mutable reference
-  Object.defineProperty(w, '__ODV_GET_CONFIG__', {
-    value: () => cfg,
-    writable: false,
-    enumerable: false,
-    configurable: false,
+  Object.defineProperty(w, "__ODV_GET_CONFIG__", {
+    value: function () { return cfg; },
+    writable: false, enumerable: false, configurable: false
   });
-
-  // NOTE: No console.log here to keep production output clean.
-})(typeof window !== 'undefined' ? window : globalThis);
+})(window, document);

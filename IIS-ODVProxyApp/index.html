@@ -1,0 +1,18 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <title>ODV Proxy App</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <style>body{font:14px/1.4 system-ui,Segoe UI,Arial,sans-serif;margin:2rem;color:#333}</style>
+  </head>
+  <body>
+    <h1>OpenDocViewer Proxy</h1>
+    <p>This IIS app only reverse-proxies logging endpoints.</p>
+    <ul>
+      <li><code>POST ./log</code> → System Log server</li>
+      <li><code>POST ./userlog/record</code> → User Log server</li>
+    </ul>
+    <p>Rules may be enabled/disabled by the setup script.</p>
+  </body>
+</html>
