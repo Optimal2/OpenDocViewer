@@ -1,0 +1,69 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!--
+  ODV Proxy App — minimal IIS reverse proxy for ODV log servers
+  This app contains no UI; it only proxies:
+    /log              -> __SYSTEM_LOG_URL__
+    /userlog/record   -> __USER_LOG_URL__
+
+  REQUIREMENTS
+    - IIS URL Rewrite module
+    - IIS Application Request Routing (ARR) with proxying enabled
+-->
+<configuration>
+  <system.webServer>
+
+    <httpProtocol>
+      <customHeaders>
+        <add name="X-Content-Type-Options" value="nosniff" />
+        <add name="Referrer-Policy" value="no-referrer" />
+      </customHeaders>
+    </httpProtocol>
+
+    <rewrite>
+      <rules>
+        <clear />
+
+        <!-- System Log proxy -->
+        <rule name="Proxy_SystemLog" enabled="__ENABLE_SYSTEM_LOG__" stopProcessing="true">
+          <match url="^log$" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_METHOD}" pattern="POST|OPTIONS" />
+          </conditions>
+          <action type="Rewrite"
+                  url="__SYSTEM_LOG_URL__"
+                  appendQueryString="true"
+                  logRewrittenUrl="true" />
+          __SERVER_VARS_BLOCK__
+        </rule>
+
+        <!-- User Log proxy -->
+        <rule name="Proxy_UserLog" enabled="__ENABLE_USER_LOG__" stopProcessing="true">
+          <match url="^userlog/record$" />
+          <conditions logicalGrouping="MatchAll">
+            <add input="{REQUEST_METHOD}" pattern="POST|OPTIONS" />
+          </conditions>
+          <action type="Rewrite"
+                  url="__USER_LOG_URL__"
+                  appendQueryString="true"
+                  logRewrittenUrl="true" />
+          __SERVER_VARS_BLOCK__
+        </rule>
+
+        <!-- Landing page (GET / -> /index.html) -->
+        <rule name="Landing" stopProcessing="true">
+          <match url="^$" />
+          <action type="Rewrite" url="index.html" />
+        </rule>
+      </rules>
+
+      <!-- Placeholder; by default we don't touch server variables -->
+      <!--__ALLOWED_SERVER_VARIABLES__-->
+    </rewrite>
+
+    <staticContent>
+      <remove fileExtension=".html" />
+      <mimeMap fileExtension=".html" mimeType="text/html" />
+    </staticContent>
+
+  </system.webServer>
+</configuration>

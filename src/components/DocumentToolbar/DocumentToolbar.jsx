@@ -1,18 +1,31 @@
-// File: src/components/DocumentToolbar/DocumentToolbar.jsx
 /**
  * File: src/components/DocumentToolbar/DocumentToolbar.jsx
  *
  * OpenDocViewer — Document Toolbar
  *
- * NOTE: Single print entry point with a dialog that supports:
- *  - Active page (default)
- *  - All pages
- *  - Page range (inclusive)
+ * Single print entry point + dialog that collects:
+ *  - Page selection (active / all / range / advanced)
+ *  - User-print metadata (reason, forWhom) when enabled by config
+ *
+ * The dialog submits a detail object; we forward reason/forWhom to
+ * UserLogController in a non-blocking way before starting the print job.
  */
 
-import React, { useContext, useCallback, useMemo, useState } from 'react';
+/**
+ * JSDoc typedefs for the print dialog payload (avoid TS-style unions).
+ * @typedef {Object} PrintSubmitDetail
+ * @property {string} mode  Allowed values: "active" | "all" | "range" | "advanced".
+ * @property {number} [from]
+ * @property {number} [to]
+ * @property {Array<number>} [sequence]
+ * @property {?string} [reason]
+ * @property {?string} [forWhom]
+ */
+
+import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import logger from '../../LogController.js';
+import userLog from '../../UserLogController.js';
 import { ThemeContext } from '../../ThemeContext.jsx';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
@@ -24,34 +37,6 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
 /** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
 
-/**
- * DocumentToolbar component.
- *
- * @param {Object} props
- * @param {number} props.pageNumber
- * @param {number} props.totalPages
- * @param {boolean} props.prevPageDisabled
- * @param {boolean} props.nextPageDisabled
- * @param {boolean} props.firstPageDisabled
- * @param {boolean} props.lastPageDisabled
- * @param {SetPageNumber} props.setPageNumber
- * @param {function(): void} props.zoomIn
- * @param {function(): void} props.zoomOut
- * @param {function(): void} props.fitToScreen
- * @param {function(): void} props.fitToWidth
- * @param {RefLike} props.documentRenderRef
- * @param {RefLike} props.viewerContainerRef
- * @param {function(): void} props.handleCompare
- * @param {boolean} props.isComparing
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
- * @param {function(number): void} props.handleRotationChange
- * @param {function({target:{value:*}}): void} props.handleBrightnessChange
- * @param {function({target:{value:*}}): void} props.handleContrastChange
- * @param {function(): void} props.resetImageProperties
- * @param {boolean} props.isExpanded
- * @param {SetBooleanState} props.setIsExpanded
- * @returns {React.ReactElement}
- */
 const DocumentToolbar = ({
   pageNumber,
   totalPages,
@@ -77,6 +62,22 @@ const DocumentToolbar = ({
   setIsExpanded,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
+
+  // Initialize optional context for user logging (iframe id, app version)
+  useEffect(() => {
+    try {
+      const iframeId = typeof window !== 'undefined' && window.frameElement ? (window.frameElement.id || null) : null;
+      userLog.initContext({ iframeId });
+    } catch {}
+    try {
+      // If the host/build injects a version variable, attach it.
+      const ver =
+        (typeof window !== 'undefined' && (window.__ODV_APP_VERSION__ || window.__APP_VERSION__)) ||
+        (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.VITE_APP_VERSION) ||
+        null;
+      if (ver) userLog.setViewerVersion(String(ver));
+    } catch {}
+  }, []);
 
   // Navigation helpers (single-step handlers + press-and-hold timers)
   const {
@@ -132,9 +133,60 @@ const DocumentToolbar = ({
     });
   }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
 
-  /** Callback when the print dialog submits. */
-  const handlePrintSubmit = useCallback((detail /* {mode:'active'|'all'|'range'|'advanced', from?:number, to?:number, sequence?:number[]} */) => {
+  /**
+   * Build a compact "pages" descriptor for logging:
+   *  - 'all'
+   *  - current page number for 'active'
+   *  - 'from-to' for range
+   *  - comma-joined sequence for advanced
+   * @param {PrintSubmitDetail} detail
+   * @returns {?string}
+   */
+  const toPagesString = useCallback((detail) => {
+    if (!detail) return null;
+    if (detail.mode === 'all') return 'all';
+    if (detail.mode === 'active') return String(pageNumber);
+    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+      return `${detail.from}-${detail.to}`;
+    }
+    if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
+      return detail.sequence.join(',');
+    }
+    return null;
+  }, [pageNumber]);
+
+  /**
+   * Fire-and-forget user print log. Must never block the print action.
+   * @param {PrintSubmitDetail} detail
+   */
+  const submitUserPrintLog = useCallback((detail) => {
+    try {
+      userLog.submitPrint({
+        action: 'print',
+        reason: detail?.reason ?? null,
+        forWhom: detail?.forWhom ?? null,
+        docId: null,         // supply if you have a stable id
+        fileName: null,      // supply if available
+        pageCount: totalPages ?? null,
+        pages: toPagesString(detail),
+        copies: 1
+      });
+    } catch {
+      /* never throw */
+    }
+  }, [toPagesString, totalPages]);
+
+  /**
+   * Callback when the print dialog submits.
+   * @param {PrintSubmitDetail} detail
+   * @returns {void}
+   */
+  const handlePrintSubmit = useCallback((detail) => {
     setPrintDialogOpen(false);
+
+    // Kick off user-log submission first (non-blocking).
+    submitUserPrintLog(detail);
+
     if (!detail || detail.mode === 'active') {
       handlePrint(documentRenderRef, { viewerContainerRef });
       return;
@@ -143,19 +195,19 @@ const DocumentToolbar = ({
       handlePrintAll(documentRenderRef, { viewerContainerRef });
       return;
     }
-     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
-       handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
+    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+      handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
       return;
     }
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, { viewerContainerRef });
-       return;
-     }
-   }, [documentRenderRef, viewerContainerRef]);
+      return;
+    }
+  }, [documentRenderRef, viewerContainerRef, submitUserPrintLog]);
 
   return (
     <div className="toolbar" role="toolbar" aria-label="Document controls">
-      {/* Single Print button → opens dialog (Active | All | Range) */}
+      {/* Print button → opens dialog */}
       <button
         type="button"
         onClick={() => setPrintDialogOpen(true)}
@@ -283,7 +335,7 @@ const DocumentToolbar = ({
       {/* Theme toggle */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
 
-      {/* Modal for print selection */}
+      {/* Modal for print selection + reason/forWhom */}
       <PrintRangeDialog
         isOpen={isPrintDialogOpen}
         onClose={() => setPrintDialogOpen(false)}
