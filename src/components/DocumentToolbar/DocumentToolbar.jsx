@@ -1,3 +1,4 @@
+// File: src/components/DocumentToolbar/DocumentToolbar.jsx
 /**
  * File: src/components/DocumentToolbar/DocumentToolbar.jsx
  *
@@ -178,6 +179,9 @@ const DocumentToolbar = ({
 
   /**
    * Callback when the print dialog submits.
+   * Ensures reason/forWhom are forwarded into the print pipeline so
+   * the config-driven header overlay can render tokens in print preview.
+   *
    * @param {PrintSubmitDetail} detail
    * @returns {void}
    */
@@ -187,20 +191,27 @@ const DocumentToolbar = ({
     // Kick off user-log submission first (non-blocking).
     submitUserPrintLog(detail);
 
+    // Common options passed to print helpers to enable header token substitution.
+    const commonOpts = {
+      viewerContainerRef,
+      reason: detail?.reason || '',
+      forWhom: detail?.forWhom || ''
+    };
+
     if (!detail || detail.mode === 'active') {
-      handlePrint(documentRenderRef, { viewerContainerRef });
+      handlePrint(documentRenderRef, commonOpts);
       return;
     }
     if (detail.mode === 'all') {
-      handlePrintAll(documentRenderRef, { viewerContainerRef });
+      handlePrintAll(documentRenderRef, commonOpts);
       return;
     }
     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
-      handlePrintRange(documentRenderRef, detail.from, detail.to, { viewerContainerRef });
+      handlePrintRange(documentRenderRef, detail.from, detail.to, commonOpts);
       return;
     }
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
-      handlePrintSequence(documentRenderRef, detail.sequence, { viewerContainerRef });
+      handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
       return;
     }
   }, [documentRenderRef, viewerContainerRef, submitUserPrintLog]);

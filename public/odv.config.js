@@ -1,3 +1,4 @@
+// File: public/odv.config.js
 /**
  * OpenDocViewer — Runtime Configuration (public/odv.config.js)
  *
@@ -122,18 +123,19 @@
     // ---- PRINT HEADER ---------------------------------------------------------
     // When enabled, a header/footer band is added to printed pages.
     printHeader: {
-      enabled: false,            // keep off by default; turn on if you want stamping
+      enabled: true,             // ENABLED by default
       position: "top",           // "top" | "bottom"
       heightPx: 32,              // reserved space; dialog may warn if too small
       applyTo: "all",            // "all" | "first" | "last"
       // Tokenized template (simple ${...} substitution).
-      // Available tokens: now, page, totalPages, reason, forWhom, user.id, user.name,
-      // doc.id, doc.title, doc.pageCount, viewer.version
+      // Available tokens: date (YYYY-MM-DD), time (HH:MM 24h), now, page, totalPages,
+      // reason, forWhom, user.id, user.name, doc.id, doc.title, doc.pageCount, viewer.version
       template:
-        "${now} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
+        "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
       // Optional CSS injected only for print media; scoping class provided by viewer
       css: [
-        ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444; }",
+        ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444; ",
+        "  background:rgba(255,255,255,.85); padding:4mm 6mm; }",
         ".odv-print-header strong{ color:#000; }"
       ].join("\n")
     },
