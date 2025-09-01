@@ -1,18 +1,13 @@
+<!-- File: index.html -->
 <!--
   OpenDocViewer — index.html
-  Notes for maintainers (safe to keep in production; these are HTML comments only):
 
-  - Runtime config MUST load BEFORE the main bundle so toggles like `showPerfOverlay`
-    and `exposeStackTraces` are available at startup. See /odv.config.js.
-  - Do NOT long-cache this file or /odv.config.js. On IIS, web.config sets Cache-Control: no-store
-    for both. Other hosts should do the same.
-  - External fonts (Google) can reveal client IP/UA and add latency. Consider self-hosting if needed.
-  - The root app container uses aria-live="polite". This is broad; keep usage of live regions minimal
-    inside the app to avoid noisy screen reader announcements.
-  - If deploying under a subpath, build with `vite build --base=/YourPath/` (also see vite.config.js).
-
-  Source for this file (traceability): :contentReference[oaicite:0]{index=0}
+  We now load runtime configs via a small module bootstrap (src/boot-config.js),
+  which injects odv.site.config.js (optional) and odv.config.js (required)
+  from the *application base path* (works under IIS virtual directories),
+  then imports the app entry.
 -->
+
 <!doctype html>
 <html lang="en">
   <head>
@@ -34,7 +29,7 @@
     <link rel="apple-touch-icon" href="/logo192.png" />
     <link rel="manifest" href="/manifest.json" />
 
-    <!-- Performance hints for fonts (optional; safe if you keep Google-hosted fonts) -->
+    <!-- Performance hints for fonts (optional) -->
     <link rel="preconnect" href="https://fonts.googleapis.com" crossorigin />
     <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
 
@@ -72,14 +67,10 @@
       </div>
     </noscript>
 
-    <!-- Root app container.
-         aria-live=polite is broad; keep app-level announcements minimal to avoid SR noise. -->
     <div id="root" aria-live="polite"></div>
 
-    <!-- Runtime config MUST load before the main bundle. See README for details. -->
-    <script src="/odv.config.js"></script>
-
-    <!-- Main entry (Vite/ESM). Note: base path is controlled by the Vite build flag `--base`. -->
-    <script type="module" src="/src/index.jsx"></script>
+    <!-- Module bootstrap: loads odv.site.config.js (optional) and odv.config.js (required)
+         from the *application base path*, then imports /src/index.jsx. -->
+    <script type="module" src="./src/boot-config.js"></script>
   </body>
 </html>

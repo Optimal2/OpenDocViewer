@@ -74,3 +74,4 @@ lerna-debug.log*
 # keep it committed. If you choose not to track a lockfile, add it here explicitly.
 # ------------------------------------------------------------------------------
 *.zip
+public/odv.site.config.js

@@ -1,0 +1,586 @@
+<!-- File: public/odv-admin.html -->
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>OpenDocViewer – Admin (Site Config)</title>
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <style>
+    :root { --bg:#0b1320; --fg:#e9eef7; --muted:#9fb0c7; --card:#121a2a; --accent:#4da3ff; --good:#3ccf91; --warn:#ffcc66; --bad:#ff6b6b; --line:#1e2a42; }
+    html,body { height:100%; }
+    body { margin:0; background:var(--bg); color:var(--fg); font:14px/1.45 system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif; }
+    header { padding:16px 20px; background:linear-gradient(180deg, #0f1a33, #0b1320); border-bottom:1px solid var(--line); }
+    header h1 { margin:0; font-size:18px; }
+    header p { margin:.25rem 0 0; color:var(--muted); }
+    main { padding:18px 20px 40px; display:grid; gap:14px; max-width:1100px; margin:0 auto; }
+    .row { display:grid; gap:12px; grid-template-columns: repeat(12, 1fr); }
+    .col-4 { grid-column: span 4; }
+    .col-6 { grid-column: span 6; }
+    .col-8 { grid-column: span 8; }
+    .col-12{ grid-column: span 12;}
+    .card { background:var(--card); border:1px solid var(--line); border-radius:12px; padding:14px; box-shadow: 0 0 0 1px rgba(255,255,255,.02) inset; }
+    .card h2 { font-size:15px; margin:0 0 6px; }
+    .subhead { margin:10px 0 6px; font-weight:700; }
+    .help { color: var(--muted); font-size:12px; margin:4px 0 10px; }
+    label { display:block; margin:8px 0 6px; font-weight:600; }
+    input[type="text"], input[type="url"], input[type="number"], textarea, select {
+      width:100%; box-sizing:border-box; padding:10px 12px; border-radius:10px;
+      border:1px solid #2a3a5c; background:#0f1728; color:#e9eef7; outline:none;
+    }
+    input:focus, textarea:focus, select:focus { border-color: var(--accent); }
+    textarea { min-height: 120px; font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, monospace; font-size: 12px; }
+    .inline { display:flex; gap:10px; align-items:center; }
+    .btnbar { display:flex; gap:10px; flex-wrap:wrap; margin-top:8px; }
+    button {
+      border:1px solid #2a3a5c; background:#0f1728; color:#e9eef7; padding:10px 14px; border-radius:10px; cursor:pointer;
+    }
+    button.primary { background: var(--accent); border-color: #3a86e0; color:#081325; font-weight:700; }
+    button.good { background: var(--good); border-color:#23b573; color:#06281b; }
+    button.warn { background: var(--warn); border-color:#d6a84a; color:#2f2207; }
+    button.bad  { background: var(--bad);  border-color:#d45b5b; color:#2b0c0c; }
+    .kvl { display:grid; grid-template-columns: 200px 1fr; gap:8px 12px; align-items:center; }
+    .muted { color: var(--muted); }
+    .mono { font-family: ui-monospace, Menlo, Consolas, monospace; }
+    .footer { color:var(--muted); padding:18px 20px; border-top:1px solid var(--line); text-align:center; }
+    .pill { display:inline-block; padding:2px 8px; border-radius:999px; background:#13203b; border:1px solid #27416e; font-size:12px; margin-left:6px; color:#b9d1f5; }
+    .notice { background:#0f1a33; border:1px dashed #28416b; padding:10px 12px; border-radius:10px; color:#b9c7df; }
+    .grid2 { display:grid; grid-template-columns:1fr 1fr; gap:12px; }
+    .grid3 { display:grid; grid-template-columns:1fr 1fr 1fr; gap:12px; }
+    .rowline { margin: 8px 0; border-top:1px dashed #273552; }
+    .hidden { display:none; }
+    @media (max-width: 1100px) {
+      .row { grid-template-columns: 1fr; }
+      .col-4, .col-6, .col-8, .col-12 { grid-column: 1/-1; }
+      .grid2, .grid3 { grid-template-columns:1fr; }
+    }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>OpenDocViewer – Site Config Admin <span class="pill mono">public/odv.site.config.js</span></h1>
+    <p>Edit all site-specific settings without touching code. Save to disk (Edge/Chrome) or download and replace on the server.</p>
+  </header>
+
+  <main>
+    <div class="row">
+      <!-- ===== Global toggles ===== -->
+      <section class="card col-12">
+        <h2>Global</h2>
+        <div class="kvl">
+          <label for="g-expose">Expose stack traces</label>
+          <input type="checkbox" id="g-expose" />
+
+          <label for="g-perf">Show performance overlay</label>
+          <input type="checkbox" id="g-perf" />
+        </div>
+      </section>
+
+      <!-- ===== Print Header ===== -->
+      <section class="card col-12">
+        <h2>Print Header</h2>
+        <p class="help">Configures the non-optional header overlay rendered on printed pages.</p>
+        <div class="kvl">
+          <label for="ph-enabled">Enabled</label>
+          <input type="checkbox" id="ph-enabled" />
+
+          <label for="ph-position">Position</label>
+          <select id="ph-position">
+            <option value="top">top</option>
+            <option value="bottom">bottom</option>
+          </select>
+
+          <label for="ph-applyto">Apply to</label>
+          <select id="ph-applyto">
+            <option value="all">all</option>
+            <option value="first">first</option>
+            <option value="last">last</option>
+          </select>
+
+          <label for="ph-height">Height (px)</label>
+          <input type="number" id="ph-height" min="0" step="1" placeholder="32" />
+
+          <label for="ph-template">Template</label>
+          <textarea id="ph-template" spellcheck="false"
+            placeholder="${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}"></textarea>
+
+          <label for="ph-css">CSS</label>
+          <textarea id="ph-css" spellcheck="false"
+            placeholder=".odv-print-header{font:12px/1.2 Arial; background:rgba(255,255,255,.85); padding:4mm 6mm;}"></textarea>
+        </div>
+      </section>
+
+      <!-- ===== User Log ===== -->
+      <section class="card col-12">
+        <h2>User Log</h2>
+        <p class="help">Audit who prints and why. Values are sent to the user-log endpoint when enabled.</p>
+        <div class="kvl">
+          <label for="ul-enabled">Enabled</label>
+          <input type="checkbox" id="ul-enabled" />
+
+          <label for="ul-endpoint">Endpoint</label>
+          <input type="url" id="ul-endpoint" placeholder="/ODVProxy/userlog/record" />
+
+          <label for="ul-transport">Transport</label>
+          <select id="ul-transport">
+            <option value="form">form</option>
+          </select>
+
+          <div class="rowline"></div>
+
+          <label for="ul-showReason">Show “Reason”</label>
+          <select id="ul-showReason">
+            <option value="auto">auto</option>
+            <option value="always">always</option>
+            <option value="never">never</option>
+          </select>
+
+          <label for="ul-showForWhom">Show “For whom”</label>
+          <select id="ul-showForWhom">
+            <option value="auto">auto</option>
+            <option value="always">always</option>
+            <option value="never">never</option>
+          </select>
+        </div>
+
+        <h3 class="subhead">Reason field</h3>
+        <div class="kvl">
+          <label for="r-required">Required</label>
+          <input type="checkbox" id="r-required" />
+
+          <label for="r-maxLen">Max length</label>
+          <input type="number" id="r-maxLen" min="1" step="1" placeholder="255" />
+
+          <label for="r-regex">Regex</label>
+          <input type="text" id="r-regex" placeholder="^([\\s\\S]{0,255})$" />
+
+          <label for="r-regexFlags">Regex flags</label>
+          <input type="text" id="r-regexFlags" placeholder="" />
+
+          <label for="r-placeholder">Placeholder</label>
+          <input type="text" id="r-placeholder" placeholder="Select reason…" />
+
+          <label for="r-default">Default (must match an option value)</label>
+          <input type="text" id="r-default" placeholder="" />
+        </div>
+
+        <div class="notice" style="margin-top:8px">
+          <div class="grid2">
+            <div>
+              <strong>Inline options (JSON array)</strong>
+              <div class="help">Each item: { "value": "Text", "allowFreeText": true?, "input": { "required": bool, "maxLen": n, "regex": "...", "regexFlags": "", "placeholder": "", "prefix": "", "suffix": "" } }</div>
+              <textarea id="r-options" spellcheck="false" placeholder='[
+  { "value": "Patient copy" },
+  { "value": "Internal review" },
+  { "value": "Legal request" },
+  { "value": "Other", "allowFreeText": true, "input": { "required": true, "maxLen": 140, "placeholder": "Type other reason…" } }
+]'></textarea>
+            </div>
+            <div>
+              <strong>OR load from URL</strong>
+              <div class="help">If URL is provided, options will be ignored. Keep same-origin for security.</div>
+              <label for="r-url" style="margin-top:0">Source URL</label>
+              <input type="url" id="r-url" placeholder="/OpenDocViewer/userlog/reasons.json" />
+              <label for="r-cache">Cache TTL (seconds)</label>
+              <input type="number" id="r-cache" min="0" step="1" placeholder="300" />
+            </div>
+          </div>
+        </div>
+
+        <h3 class="subhead">For whom field</h3>
+        <div class="kvl">
+          <label for="f-required">Required</label>
+          <input type="checkbox" id="f-required" />
+
+          <label for="f-maxLen">Max length</label>
+          <input type="number" id="f-maxLen" min="1" step="1" placeholder="120" />
+
+          <label for="f-regex">Regex</label>
+          <input type="text" id="f-regex" placeholder="^([\\s\\S]{0,120})$" />
+
+          <label for="f-regexFlags">Regex flags</label>
+          <input type="text" id="f-regexFlags" placeholder="" />
+
+          <label for="f-placeholder">Placeholder</label>
+          <input type="text" id="f-placeholder" placeholder="Who requested this?" />
+        </div>
+      </section>
+
+      <!-- ===== System Log ===== -->
+      <section class="card col-12">
+        <h2>System Log</h2>
+        <div class="kvl">
+          <label for="sl-enabled">Enabled</label>
+          <input type="checkbox" id="sl-enabled" />
+
+          <label for="sl-endpoint">Endpoint</label>
+          <input type="url" id="sl-endpoint" placeholder="/ODVProxy/log" />
+
+          <label for="sl-token">Token</label>
+          <input type="text" id="sl-token" placeholder="REPLACE_WITH_SYSTEM_LOG_TOKEN" />
+        </div>
+      </section>
+
+      <!-- ===== Actions & Preview ===== -->
+      <section class="card col-12">
+        <h2>Actions</h2>
+        <div class="notice">
+          <div class="grid2">
+            <div>
+              <strong>Load current values</strong>
+              <div class="help">Reads <span class="mono">/odv.site.config.js</span> if present, or loads the merged effective config.</div>
+              <div class="btnbar">
+                <button id="btn-load" type="button">Load overrides from file</button>
+                <button id="btn-load-effective" type="button">Load effective config</button>
+              </div>
+            </div>
+            <div>
+              <strong>Save changes</strong>
+              <div class="help">Best: Save directly to <span class="mono">odv.site.config.js</span> (Edge/Chrome). Fallback: download the file.</div>
+              <div class="btnbar">
+                <button id="btn-save-fs" type="button" class="good">Save to disk (File System Access)</button>
+                <button id="btn-download" type="button" class="primary">Download odv.site.config.js</button>
+                <button id="btn-reset" type="button" class="warn">Reset form to defaults</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <h3 class="subhead">Preview (generated file content)</h3>
+        <textarea id="preview" spellcheck="false" style="min-height:260px"></textarea>
+        <p class="help">This is exactly what will be written to <span class="mono">public/odv.site.config.js</span> (IIFE wrapper included).</p>
+      </section>
+    </div>
+  </main>
+
+  <div class="footer">
+    Tokens: <span class="mono">date</span>, <span class="mono">time</span>, <span class="mono">now</span>, <span class="mono">page</span>, <span class="mono">totalPages</span>, <span class="mono">reason</span>, <span class="mono">forWhom</span>, <span class="mono">doc.title</span>, <span class="mono">viewer.version</span>.
+  </div>
+
+  <script>
+    // ------------------------ helpers -----------------------------------------
+    function q(id){ return document.getElementById(id); }
+    function deepClone(o){ return JSON.parse(JSON.stringify(o || {})); }
+    function numVal(el){ const n = parseInt(el.value, 10); return Number.isFinite(n) ? n : undefined; }
+    function strOrUndef(v){ const s = (v ?? '').toString(); return s.trim() === '' ? undefined : s; }
+
+    // ------------------------ defaults (must mirror odv.config.js) ------------
+    const DEFAULTS = {
+      exposeStackTraces: false,
+      showPerfOverlay: false,
+
+      printHeader: {
+        enabled: true,
+        position: "top",
+        heightPx: 32,
+        applyTo: "all",
+        template: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
+        css: [
+          ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;",
+          "  background:rgba(255,255,255,.85); padding:4mm 6mm; }",
+          ".odv-print-header strong{ color:#000; }"
+        ].join("\\n")
+      },
+
+      userLog: {
+        enabled: true,
+        endpoint: "/ODVProxy/userlog/record",
+        transport: "form",
+        ui: {
+          showReasonWhen: "auto",
+          showForWhomWhen: "auto",
+          fields: {
+            reason: {
+              required: true,
+              maxLen: 255,
+              regex: null,
+              regexFlags: "",
+              placeholder: "Select reason…",
+              source: {
+                options: [
+                  { value: "Patient copy" },
+                  { value: "Internal review" },
+                  { value: "Legal request" },
+                  {
+                    value: "Other",
+                    allowFreeText: true,
+                    input: {
+                      required: true,
+                      maxLen: 140,
+                      regex: null,
+                      regexFlags: "",
+                      placeholder: "Type other reason…",
+                      prefix: "",
+                      suffix: ""
+                    }
+                  }
+                ]
+                // url: "/OpenDocViewer/userlog/reasons.json",
+                // cacheTtlSec: 300
+              },
+              default: null
+            },
+            forWhom: {
+              required: false,
+              maxLen: 120,
+              regex: null,
+              regexFlags: "",
+              placeholder: "Who requested this?"
+            }
+          }
+        }
+      },
+
+      systemLog: {
+        enabled: true,
+        endpoint: "/ODVProxy/log",
+        token: "REPLACE_WITH_SYSTEM_LOG_TOKEN"
+      }
+    };
+
+    // ------------------------ read/write form ---------------------------------
+    function readForm(){
+      // Build full override object mirroring the config shape.
+      // Only include fields relevant to customers.
+      const optionsJson = q('r-options').value.trim();
+      let parsedOptions = undefined;
+      if (optionsJson) {
+        try {
+          const arr = JSON.parse(optionsJson);
+          if (Array.isArray(arr)) parsedOptions = arr;
+          else alert('“Inline options” must be a JSON array.');
+        } catch (e) {
+          alert('Invalid JSON in “Inline options”.');
+          throw e;
+        }
+      }
+
+      const reasonSource = {};
+      const url = strOrUndef(q('r-url').value);
+      const ttl = numVal(q('r-cache'));
+      if (url) {
+        reasonSource.url = url;
+        if (Number.isFinite(ttl)) reasonSource.cacheTtlSec = ttl;
+      } else if (parsedOptions) {
+        reasonSource.options = parsedOptions;
+      } else {
+        // neither provided → leave empty; the app will fall back to defaults
+      }
+
+      const cfg = {
+        exposeStackTraces: q('g-expose').checked,
+        showPerfOverlay: q('g-perf').checked,
+
+        printHeader: {
+          enabled: q('ph-enabled').checked,
+          position: q('ph-position').value,
+          applyTo: q('ph-applyto').value,
+          heightPx: numVal(q('ph-height')),
+          template: q('ph-template').value,
+          css: q('ph-css').value
+        },
+
+        userLog: {
+          enabled: q('ul-enabled').checked,
+          endpoint: q('ul-endpoint').value,
+          transport: q('ul-transport').value,
+          ui: {
+            showReasonWhen: q('ul-showReason').value,
+            showForWhomWhen: q('ul-showForWhom').value,
+            fields: {
+              reason: {
+                required: q('r-required').checked,
+                maxLen: numVal(q('r-maxLen')),
+                regex: q('r-regex').value || null,
+                regexFlags: q('r-regexFlags').value || "",
+                placeholder: q('r-placeholder').value,
+                source: reasonSource,
+                default: q('r-default').value || null
+              },
+              forWhom: {
+                required: q('f-required').checked,
+                maxLen: numVal(q('f-maxLen')),
+                regex: q('f-regex').value || null,
+                regexFlags: q('f-regexFlags').value || "",
+                placeholder: q('f-placeholder').value
+              }
+            }
+          }
+        },
+
+        systemLog: {
+          enabled: q('sl-enabled').checked,
+          endpoint: q('sl-endpoint').value,
+          token: q('sl-token').value
+        }
+      };
+
+      // Clean undefineds (to keep the file tidy)
+      function clean(o){
+        if (Array.isArray(o)) return o.map(clean);
+        if (o && typeof o === 'object') {
+          const out = {};
+          Object.keys(o).forEach(k => {
+            const v = clean(o[k]);
+            if (v !== undefined) out[k] = v;
+          });
+          return out;
+        }
+        return o;
+      }
+      return clean(cfg);
+    }
+
+    function writeForm(eff){
+      const c = eff || {};
+      // Globals
+      q('g-expose').checked = !!c.exposeStackTraces;
+      q('g-perf').checked = !!c.showPerfOverlay;
+
+      // Print header
+      const ph = c.printHeader || {};
+      q('ph-enabled').checked = !!ph.enabled;
+      q('ph-position').value = ph.position || 'top';
+      q('ph-applyto').value = ph.applyTo || 'all';
+      q('ph-height').value = ph.heightPx != null ? ph.heightPx : '';
+      q('ph-template').value = ph.template || DEFAULTS.printHeader.template;
+      q('ph-css').value = ph.css || DEFAULTS.printHeader.css;
+
+      // User log basics
+      const ul = c.userLog || {};
+      q('ul-enabled').checked = !!ul.enabled;
+      q('ul-endpoint').value = ul.endpoint || DEFAULTS.userLog.endpoint;
+      q('ul-transport').value = ul.transport || DEFAULTS.userLog.transport;
+
+      // UI visibility
+      const ui = ul.ui || {};
+      q('ul-showReason').value = ui.showReasonWhen || 'auto';
+      q('ul-showForWhom').value = ui.showForWhomWhen || 'auto';
+
+      // Reason field
+      const rf = (ui.fields && ui.fields.reason) || {};
+      q('r-required').checked = !!rf.required;
+      q('r-maxLen').value = rf.maxLen != null ? rf.maxLen : '';
+      q('r-regex').value = rf.regex || '';
+      q('r-regexFlags').value = rf.regexFlags || '';
+      q('r-placeholder').value = rf.placeholder || DEFAULTS.userLog.ui.fields.reason.placeholder;
+      q('r-default').value = rf.default || '';
+
+      // Reason source
+      const rs = rf.source || {};
+      if (rs.options) q('r-options').value = JSON.stringify(rs.options, null, 2);
+      else q('r-options').value = JSON.stringify(DEFAULTS.userLog.ui.fields.reason.source.options, null, 2);
+      q('r-url').value = rs.url || '';
+      q('r-cache').value = rs.cacheTtlSec != null ? rs.cacheTtlSec : '';
+
+      // For whom field
+      const ff = (ui.fields && ui.fields.forWhom) || {};
+      q('f-required').checked = !!ff.required;
+      q('f-maxLen').value = ff.maxLen != null ? ff.maxLen : '';
+      q('f-regex').value = ff.regex || '';
+      q('f-regexFlags').value = ff.regexFlags || '';
+      q('f-placeholder').value = ff.placeholder || DEFAULTS.userLog.ui.fields.forWhom.placeholder;
+
+      // System log
+      const sl = c.systemLog || {};
+      q('sl-enabled').checked = !!sl.enabled;
+      q('sl-endpoint').value = sl.endpoint || DEFAULTS.systemLog.endpoint;
+      q('sl-token').value = sl.token || DEFAULTS.systemLog.token;
+
+      refreshPreview();
+    }
+
+    // ------------------------ preview & IO -------------------------------------
+    function generateFileText(cfg){
+      const safe = deepClone(cfg);
+      const json = JSON.stringify(safe, null, 2);
+      return `// File: public/odv.site.config.js
+/**
+ * OpenDocViewer — Site-specific Overrides
+ * Generated by public/odv-admin.html
+ * Edit via the admin page or by hand if needed.
+ */
+(function (w) {
+  w.__ODV_SITE_CONFIG__ = ${json};
+})(window);
+`;
+    }
+
+    function refreshPreview(){ q('preview').value = generateFileText(readForm()); }
+
+    function injectScript(src){
+      return new Promise(function(resolve){
+        const s = document.createElement('script');
+        s.src = src;
+        s.onload = () => resolve(true);
+        s.onerror = () => resolve(false);
+        document.head.appendChild(s);
+      });
+    }
+
+    async function loadOverridesFromFile(){
+      const ok = await injectScript('/odv.site.config.js?_=' + Date.now());
+      const site = ok && window.__ODV_SITE_CONFIG__ ? deepClone(window.__ODV_SITE_CONFIG__) : {};
+      // If no site overrides: start from defaults
+      const start = (site && Object.keys(site).length) ? site : DEFAULTS;
+      writeForm(start);
+    }
+
+    async function loadEffective(){
+      // Load default config to read the merged effective config
+      await injectScript('/odv.config.js?_=' + Date.now());
+      const eff = typeof window.__ODV_GET_CONFIG__ === 'function' ? window.__ODV_GET_CONFIG__() : null;
+      // Pick only the keys the admin can manage
+      const siteLike = {
+        exposeStackTraces: !!(eff && eff.exposeStackTraces),
+        showPerfOverlay: !!(eff && eff.showPerfOverlay),
+        printHeader: eff && eff.printHeader ? eff.printHeader : DEFAULTS.printHeader,
+        userLog: eff && eff.userLog ? eff.userLog : DEFAULTS.userLog,
+        systemLog: eff && eff.systemLog ? eff.systemLog : DEFAULTS.systemLog
+      };
+      writeForm(siteLike);
+    }
+
+    async function saveWithFileSystemAccess(){
+      if (!('showSaveFilePicker' in window)) {
+        alert('Your browser does not support the File System Access API. Use "Download" instead and copy the file to /public/odv.site.config.js.');
+        return;
+      }
+      const suggestedName = 'odv.site.config.js';
+      try {
+        const handle = await window.showSaveFilePicker({
+          suggestedName,
+          types: [{ description: 'JavaScript', accept: { 'application/javascript': ['.js'] } }]
+        });
+        const writable = await handle.createWritable();
+        await writable.write(generateFileText(readForm()));
+        await writable.close();
+        alert('Saved. Copy/move the file to your server’s OpenDocViewer /public/ folder if needed.');
+      } catch (e) {
+        if (e && e.name === 'AbortError') return;
+        console.error(e);
+        alert('Failed to save: ' + (e && e.message ? e.message : e));
+      }
+    }
+
+    function downloadFile(){
+      const a = document.createElement('a');
+      a.href = URL.createObjectURL(new Blob([generateFileText(readForm())], { type: 'application/javascript' }));
+      a.download = 'odv.site.config.js';
+      document.body.appendChild(a);
+      a.click();
+      a.remove();
+      setTimeout(() => URL.revokeObjectURL(a.href), 2500);
+    }
+
+    // Wire buttons
+    q('btn-load').addEventListener('click', loadOverridesFromFile);
+    q('btn-load-effective').addEventListener('click', loadEffective);
+    q('btn-save-fs').addEventListener('click', saveWithFileSystemAccess);
+    q('btn-download').addEventListener('click', downloadFile);
+    q('btn-reset').addEventListener('click', () => writeForm(DEFAULTS));
+
+    // Init with defaults
+    writeForm(DEFAULTS);
+  </script>
+</body>
+</html>

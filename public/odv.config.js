@@ -9,6 +9,12 @@
  *   This file exposes ALL knobs at all times. You enable/disable features by
  *   flipping booleans (no comment/uncomment “modes” needed here).
  *
+ * LAYERED CONFIG (site-specific overrides):
+ *   If present, a site-local override object `window.__ODV_SITE_CONFIG__` will be
+ *   deep-merged on top of this default config. Load order in your HTML should be:
+ *     <script src="./odv.site.config.js"></script>
+ *     <script src="./odv.config.js"></script>
+ *
  * UI Logic (used by the print dialog):
  *   - Show "Reason" / "For whom" inputs when (userLog.enabled || printHeader.enabled),
  *     unless you force visibility via ui.showReasonWhen / ui.showForWhomWhen.
@@ -22,6 +28,21 @@
 
 (function (w, d) {
   function toBool(v, def) { return typeof v === 'boolean' ? v : def; }
+
+  // --- tiny deep merge (objects only; arrays/values are replaced) ---
+  function isObj(x){ return x && typeof x === 'object' && !Array.isArray(x); }
+  function deepMerge(dst, src){
+    if (!isObj(dst)) dst = {};
+    if (!isObj(src)) return src === undefined ? dst : src;
+    var out = {};
+    var k;
+    for (k in dst) if (Object.prototype.hasOwnProperty.call(dst, k)) out[k] = dst[k];
+    for (k in src) if (Object.prototype.hasOwnProperty.call(src, k)) {
+      var dv = out[k], sv = src[k];
+      out[k] = (isObj(dv) && isObj(sv)) ? deepMerge(dv, sv) : sv;
+    }
+    return out;
+  }
 
   // Compute app base from THIS file's URL (robust for virtual directories).
   var scriptEl = d.currentScript || (function () {
@@ -50,6 +71,8 @@
 
   // If a previous config exists, allow it to seed a few booleans (ops can inline something before us).
   var existing = w.__ODV_CONFIG__ || {};
+  // Optional site-specific overrides (loaded BEFORE this file).
+  var siteOverrides = w.__ODV_SITE_CONFIG__ || {};
 
   // ========================= ACTIVE (mode-less) CONFIG =========================
   var ACTIVE_CONFIG = {
@@ -149,8 +172,9 @@
     }
   };
 
-  // Freeze & publish
-  var cfg = Object.freeze(ACTIVE_CONFIG);
+  // Merge site overrides on top of defaults, then freeze & publish.
+  var merged = deepMerge(ACTIVE_CONFIG, siteOverrides);
+  var cfg = Object.freeze(merged);
   w.__ODV_CONFIG__ = cfg;
   Object.defineProperty(w, "__ODV_GET_CONFIG__", {
     value: function () { return cfg; },
