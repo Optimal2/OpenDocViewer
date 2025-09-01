@@ -1,4 +1,5 @@
 ﻿// File: src/components/DocumentLoader/WorkerHandler.js
+// Source reference: :contentReference[oaicite:0]{index=0}
 /**
  * File: src/components/DocumentLoader/WorkerHandler.js
  *
@@ -7,7 +8,8 @@
  * PURPOSE
  *   - Create image workers for off-main-thread rasterization/conversion.
  *   - Normalize and handle messages from workers, producing page entries for the viewer.
- *   - Provide a safe fallback path (main-thread TIFF render) if a worker reports errors.
+ *   - Provide a safe fallback path (main-thread render) if a worker reports errors
+ *     or explicitly requests main-thread handling.
  *   - Manage Blob URL lifetimes to prevent memory leaks.
  *
  * DESIGN NOTES
@@ -21,21 +23,21 @@
  */
 
 import logger from '../../LogController.js';
-import { renderTIFFInMainThread } from './MainThreadRenderer.js';
+import { renderTIFFInMainThread as importedRenderTIFFInMainThread } from './MainThreadRenderer.js';
 import { generateThumbnail } from './Utils.js';
 
 /**
  * A single job/result entry communicated between worker and main thread.
  * @typedef {Object} WorkerJob
- * @property {(ArrayBuffer|Blob|undefined)} [blob]          optional blob produced by worker
- * @property {(string|undefined)} [fullSizeUrl]             optional pre-made object URL
- * @property {number} fileIndex                             original document index
- * @property {number} pageIndex                             page within the file (0-based)
- * @property {number} allPagesIndex                         global index in the flat page list
- * @property {string} fileExtension                         'png' | 'jpg' | 'pdf' | 'tif' | 'tiff' | ...
- * @property {(number|undefined)} [pagesInvolved]           for multi-page jobs (tiff/pdf)
- * @property {(number|undefined)} [pageStartIndex]          for multi-page jobs (tiff/pdf)
- * @property {(boolean|undefined)} [handleInMainThread]     worker requests main-thread handling
+ * @property {(Blob|undefined)} [blob]                    Optional blob produced by worker
+ * @property {(string|undefined)} [fullSizeUrl]           Optional pre-made object URL
+ * @property {number} fileIndex                           Original document index
+ * @property {number} pageIndex                           Page within the file (0-based)
+ * @property {number} allPagesIndex                       Global index in the flat page list
+ * @property {string} fileExtension                       'png' | 'jpg' | 'pdf' | 'tif' | 'tiff' | ...
+ * @property {(number|undefined)} [pagesInvolved]         For multi-page jobs (tiff/pdf)
+ * @property {(number|undefined)} [pageStartIndex]        For multi-page jobs (tiff/pdf)
+ * @property {(boolean|undefined)} [handleInMainThread]   Worker requests main-thread handling
  */
 
 /**
@@ -54,6 +56,16 @@ import { generateThumbnail } from './Utils.js';
  * @param {*} page
  * @param {number} index
  * @returns {void}
+ */
+
+/**
+ * Optional options for handleWorkerMessage to coordinate with a scheduler.
+ * When provided, main-thread fallbacks can be queued instead of executed immediately.
+ *
+ * @typedef {Object} HandleOpts
+ * @property {{ current: Array<WorkerJob> }} [mainThreadJobQueueRef]  Queue to push main-thread jobs into
+ * @property {Function} [renderPDFInMainThread]   Renderer to use for PDF (if ever needed)
+ * @property {Function} [renderTIFFInMainThread]  Renderer to use for TIFF (overrides imported)
  */
 
 /* ------------------------------------------------------------------------------------------------
@@ -120,6 +132,37 @@ export const getNumberOfWorkers = (maxWorkers) => {
  * ------------------------------------------------------------------------------------------------ */
 
 /**
+ * Decide how to schedule/execute a main-thread render job based on options:
+ *  - If a queue ref is provided → push the job to the queue (deferred execution).
+ *  - Else → execute immediately with the appropriate renderer.
+ *
+ * @param {WorkerJob} job
+ * @param {InsertPageAtIndex} insertPageAtIndex
+ * @param {boolean} sameBlob
+ * @param {{ current: boolean }} [isMounted]
+ * @param {HandleOpts} [opts]
+ * @returns {void}
+ */
+function scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts) {
+  const fileExt = String(job.fileExtension || '').toLowerCase();
+  const qref = opts && opts.mainThreadJobQueueRef;
+  const renderTIFF = (opts && opts.renderTIFFInMainThread) || importedRenderTIFFInMainThread;
+  const renderPDF = opts && opts.renderPDFInMainThread;
+
+  if (qref && qref.current && Array.isArray(qref.current)) {
+    qref.current.push(job);
+    return;
+  }
+
+  // Execute immediately when no queue is provided.
+  if (['tiff', 'tif'].includes(fileExt)) {
+    renderTIFF(job, insertPageAtIndex, sameBlob, isMounted);
+  } else if (fileExt === 'pdf' && typeof renderPDF === 'function') {
+    renderPDF(job, insertPageAtIndex, sameBlob, isMounted);
+  }
+}
+
+/**
  * Handle a message payload from an image worker and insert resulting page(s).
  *
  * CONTRACT
@@ -127,7 +170,7 @@ export const getNumberOfWorkers = (maxWorkers) => {
  *       • `blob`  (we will create an object URL), or
  *       • `fullSizeUrl` (pre-made, e.g., from main-thread processing)
  *   - On error: { error: string, jobs?: Array.<WorkerJob> } ; for TIFF jobs we invoke
- *                main-thread fallback rendering to avoid losing output entirely.
+ *                main-thread fallback rendering or enqueue it, depending on options.
  *   - Fallback request: { handleInMainThread: true, job?: WorkerJob, jobs?: Array.<WorkerJob> }
  *
  * @param {MessageEvent} event
@@ -138,9 +181,11 @@ export const getNumberOfWorkers = (maxWorkers) => {
  *        If true, reuse the full-size blob URL for thumbnail (no extra canvas work).
  * @param {({ current: boolean }|{ current: * })} [isMounted]
  *        Optional ref flag — if present and false, handler becomes a no-op.
+ * @param {HandleOpts} [opts]
+ *        Optional control hooks (queue reference & direct renderer fns).
  * @returns {void}
  */
-export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounted) => {
+export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounted, opts) => {
   if (isMounted && isMounted.current === false) return;
 
   const { data } = event || {};
@@ -154,7 +199,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     handleInMainThread: Boolean(msg.handleInMainThread),
   });
 
-  /* ---------- 1) Error path: attempt main-thread fallback for TIFF  ---------- */
+  /* ---------- 1) Error path: schedule main-thread fallback for multi-page formats ---------- */
   if (msg.error) {
     logger.info('Worker reported error', { error: msg.error });
 
@@ -162,21 +207,39 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     jobs.forEach((job) => {
       if (isMounted && isMounted.current === false) return;
       job.handleInMainThread = true;
-      if (['tiff', 'tif'].includes(String(job.fileExtension || '').toLowerCase())) {
-        renderTIFFInMainThread(job, insertPageAtIndex, sameBlob, isMounted);
+      const ext = String(job.fileExtension || '').toLowerCase();
+      if (['tiff', 'tif', 'pdf'].includes(ext)) {
+        scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts);
+      } else {
+        // Non-multipage types: insert a failure placeholder so UI remains consistent
+        const placeholder = {
+          fullSizeUrl: 'placeholder.png',
+          thumbnailUrl: 'placeholder.png',
+          loaded: false,
+          status: -1,
+          fileExtension: ext,
+          fileIndex: job.fileIndex,
+          pageIndex: job.pageIndex,
+          allPagesIndex: job.allPagesIndex,
+        };
+        insertPageAtIndex(placeholder, job.allPagesIndex);
       }
     });
     return;
   }
 
-  /* ---------- 2) Explicit main-thread handling request  ---------- */
+  /* ---------- 2) Explicit main-thread handling request ---------- */
   if (msg.handleInMainThread) {
     const maybeDo = (job) => {
       if (!job) return;
       if (isMounted && isMounted.current === false) return;
-      if (['tiff', 'tif'].includes(String(job.fileExtension || '').toLowerCase())) {
-        logger.debug('Main-thread TIFF processing requested', { jobIndex: job.allPagesIndex });
-        renderTIFFInMainThread(job, insertPageAtIndex, sameBlob, isMounted);
+      const ext = String(job.fileExtension || '').toLowerCase();
+      if (['tiff', 'tif', 'pdf'].includes(ext)) {
+        logger.debug('Main-thread processing requested by worker', {
+          allPagesIndex: job.allPagesIndex,
+          ext,
+        });
+        scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts);
       }
     };
     if (msg.job) maybeDo(msg.job);
@@ -184,7 +247,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     return;
   }
 
-  /* ---------- 3) Success path: produce page entries  ---------- */
+  /* ---------- 3) Success path: produce page entries ---------- */
   if (!Array.isArray(msg.jobs) || msg.jobs.length === 0) {
     // Nothing to process — this can be valid for keep-alive worker pings.
     return;
@@ -234,7 +297,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
           pageIndex,
           allPagesIndex,
         };
-        logger.debug('Inserting placeholder page', { allPagesIndex });
+        logger.debug('Inserting placeholder page (no fullSizeUrl/blob)', { allPagesIndex });
         if (isMounted && isMounted.current === false) return;
         insertPageAtIndex(placeholder, allPagesIndex);
       }
