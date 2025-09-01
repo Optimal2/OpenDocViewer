@@ -6,21 +6,24 @@
  *
  * MODES
  *   1) Pattern mode (legacy/demo): { folder, extension, endNumber }
- *   2) Explicit-list mode:        { sourceList: [{ url, ext?, fileIndex? }, ...] }
+ *   2) Explicit-list mode:        { sourceList: [{ url, ext, fileIndex }, ...] }
  *
  * PIPELINE (high level)
  *   - For each input entry → fetch bytes (ArrayBuffer)
  *   - Detect content type via `file-type` (buffer first, then blob fallback)
  *   - Decide execution path:
- *       • PDF/TIFF → push a single job to the main-thread renderer queue
+ *       • PDF → push a single job to the main-thread renderer queue
+ *       • TIFF → prefer WORKERS for most cases; special types (e.g., OJPEG handled or JP2K→main thread)
  *       • Other images → push a single job to the worker queue
  *   - Schedule work:
  *       • Low-core devices (≤3 logical cores) → sequential scheduler; yields to UI between jobs
  *       • Others → batched, multi-worker processing via `batchHandler`
  *
  * PERFORMANCE & STABILITY NOTES
- *   - We reuse one ArrayBuffer per file (PDF/TIFF) to avoid N× buffer duplication for multi-page formats.
- *   - We transfer ArrayBuffers to workers when possible to reduce GC pressure.
+ *   - We reuse one ArrayBuffer per file when possible to reduce GC pressure.
+ *   - TIFF goes to workers by default. The worker can post `handleInMainThread: true`
+ *     for rare edge cases. We now explicitly route TIFF **Compression=34712 (JPEG 2000)** to
+ *     the main thread to avoid worker stalls.
  *   - We install per-fetch AbortControllers and abort them on unmount to avoid leaks.
  *   - We pre-insert lightweight placeholders so the UI can lay out while decoding occurs.
  *
@@ -28,16 +31,6 @@
  *   - We intentionally import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With `file-type` v21 the '/browser' subpath is not exported for bundlers and will break Vite builds.
  *     (See README for more context.)
- *
- * Provenance / baseline reference for prior version of this module: :contentReference[oaicite:0]{index=0}
- */
-
-/**
- * Explicit-list source item.
- * @typedef {Object} ExplicitSourceItem
- * @property {string} url
- * @property {(string|undefined)} ext
- * @property {(number|undefined)} fileIndex
  */
 
 import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
@@ -49,6 +42,19 @@ import { batchHandler } from './BatchHandler.js';
 import { renderPDFInMainThread, renderTIFFInMainThread } from './MainThreadRenderer.js';
 // Browser-safe: use file-type top-level ESM with Uint8Array/Blob
 import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
+
+/* ------------------------------------------------------------------------------------------------
+ * Types
+ * ------------------------------------------------------------------------------------------------ */
+
+/**
+ * Explicit-list item used by `sourceList`.
+ * Closure/JSDoc: optional properties use the `name=` syntax in @property blocks.
+ * @typedef {Object} DocumentSourceItem
+ * @property {string} url
+ * @property {string=} ext
+ * @property {number=} fileIndex
+ */
 
 /* ------------------------------------------------------------------------------------------------
  * Adaptive worker tuning
@@ -64,7 +70,6 @@ import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 const isMobile = (() => {
-  // Prefer UA-CH when available; fallback to a simple UA test.
   try {
     // @ts-ignore
     if (navigator?.userAgentData?.mobile != null) return navigator.userAgentData.mobile;
@@ -87,35 +92,88 @@ const isMobile = (() => {
  */
 function computeWorkerTuning({ cpuBound = true, ioHeavy = false, desiredCap } = {}) {
   const cores = Math.max(1, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2));
-  // Chromium-only; otherwise default
   const memGB = Number((typeof navigator !== 'undefined' && navigator.deviceMemory) || 4);
 
-  const lowCore = cores <= 3; // 1–3 logical cores → sequential
+  const lowCore = cores <= 3;
   const leaveForMain = cores > 1 ? 1 : 0;
 
-  // Hard cap to avoid oversubscription on quirky machines
   let hardCap = desiredCap ?? (isMobile ? 8 : 16);
   if (memGB <= 3) hardCap = Math.min(hardCap, isMobile ? 4 : 8);
 
-  // Base: 1:1 with cores but leave one for the main thread
   const base = clamp(cores - leaveForMain, 1, hardCap);
-
-  // CPU-bound → keep near 1:1; IO-heavy → allow slight oversubscription
   let maxWorkers = cpuBound ? base : clamp(Math.ceil(base * (ioHeavy ? 1.5 : 1.2)), 1, hardCap);
+  if (lowCore) maxWorkers = 1;
 
-  if (lowCore) maxWorkers = 1; // strict sequential
-
-  // BatchSize: Infinity = no splitting (more explicit than MAX_SAFE_INTEGER)
   const batchSize = lowCore ? Infinity : (cpuBound ? 24 : 64);
-
   return { maxWorkers, batchSize, lowCore };
 }
 
 // Default config for our workload (mostly CPU-bound image/PDF decoding)
 const { maxWorkers, batchSize, lowCore } = computeWorkerTuning({ cpuBound: true });
 
-// Toggle verbose TIFF metadata logging (costs a bit of CPU)
-const enableMetadataLogging = false;
+/* ------------------------------------------------------------------------------------------------
+ * TIFF compression peek (minimal parser — no full decode)
+ * ------------------------------------------------------------------------------------------------ */
+
+/**
+ * Read Compression (259) values from up to `maxIfds` IFDs in a TIFF buffer.
+ * Only the tag headers are parsed; no strip/tile decoding.
+ *
+ * @param {ArrayBuffer} buf
+ * @param {number=} maxIfds
+ * @returns {Array.<number>}
+ */
+function peekTiffCompressions(buf, maxIfds = 64) {
+  try {
+    const u8 = new Uint8Array(buf);
+    if (u8.length < 8) return [];
+    const le = u8[0] === 0x49 && u8[1] === 0x49; // 'II'
+    const be = u8[0] === 0x4D && u8[1] === 0x4D; // 'MM'
+    if (!le && !be) return [];
+    const dv = new DataView(buf);
+    const get16 = (o) => (le ? dv.getUint16(o, true) : dv.getUint16(o, false));
+    const get32 = (o) => (le ? dv.getUint32(o, true) : dv.getUint32(o, false));
+
+    const magic = get16(2);
+    if (magic !== 42 && magic !== 43) return []; // 42=TIFF, 43=BigTIFF (we only read first IFD for BigTIFF)
+    let offset = get32(4);
+    const out = [];
+    let loops = 0;
+    while (offset && loops < maxIfds && offset + 2 <= u8.length) {
+      loops++;
+      const count = get16(offset);
+      const base = offset + 2;
+      if (base + count * 12 + 4 > u8.length) break;
+      let compression = null;
+      for (let i = 0; i < count; i++) {
+        const entry = base + i * 12;
+        const tag = get16(entry + 0);
+        if (tag === 259) {
+          // type = SHORT/LONG (we only need the value when count==1 and fits in 4 bytes)
+          const type = get16(entry + 2);
+          const cnt = get32(entry + 4);
+          const valOff = entry + 8;
+          if (cnt === 1) {
+            if (type === 3) {
+              // SHORT stored in low 2 bytes of value field
+              compression = le ? dv.getUint16(valOff, true) : dv.getUint16(valOff, false);
+            } else if (type === 4) {
+              compression = get32(valOff);
+            }
+          }
+        }
+      }
+      if (compression != null) out.push(compression);
+      offset = get32(base + count * 12); // next IFD
+    }
+    return out;
+  } catch {
+    return [];
+  }
+}
+
+// Known problematic compression codes for browser workers (route to main thread)
+const COMPRESSION_JPEG2000 = 34712;
 
 /* ------------------------------------------------------------------------------------------------
  * React component
@@ -128,11 +186,11 @@ const enableMetadataLogging = false;
  * @param {(string|undefined)} [props.folder]           Pattern mode: base folder/path for assets
  * @param {(string|undefined)} [props.extension]        Pattern mode: file extension (e.g., "png", "tiff")
  * @param {(number|undefined)} [props.endNumber]        Pattern mode: last page/file number (1..N)
- * @param {Array.<ExplicitSourceItem>} [props.sourceList]
+ * @param {Array.<DocumentSourceItem>} [props.sourceList]
  *        Explicit-list mode: ordered list of source items
  * @param {(boolean|undefined)} [props.sameBlob=true]   Reuse full-size blob URL for thumbnails when possible
- * @param {React.ReactNode} props.children              Render prop subtree (viewer UI)
- * @returns {React.ReactElement}
+ * @param {*} props.children                             Render prop subtree (viewer UI)
+ * @returns {*}
  */
 const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumber, sourceList }) => {
   const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
@@ -142,8 +200,8 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   const isMounted = useRef(true);
 
   /** Work queues */
-  /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // single-image jobs (workers)
-  /** @type {React.MutableRefObject.<Array.<*>>} */ const mainThreadJobQueue = useRef([]); // multi-page or fallback jobs (PDF/TIFF)
+  /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // single-image & TIFF jobs (workers)
+  /** @type {React.MutableRefObject.<Array.<*>>} */ const mainThreadJobQueue = useRef([]); // multi-page or fallback jobs (PDF / special TIFF)
   /** @type {React.MutableRefObject.<Array.<*>>} */ const batchQueue = useRef([]);         // used by batchHandler
 
   /** Global page index across all inputs (for ViewerContext ordering) */
@@ -215,7 +273,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
    * @returns {Promise.<void>}
    */
   const loadDocumentAsync = useCallback(async (url, index) => {
-    // Per-fetch controller
     const controller = new AbortController();
     fetchControllers.current.add(controller);
 
@@ -231,7 +288,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
 
       let arrayBuffer = await response.arrayBuffer();
 
-      // Fetch completed successfully → remove controller
       fetchControllers.current.delete(controller);
 
       if (!arrayBuffer || arrayBuffer.byteLength === 0) {
@@ -241,30 +297,21 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
       // Robust content-type detection (browser-safe)
       let fileType;
       try {
-        // file-type expects Uint8Array for buffer-based detection
         fileType = await fileTypeFromBuffer(new Uint8Array(arrayBuffer));
-      } catch {
-        /* ignore and try fallback */
-      }
-
+      } catch {}
       if (!fileType) {
         try {
-          // Fallback path (works well in browsers)
           fileType = await fileTypeFromBlob(new Blob([arrayBuffer]));
-        } catch {
-          /* ignore; we’ll infer below */
-        }
+        } catch {}
       }
 
-      // Infer extension if signatures are unknown (e.g., some TIFFs/PDFs with odd headers)
+      // Infer extension if signatures are unknown
       let fileExtension = fileType?.ext;
       if (!fileExtension) {
-        // Try server header first
         const ct = (typeof response !== 'undefined' && response.headers?.get?.('content-type')) || '';
         if (/pdf/i.test(ct)) fileExtension = 'pdf';
         else if (/tiff?/i.test(ct)) fileExtension = 'tiff';
         else {
-          // Last-ditch: guess from URL (may include querystring)
           const m = String(url).toLowerCase().match(/\.(pdf|tiff?|png|jpe?g|bmp|gif)(?:$|\?)/i);
           fileExtension = m ? m[1].toLowerCase() : null;
         }
@@ -275,13 +322,14 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
       }
 
       const totalPages = await getTotalPages(arrayBuffer, fileExtension);
-      logger.debug('Total pages detected', { totalPages });
+      logger.debug('Total pages detected', { totalPages, url });
 
       // Decide processing path
       if (fileExtension === 'pdf') {
-        // Process PDF on main thread (reuse the original buffer)
+        // PDFs always on main thread for now
         mainThreadJobQueue.current.push({
           arrayBuffer,
+          sourceUrl: url,
           fileExtension,
           index,
           pageStartIndex: 0,
@@ -291,42 +339,57 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
         arrayBuffer = null;
         currentPageIndex.current += totalPages;
       } else if (['tiff', 'tif'].includes(fileExtension)) {
-        if (enableMetadataLogging) {
-          const metadata = getTiffMetadata(arrayBuffer);
-          logger.debug('TIFF metadata detected', { metadata });
+        // TIFF: prefer workers, except for known-problematic compressions (e.g., 34712 = JPEG 2000)
+        const compCodes = peekTiffCompressions(arrayBuffer);
+        const hasJpeg2000 = compCodes.includes(COMPRESSION_JPEG2000);
+
+        if (hasJpeg2000) {
+          logger.debug('Routing TIFF (JPEG 2000 compression) to main thread', { url, index, compCodes });
+          mainThreadJobQueue.current.push({
+            arrayBuffer,
+            sourceUrl: url,
+            fileExtension,
+            index,
+            pageStartIndex: 0,
+            pagesInvolved: totalPages,
+            allPagesStartingIndex: currentPageIndex.current,
+          });
+          arrayBuffer = null;
+          currentPageIndex.current += totalPages;
+        } else {
+          const job = {
+            arrayBuffer, // transferred to worker
+            sourceUrl: url,
+            fileExtension,
+            index,
+            pageStartIndex: 0,
+            pagesInvolved: totalPages,
+            allPagesStartingIndex: currentPageIndex.current,
+          };
+          logger.debug('Queueing TIFF job for worker', { index, totalPages, start: currentPageIndex.current, compCodes });
+          jobQueue.current.push(job);
+          arrayBuffer = null; // help GC
+          currentPageIndex.current += totalPages;
         }
-        // Process TIFF entirely on the main thread to avoid duplicating the buffer per page.
-        const job = {
-          arrayBuffer, // reuse one buffer
-          fileExtension,
-          index,
-          pageStartIndex: 0,
-          pagesInvolved: totalPages,
-          allPagesStartingIndex: currentPageIndex.current,
-        };
-        mainThreadJobQueue.current.push(job);
-        arrayBuffer = null;
-        currentPageIndex.current += totalPages;
       } else {
-        // Other single-image types (reuse original buffer so it can be transferred)
+        // Other single-image types → worker
         const job = {
           arrayBuffer,
+          sourceUrl: url,
           fileExtension,
           index,
           pageStartIndex: 0,
           pagesInvolved: 1,
           allPagesStartingIndex: currentPageIndex.current,
         };
-        logger.debug('Queueing job for image type', { job, currentPageIndex: currentPageIndex.current });
+        logger.debug('Queueing job for image type', { job: { fileExtension, index }, currentPageIndex: currentPageIndex.current });
         jobQueue.current.push(job);
-        arrayBuffer = null; // help GC
+        arrayBuffer = null;
         currentPageIndex.current += 1;
       }
     } catch (error) {
-      // Always remove controller on exit (including aborts)
       fetchControllers.current.delete(controller);
 
-      // If unmounted or aborted, do nothing noisy
       if (error?.name === 'AbortError') {
         logger.debug('Fetch aborted', { url });
         return;
@@ -341,10 +404,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
   }, [setError, handleFailedDocumentLoad]);
 
   // Process batches of jobs using workers
-  /**
-   * Start/continue batched worker processing.
-   * @returns {void}
-   */
   const processBatches = useCallback(() => {
     batchHandler(
       jobQueue,
@@ -358,27 +417,24 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
     );
   }, [imageWorkers, sameBlob, insertPageAtIndex]);
 
-  // Low-core sequential scheduler (1 job at a time; yield to UI between jobs)
-  /**
-   * Sequentially process worker and main-thread jobs for low-core devices.
-   * @returns {void}
-   */
+  // Low-core sequential scheduler
   const processSequential = useCallback(() => {
     if (!isMounted.current) return;
 
-    // 1) Worker job: send next to the single worker
     const next = jobQueue.current.shift();
     if (next) {
       const w = imageWorkers[0];
       if (!w) return;
 
       w.onmessage = (evt) => {
-        handleWorkerMessage(evt, insertPageAtIndex, sameBlob, isMounted);
-        // Give the main thread a breather before the next job
+        handleWorkerMessage(evt, insertPageAtIndex, sameBlob, isMounted, {
+          renderPDFInMainThread,
+          renderTIFFInMainThread,
+          mainThreadJobQueueRef: mainThreadJobQueue,
+        });
         setTimeout(processSequential, 0);
       };
       w.onerror = () => {
-        // Fallback: TIFF in main thread; otherwise a placeholder
         if (['tiff', 'tif'].includes(next.fileExtension)) {
           renderTIFFInMainThread(next, insertPageAtIndex, sameBlob, isMounted)
             .then(() => setTimeout(processSequential, 0));
@@ -407,10 +463,9 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
 
       const transfer = next?.arrayBuffer instanceof ArrayBuffer ? [next.arrayBuffer] : [];
       w.postMessage({ jobs: [next], fileExtension: next.fileExtension }, transfer);
-      return; // wait for onmessage before proceeding
+      return;
     }
 
-    // 2) Drain main-thread jobs (PDF/TIFF) one at a time
     const mt = mainThreadJobQueue.current.shift();
     if (mt) {
       const run = mt.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
@@ -423,10 +478,8 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
     hasStarted.current = true;
 
     const loadDocuments = async () => {
-      // Insert the very first placeholder now so the UI can layout immediately.
       preloadPlaceholderImage(currentPageIndex.current);
 
-      // Choose explicit-list or pattern
       let entries = [];
       if (Array.isArray(sourceList) && sourceList.length > 0) {
         entries = sourceList
@@ -443,19 +496,16 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
       }
 
       try {
-        // Fetch sequentially to avoid overwhelming the network in constrained environments.
         for (let i = 0; i < entries.length; i++) {
           const { url, fileIndex } = entries[i];
           logger.debug('Processing document URL', { url, index: fileIndex });
           await loadDocumentAsync(url, fileIndex);
         }
 
-        // Backfill placeholders for any remaining pages
         for (let i = 1; i < currentPageIndex.current; i++) {
           preloadPlaceholderImage(i);
         }
 
-        // Low-core: strictly sequential; otherwise: batched workers + drain main-thread queue
         if (lowCore) {
           processSequential();
         } else {
@@ -482,7 +532,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
     return () => {
       isMounted.current = false;
 
-      // Abort any in-flight fetches
       fetchControllers.current.forEach((ctrl) => {
         try {
           ctrl.abort();
@@ -490,7 +539,6 @@ const DocumentLoader = ({ folder, extension, children, sameBlob = true, endNumbe
       });
       fetchControllers.current.clear();
 
-      // Terminate workers
       imageWorkers.forEach((worker) => worker.terminate());
     };
   }, [

@@ -37,6 +37,7 @@ import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
  * Render job passed to the main-thread renderer.
  * @typedef {Object} RenderJob
  * @property {ArrayBuffer} arrayBuffer
+ * @property {(string|undefined)} sourceUrl
  * @property {number} index
  * @property {number} pageStartIndex
  * @property {number} pagesInvolved
@@ -111,7 +112,15 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       // non-fatal in SSR/odd envs
     }
 
-    const pdf = await pdfjsLib.getDocument({ data: job.arrayBuffer.slice(0) }).promise;
+    // If the worker queued a fallback without bytes, fetch them now using sourceUrl.
+    let dataBuffer = job.arrayBuffer;
+    if ((!dataBuffer || dataBuffer.byteLength === 0) && job.sourceUrl) {
+      const resp = await fetch(job.sourceUrl);
+      if (!resp.ok) throw new Error('Failed to fetch PDF for main-thread render');
+      dataBuffer = await resp.arrayBuffer();
+    }
+
+    const pdf = await pdfjsLib.getDocument({ data: dataBuffer.slice(0) }).promise;
 
     // pdf.getPage(...) is 1-based; translate (pageStartIndex .. +pagesInvolved-1) → (1..N)
     const first = job.pageStartIndex + 1;
@@ -198,11 +207,87 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
 };
 
 /* ------------------------------------------------------------------------------------------------
- * TIFF — main-thread renderer
+ * TIFF — main-thread renderer (with ultra-light OJPEG fallback)
  * ------------------------------------------------------------------------------------------------ */
 
 /**
- * Render TIFF pages on the main thread and insert results directly.
+ * Safely read a TIFF tag array from a utif2 IFD object.
+ * utif2 exposes numeric tags as `t<id>` (e.g., t259 for Compression).
+ * @param {any} ifd
+ * @param {number} tagId
+ * @returns {(Array<number>|undefined)}
+ */
+function getTagArray(ifd, tagId) {
+  const key = 't' + tagId;
+  const v = ifd && ifd[key];
+  if (!v) return undefined;
+  return Array.isArray(v) ? v : [v];
+}
+
+/**
+ * Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by
+ * concatenating the tables (`JPEGInterchangeFormat`/`Length`: t513/t514) with
+ * the entropy-coded scan strips (`StripOffsets`/`StripByteCounts`: t273/t279).
+ *
+ * @param {ArrayBuffer} arrayBuffer
+ * @param {any} ifd
+ * @returns {(Blob|null)} Blob of type 'image/jpeg' or null if reconstruction is not possible
+ */
+function buildOjpegJpeg(arrayBuffer, ifd) {
+  try {
+    const t513 = getTagArray(ifd, 513); // JPEGInterchangeFormat (offset to tables)
+    const t514 = getTagArray(ifd, 514); // JPEGInterchangeFormatLength
+    const t273 = getTagArray(ifd, 273); // StripOffsets (scan data offsets)
+    const t279 = getTagArray(ifd, 279); // StripByteCounts (scan data lengths)
+
+    if (!t513 || !t514 || !t273 || !t279) return null;
+
+    const tablesOffset = t513[0] >>> 0;
+    const tablesLen = t514[0] >>> 0;
+    if (!tablesLen) return null;
+
+    const u8 = new Uint8Array(arrayBuffer);
+    const parts = [];
+
+    // Tables blob (SOI + APP0(JFIF) + DQT/DHT/SOF0 ... up to SOS)
+    parts.push(u8.subarray(tablesOffset, tablesOffset + tablesLen));
+
+    // Concatenate all strips (usually single-strip; support multi-strip just in case)
+    let totalScanLen = 0;
+    for (let i = 0; i < t273.length && i < t279.length; i++) {
+      totalScanLen += (t279[i] >>> 0);
+    }
+    const scanAll = new Uint8Array(totalScanLen);
+    let cursor = 0;
+    for (let i = 0; i < t273.length && i < t279.length; i++) {
+      const off = t273[i] >>> 0;
+      const len = t279[i] >>> 0;
+      scanAll.set(u8.subarray(off, off + len), cursor);
+      cursor += len;
+    }
+    parts.push(scanAll);
+
+    // Join into one buffer
+    let totalLen = 0;
+    for (const p of parts) totalLen += p.byteLength;
+    const out = new Uint8Array(totalLen);
+    let o = 0;
+    for (const p of parts) {
+      out.set(p, o);
+      o += p.byteLength;
+    }
+
+    return new Blob([out], { type: 'image/jpeg' });
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Render TIFF pages on the main thread with an ultra-light OJPEG fast path:
+ * - If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream
+ *   by concatenating the JFIF/tables blob with the scan strips and use that directly.
+ * - Otherwise, decode to RGBA via utif2 and paint to a canvas (export as PNG).
  *
  * @param {RenderJob} job
  * @param {InsertPageAtIndex} insertPageAtIndex
@@ -214,7 +299,17 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
   if (isMounted && isMounted.current === false) return;
 
   try {
-    const ifds = decodeUTIF(job.arrayBuffer);
+    // If we were scheduled without bytes, fetch them using sourceUrl.
+    let buffer = job.arrayBuffer;
+    if ((!buffer || buffer.byteLength === 0) && job.sourceUrl) {
+      const resp = await fetch(job.sourceUrl);
+      if (!resp.ok) throw new Error('Failed to fetch TIFF for main-thread render');
+      buffer = await resp.arrayBuffer();
+      // Keep for downstream functions that may rely on job.arrayBuffer
+      job.arrayBuffer = buffer;
+    }
+
+    const ifds = decodeUTIF(buffer);
 
     const start = job.pageStartIndex;
     const end = Math.min(job.pageStartIndex + job.pagesInvolved, ifds.length);
@@ -224,49 +319,123 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
 
       const ifd = ifds[i];
 
-      // Decode the target IFD to RGBA8
-      decodeUTIFImage(job.arrayBuffer, ifd);
-      const rgba = toRGBA8(ifd);
+      // 1) Ultra-light OJPEG path: Compression == 6
+      const compressionArr = getTagArray(ifd, 259);
+      const compression = compressionArr && compressionArr.length ? (compressionArr[0] >>> 0) : 0;
 
-      // Paint onto a canvas
-      const canvas = document.createElement('canvas');
-      canvas.width = ifd.width;
-      canvas.height = ifd.height;
+      if (compression === 6) {
+        try {
+          const jpegBlob = buildOjpegJpeg(buffer, ifd);
+          if (jpegBlob) {
+            const url = URL.createObjectURL(jpegBlob);
+            addToUrlRegistry(url);
 
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not obtain 2D context for TIFF canvas');
+            const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
+            const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
 
-      const imageData = ctx.createImageData(ifd.width, ifd.height);
-      imageData.data.set(rgba);
-      ctx.putImageData(imageData, 0, 0);
+            insertPageAtIndex(
+              {
+                fullSizeUrl: url,
+                thumbnailUrl: thumbUrl,
+                loaded: true,
+                status: 1,
+                fileExtension: 'tiff',
+                fileIndex: job.index,
+                pageIndex: i,
+                allPagesIndex: at,
+              },
+              at
+            );
 
-      // Export to Blob → URL
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve));
-      if (!blob) throw new Error('Failed to create blob from TIFF canvas');
+            logger.debug('TIFF OJPEG rewrap used (main thread)', {
+              pageIndex: i,
+              fileIndex: job.index,
+              allPagesIndex: at,
+            });
 
-      const url = URL.createObjectURL(blob);
-      addToUrlRegistry(url);
+            // Small yield to keep UI responsive on long runs
+            if ((i - start) % 2 === 1) await new Promise((r) => setTimeout(r, 0));
+            continue; // Next page
+          }
+        } catch (e) {
+          // If rewrap failed, fall through to RGBA decode
+          logger.warn('OJPEG rewrap failed; falling back to RGBA decode', {
+            pageIndex: i,
+            fileIndex: job.index,
+            error: String(e?.message || e),
+          });
+        }
+      }
 
-      if (isMounted && isMounted.current === false) return;
+      // 2) Standard path — decode the target IFD to RGBA8, paint to canvas, export PNG
+      try {
+        decodeUTIFImage(buffer, ifd);
+        const rgba = toRGBA8(ifd);
 
-      // Generate (or reuse) a thumbnail
-      const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
+        // Paint onto a canvas
+        const canvas = document.createElement('canvas');
+        canvas.width = ifd.width >>> 0;
+        canvas.height = ifd.height >>> 0;
 
-      // Insert page
-      const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
-      insertPageAtIndex(
-        {
-          fullSizeUrl: url,
-          thumbnailUrl: thumbUrl,
-          loaded: true,
-          status: 1,
-          fileExtension: 'tiff',
-          fileIndex: job.index,
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Could not obtain 2D context for TIFF canvas');
+
+        const imageData = ctx.createImageData(canvas.width, canvas.height);
+        imageData.data.set(rgba);
+        ctx.putImageData(imageData, 0, 0);
+
+        // Export to Blob → URL (prefer PNG)
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('Failed to create blob from TIFF canvas');
+
+        const url = URL.createObjectURL(blob);
+        addToUrlRegistry(url);
+
+        if (isMounted && isMounted.current === false) return;
+
+        // Generate (or reuse) a thumbnail
+        const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
+
+        // Insert page
+        const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
+        insertPageAtIndex(
+          {
+            fullSizeUrl: url,
+            thumbnailUrl: thumbUrl,
+            loaded: true,
+            status: 1,
+            fileExtension: 'tiff',
+            fileIndex: job.index,
+            pageIndex: i,
+            allPagesIndex: at,
+          },
+          at
+        );
+      } catch (perPageError) {
+        // Per-page failure should not abort the whole job — insert placeholder and continue.
+        const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
+        const placeholderImageUrl = 'placeholder.png';
+
+        logger.warn('TIFF page failed to decode on main thread; inserting placeholder', {
           pageIndex: i,
-          allPagesIndex: at,
-        },
-        at
-      );
+          fileIndex: job.index,
+          error: String(perPageError?.message || perPageError),
+        });
+
+        insertPageAtIndex(
+          {
+            fullSizeUrl: placeholderImageUrl,
+            thumbnailUrl: placeholderImageUrl,
+            loaded: false,
+            status: -1,
+            fileExtension: job.fileExtension,
+            fileIndex: job.index,
+            pageIndex: i,
+            allPagesIndex: at,
+          },
+          at
+        );
+      }
 
       // Small yields help on low-core machines during long TIFF batches
       if ((i - start) % 2 === 1) {
