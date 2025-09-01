@@ -13,6 +13,11 @@
  * This component only COLLECTS the "reason" and "for whom" values and returns
  * them in the `onSubmit` detail. The consumer (toolbar) decides what to do
  * (e.g., call UserLogController.submitPrint) without blocking the print flow.
+ *
+ * NOTE:
+ *   When printHeader.enabled === true in runtime config, this dialog shows a
+ *   read-only informational note that a header overlay will be stamped on
+ *   printed pages. There is NO toggle here; it is not optional for the user.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -164,7 +169,9 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
 
   // UI
   const [error, setError] = useState('');
+  /** @type {React.RefObject<HTMLFormElement>} */
   const dialogRef = useRef(/** @type {HTMLFormElement|null} */(null));
+  /** @type {React.RefObject<HTMLDivElement>} */
   const backdropRef = useRef(/** @type {HTMLDivElement|null} */(null));
 
   const pageOptions = useMemo(() => {
@@ -337,6 +344,13 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
       <form ref={dialogRef} onSubmit={submit} className={styles.dialog} noValidate>
         <h3 id="print-title" className={styles.title}>Print – {titleSuffix}</h3>
         <p className={styles.desc}>Pick what to print. Default is <strong>Active page</strong>.</p>
+
+        {/* Read-only note about non-optional header overlay when enabled in config */}
+        {headerCfg?.enabled ? (
+          <div className={styles.hint} role="note">
+            A header will be stamped on printed pages. This is configured by your administrator and cannot be disabled here.
+          </div>
+        ) : null}
 
         {modeGroup === 'basic' ? (
           <p className={styles.modeSwitch}>

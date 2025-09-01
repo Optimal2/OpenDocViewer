@@ -15,6 +15,13 @@
  *   - Printing is performed via a hidden <iframe> to avoid popup blockers.
  *   - When possible, we obtain data URLs from the imperative handle; otherwise
  *     we fall back to canvases/images currently in the DOM.
+ *
+ * HEADER OVERLAY
+ *   When odvConfig.printHeader.enabled === true, this module injects a non-optional
+ *   overlay band into the print DOM (top or bottom) for each printed page, according
+ *   to printHeader.applyTo ("all" | "first" | "last"). The overlay is absolutely
+ *   positioned and does NOT reflow content. Admins may customize its look using
+ *   printHeader.css (string), which is injected as print-only CSS inside the print iframe.
  */
 
 import logger from '../LogController.js';
@@ -25,6 +32,8 @@ import logger from '../LogController.js';
  * @property {'auto'|'portrait'|'landscape'} [orientation='auto']  Page orientation for single-page print.
  * @property {number} [printDelayMs=0]                              Extra delay before print() after image load.
  * @property {{ current: HTMLElement|null }} [viewerContainerRef]   Optional viewer root for DOM fallbacks.
+ * @property {string} [reason]                                      Optional reason text to propagate to header tokens.
+ * @property {string} [forWhom]                                     Optional "for whom" text to propagate to header tokens.
  */
 
 /**
@@ -40,6 +49,8 @@ import logger from '../LogController.js';
  * @property {number} [printDelayMs=0]
  * @property {{ current: HTMLElement|null }} [viewerContainerRef]
  * @property {PageRange} [pageRange]
+ * @property {string} [reason]
+ * @property {string} [forWhom]
  */
 
 /**
@@ -47,6 +58,17 @@ import logger from '../LogController.js';
  * @typedef {Object} PrintCandidate
  * @property {(HTMLCanvasElement|HTMLImageElement)} node
  * @property {number} area
+ */
+
+/**
+ * Print header config (runtime) consumed by the print overlay logic.
+ * Using Closure-friendly optional properties (the trailing "=").
+ * @typedef {Object} PrintHeaderCfg
+ * @property {boolean=} enabled
+ * @property {"top"|"bottom"=} position
+ * @property {"all"|"first"|"last"=} applyTo
+ * @property {string=} template
+ * @property {string=} css
  */
 
 /**
@@ -140,19 +162,237 @@ function resolveOrientation(width, height, requested) {
 }
 
 /**
+ * Resolve runtime ODV config injected at /public/odv.config.js.
+ * Falls back gracefully if not present.
+ * @returns {Object}
+ */
+function getODVConfig() {
+  try {
+    // __ODV_GET_CONFIG__ is a function in some deployments
+    const f = /** @type {any} */ (window).__ODV_GET_CONFIG__;
+    if (typeof f === 'function') {
+      const v = f();
+      if (v && typeof v === 'object') return v;
+    }
+  } catch {}
+  try {
+    const v = /** @type {any} */ (window).__ODV_CONFIG__;
+    if (v && typeof v === 'object') return v;
+  } catch {}
+  return {};
+}
+
+/** Zero-pad helper. */
+function z2(n) { return (n < 10 ? '0' : '') + n; }
+
+/**
+ * Make a shallow "context" object for token substitution in header templates.
+ * `doc` and `user` are best-effort and may be empty objects.
+ *
+ * Adds:
+ *   - date: YYYY-MM-DD (local)
+ *   - time: HH:MM (24h, local)
+ *
+ * @param {Object|undefined} handle   Optional imperative handle for doc metadata (best-effort).
+ * @param {string} reason
+ * @param {string} forWhom
+ * @returns {{ now: string, date: string, time: string, reason: string, forWhom: string, user: Object, doc: Object, viewer: Object }}
+ */
+function makeBaseTokenContext(handle, reason, forWhom) {
+  /** @type {any} */
+  const user = (/** @type {any} */ (window)).__ODV_USER__ || {};
+  /** @type {any} */
+  const viewer = { version: (/** @type {any} */ (window)).__ODV_VERSION__ || '' };
+
+  /** @type {any} */
+  let doc = {};
+  try {
+    if (handle && typeof (/** @type {any} */ (handle)).getDocumentMeta === 'function') {
+      const meta = (/** @type {any} */ (handle)).getDocumentMeta();
+      if (meta && typeof meta === 'object') doc = meta;
+    } else if (handle && typeof (/** @type {any} */ (handle)).getDocumentSummary === 'function') {
+      const meta = (/** @type {any} */ (handle)).getDocumentSummary();
+      if (meta && typeof meta === 'object') doc = meta;
+    }
+  } catch {
+    // best-effort only
+  }
+
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = z2(now.getMonth() + 1);
+  const d = z2(now.getDate());
+  const hh = z2(now.getHours());
+  const mm = z2(now.getMinutes());
+
+  return {
+    // Back-compat token:
+    now: now.toLocaleString ? now.toLocaleString() : now.toISOString(),
+    // New explicit tokens for formatting:
+    date: y + '-' + m + '-' + d,      // YYYY-MM-DD
+    time: hh + ':' + mm,              // HH:MM (24h)
+    reason: reason || '',
+    forWhom: forWhom || '',
+    user,
+    doc,
+    viewer
+  };
+}
+
+/**
+ * Resolve a dotted-path property from an object (e.g., path "doc.title").
+ * @param {Object} obj
+ * @param {string} path
+ * @returns {any}
+ */
+function getByPath(obj, path) {
+  if (!obj || !path) return undefined;
+  const parts = path.split('.');
+  /** @type {any} */
+  let cur = obj;
+  for (let i = 0; i < parts.length; i++) {
+    const k = parts[i];
+    if (cur && Object.prototype.hasOwnProperty.call(cur, k)) {
+      cur = cur[k];
+    } else {
+      return undefined;
+    }
+  }
+  return cur;
+}
+
+/**
+ * Perform simple token substitution for strings like:
+ *   "${now} | ${doc.title||''} | Page ${page}/${totalPages}"
+ * Supported form: ${path} or ${path||fallbackLiteral}
+ * - path may be "reason", "forWhom", "user.name", "doc.title", "page", "totalPages", "date", "time", etc.
+ * - fallbackLiteral is used if resolved value is null/undefined/empty string; quotes may be single or double.
+ *
+ * @param {string} tpl
+ * @param {Object} tokenContext
+ * @returns {string}
+ */
+function applyTemplateTokens(tpl, tokenContext) {
+  if (typeof tpl !== 'string' || !tpl) return '';
+  return tpl.replace(/\$\{([^}]+)\}/g, function (_m, inner) {
+    const raw = String(inner || '').trim();
+    // Support "path||'fallback'" syntax
+    const parts = raw.split('||');
+    const path = (parts[0] || '').trim();
+    let val;
+    if (path) {
+      val = getByPath(tokenContext, path);
+    }
+    if (val === undefined || val === null || String(val) === '') {
+      if (parts.length > 1) {
+        // Parse simple quoted literal or bare text fallback
+        const fb = parts.slice(1).join('||').trim();
+        // Remove surrounding quotes if present
+        const m = fb.match(/^(['"])(.*)\1$/);
+        return m ? m[2] : fb;
+      }
+      return '';
+    }
+    return String(val);
+  });
+}
+
+/**
+ * Build the print-only CSS (inlined within the print iframe).
+ * Includes base rules for pages, image fit, and the header overlay class,
+ * and appends admin-provided CSS (string) if present.
+ *
+ * @param {string} extraCss
+ * @returns {string}
+ */
+function buildPrintCss(extraCss) {
+  const base =
+    '@media print{@page{margin:0;}html,body{height:100%;}}' +
+    'html,body{margin:0;padding:0;background:#fff;height:100%;}' +
+    '.page{break-after:page;-webkit-break-after:page;page-break-after:always;' +
+      'display:flex;align-items:center;justify-content:center;min-height:100vh;' +
+      'box-sizing:border-box;overflow:hidden;position:relative;}' +
+    '.page.last{break-after:auto;-webkit-break-after:auto;page-break-after:auto;}' +
+    '.page img{display:block;width:auto;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;' +
+      'page-break-inside:avoid;break-inside:avoid;}' +
+    '.odv-print-header{pointer-events:none;z-index:2147483647;}';
+
+  const css = base + (typeof extraCss === 'string' && extraCss ? String(extraCss) : '');
+  // Use <style media="print"> to scope to printing context (still present in preview)
+  return '<style media="print">' + css + '</style>';
+}
+
+/**
+ * Decide if a header should be applied to the i-th page in a sequence of N,
+ * according to "all" | "first" | "last".
+ * @param {"all"|"first"|"last"} applyTo
+ * @param {number} index1  1-based index within the printed SEQUENCE
+ * @param {number} total   total printed pages in the SEQUENCE
+ * @returns {boolean}
+ */
+function shouldApplyHeader(applyTo, index1, total) {
+  if (applyTo === 'first') return index1 === 1;
+  if (applyTo === 'last') return index1 === total;
+  return true; // "all" or any unknown → default all
+}
+
+/**
+ * Create a single header DIV markup for a page using config + tokens.
+ *
+ * @param {PrintHeaderCfg} cfg
+ * @param {Object} tokenContext
+ * @param {number} page     1-based page number in the CURRENT printed sequence
+ * @param {number} total    total pages in the CURRENT printed sequence
+ * @returns {string}        HTML string, or empty string if not applicable
+ */
+function buildHeaderDivHtml(cfg, tokenContext, page, total) {
+  if (!cfg || !cfg.enabled) return '';
+  const applyTo = /** @type {("all"|"first"|"last")} */ (cfg.applyTo || 'all');
+  if (!shouldApplyHeader(applyTo, page, total)) return '';
+
+  const pos = (cfg.position || 'top') === 'bottom' ? 'bottom:0;' : 'top:0;';
+  const tpl = cfg.template || '';
+  const content = applyTemplateTokens(tpl, { ...tokenContext, page, totalPages: total });
+
+  // Inline position for overlay, allow admin CSS to style content
+  return '<div class="odv-print-header" style="position:absolute;' + pos + 'left:0;right:0;">' +
+           content +
+         '</div>';
+}
+
+/**
  * Create a minimal, print-ready HTML document string embedding a single raster image.
+ * Includes optional header overlay per config.
+ *
  * @param {string} dataUrl
  * @param {'portrait'|'landscape'} orientation
  * @param {number} printDelayMs
+ * @param {Object} odvConfig
+ * @param {Object} tokenContext
  * @returns {string}
  */
-function buildPrintHtml(dataUrl, orientation, printDelayMs) {
+function buildPrintHtml(dataUrl, orientation, printDelayMs, odvConfig, tokenContext) {
+  const ph = (odvConfig && odvConfig.printHeader) || {};
+  const css = buildPrintCss(ph.css || '');
+
+  const header = ph.enabled
+    ? buildHeaderDivHtml(ph, tokenContext, 1, 1)
+    : '';
+
+  // Wrap in .page to unify with multi-page layout
+  const body =
+    '<div class="page last">' +
+      header +
+      '<img id="__odv_print_image__" alt="Printable Document" src="' + dataUrl + '" />' +
+    '</div>';
+
   return (
     '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print</title><style>' +
-    '@media print{@page{size:' + orientation + ';margin:0;}html,body{height:100%;}body{margin:0;display:flex;align-items:center;justify-content:center;}img{max-width:100vw;max-height:100vh;width:auto;height:auto;}}' +
-    'html,body{margin:0;padding:0;height:100%;background:#fff;}body{display:flex;align-items:center;justify-content:center;}img{max-width:100vw;max-height:100vh;width:auto;height:auto;}' +
-    '</style></head><body>' +
-    '<img id="__odv_print_image__" alt="Printable Document" src="' + dataUrl + '" />' +
+    '@media print{@page{size:' + orientation + ';margin:0;}}' +
+    '</style>' +
+    css +
+    '</head><body>' +
+    body +
     '<script>(function(){function g(){try{window.print()}catch(e){}}var d=' + (Math.max(0, Number(printDelayMs) || 0)) + ';' +
     'var i=document.getElementById("__odv_print_image__");if(i&&i.complete){setTimeout(g,d)}else if(i){i.addEventListener("load",function(){setTimeout(g,d)},{once:true})}})();</script>' +
     '</body></html>'
@@ -161,26 +401,35 @@ function buildPrintHtml(dataUrl, orientation, printDelayMs) {
 
 /**
  * Build a multi-page print HTML with one image per page, single column, page breaks between items.
+ * Injects header overlay per page if enabled by config.
+ *
  * @param {Array.<string>} dataUrls
  * @param {number} printDelayMs
+ * @param {Object} odvConfig
+ * @param {Object} tokenContext
  * @returns {string}
  */
-function buildPrintAllHtml(dataUrls, printDelayMs) {
+function buildPrintAllHtml(dataUrls, printDelayMs, odvConfig, tokenContext) {
+  const total = dataUrls.length;
+  const ph = (odvConfig && odvConfig.printHeader) || {};
+  const css = buildPrintCss(ph.css || '');
+
   const imgs = dataUrls
     .map((src, i) => {
-      const last = i === dataUrls.length - 1;
-      return '<div class="page' + (last ? ' last' : '') + '"><img alt="Page ' + (i + 1) + '" src="' + src + '" /></div>';
+      const index1 = i + 1;
+      const last = i === total - 1;
+      const header = ph.enabled ? buildHeaderDivHtml(ph, tokenContext, index1, total) : '';
+      return '<div class="page' + (last ? ' last' : '') + '">' +
+               header +
+               '<img alt="Page ' + index1 + '" src="' + src + '" />' +
+             '</div>';
     })
     .join('');
 
   return (
-    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print All</title><style>' +
-    'html,body{margin:0;padding:0;background:#fff;height:100%;}' +
-    '.page{break-after:page;-webkit-break-after:page;page-break-after:always;display:flex;align-items:center;justify-content:center;min-height:100vh;box-sizing:border-box;overflow:hidden;}' +
-    '.page.last{break-after:auto;-webkit-break-after:auto;page-break-after:auto;}' +
-    '.page img{display:block;width:auto;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;page-break-inside:avoid;break-inside:avoid;}' +
-    '@media print{@page{margin:0;}html,body{height:100%;}.page{min-height:100vh;}.page img{max-width:100vw;max-height:100vh;}}' +
-    '</style></head><body>' +
+    '<!DOCTYPE html><html><head><meta charset="utf-8"><title>Print All</title>' +
+    css +
+    '</head><body>' +
     imgs +
     '<script>(function(){var d=' + (Math.max(0, Number(printDelayMs) || 0)) + ';' +
     'var a=Array.prototype.slice.call(document.images||[]);function L(i){return i.complete&&(typeof i.naturalWidth==="undefined"||i.naturalWidth>0)}' +
@@ -266,7 +515,7 @@ function printViaHiddenIframe(html, cleanupDelayMs = 2000) {
 export function handlePrint(documentRenderRef, options = {}) {
   logger.info('handlePrint invoked');
 
-  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef } = options;
+  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '' } = options;
 
   const active = resolveActiveNode(documentRenderRef, viewerContainerRef);
   if (!active) {
@@ -294,7 +543,12 @@ export function handlePrint(documentRenderRef, options = {}) {
   } catch {}
 
   const pageOrientation = resolveOrientation(w, h, orientation);
-  const html = buildPrintHtml(dataUrl, pageOrientation, printDelayMs);
+
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+
+  const html = buildPrintHtml(dataUrl, pageOrientation, printDelayMs, odv, tokenContext);
   printViaHiddenIframe(html, 2000);
 }
 
@@ -352,6 +606,7 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
  * Print ALL pages/images visible in the viewer, one per page, single column.
  * If `options.pageRange` is provided, only that inclusive range is printed.
  * Descending ranges (e.g., 5→2) are supported.
+ * Applies header overlay per config to the PRINTED sequence.
  *
  * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
  * @param {PrintAllOptions} [options]
@@ -360,7 +615,7 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
 export async function handlePrintAll(documentRenderRef, options = {}) {
   logger.info('handlePrintAll invoked');
 
-  const { printDelayMs = 0, viewerContainerRef, pageRange } = options;
+  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '' } = options;
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!dataUrls.length) {
@@ -389,19 +644,25 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
     }
   }
 
-  const html = buildPrintAllHtml(toPrint, printDelayMs);
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+
+  const html = buildPrintAllHtml(toPrint, printDelayMs, odv, tokenContext);
   printViaHiddenIframe(html, Math.max(2500, 1000 + toPrint.length * 5));
 }
 
 /**
  * Print an explicit sequence of 1-based page indices.
+ * Applies header overlay per config to the PRINTED sequence.
+ *
  * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
  * @param {Array.<number>} sequence
  * @param {PrintAllOptions} [options]
  * @returns {Promise.<void>}
  */
 export async function handlePrintSequence(documentRenderRef, sequence, options = {}) {
-  const { printDelayMs = 0, viewerContainerRef } = options || {};
+  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '' } = options || {};
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!Array.isArray(sequence) || !sequence.length) {
@@ -425,7 +686,11 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
     toPrint.push(dataUrls[idx]);
   }
 
-  const html = buildPrintAllHtml(toPrint, printDelayMs);
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (documentRenderRef?.current);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+
+  const html = buildPrintAllHtml(toPrint, printDelayMs, odv, tokenContext);
   printViaHiddenIframe(html, Math.max(2500, 1000 + toPrint.length * 5));
 }
 
