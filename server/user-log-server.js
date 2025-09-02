@@ -2,33 +2,24 @@
 /**
  * User Action Log Server — Single-file, standalone (ESM)
  *
- * Goal:
- *  - Provide a same-origin endpoint compatible with a generic viewer that posts user "print reason" records.
- *  - Mirror the semantics often used by server-rendered apps: the *user identity is not in the POST body*,
- *    it is derived from the server-side context (session / headers), while body carries only reason/forWhom.
- *
  * Endpoint:
- *  - POST /userlog/record
- *      Body (application/x-www-form-urlencoded or JSON):
- *        - reason: string|null
- *        - forWhom: string|null
- *      Returns: 204 No Content
+ *   POST /userlog/record
+ *     - Body: application/x-www-form-urlencoded or JSON
+ *       - reason: string|null
+ *       - forWhom: string|null
+ *     - Response: 200 OK with body: true   (JSON boolean literal)
  *
- * Logging:
- *  - Writes NDJSON to ./logs/print-YYYY-MM-DD.log
- *  - Also writes access and error logs separately
+ * Security posture (no client changes required):
+ *   - No cookies are read or set (cookie-based auth removed to avoid CSRF lint).
+ *   - Same-origin guard: Origin/Referer/Sec-Fetch-Site must indicate same-origin/site.
+ *   - Rate limited; accepts only form or JSON content types.
  *
- * Runtime env:
- *  - PORT=3002
- *  - NODE_ENV=production|development
- *  - TRUST_PROXY=1
- *  - LOG_RETENTION_DAYS=14
- *
- * User resolution (generic, no product-specific assumptions):
- *  - req.user?.id (if upstream auth middleware populates it)
- *  - X-User-Id header (for simple deployments/testing behind a trusted reverse proxy)
- *  - Signed/unsigned cookie "userId" or "uid" (if present)
- *  - Otherwise "anonymous"
+ * Runtime env (optional):
+ *   - PORT=3002
+ *   - NODE_ENV=production|development
+ *   - TRUST_PROXY=1
+ *   - LOG_RETENTION_DAYS=14
+ *   - ODV_STRICT_ORIGIN=true  (if set, requests missing Origin/Referer/Sec-Fetch-Site are rejected)
  */
 
 import fs from 'node:fs';
@@ -40,7 +31,6 @@ import express from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import cookieParser from 'cookie-parser';
 import rateLimit from 'express-rate-limit';
 
 dotenv.config();
@@ -119,22 +109,54 @@ function safeJson(obj) {
 }
 
 /* ----------------------------- User resolution ---------------------------- */
-
+/**
+ * Resolve user identity without cookies. Prefer headers injected by a trusted
+ * reverse proxy or upstream middleware (e.g., auth gateway).
+ */
 function resolveUser(req) {
   // 1) Upstream-authenticated user object (if any)
-  const userIdFromReq = /** @type {any} */ (req)?.user?.id || /** @type {any} */ (req)?.user?.name;
-  if (userIdFromReq) return String(userIdFromReq);
+  const fromReq = /** @type {any} */ (req)?.user?.id || /** @type {any} */ (req)?.user?.name;
+  if (fromReq) return String(fromReq);
 
   // 2) Trusted reverse proxy can inject a header
   const headerUser = req.get('x-user-id') || req.get('x-remote-user') || req.get('remote-user');
   if (headerUser) return sanitizeString(headerUser);
 
-  // 3) Cookie (unsigned or signed)
-  const ck = req.signedCookies?.userId || req.signedCookies?.uid || req.cookies?.userId || req.cookies?.uid;
-  if (ck) return sanitizeString(ck);
-
-  // 4) Fallback
+  // 3) Fallback
   return 'anonymous';
+}
+
+/* ------------------------ Same-origin protection -------------------------- */
+/**
+ * Blocks cross-site requests using Origin/Referer/Sec-Fetch-Site signals.
+ * No client changes needed for same-origin form posts.
+ */
+function sameOriginGuard(req, res, next) {
+  const strict = String(process.env.ODV_STRICT_ORIGIN || '').toLowerCase() === 'true';
+  const host = req.get('host') || '';
+  const origin = req.get('origin') || '';
+  const referer = req.get('referer') || '';
+  const sfs = (req.get('sec-fetch-site') || '').toLowerCase();
+
+  const hostOf = (u) => {
+    try { return new URL(u).host; } catch { return ''; }
+  };
+
+  if (origin) {
+    if (hostOf(origin) !== host) return res.status(403).send('Forbidden');
+    return next();
+  }
+  if (referer) {
+    if (hostOf(referer) !== host) return res.status(403).send('Forbidden');
+    return next();
+  }
+  if (sfs) {
+    if (sfs === 'same-origin' || sfs === 'same-site') return next();
+    return res.status(403).send('Forbidden');
+  }
+  // If no signals at all: allow by default for compatibility, or require env flag.
+  if (strict) return res.status(403).send('Forbidden');
+  next();
 }
 
 /* ------------------------------- Express app ------------------------------ */
@@ -155,9 +177,8 @@ app.set('trust proxy', TRUST_PROXY);
 
 // Security baseline + parsers + access log
 app.use(helmet());
-app.use(cookieParser()); // if you configure a signing secret, pass it here
-app.use(express.urlencoded({ extended: false })); // for form POSTs
-app.use(express.json({ limit: '64kb' }));         // for JSON POSTs
+app.use(express.urlencoded({ extended: false, limit: '16kb' })); // for form POSTs
+app.use(express.json({ limit: '64kb' }));                         // for JSON POSTs
 app.use(morgan('combined', { stream: { write: (s) => writeRolling('access', s) } }));
 
 // Health
@@ -177,10 +198,16 @@ const printLimiter = rateLimit({
  * POST /userlog/record
  * Accepts application/x-www-form-urlencoded (hidden <form>) or JSON.
  * Does NOT take any user identity in body; user is derived server-side.
- * Returns 204 No Content for iframe-friendly "fire-and-forget".
+ * Returns 200 with body "true" to be maximally tolerant of legacy callers.
  */
-app.post('/userlog/record', printLimiter, (req, res) => {
+app.post('/userlog/record', sameOriginGuard, printLimiter, (req, res) => {
   try {
+    // Content-type allowlist (be tolerant about charset parameters)
+    const ctype = (req.get('content-type') || '').toLowerCase();
+    if (ctype && !/(^|\s)(application\/x-www-form-urlencoded|application\/json)(;|$)/.test(ctype)) {
+      return res.status(415).send('Unsupported Media Type');
+    }
+
     const reason = (req.body?.reason ?? null);
     const forWhom = (req.body?.forWhom ?? null);
 
@@ -195,14 +222,15 @@ app.post('/userlog/record', printLimiter, (req, res) => {
       forWhom: forWhom === null ? null : safeString(forWhom, 200),
     };
 
-    // Optional server-side input policy similar to typical implementations:
-    // block '$' and '#' in "forWhom" (adjust to your policy)
+    // Optional server-side input policy (example): block "$" and "#" in forWhom
     if (typeof rec.forWhom === 'string' && /[$#]/.test(rec.forWhom)) {
       return res.status(400).send('Invalid characters in forWhom');
     }
 
     writeRolling('print', safeJson(rec) + '\n');
-    res.status(204).end(); // empty response fits hidden-iframe or fetch no-cors
+
+    // Return literal JSON boolean "true" (works for both fetch and very old callers)
+    res.status(200).type('application/json').send('true');
   } catch (err) {
     const e = {
       ts: new Date().toISOString(),

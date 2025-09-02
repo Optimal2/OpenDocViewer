@@ -1,3 +1,4 @@
+// File: src/integration/UserLogController.js
 /**
  * UserLogController — client-side controller for **user** print logs (backend-agnostic).
  *
@@ -5,8 +6,8 @@
  *   window.__ODV_GET_CONFIG__?.() or window.__ODV_CONFIG__ exposes:
  *     userLog: {
  *       enabled: boolean,
- *       endpoint: string,        // absolute or app-root-relative
- *       transport?: 'json'|'form'// optional; 'form' → x-www-form-urlencoded(reason, forWhom)
+ *       endpoint: string,         // absolute or app-root-relative
+ *       transport?: 'json'|'form' // optional; 'form' → x-www-form-urlencoded(reason, forWhom)
  *     }
  *
  * REQUIREMENTS
@@ -175,8 +176,8 @@ class UserLogController {
   /**
    * Submit a "print" user-log event. **Fire-and-forget**; never block UI.
    * Transport:
-   *   - when cfg.userLog.transport === 'form' (or endpoint contains 'DocumentView/LogPrint'):
-   *       → x-www-form-urlencoded with only reason & forWhom (compat with legacy external app)
+   *   - when cfg.userLog.transport === 'form':
+   *       → x-www-form-urlencoded with only reason & forWhom (compat mode)
    *   - otherwise → JSON envelope (rich event)
    * Credentials:
    *   - fetch fallback always uses { credentials:'include' } to reuse site session/cookies.
@@ -192,7 +193,7 @@ class UserLogController {
       const absUrl = toAbsoluteUrl(ul.endpoint);
       if (!absUrl) { debug('invalid endpoint'); return; }
 
-      const useForm = (ul.transport === 'form') || /DocumentView\/LogPrint/i.test(absUrl);
+      const useForm = (ul.transport === 'form');
 
       if (useForm) {
         // Compatibility path: only send reason & forWhom

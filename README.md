@@ -144,7 +144,7 @@ window.__ODV_CONFIG__ = {
 
   userLog: {
     enabled:   true,
-    endpoint:  "/path/to/your/DocumentView/LogPrint", // or any same-origin user-log endpoint
+    endpoint:  "/your-app/userlog/record", // any same-origin user-log endpoint managed by your platform
     transport: "form" // sends application/x-www-form-urlencoded with reason & forWhom
   },
 
@@ -185,7 +185,7 @@ When the user triggers **Print** inside the viewer, the client can **optionally*
     "session":{ "id": null, "iframeId": null, "createdAt": "ISO", "cookieFingerprint": "sha256-..." }
   }
   ```
-* **Mode 3 (form):** sends `reason=<...>&forWhom=<...>` only (legacy compatibility).
+* **Mode 3 (form):** sends `reason=<...>&forWhom=<...>` only (form-compatible endpoints).
 
 **Acceptance checklist**
 

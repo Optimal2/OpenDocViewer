@@ -73,13 +73,23 @@ function buildPrintCss(extraCss, pageOrientation) {
 }
 
 /**
- * Append <head> with meta + style into the print document.
+ * Ensure there is exactly one <head>, clear it, and append meta+style.
  * @param {Document} doc
  * @param {string} cssText
  * @returns {void}
  */
-function appendHead(doc, cssText) {
-  const head = doc.createElement('head');
+function ensureHead(doc, cssText) {
+  const html = doc.documentElement || doc.createElement('html');
+  if (!doc.documentElement) doc.appendChild(html);
+
+  let head = doc.head;
+  if (!head) {
+    head = doc.createElement('head');
+    html.appendChild(head);
+  }
+  // Clear existing <head> content
+  while (head.firstChild) head.removeChild(head.firstChild);
+
   const meta = doc.createElement('meta');
   meta.setAttribute('charset', 'utf-8');
   head.appendChild(meta);
@@ -88,8 +98,25 @@ function appendHead(doc, cssText) {
   style.setAttribute('media', 'print');
   style.textContent = cssText;
   head.appendChild(style);
+}
 
-  doc.documentElement.appendChild(head);
+/**
+ * Ensure there is exactly one <body> and clear it.
+ * @param {Document} doc
+ * @returns {HTMLBodyElement}
+ */
+function ensureBody(doc) {
+  const html = doc.documentElement || doc.createElement('html');
+  if (!doc.documentElement) doc.appendChild(html);
+
+  let body = doc.body;
+  if (!body) {
+    body = doc.createElement('body');
+    html.appendChild(body);
+  }
+  // Clear existing <body> content
+  while (body.firstChild) body.removeChild(body.firstChild);
+  return body;
 }
 
 /**
@@ -119,7 +146,7 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
 }
 
 /**
- * Attach <body> with pages and images, wait for loads, then print.
+ * Attach pages and images into the (cleared) body, wait for loads, then print.
  * @param {Document} doc
  * @param {Array.<{src: string, alt: string}>} pages
  * @param {number} printDelayMs
@@ -127,8 +154,8 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
  * @param {TokenContext} tokenContext
  * @returns {void}
  */
-function appendBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenContext) {
-  const body = doc.createElement('body');
+function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenContext) {
+  const body = ensureBody(doc);
 
   const total = pages.length;
   const imgs = [];
@@ -148,8 +175,6 @@ function appendBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenConte
 
     body.appendChild(pageWrapper);
   }
-
-  doc.documentElement.appendChild(body);
 
   // Wait until images load (or error), then print.
   const delay = Math.max(0, Number(printDelayMs) || 0);
@@ -183,16 +208,10 @@ function appendBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenConte
  * @returns {void}
  */
 export function renderSingleDocument(doc, opts) {
-  // <html> root
-  if (!doc.documentElement) {
-    const html = doc.createElement('html');
-    doc.appendChild(html);
-  }
-
   const cssText = buildPrintCss((opts.printHeaderCfg?.css) || '', opts.orientation);
-  appendHead(doc, cssText);
+  ensureHead(doc, cssText);
 
-  appendBodyAndPrint(
+  populateBodyAndPrint(
     doc,
     [{ src: opts.dataUrl, alt: 'Printable Document' }],
     opts.printDelayMs,
@@ -208,16 +227,11 @@ export function renderSingleDocument(doc, opts) {
  * @returns {void}
  */
 export function renderMultiDocument(doc, opts) {
-  if (!doc.documentElement) {
-    const html = doc.createElement('html');
-    doc.appendChild(html);
-  }
-
   const cssText = buildPrintCss((opts.printHeaderCfg?.css) || '', undefined);
-  appendHead(doc, cssText);
+  ensureHead(doc, cssText);
 
   const pages = (opts.dataUrls || []).map((src, i) => ({ src, alt: 'Page ' + (i + 1) }));
-  appendBodyAndPrint(
+  populateBodyAndPrint(
     doc,
     pages,
     opts.printDelayMs,
