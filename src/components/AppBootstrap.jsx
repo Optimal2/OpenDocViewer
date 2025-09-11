@@ -9,6 +9,7 @@
  *   and render <OpenDocViewer /> with the appropriate props:
  *     • Pattern mode:     { folder, extension, endNumber }
  *     • Explicit-list:    { sourceList, bundle }
+ *     • Demo (new logic): build an explicit sourceList from /public sample files.
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -19,62 +20,107 @@ import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/Bootstrap.
 import { makeExplicitSource } from './DocumentLoader/sources/ExplicitListSource.js';
 
 /**
+ * Session metadata for a bundle.
  * @typedef {Object} SessionShape
  * @property {string} id
- * @property {(string|undefined)} userId
- * @property {(string|undefined)} issuedAt
+ * @property {string} [userId]
+ * @property {string} [issuedAt]
  */
+
 /**
+ * Explicit item (URL list).
  * @typedef {Object} ExplicitItem
  * @property {string} url
- * @property {(string|undefined)} ext
- * @property {(number|undefined)} fileIndex
+ * @property {string} [ext]
+ * @property {number} [fileIndex]
  */
+
 /**
+ * Portable document bundle shape.
  * @typedef {Object} PortableDocumentBundle
  * @property {SessionShape} session
  * @property {Array.<*>} documents
  */
+
 /**
+ * URL parameter config (pattern mode).
  * @typedef {Object} UrlConfig
  * @property {string} folder
  * @property {string} extension
  * @property {number} endNumber
  */
 
-const DEMO_DEFAULT = Object.freeze({ endNumber: 300 });
+/**
+ * Options for building a demo source list.
+ * @typedef {Object} DemoBuildOptions
+ * @property {number} count
+ * @property {'repeat'|'mix'} strategy
+ * @property {Array.<string>} formats
+ */
+
+/**
+ * One entry in the demo source list.
+ * @typedef {Object} DemoSourceItem
+ * @property {string} url
+ * @property {string} ext
+ * @property {number} fileIndex
+ */
+
+const DEMO_MAX = 300;
+
+/**
+ * Build a demo source list from the /public sample files.
+ * Use Vite's BASE_URL so paths work under any mount point.
+ *
+ * @param {DemoBuildOptions} opts
+ * @returns {Array.<DemoSourceItem>}
+ */
+function buildDemoSourceList({ count, strategy, formats }) {
+  if (!Array.isArray(formats) || formats.length === 0) formats = ['jpg'];
+  const base = (import.meta?.env?.BASE_URL || '/').replace(/\/+$/, '/'); // ensure trailing slash
+  /** @type {Array.<DemoSourceItem>} */
+  const out = [];
+  const n = Math.max(0, Number(count) | 0);
+  for (let i = 0; i < n; i++) {
+    const fmt = (strategy === 'mix') ? formats[i % formats.length] : formats[0];
+    out.push({ url: `${base}sample.${fmt}`, ext: fmt, fileIndex: i });
+  }
+  logger.info('Demo sourceList built', {
+    count: out.length,
+    first3: out.slice(0, 3).map(x => x.url),
+  });
+  return out;
+}
 
 /**
  * Top-level bootstrapper component.
  * Detects environment, prepares props, and mounts the main viewer.
- * @returns {React.ReactElement}
+ * @returns {*} React element
  */
 export default function AppBootstrap() {
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
-  const [bundle, setBundle] = useState(
-    /** @type {(PortableDocumentBundle|null)} */ (null)
-  );
-  const [urlConfig, setUrlConfig] = useState(
-    /** @type {(UrlConfig|null)} */ (null)
-  );
-  const [demo, setDemo] = useState({ folder: '', extension: '', endNumber: DEMO_DEFAULT.endNumber });
-  const [startApp, setStartApp] = useState(false);
+  const [bundle, setBundle] = useState(/** @type {(PortableDocumentBundle|null)} */ (null));
+  const [urlConfig, setUrlConfig] = useState(/** @type {(UrlConfig|null)} */ (null));
+
+  // Demo UI state (shown only when mode === DEMO and we haven't started)
+  const [count, setCount] = useState(10);
+  const [format, setFormat] = useState('png'); // 'jpg'|'png'|'tif'|'pdf'
+  const [mix, setMix] = useState(false);
+  const [start, setStart] = useState(false);
 
   // Detect once on mount
   useEffect(() => {
     let mounted = true;
-
     (async () => {
       try {
         const res = await bootstrapDetect();
         if (!mounted) return;
-
         setMode(res.mode);
         if (res.bundle) setBundle(res.bundle);
         if (res.urlConfig) setUrlConfig(res.urlConfig);
 
-        // Auto-start for everything except demo (demo waits for user click)
-        if (res.bundle || res.urlConfig) setStartApp(true);
+        // Auto-start in non-demo modes
+        if (res.bundle || res.urlConfig) setStart(true);
 
         logger.info('Bootstrap detection', {
           mode: res.mode,
@@ -85,27 +131,30 @@ export default function AppBootstrap() {
         logger.error('Bootstrap detection failed', { error: String(error?.message || error) });
       }
     })();
-
-    return () => {
-      mounted = false;
-    };
+    return () => { mounted = false; };
   }, []);
 
-  // Demo inputs
-  const handleDemoEndChange = useCallback((e) => {
-    const val = Number(e?.target?.value);
-    setDemo((p) => ({ ...p, endNumber: Number.isFinite(val) ? val : DEMO_DEFAULT.endNumber }));
-    logger.info('Demo endNumber changed', { value: val });
+  const onEndChange = useCallback((e) => {
+    const v = Math.max(1, Math.min(DEMO_MAX, Number(e?.target?.value) || 1));
+    setCount(v);
+    logger.info('Demo endNumber changed', { value: v });
   }, []);
 
-  const handleDemoClick = useCallback((type) => {
-    setDemo((p) => ({ ...p, folder: type, extension: type }));
-    setStartApp(true);
-    logger.info('Demo type selected', { type });
+  const onSelectFormat = useCallback((fmt) => {
+    setFormat(fmt);
+    setMix(false);
+    setStart(true);
+    logger.info('Demo type selected', { type: fmt });
+  }, []);
+
+  const onMix = useCallback(() => {
+    setMix(true);
+    setStart(true);
+    logger.info('Demo mix selected');
   }, []);
 
   // Build explicit source list from bundle (if present)
-  const sourceList = useMemo(() => {
+  const sourceListFromBundle = useMemo(() => {
     if (!bundle) return null;
     try {
       const src = makeExplicitSource(bundle);
@@ -116,7 +165,7 @@ export default function AppBootstrap() {
     }
   }, [bundle]);
 
-  // Decide final props for <OpenDocViewer />
+  // Props for <OpenDocViewer />
   const viewerProps = useMemo(() => {
     // 1) URL params → pattern mode
     if (mode === ODV_BOOTSTRAP_MODES.URL_PARAMS && urlConfig) {
@@ -132,24 +181,23 @@ export default function AppBootstrap() {
       (mode === ODV_BOOTSTRAP_MODES.PARENT_PAGE ||
         mode === ODV_BOOTSTRAP_MODES.SESSION_TOKEN ||
         mode === ODV_BOOTSTRAP_MODES.JS_API) &&
-      Array.isArray(sourceList) &&
-      sourceList.length > 0
+      Array.isArray(sourceListFromBundle) &&
+      sourceListFromBundle.length > 0
     ) {
-      return { sourceList, bundle };
+      return { sourceList: sourceListFromBundle, bundle };
     }
 
-    // 3) Demo (after user picks a type)
-    if (mode === ODV_BOOTSTRAP_MODES.DEMO && startApp) {
-      return {
-        folder: demo.folder,
-        extension: demo.extension,
-        endNumber: demo.endNumber,
-      };
+    // 3) Demo launcher pressed → explicit-list mode from /public samples
+    if (mode === ODV_BOOTSTRAP_MODES.DEMO && start) {
+      const formats = mix ? ['jpg', 'png', 'tif', 'pdf'] : [format];
+      const sourceList = buildDemoSourceList({ count, strategy: mix ? 'mix' : 'repeat', formats });
+      // Pass demoMode so the loader knows it can insert simple image pages directly (no workers).
+      return { sourceList, demoMode: true };
     }
 
     // No props yet → show demo launcher
     return null;
-  }, [mode, urlConfig, sourceList, bundle, demo, startApp]);
+  }, [mode, urlConfig, sourceListFromBundle, bundle, start, mix, format, count]);
 
   // Render the demo launcher if we don't have props to start the viewer yet
   if (!viewerProps) {
@@ -161,23 +209,21 @@ export default function AppBootstrap() {
         <input
           type="number"
           id="endNumber"
-          value={demo.endNumber}
-          onChange={handleDemoEndChange}
+          value={count}
+          onChange={onEndChange}
           placeholder="Enter end number"
-          min="1"
-          max={DEMO_DEFAULT.endNumber}
+          min={1}
+          max={DEMO_MAX}
           aria-label="Total pages/files to load"
         />
-        {['jpg', 'png', 'tif', 'pdf'].map((type) => (
-          <button
-            key={type}
-            onClick={() => handleDemoClick(type)}
-            type="button"
-            aria-label={`Start ${type.toUpperCase()} demo`}
-          >
-            {type.toUpperCase()}
+        {['jpg', 'png', 'tif', 'pdf'].map((t) => (
+          <button key={t} onClick={() => onSelectFormat(t)} type="button" aria-label={`Start ${t.toUpperCase()} demo`}>
+            {t.toUpperCase()}
           </button>
         ))}
+        <button onClick={onMix} type="button" aria-label="Start mixed formats demo" style={{ marginLeft: 8 }}>
+          Mix
+        </button>
       </div>
     );
   }

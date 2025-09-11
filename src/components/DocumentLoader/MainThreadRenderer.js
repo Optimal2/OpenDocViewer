@@ -9,41 +9,34 @@
  *   (e.g., worker fallback, low-core devices, or when explicitly configured).
  *
  * DESIGN NOTES
- *   - Uses the same pdf.js version and worker artifact that are bundled at build time,
- *     wired via `?url` so Vite/Rollup resolve the correct asset.
+ *   - Uses the same pdf.js version and worker artifact that are bundled at build time.
+ *     To behave IDENTICALLY in dev and build, we set a single worker script URL:
+ *       pdfjsLib.GlobalWorkerOptions.workerSrc = <resolved-url>
  *   - Object URLs created here are registered in a shared global registry and revoked
  *     on `beforeunload`/`pagehide` to minimize leaks between navigations.
- *   - For consistency with the worker pipeline, the PDF path reports its results
- *     via `handleWorkerMessage(...)`, while the TIFF path inserts pages directly.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With `file-type` v21 the '/browser' subpath is not exported
- *     for bundlers and will break Vite builds. See README “Design notes & gotchas”.
- *
- * Provenance / baseline reference for prior version of this file: :contentReference[oaicite:0]{index=0}
+ *   - ⚠️ Important: this module no longer imports `handleWorkerMessage` to avoid
+ *     a circular dependency with WorkerHandler in dev/HMR. It inserts pages directly.
  */
 
 import logger from '../../LogController.js';
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
 import { generateThumbnail } from './Utils.js';
-import { handleWorkerMessage } from './WorkerHandler.js';
 
 // Import the matching pdf.js API and resolve the worker URL from the same package version
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
-import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 
 /**
  * Render job passed to the main-thread renderer.
  * @typedef {Object} RenderJob
  * @property {ArrayBuffer} arrayBuffer
- * @property {(string|undefined)} sourceUrl
+ * @property {string=} sourceUrl
  * @property {number} index
  * @property {number} pageStartIndex
  * @property {number} pagesInvolved
  * @property {number} allPagesStartingIndex
  * @property {string} fileExtension
- * @property {(number|undefined)} pageIndex // used in error paths
+ * @property {number=} pageIndex // used in error paths
  */
 
 /**
@@ -90,8 +83,31 @@ function addToUrlRegistry(url) {
  * PDF — main-thread renderer
  * ------------------------------------------------------------------------------------------------ */
 
+/** One-time init of pdf.js classic worker script URL (dev == build). */
+let __pdfWorkerInitialized = false;
+
 /**
- * Render PDF pages on the main thread and forward results via the standard worker-message handler.
+ * Ensure a pdf.js worker is ready for this runtime.
+ * Uses a single worker script URL so dev and build behave identically.
+ * @returns {void}
+ */
+function ensurePdfWorker() {
+  try {
+    if (!pdfjsLib?.GlobalWorkerOptions || __pdfWorkerInitialized) return;
+    // Ensure the worker matches the API version that was bundled
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerJsUrl;
+    __pdfWorkerInitialized = true;
+    logger.debug('pdf.js workerSrc set (legacy ESM worker)', { workerSrc: pdfWorkerJsUrl });
+  } catch (e) {
+    // Non-fatal: pdf.js can render on main thread, but performance will be lower.
+    logger.warn('Failed to set pdf.js workerSrc; falling back to main-thread rendering', {
+      error: String(e?.message || e),
+    });
+  }
+}
+
+/**
+ * Render PDF pages on the main thread and INSERT THEM DIRECTLY.
  *
  * @param {RenderJob} job
  * @param {InsertPageAtIndex} insertPageAtIndex
@@ -103,16 +119,10 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
   if (isMounted && isMounted.current === false) return;
 
   try {
-    // Ensure the worker matches the API version that was bundled
-    try {
-      if (pdfjsLib?.GlobalWorkerOptions) {
-        pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
-      }
-    } catch {
-      // non-fatal in SSR/odd envs
-    }
+    // Initialize (or reuse) the pdf.js worker (identical in dev/build).
+    ensurePdfWorker();
 
-    // If the worker queued a fallback without bytes, fetch them now using sourceUrl.
+    // If we were scheduled without bytes, fetch them using sourceUrl.
     let dataBuffer = job.arrayBuffer;
     if ((!dataBuffer || dataBuffer.byteLength === 0) && job.sourceUrl) {
       const resp = await fetch(job.sourceUrl);
@@ -151,31 +161,29 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       const url = URL.createObjectURL(blob);
       addToUrlRegistry(url);
 
+      const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
+      const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
+
+      // INSERT DIRECTLY (no call back into WorkerHandler to avoid cyc import)
+      insertPageAtIndex(
+        {
+          fullSizeUrl: url,
+          thumbnailUrl: thumbUrl,
+          loaded: true,
+          status: 1,
+          fileExtension: 'pdf',
+          fileIndex: job.index,
+          pageIndex: i - 1,
+          allPagesIndex: at,
+        },
+        at
+      );
+
       logger.debug('Main-thread PDF page rasterized', {
         pdfPage: i,
         fileIndex: job.index,
-        allPagesIndex: job.allPagesStartingIndex + (i - 1 - job.pageStartIndex),
+        allPagesIndex: at,
       });
-
-      // Re-use the worker message pathway so thumbnails and page insertion are uniform
-      handleWorkerMessage(
-        {
-          data: {
-            jobs: [
-              {
-                fullSizeUrl: url,
-                fileIndex: job.index,
-                pageIndex: i - 1,
-                fileExtension: 'pdf',
-                allPagesIndex: job.allPagesStartingIndex + (i - 1 - job.pageStartIndex),
-              },
-            ],
-          },
-        },
-        insertPageAtIndex,
-        sameBlob,
-        isMounted
-      );
     }
   } catch (error) {
     if (isMounted && isMounted.current === false) return;

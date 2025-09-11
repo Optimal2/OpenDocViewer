@@ -6,33 +6,27 @@
  *
  * PURPOSE
  *   Helper utilities used by the DocumentLoader pipeline:
- *     • Build document URL lists (pattern mode)
+ *     • Build document URL lists (pattern mode and demo mode)
  *     • Fetch as ArrayBuffer (with optional AbortSignal)
  *     • Page counting (PDF / TIFF)
  *     • Lightweight TIFF metadata extraction
  *     • Thumbnail generation for images
- *
- * DESIGN NOTES
- *   - pdf.js worker URL is wired via `?url` import; bundlers (Vite/Rollup/Webpack) rewrite it.
- *   - Avoid logging large arrays/blobs; prefer counts and small samples in logs.
- *   - Thumbnail generation falls back to a transparent 1×1 data URI to avoid blocking the UI.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - In other modules we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With `file-type` v21 the '/browser' subpath is not exported and will break Vite builds.
  */
 
 import logger from '../../LogController.js';
 import { decode as decodeUTIF } from 'utif2';
 
-// Use the same pdf.js API and worker that are bundled with the app
+// Use the same pdf.js API and worker that are bundled with the app (legacy build + ESM worker).
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 
-// Ensure API ↔ worker versions match
+// Ensure API ↔ worker versions match (dev == build behavior)
 try {
   if (pdfjsLib?.GlobalWorkerOptions) {
-    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    // Set once; pdf.js will spawn the worker using this URL.
+    if (!pdfjsLib.GlobalWorkerOptions.workerSrc) {
+      pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+    }
   }
 } catch {
   // Non-fatal in SSR or odd environments
@@ -61,13 +55,50 @@ export const generateDocumentList = (folder, extension, endNumber = 300) => {
     const filePath = `${folder}/${fileName}`; // relative path so virtual app roots work
     documents.push(filePath);
   }
-  // Log only concise info (avoid dumping large arrays)
   logger.debug('Generated document list', {
     count: documents.length,
     sampleStart: documents[0],
     sampleEnd: documents[documents.length - 1],
   });
   return documents;
+};
+
+/**
+ * Generate a list of demo document URLs by repeating or mixing sample files.
+ *
+ * STRATEGIES
+ *   - repeat: Use one format (jpg/png/tif/pdf) and repeat the same file N times.
+ *   - mix:    Cycle through formats in order for N entries.
+ *
+ * @param {Object} opts
+ * @param {('repeat'|'mix')} opts.strategy   Demo strategy.
+ * @param {number} opts.count                Number of entries to produce.
+ * @param {Array.<string>} [opts.formats]    File formats to use (default: ['jpg','png','tif','pdf']).
+ * @returns {Array.<string>}                 Ordered list of demo URLs.
+ */
+export const generateDemoList = ({ strategy, count, formats = ['jpg','png','tif','pdf'] }) => {
+  const docs = [];
+  if (!count || count <= 0) return docs;
+
+  if (strategy === 'repeat') {
+    const fmt = (formats && formats.length > 0 ? formats[0] : 'jpg').toLowerCase();
+    for (let i = 0; i < count; i++) {
+      docs.push(`/sample.${fmt}`);
+    }
+  } else if (strategy === 'mix') {
+    for (let i = 0; i < count; i++) {
+      const fmt = formats[i % formats.length].toLowerCase();
+      docs.push(`/sample.${fmt}`);
+    }
+  }
+
+  logger.debug('Generated demo list', {
+    strategy,
+    count: docs.length,
+    sampleStart: docs[0],
+    sampleEnd: docs[docs.length - 1],
+  });
+  return docs;
 };
 
 /**
@@ -135,7 +166,7 @@ export const getTiffMetadata = (arrayBuffer) => {
   try {
     const ifds = decodeUTIF(arrayBuffer);
     const metadata = (Array.isArray(ifds) ? ifds : []).map((ifd) => {
-      const compressionType = ifd['t259'] ? ifd['t259'][0] : 1; // default: no compression
+      const compressionType = ifd['t259'] ? ifd['t259'][0] : 1;
       return {
         compressionType,
         photometricInterpretation: ifd['t262'] ? ifd['t262'][0] : 'unknown',
@@ -154,13 +185,7 @@ export const getTiffMetadata = (arrayBuffer) => {
 
 /**
  * Create a small thumbnail data URL for a given image URL.
- * Falls back to a transparent 1×1 data URI if the image cannot be loaded
- * (CORS, network failures, tainted canvas, etc.).
- *
- * NOTE
- *   - If you serve cross-origin assets with proper CORS, you can set:
- *       img.crossOrigin = 'anonymous';
- *     prior to setting `img.src` to allow Canvas export.
+ * Falls back to a transparent 1×1 data URI if the image cannot be loaded.
  *
  * @param {string} imageUrl
  * @param {number} maxWidth
@@ -172,12 +197,11 @@ export const generateThumbnail = (imageUrl, maxWidth, maxHeight) => {
 
   return new Promise((resolve) => {
     const img = new Image();
-    // img.crossOrigin = 'anonymous'; // enable if your assets send proper CORS headers
     try { img.decoding = 'async'; } catch {}
 
     const resolveFallback = () => {
       logger.debug('Thumbnail generation fallback used', { imageUrl });
-      resolve(TRANSPARENT_1x1); // or consider 'placeholder.png' as a themed fallback
+      resolve(TRANSPARENT_1x1);
     };
 
     img.onerror = resolveFallback;
@@ -206,7 +230,6 @@ export const generateThumbnail = (imageUrl, maxWidth, maxHeight) => {
 
         ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
 
-        // Export may throw on tainted canvas (CORS); catch and fallback.
         try {
           const dataUrl = canvas.toDataURL();
           resolve(dataUrl || TRANSPARENT_1x1);

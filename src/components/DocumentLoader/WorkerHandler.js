@@ -1,6 +1,4 @@
-﻿// File: src/components/DocumentLoader/WorkerHandler.js
-// Source reference: :contentReference[oaicite:0]{index=0}
-/**
+﻿/**
  * File: src/components/DocumentLoader/WorkerHandler.js
  *
  * OpenDocViewer — Worker orchestration & message handling
@@ -13,45 +11,57 @@
  *   - Manage Blob URL lifetimes to prevent memory leaks.
  *
  * DESIGN NOTES
- *   - Worker path is resolved via `new URL(..., import.meta.url)` which Vite/Rollup/Webpack understand.
+ *   - Worker path is resolved via Vite’s `?worker`, which produces a concrete worker
+ *     bundle in both dev and production builds (fixes MIME/text/html dev failures).
+ *   - Dev and production builds use the same logic/code paths.
  *   - We avoid logging large payloads (blobs/arrays) — only counts and minimal info are logged.
  *   - Blob URLs are registered and revoked on `beforeunload` and `pagehide` to reduce leaks.
  *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
+ * IMPORTANT PROJECT GOTCHA
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With `file-type` v21 the '/browser' subpath is not exported and will break Vite builds.
  */
 
 import logger from '../../LogController.js';
-import { renderTIFFInMainThread as importedRenderTIFFInMainThread } from './MainThreadRenderer.js';
+import {
+  renderTIFFInMainThread as importedRenderTIFFInMainThread,
+  renderPDFInMainThread as importedRenderPDFInMainThread,
+} from './MainThreadRenderer.js';
 import { generateThumbnail } from './Utils.js';
+
+/**
+ * ✅ IMPORTANT:
+ * The worker file physically resides in `src/workers/imageWorker.js`.
+ * Use a relative import from this module's folder and Vite’s `?worker`
+ * so that **dev and build behave identically**.
+ */
+import ImageWorker from '../../workers/imageWorker.js?worker';
 
 /**
  * A single job/result entry communicated between worker and main thread.
  * @typedef {Object} WorkerJob
- * @property {(Blob|undefined)} [blob]                    Optional blob produced by worker
- * @property {(string|undefined)} [fullSizeUrl]           Optional pre-made object URL
- * @property {number} fileIndex                           Original document index
- * @property {number} pageIndex                           Page within the file (0-based)
- * @property {number} allPagesIndex                       Global index in the flat page list
- * @property {string} fileExtension                       'png' | 'jpg' | 'pdf' | 'tif' | 'tiff' | ...
- * @property {(number|undefined)} [pagesInvolved]         For multi-page jobs (tiff/pdf)
- * @property {(number|undefined)} [pageStartIndex]        For multi-page jobs (tiff/pdf)
- * @property {(boolean|undefined)} [handleInMainThread]   Worker requests main-thread handling
+ * @property {Blob} [blob]
+ * @property {string} [fullSizeUrl]
+ * @property {number} fileIndex
+ * @property {number} pageIndex
+ * @property {number} allPagesIndex
+ * @property {string} fileExtension
+ * @property {number} [pagesInvolved]
+ * @property {number} [pageStartIndex]
+ * @property {boolean} [handleInMainThread]
  */
 
 /**
  * Worker → main message envelope.
  * @typedef {Object} WorkerMessage
- * @property {(string|undefined)} [error]
- * @property {(Array.<WorkerJob>|undefined)} [jobs]
- * @property {(WorkerJob|undefined)} [job]
- * @property {(boolean|undefined)} [handleInMainThread]
- * @property {(string|undefined)} [fileExtension]
+ * @property {string} [error]
+ * @property {Array.<WorkerJob>} [jobs]
+ * @property {WorkerJob} [job]
+ * @property {boolean} [handleInMainThread]
+ * @property {string} [fileExtension]
  */
 
 /**
- * Signature for inserting a page structure into the page list at an index.
+ * Signature for inserting a page structure into the viewer at a specific index.
  * @callback InsertPageAtIndex
  * @param {*} page
  * @param {number} index
@@ -59,17 +69,52 @@ import { generateThumbnail } from './Utils.js';
  */
 
 /**
- * Optional options for handleWorkerMessage to coordinate with a scheduler.
- * When provided, main-thread fallbacks can be queued instead of executed immediately.
- *
+ * Options passed to the handler to coordinate main-thread rendering.
  * @typedef {Object} HandleOpts
- * @property {{ current: Array<WorkerJob> }} [mainThreadJobQueueRef]  Queue to push main-thread jobs into
- * @property {Function} [renderPDFInMainThread]   Renderer to use for PDF (if ever needed)
- * @property {Function} [renderTIFFInMainThread]  Renderer to use for TIFF (overrides imported)
+ * @property {{ current: Array<WorkerJob> }} [mainThreadJobQueueRef]
+ * @property {Function} [renderPDFInMainThread]
+ * @property {Function} [renderTIFFInMainThread]
  */
 
 /* ------------------------------------------------------------------------------------------------
- * Blob URL registry & cleanup
+ * Worker creation & sizing (exported)
+ * ------------------------------------------------------------------------------------------------ */
+
+/**
+ * Create a new image worker instance.
+ * Uses Vite’s `?worker` import so dev and prod behave identically.
+ *
+ * @returns {Worker}
+ */
+export function createWorker() {
+  /** @type {Worker} */
+  // @ts-ignore - older TS libs may not know the 'name' option.
+  const w = new ImageWorker({ type: 'module', name: 'odv-image-worker' });
+  // @ts-ignore - internal busy flag used by the batch scheduler
+  w.__busy = false;
+  return w;
+}
+
+/**
+ * Decide how many workers to spawn, leaving one logical core for the UI when possible.
+ *
+ * @param {number} [maxDesired=1]
+ * @returns {number}
+ */
+export function getNumberOfWorkers(maxDesired = 1) {
+  let cores = 2;
+  try {
+    cores = Math.max(1, Number(navigator?.hardwareConcurrency || 2));
+  } catch {}
+  const leaveForMain = cores > 1 ? 1 : 0;
+  const hard = Math.max(1, cores - leaveForMain);
+  const n = Math.max(1, Math.min(hard, Math.max(1, Number(maxDesired) || 1)));
+  logger.debug('getNumberOfWorkers decision', { cores, leaveForMain, hard, maxDesired, chosen: n });
+  return n;
+}
+
+/* ------------------------------------------------------------------------------------------------
+ * Blob URL lifetime management
  * ------------------------------------------------------------------------------------------------ */
 
 /** Create / get a global URL registry and install unload cleanup once. */
@@ -89,7 +134,6 @@ function addToUrlRegistry(url) {
           try { w.__odv_url_registry.clear(); } catch {}
         }
       };
-      // Revoke on both lifecycle events for better coverage (mobile/tab bfcache cases).
       w.addEventListener('beforeunload', cleanup, { once: true });
       w.addEventListener('pagehide', cleanup, { once: true });
       w.__odv_url_cleanup_installed = true;
@@ -100,35 +144,7 @@ function addToUrlRegistry(url) {
 }
 
 /* ------------------------------------------------------------------------------------------------
- * Worker creation & sizing
- * ------------------------------------------------------------------------------------------------ */
-
-/**
- * Creates a new image worker (module worker).
- * Keep the path relative to this file; bundlers rewrite it at build time.
- * @returns {Worker}
- */
-export const createWorker = () =>
-  new Worker(new URL('../../workers/imageWorker.js', import.meta.url), { type: 'module' });
-
-/**
- * Derive a safe number of workers based on device cores and a caller-provided cap.
- * SSR-safe: falls back when `navigator` is absent.
- *
- * @param {number} maxWorkers Upper bound decided by the caller.
- * @returns {number}
- */
-export const getNumberOfWorkers = (maxWorkers) => {
-  try {
-    const cores = Math.max(1, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 4));
-    return Math.min(cores, Math.max(1, Number(maxWorkers) || 1));
-  } catch {
-    return Math.max(1, Number(maxWorkers) || 1);
-  }
-};
-
-/* ------------------------------------------------------------------------------------------------
- * Worker message handling
+ * Main-thread scheduling helper
  * ------------------------------------------------------------------------------------------------ */
 
 /**
@@ -147,42 +163,32 @@ function scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts) {
   const fileExt = String(job.fileExtension || '').toLowerCase();
   const qref = opts && opts.mainThreadJobQueueRef;
   const renderTIFF = (opts && opts.renderTIFFInMainThread) || importedRenderTIFFInMainThread;
-  const renderPDF = opts && opts.renderPDFInMainThread;
+  const renderPDF  = (opts && opts.renderPDFInMainThread)  || importedRenderPDFInMainThread;
 
   if (qref && qref.current && Array.isArray(qref.current)) {
     qref.current.push(job);
     return;
   }
 
-  // Execute immediately when no queue is provided.
   if (['tiff', 'tif'].includes(fileExt)) {
     renderTIFF(job, insertPageAtIndex, sameBlob, isMounted);
-  } else if (fileExt === 'pdf' && typeof renderPDF === 'function') {
+  } else if (fileExt === 'pdf') {
     renderPDF(job, insertPageAtIndex, sameBlob, isMounted);
   }
 }
 
+/* ------------------------------------------------------------------------------------------------
+ * Worker message handler (exported)
+ * ------------------------------------------------------------------------------------------------ */
+
 /**
  * Handle a message payload from an image worker and insert resulting page(s).
  *
- * CONTRACT
- *   - On success: { jobs: Array.<WorkerJob> } where each job contains either:
- *       • `blob`  (we will create an object URL), or
- *       • `fullSizeUrl` (pre-made, e.g., from main-thread processing)
- *   - On error: { error: string, jobs?: Array.<WorkerJob> } ; for TIFF jobs we invoke
- *                main-thread fallback rendering or enqueue it, depending on options.
- *   - Fallback request: { handleInMainThread: true, job?: WorkerJob, jobs?: Array.<WorkerJob> }
- *
  * @param {MessageEvent} event
- *        The worker message event. Its `data` is interpreted as a WorkerMessage.
  * @param {InsertPageAtIndex} insertPageAtIndex
- *        Callback from ViewerContext to place a page at a given global index.
  * @param {boolean} sameBlob
- *        If true, reuse the full-size blob URL for thumbnail (no extra canvas work).
- * @param {({ current: boolean }|{ current: * })} [isMounted]
- *        Optional ref flag — if present and false, handler becomes a no-op.
+ * @param {{ current: boolean }} [isMounted]
  * @param {HandleOpts} [opts]
- *        Optional control hooks (queue reference & direct renderer fns).
  * @returns {void}
  */
 export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounted, opts) => {
@@ -192,17 +198,15 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
   /** @type {WorkerMessage} */
   const msg = data || {};
 
-  // Avoid logging large payloads/blobs — only counts and flags
   logger.debug('Worker message received', {
     jobs: Array.isArray(msg.jobs) ? msg.jobs.length : 0,
     hasError: Boolean(msg.error),
     handleInMainThread: Boolean(msg.handleInMainThread),
   });
 
-  /* ---------- 1) Error path: schedule main-thread fallback for multi-page formats ---------- */
+  // Error path: let PDFs/TIFFs fall back to main-thread; others get placeholders.
   if (msg.error) {
     logger.info('Worker reported error', { error: msg.error });
-
     const jobs = Array.isArray(msg.jobs) ? msg.jobs : [];
     jobs.forEach((job) => {
       if (isMounted && isMounted.current === false) return;
@@ -211,7 +215,6 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
       if (['tiff', 'tif', 'pdf'].includes(ext)) {
         scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts);
       } else {
-        // Non-multipage types: insert a failure placeholder so UI remains consistent
         const placeholder = {
           fullSizeUrl: 'placeholder.png',
           thumbnailUrl: 'placeholder.png',
@@ -228,7 +231,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     return;
   }
 
-  /* ---------- 2) Explicit main-thread handling request ---------- */
+  // Worker can explicitly request main-thread handling (e.g., unsupported codec).
   if (msg.handleInMainThread) {
     const maybeDo = (job) => {
       if (!job) return;
@@ -247,12 +250,11 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     return;
   }
 
-  /* ---------- 3) Success path: produce page entries ---------- */
   if (!Array.isArray(msg.jobs) || msg.jobs.length === 0) {
-    // Nothing to process — this can be valid for keep-alive worker pings.
     return;
   }
 
+  // Normal success path: insert each rendered page (or placeholder if missing blob/url).
   msg.jobs.forEach(async (job) => {
     try {
       if (isMounted && isMounted.current === false) return;
@@ -260,7 +262,6 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
       const fileExt = String(job.fileExtension || '').toLowerCase();
       const { fileIndex, pageIndex, allPagesIndex } = job;
 
-      // Prefer URL from worker; otherwise, derive one from a Blob
       let fullSizeUrl = job.fullSizeUrl || null;
       if (!fullSizeUrl && job.blob instanceof Blob) {
         fullSizeUrl = URL.createObjectURL(job.blob);
@@ -272,9 +273,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
       if (fullSizeUrl) {
         const page = {
           fullSizeUrl,
-          thumbnailUrl: sameBlob
-            ? fullSizeUrl
-            : await generateThumbnail(fullSizeUrl, 200, 200),
+          thumbnailUrl: sameBlob ? fullSizeUrl : await generateThumbnail(fullSizeUrl, 200, 200),
           loaded: true,
           status: 1,
           fileExtension: fileExt,
@@ -286,7 +285,6 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
         if (isMounted && isMounted.current === false) return;
         insertPageAtIndex(page, allPagesIndex);
       } else {
-        // No output — insert a failure placeholder so the UI remains consistent
         const placeholder = {
           fullSizeUrl: 'placeholder.png',
           thumbnailUrl: 'placeholder.png',

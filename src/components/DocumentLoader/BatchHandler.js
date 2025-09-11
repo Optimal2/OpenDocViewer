@@ -24,9 +24,6 @@
  *     NOT 'file-type/browser'. With `file-type` v21 the '/browser' subpath is
  *     not exported and will break Vite builds. This scheduler doesn’t use it,
  *     but the reminder here helps future reviewers keep things consistent.
- *
- * Provenance / baseline reference (previous content of this module):
- *   :contentReference[oaicite:0]{index=0}
  */
 
 import logger from '../../LogController.js';
@@ -40,6 +37,7 @@ import logger from '../../LogController.js';
  * @property {number} pageStartIndex                 First page index inside the file (0-based)
  * @property {number} pagesInvolved                  Number of pages represented by this job
  * @property {number} allPagesStartingIndex          Global page offset (into the flat viewer list)
+ * @property {string=} sourceUrl                     Fallback URL (used by main-thread renderers)
  */
 
 /**
@@ -94,8 +92,6 @@ function pump(
   if (isMounted && isMounted.current === false) return;
   if (!batchQueue?.current || batchQueue.current.length === 0) return;
 
-  let dispatched = 0;
-
   imageWorkers.forEach((worker) => {
     if (!batchQueue.current.length) return;
     // @ts-ignore - annotate a private busy flag onto the Worker instance
@@ -126,17 +122,37 @@ function pump(
 
     worker.onerror = (err) => {
       try {
-        // Fall back to placeholders so UI stays consistent; let the central
-        // handler map these to “failed” insertions.
+        // IMPORTANT:
+        // If a worker fails to load/run (common in dev when the module URL can't be served),
+        // we must *explicitly* request MAIN-THREAD processing for multi-page formats.
+        // Otherwise the central handler will treat this as a “success with no blob”
+        // and just insert placeholders.
         const jobs = (batch.jobs || []).map((j) => ({
-          fullSizeUrl: null,
+          // Minimal set needed for main-thread renderers to proceed:
           fileIndex: j.index,
           pageIndex: j.pageStartIndex || 0,
-          fileExtension: j.fileExtension,
           allPagesIndex: j.allPagesStartingIndex,
+          fileExtension: j.fileExtension,
+          // For PDFs/TIFFs the renderer will loop pages; keep these:
+          pagesInvolved: j.pagesInvolved,
+          pageStartIndex: j.pageStartIndex,
+          // Buffers may be neutered because we transferred them; provide sourceUrl for refetch:
+          sourceUrl: j.sourceUrl || null,
         }));
-        handleWorkerMessage({ data: { jobs } }, insertPageAtIndex, sameBlob, isMounted);
-        logger.error('Worker error; inserted placeholders for batch', { error: String(err?.message || err) });
+
+        logger.warn('Worker error; scheduling main-thread render for affected batch', {
+          error: String(err?.message || err),
+          jobs: jobs.length,
+          ext: batch.fileExtension,
+        });
+
+        // Signal the central handler to route these to main-thread renderers.
+        handleWorkerMessage(
+          { data: { handleInMainThread: true, jobs, fileExtension: batch.fileExtension } },
+          insertPageAtIndex,
+          sameBlob,
+          isMounted
+        );
       } finally {
         // @ts-ignore
         worker.__busy = false;
@@ -165,11 +181,7 @@ function pump(
     });
 
     worker.postMessage(batch, transfer);
-    dispatched++;
   });
-
-  // If no workers were idle, do nothing here; the next pump is triggered by
-  // whichever worker finishes first (onmessage/onerror).
 }
 
 /**
