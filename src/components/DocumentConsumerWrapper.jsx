@@ -8,20 +8,13 @@
  *   Orchestrates the document loading pipeline and the main viewer UI:
  *     • Pattern mode:     { folder, extension, endNumber }
  *     • Explicit-list:    { sourceList: [{ url, ext?, fileIndex? }, ...] }
- *   In mobile layouts, it can render a lightweight thumbnail-only view.
+ *     • Demo mode (new):  { demoMode, demoStrategy, demoCount, demoFormats }
  *
  * ACCESSIBILITY
  *   - Suspense fallback announces loading state.
  *
  * PERFORMANCE
  *   - Uses React.lazy + Suspense to split large viewer/loader bundles.
- *
- * IMPORTANT PROJECT GOTCHA
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- *     See README “Design notes & gotchas” before changing that import.
- *
- * Provenance / previous baseline for this module: :contentReference[oaicite:0]{index=0}
  */
 
 import React, {
@@ -61,6 +54,10 @@ const DocumentThumbnailList = lazy(() => import('./DocumentThumbnailList'));
  *        Explicit-list mode: ordered list of source items
  * @param {boolean} props.isMobileView           Whether to render the thumbnail-only view
  * @param {boolean} props.initialized            Delay mounting until basic app init completes
+ * @param {(boolean|undefined)} [props.demoMode]         Demo mode: use public '/sample.*' files
+ * @param {"repeat"|"mix"}      [props.demoStrategy]     Demo strategy (default handled in loader)
+ * @param {(number|undefined)}  [props.demoCount]        Demo count
+ * @param {Array.<string>=}     [props.demoFormats]      Demo formats
  * @returns {React.ReactElement}
  */
 const DocumentConsumerWrapper = ({
@@ -70,6 +67,11 @@ const DocumentConsumerWrapper = ({
   sourceList,
   isMobileView,
   initialized,
+  // NEW demo props (optional):
+  demoMode,
+  demoStrategy,
+  demoCount,
+  demoFormats,
 }) => {
   const { allPages } = useContext(ViewerContext);
   const thumbnailsContainerRef = useRef(null);
@@ -80,9 +82,9 @@ const DocumentConsumerWrapper = ({
       totalPages: Array.isArray(allPages) ? allPages.length : 0,
       isMobileView,
       initialized,
-      mode: Array.isArray(sourceList) && sourceList.length > 0 ? 'explicit-list' : 'pattern',
+      mode: Array.isArray(sourceList) && sourceList.length > 0 ? 'explicit-list' : (demoMode ? 'demo' : 'pattern'),
     });
-  }, [allPages, isMobileView, initialized, sourceList]);
+  }, [allPages, isMobileView, initialized, sourceList, demoMode]);
 
   // Best-effort width for thumbnails container (SSR-safe)
   const thumbWidth = (() => {
@@ -106,6 +108,11 @@ const DocumentConsumerWrapper = ({
             sourceList={sourceList || null}
             placeholderImage="placeholder.png"
             sameBlob={true}
+            // Forward NEW demo props (undefined values are harmless):
+            demoMode={demoMode}
+            demoStrategy={demoStrategy}
+            demoCount={demoCount}
+            demoFormats={demoFormats}
           >
             {isMobileView ? (
               <div className="thumbnail-only-view">
@@ -146,6 +153,11 @@ DocumentConsumerWrapper.propTypes = {
   ),
   isMobileView: PropTypes.bool.isRequired,
   initialized: PropTypes.bool.isRequired,
+  // NEW demo props
+  demoMode: PropTypes.bool,
+  demoStrategy: PropTypes.oneOf(['repeat', 'mix']),
+  demoCount: PropTypes.number,
+  demoFormats: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default DocumentConsumerWrapper;

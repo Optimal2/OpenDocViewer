@@ -11,6 +11,9 @@
  *   - Support two input styles:
  *       1) Pattern mode: { folder, extension, endNumber }
  *       2) Explicit list: { sourceList, bundle }
+ *   - NEW (demo passthrough): Forward optional demo-mode props so the loader can
+ *       short-circuit simple images (JPG/PNG/etc.) without workers:
+ *       { demoMode, demoStrategy, demoCount, demoFormats }
  *
  * RUNTIME TOGGLES (set via public/odv.config.js, <meta>, or Vite env)
  *   - showPerfOverlay: boolean — when true OR when ?perf=1 is present, the HUD is shown.
@@ -97,9 +100,28 @@ function readFlag(name, envVar, metaName, fallback = false) {
  * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit list mode: ordered list of document sources
  * @param {Object} [props.bundle]    Optional metadata object (reserved for future)
+ * @param {(boolean|undefined)} [props.demoMode]
+ *        Demo passthrough: when true, the loader may directly insert simple images.
+ * @param {"repeat"|"mix"} [props.demoStrategy]
+ *        Demo passthrough (optional; defaults handled in loader)
+ * @param {(number|undefined)} [props.demoCount]
+ *        Demo passthrough (optional)
+ * @param {Array.<string>} [props.demoFormats]
+ *        Demo passthrough (optional)
  * @returns {React.ReactElement}
  */
-const OpenDocViewer = ({ folder, extension, endNumber, sourceList, bundle }) => {
+const OpenDocViewer = ({
+  folder,
+  extension,
+  endNumber,
+  sourceList,
+  bundle,
+  // NEW: demo passthrough props
+  demoMode,
+  demoStrategy,
+  demoCount,
+  demoFormats
+}) => {
   const [initialized, setInitialized] = useState(false);
 
   // Initial mobile-view detection (SSR-safe default)
@@ -169,6 +191,11 @@ const OpenDocViewer = ({ folder, extension, endNumber, sourceList, bundle }) => 
           bundle={bundle || null}          // optional metadata
           isMobileView={isMobileView}
           initialized={initialized}
+          /* NEW: forward demo-mode props so the loader can engage demo fast-paths */
+          demoMode={demoMode}
+          demoStrategy={demoStrategy}
+          demoCount={demoCount}
+          demoFormats={demoFormats}
         />
         {/* Render HUD only when enabled (runtime-toggleable; see public/odv.config.js) */}
         {showPerf && <PerformanceMonitor />}
@@ -191,7 +218,13 @@ OpenDocViewer.propTypes = {
       fileIndex: PropTypes.number
     })
   ),
-  bundle: PropTypes.object
+  bundle: PropTypes.object,
+
+  // Demo-mode passthrough (optional)
+  demoMode: PropTypes.bool,
+  demoStrategy: PropTypes.oneOf(['repeat', 'mix']),
+  demoCount: PropTypes.number,
+  demoFormats: PropTypes.arrayOf(PropTypes.string),
 };
 
 export default OpenDocViewer;
