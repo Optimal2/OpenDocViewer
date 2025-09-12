@@ -1,0 +1,60 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*.*.*'   # run only when a SemVer-like tag is pushed
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+
+    permissions:
+      contents: write  # needed to create release & upload assets
+
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0  # useful if you auto-generate release notes
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+          cache: 'npm'
+
+      - name: Install deps (clean)
+        run: npm ci
+
+      # Build your IIS portable bundle
+      - name: Build
+        run: npm run build
+
+      # Build docs (adjust if your docs command is different)
+      - name: Build docs
+        run: npm run doc
+
+      # Zip artifacts
+      - name: Package dist
+        run: zip -r "OpenDocViewer-dist-${{ github.ref_name }}.zip" dist/
+
+      - name: Package docs
+        run: |
+          if [ -d docs ]; then
+            zip -r "OpenDocViewer-docs-${{ github.ref_name }}.zip" docs/
+          else
+            echo "docs/ folder not found; skipping docs zip."
+          fi
+
+      # Create a GitHub Release & upload assets
+      - name: Create GitHub Release
+        uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ github.ref_name }}
+          name: OpenDocViewer ${{ github.ref_name }}
+          draft: false
+          prerelease: false
+          files: |
+            OpenDocViewer-dist-${{ github.ref_name }}.zip
+            OpenDocViewer-docs-${{ github.ref_name }}.zip
