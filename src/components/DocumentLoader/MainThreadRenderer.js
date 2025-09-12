@@ -37,6 +37,7 @@ import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
  * @property {number} allPagesStartingIndex
  * @property {string} fileExtension
  * @property {number=} pageIndex // used in error paths
+ * @property {string=} runId
  */
 
 /**
@@ -121,6 +122,12 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
   try {
     // Initialize (or reuse) the pdf.js worker (identical in dev/build).
     ensurePdfWorker();
+    logger.debug('Main-thread PDF render start', {
+      runId: job.runId,
+      index: job.index,
+      start: job.pageStartIndex,
+      pages: job.pagesInvolved
+    });
 
     // If we were scheduled without bytes, fetch them using sourceUrl.
     let dataBuffer = job.arrayBuffer;
@@ -164,7 +171,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
       const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
 
-      // INSERT DIRECTLY (no call back into WorkerHandler to avoid cyc import)
+      // INSERT DIRECTLY (tag page with runId for loader-side filtering)
       insertPageAtIndex(
         {
           fullSizeUrl: url,
@@ -175,6 +182,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
           fileIndex: job.index,
           pageIndex: i - 1,
           allPagesIndex: at,
+          runId: job.runId,
         },
         at
       );
@@ -183,6 +191,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
         pdfPage: i,
         fileIndex: job.index,
         allPagesIndex: at,
+        runId: job.runId
       });
     }
   } catch (error) {
@@ -196,7 +205,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
     const at = job.allPagesStartingIndex + (idx - job.pageStartIndex);
     const placeholderImageUrl = 'placeholder.png';
 
-    logger.error('Error processing PDF in main thread', { error: String(error?.message || error) });
+    logger.error('Error processing PDF in main thread', { error: String(error?.message || error), runId: job.runId });
 
     insertPageAtIndex(
       {
@@ -208,6 +217,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
         fileIndex: job.index,
         pageIndex: idx,
         allPagesIndex: at,
+        runId: job.runId,
       },
       at
     );
@@ -307,6 +317,13 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
   if (isMounted && isMounted.current === false) return;
 
   try {
+    logger.debug('Main-thread TIFF render start', {
+      runId: job.runId,
+      index: job.index,
+      start: job.pageStartIndex,
+      pages: job.pagesInvolved
+    });
+
     // If we were scheduled without bytes, fetch them using sourceUrl.
     let buffer = job.arrayBuffer;
     if ((!buffer || buffer.byteLength === 0) && job.sourceUrl) {
@@ -351,6 +368,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
                 fileIndex: job.index,
                 pageIndex: i,
                 allPagesIndex: at,
+                runId: job.runId,
               },
               at
             );
@@ -359,6 +377,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
               pageIndex: i,
               fileIndex: job.index,
               allPagesIndex: at,
+              runId: job.runId
             });
 
             // Small yield to keep UI responsive on long runs
@@ -371,6 +390,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
             pageIndex: i,
             fileIndex: job.index,
             error: String(e?.message || e),
+            runId: job.runId
           });
         }
       }
@@ -416,6 +436,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
             fileIndex: job.index,
             pageIndex: i,
             allPagesIndex: at,
+            runId: job.runId,
           },
           at
         );
@@ -428,6 +449,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
           pageIndex: i,
           fileIndex: job.index,
           error: String(perPageError?.message || perPageError),
+          runId: job.runId
         });
 
         insertPageAtIndex(
@@ -440,6 +462,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
             fileIndex: job.index,
             pageIndex: i,
             allPagesIndex: at,
+            runId: job.runId,
           },
           at
         );
@@ -461,7 +484,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
     const at = job.allPagesStartingIndex + (idx - job.pageStartIndex);
     const placeholderImageUrl = 'placeholder.png';
 
-    logger.error('Error processing TIFF in main thread', { error: String(error?.message || error) });
+    logger.error('Error processing TIFF in main thread', { error: String(error?.message || error), runId: job.runId });
 
     insertPageAtIndex(
       {
@@ -473,6 +496,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
         fileIndex: job.index,
         pageIndex: idx,
         allPagesIndex: at,
+        runId: job.runId,
       },
       at
     );

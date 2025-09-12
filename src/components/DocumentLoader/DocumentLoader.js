@@ -24,7 +24,7 @@
  *   - Import from the root 'file-type' package (not 'file-type/browser'); many bundlers don't expose that subpath.
  */
 
-import { useEffect, useContext, useRef, useMemo, useCallback } from 'react';
+import { useEffect, useContext, useRef, useCallback } from 'react';
 import { ViewerContext } from '../../ViewerContext.jsx';
 import logger from '../../LogController.js';
 import { generateDocumentList, generateDemoList, getTotalPages } from './Utils.js';
@@ -137,9 +137,24 @@ const DocumentLoader = ({
 }) => {
   const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
 
-  /** Idempotence & lifecycle guards */
-  const hasStarted = useRef(false);
+  /** Lifecycle guard (StrictMode-safe) */
   const isMounted = useRef(true);
+
+  /** Trace counters (dev diagnostics) */
+  const insertsAttempted = useRef(0);
+  const insertsAccepted = useRef(0);
+
+  /** Lightweight run tracing to make StrictMode re-mounts obvious in logs. */
+  const runId = useRef(
+    (() => {
+      try {
+        const s = Math.random().toString(36).slice(2, 8);
+        return `run_${Date.now().toString(36)}_${s}`;
+      } catch {
+        return `run_${Date.now()}`;
+      }
+    })()
+  );
 
   /** Work queues */
   /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // worker jobs
@@ -152,37 +167,11 @@ const DocumentLoader = ({
   /** Track inflight fetches for cleanup on unmount */
   const fetchControllers = useRef(new Set());
 
-  // Create workers ONCE (render-safe)
-  const imageWorkers = useMemo(() => {
-    const numWorkers = getNumberOfWorkers(maxWorkers);
-    logger.debug(`Using ${numWorkers} workers. (maxWorkers=${maxWorkers}, lowCore=${lowCore}, batchSize=${batchSize})`);
-    return Array.from({ length: numWorkers }, () => createWorker());
-  }, []);
+  /** Worker pool lives per-effect run (StrictMode-safe) */
+  const imageWorkersRef = useRef(/** @type {Worker[]} */([]));
 
-  // Publish worker count to the viewer state
-  useEffect(() => {
-    setWorkerCount(imageWorkers.length);
-  }, [imageWorkers.length, setWorkerCount]);
-
-  /**
-   * Insert a placeholder page at a global index.
-   * @param {number} index
-   * @returns {void}
-   */
-  const preloadPlaceholderImage = useCallback((index) => {
-    const placeholderImageUrl = 'placeholder.png';
-    const placeholderPage = {
-      fullSizeUrl: placeholderImageUrl,
-      thumbnailUrl: placeholderImageUrl,
-      loaded: false,
-      status: 0,
-      fileExtension: 'png',
-      fileIndex: 0,
-      pageIndex: 0,
-    };
-    logger.debug(`Preloading placeholder image for index ${index}`);
-    insertPageAtIndex(placeholderPage, index);
-  }, [insertPageAtIndex]);
+  /** Start timer handle (so the "probe" pass can be neutralized cleanly) */
+  const startTimerRef = useRef(/** @type {number|undefined} */(undefined));
 
   /**
    * Minimal failure placeholder insertion.
@@ -191,7 +180,7 @@ const DocumentLoader = ({
    * @returns {void}
    */
   const handleFailedDocumentLoad = useCallback((url, fileIndex) => {
-    logger.error(`Failed to load document at ${url}`);
+    logger.error(`Failed to load document at ${url}`, { runId: runId.current });
     const failedPage = {
       fullSizeUrl: 'lost.png',
       thumbnailUrl: 'lost.png',
@@ -200,9 +189,13 @@ const DocumentLoader = ({
       fileExtension: 'png',
       fileIndex,
       pageIndex: 0,
+      runId: runId.current,
     };
+    insertsAttempted.current += 1;
     insertPageAtIndex(failedPage, currentPageIndex.current);
+    insertsAccepted.current += 1;
     currentPageIndex.current += 1;
+    logger.info('Inserted page at index', { index: currentPageIndex.current - 1, ext: 'png', fileIndex, pageIndex: 0 });
   }, [insertPageAtIndex]);
 
   /** Quick ext inference from URL (no network). */
@@ -211,21 +204,37 @@ const DocumentLoader = ({
     return m ? m[1].toLowerCase() : null;
   };
 
+  /** Insert wrapper (keeps counters/logging consistent). */
+  const insertAtIndex = useCallback((page, index) => {
+    insertsAttempted.current += 1;
+    insertPageAtIndex(page, index);
+    insertsAccepted.current += 1;
+    logger.info('Inserted page at index', {
+      index,
+      ext: page?.fileExtension,
+      fileIndex: page?.fileIndex,
+      pageIndex: page?.pageIndex
+    });
+  }, [insertPageAtIndex]);
+
   /**
    * Drain and execute any queued main-thread jobs (PDF/TIFF) ASAP.
    * Ensures dev and build behave identically when workers request main-thread handling.
    */
   const drainMainThreadJobs = useCallback(async () => {
+    logger.debug('Drain main-thread jobs: start', { runId: runId.current, queued: mainThreadJobQueue.current.length });
     while (isMounted.current && mainThreadJobQueue.current.length > 0) {
+      /** @type {*} */
       const job = mainThreadJobQueue.current.shift();
       try {
         const run = job.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
-        await run(job, insertPageAtIndex, sameBlob, isMounted);
+        await run(job, insertAtIndex, sameBlob, isMounted);
       } catch (e) {
-        logger.error('Main-thread render failed', { error: String(e?.message || e) });
+        logger.error('Main-thread render failed', { error: String(e?.message || e), runId: runId.current });
       }
     }
-  }, [insertPageAtIndex, sameBlob]);
+    logger.debug('Drain main-thread jobs: end', { runId: runId.current });
+  }, [insertAtIndex, sameBlob]);
 
   /**
    * Fetch + detect + enqueue a single document, or directly insert for simple images in demo mode.
@@ -238,6 +247,8 @@ const DocumentLoader = ({
     // Fast path: in demo mode, directly insert simple image formats (no workers needed).
     const urlExt = extFromUrl(url);
     if (demoMode && urlExt && !['pdf', 'tiff', 'tif'].includes(urlExt)) {
+      const at = currentPageIndex.current;
+      /** @type {*} */
       const page = {
         fullSizeUrl: url,
         thumbnailUrl: url,
@@ -246,9 +257,18 @@ const DocumentLoader = ({
         fileExtension: urlExt,
         fileIndex: index,
         pageIndex: 0,
+        runId: runId.current,
       };
-      insertPageAtIndex(page, currentPageIndex.current);
+      logger.debug('Reserve indices (simple image)', {
+        fileIndex: index,
+        ext: urlExt,
+        at,
+        pages: 1,
+        runId: runId.current
+      });
+
       currentPageIndex.current += 1;
+      insertAtIndex(page, at);
       return;
     }
 
@@ -256,10 +276,10 @@ const DocumentLoader = ({
     fetchControllers.current.add(controller);
 
     try {
-      logger.debug('Loading document', { url, index });
+      logger.debug('Loading document', { url, index, runId: runId.current });
 
       const response = await fetch(url, { signal: controller.signal });
-      logger.debug('Fetch response', { url, status: response.status });
+      logger.debug('Fetch response', { url, status: response.status, runId: runId.current });
 
       if (!response.ok) {
         throw new Error(`Failed to fetch document at ${url} with status ${response.status}`);
@@ -301,11 +321,12 @@ const DocumentLoader = ({
       }
 
       const totalPages = await getTotalPages(arrayBuffer, fileExtension);
-      logger.debug('Total pages detected', { totalPages, url });
+      logger.debug('Total pages detected', { totalPages, url, runId: runId.current });
 
       // ✅ DEV == BUILD: always render multi-page formats on main thread
       if (fileExtension === 'pdf' || fileExtension === 'tiff' || fileExtension === 'tif') {
-        mainThreadJobQueue.current.push({
+        const job = {
+          runId: runId.current,
           arrayBuffer,
           sourceUrl: url,
           fileExtension,
@@ -313,13 +334,24 @@ const DocumentLoader = ({
           pageStartIndex: 0,
           pagesInvolved: totalPages,
           allPagesStartingIndex: currentPageIndex.current,
+        };
+        logger.debug('Reserve indices (multi-page MT)', {
+          fileIndex: index,
+          ext: fileExtension,
+          start: job.allPagesStartingIndex,
+          end: job.allPagesStartingIndex + totalPages - 1,
+          pages: totalPages,
+          runId: runId.current
         });
+
+        mainThreadJobQueue.current.push(job);
         arrayBuffer = null;
         currentPageIndex.current += totalPages;
-        logger.debug('Routed multi-page document to main thread', { fileExtension, totalPages });
+        logger.debug('Routed multi-page document to main thread', { fileExtension, totalPages, runId: runId.current });
       } else {
         // Other single-image types → worker
         const job = {
+          runId: runId.current,
           arrayBuffer,
           sourceUrl: url,
           fileExtension,
@@ -328,7 +360,14 @@ const DocumentLoader = ({
           pagesInvolved: 1,
           allPagesStartingIndex: currentPageIndex.current,
         };
-        logger.debug('Queueing job for image type', { job: { fileExtension, index }, currentPageIndex: currentPageIndex.current });
+        logger.debug('Reserve indices (worker image)', {
+          fileIndex: index,
+          ext: fileExtension,
+          at: job.allPagesStartingIndex,
+          pages: 1,
+          runId: runId.current
+        });
+
         jobQueue.current.push(job);
         arrayBuffer = null;
         currentPageIndex.current += 1;
@@ -337,32 +376,31 @@ const DocumentLoader = ({
       fetchControllers.current.delete(controller);
 
       if (error?.name === 'AbortError') {
-        logger.debug('Fetch aborted', { url });
+        logger.debug('Fetch aborted', { url, runId: runId.current });
         return;
       }
 
       handleFailedDocumentLoad(url, index);
       if (isMounted.current) {
         setError(error.message);
-        logger.error('Error loading document', { error: error.message });
+        logger.error('Error loading document', { error: error.message, runId: runId.current });
       }
     }
-  }, [setError, handleFailedDocumentLoad, demoMode, insertPageAtIndex]);
+  }, [setError, handleFailedDocumentLoad, demoMode, insertAtIndex]);
 
   // Wrap worker handler and immediately drain any main-thread jobs the worker requested.
   const onWorkerMessage = useCallback(
     (evt) => {
-      handleWorkerMessage(evt, insertPageAtIndex, sameBlob, isMounted, {
+      handleWorkerMessage(evt, insertAtIndex, sameBlob, isMounted, {
         renderPDFInMainThread,
         renderTIFFInMainThread,
         mainThreadJobQueueRef: mainThreadJobQueue,
       });
       if (mainThreadJobQueue.current.length > 0) {
-        // Drain asap so dev == build behavior
         setTimeout(drainMainThreadJobs, 0);
       }
     },
-    [insertPageAtIndex, sameBlob, drainMainThreadJobs]
+    [insertAtIndex, sameBlob, drainMainThreadJobs]
   );
 
   // Process batches of jobs using workers
@@ -371,13 +409,13 @@ const DocumentLoader = ({
       jobQueue,
       batchQueue,
       batchSize,
-      imageWorkers,
+      imageWorkersRef.current,
       onWorkerMessage,
-      insertPageAtIndex,
+      insertAtIndex,
       sameBlob,
       isMounted
     );
-  }, [imageWorkers, sameBlob, insertPageAtIndex, onWorkerMessage]);
+  }, [sameBlob, insertAtIndex, onWorkerMessage]);
 
   // Low-core sequential scheduler
   const processSequential = useCallback(() => {
@@ -385,23 +423,21 @@ const DocumentLoader = ({
 
     const next = jobQueue.current.shift();
     if (next) {
-      const w = imageWorkers[0];
+      const w = imageWorkersRef.current[0];
       if (!w) return;
 
       w.onmessage = async (evt) => {
-        handleWorkerMessage(evt, insertPageAtIndex, sameBlob, isMounted, {
+        handleWorkerMessage(evt, insertAtIndex, sameBlob, isMounted, {
           renderPDFInMainThread,
           renderTIFFInMainThread,
           mainThreadJobQueueRef: mainThreadJobQueue,
         });
         if (mainThreadJobQueue.current.length > 0) {
-          await drainMainThreadJobs();
+          setTimeout(drainMainThreadJobs, 0);
         }
         setTimeout(processSequential, 0);
       };
       w.onerror = async () => {
-        // Any worker failure: nothing here is multi-page anymore (PDF/TIFF are main-thread),
-        // so insert placeholders via the central handler.
         handleWorkerMessage(
           {
             data: {
@@ -416,12 +452,12 @@ const DocumentLoader = ({
               ],
             },
           },
-          insertPageAtIndex,
+          insertAtIndex,
           sameBlob,
           isMounted
         );
         if (mainThreadJobQueue.current.length > 0) {
-          await drainMainThreadJobs();
+          setTimeout(drainMainThreadJobs, 0);
         }
         setTimeout(processSequential, 0);
       };
@@ -431,81 +467,129 @@ const DocumentLoader = ({
       return;
     }
 
+    /** @type {*} */
     const mt = mainThreadJobQueue.current.shift();
     if (mt) {
       const run = mt.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
-      run(mt, insertPageAtIndex, sameBlob, isMounted).then(() => setTimeout(processSequential, 0));
+      run(mt, insertAtIndex, sameBlob, isMounted).then(() => setTimeout(processSequential, 0));
     }
-  }, [imageWorkers, insertPageAtIndex, sameBlob, drainMainThreadJobs]);
+  }, [insertAtIndex, sameBlob, drainMainThreadJobs]);
 
   useEffect(() => {
-    if (hasStarted.current) return;
-    hasStarted.current = true;
+    // Fresh run token (helps trace StrictMode re-runs)
+    try {
+      runId.current = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
+    } catch {
+      runId.current = `run_${Date.now()}`;
+    }
+    isMounted.current = true;
+    insertsAttempted.current = 0;
+    insertsAccepted.current = 0;
 
-    const loadDocuments = async () => {
-      // Always add a first placeholder so the UI doesn't flash empty
-      preloadPlaceholderImage(currentPageIndex.current);
-
-      let entries = [];
-      if (Array.isArray(sourceList) && sourceList.length > 0) {
-        entries = sourceList
-          .map((it, i) => ({ url: it?.url, fileIndex: typeof it?.fileIndex === 'number' ? it.fileIndex : i }))
-          .filter((e) => !!e.url);
-        logger.debug('Using explicit sourceList', { count: entries.length });
-      } else if (demoMode) {
-        const demoUrls = generateDemoList({ strategy: demoStrategy, count: demoCount || 1, formats: demoFormats });
-        entries = demoUrls.map((url, i) => ({ url, fileIndex: i }));
-        logger.debug('Generated demo URLs', { count: demoUrls.length, strategy: demoStrategy });
-      } else {
-        const documentUrls = generateDocumentList(folder, extension, endNumber);
-        entries = documentUrls.map((url, i) => ({ url, fileIndex: i }));
-        logger.debug('Generated document URLs', { count: documentUrls.length });
+    // 🔧 STRICTMODE-ROBUST: Defer ALL heavy setup/scheduling to next tick.
+    // In React dev StrictMode the first mount is immediately unmounted; by deferring,
+    // the "probe" pass is cleaned up before any work runs, so no duplicates.
+    startTimerRef.current = window.setTimeout(() => {
+      if (!isMounted.current) {
+        logger.debug('Start aborted (component already unmounted)', { runId: runId.current });
+        return;
       }
 
-      try {
-        for (let i = 0; i < entries.length; i++) {
-          const { url, fileIndex } = entries[i];
-          logger.debug('Processing document URL', { url, index: fileIndex });
-          await loadDocumentAsync(url, fileIndex);
+      // Reset queues/counters for this run
+      jobQueue.current = [];
+      mainThreadJobQueue.current = [];
+      batchQueue.current = [];
+      currentPageIndex.current = 0;
+
+      // Create a fresh worker pool for THIS run
+      const numWorkers = getNumberOfWorkers(maxWorkers);
+      imageWorkersRef.current = Array.from({ length: numWorkers }, () => createWorker());
+      setWorkerCount(imageWorkersRef.current.length);
+      logger.debug(`Using ${numWorkers} workers. (maxWorkers=${maxWorkers}, lowCore=${lowCore}, batchSize=${batchSize})`, {
+        runId: runId.current
+      });
+
+      const loadDocuments = async () => {
+        logger.info('DocumentLoader start', { runId: runId.current });
+
+        let entries = [];
+        if (Array.isArray(sourceList) && sourceList.length > 0) {
+          entries = sourceList
+            .map((it, i) => ({ url: it?.url, fileIndex: typeof it?.fileIndex === 'number' ? it.fileIndex : i }))
+            .filter((e) => !!e.url);
+          logger.debug('Using explicit sourceList', { count: entries.length, runId: runId.current });
+        } else if (demoMode) {
+          const demoUrls = generateDemoList({ strategy: demoStrategy, count: demoCount || 1, formats: demoFormats });
+          entries = demoUrls.map((url, i) => ({ url, fileIndex: i }));
+          logger.debug('Generated demo URLs', { count: demoUrls.length, strategy: demoStrategy, runId: runId.current });
+        } else {
+          const documentUrls = generateDocumentList(folder, extension, endNumber);
+          entries = documentUrls.map((url, i) => ({ url, fileIndex: i }));
+          logger.debug('Generated document URLs', { count: documentUrls.length, runId: runId.current });
         }
 
-        const hasPending =
-          (jobQueue.current && jobQueue.current.length > 0) ||
-          (mainThreadJobQueue.current && mainThreadJobQueue.current.length > 0);
+        try {
+          logger.debug('Scheduling entries', { count: entries.length, runId: runId.current });
+          for (let i = 0; i < entries.length; i++) {
+            const { url, fileIndex } = entries[i];
+            if (!isMounted.current) break;
+            logger.debug('Processing document URL', { url, index: fileIndex, runId: runId.current });
+            await loadDocumentAsync(url, fileIndex);
+          }
 
-        if (hasPending) {
-          // Fill remaining placeholder slots for pages scheduled above.
-          for (let i = 1; i < currentPageIndex.current; i++) {
-            preloadPlaceholderImage(i);
+          logger.debug('Scheduling complete', {
+            runId: runId.current,
+            pendingWorkerJobs: jobQueue.current.length,
+            pendingMainThreadJobs: mainThreadJobQueue.current.length,
+            totalPlannedPages: currentPageIndex.current
+          });
+
+          if (!isMounted.current) return;
+
+          if (lowCore) {
+            setTimeout(processSequential, 0);
+          } else {
+            processBatches();
+            setTimeout(drainMainThreadJobs, 0);
+          }
+        } catch (error) {
+          if (isMounted.current) {
+            setError(error.message);
+            logger.error('Error loading documents', { error: error.message, runId: runId.current });
           }
         }
+      };
 
-        if (lowCore) {
-          processSequential();
-        } else {
-          processBatches();
-          // Immediately drain any main-thread jobs already queued (e.g., PDFs/TIFFs)
-          await drainMainThreadJobs();
-        }
-      } catch (error) {
-        if (isMounted.current) {
-          setError(error.message);
-          logger.error('Error loading documents', { error: error.message });
-        }
-      }
-    };
-
-    loadDocuments();
+      loadDocuments();
+    }, 0);
 
     return () => {
       isMounted.current = false;
+
+      // Cancel deferred start if it hasn't executed yet (neutralizes StrictMode probe)
+      if (startTimerRef.current != null) {
+        try { clearTimeout(startTimerRef.current); } catch {}
+        startTimerRef.current = undefined;
+      }
 
       fetchControllers.current.forEach((ctrl) => {
         try { ctrl.abort(); } catch {}
       });
       fetchControllers.current.clear();
 
-      imageWorkers.forEach((worker) => worker.terminate());
+      // Terminate this run's workers
+      (imageWorkersRef.current || []).forEach((worker) => {
+        try { worker.terminate(); } catch {}
+      });
+      imageWorkersRef.current = [];
+      setWorkerCount(0);
+
+      logger.info('DocumentLoader cleanup', {
+        runId: runId.current,
+        insertsAttempted: insertsAttempted.current,
+        insertsAccepted: insertsAccepted.current,
+        plannedTotal: currentPageIndex.current
+      });
     };
   }, [
     folder,
@@ -517,13 +601,11 @@ const DocumentLoader = ({
     demoCount,
     demoFormats,
     setError,
-    imageWorkers,
     loadDocumentAsync,
-    insertPageAtIndex,
+    insertAtIndex,
     sameBlob,
     processBatches,
     processSequential,
-    preloadPlaceholderImage,
     drainMainThreadJobs,
   ]);
 
