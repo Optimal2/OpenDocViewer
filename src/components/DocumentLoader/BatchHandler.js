@@ -38,6 +38,7 @@ import logger from '../../LogController.js';
  * @property {number} pagesInvolved                  Number of pages represented by this job
  * @property {number} allPagesStartingIndex          Global page offset (into the flat viewer list)
  * @property {string=} sourceUrl                     Fallback URL (used by main-thread renderers)
+ * @property {string=} runId                         Ownership token (drops stale dev runs)
  */
 
 /**
@@ -122,21 +123,15 @@ function pump(
 
     worker.onerror = (err) => {
       try {
-        // IMPORTANT:
-        // If a worker fails to load/run (common in dev when the module URL can't be served),
-        // we must *explicitly* request MAIN-THREAD processing for multi-page formats.
-        // Otherwise the central handler will treat this as a “success with no blob”
-        // and just insert placeholders.
+        // If a worker fails, synthesize "main-thread" jobs preserving original metadata.
         const jobs = (batch.jobs || []).map((j) => ({
-          // Minimal set needed for main-thread renderers to proceed:
+          runId: j.runId, // ← preserve run ownership
           fileIndex: j.index,
           pageIndex: j.pageStartIndex || 0,
           allPagesIndex: j.allPagesStartingIndex,
           fileExtension: j.fileExtension,
-          // For PDFs/TIFFs the renderer will loop pages; keep these:
           pagesInvolved: j.pagesInvolved,
           pageStartIndex: j.pageStartIndex,
-          // Buffers may be neutered because we transferred them; provide sourceUrl for refetch:
           sourceUrl: j.sourceUrl || null,
         }));
 
@@ -217,6 +212,7 @@ export const batchHandler = (
   while (jobQueue.current.length > 0) {
     const job = jobQueue.current.shift();
     if (!job) continue;
+    // Preserve runId on the job as it enters the batch.
     batchQueue.current.push({ jobs: [job], fileExtension: job.fileExtension });
   }
 

@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/components/DocumentLoader/WorkerHandler.js
+/**
  * File: src/components/DocumentLoader/WorkerHandler.js
  *
  * OpenDocViewer — Worker orchestration & message handling
@@ -39,6 +40,7 @@ import ImageWorker from '../../workers/imageWorker.js?worker';
 /**
  * A single job/result entry communicated between worker and main thread.
  * @typedef {Object} WorkerJob
+ * @property {string=} runId
  * @property {Blob} [blob]
  * @property {string} [fullSizeUrl]
  * @property {number} fileIndex
@@ -48,6 +50,7 @@ import ImageWorker from '../../workers/imageWorker.js?worker';
  * @property {number} [pagesInvolved]
  * @property {number} [pageStartIndex]
  * @property {boolean} [handleInMainThread]
+ * @property {string=} sourceUrl
  */
 
 /**
@@ -74,6 +77,7 @@ import ImageWorker from '../../workers/imageWorker.js?worker';
  * @property {{ current: Array<WorkerJob> }} [mainThreadJobQueueRef]
  * @property {Function} [renderPDFInMainThread]
  * @property {Function} [renderTIFFInMainThread]
+ * @property {{ current: string }} [activeRunIdRef]
  */
 
 /* ------------------------------------------------------------------------------------------------
@@ -165,6 +169,10 @@ function scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts) {
   const renderTIFF = (opts && opts.renderTIFFInMainThread) || importedRenderTIFFInMainThread;
   const renderPDF  = (opts && opts.renderPDFInMainThread)  || importedRenderPDFInMainThread;
 
+  // Ensure job carries the active runId (belt-and-suspenders)
+  const activeRunId = opts && opts.activeRunIdRef ? String(opts.activeRunIdRef.current || '') : '';
+  if (activeRunId && !job.runId) job.runId = activeRunId;
+
   if (qref && qref.current && Array.isArray(qref.current)) {
     qref.current.push(job);
     return;
@@ -198,19 +206,25 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
   /** @type {WorkerMessage} */
   const msg = data || {};
 
+  const activeRunId = opts && opts.activeRunIdRef ? String(opts.activeRunIdRef.current || '') : '';
+
   logger.debug('Worker message received', {
     jobs: Array.isArray(msg.jobs) ? msg.jobs.length : 0,
     hasError: Boolean(msg.error),
     handleInMainThread: Boolean(msg.handleInMainThread),
   });
 
+  // Helper to drop stale jobs (from prior runs)
+  const isStale = (job) => !!(activeRunId && job && job.runId && job.runId !== activeRunId);
+
   // Error path: let PDFs/TIFFs fall back to main-thread; others get placeholders.
   if (msg.error) {
     logger.info('Worker reported error', { error: msg.error });
-    const jobs = Array.isArray(msg.jobs) ? msg.jobs : [];
+    const jobs = (Array.isArray(msg.jobs) ? msg.jobs : []).filter((j) => !isStale(j));
     jobs.forEach((job) => {
       if (isMounted && isMounted.current === false) return;
       job.handleInMainThread = true;
+      if (activeRunId && !job.runId) job.runId = activeRunId;
       const ext = String(job.fileExtension || '').toLowerCase();
       if (['tiff', 'tif', 'pdf'].includes(ext)) {
         scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts);
@@ -224,6 +238,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
           fileIndex: job.fileIndex,
           pageIndex: job.pageIndex,
           allPagesIndex: job.allPagesIndex,
+          runId: job.runId || activeRunId,
         };
         insertPageAtIndex(placeholder, job.allPagesIndex);
       }
@@ -234,8 +249,9 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
   // Worker can explicitly request main-thread handling (e.g., unsupported codec).
   if (msg.handleInMainThread) {
     const maybeDo = (job) => {
-      if (!job) return;
+      if (!job || isStale(job)) return;
       if (isMounted && isMounted.current === false) return;
+      if (activeRunId && !job.runId) job.runId = activeRunId;
       const ext = String(job.fileExtension || '').toLowerCase();
       if (['tiff', 'tif', 'pdf'].includes(ext)) {
         logger.debug('Main-thread processing requested by worker', {
@@ -258,6 +274,10 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
   msg.jobs.forEach(async (job) => {
     try {
       if (isMounted && isMounted.current === false) return;
+      if (isStale(job)) {
+        logger.debug('Dropping stale worker job output', { jobRun: job.runId, activeRunId });
+        return;
+      }
 
       const fileExt = String(job.fileExtension || '').toLowerCase();
       const { fileIndex, pageIndex, allPagesIndex } = job;
@@ -280,8 +300,9 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
           fileIndex,
           pageIndex,
           allPagesIndex,
+          runId: job.runId || activeRunId,
         };
-        logger.debug('Inserting rendered page', { allPagesIndex });
+        logger.debug('Inserting rendered page', { allPagesIndex, runId: page.runId });
         if (isMounted && isMounted.current === false) return;
         insertPageAtIndex(page, allPagesIndex);
       } else {
@@ -294,8 +315,9 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
           fileIndex,
           pageIndex,
           allPagesIndex,
+          runId: job.runId || activeRunId,
         };
-        logger.debug('Inserting placeholder page (no fullSizeUrl/blob)', { allPagesIndex });
+        logger.debug('Inserting placeholder page (no fullSizeUrl/blob)', { allPagesIndex, runId: placeholder.runId });
         if (isMounted && isMounted.current === false) return;
         insertPageAtIndex(placeholder, allPagesIndex);
       }
