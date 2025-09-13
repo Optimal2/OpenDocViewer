@@ -14,15 +14,15 @@
  * @param {function(PrintSubmitDetail):void} props.onSubmit - Called with the chosen print details.
  * @param {number} props.totalPages - Total number of pages (validates range/custom).
  * @returns {(JSX.Element|null)}
+ *
+ * Source snapshot: :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import styles from './PrintRangeDialog.module.css';
-import {
-  usePrintRangeController
-} from './PrintRangeDialog.controller';
+import { usePrintRangeController } from './PrintRangeDialog.controller';
 
 /**
  * Allowed print modes (string-literal union for JSDoc).
@@ -41,10 +41,10 @@ import {
  */
 
 export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages }) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
 
   const ctrl = usePrintRangeController({
-    isOpen, onClose, onSubmit, totalPages, t, styles
+    isOpen, onClose, onSubmit, totalPages, t, styles, i18n
   });
 
   if (!isOpen) return null;
@@ -222,7 +222,9 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                           aria-label={t('printDialog.reason.label')}
                         >
                           {ctrl.reasonOptions.map(opt => (
-                            <option key={String(opt.value)} value={opt.value}>{opt.value}</option>
+                            <option key={String(opt.value)} value={opt.value}>
+                              {ctrl.optionLabel(opt)}
+                            </option>
                           ))}
                         </select>
 
@@ -232,7 +234,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                             <input
                               type="text"
                               className={styles.inputWide}
-                              placeholder={ctrl.extraCfg?.placeholder || t('printDialog.reason.extra.placeholder')}
+                              placeholder={ctrl.extraPlaceholder || t('printDialog.reason.extra.placeholder')}
                               maxLength={ctrl.extraMax || undefined}
                               value={ctrl.extraText}
                               onChange={(e) => ctrl.setExtraText(e.target.value)}
@@ -245,7 +247,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                       <input
                         type="text"
                         className={styles.inputWide}
-                        placeholder={ctrl.reasonCfg?.placeholder || t('printDialog.reason.label')}
+                        placeholder={ctrl.reasonPlaceholder || t('printDialog.reason.label')}
                         maxLength={ctrl.reasonMax || undefined}
                         value={ctrl.freeReason}
                         onChange={(e) => ctrl.setFreeReason(e.target.value)}
@@ -267,7 +269,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                     <input
                       type="text"
                       className={styles.inputWide}
-                      placeholder={ctrl.forWhomCfg?.placeholder || t('printDialog.forWhom.label')}
+                      placeholder={ctrl.forWhomPlaceholder || t('printDialog.forWhom.label')}
                       maxLength={ctrl.forWhomMax || undefined}
                       value={ctrl.forWhomText}
                       onChange={(e) => ctrl.setForWhomText(e.target.value)}

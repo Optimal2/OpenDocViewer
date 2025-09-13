@@ -5,20 +5,15 @@
  * HOW TO USE
  *   1) Copy this file to the same folder as `odv.config.js` (usually /public).
  *   2) Rename it to:  odv.site.config.js
- *   3) Open /odv-admin.html to edit and download a new override anytime.
  *
- * WHAT THIS DOES
- *   The viewer deep-merges this object into its default config at runtime.
- *   Omit any keys you don't want to override. Arrays and primitive values replace
- *   defaults; objects merge recursively.
- *
- * TIP
- *   Keep this file out of your upgrade payload so site customizations persist.
+ * LOCALIZED VALUES:
+ *   Any user-facing string may be a plain string OR a LocalizedString map:
+ *     { en: "Select reason…", sv: "Välj orsak…" }
+ * Keep `value` as a stable id; use optional `label` for localized display.
  */
 (function (w) {
   w.__ODV_SITE_CONFIG__ = {
     // ===== UI & diagnostics ====================================================
-    // These can help with troubleshooting on specific sites.
     exposeStackTraces: false,
     showPerfOverlay: false,
 
@@ -26,62 +21,62 @@
     userLog: {
       enabled: true,
       endpoint: "/ODVProxy/userlog/record",
-      transport: "form", // reserved for future transports
+      transport: "form",
 
       ui: {
-        // Show the Reason/For whom fields when (userLog.enabled || printHeader.enabled),
-        // unless you force visibility here:
-        //   - "auto": show when useful
-        //   - "always": always show
-        //   - "never": never show
+        // "auto": show when (userLog.enabled || printHeader.enabled),
+        // "always": force show, "never": force hide
         showReasonWhen:  "auto",
         showForWhomWhen: "auto",
 
         fields: {
-          // ---- Reason field (dropdown or free text) --------------------------
+          // ---- Reason field (dropdown with optional extra) -------------------
           reason: {
             required: true,
             maxLen: 255,
-            regex: null,          // e.g. "^([\\s\\S]{0,255})$"
+            regex: null,
             regexFlags: "",
-            placeholder: "Select reason…",
+            // Localized placeholder (EN + SV)
+            placeholder: { en: "Select reason…", sv: "Välj orsak…" },
 
-            // You may provide inline options OR a URL (future).
-            // If both are provided, the app will prefer `url`.
+            // Inline options. Keep `value` as the stable id used for logging.
             source: {
               options: [
-                { value: "Patient copy" },
-                { value: "Internal review" },
-                { value: "Legal request" },
+                { value: "Patient copy",    label: { en: "Patient copy",    sv: "Patientkopia" } },
+                { value: "Internal review", label: { en: "Internal review", sv: "Intern granskning" } },
+                { value: "Legal request",   label: { en: "Legal request",   sv: "Juridisk begäran" } },
                 {
                   value: "Other",
+                  label: { en: "Other", sv: "Annat" },
                   allowFreeText: true,
                   input: {
                     required: true,
                     maxLen: 140,
-                    regex: null,       // e.g. "^([\\s\\S]{0,140})$"
+                    regex: null,
                     regexFlags: "",
-                    placeholder: "Type other reason…",
-                    prefix: "",
-                    suffix: ""
+                    // Localized affixes for the free-text part appended to the value
+                    placeholder: { en: "Type other reason…", sv: "Ange annan orsak…" },
+                    prefix:      { en: "Other: ",            sv: "Annan: " },
+                    suffix:      { en: " (specify)",         sv: " (ange)" }
                   }
                 }
               ]
-              // url: "/OpenDocViewer/userlog/reasons.json",
-              // cacheTtlSec: 300
+              // You may alternatively load reasons from a URL:
+              // ,url: "/OpenDocViewer/userlog/reasons.json"
+              // ,cacheTtlSec: 300
             },
 
-            // Default selected reason (must match one of the options' `value` when using options)
-            default: null // e.g. "Patient copy"
+            // Default selected reason by stable id (matches an option `value`)
+            default: null
           },
 
           // ---- For whom field -------------------------------------------------
           forWhom: {
             required: false,
             maxLen: 120,
-            regex: null,           // e.g. "^([\\s\\S]{0,120})$"
+            regex: null,
             regexFlags: "",
-            placeholder: "Who requested this?"
+            placeholder: { en: "Who requested this?", sv: "Vem begärde detta?" }
           }
         }
       }
@@ -89,17 +84,15 @@
 
     // ===== PRINT HEADER (non-optional when enabled) ============================
     printHeader: {
-      enabled: true,           // show header overlay in print preview/print
-      position: "top",         // "top" | "bottom"
-      heightPx: 32,            // informational only (admins can style via CSS)
-      applyTo: "all",          // "all" | "first" | "last"
-
-      // Tokens:
-      //   ${date} (YYYY-MM-DD), ${time} (HH:MM 24h), ${now}, ${page}, ${totalPages},
-      //   ${reason}, ${forWhom}, ${user.id}, ${user.name}, ${doc.id}, ${doc.title}, ${doc.pageCount}, ${viewer.version}
-      template: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
-
-      // Print-only CSS scoped to `.odv-print-header`
+      enabled: true,
+      position: "top",
+      heightPx: 32,
+      applyTo: "all",
+      // Localized template with tokens described in the default config
+      template: {
+        en: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
+        sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
+      },
       css: [
         ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;",
         "  background:rgba(255,255,255,.85); padding:4mm 6mm; }",
@@ -111,7 +104,7 @@
     systemLog: {
       enabled: true,
       endpoint: "/ODVProxy/log",
-      token: "REPLACE_WITH_SYSTEM_LOG_TOKEN" // paste the generated token
+      token: "REPLACE_WITH_SYSTEM_LOG_TOKEN"
     }
   };
 })(window);
