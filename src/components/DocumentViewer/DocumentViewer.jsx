@@ -19,6 +19,7 @@
  * @returns {React.ReactElement}
  */
 import React, { useContext } from 'react';
+import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
@@ -29,6 +30,7 @@ import { useDocumentViewer } from './useDocumentViewer.js';
 
 const DocumentViewer = () => {
   const { allPages } = useContext(ViewerContext);
+  const { t } = useTranslation('common');
 
   const {
     pageNumber,
@@ -73,7 +75,7 @@ const DocumentViewer = () => {
       className="document-viewer-container"
       onClick={handleContainerClick}
       role="region"
-      aria-label="Document viewer container"
+      aria-label={t('viewer.aria.containerRegion')}
     >
       <DocumentViewerToolbar
         /* page + totals */
@@ -115,7 +117,7 @@ const DocumentViewer = () => {
         ref={viewerContainerRef}
         id="viewerContainer"
         tabIndex={0}
-        aria-label="Document viewer"
+        aria-label={t('viewer.aria.main')}
       >
         {/* Sidebar: thumbnails with resizer */}
         <div style={{ display: 'flex', width: `${thumbnailWidth}px`, flexShrink: 0 }}>

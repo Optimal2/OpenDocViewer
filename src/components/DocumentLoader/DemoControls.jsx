@@ -1,6 +1,6 @@
-// File: src/components/DocumentLoader/DemoControls.js
+// File: src/components/DocumentLoader/DemoControls.jsx
 /**
- * File: src/components/DocumentLoader/DemoControls.js
+ * File: src/components/DocumentLoader/DemoControls.jsx
  *
  * OpenDocViewer — Demo Controls for “one-file-per-format” demo mode
  *
@@ -22,6 +22,7 @@
  */
 
 import React, { useMemo, useState } from 'react';
+import { useTranslation } from 'react-i18next';
 import DocumentLoader from './DocumentLoader';
 
 /**
@@ -32,6 +33,8 @@ import DocumentLoader from './DocumentLoader';
  * @returns {React.ReactElement}
  */
 export default function DemoControls({ children }) {
+  const { t } = useTranslation('common');
+
   const [count, setCount] = useState(10);
   const [format, setFormat] = useState('png');   // 'jpg'|'png'|'tif'|'pdf'
   const [mix, setMix] = useState(false);
@@ -49,22 +52,36 @@ export default function DemoControls({ children }) {
     <div style={{ padding: 12 }}>
       {/* Controls row */}
       <div className="odv-allow-select" style={{ display: 'flex', alignItems: 'center', gap: 8, marginBottom: 12 }}>
-        <label style={{ marginRight: 6 }}>Total pages/files:</label>
+        <label htmlFor="odv-demo-total" style={{ marginRight: 6 }}>
+          {t('demoControls.totalLabel', { defaultValue: 'Total pages/files:' })}
+        </label>
+
         <input
+          id="odv-demo-total"
           type="number"
           min={1}
           value={count}
           onChange={(e) => setCount(Math.max(1, Number(e.target.value) || 1))}
           style={{ width: 80, marginRight: 12 }}
+          aria-label={t('demoControls.totalLabel', { defaultValue: 'Total pages/files:' })}
         />
 
-        <button onClick={() => selectFormat('jpg')}>JPG</button>
-        <button onClick={() => selectFormat('png')}>PNG</button>
-        <button onClick={() => selectFormat('tif')}>TIF</button>
-        <button onClick={() => selectFormat('pdf')}>PDF</button>
+        {/* Format buttons (initialisms typically don't need translation) */}
+        <button onClick={() => selectFormat('jpg')} aria-label="JPG">JPG</button>
+        <button onClick={() => selectFormat('png')} aria-label="PNG">PNG</button>
+        <button onClick={() => selectFormat('tif')} aria-label="TIF">TIF</button>
+        <button onClick={() => selectFormat('pdf')} aria-label="PDF">PDF</button>
 
-        <button onClick={() => setMix((v) => !v)} style={{ marginLeft: 12 }}>
-          {mix ? 'Mix: ON' : 'Mix'}
+        <button
+          onClick={() => setMix((v) => !v)}
+          style={{ marginLeft: 12 }}
+          aria-pressed={mix}
+          aria-label={t('demoControls.mixToggle', { defaultValue: 'Toggle mix' })}
+          title={t('demoControls.mixToggle', { defaultValue: 'Toggle mix' })}
+        >
+          {mix
+            ? t('demoControls.mixOn', { defaultValue: 'Mix: ON' })
+            : t('demoControls.mix', { defaultValue: 'Mix' })}
         </button>
       </div>
 

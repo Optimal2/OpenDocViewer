@@ -25,6 +25,7 @@
  */
 
 import React from 'react';
+import i18next from 'i18next';
 import logger from './LogController';
 
 /**
@@ -34,6 +35,21 @@ import logger from './LogController';
 const IS_DEV =
   (typeof import.meta !== 'undefined' && import.meta?.env?.MODE === 'development') ||
   (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development');
+
+/**
+ * Tiny helper to translate with safe fallback (NS: 'common').
+ * @param {string} key
+ * @param {string} defaultValue
+ * @param {Object=} options
+ * @returns {string}
+ */
+function tr(key, defaultValue, options) {
+  try {
+    return i18next.t(key, { ns: 'common', defaultValue, ...(options || {}) });
+  } catch {
+    return defaultValue;
+  }
+}
 
 /**
  * Coerce unknown values to boolean using common string/number forms.
@@ -222,21 +238,21 @@ export default class ErrorBoundary extends React.Component {
 
     return (
       <div role="alert" aria-live="polite" style={wrap}>
-        <h2 style={title}>Something went wrong</h2>
+        <h2 style={title}>{tr('errorBoundary.title', 'Something went wrong')}</h2>
 
         {!exposeStackTraces ? (
           <>
-            <p>The application encountered an unexpected error.</p>
+            <p>{tr('errorBoundary.generic', 'The application encountered an unexpected error.')}</p>
             <details open={this.state.showDetails} onToggle={(e) => this.setState({ showDetails: e.currentTarget.open })}>
-              <summary>Details (for support)</summary>
+              <summary>{tr('errorBoundary.detailsSummary', 'Details (for support)')}</summary>
               <pre style={pre}>
 {String(this.state.error?.message || this.state.error || 'Unknown error')}
               </pre>
             </details>
             <div>
-              <button type="button" style={btn} onClick={this.reset}>Try again</button>
-              <button type="button" style={btn} onClick={() => { try { window.location.reload(); } catch {} }}>Reload</button>
-              <button type="button" style={btn} onClick={this.copyDetails}>Copy details</button>
+              <button type="button" style={btn} onClick={this.reset}>{tr('errorBoundary.tryAgain', 'Try again')}</button>
+              <button type="button" style={btn} onClick={() => { try { window.location.reload(); } catch {} }}>{tr('errorBoundary.reload', 'Reload')}</button>
+              <button type="button" style={btn} onClick={this.copyDetails}>{tr('errorBoundary.copyDetails', 'Copy details')}</button>
             </div>
           </>
         ) : (
@@ -246,20 +262,20 @@ export default class ErrorBoundary extends React.Component {
             </p>
             {this.state.error?.stack ? (
               <>
-                <h3 style={{ marginBottom: 6 }}>Stack Trace</h3>
+                <h3 style={{ marginBottom: 6 }}>{tr('errorBoundary.stackTrace', 'Stack Trace')}</h3>
                 <pre style={pre}>{this.state.error.stack}</pre>
               </>
             ) : null}
             {this.state.errorInfo?.componentStack ? (
               <>
-                <h3 style={{ marginBottom: 6 }}>Component Stack</h3>
+                <h3 style={{ marginBottom: 6 }}>{tr('errorBoundary.componentStack', 'Component Stack')}</h3>
                 <pre style={pre}>{this.state.errorInfo.componentStack}</pre>
               </>
             ) : null}
             <div>
-              <button type="button" style={btn} onClick={this.reset}>Try again</button>
-              <button type="button" style={btn} onClick={() => { try { window.location.reload(); } catch {} }}>Reload</button>
-              <button type="button" style={btn} onClick={this.copyDetails}>Copy details</button>
+              <button type="button" style={btn} onClick={this.reset}>{tr('errorBoundary.tryAgain', 'Try again')}</button>
+              <button type="button" style={btn} onClick={() => { try { window.location.reload(); } catch {} }}>{tr('errorBoundary.reload', 'Reload')}</button>
+              <button type="button" style={btn} onClick={this.copyDetails}>{tr('errorBoundary.copyDetails', 'Copy details')}</button>
             </div>
           </>
         )}

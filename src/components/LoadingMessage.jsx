@@ -25,14 +25,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
-
-/** Default copy and assets (overridable via props). */
-const DEFAULTS = Object.freeze({
-  loadingText: 'Please wait, pages are still loading.',
-  errorText: 'Error: The document is corrupted, missing, or in an unsupported format.',
-  loadingImg: 'placeholder.png',
-  errorImg: 'lost.png',
-});
+import { useTranslation } from 'react-i18next';
 
 /**
  * LoadingMessage component.
@@ -48,19 +41,23 @@ const DEFAULTS = Object.freeze({
  */
 const LoadingMessage = ({
   pageStatus,
-  loadingText = DEFAULTS.loadingText,
-  errorText = DEFAULTS.errorText,
-  loadingImageSrc = DEFAULTS.loadingImg,
-  errorImageSrc = DEFAULTS.errorImg,
+  loadingText,
+  errorText,
+  loadingImageSrc = 'placeholder.png',
+  errorImageSrc = 'lost.png',
   className = '',
   // Note: React supports 'data-testid' as a prop, but we omit it from JSDoc to avoid Closure parser issues with dashed names.
   'data-testid': testId,
 }) => {
+  const { t } = useTranslation('common');
   const isError = pageStatus === -1;
 
-  const displayMessage = isError ? errorText : loadingText;
+  const displayMessage = isError
+    ? (errorText || t('viewer.loadingMessage.errorText'))
+    : (loadingText || t('viewer.loadingMessage.loadingText'));
+
   const imageUrl = isError ? errorImageSrc : loadingImageSrc;
-  const alt = isError ? 'Document load error' : 'Loading document';
+  const alt = isError ? t('viewer.loadingMessage.alt.error') : t('viewer.loadingMessage.alt.loading');
 
   return (
     <div

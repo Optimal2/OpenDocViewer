@@ -24,6 +24,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Image load/error handler.
@@ -65,6 +66,8 @@ const ImageRenderer = React.forwardRef(function ImageRenderer(
   },
   ref
 ) {
+  const { t } = useTranslation('common');
+
   // Defensive: ensure a sane, positive zoom
   const scale = Number.isFinite(zoom) && zoom > 0 ? zoom : 1;
 
@@ -85,7 +88,7 @@ const ImageRenderer = React.forwardRef(function ImageRenderer(
     <img
       ref={ref}
       src={src}
-      alt={`Page ${pageNumber}`}
+      alt={t('viewer.pageAlt', { page: pageNumber })}
       data-page-number={pageNumber}
       className={className}
       style={{ ...baseStyle, ...style }}

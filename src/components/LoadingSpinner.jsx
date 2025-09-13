@@ -27,6 +27,7 @@
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /** Inline “visually hidden” style for screen-reader-only text (no CSS dependency). */
 const srOnlyStyle = {
@@ -51,7 +52,11 @@ const srOnlyStyle = {
  * @param {string} [props.className]      Extra classes to append to the root element.
  * @returns {React.ReactElement}
  */
-const LoadingSpinner = ({ size, label = 'Loading', className = '' }) => {
+const LoadingSpinner = ({ size, label, className = '' }) => {
+  const { t } = useTranslation('common');
+
+  const resolvedLabel = label || t('generic.loading');
+
   const style =
     size == null
       ? undefined
@@ -65,10 +70,10 @@ const LoadingSpinner = ({ size, label = 'Loading', className = '' }) => {
       className={`spinner${className ? ` ${className}` : ''}`}
       role="status"
       aria-live="polite"
-      aria-label={label}
+      aria-label={resolvedLabel}
       style={style}
     >
-      <span style={srOnlyStyle}>{label}…</span>
+      <span style={srOnlyStyle}>{resolvedLabel}…</span>
     </div>
   );
 };

@@ -13,6 +13,7 @@
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
 import '../i18n.js'; // initialize i18n before any components render
 import logger from '../LogController.js';
 import ErrorBoundary from '../ErrorBoundary.jsx';
@@ -99,6 +100,8 @@ function buildDemoSourceList({ count, strategy, formats }) {
  * @returns {*} React element
  */
 export default function AppBootstrap() {
+  const { t } = useTranslation('common');
+
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
   const [bundle, setBundle] = useState(/** @type {(PortableDocumentBundle|null)} */ (null));
   const [urlConfig, setUrlConfig] = useState(/** @type {(UrlConfig|null)} */ (null));
@@ -203,27 +206,42 @@ export default function AppBootstrap() {
   // Render the demo launcher if we don't have props to start the viewer yet
   if (!viewerProps) {
     return (
-      <div className="button-container" role="region" aria-label="OpenDocViewer demo launcher">
+      <div className="button-container" role="region" aria-label={t('demoLauncher.aria.region')}>
         <label htmlFor="endNumber" style={{ marginRight: 8 }}>
-          Total pages/files:
+          {t('demoControls.totalLabel')}
         </label>
         <input
           type="number"
           id="endNumber"
           value={count}
           onChange={onEndChange}
-          placeholder="Enter end number"
+          placeholder={t('demoControls.endNumberPlaceholder')}
           min={1}
           max={DEMO_MAX}
-          aria-label="Total pages/files to load"
+          aria-label={t('demoControls.totalAria')}
         />
-        {['jpg', 'png', 'tif', 'pdf'].map((t) => (
-          <button key={t} onClick={() => onSelectFormat(t)} type="button" aria-label={`Start ${t.toUpperCase()} demo`}>
-            {t.toUpperCase()}
-          </button>
-        ))}
-        <button onClick={onMix} type="button" aria-label="Start mixed formats demo" style={{ marginLeft: 8 }}>
-          Mix
+        {['jpg', 'png', 'tif', 'pdf'].map((fmt) => {
+          const label = (fmt || '').toUpperCase();
+          return (
+            <button
+              key={fmt}
+              onClick={() => onSelectFormat(fmt)}
+              type="button"
+              aria-label={t('demoControls.startFormatDemo', { fmt: label })}
+              title={t('demoControls.startFormatDemo', { fmt: label })}
+            >
+              {label}
+            </button>
+          );
+        })}
+        <button
+          onClick={onMix}
+          type="button"
+          aria-label={t('demoControls.startMixedDemo')}
+          title={t('demoControls.startMixedDemo')}
+          style={{ marginLeft: 8 }}
+        >
+          {t('demoControls.mix')}
         </button>
       </div>
     );

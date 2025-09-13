@@ -9,6 +9,7 @@
  *   wait until images load, then trigger window.print().
  */
 
+import i18next from 'i18next';
 import { applyTemplateTokensEscaped } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
@@ -34,6 +35,21 @@ import { isSafeImageSrc } from './printSanitize.js';
  * @property {Object} doc
  * @property {Object} viewer
  */
+
+/**
+ * Tiny helper to translate with safe fallback.
+ * @param {string} key
+ * @param {string} defaultValue
+ * @param {Object=} options
+ * @returns {string}
+ */
+function tr(key, defaultValue, options) {
+  try {
+    return i18next.t(key, { ns: 'common', defaultValue, ...(options || {}) });
+  } catch {
+    return defaultValue;
+  }
+}
 
 /**
  * Decide if a header should be applied to the i-th page in a sequence of N,
@@ -167,7 +183,8 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     if (header) pageWrapper.appendChild(header);
 
     const img = doc.createElement('img');
-    img.setAttribute('alt', pages[i].alt || ('Page ' + (i + 1)));
+    // Default alt falls back to translated "Page {page}"
+    img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
     // Allow-list only
     if (isSafeImageSrc(pages[i].src)) img.src = pages[i].src;
     pageWrapper.appendChild(img);
@@ -213,7 +230,7 @@ export function renderSingleDocument(doc, opts) {
 
   populateBodyAndPrint(
     doc,
-    [{ src: opts.dataUrl, alt: 'Printable Document' }],
+    [{ src: opts.dataUrl, alt: tr('print.alt.printableDocument', 'Printable Document') }],
     opts.printDelayMs,
     opts.printHeaderCfg || {},
     opts.tokenContext
@@ -230,7 +247,10 @@ export function renderMultiDocument(doc, opts) {
   const cssText = buildPrintCss((opts.printHeaderCfg?.css) || '', undefined);
   ensureHead(doc, cssText);
 
-  const pages = (opts.dataUrls || []).map((src, i) => ({ src, alt: 'Page ' + (i + 1) }));
+  const pages = (opts.dataUrls || []).map((src, i) => ({
+    src,
+    alt: tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }),
+  }));
   populateBodyAndPrint(
     doc,
     pages,

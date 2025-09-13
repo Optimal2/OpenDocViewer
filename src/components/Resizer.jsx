@@ -51,13 +51,16 @@
 
 import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
 /**
  * Resizer component.
  * @param {ResizerProps} props
  * @returns {React.ReactElement}
  */
-const Resizer = React.memo(({ onMouseDown, orientation = 'vertical', ariaLabel = 'Resize panel', className = '' }) => {
+const Resizer = React.memo(({ onMouseDown, orientation = 'vertical', ariaLabel, className = '' }) => {
+  const { t } = useTranslation('common');
+
   /**
    * Keyboard handler (Enter/Space) to initiate the same flow as mouse down.
    * Parent components may listen for this to start a keyboard resize routine.
@@ -74,13 +77,15 @@ const Resizer = React.memo(({ onMouseDown, orientation = 'vertical', ariaLabel =
     [onMouseDown]
   );
 
+  const label = ariaLabel || t('viewer.resizer.ariaLabel');
+
   return (
     <div
       className={`resizer${className ? ` ${className}` : ''}`}
       onMouseDown={onMouseDown}
       role="separator"
       aria-orientation={orientation}
-      aria-label={ariaLabel}
+      aria-label={label}
       tabIndex={0}
       onKeyDown={handleKeyDown}
       onFocus={(e) => e.currentTarget.classList.add('resizer-focused')}

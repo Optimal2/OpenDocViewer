@@ -25,6 +25,7 @@ import React, {
   Suspense,
 } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { ViewerContext } from '../ViewerContext';
 import logger from '../LogController';
 
@@ -73,6 +74,7 @@ const DocumentConsumerWrapper = ({
   demoCount,
   demoFormats,
 }) => {
+  const { t } = useTranslation('common');
   const { allPages } = useContext(ViewerContext);
   const thumbnailsContainerRef = useRef(null);
 
@@ -96,7 +98,7 @@ const DocumentConsumerWrapper = ({
       <Suspense
         fallback={
           <div className="loading-container" role="status" aria-live="polite">
-            <div className="initial-loading-text">Loading viewer…</div>
+            <div className="initial-loading-text">{t('viewer.loadingViewer')}</div>
           </div>
         }
       >
@@ -125,7 +127,7 @@ const DocumentConsumerWrapper = ({
                     width={thumbWidth}
                   />
                 ) : (
-                  <div className="initial-loading-text">No documents loaded</div>
+                  <div className="initial-loading-text">{t('viewer.noDocuments')}</div>
                 )}
               </div>
             ) : (

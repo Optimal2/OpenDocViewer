@@ -101,8 +101,107 @@
       "forWhomTooLong": "“For whom” is too long (max {max}).",
       "forWhomFormat": "“For whom” format is not allowed.",
       "invalidCustom": "Invalid custom pages input.",
-      "review": "Please review the required fields."
+      "review": "Please review the required fields.",
+      "enterAtLeastOne": "Enter at least one page or range.",
+      "invalidToken": "Invalid token \"{token}\".",
+      "invalidRange": "Invalid range \"{range}\".",
+      "invalidNumber": "Invalid number \"{value}\".",
+      "noPagesSelected": "No pages selected."
     },
-    "summary": "You will print {count, plural, =1 {# page} other {# pages}}."
+    "summary": "You will print {count, plural, =1 {# page} other {# pages}}.",
+    "aria": {
+      "basicGroup": "Basic choices",
+      "advancedGroup": "Advanced choices",
+      "userLogGroup": "User log"
+    }
+  },
+  "print": {
+    "alt": {
+      "printableDocument": "Printable Document"
+    }
+  },
+  "demoControls": {
+    "totalLabel": "Total pages/files:",
+    "totalAria": "Total pages/files to load",
+    "endNumberPlaceholder": "Enter end number",
+    "startFormatDemo": "Start {fmt} demo",
+    "startMixedDemo": "Start mixed formats demo",
+    "mixToggle": "Toggle mix",
+    "mixOn": "Mix: ON",
+    "mix": "Mix"
+  },
+  "demoLauncher": {
+    "aria": {
+      "region": "OpenDocViewer demo launcher"
+    }
+  },
+  "viewer": {
+    "aria": {
+      "containerRegion": "Document viewer container",
+      "main": "Document viewer"
+    },
+    "loadingViewer": "Loading viewer…",
+    "noDocuments": "No documents loaded",
+    "loadingPagesWait": "Loading pages… Please wait.",
+    "pageAlt": "Page {page}",
+    "loadingMessage": {
+      "loadingText": "Please wait, pages are still loading.",
+      "errorText": "Error: The document is corrupted, missing, or in an unsupported format.",
+      "alt": {
+        "loading": "Loading document",
+        "error": "Document load error"
+      }
+    },
+    "resizer": {
+      "ariaLabel": "Resize panel"
+    }
+  },
+  "thumbnails": {
+    "aria": {
+      "container": "Document thumbnails"
+    },
+    "goToPage": "Go to page {page}",
+    "pageFailedAlt": "Page {page} failed to load"
+  },
+  "generic": {
+    "loading": "Loading"
+  },
+  "errorBoundary": {
+    "title": "Something went wrong",
+    "generic": "The application encountered an unexpected error.",
+    "detailsSummary": "Details (for support)",
+    "tryAgain": "Try again",
+    "reload": "Reload",
+    "copyDetails": "Copy details",
+    "stackTrace": "Stack Trace",
+    "componentStack": "Component Stack"
+  },
+  "perf": {
+    "title": "OpenDocViewer · Perf",
+    "fpsLabel": "FPS:",
+    "cpuCores": "· CPU: {count}c",
+    "ramApprox": "· RAM≈{gb}GB",
+    "heapLabel": "Heap:",
+    "heapLimit": "(limit {mb} MB)",
+    "pagesLabel": "Pages:",
+    "loadedOfTotal": "{loaded} loaded / {total} total",
+    "failedSuffix": "· failed {count}",
+    "workersLabel": "Workers:",
+    "errorPrefix": "Error:",
+    "messagesLabel": "Messages:"
+  },
+  "html": {
+    "title": "OpenDocViewer",
+    "meta": {
+      "description": "OpenDocViewer – React JavaScript Document Viewer"
+    },
+    "og": {
+      "title": "OpenDocViewer",
+      "description": "OpenDocViewer – React JavaScript Document Viewer"
+    },
+    "noscript": {
+      "title": "JavaScript is disabled",
+      "message": "You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page."
+    }
   }
 }

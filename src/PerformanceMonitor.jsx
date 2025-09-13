@@ -25,6 +25,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';
+import { useTranslation } from 'react-i18next';
 import { ViewerContext } from './ViewerContext';
 
 /**
@@ -72,6 +73,7 @@ function toMB(bytes) {
  * @returns {(React.ReactElement|null)}
  */
 const PerformanceMonitor = () => {
+  const { t } = useTranslation('common');
   const { allPages, error, workerCount, messageQueue } = useContext(ViewerContext);
 
   // Runtime toggle (read once at mount; if you need live toggling, change to state + event)
@@ -207,37 +209,38 @@ const PerformanceMonitor = () => {
 
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">
-      <h3 style={h3Style}>OpenDocViewer · Perf</h3>
+      <h3 style={h3Style}>{t('perf.title')}</h3>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>FPS:</span> <strong>{fps || 0}</strong>
+        <span style={labelStyle}>{t('perf.fpsLabel')}</span> <strong>{fps || 0}</strong>
         <span style={{ marginLeft: 8, opacity: 0.7 }}>
-          · CPU: {hardwareConcurrency}c{deviceMemory ? ` · RAM≈${deviceMemory}GB` : ''}
+          {t('perf.cpuCores', { count: hardwareConcurrency })}
+          {deviceMemory ? ` ${t('perf.ramApprox', { gb: deviceMemory })}` : ''}
         </span>
       </div>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>Heap:</span>{' '}
+        <span style={labelStyle}>{t('perf.heapLabel')}</span>{' '}
         <strong>{memory.usedJSHeapSize.toFixed(1)} MB</strong>
         <span style={{ opacity: 0.7 }}>
-          {' '} / {memory.totalJSHeapSize.toFixed(1)} MB (limit {memory.jsHeapSizeLimit.toFixed(0)} MB)
+          {' '} / {memory.totalJSHeapSize.toFixed(1)} MB {t('perf.heapLimit', { mb: memory.jsHeapSizeLimit.toFixed(0) })}
         </span>
       </div>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>Pages:</span>{' '}
-        <strong>{loadedPages}</strong> loaded / {totalPages} total
-        {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> · failed {failedPages}</span> : null}
+        <span style={labelStyle}>{t('perf.pagesLabel')}</span>{' '}
+        <strong>{loadedPages}</strong> {t('perf.loadedOfTotal', { loaded: loadedPages, total: totalPages })}
+        {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> {t('perf.failedSuffix', { count: failedPages })}</span> : null}
       </div>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>Workers:</span> <strong>{workerCount}</strong>
-        {error ? <div style={{ color: '#ff9c9c', marginTop: 4 }}>Error: {String(error)}</div> : null}
+        <span style={labelStyle}>{t('perf.workersLabel')}</span> <strong>{workerCount}</strong>
+        {error ? <div style={{ color: '#ff9c9c', marginTop: 4 }}>{t('perf.errorPrefix')} {String(error)}</div> : null}
       </div>
 
       {messages.length > 0 && (
         <div style={{ ...sectionStyle, maxHeight: '24vh', overflowY: 'auto' }}>
-          <div style={{ ...labelStyle, marginBottom: 2 }}>Messages:</div>
+          <div style={{ ...labelStyle, marginBottom: 2 }}>{t('perf.messagesLabel')}</div>
           <ul style={{ margin: 0, paddingLeft: 16 }}>
             {messages.map((msg, i) => (
               <li key={i} style={{ whiteSpace: 'pre-wrap' }}>
