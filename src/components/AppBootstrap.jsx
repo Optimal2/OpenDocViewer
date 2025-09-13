@@ -100,7 +100,8 @@ function buildDemoSourceList({ count, strategy, formats }) {
  * @returns {*} React element
  */
 export default function AppBootstrap() {
-  const { t } = useTranslation('common');
+  // NOTE: Gate demo UI on `ready` to avoid calling t(...) before i18n has initialized.
+  const { t, ready } = useTranslation('common');
 
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
   const [bundle, setBundle] = useState(/** @type {(PortableDocumentBundle|null)} */ (null));
@@ -205,6 +206,15 @@ export default function AppBootstrap() {
 
   // Render the demo launcher if we don't have props to start the viewer yet
   if (!viewerProps) {
+    // Avoid calling t(...) before i18n is initialized (prevents noisy dev warnings).
+    if (!ready) {
+      return (
+        <div className="button-container" role="region" aria-busy="true" aria-live="polite">
+          Loading…
+        </div>
+      );
+    }
+
     return (
       <div className="button-container" role="region" aria-label={t('demoLauncher.aria.region')}>
         <label htmlFor="endNumber" style={{ marginRight: 8 }}>

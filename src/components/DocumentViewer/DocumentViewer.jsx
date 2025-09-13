@@ -60,6 +60,9 @@ const DocumentViewer = () => {
     handleMouseDown,
     selectForCompare,
     setIsExpanded,
+    // NEW: sticky fit semantics
+    zoomState,
+    setZoomMode,
   } = useDocumentViewer();
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
@@ -82,7 +85,6 @@ const DocumentViewer = () => {
         pageNumber={pageNumber}
         setPageNumber={setPageNumber}
         totalPages={totalPages}
-        allPages={allPages}
 
         /* zoom controls */
         zoom={zoom}
@@ -91,6 +93,9 @@ const DocumentViewer = () => {
         zoomOut={zoomOut}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
+        /* NEW: zoom mode (optional pass-through; safe if parent ignores) */
+        zoomState={zoomState}
+        setZoomMode={setZoomMode}
 
         /* compare + editing */
         isComparing={isComparing}
@@ -102,7 +107,10 @@ const DocumentViewer = () => {
         imageProperties={imageProperties}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
+
+        /* imperative + layout refs used by toolbar/print */
         documentRenderRef={documentRenderRef}
+        viewerContainerRef={viewerContainerRef}
 
         /* nav button disabled states */
         prevPageDisabled={prevPageDisabled}
@@ -147,6 +155,8 @@ const DocumentViewer = () => {
           compareRef={compareRef}
           allPages={allPages}
           thumbnailsContainerRef={thumbnailsContainerRef}
+          /* NEW: tell the renderer what sticky mode we're in so it can re-fit after load */
+          zoomMode={zoomState?.mode}
         />
       </div>
     </div>

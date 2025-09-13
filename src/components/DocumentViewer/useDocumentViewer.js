@@ -13,6 +13,7 @@
  *   - We clamp navigation into [1, totalPages] defensively.
  *   - Keyboard shortcuts (PageUp/PageDown/Home/End) are attached on mount.
  *   - First successful render can trigger an auto “fit to screen” if the renderer exposes it.
+ *   - NEW: Zoom is governed by a "mode" so that Fit modes recompute on page change & resize.
  *
  * TYPES
  *   This hook references common typedefs/callbacks from src/types/jsdoc-types.js:
@@ -21,6 +22,7 @@
  *     - RefLike
  *     - DocumentRenderHandle
  */
+
 import { useState, useRef, useEffect, useCallback, useContext } from 'react';
 import logger from '../../LogController.js';
 import { ViewerContext } from '../../ViewerContext.jsx';
@@ -31,6 +33,15 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * @property {number} rotation       Degrees, positive clockwise. 0 is neutral.
  * @property {number} brightness     0..200 (100 = neutral)
  * @property {number} contrast       0..200 (100 = neutral)
+ */
+
+/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode */
+
+/**
+ * Zoom state (mode + current numeric scale).
+ * @typedef {Object} ZoomState
+ * @property {ZoomMode} mode
+ * @property {number} scale
  */
 
 /**
@@ -63,6 +74,8 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * @property {function(MouseEvent): void} handleMouseDown
  * @property {function(number): void} selectForCompare
  * @property {function(boolean): void} setIsExpanded
+ * @property {ZoomState} zoomState                                  // NEW (non-breaking addition)
+ * @property {function(ZoomMode): void} setZoomMode                  // NEW (non-breaking addition)
  */
 
 /**
@@ -101,6 +114,7 @@ export function useDocumentViewer() {
   // State
   const [pageNumber, setPageNumber] = useState(1);
   const [zoom, setZoom] = useState(1);
+  const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
   const [isComparing, setIsComparing] = useState(false);
   const [comparePageNumber, setComparePageNumber] = useState(/** @type {(number|null)} */ (null));
   const [imageProperties, setImageProperties] = useState(/** @type {ImageProperties} */ ({
@@ -135,8 +149,14 @@ export function useDocumentViewer() {
     }
   }, [pageNumber, totalPages]);
 
+  // Keep zoomState.scale in sync with numeric zoom
+  useEffect(() => {
+    setZoomState((s) => ({ ...s, scale: zoom }));
+  }, [zoom]);
+
   // Zoom helpers
   const zoomIn = useCallback(() => {
+    setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
     try {
       if (documentRenderRef.current && typeof documentRenderRef.current.zoomIn === 'function') {
         documentRenderRef.current.zoomIn();
@@ -147,6 +167,7 @@ export function useDocumentViewer() {
   }, []);
 
   const zoomOut = useCallback(() => {
+    setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
     try {
       if (documentRenderRef.current && typeof documentRenderRef.current.zoomOut === 'function') {
         documentRenderRef.current.zoomOut();
@@ -157,12 +178,50 @@ export function useDocumentViewer() {
   }, []);
 
   const fitToScreen = useCallback(() => {
-    try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToScreen === 'function') documentRenderRef.current.fitToScreen(); } catch {}
-  }, []);
+    setZoomState({ mode: 'FIT_PAGE', scale: zoom }); // scale will be updated by setZoom in renderer
+    try {
+      if (documentRenderRef.current && typeof documentRenderRef.current.fitToScreen === 'function') {
+        documentRenderRef.current.fitToScreen();
+      }
+    } catch {}
+  }, [zoom]);
 
   const fitToWidth = useCallback(() => {
-    try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToWidth === 'function') documentRenderRef.current.fitToWidth(); } catch {}
+    setZoomState({ mode: 'FIT_WIDTH', scale: zoom });
+    try {
+      if (documentRenderRef.current && typeof documentRenderRef.current.fitToWidth === 'function') {
+        documentRenderRef.current.fitToWidth();
+      }
+    } catch {}
+  }, [zoom]);
+
+  /** Set zoom mode directly (e.g., ACTUAL_SIZE) */
+  const setZoomMode = useCallback((mode) => {
+    setZoomState((s) => ({ ...s, mode }));
+    if (mode === 'ACTUAL_SIZE') {
+      setZoom(1);
+    } else if (mode === 'FIT_PAGE') {
+      try { documentRenderRef.current?.fitToScreen?.(); } catch {}
+    } else if (mode === 'FIT_WIDTH') {
+      try { documentRenderRef.current?.fitToWidth?.(); } catch {}
+    }
   }, []);
+
+  // Recompute fits when the page changes, rotation changes, or compare toggles,
+  // but ONLY if we are in a Fit mode (sticky behavior users expect).
+  useEffect(() => {
+    const mode = zoomState.mode;
+    if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return;
+    const ref = documentRenderRef.current;
+    if (!ref) return;
+    const doFit = () => {
+      try {
+        if (mode === 'FIT_PAGE') ref.fitToScreen?.();
+        else if (mode === 'FIT_WIDTH') ref.fitToWidth?.();
+      } catch {}
+    };
+    doFit();
+  }, [pageNumber, imageProperties.rotation, isComparing, thumbnailWidth, zoomState.mode]);
 
   // Compare toggle (toolbar button)
   const handleCompare = useCallback(() => {
@@ -260,6 +319,32 @@ export function useDocumentViewer() {
   }, []);
 
   /**
+   * Recompute fits when container size changes (ResizeObserver).
+   * Debounced by rAF via micro task scheduling.
+   */
+  useEffect(() => {
+    const el = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
+    if (!el) return;
+    if (zoomState.mode !== 'FIT_PAGE' && zoomState.mode !== 'FIT_WIDTH') return;
+
+    let raf = 0;
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(raf);
+      raf = requestAnimationFrame(() => {
+        try {
+          if (zoomState.mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
+          else if (zoomState.mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
+        } catch {}
+      });
+    });
+    ro.observe(el);
+    return () => {
+      cancelAnimationFrame(raf);
+      ro.disconnect();
+    };
+  }, [viewerContainerRef, zoomState.mode]);
+
+  /**
    * Handle container clicks. If a modal/dialog is open we may ignore the click.
    * @param {*} _event
    * @returns {void}
@@ -327,6 +412,8 @@ export function useDocumentViewer() {
     resetImageProperties,
     handleMouseDown,
     selectForCompare,
-    setIsExpanded
+    setIsExpanded,
+    zoomState,
+    setZoomMode
   };
 }
