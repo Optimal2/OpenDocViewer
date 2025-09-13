@@ -13,6 +13,7 @@
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
+import '../i18n.js'; // initialize i18n before any components render
 import logger from '../LogController.js';
 import ErrorBoundary from '../ErrorBoundary.jsx';
 import OpenDocViewer from '../OpenDocViewer.jsx';

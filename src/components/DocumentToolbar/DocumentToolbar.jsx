@@ -4,27 +4,42 @@
  *
  * OpenDocViewer — Document Toolbar
  *
- * Single print entry point + dialog that collects:
- *  - Page selection (active / all / range / advanced)
- *  - User-print metadata (reason, forWhom) when enabled by config
+ * Renders the top toolbar with print, navigation, zoom, compare, and
+ * canvas-editing controls. Integrates with i18n for labels/tooltips and
+ * forwards print selections (including reason/forWhom) to the print pipeline.
  *
- * The dialog submits a detail object; we forward reason/forWhom to
- * UserLogController in a non-blocking way before starting the print job.
- */
-
-/**
- * JSDoc typedefs for the print dialog payload (avoid TS-style unions).
- * @typedef {Object} PrintSubmitDetail
- * @property {string} mode  Allowed values: "active" | "all" | "range" | "advanced".
- * @property {number} [from]
- * @property {number} [to]
- * @property {Array<number>} [sequence]
- * @property {?string} [reason]
- * @property {?string} [forWhom]
+ * This component is memoized for performance.
+ *
+ * @component
+ * @param {Object} props
+ * @param {number} props.pageNumber - The currently active page (1-based).
+ * @param {number} props.totalPages - Total number of pages in the document.
+ * @param {boolean} props.prevPageDisabled - Disable the "previous page" button.
+ * @param {boolean} props.nextPageDisabled - Disable the "next page" button.
+ * @param {boolean} props.firstPageDisabled - Disable the "first page" button.
+ * @param {boolean} props.lastPageDisabled - Disable the "last page" button.
+ * @param {SetPageNumber} props.setPageNumber - State setter for page number (see jsdoc-types.js).
+ * @param {function():void} props.zoomIn - Zoom in handler.
+ * @param {function():void} props.zoomOut - Zoom out handler.
+ * @param {function():void} props.fitToScreen - Fit-to-screen handler.
+ * @param {function():void} props.fitToWidth - Fit-to-width handler.
+ * @param {RefLike} props.documentRenderRef - Imperative handle to the renderer (see jsdoc-types.js).
+ * @param {RefLike} props.viewerContainerRef - Ref to the viewer container element.
+ * @param {function():void} props.handleCompare - Toggle compare mode.
+ * @param {boolean} props.isComparing - Whether compare mode is active.
+ * @param {{rotation:number,brightness:number,contrast:number}} props.imageProperties - Current canvas adjustments.
+ * @param {function(number):void} props.handleRotationChange - Apply rotation delta in degrees (e.g., ±90).
+ * @param {function(*):void} props.handleBrightnessChange - Brightness slider change handler (event-like).
+ * @param {function(*):void} props.handleContrastChange - Contrast slider change handler (event-like).
+ * @param {function():void} props.resetImageProperties - Reset brightness/contrast/rotation to defaults.
+ * @param {boolean} props.isExpanded - Whether the canvas editing tool panel is open.
+ * @param {SetBooleanState} props.setIsExpanded - Toggle state setter for the editing panel (see jsdoc-types.js).
+ * @returns {JSX.Element}
  */
 
 import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import logger from '../../LogController.js';
 import userLog from '../../UserLogController.js';
 import { ThemeContext } from '../../ThemeContext.jsx';
@@ -63,6 +78,7 @@ const DocumentToolbar = ({
   setIsExpanded,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
+  const { t } = useTranslation();
 
   // Initialize optional context for user logging (iframe id, app version)
   useEffect(() => {
@@ -101,6 +117,11 @@ const DocumentToolbar = ({
     []
   );
 
+  /**
+   * Handle brightness slider changes with neutral snapping at 100.
+   * @param {*} event - Change event or event-like object with target.value
+   * @returns {void}
+   */
   const handleBrightnessSliderChange = useCallback(
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
@@ -110,6 +131,11 @@ const DocumentToolbar = ({
     [handleBrightnessChange, snapToZero]
   );
 
+  /**
+   * Handle contrast slider changes with neutral snapping at 100.
+   * @param {*} event - Change event or event-like object with target.value
+   * @returns {void}
+   */
   const handleContrastSliderChange = useCallback(
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
@@ -135,13 +161,9 @@ const DocumentToolbar = ({
   }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
 
   /**
-   * Build a compact "pages" descriptor for logging:
-   *  - 'all'
-   *  - current page number for 'active'
-   *  - 'from-to' for range
-   *  - comma-joined sequence for advanced
+   * Build a compact "pages" descriptor for logging.
    * @param {PrintSubmitDetail} detail
-   * @returns {?string}
+   * @returns {(string|null)} A string like "all", "3", "2-5", or "7,6,5".
    */
   const toPagesString = useCallback((detail) => {
     if (!detail) return null;
@@ -159,6 +181,7 @@ const DocumentToolbar = ({
   /**
    * Fire-and-forget user print log. Must never block the print action.
    * @param {PrintSubmitDetail} detail
+   * @returns {void}
    */
   const submitUserPrintLog = useCallback((detail) => {
     try {
@@ -166,22 +189,17 @@ const DocumentToolbar = ({
         action: 'print',
         reason: detail?.reason ?? null,
         forWhom: detail?.forWhom ?? null,
-        docId: null,         // supply if you have a stable id
-        fileName: null,      // supply if available
+        docId: null,
+        fileName: null,
         pageCount: totalPages ?? null,
         pages: toPagesString(detail),
         copies: 1
       });
-    } catch {
-      /* never throw */
-    }
+    } catch { /* never throw */ }
   }, [toPagesString, totalPages]);
 
   /**
-   * Callback when the print dialog submits.
-   * Ensures reason/forWhom are forwarded into the print pipeline so
-   * the config-driven header overlay can render tokens in print preview.
-   *
+   * Handle the dialog submit event and dispatch the correct print action.
    * @param {PrintSubmitDetail} detail
    * @returns {void}
    */
@@ -217,13 +235,13 @@ const DocumentToolbar = ({
   }, [documentRenderRef, viewerContainerRef, submitUserPrintLog]);
 
   return (
-    <div className="toolbar" role="toolbar" aria-label="Document controls">
+    <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
       {/* Print button → opens dialog */}
       <button
         type="button"
         onClick={() => setPrintDialogOpen(true)}
-        aria-label="Print"
-        title="Print"
+        aria-label={t('toolbar.print')}
+        title={t('toolbar.print')}
         className="odv-btn"
       >
         <span className="material-icons" aria-hidden="true">print</span>
@@ -265,8 +283,8 @@ const DocumentToolbar = ({
       <button
         type="button"
         onClick={handleCompare}
-        aria-label={isComparing ? 'Disable compare mode' : 'Enable compare mode'}
-        title={isComparing ? 'Disable compare mode' : 'Enable compare mode'}
+        aria-label={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
+        title={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
         className={`odv-btn compare-button ${isComparing ? 'compare-enabled' : 'compare-disabled'}`}
       >
         <span className="material-icons" aria-hidden="true">compare</span>
@@ -278,8 +296,8 @@ const DocumentToolbar = ({
       <button
         type="button"
         onClick={toggleExpand}
-        aria-label={isExpanded ? 'Disable canvas tools' : 'Enable canvas tools'}
-        title={isExpanded ? 'Disable canvas tools' : 'Enable canvas tools'}
+        aria-label={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
+        title={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
         className={`odv-btn editing-button ${isExpanded ? 'editing-enabled' : 'editing-disabled'}`}
       >
         <span className="material-icons" aria-hidden="true">edit</span>
@@ -287,12 +305,12 @@ const DocumentToolbar = ({
 
       {/* Editing controls (visible only when canvas tools are enabled) */}
       {isExpanded && (
-        <div className="editing-tools" aria-label="Image adjustments">
+        <div className="editing-tools" aria-label={t('toolbar.imageAdjustments')}>
           <button
             type="button"
             onClick={() => handleRotationChange(-90)}
-            aria-label="Rotate left 90°"
-            title="Rotate left 90°"
+            aria-label={t('toolbar.rotateLeft90')}
+            title={t('toolbar.rotateLeft90')}
             className="odv-btn"
           >
             ⟲
@@ -300,15 +318,15 @@ const DocumentToolbar = ({
           <button
             type="button"
             onClick={() => handleRotationChange(90)}
-            aria-label="Rotate right 90°"
-            title="Rotate right 90°"
+            aria-label={t('toolbar.rotateRight90')}
+            title={t('toolbar.rotateRight90')}
             className="odv-btn"
           >
             ⟳
           </button>
 
           <label className="slider-label">
-            Brightness
+            {t('toolbar.brightness')}
             <input
               type="range"
               min="0"
@@ -319,12 +337,12 @@ const DocumentToolbar = ({
               aria-valuemin={0}
               aria-valuemax={200}
               aria-valuenow={imageProperties.brightness}
-              aria-label="Adjust brightness"
+              aria-label={t('toolbar.adjustBrightness')}
             />
           </label>
 
           <label className="slider-label">
-            Contrast
+            {t('toolbar.contrast')}
             <input
               type="range"
               min="0"
@@ -335,7 +353,7 @@ const DocumentToolbar = ({
               aria-valuemin={0}
               aria-valuemax={200}
               aria-valuenow={imageProperties.contrast}
-              aria-label="Adjust contrast"
+              aria-label={t('toolbar.adjustContrast')}
             />
           </label>
         </div>

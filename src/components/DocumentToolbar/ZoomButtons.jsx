@@ -2,45 +2,24 @@
 /**
  * File: src/components/DocumentToolbar/ZoomButtons.jsx
  *
- * OpenDocViewer — Zoom & Fit Controls
+ * Zoom control cluster: zoom out/in and fit to screen/width.
  *
- * PURPOSE
- *   Small, stateless group of buttons used by the toolbar to control zoom and
- *   auto-fit behavior. This component stays “dumb” on purpose—business logic
- *   (clamping, recomputing fit, etc.) lives in higher-level hooks/components.
- *
- * ACCESSIBILITY
- *   - Each control has an aria-label and a title tooltip for clarity.
- *   - Buttons are standard <button type="button">, keyboard and screen-reader friendly.
- *
- * ICONS
- *   - Relies on Material Icons classes present in the consuming page:
- *       • "material-icons"               (filled set)
- *       • "material-symbols-outlined"    (symbols set)
- *     Swap the spans if you prefer a different icon system.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - Elsewhere in the project we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With `file-type` v21 that subpath is not exported and
- *     will break the Vite build. See README “Design notes & gotchas”.
+ * @component
+ * @param {Object} props
+ * @param {function():void} props.zoomIn - Zoom in handler.
+ * @param {function():void} props.zoomOut - Zoom out handler.
+ * @param {function():void} props.fitToScreen - Fit page content to screen height.
+ * @param {function():void} props.fitToWidth - Fit page content to container width.
+ * @param {boolean} [props.disableZoomOut=false] - Disable the "zoom out" action.
+ * @param {boolean} [props.disableZoomIn=false] - Disable the "zoom in" action.
+ * @param {boolean} [props.disableFits=false] - Disable fit actions.
+ * @returns {JSX.Element}
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
-/**
- * ZoomButtons
- *
- * @param {Object} props
- * @param {function(): void} props.zoomIn        Increase zoom level (clamped by caller).
- * @param {function(): void} props.zoomOut       Decrease zoom level (clamped by caller).
- * @param {function(): void} props.fitToScreen   Compute and apply “fit to screen” zoom.
- * @param {function(): void} props.fitToWidth    Compute and apply “fit to width” zoom.
- * @param {boolean} [props.disableZoomOut]       Optional: disable the zoom-out action.
- * @param {boolean} [props.disableZoomIn]        Optional: disable the zoom-in action.
- * @param {boolean} [props.disableFits]          Optional: disable both fit actions.
- * @returns {React.ReactElement}
- */
 const ZoomButtons = ({
   zoomIn,
   zoomOut,
@@ -50,13 +29,14 @@ const ZoomButtons = ({
   disableZoomIn = false,
   disableFits = false,
 }) => {
+  const { t } = useTranslation();
   return (
     <>
       <button
         type="button"
         onClick={zoomOut}
-        aria-label="Zoom out"
-        title="Zoom out"
+        aria-label={t('toolbar.zoomOut')}
+        title={t('toolbar.zoomOut')}
         className="odv-btn"
         disabled={disableZoomOut}
       >
@@ -66,8 +46,8 @@ const ZoomButtons = ({
       <button
         type="button"
         onClick={zoomIn}
-        aria-label="Zoom in"
-        title="Zoom in"
+        aria-label={t('toolbar.zoomIn')}
+        title={t('toolbar.zoomIn')}
         className="odv-btn"
         disabled={disableZoomIn}
       >
@@ -77,8 +57,8 @@ const ZoomButtons = ({
       <button
         type="button"
         onClick={fitToScreen}
-        aria-label="Fit to screen"
-        title="Fit to screen"
+        aria-label={t('toolbar.fitToScreen')}
+        title={t('toolbar.fitToScreen')}
         className="odv-btn"
         disabled={disableFits}
       >
@@ -88,8 +68,8 @@ const ZoomButtons = ({
       <button
         type="button"
         onClick={fitToWidth}
-        aria-label="Fit to width"
-        title="Fit to width"
+        aria-label={t('toolbar.fitToWidth')}
+        title={t('toolbar.fitToWidth')}
         className="odv-btn"
         disabled={disableFits}
       >

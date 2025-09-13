@@ -1,0 +1,108 @@
+{
+  "toolbar": {
+    "print": "Print",
+    "zoomIn": "Zoom in",
+    "zoomOut": "Zoom out",
+    "fitToScreen": "Fit to screen",
+    "fitToWidth": "Fit to width",
+    "firstPage": "First page",
+    "previousPage": "Previous page",
+    "nextPage": "Next page",
+    "lastPage": "Last page",
+    "page": "Page",
+    "compare": {
+      "enable": "Enable compare mode",
+      "disable": "Disable compare mode"
+    },
+    "editing": {
+      "enable": "Enable canvas tools",
+      "disable": "Disable canvas tools"
+    },
+    "rotateLeft90": "Rotate left 90°",
+    "rotateRight90": "Rotate right 90°",
+    "brightness": "Brightness",
+    "contrast": "Contrast",
+    "adjustBrightness": "Adjust brightness",
+    "adjustContrast": "Adjust contrast",
+    "imageAdjustments": "Image adjustments",
+    "aria": {
+      "documentControls": "Document controls"
+    },
+    "theme": {
+      "switchToLight": "Switch to light theme",
+      "switchToDark": "Switch to dark theme"
+    }
+  },
+  "printDialog": {
+    "title": "Print",
+    "mode": {
+      "basic": "Basic mode",
+      "advanced": "Advanced mode"
+    },
+    "modeSwitch": {
+      "to": "Switch to {mode}.",
+      "back": "Switch back to {mode}."
+    },
+    "desc": "Pick what to print. Default is {active}.",
+    "headerNote": "A header will be stamped on printed pages. This is configured by your administrator and cannot be disabled here.",
+    "switchToAdvanced": "advanced mode",
+    "switchToBasic": "basic mode",
+    "pagesHeader": "Pages",
+    "basic": {
+      "active": "Active page",
+      "all": "All pages"
+    },
+    "advanced": {
+      "range": "Simple range",
+      "custom": "Custom pages"
+    },
+    "range": {
+      "from": "From",
+      "to": "To",
+      "allowedHint": "Allowed: 1–{total}. Ascending (2→5) or descending (5→2)."
+    },
+    "custom": {
+      "placeholder": "e.g. 7 6 5 4 2   or   1-3, 2, 2, 5-2",
+      "hint": "Spaces or commas. Ranges can ascend (2-5) or descend (5-2)."
+    },
+    "userSection": {
+      "header": "Reason & recipient"
+    },
+    "reason": {
+      "label": "Reason",
+      "requiredHint": "Required. Max {max}{extra} characters.",
+      "optionalHint": "Optional. Max {max}{extra} characters.",
+      "extra": {
+        "placeholder": "Add details…",
+        "suffix": " (additional text)"
+      }
+    },
+    "forWhom": {
+      "label": "For whom",
+      "requiredHint": "Required. Max {max} characters.",
+      "optionalHint": "Optional. Max {max} characters."
+    },
+    "footer": {
+      "cancel": "Cancel",
+      "continue": "Continue"
+    },
+    "errors": {
+      "selectValidPages": "Select valid pages.",
+      "valuesPositive": "Values must be positive.",
+      "highestAllowed": "The highest allowed page is {total}.",
+      "selectReason": "Please select a reason.",
+      "enterExtra": "Please enter additional details for the selected reason.",
+      "extraTooLong": "Additional text too long (max {max}).",
+      "extraFormat": "Additional text format is not allowed.",
+      "enterReason": "Please enter a reason.",
+      "reasonTooLong": "Reason is too long (max {max}).",
+      "reasonFormat": "Reason format is not allowed.",
+      "enterForWhom": "Please enter who requested this.",
+      "forWhomTooLong": "“For whom” is too long (max {max}).",
+      "forWhomFormat": "“For whom” format is not allowed.",
+      "invalidCustom": "Invalid custom pages input.",
+      "review": "Please review the required fields."
+    },
+    "summary": "You will print {count, plural, =1 {# page} other {# pages}}."
+  }
+}
