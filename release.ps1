@@ -7,18 +7,33 @@ $ErrorActionPreference = 'Stop'
 function J($a){ if(-not $a){''}else{ ($a|%{ if($_ -match '[\s"|\\]'){'"'+($_ -replace '(["\\])','\\$1')+'"' }else{$_}}) -join ' ' } }
 function Exec {
   param([Parameter(Mandatory)][string]$File,[string[]]$Args=@(),[string]$Cwd=$null,[switch]$AllowNonZero,[switch]$Quiet)
-  $as = J $Args; if(-not $Quiet){ if($Cwd){Write-Host "==> ($Cwd) $File $as" -f Cyan}else{Write-Host "==> $File $as" -f Cyan} }
-  $psi=[System.Diagnostics.ProcessStartInfo]::new(); $psi.FileName=$File; $psi.Arguments=$as; $psi.RedirectStandardOutput=$true; $psi.RedirectStandardError=$true; $psi.UseShellExecute=$false; $psi.CreateNoWindow=$true; if($Cwd){$psi.WorkingDirectory=$Cwd}
-  $p=[System.Diagnostics.Process]::new(); $p.StartInfo=$psi; $null=$p.Start(); $o=$p.StandardOutput.ReadToEnd(); $e=$p.StandardError.ReadToEnd(); $p.WaitForExit()
-  if($o){Write-Host $o.TrimEnd()} if($e){ if($p.ExitCode -eq 0){Write-Warning $e.TrimEnd()}else{Write-Error $e.TrimEnd()} }
+  $as = J $Args
+  if(-not $Quiet){
+    if($Cwd){Write-Host "==> ($Cwd) $File $as" -ForegroundColor Cyan}
+    else    {Write-Host "==> $File $as" -ForegroundColor Cyan}
+  }
+  $psi=[System.Diagnostics.ProcessStartInfo]::new()
+  $psi.FileName=$File; $psi.Arguments=$as
+  if($Cwd){$psi.WorkingDirectory=$Cwd}
+  $psi.RedirectStandardOutput=$true; $psi.RedirectStandardError=$true
+  $psi.UseShellExecute=$false; $psi.CreateNoWindow=$true
+  $p=[System.Diagnostics.Process]::new(); $p.StartInfo=$psi
+  $null=$p.Start()
+  $o=$p.StandardOutput.ReadToEnd(); $e=$p.StandardError.ReadToEnd()
+  $p.WaitForExit()
+  if($o){Write-Host $o.TrimEnd()}
+  if($e){ if($p.ExitCode -eq 0){Write-Warning $e.TrimEnd()}else{Write-Error $e.TrimEnd()} }
   if($p.ExitCode -ne 0 -and -not $AllowNonZero){ throw "Command failed ($File $as) with exit code $($p.ExitCode)." }
   @{Code=$p.ExitCode;Out=$o;Err=$e}
 }
-function ExecNpm { # run npm reliably on Windows via cmd.exe
-  param([string[]]$Args,[string]$Cwd)
-  $cmd=$env:ComSpec; if(-not $cmd){$cmd='cmd.exe'}
-  Exec $cmd @('/d','/c','npm')+$Args -Cwd $Cwd
+
+function ExecNpm {  # run npm reliably on Windows via cmd.exe
+  param([string[]]$NpmArgs,[string]$Cwd)
+  $cmd = $env:ComSpec; if(-not $cmd){ $cmd='cmd.exe' }
+  $allArgs = @('/d','/c','npm') + $NpmArgs
+  Exec -File $cmd -Args $allArgs -Cwd $Cwd
 }
+
 function ReadNonEmpty([string]$p){ $v=Read-Host $p; if([string]::IsNullOrWhiteSpace($v)){throw "Input cannot be empty."}; $v }
 
 # Resolve repo root from script path; work there regardless of current location
@@ -31,7 +46,7 @@ if($inside -ne 'true'){ throw "Git says this is not a working tree: $repoRoot" }
 $branch=(Exec 'git' @('rev-parse','--abbrev-ref','HEAD') -Cwd $repoRoot -Quiet).Out.Trim(); if([string]::IsNullOrWhiteSpace($branch)){$branch='main'}
 
 $hasRemote=$true; try{$null=Exec 'git' @('remote','get-url','origin') -Cwd $repoRoot -Quiet}catch{$hasRemote=$false}
-if($hasRemote){ Exec 'git' @('fetch','--tags','--prune') -Cwd $repoRoot | Out-Null }
+if($hasRemote){ Exec 'git' @('fetch','--tags','--prune') -Cwd $repoRoot -Quiet | Out-Null }
 
 Write-Host "=== OpenDocViewer Release Helper ===`n"
 $commitMsg   = ReadNonEmpty 'Commit message (e.g. chore(deps): bump axios to 1.12.1)'
@@ -42,8 +57,8 @@ Write-Host "`nSummary:`n  Repo root:     $repoRoot`n  Branch:        $branch`n  
 if((Read-Host 'Proceed? (Y/N)').ToUpper() -ne 'Y'){ Write-Host 'Aborted.'; exit 0 }
 
 # Stage + commit (skip if empty)
-Exec 'git' @('add','-A') -Cwd $repoRoot | Out-Null
-$commitRes=Exec 'git' @('commit','-m',$commitMsg) -Cwd $repoRoot -AllowNonZero
+Exec 'git' @('add','-A') -Cwd $repoRoot -Quiet | Out-Null
+$commitRes=Exec 'git' @('commit','-m',$commitMsg) -Cwd $repoRoot -AllowNonZero -Quiet
 if($commitRes.Code -ne 0){ Write-Host 'No changes to commit. Continuing...' }
 
 # Ensure clean working tree for npm version (untracked included)
@@ -52,8 +67,8 @@ if(-not [string]::IsNullOrWhiteSpace($porcelain)){
   Write-Warning "Working tree not clean:`n$porcelain"
   $ch=Read-Host "Fix automatically? [A]dd&commit / [S]tash -u / [Q]uit (A/S/Q)"
   switch($ch.ToUpper()){
-    'A'{ Exec 'git' @('add','-A') -Cwd $repoRoot | Out-Null; Exec 'git' @('commit','-m','chore(release): pre-release housekeeping') -Cwd $repoRoot -AllowNonZero | Out-Null }
-    'S'{ $global:__REL_STASH__=(Exec 'git' @('stash','push','-u','-m','release: pre-version stash') -Cwd $repoRoot).Out.Trim() }
+    'A'{ Exec 'git' @('add','-A') -Cwd $repoRoot -Quiet | Out-Null; Exec 'git' @('commit','-m','chore(release): pre-release housekeeping') -Cwd $repoRoot -AllowNonZero -Quiet | Out-Null }
+    'S'{ $global:__REL_STASH__=(Exec 'git' @('stash','push','-u','-m','release: pre-version stash') -Cwd $repoRoot -Quiet).Out.Trim() }
     Default{ throw "Aborted due to dirty working tree." }
   }
   $again=(Exec 'git' @('status','--porcelain') -Cwd $repoRoot -Quiet).Out
@@ -63,7 +78,7 @@ if(-not [string]::IsNullOrWhiteSpace($porcelain)){
 $prevHead=(Exec 'git' @('rev-parse','HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 
 # Version bump via package.json scripts
-ExecNpm @('run','--silent',"release:$releaseType") -Cwd $repoRoot
+ExecNpm -NpmArgs @('run','--silent',"release:$releaseType") -Cwd $repoRoot
 
 # Resolve tag/version
 $newVersion=$null; try{ $pkg=Get-Content -Raw -Path (Join-Path $repoRoot 'package.json') | ConvertFrom-Json; $newVersion=$pkg.version }catch{}
@@ -84,7 +99,7 @@ try{
 
 # Post-push verification: confirm head & tag on origin
 if($hasRemote){
-  Exec 'git' @('fetch','--tags') -Cwd $repoRoot | Out-Null
+  Exec 'git' @('fetch','--tags') -Cwd $repoRoot -Quiet | Out-Null
   $local=(Exec 'git' @('rev-parse','HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
   $remote=(Exec 'git' @('rev-parse',"origin/$branch") -Cwd $repoRoot -Quiet).Out.Trim()
   $tagRemote=(Exec 'git' @('ls-remote','--tags','origin',$tagName) -Cwd $repoRoot -AllowNonZero -Quiet).Out.Trim()
