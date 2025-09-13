@@ -2,38 +2,58 @@
 /**
  * OpenDocViewer — Runtime Configuration (public/odv.config.js)
  *
- * Works under an IIS application folder (e.g., /OpenDocViewer).
- * The script computes basePath from its own <script src=".../odv.config.js"> URL.
+ * INTERNATIONALIZED CONFIG VALUES:
+ *   Any user-facing string may be either a plain string (back-compat)
+ *   OR a map { [languageCode]: string } — a "LocalizedString".
+ *   Example: "Select reason…"  OR  { en: "Select reason…", sv: "Välj orsak…" }
  *
- * DESIGN (mode-less):
- *   This file exposes ALL knobs at all times. You enable/disable features by
- *   flipping booleans (no comment/uncomment “modes” needed here).
+ * Keep stable identifiers (like reason `value`) as plain strings for logging.
+ */
+
+/**
+ * @typedef {string | Object.<string,string>} LocalizedString
  *
- * LAYERED CONFIG (site-specific overrides):
- *   If present, a site-local override object `window.__ODV_SITE_CONFIG__` will be
- *   deep-merged on top of this default config. Load order in your HTML should be:
- *     <script src="./odv.site.config.js"></script>
- *     <script src="./odv.config.js"></script>
+ * @typedef {Object} ReasonFreeText
+ * @property {boolean} [required]
+ * @property {number}  [maxLen]
+ * @property {string|null} [regex]
+ * @property {string} [regexFlags]
+ * @property {LocalizedString} [placeholder]
+ * @property {LocalizedString} [prefix]
+ * @property {LocalizedString} [suffix]
  *
- * UI Logic (used by the print dialog):
- *   - Show "Reason" / "For whom" inputs when (userLog.enabled || printHeader.enabled),
- *     unless you force visibility via ui.showReasonWhen / ui.showForWhomWhen.
- *   - Validation (required, maxLen, regex) comes from userLog.ui.fields.*.
- *   - Reason dropdown can be inline (options[]) or loaded from source.url.
- *   - A reason option may request additional free text via allowFreeText + input{...}.
- *
- * CACHING:
- *   Keep this file uncached (web.config sets Cache-Control: no-store).
+ * @typedef {Object} ReasonOption
+ * @property {string} value             // stable id sent to logs (keep as plain string)
+ * @property {LocalizedString} [label]  // optional localized display label (falls back to value)
+ * @property {boolean} [allowFreeText]
+ * @property {ReasonFreeText} [input]
  */
 
 (function (w, d) {
+  /**
+   * Coerce a value to boolean with a default.
+   * @param {*} v
+   * @param {boolean} def
+   * @returns {boolean}
+   */
   function toBool(v, def) { return typeof v === 'boolean' ? v : def; }
 
-  // --- tiny deep merge (objects only; arrays/values are replaced) ---
+  /**
+   * @param {*} x
+   * @returns {x is Record<string, any>}
+   */
   function isObj(x){ return x && typeof x === 'object' && !Array.isArray(x); }
+
+  /**
+   * Deep-merge two plain objects. Arrays/primitives are replaced.
+   * @param {Record<string, any>} dst
+   * @param {Record<string, any>} src
+   * @returns {Record<string, any>}
+   */
   function deepMerge(dst, src){
     if (!isObj(dst)) dst = {};
     if (!isObj(src)) return src === undefined ? dst : src;
+    /** @type {Record<string, any>} */
     var out = {};
     var k;
     for (k in dst) if (Object.prototype.hasOwnProperty.call(dst, k)) out[k] = dst[k];
@@ -44,7 +64,7 @@
     return out;
   }
 
-  // Compute app base from THIS file's URL (robust for virtual directories).
+  // Detect our own script tag to infer base paths (works under virtual directories).
   var scriptEl = d.currentScript || (function () {
     var all = d.getElementsByTagName('script');
     for (var i = all.length - 1; i >= 0; i--) {
@@ -57,21 +77,16 @@
   var cfgSrc = scriptEl ? scriptEl.getAttribute('src') : '';
   var abs;
   try { abs = new URL(cfgSrc, d.baseURI || w.location.href); } catch { abs = null; }
-
-  // E.g.: /OpenDocViewer/odv.config.js  -> baseHref: /OpenDocViewer/
   var baseHref = '/';
   if (abs && abs.pathname) {
     baseHref = abs.pathname.replace(/\/odv\.config\.js(?:\?.*)?$/i, '/');
   } else {
-    // Fallback: use the directory of the current location
     baseHref = (w.location.pathname || '/').replace(/[^/]+$/, '/');
   }
   if (!/\/$/.test(baseHref)) baseHref += '/';
-  var basePath = baseHref.replace(/\/$/, ''); // without trailing slash, e.g. "/OpenDocViewer"
+  var basePath = baseHref.replace(/\/$/, '');
 
-  // If a previous config exists, allow it to seed a few booleans (ops can inline something before us).
   var existing = w.__ODV_CONFIG__ || {};
-  // Optional site-specific overrides (loaded BEFORE this file).
   var siteOverrides = w.__ODV_SITE_CONFIG__ || {};
 
   // ========================= ACTIVE (mode-less) CONFIG =========================
@@ -80,70 +95,71 @@
     exposeStackTraces: toBool(existing.exposeStackTraces, false),
     showPerfOverlay:   toBool(existing.showPerfOverlay,   false),
 
-    // Where the app is mounted (derived above); useful for building URLs.
-    basePath: basePath,    // e.g. "/OpenDocViewer"
-    baseHref: baseHref,    // e.g. "/OpenDocViewer/"
+    // Where the app is mounted (derived above).
+    basePath: basePath,
+    baseHref: baseHref,
 
     // ---- INTERNATIONALIZATION -------------------------------------------------
-    // Used by src/i18n.js to set defaults & load translation files at runtime.
-    // `loadPath` works under virtual directories: uses baseHref.
     i18n: {
       default: 'en',
       supported: ['en', 'sv'],
-      // Include a version placeholder in the query to help cache-busting.
-      // src/i18n.js will also append ?v=<token> if you omit {{ver}} here.
       loadPath: baseHref + 'locales/{{lng}}/{{ns}}.json?v={{ver}}',
-      // Bump this when deploying new locale files to force clients to fetch fresh JSON.
       version: '1'
-      // debug: true // uncomment temporarily if you want i18n logs in prod
     },
 
     // ---- USER LOG -------------------------------------------------------------
-    // Default: ENABLED — proxied via a dedicated IIS app at /ODVProxy/.
     userLog: {
       enabled:  true,
-      endpoint: "/ODVProxy/userlog/record", // IIS proxy to http://localhost:3002/userlog/record
+      endpoint: "/ODVProxy/userlog/record",
       transport: "form",
 
       // Print dialog UI/validation knobs.
-      // The dialog will show inputs only when (userLog.enabled || printHeader.enabled),
-      // unless you force visibility with "always"/"never" below.
       ui: {
-        showReasonWhen:  "auto",  // "auto" | "always" | "never"
-        showForWhomWhen: "auto",  // "auto" | "always" | "never"
+        /**
+         * Control Reason/ForWhom visibility.
+         * "auto": show when (userLog.enabled || printHeader.enabled),
+         * "always": force show, "never": force hide.
+         * @type {"auto"|"always"|"never"}
+         */
+        showReasonWhen:  "auto",
+        /** @type {"auto"|"always"|"never"} */
+        showForWhomWhen: "auto",
 
         fields: {
           reason: {
             required: true,
             maxLen: 255,
-            // regex: null → viewer uses a permissive default that caps to maxLen
-            regex: null,          // or e.g. "^(.*)$"
+            regex: null,
             regexFlags: "",
-            placeholder: "Select reason…",
+            /** @type {LocalizedString} */
+            placeholder: { en: "Select reason…", sv: "Välj orsak…" },
             source: {
-              // Inline options (used if no URL is provided)
+              /** @type {ReasonOption[]} */
               options: [
-                { value: "Patient copy" },
-                { value: "Internal review" },
-                { value: "Legal request" },
-                // Example of an option that requests additional free text:
-                { value: "Other", allowFreeText: true,
+                { value: "Patient copy",    label: { en: "Patient copy",    sv: "Patientkopia" } },
+                { value: "Internal review", label: { en: "Internal review", sv: "Intern granskning" } },
+                { value: "Legal request",   label: { en: "Legal request",   sv: "Juridisk begäran" } },
+                {
+                  value: "Other",
+                  label: { en: "Other", sv: "Annat" },
+                  allowFreeText: true,
                   input: {
                     required: true,
                     maxLen: 140,
                     regex: null,
                     regexFlags: "",
-                    placeholder: "Type other reason…",
-                    prefix: "",
-                    suffix: ""
+                    /** @type {LocalizedString} */
+                    placeholder: { en: "Type other reason…", sv: "Ange annan orsak…" },
+                    /** @type {LocalizedString} */
+                    prefix: { en: "Other: ", sv: "Annan: " },
+                    /** @type {LocalizedString} */
+                    suffix: { en: " (specify)", sv: " (ange)" }
                   }
                 }
               ]
-              // To load reasons at runtime instead, set a same-origin URL and (optionally) a small cache TTL:
-              // ,url: basePath + "/userlog/reasons.json"
-              // ,cacheTtlSec: 300
             },
-            default: null          // e.g., "Patient copy"
+            // Default by stable id (matches an option `value` when using options)
+            default: null
           },
 
           forWhom: {
@@ -151,25 +167,30 @@
             maxLen: 120,
             regex: null,
             regexFlags: "",
-            placeholder: "Who requested this?"
+            /** @type {LocalizedString} */
+            placeholder: { en: "Who requested this?", sv: "Vem begärde detta?" }
           }
         }
       }
     },
 
     // ---- PRINT HEADER ---------------------------------------------------------
-    // When enabled, a header/footer band is added to printed pages.
     printHeader: {
-      enabled: true,             // ENABLED by default
-      position: "top",           // "top" | "bottom"
-      heightPx: 32,              // reserved space; dialog may warn if too small
-      applyTo: "all",            // "all" | "first" | "last"
-      // Tokenized template (simple ${...} substitution).
-      // Available tokens: date (YYYY-MM-DD), time (HH:MM 24h), now, page, totalPages,
-      // reason, forWhom, user.id, user.name, doc.id, doc.title, doc.pageCount, viewer.version
-      template:
-        "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
-      // Optional CSS injected only for print media; scoping class provided by viewer
+      enabled: true,            // non-optional when enabled
+      position: "top",          // "top" | "bottom"
+      heightPx: 32,
+      applyTo: "all",           // "all" | "first" | "last"
+      /**
+       * Tokenized template (simple ${...} substitution).
+       * Available tokens: date (YYYY-MM-DD), time (HH:MM 24h), now, page, totalPages,
+       * reason, forWhom, user.id, user.name, doc.id, doc.title, doc.pageCount, viewer.version
+       * @type {LocalizedString}
+       */
+      template: {
+        en: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
+        sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
+      },
+      // Print-only CSS scoped to `.odv-print-header`
       css: [
         ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444; ",
         "  background:rgba(255,255,255,.85); padding:4mm 6mm; }",
@@ -178,11 +199,10 @@
     },
 
     // ---- SYSTEM LOG -----------------------------------------------------------
-    // Default: ENABLED — proxied via the IIS app at /ODVProxy/.
     systemLog: {
       enabled:  true,
-      endpoint: "/ODVProxy/log",   // IIS proxy to http://localhost:3001/log
-      token:    "REPLACE_WITH_SYSTEM_LOG_TOKEN" // paste the token generated by Manage-ODV-LogServers.ps1
+      endpoint: "/ODVProxy/log",
+      token:    "REPLACE_WITH_SYSTEM_LOG_TOKEN"
     }
   };
 

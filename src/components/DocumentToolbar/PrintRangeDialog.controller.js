@@ -8,6 +8,7 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parsePrintSequence } from '../../utils/printUtils.js';
+import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localizedValue.js';
 
 /**
  * Allowed print modes (string-literal union for JSDoc).
@@ -91,8 +92,9 @@ export function ensureODVPrintCSS() {
  * @param {number} params.totalPages
  * @param {function(string, Object=): string} params.t
  * @param {Object} params.styles
+ * @param {any} params.i18n
  */
-export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, t, styles }) {
+export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, t, styles, i18n }) {
   const cfg = getCfg();
   const userLogCfg = cfg?.userLog || {};
   const headerCfg  = cfg?.printHeader || {};
@@ -116,9 +118,9 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   const reasonMax = Number.isFinite(reasonCfg?.maxLen) ? reasonCfg.maxLen : 255;
   const forWhomMax = Number.isFinite(forWhomCfg?.maxLen) ? forWhomCfg.maxLen : 120;
 
+  // Options + default (default is by stable id)
   const reasonOptions = Array.isArray(reasonCfg?.source?.options) ? reasonCfg.source.options : null;
   const hasOptions    = Array.isArray(reasonOptions) && reasonOptions.length > 0;
-
   const defaultReason = reasonCfg?.default ?? (hasOptions ? (reasonOptions[0]?.value ?? '') : '');
 
   /** @type {'basic'|'advanced'} */
@@ -260,6 +262,15 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     forWhomText, forWhomCfg?.required, forWhomMax, forWhomRegex, t
   ]);
 
+  // ---- Localized admin strings (resolved once per render) --------------------
+  const reasonPlaceholder   = resolveLocalizedValue(reasonCfg?.placeholder, i18n);
+  const forWhomPlaceholder  = resolveLocalizedValue(forWhomCfg?.placeholder, i18n);
+  const extraPlaceholder    = resolveLocalizedValue(extraCfg?.placeholder, i18n);
+  const extraPrefixResolved = resolveLocalizedValue(extraCfg?.prefix, i18n);
+  const extraSuffixResolved = resolveLocalizedValue(extraCfg?.suffix, i18n);
+
+  const optionLabel = useCallback((opt) => resolveOptionLabel(opt, i18n), [i18n]);
+
   /**
    * Compose the Reason string from option + (optional) extra text.
    * @returns {(string|null)}
@@ -269,14 +280,12 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     if (hasOptions) {
       const base = selectedReason || '';
       if (!needsExtra) return base;
-      const pre = extraCfg?.prefix || '';
-      const suf = extraCfg?.suffix || '';
       const txt = String(extraText || '');
-      return base + (txt ? (pre + txt + suf) : '');
+      return base + (txt ? (extraPrefixResolved + txt + extraSuffixResolved) : '');
     }
     const r = String(freeReason || '');
     return r || null;
-  }, [showReason, hasOptions, selectedReason, needsExtra, extraCfg?.prefix, extraCfg?.suffix, extraText, freeReason]);
+  }, [showReason, hasOptions, selectedReason, needsExtra, extraPrefixResolved, extraSuffixResolved, extraText, freeReason]);
 
   /**
    * Compute the additional user-log properties to attach to the submit payload.
@@ -337,6 +346,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   const titleSuffix = modeGroup === 'basic' ? t('printDialog.mode.basic') : t('printDialog.mode.advanced');
   const switchTo = t('printDialog.modeSwitch.to', { mode: t('printDialog.mode.advanced') });
   const switchBack = t('printDialog.modeSwitch.back', { mode: t('printDialog.mode.basic') });
+  // This is a TRANSLATION hint line (not the config suffix):
   const extraSuffix = (hasOptions && needsExtra) ? t('printDialog.reason.extra.suffix') : '';
 
   return {
@@ -365,6 +375,11 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     extraCfg, extraMax,
     reasonMax, forWhomMax,
     pageOptions,
+    // localized admin strings
+    reasonPlaceholder,
+    forWhomPlaceholder,
+    extraPlaceholder,
+    optionLabel,
     // ui strings
     titleSuffix, switchTo, switchBack, extraSuffix,
     // handlers
