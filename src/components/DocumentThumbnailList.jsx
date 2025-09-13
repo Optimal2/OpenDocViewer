@@ -16,6 +16,7 @@
  */
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import logger from '../LogController.js';
 
 /**
@@ -36,6 +37,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   width,
   selectForCompare,
 }) {
+  const { t } = useTranslation('common');
   const scrollPosition = useRef(0);
 
   /** Selected option id for aria-activedescendant (only valid when in range). */
@@ -118,7 +120,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       className="thumbnails-container"
       ref={thumbnailsContainerRef}
       role="listbox"
-      aria-label="Document Thumbnails"
+      aria-label={t('thumbnails.aria.container')}
       aria-activedescendant={activeDescendantId}
       style={{ width: String(Number(width) || 0) + 'px' }}
     >
@@ -138,9 +140,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
               onKeyDown={(e) => handleKeyDown(e, itemIndex)}
               role="option"
               tabIndex={isSelected ? 0 : -1}
-              aria-label={`Go to page ${itemIndex}`}
+              aria-label={t('thumbnails.goToPage', { page: itemIndex })}
               aria-selected={isSelected}
-              title={`Go to page ${itemIndex}`}
+              title={t('thumbnails.goToPage', { page: itemIndex })}
             >
               <div id={`thumbnail-anchor-${itemIndex}`} className="thumbnail-anchor" />
               <div className="thumbnail-number">{itemIndex}</div>
@@ -150,7 +152,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
                 {status === -1 && (
                   <img
                     src="lost.png"
-                    alt={`Page ${itemIndex} failed to load`}
+                    alt={t('thumbnails.pageFailedAlt', { page: itemIndex })}
                     className="thumbnail"
                     loading="lazy"
                     decoding="async"
@@ -160,7 +162,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
                 {status === 1 && (
                   <img
                     src={thumbnailUrl}
-                    alt={`Page ${itemIndex}`}
+                    alt={t('viewer.pageAlt', { page: itemIndex })}
                     className="thumbnail"
                     loading="lazy"
                     decoding="async"

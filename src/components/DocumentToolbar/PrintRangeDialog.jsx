@@ -41,7 +41,7 @@ import {
  */
 
 export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages }) {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
 
   const ctrl = usePrintRangeController({
     isOpen, onClose, onSubmit, totalPages, t, styles
@@ -100,7 +100,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
         <h4 className={styles.sectionHeader}>{t('printDialog.pagesHeader')}</h4>
 
         {ctrl.modeGroup === 'basic' && (
-          <div className={styles.section} role="group" aria-label="Basic choices">
+          <div className={styles.section} role="group" aria-label={t('printDialog.aria.basicGroup')}>
             <div className={styles.radioList}>
               <label className={styles.radioRow}>
                 <input
@@ -127,7 +127,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
         )}
 
         {ctrl.modeGroup === 'advanced' && (
-          <div className={styles.section} role="group" aria-label="Advanced choices">
+          <div className={styles.section} role="group" aria-label={t('printDialog.aria.advancedGroup')}>
             <div className={styles.radioList}>
               <label className={styles.radioRow}>
                 <input
@@ -208,7 +208,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
         {ctrl.showUserSection && (
           <>
             <h4 className={styles.sectionHeader}>{t('printDialog.userSection.header')}</h4>
-            <div className={styles.section} role="group" aria-label="User log">
+            <div className={styles.section} role="group" aria-label={t('printDialog.aria.userLogGroup')}>
               <div className={styles.fieldCol}>
                 {ctrl.showReason && (
                   <label className={styles.labelBlock}>

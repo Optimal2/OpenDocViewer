@@ -29,6 +29,7 @@ import React, {
   useMemo,
   useImperativeHandle,
 } from 'react';
+import { useTranslation } from 'react-i18next';
 import logger from '../LogController';
 import ImageRenderer from './ImageRenderer';
 import CanvasRenderer from './CanvasRenderer';
@@ -73,26 +74,6 @@ function getCurrentPage(allPages, pageNumber) {
  * @property {function(): !Array<string>} getAllPrintableDataUrls   // NEW: list of full-size URLs for ALL pages in order
  */
 
-/**
- * DocumentRender
- *
- * @param {Object} props
- * @param {number} props.pageNumber
- * @param {number} props.zoom
- * @param {function(): void} [props.initialRenderDone]  Callback when the very first page finishes rendering
- * @param {function(): void} [props.onRender]           Callback on each render completion
- * @param {RefLike} props.viewerContainerRef
- * @param {SetNumberState} props.setZoom
- * @param {SetPageNumber} props.setPageNumber
- * @param {boolean} props.isCompareMode
- * @param {{ rotation: number, brightness: number, contrast: number }} props.imageProperties
- * @param {boolean} props.isCanvasEnabled
- * @param {boolean} props.forceRender
- * @param {Array.<PageEntry>} props.allPages
- * @param {RefLike} props.thumbnailsContainerRef
- * @param {*} ref
- * @returns {React.ReactElement}
- */
 const DocumentRender = React.forwardRef(function DocumentRender(
   {
     pageNumber,
@@ -111,6 +92,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   },
   ref
 ) {
+  const { t } = useTranslation('common');
+
   // DOM refs for actual drawing/hosting of the page
   const canvasRef = useRef(/** @type {HTMLCanvasElement|null} */ (null));
   const imgRef = useRef(/** @type {HTMLImageElement|null} */ (null));
@@ -400,7 +383,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         }}
       >
         <div className="loading-progress" style={{ fontSize: '1.5rem' }}>
-          Loading pages… Please wait.
+          {t('viewer.loadingPagesWait')}
         </div>
       </div>
     );

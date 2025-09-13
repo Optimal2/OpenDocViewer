@@ -16,6 +16,44 @@
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
 
+    <!-- Early i18n for static shell (title/meta) before React mounts. 
+         Uses stored i18next language (if any) or navigator language. -->
+    <script>
+      (function () {
+        try {
+          var stored = (typeof localStorage !== 'undefined' && localStorage.getItem('i18nextLng')) || '';
+          var nav = (typeof navigator !== 'undefined' && navigator.language) ? navigator.language : 'en';
+          var raw = (stored || nav || 'en').toLowerCase();
+          var lang = raw.split('-')[0]; // language-only loading (sv-SE -> sv)
+          if (lang !== 'sv') lang = 'en';
+
+          document.documentElement.setAttribute('lang', lang);
+
+          var STR = {
+            en: {
+              title: 'OpenDocViewer',
+              metaDesc: 'OpenDocViewer – React JavaScript Document Viewer',
+              ogTitle: 'OpenDocViewer',
+              ogDesc: 'OpenDocViewer – React JavaScript Document Viewer'
+            },
+            sv: {
+              title: 'OpenDocViewer',
+              metaDesc: 'OpenDocViewer – Dokumentvisare för React och JavaScript',
+              ogTitle: 'OpenDocViewer',
+              ogDesc: 'OpenDocViewer – Dokumentvisare för React och JavaScript'
+            }
+          };
+          var S = STR[lang];
+
+          var el;
+          if ((el = document.querySelector('title'))) el.textContent = S.title;
+          if ((el = document.querySelector('meta[name="description"]'))) el.setAttribute('content', S.metaDesc);
+          if ((el = document.querySelector('meta[property="og:title"]'))) el.setAttribute('content', S.ogTitle);
+          if ((el = document.querySelector('meta[property="og:description"]'))) el.setAttribute('content', S.ogDesc);
+        } catch (e) { /* best effort only */ }
+      })();
+    </script>
+
     <!-- SEO / Sharing -->
     <meta name="description" content="OpenDocViewer – React JavaScript Document Viewer" />
     <meta name="keywords" content="document viewer, React, JavaScript, OpenDocViewer, PDF, TIFF" />
@@ -57,13 +95,20 @@
       html, body { height: 100%; }
       body { margin: 0; padding: 0; font-family: Arial, sans-serif; }
       #root { height: 100vh; width: 100vw; display: flex; flex-direction: column; }
+      /* Basic spacing for <noscript> bilingual message */
+      .noscript-wrap { text-align: center; margin-top: 16vh; padding: 0 16px; }
+      .noscript-wrap h1 { margin-bottom: .25em; }
+      .noscript-wrap p { margin: .25em 0; }
     </style>
   </head>
   <body>
     <noscript>
-      <div style="text-align: center; margin-top: 20%;">
-        <h1>JavaScript is disabled</h1>
-        <p>You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page.</p>
+      <div class="noscript-wrap" role="alert" aria-live="polite">
+        <h1 lang="en">JavaScript is disabled</h1>
+        <p lang="en">You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page.</p>
+
+        <h1 lang="sv">JavaScript är inaktiverat</h1>
+        <p lang="sv">Du måste aktivera JavaScript för att köra appen. Aktivera JavaScript i din webbläsares inställningar och uppdatera sidan.</p>
       </div>
     </noscript>
 
