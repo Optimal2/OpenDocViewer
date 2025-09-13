@@ -34,10 +34,19 @@ const ZOOM_STEP = 1.1;
 /**
  * Layout constants tied to the current viewer UI.
  * If you adjust toolbar/sidebar sizes, update these to keep zoom calculations correct.
+ * NOTE: Callers can override these per call via the `opts` parameter.
  */
-const SIDEBAR_WIDTH_PX = 250;     // Thumbnail sidebar nominal width
+const SIDEBAR_WIDTH_PX = 250;     // Thumbnail sidebar nominal width (fallback)
 const CHROME_HEIGHT_PX = 30;      // Top/bottom chrome (toolbar paddings etc.)
 const COMPARE_GUTTER_PX = 30;     // Extra spacing when compare mode splits the view
+
+/**
+ * Optional calculation overrides.
+ * @typedef {Object} ZoomCalcOptions
+ * @property {number=} sidebarWidthPx     Width to subtract for thumbnails sidebar (defaults to 250)
+ * @property {number=} chromeHeightPx     Height to subtract for chrome (defaults to 30)
+ * @property {number=} compareGutterPx    Split gutter in compare mode (defaults to 30)
+ */
 
 /**
  * Clamp a numeric value into the inclusive range [min, max].
@@ -85,16 +94,21 @@ function getNaturalSize(image) {
  *
  * @param {HTMLElement} container
  * @param {boolean} isComparing
+ * @param {ZoomCalcOptions=} opts
  * @returns {{ vw: number, vh: number }}
  */
-function getViewportSize(container, isComparing) {
+function getViewportSize(container, isComparing, opts) {
+  const sidebar = Math.max(0, Number(opts?.sidebarWidthPx ?? SIDEBAR_WIDTH_PX));
+  const chrome = Math.max(0, Number(opts?.chromeHeightPx ?? CHROME_HEIGHT_PX));
+  const gutter = Math.max(0, Number(opts?.compareGutterPx ?? COMPARE_GUTTER_PX));
+
   // Subtract persistent UI chrome
-  let vw = Math.max(0, container.clientWidth - SIDEBAR_WIDTH_PX);
-  const vh = Math.max(0, container.clientHeight - CHROME_HEIGHT_PX);
+  let vw = Math.max(0, container.clientWidth - sidebar);
+  const vh = Math.max(0, container.clientHeight - chrome);
 
   // In compare mode, split horizontally and subtract a small gutter for the divider
   if (isComparing) {
-    vw = Math.max(0, Math.floor(vw / 2) - COMPARE_GUTTER_PX);
+    vw = Math.max(0, Math.floor(vw / 2) - gutter);
   }
   return { vw, vh };
 }
@@ -118,9 +132,10 @@ function applyZoom(setZoom, next) {
  * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
  * @param {SetNumberState} setZoom                         React-like state setter for zoom.
  * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
+ * @param {ZoomCalcOptions=} opts                          Optional overrides for layout constants.
  * @returns {void}
  */
-export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isComparing) {
+export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isComparing, opts) {
   logger.info('Calculating fit-to-screen zoom', { isComparing });
 
   const container = getContainer(viewerContainerRef);
@@ -136,7 +151,7 @@ export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isC
     return;
   }
 
-  const { vw, vh } = getViewportSize(container, isComparing);
+  const { vw, vh } = getViewportSize(container, isComparing, opts);
   if (vw <= 0 || vh <= 0) {
     logger.warn('Non-positive viewport for fit-to-screen', { vw, vh });
     return;
@@ -159,9 +174,10 @@ export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isC
  * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
  * @param {SetNumberState} setZoom                         React-like state setter for zoom.
  * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
+ * @param {ZoomCalcOptions=} opts                          Optional overrides for layout constants.
  * @returns {void}
  */
-export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isComparing) {
+export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isComparing, opts) {
   logger.info('Calculating fit-to-width zoom', { isComparing });
 
   const container = getContainer(viewerContainerRef);
@@ -176,7 +192,7 @@ export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isCo
     return;
   }
 
-  const { vw } = getViewportSize(container, isComparing);
+  const { vw } = getViewportSize(container, isComparing, opts);
   if (vw <= 0) {
     logger.warn('Non-positive viewport width for fit-to-width', { vw });
     return;

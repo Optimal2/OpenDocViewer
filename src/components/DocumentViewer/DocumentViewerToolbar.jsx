@@ -15,8 +15,11 @@
  * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
  *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- *
- * Provenance / baseline reference for this file: :contentReference[oaicite:0]{index=0}
+ */
+
+/**
+ * Zoom mode for the viewer.
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
 
 import React from 'react';
@@ -33,9 +36,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 
 /**
  * Props for DocumentViewerToolbar.
- * (Function types use Closure-style `function(...)` notation or project-wide callbacks.)
  * @typedef {Object} DocumentViewerToolbarProps
- * @property {Array} pages
  * @property {number} pageNumber
  * @property {number} totalPages
  * @property {SetPageNumber} setPageNumber
@@ -43,6 +44,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} zoomOut
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
+ * @property {number} zoom
+ * @property {{mode:('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'), scale:number}} zoomState
+ * @property {(function(ZoomMode): void)} setZoomMode
  * @property {SetNumberState} setZoom
  * @property {RefLike} viewerContainerRef
  * @property {function(): void} handleCompare
@@ -67,7 +71,6 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @returns {JSX.Element}
  */
 const DocumentViewerToolbar = ({
-  pages,
   pageNumber,
   totalPages,
   setPageNumber,
@@ -75,6 +78,9 @@ const DocumentViewerToolbar = ({
   zoomOut,
   fitToScreen,
   fitToWidth,
+  zoom,
+  zoomState,
+  setZoomMode,
   setZoom,
   viewerContainerRef,
   handleCompare,
@@ -94,16 +100,22 @@ const DocumentViewerToolbar = ({
 }) => {
   return (
     <DocumentToolbar
-      pages={pages}
       pageNumber={pageNumber}
       totalPages={totalPages}
       setPageNumber={setPageNumber}
+      /* zoom controls */
+      zoom={zoom}
+      zoomState={zoomState}
+      setZoomMode={setZoomMode}
       zoomIn={zoomIn}
       zoomOut={zoomOut}
       fitToScreen={fitToScreen}
       fitToWidth={fitToWidth}
       setZoom={setZoom}
+      /* printing + context */
       viewerContainerRef={viewerContainerRef}
+      documentRenderRef={documentRenderRef}
+      /* compare + editing */
       handleCompare={handleCompare}
       isComparing={isComparing}
       imageProperties={imageProperties}
@@ -111,9 +123,9 @@ const DocumentViewerToolbar = ({
       handleBrightnessChange={handleBrightnessChange}
       handleContrastChange={handleContrastChange}
       resetImageProperties={resetImageProperties}
-      documentRenderRef={documentRenderRef}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
+      /* nav button disabled states */
       prevPageDisabled={prevPageDisabled}
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
@@ -123,7 +135,6 @@ const DocumentViewerToolbar = ({
 };
 
 DocumentViewerToolbar.propTypes = {
-  pages: PropTypes.array.isRequired,
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
   setPageNumber: PropTypes.func.isRequired,
@@ -131,6 +142,12 @@ DocumentViewerToolbar.propTypes = {
   zoomOut: PropTypes.func.isRequired,
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
+  zoom: PropTypes.number.isRequired,
+  zoomState: PropTypes.shape({
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']).isRequired,
+    scale: PropTypes.number.isRequired,
+  }).isRequired,
+  setZoomMode: PropTypes.func.isRequired,
   setZoom: PropTypes.func.isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,

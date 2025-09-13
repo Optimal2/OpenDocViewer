@@ -205,33 +205,20 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         // First-time auto-zoom: compute a “fit-to-screen” zoom using container bounds.
         if (isInitialLoad) {
           setIsInitialLoad(false);
-
-          const container = viewerContainerRef?.current || null;
-          if (container) {
-            // Compute available viewport considering compare mode split
-            const rect = container.getBoundingClientRect();
-            let availableWidth = rect.width;
-            let availableHeight = rect.height;
-            if (isCompareMode) availableWidth = availableWidth / 2;
-
-            const { width: imgWidth, height: imgHeight } = getImageDimensions(image);
-            const widthRatio = availableWidth / imgWidth;
-            const heightRatio = availableHeight / imgHeight;
-            const newZoom = Math.min(widthRatio, heightRatio);
-
-            logger.info('Calculated fit-to-screen zoom', {
-              containerRect: rect,
-              availableWidth,
-              availableHeight,
-              imgWidth,
-              imgHeight,
-              widthRatio,
-              heightRatio,
-              newZoom,
-            });
-
-            // Apply zoom on next tick to avoid layout thrash
-            setTimeout(() => setZoom(newZoom), 0);
+          try {
+            const sidebar = Math.max(
+              0,
+              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
+            );
+            calculateFitToScreenZoom(
+              image,
+              viewerContainerRef,
+              setZoom,
+              isCompareMode,
+              { sidebarWidthPx: sidebar }
+            );
+          } catch (e) {
+            logger.warn('Auto fit-to-screen failed', { error: String(e?.message || e) });
           }
         }
 
@@ -279,8 +266,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     isInitialLoad,
     viewerContainerRef,
     isCompareMode,
-    thumbnailsContainerRef,
-    getImageDimensions,
+    thumbnailsContainerRef
   ]);
 
   // Re-draw the canvas when zoom/filters change (only if we already drew once)
@@ -311,13 +297,33 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         fitToScreen() {
           const img = imgRef.current;
           if (img && img.complete) {
-            calculateFitToScreenZoom(img, viewerContainerRef, setZoom, isCompareMode);
+            const sidebar = Math.max(
+              0,
+              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
+            );
+            calculateFitToScreenZoom(
+              img,
+              viewerContainerRef,
+              setZoom,
+              isCompareMode,
+              { sidebarWidthPx: sidebar }
+            );
           }
         },
         fitToWidth() {
           const img = imgRef.current;
           if (img && img.complete) {
-            calculateFitToWidthZoom(img, viewerContainerRef, setZoom, isCompareMode);
+            const sidebar = Math.max(
+              0,
+              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
+            );
+            calculateFitToWidthZoom(
+              img,
+              viewerContainerRef,
+              setZoom,
+              isCompareMode,
+              { sidebarWidthPx: sidebar }
+            );
           }
         },
         zoomIn() {
@@ -364,6 +370,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       setZoom,
       isCompareMode,
       allPages,
+      thumbnailsContainerRef
     ]
   );
 

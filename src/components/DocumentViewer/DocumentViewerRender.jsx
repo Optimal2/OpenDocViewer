@@ -46,6 +46,7 @@ import DocumentRender from '../DocumentRender.jsx';
  * @param {RefLike} props.compareRef                           Imperative ref for the comparison <DocumentRender />
  * @param {Array} props.allPages                               Full page list (shared by panes)
  * @param {RefLike} props.thumbnailsContainerRef               Ref to thumbnails container (for scroll sync)
+ * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']  Sticky zoom mode to respect after page load
  * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
@@ -62,7 +63,24 @@ const DocumentViewerRender = ({
   compareRef,
   allPages,
   thumbnailsContainerRef,
+  zoomMode = 'CUSTOM',
 }) => {
+  const handlePrimaryRendered = () => {
+    if (zoomMode === 'FIT_PAGE') {
+      documentRenderRef?.current?.fitToScreen?.();
+    } else if (zoomMode === 'FIT_WIDTH') {
+      documentRenderRef?.current?.fitToWidth?.();
+    }
+  };
+
+  const handleCompareRendered = () => {
+    if (zoomMode === 'FIT_PAGE') {
+      compareRef?.current?.fitToScreen?.();
+    } else if (zoomMode === 'FIT_WIDTH') {
+      compareRef?.current?.fitToWidth?.();
+    }
+  };
+
   return (
     <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
       <div className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}>
@@ -71,7 +89,7 @@ const DocumentViewerRender = ({
           pageNumber={pageNumber}
           zoom={zoom}
           initialRenderDone={() => {}}
-          onRender={() => {}}
+          onRender={handlePrimaryRendered}
           viewerContainerRef={viewerContainerRef}
           setZoom={setZoom}
           setPageNumber={setPageNumber}
@@ -90,7 +108,7 @@ const DocumentViewerRender = ({
             pageNumber={comparePageNumber}
             zoom={zoom}
             initialRenderDone={() => {}}
-            onRender={() => {}}
+            onRender={handleCompareRendered}
             viewerContainerRef={viewerContainerRef}
             setZoom={setZoom}
             setPageNumber={setPageNumber}
@@ -124,6 +142,7 @@ DocumentViewerRender.propTypes = {
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
   thumbnailsContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
 };
 
 export default React.memo(DocumentViewerRender);

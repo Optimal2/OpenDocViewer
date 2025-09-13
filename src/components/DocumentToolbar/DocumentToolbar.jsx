@@ -34,7 +34,15 @@
  * @param {function():void} props.resetImageProperties - Reset brightness/contrast/rotation to defaults.
  * @param {boolean} props.isExpanded - Whether the canvas editing tool panel is open.
  * @param {SetBooleanState} props.setIsExpanded - Toggle state setter for the editing panel (see jsdoc-types.js).
+ * @param {number=} props.zoom - (Optional) current zoom scale (1.0 = 100%). Used for display only.
+ * @param {{mode:('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'),scale:number}=} props.zoomState - (Optional) zoom mode/state for highlighting.
+ * @param {(function(ZoomMode): void)=} props.setZoomMode - (Optional) switch zoom mode (sets sticky fit behaviors).
  * @returns {JSX.Element}
+ */
+
+/**
+ * Zoom mode for the viewer.
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
 
 import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
@@ -76,6 +84,10 @@ const DocumentToolbar = ({
   resetImageProperties,
   isExpanded,
   setIsExpanded,
+  // NEW (optional; safe defaults below)
+  zoom,
+  zoomState,
+  setZoomMode,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
@@ -234,6 +246,10 @@ const DocumentToolbar = ({
     }
   }, [documentRenderRef, viewerContainerRef, submitUserPrintLog]);
 
+  // Derived display values (safe defaults if optional props are absent)
+  const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
+  const zoomMode = zoomState?.mode;
+
   return (
     <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
       {/* Print button → opens dialog */}
@@ -273,8 +289,17 @@ const DocumentToolbar = ({
       <ZoomButtons
         zoomIn={zoomIn}
         zoomOut={zoomOut}
-        fitToScreen={fitToScreen}
-        fitToWidth={fitToWidth}
+        fitToScreen={() => {
+          setZoomMode?.('FIT_PAGE');
+          fitToScreen();
+        }}
+        fitToWidth={() => {
+          setZoomMode?.('FIT_WIDTH');
+          fitToWidth();
+        }}
+        onActualSize={setZoomMode ? () => setZoomMode('ACTUAL_SIZE') : undefined}
+        zoomMode={zoomMode}
+        zoomPercent={zoomPercent}
       />
 
       <div className="separator" />
@@ -402,6 +427,12 @@ DocumentToolbar.propTypes = {
   resetImageProperties: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   setIsExpanded: PropTypes.func.isRequired,
+  zoom: PropTypes.number,
+  zoomState: PropTypes.shape({
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+    scale: PropTypes.number,
+  }),
+  setZoomMode: PropTypes.func,
 };
 
 export default React.memo(DocumentToolbar);

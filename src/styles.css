@@ -368,6 +368,12 @@ canvas {
   background-color: var(--primary-color);
 }
 
+/* NEW: visual 'active' state for zoom-mode buttons (Fit Page / Fit Width / 100%) */
+.toolbar .odv-btn.is-active {
+  outline: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35) inset;
+}
+
 .separator {
   width: 1px;
   height: 30px;
@@ -399,6 +405,15 @@ input[type="range"].active {
 .toolbar .editing-tools input[type="range"] {
   margin-left: 5px;
   width: 100px;
+}
+
+/* NEW: zoom percentage indicator styling */
+.toolbar .zoom-percent {
+  padding: 0 6px;
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
 }
 
 .collapsible {
