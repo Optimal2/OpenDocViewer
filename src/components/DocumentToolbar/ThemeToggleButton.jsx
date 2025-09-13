@@ -2,40 +2,22 @@
 /**
  * File: src/components/DocumentToolbar/ThemeToggleButton.jsx
  *
- * OpenDocViewer — Theme Toggle Button
+ * Small button that toggles between light/dark themes using the ThemeContext.
  *
- * PURPOSE
- *   Small, stateless control that toggles the viewer theme between "light" and "dark".
- *   By default it consumes ThemeContext for the current theme value, and will use a
- *   provided `toggleTheme` prop if supplied (useful for testing or custom hosts).
- *
- * ACCESSIBILITY
- *   - Uses `aria-pressed` to expose the toggle state.
- *   - Button includes a descriptive `aria-label` and `title`.
- *
- * ICONS
- *   - Uses Material Icons glyphs: `dark_mode` (when current theme is light) and
- *     `light_mode` (when current theme is dark).
- *
- * IMPORTANT PROJECT NOTE (future reviewers)
- *   - Elsewhere in this project we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With file-type v21 the '/browser' subpath is not exported
- *     for bundlers and will break the Vite build. See README “Design notes & gotchas”.
+ * @component
+ * @param {Object} props
+ * @param {function():void} [props.toggleTheme] - Optional external toggle handler; falls back to context.
+ * @param {string} [props.className] - Optional extra class names.
+ * @returns {JSX.Element}
  */
 
 import React, { useContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import { ThemeContext } from '../../ThemeContext.jsx';
 
-/**
- * ThemeToggleButton
- *
- * @param {Object}   props
- * @param {function(): void} [props.toggleTheme]  Optional override; if omitted, uses ThemeContext.toggleTheme.
- * @param {string}   [props.className]            Optional extra class names for the button.
- * @returns {React.ReactElement}
- */
 const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
+  const { t } = useTranslation();
   const ctx = useContext(ThemeContext);
   const theme = (ctx?.theme === 'dark' || ctx?.theme === 'light') ? ctx.theme : 'light';
   const doToggle = toggleTheme || ctx?.toggleTheme;
@@ -44,11 +26,11 @@ const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
 
   const labels = useMemo(() => {
     return {
-      aria: isDark ? 'Switch to light theme' : 'Switch to dark theme',
-      title: isDark ? 'Switch to light theme' : 'Switch to dark theme',
+      aria: isDark ? t('toolbar.theme.switchToLight') : t('toolbar.theme.switchToDark'),
+      title: isDark ? t('toolbar.theme.switchToLight') : t('toolbar.theme.switchToDark'),
       icon: isDark ? 'light_mode' : 'dark_mode',
     };
-  }, [isDark]);
+  }, [isDark, t]);
 
   return (
     <button

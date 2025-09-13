@@ -1,0 +1,108 @@
+{
+  "toolbar": {
+    "print": "Skriv ut",
+    "zoomIn": "Zooma in",
+    "zoomOut": "Zooma ut",
+    "fitToScreen": "Anpassa till skärmen",
+    "fitToWidth": "Anpassa till bredden",
+    "firstPage": "Första sidan",
+    "previousPage": "Föregående sida",
+    "nextPage": "Nästa sida",
+    "lastPage": "Sista sidan",
+    "page": "Sida",
+    "compare": {
+      "enable": "Aktivera jämför-läge",
+      "disable": "Inaktivera jämför-läge"
+    },
+    "editing": {
+      "enable": "Aktivera redigeringsverktyg",
+      "disable": "Inaktivera redigeringsverktyg"
+    },
+    "rotateLeft90": "Rotera vänster 90°",
+    "rotateRight90": "Rotera höger 90°",
+    "brightness": "Ljusstyrka",
+    "contrast": "Kontrast",
+    "adjustBrightness": "Justera ljusstyrka",
+    "adjustContrast": "Justera kontrast",
+    "imageAdjustments": "Bildjusteringar",
+    "aria": {
+      "documentControls": "Dokumentkontroller"
+    },
+    "theme": {
+      "switchToLight": "Byt till ljust tema",
+      "switchToDark": "Byt till mörkt tema"
+    }
+  },
+  "printDialog": {
+    "title": "Skriv ut",
+    "mode": {
+      "basic": "Enkelt läge",
+      "advanced": "Avancerat läge"
+    },
+    "modeSwitch": {
+      "to": "Byt till {mode}.",
+      "back": "Byt tillbaka till {mode}."
+    },
+    "desc": "Välj vad som ska skrivas ut. Standard är {active}.",
+    "headerNote": "Ett sidhuvud stämplas på utskrivna sidor. Detta är konfigurerat av administratören och kan inte stängas av här.",
+    "switchToAdvanced": "avancerat läge",
+    "switchToBasic": "enkelt läge",
+    "pagesHeader": "Sidor",
+    "basic": {
+      "active": "Aktuell sida",
+      "all": "Alla sidor"
+    },
+    "advanced": {
+      "range": "Enkelt intervall",
+      "custom": "Egna sidor"
+    },
+    "range": {
+      "from": "Från",
+      "to": "Till",
+      "allowedHint": "Tillåtet: 1–{total}. Stigande (2→5) eller fallande (5→2)."
+    },
+    "custom": {
+      "placeholder": "t.ex. 7 6 5 4 2   eller   1-3, 2, 2, 5-2",
+      "hint": "Mellanslag eller kommatecken. Intervall kan vara stigande (2-5) eller fallande (5-2)."
+    },
+    "userSection": {
+      "header": "Orsak & mottagare"
+    },
+    "reason": {
+      "label": "Orsak",
+      "requiredHint": "Obligatoriskt. Max {max}{extra} tecken.",
+      "optionalHint": "Valfritt. Max {max}{extra} tecken.",
+      "extra": {
+        "placeholder": "Lägg till detaljer…",
+        "suffix": " (ytterligare text)"
+      }
+    },
+    "forWhom": {
+      "label": "För vem",
+      "requiredHint": "Obligatoriskt. Max {max} tecken.",
+      "optionalHint": "Valfritt. Max {max} tecken."
+    },
+    "footer": {
+      "cancel": "Avbryt",
+      "continue": "Fortsätt"
+    },
+    "errors": {
+      "selectValidPages": "Välj giltiga sidor.",
+      "valuesPositive": "Värden måste vara positiva.",
+      "highestAllowed": "Högsta tillåtna sida är {total}.",
+      "selectReason": "Välj en orsak.",
+      "enterExtra": "Ange ytterligare detaljer för vald orsak.",
+      "extraTooLong": "Ytterligare text är för lång (max {max}).",
+      "extraFormat": "Formatet på ytterligare text är inte tillåtet.",
+      "enterReason": "Ange en orsak.",
+      "reasonTooLong": "Orsaken är för lång (max {max}).",
+      "reasonFormat": "Formatet på orsaken är inte tillåtet.",
+      "enterForWhom": "Ange vem som begärde detta.",
+      "forWhomTooLong": "”För vem” är för långt (max {max}).",
+      "forWhomFormat": "Formatet på ”För vem” är inte tillåtet.",
+      "invalidCustom": "Ogiltig inmatning av egna sidor.",
+      "review": "Kontrollera obligatoriska fält."
+    },
+    "summary": "Du kommer att skriva ut {count, plural, =1 {# sida} other {# sidor}}."
+  }
+}

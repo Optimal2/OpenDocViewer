@@ -2,69 +2,32 @@
 /**
  * File: src/components/DocumentToolbar/PageNavigationButtons.jsx
  *
- * OpenDocViewer — Page Navigation Controls
+ * Page navigation controls with support for single-step clicks and
+ * continuous stepping on press-and-hold (mouse/touch).
  *
- * PURPOSE
- *   Stateless group of navigation controls to move between pages and jump to
- *   the first/last page. Supports both single-step clicks and press-and-hold
- *   (continuous) navigation via timers provided by the parent hook.
- *
- * ACCESSIBILITY
- *   - Each control has clear aria-labels and title tooltips.
- *   - Current page info is exposed in a polite live region so AT announces updates.
- *
- * INTERACTION MODEL
- *   - Click → single step (prev/next).
- *   - Press & hold (mouse or touch) → continuous stepping using timers provided by the parent.
- *
- * IMPORTANT PROJECT GOTCHA (for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT
- *     'file-type/browser'. With file-type v21 the '/browser' subpath is not
- *     exported for bundlers and will break the Vite build. See README for details.
- */
-
-/**
- * Direction token for page timers/navigation.
- * Prefer reusing the central typedef if available in jsdoc-types.js.
- * @typedef {'prev'|'next'} PageDirection
- */
-
-/**
- * Start a continuous page-timer in the given direction.
- * @callback StartPageTimer
- * @param {PageDirection} dir
- * @returns {void}
- */
-
-/**
- * Stop a running page-timer.
- * @callback StopPageTimer
- * @returns {void}
+ * @component
+ * @param {Object} props
+ * @param {boolean} props.prevPageDisabled - Disable "previous page".
+ * @param {boolean} props.nextPageDisabled - Disable "next page".
+ * @param {boolean} props.firstPageDisabled - Disable "first page".
+ * @param {boolean} props.lastPageDisabled - Disable "last page".
+ * @param {function(PageDirection):void} props.startPrevPageTimer - Start the "prev" repeat timer.
+ * @param {function():void} props.stopPrevPageTimer - Stop the "prev" repeat timer.
+ * @param {function(PageDirection):void} props.startNextPageTimer - Start the "next" repeat timer.
+ * @param {function():void} props.stopNextPageTimer - Stop the "next" repeat timer.
+ * @param {function():void} props.handleFirstPage - Jump to first page.
+ * @param {function():void} props.handleLastPage - Jump to last page.
+ * @param {function():void} props.handlePrevPage - Single-step to previous page.
+ * @param {function():void} props.handleNextPage - Single-step to next page.
+ * @param {number} props.pageNumber - Current page number (1-based).
+ * @param {number} props.totalPages - Total pages.
+ * @returns {JSX.Element}
  */
 
 import React, { useRef } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 
-/**
- * PageNavigationButtons component.
- *
- * @param {Object} props
- * @param {boolean} props.prevPageDisabled
- * @param {boolean} props.nextPageDisabled
- * @param {boolean} props.firstPageDisabled
- * @param {boolean} props.lastPageDisabled
- * @param {StartPageTimer} props.startPrevPageTimer
- * @param {StopPageTimer} props.stopPrevPageTimer
- * @param {StartPageTimer} props.startNextPageTimer
- * @param {StopPageTimer} props.stopNextPageTimer
- * @param {function(): void} props.handleFirstPage
- * @param {function(): void} props.handleLastPage
- * @param {function(): void} props.handlePrevPage
- * @param {function(): void} props.handleNextPage
- * @param {number} props.pageNumber
- * @param {number} props.totalPages
- * @returns {React.ReactElement}
- */
 const PageNavigationButtons = ({
   prevPageDisabled,
   nextPageDisabled,
@@ -81,6 +44,7 @@ const PageNavigationButtons = ({
   pageNumber,
   totalPages,
 }) => {
+  const { t } = useTranslation();
   // Suppress the subsequent onClick if a pointer press already caused a leading-edge step.
   const suppressNextClickRef = useRef(false);
 
@@ -122,8 +86,8 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={handleFirstPage}
-        aria-label="First page"
-        title="First page"
+        aria-label={t('toolbar.firstPage')}
+        title={t('toolbar.firstPage')}
         className="odv-btn"
         disabled={firstPageDisabled}
       >
@@ -148,8 +112,8 @@ const PageNavigationButtons = ({
         }}
         onTouchStart={onTouchStartPrev}
         onTouchEnd={stopPrevPageTimer}
-        aria-label="Previous page"
-        title="Previous page"
+        aria-label={t('toolbar.previousPage')}
+        title={t('toolbar.previousPage')}
         className="odv-btn"
         disabled={prevPageDisabled}
       >
@@ -158,7 +122,7 @@ const PageNavigationButtons = ({
 
       {/* Page info (live region announces updates politely) */}
       <div className="page-info" aria-live="polite">
-        <div>Page</div>
+        <div>{t('toolbar.page')}</div>
         <div>{pageNumber} / {totalPages}</div>
       </div>
 
@@ -179,8 +143,8 @@ const PageNavigationButtons = ({
         }}
         onTouchStart={onTouchStartNext}
         onTouchEnd={stopNextPageTimer}
-        aria-label="Next page"
-        title="Next page"
+        aria-label={t('toolbar.nextPage')}
+        title={t('toolbar.nextPage')}
         className="odv-btn"
         disabled={nextPageDisabled}
       >
@@ -191,8 +155,8 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={handleLastPage}
-        aria-label="Last page"
-        title="Last page"
+        aria-label={t('toolbar.lastPage')}
+        title={t('toolbar.lastPage')}
         className="odv-btn"
         disabled={lastPageDisabled}
       >

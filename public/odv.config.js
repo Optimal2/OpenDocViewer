@@ -20,7 +20,7 @@
  *     unless you force visibility via ui.showReasonWhen / ui.showForWhomWhen.
  *   - Validation (required, maxLen, regex) comes from userLog.ui.fields.*.
  *   - Reason dropdown can be inline (options[]) or loaded from source.url.
- *   - A reason option may request extra free text via allowFreeText + input{...}.
+ *   - A reason option may request additional free text via allowFreeText + input{...}.
  *
  * CACHING:
  *   Keep this file uncached (web.config sets Cache-Control: no-store).
@@ -84,6 +84,20 @@
     basePath: basePath,    // e.g. "/OpenDocViewer"
     baseHref: baseHref,    // e.g. "/OpenDocViewer/"
 
+    // ---- INTERNATIONALIZATION -------------------------------------------------
+    // Used by src/i18n.js to set defaults & load translation files at runtime.
+    // `loadPath` works under virtual directories: uses baseHref.
+    i18n: {
+      default: 'en',
+      supported: ['en', 'sv'],
+      // Include a version placeholder in the query to help cache-busting.
+      // src/i18n.js will also append ?v=<token> if you omit {{ver}} here.
+      loadPath: baseHref + 'locales/{{lng}}/{{ns}}.json?v={{ver}}',
+      // Bump this when deploying new locale files to force clients to fetch fresh JSON.
+      version: '1'
+      // debug: true // uncomment temporarily if you want i18n logs in prod
+    },
+
     // ---- USER LOG -------------------------------------------------------------
     // Default: ENABLED — proxied via a dedicated IIS app at /ODVProxy/.
     userLog: {
@@ -103,7 +117,7 @@
             required: true,
             maxLen: 255,
             // regex: null → viewer uses a permissive default that caps to maxLen
-            regex: null,          // or e.g. "^([\\s\\S]{0,255})$"
+            regex: null,          // or e.g. "^(.*)$"
             regexFlags: "",
             placeholder: "Select reason…",
             source: {
@@ -117,17 +131,17 @@
                   input: {
                     required: true,
                     maxLen: 140,
-                    regex: null,       // or "^([\\s\\S]{0,140})$"
+                    regex: null,
                     regexFlags: "",
                     placeholder: "Type other reason…",
-                    prefix: "",        // prepend to the user's text
-                    suffix: ""         // append after the user's text
+                    prefix: "",
+                    suffix: ""
                   }
                 }
-              ],
+              ]
               // To load reasons at runtime instead, set a same-origin URL and (optionally) a small cache TTL:
-              // url: basePath + "/userlog/reasons.json",
-              // cacheTtlSec: 300
+              // ,url: basePath + "/userlog/reasons.json"
+              // ,cacheTtlSec: 300
             },
             default: null          // e.g., "Patient copy"
           },
@@ -135,7 +149,7 @@
           forWhom: {
             required: false,
             maxLen: 120,
-            regex: null,           // or "^([\\s\\S]{0,120})$"
+            regex: null,
             regexFlags: "",
             placeholder: "Who requested this?"
           }

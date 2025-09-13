@@ -20,6 +20,7 @@
 import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
+import './i18n'; // initialize i18n before rendering
 import logger from './LogController';
 import AppBootstrap from './components/AppBootstrap';
 
