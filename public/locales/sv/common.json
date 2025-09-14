@@ -3,8 +3,10 @@
     "print": "Skriv ut",
     "zoomIn": "Zooma in",
     "zoomOut": "Zooma ut",
+    "zoomActual": "Faktisk storlek (1:1)",
     "fitToScreen": "Anpassa till skärmen",
     "fitToWidth": "Anpassa till bredden",
+    "zoomPercentAria": "Aktuell zoomprocent",
     "firstPage": "Första sidan",
     "previousPage": "Föregående sida",
     "nextPage": "Nästa sida",
@@ -31,7 +33,9 @@
     "theme": {
       "switchToLight": "Byt till ljust tema",
       "switchToDark": "Byt till mörkt tema"
-    }
+    },
+    "focusWarningTitle": "Genvägar inaktiva",
+    "focusWarningAction": "Fokusera visaren"
   },
   "printDialog": {
     "title": "Skriv ut",
