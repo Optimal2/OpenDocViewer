@@ -1,87 +1,101 @@
 # OpenDocViewer
 
-OpenDocViewer is a fast, lightweight, MIT-licensed document viewer built with **React + Vite**. It supports **PDF**, **TIFF**, and common image formats (**JPG/PNG**), with thumbnails, zoom, fit-to-screen/width, keyboard navigation, optional image adjustments (rotation, brightness, contrast), and a compare mode.
-
-The app is **runtime-configurable** via `/odv.config.js` (with optional site overrides in `/odv.site.config.js`)—no rebuild required. Optional log servers are included for operational telemetry:
-
-* **System Log** (token-gated JSON ingestion; intended for infrastructure logs)
-* **User Print Log** (records end-user print reasons; non-blocking and backend-agnostic)
+OpenDocViewer is a fast, lightweight, MIT-licensed **React + Vite** viewer for **PDF**, **TIFF**, and common images (**JPG/PNG**). It ships with thumbnails, sticky zoom modes, comparison view, printing helpers, localized UI (i18next), and optional logging. It is 100% client-side and deploys as static files.
 
 ---
 
 ## Table of contents
 
 * [Features](#features)
+* [What’s new](#whats-new)
 * [Architecture overview](#architecture-overview)
 * [Requirements](#requirements)
 * [Quick start (development)](#quick-start-development)
 * [Build & preview (production)](#build--preview-production)
 * [Hosting & deployment](#hosting--deployment)
 * [Runtime configuration](#runtime-configuration)
-* [Site overrides & admin tool](#site-overrides--admin-tool)
-* [Printing (range, sequence, header overlay)](#printing-range-sequence-header-overlay)
-* [Logging (optional)](#logging-optional)
-* [Embedding & integration patterns](#embedding--integration-patterns)
 * [Internationalization (i18n)](#internationalization-i18n)
-* [JSDoc (API docs)](#jsdoc-api-docs)
-* [Linting & formatting](#linting--formatting)
+* [Printing](#printing)
+* [Logging (optional)](#logging-optional)
+* [Keyboard & mouse shortcuts](#keyboard--mouse-shortcuts)
+* [Accessibility](#accessibility)
 * [Project structure](#project-structure)
-* [Security & privacy notes](#security--privacy-notes)
-* [Design notes & gotchas](#design-notes--gotchas)
+* [Contributing & quality](#contributing--quality)
 * [License](#license)
 
 ---
 
 ## Features
 
-* **PDF, TIFF, JPG/PNG** viewing with robust fallbacks
+* **Formats**
 
-  * PDF & multi-page TIFF rasterized on the **main thread** for consistent behavior (dev = prod)
-  * Single-page images processed in **Web Workers** (when available)
-* **Thumbnails** with accessible listbox semantics, keyboard activation, and stable scroll position
-* **Zoom**, **fit to screen/width**, and **compare mode** (pick two pages to view side-by-side)
-* **Image adjustments** (per-page): rotate ±90°, brightness, contrast
-* **Printing**:
+  * PDF and multi-page TIFF render reliably (main thread), single images use a worker pipeline
+  * JPG/PNG render via `<img>` or `<canvas>` as needed (rotation/filters)
+* **Viewer**
 
-  * Current page / all pages / range (ascending or descending) / custom **sequence**
-  * Non-blocking client (never delays printing)
-  * Optional **header overlay** stamped on printed pages (tokens & localization supported)
-* **Keyboard navigation**: PageDown/Right/Down → next, PageUp/Left/Up → previous, Home/End → first/last
-* **Portable build** (static assets in `dist/`) that runs on any static host
-* **Runtime configuration** via `/odv.config.js` and optional `/odv.site.config.js` (no rebuild)
-* **Optional logging**:
+  * **Sticky Fit** modes: **Fit to page** and **Fit to width** re-compute on page/rotate/resize
+  * **Zoom**: +/− buttons, **Ctrl/Cmd + mouse wheel**, and editable **percentage** field
+  * **Compare mode**: side-by-side pages with **per-pane post-zoom** (floating controls)
+  * **Thumbnails** with keyboard activation and stable scrolling
+  * **Edit tools** (per page): rotate ±90°, brightness, contrast (visual only; printing unaffected)
+  * **Focus warning** button appears when shortcuts are inactive (focus left the viewer)
+* **Printing**
 
-  * **User Print Log** (same-origin `sendBeacon`/`keepalive` with JSON or form transport)
-  * **System Log** (token-gated JSON ingestion server; typically proxied behind IIS)
+  * Active page / All / Range (ascending/descending) / **Custom sequence**
+  * Optional **header overlay** with tokens (date/time/page/reason/forWhom/etc.)
+* **Runtime configurable**
+
+  * `/odv.config.js` with optional site overrides in `/odv.site.config.js` (no rebuild)
+* **Optional logging**
+
+  * **User Print Log** (reason/for whom), **System Log** (structured events)
+
+---
+
+## What’s new
+
+Recent highlights:
+
+* **Per-pane post-zoom in comparison view**
+  Floating overlay per pane (top-center) applies a multiplicative factor on top of base zoom. Independent left/right fine-tuning without altering sticky fit or global zoom.
+
+* **Editable zoom with a `%` suffix**
+  Zoom box always shows percent when unfocused (e.g., `125%`), and allows numeric editing when focused (e.g., `125`).
+
+* **Unified, grouped toolbar controls**
+  Paging and edit controls are presented in compact “white areas” similar to the zoom group. The **page field is editable**: unfocused shows `X / Y`; focused shows just `X`. Enter/blur applies (clamped), Esc cancels.
+
+* **Compare ↔ Edit mutual exclusivity**
+  Edit button disabled while Compare is active and vice versa—no special-case handling required.
+
+* **CSS refactor**
+  `src/styles.css` now aggregates modular files: `styles/theme.css`, `styles/layout.css`, `styles/toolbar.css`, `styles/dialogs.css`, `styles/print.css`. The print dialog moved from a CSS Module to global styles under `styles/dialogs.css`.
 
 ---
 
 ## Architecture overview
 
-* **Viewer SPA** (React + Vite)
+* **SPA** built with **React + Vite**
 
-  * Entry: `src/index.jsx` mounts `<AppBootstrap/>`, which detects how to start the viewer
-  * Top-level component: `src/OpenDocViewer.jsx` wires providers, toggles, and performance HUD
-  * Rendering:
+  * Entry: `src/index.jsx`
+  * Root: `src/OpenDocViewer.jsx`
+* **Rendering**
 
-    * **PDF** via `pdfjs-dist` API with an **ESM worker** configured once (dev = prod)
-    * **TIFF** via `utif2`
-    * Images via a worker pipeline (batching tuned by cores/device memory)
-* **Boot/integration paths** (detected automatically in `src/integrations/Bootstrap.js`)
+  * PDF via `pdfjs-dist` (ESM worker configured once, dev == prod)
+  * TIFF via `utif2`
+  * Images via worker pipeline (batching tuned by cores/device memory)
+* **Viewer components**
 
-  1. **Same-origin parent bridge** (reads `parent.ODV_BOOTSTRAP` or legacy shapes)
-  2. **Session token** in URL (`?sessiondata=<base64-json>`)
-  3. **URL params** (pattern mode: `folder`, `extension`, `endNumber`)
-  4. **JS API** (`window.ODV.start(payload)`)
-  5. **Demo** (sample assets in `/public`)
-* **Runtime config**: `public/odv.config.js` (active defaults) + optional `public/odv.site.config.js` (overrides)
+  * `DocumentViewer/*` — container, renderer, thumbnails, toolbar
+  * `DocumentToolbar/*` — zoom, paging, print dialog, theme toggle
+  * Hooks split for clarity: `useDocumentViewer`, `hooks/useViewerEffects`, `hooks/useViewerPostZoom`
 
 ---
 
 ## Requirements
 
-* **Node.js 18+** and npm
-* Modern browser (Chromium/Firefox/Safari). ES modules and Web Workers are used; IE is not supported.
+* **Node.js 18+**
+* Modern browsers (Chromium/Firefox/Safari). IE is not supported.
 
 ---
 
@@ -94,7 +108,7 @@ npm install
 npm run dev
 ```
 
-Open the URL printed by Vite (typically `http://localhost:5173`).
+Open the URL Vite prints (typically `http://localhost:5173`).
 
 ---
 
@@ -112,259 +126,111 @@ npm run preview
 
 ## Hosting & deployment
 
-The production build is **static**. Deploy the `dist/` folder to any static host (IIS, Nginx, Apache, S3/CloudFront, GitHub Pages, …).
+The build is **static**. Deploy `dist/` to any static host (IIS, Nginx, Apache, S3/CloudFront, GitHub Pages, …).
 
-**SPA routing:** configure a fallback so unknown routes serve `index.html`.
-
-**Caching:** long-cache hashed assets; **do not** long-cache `index.html` or `odv.config.js` (serve both with `Cache-Control: no-store`).
+* **SPA fallback:** serve `index.html` for unknown routes.
+* **Caching:** long-cache fingerprinted assets; **do not** long-cache `index.html` or `odv.config.js` (serve with `Cache-Control: no-store`).
 
 ### IIS
 
-A production-ready `web.config` is included (SPA fallback, MIME types, compression, security headers). It is **mode-less**:
-
-* This app **does not** proxy logs directly.
-* If you want to expose the optional Node log servers behind IIS, deploy a **separate IIS app** (for example at `/ODVProxy`) and point the runtime config endpoints there (e.g., `/ODVProxy/log`, `/ODVProxy/userlog/record`). See [Logging](#logging-optional).
+A production `web.config` is included (SPA fallback, MIME types, compression, security headers). Keep Node log servers (if used) as **separate apps** and proxy them (e.g., `/ODVProxy/log`, `/ODVProxy/userlog/record`).
 
 ---
 
 ## Runtime configuration
 
-Runtime config is loaded **before** the app via a tiny bootstrap (`src/boot-config.js`) that:
+Loaded **before** the app starts:
 
-1. Determines the app base path (works under IIS virtual directories).
-2. Loads optional **site overrides** from `/odv.site.config.js`.
-3. Loads required **defaults** from `/odv.config.js`.
-4. Starts the app.
+1. Determine base path (supports virtual directories).
+2. Load optional site overrides: `/odv.site.config.js`.
+3. Load required defaults: `/odv.config.js`.
 
-`/odv.config.js` exports a single “active” config object (no historical “modes”) covering:
+Config covers:
 
-* **Diagnostics**
+* **Diagnostics:** `exposeStackTraces`, `showPerfOverlay`
+* **Mount:** `basePath`, `baseHref`
+* **i18n:** `default`, `supported`, `loadPath`, `version`
+* **User Print Log:** `enabled`, `endpoint`, `transport`, UI policy & validation
+* **Print header overlay:** `enabled`, `position`, `applyTo`, `heightPx`, `template`, `css`
+* **System Log:** `enabled`, `endpoint`, `token`
 
-  * `exposeStackTraces: boolean` – show/hide error stacks in the UI
-  * `showPerfOverlay: boolean` – toggle the performance HUD
-* **Mount info**
-
-  * `basePath`, `baseHref` (automatically derived; used by i18n and routerless asset URLs)
-* **Internationalization (i18n)**
-
-  * `default`, `supported`, `loadPath`, `version` (cache-busting token)
-* **User Print Log**
-
-  * `enabled`, `endpoint` (absolute or app-relative), `transport: 'json'|'form'`
-  * UI policy (`ui.showReasonWhen`, `ui.showForWhomWhen`) and validation
-* **Print header overlay**
-
-  * `enabled`, `position: "top"|"bottom"`, `applyTo: "all"|"first"|"last"`, `heightPx`
-  * `template` (tokens; supports localized strings), `css` (print-only)
-* **System Log**
-
-  * `enabled`, `endpoint`, `token`
-
-The config is read at runtime by the viewer and by integration controllers—**no rebuild needed** to change behavior.
+Admins can use `/odv-admin.html` to inspect and save site overrides (File System Access API where supported).
 
 ---
 
-## Site overrides & admin tool
+## Internationalization (i18n)
 
-* Put site-specific changes in **`/odv.site.config.js`** (same folder as `odv.config.js`). This file is **optional**.
-* A helper UI **`/odv-admin.html`** lets administrators:
-
-  * Load the current effective config
-  * Edit User Print Log fields, Print Header template/CSS, System Log settings, toggles
-  * **Save directly** to `public/odv.site.config.js` via the File System Access API (Edge/Chrome) or **download** the file
+* Libraries: `i18next`, `react-i18next`, `i18next-icu`
+* Early language/meta applied in `index.html` for localized shell
+* Translations under `public/locales/{lng}/common.json`
+* Set `i18n.version` in config to bust caches
 
 ---
 
-## Printing (range, sequence, header overlay)
+## Printing
 
-OpenDocViewer provides a complete print pipeline:
+* **Modes:** Active page / All / Range / Custom sequence
+* **Dialog UX:** Basic and Advanced sections, optional **Reason** and **For whom** inputs (policy driven)
+* **Transport:** Prefers `sendBeacon` for same-origin; falls back to `fetch({keepalive:true})`
+* **Header overlay:** Tokenized template (e.g., `page`, `totalPages`, `date`, `reason`, `forWhom`, `viewer.version`) and scoped print CSS
 
-* **What you can print**
-
-  * **Active page**, **All pages**
-  * **Range** (ascending `2→5` or descending `5→2`)
-  * **Custom sequence** (e.g., `"1-3, 2, 2, 7-5"`)
-* **UX**
-
-  * Print dialog collects **Reason** and **For whom** (policy controlled via runtime config)
-  * Printing is **non-blocking**: the log call (if enabled) is fire-and-forget
-* **Transport**
-
-  * Prefers `navigator.sendBeacon` for same-origin; otherwise `fetch({ keepalive: true, credentials: 'include' })` with a short abort
-  * **Cookies are included** for same-origin requests
-* **Header overlay**
-
-  * When enabled, a lightweight header is **stamped** on printed pages
-  * Template supports tokens (HTML-escaped at render time):
-
-    * `date`, `time`, `now`
-    * `page`, `totalPages`
-    * `reason`, `forWhom`
-    * `user.id`, `user.name`
-    * `doc.id`, `doc.title`, `doc.pageCount`
-    * `viewer.version`
-  * Admins may localize the template and style it via print-scoped CSS
-
-Developers can also call the public helpers exported by `src/utils/printUtils.js`:
+Developer helpers (`src/utils/printUtils.js`):
 
 ```js
-import { handlePrint, handlePrintAll, handlePrintRange, handlePrintSequence, parsePrintSequence } from './src/utils/printUtils.js';
+import {
+  handlePrint, handlePrintAll, handlePrintRange, handlePrintSequence, parsePrintSequence
+} from './src/utils/printUtils.js';
 ```
 
 ---
 
 ## Logging (optional)
 
-### User Print Log (client → configurable endpoint)
+### User Print Log
 
-* Implemented in `src/integration/UserLogController.js`
-* Reads `userLog` from runtime config:
+* Client in `UserLogController` posts to configurable endpoint
+* JSON or form transports
+* Non-blocking; printing proceeds even if logging fails
 
-  * `enabled: boolean`
-  * `endpoint: string`
-  * `transport: 'json'|'form'`
-* **Payloads**
+### System Log
 
-  * **JSON** (rich details, including page count and environment snapshot)
-  * **Form** (compat path for legacy endpoints: `reason`/`forWhom` only)
-* **Resilience**
-
-  * Uses `sendBeacon` when same-origin; else `fetch` with `keepalive`
-  * Exceptions are swallowed; printing proceeds regardless of network state
-
-### System Log (bundled Node server)
-
-A hardened, single-file Node/Express service that ingests structured logs:
-
-* **Endpoint**: `POST /log` (token-gated via `x-log-token`)
-* **Files**: daily-rotated NDJSON logs under `server/logs/` with retention
-* **Rate limiting**, **helmet**, and optional **CORS** (allowlist)
-* **Health**: `GET /healthz`
-
-Start it locally:
-
-```bash
-npm run dev:system-log   # PORT=3001 (dev defaults)
-```
-
-### User Log Server (bundled Node server)
-
-* **Endpoint**: `POST /userlog/record`
-
-  * Content types: `application/json` or `application/x-www-form-urlencoded`
-  * Returns `200 true` for maximum tolerance
-* **Same-origin guard** (Origin/Referer/Sec-Fetch-Site), **rate limiting**, **helmet**
-* **Health**: `GET /healthz`
-
-Start it locally:
-
-```bash
-npm run dev:user-log     # PORT=3002 (dev defaults)
-```
-
-### Running everything together (dev)
-
-```bash
-npm run dev:both         # Vite dev server + both log servers
-```
-
-> **IIS:** Proxy the Node servers through a separate app (e.g. `/ODVProxy`) and point `odv.config.js` to `/ODVProxy/log` and `/ODVProxy/userlog/record`. Helper scripts are in `scripts/` to set up and test the proxies.
+* Simple Node/Express ingestion with token auth, rate limiting, rotation & retention
+* Intended for infrastructure logs; usually proxied behind IIS
 
 ---
 
-## Embedding & integration patterns
+## Keyboard & mouse shortcuts
 
-### 1) React (explicit list; recommended)
+* **General navigation**
 
-```jsx
-import OpenDocViewer from './src/OpenDocViewer.jsx';
+  * `PageDown`/`ArrowRight`/`ArrowDown` → next page
+  * `PageUp`/`ArrowLeft`/`ArrowUp` → previous page
+  * `Home` → first page
+  * `End` → last page
+* **Zoom**
 
-const files = [
-  { url: '/docs/spec.pdf' },
-  { url: '/scans/scan01.tif' },
-  { url: '/images/page-01.png' }
-];
+  * `Ctrl/Cmd + Wheel` → zoom document (prevents browser zoom)
+  * `+ / -` or Numpad `+ / -` → zoom in/out
+  * `1` → **1:1 (100%)** and switch to custom zoom
+  * `2` → **Fit to page**
+  * `3` → **Fit to width**
+* **Modes**
 
-export default function Demo() {
-  return <OpenDocViewer sourceList={files} bundle={{ title: 'Demo bundle' }} />;
-}
-```
+  * `4` → Toggle **Compare**
+  * `5` → Toggle **Edit tools**
+  * `6` → Toggle **Theme**
 
-### 2) Pattern mode (legacy/demo)
-
-```jsx
-<OpenDocViewer folder="/images/page-" extension="png" endNumber={12} />
-```
-
-### 3) Same-origin parent bridge
-
-Place a normalized **portable bundle** (see below) on `parent.ODV_BOOTSTRAP` and host the viewer in an iframe. The viewer will detect and start.
-
-### 4) Session token in URL
-
-Encode a bundle as Base64 JSON and pass `?sessiondata=<token>`. The viewer decodes it on load.
-
-### 5) JS API (no iframe required)
-
-```html
-<script>
-  // Provide normalized data before or after the SPA loads:
-  window.ODV = window.ODV || {};
-  window.ODV.start({
-    session: { id: 'sess-123', userId: 'alice' },
-    documents: [
-      { documentId: 'doc-1', files: [{ url: '/docs/spec.pdf' }] }
-    ]
-  });
-</script>
-```
-
-### Portable bundle (v1, normalized shape)
-
-```json
-{
-  "session": { "id": "string", "userId": "string?" },
-  "documents": [
-    {
-      "documentId": "string",
-      "files": [ "url-or-path", { "url": "/path/file.png", "ext": "png", "id": "optional" } ],
-      "meta": { "title": "optional", "pageCount": 10 }
-    }
-  ]
-}
-```
+> While in **Compare**, edit is disabled. While in **Edit**, compare is disabled.
 
 ---
 
-## Internationalization (i18n)
+## Accessibility
 
-* **Libraries**: `i18next`, `react-i18next`, `i18next-icu`
-* **Runtime-computed load path** that respects the app base (`/` or virtual directory)
-* **Versioned resources**: set `i18n.version` in config to force refresh
-* Early **language and meta tags** are set in `index.html` before React mounts, so titles/descriptions are localized for SEO/shell.
-* Translation files live under `public/locales/{lng}/common.json`. (Sample Swedish `common.json` is included.)
-
----
-
-## JSDoc (API docs)
-
-```bash
-npm run doc
-```
-
-Outputs to `./docs/` using `jsdoc` + `docdash`. (Sources are limited to `src/**/*.js|jsx`.)
-
----
-
-## Linting & formatting
-
-```bash
-npm run lint
-npm run lint:fix
-npm run format
-```
-
-Flat-config ESLint with React hooks and Refresh safety; Prettier for formatting.
+* Thumbnails use listbox semantics with keyboard activation
+* Toolbar buttons include `aria-label`/`title`
+* Compare overlay buttons are reachable and labeled
+* Dialogs are focus-trapped, labeled, and keyboard-operable
+* Inputs expose `spinbutton` semantics where appropriate
 
 ---
 
@@ -373,59 +239,49 @@ Flat-config ESLint with React hooks and Refresh safety; Prettier for formatting.
 ```
 OpenDocViewer/
 ├─ public/
-│  ├─ favicon.ico, logo192.png, logo512.png
-│  ├─ manifest.json
-│  ├─ odv.config.js                 # active runtime defaults (mode-less)
-│  ├─ odv.site.config.sample.js     # copy → odv.site.config.js for site overrides
-│  ├─ odv-admin.html                # admin UI to edit/save site overrides
-│  ├─ locales/{en,sv}/common.json   # translations
-│  └─ sample.{jpg,png,tif,pdf}      # demo assets
-├─ server/
-│  ├─ system-log-server.js          # POST /log (token-gated), health, rotation, retention
-│  └─ user-log-server.js            # POST /userlog/record (form or JSON), same-origin guard
+│  ├─ locales/{en,sv}/common.json
+│  ├─ odv.config.js
+│  ├─ odv.site.config.sample.js
+│  └─ assets for demo/tests…
 ├─ src/
-│  ├─ index.jsx, OpenDocViewer.jsx, styles.css, i18n.js
+│  ├─ index.jsx, OpenDocViewer.jsx
+│  ├─ styles.css                   # aggregator only
+│  ├─ styles/
+│  │  ├─ theme.css                 # variables, base, dark/light
+│  │  ├─ layout.css                # viewer shell, renderers, thumbnails, overlays
+│  │  ├─ toolbar.css               # toolbar groups, zoom/page inputs, edit tools
+│  │  ├─ dialogs.css               # global dialog styles (print dialog, etc.)
+│  │  └─ print.css                 # @media print rules
 │  ├─ components/
-│  │  ├─ AppBootstrap.jsx
-│  │  ├─ DocumentViewer/…           # viewer container, toolbar, thumbnails
-│  │  └─ DocumentToolbar/…          # print dialog, zoom, theme toggle
-│  ├─ integrations/
-│  │  ├─ Bootstrap.js, parentBridge.js, sessionToken.js, urlParams.js
-│  │  ├─ normalizeBundle.js
-│  │  └─ UserLogController.js
-│  ├─ utils/
-│  │  ├─ printCore.js, printDom.js, printParse.js, printTemplate.js, printSanitize.js, printUtils.js
-│  │  └─ zoomUtils.js, navigationUtils.js
-│  ├─ LogController.js              # console + optional HTTP forwarding
-│  └─ PerformanceMonitor.jsx
-├─ scripts/
-│  ├─ Manage-ODV-LogServers.ps1     # start/stop Node log servers (Windows)
-│  ├─ Setup-IIS-ODVProxy.ps1        # create IIS app that proxies → Node servers
-│  └─ Test-ODV-IISProxy.ps1         # smoke-tests proxy endpoints
-├─ web.config                        # SPA hosting on IIS (no proxy rules here; use separate app)
-├─ package.json, vite.config.js, eslint.config.js, jsdoc.json
-└─ dist/                             # production build (after `npm run build`)
+│  │  ├─ DocumentViewer/
+│  │  │  ├─ useDocumentViewer.js
+│  │  │  ├─ hooks/useViewerEffects.js
+│  │  │  ├─ hooks/useViewerPostZoom.js
+│  │  │  ├─ DocumentViewer.jsx / DocumentViewerRender.jsx / …
+│  │  │  └─ CompareZoomOverlay.jsx
+│  │  └─ DocumentToolbar/
+│  │     ├─ DocumentToolbar.jsx
+│  │     ├─ ZoomButtons.jsx
+│  │     ├─ PageNavigationButtons.jsx
+│  │     ├─ PrintRangeDialog.jsx
+│  │     └─ PrintRangeDialog.controller.js
+│  ├─ utils/ (printing, zoom, navigation…)
+│  └─ integrations/ (normalization, bridges, token boot, URL patterns…)
+└─ dist/ (after build)
 ```
 
 ---
 
-## Security & privacy notes
+## Contributing & quality
 
-* **System Log server** requires a shared token via `x-log-token`. Never expose it to untrusted clients.
-* **User Log server** performs a **same-origin check** and rate limits inputs; it does not read/set cookies.
-* **Print overlay tokens** are HTML-escaped before substitution.
-* **IIS security headers** (`X-Content-Type-Options`, `Referrer-Policy`, `Permissions-Policy`) are set by default; HSTS is commented (enable only on always-HTTPS sites).
-* **Caching**: `index.html` and `odv.config.js` are served with `no-store`.
+* **Type & API docs:** `npm run doc` (JSDoc + docdash)
+* **Lint & format:** `npm run lint`, `npm run lint:fix`, `npm run format`
+* **PR guidelines**
 
----
-
-## Design notes & gotchas
-
-* **pdf.js worker parity**: The app sets a single `pdfjs-dist` worker URL so **dev == prod**. Keep the worker version aligned with the API version.
-* **TIFF memory**: Multi-page TIFFs render on the main thread to minimize peak memory and differences between environments.
-* **Worker batching**: Image processing scales with logical cores and device memory; low-core devices use a sequential scheduler to preserve responsiveness.
-* **`file-type` import**: Elsewhere in the project we import from the **root** `'file-type'` package, **not** `'file-type/browser'`. With v21 the `/browser` subpath is not exported and will break Vite builds.
-* **No rebuilds for ops**: Most operational tweaks (endpoints, policies, i18n version, toggles) live in runtime config.
+  * Keep components small; prefer hooks for cross-cutting effects
+  * Maintain JSDoc comments (no TS types required)
+  * Favor accessible labels/roles and keyboard paths
+  * Add i18n keys for new strings in `public/locales/*/common.json`
 
 ---
 

@@ -5,10 +5,9 @@
  * Zoom control cluster:
  *   [ - ] [  % editable  ] [ + ]  |  [ 1:1 ] [ Fit Page ] [ Fit Width ]
  *
- * - Shows a framed fixed-zoom group with minus / percent-input / plus.
- * - "1:1" is a quick preset for CUSTOM @ 100% (no dedicated mode).
- * - Fit buttons use the same "active" visual language as compare/edit.
- * - Active buttons are disabled (idempotent action).
+ * - When the field is NOT focused, it renders like “100%”.
+ * - When focused, it renders just the raw number “100” for easy editing.
+ * - Enter/Blur applies; Escape cancels and restores the previous value.
  *
  * @component
  * @param {Object} props
@@ -72,16 +71,17 @@ const ZoomButtons = ({
   const [draft, setDraft] = useState(
     Number.isFinite(zoomPercent) ? String(Math.round(zoomPercent)) : ''
   );
+  const [isFocused, setIsFocused] = useState(false);
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
   useEffect(() => {
     const el = inputRef.current;
-    const isFocused = !!(el && document.activeElement === el);
-    if (!isFocused && Number.isFinite(zoomPercent)) {
+    const focused = !!(el && document.activeElement === el) || isFocused;
+    if (!focused && Number.isFinite(zoomPercent)) {
       setDraft(String(Math.round(zoomPercent)));
     }
-  }, [zoomPercent]);
+  }, [zoomPercent, isFocused]);
 
   function applyDraft() {
     const next = parsePercentInput(draft);
@@ -110,6 +110,11 @@ const ZoomButtons = ({
   const disableFitPage = disableFits || fitPageActive;
   const disableFitWidth = disableFits || fitWidthActive;
 
+  // Display value: show "100%" while not focused; show "100" while editing.
+  const displayValue = isFocused
+    ? draft
+    : (Number.isFinite(zoomPercent) ? `${Math.round(zoomPercent)}%` : '');
+
   return (
     <>
       {/* Fixed-zoom group: [-] [ % ] [+] */}
@@ -131,15 +136,28 @@ const ZoomButtons = ({
           type="text"
           inputMode="decimal"
           pattern="[0-9,.\s%]*"
-          value={draft}
+          value={displayValue}
           onChange={(e) => setDraft(e.target.value)}
-          onFocus={(e) => e.currentTarget.select()}
-          onBlur={applyDraft}
+          onFocus={(e) => {
+            setIsFocused(true);
+            // Replace “100%” -> “100” for editing and select the text.
+            const numeric = Number.isFinite(zoomPercent) ? String(Math.round(zoomPercent)) : draft.replace('%', '');
+            setDraft(numeric);
+            e.currentTarget.select();
+          }}
+          onBlur={() => {
+            applyDraft();
+            setIsFocused(false);
+          }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter') applyDraft();
-            else if (e.key === 'Escape') {
+            if (e.key === 'Enter') {
+              applyDraft();
+              setIsFocused(false);
+              e.currentTarget.blur();
+            } else if (e.key === 'Escape') {
               e.preventDefault();
               cancelDraft();
+              setIsFocused(false);
               e.currentTarget.blur();
             }
           }}
@@ -150,6 +168,9 @@ const ZoomButtons = ({
           aria-valuemin={5}
           aria-valuemax={800}
           aria-valuenow={Number.isFinite(zoomPercent) ? Math.round(zoomPercent) : undefined}
+          aria-valuetext={
+            Number.isFinite(zoomPercent) ? `${Math.round(zoomPercent)}%` : undefined
+          }
         />
 
         <button

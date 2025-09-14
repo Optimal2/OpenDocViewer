@@ -66,6 +66,11 @@ const DocumentViewer = () => {
     // NEW: keyboard hint + focus restoration
     needsViewerFocusHint,
     focusViewer,
+    // NEW: per-pane post-zoom (compare mode only)
+    postZoomLeft,
+    postZoomRight,
+    bumpPostZoomLeft,
+    bumpPostZoomRight,
   } = useDocumentViewer();
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
@@ -164,6 +169,11 @@ const DocumentViewer = () => {
           thumbnailsContainerRef={thumbnailsContainerRef}
           /* NEW: tell the renderer what sticky mode we're in so it can re-fit after load */
           zoomMode={zoomState?.mode}
+          /* NEW: per-pane post-zoom inputs + bump handlers */
+          postZoomLeft={postZoomLeft}
+          postZoomRight={postZoomRight}
+          bumpPostZoomLeft={bumpPostZoomLeft}
+          bumpPostZoomRight={bumpPostZoomRight}
         />
       </div>
     </div>

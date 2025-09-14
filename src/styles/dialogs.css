@@ -1,6 +1,7 @@
-/* File: src/components/DocumentToolbar/PrintRangeDialog.module.css */
+/* File: src/styles/dialogs.css
+   Global (non-module) styles for app dialogs, including PrintRangeDialog. */
 
-.backdrop {
+.odv-prd-backdrop {
   position: fixed;
   inset: 0;
   background: rgba(0, 0, 0, 0.42);
@@ -10,7 +11,7 @@
   z-index: 9999;
 }
 
-.dialog {
+.odv-prd-dialog {
   background: var(--odv-surface, #ffffff);
   color: inherit;
   border-radius: 16px;
@@ -20,24 +21,24 @@
   box-shadow: 0 18px 48px rgba(0, 0, 0, 0.28);
 }
 
-.title {
+.odv-prd-title {
   margin: 0 0 4px 0;
   font-size: 18px;
 }
 
-.desc {
+.odv-prd-desc {
   margin: 0 0 10px 0;
   opacity: 0.9;
 }
 
-.modeSwitch {
+.odv-prd-modeSwitch {
   margin: 0 0 8px 0;
   font-size: 13px;
   opacity: 0.9;
 }
 
 /* true text-link look */
-.linkBtn {
+.odv-prd-linkBtn {
   background: none !important;
   border: none !important;
   padding: 0 !important;
@@ -48,30 +49,30 @@
   cursor: pointer !important;
   box-shadow: none !important;
 }
-.linkBtn:hover { text-decoration: none !important; }
-.linkBtn:focus-visible {
+.odv-prd-linkBtn:hover { text-decoration: none !important; }
+.odv-prd-linkBtn:focus-visible {
   outline: 2px solid currentColor;
   outline-offset: 2px;
 }
 
-.section { margin-top: 8px; }
+.odv-prd-section { margin-top: 8px; }
 
 /* Section headers & divider for clearer grouping */
-.sectionHeader {
+.odv-prd-sectionHeader {
   margin: 14px 0 6px 0;
   font-size: 14px;
   font-weight: 600;
   opacity: 0.95;
 }
-.divider {
+.odv-prd-divider {
   margin: 12px 0;
   border: 0;
   border-top: 1px solid var(--odv-border, #d5dae1);
 }
 
 /* Radios */
-.radioList { display: grid; gap: 10px; }
-.radioRow {
+.odv-prd-radioList { display: grid; gap: 10px; }
+.odv-prd-radioRow {
   display: inline-flex;
   align-items: center;
   gap: 8px;
@@ -79,8 +80,8 @@
 }
 
 /* Conditional input rows */
-.rangeRow,
-.advancedRow {
+.odv-prd-rangeRow,
+.odv-prd-advancedRow {
   display: flex;
   gap: 12px;
   align-items: center;
@@ -88,13 +89,13 @@
   flex-wrap: wrap;
 }
 
-.label { display: flex; align-items: center; gap: 6px; }
-.labelBlock { display: flex; flex-direction: column; gap: 6px; }
+.odv-prd-label { display: flex; align-items: center; gap: 6px; }
+.odv-prd-labelBlock { display: flex; flex-direction: column; gap: 6px; }
 
-.fieldCol { display: grid; gap: 10px; margin-top: 8px; }
+.odv-prd-fieldCol { display: grid; gap: 10px; margin-top: 8px; }
 
-.input,
-.select {
+.odv-prd-input,
+.odv-prd-select {
   width: 120px;
   padding: 6px 8px;
   border-radius: 8px;
@@ -104,7 +105,7 @@
   color: inherit;
 }
 
-.inputWide {
+.odv-prd-inputWide {
   width: min(520px, 86vw);
   padding: 8px 10px;
   border-radius: 10px;
@@ -114,7 +115,10 @@
   color: inherit;
 }
 
-.hint {
+/* present but previously unstyled; keep for structure */
+.odv-prd-subField { display: block; }
+
+.odv-prd-hint {
   margin-left: 0;
   font-size: 12px;
   opacity: 0.85;
@@ -122,13 +126,13 @@
   margin-top: 6px;
 }
 
-.error {
+.odv-prd-error {
   color: #b00020;
   margin-top: 10px;
   font-size: 13px;
 }
 
-.footer {
+.odv-prd-footer {
   display: flex;
   gap: 12px;
   justify-content: flex-end;
@@ -136,7 +140,7 @@
 }
 
 /* a11y helper */
-.visuallyHidden {
+.odv-prd-visuallyHidden {
   position: absolute;
   width: 1px;
   height: 1px;

@@ -1,0 +1,193 @@
+/* File: src/styles/toolbar.css
+   Toolbar, grouped “white areas”, percent/page inputs, editing tools, compare/edit active states. */
+
+.toolbar {
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  width: 100%;
+  height: 50px;
+  background-color: var(--toolbar-background-color);
+  box-shadow: var(--box-shadow);
+  border-radius: var(--border-radius);
+  padding-left: 10px;
+  flex-shrink: 0;
+}
+.toolbar > * { margin: 0 0.15rem; }
+
+.toolbar button,
+.toolbar .toggle-collapse {
+  padding: 0.15rem 0.25rem;
+  font-size: 1.1rem;
+  cursor: pointer;
+  background-color: var(--primary-color);
+  color: #ffffff;
+  border: none;
+  border-radius: var(--border-radius);
+  transition: background-color 0.3s, transform 0.3s;
+  box-shadow: var(--box-shadow);
+}
+
+/* Prevent text selection and native selection menu on toolbar */
+.toolbar,
+.toolbar button,
+.toolbar .odv-btn,
+.toolbar .toggle-collapse,
+.toolbar .material-icons,
+.toolbar .material-symbols-outlined {
+  -webkit-user-select: none !important;
+  user-select: none !important;
+  -webkit-touch-callout: none;
+}
+/* Ensure clicks hit the button, not the glyph span */
+.toolbar .material-icons,
+.toolbar .material-symbols-outlined {
+  pointer-events: none;
+}
+
+.toolbar button:hover,
+.toolbar button:focus,
+.toolbar .toggle-collapse:hover,
+.toolbar .toggle-collapse:focus {
+  background-color: var(--primary-color-hover);
+  outline: none;
+  transform: translateY(-2px);
+}
+.toolbar button:active,
+.toolbar .toggle-collapse:active {
+  background-color: var(--primary-color-active);
+  transform: translateY(0);
+}
+.toolbar button:disabled { background-color: var(--disabled-color); cursor: not-allowed; }
+
+/* Compare/Edit "enabled" sticky color */
+.compare-button.compare-enabled,
+.compare-button.compare-enabled:hover,
+.compare-button.compare-enabled:focus,
+.compare-button.compare-enabled:active,
+.editing-button.editing-enabled,
+.editing-button.editing-enabled:hover,
+.editing-button.editing-enabled:focus,
+.editing-button.editing-enabled:active {
+  background-color: var(--warning-color);
+}
+.compare-button.compare-disabled,
+.editing-button.editing-disabled { background-color: var(--primary-color); }
+
+/* Unified active state for zoom-mode buttons (1:1 / Fit Page / Fit Width) */
+.toolbar .odv-btn.is-active,
+.toolbar .odv-btn.is-active:disabled,
+.toolbar .odv-btn.is-active:hover,
+.toolbar .odv-btn.is-active:focus {
+  background-color: var(--warning-color) !important;
+  color: #fff;
+  outline: 2px solid #ffffff;
+  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35) inset;
+  transform: none;
+  cursor: default;
+}
+
+/* Warning/focus-restore button */
+.toolbar .odv-btn.warning {
+  background-color: #ffb74d;
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.toolbar .odv-btn.warning:hover,
+.toolbar .odv-btn.warning:focus { filter: brightness(0.95); transform: translateY(-2px); }
+[data-theme='dark'] .toolbar .odv-btn.warning {
+  background-color: #ffb300;
+  color: #111;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Group frame for [-] [input] [+] blocks (zoom & page) */
+.zoom-fixed-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 2px 6px;
+  border: 1px solid var(--thumbnail-border-color);
+  border-radius: calc(var(--border-radius) + 2px);
+  background-color: var(--canvas-background-color);
+}
+.zoom-fixed-group .odv-btn { margin: 0; }
+
+.separator {
+  width: 1px;
+  height: 30px;
+  background-color: var(--primary-color);
+  margin: 0 0.5rem;
+}
+
+/* Editable zoom percent input (combobox style) */
+.zoom-percent-input {
+  width: 64px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--thumbnail-border-color);
+  border-radius: var(--border-radius);
+  background-color: #ffffff;
+  color: var(--primary-color-active);
+  outline: none;
+}
+[data-theme='dark'] .zoom-percent-input {
+  background-color: #222;
+  color: #eee;
+  border-color: #555;
+}
+.zoom-percent-input:focus {
+  box-shadow: 0 0 0 2px rgba(34, 166, 179, 0.35);
+}
+
+/* Editable page number (within the paging group) */
+.page-number-input {
+  width: 84px; /* room for '123 / 999' when unfocused */
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--thumbnail-border-color);
+  border-radius: var(--border-radius);
+  background-color: #ffffff;
+  color: var(--primary-color-active);
+  outline: none;
+}
+[data-theme='dark'] .page-number-input {
+  background-color: #222;
+  color: #eee;
+  border-color: #555;
+}
+.page-number-input:focus { box-shadow: 0 0 0 2px rgba(34, 166, 179, 0.35); }
+
+/* Sliders inside the editing group */
+input[type="range"].resting {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--primary-color);
+}
+input[type="range"].active {
+  -webkit-appearance: none;
+  appearance: none;
+  background-color: var(--warning-color);
+}
+
+.toolbar .editing-tools { display: flex; align-items: center; }
+.toolbar .editing-tools label { margin-left: 10px; }
+.toolbar .editing-tools input[type="range"] { margin-left: 5px; width: 100px; }
+
+/* Collapsible (legacy) */
+.collapsible {
+  display: flex;
+  align-items: center;
+  transition: max-width 0.3s ease-in-out, opacity 0.3s ease-in-out;
+  overflow: hidden;
+  max-width: 0;
+  opacity: 0;
+}
+.collapsible.expanded { max-width: 400px; opacity: 1; }
+
+.page-info { width: 80px; text-align: center; }
+.toggle-collapse .material-icons { font-size: 1.1rem; }
+.toggle-collapse.collapsed .material-icons { transform: rotate(180deg); }
+.toggle-collapse.expanded .material-icons { transform: rotate(0); }
