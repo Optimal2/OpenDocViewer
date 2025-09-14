@@ -38,11 +38,30 @@ function clampPercent(n) {
   return Math.max(5, Math.min(800, v));
 }
 
+/**
+ * Parse a percent-like string safely.
+ * Accepts: "80", "80%", "80.5%", "80,5%", with extra spaces or repeated symbols.
+ * - Removes ALL whitespace and percent signs
+ * - Normalizes commas to dots
+ * - Strips any other non-numeric/non-dot chars
+ * - Collapses multiple dots to a single decimal separator
+ */
 function parsePercentInput(value) {
   if (value == null) return null;
-  // Accept "80", "80%", "80.5%", "80,5%", with extra spaces
   let s = String(value).trim();
-  s = s.replace('%', '').replace(',', '.');
+
+  // Remove ALL whitespace and %; normalize commas to dots (global)
+  s = s.replace(/[%\s]+/g, '').replace(/,/g, '.');
+
+  // Keep only digits and dots
+  s = s.replace(/[^0-9.]/g, '');
+
+  // Collapse multiple dots to a single one (keep the first)
+  const firstDot = s.indexOf('.');
+  if (firstDot !== -1) {
+    s = s.slice(0, firstDot + 1) + s.slice(firstDot + 1).replace(/\./g, '');
+  }
+
   const n = parseFloat(s);
   if (!Number.isFinite(n)) return null;
   return clampPercent(n);
@@ -141,7 +160,9 @@ const ZoomButtons = ({
           onFocus={(e) => {
             setIsFocused(true);
             // Replace “100%” -> “100” for editing and select the text.
-            const numeric = Number.isFinite(zoomPercent) ? String(Math.round(zoomPercent)) : draft.replace('%', '');
+            const numeric = Number.isFinite(zoomPercent)
+              ? String(Math.round(zoomPercent))
+              : draft.replace(/%/g, '');
             setDraft(numeric);
             e.currentTarget.select();
           }}
