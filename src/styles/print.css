@@ -1,0 +1,44 @@
+/* File: src/styles/print.css
+   Print rules (keep 1 image => 1 physical page in Chrome/Edge) */
+
+@media print {
+  @page { margin: 0; size: A4 portrait; }
+  html, body { margin: 0 !important; padding: 0 !important; }
+
+  /* Wrapper used by multi-page printing (All/Range) */
+  .odv-print-page,
+  [data-odv-print-page] {
+    page-break-after: always;
+    break-after: page;
+    break-inside: avoid;
+    display: grid;
+    place-items: center;
+    overflow: hidden;
+    box-sizing: border-box;
+    padding: 8mm;
+    width: auto;
+    height: auto;
+    min-height: calc(100vh - 8mm);
+  }
+
+  .odv-print-page img,
+  .odv-print-page canvas,
+  [data-odv-print-page] img,
+  [data-odv-print-page] canvas {
+    display: block;
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+  }
+
+  /* Fallback for single "Active page" path (kept as-is) */
+  .document-render-container img {
+    page-break-after: always;
+    break-inside: avoid;
+    display: block;
+    margin: 0 auto;
+    max-width: calc(100% - 10mm);
+    max-height: 95vh;
+    object-fit: contain;
+  }
+}

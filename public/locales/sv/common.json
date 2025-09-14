@@ -167,6 +167,12 @@
     "goToPage": "Gå till sida {page}",
     "pageFailedAlt": "Sida {page} kunde inte läsas in"
   },
+  "compareZoom": {
+    "increase": "Öka panelens zoom",
+    "decrease": "Minska panelens zoom",
+    "factor": "Panelens zoomfaktor",
+    "groupLabel": "Zoomkontroller per panel"
+  },
   "generic": {
     "loading": "Laddar"
   },

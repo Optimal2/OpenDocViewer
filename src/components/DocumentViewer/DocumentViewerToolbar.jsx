@@ -102,6 +102,10 @@ const DocumentViewerToolbar = ({
   needsViewerFocusHint,
   focusViewer,
 }) => {
+  // Mutually-exclusive UI disable flags
+  const compareDisabled = isExpanded;   // disable Compare while Edit is active
+  const editDisabled = isComparing;     // disable Edit while Compare is active
+
   return (
     <DocumentToolbar
       pageNumber={pageNumber}
@@ -129,6 +133,9 @@ const DocumentViewerToolbar = ({
       resetImageProperties={resetImageProperties}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
+      /* NEW: pass explicit disabled flags so the UI reflects exclusivity */
+      compareDisabled={compareDisabled}
+      editDisabled={editDisabled}
       /* nav button disabled states */
       prevPageDisabled={prevPageDisabled}
       nextPageDisabled={nextPageDisabled}

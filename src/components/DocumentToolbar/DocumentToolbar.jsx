@@ -42,6 +42,8 @@
  * @param {SetNumberState=} [props.setZoom] - (Optional) zoom setter for applying typed % or 1:1.
  * @param {boolean} [props.needsViewerFocusHint=false] - Show a focus-restore hint when shortcuts are inactive (focus outside viewer).
  * @param {function():void} [props.focusViewer] - Programmatically focus the main viewer container.
+ * @param {boolean} [props.compareDisabled=false] - Disable the Compare button (e.g., while Edit is active).
+ * @param {boolean} [props.editDisabled=false] - Disable the Edit button (e.g., while Compare is active).
  * @returns {JSX.Element}
  */
 
@@ -94,6 +96,9 @@ const DocumentToolbar = ({
   // NEW: focus hint + restore
   needsViewerFocusHint = false,
   focusViewer,
+  // NEW: mutual-exclusion UI flags
+  compareDisabled = false,
+  editDisabled = false,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
@@ -302,7 +307,7 @@ const DocumentToolbar = ({
 
       <div className="separator" />
 
-      {/* Paging controls */}
+      {/* Paging controls (now include editable page field inside the group) */}
       <PageNavigationButtons
         prevPageDisabled={prevPageDisabled}
         nextPageDisabled={nextPageDisabled}
@@ -318,6 +323,8 @@ const DocumentToolbar = ({
         handleNextPage={handleNextPageWrapper}
         pageNumber={pageNumber}
         totalPages={totalPages}
+        /* NEW: allow manual page entry to apply immediately */
+        onGoToPage={setPageNumber}
       />
 
       <div className="separator" />
@@ -350,6 +357,8 @@ const DocumentToolbar = ({
         aria-label={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
         title={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
         className={`odv-btn compare-button ${isComparing ? 'compare-enabled' : 'compare-disabled'}`}
+        disabled={!!compareDisabled}
+        aria-disabled={!!compareDisabled}
       >
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
@@ -363,13 +372,16 @@ const DocumentToolbar = ({
         aria-label={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
         title={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
         className={`odv-btn editing-button ${isExpanded ? 'editing-enabled' : 'editing-disabled'}`}
+        disabled={!!editDisabled}
+        aria-disabled={!!editDisabled}
       >
         <span className="material-icons" aria-hidden="true">edit</span>
       </button>
 
-      {/* Editing controls (visible only when canvas tools are enabled) */}
+      {/* Editing controls (visible only when canvas tools are enabled).
+          Wrapped in a white "group" to match the zoom/paging clusters. */}
       {isExpanded && (
-        <div className="editing-tools" aria-label={t('toolbar.imageAdjustments')}>
+        <div className="zoom-fixed-group editing-tools" aria-label={t('toolbar.imageAdjustments')}>
           <button
             type="button"
             onClick={() => handleRotationChange(-90)}
@@ -428,7 +440,7 @@ const DocumentToolbar = ({
       {/* Theme toggle (also mapped to key "6") */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
 
-      {/* NEW: Focus warning / restore — visible only when shortcuts are inactive */}
+      {/* Focus warning / restore — visible only when shortcuts are inactive */}
       {needsViewerFocusHint && typeof focusViewer === 'function' && (
         <>
           <div className="separator" />
@@ -491,6 +503,8 @@ DocumentToolbar.propTypes = {
   setZoom: PropTypes.func,
   needsViewerFocusHint: PropTypes.bool.isRequired,
   focusViewer: PropTypes.func.isRequired,
+  compareDisabled: PropTypes.bool,
+  editDisabled: PropTypes.bool,
 };
 
 export default React.memo(DocumentToolbar);

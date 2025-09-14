@@ -14,14 +14,11 @@
  * @param {function(PrintSubmitDetail):void} props.onSubmit - Called with the chosen print details.
  * @param {number} props.totalPages - Total number of pages (validates range/custom).
  * @returns {(JSX.Element|null)}
- *
- * Source snapshot: :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import styles from './PrintRangeDialog.module.css';
 import { usePrintRangeController } from './PrintRangeDialog.controller';
 
 /**
@@ -43,8 +40,9 @@ import { usePrintRangeController } from './PrintRangeDialog.controller';
 export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages }) {
   const { t, i18n } = useTranslation('common');
 
+  // No CSS Module anymore; controller doesn't need styles
   const ctrl = usePrintRangeController({
-    isOpen, onClose, onSubmit, totalPages, t, styles, i18n
+    isOpen, onClose, onSubmit, totalPages, t, i18n
   });
 
   if (!isOpen) return null;
@@ -52,32 +50,32 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
   return (
     <div
       ref={ctrl.backdropRef}
-      className={styles.backdrop}
+      className="odv-prd-backdrop"
       role="dialog"
       aria-modal="true"
       aria-labelledby="print-title"
       onMouseDown={ctrl.onBackdropMouseDown}
     >
-      <form ref={ctrl.dialogRef} onSubmit={ctrl.submit} className={styles.dialog} noValidate>
-        <h3 id="print-title" className={styles.title}>
+      <form ref={ctrl.dialogRef} onSubmit={ctrl.submit} className="odv-prd-dialog" noValidate>
+        <h3 id="print-title" className="odv-prd-title">
           {t('printDialog.title')} – {ctrl.titleSuffix}
         </h3>
 
-        <p className={styles.desc}>
+        <p className="odv-prd-desc">
           {t('printDialog.desc', { active: t('printDialog.basic.active') })}
         </p>
 
         {ctrl.headerCfg?.enabled ? (
-          <div className={styles.hint} role="note">
+          <div className="odv-prd-hint" role="note">
             {t('printDialog.headerNote')}
           </div>
         ) : null}
 
         {ctrl.modeGroup === 'basic' ? (
-          <p className={styles.modeSwitch}>
+          <p className="odv-prd-modeSwitch">
             <button
               type="button"
-              className={styles.linkBtn}
+              className="odv-prd-linkBtn"
               onClick={() => ctrl.setModeGroup('advanced')}
               aria-label={ctrl.switchTo}
             >
@@ -85,10 +83,10 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
             </button>
           </p>
         ) : (
-          <p className={styles.modeSwitch}>
+          <p className="odv-prd-modeSwitch">
             <button
               type="button"
-              className={styles.linkBtn}
+              className="odv-prd-linkBtn"
               onClick={() => ctrl.setModeGroup('basic')}
               aria-label={ctrl.switchBack}
             >
@@ -97,12 +95,12 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
           </p>
         )}
 
-        <h4 className={styles.sectionHeader}>{t('printDialog.pagesHeader')}</h4>
+        <h4 className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
 
         {ctrl.modeGroup === 'basic' && (
-          <div className={styles.section} role="group" aria-label={t('printDialog.aria.basicGroup')}>
-            <div className={styles.radioList}>
-              <label className={styles.radioRow}>
+          <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.basicGroup')}>
+            <div className="odv-prd-radioList">
+              <label className="odv-prd-radioRow">
                 <input
                   type="radio"
                   name="basicChoice"
@@ -112,7 +110,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                 />
                 <span>{t('printDialog.basic.active')}</span>
               </label>
-              <label className={styles.radioRow}>
+              <label className="odv-prd-radioRow">
                 <input
                   type="radio"
                   name="basicChoice"
@@ -127,9 +125,9 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
         )}
 
         {ctrl.modeGroup === 'advanced' && (
-          <div className={styles.section} role="group" aria-label={t('printDialog.aria.advancedGroup')}>
-            <div className={styles.radioList}>
-              <label className={styles.radioRow}>
+          <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.advancedGroup')}>
+            <div className="odv-prd-radioList">
+              <label className="odv-prd-radioRow">
                 <input
                   type="radio"
                   name="advancedChoice"
@@ -139,7 +137,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                 />
                 <span>{t('printDialog.advanced.range')}</span>
               </label>
-              <label className={styles.radioRow}>
+              <label className="odv-prd-radioRow">
                 <input
                   type="radio"
                   name="advancedChoice"
@@ -152,44 +150,44 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
             </div>
 
             {ctrl.advancedChoice === 'range' && (
-              <div className={styles.rangeRow}>
-                <label className={styles.label}>
+              <div className="odv-prd-rangeRow">
+                <label className="odv-prd-label">
                   {t('printDialog.range.from')}
                   <select
                     value={ctrl.fromValue}
                     onChange={(e) => ctrl.setFromValue(e.target.value)}
-                    className={styles.select}
+                    className="odv-prd-select"
                     aria-label={t('printDialog.range.from')}
                   >
                     {ctrl.pageOptions.map((v) => <option key={'from-' + v} value={v}>{v}</option>)}
                   </select>
                 </label>
 
-                <label className={styles.label}>
+                <label className="odv-prd-label">
                   {t('printDialog.range.to')}
                   <select
                     value={ctrl.toValue}
                     onChange={(e) => ctrl.setToValue(e.target.value)}
-                    className={styles.select}
+                    className="odv-prd-select"
                     aria-label={t('printDialog.range.to')}
                   >
                     {ctrl.pageOptions.map((v) => <option key={'to-' + v} value={v}>{v}</option>)}
                   </select>
                 </label>
 
-                <span className={styles.hint}>
+                <span className="odv-prd-hint">
                   {t('printDialog.range.allowedHint', { total: totalPages })}
                 </span>
               </div>
             )}
 
             {ctrl.advancedChoice === 'custom' && (
-              <div className={styles.advancedRow}>
-                <label className={styles.label} style={{ width: '100%' }}>
-                  <span className={styles.visuallyHidden}>{t('printDialog.advanced.custom')}</span>
+              <div className="odv-prd-advancedRow">
+                <label className="odv-prd-label" style={{ width: '100%' }}>
+                  <span className="odv-prd-visuallyHidden">{t('printDialog.advanced.custom')}</span>
                   <input
                     type="text"
-                    className={styles.inputWide}
+                    className="odv-prd-inputWide"
                     placeholder={t('printDialog.custom.placeholder')}
                     value={ctrl.customText}
                     onChange={(e) => ctrl.setCustomText(e.target.value)}
@@ -197,26 +195,26 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                     inputMode="numeric"
                   />
                 </label>
-                <span className={styles.hint}>{t('printDialog.custom.hint')}</span>
+                <span className="odv-prd-hint">{t('printDialog.custom.hint')}</span>
               </div>
             )}
           </div>
         )}
 
-        <hr className={styles.divider} />
+        <hr className="odv-prd-divider" />
 
         {ctrl.showUserSection && (
           <>
-            <h4 className={styles.sectionHeader}>{t('printDialog.userSection.header')}</h4>
-            <div className={styles.section} role="group" aria-label={t('printDialog.aria.userLogGroup')}>
-              <div className={styles.fieldCol}>
+            <h4 className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
+            <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
+              <div className="odv-prd-fieldCol">
                 {ctrl.showReason && (
-                  <label className={styles.labelBlock}>
+                  <label className="odv-prd-labelBlock">
                     {t('printDialog.reason.label')} {ctrl.reasonCfg?.required ? <span aria-hidden="true">*</span> : null}
                     {ctrl.hasOptions ? (
                       <>
                         <select
-                          className={styles.select}
+                          className="odv-prd-select"
                           value={ctrl.selectedReason}
                           onChange={(e) => ctrl.setSelectedReason(e.target.value)}
                           aria-label={t('printDialog.reason.label')}
@@ -229,11 +227,11 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                         </select>
 
                         {ctrl.needsExtra && (
-                          <div className={styles.subField}>
-                            <label className={styles.visuallyHidden}>{t('printDialog.reason.extra.placeholder')}</label>
+                          <div className="odv-prd-subField">
+                            <label className="odv-prd-visuallyHidden">{t('printDialog.reason.extra.placeholder')}</label>
                             <input
                               type="text"
-                              className={styles.inputWide}
+                              className="odv-prd-inputWide"
                               placeholder={ctrl.extraPlaceholder || t('printDialog.reason.extra.placeholder')}
                               maxLength={ctrl.extraMax || undefined}
                               value={ctrl.extraText}
@@ -246,7 +244,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                     ) : (
                       <input
                         type="text"
-                        className={styles.inputWide}
+                        className="odv-prd-inputWide"
                         placeholder={ctrl.reasonPlaceholder || t('printDialog.reason.label')}
                         maxLength={ctrl.reasonMax || undefined}
                         value={ctrl.freeReason}
@@ -254,7 +252,7 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                         aria-label={t('printDialog.reason.label')}
                       />
                     )}
-                    <span className={styles.hint}>
+                    <span className="odv-prd-hint">
                       {ctrl.reasonCfg?.required
                         ? t('printDialog.reason.requiredHint', { max: (ctrl.hasOptions && ctrl.needsExtra && ctrl.extraMax) ? ctrl.extraMax : ctrl.reasonMax, extra: ctrl.extraSuffix })
                         : t('printDialog.reason.optionalHint', { max: (ctrl.hasOptions && ctrl.needsExtra && ctrl.extraMax) ? ctrl.extraMax : ctrl.reasonMax, extra: ctrl.extraSuffix })
@@ -264,18 +262,18 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                 )}
 
                 {ctrl.showForWhom && (
-                  <label className={styles.labelBlock}>
+                  <label className="odv-prd-labelBlock">
                     {t('printDialog.forWhom.label')} {ctrl.forWhomCfg?.required ? <span aria-hidden="true">*</span> : null}
                     <input
                       type="text"
-                      className={styles.inputWide}
+                      className="odv-prd-inputWide"
                       placeholder={ctrl.forWhomPlaceholder || t('printDialog.forWhom.label')}
                       maxLength={ctrl.forWhomMax || undefined}
                       value={ctrl.forWhomText}
                       onChange={(e) => ctrl.setForWhomText(e.target.value)}
                       aria-label={t('printDialog.forWhom.label')}
                     />
-                    <span className={styles.hint}>
+                    <span className="odv-prd-hint">
                       {ctrl.forWhomCfg?.required
                         ? t('printDialog.forWhom.requiredHint', { max: ctrl.forWhomMax })
                         : t('printDialog.forWhom.optionalHint', { max: ctrl.forWhomMax })
@@ -284,14 +282,14 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                   </label>
                 )}
               </div>
-              <span className={styles.hint} />
+              <span className="odv-prd-hint" />
             </div>
           </>
         )}
 
-        {ctrl.error ? <div role="alert" className={styles.error}>{ctrl.error}</div> : null}
+        {ctrl.error ? <div role="alert" className="odv-prd-error">{ctrl.error}</div> : null}
 
-        <div className={styles.footer}>
+        <div className="odv-prd-footer">
           <button
             type="button"
             className="odv-btn"

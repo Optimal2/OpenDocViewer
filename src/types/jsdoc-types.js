@@ -1,4 +1,5 @@
-﻿/**
+﻿// File: src/types/jsdoc-types.js
+/**
  * Centralized JSDoc-only type and callback definitions.
  * This file exports no runtime code; it just helps JSDoc parse types consistently.
  */
@@ -73,4 +74,27 @@
  * Generic "ref-like" object (for places where React.MutableRefObject is too specific).
  * @typedef {Object} RefLike
  * @property {*} current
+ */
+
+/**
+ * Sticky zoom modes used by the viewer.
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
+ */
+
+/**
+ * Step the per-pane post-zoom by ±0.1.
+ * @callback BumpPostZoom
+ * @param {number} sign - Use +1 to increase, -1 to decrease.
+ * @returns {void}
+ */
+
+/**
+ * Per-pane post-zoom API that augments the document viewer hook.
+ * Consumers display and adjust post-zoom independently for left/right panes.
+ * @typedef {Object} PostZoomApi
+ * @property {number} postZoomLeft
+ * @property {number} postZoomRight
+ * @property {BumpPostZoom} bumpPostZoomLeft
+ * @property {BumpPostZoom} bumpPostZoomRight
+ * @property {function():void} resetPostZoom
  */

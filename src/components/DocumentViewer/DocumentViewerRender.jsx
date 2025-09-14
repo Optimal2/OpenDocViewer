@@ -14,39 +14,43 @@
  *   - This wrapper simply provides a flexible container layout.
  *
  * DESIGN NOTES / GOTCHAS
- *   - When compare mode is enabled, both panes receive the same zoom value for a
- *     side-by-side, synchronized experience. If you later want independent zoom,
- *     split the zoom state in the viewer and pass separate values down.
- *   - Project-wide reminder: when type-sniffing elsewhere we import from the **root**
- *     'file-type' package, NOT 'file-type/browser' (file-type v21 does not export that
- *     subpath for bundlers and builds will fail if changed). See README for details.
- *
- * Provenance / baseline reference for prior content: :contentReference[oaicite:0]{index=0}
+ *   - Base zoom remains global/shared. In compare mode we now apply a *post-zoom*
+ *     multiplicative factor per pane to fine-tune each side independently:
+ *       effectiveLeft  = zoom * postZoomLeft
+ *       effectiveRight = zoom * postZoomRight
+ *   - Sticky fit modes are still honored after each pane renders.
+ *   - Per-pane floating zoom controls use a sticky holder that must be rendered
+ *     BEFORE the scrollable content so it pins to the top of each pane.
  */
 
 import React from 'react';
 import PropTypes from 'prop-types';
 import DocumentRender from '../DocumentRender.jsx';
+import CompareZoomOverlay from './CompareZoomOverlay.jsx';
 
 /**
  * DocumentViewerRender
  * Renders the main document pane and, if enabled, a comparison pane.
  *
  * @param {Object} props
- * @param {number} props.pageNumber                            Current (1-based) page for the primary pane
- * @param {number} props.zoom                                  Current zoom factor (shared across panes)
- * @param {RefLike} props.viewerContainerRef                   Ref to the scrollable viewer container
- * @param {SetNumberState} props.setZoom                       Zoom setter (number or updater fn)
- * @param {SetPageNumber} props.setPageNumber                  Page setter (number or updater fn)
- * @param {boolean} props.isComparing                          Whether compare mode is active
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties Image adjustments
- * @param {boolean} props.isExpanded                           Whether to render via <canvas> (true) or <img> (false)
- * @param {RefLike} props.documentRenderRef                    Imperative ref for the primary <DocumentRender />
- * @param {(number|null)} props.comparePageNumber              Page number for the comparison pane, when enabled
- * @param {RefLike} props.compareRef                           Imperative ref for the comparison <DocumentRender />
- * @param {Array} props.allPages                               Full page list (shared by panes)
- * @param {RefLike} props.thumbnailsContainerRef               Ref to thumbnails container (for scroll sync)
- * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']  Sticky zoom mode to respect after page load
+ * @param {number} props.pageNumber
+ * @param {number} props.zoom
+ * @param {RefLike} props.viewerContainerRef
+ * @param {SetNumberState} props.setZoom
+ * @param {SetPageNumber} props.setPageNumber
+ * @param {boolean} props.isComparing
+ * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
+ * @param {boolean} props.isExpanded
+ * @param {RefLike} props.documentRenderRef
+ * @param {(number|null)} props.comparePageNumber
+ * @param {RefLike} props.compareRef
+ * @param {Array} props.allPages
+ * @param {RefLike} props.thumbnailsContainerRef
+ * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
+ * @param {number} props.postZoomLeft
+ * @param {number} props.postZoomRight
+ * @param {function(number): void} props.bumpPostZoomLeft
+ * @param {function(number): void} props.bumpPostZoomRight
  * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
@@ -64,6 +68,10 @@ const DocumentViewerRender = ({
   allPages,
   thumbnailsContainerRef,
   zoomMode = 'CUSTOM',
+  postZoomLeft = 1.0,
+  postZoomRight = 1.0,
+  bumpPostZoomLeft,
+  bumpPostZoomRight,
 }) => {
   const handlePrimaryRendered = () => {
     if (zoomMode === 'FIT_PAGE') {
@@ -81,13 +89,31 @@ const DocumentViewerRender = ({
     }
   };
 
+  // Apply per-pane post-zoom only while comparing; single-pane stays at base zoom
+  const effectiveLeftZoom = isComparing ? zoom * postZoomLeft : zoom;
+  const effectiveRightZoom = isComparing ? zoom * postZoomRight : zoom;
+
   return (
     <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
-      <div className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}>
+      {/* LEFT / PRIMARY PANE */}
+      <div
+        className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
+        style={{ position: 'relative' }}
+      >
+        {isComparing && (
+          <div className="compare-zoom-sticky">
+            <CompareZoomOverlay
+              value={postZoomLeft}
+              onInc={() => bumpPostZoomLeft?.(1)}
+              onDec={() => bumpPostZoomLeft?.(-1)}
+            />
+          </div>
+        )}
+
         <DocumentRender
           ref={documentRenderRef}
           pageNumber={pageNumber}
-          zoom={zoom}
+          zoom={effectiveLeftZoom}
           initialRenderDone={() => {}}
           onRender={handlePrimaryRendered}
           viewerContainerRef={viewerContainerRef}
@@ -101,12 +127,21 @@ const DocumentViewerRender = ({
         />
       </div>
 
+      {/* RIGHT / COMPARE PANE */}
       {isComparing && comparePageNumber !== null && (
-        <div className="document-render-container-comparison">
+        <div className="document-render-container-comparison" style={{ position: 'relative' }}>
+          <div className="compare-zoom-sticky">
+            <CompareZoomOverlay
+              value={postZoomRight}
+              onInc={() => bumpPostZoomRight?.(1)}
+              onDec={() => bumpPostZoomRight?.(-1)}
+            />
+          </div>
+
           <DocumentRender
             ref={compareRef}
             pageNumber={comparePageNumber}
-            zoom={zoom}
+            zoom={effectiveRightZoom}
             initialRenderDone={() => {}}
             onRender={handleCompareRendered}
             viewerContainerRef={viewerContainerRef}
@@ -143,6 +178,10 @@ DocumentViewerRender.propTypes = {
   allPages: PropTypes.array.isRequired,
   thumbnailsContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+  postZoomLeft: PropTypes.number.isRequired,
+  postZoomRight: PropTypes.number.isRequired,
+  bumpPostZoomLeft: PropTypes.func.isRequired,
+  bumpPostZoomRight: PropTypes.func.isRequired,
 };
 
 export default React.memo(DocumentViewerRender);

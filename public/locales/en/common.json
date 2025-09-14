@@ -167,6 +167,12 @@
     "goToPage": "Go to page {page}",
     "pageFailedAlt": "Page {page} failed to load"
   },
+  "compareZoom": {
+    "increase": "Increase pane zoom",
+    "decrease": "Decrease pane zoom",
+    "factor": "Pane zoom factor",
+    "groupLabel": "Per-pane zoom controls"
+  },
   "generic": {
     "loading": "Loading"
   },
@@ -203,7 +209,7 @@
       "title": "OpenDocViewer",
       "description": "OpenDocViewer – React JavaScript Document Viewer"
     },
-    "noscript": {
+  "noscript": {
       "title": "JavaScript is disabled",
       "message": "You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page."
     }
