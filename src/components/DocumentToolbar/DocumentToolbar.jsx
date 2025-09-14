@@ -10,6 +10,8 @@
  *
  * This component is memoized for performance.
  *
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} ZoomMode
+ *
  * @component
  * @param {Object} props
  * @param {number} props.pageNumber - The currently active page (1-based).
@@ -35,14 +37,12 @@
  * @param {boolean} props.isExpanded - Whether the canvas editing tool panel is open.
  * @param {SetBooleanState} props.setIsExpanded - Toggle state setter for the editing panel (see jsdoc-types.js).
  * @param {number=} props.zoom - (Optional) current zoom scale (1.0 = 100%). Used for display only.
- * @param {{mode:('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'),scale:number}=} props.zoomState - (Optional) zoom mode/state for highlighting.
- * @param {(function(ZoomMode): void)=} props.setZoomMode - (Optional) switch zoom mode (sets sticky fit behaviors).
+ * @param {{mode:ZoomMode,scale:number}=} [props.zoomState] - (Optional) zoom mode/state for highlighting.
+ * @param {(function(ZoomMode): void)=} [props.setZoomMode] - (Optional) switch zoom mode (sets sticky fit behaviors).
+ * @param {SetNumberState=} [props.setZoom] - (Optional) zoom setter for applying typed % or 1:1.
+ * @param {boolean} [props.needsViewerFocusHint=false] - Show a focus-restore hint when shortcuts are inactive (focus outside viewer).
+ * @param {function():void} [props.focusViewer] - Programmatically focus the main viewer container.
  * @returns {JSX.Element}
- */
-
-/**
- * Zoom mode for the viewer.
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
 
 import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
@@ -60,6 +60,8 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
+/** Epsilon for considering zoom ≈ 100% (0.5%). */
+const ONE_TO_ONE_EPS = 0.005;
 
 const DocumentToolbar = ({
   pageNumber,
@@ -88,6 +90,10 @@ const DocumentToolbar = ({
   zoom,
   zoomState,
   setZoomMode,
+  setZoom,
+  // NEW: focus hint + restore
+  needsViewerFocusHint = false,
+  focusViewer,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
@@ -107,6 +113,20 @@ const DocumentToolbar = ({
       if (ver) userLog.setViewerVersion(String(ver));
     } catch {}
   }, []);
+
+  // Global key: "6" toggles theme (no modifiers)
+  useEffect(() => {
+    const onKeyDown = (e) => {
+      if (e.defaultPrevented) return;
+      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
+      if (e.key === '6') {
+        e.preventDefault();
+        try { toggleTheme(); } catch {}
+      }
+    };
+    window.addEventListener('keydown', onKeyDown);
+    return () => window.removeEventListener('keydown', onKeyDown);
+  }, [toggleTheme]);
 
   // Navigation helpers (single-step handlers + press-and-hold timers)
   const {
@@ -248,7 +268,24 @@ const DocumentToolbar = ({
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
-  const zoomMode = zoomState?.mode;
+  const zoomMode = zoomState?.mode || 'CUSTOM';
+
+  // 1:1 active when NOT in a FIT mode and zoom ≈ 1.0
+  const isOneToOneActive =
+    (zoomMode !== 'FIT_PAGE' && zoomMode !== 'FIT_WIDTH') &&
+    (typeof zoom === 'number' && Math.abs(zoom - 1) <= ONE_TO_ONE_EPS);
+
+  // Apply typed percent → set zoom and switch to CUSTOM
+  const handlePercentApply = useCallback((percentInt) => {
+    if (typeof setZoom === 'function') setZoom(percentInt / 100);
+    if (typeof setZoomMode === 'function') setZoomMode('CUSTOM');
+  }, [setZoom, setZoomMode]);
+
+  // 1:1 click → set zoom=1 and switch to CUSTOM
+  const handleActualSize = useCallback(() => {
+    if (typeof setZoom === 'function') setZoom(1);
+    if (typeof setZoomMode === 'function') setZoomMode('CUSTOM');
+  }, [setZoom, setZoomMode]);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
@@ -287,8 +324,8 @@ const DocumentToolbar = ({
 
       {/* Zoom & fit */}
       <ZoomButtons
-        zoomIn={zoomIn}
-        zoomOut={zoomOut}
+        zoomIn={() => { zoomIn(); setZoomMode?.('CUSTOM'); }}
+        zoomOut={() => { zoomOut(); setZoomMode?.('CUSTOM'); }}
         fitToScreen={() => {
           setZoomMode?.('FIT_PAGE');
           fitToScreen();
@@ -297,9 +334,11 @@ const DocumentToolbar = ({
           setZoomMode?.('FIT_WIDTH');
           fitToWidth();
         }}
-        onActualSize={setZoomMode ? () => setZoomMode('ACTUAL_SIZE') : undefined}
+        onActualSize={handleActualSize}
         zoomMode={zoomMode}
         zoomPercent={zoomPercent}
+        isOneToOneActive={isOneToOneActive}
+        onPercentApply={handlePercentApply}
       />
 
       <div className="separator" />
@@ -386,8 +425,24 @@ const DocumentToolbar = ({
 
       <div className="separator" />
 
-      {/* Theme toggle */}
+      {/* Theme toggle (also mapped to key "6") */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
+
+      {/* NEW: Focus warning / restore — visible only when shortcuts are inactive */}
+      {needsViewerFocusHint && typeof focusViewer === 'function' && (
+        <>
+          <div className="separator" />
+          <button
+            type="button"
+            onClick={focusViewer}
+            aria-label={t('toolbar.focusWarningAction', 'Focus viewer')}
+            title={t('toolbar.focusWarningTitle', 'Shortcuts inactive')}
+            className="odv-btn warning"
+          >
+            ⚠︎
+          </button>
+        </>
+      )}
 
       {/* Modal for print selection + reason/forWhom */}
       <PrintRangeDialog
@@ -429,10 +484,13 @@ DocumentToolbar.propTypes = {
   setIsExpanded: PropTypes.func.isRequired,
   zoom: PropTypes.number,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'CUSTOM']),
     scale: PropTypes.number,
   }),
   setZoomMode: PropTypes.func,
+  setZoom: PropTypes.func,
+  needsViewerFocusHint: PropTypes.bool.isRequired,
+  focusViewer: PropTypes.func.isRequired,
 };
 
 export default React.memo(DocumentToolbar);

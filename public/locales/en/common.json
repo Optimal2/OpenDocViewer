@@ -3,8 +3,10 @@
     "print": "Print",
     "zoomIn": "Zoom in",
     "zoomOut": "Zoom out",
+    "zoomActual": "Actual size (1:1)",
     "fitToScreen": "Fit to screen",
     "fitToWidth": "Fit to width",
+    "zoomPercentAria": "Current zoom percent",
     "firstPage": "First page",
     "previousPage": "Previous page",
     "nextPage": "Next page",
@@ -31,7 +33,9 @@
     "theme": {
       "switchToLight": "Switch to light theme",
       "switchToDark": "Switch to dark theme"
-    }
+    },
+    "focusWarningTitle": "Shortcuts inactive",
+    "focusWarningAction": "Focus viewer"
   },
   "printDialog": {
     "title": "Print",
@@ -59,7 +63,7 @@
     "range": {
       "from": "From",
       "to": "To",
-      "allowedHint": "Allowed: 1–{total}. Ascending (2→5) or descending (5→2)."
+      "allowedHint": "Allowed: 1–{total}. Ascending (2→5) or descending (5–2)."
     },
     "custom": {
       "placeholder": "e.g. 7 6 5 4 2   or   1-3, 2, 2, 5-2",

@@ -19,7 +19,7 @@
 
 /**
  * Zoom mode for the viewer.
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} ZoomMode
  */
 
 import React from 'react';
@@ -45,7 +45,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
  * @property {number} zoom
- * @property {{mode:('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'), scale:number}} zoomState
+ * @property {{mode:ZoomMode, scale:number}} zoomState
  * @property {(function(ZoomMode): void)} setZoomMode
  * @property {SetNumberState} setZoom
  * @property {RefLike} viewerContainerRef
@@ -63,6 +63,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
+ * @property {boolean} needsViewerFocusHint   // NEW: true when focus is outside the viewer container
+ * @property {function(): void} focusViewer   // NEW: programmatically focus the viewer container
  */
 
 /**
@@ -97,6 +99,8 @@ const DocumentViewerToolbar = ({
   nextPageDisabled,
   firstPageDisabled,
   lastPageDisabled,
+  needsViewerFocusHint,
+  focusViewer,
 }) => {
   return (
     <DocumentToolbar
@@ -130,6 +134,9 @@ const DocumentViewerToolbar = ({
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
+      /* NEW: shortcuts inactive hint + focus restore */
+      needsViewerFocusHint={needsViewerFocusHint}
+      focusViewer={focusViewer}
     />
   );
 };
@@ -144,7 +151,7 @@ DocumentViewerToolbar.propTypes = {
   fitToWidth: PropTypes.func.isRequired,
   zoom: PropTypes.number.isRequired,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']).isRequired,
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'CUSTOM']).isRequired,
     scale: PropTypes.number.isRequired,
   }).isRequired,
   setZoomMode: PropTypes.func.isRequired,
@@ -168,6 +175,8 @@ DocumentViewerToolbar.propTypes = {
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
+  needsViewerFocusHint: PropTypes.bool.isRequired,
+  focusViewer: PropTypes.func.isRequired,
 };
 
 export default React.memo(DocumentViewerToolbar);

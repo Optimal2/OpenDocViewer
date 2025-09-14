@@ -63,6 +63,9 @@ const DocumentViewer = () => {
     // NEW: sticky fit semantics
     zoomState,
     setZoomMode,
+    // NEW: keyboard hint + focus restoration
+    needsViewerFocusHint,
+    focusViewer,
   } = useDocumentViewer();
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
@@ -117,6 +120,10 @@ const DocumentViewer = () => {
         nextPageDisabled={nextPageDisabled}
         firstPageDisabled={firstPageDisabled}
         lastPageDisabled={lastPageDisabled}
+
+        /* NEW: shortcuts inactive hint + focus restore */
+        needsViewerFocusHint={needsViewerFocusHint}
+        focusViewer={focusViewer}
       />
 
       {/* Main area: thumbnails + resizer + page renderer(s) */}

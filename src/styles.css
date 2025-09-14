@@ -368,10 +368,84 @@ canvas {
   background-color: var(--primary-color);
 }
 
-/* NEW: visual 'active' state for zoom-mode buttons (Fit Page / Fit Width / 100%) */
-.toolbar .odv-btn.is-active {
+/* NEW: unified 'active' state for zoom-mode buttons (1:1 / Fit Page / Fit Width)
+   Use the same visual language as compare/edit enabled, and keep it visible
+   even while the button is disabled (idempotent while active). */
+.toolbar .odv-btn.is-active,
+.toolbar .odv-btn.is-active:disabled,
+.toolbar .odv-btn.is-active:hover,
+.toolbar .odv-btn.is-active:focus {
+  background-color: var(--warning-color) !important;
+  color: #fff;
   outline: 2px solid #ffffff;
   box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35) inset;
+  transform: none;
+  cursor: default;
+}
+
+/* NEW: warning/focus-restore button (visible when shortcuts are inactive) */
+.toolbar .odv-btn.warning {
+  background-color: #ffb74d; /* light amber */
+  color: #1a1a1a;
+  border: 1px solid rgba(0, 0, 0, 0.12);
+}
+.toolbar .odv-btn.warning:hover,
+.toolbar .odv-btn.warning:focus {
+  filter: brightness(0.95);
+  transform: translateY(-2px);
+}
+[data-theme='dark'] .toolbar .odv-btn.warning {
+  background-color: #ffb300; /* darker amber for contrast */
+  color: #111;
+  border-color: rgba(255, 255, 255, 0.2);
+}
+
+/* Subtle grouping frame for [-] [ % ] [+] */
+.zoom-fixed-group {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.2rem;
+  padding: 2px 6px;
+  border: 1px solid var(--thumbnail-border-color);
+  border-radius: calc(var(--border-radius) + 2px);
+  background-color: var(--canvas-background-color);
+}
+
+/* Editable zoom percent input (combobox style) */
+.zoom-percent-input {
+  width: 64px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  padding: 0.15rem 0.4rem;
+  border: 1px solid var(--thumbnail-border-color);
+  border-radius: var(--border-radius);
+  background-color: #ffffff;
+  color: var(--primary-color-active);
+  outline: none;
+}
+
+[data-theme='dark'] .zoom-percent-input {
+  background-color: #222;
+  color: #eee;
+  border-color: #555;
+}
+
+.zoom-percent-input:focus {
+  box-shadow: 0 0 0 2px rgba(34, 166, 179, 0.35);
+}
+
+/* Spacing for icon-only buttons inside the zoom group (inherit default button styles) */
+.zoom-fixed-group .odv-btn {
+  margin: 0;
+}
+
+/* Legacy non-editable zoom percent (kept for compatibility, not used by new UI) */
+.toolbar .zoom-percent {
+  padding: 0 6px;
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+  opacity: 0.9;
 }
 
 .separator {
@@ -405,15 +479,6 @@ input[type="range"].active {
 .toolbar .editing-tools input[type="range"] {
   margin-left: 5px;
   width: 100px;
-}
-
-/* NEW: zoom percentage indicator styling */
-.toolbar .zoom-percent {
-  padding: 0 6px;
-  min-width: 44px;
-  text-align: center;
-  font-variant-numeric: tabular-nums;
-  opacity: 0.9;
 }
 
 .collapsible {

@@ -14,6 +14,8 @@
  *   - Keyboard shortcuts (PageUp/PageDown/Home/End) are attached on mount.
  *   - First successful render can trigger an auto “fit to screen” if the renderer exposes it.
  *   - NEW: Zoom is governed by a "mode" so that Fit modes recompute on page change & resize.
+ *   - NEW: Global Ctrl/Cmd + wheel always zooms the document (never browser page zoom).
+ *   - NEW: Focus hint when shortcuts are inactive (focus outside viewer).
  *
  * TYPES
  *   This hook references common typedefs/callbacks from src/types/jsdoc-types.js:
@@ -35,7 +37,7 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * @property {number} contrast       0..200 (100 = neutral)
  */
 
-/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode */
+/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} ZoomMode */
 
 /**
  * Zoom state (mode + current numeric scale).
@@ -74,8 +76,10 @@ import { ViewerContext } from '../../ViewerContext.jsx';
  * @property {function(MouseEvent): void} handleMouseDown
  * @property {function(number): void} selectForCompare
  * @property {function(boolean): void} setIsExpanded
- * @property {ZoomState} zoomState                                  // NEW (non-breaking addition)
- * @property {function(ZoomMode): void} setZoomMode                  // NEW (non-breaking addition)
+ * @property {ZoomState} zoomState
+ * @property {function(ZoomMode): void} setZoomMode
+ * @property {boolean} needsViewerFocusHint                     // NEW: true when focus is outside viewer
+ * @property {function(): void} focusViewer                     // NEW: programmatically focus the viewer
  */
 
 /**
@@ -124,12 +128,13 @@ export function useDocumentViewer() {
   }));
   const [isExpanded, setIsExpanded] = useState(false);
   const [thumbnailWidth, setThumbnailWidth] = useState(200);
+  const [needsViewerFocusHint, setNeedsViewerFocusHint] = useState(false); // NEW
 
   // Refs
   /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
-  /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
-  /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
-  /** @type {{ current: any }} */ const compareRef = useRef(null);
+  /** @type={{ current: any }} */ const thumbnailsContainerRef = useRef(null);
+  /** @type={{ current: any }} */ const documentRenderRef = useRef(null);
+  /** @type={{ current: any }} */ const compareRef = useRef(null);
 
   /**
    * Change the current page number safely (clamped).
@@ -163,7 +168,7 @@ export function useDocumentViewer() {
         return;
       }
     } catch {}
-    setZoom(function (z) { return Math.min(8, Math.round((z + 0.1) * 100) / 100); });
+    setZoom((z) => Math.min(8, Math.round((z * 1.1) * 100) / 100));
   }, []);
 
   const zoomOut = useCallback(() => {
@@ -174,7 +179,7 @@ export function useDocumentViewer() {
         return;
       }
     } catch {}
-    setZoom(function (z) { return Math.max(0.1, Math.round((z - 0.1) * 100) / 100); });
+    setZoom((z) => Math.max(0.1, Math.round((z / 1.1) * 100) / 100));
   }, []);
 
   const fitToScreen = useCallback(() => {
@@ -195,16 +200,15 @@ export function useDocumentViewer() {
     } catch {}
   }, [zoom]);
 
-  /** Set zoom mode directly (e.g., ACTUAL_SIZE) */
+  /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM') */
   const setZoomMode = useCallback((mode) => {
     setZoomState((s) => ({ ...s, mode }));
-    if (mode === 'ACTUAL_SIZE') {
-      setZoom(1);
-    } else if (mode === 'FIT_PAGE') {
+    if (mode === 'FIT_PAGE') {
       try { documentRenderRef.current?.fitToScreen?.(); } catch {}
     } else if (mode === 'FIT_WIDTH') {
       try { documentRenderRef.current?.fitToWidth?.(); } catch {}
     }
+    // 'CUSTOM' is handled by direct zoom changes elsewhere.
   }, []);
 
   // Recompute fits when the page changes, rotation changes, or compare toggles,
@@ -225,7 +229,7 @@ export function useDocumentViewer() {
 
   // Compare toggle (toolbar button)
   const handleCompare = useCallback(() => {
-    setIsComparing(function (prev) {
+    setIsComparing((prev) => {
       const next = !prev;
       if (next) setComparePageNumber(pageNumber);
       return next;
@@ -250,9 +254,7 @@ export function useDocumentViewer() {
   // Image adjustments
   const handleRotationChange = useCallback((delta) => {
     const d = Number(delta || 0);
-    setImageProperties(function (s) {
-      return { ...s, rotation: Math.round((s.rotation + d) % 360) };
-    });
+    setImageProperties((s) => ({ ...s, rotation: Math.round((s.rotation + d) % 360) }));
     try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
@@ -260,7 +262,7 @@ export function useDocumentViewer() {
   const handleBrightnessChange = useCallback((e) => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties(function (s) { return { ...s, brightness: v }; });
+    setImageProperties((s) => ({ ...s, brightness: v }));
     try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
@@ -268,7 +270,7 @@ export function useDocumentViewer() {
   const handleContrastChange = useCallback((e) => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties(function (s) { return { ...s, contrast: v }; });
+    setImageProperties((s) => ({ ...s, contrast: v }));
     try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
@@ -277,7 +279,7 @@ export function useDocumentViewer() {
     try { if (documentRenderRef.current && typeof documentRenderRef.current.forceRender === 'function') documentRenderRef.current.forceRender(); } catch {}
   }, []);
 
-  // Keyboard navigation on the viewer container
+  // Keyboard navigation & zoom shortcuts on the viewer container (when focused)
   useEffect(() => {
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
@@ -285,16 +287,18 @@ export function useDocumentViewer() {
       const inside = e.target instanceof Node && viewerContainerRef.current.contains(/** @type {Node} */(e.target));
       if (!inside) return;
 
+      // Do not interfere with browser Ctrl/Cmd+0 (page zoom reset)
+      const mod = e.ctrlKey || e.metaKey;
+
       switch (e.key) {
+        // Paging: ArrowUp/Down and PageUp/PageDown (Left/Right reserved for future rotation)
         case 'PageDown':
-        case 'ArrowRight':
         case 'ArrowDown':
-          setPageNumber(function (p) { return stepPage(p, 1, totalPages); });
+          setPageNumber((p) => stepPage(p, 1, totalPages));
           break;
         case 'PageUp':
-        case 'ArrowLeft':
         case 'ArrowUp':
-          setPageNumber(function (p) { return stepPage(p, -1, totalPages); });
+          setPageNumber((p) => stepPage(p, -1, totalPages));
           break;
         case 'Home':
           setPageNumber(1);
@@ -302,20 +306,41 @@ export function useDocumentViewer() {
         case 'End':
           setPageNumber(totalPages || 1);
           break;
+
+        // Zoom keys: + (including NumpadAdd), - (including NumpadSubtract)
+        case '+':
+          if (!mod) { e.preventDefault(); zoomIn(); }
+          break;
+        case '-':
+          if (!mod) { e.preventDefault(); zoomOut(); }
+          break;
         default:
+          // Numpad variants via code (for some layouts)
+          if (!mod && e.code === 'NumpadAdd') { e.preventDefault(); zoomIn(); break; }
+          if (!mod && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOut(); break; }
+
+          // Number hotkeys (no modifiers): align with button order: 1:1, Fit Page, Fit Width, Compare, Edit
+          if (!mod && !e.shiftKey && !e.altKey) {
+            if (e.key === '1') { e.preventDefault(); setZoomMode('CUSTOM'); setZoom(1); }
+            else if (e.key === '2') { e.preventDefault(); setZoomMode('FIT_PAGE'); }
+            else if (e.key === '3') { e.preventDefault(); setZoomMode('FIT_WIDTH'); }
+            else if (e.key === '4') { e.preventDefault(); setIsComparing((v) => !v); if (!isComparing) setComparePageNumber(pageNumber); }
+            else if (e.key === '5') { e.preventDefault(); setIsExpanded((v) => !v); }
+            // '6' reserved for theme toggle (handled in toolbar where toggleTheme exists)
+          }
           break;
       }
     }
     window.addEventListener('keydown', onKeyDown);
-    return function cleanup() { window.removeEventListener('keydown', onKeyDown); };
-  }, [totalPages]);
+    return () => { window.removeEventListener('keydown', onKeyDown); };
+  }, [totalPages, setZoomMode, setZoom, isComparing, pageNumber]);
 
   // Optional: auto-fit after first mount if renderer supports it.
   useEffect(() => {
-    const t = setTimeout(function () {
+    const t = setTimeout(() => {
       try { if (documentRenderRef.current && typeof documentRenderRef.current.fitToScreen === 'function') documentRenderRef.current.fitToScreen(); } catch {}
     }, 0);
-    return function cleanup() { clearTimeout(t); };
+    return () => { clearTimeout(t); };
   }, []);
 
   /**
@@ -343,6 +368,54 @@ export function useDocumentViewer() {
       ro.disconnect();
     };
   }, [viewerContainerRef, zoomState.mode]);
+
+  // GLOBAL: Ctrl/Cmd + wheel (or trackpad pinch) → always zoom document, never browser page
+  useEffect(() => {
+    /** @param {WheelEvent} e */
+    const onWheelGlobal = (e) => {
+      if (e.ctrlKey || e.metaKey) {
+        e.preventDefault(); // block browser zoom
+        if (e.deltaY < 0) zoomIn();
+        else if (e.deltaY > 0) zoomOut();
+      }
+    };
+    // Capture phase to preempt browser/page handlers even over the toolbar
+    window.addEventListener('wheel', onWheelGlobal, { passive: false, capture: true });
+    return () => { window.removeEventListener('wheel', onWheelGlobal, { capture: true }); };
+  }, [zoomIn, zoomOut]);
+
+  // Focus tracking: show a hint when focus is outside the viewer (shortcuts inactive)
+  useEffect(() => {
+    /** @param {Event} e */
+    const update = (e) => {
+      const container = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
+      if (!container) return;
+      const target = /** @type {any} */ (e.target);
+      const inside = target instanceof Node ? container.contains(target) : false;
+      setNeedsViewerFocusHint(!inside);
+    };
+    window.addEventListener('focusin', update, true);
+    window.addEventListener('pointerdown', update, true);
+    // Initialize once on mount
+    update({ target: document.activeElement });
+    return () => {
+      window.removeEventListener('focusin', update, true);
+      window.removeEventListener('pointerdown', update, true);
+    };
+  }, []);
+
+  /**
+   * Programmatically focus the viewer container and clear the hint.
+   * @returns {void}
+   */
+  const focusViewer = useCallback(() => {
+    try {
+      const el = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
+      if (el && typeof el.focus === 'function') el.focus();
+    } finally {
+      setNeedsViewerFocusHint(false);
+    }
+  }, []);
 
   /**
    * Handle container clicks. If a modal/dialog is open we may ignore the click.
@@ -414,6 +487,8 @@ export function useDocumentViewer() {
     selectForCompare,
     setIsExpanded,
     zoomState,
-    setZoomMode
+    setZoomMode,
+    needsViewerFocusHint,      // NEW
+    focusViewer               // NEW
   };
 }
