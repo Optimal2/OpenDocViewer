@@ -59,7 +59,7 @@
     "i18next-browser-languagedetector": "^8.2.0",
     "i18next-http-backend": "^3.0.2",
     "i18next-icu": "^2.4.1",
-    "jspdf": "^3.0.4",
+    "jspdf": "^4.2.0",
     "morgan": "^1.10.1",
     "pdfjs-dist": "^5.4.449",
     "react": "^19.2.3",
