@@ -25,12 +25,12 @@
  */
 
 import { useEffect, useContext, useRef, useCallback } from 'react';
-import ViewerContext from '../../ViewerContextValue.js';
-import logger from '../../LogController.js';
-import { generateDocumentList, generateDemoList, getTotalPages } from './Utils.js';
-import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './WorkerHandler.js';
-import { batchHandler } from './BatchHandler.js';
-import { renderPDFInMainThread, renderTIFFInMainThread } from './MainThreadRenderer.js';
+import ViewerContext from '../../contexts/viewerContext.js';
+import logger from '../../logging/systemLogger.js';
+import { generateDocumentList, generateDemoList, getTotalPages } from './documentLoaderUtils.js';
+import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './workerHandler.js';
+import { batchHandler } from './batchHandler.js';
+import { renderPDFInMainThread, renderTIFFInMainThread } from './mainThreadRenderer.js';
 import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
 
 /* ------------------------------------------------------------------------------------------------

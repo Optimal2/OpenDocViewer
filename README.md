@@ -244,7 +244,17 @@ OpenDocViewer/
 │  ├─ odv.site.config.sample.js
 │  └─ assets for demo/tests…
 ├─ src/
-│  ├─ index.jsx, OpenDocViewer.jsx
+│  ├─ index.jsx
+│  ├─ app/
+│  │  ├─ AppBootstrap.jsx
+│  │  ├─ OpenDocViewer.jsx
+│  │  └─ bootConfig.js
+│  ├─ contexts/
+│  │  ├─ ThemeProvider.jsx / themeContext.js
+│  │  └─ ViewerProvider.jsx / viewerContext.js
+│  ├─ logging/
+│  │  ├─ systemLogger.js
+│  │  └─ userLogger.js
 │  ├─ styles.css                   # aggregator only
 │  ├─ styles/
 │  │  ├─ theme.css                 # variables, base, dark/light
@@ -266,7 +276,8 @@ OpenDocViewer/
 │  │     ├─ PrintRangeDialog.jsx
 │  │     └─ usePrintRangeDialog.js
 │  ├─ utils/ (printing, zoom, navigation…)
-│  └─ integrations/ (normalization, bridges, token boot, URL patterns…)
+│  ├─ integrations/ (normalization, bridges, token boot, URL patterns…)
+│  └─ Compatibility re-export stubs retained at older paths for gradual migration
 └─ dist/ (after build)
 ```
 

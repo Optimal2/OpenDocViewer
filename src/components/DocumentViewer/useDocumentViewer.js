@@ -16,8 +16,8 @@
  */
 
 import { useState, useRef, useCallback, useContext } from 'react';
-import logger from '../../LogController.js';
-import ViewerContext from '../../ViewerContextValue.js';
+import logger from '../../logging/systemLogger.js';
+import ViewerContext from '../../contexts/viewerContext.js';
 import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 

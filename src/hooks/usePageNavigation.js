@@ -37,7 +37,7 @@
  */
 
 import { useCallback } from 'react';
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 import usePageTimer from './usePageTimer';
 import {
   handlePrevPage,
