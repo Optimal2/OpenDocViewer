@@ -34,6 +34,24 @@ import {
   handleZoomOut,
 } from '../utils/zoomUtils';
 
+
+/**
+ * Props for {@link DocumentRender}.
+ * @typedef {Object} DocumentRenderProps
+ * @property {number} pageNumber
+ * @property {number} zoom
+ * @property {function(): void=} initialRenderDone
+ * @property {function(): void=} onRender
+ * @property {{ current: HTMLElement|null }} viewerContainerRef
+ * @property {function(number): void} setZoom
+ * @property {boolean} isCompareMode
+ * @property {{ rotation: number, brightness: number, contrast: number }} imageProperties
+ * @property {boolean} isCanvasEnabled
+ * @property {boolean} forceRender
+ * @property {Array<PageEntry>} allPages
+ * @property {{ current: HTMLElement|null }=} thumbnailsContainerRef
+ */
+
 /**
  * @typedef {Object} PageEntry
  * @property {string} fullSizeUrl           Resolved URL for the full-size raster image
@@ -67,6 +85,13 @@ function getCurrentPage(allPages, pageNumber) {
  * @property {function(): !Array<string>} getAllPrintableDataUrls   // NEW: list of full-size URLs for ALL pages in order
  */
 
+/**
+ * Render the currently active page and expose imperative viewer helpers to parent components.
+ *
+ * @param {DocumentRenderProps} props
+ * @param {*} ref
+ * @returns {*}
+ */
 const DocumentRender = React.forwardRef(function DocumentRender(
   {
     pageNumber,

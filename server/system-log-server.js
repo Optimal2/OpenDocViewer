@@ -17,6 +17,7 @@
  *  - JSON_LIMIT=64kb
  *  - LOG_RETENTION_DAYS=14
  *
+ * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  * Note: This file is self-contained; no internal imports required.
  */
 

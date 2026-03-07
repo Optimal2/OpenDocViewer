@@ -87,3 +87,16 @@ Also check:
 - `docs-src/architecture.md` — architecture and flow notes
 - `docs-src/runtime-configuration.md` — runtime config and override rules
 - `src/types/jsdoc-types.js` — shared JSDoc-only type aliases
+
+
+## Documentation files
+
+When a change affects runtime behavior or operations, update the matching documentation layer as well:
+
+- `README.md` for product-level usage and setup
+- `docs-src/architecture.md` for module responsibility changes
+- `docs-src/runtime-configuration.md` for config precedence or loading changes
+- `docs-src/log-servers.md` for logging endpoint, retention, or proxy changes
+- `docs-src/deploy-ops.md` for IIS, proxy, or deployment workflow changes
+- `docs-src/printing.md` for print-pipeline design changes
+- `docs-src/integrations.md` for bootstrap or host payload changes

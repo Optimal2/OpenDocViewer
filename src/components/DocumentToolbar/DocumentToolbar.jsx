@@ -27,11 +27,67 @@ import ThemeToggleButton from './ThemeToggleButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 
+
+/**
+ * Detail payload emitted by the print dialog.
+ * @typedef {Object} PrintSubmitDetail
+ * @property {'active'|'all'|'range'|'advanced'} mode
+ * @property {number=} from
+ * @property {number=} to
+ * @property {Array<number>=} sequence
+ * @property {string=} reason
+ * @property {string=} forWhom
+ */
+
+/**
+ * Props for {@link DocumentToolbar}.
+ * @typedef {Object} DocumentToolbarProps
+ * @property {number} pageNumber
+ * @property {number} totalPages
+ * @property {boolean} prevPageDisabled
+ * @property {boolean} nextPageDisabled
+ * @property {boolean} firstPageDisabled
+ * @property {boolean} lastPageDisabled
+ * @property {function(number): void} setPageNumber
+ * @property {function(): void} zoomIn
+ * @property {function(): void} zoomOut
+ * @property {function(): void} fitToScreen
+ * @property {function(): void} fitToWidth
+ * @property {{ current: any }} documentRenderRef
+ * @property {{ current: any }} viewerContainerRef
+ * @property {function(): void} handleCompare
+ * @property {boolean} isComparing
+ * @property {{ rotation: number, brightness: number, contrast: number }} imageProperties
+ * @property {function(number): void} handleRotationChange
+ * @property {function({ target: { value: number } }): void} handleBrightnessChange
+ * @property {function({ target: { value: number } }): void} handleContrastChange
+ * @property {function(): void} resetImageProperties
+ * @property {boolean} isExpanded
+ * @property {function(*): void} setIsExpanded
+ * @property {number=} zoom
+ * @property {{ mode?: 'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM', scale?: number }=} zoomState
+ * @property {function(*): void=} setZoomMode
+ * @property {function(number): void=} setZoom
+ * @property {boolean=} needsViewerFocusHint
+ * @property {function(): void=} focusViewer
+ * @property {boolean=} compareDisabled
+ * @property {boolean=} editDisabled
+ */
+
 /** Range (±) around 100% where sliders snap back to the neutral value. */
 const SLIDER_CENTER_RANGE = 20;
 /** Epsilon for considering zoom ≈ 100% (0.5%). */
 const ONE_TO_ONE_EPS = 0.005;
 
+/**
+ * Toolbar shell for page navigation, zoom, compare/edit toggles, theme switching, and print entry.
+ *
+ * The component owns only local toolbar UI state. Page rendering, zoom math, and print execution
+ * are delegated to dedicated hooks and helper modules.
+ *
+ * @param {DocumentToolbarProps} props
+ * @returns {*}
+ */
 const DocumentToolbar = ({
   pageNumber,
   totalPages,

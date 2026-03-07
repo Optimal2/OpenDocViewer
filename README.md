@@ -23,6 +23,7 @@ The codebase now has three documentation layers:
 - [Runtime configuration](#runtime-configuration)
 - [Printing](#printing)
 - [Logging](#logging)
+- [Operations and deployment](#operations-and-deployment)
 - [Project structure](#project-structure)
 - [Development conventions](#development-conventions)
 - [Troubleshooting notes](#troubleshooting-notes)
@@ -67,6 +68,14 @@ Use the following files depending on what you are trying to understand:
   - module responsibilities and request/data flow through the app
 - `docs-src/runtime-configuration.md`
   - runtime config loading order, override rules, and deployment notes
+- `docs-src/log-servers.md`
+  - logging endpoint contracts, retention, proxy patterns, and security assumptions
+- `docs-src/deploy-ops.md`
+  - IIS hosting, proxy deployment, cache rules, and operational checklists
+- `docs-src/printing.md`
+  - print pipeline design and the responsibilities of the print helper modules
+- `docs-src/integrations.md`
+  - bootstrap modes, host payload shapes, and where integration logic belongs
 - `src/types/jsdoc-types.js`
   - shared JSDoc-only callback/type aliases used across the UI
 
@@ -223,6 +232,9 @@ Key design points:
 
 ## Logging
 
+For the logging server contract and reverse-proxy examples, see `docs-src/log-servers.md`.
+
+
 ### User print log
 
 Client code lives in `src/logging/userLogger.js` and records user print metadata such as reason / recipient, depending on runtime policy.
@@ -238,6 +250,10 @@ Optional ingestion servers live in:
 These are intentionally separate from the static frontend so deployments can choose whether to enable them.
 
 ---
+
+## Operations and deployment
+
+For IIS-specific hosting, proxy setup, cache guidance, and ops checklists, see `docs-src/deploy-ops.md`.
 
 ## Project structure
 
