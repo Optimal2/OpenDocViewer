@@ -5,14 +5,16 @@
  * Goals:
  *  - Fast dev server with React Refresh
  *  - Predictable production builds with ES module workers (pdf.js, image workers)
- *  - Robust JSX handling for `.js/.jsx` within **src/** only (avoid surprising 3P deps)
+ *  - App source uses `.jsx` for JSX and `.js` for logic-only modules
+ *  - Keep dependency parsing conservative to avoid surprising 3P deps
  *  - SVGs via SVGR (icon mode on)
  *
  * Important notes:
  *  - **Web Workers as ES modules**: `worker.format = 'es'` ensures worker code is bundled
  *    as native ES modules, matching how pdf.js ships its worker entry.
- *  - **JSX loaders**: We treat `.js/.jsx` inside **src/** as JSX via esbuild (see `esbuild.include`).
- *    We also instruct dependency pre-bundling to parse `.js/.jsx` as JSX. DO NOT widen this
+ *  - **JSX loaders**: App source is parsed as JSX only for `.jsx` files. Dependency pre-bundling
+ *    keeps explicit `.js/.jsx` loaders because some third-party packages still ship JSX in `.js`.
+ *    DO NOT widen this
  *    to all node_modules—some packages use `.js` for non-JSX content.
  *  - **Base path**: In production we use `./` (relative) so the app works under an IIS
  *    application folder (e.g. `/OpenDocViewer`). In dev we keep `/`.
@@ -69,12 +71,13 @@ export default defineConfig(({ mode }) => {
 
     /**
      * App source compilation via esbuild:
-     * - Treat only files under **src/** as JSX-capable `.js`
+     * - Treat only `.jsx` files under **src/** as JSX
+     * - Let plain `.js` files compile as standard JavaScript
      * - Use the automatic JSX runtime (no need to import React in every file)
      */
     esbuild: {
       loader: 'jsx',
-      include: /src\/.*\.[jt]sx?$/, // explicitly include all js, jsx, ts, tsx in src
+      include: /src\/.*\.jsx$/,
       jsx: 'automatic',
     },
 
