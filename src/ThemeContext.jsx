@@ -19,8 +19,9 @@
  *     not "file-type/browser", because v21 does not export that subpath for bundlers.
  */
 
-import React, { createContext, useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback } from 'react';
 import logger from './LogController';
+import ThemeContext from './ThemeContextValue.js';
 
 /**
  * Theme identifier.
@@ -98,20 +99,6 @@ function applyThemeToDocument(newTheme) {
     // ignore; DOM not available or locked down
   }
 }
-
-/**
- * Create the Theme context with a safe default to avoid undefined access
- * if a consumer is mounted outside the provider by mistake.
- * Consumers should still wrap with <ThemeProvider>.
- * @type {React.Context.<ThemeContextValue>}
- */
-export const ThemeContext = createContext(
-  /** @type {ThemeContextValue} */ ({
-    theme: 'light',
-    toggleTheme: function () {},
-    setThemeExplicit: function (_next) {}
-  })
-);
 
 /**
  * ThemeProvider component to manage and provide theme-related state and functions.

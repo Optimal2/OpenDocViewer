@@ -82,7 +82,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     onRender = () => {},
     viewerContainerRef,
     setZoom,
-    setPageNumber,
     isCompareMode,
     imageProperties,
     isCanvasEnabled,

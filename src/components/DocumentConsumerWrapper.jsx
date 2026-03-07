@@ -26,7 +26,7 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { ViewerContext } from '../ViewerContext';
+import ViewerContext from '../ViewerContextValue.js';
 import logger from '../LogController';
 
 // Lazy-load heavy subtrees to keep initial bundle small

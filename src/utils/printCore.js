@@ -29,6 +29,12 @@ import { renderSingleDocument, renderMultiDocument } from './printDom.js';
 import { makeBaseTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
+// Hidden print-iframe cleanup timing (milliseconds).
+const DEFAULT_IFRAME_CLEANUP_MS = 2000;
+const MIN_MULTI_PAGE_CLEANUP_MS = 2500;
+const BASE_MULTI_PAGE_CLEANUP_MS = 1000;
+const PER_PAGE_CLEANUP_MS = 5;
+
 /**
  * Options for single-page printing.
  * @typedef {Object} PrintOptions
@@ -210,10 +216,10 @@ function resolveActiveNode(documentRenderRef, viewerContainerRef) {
 
 /**
  * Create a hidden iframe and return the element plus a cleanup function.
- * @param {number} [cleanupDelayMs=2000]
+ * @param {number} [cleanupDelayMs=DEFAULT_IFRAME_CLEANUP_MS]
  * @returns {HiddenIframe}
  */
-function createHiddenIframe(cleanupDelayMs = 2000) {
+function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
   const f = document.createElement('iframe');
   f.setAttribute('aria-hidden', 'true');
   Object.assign(f.style, {
@@ -284,7 +290,7 @@ export function handlePrint(documentRenderRef, options = {}) {
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
 
-  const { frame } = createHiddenIframe(2000);
+  const { frame } = createHiddenIframe(DEFAULT_IFRAME_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
@@ -396,7 +402,12 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
 
-  const { frame } = createHiddenIframe(Math.max(2500, 1000 + toPrint.length * 5));
+  const { frame } = createHiddenIframe(
+    Math.max(
+      MIN_MULTI_PAGE_CLEANUP_MS,
+      BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+    )
+  );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
@@ -449,7 +460,12 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
 
-  const { frame } = createHiddenIframe(Math.max(2500, 1000 + toPrint.length * 5));
+  const { frame } = createHiddenIframe(
+    Math.max(
+      MIN_MULTI_PAGE_CLEANUP_MS,
+      BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+    )
+  );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');

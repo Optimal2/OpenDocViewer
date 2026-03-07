@@ -25,7 +25,7 @@
  */
 
 import { useEffect, useContext, useRef, useCallback } from 'react';
-import { ViewerContext } from '../../ViewerContext.jsx';
+import ViewerContext from '../../ViewerContextValue.js';
 import logger from '../../LogController.js';
 import { generateDocumentList, generateDemoList, getTotalPages } from './Utils.js';
 import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './WorkerHandler.js';
@@ -476,6 +476,9 @@ const DocumentLoader = ({
   }, [insertAtIndex, sameBlob, drainMainThreadJobs]);
 
   useEffect(() => {
+    const activeFetchControllers = new Set();
+    fetchControllers.current = activeFetchControllers;
+
     // Fresh run token (helps trace StrictMode re-runs)
     try {
       runId.current = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
@@ -572,10 +575,13 @@ const DocumentLoader = ({
         startTimerRef.current = undefined;
       }
 
-      fetchControllers.current.forEach((ctrl) => {
+      activeFetchControllers.forEach((ctrl) => {
         try { ctrl.abort(); } catch {}
       });
-      fetchControllers.current.clear();
+      activeFetchControllers.clear();
+      if (fetchControllers.current === activeFetchControllers) {
+        fetchControllers.current = new Set();
+      }
 
       // Terminate this run's workers
       (imageWorkersRef.current || []).forEach((worker) => {
@@ -607,6 +613,7 @@ const DocumentLoader = ({
     processBatches,
     processSequential,
     drainMainThreadJobs,
+    setWorkerCount,
   ]);
 
   return children;

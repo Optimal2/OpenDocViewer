@@ -25,7 +25,7 @@ import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
 import Resizer from '../Resizer.jsx';
 import logger from '../../LogController.js';
-import { ViewerContext } from '../../ViewerContext.jsx';
+import ViewerContext from '../../ViewerContextValue.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
 
 const DocumentViewer = () => {

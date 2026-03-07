@@ -14,7 +14,7 @@
 import React, { useContext, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { ThemeContext } from '../../ThemeContext.jsx';
+import ThemeContext from '../../ThemeContextValue.js';
 
 const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
   const { t } = useTranslation();
