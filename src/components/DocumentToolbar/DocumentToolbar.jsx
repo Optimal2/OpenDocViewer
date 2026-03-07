@@ -40,6 +40,27 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  */
 
 /**
+ * Mutable ref-like object used by the toolbar.
+ * @typedef {Object} AnyRef
+ * @property {*} current
+ */
+
+/**
+ * Editable image state shown by the toolbar.
+ * @typedef {Object} ImageProperties
+ * @property {number} rotation
+ * @property {number} brightness
+ * @property {number} contrast
+ */
+
+/**
+ * Zoom display state used by the newer toolbar UX paths.
+ * @typedef {Object} ZoomState
+ * @property {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} [mode]
+ * @property {number} [scale]
+ */
+
+/**
  * Props for {@link DocumentToolbar}.
  * @typedef {Object} DocumentToolbarProps
  * @property {number} pageNumber
@@ -53,11 +74,11 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} zoomOut
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
- * @property {{ current: any }} documentRenderRef
- * @property {{ current: any }} viewerContainerRef
+ * @property {AnyRef} documentRenderRef
+ * @property {AnyRef} viewerContainerRef
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
- * @property {{ rotation: number, brightness: number, contrast: number }} imageProperties
+ * @property {ImageProperties} imageProperties
  * @property {function(number): void} handleRotationChange
  * @property {function({ target: { value: number } }): void} handleBrightnessChange
  * @property {function({ target: { value: number } }): void} handleContrastChange
@@ -65,7 +86,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {boolean} isExpanded
  * @property {function(*): void} setIsExpanded
  * @property {number=} zoom
- * @property {{ mode?: 'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM', scale?: number }=} zoomState
+ * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
  * @property {function(number): void=} setZoom
  * @property {boolean=} needsViewerFocusHint
