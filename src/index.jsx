@@ -31,7 +31,7 @@ import AppBootstrap from './components/AppBootstrap';
  */
 const isDev =
   (typeof import.meta !== 'undefined' && import.meta?.env?.MODE === 'development') ||
-  (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development');
+  (typeof globalThis !== 'undefined' && globalThis.process?.env?.NODE_ENV === 'development');
 
 logger.setLogLevel(isDev ? 'debug' : 'warn');
 logger.info('OpenDocViewer entry loaded', { mode: isDev ? 'development' : 'production' });

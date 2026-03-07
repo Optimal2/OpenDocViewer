@@ -295,7 +295,7 @@ export function handlePrint(documentRenderRef, options = {}) {
     dataUrl,
     orientation: pageOrientation,
     printDelayMs,
-    printHeaderCfg: (odv && odv.printHeader) || {},
+    printHeaderCfg: odv.printHeader || {},
     tokenContext
   });
 }
@@ -406,7 +406,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
   renderMultiDocument(doc, {
     dataUrls: toPrint,
     printDelayMs,
-    printHeaderCfg: (odv && odv.printHeader) || {},
+    printHeaderCfg: odv.printHeader || {},
     tokenContext
   });
 }
@@ -459,7 +459,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
   renderMultiDocument(doc, {
     dataUrls: toPrint,
     printDelayMs,
-    printHeaderCfg: (odv && odv.printHeader) || {},
+    printHeaderCfg: odv.printHeader || {},
     tokenContext
   });
 }

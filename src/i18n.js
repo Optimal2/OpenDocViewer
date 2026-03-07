@@ -32,7 +32,7 @@ import LanguageDetector from 'i18next-browser-languagedetector';
 /** Dev-mode detector (Vite + Node envs). */
 const IS_DEV =
   (typeof import.meta !== 'undefined' && import.meta?.env?.MODE === 'development') ||
-  (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development');
+  (typeof globalThis !== 'undefined' && globalThis.process?.env?.NODE_ENV === 'development');
 
 /** Read a query parameter by name (no deps). */
 function readQuery(name) {

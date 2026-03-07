@@ -18,6 +18,7 @@ import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../LogController.js';
+import LoadingSpinner from './LoadingSpinner.jsx';
 
 /**
  * @param {Object} props
@@ -148,7 +149,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
               <div className="thumbnail-number">{itemIndex}</div>
               <div className="thumbnail-image">
                 {/* 0=loading, -1=failed, 1=ready */}
-                {status === 0 && (typeof LoadingSpinner !== 'undefined' ? <LoadingSpinner /> : <div className="loading-spinner" />)}
+                {status === 0 && <LoadingSpinner />}
                 {status === -1 && (
                   <img
                     src="lost.png"

@@ -10,10 +10,12 @@
  *   - Optionally forward structured logs to a backend ingestion endpoint (server.js).
  *
  * RUNTIME CONFIG SOURCES (highest precedence first)
- *   1) window.__ODV_CONFIG__:
+ *   1) window.__ODV_CONFIG__ / window.__ODV_GET_CONFIG__():
  *        - logEndpoint: string (absolute or relative)
  *        - logToken:    string (sent as 'x-log-token')
  *        - logEnabled:  boolean (optional override; default: true when URL exists)
+ *        - OR nested runtime config:
+ *          systemLog: { endpoint: string, token: string, enabled: boolean }
  *   2) <meta> tags in index.html:
  *        - <meta name="odv-log-endpoint" content="...">
  *        - <meta name="odv-log-token" content="...">
@@ -71,16 +73,33 @@ function readMetaBool(name) {
 }
 
 /**
- * Resolve a runtime config snapshot from window.__ODV_CONFIG__ (SSR-safe).
+ * Resolve a runtime config snapshot from runtime globals (SSR-safe).
+ * Supports both legacy flat log keys and nested `systemLog` keys from odv.config.js.
  * @returns {{ logEndpoint: (string|undefined), logToken: (string|undefined), logEnabled: (boolean|undefined) }}
  */
 function readRuntimeConfig() {
   try {
-    if (typeof window !== 'undefined' && window.__ODV_CONFIG__) {
-      return /** @type {{ logEndpoint: (string|undefined), logToken: (string|undefined), logEnabled: (boolean|undefined) }} */ (
-        /** @type {*} */ (window.__ODV_CONFIG__)
-      ) || {};
-    }
+    if (typeof window === 'undefined') return {};
+
+    const runtimeCfg =
+      (typeof window.__ODV_GET_CONFIG__ === 'function' && window.__ODV_GET_CONFIG__()) ||
+      window.__ODV_CONFIG__ ||
+      {};
+
+    const cfg = /** @type {*} */ (runtimeCfg) || {};
+    const systemLog = (cfg.systemLog && typeof cfg.systemLog === 'object') ? cfg.systemLog : {};
+
+    return {
+      logEndpoint:
+        typeof cfg.logEndpoint === 'string' ? cfg.logEndpoint :
+        (typeof systemLog.endpoint === 'string' ? systemLog.endpoint : undefined),
+      logToken:
+        typeof cfg.logToken === 'string' ? cfg.logToken :
+        (typeof systemLog.token === 'string' ? systemLog.token : undefined),
+      logEnabled:
+        typeof cfg.logEnabled === 'boolean' ? cfg.logEnabled :
+        (typeof systemLog.enabled === 'boolean' ? systemLog.enabled : undefined),
+    };
   } catch {
     // ignore
   }

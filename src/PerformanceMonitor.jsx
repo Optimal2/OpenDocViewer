@@ -79,8 +79,6 @@ const PerformanceMonitor = () => {
   // Runtime toggle (read once at mount; if you need live toggling, change to state + event)
   const showPerfOverlay = useMemo(() => !!readRuntimeConfig().showPerfOverlay, []);
 
-  // Early exit to keep costs at absolute minimum when disabled
-  if (!showPerfOverlay) return null;
 
   const [memory, setMemory] = useState(
     /** @type {MemorySnapshot} */ ({
@@ -90,22 +88,22 @@ const PerformanceMonitor = () => {
     })
   );
 
-  const [hardwareConcurrency, setHardwareConcurrency] = useState(() => {
+  const hardwareConcurrency = useMemo(() => {
     try {
       return typeof navigator !== 'undefined' ? (navigator.hardwareConcurrency || 1) : 1;
     } catch {
       return 1;
     }
-  });
+  }, []);
 
-  const [deviceMemory, setDeviceMemory] = useState(() => {
+  const deviceMemory = useMemo(() => {
     try {
       // Non-standard; Chromium only; returns GB
       return typeof navigator !== 'undefined' ? (Number(navigator.deviceMemory) || 0) : 0;
     } catch {
       return 0;
     }
-  });
+  }, []);
 
   // FPS sampling (simple moving average)
   const [fps, setFps] = useState(0);
@@ -161,8 +159,10 @@ const PerformanceMonitor = () => {
     }
   }, []);
 
-  // Start FPS and memory loops
+  // Start FPS and memory loops only when the overlay is actually enabled
   useEffect(() => {
+    if (!showPerfOverlay) return undefined;
+
     rafRef.current = requestAnimationFrame(tick);
     const id = setInterval(updateMemory, 1000);
     // seed once so UI doesn't start with zeros
@@ -171,7 +171,7 @@ const PerformanceMonitor = () => {
       try { if (rafRef.current) cancelAnimationFrame(rafRef.current); } catch {}
       clearInterval(id);
     };
-  }, [tick, updateMemory]);
+  }, [showPerfOverlay, tick, updateMemory]);
 
   // Derivations
   const totalPages = allPages.length;
@@ -206,6 +206,8 @@ const PerformanceMonitor = () => {
   const labelStyle = { opacity: 0.8 };
 
   const messages = messageQueue.slice(-20); // last 20
+
+  if (!showPerfOverlay) return null;
 
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">

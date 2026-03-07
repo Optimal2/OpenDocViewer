@@ -210,8 +210,8 @@ export const generateThumbnail = (imageUrl, maxWidth, maxHeight) => {
         if (!img.width || !img.height) return resolveFallback();
 
         const aspect = img.width / img.height;
-        let width = maxWidth;
-        let height = maxHeight;
+        let width;
+        let height;
 
         if (img.width >= img.height) {
           height = Math.min(maxHeight, Math.floor(maxWidth / aspect));
