@@ -34,7 +34,6 @@
  *   'file-type/browser'. With file-type v21 the '/browser' subpath is not
  *   exported for bundlers and will break Vite builds.
  *
- * Source: :contentReference[oaicite:0]{index=0}
  */
 
 import { useCallback } from 'react';

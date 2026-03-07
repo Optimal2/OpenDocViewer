@@ -1,8 +1,8 @@
-// File: src/components/DocumentToolbar/PrintRangeDialog.controller.js
+// File: src/components/DocumentToolbar/usePrintRangeDialog.js
 /**
- * File: src/components/DocumentToolbar/PrintRangeDialog.controller.js
+ * File: src/components/DocumentToolbar/usePrintRangeDialog.js
  *
- * Controller hook + helpers for PrintRangeDialog.
+ * Hook + helpers for PrintRangeDialog.
  * All heavy logic and effects live here to keep the main component lean.
  */
 

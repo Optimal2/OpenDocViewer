@@ -264,7 +264,7 @@ OpenDocViewer/
 │  │     ├─ ZoomButtons.jsx
 │  │     ├─ PageNavigationButtons.jsx
 │  │     ├─ PrintRangeDialog.jsx
-│  │     └─ PrintRangeDialog.controller.js
+│  │     └─ usePrintRangeDialog.js
 │  ├─ utils/ (printing, zoom, navigation…)
 │  └─ integrations/ (normalization, bridges, token boot, URL patterns…)
 └─ dist/ (after build)

@@ -25,7 +25,6 @@
  *   - Creating a `Uint8ClampedArray` over the TIFF RGBA buffer avoids an extra copy.
  *   - `convertToBlob` on OffscreenCanvas is async and keeps memory pressure lower than toDataURL.
  *
- * Provenance / source reference: :contentReference[oaicite:0]{index=0}
  */
 
 /**
@@ -53,7 +52,7 @@
 // --- Worker global -----------------------------------------------------------
 
 /** @type {(ServiceWorkerGlobalScope|DedicatedWorkerGlobalScope|SharedWorkerGlobalScope|*)} */
-const ctx = self;
+const workerScope = self;
 
 // --- Shared OffscreenCanvas cache -------------------------------------------
 
@@ -119,7 +118,7 @@ function postMainThreadFallback(jobs, fileExtension) {
     handleInMainThread: true,
     sourceUrl: j.sourceUrl || null,
   }));
-  ctx.postMessage({ jobs: safeJobs, fileExtension, handleInMainThread: true });
+  workerScope.postMessage({ jobs: safeJobs, fileExtension, handleInMainThread: true });
 }
 
 /**
@@ -127,7 +126,7 @@ function postMainThreadFallback(jobs, fileExtension) {
  * @param {MessageEvent} event
  * @returns {void}
  */
-ctx.onmessage = async (event) => {
+workerScope.onmessage = async (event) => {
   const { jobs, fileExtension } = event.data || {};
   if (!Array.isArray(jobs) || jobs.length === 0) return;
 
@@ -143,7 +142,7 @@ ctx.onmessage = async (event) => {
       await processImage(jobs, fileExtLower, jobResults);
     }
 
-    ctx.postMessage({ jobs: jobResults, fileExtension });
+    workerScope.postMessage({ jobs: jobResults, fileExtension });
   } catch (error) {
     // On any unexpected failure, avoid posting large buffers back.
     const safeJobs = jobs.map((j) => ({
@@ -156,7 +155,7 @@ ctx.onmessage = async (event) => {
       handleInMainThread: true,
       sourceUrl: j.sourceUrl || null,
     }));
-    ctx.postMessage({ error: String(error?.message || error), jobs: safeJobs, handleInMainThread: true });
+    workerScope.postMessage({ error: String(error?.message || error), jobs: safeJobs, handleInMainThread: true });
   }
 };
 

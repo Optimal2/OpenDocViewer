@@ -18,7 +18,6 @@
  *     package, NOT 'file-type/browser'. With file-type v21 the '/browser' subpath is not
  *     exported for bundlers and will break Vite builds. See README “Design notes & gotchas”.
  *
- * Provenance / baseline reference for prior content: :contentReference[oaicite:0]{index=0}
  */
 
 import React, {
