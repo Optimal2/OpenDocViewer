@@ -2,15 +2,13 @@
 /**
  * File: src/integrations/bootstrapRuntime.js
  *
- * OpenDocViewer — Bootstrap Detection & Host Integration
+ * Startup mode detection and host-integration entry point.
  *
- * PURPOSE
- *   Determine how the viewer should be initialized at runtime by probing:
- *     1) Parent page (same-origin bridge)
- *     2) Session token in URL (?sessiondata=…)
- *     3) URL params (pattern mode)
- *     4) JS API (window.ODV.start(...))
- *     5) Fallback demo mode
+ * Responsibilities:
+ * - expose a tiny `window.ODV.start(...)` host API
+ * - probe all supported startup sources in priority order
+ * - normalize host payloads into a single bundle shape when possible
+ * - report the selected bootstrap mode back to `AppBootstrap`
  */
 
 import { readFromParent } from './parentBridge.js';

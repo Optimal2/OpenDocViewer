@@ -2,27 +2,16 @@
 /**
  * src/app/OpenDocViewer.jsx
  *
- * OpenDocViewer — Top-level Viewer Component (React)
+ * Main application shell for the viewer.
  *
- * PURPOSE
- *   - Initialize theme and viewer providers.
- *   - Track a simple mobile-view breakpoint and pass it to the viewer shell.
- *   - Decide whether to render the PerformanceMonitor (runtime-toggleable).
- *   - Support two input styles:
- *       1) Pattern mode: { folder, extension, endNumber }
- *       2) Explicit list: { sourceList, bundle }
- *   - NEW (demo passthrough): Forward optional demo-mode props so the loader can
- *       short-circuit simple images (JPG/PNG/etc.) without workers:
- *       { demoMode, demoStrategy, demoCount, demoFormats }
+ * Responsibilities:
+ * - mount theme and viewer providers
+ * - keep a lightweight responsive/mobile flag for the shell
+ * - decide whether optional diagnostics such as the performance overlay should render
+ * - pass the selected startup payload into `DocumentConsumerWrapper`
  *
- * RUNTIME TOGGLES (set via public/odv.config.js, <meta>, or Vite env)
- *   - showPerfOverlay: boolean — when true OR when ?perf=1 is present, the HUD is shown.
- *   - exposeStackTraces: boolean — used elsewhere (ErrorBoundary/UI) to hide/show error stacks.
- *
- * IMPORTANT PROJECT NOTE
- *   - Elsewhere in the app we import from 'file-type' (root), NOT 'file-type/browser'.
- *     With file-type v21 the '/browser' subpath is not exported and breaks Vite builds.
- *     See README “Design notes & gotchas” before changing this.
+ * This component intentionally does not contain document-loading logic or toolbar/viewer logic.
+ * Those concerns live deeper in the component tree.
  */
 
 import React, { useState, useEffect, useCallback, useRef } from 'react';
@@ -124,7 +113,7 @@ const OpenDocViewer = ({
 }) => {
   const [initialized, setInitialized] = useState(false);
 
-  // Initial mobile-view detection (SSR-safe default)
+  // Keep a simple shell-level breakpoint flag; renderer/layout details are handled lower down.
   const [isMobileView, setIsMobileView] = useState(
     typeof window !== 'undefined' ? window.innerWidth < 600 : false
   );

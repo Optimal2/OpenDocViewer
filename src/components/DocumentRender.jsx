@@ -2,22 +2,16 @@
 /**
  * File: src/components/DocumentRender.jsx
  *
- * OpenDocViewer — Main Page Renderer
+ * Active-page renderer for the viewer.
  *
- * PURPOSE
- *   Render the current page either via <canvas> (with rotation/filters) or as a plain <img>.
- *   This component coordinates image loading, initial “fit to screen” zoom, and exposes
- *   an imperative API for toolbar actions (fit-to-screen, fit-to-width, zoom in/out, etc.).
+ * Responsibilities:
+ * - render the currently selected page either as a plain image or via canvas
+ * - compute fit-based zoom values from measured image dimensions
+ * - expose an imperative API used by toolbar and viewer helpers
+ * - coordinate initial-load, re-render, and printable-surface access for the active page
  *
- * ACCESSIBILITY
- *   - The image/canvas is absolutely positioned; alt text lives in the ImageRenderer.
- *   - Loading and error states are surfaced via LoadingMessage where applicable.
- *
- * IMPORTANT PROJECT GOTCHA
- *   - When we type-sniff elsewhere in the application we import from the **root** 'file-type'
- *     package, NOT 'file-type/browser'. With file-type v21 the '/browser' subpath is not
- *     exported for bundlers and will break Vite builds. See README “Design notes & gotchas”.
- *
+ * This file is intentionally renderer-focused. Global viewer state, page lists, and print orchestration
+ * live elsewhere.
  */
 
 import React, {

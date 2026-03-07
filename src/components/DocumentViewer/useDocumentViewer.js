@@ -2,17 +2,15 @@
 /**
  * File: src/components/DocumentViewer/useDocumentViewer.js
  *
- * OpenDocViewer — Document Viewer State & Control Hook (public entry)
+ * Primary viewer-state hook.
  *
- * PURPOSE
- *   Centralize the viewer’s local UI state (page, zoom, compare mode, image adjustments)
- *   and expose memoized handlers that the toolbar and child components can call.
- *   This file delegates effect plumbing and per-pane post-zoom to dedicated hooks
- *   to keep this module focused and readable.
+ * Responsibilities:
+ * - own local viewer interaction state such as page number, zoom, compare mode, and image adjustments
+ * - expose memoized handlers consumed by the viewer shell and toolbar
+ * - coordinate with helper hooks that manage effects and per-pane post-zoom behavior
  *
- * NOTE
- *   - API surface (returned object) is unchanged from previous versions.
- *   - Compare/Edit mutual exclusivity is enforced here (guarded toggles).
+ * This is the main public hook for viewer interaction state. Helper hooks may be split further, but the
+ * returned API from this module should remain stable unless a deliberate consumer-facing refactor is made.
  */
 
 import { useState, useRef, useCallback, useContext } from 'react';
@@ -63,7 +61,7 @@ export function useDocumentViewer() {
   const { allPages } = useContext(ViewerContext);
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
 
-  // --- Core state ----------------------------------------------------------------
+  // --- Core viewer interaction state ----------------------------------------------
   const [pageNumber, setPageNumber] = useState(1);
   const [zoom, setZoom] = useState(1);
   const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
@@ -80,7 +78,7 @@ export function useDocumentViewer() {
 
   const [thumbnailWidth, setThumbnailWidth] = useState(200);
 
-  // Refs shared with renderer and effects
+  // Refs shared with the renderer layer and the effect helpers.
   /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
   /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
   /** @type {{ current: any }} */ const documentRenderRef = useRef(null);

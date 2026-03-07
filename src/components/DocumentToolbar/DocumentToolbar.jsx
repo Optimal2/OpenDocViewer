@@ -2,49 +2,16 @@
 /**
  * File: src/components/DocumentToolbar/DocumentToolbar.jsx
  *
- * OpenDocViewer — Document Toolbar
+ * Main toolbar UI for page navigation, zoom, compare/edit toggles, theme switching, and print entry.
  *
- * Renders the top toolbar with print, navigation, zoom, compare, and
- * canvas-editing controls. Integrates with i18n for labels/tooltips and
- * forwards print selections (including reason/forWhom) to the print pipeline.
+ * Responsibilities:
+ * - render the visible toolbar controls and local dialog state
+ * - delegate page-number behavior to the navigation hook
+ * - delegate actual print work to `src/utils/print*.js`
+ * - keep the visible control state aligned with the current viewer state
  *
- * This component is memoized for performance.
- *
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} ZoomMode
- *
- * @component
- * @param {Object} props
- * @param {number} props.pageNumber - The currently active page (1-based).
- * @param {number} props.totalPages - Total number of pages in the document.
- * @param {boolean} props.prevPageDisabled - Disable the "previous page" button.
- * @param {boolean} props.nextPageDisabled - Disable the "next page" button.
- * @param {boolean} props.firstPageDisabled - Disable the "first page" button.
- * @param {boolean} props.lastPageDisabled - Disable the "last page" button.
- * @param {SetPageNumber} props.setPageNumber - State setter for page number (see jsdoc-types.js).
- * @param {function():void} props.zoomIn - Zoom in handler.
- * @param {function():void} props.zoomOut - Zoom out handler.
- * @param {function():void} props.fitToScreen - Fit-to-screen handler.
- * @param {function():void} props.fitToWidth - Fit-to-width handler.
- * @param {RefLike} props.documentRenderRef - Imperative handle to the renderer (see jsdoc-types.js).
- * @param {RefLike} props.viewerContainerRef - Ref to the viewer container element.
- * @param {function():void} props.handleCompare - Toggle compare mode.
- * @param {boolean} props.isComparing - Whether compare mode is active.
- * @param {{rotation:number,brightness:number,contrast:number}} props.imageProperties - Current canvas adjustments.
- * @param {function(number):void} props.handleRotationChange - Apply rotation delta in degrees (e.g., ±90).
- * @param {function(*):void} props.handleBrightnessChange - Brightness slider change handler (event-like).
- * @param {function(*):void} props.handleContrastChange - Contrast slider change handler (event-like).
- * @param {function():void} props.resetImageProperties - Reset brightness/contrast/rotation to defaults.
- * @param {boolean} props.isExpanded - Whether the canvas editing tool panel is open.
- * @param {SetBooleanState} props.setIsExpanded - Toggle state setter for the editing panel (see jsdoc-types.js).
- * @param {number=} props.zoom - (Optional) current zoom scale (1.0 = 100%). Used for display only.
- * @param {{mode:ZoomMode,scale:number}=} [props.zoomState] - (Optional) zoom mode/state for highlighting.
- * @param {(function(ZoomMode): void)=} [props.setZoomMode] - (Optional) switch zoom mode (sets sticky fit behaviors).
- * @param {SetNumberState=} [props.setZoom] - (Optional) zoom setter for applying typed % or 1:1.
- * @param {boolean} [props.needsViewerFocusHint=false] - Show a focus-restore hint when shortcuts are inactive (focus outside viewer).
- * @param {function():void} [props.focusViewer] - Programmatically focus the main viewer container.
- * @param {boolean} [props.compareDisabled=false] - Disable the Compare button (e.g., while Edit is active).
- * @param {boolean} [props.editDisabled=false] - Disable the Edit button (e.g., while Compare is active).
- * @returns {JSX.Element}
+ * This component should stay mostly presentational/orchestration-oriented. Core print logic, page
+ * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
 import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
@@ -88,22 +55,22 @@ const DocumentToolbar = ({
   resetImageProperties,
   isExpanded,
   setIsExpanded,
-  // NEW (optional; safe defaults below)
+  // Optional zoom-display state used by newer toolbar UX paths.
   zoom,
   zoomState,
   setZoomMode,
   setZoom,
-  // NEW: focus hint + restore
+  // Optional focus hint and focus-restore callback for keyboard shortcut UX.
   needsViewerFocusHint = false,
   focusViewer,
-  // NEW: mutual-exclusion UI flags
+  // Optional UI flags that keep Compare and Edit mutually exclusive.
   compareDisabled = false,
   editDisabled = false,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
 
-  // Initialize optional context for user logging (iframe id, app version)
+  // Seed optional user-log context once so later print actions can attach host metadata.
   useEffect(() => {
     try {
       const iframeId = typeof window !== 'undefined' && window.frameElement ? (window.frameElement.id || null) : null;

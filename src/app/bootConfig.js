@@ -1,13 +1,18 @@
 // File: src/app/bootConfig.js
 /**
- * Boot loader that ensures classic runtime configs are loaded before the app.
- * - Loads optional odv.site.config.js only from the *application base* (no root fallback → no 404 noise).
- * - Loads required odv.config.js from the *application base*, then falls back to site root (dev).
- * - Probes URLs with fetch (HEAD/GET) to avoid MIME errors before injecting <script>.
- * - Then imports /src/index.jsx to start the app.
+ * Runtime boot loader that resolves configuration scripts before React starts.
+ *
+ * High-level flow:
+ * - derive the application base path from the current URL
+ * - probe and load optional `odv.site.config.js`
+ * - probe and load required `odv.config.js`
+ * - import `src/index.jsx` only after the runtime configuration surface is available
+ *
+ * The fetch probe is deliberate: it avoids executing an SPA fallback HTML page or a resource with
+ * the wrong MIME type as if it were JavaScript.
  */
 
-/** Return application base path (trailing slash), derived from the page URL. */
+/** Return the application base path (always with a trailing slash) derived from the current page URL. */
 function getAppBase() {
   try {
     const u = new URL(document.baseURI || window.location.href);
@@ -33,7 +38,7 @@ function isJsContentType(ct) {
   );
 }
 
-/** Probe a URL; resolve {ok, url} only if response looks like a JS file. */
+/** Probe a candidate script URL and only accept it when the response looks like JavaScript. */
 async function probeScriptUrl(url) {
   try {
     const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
@@ -95,6 +100,6 @@ async function loadFromCandidates(name, candidates, { optional = false } = {}) {
   );
   if (!mainCfg.ok) return; // cannot run without defaults
 
-  // 3) Start the app only after configs are in place.
+  // 3) Start the React application only after runtime configuration has been loaded.
   await import('/src/index.jsx');
 })();
