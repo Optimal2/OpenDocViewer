@@ -1,4 +1,4 @@
-// File: src/utils/zoomUtils.js
+﻿// File: src/utils/zoomUtils.js
 /**
  * File: src/utils/zoomUtils.js
  *
@@ -24,11 +24,11 @@
 
 import logger from '../logging/systemLogger.js';
 
-/** Minimum allowed zoom factor (5%). */
+/** Minimum allowed zoom factor (5%). Kept intentionally permissive for very large pages. */
 const MIN_ZOOM = 0.05;
 /** Maximum allowed zoom factor (800%). */
 const MAX_ZOOM = 8;
-/** Zoom step multiplier (±10%). */
+/** Zoom step multiplier: 1.1x for zoom in, divide by 1.1 for zoom out. */
 const ZOOM_STEP = 1.1;
 
 /**
@@ -66,13 +66,8 @@ function clamp(value, min, max) {
  * @returns {(HTMLElement|null)}
  */
 function getContainer(viewerContainerRef) {
-  try {
-    return viewerContainerRef && /** @type {*} */ (viewerContainerRef).current
-      ? /** @type {HTMLElement} */ (viewerContainerRef.current)
-      : null;
-  } catch {
-    return null;
-  }
+  const current = viewerContainerRef ? /** @type {*} */ (viewerContainerRef).current : null;
+  return current ? /** @type {HTMLElement} */ (current) : null;
 }
 
 /**
