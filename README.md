@@ -78,7 +78,8 @@ Recent highlights:
 * **SPA** built with **React + Vite**
 
   * Entry: `src/index.jsx`
-  * Root: `src/OpenDocViewer.jsx`
+  * App root: `src/app/OpenDocViewer.jsx`
+  * Bootstrap shell: `src/app/AppBootstrap.jsx`
 * **Rendering**
 
   * PDF via `pdfjs-dist` (ESM worker configured once, dev == prod)
@@ -88,6 +89,7 @@ Recent highlights:
 
   * `DocumentViewer/*` — container, renderer, thumbnails, toolbar
   * `DocumentToolbar/*` — zoom, paging, print dialog, theme toggle
+  * Contexts live under `src/contexts/*`; logging lives under `src/logging/*`
   * Hooks split for clarity: `useDocumentViewer`, `hooks/useViewerEffects`, `hooks/useViewerPostZoom`
 
 ---
@@ -263,6 +265,11 @@ OpenDocViewer/
 │  │  ├─ dialogs.css               # global dialog styles (print dialog, etc.)
 │  │  └─ print.css                 # @media print rules
 │  ├─ components/
+│  │  ├─ DocumentLoader/
+│  │  │  ├─ DocumentLoader.js
+│  │  │  ├─ DemoControls.jsx
+│  │  │  ├─ batchHandler.js / mainThreadRenderer.js / workerHandler.js
+│  │  │  └─ documentLoaderUtils.js / sources/explicitListSource.js
 │  │  ├─ DocumentViewer/
 │  │  │  ├─ useDocumentViewer.js
 │  │  │  ├─ hooks/useViewerEffects.js
@@ -275,9 +282,10 @@ OpenDocViewer/
 │  │     ├─ PageNavigationButtons.jsx
 │  │     ├─ PrintRangeDialog.jsx
 │  │     └─ usePrintRangeDialog.js
-│  ├─ utils/ (printing, zoom, navigation…)
+│  ├─ hooks/ (navigation and page timer helpers)
 │  ├─ integrations/ (normalization, bridges, token boot, URL patterns…)
-│  └─ Compatibility re-export stubs retained at older paths for gradual migration
+│  ├─ logging/ (system/user logging)
+│  └─ utils/ (printing, zoom, navigation…)
 └─ dist/ (after build)
 ```
 
