@@ -1,4 +1,4 @@
-﻿// File: src/integrations/normalizeBundle.js
+// File: src/integrations/normalizeBundle.js
 /**
  * File: src/integrations/normalizeBundle.js
  *
@@ -30,7 +30,6 @@
  *     import from the **root** 'file-type' package (v21), NOT 'file-type/browser', which is
  *     not exported for bundlers and will break the Vite build.
  *
- * Baseline source for this module (traceability): :contentReference[oaicite:0]{index=0}
  */
 
 /**

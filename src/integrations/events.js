@@ -1,4 +1,4 @@
-﻿// File: src/integrations/events.js
+// File: src/integrations/events.js
 /**
  * File: src/integrations/events.js
  *
@@ -22,7 +22,6 @@
  *   - Elsewhere in the app we import from the **root** 'file-type' package, *not* 'file-type/browser'.
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
  *
- * Provenance / original baseline reference: :contentReference[oaicite:0]{index=0}
  */
 
 import logger from '../LogController';

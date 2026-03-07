@@ -1,6 +1,6 @@
-﻿// File: src/integrations/Bootstrap.js
+// File: src/integrations/bootstrapRuntime.js
 /**
- * File: src/integrations/Bootstrap.js
+ * File: src/integrations/bootstrapRuntime.js
  *
  * OpenDocViewer — Bootstrap Detection & Host Integration
  *

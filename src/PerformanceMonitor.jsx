@@ -21,7 +21,6 @@
  *   - Elsewhere we import from 'file-type' (root), **not** 'file-type/browser', because v21 does
  *     not export that subpath for bundlers and it will break a Vite build. See README design notes.
  *
- * Source of original baseline for reference: :contentReference[oaicite:0]{index=0}
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';

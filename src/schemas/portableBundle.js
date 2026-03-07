@@ -1,4 +1,4 @@
-﻿// File: src/schemas/portableBundle.js
+// File: src/schemas/portableBundle.js
 /**
  * File: src/schemas/portableBundle.js
  *
@@ -16,7 +16,6 @@
  *     because v21 does not export the '/browser' subpath for bundlers.)
  *   - This module has no runtime side-effects and can be used in Node or the browser.
  *
- * Provenance / baseline reference: :contentReference[oaicite:0]{index=0}
  */
 
 /** Schema version of this portable bundle definition. Increase on breaking changes. */

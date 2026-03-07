@@ -87,6 +87,23 @@ export default defineConfig(({ mode }) => {
     },
 
     /**
+     * Conservative chunking to keep heavy format libraries out of the main lazy viewer chunks.
+     * This improves cacheability and reduces the size of the DocumentLoader chunk without
+     * changing runtime behavior.
+     */
+    build: {
+      rollupOptions: {
+        output: {
+          manualChunks(id) {
+            if (id.includes('pdfjs-dist')) return 'pdfjs';
+            if (id.includes('utif2')) return 'utif';
+            return undefined;
+          },
+        },
+      },
+    },
+
+    /**
      * Provide a small compatibility shim for code that inspects process.env.
      * PUBLIC_URL follows `base`.
      */

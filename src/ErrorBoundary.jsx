@@ -21,7 +21,6 @@
  *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
  *     See README “Design notes & gotchas” before changing this.
  *
- * Provenance for this baseline (traceability): :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';

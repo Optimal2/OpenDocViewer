@@ -19,7 +19,6 @@
  *     'file-type' package, NOT 'file-type/browser' (v21 does not export that subpath
  *     for bundlers and builds will fail if changed).
  *
- * Provenance / source reference for previous baseline: :contentReference[oaicite:0]{index=0}
  */
 
 import React from 'react';

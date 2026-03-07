@@ -19,7 +19,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { usePrintRangeController } from './PrintRangeDialog.controller';
+import { usePrintRangeController } from './usePrintRangeDialog.js';
 
 /**
  * Allowed print modes (string-literal union for JSDoc).

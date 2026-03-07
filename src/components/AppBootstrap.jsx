@@ -1,4 +1,4 @@
-﻿// File: src/components/AppBootstrap.jsx
+// File: src/components/AppBootstrap.jsx
 /**
  * File: src/components/AppBootstrap.jsx
  *
@@ -18,7 +18,7 @@ import '../i18n.js'; // initialize i18n before any components render
 import logger from '../LogController.js';
 import ErrorBoundary from '../ErrorBoundary.jsx';
 import OpenDocViewer from '../OpenDocViewer.jsx';
-import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/Bootstrap.js';
+import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/bootstrapRuntime.js';
 import { makeExplicitSource } from './DocumentLoader/sources/ExplicitListSource.js';
 
 /**
