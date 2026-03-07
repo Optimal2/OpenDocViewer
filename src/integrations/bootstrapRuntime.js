@@ -16,7 +16,7 @@
 import { readFromParent } from './parentBridge.js';
 import { readFromSessionToken } from './sessionToken.js';
 import { readFromUrlParams } from './urlParams.js';
-import { normalizeToPortableBundle } from './normalizeBundle.js';
+import { normalizeToPortableBundle } from './normalizePortableBundle.js';
 
 /**
  * Canonical bootstrap modes.

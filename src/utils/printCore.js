@@ -24,7 +24,7 @@
  *   printHeader.css (string), which is injected as print-only CSS inside the print iframe.
  */
 
-import logger from '../LogController.js';
+import logger from '../logging/systemLogger.js';
 import { renderSingleDocument, renderMultiDocument } from './printDom.js';
 import { makeBaseTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';

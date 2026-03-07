@@ -21,8 +21,8 @@ import React from 'react';
 import { createRoot } from 'react-dom/client';
 import './styles.css';
 import './i18n'; // initialize i18n before rendering
-import logger from './LogController';
-import AppBootstrap from './components/AppBootstrap';
+import logger from './logging/systemLogger.js';
+import AppBootstrap from './app/AppBootstrap.jsx';
 
 /**
  * Determine environment and set a sensible client-side log level.

@@ -22,7 +22,7 @@
  *     are typically suppressed unless you increase verbosity.
  */
 
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 
 /** Minimum allowed zoom factor (5%). */
 const MIN_ZOOM = 0.05;

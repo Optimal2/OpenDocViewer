@@ -17,7 +17,7 @@
 import React, { useCallback, useEffect, useMemo, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import logger from '../LogController.js';
+import logger from '../logging/systemLogger.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
 
 /**

@@ -33,7 +33,7 @@
  */
 
 import { useRef, useEffect, useCallback } from 'react';
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 
 /** Default repeat cadence (ms). Keep modest to balance CPU and responsiveness. */
 const DEFAULT_REPEAT_INTERVAL_MS = 50;

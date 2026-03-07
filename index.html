@@ -2,7 +2,7 @@
 <!--
   OpenDocViewer — index.html
 
-  We now load runtime configs via a small module bootstrap (src/boot-config.js),
+  We now load runtime configs via a small module bootstrap (src/app/bootConfig.js),
   which injects odv.site.config.js (optional) and odv.config.js (required)
   from the *application base path* (works under IIS virtual directories),
   then imports the app entry.
@@ -116,6 +116,6 @@
 
     <!-- Module bootstrap: loads odv.site.config.js (optional) and odv.config.js (required)
          from the *application base path*, then imports /src/index.jsx. -->
-    <script type="module" src="./src/boot-config.js"></script>
+    <script type="module" src="./src/app/bootConfig.js"></script>
   </body>
 </html>

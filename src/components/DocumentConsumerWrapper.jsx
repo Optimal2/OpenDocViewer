@@ -26,8 +26,8 @@ import React, {
 } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import ViewerContext from '../ViewerContextValue.js';
-import logger from '../LogController';
+import ViewerContext from '../contexts/viewerContext.js';
+import logger from '../logging/systemLogger.js';
 
 // Lazy-load heavy subtrees to keep initial bundle small
 const DocumentViewer = lazy(() => import('./DocumentViewer/DocumentViewer'));

@@ -29,7 +29,7 @@ import React, {
   useImperativeHandle,
 } from 'react';
 import { useTranslation } from 'react-i18next';
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 import ImageRenderer from './ImageRenderer';
 import CanvasRenderer from './CanvasRenderer';
 import LoadingMessage from './LoadingMessage';

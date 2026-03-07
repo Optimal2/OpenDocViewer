@@ -25,7 +25,7 @@
 
 import React from 'react';
 import i18next from 'i18next';
-import logger from './LogController';
+import logger from './logging/systemLogger.js';
 
 /**
  * Determine whether we are in development mode.

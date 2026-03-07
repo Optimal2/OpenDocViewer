@@ -27,7 +27,7 @@
  *     not exported for bundlers and will break the Vite build.
  */
 
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 
 /**
  * @typedef {Object} UrlParamsData

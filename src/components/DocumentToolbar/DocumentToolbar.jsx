@@ -50,9 +50,9 @@
 import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import logger from '../../LogController.js';
-import userLog from '../../UserLogController.js';
-import ThemeContext from '../../ThemeContextValue.js';
+import logger from '../../logging/systemLogger.js';
+import userLog from '../../logging/userLogger.js';
+import ThemeContext from '../../contexts/themeContext.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';

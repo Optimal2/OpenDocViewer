@@ -20,7 +20,7 @@
  *     'file-type/browser' (v21 does not export that subpath for bundlers, which breaks Vite).
  */
 
-import logger from '../LogController';
+import logger from '../logging/systemLogger.js';
 
 /**
  * Coerce a value to a positive integer (minimum 1).
