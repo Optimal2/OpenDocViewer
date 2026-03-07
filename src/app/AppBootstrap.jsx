@@ -2,14 +2,20 @@
 /**
  * File: src/app/AppBootstrap.jsx
  *
- * OpenDocViewer — Application Bootstrapper
+ * Application bootstrap React component.
  *
- * PURPOSE
- *   Detect how the viewer should start (demo, URL params, parent page, session token, or JS API)
- *   and render <OpenDocViewer /> with the appropriate props:
- *     • Pattern mode:     { folder, extension, endNumber }
- *     • Explicit-list:    { sourceList, bundle }
- *     • Demo (new logic): build an explicit sourceList from /public sample files.
+ * Responsibilities:
+ * - run bootstrap detection exactly once after mount
+ * - convert the detected startup mode into a stable prop shape for `OpenDocViewer`
+ * - present the demo launcher when no host-provided startup payload exists
+ *
+ * Supported startup inputs:
+ * - URL pattern mode (`folder` + `extension` + `endNumber`)
+ * - explicit source lists derived from normalized bundles
+ * - local demo source lists built from files in `public/`
+ *
+ * This file should stay focused on *startup selection*. It should not own document rendering,
+ * bundle normalization rules, or viewer interaction state.
  */
 
 import React, { useEffect, useMemo, useState, useCallback } from 'react';
@@ -113,7 +119,7 @@ export default function AppBootstrap() {
   const [mix, setMix] = useState(false);
   const [start, setStart] = useState(false);
 
-  // Detect once on mount
+  // Detect startup mode once on mount and cache the resulting input shape.
   useEffect(() => {
     let mounted = true;
     (async () => {
@@ -158,7 +164,7 @@ export default function AppBootstrap() {
     logger.info('Demo mix selected');
   }, []);
 
-  // Build explicit source list from bundle (if present)
+  // Convert a normalized bundle into the explicit source-list format consumed by the loader.
   const sourceListFromBundle = useMemo(() => {
     if (!bundle) return null;
     try {
@@ -170,7 +176,7 @@ export default function AppBootstrap() {
     }
   }, [bundle]);
 
-  // Props for <OpenDocViewer />
+  // Build the canonical prop object expected by the application shell.
   const viewerProps = useMemo(() => {
     // 1) URL params → pattern mode
     if (mode === ODV_BOOTSTRAP_MODES.URL_PARAMS && urlConfig) {
@@ -204,7 +210,7 @@ export default function AppBootstrap() {
     return null;
   }, [mode, urlConfig, sourceListFromBundle, bundle, start, mix, format, count]);
 
-  // Render the demo launcher if we don't have props to start the viewer yet
+  // Until a startup payload exists, show the demo launcher instead of the viewer shell.
   if (!viewerProps) {
     // Avoid calling t(...) before i18n is initialized (prevents noisy dev warnings).
     if (!ready) {

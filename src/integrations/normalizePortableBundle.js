@@ -2,34 +2,15 @@
 /**
  * File: src/integrations/normalizePortableBundle.js
  *
- * OpenDocViewer — Normalize many incoming shapes to a neutral PortableDocumentBundle v1
+ * Normalizes multiple host payload shapes into the project’s neutral portable bundle shape.
  *
- * PURPOSE
- *   Accepts a variety of host-provided inputs (parent page objects, arrays of URLs,
- *   string tickets, already-normalized bundles) and produces a predictable, minimal
- *   “portable bundle” that the rest of the app can consume without special cases.
+ * Responsibilities:
+ * - accept already-normalized bundles, legacy parent-page models, URL arrays, and single URLs
+ * - sanitize the result into a predictable shape for the rest of the app
+ * - avoid network access or heavy runtime dependencies
  *
- * ACCEPTED INPUT SHAPES (in priority order)
- *   1) Already-normalized:
- *        { session: { id, userId? }, documents: [{ documentId, files: [...] }, ...] }
- *   2) Legacy parent-page model:
- *        { UserId?, SessionId?, PortableDocuments: { [docId]: { FileCollection, MetaDataCollection } } }
- *   3) Array of URLs or "tickets":
- *        [ "https://…/file1.png", "id|ext|relative/path/file2.tiff", { url, ext?, path? }, ... ]
- *   4) Single URL string:
- *        "https://…/file1.png"
- *   5) Fallback coercion:
- *        Any other object → minimal sanitized bundle with generated session id and empty docs.
- *
- * DESIGN NOTES
- *   - No network access and no type sniffing here (kept intentionally dependency-free).
- *   - Relative URL handling: if a value starts with "/", we treat it as app-relative (not site root)
- *     by stripping the leading slash before resolving against document.baseURI.
- *   - SSR-safety: all window/document access is guarded.
- *   - Project-wide gotcha (DO NOT change elsewhere): when type-sniffing in other modules,
- *     import from the **root** 'file-type' package (v21), NOT 'file-type/browser', which is
- *     not exported for bundlers and will break the Vite build.
- *
+ * This file is an integration boundary. Rendering code should consume the normalized output rather than
+ * branching on host-specific input shapes.
  */
 
 /**

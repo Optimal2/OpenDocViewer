@@ -1,27 +1,23 @@
-﻿// File: src/components/DocumentLoader/DocumentLoader.js
+// File: src/components/DocumentLoader/DocumentLoader.js
 /**
  * File: src/components/DocumentLoader/DocumentLoader.js
  *
- * OpenDocViewer — Orchestrates document fetching, type detection, paging, and rendering.
+ * Document loading orchestrator.
  *
- * MODES
- *   1) Pattern mode (legacy/demo): { folder, extension, endNumber }
- *   2) Explicit-list mode:        { sourceList: [{ url, ext, fileIndex }, ...] }
- *   3) Demo mode (new):           { demoMode, demoStrategy, demoCount, demoFormats }
+ * Responsibilities:
+ * - create the ordered list of source entries (pattern mode, explicit list, or demo list)
+ * - fetch bytes and infer file type
+ * - choose the correct execution path for each source
+ *   - PDF: main thread
+ *   - TIFF: main thread
+ *   - raster image: worker pipeline
+ * - insert normalized page entries into `ViewerContext` in stable page order
  *
- * PIPELINE (high level)
- *   - For each input entry → fetch bytes (ArrayBuffer)
- *   - Detect content type via `file-type` (buffer first, then blob fallback)
- *   - Decide execution path:
- *       • PDF → push a single job to the main-thread renderer queue
- *       • TIFF → push a single job to the main-thread renderer queue (dev == build)
- *       • Other images → push a single job to the worker queue
- *   - Schedule work:
- *       • Low-core devices (≤3 logical cores) → sequential scheduler; yields to UI between jobs
- *       • Others → batched, multi-worker processing via `batchHandler`
- *
- * DESIGN GOTCHA
- *   - Import from the root 'file-type' package (not 'file-type/browser'); many bundlers don't expose that subpath.
+ * Design boundaries:
+ * - type normalization belongs in `documentLoaderUtils.js`
+ * - worker lifecycle helpers belong in `workerHandler.js`
+ * - batch scheduling belongs in `batchHandler.js`
+ * - PDF/TIFF rasterization belongs in `mainThreadRenderer.js`
  */
 
 import { useEffect, useContext, useRef, useCallback } from 'react';
@@ -137,10 +133,10 @@ const DocumentLoader = ({
 }) => {
   const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
 
-  /** Lifecycle guard (StrictMode-safe) */
+  /** Lifecycle guard so async work can stop cleanly on unmount or StrictMode remount. */
   const isMounted = useRef(true);
 
-  /** Trace counters (dev diagnostics) */
+  /** Lightweight counters for tracing insert behavior during development and troubleshooting. */
   const insertsAttempted = useRef(0);
   const insertsAccepted = useRef(0);
 
@@ -156,12 +152,12 @@ const DocumentLoader = ({
     })()
   );
 
-  /** Work queues */
+  /** Work queues separated by execution environment. */
   /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // worker jobs
   /** @type {React.MutableRefObject.<Array.<*>>} */ const mainThreadJobQueue = useRef([]); // PDF/TIFF fallbacks
   /** @type {React.MutableRefObject.<Array.<*>>} */ const batchQueue = useRef([]);
 
-  /** Global page index across all inputs (for ViewerContext ordering) */
+  /** Global page index across all inputs so inserted pages remain stable in viewer order. */
   const currentPageIndex = useRef(0);
 
   /** Track inflight fetches for cleanup on unmount */

@@ -2,26 +2,16 @@
 /**
  * File: src/utils/printCore.js
  *
- * OpenDocViewer — Print Core
+ * Core print coordinator for the frontend.
  *
- * PURPOSE
- *   Core print routines used by the viewer:
- *     - Print current page (canvas or image, including canvas edits)
- *     - Print all pages
- *     - Print a selected range (ascending or descending)
- *     - Print an explicit sequence of pages
+ * Responsibilities:
+ * - gather printable surfaces or source URLs for the requested print mode
+ * - render printable DOM into a hidden iframe
+ * - apply optional print-header overlays and token substitution
+ * - trigger printing and clean up the iframe afterwards
  *
- * NOTES
- *   - Printing is performed via a hidden <iframe> to avoid popup blockers.
- *   - When possible, we obtain data URLs from the imperative handle; otherwise
- *     we fall back to canvases/images currently in the DOM.
- *
- * HEADER OVERLAY
- *   When odvConfig.printHeader.enabled === true, this module injects a non-optional
- *   overlay band into the print DOM (top or bottom) for each printed page, according
- *   to printHeader.applyTo ("all" | "first" | "last"). The overlay is absolutely
- *   positioned and does NOT reflow content. Admins may customize its look using
- *   printHeader.css (string), which is injected as print-only CSS inside the print iframe.
+ * Lower-level DOM generation lives in `printDom.js`, while parsing/token helpers live in the dedicated
+ * `printParse.js` and `printTemplate.js` modules.
  */
 
 import logger from '../logging/systemLogger.js';
@@ -29,7 +19,7 @@ import { renderSingleDocument, renderMultiDocument } from './printDom.js';
 import { makeBaseTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
-// Hidden print-iframe cleanup timing (milliseconds).
+// Hidden print-iframe cleanup timing (milliseconds). Kept near the top so maintainers can tune print cleanup without hunting for call-site literals.
 const DEFAULT_IFRAME_CLEANUP_MS = 2000;
 const MIN_MULTI_PAGE_CLEANUP_MS = 2500;
 const BASE_MULTI_PAGE_CLEANUP_MS = 1000;
