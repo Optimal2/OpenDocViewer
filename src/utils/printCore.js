@@ -82,6 +82,13 @@ const PER_PAGE_CLEANUP_MS = 5;
  * @param {Element} el
  * @returns {boolean}
  */
+/**
+ * Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.
+ * This is used before selecting DOM fallbacks for printing.
+ *
+ * @param {Element} el
+ * @returns {boolean}
+ */
 function isVisiblyMeasurable(el) {
   try {
     const rect = el.getBoundingClientRect?.();
@@ -172,6 +179,12 @@ function resolveOrientation(width, height, requested) {
  * Falls back gracefully if not present.
  * @returns {Object}
  */
+/**
+ * Read runtime configuration from the globals populated by `public/odv.config.js`.
+ * The function is intentionally tolerant so print actions can still proceed when no config is present.
+ *
+ * @returns {Object}
+ */
 function getODVConfig() {
   try {
     // __ODV_GET_CONFIG__ is a function in some deployments
@@ -206,6 +219,15 @@ function resolveActiveNode(documentRenderRef, viewerContainerRef) {
 
 /**
  * Create a hidden iframe and return the element plus a cleanup function.
+ * @param {number} [cleanupDelayMs=DEFAULT_IFRAME_CLEANUP_MS]
+ * @returns {HiddenIframe}
+ */
+/**
+ * Create the temporary hidden iframe used as the print document host.
+ *
+ * The iframe is removed on `afterprint` when possible and also via a timeout fallback so abandoned
+ * print dialogs do not leave detached iframes behind.
+ *
  * @param {number} [cleanupDelayMs=DEFAULT_IFRAME_CLEANUP_MS]
  * @returns {HiddenIframe}
  */
@@ -302,6 +324,13 @@ export function handlePrint(documentRenderRef, options = {}) {
  * @param {HTMLElement|Document} root
  * @returns {Array.<string>}
  */
+/**
+ * Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide
+ * an explicit all-pages list.
+ *
+ * @param {HTMLElement|Document} root
+ * @returns {Array<string>}
+ */
 function collectAllPrintableDataUrlsFromDom(root) {
   const nodes = (root || document).querySelectorAll?.('canvas, img');
   /** @type {Array.<string>} */
@@ -321,6 +350,13 @@ function collectAllPrintableDataUrlsFromDom(root) {
  * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
  * @param {{ current: HTMLElement|null }|undefined} viewerContainerRef
  * @returns {Promise.<Array.<string>>}
+ */
+/**
+ * Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
+ * @param {{ current: HTMLElement|null }|undefined} viewerContainerRef
+ * @returns {Promise<Array<string>>}
  */
 async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
@@ -355,6 +391,13 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
  * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
  * @param {PrintAllOptions} [options]
  * @returns {Promise.<void>}
+ */
+/**
+ * Print all available pages in viewer order.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
+ * @param {PrintAllOptions} [options]
+ * @returns {Promise<void>}
  */
 export async function handlePrintAll(documentRenderRef, options = {}) {
   logger.info('handlePrintAll invoked');
@@ -421,6 +464,14 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
  * @param {PrintAllOptions} [options]
  * @returns {Promise.<void>}
  */
+/**
+ * Print an explicit page sequence such as `3,1,2`.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
+ * @param {Array<number>} sequence
+ * @param {PrintAllOptions} [options]
+ * @returns {Promise<void>}
+ */
 export async function handlePrintSequence(documentRenderRef, sequence, options = {}) {
   const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '' } = options || {};
 
@@ -477,6 +528,15 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
  * @param {number} to
  * @param {PrintAllOptions} [options]
  * @returns {Promise.<void>}
+ */
+/**
+ * Print an inclusive page range.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} documentRenderRef
+ * @param {number} from
+ * @param {number} to
+ * @param {PrintAllOptions} [options]
+ * @returns {void}
  */
 export function handlePrintRange(documentRenderRef, from, to, options = {}) {
   return handlePrintAll(documentRenderRef, { ...(options || {}), pageRange: { from, to } });

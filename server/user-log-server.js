@@ -20,6 +20,7 @@
  *   - TRUST_PROXY=1
  *   - LOG_RETENTION_DAYS=14
  *   - ODV_STRICT_ORIGIN=true  (if set, requests missing Origin/Referer/Sec-Fetch-Site are rejected)
+ * See also: `docs-src/log-servers.md` for endpoint contracts, retention, and proxy assumptions.
  */
 
 import fs from 'node:fs';

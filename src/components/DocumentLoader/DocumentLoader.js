@@ -33,6 +33,22 @@ import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
  * Types
  * ------------------------------------------------------------------------------------------------ */
 
+
+/**
+ * Props for {@link DocumentLoader}.
+ * @typedef {Object} DocumentLoaderProps
+ * @property {string=} folder Pattern-mode base folder/path for assets.
+ * @property {string=} extension Pattern-mode extension such as `png` or `tiff`.
+ * @property {number=} endNumber Pattern-mode upper bound for generated file numbers.
+ * @property {Array.<DocumentSourceItem>=} sourceList Explicit ordered source list.
+ * @property {boolean=} sameBlob Reuse full-size blob URLs for thumbnails when appropriate.
+ * @property {boolean=} demoMode Enable generated/demo source entries.
+ * @property {'repeat'|'mix'=} demoStrategy Strategy for demo source generation.
+ * @property {number=} demoCount Number of demo entries to produce.
+ * @property {Array.<string>=} demoFormats Demo formats to cycle through.
+ * @property {*} children Viewer subtree rendered after loader orchestration is mounted.
+ */
+
 /**
  * Explicit-list item used by `sourceList`.
  * @typedef {Object} DocumentSourceItem
@@ -54,6 +70,12 @@ import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
  */
 const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
+/**
+ * Detect mobile-like environments to keep the default worker cap conservative on handheld devices.
+ * This is a best-effort heuristic and not a hard capability check.
+ *
+ * @returns {boolean}
+ */
 const isMobile = (() => {
   try {
     // @ts-ignore
@@ -105,7 +127,10 @@ const { maxWorkers, batchSize, lowCore } = computeWorkerTuning({ cpuBound: true 
 /**
  * DocumentLoader — Loads and processes documents for rendering.
  *
- * @param {Object} props
+ * The component is intentionally orchestration-heavy: it decides which loading path to use,
+ * reserves stable page indexes, and fans work out to workers or main-thread renderers.
+ *
+ * @param {DocumentLoaderProps} props
  * @param {(string|undefined)} [props.folder]           Pattern mode: base folder/path for assets
  * @param {(string|undefined)} [props.extension]        Pattern mode: file extension (e.g., "png", "tiff")
  * @param {(number|undefined)} [props.endNumber]        Pattern mode: last page/file number (1..N)
@@ -194,7 +219,13 @@ const DocumentLoader = ({
     logger.info('Inserted page at index', { index: currentPageIndex.current - 1, ext: 'png', fileIndex, pageIndex: 0 });
   }, [insertPageAtIndex]);
 
-  /** Quick ext inference from URL (no network). */
+  /**
+   * Infer a file extension directly from a source URL without any network fetch.
+   * Used only for the demo-mode fast path.
+   *
+   * @param {string} u
+   * @returns {(string|null)}
+   */
   const extFromUrl = (u) => {
     const m = String(u).toLowerCase().match(/\.(pdf|tiff?|png|jpe?g|bmp|gif)(?:$|\?)/i);
     return m ? m[1].toLowerCase() : null;
@@ -384,7 +415,12 @@ const DocumentLoader = ({
     }
   }, [setError, handleFailedDocumentLoad, demoMode, insertAtIndex]);
 
-  // Wrap worker handler and immediately drain any main-thread jobs the worker requested.
+  /**
+   * Handle worker results and immediately drain any follow-up work that must occur on the main thread.
+   *
+   * @param {MessageEvent} evt
+   * @returns {void}
+   */
   const onWorkerMessage = useCallback(
     (evt) => {
       handleWorkerMessage(evt, insertAtIndex, sameBlob, isMounted, {
@@ -399,7 +435,11 @@ const DocumentLoader = ({
     [insertAtIndex, sameBlob, drainMainThreadJobs]
   );
 
-  // Process batches of jobs using workers
+  /**
+   * Start batched worker processing for the queued raster-image jobs.
+   *
+   * @returns {void}
+   */
   const processBatches = useCallback(() => {
     batchHandler(
       jobQueue,
@@ -413,7 +453,11 @@ const DocumentLoader = ({
     );
   }, [sameBlob, insertAtIndex, onWorkerMessage]);
 
-  // Low-core sequential scheduler
+  /**
+   * Sequential fallback scheduler used on low-core devices where parallel workers would harm responsiveness.
+   *
+   * @returns {void}
+   */
   const processSequential = useCallback(() => {
     if (!isMounted.current) return;
 
@@ -508,6 +552,12 @@ const DocumentLoader = ({
         runId: runId.current
       });
 
+      /**
+       * Resolve the active source strategy, enqueue every document, then hand execution off to the
+       * worker or main-thread schedulers.
+       *
+       * @returns {Promise.<void>}
+       */
       const loadDocuments = async () => {
         logger.info('DocumentLoader start', { runId: runId.current });
 
