@@ -33,16 +33,6 @@ function clampPage(n, total) {
   return Math.min(v, total);
 }
 
-/**
- * Move by delta pages relative to current, clamped.
- * @param {number} current
- * @param {number} delta
- * @param {number} total
- * @returns {number}
- */
-function stepPage(current, delta, total) {
-  return clampPage(current + delta, total);
-}
 
 /**
  * Image adjustment properties for canvas edit mode.

@@ -77,12 +77,9 @@
   var cfgSrc = scriptEl ? scriptEl.getAttribute('src') : '';
   var abs;
   try { abs = new URL(cfgSrc, d.baseURI || w.location.href); } catch { abs = null; }
-  var baseHref = '/';
-  if (abs && abs.pathname) {
-    baseHref = abs.pathname.replace(/\/odv\.config\.js(?:\?.*)?$/i, '/');
-  } else {
-    baseHref = (w.location.pathname || '/').replace(/[^/]+$/, '/');
-  }
+  var baseHref = abs && abs.pathname
+    ? abs.pathname.replace(/\/odv\.config\.js(?:\?.*)?$/i, '/')
+    : (w.location.pathname || '/').replace(/[^/]+$/, '/');
   if (!/\/$/.test(baseHref)) baseHref += '/';
   var basePath = baseHref.replace(/\/$/, '');
 

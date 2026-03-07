@@ -59,15 +59,10 @@ function createCustomEvent(name, detail) {
     return new CustomEvent(name, { detail });
   } catch {
     // Fallback (IE11-era). Safe to keep as best effort; modern engines ignore.
-    try {
-      const evt = document.createEvent('CustomEvent');
-      // @ts-ignore - legacy API
-      evt.initCustomEvent(name, false, false, detail);
-      return evt;
-    } catch (e) {
-      // As a last resort, rethrow so caller can log and bail.
-      throw e;
-    }
+    const evt = document.createEvent('CustomEvent');
+    // @ts-ignore - legacy API
+    evt.initCustomEvent(name, false, false, detail);
+    return evt;
   }
 }
 

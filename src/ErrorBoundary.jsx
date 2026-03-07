@@ -34,7 +34,7 @@ import logger from './LogController';
  */
 const IS_DEV =
   (typeof import.meta !== 'undefined' && import.meta?.env?.MODE === 'development') ||
-  (typeof process !== 'undefined' && process?.env?.NODE_ENV === 'development');
+  (typeof globalThis !== 'undefined' && globalThis.process?.env?.NODE_ENV === 'development');
 
 /**
  * Tiny helper to translate with safe fallback (NS: 'common').
