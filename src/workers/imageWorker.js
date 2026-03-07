@@ -1,5 +1,4 @@
 // File: src/workers/imageWorker.js
-/* eslint-disable no-restricted-globals */
 /**
  * OpenDocViewer — Image/ TIFF Worker
  *
@@ -255,7 +254,7 @@ async function processTiff(jobs, jobResults) {
   let decode, toRGBA8, decodeImage;
   try {
     ({ decode, toRGBA8, decodeImage } = await import('utif2'));
-  } catch (e) {
+  } catch {
     // If the module isn't available in this environment, hand off to main thread.
     postMainThreadFallback(jobs, 'tiff');
     return;
@@ -337,7 +336,7 @@ async function processTiff(jobs, jobResults) {
           // Very old engines may not support convertToBlob; try a lossy fallback to JPEG.
           try {
             blob = await sharedCanvas.convertToBlob({ type: 'image/jpeg', quality: 0.92 });
-          } catch (e2) {
+          } catch {
             // Give up and ask main thread to handle this page.
             postMainThreadFallback([job], 'tiff');
             break;
@@ -390,4 +389,3 @@ async function processImage(jobs, fileExtensionLower, jobResults) {
     }
   }
 }
-/* eslint-enable no-restricted-globals */

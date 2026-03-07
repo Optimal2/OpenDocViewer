@@ -91,10 +91,9 @@ export function ensureODVPrintCSS() {
  * @param {function(PrintSubmitDetail):void} params.onSubmit
  * @param {number} params.totalPages
  * @param {function(string, Object=): string} params.t
- * @param {Object} params.styles
  * @param {any} params.i18n
  */
-export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, t, styles, i18n }) {
+export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, t, i18n }) {
   const cfg = getCfg();
   const userLogCfg = cfg?.userLog || {};
   const headerCfg  = cfg?.printHeader || {};

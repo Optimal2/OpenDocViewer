@@ -24,8 +24,9 @@
  *     because v21 does not export that subpath for bundlers. Changing this will break builds.
  */
 
-import React, { createContext, useState, useCallback, useMemo } from 'react';
+import { useState, useCallback, useMemo } from 'react';
 import logger from './LogController';
+import ViewerContext from './ViewerContextValue.js';
 
 /**
  * @typedef {Object} PageEntry
@@ -50,9 +51,6 @@ import logger from './LogController';
  * @property {Array.<string>} messageQueue
  * @property {function(string): void} addMessage
  */
-
-/** Create the Viewer context (default value is narrowed at runtime by the Provider). */
-export const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({}));
 
 /**
  * ViewerProvider

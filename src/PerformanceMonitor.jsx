@@ -26,7 +26,7 @@
 
 import React, { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
-import { ViewerContext } from './ViewerContext';
+import ViewerContext from './ViewerContextValue.js';
 
 /**
  * @typedef {Object} MemorySnapshot

@@ -165,10 +165,22 @@ export default class ErrorBoundary extends React.Component {
    * @returns {void}
    */
   reset = () => {
-    this.setState({ hasError: false, error: null, errorInfo: null, showDetails: !!this.props?.showDetailsByDefault });
-    if (typeof this.props.onReset === 'function') {
-      try { this.props.onReset(); } catch { /* ignore */ }
-    }
+    const showDetailsByDefault = !!this.props?.showDetailsByDefault;
+    const onReset = typeof this.props.onReset === 'function' ? this.props.onReset : null;
+
+    this.setState(
+      () => ({
+        hasError: false,
+        error: null,
+        errorInfo: null,
+        showDetails: showDetailsByDefault,
+      }),
+      () => {
+        if (onReset) {
+          try { onReset(); } catch { /* ignore */ }
+        }
+      }
+    );
   };
 
   /**

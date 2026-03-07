@@ -48,7 +48,6 @@ function getSameOriginParent() {
     if (window.parent && window.parent !== window) {
       // Accessing .location.href on a cross-origin parent will throw a DOMException.
       // If this line does not throw, we can safely treat the parent as same-origin.
-      // eslint-disable-next-line no-void
       void window.parent.location.href;
       return window.parent;
     }

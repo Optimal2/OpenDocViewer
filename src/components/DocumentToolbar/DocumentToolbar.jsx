@@ -52,7 +52,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../LogController.js';
 import userLog from '../../UserLogController.js';
-import { ThemeContext } from '../../ThemeContext.jsx';
+import ThemeContext from '../../ThemeContextValue.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
