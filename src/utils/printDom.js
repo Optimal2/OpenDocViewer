@@ -74,10 +74,11 @@ function shouldApplyHeader(applyTo, index1, total) {
  * @returns {string}
  */
 function buildPrintCss(extraCss, pageOrientation) {
+  const pageRule =
+    '@page{margin:0;' + (pageOrientation ? ('size:' + pageOrientation + ';') : '') + '}';
+
   const base =
-    '@media print{@page{margin:0;}' +
-      (pageOrientation ? '@page{size:' + pageOrientation + ';}' : '') +
-    'html,body{height:100%;}}' +
+    '@media print{' + pageRule + 'html,body{height:100%;}}' +
     'html,body{margin:0;padding:0;background:#fff;height:100%;}' +
     '.page{break-after:page;-webkit-break-after:page;page-break-after:always;' +
       'display:flex;align-items:center;justify-content:center;min-height:100vh;' +
@@ -156,7 +157,7 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   const content = applyTemplateTokensEscaped(tpl, { ...tokenContext, page, totalPages: total });
   if (!content) return null;
 
-  const heightPx = Number.isFinite(cfg?.heightPx) ? Math.max(0, Number(cfg.heightPx)) : 0;
+  const heightPx = Number.isFinite(cfg.heightPx) ? Math.max(0, Number(cfg.heightPx)) : 0;
 
   const div = doc.createElement('div');
   div.className = 'odv-print-header';
@@ -206,7 +207,7 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
   // Wait until images load (or error), then print.
   const delay = Math.max(0, Number(printDelayMs) || 0);
-  const isLoaded = (im) => im.complete && (typeof im.naturalWidth === 'undefined' || im.naturalWidth > 0);
+  const isLoaded = (im) => im.complete && im.naturalWidth > 0;
 
   function whenAllLoaded(list, cb) {
     let remaining = list.length;
