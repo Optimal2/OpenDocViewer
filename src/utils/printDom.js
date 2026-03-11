@@ -207,23 +207,35 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
   // Wait until images load (or error), then print.
   const delay = Math.max(0, Number(printDelayMs) || 0);
-  const isLoaded = (im) => im.complete && im.currentSrc && im.naturalWidth > 0;
+  const isLoaded = (im) => im.complete && im.naturalWidth > 0;
 
-  function whenAllLoaded(list, cb) {
+  function waitForImagesToLoad(list, cb) {
     let remaining = list.length;
     if (remaining === 0) return cb();
+
     list.forEach((im) => {
-      if (isLoaded(im)) {
+      let doneCalled = false;
+
+      const done = () => {
+        if (doneCalled) return;
+        doneCalled = true;
+        im.removeEventListener('load', done);
+        im.removeEventListener('error', done);
         if (--remaining === 0) cb();
-        return;
+      };
+
+      im.addEventListener('load', done);
+      im.addEventListener('error', done);
+
+      // Re-check after listeners are attached to avoid a timing gap where the image
+      // finishes between the initial state check and listener registration.
+      if (im.complete) {
+        done();
       }
-      const done = () => { if (--remaining === 0) cb(); };
-      im.addEventListener('load', done, { once: true });
-      im.addEventListener('error', done, { once: true });
     });
   }
 
-  whenAllLoaded(imgs, () => {
+  waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
       try { doc.defaultView?.print(); } catch {}
     }, delay);
