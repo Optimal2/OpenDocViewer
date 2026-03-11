@@ -175,7 +175,7 @@ const PageNavigationButtons = ({
         className="page-number-input"
         type="text"
         inputMode="numeric"
-        pattern="[0-9\s/]*"
+        pattern="[0-9 /]*"
         value={displayValue}
         onFocus={(e) => {
           setIsFocused(true);
