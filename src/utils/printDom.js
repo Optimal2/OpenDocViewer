@@ -116,7 +116,7 @@ function normalizePageOrientation(pageOrientation) {
  * @returns {string}
  */
 function normalizeTrustedExtraCss(extraCss) {
-  return typeof extraCss === 'string' && extraCss ? String(extraCss) : '';
+  return typeof extraCss === 'string' && extraCss ? extraCss : '';
 }
 
 /**
@@ -239,7 +239,7 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   // If the resolved/expanded template becomes empty, do not create a header node.
   if (!content) return null;
 
-  const heightPx = Number.isFinite(cfg.heightPx) ? Math.max(0, Number(cfg.heightPx)) : 0;
+  const heightPx = Number.isFinite(cfg.heightPx) ? Math.max(0, cfg.heightPx) : 0;
 
   const div = doc.createElement('div');
   div.className = 'odv-print-header';
@@ -351,7 +351,8 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     body.appendChild(pageWrapper);
   }
 
-  const delay = Math.max(0, Number(printDelayMs) || 0);
+  const parsedDelay = Number(printDelayMs);
+  const delay = Math.max(0, Number.isFinite(parsedDelay) ? parsedDelay : 0);
 
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
