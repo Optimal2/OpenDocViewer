@@ -74,8 +74,7 @@ function shouldApplyHeader(applyTo, index1, total) {
  * @returns {string}
  */
 function buildPrintCss(extraCss, pageOrientation) {
-  const pageRule =
-    '@page{margin:0;' + (pageOrientation ? ('size:' + pageOrientation + ';') : '') + '}';
+  const pageRule = `@page{margin:0;${pageOrientation ? `size:${pageOrientation};` : ''}}`;
 
   const base =
     '@media print{' + pageRule + 'html,body{height:100%;}}' +
