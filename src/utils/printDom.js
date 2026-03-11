@@ -21,9 +21,13 @@
  *     We resolve the localized form at runtime.
  *   - Only allow-listed image sources are assigned to <img>. This prevents unsafe sources
  *     from being injected into the print document.
+ *   - The CSS fragment passed in through runtime config is treated as trusted admin configuration,
+ *     not as untrusted end-user input. We normalize it to a string, but do not attempt to "sanitize"
+ *     arbitrary CSS because a fake sanitizer would provide misleading security guarantees.
  */
 
 import i18next from 'i18next';
+import logger from '../logging/systemLogger.js';
 import { applyTemplateTokensEscaped } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveLocalizedValue } from './localizedValue.js';
@@ -82,18 +86,57 @@ function shouldApplyHeader(applyTo, index1, total) {
 }
 
 /**
+ * Normalize runtime orientation to the only values this print CSS supports.
+ *
+ * WHY THIS EXISTS
+ *   JSDoc already constrains callers to 'portrait' | 'landscape' | undefined,
+ *   but we also validate at runtime before interpolating into CSS.
+ *   That makes the contract explicit and prevents arbitrary values from being
+ *   inserted into the @page rule.
+ *
+ * @param {unknown} pageOrientation
+ * @returns {('portrait'|'landscape'|undefined)}
+ */
+function normalizePageOrientation(pageOrientation) {
+  if (pageOrientation === 'portrait' || pageOrientation === 'landscape') {
+    return pageOrientation;
+  }
+  return undefined;
+}
+
+/**
+ * Normalize trusted extra CSS from runtime config.
+ *
+ * IMPORTANT
+ *   This is intentionally NOT a general CSS sanitizer.
+ *   The source is expected to be trusted admin/runtime configuration.
+ *   We only coerce to a string or drop the value when it is not a string.
+ *
+ * @param {unknown} extraCss
+ * @returns {string}
+ */
+function normalizeTrustedExtraCss(extraCss) {
+  return typeof extraCss === 'string' && extraCss ? String(extraCss) : '';
+}
+
+/**
  * Build the print-only CSS string (inlined within the print iframe).
  *
- * IMPORTANT:
- *   We intentionally generate a single @page rule when orientation is present.
- *   This is clearer than concatenating multiple @page blocks and avoids unnecessary duplication.
+ * IMPORTANT
+ *   - We intentionally generate a single @page rule when orientation is present.
+ *   - We intentionally keep these styles under print media only.
+ *     The iframe is used as a dedicated print host, not as a general screen-rendered surface.
+ *     Therefore `media="print"` on the style element is correct for this design.
  *
  * @param {string} extraCss
  * @param {('portrait'|'landscape'|undefined)} pageOrientation
  * @returns {string}
  */
 function buildPrintCss(extraCss, pageOrientation) {
-  const pageRule = `@page{margin:0;${pageOrientation ? `size:${pageOrientation};` : ''}}`;
+  const safeOrientation = normalizePageOrientation(pageOrientation);
+  const trustedExtraCss = normalizeTrustedExtraCss(extraCss);
+
+  const pageRule = `@page{margin:0;${safeOrientation ? `size:${safeOrientation};` : ''}}`;
 
   const base =
     `@media print{${pageRule}html,body{height:100%;}}` +
@@ -106,7 +149,7 @@ function buildPrintCss(extraCss, pageOrientation) {
       'page-break-inside:avoid;break-inside:avoid;}' +
     '.odv-print-header{pointer-events:none;z-index:2147483647;}';
 
-  return base + (typeof extraCss === 'string' && extraCss ? String(extraCss) : '');
+  return base + trustedExtraCss;
 }
 
 /**
@@ -205,7 +248,7 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
     'position:absolute;' +
     (posBottom ? 'bottom:0;' : 'top:0;') +
     'left:0;right:0;' +
-    (heightPx > 0 ? (`min-height:${heightPx}px;box-sizing:border-box;`) : '')
+    (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '')
   );
 
   // Intentionally using innerHTML:
@@ -314,7 +357,14 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     setTimeout(() => {
       try {
         doc.defaultView?.print();
-      } catch {}
+      } catch (error) {
+        // Intentionally logged instead of silently swallowed.
+        // Printing may fail because of browser-specific restrictions, blocked dialogs,
+        // or iframe/window state. Logging preserves diagnosability without changing UX flow.
+        logger.warn('Print invocation failed', {
+          error: String(error?.message || error),
+        });
+      }
     }, delay);
   });
 }
