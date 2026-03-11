@@ -133,6 +133,9 @@ function ensureHead(doc, cssText) {
   head.appendChild(meta);
 
   const style = doc.createElement('style');
+  // Intentionally limited to print media.
+  // This iframe is used as a dedicated print host, so these styles are only meant
+  // to affect print rendering / print preview, not general screen styling.
   style.setAttribute('media', 'print');
   style.textContent = cssText;
   head.appendChild(style);
@@ -293,6 +296,9 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
     if (safeSrc) {
       const img = doc.createElement('img');
+      // Intentionally reusing the generic page-alt translation here.
+      // Multi-page print pages conceptually map to viewer pages ("Page {page}") and
+      // this avoids introducing a second near-identical translation key.
       img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
       img.src = safeSrc;
       pageWrapper.appendChild(img);
