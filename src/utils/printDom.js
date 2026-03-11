@@ -193,13 +193,17 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     const header = buildHeaderElement(doc, printHeaderCfg, tokenContext, i + 1, total);
     if (header) pageWrapper.appendChild(header);
 
-    const img = doc.createElement('img');
-    // Default alt falls back to translated "Page {page}"
-    img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
-    // Allow-list only
-    if (isSafeImageSrc(pages[i].src)) img.src = pages[i].src;
-    pageWrapper.appendChild(img);
-    imgs.push(img);
+    const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
+
+    // Create and track an image only when the source is allow-listed.
+    if (safeSrc) {
+      const img = doc.createElement('img');
+      // Default alt falls back to translated "Page {page}"
+      img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
+      img.src = safeSrc;
+      pageWrapper.appendChild(img);
+      imgs.push(img);
+    }
 
     body.appendChild(pageWrapper);
   }
@@ -232,6 +236,13 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
       }
     });
   }
+
+  waitForImagesToLoad(imgs, () => {
+    setTimeout(() => {
+      try { doc.defaultView?.print(); } catch {}
+    }, delay);
+  });
+}
 
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
