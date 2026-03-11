@@ -12,6 +12,7 @@
 import i18next from 'i18next';
 import { applyTemplateTokensEscaped } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
+import { resolveLocalizedValue } from './localizedValue.js';
 
 /**
  * Print header config (runtime) consumed by the print overlay logic.
@@ -19,7 +20,8 @@ import { isSafeImageSrc } from './printSanitize.js';
  * @property {boolean=} enabled
  * @property {"top"|"bottom"=} position
  * @property {"all"|"first"|"last"=} applyTo
- * @property {string=} template
+ * @property {number=} heightPx
+ * @property {(string|Object.<string,string>)=} template
  * @property {string=} css
  */
 
@@ -150,12 +152,21 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   if (!shouldApplyHeader(applyTo, page, total)) return null;
 
   const posBottom = (cfg.position || 'top') === 'bottom';
-  const tpl = cfg.template || '';
+  const tpl = resolveLocalizedValue(cfg.template || '', i18next);
   const content = applyTemplateTokensEscaped(tpl, { ...tokenContext, page, totalPages: total });
+  if (!content) return null;
+
+  const heightPx = Number.isFinite(cfg?.heightPx) ? Math.max(0, Number(cfg.heightPx)) : 0;
 
   const div = doc.createElement('div');
   div.className = 'odv-print-header';
-  div.setAttribute('style', 'position:absolute;' + (posBottom ? 'bottom:0;' : 'top:0;') + 'left:0;right:0;');
+  div.setAttribute(
+    'style',
+    'position:absolute;' +
+    (posBottom ? 'bottom:0;' : 'top:0;') +
+    'left:0;right:0;' +
+    (heightPx > 0 ? ('min-height:' + heightPx + 'px;box-sizing:border-box;') : '')
+  );
   // Admin template may contain markup; token values are already escaped.
   div.innerHTML = content;
   return div;

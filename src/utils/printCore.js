@@ -66,7 +66,8 @@ const PER_PAGE_CLEANUP_MS = 5;
  * @property {boolean=} enabled
  * @property {"top"|"bottom"=} position
  * @property {"all"|"first"|"last"=} applyTo
- * @property {string=} template
+ * @property {number=} heightPx
+ * @property {(string|Object.<string,string>)=} template
  * @property {string=} css
  */
 
