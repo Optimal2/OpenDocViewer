@@ -207,7 +207,6 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
   // Wait until images load (or error), then print.
   const delay = Math.max(0, Number(printDelayMs) || 0);
-  const isLoaded = (im) => im.complete && im.naturalWidth > 0;
 
   function waitForImagesToLoad(list, cb) {
     let remaining = list.length;
