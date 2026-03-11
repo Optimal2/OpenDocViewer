@@ -1,6 +1,6 @@
 {
   "name": "opendocviewer",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "private": true,
   "description": "Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite, with a token-gated log server and runtime configuration.",
   "license": "MIT",
