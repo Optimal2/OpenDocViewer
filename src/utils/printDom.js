@@ -105,6 +105,23 @@ function normalizePageOrientation(pageOrientation) {
 }
 
 /**
+ * Normalize runtime header application mode to the only values supported by the print header logic.
+ *
+ * WHY THIS EXISTS
+ *   JSDoc constrains callers to 'all' | 'first' | 'last',
+ *   but we also validate at runtime so invalid values do not silently flow through.
+ *
+ * @param {unknown} applyTo
+ * @returns {('all'|'first'|'last')}
+ */
+function normalizeApplyTo(applyTo) {
+  if (applyTo === 'first' || applyTo === 'last' || applyTo === 'all') {
+    return applyTo;
+  }
+  return 'all';
+}
+
+/**
  * Normalize trusted extra CSS from runtime config.
  *
  * IMPORTANT
@@ -222,7 +239,7 @@ function ensureBody(doc) {
 function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   if (!cfg || !cfg.enabled) return null;
 
-  const applyTo = /** @type {("all"|"first"|"last")} */ (cfg.applyTo || 'all');
+  const applyTo = normalizeApplyTo(cfg.applyTo);
   if (!shouldApplyHeader(applyTo, page, total)) return null;
 
   const posBottom = (cfg.position || 'top') === 'bottom';
