@@ -72,11 +72,43 @@ function tr(key, defaultValue, options) {
 }
 
 /**
+ * Normalize a numeric configuration value to a non-negative number.
+ * Returns 0 if the value is not a finite number.
+ *
+ * IMPORTANT
+ *   This helper expects a numeric value. If a caller may receive string data,
+ *   coerce first with Number(...).
+ *
+ * @param {*} value
+ * @returns {number}
+ */
+function normalizeNonNegativeNumber(value) {
+  return Number.isFinite(value) ? Math.max(0, value) : 0;
+}
+
+/**
+ * Normalize runtime header application mode to the only values supported by the print header logic.
+ *
+ * WHY THIS EXISTS
+ *   JSDoc constrains callers to 'all' | 'first' | 'last',
+ *   but we also validate at runtime so invalid values do not silently flow through.
+ *
+ * @param {unknown} applyTo
+ * @returns {('all'|'first'|'last')}
+ */
+function normalizeApplyTo(applyTo) {
+  if (applyTo === 'first' || applyTo === 'last' || applyTo === 'all') {
+    return applyTo;
+  }
+  return 'all';
+}
+
+/**
  * Decide if a header should be applied to the i-th page in a sequence of N,
  * according to "all" | "first" | "last".
  * @param {"all"|"first"|"last"} applyTo
- * @param {number} index1  1-based index within the printed SEQUENCE
- * @param {number} total   total printed pages in the SEQUENCE
+ * @param {number} index1  1-based index within the printed sequence
+ * @param {number} total   total printed pages in the sequence
  * @returns {boolean}
  */
 function shouldApplyHeader(applyTo, index1, total) {
@@ -105,29 +137,12 @@ function normalizePageOrientation(pageOrientation) {
 }
 
 /**
- * Normalize runtime header application mode to the only values supported by the print header logic.
- *
- * WHY THIS EXISTS
- *   JSDoc constrains callers to 'all' | 'first' | 'last',
- *   but we also validate at runtime so invalid values do not silently flow through.
- *
- * @param {unknown} applyTo
- * @returns {('all'|'first'|'last')}
- */
-function normalizeApplyTo(applyTo) {
-  if (applyTo === 'first' || applyTo === 'last' || applyTo === 'all') {
-    return applyTo;
-  }
-  return 'all';
-}
-
-/**
  * Normalize trusted extra CSS from runtime config.
  *
  * IMPORTANT
  *   This is intentionally NOT a general CSS sanitizer.
  *   The source is expected to be trusted admin/runtime configuration.
- *   We only coerce to a string or drop the value when it is not a string.
+ *   We only keep the value if it is already a string.
  *
  * @param {unknown} extraCss
  * @returns {string}
@@ -143,7 +158,7 @@ function normalizeTrustedExtraCss(extraCss) {
  *   - We intentionally generate a single @page rule when orientation is present.
  *   - We intentionally keep these styles under print media only.
  *     The iframe is used as a dedicated print host, not as a general screen-rendered surface.
- *     Therefore `media="print"` on the style element is correct for this design.
+ *     Therefore media="print" on the style element is correct for this design.
  *
  * @param {string} extraCss
  * @param {('portrait'|'landscape'|undefined)} pageOrientation
@@ -232,8 +247,8 @@ function ensureBody(doc) {
  * @param {Document} doc
  * @param {PrintHeaderCfg} cfg
  * @param {TokenContext} tokenContext
- * @param {number} page     1-based page number in the CURRENT printed sequence
- * @param {number} total    total pages in the CURRENT printed sequence
+ * @param {number} page     1-based page number in the current printed sequence
+ * @param {number} total    total pages in the current printed sequence
  * @returns {HTMLElement|null}
  */
 function buildHeaderElement(doc, cfg, tokenContext, page, total) {
@@ -256,7 +271,7 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   // If the resolved/expanded template becomes empty, do not create a header node.
   if (!content) return null;
 
-  const heightPx = Number.isFinite(cfg.heightPx) ? Math.max(0, cfg.heightPx) : 0;
+  const heightPx = normalizeNonNegativeNumber(cfg.heightPx);
 
   const div = doc.createElement('div');
   div.className = 'odv-print-header';
@@ -368,8 +383,7 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     body.appendChild(pageWrapper);
   }
 
-  const parsedDelay = Number(printDelayMs);
-  const delay = Math.max(0, Number.isFinite(parsedDelay) ? parsedDelay : 0);
+  const delay = normalizeNonNegativeNumber(Number(printDelayMs));
 
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
@@ -388,7 +402,7 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 }
 
 /**
- * Render a *single* page print document in the given print iframe document.
+ * Render a single-page print document in the given print iframe document.
  * @param {Document} doc
  * @param {{ dataUrl: string, orientation: ('portrait'|'landscape'), printDelayMs: number, printHeaderCfg: PrintHeaderCfg, tokenContext: TokenContext }} opts
  * @returns {void}
@@ -407,7 +421,7 @@ export function renderSingleDocument(doc, opts) {
 }
 
 /**
- * Render a *multi*-page print document in the given print iframe document.
+ * Render a multi-page print document in the given print iframe document.
  * @param {Document} doc
  * @param {{ dataUrls: Array.<string>, printDelayMs: number, printHeaderCfg: PrintHeaderCfg, tokenContext: TokenContext }} opts
  * @returns {void}
