@@ -6,7 +6,21 @@
  *
  * PURPOSE
  *   Safely construct the print iframe’s DOM using DOM APIs (no doc.write),
- *   wait until images load, then trigger window.print().
+ *   wait until images reach a terminal state, then trigger window.print().
+ *
+ * DESIGN NOTES
+ *   - We intentionally build the print document with DOM APIs instead of string-based document writing.
+ *   - We intentionally wait for each image to reach a terminal state before printing.
+ *     "Terminal state" means either:
+ *       1) the image loaded successfully, or
+ *       2) the image failed to load.
+ *     The print flow must not hang forever just because one image errors.
+ *   - The print header template may be either:
+ *       * a plain string, or
+ *       * a localized object such as { sv: '...', en: '...' }.
+ *     We resolve the localized form at runtime.
+ *   - Only allow-listed image sources are assigned to <img>. This prevents unsafe sources
+ *     from being injected into the print document.
  */
 
 import i18next from 'i18next';
@@ -69,6 +83,11 @@ function shouldApplyHeader(applyTo, index1, total) {
 
 /**
  * Build the print-only CSS string (inlined within the print iframe).
+ *
+ * IMPORTANT:
+ *   We intentionally generate a single @page rule when orientation is present.
+ *   This is clearer than concatenating multiple @page blocks and avoids unnecessary duplication.
+ *
  * @param {string} extraCss
  * @param {('portrait'|'landscape'|undefined)} pageOrientation
  * @returns {string}
@@ -77,7 +96,7 @@ function buildPrintCss(extraCss, pageOrientation) {
   const pageRule = `@page{margin:0;${pageOrientation ? `size:${pageOrientation};` : ''}}`;
 
   const base =
-    '@media print{' + pageRule + 'html,body{height:100%;}}' +
+    `@media print{${pageRule}html,body{height:100%;}}` +
     'html,body{margin:0;padding:0;background:#fff;height:100%;}' +
     '.page{break-after:page;-webkit-break-after:page;page-break-after:always;' +
       'display:flex;align-items:center;justify-content:center;min-height:100vh;' +
@@ -105,7 +124,8 @@ function ensureHead(doc, cssText) {
     head = doc.createElement('head');
     html.appendChild(head);
   }
-  // Clear existing <head> content
+
+  // Clear existing <head> content so each print render starts from a known clean state.
   while (head.firstChild) head.removeChild(head.firstChild);
 
   const meta = doc.createElement('meta');
@@ -132,13 +152,20 @@ function ensureBody(doc) {
     body = doc.createElement('body');
     html.appendChild(body);
   }
-  // Clear existing <body> content
+
+  // Clear existing <body> content so repeated print attempts do not accumulate stale nodes.
   while (body.firstChild) body.removeChild(body.firstChild);
   return body;
 }
 
 /**
  * Build a header DIV element for a page using config + tokens (values escaped).
+ *
+ * SECURITY / CORRECTNESS NOTES
+ *   - Token values are escaped before insertion.
+ *   - The admin-defined template itself may contain intentional markup, so it is inserted as HTML.
+ *   - The template can be localized; we resolve it for the active i18n language before token expansion.
+ *
  * @param {Document} doc
  * @param {PrintHeaderCfg} cfg
  * @param {TokenContext} tokenContext
@@ -148,12 +175,22 @@ function ensureBody(doc) {
  */
 function buildHeaderElement(doc, cfg, tokenContext, page, total) {
   if (!cfg || !cfg.enabled) return null;
+
   const applyTo = /** @type {("all"|"first"|"last")} */ (cfg.applyTo || 'all');
   if (!shouldApplyHeader(applyTo, page, total)) return null;
 
   const posBottom = (cfg.position || 'top') === 'bottom';
+
+  // The template may be a localized object instead of a plain string.
+  // Resolve that here so printing works consistently across languages.
   const tpl = resolveLocalizedValue(cfg.template || '', i18next);
-  const content = applyTemplateTokensEscaped(tpl, { ...tokenContext, page, totalPages: total });
+  const content = applyTemplateTokensEscaped(tpl, {
+    ...tokenContext,
+    page,
+    totalPages: total,
+  });
+
+  // If the resolved/expanded template becomes empty, do not create a header node.
   if (!content) return null;
 
   const heightPx = Number.isFinite(cfg.heightPx) ? Math.max(0, Number(cfg.heightPx)) : 0;
@@ -165,15 +202,73 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
     'position:absolute;' +
     (posBottom ? 'bottom:0;' : 'top:0;') +
     'left:0;right:0;' +
-    (heightPx > 0 ? ('min-height:' + heightPx + 'px;box-sizing:border-box;') : '')
+    (heightPx > 0 ? (`min-height:${heightPx}px;box-sizing:border-box;`) : '')
   );
-  // Admin template may contain markup; token values are already escaped.
+
+  // Intentionally using innerHTML:
+  // - token values are already escaped
+  // - template markup is considered admin-authored formatting
   div.innerHTML = content;
   return div;
 }
 
 /**
- * Attach pages and images into the (cleared) body, wait for loads, then print.
+ * Wait until every image in the list has reached a terminal state, then invoke the callback.
+ *
+ * WHY THIS IS WRITTEN THIS WAY
+ *   - We use one Promise per image and resolve it on either "load" or "error".
+ *   - This avoids manual shared-counter bookkeeping and makes the completion contract explicit.
+ *   - Event listeners are attached BEFORE the immediate `complete` re-check to avoid the classic
+ *     timing gap where an image finishes between an initial state check and listener registration.
+ *   - We intentionally treat `complete === true` as a terminal state here, even if the image failed,
+ *     because the goal of this function is "do not hang forever", not "verify successful decode".
+ *     Success/failure is already represented by the browser's load/error lifecycle.
+ *
+ * @param {Array<HTMLImageElement>} list
+ * @param {function(): void} cb
+ * @returns {void}
+ */
+function waitForImagesToLoad(list, cb) {
+  if (!Array.isArray(list) || list.length === 0) {
+    cb();
+    return;
+  }
+
+  const promises = list.map((im) => {
+    return new Promise((resolve) => {
+      let settled = false;
+
+      const onDone = () => {
+        if (settled) return;
+        settled = true;
+        im.removeEventListener('load', onDone);
+        im.removeEventListener('error', onDone);
+        resolve();
+      };
+
+      im.addEventListener('load', onDone);
+      im.addEventListener('error', onDone);
+
+      // Re-check after listeners are attached.
+      // If the image already reached a terminal state very quickly, resolve immediately.
+      if (im.complete) {
+        onDone();
+      }
+    });
+  });
+
+  Promise.all(promises).then(() => cb());
+}
+
+/**
+ * Attach pages and images into the (cleared) body, wait for image terminal states, then print.
+ *
+ * IMPORTANT BEHAVIOR
+ *   - We only create and track an <img> when the source is allow-listed.
+ *   - Unsafe or disallowed sources are not assigned to the DOM image element.
+ *   - The page wrapper is still created so page ordering and header numbering remain stable.
+ *     This is intentional low-risk behavior: we avoid silently re-numbering pages in print output.
+ *
  * @param {Document} doc
  * @param {Array.<{src: string, alt: string}>} pages
  * @param {number} printDelayMs
@@ -186,6 +281,7 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
   const total = pages.length;
   const imgs = [];
+
   for (let i = 0; i < pages.length; i++) {
     const pageWrapper = doc.createElement('div');
     pageWrapper.className = 'page' + (i === total - 1 ? ' last' : '');
@@ -195,10 +291,8 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
 
     const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
 
-    // Create and track an image only when the source is allow-listed.
     if (safeSrc) {
       const img = doc.createElement('img');
-      // Default alt falls back to translated "Page {page}"
       img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
       img.src = safeSrc;
       pageWrapper.appendChild(img);
@@ -208,45 +302,13 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     body.appendChild(pageWrapper);
   }
 
-  // Wait until images load (or error), then print.
   const delay = Math.max(0, Number(printDelayMs) || 0);
 
-  function waitForImagesToLoad(list, cb) {
-    let remaining = list.length;
-    if (remaining === 0) return cb();
-
-    list.forEach((im) => {
-      let doneCalled = false;
-
-      const done = () => {
-        if (doneCalled) return;
-        doneCalled = true;
-        im.removeEventListener('load', done);
-        im.removeEventListener('error', done);
-        if (--remaining === 0) cb();
-      };
-
-      im.addEventListener('load', done);
-      im.addEventListener('error', done);
-
-      // Re-check after listeners are attached to avoid a timing gap where the image
-      // finishes between the initial state check and listener registration.
-      if (im.complete) {
-        done();
-      }
-    });
-  }
-
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
-      try { doc.defaultView?.print(); } catch {}
-    }, delay);
-  });
-}
-
-  waitForImagesToLoad(imgs, () => {
-    setTimeout(() => {
-      try { doc.defaultView?.print(); } catch {}
+      try {
+        doc.defaultView?.print();
+      } catch {}
     }, delay);
   });
 }
@@ -284,6 +346,7 @@ export function renderMultiDocument(doc, opts) {
     src,
     alt: tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }),
   }));
+
   populateBodyAndPrint(
     doc,
     pages,
