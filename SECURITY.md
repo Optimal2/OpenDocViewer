@@ -1,24 +1,31 @@
+<!-- File: SECURITY.md -->
 # Security Policy
 
 ## Supported Versions
 
-**OpenDocViewer v1.1.0** is the current recommended release.  
-**OpenDocViewer v1.0.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.1.0 and lacks some fixes and functionality added later.
+**OpenDocViewer v1.2.0** is the current recommended release.  
+**OpenDocViewer v1.1.0** is still considered safe to run and eligible for security fixes, but it is superseded by v1.2.0 and lacks some usability improvements added later.  
+**OpenDocViewer v1.0.1** is still considered safe to run for older deployments, but it is a legacy supported release and lacks later fixes and improvements.
 
 Older releases are retained for historical reference only.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.1.0   | :white_check_mark: | Current recommended release |
-| 1.0.1   | :white_check_mark: | Supported safe release, superseded by 1.1.0 |
-| 1.0.0   | :x: | Superseded by 1.0.1 and 1.1.0 |
+| 1.2.0   | :white_check_mark: | Current recommended release |
+| 1.1.0   | :white_check_mark: | Supported safe release, superseded by 1.2.0 |
+| 1.0.1   | :white_check_mark: | Supported legacy safe release |
+| 1.0.0   | :x: | Superseded by later supported releases |
 | 0.9.0   | :x: | Unsupported |
-| 0.8.1   | :x: | Unsupported |
-| < 0.8.1 | :x: | Unsupported |
+| < 0.9.0 | :x: | Unsupported |
 
 ## Recent release context
 
 The five most recent releases are listed below for operational context:
+
+### OpenDocViewer v1.2.0
+OpenDocViewer v1.2.0 improves keyboard shortcut reliability and removes focus-dependent viewer command handling.
+
+This release changes shortcut routing so viewer commands continue to work when focus is on toolbar buttons or other non-editable UI elements. Shortcuts are now suppressed only in interactive editing contexts such as text inputs, selects, contenteditable regions, and modal dialogs. It also removes the previous focus warning/button that was required to restore viewer keyboard control.
 
 ### OpenDocViewer v1.1.0
 OpenDocViewer v1.1.0 improves print integration, keyboard usability, and document loading feedback.
@@ -41,11 +48,6 @@ It also includes smaller robustness improvements across the viewer, loader, diag
 OpenDocViewer 0.9.0 updates project dependencies and maintenance tooling.
 
 This release primarily refreshes runtime and development dependencies, including React, Vite, i18n, PDF, and linting-related packages, without verified application-level feature changes in the source code.
-
-### OpenDocViewer v0.8.1
-OpenDocViewer 0.8.1 improves security hardening for the zoom percent input.
-
-This release sanitizes user-entered zoom values more robustly while preserving the same behavior for valid input. It includes no UI or API changes and mainly affects malformed input handling.
 
 ## Reporting a Vulnerability
 
