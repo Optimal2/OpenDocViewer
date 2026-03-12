@@ -56,8 +56,6 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
- * @property {boolean} needsViewerFocusHint
- * @property {function(): void} focusViewer
  */
 
 /**
@@ -96,8 +94,6 @@ const DocumentViewerToolbar = ({
   nextPageDisabled,
   firstPageDisabled,
   lastPageDisabled,
-  needsViewerFocusHint,
-  focusViewer,
 }) => {
   const compareDisabled = isExpanded;
   const editDisabled = isComparing;
@@ -136,8 +132,6 @@ const DocumentViewerToolbar = ({
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
-      needsViewerFocusHint={needsViewerFocusHint}
-      focusViewer={focusViewer}
     />
   );
 };
@@ -180,8 +174,6 @@ DocumentViewerToolbar.propTypes = {
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
-  needsViewerFocusHint: PropTypes.bool.isRequired,
-  focusViewer: PropTypes.func.isRequired,
 };
 
 export default React.memo(DocumentViewerToolbar);

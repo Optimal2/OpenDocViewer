@@ -251,8 +251,8 @@ export function useDocumentViewer() {
     resetPostZoom,
   } = useViewerPostZoom(isComparing);
 
-  // --- Effects: sticky fit, global wheel, hotkeys, focus hint --------------------
-  const { needsViewerFocusHint, focusViewer } = useViewerEffects({
+  // --- Effects: sticky fit, global wheel, hotkeys --------------------------------
+  useViewerEffects({
     zoom,
     zoomState,
     setZoomState,
@@ -309,8 +309,6 @@ export function useDocumentViewer() {
     setIsExpanded, // guarded setter
     zoomState,
     setZoomMode,
-    needsViewerFocusHint,
-    focusViewer,
 
     // per-pane post-zoom
     postZoomLeft,
