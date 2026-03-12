@@ -36,7 +36,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} fitToWidth
  * @property {number} zoom
  * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'), scale: number }} zoomState
- * @property {function('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'): void} setZoomMode
+ * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, or CUSTOM.
  * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
  * @property {RefLike} documentRenderRef
