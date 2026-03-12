@@ -2,26 +2,33 @@
 
 ## Supported Versions
 
-Only **OpenDocViewer v1.0.1** is currently considered safe to run and eligible for security fixes.
+**OpenDocViewer v1.1.0** is the current recommended release.  
+**OpenDocViewer v1.0.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.1.0 and lacks some fixes and functionality added later.
+
 Older releases are retained for historical reference only.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.0.1   | :white_check_mark: | Current safe release |
-| 1.0.0   | :x: | Superseded by 1.0.1 |
+| 1.1.0   | :white_check_mark: | Current recommended release |
+| 1.0.1   | :white_check_mark: | Supported safe release, superseded by 1.1.0 |
+| 1.0.0   | :x: | Superseded by 1.0.1 and 1.1.0 |
 | 0.9.0   | :x: | Unsupported |
 | 0.8.1   | :x: | Unsupported |
-| 0.8.0   | :x: | Unsupported |
-| < 0.8.0 | :x: | Unsupported |
+| < 0.8.1 | :x: | Unsupported |
 
 ## Recent release context
 
 The five most recent releases are listed below for operational context:
 
-### OpenDocViewer v1.0.1
-Fixes a critical issue where print headers did not work in v1.0.0.
+### OpenDocViewer v1.1.0
+OpenDocViewer v1.1.0 improves print integration, keyboard usability, and document loading feedback.
 
-This release restores print header functionality and improves the robustness of the print flow, including safer DOM handling and better readiness handling before printing.
+This release adds configurable handling for Ctrl/Cmd+P, introduces a dedicated print shortcut on 0, fixes an issue where shortcut 6 could override numeric input in toolbar fields, and makes ongoing page loading more visible in the navigation UI. It also updates SECURITY.md and refines runtime configuration examples to better reflect the current application behavior.
+
+### OpenDocViewer v1.0.1
+OpenDocViewer v1.0.1 improves print header reliability and overall print-flow robustness.
+
+This release fixes a critical issue introduced in v1.0.0 where print headers did not render correctly, and strengthens the print pipeline with safer DOM handling and improved readiness checks before printing.
 
 ### OpenDocViewer v1.0.0
 OpenDocViewer 1.0.0 establishes the first stable baseline for the project.
@@ -39,11 +46,6 @@ This release primarily refreshes runtime and development dependencies, including
 OpenDocViewer 0.8.1 improves security hardening for the zoom percent input.
 
 This release sanitizes user-entered zoom values more robustly while preserving the same behavior for valid input. It includes no UI or API changes and mainly affects malformed input handling.
-
-### OpenDocViewer v0.8.0
-OpenDocViewer 0.8.0 improves compare view controls and overall toolbar usability.
-
-This release adds per-pane zoom controls in compare mode, refines the zoom and page input experience, and includes internal CSS and viewer structure cleanup without breaking public API changes.
 
 ## Reporting a Vulnerability
 
