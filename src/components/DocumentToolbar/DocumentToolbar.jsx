@@ -14,7 +14,7 @@
  * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
-import React, { useContext, useCallback, useMemo, useState, useEffect } from 'react';
+import React, { useContext, useCallback, useMemo, useEffect } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../logging/systemLogger.js';
@@ -65,6 +65,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @typedef {Object} DocumentToolbarProps
  * @property {number} pageNumber
  * @property {number} totalPages
+ * @property {boolean} isDocumentLoading
  * @property {boolean} prevPageDisabled
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
@@ -76,6 +77,9 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} fitToWidth
  * @property {AnyRef} documentRenderRef
  * @property {AnyRef} viewerContainerRef
+ * @property {boolean} isPrintDialogOpen
+ * @property {function(): void} openPrintDialog
+ * @property {function(): void} closePrintDialog
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {ImageProperties} imageProperties
@@ -112,6 +116,7 @@ const ONE_TO_ONE_EPS = 0.005;
 const DocumentToolbar = ({
   pageNumber,
   totalPages,
+  isDocumentLoading = false,
   prevPageDisabled,
   nextPageDisabled,
   firstPageDisabled,
@@ -123,6 +128,9 @@ const DocumentToolbar = ({
   fitToWidth,
   documentRenderRef,
   viewerContainerRef,
+  isPrintDialogOpen = false,
+  openPrintDialog,
+  closePrintDialog,
   handleCompare,
   isComparing,
   imageProperties,
@@ -163,20 +171,6 @@ const DocumentToolbar = ({
     } catch {}
   }, []);
 
-  // Global key: "6" toggles theme (no modifiers)
-  useEffect(() => {
-    const onKeyDown = (e) => {
-      if (e.defaultPrevented) return;
-      if (e.ctrlKey || e.metaKey || e.altKey || e.shiftKey) return;
-      if (e.key === '6') {
-        e.preventDefault();
-        try { toggleTheme(); } catch {}
-      }
-    };
-    window.addEventListener('keydown', onKeyDown);
-    return () => window.removeEventListener('keydown', onKeyDown);
-  }, [toggleTheme]);
-
   // Navigation helpers (single-step handlers + press-and-hold timers)
   const {
     handlePrevPageWrapper,
@@ -189,8 +183,6 @@ const DocumentToolbar = ({
     stopNextPageTimer,
   } = usePageNavigation(setPageNumber, totalPages);
 
-  // Print dialog state
-  const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
   const snapToZero = useMemo(
@@ -285,7 +277,7 @@ const DocumentToolbar = ({
    * @returns {void}
    */
   const handlePrintSubmit = useCallback((detail) => {
-    setPrintDialogOpen(false);
+    closePrintDialog?.();
 
     // Kick off user-log submission first (non-blocking).
     submitUserPrintLog(detail);
@@ -313,7 +305,7 @@ const DocumentToolbar = ({
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
       return;
     }
-  }, [documentRenderRef, viewerContainerRef, submitUserPrintLog]);
+  }, [closePrintDialog, documentRenderRef, viewerContainerRef, submitUserPrintLog]);
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
@@ -341,7 +333,7 @@ const DocumentToolbar = ({
       {/* Print button → opens dialog */}
       <button
         type="button"
-        onClick={() => setPrintDialogOpen(true)}
+        onClick={() => openPrintDialog?.()}
         aria-label={t('toolbar.print')}
         title={t('toolbar.print')}
         className="odv-btn"
@@ -369,6 +361,7 @@ const DocumentToolbar = ({
         totalPages={totalPages}
         /* NEW: allow manual page entry to apply immediately */
         onGoToPage={setPageNumber}
+        isDocumentLoading={isDocumentLoading}
       />
 
       <div className="separator" />
@@ -503,7 +496,7 @@ const DocumentToolbar = ({
       {/* Modal for print selection + reason/forWhom */}
       <PrintRangeDialog
         isOpen={isPrintDialogOpen}
-        onClose={() => setPrintDialogOpen(false)}
+        onClose={() => closePrintDialog?.()}
         onSubmit={handlePrintSubmit}
         totalPages={totalPages}
       />
@@ -514,6 +507,7 @@ const DocumentToolbar = ({
 DocumentToolbar.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
+  isDocumentLoading: PropTypes.bool,
   prevPageDisabled: PropTypes.bool.isRequired,
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
@@ -525,6 +519,9 @@ DocumentToolbar.propTypes = {
   fitToWidth: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  isPrintDialogOpen: PropTypes.bool,
+  openPrintDialog: PropTypes.func,
+  closePrintDialog: PropTypes.func,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({

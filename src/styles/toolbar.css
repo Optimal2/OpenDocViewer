@@ -160,6 +160,28 @@
 }
 .page-number-input:focus { box-shadow: 0 0 0 2px rgba(34, 166, 179, 0.35); }
 
+.zoom-fixed-group.is-loading {
+  background-color: #fff4bf;
+  border-color: #c99700;
+}
+[data-theme='dark'] .zoom-fixed-group.is-loading {
+  background-color: #5b4200;
+  border-color: #e0a800;
+}
+.page-number-input.is-loading {
+  background-color: #ffe082;
+  border-color: #c99700;
+  color: #3d2b00;
+}
+[data-theme='dark'] .page-number-input.is-loading {
+  background-color: #7a5a00;
+  border-color: #ffd54f;
+  color: #fff8e1;
+}
+.page-number-input.is-loading:focus {
+  box-shadow: 0 0 0 2px rgba(201, 151, 0, 0.35);
+}
+
 /* Sliders inside the editing group */
 input[type="range"].resting {
   -webkit-appearance: none;

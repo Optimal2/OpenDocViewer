@@ -9,6 +9,10 @@ import { createContext } from 'react';
  * @property {function((string|null)): void} setError
  * @property {number} workerCount
  * @property {function(number): void} setWorkerCount
+ * @property {boolean} loadingRunActive
+ * @property {function(boolean): void} setLoadingRunActive
+ * @property {number} plannedPageCount
+ * @property {function(number): void} setPlannedPageCount
  * @property {Array.<string>} messageQueue
  * @property {function(string): void} addMessage
  */

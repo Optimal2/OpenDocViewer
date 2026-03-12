@@ -41,6 +41,7 @@ Good runtime-config candidates:
 - i18n defaults and translation versioning
 - print-header settings
 - diagnostics toggles
+- keyboard shortcut policy for browser-print interception
 - deployment base path / base href
 
 Poor runtime-config candidates:
@@ -48,6 +49,29 @@ Poor runtime-config candidates:
 - logic that should be compile-time code
 - secrets that should not be visible to the browser
 - values that need strong server-side enforcement
+
+## Print shortcut policy
+
+The runtime config now supports a keyboard-only print policy surface under:
+
+```js
+shortcuts: {
+  print: {
+    ctrlOrCmdP: "browser" // "browser" | "disable" | "dialog"
+  }
+}
+```
+
+Behavior:
+
+- `browser`: keep native browser handling for `Ctrl+P` / `Cmd+P`
+- `disable`: cancel the keyboard shortcut without opening any print dialog
+- `dialog`: cancel the keyboard shortcut and open OpenDocViewer's own print dialog instead
+
+Important limitation:
+
+- This applies to keyboard interception only.
+- Browser menus, toolbar print buttons, and native context-menu print entries cannot be reliably overridden from normal page JavaScript.
 
 ## Operational advice
 

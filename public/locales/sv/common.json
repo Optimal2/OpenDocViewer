@@ -35,7 +35,8 @@
       "switchToDark": "Byt till mörkt tema"
     },
     "focusWarningTitle": "Genvägar inaktiva",
-    "focusWarningAction": "Fokusera visaren"
+    "focusWarningAction": "Fokusera visaren",
+    "pageLoadingTitle": "Sidindikator (sidor läses fortfarande in)"
   },
   "printDialog": {
     "title": "Skriv ut",

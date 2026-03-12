@@ -17,9 +17,20 @@
     exposeStackTraces: false,
     showPerfOverlay: false,
 
+    // ===== SHORTCUTS ===========================================================
+    shortcuts: {
+      print: {
+        // "browser": keep native Ctrl/Cmd+P
+        // "disable": cancel Ctrl/Cmd+P without opening any dialog
+        // "dialog": cancel Ctrl/Cmd+P and open the OpenDocViewer print dialog
+        // Note: browser menus / native context menus cannot be reliably overridden from page code.
+        ctrlOrCmdP: "dialog"
+      }
+    },
+
     // ===== USER LOG (proxied via /ODVProxy/) ==================================
     userLog: {
-      enabled: true,
+      enabled: false,
       endpoint: "/ODVProxy/userlog/record",
       transport: "form",
 
@@ -102,7 +113,7 @@
 
     // ===== SYSTEM LOG (proxied via /ODVProxy/) ================================
     systemLog: {
-      enabled: true,
+      enabled: false,
       endpoint: "/ODVProxy/log",
       token: "REPLACE_WITH_SYSTEM_LOG_TOKEN"
     }

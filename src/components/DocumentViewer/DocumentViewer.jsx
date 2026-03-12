@@ -18,7 +18,7 @@
  *
  * @returns {React.ReactElement}
  */
-import React, { useContext } from 'react';
+import React, { useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
@@ -29,7 +29,7 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
 
 const DocumentViewer = () => {
-  const { allPages } = useContext(ViewerContext);
+  const { allPages, loadingRunActive, plannedPageCount } = useContext(ViewerContext);
   const { t } = useTranslation('common');
 
   const {
@@ -39,6 +39,9 @@ const DocumentViewer = () => {
     setZoom,
     isComparing,
     comparePageNumber,
+    isPrintDialogOpen,
+    openPrintDialog,
+    closePrintDialog,
     imageProperties,
     isExpanded,
     thumbnailWidth,
@@ -60,13 +63,13 @@ const DocumentViewer = () => {
     handleMouseDown,
     selectForCompare,
     setIsExpanded,
-    // NEW: sticky fit semantics
+    // sticky fit semantics
     zoomState,
     setZoomMode,
-    // NEW: keyboard hint + focus restoration
+    // keyboard hint + focus restoration
     needsViewerFocusHint,
     focusViewer,
-    // NEW: per-pane post-zoom (compare mode only)
+    // per-pane post-zoom (compare mode only)
     postZoomLeft,
     postZoomRight,
     bumpPostZoomLeft,
@@ -74,12 +77,20 @@ const DocumentViewer = () => {
   } = useDocumentViewer();
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
+  const resolvedPageCount = useMemo(
+    () => (Array.isArray(allPages)
+      ? allPages.reduce((count, page) => count + (page && typeof page.status === 'number' ? 1 : 0), 0)
+      : 0),
+    [allPages]
+  );
+  const isDocumentLoading = !!loadingRunActive || (plannedPageCount > 0 && resolvedPageCount < plannedPageCount);
+
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
   const lastPageDisabled = pageNumber >= totalPages;
 
-  logger.debug('Rendering DocumentViewer', { totalPages });
+  logger.debug('Rendering DocumentViewer', { totalPages, plannedPageCount, resolvedPageCount, isDocumentLoading });
 
   return (
     <div
@@ -93,6 +104,7 @@ const DocumentViewer = () => {
         pageNumber={pageNumber}
         setPageNumber={setPageNumber}
         totalPages={totalPages}
+        isDocumentLoading={isDocumentLoading}
 
         /* zoom controls */
         zoom={zoom}
@@ -101,9 +113,13 @@ const DocumentViewer = () => {
         zoomOut={zoomOut}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
-        /* NEW: zoom mode (optional pass-through; safe if parent ignores) */
         zoomState={zoomState}
         setZoomMode={setZoomMode}
+
+        /* print */
+        isPrintDialogOpen={isPrintDialogOpen}
+        openPrintDialog={openPrintDialog}
+        closePrintDialog={closePrintDialog}
 
         /* compare + editing */
         isComparing={isComparing}
@@ -126,12 +142,11 @@ const DocumentViewer = () => {
         firstPageDisabled={firstPageDisabled}
         lastPageDisabled={lastPageDisabled}
 
-        /* NEW: shortcuts inactive hint + focus restore */
+        /* shortcuts inactive hint + focus restore */
         needsViewerFocusHint={needsViewerFocusHint}
         focusViewer={focusViewer}
       />
 
-      {/* Main area: thumbnails + resizer + page renderer(s) */}
       <div
         className="document-viewer-wrapper"
         ref={viewerContainerRef}
@@ -139,7 +154,6 @@ const DocumentViewer = () => {
         tabIndex={0}
         aria-label={t('viewer.aria.main')}
       >
-        {/* Sidebar: thumbnails with resizer */}
         <div style={{ display: 'flex', width: `${thumbnailWidth}px`, flexShrink: 0 }}>
           <DocumentViewerThumbnails
             allPages={allPages}
@@ -152,7 +166,6 @@ const DocumentViewer = () => {
           <Resizer onMouseDown={handleMouseDown} />
         </div>
 
-        {/* Main renderer(s) */}
         <DocumentViewerRender
           pageNumber={pageNumber}
           zoom={zoom}
@@ -167,9 +180,7 @@ const DocumentViewer = () => {
           compareRef={compareRef}
           allPages={allPages}
           thumbnailsContainerRef={thumbnailsContainerRef}
-          /* NEW: tell the renderer what sticky mode we're in so it can re-fit after load */
           zoomMode={zoomState?.mode}
-          /* NEW: per-pane post-zoom inputs + bump handlers */
           postZoomLeft={postZoomLeft}
           postZoomRight={postZoomRight}
           bumpPostZoomLeft={bumpPostZoomLeft}
