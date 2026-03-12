@@ -93,8 +93,6 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
  * @property {function(number): void=} setZoom
- * @property {boolean=} needsViewerFocusHint
- * @property {function(): void=} focusViewer
  * @property {boolean=} compareDisabled
  * @property {boolean=} editDisabled
  */
@@ -145,9 +143,6 @@ const DocumentToolbar = ({
   zoomState,
   setZoomMode,
   setZoom,
-  // Optional focus hint and focus-restore callback for keyboard shortcut UX.
-  needsViewerFocusHint = false,
-  focusViewer,
   // Optional UI flags that keep Compare and Edit mutually exclusive.
   compareDisabled = false,
   editDisabled = false,
@@ -477,21 +472,7 @@ const DocumentToolbar = ({
       {/* Theme toggle (also mapped to key "6") */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
 
-      {/* Focus warning / restore — visible only when shortcuts are inactive */}
-      {needsViewerFocusHint && typeof focusViewer === 'function' && (
-        <>
-          <div className="separator" />
-          <button
-            type="button"
-            onClick={focusViewer}
-            aria-label={t('toolbar.focusWarningAction', 'Focus viewer')}
-            title={t('toolbar.focusWarningTitle', 'Shortcuts inactive')}
-            className="odv-btn warning"
-          >
-            ⚠︎
-          </button>
-        </>
-      )}
+
 
       {/* Modal for print selection + reason/forWhom */}
       <PrintRangeDialog
@@ -542,8 +523,6 @@ DocumentToolbar.propTypes = {
   }),
   setZoomMode: PropTypes.func,
   setZoom: PropTypes.func,
-  needsViewerFocusHint: PropTypes.bool.isRequired,
-  focusViewer: PropTypes.func.isRequired,
   compareDisabled: PropTypes.bool,
   editDisabled: PropTypes.bool,
 };

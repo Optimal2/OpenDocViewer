@@ -7,14 +7,13 @@
  *  - Sticky Fit recomputation on relevant changes
  *  - ResizeObserver to re-fit on container resize
  *  - Global Ctrl/Cmd + wheel zoom
- *  - Keyboard navigation/zoom/hotkeys
- *  - Focus tracking (shortcuts hint) + focusViewer helper
+ *  - Global keyboard navigation/zoom/hotkeys with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
  * @module useViewerEffects
  */
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect } from 'react';
 
 /**
  * Sticky zoom modes used by the viewer.
@@ -49,21 +48,52 @@ import { useCallback, useEffect, useState } from 'react';
  */
 
 /**
- * Determine whether the event target is an editable control where viewer shortcuts should stay inactive.
+ * Determine whether the event target is an editable or form control where viewer shortcuts
+ * must stay inactive.
+ *
+ * Buttons are intentionally NOT treated as blocking controls so toolbar buttons may keep focus
+ * while the global viewer shortcuts remain available.
+ *
  * @param {*} target
  * @returns {boolean}
  */
 function isEditableTarget(target) {
   if (!(target instanceof Element)) return false;
   if (target.isContentEditable) return true;
-  const tag = String(target.tagName || '').toUpperCase();
-  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
-  return !!target.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]');
+  return !!target.closest(
+    'input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"], [data-odv-shortcuts="off"]'
+  );
+}
+
+/**
+ * Determine whether a modal dialog is currently open.
+ * While a modal is active, viewer shortcuts should be completely suspended so the dialog owns
+ * keyboard interaction.
+ *
+ * @returns {boolean}
+ */
+function hasActiveModalDialog() {
+  if (typeof document === 'undefined') return false;
+  return !!document.querySelector('[role="dialog"][aria-modal="true"], dialog[open][aria-modal="true"]');
+}
+
+/**
+ * Decide whether a keyboard shortcut should be ignored for the viewer.
+ *
+ * @param {KeyboardEvent} event
+ * @returns {boolean}
+ */
+function shouldIgnoreViewerShortcut(event) {
+  if (event.defaultPrevented) return true;
+  if (event.isComposing) return true;
+  if (hasActiveModalDialog()) return true;
+  if (isEditableTarget(event.target)) return true;
+  return isEditableTarget(document.activeElement);
 }
 
 /**
  * @param {UseViewerEffectsArgs} args
- * @returns {{needsViewerFocusHint: boolean, focusViewer: function(): void}}
+ * @returns {void}
  */
 export function useViewerEffects(args) {
   const {
@@ -135,11 +165,13 @@ export function useViewerEffects(args) {
   useEffect(() => {
     /** @param {WheelEvent} e */
     const onWheelGlobal = (e) => {
-      if (e.ctrlKey || e.metaKey) {
-        e.preventDefault();
-        if (e.deltaY < 0) zoomIn();
-        else if (e.deltaY > 0) zoomOut();
-      }
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (hasActiveModalDialog()) return;
+      if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
+
+      e.preventDefault();
+      if (e.deltaY < 0) zoomIn();
+      else if (e.deltaY > 0) zoomOut();
     };
     window.addEventListener('wheel', onWheelGlobal, { passive: false, capture: true });
     return () => { window.removeEventListener('wheel', onWheelGlobal, { capture: true }); };
@@ -153,6 +185,7 @@ export function useViewerEffects(args) {
       if (key !== 'p') return;
       if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
       if (keyboardPrintShortcutBehavior === 'browser') return;
+      if (hasActiveModalDialog()) return;
 
       e.preventDefault();
       if (keyboardPrintShortcutBehavior === 'dialog') {
@@ -164,7 +197,7 @@ export function useViewerEffects(args) {
     return () => { window.removeEventListener('keydown', onKeyDown, true); };
   }, [keyboardPrintShortcutBehavior, onOpenPrintDialog]);
 
-  // Keyboard navigation & zoom shortcuts (when viewer is focused)
+  // Global keyboard navigation & zoom shortcuts.
   useEffect(() => {
     /** Clamp page helpers (inline to avoid importing) */
     const clampPage = (n, total) => {
@@ -176,28 +209,27 @@ export function useViewerEffects(args) {
 
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
-      const root = viewerContainerRef.current;
-      if (!root) return;
-
-      const inside = e.target instanceof Node && root.contains(/** @type {Node} */ (e.target));
-      if (!inside) return;
-      if (isEditableTarget(e.target)) return;
+      if (shouldIgnoreViewerShortcut(e)) return;
 
       const mod = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
 
       switch (e.key) {
         case 'PageDown':
         case 'ArrowDown':
+          e.preventDefault();
           setPageNumber((p) => stepPage(p, 1, totalPages));
           break;
         case 'PageUp':
         case 'ArrowUp':
+          e.preventDefault();
           setPageNumber((p) => stepPage(p, -1, totalPages));
           break;
         case 'Home':
+          e.preventDefault();
           setPageNumber(1);
           break;
         case 'End':
+          e.preventDefault();
           setPageNumber(totalPages || 1);
           break;
 
@@ -227,45 +259,13 @@ export function useViewerEffects(args) {
       }
     }
 
-    window.addEventListener('keydown', onKeyDown);
-    return () => { window.removeEventListener('keydown', onKeyDown); };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => { window.removeEventListener('keydown', onKeyDown, true); };
   }, [
-    viewerContainerRef, totalPages, setPageNumber,
+    totalPages, setPageNumber,
     setZoomMode, setZoom, handleCompare, setIsExpandedGuarded,
     zoomIn, zoomOut, onOpenPrintDialog, onToggleTheme,
   ]);
-
-  // Focus tracking: hint when focus is outside the viewer (shortcuts inactive)
-  const [needsViewerFocusHint, setNeedsViewerFocusHint] = useState(false);
-
-  useEffect(() => {
-    /** @param {Event} e */
-    const update = (e) => {
-      const container = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
-      if (!container) return;
-      const target = /** @type {any} */ (e.target);
-      const inside = target instanceof Node ? container.contains(target) : false;
-      setNeedsViewerFocusHint(!inside);
-    };
-    window.addEventListener('focusin', update, true);
-    window.addEventListener('pointerdown', update, true);
-    // Initialize once on mount
-    update({ target: document.activeElement });
-    return () => {
-      window.removeEventListener('focusin', update, true);
-      window.removeEventListener('pointerdown', update, true);
-    };
-  }, [viewerContainerRef]);
-
-  /** Give focus to the viewer and clear the hint. */
-  const focusViewer = useCallback(() => {
-    try {
-      const el = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
-      if (el && typeof el.focus === 'function') el.focus();
-    } finally {
-      setNeedsViewerFocusHint(false);
-    }
-  }, [viewerContainerRef]);
 
   // Optional: auto-fit after first mount if renderer supports it.
   useEffect(() => {
@@ -274,6 +274,4 @@ export function useViewerEffects(args) {
     }, 0);
     return () => { clearTimeout(t); };
   }, [documentRenderRef]);
-
-  return { needsViewerFocusHint, focusViewer };
 }

@@ -13,8 +13,9 @@
  *   heavy logic to the dedicated hook `useDocumentViewer`.
  *
  * ACCESSIBILITY
- *   - The scrollable viewer container is focusable (tabIndex=0) so that
- *     keyboard navigation (PageUp/PageDown/Arrows, Home/End) works when the user focuses it.
+ *   - The scrollable viewer container remains focusable for scroll/assistive-tech workflows.
+ *   - Viewer shortcuts are handled globally and are suspended only inside editable/form contexts
+ *     or active modal dialogs.
  *
  * @returns {React.ReactElement}
  */
@@ -66,9 +67,6 @@ const DocumentViewer = () => {
     // sticky fit semantics
     zoomState,
     setZoomMode,
-    // keyboard hint + focus restoration
-    needsViewerFocusHint,
-    focusViewer,
     // per-pane post-zoom (compare mode only)
     postZoomLeft,
     postZoomRight,
@@ -142,9 +140,6 @@ const DocumentViewer = () => {
         firstPageDisabled={firstPageDisabled}
         lastPageDisabled={lastPageDisabled}
 
-        /* shortcuts inactive hint + focus restore */
-        needsViewerFocusHint={needsViewerFocusHint}
-        focusViewer={focusViewer}
       />
 
       <div
