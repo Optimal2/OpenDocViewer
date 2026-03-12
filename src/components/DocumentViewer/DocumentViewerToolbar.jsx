@@ -1,25 +1,9 @@
 // File: src/components/DocumentViewer/DocumentViewerToolbar.jsx
 /**
- * File: src/components/DocumentViewer/DocumentViewerToolbar.jsx
+ * Toolbar adapter for the document viewer.
  *
- * OpenDocViewer — Document Viewer Toolbar (Wrapper)
- *
- * PURPOSE
- *   Thin wrapper that wires the viewer-specific state/handlers to the generic
- *   <DocumentToolbar /> component. Keeping this layer separate lets us evolve
- *   the toolbar UI without touching the parent viewer container.
- *
- * ACCESSIBILITY
- *   - All ARIA semantics are implemented inside <DocumentToolbar />.
- *
- * IMPORTANT PROJECT NOTE (gotcha for future reviewers)
- *   - Elsewhere in the app we import from the **root** 'file-type' package, NOT 'file-type/browser'.
- *     With file-type v21 the '/browser' subpath is not exported and will break Vite builds.
- */
-
-/**
- * Zoom mode for the viewer.
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} ZoomMode
+ * Keeps the container/viewer layer decoupled from the concrete toolbar implementation by translating
+ * viewer state and handlers into the prop shape expected by `DocumentToolbar`.
  */
 
 import React from 'react';
@@ -27,44 +11,53 @@ import PropTypes from 'prop-types';
 import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 
 /**
- * Image adjustments passed to the toolbar.
- * @typedef {Object} ImageAdjustments
- * @property {number} rotation
- * @property {number} brightness
- * @property {number} contrast
+ * Ref-like shape used for imperative handles.
+ * @typedef {Object} RefLike
+ * @property {*} current
  */
 
 /**
- * Props for DocumentViewerToolbar.
+ * State setter that accepts a boolean or an updater callback.
+ * @callback SetBooleanState
+ * @param {(boolean|function(boolean): boolean)} next
+ * @returns {void}
+ */
+
+/**
+ * Props consumed by DocumentViewerToolbar.
  * @typedef {Object} DocumentViewerToolbarProps
  * @property {number} pageNumber
  * @property {number} totalPages
- * @property {SetPageNumber} setPageNumber
+ * @property {boolean} isDocumentLoading
+ * @property {function(number): void} setPageNumber
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
  * @property {number} zoom
- * @property {{mode:ZoomMode, scale:number}} zoomState
- * @property {(function(ZoomMode): void)} setZoomMode
- * @property {SetNumberState} setZoom
+ * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'), scale: number }} zoomState
+ * @property {function('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'): void} setZoomMode
+ * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
+ * @property {RefLike} documentRenderRef
+ * @property {boolean} isPrintDialogOpen
+ * @property {function(): void} openPrintDialog
+ * @property {function(): void} closePrintDialog
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
- * @property {ImageAdjustments} imageProperties
+ * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
  * @property {function(number): void} handleRotationChange
  * @property {function(*): void} handleBrightnessChange
  * @property {function(*): void} handleContrastChange
  * @property {function(): void} resetImageProperties
- * @property {RefLike} documentRenderRef
  * @property {boolean} isExpanded
  * @property {SetBooleanState} setIsExpanded
  * @property {boolean} prevPageDisabled
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
- * @property {boolean} needsViewerFocusHint   // NEW: true when focus is outside the viewer container
- * @property {function(): void} focusViewer   // NEW: programmatically focus the viewer container
+ * @property {boolean} needsViewerFocusHint
+ * @property {function(): void} focusViewer
  */
 
 /**
@@ -75,6 +68,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 const DocumentViewerToolbar = ({
   pageNumber,
   totalPages,
+  isDocumentLoading,
   setPageNumber,
   zoomIn,
   zoomOut,
@@ -93,6 +87,9 @@ const DocumentViewerToolbar = ({
   handleContrastChange,
   resetImageProperties,
   documentRenderRef,
+  isPrintDialogOpen,
+  openPrintDialog,
+  closePrintDialog,
   isExpanded,
   setIsExpanded,
   prevPageDisabled,
@@ -102,16 +99,15 @@ const DocumentViewerToolbar = ({
   needsViewerFocusHint,
   focusViewer,
 }) => {
-  // Mutually-exclusive UI disable flags
-  const compareDisabled = isExpanded;   // disable Compare while Edit is active
-  const editDisabled = isComparing;     // disable Edit while Compare is active
+  const compareDisabled = isExpanded;
+  const editDisabled = isComparing;
 
   return (
     <DocumentToolbar
       pageNumber={pageNumber}
       totalPages={totalPages}
+      isDocumentLoading={isDocumentLoading}
       setPageNumber={setPageNumber}
-      /* zoom controls */
       zoom={zoom}
       zoomState={zoomState}
       setZoomMode={setZoomMode}
@@ -120,10 +116,11 @@ const DocumentViewerToolbar = ({
       fitToScreen={fitToScreen}
       fitToWidth={fitToWidth}
       setZoom={setZoom}
-      /* printing + context */
       viewerContainerRef={viewerContainerRef}
       documentRenderRef={documentRenderRef}
-      /* compare + editing */
+      isPrintDialogOpen={isPrintDialogOpen}
+      openPrintDialog={openPrintDialog}
+      closePrintDialog={closePrintDialog}
       handleCompare={handleCompare}
       isComparing={isComparing}
       imageProperties={imageProperties}
@@ -133,15 +130,12 @@ const DocumentViewerToolbar = ({
       resetImageProperties={resetImageProperties}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
-      /* NEW: pass explicit disabled flags so the UI reflects exclusivity */
       compareDisabled={compareDisabled}
       editDisabled={editDisabled}
-      /* nav button disabled states */
       prevPageDisabled={prevPageDisabled}
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
-      /* NEW: shortcuts inactive hint + focus restore */
       needsViewerFocusHint={needsViewerFocusHint}
       focusViewer={focusViewer}
     />
@@ -151,6 +145,7 @@ const DocumentViewerToolbar = ({
 DocumentViewerToolbar.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
+  isDocumentLoading: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
@@ -176,6 +171,9 @@ DocumentViewerToolbar.propTypes = {
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  isPrintDialogOpen: PropTypes.bool.isRequired,
+  openPrintDialog: PropTypes.func.isRequired,
+  closePrintDialog: PropTypes.func.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   setIsExpanded: PropTypes.func.isRequired,
   prevPageDisabled: PropTypes.bool.isRequired,

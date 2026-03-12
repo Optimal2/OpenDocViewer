@@ -5,11 +5,12 @@
  * Page navigation controls with support for single-step clicks and
  * continuous stepping on press-and-hold (mouse/touch).
  *
- * Now also includes an editable page field, grouped visually like the zoom control:
+ * Also includes an editable page field, grouped visually like the zoom control:
  *   [ « ][ ‹ ]  [  X / Y  ]  [ › ][ » ]
  * - When NOT focused, the field shows "X / Y".
  * - When focused, it shows only the current page "X" for editing.
  * - Enter/Blur applies (clamped 1..Y). Escape cancels and restores.
+ * - During document loading the page field gets a warning-style background.
  *
  * @component
  * @param {Object} props
@@ -28,6 +29,7 @@
  * @param {number} props.pageNumber - Current page number (1-based).
  * @param {number} props.totalPages - Total pages.
  * @param {function(number):void} [props.onGoToPage] - Optional: apply a specific page number (1..totalPages).
+ * @param {boolean} [props.isDocumentLoading=false] - Whether the document set is still loading.
  * @returns {JSX.Element}
  */
 
@@ -58,18 +60,15 @@ const PageNavigationButtons = ({
   pageNumber,
   totalPages,
   onGoToPage,
+  isDocumentLoading = false,
 }) => {
   const { t } = useTranslation();
 
-  // Suppress the subsequent onClick if a pointer press already caused a leading-edge step.
   const suppressNextClickRef = useRef(false);
-
-  // Local draft for the editable page input
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState(String(pageNumber));
 
-  // Keep draft in sync with external page when the field is not focused.
   useEffect(() => {
     const el = inputRef.current;
     const focused = !!(el && document.activeElement === el) || isFocused;
@@ -77,16 +76,12 @@ const PageNavigationButtons = ({
   }, [pageNumber, isFocused]);
 
   function applyDraft() {
-    // Parse and clamp
     const next = clampPage(draft, totalPages);
     if (next == null) {
-      // Revert if parse failed
       setDraft(String(pageNumber));
       return;
     }
-    if (typeof onGoToPage === 'function') {
-      onGoToPage(next);
-    }
+    if (typeof onGoToPage === 'function') onGoToPage(next);
     setDraft(String(next));
   }
 
@@ -94,14 +89,14 @@ const PageNavigationButtons = ({
     setDraft(String(pageNumber));
   }
 
-  // Touch helpers so press-and-hold also works on touch devices without scrolling the page.
   const onTouchStartPrev = (e) => {
     if (!prevPageDisabled) {
       e.preventDefault();
-      suppressNextClickRef.current = true; // leading-edge step will occur via timer
+      suppressNextClickRef.current = true;
       startPrevPageTimer('prev');
     }
   };
+
   const onTouchStartNext = (e) => {
     if (!nextPageDisabled) {
       e.preventDefault();
@@ -110,14 +105,14 @@ const PageNavigationButtons = ({
     }
   };
 
-  // Click handlers that respect suppression (so a press that already stepped once won’t step again).
   const onClickPrev = () => {
     if (suppressNextClickRef.current) {
       suppressNextClickRef.current = false;
-      return; // skip duplicate step
+      return;
     }
     handlePrevPage();
   };
+
   const onClickNext = () => {
     if (suppressNextClickRef.current) {
       suppressNextClickRef.current = false;
@@ -126,12 +121,16 @@ const PageNavigationButtons = ({
     handleNextPage();
   };
 
-  // Unfocused display shows "X / Y"; focused shows just "X"
   const displayValue = isFocused ? draft : `${pageNumber} / ${totalPages}`;
+  const pageTitle = isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page');
 
   return (
-    <div className="zoom-fixed-group" role="group" aria-label={t('toolbar.page')}>
-      {/* First page */}
+    <div
+      className={`zoom-fixed-group${isDocumentLoading ? ' is-loading' : ''}`}
+      role="group"
+      aria-label={t('toolbar.page')}
+      aria-busy={isDocumentLoading}
+    >
       <button
         type="button"
         onClick={handleFirstPage}
@@ -143,20 +142,18 @@ const PageNavigationButtons = ({
         <span className="material-icons" aria-hidden="true">first_page</span>
       </button>
 
-      {/* Previous (click = single step; press & hold = continuous) */}
       <button
         type="button"
         onClick={onClickPrev}
         onMouseDown={() => {
           if (!prevPageDisabled) {
-            suppressNextClickRef.current = true; // leading-edge step via timer
+            suppressNextClickRef.current = true;
             startPrevPageTimer('prev');
           }
         }}
         onMouseUp={stopPrevPageTimer}
         onMouseLeave={() => {
           stopPrevPageTimer();
-          // If the pointer left the button, a click won’t follow; clear suppression to avoid stickiness.
           suppressNextClickRef.current = false;
         }}
         onTouchStart={onTouchStartPrev}
@@ -169,10 +166,9 @@ const PageNavigationButtons = ({
         <span className="material-icons" aria-hidden="true">chevron_left</span>
       </button>
 
-      {/* Editable page number */}
       <input
         ref={inputRef}
-        className="page-number-input"
+        className={`page-number-input${isDocumentLoading ? ' is-loading' : ''}`}
         type="text"
         inputMode="numeric"
         pattern="[0-9 /]*"
@@ -180,7 +176,6 @@ const PageNavigationButtons = ({
         onFocus={(e) => {
           setIsFocused(true);
           setDraft(String(pageNumber));
-          // Select number for quick replacement
           e.currentTarget.setSelectionRange(0, String(pageNumber).length);
         }}
         onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ''))}
@@ -197,16 +192,16 @@ const PageNavigationButtons = ({
             e.currentTarget.blur();
           }
         }}
-        aria-label={t('toolbar.page')}
+        aria-label={pageTitle}
         role="spinbutton"
         aria-valuemin={1}
         aria-valuemax={Math.max(1, totalPages || 1)}
         aria-valuenow={pageNumber}
         aria-valuetext={t('toolbar.page') + ` ${pageNumber} / ${totalPages}`}
-        title={t('toolbar.page')}
+        aria-busy={isDocumentLoading}
+        title={pageTitle}
       />
 
-      {/* Next (click = single step; press & hold = continuous) */}
       <button
         type="button"
         onClick={onClickNext}
@@ -231,7 +226,6 @@ const PageNavigationButtons = ({
         <span className="material-icons" aria-hidden="true">chevron_right</span>
       </button>
 
-      {/* Last page */}
       <button
         type="button"
         onClick={handleLastPage}
@@ -261,7 +255,8 @@ PageNavigationButtons.propTypes = {
   handleNextPage: PropTypes.func.isRequired,
   pageNumber: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
-  onGoToPage: PropTypes.func, // optional for backward-compat
+  onGoToPage: PropTypes.func,
+  isDocumentLoading: PropTypes.bool,
 };
 
 export default React.memo(PageNavigationButtons);

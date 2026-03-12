@@ -104,6 +104,23 @@
       version: '1'
     },
 
+    // ---- SHORTCUTS ------------------------------------------------------------
+    shortcuts: {
+      print: {
+        /**
+         * Ctrl/Cmd+P behavior.
+         * - "browser": keep the native browser shortcut
+         * - "disable": cancel the shortcut without opening any dialog
+         * - "dialog": cancel the shortcut and open OpenDocViewer's print dialog
+         *
+         * NOTE: this only affects keyboard interception. Browser menus / native context menus
+         * cannot be reliably overridden by regular web-page code.
+         * @type {"browser"|"disable"|"dialog"}
+         */
+        ctrlOrCmdP: "dialog"
+      }
+    },
+
     // ---- USER LOG -------------------------------------------------------------
     userLog: {
       enabled:  true,

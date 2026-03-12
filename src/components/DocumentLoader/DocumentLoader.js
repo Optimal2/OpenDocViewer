@@ -156,7 +156,13 @@ const DocumentLoader = ({
   demoCount,
   demoFormats
 }) => {
-  const { insertPageAtIndex, setError, setWorkerCount } = useContext(ViewerContext);
+  const {
+    insertPageAtIndex,
+    setError,
+    setWorkerCount,
+    setLoadingRunActive,
+    setPlannedPageCount,
+  } = useContext(ViewerContext);
 
   /** Lifecycle guard so async work can stop cleanly on unmount or StrictMode remount. */
   const isMounted = useRef(true);
@@ -195,6 +201,16 @@ const DocumentLoader = ({
   const startTimerRef = useRef(/** @type {number|undefined} */(undefined));
 
   /**
+   * Publish the currently planned page total to viewer context.
+   * @param {number} count
+   * @returns {void}
+   */
+  const publishPlannedPageCount = useCallback((count) => {
+    const next = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
+    setPlannedPageCount(next);
+  }, [setPlannedPageCount]);
+
+  /**
    * Minimal failure placeholder insertion.
    * @param {string} url
    * @param {number} fileIndex
@@ -216,8 +232,9 @@ const DocumentLoader = ({
     insertPageAtIndex(failedPage, currentPageIndex.current);
     insertsAccepted.current += 1;
     currentPageIndex.current += 1;
+    publishPlannedPageCount(currentPageIndex.current);
     logger.info('Inserted page at index', { index: currentPageIndex.current - 1, ext: 'png', fileIndex, pageIndex: 0 });
-  }, [insertPageAtIndex]);
+  }, [insertPageAtIndex, publishPlannedPageCount]);
 
   /**
    * Infer a file extension directly from a source URL without any network fetch.
@@ -295,6 +312,7 @@ const DocumentLoader = ({
       });
 
       currentPageIndex.current += 1;
+      publishPlannedPageCount(currentPageIndex.current);
       insertAtIndex(page, at);
       return;
     }
@@ -374,6 +392,7 @@ const DocumentLoader = ({
         mainThreadJobQueue.current.push(job);
         arrayBuffer = null;
         currentPageIndex.current += totalPages;
+        publishPlannedPageCount(currentPageIndex.current);
         logger.debug('Routed multi-page document to main thread', { fileExtension, totalPages, runId: runId.current });
       } else {
         // Other single-image types → worker
@@ -398,6 +417,7 @@ const DocumentLoader = ({
         jobQueue.current.push(job);
         arrayBuffer = null;
         currentPageIndex.current += 1;
+        publishPlannedPageCount(currentPageIndex.current);
       }
     } catch (error) {
       fetchControllers.current.delete(controller);
@@ -413,7 +433,7 @@ const DocumentLoader = ({
         logger.error('Error loading document', { error: error.message, runId: runId.current });
       }
     }
-  }, [setError, handleFailedDocumentLoad, demoMode, insertAtIndex]);
+  }, [setError, handleFailedDocumentLoad, demoMode, insertAtIndex, publishPlannedPageCount]);
 
   /**
    * Handle worker results and immediately drain any follow-up work that must occur on the main thread.
@@ -539,6 +559,8 @@ const DocumentLoader = ({
       }
 
       // Reset queues/counters for this run
+      setLoadingRunActive(true);
+      publishPlannedPageCount(0);
       jobQueue.current = [];
       mainThreadJobQueue.current = [];
       batchQueue.current = [];
@@ -595,6 +617,8 @@ const DocumentLoader = ({
 
           if (!isMounted.current) return;
 
+          setLoadingRunActive(false);
+
           if (lowCore) {
             setTimeout(processSequential, 0);
           } else {
@@ -603,6 +627,7 @@ const DocumentLoader = ({
           }
         } catch (error) {
           if (isMounted.current) {
+            setLoadingRunActive(false);
             setError(error.message);
             logger.error('Error loading documents', { error: error.message, runId: runId.current });
           }
@@ -635,6 +660,7 @@ const DocumentLoader = ({
       });
       imageWorkersRef.current = [];
       setWorkerCount(0);
+      setLoadingRunActive(false);
 
       logger.info('DocumentLoader cleanup', {
         runId: runId.current,
@@ -660,6 +686,8 @@ const DocumentLoader = ({
     processSequential,
     drainMainThreadJobs,
     setWorkerCount,
+    setLoadingRunActive,
+    publishPlannedPageCount,
   ]);
 
   return children;

@@ -35,7 +35,8 @@
       "switchToDark": "Switch to dark theme"
     },
     "focusWarningTitle": "Shortcuts inactive",
-    "focusWarningAction": "Focus viewer"
+    "focusWarningAction": "Focus viewer",
+    "pageLoadingTitle": "Page indicator (pages are still loading)"
   },
   "printDialog": {
     "title": "Print",
@@ -209,7 +210,7 @@
       "title": "OpenDocViewer",
       "description": "OpenDocViewer – React JavaScript Document Viewer"
     },
-  "noscript": {
+    "noscript": {
       "title": "JavaScript is disabled",
       "message": "You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page."
     }

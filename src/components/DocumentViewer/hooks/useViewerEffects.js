@@ -9,6 +9,7 @@
  *  - Global Ctrl/Cmd + wheel zoom
  *  - Keyboard navigation/zoom/hotkeys
  *  - Focus tracking (shortcuts hint) + focusViewer helper
+ *  - Config-driven Ctrl/Cmd + P behavior
  *
  * @module useViewerEffects
  */
@@ -19,6 +20,8 @@ import { useCallback, useEffect, useState } from 'react';
  * Sticky zoom modes used by the viewer.
  * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
+
+/** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
 
 /**
  * Arguments for useViewerEffects. (Simplified types for JSDoc compatibility.)
@@ -40,7 +43,23 @@ import { useCallback, useEffect, useState } from 'react';
  * @property {Function} zoomOut
  * @property {Function} handleCompare
  * @property {Function} setIsExpandedGuarded
+ * @property {Function=} onOpenPrintDialog
+ * @property {Function=} onToggleTheme
+ * @property {KeyboardPrintShortcutBehavior=} keyboardPrintShortcutBehavior
  */
+
+/**
+ * Determine whether the event target is an editable control where viewer shortcuts should stay inactive.
+ * @param {*} target
+ * @returns {boolean}
+ */
+function isEditableTarget(target) {
+  if (!(target instanceof Element)) return false;
+  if (target.isContentEditable) return true;
+  const tag = String(target.tagName || '').toUpperCase();
+  if (tag === 'INPUT' || tag === 'TEXTAREA' || tag === 'SELECT') return true;
+  return !!target.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"]');
+}
 
 /**
  * @param {UseViewerEffectsArgs} args
@@ -65,6 +84,9 @@ export function useViewerEffects(args) {
     zoomOut,
     handleCompare,
     setIsExpandedGuarded,
+    onOpenPrintDialog,
+    onToggleTheme,
+    keyboardPrintShortcutBehavior = 'browser',
   } = args;
 
   // Keep zoomState.scale in sync with numeric zoom
@@ -123,6 +145,25 @@ export function useViewerEffects(args) {
     return () => { window.removeEventListener('wheel', onWheelGlobal, { capture: true }); };
   }, [zoomIn, zoomOut]);
 
+  // Config-driven Ctrl/Cmd+P handling.
+  useEffect(() => {
+    /** @param {KeyboardEvent} e */
+    const onKeyDown = (e) => {
+      const key = String(e.key || '').toLowerCase();
+      if (key !== 'p') return;
+      if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
+      if (keyboardPrintShortcutBehavior === 'browser') return;
+
+      e.preventDefault();
+      if (keyboardPrintShortcutBehavior === 'dialog') {
+        try { onOpenPrintDialog?.(); } catch {}
+      }
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => { window.removeEventListener('keydown', onKeyDown, true); };
+  }, [keyboardPrintShortcutBehavior, onOpenPrintDialog]);
+
   // Keyboard navigation & zoom shortcuts (when viewer is focused)
   useEffect(() => {
     /** Clamp page helpers (inline to avoid importing) */
@@ -138,8 +179,9 @@ export function useViewerEffects(args) {
       const root = viewerContainerRef.current;
       if (!root) return;
 
-      const inside = e.target instanceof Node && root.contains(/** @type {Node} */(e.target));
+      const inside = e.target instanceof Node && root.contains(/** @type {Node} */ (e.target));
       if (!inside) return;
+      if (isEditableTarget(e.target)) return;
 
       const mod = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
 
@@ -171,14 +213,15 @@ export function useViewerEffects(args) {
           if (!mod && e.code === 'NumpadAdd') { e.preventDefault(); zoomIn(); break; }
           if (!mod && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOut(); break; }
 
-          // Number hotkeys (1:1, Fit Page, Fit Width, Compare, Edit)
+          // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare, Edit, Theme)
           if (!mod && !e.shiftKey && !e.altKey) {
-            if (e.key === '1') { e.preventDefault(); setZoomMode('CUSTOM'); setZoom(1); }
+            if (e.key === '0') { e.preventDefault(); onOpenPrintDialog?.(); }
+            else if (e.key === '1') { e.preventDefault(); setZoomMode('CUSTOM'); setZoom(1); }
             else if (e.key === '2') { e.preventDefault(); setZoomMode('FIT_PAGE'); }
             else if (e.key === '3') { e.preventDefault(); setZoomMode('FIT_WIDTH'); }
-            else if (e.key === '4') { e.preventDefault(); handleCompare(); }                 // guarded inside
-            else if (e.key === '5') { e.preventDefault(); setIsExpandedGuarded((v) => !v); } // guarded inside
-            // '6' remains for theme toggle (toolbar owns it)
+            else if (e.key === '4') { e.preventDefault(); handleCompare(); }
+            else if (e.key === '5') { e.preventDefault(); setIsExpandedGuarded((v) => !v); }
+            else if (e.key === '6') { e.preventDefault(); onToggleTheme?.(); }
           }
           break;
       }
@@ -189,7 +232,7 @@ export function useViewerEffects(args) {
   }, [
     viewerContainerRef, totalPages, setPageNumber,
     setZoomMode, setZoom, handleCompare, setIsExpandedGuarded,
-    zoomIn, zoomOut
+    zoomIn, zoomOut, onOpenPrintDialog, onToggleTheme,
   ]);
 
   // Focus tracking: hint when focus is outside the viewer (shortcuts inactive)

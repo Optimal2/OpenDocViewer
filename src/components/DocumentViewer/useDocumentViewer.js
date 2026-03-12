@@ -16,6 +16,8 @@
 import { useState, useRef, useCallback, useContext } from 'react';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
+import ThemeContext from '../../contexts/themeContext.js';
+import { getKeyboardPrintShortcutBehavior } from '../../utils/runtimeConfig.js';
 import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
@@ -30,7 +32,6 @@ function clampPage(n, total) {
   const v = Math.max(1, Math.floor(Number(n) || 1));
   return Math.min(v, total);
 }
-
 
 /**
  * Image adjustment properties for canvas edit mode.
@@ -59,7 +60,9 @@ function clampPage(n, total) {
  */
 export function useDocumentViewer() {
   const { allPages } = useContext(ViewerContext);
+  const { toggleTheme } = useContext(ThemeContext);
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
+  const keyboardPrintShortcutBehavior = getKeyboardPrintShortcutBehavior();
 
   // --- Core viewer interaction state ----------------------------------------------
   const [pageNumber, setPageNumber] = useState(1);
@@ -68,6 +71,7 @@ export function useDocumentViewer() {
 
   const [isComparing, setIsComparing] = useState(false);
   const [comparePageNumber, setComparePageNumber] = useState(/** @type {(number|null)} */ (null));
+  const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
   const [imageProperties, setImageProperties] = useState(/** @type {ImageProperties} */ ({
     rotation: 0, brightness: 100, contrast: 100
@@ -96,6 +100,15 @@ export function useDocumentViewer() {
     const clamped = clampPage(next, totalPages);
     if (clamped !== pageNumber) setPageNumber(clamped);
   }, [pageNumber, totalPages]);
+
+  // --- Print dialog --------------------------------------------------------------
+  const openPrintDialog = useCallback(() => {
+    setPrintDialogOpen(true);
+  }, []);
+
+  const closePrintDialog = useCallback(() => {
+    setPrintDialogOpen(false);
+  }, []);
 
   // --- Zoom helpers --------------------------------------------------------------
   const zoomIn = useCallback(() => {
@@ -257,9 +270,12 @@ export function useDocumentViewer() {
     zoomOut,
     handleCompare,
     setIsExpandedGuarded: setIsExpanded,
+    onOpenPrintDialog: openPrintDialog,
+    onToggleTheme: toggleTheme,
+    keyboardPrintShortcutBehavior,
   });
 
-  // --- Public API (unchanged) ----------------------------------------------------
+  // --- Public API ---------------------------------------------------------------
   return {
     pageNumber,
     setPageNumber,
@@ -267,6 +283,9 @@ export function useDocumentViewer() {
     setZoom,
     isComparing,
     comparePageNumber,
+    isPrintDialogOpen,
+    openPrintDialog,
+    closePrintDialog,
     imageProperties,
     isExpanded,
     thumbnailWidth,
