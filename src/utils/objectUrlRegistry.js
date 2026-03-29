@@ -42,6 +42,19 @@ export function revokeTrackedObjectUrls(urls) {
 }
 
 /**
+ * Check whether a blob/object URL is still tracked as live by the viewer.
+ * Non-blob URLs are never tracked here and therefore return false.
+ *
+ * @param {(string|null|undefined)} url
+ * @returns {boolean}
+ */
+export function isTrackedObjectUrl(url) {
+  const value = String(url || '').trim();
+  if (!value || !/^blob:/i.test(value)) return false;
+  return TRACKED_URLS.has(value);
+}
+
+/**
  * Revoke every tracked object URL. Mostly useful for defensive shutdown paths.
  * @returns {void}
  */

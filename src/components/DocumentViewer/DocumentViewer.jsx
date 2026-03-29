@@ -57,6 +57,7 @@ const DocumentViewer = () => {
     handlePageNumberChange,
     zoomIn,
     zoomOut,
+    actualSize,
     fitToScreen,
     fitToWidth,
     handleContainerClick,
@@ -113,6 +114,7 @@ const DocumentViewer = () => {
         setZoom={setZoom}
         zoomIn={zoomIn}
         zoomOut={zoomOut}
+        actualSize={actualSize}
         fitToScreen={fitToScreen}
         fitToWidth={fitToWidth}
         zoomState={zoomState}
@@ -189,9 +191,7 @@ const DocumentViewer = () => {
         <DocumentViewerRender
           pageNumber={pageNumber}
           zoom={zoom}
-          viewerContainerRef={viewerContainerRef}
           setZoom={setZoom}
-          setPageNumber={setPageNumber}
           isComparing={isComparing}
           imageProperties={imageProperties}
           isExpanded={isExpanded}
@@ -199,7 +199,6 @@ const DocumentViewer = () => {
           comparePageNumber={comparePageNumber}
           compareRef={compareRef}
           allPages={allPages}
-          thumbnailsContainerRef={thumbnailsContainerRef}
           zoomMode={zoomState?.mode}
           postZoomLeft={postZoomLeft}
           postZoomRight={postZoomRight}

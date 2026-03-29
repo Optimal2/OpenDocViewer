@@ -1,25 +1,10 @@
-﻿// File: src/utils/zoomUtils.js
+// File: src/utils/zoomUtils.js
 /**
- * File: src/utils/zoomUtils.js
+ * OpenDocViewer — Zoom utilities.
  *
- * OpenDocViewer — Zoom Utilities
- *
- * PURPOSE
- *   Helper functions for computing and applying zoom levels in the document viewer.
- *   These are intentionally UI-agnostic: they operate on DOM sizes and setters only.
- *
- * DESIGN NOTES
- *   - Zoom values are scale factors where `1` = 100% (natural size).
- *   - We clamp zoom to a safe, user-friendly range to avoid extreme CPU/GPU costs.
- *   - When compare mode is active, we assume the viewport is split horizontally
- *     into two panes and subtract a small gutter for the resizer/spacing.
- *   - Magic numbers from the current layout (sidebar/gutter heights) are collected
- *     as constants below to make future layout changes explicit and easy to adjust.
- *
- * LOGGING
- *   - These functions log at `info` level when actions occur and `warn` when inputs
- *     are missing. In production, the default log level is `warn`, so the info logs
- *     are typically suppressed unless you increase verbosity.
+ * These helpers work against the *exact* viewport for a single rendered pane instead of trying to
+ * infer available space from global layout constants. That keeps zoom math stable when surrounding
+ * chrome changes (thumbnail pane width, compare borders, scrollbar gutters, etc.).
  */
 
 import logger from '../logging/systemLogger.js';
@@ -32,20 +17,10 @@ const MAX_ZOOM = 8;
 const ZOOM_STEP = 1.1;
 
 /**
- * Layout constants tied to the current viewer UI.
- * If you adjust toolbar/sidebar sizes, update these to keep zoom calculations correct.
- * NOTE: Callers can override these per call via the `opts` parameter.
- */
-const SIDEBAR_WIDTH_PX = 250;     // Thumbnail sidebar nominal width (fallback)
-const CHROME_HEIGHT_PX = 30;      // Top/bottom chrome (toolbar paddings etc.)
-const COMPARE_GUTTER_PX = 30;     // Extra spacing when compare mode splits the view
-
-/**
  * Optional calculation overrides.
  * @typedef {Object} ZoomCalcOptions
- * @property {number=} sidebarWidthPx     Width to subtract for thumbnails sidebar (defaults to 250)
- * @property {number=} chromeHeightPx     Height to subtract for chrome (defaults to 30)
- * @property {number=} compareGutterPx    Split gutter in compare mode (defaults to 30)
+ * @property {number=} viewportInsetPx Conservative safety inset subtracted from the measured
+ *     viewport on each axis. Leave at 0 to use the full client box.
  */
 
 /**
@@ -60,52 +35,63 @@ function clamp(value, min, max) {
 }
 
 /**
- * Get the current viewer container element from a React-like ref.
- * Best-effort — returns null if the ref is not attached yet.
- * @param {RefLike} viewerContainerRef
+ * Resolve an exact viewport element from either a DOM node or a React-like ref.
+ *
+ * @param {(HTMLElement|{ current: HTMLElement|null }|null|undefined)} viewportOrRef
  * @returns {(HTMLElement|null)}
  */
-function getContainer(viewerContainerRef) {
-  const current = viewerContainerRef ? /** @type {*} */ (viewerContainerRef).current : null;
-  return current ? /** @type {HTMLElement} */ (current) : null;
+function getViewport(viewportOrRef) {
+  if (!viewportOrRef) return null;
+  if (viewportOrRef instanceof HTMLElement) return viewportOrRef;
+  const current = /** @type {*} */ (viewportOrRef).current;
+  return current instanceof HTMLElement ? current : null;
 }
 
 /**
- * Safely read natural image dimensions. Returns null if invalid/zero.
- * @param {HTMLImageElement} image
+ * Read the intrinsic size of the active render surface.
+ * Supports both images and canvases because canvas edit mode renders into a rotated/filtered
+ * canvas while normal mode uses an image element directly.
+ *
+ * @param {(HTMLImageElement|HTMLCanvasElement|null|undefined)} surface
  * @returns {{ w: number, h: number } | null}
  */
-function getNaturalSize(image) {
-  if (!image) return null;
-  const w = Number(image.naturalWidth || 0);
-  const h = Number(image.naturalHeight || 0);
-  if (!Number.isFinite(w) || !Number.isFinite(h) || w <= 0 || h <= 0) return null;
-  return { w, h };
+function getRenderableSize(surface) {
+  if (!surface) return null;
+
+  let width = 0;
+  let height = 0;
+
+  if (surface instanceof HTMLImageElement) {
+    width = Number(surface.naturalWidth || surface.width || 0);
+    height = Number(surface.naturalHeight || surface.height || 0);
+  } else if (surface instanceof HTMLCanvasElement) {
+    width = Number(surface.width || 0);
+    height = Number(surface.height || 0);
+  } else {
+    width = Number(surface?.width || 0);
+    height = Number(surface?.height || 0);
+  }
+
+  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+    return null;
+  }
+
+  return { w: width, h: height };
 }
 
 /**
- * Compute available viewport width/height for rendering, taking into account
- * sidebar, chrome, and compare mode split.
+ * Read the exact client viewport available to the rendered pane.
  *
- * @param {HTMLElement} container
- * @param {boolean} isComparing
+ * @param {HTMLElement} viewport
  * @param {ZoomCalcOptions=} opts
  * @returns {{ vw: number, vh: number }}
  */
-function getViewportSize(container, isComparing, opts) {
-  const sidebar = Math.max(0, Number(opts?.sidebarWidthPx ?? SIDEBAR_WIDTH_PX));
-  const chrome = Math.max(0, Number(opts?.chromeHeightPx ?? CHROME_HEIGHT_PX));
-  const gutter = Math.max(0, Number(opts?.compareGutterPx ?? COMPARE_GUTTER_PX));
-
-  // Subtract persistent UI chrome
-  let vw = Math.max(0, container.clientWidth - sidebar);
-  const vh = Math.max(0, container.clientHeight - chrome);
-
-  // In compare mode, split horizontally and subtract a small gutter for the divider
-  if (isComparing) {
-    vw = Math.max(0, Math.floor(vw / 2) - gutter);
-  }
-  return { vw, vh };
+function getViewportSize(viewport, opts) {
+  const inset = Math.max(0, Number(opts?.viewportInsetPx ?? 0));
+  return {
+    vw: Math.max(0, Number(viewport.clientWidth || 0) - inset),
+    vh: Math.max(0, Number(viewport.clientHeight || 0) - inset),
+  };
 }
 
 /**
@@ -120,74 +106,73 @@ function applyZoom(setZoom, next) {
 }
 
 /**
- * Calculates and sets the zoom level so that the image fits within both the width
- * and height of the viewer container (i.e., “Fit to Screen”).
+ * Calculate and set a zoom that fits the render surface within both viewport axes.
  *
- * @param {HTMLImageElement} image                         The image element to be zoomed.
- * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
- * @param {SetNumberState} setZoom                         React-like state setter for zoom.
- * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
- * @param {ZoomCalcOptions=} opts                          Optional overrides for layout constants.
+ * @param {(HTMLImageElement|HTMLCanvasElement|null|undefined)} surface Active image/canvas.
+ * @param {(HTMLElement|{ current: HTMLElement|null }|null|undefined)} viewportOrRef Exact pane viewport.
+ * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {ZoomCalcOptions=} opts Optional conservative inset.
  * @returns {void}
  */
-export function calculateFitToScreenZoom(image, viewerContainerRef, setZoom, isComparing, opts) {
-  logger.info('Calculating fit-to-screen zoom', { isComparing });
+export function calculateFitToScreenZoom(surface, viewportOrRef, setZoom, opts) {
+  logger.info('Calculating fit-to-screen zoom');
 
-  const container = getContainer(viewerContainerRef);
-  const size = getNaturalSize(image);
+  const viewport = getViewport(viewportOrRef);
+  const size = getRenderableSize(surface);
 
-  if (!container || !size) {
-    logger.warn('Image or viewer container unavailable for fit-to-screen', {
-      imageExists: !!image,
-      viewerContainerExists: !!container,
-      naturalWidth: image?.naturalWidth ?? null,
-      naturalHeight: image?.naturalHeight ?? null
+  if (!viewport || !size) {
+    logger.warn('Render surface or viewport unavailable for fit-to-screen', {
+      surfaceExists: !!surface,
+      viewportExists: !!viewport,
+      width: surface ? Number(surface.width || 0) || null : null,
+      height: surface ? Number(surface.height || 0) || null : null,
+      naturalWidth: surface instanceof HTMLImageElement ? Number(surface.naturalWidth || 0) || null : null,
+      naturalHeight: surface instanceof HTMLImageElement ? Number(surface.naturalHeight || 0) || null : null,
     });
     return;
   }
 
-  const { vw, vh } = getViewportSize(container, isComparing, opts);
+  const { vw, vh } = getViewportSize(viewport, opts);
   if (vw <= 0 || vh <= 0) {
     logger.warn('Non-positive viewport for fit-to-screen', { vw, vh });
     return;
   }
 
-  const widthRatio = vw / size.w;
-  const heightRatio = vh / size.h;
-
-  let zoom = Math.min(widthRatio, heightRatio);
+  let zoom = Math.min(vw / size.w, vh / size.h);
   if (!Number.isFinite(zoom) || zoom <= 0) zoom = 1;
 
   applyZoom(setZoom, zoom);
 }
 
 /**
- * Calculates and sets the zoom level to fit the image width within the viewer container
- * (i.e., “Fit to Width”). Height is allowed to overflow/scroll.
+ * Calculate and set a zoom that fits the render surface width within the pane viewport.
+ * Height may overflow vertically and remain scrollable.
  *
- * @param {HTMLImageElement} image                         The image element to be zoomed.
- * @param {RefLike} viewerContainerRef                     Reference to the viewer container element.
- * @param {SetNumberState} setZoom                         React-like state setter for zoom.
- * @param {boolean} isComparing                            Whether compare mode (split view) is enabled.
- * @param {ZoomCalcOptions=} opts                          Optional overrides for layout constants.
+ * @param {(HTMLImageElement|HTMLCanvasElement|null|undefined)} surface Active image/canvas.
+ * @param {(HTMLElement|{ current: HTMLElement|null }|null|undefined)} viewportOrRef Exact pane viewport.
+ * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {ZoomCalcOptions=} opts Optional conservative inset.
  * @returns {void}
  */
-export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isComparing, opts) {
-  logger.info('Calculating fit-to-width zoom', { isComparing });
+export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
+  logger.info('Calculating fit-to-width zoom');
 
-  const container = getContainer(viewerContainerRef);
-  const size = getNaturalSize(image);
+  const viewport = getViewport(viewportOrRef);
+  const size = getRenderableSize(surface);
 
-  if (!container || !size) {
-    logger.warn('Image or viewer container unavailable for fit-to-width', {
-      imageExists: !!image,
-      viewerContainerExists: !!container,
-      naturalWidth: image?.naturalWidth ?? null
+  if (!viewport || !size) {
+    logger.warn('Render surface or viewport unavailable for fit-to-width', {
+      surfaceExists: !!surface,
+      viewportExists: !!viewport,
+      width: surface ? Number(surface.width || 0) || null : null,
+      height: surface ? Number(surface.height || 0) || null : null,
+      naturalWidth: surface instanceof HTMLImageElement ? Number(surface.naturalWidth || 0) || null : null,
+      naturalHeight: surface instanceof HTMLImageElement ? Number(surface.naturalHeight || 0) || null : null,
     });
     return;
   }
 
-  const { vw } = getViewportSize(container, isComparing, opts);
+  const { vw } = getViewportSize(viewport, opts);
   if (vw <= 0) {
     logger.warn('Non-positive viewport width for fit-to-width', { vw });
     return;
@@ -200,14 +185,14 @@ export function calculateFitToWidthZoom(image, viewerContainerRef, setZoom, isCo
 }
 
 /**
- * Increases the zoom level by 10% (multiplicative), clamped to the safe range.
+ * Increase the zoom level by 10% (multiplicative), clamped to the safe range.
  *
- * @param {SetNumberState} setZoom  React-like state setter for zoom.
+ * @param {SetNumberState} setZoom React-like state setter for zoom.
  * @returns {void}
  */
 export function handleZoomIn(setZoom) {
   logger.info('Zooming in');
-  setZoom(function (prevZoom) {
+  setZoom((prevZoom) => {
     const current = Number(prevZoom) || 1;
     const next = clamp(current * ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
     return next;
@@ -215,14 +200,14 @@ export function handleZoomIn(setZoom) {
 }
 
 /**
- * Decreases the zoom level by ~9.09% (inverse of +10%), clamped to the safe range.
+ * Decrease the zoom level by ~9.09% (inverse of +10%), clamped to the safe range.
  *
- * @param {SetNumberState} setZoom  React-like state setter for zoom.
+ * @param {SetNumberState} setZoom React-like state setter for zoom.
  * @returns {void}
  */
 export function handleZoomOut(setZoom) {
   logger.info('Zooming out');
-  setZoom(function (prevZoom) {
+  setZoom((prevZoom) => {
     const current = Number(prevZoom) || 1;
     const next = clamp(current / ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
     return next;

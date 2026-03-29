@@ -13,6 +13,8 @@
  * branching on host-specific input shapes.
  */
 
+import { createOpaqueId } from '../utils/idUtils.js';
+
 /**
  * Session info stored on a bundle.
  * @typedef {Object} PortableSession
@@ -342,7 +344,7 @@ function sanitizeBundle(b) {
 
   const documents = Array.isArray(b?.documents)
     ? b.documents.map((d) => ({
-        documentId: String(d?.documentId ?? `doc-${Math.random().toString(36).slice(2)}`),
+        documentId: String(d?.documentId ?? createOpaqueId('doc', 8)),
         created: d?.created,
         modified: d?.modified,
         meta: d?.meta,

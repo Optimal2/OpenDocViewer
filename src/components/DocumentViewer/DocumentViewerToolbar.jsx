@@ -32,11 +32,12 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(number): void} setPageNumber
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
+ * @property {function(): void} actualSize
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
  * @property {number} zoom
- * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'), scale: number }} zoomState
- * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, or CUSTOM.
+ * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'), scale: number }} zoomState
+ * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, ACTUAL_SIZE, or CUSTOM.
  * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
  * @property {RefLike} documentRenderRef
@@ -70,6 +71,7 @@ const DocumentViewerToolbar = ({
   setPageNumber,
   zoomIn,
   zoomOut,
+  actualSize,
   fitToScreen,
   fitToWidth,
   zoom,
@@ -109,6 +111,7 @@ const DocumentViewerToolbar = ({
       setZoomMode={setZoomMode}
       zoomIn={zoomIn}
       zoomOut={zoomOut}
+      actualSize={actualSize}
       fitToScreen={fitToScreen}
       fitToWidth={fitToWidth}
       setZoom={setZoom}
@@ -143,11 +146,12 @@ DocumentViewerToolbar.propTypes = {
   setPageNumber: PropTypes.func.isRequired,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
+  actualSize: PropTypes.func.isRequired,
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   zoom: PropTypes.number.isRequired,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'CUSTOM']).isRequired,
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']).isRequired,
     scale: PropTypes.number.isRequired,
   }).isRequired,
   setZoomMode: PropTypes.func.isRequired,

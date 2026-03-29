@@ -26,6 +26,7 @@ import {
   shouldRecommendStopping,
 } from '../../utils/documentLoadingConfig.js';
 import LoadPressureDialog from './LoadPressureDialog.jsx';
+import { createOpaqueIdFragment } from '../../utils/idUtils.js';
 
 /**
  * @typedef {Object} DocumentSourceItem
@@ -175,11 +176,7 @@ function mimeToExtension(mimeType) {
  * @returns {string}
  */
 function createSourceKey(fileIndex, orderIndex) {
-  try {
-    return `src_${String(fileIndex)}_${String(orderIndex)}_${Math.random().toString(36).slice(2, 8)}`;
-  } catch {
-    return `src_${String(fileIndex)}_${String(orderIndex)}_${Date.now()}`;
-  }
+  return ['src', String(fileIndex), String(orderIndex), createOpaqueIdFragment(4)].join('_');
 }
 
 /**
@@ -373,11 +370,19 @@ const DocumentLoader = ({
     };
 
     /**
+     * Whether this load run is no longer allowed to mutate React state.
+     * Covers both stale re-runs (`cancelled`) and final unmounts (`isMountedRef`).
+     *
+     * @returns {boolean}
+     */
+    const shouldStopRun = () => cancelled || !isMountedRef.current;
+
+    /**
      * @param {LoadPressureSummary} summary
      * @returns {Promise<boolean>}
      */
     const maybePrompt = async (summary) => {
-      if (cancelled || !isMountedRef.current) return false;
+      if (shouldStopRun()) return false;
       return promptForPressure({
         ...summary,
         prefetchConcurrency: config.fetch.prefetchConcurrency,
@@ -496,7 +501,7 @@ const DocumentLoader = ({
           }),
         });
 
-        if (!accepted || cancelled || !isMountedRef.current) {
+        if (!accepted || shouldStopRun()) {
           const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
           if (msg) addMessage(msg);
           setLoadingRunActive(false);
@@ -509,7 +514,7 @@ const DocumentLoader = ({
         config,
       });
 
-      if (cancelled || !isMountedRef.current) return;
+      if (shouldStopRun()) return;
 
       setLoadingRunActive(true);
       setPlannedPageCount(0);
@@ -523,13 +528,12 @@ const DocumentLoader = ({
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
 
       for (let i = 0; i < prefetchTasks.length; i += 1) {
-        if (cancelled || !isMountedRef.current) break;
+        if (cancelled) break;
 
         const result = await prefetchTasks[i];
-        if (cancelled || !isMountedRef.current) break;
+        if (shouldStopRun() || result.aborted) break;
 
         if (!result.ok) {
-          if (result.aborted) break;
           const failedPages = createFailedPlaceholder({
             fileIndex: result.fileIndex,
             startIndex: nextPageIndex,
@@ -625,7 +629,7 @@ const DocumentLoader = ({
             }),
           });
 
-          if (!accepted || cancelled || !isMountedRef.current) {
+          if (!accepted || shouldStopRun()) {
             abortAllFetches();
             const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
             if (msg) addMessage(msg);
@@ -636,7 +640,7 @@ const DocumentLoader = ({
         }
       }
 
-      if (!cancelled && isMountedRef.current) {
+      if (!shouldStopRun()) {
         setLoadingRunActive(false);
         setPlannedPageCount(nextPageIndex);
 
@@ -648,7 +652,7 @@ const DocumentLoader = ({
     };
 
     run().catch((error) => {
-      if (!cancelled && isMountedRef.current) {
+      if (!shouldStopRun()) {
         logger.error('DocumentLoader run failed', { error: String(error?.message || error) });
         setError(String(error?.message || error));
         setLoadingRunActive(false);

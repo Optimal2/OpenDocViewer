@@ -56,7 +56,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
 /**
  * Zoom display state used by the newer toolbar UX paths.
  * @typedef {Object} ZoomState
- * @property {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'} [mode]
+ * @property {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [mode]
  * @property {number} [scale]
  */
 
@@ -73,6 +73,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(number): void} setPageNumber
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
+ * @property {function(): void=} actualSize
  * @property {function(): void} fitToScreen
  * @property {function(): void} fitToWidth
  * @property {AnyRef} documentRenderRef
@@ -122,6 +123,7 @@ const DocumentToolbar = ({
   setPageNumber,
   zoomIn,
   zoomOut,
+  actualSize,
   fitToScreen,
   fitToWidth,
   documentRenderRef,
@@ -317,11 +319,15 @@ const DocumentToolbar = ({
     if (typeof setZoomMode === 'function') setZoomMode('CUSTOM');
   }, [setZoom, setZoomMode]);
 
-  // 1:1 click → set zoom=1 and switch to CUSTOM
+  // 1:1 click → prefer the dedicated actual-size handler when provided.
   const handleActualSize = useCallback(() => {
+    if (typeof actualSize === 'function') {
+      actualSize();
+      return;
+    }
     if (typeof setZoom === 'function') setZoom(1);
-    if (typeof setZoomMode === 'function') setZoomMode('CUSTOM');
-  }, [setZoom, setZoomMode]);
+    if (typeof setZoomMode === 'function') setZoomMode('ACTUAL_SIZE');
+  }, [actualSize, setZoom, setZoomMode]);
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
@@ -363,16 +369,10 @@ const DocumentToolbar = ({
 
       {/* Zoom & fit */}
       <ZoomButtons
-        zoomIn={() => { zoomIn(); setZoomMode?.('CUSTOM'); }}
-        zoomOut={() => { zoomOut(); setZoomMode?.('CUSTOM'); }}
-        fitToScreen={() => {
-          setZoomMode?.('FIT_PAGE');
-          fitToScreen();
-        }}
-        fitToWidth={() => {
-          setZoomMode?.('FIT_WIDTH');
-          fitToWidth();
-        }}
+        zoomIn={zoomIn}
+        zoomOut={zoomOut}
+        fitToScreen={fitToScreen}
+        fitToWidth={fitToWidth}
         onActualSize={handleActualSize}
         zoomMode={zoomMode}
         zoomPercent={zoomPercent}
@@ -496,6 +496,7 @@ DocumentToolbar.propTypes = {
   setPageNumber: PropTypes.func.isRequired,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
+  actualSize: PropTypes.func,
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
@@ -518,7 +519,7 @@ DocumentToolbar.propTypes = {
   setIsExpanded: PropTypes.func.isRequired,
   zoom: PropTypes.number,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'CUSTOM']),
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
     scale: PropTypes.number,
   }),
   setZoomMode: PropTypes.func,

@@ -19,8 +19,8 @@
  *       effectiveLeft  = zoom * postZoomLeft
  *       effectiveRight = zoom * postZoomRight
  *   - Sticky fit modes are still honored after each pane renders.
- *   - Per-pane floating zoom controls use a sticky holder that must be rendered
- *     BEFORE the scrollable content so it pins to the top of each pane.
+ *   - Per-pane floating zoom controls are rendered above the pane viewport so the
+ *     scrollable document surface never overlaps the controls.
  */
 
 import React from 'react';
@@ -35,9 +35,7 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @param {Object} props
  * @param {number} props.pageNumber
  * @param {number} props.zoom
- * @param {RefLike} props.viewerContainerRef
  * @param {SetNumberState} props.setZoom
- * @param {SetPageNumber} props.setPageNumber
  * @param {boolean} props.isComparing
  * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
  * @param {boolean} props.isExpanded
@@ -45,7 +43,6 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @param {(number|null)} props.comparePageNumber
  * @param {RefLike} props.compareRef
  * @param {Array} props.allPages
- * @param {RefLike} props.thumbnailsContainerRef
  * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
  * @param {number} props.postZoomLeft
  * @param {number} props.postZoomRight
@@ -56,9 +53,7 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
 const DocumentViewerRender = ({
   pageNumber,
   zoom,
-  viewerContainerRef,
   setZoom,
-  setPageNumber,
   isComparing,
   imageProperties,
   isExpanded,
@@ -66,7 +61,6 @@ const DocumentViewerRender = ({
   comparePageNumber,
   compareRef,
   allPages,
-  thumbnailsContainerRef,
   zoomMode = 'CUSTOM',
   postZoomLeft = 1.0,
   postZoomRight = 1.0,
@@ -117,14 +111,10 @@ const DocumentViewerRender = ({
             zoom={effectiveLeftZoom}
             initialRenderDone={() => {}}
             onRender={handlePrimaryRendered}
-            viewerContainerRef={viewerContainerRef}
             setZoom={setZoom}
-            setPageNumber={setPageNumber}
-            isCompareMode={isComparing}
             imageProperties={imageProperties}
             isCanvasEnabled={isExpanded}
             allPages={allPages}
-            thumbnailsContainerRef={thumbnailsContainerRef}
           />
         </div>
       </div>
@@ -147,14 +137,10 @@ const DocumentViewerRender = ({
               zoom={effectiveRightZoom}
               initialRenderDone={() => {}}
               onRender={handleCompareRendered}
-              viewerContainerRef={viewerContainerRef}
               setZoom={setZoom}
-              setPageNumber={setPageNumber}
-              isCompareMode={true}
               imageProperties={imageProperties}
               isCanvasEnabled={isExpanded}
               allPages={allPages}
-              thumbnailsContainerRef={thumbnailsContainerRef}
             />
           </div>
         </div>
@@ -166,9 +152,7 @@ const DocumentViewerRender = ({
 DocumentViewerRender.propTypes = {
   pageNumber: PropTypes.number.isRequired,
   zoom: PropTypes.number.isRequired,
-  viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   setZoom: PropTypes.func.isRequired,
-  setPageNumber: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
@@ -180,7 +164,6 @@ DocumentViewerRender.propTypes = {
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
-  thumbnailsContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
   postZoomLeft: PropTypes.number.isRequired,
   postZoomRight: PropTypes.number.isRequired,
