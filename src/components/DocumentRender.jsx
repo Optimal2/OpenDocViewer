@@ -56,6 +56,14 @@ function normalizeSize(size) {
 }
 
 /**
+ * @param {(string|null|undefined)} url
+ * @returns {boolean}
+ */
+function isBlobAssetUrl(url) {
+  return /^blob:/i.test(String(url || '').trim());
+}
+
+/**
  * @typedef {Object} DisplayedAsset
  * @property {string} url
  * @property {number} pageIndex
@@ -68,14 +76,11 @@ function normalizeSize(size) {
  * @param {number} props.zoom
  * @param {function(): void=} props.initialRenderDone
  * @param {function(): void=} props.onRender
- * @param {{ current: HTMLElement|null }} props.viewerContainerRef
  * @param {function(number): void} props.setZoom
- * @param {boolean} props.isCompareMode
  * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
- * @param {{ current: HTMLElement|null }=} props.thumbnailsContainerRef
  * @returns {React.ReactElement}
  */
 const DocumentRender = React.forwardRef(function DocumentRender(
@@ -84,14 +89,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     zoom,
     initialRenderDone = () => {},
     onRender = () => {},
-    viewerContainerRef,
     setZoom,
-    isCompareMode,
     imageProperties,
     isCanvasEnabled,
     forceRender,
     allPages,
-    thumbnailsContainerRef,
   },
   ref
 ) {
@@ -113,11 +115,13 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   const canvasRef = useRef(/** @type {(HTMLCanvasElement|null)} */ (null));
   const imgRef = useRef(/** @type {(HTMLImageElement|null)} */ (null));
+  const renderViewportRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const requestSeqRef = useRef(0);
   const initialRenderRef = useRef(false);
   const initialFitPendingRef = useRef(true);
   const displayedAssetRef = useRef(/** @type {DisplayedAsset} */ ({ url: '', pageIndex: -1, pageNumber: 0 }));
   const pendingAssetRef = useRef(/** @type {(DisplayedAsset|null)} */ (null));
+  const assetRetryRef = useRef({ key: '', count: 0 });
 
   const [displayedAsset, setDisplayedAsset] = useState(/** @type {DisplayedAsset} */ ({
     url: '',
@@ -137,6 +141,78 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   useEffect(() => {
     pendingAssetRef.current = pendingAsset;
   }, [pendingAsset]);
+
+  /**
+   * Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.
+   *
+   * @returns {void}
+   */
+  const resetAssetRetry = useCallback(() => {
+    assetRetryRef.current = { key: '', count: 0 };
+  }, []);
+
+  /**
+   * @param {number} pageIndex
+   * @param {string} url
+   * @returns {boolean}
+   */
+  const claimAssetRetry = useCallback((pageIndex, url) => {
+    const normalizedUrl = String(url || '').trim();
+    if (!isBlobAssetUrl(normalizedUrl)) return false;
+
+    const key = `${Math.max(0, Number(pageIndex) || 0)}:${normalizedUrl}`;
+    const current = assetRetryRef.current;
+    if (current.key === key) {
+      if (current.count >= 1) return false;
+      assetRetryRef.current = { key, count: current.count + 1 };
+      return true;
+    }
+
+    assetRetryRef.current = { key, count: 1 };
+    return true;
+  }, []);
+
+  const normalizedRotation = ((Number(imageProperties?.rotation || 0) % 360) + 360) % 360;
+
+  const fallbackRenderSize = useMemo(
+    () => normalizeSize({
+      width: naturalSize.width || currentPage?.realWidth || 0,
+      height: naturalSize.height || currentPage?.realHeight || 0,
+    }),
+    [currentPage?.realHeight, currentPage?.realWidth, naturalSize.height, naturalSize.width]
+  );
+
+  const effectiveRenderSize = useMemo(() => {
+    if (!isCanvasEnabled) return fallbackRenderSize;
+    const swapAxes = normalizedRotation === 90 || normalizedRotation === 270;
+    return swapAxes
+      ? { width: fallbackRenderSize.height, height: fallbackRenderSize.width }
+      : fallbackRenderSize;
+  }, [fallbackRenderSize, isCanvasEnabled, normalizedRotation]);
+
+  const stageWidthPx = useMemo(() => {
+    const width = Number(effectiveRenderSize.width || 0);
+    const scale = Number(zoom || 0);
+    if (!Number.isFinite(width) || width <= 0 || !Number.isFinite(scale) || scale <= 0) return null;
+    return Math.max(1, Math.round(width * scale * 1000) / 1000);
+  }, [effectiveRenderSize.width, zoom]);
+
+  const stageHeightPx = useMemo(() => {
+    const height = Number(effectiveRenderSize.height || 0);
+    const scale = Number(zoom || 0);
+    if (!Number.isFinite(height) || height <= 0 || !Number.isFinite(scale) || scale <= 0) return null;
+    return Math.max(1, Math.round(height * scale * 1000) / 1000);
+  }, [effectiveRenderSize.height, zoom]);
+
+  const stageStyle = useMemo(
+    () => ({
+      width: stageWidthPx ? `${stageWidthPx}px` : '100%',
+      height: stageHeightPx ? `${stageHeightPx}px` : '100%',
+      minWidth: '100%',
+      minHeight: '100%',
+    }),
+    [stageHeightPx, stageWidthPx]
+  );
 
 
   useEffect(() => {
@@ -160,14 +236,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       unpinPageAsset(pageIndex, 'full');
     };
   }, [pendingAsset?.pageIndex, pendingAsset?.url, pinPageAsset, unpinPageAsset]);
-
-  /**
-   * @returns {number}
-   */
-  const getSidebarWidth = useCallback(() => {
-    const widthPx = Number(thumbnailsContainerRef?.current?.offsetWidth || 0);
-    return Math.max(0, widthPx);
-  }, [thumbnailsContainerRef]);
 
   /**
    * @param {HTMLImageElement} image
@@ -202,34 +270,38 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties]);
 
   /**
+   * Returns the surface whose intrinsic size should drive fit calculations.
+   * In edit mode that is the canvas; otherwise it is the visible image.
+   *
+   * @returns {(HTMLImageElement|HTMLCanvasElement|null)}
+   */
+  const getActiveRenderSurface = useCallback(() => {
+    const canvas = canvasRef.current;
+    if (isCanvasEnabled && canvas && canvas.width > 0 && canvas.height > 0) return canvas;
+
+    const image = imgRef.current;
+    if (image && image.complete) return image;
+
+    return null;
+  }, [isCanvasEnabled]);
+
+  /**
    * @returns {void}
    */
   const fitToScreen = useCallback(() => {
-    const image = imgRef.current;
-    if (!image || !image.complete) return;
-    calculateFitToScreenZoom(
-      image,
-      viewerContainerRef,
-      setZoom,
-      isCompareMode,
-      { sidebarWidthPx: getSidebarWidth() }
-    );
-  }, [getSidebarWidth, isCompareMode, setZoom, viewerContainerRef]);
+    const surface = getActiveRenderSurface();
+    if (!surface) return;
+    calculateFitToScreenZoom(surface, renderViewportRef, setZoom);
+  }, [getActiveRenderSurface, setZoom]);
 
   /**
    * @returns {void}
    */
   const fitToWidth = useCallback(() => {
-    const image = imgRef.current;
-    if (!image || !image.complete) return;
-    calculateFitToWidthZoom(
-      image,
-      viewerContainerRef,
-      setZoom,
-      isCompareMode,
-      { sidebarWidthPx: getSidebarWidth() }
-    );
-  }, [getSidebarWidth, isCompareMode, setZoom, viewerContainerRef]);
+    const surface = getActiveRenderSurface();
+    if (!surface) return;
+    calculateFitToWidthZoom(surface, renderViewportRef, setZoom);
+  }, [getActiveRenderSurface, setZoom]);
 
   useEffect(() => {
     let cancelled = false;
@@ -368,6 +440,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     setNaturalSize(nextSize);
     setImageLoaded(true);
     setAssetFailed(false);
+    resetAssetRetry();
     touchPageAsset(target.pageIndex, 'full');
 
     if (isCanvasEnabled && image) drawImageOnCanvas(image);
@@ -392,6 +465,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     isCanvasEnabled,
     onRender,
     touchPageAsset,
+    resetAssetRetry,
   ]);
 
   /**
@@ -408,6 +482,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     });
 
     setNaturalSize(nextSize);
+    resetAssetRetry();
     touchPageAsset(displayedAssetRef.current.pageIndex, 'full');
 
     if (isCanvasEnabled) drawImageOnCanvas(image);
@@ -432,6 +507,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     isCanvasEnabled,
     onRender,
     touchPageAsset,
+    resetAssetRetry,
   ]);
 
   /**
@@ -450,6 +526,46 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [finalizeDisplayedAsset]);
 
   /**
+   * @param {{ pageIndex:number, pageNumber:number }} target
+   * @param {string} failedUrl
+   * @param {boolean} preserveDisplayedAsset
+   * @returns {Promise<boolean>}
+   */
+  const recoverPageAsset = useCallback(async (target, failedUrl, preserveDisplayedAsset) => {
+    const normalizedFailedUrl = String(failedUrl || '').trim();
+    if (!claimAssetRetry(target.pageIndex, normalizedFailedUrl)) return false;
+
+    const requestId = requestSeqRef.current;
+    try {
+      const nextUrl = await ensurePageAsset(target.pageIndex, 'full', {
+        priority: 'critical',
+        forceRefresh: true,
+      });
+
+      if (requestSeqRef.current !== requestId) return true;
+      if (!nextUrl || !String(nextUrl || '').trim() || nextUrl === normalizedFailedUrl) return false;
+
+      if (!preserveDisplayedAsset) {
+        setDisplayedAsset({ url: '', pageIndex: target.pageIndex, pageNumber: target.pageNumber });
+      }
+      setPendingAsset({ url: nextUrl, pageIndex: target.pageIndex, pageNumber: target.pageNumber });
+      setImageLoaded(false);
+      setAssetFailed(false);
+      touchPageAsset(target.pageIndex, 'full');
+      return true;
+    } catch (error) {
+      if (requestSeqRef.current === requestId) {
+        logger.warn('Retrying page asset after image load failure failed', {
+          pageNumber: target.pageNumber,
+          pageIndex: target.pageIndex,
+          error: String(error?.message || error),
+        });
+      }
+      return requestSeqRef.current !== requestId;
+    }
+  }, [claimAssetRetry, ensurePageAsset, touchPageAsset]);
+
+  /**
    * @param {*} event
    * @returns {void}
    */
@@ -465,28 +581,40 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       pageNumber: target.pageNumber || pageNumber,
       url: imageUrl,
     });
+
     setPendingAsset(null);
-    setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
-    setImageLoaded(false);
-    setAssetFailed(true);
-  }, [currentIndex, pageNumber]);
+    void recoverPageAsset(target, imageUrl, true).then((recovered) => {
+      if (recovered) return;
+      setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+      setImageLoaded(false);
+      setAssetFailed(true);
+    });
+  }, [currentIndex, pageNumber, recoverPageAsset]);
 
   /**
    * @returns {void}
    */
   const handleVisibleImageError = useCallback((event) => {
     const imageUrl = String(event?.currentTarget?.currentSrc || event?.currentTarget?.src || '');
-    const activeUrl = String(displayedAssetRef.current.url || '');
+    const activeAsset = displayedAssetRef.current;
+    const activeUrl = String(activeAsset.url || '');
     if (!imageUrl || imageUrl !== activeUrl) return;
 
     logger.error('Active page image failed to load', {
-      pageNumber: displayedAssetRef.current.pageNumber || pageNumber,
+      pageNumber: activeAsset.pageNumber || pageNumber,
       url: activeUrl,
     });
+
     setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
     setImageLoaded(false);
-    setAssetFailed(true);
-  }, [currentIndex, pageNumber]);
+    void recoverPageAsset({
+      pageIndex: Math.max(0, Number(activeAsset.pageIndex) || 0),
+      pageNumber: activeAsset.pageNumber || pageNumber,
+    }, activeUrl, false).then((recovered) => {
+      if (recovered) return;
+      setAssetFailed(true);
+    });
+  }, [currentIndex, pageNumber, recoverPageAsset]);
 
   const imperativeHandle = useMemo(() => ({
     updateImageSourceAndFit() {
@@ -555,43 +683,49 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         visibility: 'visible',
       };
 
+  useEffect(() => {
+    resetAssetRetry();
+  }, [currentIndex, currentSourceKey, resetAssetRetry]);
+
   return (
-    <div className="document-render-container">
-      {displayedUrl && (
-        <ImageRenderer
-          key={`${displayedAsset.pageIndex}:${imageRevision}:${displayedUrl}`}
-          ref={imgRef}
-          src={displayedUrl}
-          zoom={zoom}
-          pageNumber={displayedAsset.pageNumber || pageNumber}
-          style={hiddenImageStyle}
-          onLoad={handleVisibleImageLoad}
-          onError={handleVisibleImageError}
-          draggable={false}
-        />
-      )}
+    <div ref={renderViewportRef} className="document-render-viewport">
+      <div className="document-render-container" style={stageStyle}>
+        {displayedUrl && (
+          <ImageRenderer
+            key={`${displayedAsset.pageIndex}:${imageRevision}:${displayedUrl}`}
+            ref={imgRef}
+            src={displayedUrl}
+            zoom={zoom}
+            pageNumber={displayedAsset.pageNumber || pageNumber}
+            style={hiddenImageStyle}
+            onLoad={handleVisibleImageLoad}
+            onError={handleVisibleImageError}
+            draggable={false}
+          />
+        )}
 
-      {pendingAsset?.url && pendingAsset.url !== displayedUrl && (
-        <img
-          src={pendingAsset.url}
-          alt=""
-          aria-hidden="true"
-          decoding="async"
-          style={{ display: 'none' }}
-          onLoad={handlePendingImageLoad}
-          onError={handlePendingImageError}
-        />
-      )}
+        {pendingAsset?.url && pendingAsset.url !== displayedUrl && (
+          <img
+            src={pendingAsset.url}
+            alt=""
+            aria-hidden="true"
+            decoding="async"
+            style={{ display: 'none' }}
+            onLoad={handlePendingImageLoad}
+            onError={handlePendingImageError}
+          />
+        )}
 
-      {isCanvasEnabled && !!displayedUrl && !showErrorState && (
-        <CanvasRenderer
-          ref={canvasRef}
-          naturalWidth={naturalSize.width || currentPage?.realWidth || 0}
-          naturalHeight={naturalSize.height || currentPage?.realHeight || 0}
-          zoom={zoom}
-          pageNumber={displayedAsset.pageNumber || pageNumber}
-        />
-      )}
+        {isCanvasEnabled && !!displayedUrl && !showErrorState && (
+          <CanvasRenderer
+            ref={canvasRef}
+            naturalWidth={effectiveRenderSize.width || currentPage?.realWidth || 0}
+            naturalHeight={effectiveRenderSize.height || currentPage?.realHeight || 0}
+            zoom={zoom}
+            pageNumber={displayedAsset.pageNumber || pageNumber}
+          />
+        )}
+      </div>
 
       {showErrorState && (
         <div className="document-render-status-overlay error-state">

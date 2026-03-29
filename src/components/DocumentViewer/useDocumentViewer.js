@@ -93,6 +93,15 @@ export function useDocumentViewer() {
   /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
   /** @type {{ current: any }} */ const compareRef = useRef(null);
 
+  // --- Post-zoom (compare panes) -------------------------------------------------
+  const {
+    postZoomLeft,
+    postZoomRight,
+    bumpPostZoomLeft,
+    bumpPostZoomRight,
+    resetPostZoom,
+  } = useViewerPostZoom(isComparing);
+
   // --- Page navigation -----------------------------------------------------------
   /**
    * Change the current page number safely (clamped).
@@ -128,22 +137,40 @@ export function useDocumentViewer() {
     setZoom((z) => Math.max(0.1, Math.round((z / 1.1) * 100) / 100));
   }, []);
 
+  const actualSize = useCallback(() => {
+    resetPostZoom();
+    setZoomState({ mode: 'ACTUAL_SIZE', scale: 1 });
+    setZoom(1);
+  }, [resetPostZoom]);
+
   const fitToScreen = useCallback(() => {
+    resetPostZoom();
     setZoomState({ mode: 'FIT_PAGE', scale: zoom });
     try { documentRenderRef.current?.fitToScreen?.(); } catch {}
-  }, [zoom]);
+  }, [resetPostZoom, zoom]);
 
   const fitToWidth = useCallback(() => {
+    resetPostZoom();
     setZoomState({ mode: 'FIT_WIDTH', scale: zoom });
     try { documentRenderRef.current?.fitToWidth?.(); } catch {}
-  }, [zoom]);
+  }, [resetPostZoom, zoom]);
 
-  /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM') */
+  /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'). */
   const setZoomMode = useCallback((mode) => {
-    setZoomState((s) => ({ ...s, mode }));
-    if (mode === 'FIT_PAGE')      { try { documentRenderRef.current?.fitToScreen?.(); } catch {} }
-    else if (mode === 'FIT_WIDTH'){ try { documentRenderRef.current?.fitToWidth?.(); } catch {} }
-  }, []);
+    if (mode === 'FIT_PAGE') {
+      fitToScreen();
+      return;
+    }
+    if (mode === 'FIT_WIDTH') {
+      fitToWidth();
+      return;
+    }
+    if (mode === 'ACTUAL_SIZE') {
+      actualSize();
+      return;
+    }
+    setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
+  }, [actualSize, fitToScreen, fitToWidth]);
 
   // --- Compare/Edit mutual exclusivity + handlers --------------------------------
   /**
@@ -282,15 +309,6 @@ export function useDocumentViewer() {
   /** Placeholder for future focus/selection behaviors. */
   const handleContainerClick = useCallback(function (_event) {}, []);
 
-  // --- Post-zoom (compare panes) -------------------------------------------------
-  const {
-    postZoomLeft,
-    postZoomRight,
-    bumpPostZoomLeft,
-    bumpPostZoomRight,
-    resetPostZoom,
-  } = useViewerPostZoom(isComparing);
-
   // --- Effects: sticky fit, global wheel, hotkeys --------------------------------
   useViewerEffects({
     zoom,
@@ -303,11 +321,12 @@ export function useDocumentViewer() {
     thumbnailWidth,
     pageNumber,
     totalPages,
-    setZoom,
     setPageNumber,
-    setZoomMode,
     zoomIn,
     zoomOut,
+    actualSize,
+    fitToScreen,
+    fitToWidth,
     handleCompare,
     setIsExpandedGuarded: setIsExpanded,
     onOpenPrintDialog: openPrintDialog,
@@ -341,6 +360,7 @@ export function useDocumentViewer() {
     handlePageNumberChange,
     zoomIn,
     zoomOut,
+    actualSize,
     fitToScreen,
     fitToWidth,
     handleContainerClick,

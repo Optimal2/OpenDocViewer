@@ -43,9 +43,6 @@ const DocumentViewerThumbnails = ({
   return (
     <div className="thumbnail-pane-shell" style={{ width: `${width}px`, minWidth: `${width}px` }}>
       <div className="thumbnail-pane-toolbar" aria-label={t('thumbnails.controls.groupLabel', { defaultValue: 'Thumbnail pane controls' })}>
-        <div className="thumbnail-pane-toolbar-title">
-          {t('thumbnails.panelTitle', { defaultValue: 'Pages' })}
-        </div>
         <div className="thumbnail-pane-toolbar-actions">
           <button
             type="button"

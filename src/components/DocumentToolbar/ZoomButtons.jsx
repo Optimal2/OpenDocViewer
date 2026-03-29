@@ -13,10 +13,10 @@
  * @param {Object} props
  * @param {function():void} props.zoomIn            Zoom in handler.
  * @param {function():void} props.zoomOut           Zoom out handler.
- * @param {function():void} props.fitToScreen       Fit page content to screen height.
- * @param {function():void} props.fitToWidth        Fit page content to container width.
- * @param {function():void=} props.onActualSize     Optional: set zoom to 100% (CUSTOM @ 1.0).
- * @param {('FIT_PAGE'|'FIT_WIDTH'|'CUSTOM')=} props.zoomMode
+ * @param {function():void} props.fitToScreen       Fit page content within the current pane viewport.
+ * @param {function():void} props.fitToWidth        Fit page content to the current pane width.
+ * @param {function():void=} props.onActualSize     Optional: set zoom to 100% (ACTUAL_SIZE / 1:1).
+ * @param {('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
  *        Optional: current zoom mode for highlighting.
  * @param {boolean=} props.isOneToOneActive         Optional: true when mode is not FIT_* and zoom ≈ 100%.
  * @param {number=} props.zoomPercent               Optional: current zoom in percent (rounded).
@@ -206,7 +206,7 @@ const ZoomButtons = ({
         </button>
       </div>
 
-      {/* 1:1 (Actual size) — active when CUSTOM ≈ 100%; disabled while active */}
+      {/* 1:1 (Actual size) — active when zoom is effectively 100%; disabled while active */}
       {typeof onActualSize === 'function' && (
         <button
           type="button"
@@ -253,7 +253,7 @@ ZoomButtons.propTypes = {
   fitToScreen: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   onActualSize: PropTypes.func,
-  zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'CUSTOM']),
+  zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
   isOneToOneActive: PropTypes.bool,
   zoomPercent: PropTypes.number,
   onPercentApply: PropTypes.func,

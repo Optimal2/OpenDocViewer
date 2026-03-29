@@ -48,6 +48,7 @@ import { createContext } from 'react';
  * @property {boolean=} trackInCache
  * @property {('critical'|'high'|'normal'|'low'|number)=} priority
  * @property {boolean=} skipFullReuse
+ * @property {boolean=} forceRefresh
  */
 
 /**

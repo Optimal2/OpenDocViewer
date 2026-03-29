@@ -23,6 +23,7 @@ import { createPageAssetStore } from '../utils/pageAssetStore.js';
 import { createPageAssetRenderer } from '../utils/pageAssetRenderer.js';
 import {
   createTrackedObjectUrl,
+  isTrackedObjectUrl,
   revokeTrackedObjectUrl,
   revokeTrackedObjectUrls,
 } from '../utils/objectUrlRegistry.js';
@@ -109,6 +110,24 @@ function touchCacheEntry(map, index) {
   if (!entry) return;
   map.delete(index);
   map.set(index, { ...entry, lastAccess: Date.now() });
+}
+
+/**
+ * @param {(string|null|undefined)} url
+ * @returns {boolean}
+ */
+function isBlobObjectUrl(url) {
+  return /^blob:/i.test(String(url || '').trim());
+}
+
+/**
+ * @param {(string|null|undefined)} url
+ * @returns {boolean}
+ */
+function isReusableAssetUrl(url) {
+  const value = String(url || '').trim();
+  if (!value) return false;
+  return !isBlobObjectUrl(value) || isTrackedObjectUrl(value);
 }
 
 /**
@@ -517,14 +536,26 @@ export const ViewerProvider = ({ children }) => {
     if (!source) return;
     if (Number(source.pageCount || 0) !== 1) return;
     if (!isRasterImageExtension(source.fileExtension)) return;
-    if (!tempStoreRef.current?.deleteSource) return;
+
+    const tempStore = tempStoreRef.current;
+    const assetStore = pageAssetStoreRef.current;
+    if (!tempStore?.deleteSource || !assetStore?.getAsset) return;
+
+    const tempStoreMode = String(tempStore.getStats?.().mode || 'memory');
+    const assetStoreMode = String(assetStore.getStats?.().mode || 'memory');
+    if (tempStoreMode !== 'memory' || assetStoreMode !== 'indexeddb') return;
 
     try {
-      await tempStoreRef.current.deleteSource(page.sourceKey);
+      const persisted = await assetStore.getAsset(makePersistedAssetKey(page, 'full'));
+      if (!persisted?.blob || Number(persisted.blob.size || 0) <= 0) return;
+
+      await tempStore.deleteSource(page.sourceKey);
       releasedRasterSourceKeysRef.current.add(page.sourceKey);
-      logger.info('Released original single-page raster source after full asset persist', {
+      logger.info('Released original single-page raster source after verified full-asset persist', {
         sourceKey: page.sourceKey,
         fileExtension: source.fileExtension,
+        tempStoreMode,
+        assetStoreMode,
       });
     } catch (error) {
       logger.warn('Failed to release original single-page raster source', {
@@ -581,6 +612,62 @@ export const ViewerProvider = ({ children }) => {
   const touchPageAsset = useCallback((pageIndex, variant) => {
     touchCacheEntry(getVariantCache(variant), pageIndex);
   }, [getVariantCache]);
+
+  /**
+   * Drop a page's current object URL reference from React state and the in-memory cache.
+   * Persisted page-asset blobs remain untouched and can be restored immediately.
+   *
+   * @param {number} pageIndex
+   * @param {('full'|'thumbnail')} variant
+   * @param {string=} expectedUrl
+   * @returns {void}
+   */
+  const clearPageAssetReference = useCallback((pageIndex, variant, expectedUrl = '') => {
+    const safeIndex = Math.max(0, Number(pageIndex) || 0);
+    const cache = getVariantCache(variant);
+    const urlField = variant === 'thumbnail' ? 'thumbnailUrl' : 'fullSizeUrl';
+    const normalizedExpected = String(expectedUrl || '').trim();
+    const currentPage = getPageAt(allPagesRef.current, safeIndex);
+    const cacheEntry = cache.get(safeIndex);
+    const cacheUrl = String(cacheEntry?.url || '').trim();
+    const pageUrl = String(currentPage?.[urlField] || '').trim();
+
+    if (!normalizedExpected || (cacheUrl && cacheUrl === normalizedExpected)) {
+      cache.delete(safeIndex);
+    }
+
+    const urlsToRevoke = new Set();
+    if (cacheUrl && (!normalizedExpected || cacheUrl === normalizedExpected)) urlsToRevoke.add(cacheUrl);
+    if (pageUrl && (!normalizedExpected || pageUrl === normalizedExpected)) urlsToRevoke.add(pageUrl);
+    if (urlsToRevoke.size > 0) revokeTrackedObjectUrls(urlsToRevoke);
+
+    if (!currentPage) return;
+
+    patchPageAtIndex(safeIndex, (current) => {
+      const activeUrl = String(current?.[urlField] || '').trim();
+      if (normalizedExpected && activeUrl && activeUrl !== normalizedExpected) return {};
+
+      if (variant === 'thumbnail') {
+        return {
+          thumbnailUrl: '',
+          thumbnailStatus: current?.status === -1 ? -1 : 0,
+          thumbnailUsesFullAsset: false,
+        };
+      }
+
+      return {
+        fullSizeUrl: '',
+        fullSizeStatus: current?.status === -1 ? -1 : 0,
+        loaded: false,
+        ...(current?.thumbnailUsesFullAsset
+          ? {
+              thumbnailUrl: '',
+              thumbnailStatus: current?.status === -1 ? -1 : 0,
+            }
+          : {}),
+      };
+    });
+  }, [getVariantCache, patchPageAtIndex]);
 
   /**
    * @param {number} pageIndex
@@ -762,9 +849,18 @@ export const ViewerProvider = ({ children }) => {
    */
   const ensurePageAsset = useCallback(async (pageIndex, variant, options = {}) => {
     const safeIndex = Math.max(0, Number(pageIndex) || 0);
-    const currentPage = getPageAt(allPagesRef.current, safeIndex);
-    if (!currentPage || currentPage.status === -1) {
-      return currentPage?.fullSizeUrl || currentPage?.thumbnailUrl || null;
+    let workingPage = getPageAt(allPagesRef.current, safeIndex);
+    if (!workingPage || workingPage.status === -1) {
+      return workingPage?.fullSizeUrl || workingPage?.thumbnailUrl || null;
+    }
+
+    const cache = getVariantCache(variant);
+    const urlField = variant === 'thumbnail' ? 'thumbnailUrl' : 'fullSizeUrl';
+    const statusField = variant === 'thumbnail' ? 'thumbnailStatus' : 'fullSizeStatus';
+
+    if (options.forceRefresh === true) {
+      clearPageAssetReference(safeIndex, variant);
+      workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
     }
 
     if (variant === 'thumbnail' && options.skipFullReuse !== true && shouldReuseFullAssetForThumbnail(safeIndex)) {
@@ -791,22 +887,26 @@ export const ViewerProvider = ({ children }) => {
       return fullUrl;
     }
 
-    const cache = getVariantCache(variant);
     const cacheEntry = cache.get(safeIndex);
     if (cacheEntry?.url) {
-      touchCacheEntry(cache, safeIndex);
-      return cacheEntry.url;
+      if (isReusableAssetUrl(cacheEntry.url)) {
+        touchCacheEntry(cache, safeIndex);
+        return cacheEntry.url;
+      }
+      clearPageAssetReference(safeIndex, variant, cacheEntry.url);
     }
 
-    const urlField = variant === 'thumbnail' ? 'thumbnailUrl' : 'fullSizeUrl';
-    const statusField = variant === 'thumbnail' ? 'thumbnailStatus' : 'fullSizeStatus';
-    const existingUrl = currentPage[urlField];
+    workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
+    const existingUrl = workingPage[urlField];
     if (existingUrl) {
-      if (options.trackInCache !== false) {
-        cache.set(safeIndex, { url: existingUrl, lastAccess: Date.now() });
-        touchCacheEntry(cache, safeIndex);
+      if (isReusableAssetUrl(existingUrl)) {
+        if (options.trackInCache !== false) {
+          cache.set(safeIndex, { url: existingUrl, lastAccess: Date.now() });
+          touchCacheEntry(cache, safeIndex);
+        }
+        return existingUrl;
       }
-      return existingUrl;
+      clearPageAssetReference(safeIndex, variant, existingUrl);
     }
 
     const pendingKey = makeAssetKey(variant, safeIndex);
@@ -875,7 +975,7 @@ export const ViewerProvider = ({ children }) => {
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
-  }, [enforceCacheLimit, getVariantCache, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
    * @param {Array<number>=} pageIndexes

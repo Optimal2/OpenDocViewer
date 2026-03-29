@@ -35,11 +35,12 @@ import { useEffect } from 'react';
  * @property {number} thumbnailWidth
  * @property {number} pageNumber
  * @property {number} totalPages
- * @property {Function} setZoom
  * @property {Function} setPageNumber
- * @property {Function} setZoomMode
  * @property {Function} zoomIn
  * @property {Function} zoomOut
+ * @property {Function} actualSize
+ * @property {Function} fitToScreen
+ * @property {Function} fitToWidth
  * @property {Function} handleCompare
  * @property {Function} setIsExpandedGuarded
  * @property {Function=} onOpenPrintDialog
@@ -107,11 +108,12 @@ export function useViewerEffects(args) {
     thumbnailWidth,
     pageNumber,
     totalPages,
-    setZoom,
     setPageNumber,
-    setZoomMode,
     zoomIn,
     zoomOut,
+    actualSize,
+    fitToScreen,
+    fitToWidth,
     handleCompare,
     setIsExpandedGuarded,
     onOpenPrintDialog,
@@ -248,9 +250,9 @@ export function useViewerEffects(args) {
           // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare, Edit, Theme)
           if (!mod && !e.shiftKey && !e.altKey) {
             if (e.key === '0') { e.preventDefault(); onOpenPrintDialog?.(); }
-            else if (e.key === '1') { e.preventDefault(); setZoomMode('CUSTOM'); setZoom(1); }
-            else if (e.key === '2') { e.preventDefault(); setZoomMode('FIT_PAGE'); }
-            else if (e.key === '3') { e.preventDefault(); setZoomMode('FIT_WIDTH'); }
+            else if (e.key === '1') { e.preventDefault(); actualSize(); }
+            else if (e.key === '2') { e.preventDefault(); fitToScreen(); }
+            else if (e.key === '3') { e.preventDefault(); fitToWidth(); }
             else if (e.key === '4') { e.preventDefault(); handleCompare(); }
             else if (e.key === '5') { e.preventDefault(); setIsExpandedGuarded((v) => !v); }
             else if (e.key === '6') { e.preventDefault(); onToggleTheme?.(); }
@@ -263,7 +265,8 @@ export function useViewerEffects(args) {
     return () => { window.removeEventListener('keydown', onKeyDown, true); };
   }, [
     totalPages, setPageNumber,
-    setZoomMode, setZoom, handleCompare, setIsExpandedGuarded,
+    actualSize, fitToScreen, fitToWidth,
+    handleCompare, setIsExpandedGuarded,
     zoomIn, zoomOut, onOpenPrintDialog, onToggleTheme,
   ]);
 
