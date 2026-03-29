@@ -101,7 +101,9 @@
       default: 'en',
       supported: ['en', 'sv'],
       loadPath: baseHref + 'locales/{{lng}}/{{ns}}.json?v={{ver}}',
-      version: '1'
+      // "auto" = use the current build id injected by Vite so updated locale files
+      // are fetched automatically after each build without manual version bumps.
+      version: 'auto'
     },
 
     // ---- SHORTCUTS ------------------------------------------------------------
@@ -123,7 +125,7 @@
 
     // ---- USER LOG -------------------------------------------------------------
     userLog: {
-      enabled:  true,
+      enabled:  false,
       endpoint: "/ODVProxy/userlog/record",
       transport: "form",
 
@@ -212,9 +214,111 @@
       ].join("\n")
     },
 
+    // ---- LARGE-DOCUMENT LOADING -----------------------------------------------
+    documentLoading: {
+      // Warning thresholds. Defaults favor stability/performance and avoid source-count warnings by default.
+      warning: {
+        sourceCountThreshold: 0,
+        pageCountThreshold: 5000,
+        // Start estimating total page volume after this many sources were analyzed.
+        probePageThresholdSources: 2,
+        // Above these values the dialog will recommend stopping and retrying smaller.
+        minStopRecommendationSources: 0,
+        minStopRecommendationPages: 10000
+      },
+
+      // Runtime memory heuristics. High-memory machines get more eager caching/warm-up,
+      // while lower-memory machines stay conservative.
+      adaptiveMemory: {
+        enabled: true,
+        preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
+        preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
+        reuseFullImageThumbnailsBelowPageCount: 600
+      },
+
+      // Network prefetch step used to grab expiring URLs before later page rendering.
+      fetch: {
+        // Higher values fetch expiring URLs faster but also increase parallel network / CPU pressure.
+        prefetchConcurrency: 6
+      },
+
+      // Temporary storage for the original source bytes.
+      sourceStore: {
+        // "memory" = always heap-only, "indexeddb" = always browser disk cache,
+        // "adaptive" = start in memory and switch to IndexedDB above thresholds.
+        mode: 'adaptive',
+        switchToIndexedDbAboveSourceCount: 0,
+        switchToIndexedDbAboveTotalMiB: 768,
+
+        // "none" = plain temp storage,
+        // "aes-gcm-session" = temp payloads encrypted with an in-memory per-session key.
+        protection: 'aes-gcm-session',
+
+        // Best-effort cleanup of stale temp sessions left behind in IndexedDB.
+        staleSessionTtlMs: 24 * 60 * 60 * 1000,
+
+        // Small in-memory read cache for recently used temp-store blobs.
+        blobCacheEntries: 12
+      },
+
+      // Persist already-rendered page blobs so a page normally only needs to be rasterized once.
+      assetStore: {
+        enabled: true,
+        mode: 'adaptive',
+        switchToIndexedDbAboveAssetCount: 0,
+        switchToIndexedDbAboveTotalMiB: 1536,
+        protection: 'aes-gcm-session',
+        staleSessionTtlMs: 24 * 60 * 60 * 1000,
+        blobCacheEntries: 16,
+        persistThumbnails: true,
+        // Keep original single-page raster sources by default for stability.
+        // Set to true in site config if you explicitly want the original source released after the
+        // full-page blob has been persisted.
+        releaseSinglePageRasterSourceAfterFullPersist: false
+      },
+
+      // Lazy page rendering and in-memory object URL cache limits.
+      render: {
+        maxConcurrentAssetRenders: 2,
+        fullPageScale: 1.5,
+        // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
+        // Raster images and TIFF pages are not upscaled by this setting.
+        // Real thumbnail raster size. The pane can still scale the image to fit the available width.
+        thumbnailMaxWidth: 220,
+        thumbnailMaxHeight: 310,
+
+        // Thumbnail asset request strategy (the scrollbar height remains deterministic in all modes):
+        // - "adaptive": eager-build all thumbnails for smaller documents, current/visible-first for larger ones
+        // - "eager": always build all thumbnails in the background
+        // - "viewport": only build current/visible thumbnails and nearby neighbors
+        thumbnailLoadingStrategy: 'adaptive',
+
+        // Thumbnail source strategy:
+        // - "auto": on high-memory machines, reuse full image assets for raster-image thumbnails
+        //           when the total page count is low enough; otherwise generate dedicated thumbnails
+        // - "dedicated": always generate dedicated thumbnail rasters
+        // - "prefer-full-images": always reuse full raster-image assets for thumbnails
+        thumbnailSourceStrategy: 'auto',
+
+        // When strategy is "adaptive", documents at or below this page count queue the
+        // entire thumbnail set in the background while still keeping a fixed-height pane.
+        thumbnailEagerPageThreshold: 240,
+        lookAheadPageCount: 2,
+        lookBehindPageCount: 1,
+        visibleThumbnailOverscan: 6,
+        // In-memory object-URL cache limits. The rendered blobs may still remain in the asset store
+        // even if an older object URL is later revoked from RAM.
+        fullPageCacheLimit: 64,
+        thumbnailCacheLimit: 512,
+        // Limits for open decoded multi-page source objects kept by the lazy renderer.
+        maxOpenPdfDocuments: 6,
+        maxOpenTiffDocuments: 6
+      }
+    },
+
     // ---- SYSTEM LOG -----------------------------------------------------------
     systemLog: {
-      enabled:  true,
+      enabled:  false,
       endpoint: "/ODVProxy/log",
       token:    "REPLACE_WITH_SYSTEM_LOG_TOKEN"
     }

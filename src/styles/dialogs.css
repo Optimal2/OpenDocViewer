@@ -151,3 +151,111 @@
   clip: rect(0 0 0 0);
   white-space: nowrap;
 }
+
+/* Large-load warning dialog */
+.odv-pressure-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.45);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 10000;
+}
+
+.odv-pressure-dialog {
+  width: min(720px, 92vw);
+  max-width: 92vw;
+  background: var(--odv-surface, #ffffff);
+  color: inherit;
+  border-radius: 18px;
+  padding: 20px;
+  box-shadow: 0 18px 52px rgba(0, 0, 0, 0.28);
+}
+
+.odv-pressure-title {
+  margin: 0 0 6px 0;
+  font-size: 20px;
+}
+
+.odv-pressure-desc {
+  margin: 0 0 16px 0;
+  opacity: 0.92;
+  line-height: 1.45;
+}
+
+.odv-pressure-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+  gap: 12px;
+  margin: 0;
+}
+
+.odv-pressure-metric {
+  margin: 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: rgba(127, 127, 127, 0.06);
+}
+
+.odv-pressure-metric dt {
+  margin: 0 0 6px 0;
+  font-size: 12px;
+  font-weight: 600;
+  opacity: 0.8;
+}
+
+.odv-pressure-metric dd {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.odv-pressure-note {
+  margin: 16px 0 0 0;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(59, 130, 246, 0.08);
+  border: 1px solid rgba(59, 130, 246, 0.18);
+  line-height: 1.45;
+}
+
+.odv-pressure-note.recommend {
+  background: rgba(217, 119, 6, 0.10);
+  border-color: rgba(217, 119, 6, 0.22);
+}
+
+.odv-pressure-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.odv-pressure-btn {
+  min-width: 156px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: 1px solid transparent;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.odv-pressure-btn.primary {
+  background: var(--primary-color, #2563eb);
+  color: #ffffff;
+}
+
+.odv-pressure-btn.secondary {
+  background: transparent;
+  border-color: var(--odv-border, #d5dae1);
+  color: inherit;
+}
+
+.odv-pressure-btn:focus-visible {
+  outline: 2px solid var(--primary-color, #2563eb);
+  outline-offset: 2px;
+}

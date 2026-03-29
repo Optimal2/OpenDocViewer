@@ -13,6 +13,17 @@ The recommended production topology is:
 
 This keeps the viewer itself static while still allowing same-origin logging endpoints.
 
+## Browser targeting
+
+The operational target for OpenDocViewer is Chromium-based desktop browsers:
+
+- Microsoft Edge
+- Google Chrome
+
+Firefox may work for basic viewing, but it is not the primary support target. Expect some differences in browser console output, HTML input-validation warnings, and availability of non-standard diagnostics APIs such as `performance.memory`.
+
+If a deployment must be validated formally, test Edge and Chrome first. Treat Firefox as best-effort unless the deployment explicitly chooses to support it.
+
 ## Static frontend on IIS
 
 `public/web.config` is designed for the built SPA and encodes the intended hosting rules.

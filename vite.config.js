@@ -21,8 +21,14 @@
  */
 
 import { defineConfig } from 'vite';
+import { readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
+
+const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
+const APP_VERSION = String(PKG.version || '0.0.0');
+const BUILD_STAMP = new Date().toISOString().replace(/[-:.TZ]/g, '');
+const ODV_BUILD_ID = `${APP_VERSION}-${BUILD_STAMP}`;
 
 /**
  * @typedef {import('vite').UserConfigExport} UserConfigExport
@@ -113,6 +119,9 @@ export default defineConfig(({ mode }) => {
     define: {
       'process.env.NODE_ENV': JSON.stringify(mode),
       'process.env.PUBLIC_URL': JSON.stringify(BASE),
+      'import.meta.env.APP_VERSION': JSON.stringify(APP_VERSION),
+      'import.meta.env.VITE_APP_VERSION': JSON.stringify(APP_VERSION),
+      'import.meta.env.ODV_BUILD_ID': JSON.stringify(ODV_BUILD_ID),
     },
   };
 });

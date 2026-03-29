@@ -100,59 +100,63 @@ const DocumentViewerRender = ({
         className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
         style={{ position: 'relative' }}
       >
-        {isComparing && (
-          <div className="compare-zoom-sticky">
-            <CompareZoomOverlay
-              value={postZoomLeft}
-              onInc={() => bumpPostZoomLeft?.(1)}
-              onDec={() => bumpPostZoomLeft?.(-1)}
-            />
-          </div>
-        )}
-
-        <DocumentRender
-          ref={documentRenderRef}
-          pageNumber={pageNumber}
-          zoom={effectiveLeftZoom}
-          initialRenderDone={() => {}}
-          onRender={handlePrimaryRendered}
-          viewerContainerRef={viewerContainerRef}
-          setZoom={setZoom}
-          setPageNumber={setPageNumber}
-          isCompareMode={isComparing}
-          imageProperties={imageProperties}
-          isCanvasEnabled={isExpanded}
-          allPages={allPages}
-          thumbnailsContainerRef={thumbnailsContainerRef}
-        />
-      </div>
-
-      {/* RIGHT / COMPARE PANE */}
-      {isComparing && comparePageNumber !== null && (
-        <div className="document-render-container-comparison" style={{ position: 'relative' }}>
-          <div className="compare-zoom-sticky">
-            <CompareZoomOverlay
-              value={postZoomRight}
-              onInc={() => bumpPostZoomRight?.(1)}
-              onDec={() => bumpPostZoomRight?.(-1)}
-            />
-          </div>
+        <div className={`document-pane-frame ${isComparing ? 'is-primary-pane' : 'is-single-pane'}`}>
+          {isComparing && (
+            <div className="compare-zoom-sticky">
+              <CompareZoomOverlay
+                value={postZoomLeft}
+                onInc={() => bumpPostZoomLeft?.(1)}
+                onDec={() => bumpPostZoomLeft?.(-1)}
+              />
+            </div>
+          )}
 
           <DocumentRender
-            ref={compareRef}
-            pageNumber={comparePageNumber}
-            zoom={effectiveRightZoom}
+            ref={documentRenderRef}
+            pageNumber={pageNumber}
+            zoom={effectiveLeftZoom}
             initialRenderDone={() => {}}
-            onRender={handleCompareRendered}
+            onRender={handlePrimaryRendered}
             viewerContainerRef={viewerContainerRef}
             setZoom={setZoom}
             setPageNumber={setPageNumber}
-            isCompareMode={true}
+            isCompareMode={isComparing}
             imageProperties={imageProperties}
             isCanvasEnabled={isExpanded}
             allPages={allPages}
             thumbnailsContainerRef={thumbnailsContainerRef}
           />
+        </div>
+      </div>
+
+      {/* RIGHT / COMPARE PANE */}
+      {isComparing && comparePageNumber !== null && (
+        <div className="document-render-container-comparison" style={{ position: 'relative' }}>
+          <div className="document-pane-frame is-compare-pane">
+            <div className="compare-zoom-sticky">
+              <CompareZoomOverlay
+                value={postZoomRight}
+                onInc={() => bumpPostZoomRight?.(1)}
+                onDec={() => bumpPostZoomRight?.(-1)}
+              />
+            </div>
+
+            <DocumentRender
+              ref={compareRef}
+              pageNumber={comparePageNumber}
+              zoom={effectiveRightZoom}
+              initialRenderDone={() => {}}
+              onRender={handleCompareRendered}
+              viewerContainerRef={viewerContainerRef}
+              setZoom={setZoom}
+              setPageNumber={setPageNumber}
+              isCompareMode={true}
+              imageProperties={imageProperties}
+              isCanvasEnabled={isExpanded}
+              allPages={allPages}
+              thumbnailsContainerRef={thumbnailsContainerRef}
+            />
+          </div>
         </div>
       )}
     </div>
@@ -173,7 +177,7 @@ DocumentViewerRender.propTypes = {
   }).isRequired,
   isExpanded: PropTypes.bool.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
-  comparePageNumber: PropTypes.number,
+  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
   thumbnailsContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,

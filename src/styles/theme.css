@@ -22,6 +22,10 @@
   --disabled-color: #9e9e9e;
   --warning-color: #f44336;
   --border-radius: 4px;
+  --thumbnail-primary-color: #0b57d0;
+  --thumbnail-compare-color: #b25d00;
+  --thumbnail-dual-color: #7b1fa2;
+  --thumbnail-shell-color: rgba(11, 87, 208, 0.08);
 }
 
 [data-theme='dark'] {
@@ -44,6 +48,10 @@
   /* Miscellaneous */
   --disabled-color: #555;
   --warning-color: #cf6679;
+  --thumbnail-primary-color: #8ab4f8;
+  --thumbnail-compare-color: #f6ad55;
+  --thumbnail-dual-color: #d7aefb;
+  --thumbnail-shell-color: rgba(138, 180, 248, 0.12);
 }
 
 /* Global Layout / Base Elements */

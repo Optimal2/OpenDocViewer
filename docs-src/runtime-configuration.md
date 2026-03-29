@@ -38,7 +38,7 @@ Without that probe, config failures are harder to diagnose in production.
 Good runtime-config candidates:
 
 - logging endpoints and enable/disable flags
-- i18n defaults and translation versioning
+- i18n defaults and translation versioning / build-based cache busting
 - print-header settings
 - diagnostics toggles
 - keyboard shortcut policy for browser-print interception
@@ -76,6 +76,118 @@ Important limitation:
 ## Operational advice
 
 - Do not long-cache `odv.config.js`.
+- Locale JSON URLs now include an automatic per-build version token by default (`i18n.version: 'auto'`). That reduces stale-language-cache problems after deployments without requiring manual version bumps.
+- Both `systemLog.enabled` and `userLog.enabled` are disabled by default in the shipped runtime config. Enable them explicitly in `odv.site.config.js` when the deployment is ready.
+- The performance overlay heap section depends on Chromium's `performance.memory` API. In Firefox and other browsers that do not expose those values, the overlay will show `N/A` for heap metrics.
 - If using a site override file, keep it deployment-local and avoid committing machine-specific values back into the main repo.
 - Prefer stable, same-origin logging endpoints when possible.
 - Re-check config precedence after any change to `bootConfig.js` or hosting rules.
+
+
+## Large-document loading
+
+The runtime config now also exposes a `documentLoading` section used by the new large-batch loading
+pipeline.
+
+```js
+documentLoading: {
+  warning: {
+    sourceCountThreshold: 0,
+    pageCountThreshold: 5000,
+    probePageThresholdSources: 2,
+    minStopRecommendationSources: 0,
+    minStopRecommendationPages: 10000,
+  },
+  adaptiveMemory: {
+    enabled: true,
+    preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
+    preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
+    reuseFullImageThumbnailsBelowPageCount: 600,
+  },
+  fetch: {
+    prefetchConcurrency: 6,
+  },
+  sourceStore: {
+    mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
+    switchToIndexedDbAboveSourceCount: 0,
+    switchToIndexedDbAboveTotalMiB: 768,
+    protection: 'aes-gcm-session', // 'none' | 'aes-gcm-session'
+    staleSessionTtlMs: 24 * 60 * 60 * 1000,
+    blobCacheEntries: 12,
+  },
+  assetStore: {
+    enabled: true,
+    mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
+    switchToIndexedDbAboveAssetCount: 0,
+    switchToIndexedDbAboveTotalMiB: 1536,
+    protection: 'aes-gcm-session',
+    staleSessionTtlMs: 24 * 60 * 60 * 1000,
+    blobCacheEntries: 16,
+    persistThumbnails: true,
+    releaseSinglePageRasterSourceAfterFullPersist: false,
+  },
+  render: {
+    maxConcurrentAssetRenders: 2,
+    fullPageScale: 1.5, // applies to PDF rendering in the lazy page-asset pipeline
+    thumbnailMaxWidth: 220,
+    thumbnailMaxHeight: 310,
+    thumbnailLoadingStrategy: 'adaptive',
+    thumbnailSourceStrategy: 'auto',
+    thumbnailEagerPageThreshold: 240,
+    lookAheadPageCount: 2,
+    lookBehindPageCount: 1,
+    visibleThumbnailOverscan: 6,
+    fullPageCacheLimit: 64,
+    thumbnailCacheLimit: 512,
+    maxOpenPdfDocuments: 6,
+    maxOpenTiffDocuments: 6,
+  }
+}
+```
+
+What these knobs control:
+
+- `warning.*`
+  - when to show a warning before continuing a very large load run; the shipped defaults disable source-count warnings and rely primarily on page volume
+- `adaptiveMemory.*`
+  - lets the viewer lean toward eager caching / full-image thumbnail reuse only on machines that actually have headroom
+- `fetch.prefetchConcurrency`
+  - how many source files are prefetched in parallel before page extraction starts
+- `sourceStore.*`
+  - whether original source bytes stay in memory or move to browser disk-backed storage; the shipped defaults keep them in memory longer and switch by size, not source count
+- `assetStore.*`
+  - whether already-rendered page blobs are kept in memory or IndexedDB so they can be reused without re-rendering; the shipped defaults prefer stability/performance and avoid releasing original single-page rasters automatically
+- `render.*`
+  - lazy full-page rendering, thumbnail sizing, adaptive thumbnail strategy, and cache limits for object URLs / open documents
+
+Operationally, the new pipeline works like this:
+
+1. prefetch source files early so expiring one-time URLs are captured quickly
+2. store the original bytes in memory or IndexedDB depending on configured thresholds
+3. analyze page counts in stable order from the freshly fetched blob when possible, otherwise from temp storage
+4. render thumbnails and full pages only when the UI actually needs them
+5. persist rendered page blobs in a second cache layer (memory or IndexedDB) so a page is normally rasterized once per session
+6. evict old object URLs via a small LRU cache while keeping the persisted blob recoverable for later navigation / print
+
+### Thumbnail behavior
+
+`documentLoading.render.thumbnailMaxWidth` and `thumbnailMaxHeight` define the actual maximum raster size of generated thumbnails.
+
+`documentLoading.render.thumbnailLoadingStrategy` supports:
+
+- `adaptive` — keep a fixed-height thumbnail pane; eager-build all thumbnails for smaller documents, then switch to current/visible-first requests for larger ones
+- `eager` — keep a fixed-height thumbnail pane and build all thumbnails in the background
+- `viewport` — keep a fixed-height thumbnail pane but request only the current/visible thumbnails and nearby neighbors
+
+`documentLoading.render.thumbnailEagerPageThreshold` controls when `adaptive` changes from full background thumbnail warm-up to current/visible-first thumbnail requests. The scrollbar height remains deterministic in both modes because one row is rendered for every page.
+
+In the default configuration, smaller runs keep real downscaled thumbnails cached in memory, while larger runs keep the main page pipeline lazy and only retain a bounded thumbnail cache.
+
+
+`documentLoading.render.thumbnailSourceStrategy` supports:
+
+- `auto` — on high-memory machines, reuse full raster-image assets for thumbnails when the page count is low enough; otherwise build dedicated thumbnails
+- `dedicated` — always build dedicated thumbnails
+- `prefer-full-images` — always reuse full raster-image assets for image thumbnails
+
+The thumbnail pane itself always keeps a deterministic scrollbar height. Asset reuse can change what gets stored in memory, but not the pane geometry.

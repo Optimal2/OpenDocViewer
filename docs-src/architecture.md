@@ -32,18 +32,29 @@ The rest of the application should not need to know which bootstrap source was u
 
 ## Loading and rendering pipeline
 
-`src/components/DocumentLoader/DocumentLoader.js` orchestrates loading.
+`src/components/DocumentLoader/DocumentLoader.js` now orchestrates a two-phase loading flow tuned for very
+large batches.
 
 High-level flow:
 
-1. generate a list of source entries
-2. fetch bytes
-3. infer file type
-4. choose processing path
-   - PDF -> main-thread renderer
-   - TIFF -> main-thread renderer
-   - raster image -> worker pipeline
-5. insert normalized page entries into `ViewerContext`
+1. generate a stable ordered list of source entries
+2. prefetch original source files into a temp store (memory or IndexedDB)
+3. infer file type and analyze page counts from the temp store
+4. insert lightweight page placeholders into `ViewerContext`
+5. lazily render thumbnails and full pages only when the UI requests them
+6. evict older rendered page URLs through provider-managed LRU caches
+
+Key pieces in the new pipeline:
+
+- `src/utils/sourceTempStore.js`
+  - browser temp storage for original source bytes, with adaptive IndexedDB promotion and optional
+    session AES wrapping for temp payloads
+- `src/utils/pageAssetRenderer.js`
+  - lazy rendering of full pages and thumbnails from temp-stored PDF, TIFF, and image sources
+- `src/contexts/ViewerProvider.jsx`
+  - cache ownership, object-URL lifecycle, page-asset pinning, and printable page URL generation
+- `src/components/DocumentLoader/LoadPressureDialog.jsx`
+  - warning dialog for very large loading runs
 
 Rendering responsibilities are split further:
 

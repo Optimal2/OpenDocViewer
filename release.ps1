@@ -61,6 +61,12 @@ if(@('patch','minor','major') -notcontains $releaseType.ToLower()){ throw "Inval
 Write-Host "`nSummary:`n  Repo root:     $repoRoot`n  Branch:        $branch`n  Commit:        $commitMsg`n  Release type:  $releaseType`n"
 if((Read-Host 'Proceed? (Y/N)').ToUpper() -ne 'Y'){ Write-Host 'Aborted.'; exit 0 }
 
+Write-Host "`nRunning pre-release validation (lint, build, doc)..." -ForegroundColor Yellow
+$null = ExecNpm -NpmArgs @('run','lint')  -Cwd $repoRoot
+$null = ExecNpm -NpmArgs @('run','build') -Cwd $repoRoot
+$null = ExecNpm -NpmArgs @('run','doc')   -Cwd $repoRoot
+Write-Host "Validation passed. Continuing with commit/tag/push...`n" -ForegroundColor Green
+
 # Stage + commit (skip if empty)
 $null = Exec 'git' @('add','-A') -Cwd $repoRoot
 $commitRes = Exec 'git' @('commit','-m',$commitMsg) -Cwd $repoRoot -AllowNonZero

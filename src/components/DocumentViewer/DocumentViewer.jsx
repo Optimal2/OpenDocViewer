@@ -46,6 +46,10 @@ const DocumentViewer = () => {
     imageProperties,
     isExpanded,
     thumbnailWidth,
+    increaseThumbnailWidth,
+    decreaseThumbnailWidth,
+    hideThumbnailPane,
+    showThumbnailPane,
     viewerContainerRef,
     thumbnailsContainerRef,
     documentRenderRef,
@@ -149,17 +153,38 @@ const DocumentViewer = () => {
         tabIndex={0}
         aria-label={t('viewer.aria.main')}
       >
-        <div style={{ display: 'flex', width: `${thumbnailWidth}px`, flexShrink: 0 }}>
-          <DocumentViewerThumbnails
-            allPages={allPages}
-            pageNumber={pageNumber}
-            setPageNumber={(newPageNumber) => handlePageNumberChange(newPageNumber, true)}
-            thumbnailsContainerRef={thumbnailsContainerRef}
-            width={thumbnailWidth}
-            selectForCompare={selectForCompare}
-          />
-          <Resizer onMouseDown={handleMouseDown} />
-        </div>
+        {thumbnailWidth > 0 ? (
+          <>
+            <div className="thumbnail-pane-column" style={{ width: `${thumbnailWidth}px`, minWidth: `${thumbnailWidth}px`, flexShrink: 0 }}>
+              <DocumentViewerThumbnails
+                allPages={allPages}
+                pageNumber={pageNumber}
+                setPageNumber={(newPageNumber) => handlePageNumberChange(newPageNumber, true)}
+                thumbnailsContainerRef={thumbnailsContainerRef}
+                width={thumbnailWidth}
+                selectForCompare={selectForCompare}
+                isComparing={isComparing}
+                comparePageNumber={comparePageNumber}
+                onIncreaseWidth={increaseThumbnailWidth}
+                onDecreaseWidth={decreaseThumbnailWidth}
+                onHide={hideThumbnailPane}
+              />
+            </div>
+            <Resizer onMouseDown={handleMouseDown} />
+          </>
+        ) : (
+          <div className="thumbnail-pane-collapsed-rail" aria-hidden="false">
+            <button
+              type="button"
+              className="thumbnail-pane-collapsed-toggle"
+              onClick={showThumbnailPane}
+              aria-label={t('thumbnails.controls.showPane', { defaultValue: 'Show thumbnails' })}
+              title={t('thumbnails.controls.showPane', { defaultValue: 'Show thumbnails' })}
+            >
+              <span className="material-icons" aria-hidden="true">photo_library</span>
+            </button>
+          </div>
+        )}
 
         <DocumentViewerRender
           pageNumber={pageNumber}

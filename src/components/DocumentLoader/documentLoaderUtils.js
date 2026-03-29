@@ -141,9 +141,15 @@ export const getTotalPages = async (arrayBuffer, fileExtension) => {
 
   if (fileExtLower === 'pdf') {
     const arrayBufferCopy = arrayBuffer.slice(0); // pdf.js will consume the bytes
-    const pdf = await pdfjsLib.getDocument({ data: arrayBufferCopy }).promise;
-    logger.debug('PDF document loaded', { numPages: pdf.numPages });
-    return pdf.numPages;
+    const loadingTask = pdfjsLib.getDocument({ data: arrayBufferCopy });
+    const pdf = await loadingTask.promise;
+    try {
+      logger.debug('PDF document loaded', { numPages: pdf.numPages });
+      return pdf.numPages;
+    } finally {
+      try { await pdf?.destroy?.(); } catch {}
+      try { await loadingTask?.destroy?.(); } catch {}
+    }
   }
 
   if (fileExtLower === 'tiff' || fileExtLower === 'tif') {

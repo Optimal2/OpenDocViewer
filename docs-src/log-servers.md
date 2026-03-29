@@ -119,6 +119,9 @@ This keeps the browser talking to a same-origin path even though the Node servic
 
 ### Runtime config example
 
+The shipped frontend defaults keep both log channels disabled. Enable them explicitly in your deployment override file when the corresponding backend service and proxy route are ready.
+
+
 ```js
 window.__ODV_CONFIG__ = {
   systemLog: {

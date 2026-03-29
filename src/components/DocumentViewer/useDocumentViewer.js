@@ -80,7 +80,12 @@ export function useDocumentViewer() {
   const [isExpandedRaw, setIsExpandedRaw] = useState(false); // raw edit-mode flag
   const isExpanded = isExpandedRaw;
 
-  const [thumbnailWidth, setThumbnailWidth] = useState(200);
+  const THUMBNAIL_WIDTH_MIN = 160;
+  const THUMBNAIL_WIDTH_MAX = 520;
+  const THUMBNAIL_WIDTH_STEP = 48;
+  const THUMBNAIL_WIDTH_DEFAULT = 220;
+
+  const [thumbnailWidth, setThumbnailWidth] = useState(THUMBNAIL_WIDTH_DEFAULT);
 
   // Refs shared with the renderer layer and the effect helpers.
   /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
@@ -220,15 +225,50 @@ export function useDocumentViewer() {
    * @param {MouseEvent} e
    * @returns {void}
    */
+  const applyThumbnailWidth = useCallback((next) => {
+    const numeric = Number(next);
+    if (!Number.isFinite(numeric)) return;
+    if (numeric <= 0) {
+      setThumbnailWidth(0);
+      return;
+    }
+    setThumbnailWidth(Math.max(THUMBNAIL_WIDTH_MIN, Math.min(THUMBNAIL_WIDTH_MAX, Math.round(numeric))));
+  }, []);
+
+  const increaseThumbnailWidth = useCallback(() => {
+    setThumbnailWidth((current) => {
+      const base = current > 0 ? current : THUMBNAIL_WIDTH_DEFAULT;
+      return Math.max(THUMBNAIL_WIDTH_MIN, Math.min(THUMBNAIL_WIDTH_MAX, base + THUMBNAIL_WIDTH_STEP));
+    });
+  }, []);
+
+  const decreaseThumbnailWidth = useCallback(() => {
+    setThumbnailWidth((current) => {
+      if (current <= THUMBNAIL_WIDTH_MIN) return THUMBNAIL_WIDTH_MIN;
+      return Math.max(THUMBNAIL_WIDTH_MIN, current - THUMBNAIL_WIDTH_STEP);
+    });
+  }, []);
+
+  const hideThumbnailPane = useCallback(() => {
+    setThumbnailWidth(0);
+  }, []);
+
+  const showThumbnailPane = useCallback(() => {
+    setThumbnailWidth((current) => {
+      if (current > 0) return current;
+      return THUMBNAIL_WIDTH_DEFAULT;
+    });
+  }, []);
+
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
     const startX = e.clientX;
-    const startWidth = thumbnailWidth;
+    const startWidth = Math.max(THUMBNAIL_WIDTH_MIN, thumbnailWidth || THUMBNAIL_WIDTH_DEFAULT);
 
     /** @param {MouseEvent} ev */
     function onMove(ev) {
       const dx = ev.clientX - startX;
-      const next = Math.max(120, Math.min(480, startWidth + dx));
+      const next = Math.max(THUMBNAIL_WIDTH_MIN, Math.min(THUMBNAIL_WIDTH_MAX, startWidth + dx));
       setThumbnailWidth(next);
     }
     function onUp() {
@@ -289,6 +329,11 @@ export function useDocumentViewer() {
     imageProperties,
     isExpanded,
     thumbnailWidth,
+    applyThumbnailWidth,
+    increaseThumbnailWidth,
+    decreaseThumbnailWidth,
+    hideThumbnailPane,
+    showThumbnailPane,
     viewerContainerRef,
     thumbnailsContainerRef,
     documentRenderRef,
