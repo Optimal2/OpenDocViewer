@@ -1,696 +1,704 @@
 // File: src/components/DocumentLoader/DocumentLoader.js
 /**
- * File: src/components/DocumentLoader/DocumentLoader.js
+ * OpenDocViewer — Document loader orchestrator.
  *
- * Document loading orchestrator.
+ * WHAT CHANGED
+ *   The legacy pipeline fetched, decoded, and rasterized everything up front. That works for small
+ *   batches but becomes very expensive when users open thousands of pages at once.
  *
- * Responsibilities:
- * - create the ordered list of source entries (pattern mode, explicit list, or demo list)
- * - fetch bytes and infer file type
- * - choose the correct execution path for each source
- *   - PDF: main thread
- *   - TIFF: main thread
- *   - raster image: worker pipeline
- * - insert normalized page entries into `ViewerContext` in stable page order
- *
- * Design boundaries:
- * - type normalization belongs in `documentLoaderUtils.js`
- * - worker lifecycle helpers belong in `workerHandler.js`
- * - batch scheduling belongs in `batchHandler.js`
- * - PDF/TIFF rasterization belongs in `mainThreadRenderer.js`
+ *   The new loader now:
+ *     1. resolves the ordered list of source URLs,
+ *     2. optionally warns when the run looks too large,
+ *     3. prefetches original source files into a temp store (memory or IndexedDB),
+ *     4. analyzes page counts from the temp store in stable source order,
+ *     5. inserts lightweight page placeholders, and
+ *     6. lets the viewer lazily render full pages / thumbnails on demand.
  */
 
-import { useEffect, useContext, useRef, useCallback } from 'react';
+import React, { useEffect, useContext, useRef, useState, useCallback } from 'react';
+import { useTranslation } from 'react-i18next';
+import { fileTypeFromBlob } from 'file-type';
 import ViewerContext from '../../contexts/viewerContext.js';
 import logger from '../../logging/systemLogger.js';
 import { generateDocumentList, generateDemoList, getTotalPages } from './documentLoaderUtils.js';
-import { createWorker, getNumberOfWorkers, handleWorkerMessage } from './workerHandler.js';
-import { batchHandler } from './batchHandler.js';
-import { renderPDFInMainThread, renderTIFFInMainThread } from './mainThreadRenderer.js';
-import { fileTypeFromBuffer, fileTypeFromBlob } from 'file-type';
-
-/* ------------------------------------------------------------------------------------------------
- * Types
- * ------------------------------------------------------------------------------------------------ */
-
+import {
+  getDocumentLoadingConfig,
+  shouldRecommendStopping,
+} from '../../utils/documentLoadingConfig.js';
+import LoadPressureDialog from './LoadPressureDialog.jsx';
 
 /**
- * Props for {@link DocumentLoader}.
- * @typedef {Object} DocumentLoaderProps
- * @property {string=} folder Pattern-mode base folder/path for assets.
- * @property {string=} extension Pattern-mode extension such as `png` or `tiff`.
- * @property {number=} endNumber Pattern-mode upper bound for generated file numbers.
- * @property {Array.<DocumentSourceItem>=} sourceList Explicit ordered source list.
- * @property {boolean=} sameBlob Reuse full-size blob URLs for thumbnails when appropriate.
- * @property {boolean=} demoMode Enable generated/demo source entries.
- * @property {'repeat'|'mix'=} demoStrategy Strategy for demo source generation.
- * @property {number=} demoCount Number of demo entries to produce.
- * @property {Array.<string>=} demoFormats Demo formats to cycle through.
- * @property {*} children Viewer subtree rendered after loader orchestration is mounted.
- */
-
-/**
- * Explicit-list item used by `sourceList`.
  * @typedef {Object} DocumentSourceItem
  * @property {string} url
  * @property {string=} ext
  * @property {number=} fileIndex
  */
 
-/* ------------------------------------------------------------------------------------------------
- * Adaptive worker tuning
- * ------------------------------------------------------------------------------------------------ */
+/**
+ * @typedef {Object} DocumentLoaderProps
+ * @property {string=} folder
+ * @property {string=} extension
+ * @property {number=} endNumber
+ * @property {Array.<DocumentSourceItem>=} sourceList
+ * @property {boolean=} sameBlob
+ * @property {boolean=} demoMode
+ * @property {'repeat'|'mix'=} demoStrategy
+ * @property {number=} demoCount
+ * @property {Array.<string>=} demoFormats
+ * @property {*} children
+ */
+
 
 /**
- * Clamp a number into the inclusive range [lo, hi].
- * @param {number} n
- * @param {number} lo
- * @param {number} hi
- * @returns {number}
+ * @typedef {Object} PagePlaceholderInput
+ * @property {number} fileIndex
+ * @property {string} sourceKey
+ * @property {string} fileExtension
+ * @property {number} pageCount
+ * @property {string} mimeType
+ * @property {number} sizeBytes
+ * @property {number} startIndex
  */
-const clamp = (n, lo, hi) => Math.max(lo, Math.min(hi, n));
 
 /**
- * Detect mobile-like environments to keep the default worker cap conservative on handheld devices.
- * This is a best-effort heuristic and not a hard capability check.
- *
- * @returns {boolean}
+ * @typedef {Object} FailedPlaceholderInput
+ * @property {number} fileIndex
+ * @property {number} startIndex
  */
-const isMobile = (() => {
-  try {
-    // @ts-ignore
-    if (navigator?.userAgentData?.mobile != null) return navigator.userAgentData.mobile;
-  } catch {}
-  try {
-    return /Android|iPhone|iPad|iPod/i.test(navigator?.userAgent || '');
-  } catch {
-    return false;
-  }
-})();
 
 /**
- * Compute a starting config for worker count and batch size.
- * - ≤3 logical cores → strictly sequential (1 worker) to preserve responsiveness.
- * - Always leave 1 core for the UI when possible.
- * - Constrain by device memory and mobile caps.
- *
- * @param {Object} [opts]
- * @param {boolean} [opts.cpuBound=true]
- * @param {boolean} [opts.ioHeavy=false]
- * @param {number}  [opts.desiredCap]
- * @returns {{ maxWorkers: number, batchSize: (number|Infinity), lowCore: boolean }}
+ * @typedef {Object} ResolvedEntry
+ * @property {string} url
+ * @property {number} fileIndex
+ * @property {string} ext
  */
-function computeWorkerTuning({ cpuBound = true, ioHeavy = false, desiredCap } = {}) {
-  const cores = Math.max(1, Number((typeof navigator !== 'undefined' && navigator.hardwareConcurrency) || 2));
-  const memGB = Number((typeof navigator !== 'undefined' && navigator.deviceMemory) || 4);
 
-  const lowCore = cores <= 3;
-  const leaveForMain = cores > 1 ? 1 : 0;
+/**
+ * @typedef {Object} LoadPressureSummary
+ * @property {'preload'|'analysis'} phase
+ * @property {number} sourceCount
+ * @property {number} discoveredPageCount
+ * @property {number} estimatedPageCount
+ * @property {number} prefetchedBytes
+ * @property {string} tempStoreMode
+ * @property {boolean} tempStoreProtected
+ * @property {boolean} recommendStop
+ * @property {number=} prefetchConcurrency
+ */
 
-  let hardCap = desiredCap ?? (isMobile ? 8 : 16);
-  if (memGB <= 3) hardCap = Math.min(hardCap, isMobile ? 4 : 8);
+/**
+ * @typedef {Object} PrefetchResult
+ * @property {boolean} ok
+ * @property {string=} sourceKey
+ * @property {string=} fileExtension
+ * @property {string=} mimeType
+ * @property {number=} sizeBytes
+ * @property {number} fileIndex
+ * @property {string} url
+ * @property {*=} stats
+ * @property {(Blob|undefined)} analysisBlob
+ * @property {(number|undefined)} pageCountHint
+ * @property {boolean=} aborted
+ * @property {*=} error
+ */
 
-  const base = clamp(cores - leaveForMain, 1, hardCap);
-  let maxWorkers = cpuBound ? base : clamp(Math.ceil(base * (ioHeavy ? 1.5 : 1.2)), 1, hardCap);
-  if (lowCore) maxWorkers = 1;
+/**
+ * @param {number} concurrency
+ * @returns {function(function(): Promise<any>): Promise<any>}
+ */
+function createLimiter(concurrency) {
+  const limit = Math.max(1, Number(concurrency) || 1);
+  let activeCount = 0;
+  /** @type {Array<{ task:function():Promise<any>, resolve:function(any):void, reject:function(*):void }>} */
+  const queue = [];
 
-  const batchSize = lowCore ? Infinity : (cpuBound ? 24 : 64);
-  return { maxWorkers, batchSize, lowCore };
+  const pump = () => {
+    while (activeCount < limit && queue.length > 0) {
+      const next = queue.shift();
+      if (!next) return;
+      activeCount += 1;
+      Promise.resolve()
+        .then(next.task)
+        .then(next.resolve, next.reject)
+        .finally(() => {
+          activeCount = Math.max(0, activeCount - 1);
+          pump();
+        });
+    }
+  };
+
+  return (task) => new Promise((resolve, reject) => {
+    queue.push({ task, resolve, reject });
+    pump();
+  });
 }
 
-const { maxWorkers, batchSize, lowCore } = computeWorkerTuning({ cpuBound: true });
-
-/* ------------------------------------------------------------------------------------------------
- * React component
- * ------------------------------------------------------------------------------------------------ */
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function inferUrlExtension(url) {
+  const match = String(url || '').toLowerCase().match(/\.([a-z0-9]+)(?:$|\?|#)/i);
+  return match ? match[1].toLowerCase() : '';
+}
 
 /**
- * DocumentLoader — Loads and processes documents for rendering.
- *
- * The component is intentionally orchestration-heavy: it decides which loading path to use,
- * reserves stable page indexes, and fans work out to workers or main-thread renderers.
- *
+ * @param {string} value
+ * @returns {string}
+ */
+function normalizeExtension(value) {
+  const ext = String(value || '').toLowerCase().replace(/^\./, '');
+  if (ext === 'jpeg') return 'jpg';
+  if (ext === 'tif') return 'tiff';
+  return ext;
+}
+
+/**
+ * @param {string} mimeType
+ * @returns {string}
+ */
+function mimeToExtension(mimeType) {
+  const type = String(mimeType || '').toLowerCase();
+  if (type.includes('pdf')) return 'pdf';
+  if (type.includes('tif')) return 'tiff';
+  if (type.includes('png')) return 'png';
+  if (type.includes('jpeg') || type.includes('jpg')) return 'jpg';
+  if (type.includes('gif')) return 'gif';
+  if (type.includes('bmp')) return 'bmp';
+  if (type.includes('webp')) return 'webp';
+  return '';
+}
+
+/**
+ * @param {number} fileIndex
+ * @param {number} orderIndex
+ * @returns {string}
+ */
+function createSourceKey(fileIndex, orderIndex) {
+  try {
+    return `src_${String(fileIndex)}_${String(orderIndex)}_${Math.random().toString(36).slice(2, 8)}`;
+  } catch {
+    return `src_${String(fileIndex)}_${String(orderIndex)}_${Date.now()}`;
+  }
+}
+
+/**
+ * @param {PagePlaceholderInput} input
+ * @returns {Array<Object>}
+ */
+function createPagePlaceholders(input) {
+  const pages = [];
+  for (let pageIndex = 0; pageIndex < input.pageCount; pageIndex += 1) {
+    pages.push({
+      sourceKey: input.sourceKey,
+      status: 1,
+      fullSizeStatus: 0,
+      thumbnailStatus: 0,
+      fullSizeUrl: '',
+      thumbnailUrl: '',
+      thumbnailUsesFullAsset: false,
+      loaded: false,
+      fileExtension: input.fileExtension,
+      fileIndex: input.fileIndex,
+      pageIndex,
+      allPagesIndex: input.startIndex + pageIndex,
+      sourceMimeType: input.mimeType,
+      sourceSizeBytes: input.sizeBytes,
+    });
+  }
+  return pages;
+}
+
+/**
+ * @param {FailedPlaceholderInput} input
+ * @returns {Array<Object>}
+ */
+function createFailedPlaceholder(input) {
+  return [{
+    sourceKey: `failed_${input.fileIndex}_${input.startIndex}`,
+    status: -1,
+    fullSizeStatus: -1,
+    thumbnailStatus: -1,
+    fullSizeUrl: 'lost.png',
+    thumbnailUrl: 'lost.png',
+    thumbnailUsesFullAsset: false,
+    loaded: false,
+    fileExtension: 'png',
+    fileIndex: input.fileIndex,
+    pageIndex: 0,
+    allPagesIndex: input.startIndex,
+  }];
+}
+
+/**
+ * @param {Array<DocumentSourceItem>|null|undefined} sourceList
+ * @param {boolean|undefined} demoMode
+ * @param {'repeat'|'mix'|undefined} demoStrategy
+ * @param {number|undefined} demoCount
+ * @param {Array<string>|undefined} demoFormats
+ * @param {string|undefined} folder
+ * @param {string|undefined} extension
+ * @param {number|undefined} endNumber
+ * @returns {Array<ResolvedEntry>}
+ */
+function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoFormats, folder, extension, endNumber) {
+  if (Array.isArray(sourceList) && sourceList.length > 0) {
+    return sourceList
+      .map((item, index) => ({
+        url: String(item?.url || ''),
+        fileIndex: Number.isFinite(item?.fileIndex) ? Number(item.fileIndex) : index,
+        ext: normalizeExtension(item?.ext || inferUrlExtension(item?.url || '')),
+      }))
+      .filter((item) => !!item.url);
+  }
+
+  if (demoMode) {
+    const urls = generateDemoList({
+      strategy: demoStrategy || 'repeat',
+      count: Math.max(1, Number(demoCount) || 1),
+      formats: demoFormats,
+    });
+    return urls.map((url, index) => ({
+      url,
+      fileIndex: index,
+      ext: normalizeExtension(inferUrlExtension(url)),
+    }));
+  }
+
+  const urls = generateDocumentList(folder, extension, endNumber);
+  return urls.map((url, index) => ({
+    url,
+    fileIndex: index,
+    ext: normalizeExtension(extension || inferUrlExtension(url)),
+  }));
+}
+
+/**
+ * @param {string} text
+ * @returns {string}
+ */
+function safeMessage(text) {
+  return String(text || '').trim();
+}
+
+/**
  * @param {DocumentLoaderProps} props
- * @param {(string|undefined)} [props.folder]           Pattern mode: base folder/path for assets
- * @param {(string|undefined)} [props.extension]        Pattern mode: file extension (e.g., "png", "tiff")
- * @param {(number|undefined)} [props.endNumber]        Pattern mode: last page/file number (1..N)
- * @param {Array.<DocumentSourceItem>} [props.sourceList]
- *        Explicit-list mode: ordered list of source items
- * @param {(boolean|undefined)} [props.sameBlob=true]   Reuse full-size blob URL for thumbnails when possible
- * @param {(boolean|undefined)} [props.demoMode]        Demo mode: enable direct image insertion for simple formats
- * @param {"repeat"|"mix"}      [props.demoStrategy="repeat"] Demo strategy
- * @param {(number|undefined)}  [props.demoCount]       Demo count: number of entries to produce
- * @param {Array.<string>=}     [props.demoFormats]     Demo formats: default ['jpg','png','tif','pdf']
- * @param {*} props.children                             Render prop subtree (viewer UI)
- * @returns {*}
+ * @returns {React.ReactElement}
  */
 const DocumentLoader = ({
   folder,
   extension,
   children,
-  sameBlob = true,
   endNumber,
   sourceList,
   demoMode,
   demoStrategy = 'repeat',
   demoCount,
-  demoFormats
+  demoFormats,
 }) => {
+  const { t } = useTranslation('common');
   const {
-    insertPageAtIndex,
+    insertPagesAtIndex,
+    ensurePageAsset,
     setError,
     setWorkerCount,
     setLoadingRunActive,
     setPlannedPageCount,
+    initializeDocumentSession,
+    storeSourceBlob,
+    registerSourceDescriptor,
+    addMessage,
   } = useContext(ViewerContext);
 
-  /** Lifecycle guard so async work can stop cleanly on unmount or StrictMode remount. */
-  const isMounted = useRef(true);
-
-  /** Lightweight counters for tracing insert behavior during development and troubleshooting. */
-  const insertsAttempted = useRef(0);
-  const insertsAccepted = useRef(0);
-
-  /** Lightweight run tracing to make StrictMode re-mounts obvious in logs. */
-  const runId = useRef(
-    (() => {
-      try {
-        const s = Math.random().toString(36).slice(2, 8);
-        return `run_${Date.now().toString(36)}_${s}`;
-      } catch {
-        return `run_${Date.now()}`;
-      }
-    })()
-  );
-
-  /** Work queues separated by execution environment. */
-  /** @type {React.MutableRefObject.<Array.<*>>} */ const jobQueue = useRef([]);           // worker jobs
-  /** @type {React.MutableRefObject.<Array.<*>>} */ const mainThreadJobQueue = useRef([]); // PDF/TIFF fallbacks
-  /** @type {React.MutableRefObject.<Array.<*>>} */ const batchQueue = useRef([]);
-
-  /** Global page index across all inputs so inserted pages remain stable in viewer order. */
-  const currentPageIndex = useRef(0);
-
-  /** Track inflight fetches for cleanup on unmount */
-  const fetchControllers = useRef(new Set());
-
-  /** Worker pool lives per-effect run (StrictMode-safe) */
-  const imageWorkersRef = useRef(/** @type {Worker[]} */([]));
-
-  /** Start timer handle (so the "probe" pass can be neutralized cleanly) */
-  const startTimerRef = useRef(/** @type {number|undefined} */(undefined));
+  const isMountedRef = useRef(true);
+  const activeControllersRef = useRef(new Set());
+  const promptResolverRef = useRef(null);
+  const [pressureSummary, setPressureSummary] = useState(null);
 
   /**
-   * Publish the currently planned page total to viewer context.
-   * @param {number} count
+   * @param {*} summary
+   * @returns {Promise<boolean>}
+   */
+  const promptForPressure = useCallback((summary) => new Promise((resolve) => {
+    promptResolverRef.current = resolve;
+    setPressureSummary(summary);
+  }), []);
+
+  /**
+   * @param {boolean} accepted
    * @returns {void}
    */
-  const publishPlannedPageCount = useCallback((count) => {
-    const next = Number.isFinite(count) ? Math.max(0, Math.floor(count)) : 0;
-    setPlannedPageCount(next);
-  }, [setPlannedPageCount]);
-
-  /**
-   * Minimal failure placeholder insertion.
-   * @param {string} url
-   * @param {number} fileIndex
-   * @returns {void}
-   */
-  const handleFailedDocumentLoad = useCallback((url, fileIndex) => {
-    logger.error(`Failed to load document at ${url}`, { runId: runId.current });
-    const failedPage = {
-      fullSizeUrl: 'lost.png',
-      thumbnailUrl: 'lost.png',
-      loaded: false,
-      status: -1,
-      fileExtension: 'png',
-      fileIndex,
-      pageIndex: 0,
-      runId: runId.current,
-    };
-    insertsAttempted.current += 1;
-    insertPageAtIndex(failedPage, currentPageIndex.current);
-    insertsAccepted.current += 1;
-    currentPageIndex.current += 1;
-    publishPlannedPageCount(currentPageIndex.current);
-    logger.info('Inserted page at index', { index: currentPageIndex.current - 1, ext: 'png', fileIndex, pageIndex: 0 });
-  }, [insertPageAtIndex, publishPlannedPageCount]);
-
-  /**
-   * Infer a file extension directly from a source URL without any network fetch.
-   * Used only for the demo-mode fast path.
-   *
-   * @param {string} u
-   * @returns {(string|null)}
-   */
-  const extFromUrl = (u) => {
-    const m = String(u).toLowerCase().match(/\.(pdf|tiff?|png|jpe?g|bmp|gif)(?:$|\?)/i);
-    return m ? m[1].toLowerCase() : null;
-  };
-
-  /** Insert wrapper (keeps counters/logging consistent). */
-  const insertAtIndex = useCallback((page, index) => {
-    insertsAttempted.current += 1;
-    insertPageAtIndex(page, index);
-    insertsAccepted.current += 1;
-    logger.info('Inserted page at index', {
-      index,
-      ext: page?.fileExtension,
-      fileIndex: page?.fileIndex,
-      pageIndex: page?.pageIndex
-    });
-  }, [insertPageAtIndex]);
-
-  /**
-   * Drain and execute any queued main-thread jobs (PDF/TIFF) ASAP.
-   * Ensures dev and build behave identically when workers request main-thread handling.
-   */
-  const drainMainThreadJobs = useCallback(async () => {
-    logger.debug('Drain main-thread jobs: start', { runId: runId.current, queued: mainThreadJobQueue.current.length });
-    while (isMounted.current && mainThreadJobQueue.current.length > 0) {
-      /** @type {*} */
-      const job = mainThreadJobQueue.current.shift();
-      try {
-        const run = job.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
-        await run(job, insertAtIndex, sameBlob, isMounted);
-      } catch (e) {
-        logger.error('Main-thread render failed', { error: String(e?.message || e), runId: runId.current });
-      }
-    }
-    logger.debug('Drain main-thread jobs: end', { runId: runId.current });
-  }, [insertAtIndex, sameBlob]);
-
-  /**
-   * Fetch + detect + enqueue a single document, or directly insert for simple images in demo mode.
-   *
-   * @param {string} url
-   * @param {number} index
-   * @returns {Promise.<void>}
-   */
-  const loadDocumentAsync = useCallback(async (url, index) => {
-    // Fast path: in demo mode, directly insert simple image formats (no workers needed).
-    const urlExt = extFromUrl(url);
-    if (demoMode && urlExt && !['pdf', 'tiff', 'tif'].includes(urlExt)) {
-      const at = currentPageIndex.current;
-      /** @type {*} */
-      const page = {
-        fullSizeUrl: url,
-        thumbnailUrl: url,
-        loaded: true,
-        status: 1,
-        fileExtension: urlExt,
-        fileIndex: index,
-        pageIndex: 0,
-        runId: runId.current,
-      };
-      logger.debug('Reserve indices (simple image)', {
-        fileIndex: index,
-        ext: urlExt,
-        at,
-        pages: 1,
-        runId: runId.current
-      });
-
-      currentPageIndex.current += 1;
-      publishPlannedPageCount(currentPageIndex.current);
-      insertAtIndex(page, at);
-      return;
-    }
-
-    const controller = new AbortController();
-    fetchControllers.current.add(controller);
-
-    try {
-      logger.debug('Loading document', { url, index, runId: runId.current });
-
-      const response = await fetch(url, { signal: controller.signal });
-      logger.debug('Fetch response', { url, status: response.status, runId: runId.current });
-
-      if (!response.ok) {
-        throw new Error(`Failed to fetch document at ${url} with status ${response.status}`);
-      }
-
-      let arrayBuffer = await response.arrayBuffer();
-
-      fetchControllers.current.delete(controller);
-
-      if (!arrayBuffer || arrayBuffer.byteLength === 0) {
-        throw new Error(`Invalid or empty ArrayBuffer for document at ${url}`);
-      }
-
-      // Robust content-type detection (browser-safe)
-      let fileType;
-      try {
-        fileType = await fileTypeFromBuffer(new Uint8Array(arrayBuffer));
-      } catch {}
-      if (!fileType) {
-        try {
-          fileType = await fileTypeFromBlob(new Blob([arrayBuffer]));
-        } catch {}
-      }
-
-      // Infer extension if signatures are unknown
-      let fileExtension = fileType?.ext;
-      if (!fileExtension) {
-        const ct = (typeof response !== 'undefined' && response.headers?.get?.('content-type')) || '';
-        if (/pdf/i.test(ct)) fileExtension = 'pdf';
-        else if (/tiff?/i.test(ct)) fileExtension = 'tiff';
-        else {
-          const m = String(url).toLowerCase().match(/\.(pdf|tiff?|png|jpe?g|bmp|gif)(?:$|\?)/i);
-          fileExtension = m ? m[1].toLowerCase() : null;
-        }
-      }
-
-      if (!fileExtension) {
-        throw new Error(`Unexpected file type for document at ${url}: unknown`);
-      }
-
-      const totalPages = await getTotalPages(arrayBuffer, fileExtension);
-      logger.debug('Total pages detected', { totalPages, url, runId: runId.current });
-
-      // ✅ DEV == BUILD: always render multi-page formats on main thread
-      if (fileExtension === 'pdf' || fileExtension === 'tiff' || fileExtension === 'tif') {
-        const job = {
-          runId: runId.current,
-          arrayBuffer,
-          sourceUrl: url,
-          fileExtension,
-          index,
-          pageStartIndex: 0,
-          pagesInvolved: totalPages,
-          allPagesStartingIndex: currentPageIndex.current,
-        };
-        logger.debug('Reserve indices (multi-page MT)', {
-          fileIndex: index,
-          ext: fileExtension,
-          start: job.allPagesStartingIndex,
-          end: job.allPagesStartingIndex + totalPages - 1,
-          pages: totalPages,
-          runId: runId.current
-        });
-
-        mainThreadJobQueue.current.push(job);
-        arrayBuffer = null;
-        currentPageIndex.current += totalPages;
-        publishPlannedPageCount(currentPageIndex.current);
-        logger.debug('Routed multi-page document to main thread', { fileExtension, totalPages, runId: runId.current });
-      } else {
-        // Other single-image types → worker
-        const job = {
-          runId: runId.current,
-          arrayBuffer,
-          sourceUrl: url,
-          fileExtension,
-          index,
-          pageStartIndex: 0,
-          pagesInvolved: 1,
-          allPagesStartingIndex: currentPageIndex.current,
-        };
-        logger.debug('Reserve indices (worker image)', {
-          fileIndex: index,
-          ext: fileExtension,
-          at: job.allPagesStartingIndex,
-          pages: 1,
-          runId: runId.current
-        });
-
-        jobQueue.current.push(job);
-        arrayBuffer = null;
-        currentPageIndex.current += 1;
-        publishPlannedPageCount(currentPageIndex.current);
-      }
-    } catch (error) {
-      fetchControllers.current.delete(controller);
-
-      if (error?.name === 'AbortError') {
-        logger.debug('Fetch aborted', { url, runId: runId.current });
-        return;
-      }
-
-      handleFailedDocumentLoad(url, index);
-      if (isMounted.current) {
-        setError(error.message);
-        logger.error('Error loading document', { error: error.message, runId: runId.current });
-      }
-    }
-  }, [setError, handleFailedDocumentLoad, demoMode, insertAtIndex, publishPlannedPageCount]);
-
-  /**
-   * Handle worker results and immediately drain any follow-up work that must occur on the main thread.
-   *
-   * @param {MessageEvent} evt
-   * @returns {void}
-   */
-  const onWorkerMessage = useCallback(
-    (evt) => {
-      handleWorkerMessage(evt, insertAtIndex, sameBlob, isMounted, {
-        renderPDFInMainThread,
-        renderTIFFInMainThread,
-        mainThreadJobQueueRef: mainThreadJobQueue,
-      });
-      if (mainThreadJobQueue.current.length > 0) {
-        setTimeout(drainMainThreadJobs, 0);
-      }
-    },
-    [insertAtIndex, sameBlob, drainMainThreadJobs]
-  );
-
-  /**
-   * Start batched worker processing for the queued raster-image jobs.
-   *
-   * @returns {void}
-   */
-  const processBatches = useCallback(() => {
-    batchHandler(
-      jobQueue,
-      batchQueue,
-      batchSize,
-      imageWorkersRef.current,
-      onWorkerMessage,
-      insertAtIndex,
-      sameBlob,
-      isMounted
-    );
-  }, [sameBlob, insertAtIndex, onWorkerMessage]);
-
-  /**
-   * Sequential fallback scheduler used on low-core devices where parallel workers would harm responsiveness.
-   *
-   * @returns {void}
-   */
-  const processSequential = useCallback(() => {
-    if (!isMounted.current) return;
-
-    const next = jobQueue.current.shift();
-    if (next) {
-      const w = imageWorkersRef.current[0];
-      if (!w) return;
-
-      w.onmessage = async (evt) => {
-        handleWorkerMessage(evt, insertAtIndex, sameBlob, isMounted, {
-          renderPDFInMainThread,
-          renderTIFFInMainThread,
-          mainThreadJobQueueRef: mainThreadJobQueue,
-        });
-        if (mainThreadJobQueue.current.length > 0) {
-          setTimeout(drainMainThreadJobs, 0);
-        }
-        setTimeout(processSequential, 0);
-      };
-      w.onerror = async () => {
-        handleWorkerMessage(
-          {
-            data: {
-              jobs: [
-                {
-                  fullSizeUrl: null,
-                  fileIndex: next.index,
-                  pageIndex: next.pageStartIndex || 0,
-                  fileExtension: next.fileExtension,
-                  allPagesIndex: next.allPagesStartingIndex,
-                },
-              ],
-            },
-          },
-          insertAtIndex,
-          sameBlob,
-          isMounted
-        );
-        if (mainThreadJobQueue.current.length > 0) {
-          setTimeout(drainMainThreadJobs, 0);
-        }
-        setTimeout(processSequential, 0);
-      };
-
-      const transfer = next?.arrayBuffer instanceof ArrayBuffer ? [next.arrayBuffer] : [];
-      w.postMessage({ jobs: [next], fileExtension: next.fileExtension }, transfer);
-      return;
-    }
-
-    /** @type {*} */
-    const mt = mainThreadJobQueue.current.shift();
-    if (mt) {
-      const run = mt.fileExtension === 'pdf' ? renderPDFInMainThread : renderTIFFInMainThread;
-      run(mt, insertAtIndex, sameBlob, isMounted).then(() => setTimeout(processSequential, 0));
-    }
-  }, [insertAtIndex, sameBlob, drainMainThreadJobs]);
+  const resolvePressurePrompt = useCallback((accepted) => {
+    const resolver = promptResolverRef.current;
+    promptResolverRef.current = null;
+    setPressureSummary(null);
+    resolver?.(!!accepted);
+  }, []);
 
   useEffect(() => {
-    const activeFetchControllers = new Set();
-    fetchControllers.current = activeFetchControllers;
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+      const resolver = promptResolverRef.current;
+      promptResolverRef.current = null;
+      if (resolver) resolver(false);
+    };
+  }, []);
 
-    // Fresh run token (helps trace StrictMode re-runs)
-    try {
-      runId.current = `run_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 8)}`;
-    } catch {
-      runId.current = `run_${Date.now()}`;
-    }
-    isMounted.current = true;
-    insertsAttempted.current = 0;
-    insertsAccepted.current = 0;
+  useEffect(() => {
+    let cancelled = false;
+    const config = getDocumentLoadingConfig();
+    const entries = resolveEntries(
+      sourceList,
+      demoMode,
+      demoStrategy,
+      demoCount,
+      demoFormats,
+      folder,
+      extension,
+      endNumber
+    );
 
-    // 🔧 STRICTMODE-ROBUST: Defer ALL heavy setup/scheduling to next tick.
-    // In React dev StrictMode the first mount is immediately unmounted; by deferring,
-    // the "probe" pass is cleaned up before any work runs, so no duplicates.
-    startTimerRef.current = window.setTimeout(() => {
-      if (!isMounted.current) {
-        logger.debug('Start aborted (component already unmounted)', { runId: runId.current });
+    logger.info('DocumentLoader run started', {
+      sourceCount: entries.length,
+      mode: Array.isArray(sourceList) && sourceList.length > 0 ? 'explicit-list' : (demoMode ? 'demo' : 'pattern'),
+    });
+
+    const abortAllFetches = () => {
+      const controllers = Array.from(activeControllersRef.current.values());
+      activeControllersRef.current.clear();
+      controllers.forEach((controller) => {
+        try { controller.abort(); } catch {}
+      });
+    };
+
+    /**
+     * @param {LoadPressureSummary} summary
+     * @returns {Promise<boolean>}
+     */
+    const maybePrompt = async (summary) => {
+      if (cancelled || !isMountedRef.current) return false;
+      return promptForPressure({
+        ...summary,
+        prefetchConcurrency: config.fetch.prefetchConcurrency,
+      });
+    };
+
+    const prefetchLimiter = createLimiter(config.fetch.prefetchConcurrency);
+
+    /**
+     * @param {ResolvedEntry} entry
+     * @param {number} orderIndex
+     * @returns {Promise<PrefetchResult>}
+     */
+    const prefetchSource = (entry, orderIndex) => prefetchLimiter(async () => {
+      const controller = new AbortController();
+      activeControllersRef.current.add(controller);
+
+      try {
+        const response = await fetch(entry.url, { signal: controller.signal });
+        if (!response.ok) throw new Error(`Failed to fetch ${entry.url} (status ${response.status})`);
+
+        const blob = await response.blob();
+        if (!(blob instanceof Blob) || blob.size <= 0) {
+          throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
+        }
+
+        let detectedType = null;
+        try { detectedType = await fileTypeFromBlob(blob); } catch {}
+
+        const mimeType = String(
+          detectedType?.mime
+          || response.headers.get('content-type')
+          || blob.type
+          || 'application/octet-stream'
+        );
+
+        const fileExtension = normalizeExtension(
+          detectedType?.ext
+          || mimeToExtension(mimeType)
+          || entry.ext
+          || inferUrlExtension(entry.url)
+          || 'png'
+        );
+
+        const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
+        const stored = await storeSourceBlob({
+          sourceKey,
+          blob,
+          fileExtension,
+          mimeType,
+          originalUrl: entry.url,
+          fileIndex: entry.fileIndex,
+        });
+
+        return {
+          ok: true,
+          sourceKey,
+          fileExtension,
+          mimeType,
+          sizeBytes: Number(blob.size || 0),
+          fileIndex: entry.fileIndex,
+          url: entry.url,
+          stats: stored?.stats || null,
+          analysisBlob: blob,
+          pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+        };
+      } catch (error) {
+        if (controller.signal.aborted || cancelled) {
+          return {
+            ok: false,
+            aborted: true,
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+          };
+        }
+        logger.error('Prefetch failed', {
+          url: entry.url,
+          fileIndex: entry.fileIndex,
+          error: String(error?.message || error),
+        });
+        return {
+          ok: false,
+          error,
+          fileIndex: entry.fileIndex,
+          url: entry.url,
+        };
+      } finally {
+        activeControllersRef.current.delete(controller);
+      }
+    });
+
+    const run = async () => {
+      setError(null);
+      setWorkerCount(0);
+
+      if (!entries.length) {
+        setLoadingRunActive(false);
+        setPlannedPageCount(0);
         return;
       }
 
-      // Reset queues/counters for this run
-      setLoadingRunActive(true);
-      publishPlannedPageCount(0);
-      jobQueue.current = [];
-      mainThreadJobQueue.current = [];
-      batchQueue.current = [];
-      currentPageIndex.current = 0;
+      const sourceWarningThreshold = Math.max(0, Number(config.warning.sourceCountThreshold) || 0);
+      if (sourceWarningThreshold > 0 && entries.length >= sourceWarningThreshold) {
+        const accepted = await maybePrompt({
+          phase: 'preload',
+          sourceCount: entries.length,
+          discoveredPageCount: 0,
+          estimatedPageCount: 0,
+          prefetchedBytes: 0,
+          tempStoreMode: config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory',
+          tempStoreProtected: config.sourceStore.protection === 'aes-gcm-session',
+          recommendStop: shouldRecommendStopping({
+            sourceCount: entries.length,
+            pageCount: 0,
+            config,
+          }),
+        });
 
-      // Create a fresh worker pool for THIS run
-      const numWorkers = getNumberOfWorkers(maxWorkers);
-      imageWorkersRef.current = Array.from({ length: numWorkers }, () => createWorker());
-      setWorkerCount(imageWorkersRef.current.length);
-      logger.debug(`Using ${numWorkers} workers. (maxWorkers=${maxWorkers}, lowCore=${lowCore}, batchSize=${batchSize})`, {
-        runId: runId.current
+        if (!accepted || cancelled || !isMountedRef.current) {
+          const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
+          if (msg) addMessage(msg);
+          setLoadingRunActive(false);
+          return;
+        }
+      }
+
+      await initializeDocumentSession({
+        expectedSourceCount: entries.length,
+        config,
       });
 
-      /**
-       * Resolve the active source strategy, enqueue every document, then hand execution off to the
-       * worker or main-thread schedulers.
-       *
-       * @returns {Promise.<void>}
-       */
-      const loadDocuments = async () => {
-        logger.info('DocumentLoader start', { runId: runId.current });
+      if (cancelled || !isMountedRef.current) return;
 
-        let entries = [];
-        if (Array.isArray(sourceList) && sourceList.length > 0) {
-          entries = sourceList
-            .map((it, i) => ({ url: it?.url, fileIndex: typeof it?.fileIndex === 'number' ? it.fileIndex : i }))
-            .filter((e) => !!e.url);
-          logger.debug('Using explicit sourceList', { count: entries.length, runId: runId.current });
-        } else if (demoMode) {
-          const demoUrls = generateDemoList({ strategy: demoStrategy, count: demoCount || 1, formats: demoFormats });
-          entries = demoUrls.map((url, i) => ({ url, fileIndex: i }));
-          logger.debug('Generated demo URLs', { count: demoUrls.length, strategy: demoStrategy, runId: runId.current });
-        } else {
-          const documentUrls = generateDocumentList(folder, extension, endNumber);
-          entries = documentUrls.map((url, i) => ({ url, fileIndex: i }));
-          logger.debug('Generated document URLs', { count: documentUrls.length, runId: runId.current });
+      setLoadingRunActive(true);
+      setPlannedPageCount(0);
+
+      const prefetchTasks = entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
+      let nextPageIndex = 0;
+      let processedSourceCount = 0;
+      let prefetchedBytes = 0;
+      let pageWarningShown = false;
+      let activeTempStoreMode = config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory';
+      const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
+
+      for (let i = 0; i < prefetchTasks.length; i += 1) {
+        if (cancelled || !isMountedRef.current) break;
+
+        const result = await prefetchTasks[i];
+        if (cancelled || !isMountedRef.current) break;
+
+        if (!result.ok) {
+          if (result.aborted) break;
+          const failedPages = createFailedPlaceholder({
+            fileIndex: result.fileIndex,
+            startIndex: nextPageIndex,
+          });
+          insertPagesAtIndex(failedPages, nextPageIndex);
+          nextPageIndex += failedPages.length;
+          processedSourceCount += 1;
+          setPlannedPageCount(nextPageIndex);
+          continue;
         }
 
-        try {
-          logger.debug('Scheduling entries', { count: entries.length, runId: runId.current });
-          for (let i = 0; i < entries.length; i++) {
-            const { url, fileIndex } = entries[i];
-            if (!isMounted.current) break;
-            logger.debug('Processing document URL', { url, index: fileIndex, runId: runId.current });
-            await loadDocumentAsync(url, fileIndex);
-          }
+        prefetchedBytes += Number(result.sizeBytes || 0);
+        if (result.stats?.mode) activeTempStoreMode = result.stats.mode;
 
-          logger.debug('Scheduling complete', {
-            runId: runId.current,
-            pendingWorkerJobs: jobQueue.current.length,
-            pendingMainThreadJobs: mainThreadJobQueue.current.length,
-            totalPlannedPages: currentPageIndex.current
+        let pageCount = Math.max(1, Number(result.pageCountHint) || 1);
+        if (!result.pageCountHint) {
+          try {
+            const analysisBlob = result.analysisBlob instanceof Blob ? result.analysisBlob : null;
+            const arrayBuffer = analysisBlob
+              ? await analysisBlob.arrayBuffer()
+              : null;
+            if (!arrayBuffer) throw new Error(`Prefetched source is missing analysis bytes for ${result.sourceKey}`);
+            pageCount = Math.max(1, Number(await getTotalPages(arrayBuffer, result.fileExtension)) || 1);
+          } catch (error) {
+            logger.warn('Failed to determine page count; falling back to 1 page', {
+              sourceKey: result.sourceKey,
+              url: result.url,
+              error: String(error?.message || error),
+            });
+            pageCount = 1;
+          }
+        }
+        result.analysisBlob = undefined;
+
+        processedSourceCount += 1;
+
+        registerSourceDescriptor({
+          sourceKey: result.sourceKey,
+          fileExtension: result.fileExtension,
+          fileIndex: result.fileIndex,
+          pageCount,
+          mimeType: result.mimeType,
+          sourceUrl: result.url,
+          sizeBytes: result.sizeBytes,
+        });
+
+        const placeholders = createPagePlaceholders({
+          fileIndex: result.fileIndex,
+          sourceKey: result.sourceKey,
+          fileExtension: result.fileExtension,
+          pageCount,
+          mimeType: result.mimeType,
+          sizeBytes: Number(result.sizeBytes || 0),
+          startIndex: nextPageIndex,
+        });
+
+        insertPagesAtIndex(placeholders, nextPageIndex);
+        nextPageIndex += placeholders.length;
+        setPlannedPageCount(nextPageIndex);
+
+        if (processedSourceCount === 1 && nextPageIndex > 0) {
+          try { void ensurePageAsset(0, 'thumbnail', { priority: 'high' }); } catch {}
+          try { void ensurePageAsset(0, 'full', { priority: 'critical' }); } catch {}
+        }
+
+        const estimatedTotalPages = processedSourceCount >= config.warning.probePageThresholdSources
+          ? Math.max(nextPageIndex, Math.round((nextPageIndex / processedSourceCount) * entries.length))
+          : nextPageIndex;
+
+        const pageWarningThreshold = Math.max(0, Number(config.warning.pageCountThreshold) || 0);
+        const exceedsPageThreshold = pageWarningThreshold > 0
+          && !pageWarningShown
+          && processedSourceCount < entries.length
+          && (
+            nextPageIndex >= pageWarningThreshold
+            || estimatedTotalPages >= pageWarningThreshold
+          );
+
+        if (exceedsPageThreshold) {
+          pageWarningShown = true;
+          const accepted = await maybePrompt({
+            phase: 'analysis',
+            sourceCount: entries.length,
+            discoveredPageCount: nextPageIndex,
+            estimatedPageCount: estimatedTotalPages,
+            prefetchedBytes,
+            tempStoreMode: activeTempStoreMode,
+            tempStoreProtected,
+            recommendStop: shouldRecommendStopping({
+              sourceCount: entries.length,
+              pageCount: estimatedTotalPages,
+              config,
+            }),
           });
 
-          if (!isMounted.current) return;
-
-          setLoadingRunActive(false);
-
-          if (lowCore) {
-            setTimeout(processSequential, 0);
-          } else {
-            processBatches();
-            setTimeout(drainMainThreadJobs, 0);
-          }
-        } catch (error) {
-          if (isMounted.current) {
+          if (!accepted || cancelled || !isMountedRef.current) {
+            abortAllFetches();
+            const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
+            if (msg) addMessage(msg);
             setLoadingRunActive(false);
-            setError(error.message);
-            logger.error('Error loading documents', { error: error.message, runId: runId.current });
+            setPlannedPageCount(nextPageIndex);
+            return;
           }
         }
-      };
+      }
 
-      loadDocuments();
-    }, 0);
+      if (!cancelled && isMountedRef.current) {
+        setLoadingRunActive(false);
+        setPlannedPageCount(nextPageIndex);
+
+        if (nextPageIndex > 0) {
+          try { void ensurePageAsset(0, 'thumbnail', { priority: 'high' }); } catch {}
+          try { void ensurePageAsset(0, 'full', { priority: 'critical' }); } catch {}
+        }
+      }
+    };
+
+    run().catch((error) => {
+      if (!cancelled && isMountedRef.current) {
+        logger.error('DocumentLoader run failed', { error: String(error?.message || error) });
+        setError(String(error?.message || error));
+        setLoadingRunActive(false);
+      }
+    });
 
     return () => {
-      isMounted.current = false;
-
-      // Cancel deferred start if it hasn't executed yet (neutralizes StrictMode probe)
-      if (startTimerRef.current != null) {
-        try { clearTimeout(startTimerRef.current); } catch {}
-        startTimerRef.current = undefined;
-      }
-
-      activeFetchControllers.forEach((ctrl) => {
-        try { ctrl.abort(); } catch {}
-      });
-      activeFetchControllers.clear();
-      if (fetchControllers.current === activeFetchControllers) {
-        fetchControllers.current = new Set();
-      }
-
-      // Terminate this run's workers
-      (imageWorkersRef.current || []).forEach((worker) => {
-        try { worker.terminate(); } catch {}
-      });
-      imageWorkersRef.current = [];
-      setWorkerCount(0);
+      cancelled = true;
+      abortAllFetches();
+      const resolver = promptResolverRef.current;
+      promptResolverRef.current = null;
+      if (resolver) resolver(false);
+      setPressureSummary(null);
       setLoadingRunActive(false);
-
-      logger.info('DocumentLoader cleanup', {
-        runId: runId.current,
-        insertsAttempted: insertsAttempted.current,
-        insertsAccepted: insertsAccepted.current,
-        plannedTotal: currentPageIndex.current
-      });
+      setWorkerCount(0);
     };
   }, [
-    folder,
-    extension,
-    endNumber,
-    sourceList,
-    demoMode,
-    demoStrategy,
+    addMessage,
     demoCount,
     demoFormats,
+    demoMode,
+    demoStrategy,
+    endNumber,
+    ensurePageAsset,
+    extension,
+    folder,
+    initializeDocumentSession,
+    insertPagesAtIndex,
+    promptForPressure,
+    registerSourceDescriptor,
     setError,
-    loadDocumentAsync,
-    insertAtIndex,
-    sameBlob,
-    processBatches,
-    processSequential,
-    drainMainThreadJobs,
-    setWorkerCount,
     setLoadingRunActive,
-    publishPlannedPageCount,
+    setPlannedPageCount,
+    setWorkerCount,
+    sourceList,
+    storeSourceBlob,
+    t,
   ]);
 
-  return children;
+  return React.createElement(
+    React.Fragment,
+    null,
+    children,
+    React.createElement(LoadPressureDialog, {
+      open: !!pressureSummary,
+      summary: pressureSummary,
+      onStop: () => resolvePressurePrompt(false),
+      onContinue: () => resolvePressurePrompt(true),
+    })
+  );
 };
 
 export default DocumentLoader;

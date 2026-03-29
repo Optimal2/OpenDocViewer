@@ -11,6 +11,7 @@
  *
  * SAFETY & COMPATIBILITY
  *   - Uses non-standard `performance.memory` only when available (Chromium). Falls back gracefully.
+ *   - In browsers that do not expose heap metrics (for example Firefox), the overlay shows N/A instead of misleading zero values.
  *   - Avoids noisy logs and heavy work; updates are throttled to ~1 Hz for memory and ~60 Hz for FPS.
  *   - Cleans up all timers and rAF handlers on unmount.
  *
@@ -86,6 +87,7 @@ const PerformanceMonitor = () => {
       jsHeapSizeLimit: 0
     })
   );
+  const [hasHeapMetrics, setHasHeapMetrics] = useState(false);
 
   const hardwareConcurrency = useMemo(() => {
     try {
@@ -147,12 +149,15 @@ const PerformanceMonitor = () => {
       // @ts-ignore - non-standard
       const mem = perf && perf.memory ? perf.memory : null;
       if (mem) {
+        setHasHeapMetrics(true);
         setMemory({
           totalJSHeapSize: toMB(mem.totalJSHeapSize),
           usedJSHeapSize: toMB(mem.usedJSHeapSize),
           jsHeapSizeLimit: toMB(mem.jsHeapSizeLimit)
         });
+        return;
       }
+      setHasHeapMetrics(false);
     } catch {
       // ignore; unavailable or blocked
     }
@@ -222,10 +227,19 @@ const PerformanceMonitor = () => {
 
       <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.heapLabel')}</span>{' '}
-        <strong>{memory.usedJSHeapSize.toFixed(1)} MB</strong>
-        <span style={{ opacity: 0.7 }}>
-          {' '} / {memory.totalJSHeapSize.toFixed(1)} MB {t('perf.heapLimit', { mb: memory.jsHeapSizeLimit.toFixed(0) })}
-        </span>
+        {hasHeapMetrics ? (
+          <>
+            <strong>{memory.usedJSHeapSize.toFixed(1)} MB</strong>
+            <span style={{ opacity: 0.7 }}>
+              {' '} / {memory.totalJSHeapSize.toFixed(1)} MB {t('perf.heapLimit', { mb: memory.jsHeapSizeLimit.toFixed(0) })}
+            </span>
+          </>
+        ) : (
+          <span style={{ opacity: 0.7 }}>
+            <strong>{t('perf.heapNotAvailable', { defaultValue: 'N/A' })}</strong>{' '}
+            {t('perf.heapUnsupported', { defaultValue: '(browser does not expose heap metrics)' })}
+          </span>
+        )}
       </div>
 
       <div style={sectionStyle}>

@@ -159,6 +159,27 @@
     },
     "resizer": {
       "ariaLabel": "Resize panel"
+    },
+    "loadPressure": {
+      "title": "Large document batch detected",
+      "descriptionPreload": "This loading run contains many source files. OpenDocViewer can prefetch them into temporary browser storage and render pages lazily, but the operation can still consume substantial memory, CPU, and local disk resources.",
+      "descriptionAnalysis": "The loading run is larger than expected after analyzing the prefetched files. You can stop now and retry with a smaller batch or continue at your own risk.",
+      "sourcesLabel": "Sources",
+      "pagesDiscoveredLabel": "Pages discovered",
+      "estimatedPagesLabel": "Estimated total pages",
+      "prefetchedBytesLabel": "Prefetched data",
+      "storageModeLabel": "Temp storage mode",
+      "storageModeMemory": "Memory",
+      "storageModeIndexedDb": "Browser disk cache",
+      "storageProtectedLabel": "Temp storage protection",
+      "storageProtectedOn": "Session-encrypted",
+      "storageProtectedOff": "Disabled",
+      "prefetchConcurrencyLabel": "Prefetch concurrency",
+      "recommendStop": "Recommendation: stop loading and retry with fewer files or lower concurrency if possible.",
+      "continueNote": "Continuing is usually acceptable for moderate runs, but the browser may still become slow on very large batches.",
+      "stop": "Stop loading",
+      "continue": "Continue anyway",
+      "stoppedMessage": "Loading was stopped before the remaining pages were analyzed."
     }
   },
   "thumbnails": {
@@ -166,7 +187,20 @@
       "container": "Document thumbnails"
     },
     "goToPage": "Go to page {page}",
-    "pageFailedAlt": "Page {page} failed to load"
+    "pageFailedAlt": "Page {page} failed to load",
+    "goToPageLeftPane": "Go to page {page} (left pane)",
+    "goToPageRightPane": "Go to page {page} (right pane)",
+    "goToPageBothPanes": "Go to page {page} (shown in both panes)",
+    "leftPaneBadge": "Left",
+    "rightPaneBadge": "Right",
+    "panelTitle": "Pages",
+    "controls": {
+      "groupLabel": "Thumbnail pane controls",
+      "narrower": "Make thumbnail pane narrower",
+      "wider": "Make thumbnail pane wider",
+      "hidePane": "Hide thumbnails",
+      "showPane": "Show thumbnails"
+    }
   },
   "compareZoom": {
     "increase": "Increase pane zoom",
@@ -199,7 +233,9 @@
     "failedSuffix": "· failed {count}",
     "workersLabel": "Workers:",
     "errorPrefix": "Error:",
-    "messagesLabel": "Messages:"
+    "messagesLabel": "Messages:",
+    "heapNotAvailable": "N/A",
+    "heapUnsupported": "(browser does not expose heap metrics)"
   },
   "html": {
     "title": "OpenDocViewer",

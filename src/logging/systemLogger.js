@@ -27,7 +27,8 @@
  * DEFAULTS
  *   - Log level defaults to 'debug' in dev (import.meta.env.MODE === 'development'), else 'warn'.
  *   - Backend logging is enabled IFF a backend URL exists (unless explicitly disabled).
- *   - Retries: 3 attempts, 1000 ms between attempts.
+ *   - Retries: 3 attempts, 1000 ms between attempts for transient failures.
+ *   - Non-recoverable 401/403/404 responses disable backend forwarding for the rest of the session.
  *
  * IMPORTANT (project-wide gotcha retained here for future reviewers):
  *   - In other parts of the app we import from 'file-type' (root), NOT 'file-type/browser'.
@@ -228,6 +229,10 @@ class LogController {
 
     // Axios default timeout (kept small for log fire-and-forget)
     /** @private */ this.httpTimeout = 5000; // ms
+
+    // Disable repeated backend attempts after clearly non-recoverable failures
+    /** @private */ this.backendDisabledReason = '';
+    /** @private */ this.backendDisableAnnounced = false;
   }
 
   /* ------------------------------------------------------------------------ *
@@ -241,6 +246,10 @@ class LogController {
    */
   setLogToBackend = (value) => {
     this.logToBackend = !!value;
+    if (this.logToBackend) {
+      this.backendDisabledReason = '';
+      this.backendDisableAnnounced = false;
+    }
   };
 
   /**
@@ -349,6 +358,20 @@ class LogController {
   };
 
   /**
+   * Disable backend forwarding after a non-recoverable configuration/runtime failure.
+   * @param {string} reason
+   * @returns {void}
+   */
+  disableBackendLogging = (reason) => {
+    this.logToBackend = false;
+    this.backendDisabledReason = String(reason || 'disabled');
+    if (!this.backendDisableAnnounced) {
+      this.backendDisableAnnounced = true;
+      console.warn('System log backend disabled for this session', { reason: this.backendDisabledReason });
+    }
+  };
+
+  /**
    * Attempt to POST the log to the backend, with simple linear retries.
    *
    * @param {LogLevel} level
@@ -370,6 +393,13 @@ class LogController {
         }
       );
     } catch (error) {
+      const status = Number(error?.response?.status || 0);
+      const nonRetryableClientFailure = status === 401 || status === 403 || status === 404;
+      if (nonRetryableClientFailure) {
+        this.disableBackendLogging(`HTTP ${status}`);
+        return;
+      }
+
       if (attempt < this.retryLimit) {
         setTimeout(() => {
           // Note: this recursion is intentionally non-awaited (fire-and-forget)

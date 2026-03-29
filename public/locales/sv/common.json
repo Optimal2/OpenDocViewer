@@ -159,6 +159,27 @@
     },
     "resizer": {
       "ariaLabel": "Ändra panelstorlek"
+    },
+    "loadPressure": {
+      "title": "Stor dokumentmängd upptäckt",
+      "descriptionPreload": "Den här laddningen innehåller många källfiler. OpenDocViewer kan förhämta dem till temporär lagring i webbläsaren och rendera sidor vid behov, men körningen kan ändå använda mycket minne, CPU och lokal diskyta.",
+      "descriptionAnalysis": "Laddningen blev större än väntat efter att de förhämtade filerna analyserats. Du kan stoppa nu och försöka igen med en mindre mängd filer eller fortsätta på egen risk.",
+      "sourcesLabel": "Källor",
+      "pagesDiscoveredLabel": "Upptäckta sidor",
+      "estimatedPagesLabel": "Uppskattat totalt sidantal",
+      "prefetchedBytesLabel": "Förhämtad data",
+      "storageModeLabel": "Temporär lagring",
+      "storageModeMemory": "Minne",
+      "storageModeIndexedDb": "Diskcache i webbläsaren",
+      "storageProtectedLabel": "Skydd för temporär lagring",
+      "storageProtectedOn": "Sessionskrypterad",
+      "storageProtectedOff": "Avstängd",
+      "prefetchConcurrencyLabel": "Samtidiga förhämtningar",
+      "recommendStop": "Rekommendation: stoppa laddningen och försök igen med färre filer eller lägre samtidighet om det går.",
+      "continueNote": "Det går oftast bra att fortsätta vid måttliga körningar, men webbläsaren kan fortfarande bli långsam vid mycket stora batcher.",
+      "stop": "Stoppa laddningen",
+      "continue": "Fortsätt ändå",
+      "stoppedMessage": "Laddningen stoppades innan resterande sidor hann analyseras."
     }
   },
   "thumbnails": {
@@ -166,7 +187,20 @@
       "container": "Dokumentminiatyrer"
     },
     "goToPage": "Gå till sida {page}",
-    "pageFailedAlt": "Sida {page} kunde inte läsas in"
+    "pageFailedAlt": "Sida {page} kunde inte läsas in",
+    "goToPageLeftPane": "Gå till sida {page} (vänster vy)",
+    "goToPageRightPane": "Gå till sida {page} (höger vy)",
+    "goToPageBothPanes": "Gå till sida {page} (visas i båda vyerna)",
+    "leftPaneBadge": "Vänster",
+    "rightPaneBadge": "Höger",
+    "panelTitle": "Sidor",
+    "controls": {
+      "groupLabel": "Kontroller för miniatyrpanelen",
+      "narrower": "Gör miniatyrpanelen smalare",
+      "wider": "Gör miniatyrpanelen bredare",
+      "hidePane": "Dölj miniatyrer",
+      "showPane": "Visa miniatyrer"
+    }
   },
   "compareZoom": {
     "increase": "Öka panelens zoom",
@@ -199,7 +233,9 @@
     "failedSuffix": "· misslyckade {count}",
     "workersLabel": "Arbetstrådar:",
     "errorPrefix": "Fel:",
-    "messagesLabel": "Meddelanden:"
+    "messagesLabel": "Meddelanden:",
+    "heapNotAvailable": "N/A",
+    "heapUnsupported": "(webbläsaren exponerar inte heap-metrik)"
   },
   "html": {
     "title": "OpenDocViewer",

@@ -19,6 +19,7 @@ The codebase now has three documentation layers:
 - [Requirements](#requirements)
 - [Quick start](#quick-start)
 - [Build, preview, and generated docs](#build-preview-and-generated-docs)
+- [Release workflow](#release-workflow)
 - [Hosting and deployment](#hosting-and-deployment)
 - [Runtime configuration](#runtime-configuration)
 - [Printing](#printing)
@@ -41,13 +42,17 @@ The codebase now has three documentation layers:
   - Fit-to-page and fit-to-width sticky zoom modes
   - Explicit zoom controls, typed zoom percentage, and 1:1 mode
   - Optional comparison view with independent per-pane post-zoom
-  - Thumbnail strip with keyboard-friendly selection
+  - Deterministic thumbnail pane with keyboard-friendly selection, compare badges, and width controls
+  - Lazy full-page / thumbnail rendering with bounded cache sizes
   - Basic visual image adjustments for raster pages (rotation, brightness, contrast)
 - **Printing**
   - Current page, all pages, range, and explicit sequence printing
   - Optional print-header overlay with template tokens
 - **Runtime flexibility**
   - Runtime config through `public/odv.config.js`
+  - Configurable large-document loading thresholds, adaptive memory heuristics, prefetch concurrency, and cache limits
+  - Adaptive browser temp storage (memory -> IndexedDB) for original source bytes
+  - Optional persisted page-asset storage so rendered full pages / thumbnails can be reused without re-rendering
   - Multiple bootstrap sources: demo, URL parameters, session token, parent window, JS API
 - **Optional operational support**
   - User print logging
@@ -133,7 +138,9 @@ This lets the same build work for demo use, embedded use, and host-integrated de
 ## Requirements
 
 - **Node.js 18+**
-- Modern browser engines (Chromium, Firefox, Safari)
+- Primary target browsers: Microsoft Edge and Google Chrome (Chromium)
+- Firefox may work for basic viewing, but it is not the primary support target and may differ in diagnostics and some HTML input-validation behavior
+- Safari is not the primary operational target
 - Static hosting for the built frontend
 - Optional: Node.js runtime for the log servers under `server/`
 
@@ -169,6 +176,35 @@ The generated JSDoc output is not intended to be committed. The hand-written sou
 
 ---
 
+## Release workflow
+
+For a normal release candidate, validate locally first:
+
+```bash
+npm ci
+npm run lint
+npm run build
+npm run doc
+```
+
+Then run the PowerShell helper from the repo root on Windows:
+
+```powershell
+.\release.ps1
+```
+
+The release helper now runs the same local validation steps (`lint`, `build`, `doc`) before it creates a release commit. After validation passes, it will:
+
+1. stage and commit the current working changes
+2. run `npm version <patch|minor|major>` to create the version-bump commit and Git tag
+3. push the branch and tag to `origin`
+
+The pushed tag triggers `.github/workflows/release.yml`, which builds the production bundle and generated docs, packages them as zip files, and publishes the GitHub release assets.
+
+Use GitHub Desktop for review if you want, but you do not need to create or push the release commits manually unless you explicitly prefer that workflow.
+
+---
+
 ## Hosting and deployment
 
 The frontend is static. Deploy `dist/` to IIS, Nginx, Apache, S3/CloudFront, or another static host.
@@ -201,15 +237,34 @@ Loading order:
 The config covers areas such as:
 
 - diagnostics
-- i18n defaults and translation loading
+- i18n defaults and translation loading (now cache-busted automatically per build)
 - print-header overlay
 - user print logging
 - system logging
 - application base path/base href
+- large-document loading (`documentLoading`) for warnings, temp storage, lazy rendering, and cache limits
 
 For deployment and precedence details, see `docs-src/runtime-configuration.md`.
 
 ---
+
+
+### Adaptive large-document loading
+
+The viewer now supports a two-phase loading pipeline for large batches:
+
+1. prefetch original source files early, which helps when bootstrap URLs are short-lived or tokenized
+2. store original bytes in memory or IndexedDB depending on configured thresholds
+3. analyze page counts in stable order from the freshly fetched blob when possible
+4. render thumbnails and full pages on demand
+5. persist rendered page blobs in a second cache layer so later navigation and printing can usually reuse the same blob without re-rendering
+6. keep the thumbnail scrollbar deterministic while object URLs are only evicted from RAM when configured limits are actually reached
+
+This reduces heap pressure substantially compared with eager rendering and also enables a warning dialog
+before continuing clearly large runs. The shipped defaults now favor stability/performance and only
+move into more conservative memory behavior when the browser signals lower headroom or when a site
+explicitly overrides the thresholds in `odv.site.config.js`. The relevant knobs live under
+`documentLoading` in `public/odv.config.js`.
 
 ## Printing
 
@@ -237,11 +292,11 @@ For the logging server contract and reverse-proxy examples, see `docs-src/log-se
 
 ### User print log
 
-Client code lives in `src/logging/userLogger.js` and records user print metadata such as reason / recipient, depending on runtime policy.
+Client code lives in `src/logging/userLogger.js` and records user print metadata such as reason / recipient, depending on runtime policy. Runtime default: disabled until explicitly enabled in `odv.site.config.js`.
 
 ### System log
 
-Client code lives in `src/logging/systemLogger.js`.
+Client code lives in `src/logging/systemLogger.js`. Runtime default: disabled until explicitly enabled in `odv.site.config.js`.
 Optional ingestion servers live in:
 
 - `server/system-log-server.js`
@@ -316,6 +371,12 @@ The repository conventions are documented in `CONTRIBUTING.md`. The most relevan
 - **If print output differs from the viewer**
   - check whether the current page is rendered via canvas or plain image
   - inspect `src/utils/printCore.js` and `src/utils/printDom.js`
+- **If Firefox shows console warnings such as `Unable to check <input pattern=...>`**
+  - treat them as browser-specific validation noise first
+  - OpenDocViewer is primarily validated for Chromium browsers (Edge/Chrome)
+- **If the performance overlay shows no heap numbers**
+  - heap metrics rely on Chromium's `performance.memory` API
+  - non-Chromium browsers such as Firefox will show `N/A` instead of heap usage values
 
 ---
 

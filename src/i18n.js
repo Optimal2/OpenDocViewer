@@ -14,8 +14,9 @@
  *   in priority order, from:
  *     1) URL query ?i18nV=...
  *     2) localStorage key 'ODV_I18N_VERSION'
- *     3) window.__ODV_CONFIG__.i18n.version
- *     4) window.__APP_VERSION__  or  import.meta.env.VITE_APP_VERSION / APP_VERSION
+ *     3) window.__ODV_CONFIG__.i18n.version (unless set to "auto")
+ *     4) import.meta.env.ODV_BUILD_ID (unique per build)
+ *     5) window.__APP_VERSION__ or import.meta.env.VITE_APP_VERSION / APP_VERSION
  *   If the configured template doesn't contain {{ver}}/{{version}}, a ?v=<token>
  *   parameter will be appended automatically.
  *
@@ -49,13 +50,28 @@ const WANT_DIAG = IS_DEV;
 /** Return cache-busting version token (see header). */
 function getI18nVersion() {
   try {
-    const q = readQuery('i18nV'); if (q) return q;
-    try { const v = localStorage.getItem('ODV_I18N_VERSION'); if (v) return v; } catch {}
+    const q = readQuery('i18nV');
+    if (q) return q;
+
+    try {
+      const v = localStorage.getItem('ODV_I18N_VERSION');
+      if (v) return v;
+    } catch {}
+
     const w = typeof window !== 'undefined' ? window : /** @type {*} */ ({});
     const cfg = (w.__ODV_CONFIG__ && w.__ODV_CONFIG__.i18n) || {};
-    if (cfg.version) return String(cfg.version);
-    const globalVer = w.__APP_VERSION__ ||
-      (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_APP_VERSION || import.meta.env.APP_VERSION));
+    const cfgVersion = typeof cfg.version === 'string' ? cfg.version.trim() : cfg.version;
+    if (cfgVersion && String(cfgVersion).toLowerCase() !== 'auto') return String(cfgVersion);
+
+    const globalVer =
+      (typeof import.meta !== 'undefined' && import.meta.env && (
+        import.meta.env.ODV_BUILD_ID ||
+        import.meta.env.VITE_APP_VERSION ||
+        import.meta.env.APP_VERSION
+      )) ||
+      w.__APP_VERSION__ ||
+      w.__ODV_APP_VERSION__;
+
     if (globalVer) return String(globalVer);
   } catch {}
   return '';

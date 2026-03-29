@@ -1,96 +1,82 @@
 // File: src/components/DocumentRender.jsx
 /**
- * File: src/components/DocumentRender.jsx
+ * OpenDocViewer — Active page renderer.
  *
- * Active-page renderer for the viewer.
+ * The old implementation waited until every page in the load run had been rasterized before it
+ * displayed anything. That amplified both memory and CPU usage for large batches.
  *
- * Responsibilities:
- * - render the currently selected page either as a plain image or via canvas
- * - compute fit-based zoom values from measured image dimensions
- * - expose an imperative API used by toolbar and viewer helpers
- * - coordinate initial-load, re-render, and printable-surface access for the active page
- *
- * This file is intentionally renderer-focused. Global viewer state, page lists, and print orchestration
- * live elsewhere.
+ * This renderer instead requests the active page on demand, keeps the last successfully displayed
+ * page visible while the next target page is loading, and optionally prefetches a few neighboring
+ * pages for smoother navigation. That avoids the distracting "loading page" blink during normal
+ * page-to-page navigation.
  */
 
 import React, {
+  useCallback,
+  useContext,
   useEffect,
+  useImperativeHandle,
+  useMemo,
   useRef,
   useState,
-  useCallback,
-  useMemo,
-  useImperativeHandle,
 } from 'react';
 import { useTranslation } from 'react-i18next';
+import ViewerContext from '../contexts/viewerContext.js';
 import logger from '../logging/systemLogger.js';
-import ImageRenderer from './ImageRenderer';
-import CanvasRenderer from './CanvasRenderer';
-import LoadingMessage from './LoadingMessage';
+import ImageRenderer from './ImageRenderer.jsx';
+import CanvasRenderer from './CanvasRenderer.jsx';
+import LoadingMessage from './LoadingMessage.jsx';
 import {
   calculateFitToScreenZoom,
   calculateFitToWidthZoom,
   handleZoomIn,
   handleZoomOut,
-} from '../utils/zoomUtils';
-
-
-/**
- * Props for {@link DocumentRender}.
- * @typedef {Object} DocumentRenderProps
- * @property {number} pageNumber
- * @property {number} zoom
- * @property {function(): void=} initialRenderDone
- * @property {function(): void=} onRender
- * @property {{ current: HTMLElement|null }} viewerContainerRef
- * @property {function(number): void} setZoom
- * @property {boolean} isCompareMode
- * @property {{ rotation: number, brightness: number, contrast: number }} imageProperties
- * @property {boolean} isCanvasEnabled
- * @property {boolean} forceRender
- * @property {Array<PageEntry>} allPages
- * @property {{ current: HTMLElement|null }=} thumbnailsContainerRef
- */
+} from '../utils/zoomUtils.js';
+import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
 
 /**
- * @typedef {Object} PageEntry
- * @property {string} fullSizeUrl           Resolved URL for the full-size raster image
- * @property {(string|undefined)} thumbnailUrl        Optional URL for the thumbnail
- * @property {number} status                Load status: 0=loading, 1=ready, -1=failed
- * @property {(number|undefined)} realWidth           Optional source width hint (pre-sniffed)
- * @property {(number|undefined)} realHeight          Optional source height hint (pre-sniffed)
- */
-
-/**
- * Get the current page (1-based index) or null.
- * @param {Array.<PageEntry>} allPages
+ * @param {Array<any>} allPages
  * @param {number} pageNumber
- * @returns {(PageEntry|null)}
+ * @returns {any}
  */
 function getCurrentPage(allPages, pageNumber) {
   if (!Array.isArray(allPages) || allPages.length === 0) return null;
-  return allPages[pageNumber - 1] || null;
+  return allPages[Math.max(0, Number(pageNumber) - 1)] || null;
 }
 
 /**
- * Imperative API exposed by this renderer.
- * @typedef {Object} DocumentRenderAPI
- * @property {function(): void} updateImageSourceAndFit   Reload current page and (re)draw
- * @property {function(): (HTMLCanvasElement|HTMLImageElement|null)} getActiveCanvas
- * @property {function(): void} fitToScreen               Compute “fit to screen” zoom and apply
- * @property {function(): void} fitToWidth                Compute “fit to width” zoom and apply
- * @property {function(): void} zoomIn                    Increase zoom (clamped)
- * @property {function(): void} zoomOut                   Decrease zoom (clamped)
- * @property {function(): void} forceRender               Flag to force a re-render on next effect
- * @property {function(): !Array<string>} getAllPrintableDataUrls   // NEW: list of full-size URLs for ALL pages in order
+ * @param {{ width:number, height:number }} size
+ * @returns {{ width:number, height:number }}
+ */
+function normalizeSize(size) {
+  return {
+    width: Math.max(0, Number(size?.width) || 0),
+    height: Math.max(0, Number(size?.height) || 0),
+  };
+}
+
+/**
+ * @typedef {Object} DisplayedAsset
+ * @property {string} url
+ * @property {number} pageIndex
+ * @property {number} pageNumber
  */
 
 /**
- * Render the currently active page and expose imperative viewer helpers to parent components.
- *
- * @param {DocumentRenderProps} props
- * @param {*} ref
- * @returns {*}
+ * @param {Object} props
+ * @param {number} props.pageNumber
+ * @param {number} props.zoom
+ * @param {function(): void=} props.initialRenderDone
+ * @param {function(): void=} props.onRender
+ * @param {{ current: HTMLElement|null }} props.viewerContainerRef
+ * @param {function(number): void} props.setZoom
+ * @param {boolean} props.isCompareMode
+ * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
+ * @param {boolean} props.isCanvasEnabled
+ * @param {boolean=} props.forceRender
+ * @param {Array<any>} props.allPages
+ * @param {{ current: HTMLElement|null }=} props.thumbnailsContainerRef
+ * @returns {React.ReactElement}
  */
 const DocumentRender = React.forwardRef(function DocumentRender(
   {
@@ -110,332 +96,516 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   ref
 ) {
   const { t } = useTranslation('common');
+  const {
+    ensurePageAsset,
+    touchPageAsset,
+    pinPageAsset,
+    unpinPageAsset,
+    getPrintablePageUrls,
+  } = useContext(ViewerContext);
 
-  // DOM refs for actual drawing/hosting of the page
-  const canvasRef = useRef(/** @type {HTMLCanvasElement|null} */ (null));
-  const imgRef = useRef(/** @type {HTMLImageElement|null} */ (null));
+  const loadingConfig = useMemo(() => getDocumentLoadingConfig(), []);
+  const currentIndex = Math.max(0, Number(pageNumber) - 1);
+  const currentPage = useMemo(() => getCurrentPage(allPages, pageNumber), [allPages, pageNumber]);
+  const currentSourceKey = currentPage?.sourceKey || '';
+  const currentPageStatus = Number(currentPage?.status || 0);
+  const currentFullStatus = Number(currentPage?.fullSizeStatus || 0);
 
-  // Internal state/flags
+  const canvasRef = useRef(/** @type {(HTMLCanvasElement|null)} */ (null));
+  const imgRef = useRef(/** @type {(HTMLImageElement|null)} */ (null));
+  const requestSeqRef = useRef(0);
   const initialRenderRef = useRef(false);
-  const [lastRendered, setLastRendered] = useState(/** @type {(number|null)} */ (null));
-  const [shouldForceRender, setShouldForceRender] = useState(!!forceRender);
-  const [isInitialLoad, setIsInitialLoad] = useState(true);
-  const [showPage, setShowPage] = useState(false); // becomes true when all pages are status===1
+  const initialFitPendingRef = useRef(true);
+  const displayedAssetRef = useRef(/** @type {DisplayedAsset} */ ({ url: '', pageIndex: -1, pageNumber: 0 }));
+  const pendingAssetRef = useRef(/** @type {(DisplayedAsset|null)} */ (null));
 
-  const currentPage = useMemo(
-    () => getCurrentPage(allPages, pageNumber),
-    [allPages, pageNumber]
-  );
+  const [displayedAsset, setDisplayedAsset] = useState(/** @type {DisplayedAsset} */ ({
+    url: '',
+    pageIndex: -1,
+    pageNumber: 0,
+  }));
+  const [pendingAsset, setPendingAsset] = useState(/** @type {(DisplayedAsset|null)} */ (null));
+  const [imageRevision, setImageRevision] = useState(0);
+  const [imageLoaded, setImageLoaded] = useState(false);
+  const [assetFailed, setAssetFailed] = useState(false);
+  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+
+  useEffect(() => {
+    displayedAssetRef.current = displayedAsset;
+  }, [displayedAsset]);
+
+  useEffect(() => {
+    pendingAssetRef.current = pendingAsset;
+  }, [pendingAsset]);
+
+
+  useEffect(() => {
+    const pageIndex = Number(displayedAsset?.pageIndex);
+    const url = String(displayedAsset?.url || '');
+    if (pageIndex < 0 || !url) return undefined;
+
+    pinPageAsset(pageIndex, 'full');
+    return () => {
+      unpinPageAsset(pageIndex, 'full');
+    };
+  }, [displayedAsset?.pageIndex, displayedAsset?.url, pinPageAsset, unpinPageAsset]);
+
+  useEffect(() => {
+    const pageIndex = Number(pendingAsset?.pageIndex);
+    const url = String(pendingAsset?.url || '');
+    if (pageIndex < 0 || !url) return undefined;
+
+    pinPageAsset(pageIndex, 'full');
+    return () => {
+      unpinPageAsset(pageIndex, 'full');
+    };
+  }, [pendingAsset?.pageIndex, pendingAsset?.url, pinPageAsset, unpinPageAsset]);
 
   /**
-   * Best-effort compute raster dimensions for drawing.
-   * Uses currentPage hints if present; otherwise falls back to image.natural*.
-   * @param {HTMLImageElement} image
-   * @returns {{ width: number, height: number }}
+   * @returns {number}
    */
-  const getImageDimensions = useCallback(
-    (image) => {
-      const realWidth = currentPage?.realWidth || image?.naturalWidth || 0;
-      const realHeight = currentPage?.realHeight || image?.naturalHeight || 0;
-      logger.info('Using image dimensions', { realWidth, realHeight });
-      return { width: realWidth, height: realHeight };
-    },
-    [currentPage]
-  );
+  const getSidebarWidth = useCallback(() => {
+    const widthPx = Number(thumbnailsContainerRef?.current?.offsetWidth || 0);
+    return Math.max(0, widthPx);
+  }, [thumbnailsContainerRef]);
 
   /**
-   * Draw a loaded image onto the canvas with rotation/filters.
    * @param {HTMLImageElement} image
    * @returns {void}
    */
-  const drawImageOnCanvas = useCallback(
-    (image) => {
-      const canvas = canvasRef.current;
-      const context = canvas?.getContext('2d');
-      if (!canvas || !image || !context) return;
+  const drawImageOnCanvas = useCallback((image) => {
+    const canvas = canvasRef.current;
+    const ctx = canvas?.getContext('2d');
+    if (!canvas || !ctx || !image) return;
 
-      const { width, height } = getImageDimensions(image);
-      const { rotation, brightness, contrast } = imageProperties;
+    const sourceWidth = Math.max(1, Number(image.naturalWidth || currentPage?.realWidth || 0) || 1);
+    const sourceHeight = Math.max(1, Number(image.naturalHeight || currentPage?.realHeight || 0) || 1);
+    const rotation = Number(imageProperties?.rotation || 0) || 0;
+    const brightness = Number(imageProperties?.brightness || 100) || 100;
+    const contrast = Number(imageProperties?.contrast || 100) || 100;
 
-      // Swap canvas dimensions for 90/270-degree rotations
-      if (rotation === 90 || rotation === 270) {
-        canvas.width = height;
-        canvas.height = width;
-      } else {
-        canvas.width = width;
-        canvas.height = height;
-      }
-
-      context.clearRect(0, 0, canvas.width, canvas.height);
-      context.save();
-      context.translate(canvas.width / 2, canvas.height / 2);
-      context.rotate((rotation * Math.PI) / 180);
-      context.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-      context.drawImage(image, -width / 2, -height / 2, width, height);
-      context.restore();
-    },
-    [imageProperties, getImageDimensions]
-  );
-
-  // When ALL pages are ready, we switch from initial placeholder to actual page rendering
-  useEffect(() => {
-    if (!showPage && Array.isArray(allPages) && allPages.length > 0) {
-      const allReady = allPages.every((p) => p && p.status === 1);
-      if (allReady) setShowPage(true);
+    if (rotation === 90 || rotation === 270) {
+      canvas.width = sourceHeight;
+      canvas.height = sourceWidth;
+    } else {
+      canvas.width = sourceWidth;
+      canvas.height = sourceHeight;
     }
-  }, [allPages, showPage]);
+
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.save();
+    ctx.translate(canvas.width / 2, canvas.height / 2);
+    ctx.rotate((rotation * Math.PI) / 180);
+    ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
+    ctx.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
+    ctx.restore();
+  }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties]);
 
   /**
-   * Load the current page image, then:
-   *   - draw on canvas (if enabled)
-   *   - compute initial fit-to-screen zoom (once, on the very first load)
-   *   - scroll the thumbnail strip to current page
+   * @returns {void}
    */
-  useEffect(() => {
-    if (!showPage) return;
-    if (!currentPage || (pageNumber === lastRendered && !shouldForceRender)) return;
-
-    let cancelled = false;
-    const image = new Image();
-    imgRef.current = image;
-    // Hint modern browsers to decode off the main thread
-    try { image.decoding = 'async'; } catch {}
-
-    image.onload = () => {
-      if (cancelled) return;
-
-      // Yield to allow layout to settle before heavy work
-      setTimeout(() => {
-        if (isCanvasEnabled) {
-          drawImageOnCanvas(image);
-        }
-
-        if (!initialRenderRef.current) {
-          initialRenderDone();
-          initialRenderRef.current = true;
-        }
-
-        onRender();
-        setLastRendered(pageNumber);
-        setShouldForceRender(false);
-
-        // First-time auto-zoom: compute a “fit-to-screen” zoom using container bounds.
-        if (isInitialLoad) {
-          setIsInitialLoad(false);
-          try {
-            const sidebar = Math.max(
-              0,
-              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
-            );
-            calculateFitToScreenZoom(
-              image,
-              viewerContainerRef,
-              setZoom,
-              isCompareMode,
-              { sidebarWidthPx: sidebar }
-            );
-          } catch (e) {
-            logger.warn('Auto fit-to-screen failed', { error: String(e?.message || e) });
-          }
-        }
-
-        // Ensure the current thumbnail is visible in the sidebar
-        const containerEl = thumbnailsContainerRef?.current || null;
-        if (containerEl) {
-          const anchor = document.getElementById(`thumbnail-anchor-${pageNumber}`);
-          if (anchor) {
-            containerEl.scrollTop = anchor.offsetTop - containerEl.offsetTop;
-            logger.info('Scrolled to current page', { pageNumber, offsetTop: anchor.offsetTop });
-          } else {
-            logger.warn('Thumbnail anchor not found', { pageNumber });
-          }
-        }
-      }, 0);
-    };
-
-    image.onerror = () => {
-      if (cancelled) return;
-      logger.error('Failed to load image for page', { pageNumber, url: currentPage?.fullSizeUrl });
-    };
-
-    // Kick off the fetch
-    image.src = currentPage.fullSizeUrl;
-
-    return () => {
-      cancelled = true;
-      // Break potential cycles / free memory
-      if (imgRef.current) {
-        imgRef.current.onload = null;
-        imgRef.current.onerror = null;
-      }
-    };
-  }, [
-    showPage,
-    currentPage,
-    pageNumber,
-    initialRenderDone,
-    onRender,
-    lastRendered,
-    drawImageOnCanvas,
-    isCanvasEnabled,
-    setZoom,
-    shouldForceRender,
-    isInitialLoad,
-    viewerContainerRef,
-    isCompareMode,
-    thumbnailsContainerRef
-  ]);
-
-  // Re-draw the canvas when zoom/filters change (only if we already drew once)
-  useEffect(() => {
-    if (isCanvasEnabled && showPage && imgRef.current) {
-      drawImageOnCanvas(imgRef.current);
-    }
-  }, [zoom, imageProperties, drawImageOnCanvas, isCanvasEnabled, showPage]);
-
-  // External flag to force a re-render (e.g., toolbar “refresh”)
-  useEffect(() => {
-    if (forceRender) setShouldForceRender(true);
-  }, [forceRender]);
-
-  // Imperative API exposed to parent components (toolbar, print, etc.)
-  const imperativeHandle = useMemo(
-    () =>
-      /** @type {DocumentRenderAPI} */ ({
-        updateImageSourceAndFit() {
-          const url = currentPage?.fullSizeUrl;
-          if (!url || !imgRef.current) return;
-          imgRef.current.src = url; // triggers onload; canvas will be drawn if enabled
-          if (isCanvasEnabled) drawImageOnCanvas(imgRef.current);
-        },
-        getActiveCanvas() {
-          return isCanvasEnabled ? canvasRef.current : imgRef.current;
-        },
-        fitToScreen() {
-          const img = imgRef.current;
-          if (img && img.complete) {
-            const sidebar = Math.max(
-              0,
-              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
-            );
-            calculateFitToScreenZoom(
-              img,
-              viewerContainerRef,
-              setZoom,
-              isCompareMode,
-              { sidebarWidthPx: sidebar }
-            );
-          }
-        },
-        fitToWidth() {
-          const img = imgRef.current;
-          if (img && img.complete) {
-            const sidebar = Math.max(
-              0,
-              Number(thumbnailsContainerRef?.current?.offsetWidth || 0)
-            );
-            calculateFitToWidthZoom(
-              img,
-              viewerContainerRef,
-              setZoom,
-              isCompareMode,
-              { sidebarWidthPx: sidebar }
-            );
-          }
-        },
-        zoomIn() {
-          handleZoomIn(setZoom);
-        },
-        zoomOut() {
-          handleZoomOut(setZoom);
-        },
-        forceRender() {
-          setShouldForceRender(true);
-        },
-        /**
-         * Return full-size URLs for ALL pages in order (for printing all pages).
-         * This avoids relying on the DOM (which may be virtualized) and prevents
-         * capturing duplicates like the first page twice.
-         * @returns {!Array<string>}
-         */
-        getAllPrintableDataUrls() {
-          try {
-            if (!Array.isArray(allPages) || allPages.length === 0) return [];
-            /** @type {!Array<string>} */
-            const urls = [];
-            for (let i = 0; i < allPages.length; i++) {
-              const p = allPages[i];
-              const u = p && typeof p.fullSizeUrl === 'string' ? p.fullSizeUrl : '';
-              // Exclude obvious placeholders/failures if present
-              if (u && !/placeholder|lost/i.test(u)) {
-                urls.push(u);
-              }
-            }
-            logger.info('Collected printable URLs for all pages', { count: urls.length });
-            return urls;
-          } catch (e) {
-            logger.error('getAllPrintableDataUrls failed', { error: String(e?.message || e) });
-            return [];
-          }
-        },
-      }),
-    [
-      currentPage,
-      isCanvasEnabled,
-      drawImageOnCanvas,
+  const fitToScreen = useCallback(() => {
+    const image = imgRef.current;
+    if (!image || !image.complete) return;
+    calculateFitToScreenZoom(
+      image,
       viewerContainerRef,
       setZoom,
       isCompareMode,
-      allPages,
-      thumbnailsContainerRef
-    ]
-  );
+      { sidebarWidthPx: getSidebarWidth() }
+    );
+  }, [getSidebarWidth, isCompareMode, setZoom, viewerContainerRef]);
+
+  /**
+   * @returns {void}
+   */
+  const fitToWidth = useCallback(() => {
+    const image = imgRef.current;
+    if (!image || !image.complete) return;
+    calculateFitToWidthZoom(
+      image,
+      viewerContainerRef,
+      setZoom,
+      isCompareMode,
+      { sidebarWidthPx: getSidebarWidth() }
+    );
+  }, [getSidebarWidth, isCompareMode, setZoom, viewerContainerRef]);
+
+  useEffect(() => {
+    let cancelled = false;
+    const requestId = requestSeqRef.current + 1;
+    requestSeqRef.current = requestId;
+
+    pinPageAsset(currentIndex, 'full');
+    setAssetFailed(false);
+
+    if (!currentPage) {
+      setPendingAsset(null);
+      setDisplayedAsset({ url: '', pageIndex: -1, pageNumber: 0 });
+      setImageLoaded(false);
+      setNaturalSize({ width: 0, height: 0 });
+      return () => {
+        cancelled = true;
+        unpinPageAsset(currentIndex, 'full');
+      };
+    }
+
+    if (currentPageStatus === -1 || currentFullStatus === -1) {
+      setPendingAsset(null);
+      setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+      setImageLoaded(false);
+      setAssetFailed(true);
+      return () => {
+        cancelled = true;
+        unpinPageAsset(currentIndex, 'full');
+      };
+    }
+
+    void ensurePageAsset(currentIndex, 'full', { priority: 'critical' })
+      .then((url) => {
+        if (cancelled || requestSeqRef.current !== requestId) return;
+        if (!url) {
+          setPendingAsset(null);
+          setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+          setImageLoaded(false);
+          setAssetFailed(true);
+          return;
+        }
+
+        touchPageAsset(currentIndex, 'full');
+
+        const alreadyDisplayed =
+          displayedAssetRef.current.url === url &&
+          displayedAssetRef.current.pageIndex === currentIndex;
+
+        if (alreadyDisplayed) {
+          setPendingAsset(null);
+          setImageLoaded(true);
+          setAssetFailed(false);
+        } else {
+          setPendingAsset({ url, pageIndex: currentIndex, pageNumber });
+          if (!displayedAssetRef.current.url) setImageLoaded(false);
+          setAssetFailed(false);
+        }
+
+        const lookBehind = Math.max(0, Number(loadingConfig.render.lookBehindPageCount) || 0);
+        const lookAhead = Math.max(0, Number(loadingConfig.render.lookAheadPageCount) || 0);
+        for (let i = 1; i <= lookBehind; i += 1) {
+          const idx = currentIndex - i;
+          if (idx >= 0) void ensurePageAsset(idx, 'full', { priority: 'low' }).catch(() => {});
+        }
+        for (let i = 1; i <= lookAhead; i += 1) {
+          const idx = currentIndex + i;
+          if (idx < allPages.length) void ensurePageAsset(idx, 'full', { priority: 'low' }).catch(() => {});
+        }
+      })
+      .catch((error) => {
+        if (cancelled || requestSeqRef.current !== requestId) return;
+        logger.error('Failed to request current page asset', {
+          pageNumber,
+          error: String(error?.message || error),
+        });
+        setPendingAsset(null);
+        setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+        setImageLoaded(false);
+        setAssetFailed(true);
+      });
+
+    return () => {
+      cancelled = true;
+      requestSeqRef.current += 1;
+      unpinPageAsset(currentIndex, 'full');
+    };
+  }, [
+    allPages.length,
+    currentFullStatus,
+    currentIndex,
+    currentPage,
+    currentPageStatus,
+    currentSourceKey,
+    ensurePageAsset,
+    loadingConfig.render.lookAheadPageCount,
+    loadingConfig.render.lookBehindPageCount,
+    pageNumber,
+    pinPageAsset,
+    touchPageAsset,
+    unpinPageAsset,
+  ]);
+
+  useEffect(() => {
+    if (!forceRender) return;
+    if (isCanvasEnabled && imgRef.current?.complete) {
+      drawImageOnCanvas(imgRef.current);
+      onRender();
+      return;
+    }
+    setImageRevision((prev) => prev + 1);
+  }, [drawImageOnCanvas, forceRender, isCanvasEnabled, onRender]);
+
+  useEffect(() => {
+    if (!isCanvasEnabled || !imageLoaded || !imgRef.current?.complete) return;
+    drawImageOnCanvas(imgRef.current);
+    onRender();
+  }, [drawImageOnCanvas, imageLoaded, imageProperties, isCanvasEnabled, onRender, displayedAsset.url]);
+
+  /**
+   * @param {HTMLImageElement} image
+   * @param {{ pageIndex:number, pageNumber:number }} target
+   * @returns {void}
+   */
+  const finalizeDisplayedAsset = useCallback((image, target) => {
+    const nextSize = normalizeSize({
+      width: Number(image?.naturalWidth || currentPage?.realWidth || 0),
+      height: Number(image?.naturalHeight || currentPage?.realHeight || 0),
+    });
+
+    setDisplayedAsset({
+      url: String(image?.currentSrc || image?.src || ''),
+      pageIndex: target.pageIndex,
+      pageNumber: target.pageNumber,
+    });
+    setPendingAsset(null);
+    setNaturalSize(nextSize);
+    setImageLoaded(true);
+    setAssetFailed(false);
+    touchPageAsset(target.pageIndex, 'full');
+
+    if (isCanvasEnabled && image) drawImageOnCanvas(image);
+
+    if (!initialRenderRef.current) {
+      initialRenderRef.current = true;
+      initialRenderDone();
+    }
+
+    onRender();
+
+    if (initialFitPendingRef.current) {
+      initialFitPendingRef.current = false;
+      fitToScreen();
+    }
+  }, [
+    currentPage?.realHeight,
+    currentPage?.realWidth,
+    drawImageOnCanvas,
+    fitToScreen,
+    initialRenderDone,
+    isCanvasEnabled,
+    onRender,
+    touchPageAsset,
+  ]);
+
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const handleVisibleImageLoad = useCallback((event) => {
+    const image = event?.currentTarget;
+    if (!(image instanceof HTMLImageElement)) return;
+
+    const nextSize = normalizeSize({
+      width: Number(image.naturalWidth || currentPage?.realWidth || 0),
+      height: Number(image.naturalHeight || currentPage?.realHeight || 0),
+    });
+
+    setNaturalSize(nextSize);
+    touchPageAsset(displayedAssetRef.current.pageIndex, 'full');
+
+    if (isCanvasEnabled) drawImageOnCanvas(image);
+
+    if (!initialRenderRef.current) {
+      initialRenderRef.current = true;
+      initialRenderDone();
+    }
+
+    onRender();
+
+    if (initialFitPendingRef.current) {
+      initialFitPendingRef.current = false;
+      fitToScreen();
+    }
+  }, [
+    currentPage?.realHeight,
+    currentPage?.realWidth,
+    drawImageOnCanvas,
+    fitToScreen,
+    initialRenderDone,
+    isCanvasEnabled,
+    onRender,
+    touchPageAsset,
+  ]);
+
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const handlePendingImageLoad = useCallback((event) => {
+    const image = event?.currentTarget;
+    const target = pendingAssetRef.current;
+    if (!(image instanceof HTMLImageElement) || !target) return;
+
+    const imageUrl = String(image.currentSrc || image.src || '');
+    if (!imageUrl || imageUrl !== String(target.url || '')) return;
+
+    finalizeDisplayedAsset(image, target);
+  }, [finalizeDisplayedAsset]);
+
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const handlePendingImageError = useCallback((event) => {
+    const image = event?.currentTarget;
+    const target = pendingAssetRef.current;
+    const imageUrl = String(image?.currentSrc || image?.src || '');
+    const targetUrl = String(target?.url || '');
+
+    if (!target || !imageUrl || imageUrl !== targetUrl) return;
+
+    logger.error('Pending page image failed to load', {
+      pageNumber: target.pageNumber || pageNumber,
+      url: imageUrl,
+    });
+    setPendingAsset(null);
+    setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+    setImageLoaded(false);
+    setAssetFailed(true);
+  }, [currentIndex, pageNumber]);
+
+  /**
+   * @returns {void}
+   */
+  const handleVisibleImageError = useCallback((event) => {
+    const imageUrl = String(event?.currentTarget?.currentSrc || event?.currentTarget?.src || '');
+    const activeUrl = String(displayedAssetRef.current.url || '');
+    if (!imageUrl || imageUrl !== activeUrl) return;
+
+    logger.error('Active page image failed to load', {
+      pageNumber: displayedAssetRef.current.pageNumber || pageNumber,
+      url: activeUrl,
+    });
+    setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
+    setImageLoaded(false);
+    setAssetFailed(true);
+  }, [currentIndex, pageNumber]);
+
+  const imperativeHandle = useMemo(() => ({
+    updateImageSourceAndFit() {
+      if (imgRef.current?.complete) {
+        if (isCanvasEnabled) drawImageOnCanvas(imgRef.current);
+        fitToScreen();
+      } else {
+        setImageRevision((prev) => prev + 1);
+      }
+    },
+    getActiveCanvas() {
+      return isCanvasEnabled ? canvasRef.current : imgRef.current;
+    },
+    fitToScreen() {
+      fitToScreen();
+    },
+    fitToWidth() {
+      fitToWidth();
+    },
+    zoomIn() {
+      handleZoomIn(setZoom);
+    },
+    zoomOut() {
+      handleZoomOut(setZoom);
+    },
+    forceRender() {
+      if (isCanvasEnabled && imgRef.current?.complete) {
+        drawImageOnCanvas(imgRef.current);
+        onRender();
+      } else {
+        setImageRevision((prev) => prev + 1);
+      }
+    },
+    async getAllPrintableDataUrls() {
+      return getPrintablePageUrls();
+    },
+    async exportAllPagesAsDataUrls() {
+      return getPrintablePageUrls();
+    },
+  }), [
+    drawImageOnCanvas,
+    fitToScreen,
+    fitToWidth,
+    getPrintablePageUrls,
+    isCanvasEnabled,
+    onRender,
+    setZoom,
+  ]);
 
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);
 
-  // While we wait for all pages to be ready, show a centered loading message.
-  if (!showPage) {
-    return (
-      <div
-        className="document-render-container"
-        style={{
-          height: '100%',
-          position: 'relative',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'center',
-        }}
-      >
-        <div className="loading-progress" style={{ fontSize: '1.5rem' }}>
-          {t('viewer.loadingPagesWait')}
-        </div>
-      </div>
-    );
-  }
+  const displayedUrl = displayedAsset.url;
+  const targetPageDisplayed =
+    displayedAsset.pageIndex === currentIndex &&
+    !!displayedUrl &&
+    imageLoaded &&
+    !assetFailed;
+  const showErrorState = assetFailed || currentPageStatus === -1 || currentFullStatus === -1;
+  const showLoadingOverlay = !showErrorState && !targetPageDisplayed && !displayedUrl;
+  const hiddenImageStyle = isCanvasEnabled
+    ? {
+        opacity: 0,
+        pointerEvents: 'none',
+      }
+    : {
+        visibility: 'visible',
+      };
 
-  // Main render: canvas vs image depending on feature flag and current page status.
   return (
-    <div className="document-render-container" style={{ height: '100%', position: 'relative' }}>
-      {currentPage && currentPage.status === 1 ? (
-        isCanvasEnabled ? (
-          <CanvasRenderer
-            ref={canvasRef}
-            naturalWidth={imgRef.current?.naturalWidth || currentPage.realWidth || 0}
-            naturalHeight={imgRef.current?.naturalHeight || currentPage.realHeight || 0}
-            zoom={zoom}
-            pageNumber={pageNumber}
+    <div className="document-render-container">
+      {displayedUrl && (
+        <ImageRenderer
+          key={`${displayedAsset.pageIndex}:${imageRevision}:${displayedUrl}`}
+          ref={imgRef}
+          src={displayedUrl}
+          zoom={zoom}
+          pageNumber={displayedAsset.pageNumber || pageNumber}
+          style={hiddenImageStyle}
+          onLoad={handleVisibleImageLoad}
+          onError={handleVisibleImageError}
+          draggable={false}
+        />
+      )}
+
+      {pendingAsset?.url && pendingAsset.url !== displayedUrl && (
+        <img
+          src={pendingAsset.url}
+          alt=""
+          aria-hidden="true"
+          decoding="async"
+          style={{ display: 'none' }}
+          onLoad={handlePendingImageLoad}
+          onError={handlePendingImageError}
+        />
+      )}
+
+      {isCanvasEnabled && !!displayedUrl && !showErrorState && (
+        <CanvasRenderer
+          ref={canvasRef}
+          naturalWidth={naturalSize.width || currentPage?.realWidth || 0}
+          naturalHeight={naturalSize.height || currentPage?.realHeight || 0}
+          zoom={zoom}
+          pageNumber={displayedAsset.pageNumber || pageNumber}
+        />
+      )}
+
+      {showErrorState && (
+        <div className="document-render-status-overlay error-state">
+          <LoadingMessage pageStatus={-1} className="document-render-loading-message" />
+        </div>
+      )}
+
+      {!showErrorState && showLoadingOverlay && (
+        <div className="document-render-status-overlay">
+          <LoadingMessage
+            pageStatus={0}
+            className="document-render-loading-message"
+            loadingText={t('viewer.loadingPagesWait')}
           />
-        ) : (
-          <ImageRenderer
-            ref={imgRef}
-            src={currentPage.fullSizeUrl}
-            zoom={zoom}
-            pageNumber={pageNumber}
-          />
-        )
-      ) : (
-        <div className="loading-wrapper" style={{ height: '100%' }}>
-          <LoadingMessage pageStatus={currentPage?.status || 0} />
         </div>
       )}
     </div>
