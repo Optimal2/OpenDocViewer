@@ -72,18 +72,19 @@ function tr(key, defaultValue, options) {
 }
 
 /**
- * Normalize a numeric configuration value to a non-negative number.
- * Returns 0 if the value is not a finite number.
+ * Normalize an unknown configuration value to a non-negative number.
+ * Returns 0 if the coerced value is not finite.
  *
  * IMPORTANT
- *   This helper expects a numeric value. If a caller may receive string data,
- *   coerce first with Number(...).
+ *   This helper performs its own Number(...) coercion so callers can pass
+ *   runtime configuration values without repeating that conversion at each site.
  *
  * @param {*} value
  * @returns {number}
  */
 function normalizeNonNegativeNumber(value) {
-  return Number.isFinite(value) ? Math.max(0, value) : 0;
+  const numericValue = Number(value);
+  return Number.isFinite(numericValue) ? Math.max(0, numericValue) : 0;
 }
 
 /**
@@ -383,7 +384,7 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     body.appendChild(pageWrapper);
   }
 
-  const delay = normalizeNonNegativeNumber(Number(printDelayMs));
+  const delay = normalizeNonNegativeNumber(printDelayMs);
 
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
