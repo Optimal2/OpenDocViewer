@@ -56,16 +56,27 @@ function hasWebCrypto() {
   }
 }
 
+let fallbackSessionCounter = 0;
+
 /**
  * @returns {string}
  */
 function createSessionId() {
   try {
-    if (typeof crypto !== 'undefined' && typeof crypto.randomUUID === 'function') {
-      return crypto.randomUUID();
+    const cryptoObj = globalThis.crypto;
+    if (cryptoObj && typeof cryptoObj.randomUUID === 'function') {
+      return cryptoObj.randomUUID();
+    }
+    if (cryptoObj && typeof cryptoObj.getRandomValues === 'function') {
+      const bytes = cryptoObj.getRandomValues(new Uint8Array(16));
+      const hex = Array.from(bytes, (byte) => byte.toString(16).padStart(2, '0')).join('');
+      return `odv_${Date.now().toString(36)}_${hex}`;
     }
   } catch {}
-  return `odv_${Date.now().toString(36)}_${Math.random().toString(36).slice(2, 10)}`;
+
+  fallbackSessionCounter += 1;
+  const perfNow = typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : 0;
+  return `odv_${Date.now().toString(36)}_${Math.floor(perfNow * 1000).toString(36)}_${fallbackSessionCounter.toString(36)}`;
 }
 
 /**
