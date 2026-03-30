@@ -55,7 +55,7 @@ The IIS config also establishes:
 
 ### Prefetch tuning for proxied source endpoints
 
-If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. This customer-focused bundle keeps concurrency at `2`, disables retries, and aborts individual prefetch requests after `8000` ms so one stalled upstream request does not hold the UI for long.
+If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. This customer-focused bundle keeps concurrency moderate at `4`, disables retries, and aborts individual prefetch requests after `10000` ms so one stalled upstream request does not hold the UI for long. The profile assumes the main VPN/proxy timeout issue has been resolved and now optimizes harder for responsiveness.
 
 If an environment still shows intermittent `GetStream`-style timeouts, lower concurrency first. Only re-enable retries if you have measured that the backend usually recovers quickly and users prefer waiting over surfacing a failed page faster.
 

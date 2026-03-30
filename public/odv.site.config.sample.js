@@ -197,7 +197,7 @@
       fetch: {
         // Number of concurrent network fetches used during the prefetch step.
         // Conservative by default so tokenized/proxied backends are less likely to stall.
-        prefetchConcurrency: 2,
+        prefetchConcurrency: 4,
 
         // Retry a small number of transient failures such as browser/network timeouts or
         // gateway-style upstream errors. Permanent failures are not retried.
@@ -207,7 +207,7 @@
         prefetchRetryBaseDelayMs: 750,
         // Abort a single prefetch attempt after this many milliseconds so one slow source does not
         // keep the viewer waiting on that spot in the sequence for too long.
-        prefetchRequestTimeoutMs: 8000
+        prefetchRequestTimeoutMs: 10000
       },
 
       sourceStore: {
@@ -260,7 +260,7 @@
       render: {
         // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
-        maxConcurrentAssetRenders: 4,
+        maxConcurrentAssetRenders: 6,
 
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
@@ -286,24 +286,24 @@
 
         // In "adaptive" mode, runs at or below this page count will queue the entire
         // thumbnail set in the background while still keeping a deterministic thumbnail pane.
-        thumbnailEagerPageThreshold: 5000,
+        thumbnailEagerPageThreshold: 10000,
 
         // Neighbor prefetch around the active page.
-        lookAheadPageCount: 8,
-        lookBehindPageCount: 4,
+        lookAheadPageCount: 12,
+        lookBehindPageCount: 8,
 
         // How many rows beyond the visible thumbnail range should be considered for work.
-        visibleThumbnailOverscan: 16,
+        visibleThumbnailOverscan: 24,
 
         // In-memory object-URL cache limits.
         // The underlying rendered blobs may still remain in the asset store even if an older
         // browser object URL is revoked from RAM.
-        fullPageCacheLimit: 192,
+        fullPageCacheLimit: 256,
         thumbnailCacheLimit: 8192,
 
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
-        maxOpenPdfDocuments: 12,
-        maxOpenTiffDocuments: 12
+        maxOpenPdfDocuments: 16,
+        maxOpenTiffDocuments: 16
       }
     },
 

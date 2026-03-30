@@ -35,6 +35,7 @@ import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
  * @property {function(number, ('full'|'thumbnail')): void} onImageLoad
+ * @property {boolean} fullyRenderOffscreenRows
  */
 
 /**
@@ -81,6 +82,42 @@ function getThumbnailLayout(renderConfig, paneWidth) {
   };
 }
 
+
+/**
+ * @param {number} index
+ * @param {{ start:number, end:number }} range
+ * @returns {boolean}
+ */
+function isIndexInRange(index, range) {
+  return index >= Number(range?.start) && index <= Number(range?.end);
+}
+
+/**
+ * Build a center-out thumbnail warm-up order so the pane feels responsive around the user's
+ * current scroll target instead of always starting from page 1.
+ *
+ * @param {number} totalCount
+ * @param {number} focusIndex
+ * @param {Set<number>} excluded
+ * @returns {Array<number>}
+ */
+function buildCenterOutQueue(totalCount, focusIndex, excluded) {
+  const queue = [];
+  const safeTotal = Math.max(0, Number(totalCount) || 0);
+  if (!safeTotal) return queue;
+
+  const center = clamp(focusIndex, 0, Math.max(0, safeTotal - 1));
+  for (let offset = 0; offset < safeTotal; offset += 1) {
+    const left = center - offset;
+    const right = center + offset;
+
+    if (left >= 0 && !excluded.has(left)) queue.push(left);
+    if (offset > 0 && right < safeTotal && !excluded.has(right)) queue.push(right);
+  }
+
+  return queue;
+}
+
 /**
  * @param {ThumbnailRowProps} props
  * @returns {React.ReactElement}
@@ -96,6 +133,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   onActivate,
   onKeyActivate,
   onImageLoad,
+  fullyRenderOffscreenRows,
 }) {
   const { t } = useTranslation('common');
   const pageNumber = index + 1;
@@ -130,8 +168,12 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       className="thumbnail-row-shell"
       style={{
         height: `${rowHeight}px`,
-        contentVisibility: 'auto',
-        containIntrinsicSize: `${rowHeight}px`,
+        ...(fullyRenderOffscreenRows
+          ? {}
+          : {
+              contentVisibility: 'auto',
+              containIntrinsicSize: `${rowHeight}px`,
+            }),
       }}
     >
       <div
@@ -236,6 +278,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     () => shouldWarmAllThumbnails(renderConfig, totalCount),
     [renderConfig, totalCount]
   );
+  // In the eager/high-RAM profile we keep every thumbnail row fully active so the pane behaves
+  // more like the pre-lazy-load versions that mounted every thumbnail subtree immediately.
+  const fullyRenderOffscreenRows = warmAllThumbnails;
   const activeDescendantId = totalCount > 0 && pageNumber >= 1 && pageNumber <= totalCount
     ? `thumbnail-${pageNumber}`
     : undefined;
@@ -253,6 +298,15 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       end: clamp(rawEnd, 0, Math.max(0, totalCount - 1)),
     };
   }, [layout.rowHeight, overscan, scrollTop, totalCount, viewportHeight]);
+
+  const visibleCenterIndex = useMemo(() => {
+    if (visibleRange.end < visibleRange.start || totalCount <= 0) return -1;
+    return clamp(
+      Math.round((visibleRange.start + visibleRange.end) / 2),
+      0,
+      Math.max(0, totalCount - 1)
+    );
+  }, [totalCount, visibleRange.end, visibleRange.start]);
 
   /**
    * @param {(HTMLDivElement|null)} node
@@ -330,33 +384,54 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     };
 
     const currentIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
-    pushIndex(currentIndex, 'critical');
-    touchPageAsset(currentIndex, allPages[currentIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
-
     const compareIndex = isComparing && Number.isFinite(comparePageNumber)
       ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
       : -1;
+    const visibleHasPages = visibleRange.end >= visibleRange.start;
+    // Thumbnail generation should follow the user's current scroll target first. The document
+    // page selected in the viewer still matters, but when the user drags the thumbnail scrollbar
+    // elsewhere we prioritize that visible region instead of continuing to optimize around page 1
+    // or the previously active page.
+    const focusIndex = visibleHasPages && visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
+    const currentIsVisible = isIndexInRange(currentIndex, visibleRange);
+    const compareIsVisible = compareIndex >= 0 && isIndexInRange(compareIndex, visibleRange);
+
+    pushIndex(focusIndex, 'critical');
+    touchPageAsset(focusIndex, allPages[focusIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+
+    if (currentIndex >= 0) {
+      pushIndex(currentIndex, currentIsVisible ? 'critical' : 'normal');
+      touchPageAsset(currentIndex, allPages[currentIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+    }
+
     if (compareIndex >= 0) {
-      pushIndex(compareIndex, compareIndex === currentIndex ? 'critical' : 'high');
+      pushIndex(compareIndex, compareIsVisible ? 'high' : 'normal');
       touchPageAsset(compareIndex, allPages[compareIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
     }
 
     for (let index = visibleRange.start; index <= visibleRange.end; index += 1) {
-      const priority = index === currentIndex
+      const priority = index === focusIndex
         ? 'critical'
-        : index === compareIndex
+        : index === currentIndex
           ? 'high'
-          : 'normal';
+          : index === compareIndex
+            ? 'high'
+            : 'high';
       pushIndex(index, priority);
+      touchPageAsset(index, allPages[index]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
     }
 
     const ahead = Math.max(0, Number(renderConfig.lookAheadPageCount) || 0);
     const behind = Math.max(0, Number(renderConfig.lookBehindPageCount) || 0);
-    for (let offset = 1; offset <= ahead; offset += 1) pushIndex(currentIndex + offset, 'low');
-    for (let offset = 1; offset <= behind; offset += 1) pushIndex(currentIndex - offset, 'low');
-    if (compareIndex >= 0) {
-      for (let offset = 1; offset <= ahead; offset += 1) pushIndex(compareIndex + offset, 'low');
-      for (let offset = 1; offset <= behind; offset += 1) pushIndex(compareIndex - offset, 'low');
+    for (let offset = 1; offset <= ahead; offset += 1) pushIndex(focusIndex + offset, 'normal');
+    for (let offset = 1; offset <= behind; offset += 1) pushIndex(focusIndex - offset, 'normal');
+    if (currentIndex !== focusIndex) {
+      for (let offset = 1; offset <= Math.min(2, ahead); offset += 1) pushIndex(currentIndex + offset, 'low');
+      for (let offset = 1; offset <= Math.min(2, behind); offset += 1) pushIndex(currentIndex - offset, 'low');
+    }
+    if (compareIndex >= 0 && compareIndex !== focusIndex) {
+      for (let offset = 1; offset <= Math.min(2, ahead); offset += 1) pushIndex(compareIndex + offset, 'low');
+      for (let offset = 1; offset <= Math.min(2, behind); offset += 1) pushIndex(compareIndex - offset, 'low');
     }
 
     for (const [index, priority] of requested.entries()) {
@@ -372,8 +447,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     renderConfig.lookBehindPageCount,
     totalCount,
     touchPageAsset,
-    visibleRange.end,
-    visibleRange.start,
+    visibleCenterIndex,
+    visibleRange,
   ]);
 
   useEffect(() => {
@@ -385,17 +460,23 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     const compareIndex = isComparing && Number.isFinite(comparePageNumber)
       ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
       : -1;
+    const focusIndex = visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
 
-    /** @type {Array<number>} */
-    const queue = [];
-    for (let index = 0; index < totalCount; index += 1) {
-      if (index === currentIndex || index === compareIndex) continue;
-      queue.push(index);
+    const excluded = new Set();
+    if (currentIndex >= 0) excluded.add(currentIndex);
+    if (compareIndex >= 0) excluded.add(compareIndex);
+    for (let index = visibleRange.start; index <= visibleRange.end; index += 1) {
+      if (index >= 0) excluded.add(index);
     }
+
+    // When eager warm-up is enabled we still avoid marching forward from page 1. Restarting the
+    // background queue around the visible center makes page 50 show up quickly when the user jumps
+    // there, while the rest of the document continues to warm opportunistically.
+    const queue = buildCenterOutQueue(totalCount, focusIndex, excluded);
 
     const pump = () => {
       if (cancelled) return;
-      const batchSize = Math.max(12, (Math.max(1, Number(renderConfig.maxConcurrentAssetRenders) || 1) * 8));
+      const batchSize = Math.max(1, Number(renderConfig.maxConcurrentAssetRenders) || 1);
       const batch = queue.splice(0, batchSize);
       for (const index of batch) {
         const page = allPages[index];
@@ -405,7 +486,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         if (!page || page.status === -1 || page.thumbnailStatus === -1 || !page.sourceKey || isThumbnailReady) continue;
         void ensurePageAsset(index, 'thumbnail', { priority: 'low' }).catch(() => {});
       }
-      if (queue.length > 0) timeoutId = window.setTimeout(pump, 0);
+      if (queue.length > 0) timeoutId = window.setTimeout(pump, 16);
     };
 
     timeoutId = window.setTimeout(pump, 0);
@@ -413,7 +494,19 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [allPages, comparePageNumber, ensurePageAsset, isComparing, pageNumber, renderConfig.maxConcurrentAssetRenders, totalCount, warmAllThumbnails]);
+  }, [
+    allPages,
+    comparePageNumber,
+    ensurePageAsset,
+    isComparing,
+    pageNumber,
+    renderConfig.maxConcurrentAssetRenders,
+    totalCount,
+    visibleCenterIndex,
+    visibleRange.end,
+    visibleRange.start,
+    warmAllThumbnails,
+  ]);
 
   /**
    * @param {*} event
@@ -484,6 +577,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
         onImageLoad={handleImageLoad}
+        fullyRenderOffscreenRows={fullyRenderOffscreenRows}
       />
     );
   }
@@ -526,6 +620,7 @@ ThumbnailRow.propTypes = {
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
   onImageLoad: PropTypes.func.isRequired,
+  fullyRenderOffscreenRows: PropTypes.bool.isRequired,
 };
 
 DocumentThumbnailList.propTypes = {
