@@ -240,7 +240,7 @@
       fetch: {
         // Customer-optimised profile: keep the backend pressure moderate, but fail fast so one
         // slow source does not make the whole viewer feel stuck.
-        prefetchConcurrency: 2,
+        prefetchConcurrency: 4,
 
         // Retries are disabled in this profile. In the observed customer environment, waiting for
         // another conservative attempt made the thumbnail pane feel slower than surfacing the
@@ -251,7 +251,7 @@
         prefetchRetryBaseDelayMs: 750,
         // Abort a single prefetch attempt after this many milliseconds so one slow source does not
         // keep the viewer waiting on that spot in the sequence for too long.
-        prefetchRequestTimeoutMs: 8000
+        prefetchRequestTimeoutMs: 10000
       },
 
       // Temporary storage for the original source bytes.
@@ -291,7 +291,7 @@
 
       // Lazy page rendering and in-memory object URL cache limits.
       render: {
-        maxConcurrentAssetRenders: 4,
+        maxConcurrentAssetRenders: 6,
         fullPageScale: 1.5,
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
@@ -309,17 +309,17 @@
 
         // When strategy is "adaptive", documents at or below this page count queue the
         // entire thumbnail set in the background while still keeping a fixed-height pane.
-        thumbnailEagerPageThreshold: 5000,
-        lookAheadPageCount: 8,
-        lookBehindPageCount: 4,
-        visibleThumbnailOverscan: 16,
+        thumbnailEagerPageThreshold: 10000,
+        lookAheadPageCount: 12,
+        lookBehindPageCount: 8,
+        visibleThumbnailOverscan: 24,
         // In-memory object-URL cache limits. The rendered blobs may still remain in the asset store
         // even if an older object URL is later revoked from RAM.
-        fullPageCacheLimit: 192,
+        fullPageCacheLimit: 256,
         thumbnailCacheLimit: 8192,
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
-        maxOpenPdfDocuments: 12,
-        maxOpenTiffDocuments: 12
+        maxOpenPdfDocuments: 16,
+        maxOpenTiffDocuments: 16
       }
     },
 

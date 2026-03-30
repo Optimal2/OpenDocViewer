@@ -120,7 +120,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
     fetch: {
       // Customer-tuned default: stay conservative enough for proxied backends, but fail fast so
       // slow or broken source fetches do not stall the whole thumbnail/page pipeline for long.
-      prefetchConcurrency: 2,
+      prefetchConcurrency: 4,
       // Prefer fail-fast behavior over conservative retries in environments where the user values
       // responsive navigation more than retrying the same timed-out request.
       prefetchRetryCount: 0,
@@ -128,7 +128,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       prefetchRetryBaseDelayMs: 750,
       // Abort a single prefetch attempt after this many milliseconds so one stuck request does not
       // hold back later source analysis for too long.
-      prefetchRequestTimeoutMs: 8000,
+      prefetchRequestTimeoutMs: 10000,
     },
     sourceStore: {
       mode: 'adaptive',
@@ -150,7 +150,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       releaseSinglePageRasterSourceAfterFullPersist: false,
     },
     render: {
-      maxConcurrentAssetRenders: 4,
+      maxConcurrentAssetRenders: 6,
       fullPageScale: 1.5,
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
@@ -160,14 +160,14 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       // Dedicated thumbnail rasters keep the pane lighter than reusing full-size images for every
       // thumbnail when the document set contains many large raster pages.
       thumbnailSourceStrategy: 'dedicated',
-      thumbnailEagerPageThreshold: 5000,
-      lookAheadPageCount: 8,
-      lookBehindPageCount: 4,
-      visibleThumbnailOverscan: 16,
-      fullPageCacheLimit: 192,
+      thumbnailEagerPageThreshold: 10000,
+      lookAheadPageCount: 12,
+      lookBehindPageCount: 8,
+      visibleThumbnailOverscan: 24,
+      fullPageCacheLimit: 256,
       thumbnailCacheLimit: 8192,
-      maxOpenPdfDocuments: 12,
-      maxOpenTiffDocuments: 12,
+      maxOpenPdfDocuments: 16,
+      maxOpenTiffDocuments: 16,
     },
   })
 );
@@ -355,10 +355,10 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
 
   switch (profile.tier) {
     case 'very-high':
-      base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchConcurrency = 4;
       base.fetch.prefetchRetryCount = 0;
       base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 8000;
+      base.fetch.prefetchRequestTimeoutMs = 10000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 2048;
       base.sourceStore.blobCacheEntries = 24;
@@ -375,10 +375,10 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.render.maxOpenTiffDocuments = 10;
       break;
     case 'high':
-      base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchConcurrency = 4;
       base.fetch.prefetchRetryCount = 0;
       base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 8000;
+      base.fetch.prefetchRequestTimeoutMs = 10000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1536;
       base.sourceStore.blobCacheEntries = 18;
@@ -395,10 +395,10 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.render.maxOpenTiffDocuments = 8;
       break;
     case 'medium':
-      base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchConcurrency = 4;
       base.fetch.prefetchRetryCount = 0;
       base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 8000;
+      base.fetch.prefetchRequestTimeoutMs = 10000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1024;
       base.sourceStore.blobCacheEntries = 14;
@@ -416,7 +416,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.fetch.prefetchConcurrency = 1;
       base.fetch.prefetchRetryCount = 0;
       base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 8000;
+      base.fetch.prefetchRequestTimeoutMs = 10000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 256;
       base.sourceStore.blobCacheEntries = 8;

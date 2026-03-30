@@ -105,10 +105,10 @@ documentLoading: {
     reuseFullImageThumbnailsBelowPageCount: 600,
   },
   fetch: {
-    prefetchConcurrency: 2,
+    prefetchConcurrency: 4,
     prefetchRetryCount: 0,
     prefetchRetryBaseDelayMs: 750,
-    prefetchRequestTimeoutMs: 8000,
+    prefetchRequestTimeoutMs: 10000,
   },
   sourceStore: {
     mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
@@ -130,20 +130,20 @@ documentLoading: {
     releaseSinglePageRasterSourceAfterFullPersist: false,
   },
   render: {
-    maxConcurrentAssetRenders: 4,
+    maxConcurrentAssetRenders: 6,
     fullPageScale: 1.5, // applies to PDF rendering in the lazy page-asset pipeline
     thumbnailMaxWidth: 220,
     thumbnailMaxHeight: 310,
     thumbnailLoadingStrategy: 'eager',
     thumbnailSourceStrategy: 'dedicated',
-    thumbnailEagerPageThreshold: 5000,
-    lookAheadPageCount: 8,
-    lookBehindPageCount: 4,
-    visibleThumbnailOverscan: 16,
-    fullPageCacheLimit: 192,
+    thumbnailEagerPageThreshold: 10000,
+    lookAheadPageCount: 12,
+    lookBehindPageCount: 8,
+    visibleThumbnailOverscan: 24,
+    fullPageCacheLimit: 256,
     thumbnailCacheLimit: 8192,
     maxOpenPdfDocuments: 12,
-    maxOpenTiffDocuments: 12,
+    maxOpenTiffDocuments: 16,
   }
 }
 ```
