@@ -171,7 +171,6 @@ const PageNavigationButtons = ({
         className={`page-number-input${isDocumentLoading ? ' is-loading' : ''}`}
         type="text"
         inputMode="numeric"
-        pattern="[0-9 /]*"
         value={displayValue}
         onFocus={(e) => {
           setIsFocused(true);

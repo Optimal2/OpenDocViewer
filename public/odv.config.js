@@ -238,8 +238,16 @@
 
       // Network prefetch step used to grab expiring URLs before later page rendering.
       fetch: {
-        // Higher values fetch expiring URLs faster but also increase parallel network / CPU pressure.
-        prefetchConcurrency: 6
+        // Conservative default: keep network pressure low for proxied/tokenized backends.
+        // Sites that have measured headroom can still override this in site config.
+        prefetchConcurrency: 2,
+
+        // Retry a small number of transient failures (timeouts, gateway hiccups, temporary proxy
+        // errors). Permanent failures such as 404 are still surfaced immediately.
+        prefetchRetryCount: 1,
+
+        // Base backoff before retry attempts. Later retries scale linearly from this value.
+        prefetchRetryBaseDelayMs: 1500
       },
 
       // Temporary storage for the original source bytes.
@@ -298,7 +306,7 @@
         //           when the total page count is low enough; otherwise generate dedicated thumbnails
         // - "dedicated": always generate dedicated thumbnail rasters
         // - "prefer-full-images": always reuse full raster-image assets for thumbnails
-        thumbnailSourceStrategy: 'auto',
+        thumbnailSourceStrategy: 'prefer-full-images',
 
         // When strategy is "adaptive", documents at or below this page count queue the
         // entire thumbnail set in the background while still keeping a fixed-height pane.

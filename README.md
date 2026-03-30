@@ -261,9 +261,10 @@ The viewer now supports a two-phase loading pipeline for large batches:
 6. keep the thumbnail scrollbar deterministic while object URLs are only evicted from RAM when configured limits are actually reached
 
 This reduces heap pressure substantially compared with eager rendering and also enables a warning dialog
-before continuing clearly large runs. The shipped defaults now favor stability/performance and only
-move into more conservative memory behavior when the browser signals lower headroom or when a site
-explicitly overrides the thresholds in `odv.site.config.js`. The relevant knobs live under
+before continuing clearly large runs. The shipped defaults now favor stability in real deployments:
+network prefetch now stays conservative by default, retries transient failures once with backoff,
+and raster-image thumbnails default to full-image reuse instead of generating a second asset unless a
+site explicitly overrides the thresholds in `odv.site.config.js`. The relevant knobs live under
 `documentLoading` in `public/odv.config.js`.
 
 ## Printing
