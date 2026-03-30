@@ -120,6 +120,27 @@
   margin: 0 0.5rem;
 }
 
+.toolbar-inline-hint {
+  display: inline-flex;
+  align-items: center;
+  max-width: 380px;
+  min-height: 30px;
+  padding: 0 10px;
+  border-radius: calc(var(--border-radius) + 2px);
+  background: color-mix(in srgb, var(--canvas-background-color) 82%, var(--toolbar-background-color) 18%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+  color: var(--text-color);
+  font-size: 0.82rem;
+  line-height: 1.2;
+  opacity: 0.88;
+}
+
+.compare-shortcut-hint {
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
 /* Editable zoom percent input (combobox style) */
 .zoom-percent-input {
   width: 64px;

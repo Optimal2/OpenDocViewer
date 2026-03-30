@@ -28,6 +28,7 @@ import {
   isTrackedObjectUrl,
   revokeTrackedObjectUrl,
   revokeTrackedObjectUrls,
+  getTrackedObjectUrlCount,
 } from '../utils/objectUrlRegistry.js';
 
 
@@ -207,6 +208,26 @@ export const ViewerProvider = ({ children }) => {
   const [messageQueue, setMessageQueue] = useState([]);
   const [documentLoadingConfig, setDocumentLoadingConfig] = useState(getDocumentLoadingConfig());
   const [memoryPressureStage, setMemoryPressureStage] = useState('normal');
+  const [runtimeDiagnostics, setRuntimeDiagnostics] = useState({
+    sessionStartedAtMs: 0,
+    loadRunStartedAtMs: 0,
+    loadRunCompletedAtMs: 0,
+    sourceStoreMode: 'memory',
+    assetStoreMode: 'disabled',
+    sourceCount: 0,
+    assetCount: 0,
+    sourceBytes: 0,
+    assetBytes: 0,
+    fullReadyCount: 0,
+    thumbnailReadyCount: 0,
+    fullCacheCount: 0,
+    thumbnailCacheCount: 0,
+    trackedObjectUrlCount: 0,
+    warmupQueueLength: 0,
+    pendingAssetCount: 0,
+    sourceStoreEncrypted: false,
+    assetStoreEncrypted: false,
+  });
 
   const allPagesRef = useRef([]);
   const sourceDescriptorsRef = useRef(new Map());
@@ -227,6 +248,11 @@ export const ViewerProvider = ({ children }) => {
   const indexedDbModeAnnouncedRef = useRef(false);
   const assetIndexedDbModeAnnouncedRef = useRef(false);
   const releasedRasterSourceKeysRef = useRef(new Set());
+  const diagnosticsTimerRef = useRef(null);
+  const previousLoadingRunActiveRef = useRef(false);
+  const sessionStartedAtMsRef = useRef(0);
+  const loadRunStartedAtMsRef = useRef(0);
+  const loadRunCompletedAtMsRef = useRef(0);
 
   const renderWithLimit = useRef(createLimiter(
     () => sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders || sessionConfigRef.current?.render?.maxConcurrentAssetRenders || 2
@@ -328,6 +354,34 @@ export const ViewerProvider = ({ children }) => {
     sessionConfigRef.current = defaultConfig;
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
+    if (diagnosticsTimerRef.current) {
+      try { window.clearInterval(diagnosticsTimerRef.current); } catch {}
+      diagnosticsTimerRef.current = null;
+    }
+    previousLoadingRunActiveRef.current = false;
+    sessionStartedAtMsRef.current = 0;
+    loadRunStartedAtMsRef.current = 0;
+    loadRunCompletedAtMsRef.current = 0;
+    setRuntimeDiagnostics({
+      sessionStartedAtMs: 0,
+      loadRunStartedAtMs: 0,
+      loadRunCompletedAtMs: 0,
+      sourceStoreMode: 'memory',
+      assetStoreMode: 'disabled',
+      sourceCount: 0,
+      assetCount: 0,
+      sourceBytes: 0,
+      assetBytes: 0,
+      fullReadyCount: 0,
+      thumbnailReadyCount: 0,
+      fullCacheCount: 0,
+      thumbnailCacheCount: 0,
+      trackedObjectUrlCount: 0,
+      warmupQueueLength: 0,
+      pendingAssetCount: 0,
+      sourceStoreEncrypted: false,
+      assetStoreEncrypted: false,
+    });
   }, [revokeSessionUrls, updateAllPages]);
 
   /**
@@ -456,6 +510,11 @@ export const ViewerProvider = ({ children }) => {
     });
 
     sessionEpochRef.current += 1;
+    const now = Date.now();
+    sessionStartedAtMsRef.current = now;
+    loadRunStartedAtMsRef.current = 0;
+    loadRunCompletedAtMsRef.current = 0;
+    previousLoadingRunActiveRef.current = false;
     setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
     logger.info('Initialized document session', {
       mode: tempStore.getStats?.().mode,
@@ -519,6 +578,34 @@ export const ViewerProvider = ({ children }) => {
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     setWorkerCount(0);
+    if (diagnosticsTimerRef.current) {
+      try { window.clearInterval(diagnosticsTimerRef.current); } catch {}
+      diagnosticsTimerRef.current = null;
+    }
+    previousLoadingRunActiveRef.current = false;
+    sessionStartedAtMsRef.current = 0;
+    loadRunStartedAtMsRef.current = 0;
+    loadRunCompletedAtMsRef.current = 0;
+    setRuntimeDiagnostics({
+      sessionStartedAtMs: 0,
+      loadRunStartedAtMs: 0,
+      loadRunCompletedAtMs: 0,
+      sourceStoreMode: 'memory',
+      assetStoreMode: 'disabled',
+      sourceCount: 0,
+      assetCount: 0,
+      sourceBytes: 0,
+      assetBytes: 0,
+      fullReadyCount: 0,
+      thumbnailReadyCount: 0,
+      fullCacheCount: 0,
+      thumbnailCacheCount: 0,
+      trackedObjectUrlCount: 0,
+      warmupQueueLength: 0,
+      pendingAssetCount: 0,
+      sourceStoreEncrypted: false,
+      assetStoreEncrypted: false,
+    });
   }, [revokeSessionUrls, updateAllPages]);
 
   /**
@@ -1295,6 +1382,70 @@ export const ViewerProvider = ({ children }) => {
     memoryPressureStage,
   ]);
 
+
+  useEffect(() => {
+    const wasActive = previousLoadingRunActiveRef.current;
+    if (loadingRunActive && !wasActive) {
+      loadRunStartedAtMsRef.current = Date.now();
+      loadRunCompletedAtMsRef.current = 0;
+    } else if (!loadingRunActive && wasActive && loadRunStartedAtMsRef.current > 0) {
+      loadRunCompletedAtMsRef.current = Date.now();
+    }
+    previousLoadingRunActiveRef.current = loadingRunActive;
+  }, [loadingRunActive]);
+
+  useEffect(() => {
+    const collectRuntimeDiagnostics = () => {
+      const tempStats = tempStoreRef.current?.getStats?.() || {};
+      const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
+      const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
+      let fullReadyCount = 0;
+      let thumbnailReadyCount = 0;
+      for (const page of pages) {
+        if (!page) continue;
+        if (page.fullSizeStatus === 1 && page.fullSizeUrl) fullReadyCount += 1;
+        const thumbnailReady = page.thumbnailUsesFullAsset
+          ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
+          : (page.thumbnailStatus === 1 && !!page.thumbnailUrl);
+        if (thumbnailReady) thumbnailReadyCount += 1;
+      }
+
+      setRuntimeDiagnostics((current) => {
+        const next = {
+          sessionStartedAtMs: Number(sessionStartedAtMsRef.current || 0),
+          loadRunStartedAtMs: Number(loadRunStartedAtMsRef.current || 0),
+          loadRunCompletedAtMs: Number(loadRunCompletedAtMsRef.current || 0),
+          sourceStoreMode: String(tempStats.mode || 'memory'),
+          assetStoreMode: pageAssetStoreRef.current ? String(assetStats.mode || 'memory') : 'disabled',
+          sourceCount: Math.max(0, Number(tempStats.sourceCount || sourceDescriptorsRef.current.size || 0)),
+          assetCount: Math.max(0, Number(assetStats.assetCount || 0)),
+          sourceBytes: Math.max(0, Number(tempStats.totalBytes || 0)),
+          assetBytes: Math.max(0, Number(assetStats.totalBytes || 0)),
+          fullReadyCount,
+          thumbnailReadyCount,
+          fullCacheCount: fullPageCacheRef.current.size,
+          thumbnailCacheCount: thumbnailCacheRef.current.size,
+          trackedObjectUrlCount: getTrackedObjectUrlCount(),
+          warmupQueueLength: warmupQueueRef.current.length,
+          pendingAssetCount: pendingAssetPromisesRef.current.size,
+          sourceStoreEncrypted: !!tempStats.encrypted,
+          assetStoreEncrypted: !!assetStats.encrypted,
+        };
+
+        const same = Object.keys(next).every((key) => next[key] === current[key]);
+        return same ? current : next;
+      });
+    };
+
+    collectRuntimeDiagnostics();
+    const timerId = window.setInterval(collectRuntimeDiagnostics, 1000);
+    diagnosticsTimerRef.current = timerId;
+    return () => {
+      if (diagnosticsTimerRef.current === timerId) diagnosticsTimerRef.current = null;
+      try { window.clearInterval(timerId); } catch {}
+    };
+  }, []);
+
   useEffect(() => () => {
     resetViewerState().catch((e) => {
       logger.warn('ViewerProvider unmount cleanup failed', { error: String(e?.message || e) });
@@ -1330,6 +1481,7 @@ export const ViewerProvider = ({ children }) => {
     addMessage,
     documentLoadingConfig,
     memoryPressureStage,
+    runtimeDiagnostics,
     scheduleSourceWarmup,
   }), [
     allPages,
@@ -1356,6 +1508,7 @@ export const ViewerProvider = ({ children }) => {
     addMessage,
     documentLoadingConfig,
     memoryPressureStage,
+    runtimeDiagnostics,
     scheduleSourceWarmup,
   ]);
 

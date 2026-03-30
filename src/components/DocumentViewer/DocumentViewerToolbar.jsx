@@ -29,7 +29,12 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {number} pageNumber
  * @property {number} totalPages
  * @property {boolean} isDocumentLoading
- * @property {function(number): void} setPageNumber
+ * @property {function(number|function(number): number): void} setPageNumber
+ * @property {function(number|function(number): number): void} setComparePageNumber
+ * @property {function(string=): void} goToPreviousPage
+ * @property {function(string=): void} goToNextPage
+ * @property {function(string=): void} goToFirstPage
+ * @property {function(string=): void} goToLastPage
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void} actualSize
@@ -45,6 +50,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
  * @property {function(): void} handleCompare
+ * @property {function(): void} closeCompare
  * @property {boolean} isComparing
  * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
  * @property {function(number): void} handleRotationChange
@@ -69,6 +75,11 @@ const DocumentViewerToolbar = ({
   totalPages,
   isDocumentLoading,
   setPageNumber,
+  setComparePageNumber,
+  goToPreviousPage,
+  goToNextPage,
+  goToFirstPage,
+  goToLastPage,
   zoomIn,
   zoomOut,
   actualSize,
@@ -80,6 +91,7 @@ const DocumentViewerToolbar = ({
   setZoom,
   viewerContainerRef,
   handleCompare,
+  closeCompare,
   isComparing,
   imageProperties,
   handleRotationChange,
@@ -106,6 +118,11 @@ const DocumentViewerToolbar = ({
       totalPages={totalPages}
       isDocumentLoading={isDocumentLoading}
       setPageNumber={setPageNumber}
+      setComparePageNumber={setComparePageNumber}
+      goToPreviousPage={goToPreviousPage}
+      goToNextPage={goToNextPage}
+      goToFirstPage={goToFirstPage}
+      goToLastPage={goToLastPage}
       zoom={zoom}
       zoomState={zoomState}
       setZoomMode={setZoomMode}
@@ -121,6 +138,7 @@ const DocumentViewerToolbar = ({
       openPrintDialog={openPrintDialog}
       closePrintDialog={closePrintDialog}
       handleCompare={handleCompare}
+      closeCompare={closeCompare}
       isComparing={isComparing}
       imageProperties={imageProperties}
       handleRotationChange={handleRotationChange}
@@ -144,6 +162,11 @@ DocumentViewerToolbar.propTypes = {
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
+  setComparePageNumber: PropTypes.func.isRequired,
+  goToPreviousPage: PropTypes.func.isRequired,
+  goToNextPage: PropTypes.func.isRequired,
+  goToFirstPage: PropTypes.func.isRequired,
+  goToLastPage: PropTypes.func.isRequired,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func.isRequired,
@@ -158,6 +181,7 @@ DocumentViewerToolbar.propTypes = {
   setZoom: PropTypes.func.isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
+  closeCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,

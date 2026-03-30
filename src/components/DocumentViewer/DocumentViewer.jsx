@@ -41,6 +41,7 @@ const DocumentViewer = () => {
     setZoom,
     isComparing,
     comparePageNumber,
+    setComparePageNumber,
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
@@ -57,6 +58,10 @@ const DocumentViewer = () => {
     compareRef,
     handlePrimaryDisplayStateChange,
     handlePageNumberChange,
+    goToPreviousPage,
+    goToNextPage,
+    goToFirstPage,
+    goToLastPage,
     zoomIn,
     zoomOut,
     actualSize,
@@ -64,6 +69,7 @@ const DocumentViewer = () => {
     fitToWidth,
     handleContainerClick,
     handleCompare,
+    closeCompare,
     handleRotationChange,
     handleBrightnessChange,
     handleContrastChange,
@@ -108,6 +114,7 @@ const DocumentViewer = () => {
         /* page + totals */
         pageNumber={pageNumber}
         setPageNumber={setPageNumber}
+        setComparePageNumber={setComparePageNumber}
         totalPages={totalPages}
         isDocumentLoading={isDocumentLoading}
 
@@ -130,6 +137,7 @@ const DocumentViewer = () => {
         /* compare + editing */
         isComparing={isComparing}
         handleCompare={handleCompare}
+        closeCompare={closeCompare}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
@@ -147,6 +155,10 @@ const DocumentViewer = () => {
         nextPageDisabled={nextPageDisabled}
         firstPageDisabled={firstPageDisabled}
         lastPageDisabled={lastPageDisabled}
+        goToPreviousPage={goToPreviousPage}
+        goToNextPage={goToNextPage}
+        goToFirstPage={goToFirstPage}
+        goToLastPage={goToLastPage}
 
       />
 
@@ -181,6 +193,7 @@ const DocumentViewer = () => {
             <button
               type="button"
               className="thumbnail-pane-collapsed-toggle"
+              onMouseDown={(event) => event.preventDefault()}
               onClick={showThumbnailPane}
               aria-label={t('thumbnails.controls.showPane', { defaultValue: 'Show thumbnails' })}
               title={t('thumbnails.controls.showPane', { defaultValue: 'Show thumbnails' })}

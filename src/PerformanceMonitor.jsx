@@ -11,41 +11,33 @@
  *
  * SAFETY & COMPATIBILITY
  *   - Uses non-standard `performance.memory` only when available (Chromium). Falls back gracefully.
- *   - In browsers that do not expose heap metrics (for example Firefox), the overlay shows N/A instead of misleading zero values.
- *   - Avoids noisy logs and heavy work; updates are throttled to ~1 Hz for memory and ~60 Hz for FPS.
+ *   - In browsers that do not expose heap metrics (for example Firefox), the overlay shows N/A.
+ *   - Avoids noisy logs and heavy work; memory is sampled ~1 Hz while the timer display updates at a
+ *     modest cadence.
  *   - Cleans up all timers and rAF handlers on unmount.
- *
- * CONFIG (set via public/odv.config.js; no rebuild required)
- *   - showPerfOverlay: boolean (default false) — when false, this component renders null.
- *
- * GOTCHA (project-wide reminder):
- *   - Elsewhere we import from 'file-type' (root), **not** 'file-type/browser', because v21 does
- *     not export that subpath for bundlers and it will break a Vite build. See README design notes.
- *
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';
 import { useTranslation } from 'react-i18next';
 import ViewerContext from './contexts/viewerContext.js';
+import { formatBytes } from './utils/documentLoadingConfig.js';
 
 /**
  * @typedef {Object} MemorySnapshot
- * @property {number} totalJSHeapSize  Memory in MB
- * @property {number} usedJSHeapSize   Memory in MB
- * @property {number} jsHeapSizeLimit  Memory in MB
+ * @property {number} totalJSHeapSize
+ * @property {number} usedJSHeapSize
+ * @property {number} jsHeapSizeLimit
  */
 
 /**
  * Read a stable snapshot of runtime config without exposing a mutable reference.
- * @returns {{ showPerfOverlay: (boolean|undefined) }} config
+ * @returns {{ showPerfOverlay: (boolean|undefined) }}
  */
 function readRuntimeConfig() {
   try {
-    // Preferred: helper installed by odv.config.js
     if (typeof window !== 'undefined' && typeof window.__ODV_GET_CONFIG__ === 'function') {
       return window.__ODV_GET_CONFIG__() || {};
     }
-    // Fallback: direct global
     if (typeof window !== 'undefined' && window.__ODV_CONFIG__) {
       return window.__ODV_CONFIG__ || {};
     }
@@ -56,14 +48,43 @@ function readRuntimeConfig() {
 }
 
 /**
- * Format a number of bytes into MB with two decimals.
- * Returns 0 when input is falsy or not finite.
  * @param {number} bytes
  * @returns {number}
  */
 function toMB(bytes) {
   if (!Number.isFinite(bytes) || bytes <= 0) return 0;
   return bytes / (1024 * 1024);
+}
+
+/**
+ * @param {number} ms
+ * @returns {string}
+ */
+function formatDuration(ms) {
+  const safeMs = Math.max(0, Number(ms) || 0);
+  const totalTenths = Math.round(safeMs / 100);
+  const tenths = totalTenths % 10;
+  const totalSeconds = Math.floor(totalTenths / 10);
+  const seconds = totalSeconds % 60;
+  const minutes = Math.floor(totalSeconds / 60) % 60;
+  const hours = Math.floor(totalSeconds / 3600);
+  const hh = hours > 0 ? `${hours}:` : '';
+  const mm = hours > 0 ? String(minutes).padStart(2, '0') : String(minutes);
+  const ss = String(seconds).padStart(2, '0');
+  return `${hh}${mm}:${ss}.${tenths}`;
+}
+
+/**
+ * @param {number} startedAtMs
+ * @param {number} completedAtMs
+ * @param {number} nowMs
+ * @returns {number}
+ */
+function resolveElapsedMs(startedAtMs, completedAtMs, nowMs) {
+  const start = Math.max(0, Number(startedAtMs) || 0);
+  if (!start) return 0;
+  const end = Math.max(start, Number(completedAtMs) || Number(nowMs) || start);
+  return Math.max(0, end - start);
 }
 
 /**
@@ -74,20 +95,29 @@ function toMB(bytes) {
  */
 const PerformanceMonitor = () => {
   const { t } = useTranslation('common');
-  const { allPages, error, workerCount, messageQueue } = useContext(ViewerContext);
+  const {
+    allPages,
+    error,
+    workerCount,
+    messageQueue,
+    loadingRunActive,
+    plannedPageCount,
+    documentLoadingConfig,
+    memoryPressureStage,
+    runtimeDiagnostics,
+  } = useContext(ViewerContext);
 
-  // Runtime toggle (read once at mount; if you need live toggling, change to state + event)
   const showPerfOverlay = useMemo(() => !!readRuntimeConfig().showPerfOverlay, []);
-
 
   const [memory, setMemory] = useState(
     /** @type {MemorySnapshot} */ ({
       totalJSHeapSize: 0,
       usedJSHeapSize: 0,
-      jsHeapSizeLimit: 0
+      jsHeapSizeLimit: 0,
     })
   );
   const [hasHeapMetrics, setHasHeapMetrics] = useState(false);
+  const [clockNow, setClockNow] = useState(() => Date.now());
 
   const hardwareConcurrency = useMemo(() => {
     try {
@@ -99,39 +129,32 @@ const PerformanceMonitor = () => {
 
   const deviceMemory = useMemo(() => {
     try {
-      // Non-standard; Chromium only; returns GB
       return typeof navigator !== 'undefined' ? (Number(navigator.deviceMemory) || 0) : 0;
     } catch {
       return 0;
     }
   }, []);
 
-  // FPS sampling (simple moving average)
   const [fps, setFps] = useState(0);
-  /** @type {{ current: (number|undefined) }} */
   const rafRef = useRef(undefined);
-  /** @type {{ current: (number|undefined) }} */
   const lastFrameTime = useRef(undefined);
-  /** @type {{ current: Array.<number> }} */
-  const smaWindow = useRef([]); // last N instantaneous FPS values
+  const smaWindow = useRef([]);
   const SMA_SIZE = 30;
 
   /**
-   * rAF loop to estimate instantaneous FPS and expose a short moving average.
-   * @param {number} t
+   * @param {number} frameTime
    * @returns {void}
    */
-  const tick = useCallback((t) => {
-    if (typeof t === 'number') {
+  const tick = useCallback((frameTime) => {
+    if (typeof frameTime === 'number') {
       const prev = lastFrameTime.current;
-      lastFrameTime.current = t;
-      if (typeof prev === 'number' && t > prev) {
-        const dt = (t - prev) / 1000; // seconds
+      lastFrameTime.current = frameTime;
+      if (typeof prev === 'number' && frameTime > prev) {
+        const dt = (frameTime - prev) / 1000;
         const inst = dt > 0 ? 1 / dt : 0;
         smaWindow.current.push(inst);
         if (smaWindow.current.length > SMA_SIZE) smaWindow.current.shift();
-        const avg = smaWindow.current.reduce((a, b) => a + b, 0) / smaWindow.current.length;
-        // Avoid re-render thrash: only update when the value moves noticeably
+        const avg = smaWindow.current.reduce((sum, value) => sum + value, 0) / smaWindow.current.length;
         setFps((prevFps) => (Math.abs(prevFps - avg) > 0.25 ? Math.round(avg) : prevFps));
       }
     }
@@ -139,77 +162,81 @@ const PerformanceMonitor = () => {
   }, []);
 
   /**
-   * Memory stats (1 Hz, Chromium-only).
-   * Falls back gracefully on engines that omit performance.memory.
    * @returns {void}
    */
   const updateMemory = useCallback(() => {
     try {
       const perf = typeof window !== 'undefined' ? window.performance : undefined;
-      // @ts-ignore - non-standard
+      // @ts-ignore Chromium-only API
       const mem = perf && perf.memory ? perf.memory : null;
       if (mem) {
         setHasHeapMetrics(true);
         setMemory({
           totalJSHeapSize: toMB(mem.totalJSHeapSize),
           usedJSHeapSize: toMB(mem.usedJSHeapSize),
-          jsHeapSizeLimit: toMB(mem.jsHeapSizeLimit)
+          jsHeapSizeLimit: toMB(mem.jsHeapSizeLimit),
         });
         return;
       }
       setHasHeapMetrics(false);
     } catch {
-      // ignore; unavailable or blocked
+      setHasHeapMetrics(false);
     }
   }, []);
 
-  // Start FPS and memory loops only when the overlay is actually enabled
   useEffect(() => {
     if (!showPerfOverlay) return undefined;
 
     rafRef.current = requestAnimationFrame(tick);
-    const id = setInterval(updateMemory, 1000);
-    // seed once so UI doesn't start with zeros
+    const memoryTimerId = setInterval(updateMemory, 1000);
+    const clockTimerId = setInterval(() => setClockNow(Date.now()), 250);
     updateMemory();
+    setClockNow(Date.now());
+
     return () => {
       try { if (rafRef.current) cancelAnimationFrame(rafRef.current); } catch {}
-      clearInterval(id);
+      clearInterval(memoryTimerId);
+      clearInterval(clockTimerId);
     };
   }, [showPerfOverlay, tick, updateMemory]);
 
-  // Derivations
-  const totalPages = allPages.length;
-  const loadedPages = useMemo(() => allPages.filter(Boolean).length, [allPages]);
+  const totalPages = Array.isArray(allPages) ? allPages.length : 0;
   const failedPages = useMemo(
-    () => allPages.filter((p) => p && p.status === -1).length,
+    () => allPages.filter((page) => page && (page.status === -1 || page.fullSizeStatus === -1 || page.thumbnailStatus === -1)).length,
     [allPages]
   );
+  const discoveredPages = Math.max(totalPages, Number(plannedPageCount) || 0);
+  const loadRunElapsedMs = resolveElapsedMs(
+    runtimeDiagnostics?.loadRunStartedAtMs,
+    runtimeDiagnostics?.loadRunCompletedAtMs,
+    clockNow
+  );
+  const fullReadyCount = Math.max(0, Number(runtimeDiagnostics?.fullReadyCount || 0));
+  const thumbnailReadyCount = Math.max(0, Number(runtimeDiagnostics?.thumbnailReadyCount || 0));
+  const messages = Array.isArray(messageQueue) ? messageQueue.slice(-20) : [];
 
-  // UI styles (inline to keep HUD self-contained)
   const wrapStyle = {
     position: 'fixed',
     bottom: 0,
     right: 0,
     padding: '10px 12px',
-    backgroundColor: 'rgba(0, 0, 0, 0.6)',
+    backgroundColor: 'rgba(0, 0, 0, 0.68)',
     color: '#fff',
     zIndex: 2147483646,
-    maxWidth: '340px',
+    maxWidth: '420px',
     overflowY: 'auto',
-    maxHeight: '50vh',
+    maxHeight: '60vh',
     fontFamily: 'ui-monospace, SFMono-Regular, Menlo, Consolas, monospace',
     fontSize: '12px',
     lineHeight: 1.5,
     borderTopLeftRadius: '6px',
     boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 6px 24px rgba(0,0,0,0.35)',
-    backdropFilter: 'blur(2px)'
+    backdropFilter: 'blur(2px)',
   };
-
   const h3Style = { margin: '0 0 6px 0', fontSize: '12px', letterSpacing: '0.02em', opacity: 0.9 };
   const sectionStyle = { margin: '6px 0' };
   const labelStyle = { opacity: 0.8 };
-
-  const messages = messageQueue.slice(-20); // last 20
+  const valueStyle = { fontWeight: 700 };
 
   if (!showPerfOverlay) return null;
 
@@ -226,6 +253,37 @@ const PerformanceMonitor = () => {
       </div>
 
       <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.modeLabel')}</span>{' '}
+        <span style={valueStyle}>{String(documentLoadingConfig?.mode || 'auto')}</span>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          {t('perf.stageLabel')} <strong>{String(memoryPressureStage || 'normal')}</strong>
+        </span>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          {t('perf.workersLabel')} <strong>{workerCount}</strong>
+        </span>
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.loadRunLabel')}</span>{' '}
+        <strong>{formatDuration(loadRunElapsedMs)}</strong>
+        <span style={{ marginLeft: 8, opacity: 0.75 }}>
+          {loadingRunActive ? t('perf.loadRunActive') : t('perf.loadRunDone')}
+        </span>
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.pagesLabel')}</span>{' '}
+        <strong>{discoveredPages}</strong>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          {t('perf.fullAssetsLabel')} <strong>{fullReadyCount}</strong>/{totalPages}
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          {t('perf.thumbnailAssetsLabel')} <strong>{thumbnailReadyCount}</strong>/{totalPages}
+        </span>
+        {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> {t('perf.failedSuffix', { count: failedPages })}</span> : null}
+      </div>
+
+      <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.heapLabel')}</span>{' '}
         {hasHeapMetrics ? (
           <>
@@ -236,30 +294,73 @@ const PerformanceMonitor = () => {
           </>
         ) : (
           <span style={{ opacity: 0.7 }}>
-            <strong>{t('perf.heapNotAvailable', { defaultValue: 'N/A' })}</strong>{' '}
-            {t('perf.heapUnsupported', { defaultValue: '(browser does not expose heap metrics)' })}
+            <strong>{t('perf.heapNotAvailable')}</strong> {t('perf.heapUnsupported')}
           </span>
         )}
       </div>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>{t('perf.pagesLabel')}</span>{' '}
-        <strong>{loadedPages}</strong> {t('perf.loadedOfTotal', { loaded: loadedPages, total: totalPages })}
-        {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> {t('perf.failedSuffix', { count: failedPages })}</span> : null}
+        <div>
+          <span style={labelStyle}>{t('perf.sourceStoreLabel')}</span>{' '}
+          <strong>{String(runtimeDiagnostics?.sourceStoreMode || 'memory')}</strong>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            {formatBytes(Number(runtimeDiagnostics?.sourceBytes || 0))}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            {t('perf.itemsShortLabel')} {Number(runtimeDiagnostics?.sourceCount || 0)}
+          </span>
+          {runtimeDiagnostics?.sourceStoreEncrypted ? (
+            <span style={{ marginLeft: 8, opacity: 0.75 }}>{t('perf.encryptedLabel')}</span>
+          ) : null}
+        </div>
+        <div>
+          <span style={labelStyle}>{t('perf.assetStoreLabel')}</span>{' '}
+          <strong>{String(runtimeDiagnostics?.assetStoreMode || 'disabled')}</strong>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            {formatBytes(Number(runtimeDiagnostics?.assetBytes || 0))}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            {t('perf.itemsShortLabel')} {Number(runtimeDiagnostics?.assetCount || 0)}
+          </span>
+          {runtimeDiagnostics?.assetStoreEncrypted ? (
+            <span style={{ marginLeft: 8, opacity: 0.75 }}>{t('perf.encryptedLabel')}</span>
+          ) : null}
+        </div>
       </div>
 
       <div style={sectionStyle}>
-        <span style={labelStyle}>{t('perf.workersLabel')}</span> <strong>{workerCount}</strong>
-        {error ? <div style={{ color: '#ff9c9c', marginTop: 4 }}>{t('perf.errorPrefix')} {String(error)}</div> : null}
+        <div>
+          <span style={labelStyle}>{t('perf.objectUrlsLabel')}</span>{' '}
+          <strong>{Number(runtimeDiagnostics?.trackedObjectUrlCount || 0)}</strong>
+          <span style={{ marginLeft: 10, opacity: 0.9 }}>
+            {t('perf.pendingAssetsLabel')} <strong>{Number(runtimeDiagnostics?.pendingAssetCount || 0)}</strong>
+          </span>
+          <span style={{ marginLeft: 10, opacity: 0.9 }}>
+            {t('perf.warmupQueueLabel')} <strong>{Number(runtimeDiagnostics?.warmupQueueLength || 0)}</strong>
+          </span>
+        </div>
+        <div>
+          <span style={labelStyle}>{t('perf.fullCacheLabel')}</span>{' '}
+          <strong>{Number(runtimeDiagnostics?.fullCacheCount || 0)}</strong>
+          <span style={{ marginLeft: 10, opacity: 0.9 }}>
+            {t('perf.thumbnailCacheLabel')} <strong>{Number(runtimeDiagnostics?.thumbnailCacheCount || 0)}</strong>
+          </span>
+        </div>
       </div>
+
+      {error ? (
+        <div style={{ ...sectionStyle, color: '#ff9c9c' }}>
+          {t('perf.errorPrefix')} {String(error)}
+        </div>
+      ) : null}
 
       {messages.length > 0 && (
         <div style={{ ...sectionStyle, maxHeight: '24vh', overflowY: 'auto' }}>
           <div style={{ ...labelStyle, marginBottom: 2 }}>{t('perf.messagesLabel')}</div>
           <ul style={{ margin: 0, paddingLeft: 16 }}>
-            {messages.map((msg, i) => (
-              <li key={i} style={{ whiteSpace: 'pre-wrap' }}>
-                {String(msg)}
+            {messages.map((message, index) => (
+              <li key={index} style={{ whiteSpace: 'pre-wrap' }}>
+                {String(message)}
               </li>
             ))}
           </ul>

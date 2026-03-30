@@ -251,6 +251,20 @@ canvas {
   gap: 4px;
 }
 
+.thumbnail-pane-toolbar,
+.thumbnail-pane-toolbar-button,
+.thumbnail-pane-collapsed-toggle,
+.thumbnail-pane-toolbar .material-icons {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
+.thumbnail-pane-toolbar-button .material-icons,
+.thumbnail-pane-collapsed-toggle .material-icons {
+  pointer-events: none;
+}
+
 .thumbnail-pane-toolbar-button,
 .thumbnail-pane-collapsed-toggle {
   display: inline-flex;

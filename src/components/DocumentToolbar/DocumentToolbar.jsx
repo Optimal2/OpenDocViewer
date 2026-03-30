@@ -70,7 +70,8 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
- * @property {function(number): void} setPageNumber
+ * @property {function(number|function(number): number): void} setPageNumber
+ * @property {function(number|function(number): number): void} [setComparePageNumber]
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void=} actualSize
@@ -82,6 +83,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
  * @property {function(): void} handleCompare
+ * @property {function(): void=} closeCompare
  * @property {boolean} isComparing
  * @property {ImageProperties} imageProperties
  * @property {function(number): void} handleRotationChange
@@ -121,6 +123,7 @@ const DocumentToolbar = ({
   firstPageDisabled,
   lastPageDisabled,
   setPageNumber,
+  setComparePageNumber,
   zoomIn,
   zoomOut,
   actualSize,
@@ -168,17 +171,94 @@ const DocumentToolbar = ({
     } catch {}
   }, []);
 
-  // Navigation helpers (single-step handlers + press-and-hold timers)
+  // Navigation helpers (single-step handlers + press-and-hold timers).
+  // Shift steers the right compare pane when compare mode is available. The compare-targeted setter
+  // already enables compare mode automatically, so toolbar clicks behave like Shift+thumbnail-click.
+  const primaryNavigation = usePageNavigation(setPageNumber, totalPages);
+  const compareNavigation = usePageNavigation(setComparePageNumber, totalPages);
   const {
-    handlePrevPageWrapper,
-    handleNextPageWrapper,
-    handleFirstPageWrapper,
-    handleLastPageWrapper,
-    startPrevPageTimer,
-    stopPrevPageTimer,
-    startNextPageTimer,
-    stopNextPageTimer,
-  } = usePageNavigation(setPageNumber, totalPages);
+    handlePrevPageWrapper: handlePrimaryPrevPage,
+    handleNextPageWrapper: handlePrimaryNextPage,
+    handleFirstPageWrapper: handlePrimaryFirstPage,
+    handleLastPageWrapper: handlePrimaryLastPage,
+    startPrevPageTimer: startPrimaryPrevPageTimer,
+    stopPrevPageTimer: stopPrimaryPrevPageTimer,
+    startNextPageTimer: startPrimaryNextPageTimer,
+    stopNextPageTimer: stopPrimaryNextPageTimer,
+  } = primaryNavigation;
+  const {
+    handlePrevPageWrapper: handleComparePrevPage,
+    handleNextPageWrapper: handleCompareNextPage,
+    handleFirstPageWrapper: handleCompareFirstPage,
+    handleLastPageWrapper: handleCompareLastPage,
+    startPrevPageTimer: startComparePrevPageTimer,
+    stopPrevPageTimer: stopComparePrevPageTimer,
+    startNextPageTimer: startCompareNextPageTimer,
+    stopNextPageTimer: stopCompareNextPageTimer,
+  } = compareNavigation;
+
+  const wantsCompareTarget = useCallback((event) => !!event?.shiftKey, []);
+
+  const canTargetCompare = useCallback((event) => {
+    if (!wantsCompareTarget(event)) return false;
+    if (compareDisabled) return false;
+    return typeof setComparePageNumber === 'function';
+  }, [compareDisabled, setComparePageNumber, wantsCompareTarget]);
+
+  const invokeNavigation = useCallback((event, primaryHandler, compareHandler) => {
+    if (wantsCompareTarget(event)) {
+      if (canTargetCompare(event)) {
+        compareHandler?.();
+      } else {
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+      }
+      return;
+    }
+    primaryHandler?.();
+  }, [canTargetCompare, wantsCompareTarget]);
+
+  const handlePrevPage = useCallback((event) => {
+    invokeNavigation(event, handlePrimaryPrevPage, handleComparePrevPage);
+  }, [handleComparePrevPage, handlePrimaryPrevPage, invokeNavigation]);
+
+  const handleNextPage = useCallback((event) => {
+    invokeNavigation(event, handlePrimaryNextPage, handleCompareNextPage);
+  }, [handleCompareNextPage, handlePrimaryNextPage, invokeNavigation]);
+
+  const handleFirstPage = useCallback((event) => {
+    invokeNavigation(event, handlePrimaryFirstPage, handleCompareFirstPage);
+  }, [handleCompareFirstPage, handlePrimaryFirstPage, invokeNavigation]);
+
+  const handleLastPage = useCallback((event) => {
+    invokeNavigation(event, handlePrimaryLastPage, handleCompareLastPage);
+  }, [handleCompareLastPage, handlePrimaryLastPage, invokeNavigation]);
+
+  const startPrevPageTimer = useCallback((direction, event) => {
+    if (wantsCompareTarget(event)) {
+      if (canTargetCompare(event)) startComparePrevPageTimer(direction);
+      return;
+    }
+    startPrimaryPrevPageTimer(direction);
+  }, [canTargetCompare, startComparePrevPageTimer, startPrimaryPrevPageTimer, wantsCompareTarget]);
+
+  const stopPrevPageTimer = useCallback(() => {
+    stopPrimaryPrevPageTimer();
+    stopComparePrevPageTimer();
+  }, [stopComparePrevPageTimer, stopPrimaryPrevPageTimer]);
+
+  const startNextPageTimer = useCallback((direction, event) => {
+    if (wantsCompareTarget(event)) {
+      if (canTargetCompare(event)) startCompareNextPageTimer(direction);
+      return;
+    }
+    startPrimaryNextPageTimer(direction);
+  }, [canTargetCompare, startCompareNextPageTimer, startPrimaryNextPageTimer, wantsCompareTarget]);
+
+  const stopNextPageTimer = useCallback(() => {
+    stopPrimaryNextPageTimer();
+    stopCompareNextPageTimer();
+  }, [stopCompareNextPageTimer, stopPrimaryNextPageTimer]);
 
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
@@ -354,10 +434,10 @@ const DocumentToolbar = ({
         stopPrevPageTimer={stopPrevPageTimer}
         startNextPageTimer={startNextPageTimer}
         stopNextPageTimer={stopNextPageTimer}
-        handleFirstPage={handleFirstPageWrapper}
-        handleLastPage={handleLastPageWrapper}
-        handlePrevPage={handlePrevPageWrapper}
-        handleNextPage={handleNextPageWrapper}
+        handleFirstPage={handleFirstPage}
+        handleLastPage={handleLastPage}
+        handlePrevPage={handlePrevPage}
+        handleNextPage={handleNextPage}
         pageNumber={pageNumber}
         totalPages={totalPages}
         /* NEW: allow manual page entry to apply immediately */
@@ -394,6 +474,14 @@ const DocumentToolbar = ({
       >
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
+
+      {isComparing && (
+        <div className="toolbar-inline-hint compare-shortcut-hint" role="note">
+          {t('toolbar.compare.shiftHint', {
+            defaultValue: 'Hold Shift while using page controls to steer the right compare pane. Shift + Esc closes compare.'
+          })}
+        </div>
+      )}
 
       <div className="separator" />
 
@@ -494,6 +582,7 @@ DocumentToolbar.propTypes = {
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
+  setComparePageNumber: PropTypes.func,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func,
@@ -505,6 +594,7 @@ DocumentToolbar.propTypes = {
   openPrintDialog: PropTypes.func,
   closePrintDialog: PropTypes.func,
   handleCompare: PropTypes.func.isRequired,
+  closeCompare: PropTypes.func,
   isComparing: PropTypes.bool.isRequired,
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,

@@ -194,6 +194,31 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     };
   }, [isOpen]);
 
+
+  useEffect(() => {
+    if (!isOpen) return undefined;
+
+    /**
+     * Allow Escape to close the print dialog like a regular modal dialog.
+     * Capture phase is used so the close action wins even if focus currently sits inside a nested
+     * control.
+     *
+     * @param {KeyboardEvent} event
+     * @returns {void}
+     */
+    const handleEscape = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      onClose?.();
+    };
+
+    window.addEventListener('keydown', handleEscape, true);
+    return () => {
+      window.removeEventListener('keydown', handleEscape, true);
+    };
+  }, [isOpen, onClose]);
+
   /**
    * Build a descending sequence [from..to].
    * @param {number} from
