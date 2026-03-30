@@ -53,6 +53,12 @@ The IIS config also establishes:
 - MIME types for `.mjs`, `.wasm`, `.svg`, `.json`, `.webmanifest`, `.woff`, `.woff2`
 - static and dynamic compression for JS, CSS, JSON, and SVG
 
+### Prefetch tuning for proxied source endpoints
+
+If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. The shipped default is `2`, and the viewer now retries transient prefetch failures once with a short backoff instead of driving the backend harder by default.
+
+For environments that still show intermittent `GetStream`-style timeouts, lower concurrency first before increasing any cache or rendering limits.
+
 ## IIS proxy app
 
 The dedicated proxy app under `IIS-ODVProxyApp/` exists only to forward logging traffic.

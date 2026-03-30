@@ -37,6 +37,8 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 /**
  * @typedef {Object} DocumentLoadingFetchConfig
  * @property {number} prefetchConcurrency
+ * @property {number} prefetchRetryCount
+ * @property {number} prefetchRetryBaseDelayMs
  */
 
 /**
@@ -115,7 +117,13 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       minStopRecommendationPages: 10000,
     },
     fetch: {
-      prefetchConcurrency: 6,
+      // Conservative default to reduce connection pressure against tokenized or proxied source
+      // endpoints. Deployments can still override this explicitly in runtime config.
+      prefetchConcurrency: 2,
+      // Single retry for transient network/proxy hiccups seen in some real-world environments.
+      prefetchRetryCount: 1,
+      // Base backoff between retry attempts. Later attempts scale linearly from this value.
+      prefetchRetryBaseDelayMs: 1500,
     },
     sourceStore: {
       mode: 'adaptive',
@@ -142,7 +150,9 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
       thumbnailLoadingStrategy: 'adaptive',
-      thumbnailSourceStrategy: 'auto',
+      // Prefer full raster-image reuse for thumbnails by default. This avoids extra thumbnail
+      // generation work for single-image pages and keeps the behavior deterministic.
+      thumbnailSourceStrategy: 'prefer-full-images',
       thumbnailEagerPageThreshold: 240,
       lookAheadPageCount: 2,
       lookBehindPageCount: 1,
@@ -338,7 +348,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
 
   switch (profile.tier) {
     case 'very-high':
-      base.fetch.prefetchConcurrency = 8;
+      base.fetch.prefetchConcurrency = 2;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 2048;
       base.sourceStore.blobCacheEntries = 24;
@@ -355,7 +365,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.render.maxOpenTiffDocuments = 10;
       break;
     case 'high':
-      base.fetch.prefetchConcurrency = 7;
+      base.fetch.prefetchConcurrency = 2;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1536;
       base.sourceStore.blobCacheEntries = 18;
@@ -372,7 +382,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.render.maxOpenTiffDocuments = 8;
       break;
     case 'medium':
-      base.fetch.prefetchConcurrency = 6;
+      base.fetch.prefetchConcurrency = 2;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1024;
       base.sourceStore.blobCacheEntries = 14;
@@ -387,7 +397,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.render.maxOpenTiffDocuments = 7;
       break;
     case 'low':
-      base.fetch.prefetchConcurrency = 4;
+      base.fetch.prefetchConcurrency = 1;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 256;
       base.sourceStore.blobCacheEntries = 8;
@@ -453,6 +463,8 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
     },
     fetch: {
       prefetchConcurrency: normalizeNumber(raw?.fetch?.prefetchConcurrency, adaptiveDefaults.fetch.prefetchConcurrency, 1, 16),
+      prefetchRetryCount: normalizeNumber(raw?.fetch?.prefetchRetryCount, adaptiveDefaults.fetch.prefetchRetryCount, 0, 5),
+      prefetchRetryBaseDelayMs: normalizeNumber(raw?.fetch?.prefetchRetryBaseDelayMs, adaptiveDefaults.fetch.prefetchRetryBaseDelayMs, 100, 60000),
     },
     sourceStore: {
       mode: normalizeStoreMode(raw?.sourceStore?.mode, adaptiveDefaults.sourceStore.mode),

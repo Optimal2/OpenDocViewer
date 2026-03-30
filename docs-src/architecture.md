@@ -38,7 +38,7 @@ large batches.
 High-level flow:
 
 1. generate a stable ordered list of source entries
-2. prefetch original source files into a temp store (memory or IndexedDB)
+2. prefetch original source files into a temp store (memory or IndexedDB) using a deliberately conservative concurrency level and limited retry/backoff for transient network failures
 3. infer file type and analyze page counts from the temp store
 4. insert lightweight page placeholders into `ViewerContext`
 5. lazily render thumbnails and full pages only when the UI requests them

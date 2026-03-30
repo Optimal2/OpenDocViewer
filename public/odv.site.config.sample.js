@@ -196,8 +196,15 @@
 
       fetch: {
         // Number of concurrent network fetches used during the prefetch step.
-        // Higher values grab expiring URLs faster but also increase network/CPU pressure.
-        prefetchConcurrency: 6
+        // Conservative by default so tokenized/proxied backends are less likely to stall.
+        prefetchConcurrency: 2,
+
+        // Retry a small number of transient failures such as browser/network timeouts or
+        // gateway-style upstream errors. Permanent failures are not retried.
+        prefetchRetryCount: 1,
+
+        // Base backoff before retry attempts. Later retries scale linearly from this value.
+        prefetchRetryBaseDelayMs: 1500
       },
 
       sourceStore: {
@@ -272,7 +279,7 @@
         //                           otherwise generate dedicated thumbnail rasters
         //   "dedicated"          -> always generate dedicated thumbnail rasters
         //   "prefer-full-images" -> always reuse full raster-image assets for thumbnails
-        thumbnailSourceStrategy: 'auto',
+        thumbnailSourceStrategy: 'prefer-full-images',
 
         // In "adaptive" mode, runs at or below this page count will queue the entire
         // thumbnail set in the background while still keeping a deterministic thumbnail pane.

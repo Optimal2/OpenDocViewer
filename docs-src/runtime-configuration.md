@@ -105,7 +105,9 @@ documentLoading: {
     reuseFullImageThumbnailsBelowPageCount: 600,
   },
   fetch: {
-    prefetchConcurrency: 6,
+    prefetchConcurrency: 2,
+    prefetchRetryCount: 1,
+    prefetchRetryBaseDelayMs: 1500,
   },
   sourceStore: {
     mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
@@ -132,7 +134,7 @@ documentLoading: {
     thumbnailMaxWidth: 220,
     thumbnailMaxHeight: 310,
     thumbnailLoadingStrategy: 'adaptive',
-    thumbnailSourceStrategy: 'auto',
+    thumbnailSourceStrategy: 'prefer-full-images',
     thumbnailEagerPageThreshold: 240,
     lookAheadPageCount: 2,
     lookBehindPageCount: 1,
@@ -153,6 +155,10 @@ What these knobs control:
   - lets the viewer lean toward eager caching / full-image thumbnail reuse only on machines that actually have headroom
 - `fetch.prefetchConcurrency`
   - how many source files are prefetched in parallel before page extraction starts
+  - the shipped default is intentionally conservative (`2`) to reduce pressure on proxied or tokenized backends
+- `fetch.prefetchRetryCount` / `fetch.prefetchRetryBaseDelayMs`
+  - small retry/backoff controls for transient network or gateway failures during prefetch
+  - only retry-worthy failures are retried; permanent failures such as obvious client-side missing URLs are still surfaced immediately
 - `sourceStore.*`
   - whether original source bytes stay in memory or move to browser disk-backed storage; the shipped defaults keep them in memory longer and switch by size, not source count
 - `assetStore.*`
@@ -181,7 +187,7 @@ Operationally, the new pipeline works like this:
 
 `documentLoading.render.thumbnailEagerPageThreshold` controls when `adaptive` changes from full background thumbnail warm-up to current/visible-first thumbnail requests. The scrollbar height remains deterministic in both modes because one row is rendered for every page.
 
-In the default configuration, smaller runs keep real downscaled thumbnails cached in memory, while larger runs keep the main page pipeline lazy and only retain a bounded thumbnail cache.
+In the default configuration, the prefetch stage stays deliberately conservative and retries transient failures once with backoff. Thumbnails also default to `prefer-full-images` for raster-image pages so the viewer avoids unnecessary extra thumbnail-generation work.
 
 
 `documentLoading.render.thumbnailSourceStrategy` supports:

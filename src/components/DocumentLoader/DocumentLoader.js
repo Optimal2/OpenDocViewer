@@ -180,6 +180,58 @@ function createSourceKey(fileIndex, orderIndex) {
 }
 
 /**
+ * @param {number} ms
+ * @returns {Promise<void>}
+ */
+function sleep(ms) {
+  const delay = Math.max(0, Number(ms) || 0);
+  if (delay <= 0) return Promise.resolve();
+  return new Promise((resolve) => {
+    setTimeout(resolve, delay);
+  });
+}
+
+/**
+ * Build a consistent HTTP error so the retry classifier can inspect the status code.
+ *
+ * @param {string} url
+ * @param {number} status
+ * @returns {Error}
+ */
+function createPrefetchHttpError(url, status) {
+  const error = new Error(`Failed to fetch ${url} (status ${status})`);
+  error.status = Number(status) || 0;
+  error.isHttpError = true;
+  return error;
+}
+
+/**
+ * Retry only errors that are likely to be transient in real deployments: browser/network fetch
+ * failures and gateway-style HTTP responses. Permanent input problems such as 404 are not retried.
+ *
+ * @param {*} error
+ * @returns {boolean}
+ */
+function isTransientPrefetchError(error) {
+  if (!error) return false;
+  const status = Number(error?.status);
+  if (Number.isFinite(status)) {
+    return status === 408 || status === 425 || status === 429 || status >= 500;
+  }
+
+  const name = String(error?.name || '').toLowerCase();
+  if (name === 'typeerror') return true;
+
+  const message = String(error?.message || '').toLowerCase();
+  return message.includes('failed to fetch')
+    || message.includes('networkerror')
+    || message.includes('network error')
+    || message.includes('load failed')
+    || message.includes('timed out')
+    || message.includes('timeout');
+}
+
+/**
  * @param {PagePlaceholderInput} input
  * @returns {Array<Object>}
  */
@@ -392,6 +444,10 @@ const DocumentLoader = ({
     const prefetchLimiter = createLimiter(config.fetch.prefetchConcurrency);
 
     /**
+     * Fetch and persist one source blob with conservative retry behavior. The goal is not to mask
+     * real permanent failures, but to absorb transient proxy/gateway/network hiccups without
+     * pushing the deployment with high concurrency.
+     *
      * @param {ResolvedEntry} entry
      * @param {number} orderIndex
      * @returns {Promise<PrefetchResult>}
@@ -400,72 +456,103 @@ const DocumentLoader = ({
       const controller = new AbortController();
       activeControllersRef.current.add(controller);
 
+      const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
+      const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
+
       try {
-        const response = await fetch(entry.url, { signal: controller.signal });
-        if (!response.ok) throw new Error(`Failed to fetch ${entry.url} (status ${response.status})`);
+        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+          try {
+            const response = await fetch(entry.url, { signal: controller.signal });
+            if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
 
-        const blob = await response.blob();
-        if (!(blob instanceof Blob) || blob.size <= 0) {
-          throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
+            const blob = await response.blob();
+            if (!(blob instanceof Blob) || blob.size <= 0) {
+              throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
+            }
+
+            let detectedType = null;
+            try { detectedType = await fileTypeFromBlob(blob); } catch {}
+
+            const mimeType = String(
+              detectedType?.mime
+              || response.headers.get('content-type')
+              || blob.type
+              || 'application/octet-stream'
+            );
+
+            const fileExtension = normalizeExtension(
+              detectedType?.ext
+              || mimeToExtension(mimeType)
+              || entry.ext
+              || inferUrlExtension(entry.url)
+              || 'png'
+            );
+
+            const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
+            const stored = await storeSourceBlob({
+              sourceKey,
+              blob,
+              fileExtension,
+              mimeType,
+              originalUrl: entry.url,
+              fileIndex: entry.fileIndex,
+            });
+
+            return {
+              ok: true,
+              sourceKey,
+              fileExtension,
+              mimeType,
+              sizeBytes: Number(blob.size || 0),
+              fileIndex: entry.fileIndex,
+              url: entry.url,
+              stats: stored?.stats || null,
+              analysisBlob: blob,
+              pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+            };
+          } catch (error) {
+            if (controller.signal.aborted || cancelled) {
+              return {
+                ok: false,
+                aborted: true,
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+              };
+            }
+
+            const shouldRetry = attempt < maxAttempts && isTransientPrefetchError(error);
+            if (!shouldRetry) {
+              logger.error('Prefetch failed', {
+                url: entry.url,
+                fileIndex: entry.fileIndex,
+                attempt,
+                maxAttempts,
+                error: String(error?.message || error),
+              });
+              return {
+                ok: false,
+                error,
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+              };
+            }
+
+            const retryDelayMs = retryBaseDelayMs * attempt;
+            logger.warn('Prefetch attempt failed; retrying conservatively', {
+              url: entry.url,
+              fileIndex: entry.fileIndex,
+              attempt,
+              maxAttempts,
+              retryDelayMs,
+              error: String(error?.message || error),
+            });
+            if (retryDelayMs > 0) await sleep(retryDelayMs);
+          }
         }
 
-        let detectedType = null;
-        try { detectedType = await fileTypeFromBlob(blob); } catch {}
-
-        const mimeType = String(
-          detectedType?.mime
-          || response.headers.get('content-type')
-          || blob.type
-          || 'application/octet-stream'
-        );
-
-        const fileExtension = normalizeExtension(
-          detectedType?.ext
-          || mimeToExtension(mimeType)
-          || entry.ext
-          || inferUrlExtension(entry.url)
-          || 'png'
-        );
-
-        const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
-        const stored = await storeSourceBlob({
-          sourceKey,
-          blob,
-          fileExtension,
-          mimeType,
-          originalUrl: entry.url,
-          fileIndex: entry.fileIndex,
-        });
-
-        return {
-          ok: true,
-          sourceKey,
-          fileExtension,
-          mimeType,
-          sizeBytes: Number(blob.size || 0),
-          fileIndex: entry.fileIndex,
-          url: entry.url,
-          stats: stored?.stats || null,
-          analysisBlob: blob,
-          pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
-        };
-      } catch (error) {
-        if (controller.signal.aborted || cancelled) {
-          return {
-            ok: false,
-            aborted: true,
-            fileIndex: entry.fileIndex,
-            url: entry.url,
-          };
-        }
-        logger.error('Prefetch failed', {
-          url: entry.url,
-          fileIndex: entry.fileIndex,
-          error: String(error?.message || error),
-        });
         return {
           ok: false,
-          error,
+          error: new Error(`Prefetch exhausted retries for ${entry.url}`),
           fileIndex: entry.fileIndex,
           url: entry.url,
         };
