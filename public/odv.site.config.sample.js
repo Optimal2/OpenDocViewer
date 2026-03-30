@@ -201,10 +201,13 @@
 
         // Retry a small number of transient failures such as browser/network timeouts or
         // gateway-style upstream errors. Permanent failures are not retried.
-        prefetchRetryCount: 1,
+        prefetchRetryCount: 0,
 
         // Base backoff before retry attempts. Later retries scale linearly from this value.
-        prefetchRetryBaseDelayMs: 1500
+        prefetchRetryBaseDelayMs: 750,
+        // Abort a single prefetch attempt after this many milliseconds so one slow source does not
+        // keep the viewer waiting on that spot in the sequence for too long.
+        prefetchRequestTimeoutMs: 8000
       },
 
       sourceStore: {
@@ -257,7 +260,7 @@
       render: {
         // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
-        maxConcurrentAssetRenders: 2,
+        maxConcurrentAssetRenders: 4,
 
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
@@ -272,35 +275,35 @@
         //   "adaptive" -> eager for smaller runs, current/visible-first for larger runs
         //   "eager"    -> build all thumbnails in the background
         //   "viewport" -> only build current/visible thumbnails and nearby neighbors
-        thumbnailLoadingStrategy: 'adaptive',
+        thumbnailLoadingStrategy: 'eager',
 
         // Thumbnail source strategy:
         //   "auto"               -> reuse full raster-image assets when appropriate,
         //                           otherwise generate dedicated thumbnail rasters
         //   "dedicated"          -> always generate dedicated thumbnail rasters
         //   "prefer-full-images" -> always reuse full raster-image assets for thumbnails
-        thumbnailSourceStrategy: 'prefer-full-images',
+        thumbnailSourceStrategy: 'dedicated',
 
         // In "adaptive" mode, runs at or below this page count will queue the entire
         // thumbnail set in the background while still keeping a deterministic thumbnail pane.
-        thumbnailEagerPageThreshold: 240,
+        thumbnailEagerPageThreshold: 5000,
 
         // Neighbor prefetch around the active page.
-        lookAheadPageCount: 2,
-        lookBehindPageCount: 1,
+        lookAheadPageCount: 8,
+        lookBehindPageCount: 4,
 
         // How many rows beyond the visible thumbnail range should be considered for work.
-        visibleThumbnailOverscan: 6,
+        visibleThumbnailOverscan: 16,
 
         // In-memory object-URL cache limits.
         // The underlying rendered blobs may still remain in the asset store even if an older
         // browser object URL is revoked from RAM.
-        fullPageCacheLimit: 64,
-        thumbnailCacheLimit: 512,
+        fullPageCacheLimit: 192,
+        thumbnailCacheLimit: 8192,
 
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
-        maxOpenPdfDocuments: 6,
-        maxOpenTiffDocuments: 6
+        maxOpenPdfDocuments: 12,
+        maxOpenTiffDocuments: 12
       }
     },
 

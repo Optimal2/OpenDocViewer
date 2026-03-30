@@ -106,8 +106,9 @@ documentLoading: {
   },
   fetch: {
     prefetchConcurrency: 2,
-    prefetchRetryCount: 1,
-    prefetchRetryBaseDelayMs: 1500,
+    prefetchRetryCount: 0,
+    prefetchRetryBaseDelayMs: 750,
+    prefetchRequestTimeoutMs: 8000,
   },
   sourceStore: {
     mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
@@ -129,20 +130,20 @@ documentLoading: {
     releaseSinglePageRasterSourceAfterFullPersist: false,
   },
   render: {
-    maxConcurrentAssetRenders: 2,
+    maxConcurrentAssetRenders: 4,
     fullPageScale: 1.5, // applies to PDF rendering in the lazy page-asset pipeline
     thumbnailMaxWidth: 220,
     thumbnailMaxHeight: 310,
-    thumbnailLoadingStrategy: 'adaptive',
-    thumbnailSourceStrategy: 'prefer-full-images',
-    thumbnailEagerPageThreshold: 240,
-    lookAheadPageCount: 2,
-    lookBehindPageCount: 1,
-    visibleThumbnailOverscan: 6,
-    fullPageCacheLimit: 64,
-    thumbnailCacheLimit: 512,
-    maxOpenPdfDocuments: 6,
-    maxOpenTiffDocuments: 6,
+    thumbnailLoadingStrategy: 'eager',
+    thumbnailSourceStrategy: 'dedicated',
+    thumbnailEagerPageThreshold: 5000,
+    lookAheadPageCount: 8,
+    lookBehindPageCount: 4,
+    visibleThumbnailOverscan: 16,
+    fullPageCacheLimit: 192,
+    thumbnailCacheLimit: 8192,
+    maxOpenPdfDocuments: 12,
+    maxOpenTiffDocuments: 12,
   }
 }
 ```
@@ -155,10 +156,10 @@ What these knobs control:
   - lets the viewer lean toward eager caching / full-image thumbnail reuse only on machines that actually have headroom
 - `fetch.prefetchConcurrency`
   - how many source files are prefetched in parallel before page extraction starts
-  - the shipped default is intentionally conservative (`2`) to reduce pressure on proxied or tokenized backends
-- `fetch.prefetchRetryCount` / `fetch.prefetchRetryBaseDelayMs`
-  - small retry/backoff controls for transient network or gateway failures during prefetch
-  - only retry-worthy failures are retried; permanent failures such as obvious client-side missing URLs are still surfaced immediately
+  - the customer-tuned profile in this bundle keeps concurrency at `2` but disables retries and adds an explicit fail-fast request timeout so slow upstream requests do not stall the UI for long
+- `fetch.prefetchRetryCount` / `fetch.prefetchRetryBaseDelayMs` / `fetch.prefetchRequestTimeoutMs`
+  - controls whether prefetch retries at all, how long it waits before another attempt, and when a single request is aborted as too slow
+  - this customer bundle ships with no retries and an `8000` ms request timeout to keep the UI moving
 - `sourceStore.*`
   - whether original source bytes stay in memory or move to browser disk-backed storage; the shipped defaults keep them in memory longer and switch by size, not source count
 - `assetStore.*`
@@ -187,7 +188,7 @@ Operationally, the new pipeline works like this:
 
 `documentLoading.render.thumbnailEagerPageThreshold` controls when `adaptive` changes from full background thumbnail warm-up to current/visible-first thumbnail requests. The scrollbar height remains deterministic in both modes because one row is rendered for every page.
 
-In the default configuration, the prefetch stage stays deliberately conservative and retries transient failures once with backoff. Thumbnails also default to `prefer-full-images` for raster-image pages so the viewer avoids unnecessary extra thumbnail-generation work.
+In this customer-focused configuration, the prefetch stage still keeps concurrency moderate, but it fails fast instead of retrying. Thumbnails are warmed eagerly and use dedicated thumbnail rasters so the pane stays responsive even when documents contain large source images.
 
 
 `documentLoading.render.thumbnailSourceStrategy` supports:

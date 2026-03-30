@@ -238,16 +238,20 @@
 
       // Network prefetch step used to grab expiring URLs before later page rendering.
       fetch: {
-        // Conservative default: keep network pressure low for proxied/tokenized backends.
-        // Sites that have measured headroom can still override this in site config.
+        // Customer-optimised profile: keep the backend pressure moderate, but fail fast so one
+        // slow source does not make the whole viewer feel stuck.
         prefetchConcurrency: 2,
 
-        // Retry a small number of transient failures (timeouts, gateway hiccups, temporary proxy
-        // errors). Permanent failures such as 404 are still surfaced immediately.
-        prefetchRetryCount: 1,
+        // Retries are disabled in this profile. In the observed customer environment, waiting for
+        // another conservative attempt made the thumbnail pane feel slower than surfacing the
+        // failed source quickly.
+        prefetchRetryCount: 0,
 
-        // Base backoff before retry attempts. Later retries scale linearly from this value.
-        prefetchRetryBaseDelayMs: 1500
+        // Retained for deployments that explicitly re-enable retries.
+        prefetchRetryBaseDelayMs: 750,
+        // Abort a single prefetch attempt after this many milliseconds so one slow source does not
+        // keep the viewer waiting on that spot in the sequence for too long.
+        prefetchRequestTimeoutMs: 8000
       },
 
       // Temporary storage for the original source bytes.
@@ -287,7 +291,7 @@
 
       // Lazy page rendering and in-memory object URL cache limits.
       render: {
-        maxConcurrentAssetRenders: 2,
+        maxConcurrentAssetRenders: 4,
         fullPageScale: 1.5,
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
@@ -295,32 +299,27 @@
         thumbnailMaxWidth: 220,
         thumbnailMaxHeight: 310,
 
-        // Thumbnail asset request strategy (the scrollbar height remains deterministic in all modes):
-        // - "adaptive": eager-build all thumbnails for smaller documents, current/visible-first for larger ones
-        // - "eager": always build all thumbnails in the background
-        // - "viewport": only build current/visible thumbnails and nearby neighbors
-        thumbnailLoadingStrategy: 'adaptive',
+        // Customer-optimised thumbnail strategy: keep the pane warm by queueing the whole set in
+        // the background. This costs more RAM/work, but the pane feels much more immediate.
+        thumbnailLoadingStrategy: 'eager',
 
-        // Thumbnail source strategy:
-        // - "auto": on high-memory machines, reuse full image assets for raster-image thumbnails
-        //           when the total page count is low enough; otherwise generate dedicated thumbnails
-        // - "dedicated": always generate dedicated thumbnail rasters
-        // - "prefer-full-images": always reuse full raster-image assets for thumbnails
-        thumbnailSourceStrategy: 'prefer-full-images',
+        // Dedicated thumbnail rasters keep the pane lighter and avoid decoding full-size images
+        // for every thumbnail tile in large image-heavy runs.
+        thumbnailSourceStrategy: 'dedicated',
 
         // When strategy is "adaptive", documents at or below this page count queue the
         // entire thumbnail set in the background while still keeping a fixed-height pane.
-        thumbnailEagerPageThreshold: 240,
-        lookAheadPageCount: 2,
-        lookBehindPageCount: 1,
-        visibleThumbnailOverscan: 6,
+        thumbnailEagerPageThreshold: 5000,
+        lookAheadPageCount: 8,
+        lookBehindPageCount: 4,
+        visibleThumbnailOverscan: 16,
         // In-memory object-URL cache limits. The rendered blobs may still remain in the asset store
         // even if an older object URL is later revoked from RAM.
-        fullPageCacheLimit: 64,
-        thumbnailCacheLimit: 512,
+        fullPageCacheLimit: 192,
+        thumbnailCacheLimit: 8192,
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
-        maxOpenPdfDocuments: 6,
-        maxOpenTiffDocuments: 6
+        maxOpenPdfDocuments: 12,
+        maxOpenTiffDocuments: 12
       }
     },
 

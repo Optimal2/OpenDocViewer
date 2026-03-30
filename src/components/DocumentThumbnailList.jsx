@@ -239,6 +239,10 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const activeDescendantId = totalCount > 0 && pageNumber >= 1 && pageNumber <= totalCount
     ? `thumbnail-${pageNumber}`
     : undefined;
+  const selectedIndexForAutoScroll = useMemo(
+    () => (totalCount > 0 ? clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1)) : -1),
+    [pageNumber, totalCount]
+  );
 
   const visibleRange = useMemo(() => {
     if (totalCount <= 0) return { start: 0, end: -1 };
@@ -287,14 +291,17 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node || !totalCount) return;
+    if (!node || selectedIndexForAutoScroll < 0) return;
 
-    const selectedIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
-    const rowTop = selectedIndex * layout.rowHeight;
+    const rowTop = selectedIndexForAutoScroll * layout.rowHeight;
     const rowBottom = rowTop + layout.rowHeight;
     const viewportTop = node.scrollTop || 0;
     const viewportBottom = viewportTop + (node.clientHeight || 0);
 
+    // Intentionally do NOT depend on the exact running total of discovered pages. During a load
+    // run the total page count grows as more sources are analyzed. If auto-scroll tracks every
+    // growth event, the pane jumps back to the active page while the user is manually scrolling.
+    // We only auto-align when the selected page index actually changes.
     if (rowTop < viewportTop) {
       node.scrollTop = rowTop;
     } else if (rowBottom > viewportBottom) {
@@ -302,7 +309,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     }
 
     setScrollTop(node.scrollTop || 0);
-  }, [layout.rowHeight, pageNumber, totalCount]);
+  }, [layout.rowHeight, selectedIndexForAutoScroll]);
 
   useEffect(() => {
     if (!totalCount) return;
@@ -388,7 +395,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
     const pump = () => {
       if (cancelled) return;
-      const batch = queue.splice(0, 12);
+      const batchSize = Math.max(12, (Math.max(1, Number(renderConfig.maxConcurrentAssetRenders) || 1) * 8));
+      const batch = queue.splice(0, batchSize);
       for (const index of batch) {
         const page = allPages[index];
         const isThumbnailReady = !!page && (page.thumbnailUsesFullAsset
@@ -405,7 +413,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [allPages, comparePageNumber, ensurePageAsset, isComparing, pageNumber, totalCount, warmAllThumbnails]);
+  }, [allPages, comparePageNumber, ensurePageAsset, isComparing, pageNumber, renderConfig.maxConcurrentAssetRenders, totalCount, warmAllThumbnails]);
 
   /**
    * @param {*} event
