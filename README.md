@@ -81,6 +81,8 @@ Use the following files depending on what you are trying to understand:
   - print pipeline design and the responsibilities of the print helper modules
 - `docs-src/integrations.md`
   - bootstrap modes, host payload shapes, and where integration logic belongs
+- `docs-src/customer-performance-profile.md`
+  - rationale for the high-memory, fast-feeling customer profile bundled in this build
 - `src/types/jsdoc-types.js`
   - shared JSDoc-only callback/type aliases used across the UI
 

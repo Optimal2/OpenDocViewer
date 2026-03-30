@@ -206,6 +206,21 @@ function createPrefetchHttpError(url, status) {
 }
 
 /**
+ * Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the
+ * browser/network stack to decide when a stuck request should finally die.
+ *
+ * @param {string} url
+ * @param {number} timeoutMs
+ * @returns {Error}
+ */
+function createPrefetchTimeoutError(url, timeoutMs) {
+  const error = new Error(`Prefetch timed out for ${url} after ${timeoutMs} ms`);
+  error.isTimeoutError = true;
+  error.timeoutMs = Number(timeoutMs) || 0;
+  return error;
+}
+
+/**
  * Retry only errors that are likely to be transient in real deployments: browser/network fetch
  * failures and gateway-style HTTP responses. Permanent input problems such as 404 are not retried.
  *
@@ -453,112 +468,127 @@ const DocumentLoader = ({
      * @returns {Promise<PrefetchResult>}
      */
     const prefetchSource = (entry, orderIndex) => prefetchLimiter(async () => {
-      const controller = new AbortController();
-      activeControllersRef.current.add(controller);
-
       const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
+      const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
 
-      try {
-        for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
-          try {
-            const response = await fetch(entry.url, { signal: controller.signal });
-            if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
+      for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
+        const controller = new AbortController();
+        activeControllersRef.current.add(controller);
+        let timeoutId = 0;
+        let didTimeout = false;
 
-            const blob = await response.blob();
-            if (!(blob instanceof Blob) || blob.size <= 0) {
-              throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
-            }
+        try {
+          if (requestTimeoutMs > 0) {
+            timeoutId = window.setTimeout(() => {
+              didTimeout = true;
+              try { controller.abort(); } catch {}
+            }, requestTimeoutMs);
+          }
 
-            let detectedType = null;
-            try { detectedType = await fileTypeFromBlob(blob); } catch {}
+          const response = await fetch(entry.url, { signal: controller.signal });
+          if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
 
-            const mimeType = String(
-              detectedType?.mime
-              || response.headers.get('content-type')
-              || blob.type
-              || 'application/octet-stream'
-            );
+          const blob = await response.blob();
+          if (!(blob instanceof Blob) || blob.size <= 0) {
+            throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
+          }
 
-            const fileExtension = normalizeExtension(
-              detectedType?.ext
-              || mimeToExtension(mimeType)
-              || entry.ext
-              || inferUrlExtension(entry.url)
-              || 'png'
-            );
+          let detectedType = null;
+          try { detectedType = await fileTypeFromBlob(blob); } catch {}
 
-            const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
-            const stored = await storeSourceBlob({
-              sourceKey,
-              blob,
-              fileExtension,
-              mimeType,
-              originalUrl: entry.url,
-              fileIndex: entry.fileIndex,
-            });
+          const mimeType = String(
+            detectedType?.mime
+            || response.headers.get('content-type')
+            || blob.type
+            || 'application/octet-stream'
+          );
 
+          const fileExtension = normalizeExtension(
+            detectedType?.ext
+            || mimeToExtension(mimeType)
+            || entry.ext
+            || inferUrlExtension(entry.url)
+            || 'png'
+          );
+
+          const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
+          const stored = await storeSourceBlob({
+            sourceKey,
+            blob,
+            fileExtension,
+            mimeType,
+            originalUrl: entry.url,
+            fileIndex: entry.fileIndex,
+          });
+
+          return {
+            ok: true,
+            sourceKey,
+            fileExtension,
+            mimeType,
+            sizeBytes: Number(blob.size || 0),
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+            stats: stored?.stats || null,
+            analysisBlob: blob,
+            pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+          };
+        } catch (error) {
+          const normalizedError = didTimeout
+            ? createPrefetchTimeoutError(entry.url, requestTimeoutMs)
+            : error;
+
+          if ((controller.signal.aborted && !didTimeout) || cancelled) {
             return {
-              ok: true,
-              sourceKey,
-              fileExtension,
-              mimeType,
-              sizeBytes: Number(blob.size || 0),
+              ok: false,
+              aborted: true,
               fileIndex: entry.fileIndex,
               url: entry.url,
-              stats: stored?.stats || null,
-              analysisBlob: blob,
-              pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
             };
-          } catch (error) {
-            if (controller.signal.aborted || cancelled) {
-              return {
-                ok: false,
-                aborted: true,
-                fileIndex: entry.fileIndex,
-                url: entry.url,
-              };
-            }
+          }
 
-            const shouldRetry = attempt < maxAttempts && isTransientPrefetchError(error);
-            if (!shouldRetry) {
-              logger.error('Prefetch failed', {
-                url: entry.url,
-                fileIndex: entry.fileIndex,
-                attempt,
-                maxAttempts,
-                error: String(error?.message || error),
-              });
-              return {
-                ok: false,
-                error,
-                fileIndex: entry.fileIndex,
-                url: entry.url,
-              };
-            }
-
-            const retryDelayMs = retryBaseDelayMs * attempt;
-            logger.warn('Prefetch attempt failed; retrying conservatively', {
+          const shouldRetry = attempt < maxAttempts && isTransientPrefetchError(normalizedError);
+          if (!shouldRetry) {
+            logger.error('Prefetch failed', {
               url: entry.url,
               fileIndex: entry.fileIndex,
               attempt,
               maxAttempts,
-              retryDelayMs,
-              error: String(error?.message || error),
+              requestTimeoutMs,
+              error: String(normalizedError?.message || normalizedError),
             });
-            if (retryDelayMs > 0) await sleep(retryDelayMs);
+            return {
+              ok: false,
+              error: normalizedError,
+              fileIndex: entry.fileIndex,
+              url: entry.url,
+            };
           }
-        }
 
-        return {
-          ok: false,
-          error: new Error(`Prefetch exhausted retries for ${entry.url}`),
-          fileIndex: entry.fileIndex,
-          url: entry.url,
-        };
-      } finally {
-        activeControllersRef.current.delete(controller);
+          const retryDelayMs = retryBaseDelayMs * attempt;
+          logger.warn('Prefetch attempt failed; retrying conservatively', {
+            url: entry.url,
+            fileIndex: entry.fileIndex,
+            attempt,
+            maxAttempts,
+            requestTimeoutMs,
+            retryDelayMs,
+            error: String(normalizedError?.message || normalizedError),
+          });
+          if (retryDelayMs > 0) await sleep(retryDelayMs);
+        } finally {
+          if (timeoutId) window.clearTimeout(timeoutId);
+          activeControllersRef.current.delete(controller);
+        }
       }
+
+      return {
+        ok: false,
+        error: new Error(`Prefetch exhausted retries for ${entry.url}`),
+        fileIndex: entry.fileIndex,
+        url: entry.url,
+      };
     });
 
     const run = async () => {

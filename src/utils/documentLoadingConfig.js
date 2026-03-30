@@ -39,6 +39,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  * @property {number} prefetchConcurrency
  * @property {number} prefetchRetryCount
  * @property {number} prefetchRetryBaseDelayMs
+ * @property {number} prefetchRequestTimeoutMs
  */
 
 /**
@@ -117,13 +118,17 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       minStopRecommendationPages: 10000,
     },
     fetch: {
-      // Conservative default to reduce connection pressure against tokenized or proxied source
-      // endpoints. Deployments can still override this explicitly in runtime config.
+      // Customer-tuned default: stay conservative enough for proxied backends, but fail fast so
+      // slow or broken source fetches do not stall the whole thumbnail/page pipeline for long.
       prefetchConcurrency: 2,
-      // Single retry for transient network/proxy hiccups seen in some real-world environments.
-      prefetchRetryCount: 1,
-      // Base backoff between retry attempts. Later attempts scale linearly from this value.
-      prefetchRetryBaseDelayMs: 1500,
+      // Prefer fail-fast behavior over conservative retries in environments where the user values
+      // responsive navigation more than retrying the same timed-out request.
+      prefetchRetryCount: 0,
+      // Retained for deployments that explicitly re-enable retries.
+      prefetchRetryBaseDelayMs: 750,
+      // Abort a single prefetch attempt after this many milliseconds so one stuck request does not
+      // hold back later source analysis for too long.
+      prefetchRequestTimeoutMs: 8000,
     },
     sourceStore: {
       mode: 'adaptive',
@@ -131,36 +136,38 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       switchToIndexedDbAboveTotalMiB: 768,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
-      blobCacheEntries: 12,
+      blobCacheEntries: 16,
     },
     assetStore: {
       enabled: true,
       mode: 'adaptive',
       switchToIndexedDbAboveAssetCount: 0,
-      switchToIndexedDbAboveTotalMiB: 1536,
+      switchToIndexedDbAboveTotalMiB: 3072,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
-      blobCacheEntries: 16,
+      blobCacheEntries: 24,
       persistThumbnails: true,
       releaseSinglePageRasterSourceAfterFullPersist: false,
     },
     render: {
-      maxConcurrentAssetRenders: 2,
+      maxConcurrentAssetRenders: 4,
       fullPageScale: 1.5,
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
-      thumbnailLoadingStrategy: 'adaptive',
-      // Prefer full raster-image reuse for thumbnails by default. This avoids extra thumbnail
-      // generation work for single-image pages and keeps the behavior deterministic.
-      thumbnailSourceStrategy: 'prefer-full-images',
-      thumbnailEagerPageThreshold: 240,
-      lookAheadPageCount: 2,
-      lookBehindPageCount: 1,
-      visibleThumbnailOverscan: 6,
-      fullPageCacheLimit: 64,
-      thumbnailCacheLimit: 512,
-      maxOpenPdfDocuments: 6,
-      maxOpenTiffDocuments: 6,
+      // This customer profile prioritizes a warm thumbnail pane and quick scroll response over
+      // minimizing background work. Thumbnails are therefore queued eagerly.
+      thumbnailLoadingStrategy: 'eager',
+      // Dedicated thumbnail rasters keep the pane lighter than reusing full-size images for every
+      // thumbnail when the document set contains many large raster pages.
+      thumbnailSourceStrategy: 'dedicated',
+      thumbnailEagerPageThreshold: 5000,
+      lookAheadPageCount: 8,
+      lookBehindPageCount: 4,
+      visibleThumbnailOverscan: 16,
+      fullPageCacheLimit: 192,
+      thumbnailCacheLimit: 8192,
+      maxOpenPdfDocuments: 12,
+      maxOpenTiffDocuments: 12,
     },
   })
 );
@@ -349,6 +356,9 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
   switch (profile.tier) {
     case 'very-high':
       base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchRetryCount = 0;
+      base.fetch.prefetchRetryBaseDelayMs = 750;
+      base.fetch.prefetchRequestTimeoutMs = 8000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 2048;
       base.sourceStore.blobCacheEntries = 24;
@@ -366,6 +376,9 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       break;
     case 'high':
       base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchRetryCount = 0;
+      base.fetch.prefetchRetryBaseDelayMs = 750;
+      base.fetch.prefetchRequestTimeoutMs = 8000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1536;
       base.sourceStore.blobCacheEntries = 18;
@@ -383,6 +396,9 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       break;
     case 'medium':
       base.fetch.prefetchConcurrency = 2;
+      base.fetch.prefetchRetryCount = 0;
+      base.fetch.prefetchRetryBaseDelayMs = 750;
+      base.fetch.prefetchRequestTimeoutMs = 8000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1024;
       base.sourceStore.blobCacheEntries = 14;
@@ -398,6 +414,9 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       break;
     case 'low':
       base.fetch.prefetchConcurrency = 1;
+      base.fetch.prefetchRetryCount = 0;
+      base.fetch.prefetchRetryBaseDelayMs = 750;
+      base.fetch.prefetchRequestTimeoutMs = 8000;
       base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 256;
       base.sourceStore.blobCacheEntries = 8;
@@ -465,6 +484,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       prefetchConcurrency: normalizeNumber(raw?.fetch?.prefetchConcurrency, adaptiveDefaults.fetch.prefetchConcurrency, 1, 16),
       prefetchRetryCount: normalizeNumber(raw?.fetch?.prefetchRetryCount, adaptiveDefaults.fetch.prefetchRetryCount, 0, 5),
       prefetchRetryBaseDelayMs: normalizeNumber(raw?.fetch?.prefetchRetryBaseDelayMs, adaptiveDefaults.fetch.prefetchRetryBaseDelayMs, 100, 60000),
+      prefetchRequestTimeoutMs: normalizeNumber(raw?.fetch?.prefetchRequestTimeoutMs, adaptiveDefaults.fetch.prefetchRequestTimeoutMs, 1000, 120000),
     },
     sourceStore: {
       mode: normalizeStoreMode(raw?.sourceStore?.mode, adaptiveDefaults.sourceStore.mode),
