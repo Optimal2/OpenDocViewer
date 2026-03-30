@@ -66,6 +66,13 @@ export function useDocumentViewer() {
 
   // --- Core viewer interaction state ----------------------------------------------
   const [pageNumber, setPageNumber] = useState(1);
+  const [primaryDisplayState, setPrimaryDisplayState] = useState({
+    requestedPageNumber: 1,
+    displayedPageNumber: 0,
+    pending: false,
+    blockingLoading: false,
+    hasError: false,
+  });
   const [zoom, setZoom] = useState(1);
   const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
 
@@ -114,6 +121,44 @@ export function useDocumentViewer() {
     const clamped = clampPage(next, totalPages);
     if (clamped !== pageNumber) setPageNumber(clamped);
   }, [pageNumber, totalPages]);
+
+  /**
+   * Keep requested-page state and the actually displayed page in sync so thumbnails never point at
+   * a page that the large viewer is not currently showing.
+   *
+   * @param {{ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }} nextState
+   * @returns {void}
+   */
+  const handlePrimaryDisplayStateChange = useCallback((nextState) => {
+    setPrimaryDisplayState((current) => {
+      const normalized = {
+        requestedPageNumber: Math.max(1, Number(nextState?.requestedPageNumber || current.requestedPageNumber || 1)),
+        displayedPageNumber: Math.max(0, Number(nextState?.displayedPageNumber || 0)),
+        pending: !!nextState?.pending,
+        blockingLoading: !!nextState?.blockingLoading,
+        hasError: !!nextState?.hasError,
+      };
+
+      if (
+        current.requestedPageNumber === normalized.requestedPageNumber
+        && current.displayedPageNumber === normalized.displayedPageNumber
+        && current.pending === normalized.pending
+        && current.blockingLoading === normalized.blockingLoading
+        && current.hasError === normalized.hasError
+      ) {
+        return current;
+      }
+      return normalized;
+    });
+  }, []);
+
+  const thumbnailSelectionPageNumber = (
+    primaryDisplayState.pending
+    && !primaryDisplayState.blockingLoading
+    && primaryDisplayState.displayedPageNumber > 0
+  )
+    ? primaryDisplayState.displayedPageNumber
+    : pageNumber;
 
   // --- Print dialog --------------------------------------------------------------
   const openPrintDialog = useCallback(() => {
@@ -338,6 +383,8 @@ export function useDocumentViewer() {
   return {
     pageNumber,
     setPageNumber,
+    thumbnailSelectionPageNumber,
+    primaryDisplayState,
     zoom,
     setZoom,
     isComparing,
@@ -357,6 +404,7 @@ export function useDocumentViewer() {
     thumbnailsContainerRef,
     documentRenderRef,
     compareRef,
+    handlePrimaryDisplayStateChange,
     handlePageNumberChange,
     zoomIn,
     zoomOut,

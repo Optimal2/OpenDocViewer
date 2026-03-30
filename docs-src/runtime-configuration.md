@@ -86,11 +86,18 @@ Important limitation:
 
 ## Large-document loading
 
-The runtime config now also exposes a `documentLoading` section used by the new large-batch loading
-pipeline.
+The runtime config now also exposes a `documentLoading` section used by the hybrid loading engine.
+The most important top-level knob is now `documentLoading.mode`:
+
+- `performance` — eager warm-up, worker-heavy raster/TIFF rendering, larger RAM caches
+- `memory` — lazy viewport-first rendering, aggressive eviction, IndexedDB-friendly defaults
+- `auto` — start near `performance`, then degrade one-way to softer/harder memory protection stages
+
+Example:
 
 ```js
 documentLoading: {
+  mode: 'auto',
   warning: {
     sourceCountThreshold: 0,
     pageCountThreshold: 5000,
@@ -105,76 +112,102 @@ documentLoading: {
     reuseFullImageThumbnailsBelowPageCount: 600,
   },
   fetch: {
+    strategy: 'sequential',
     prefetchConcurrency: 4,
     prefetchRetryCount: 0,
     prefetchRetryBaseDelayMs: 750,
     prefetchRequestTimeoutMs: 10000,
   },
   sourceStore: {
-    mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
+    mode: 'adaptive',
     switchToIndexedDbAboveSourceCount: 0,
     switchToIndexedDbAboveTotalMiB: 768,
-    protection: 'aes-gcm-session', // 'none' | 'aes-gcm-session'
-    staleSessionTtlMs: 24 * 60 * 60 * 1000,
-    blobCacheEntries: 12,
-  },
-  assetStore: {
-    enabled: true,
-    mode: 'adaptive', // 'memory' | 'indexeddb' | 'adaptive'
-    switchToIndexedDbAboveAssetCount: 0,
-    switchToIndexedDbAboveTotalMiB: 1536,
     protection: 'aes-gcm-session',
     staleSessionTtlMs: 24 * 60 * 60 * 1000,
     blobCacheEntries: 16,
+  },
+  assetStore: {
+    enabled: true,
+    mode: 'adaptive',
+    switchToIndexedDbAboveAssetCount: 0,
+    switchToIndexedDbAboveTotalMiB: 3072,
+    protection: 'aes-gcm-session',
+    staleSessionTtlMs: 24 * 60 * 60 * 1000,
+    blobCacheEntries: 24,
     persistThumbnails: true,
     releaseSinglePageRasterSourceAfterFullPersist: false,
   },
   render: {
-    maxConcurrentAssetRenders: 6,
-    fullPageScale: 1.5, // applies to PDF rendering in the lazy page-asset pipeline
+    strategy: 'eager-nearby',
+    backend: 'hybrid-by-format',
+    workerCount: 0,
+    useWorkersForRasterImages: true,
+    useWorkersForTiff: true,
+    maxConcurrentMainThreadRenders: 2,
+    maxConcurrentAssetRenders: 2,
+    warmupBatchSize: 24,
+    loadingOverlayDelayMs: 90,
+    fullPageScale: 1.5,
     thumbnailMaxWidth: 220,
     thumbnailMaxHeight: 310,
-    thumbnailLoadingStrategy: 'eager',
-    thumbnailSourceStrategy: 'dedicated',
+    thumbnailLoadingStrategy: 'adaptive',
+    thumbnailSourceStrategy: 'auto',
     thumbnailEagerPageThreshold: 10000,
     lookAheadPageCount: 12,
     lookBehindPageCount: 8,
     visibleThumbnailOverscan: 24,
     fullPageCacheLimit: 256,
     thumbnailCacheLimit: 8192,
-    maxOpenPdfDocuments: 12,
+    maxOpenPdfDocuments: 16,
     maxOpenTiffDocuments: 16,
-  }
+  },
+  memoryPressure: {
+    enabled: true,
+    sampleIntervalMs: 2000,
+    softHeapUsageRatio: 0.60,
+    hardHeapUsageRatio: 0.78,
+    softResidentMiB: 500,
+    hardResidentMiB: 850,
+    forceMemoryModeAbovePageCount: 3500,
+    forceMemoryModeAboveSourceCount: 0,
+  },
 }
 ```
 
 What these knobs control:
 
+- `mode`
+  - picks the base operating profile before any runtime degradation happens
 - `warning.*`
-  - when to show a warning before continuing a very large load run; the shipped defaults disable source-count warnings and rely primarily on page volume
+  - controls when the load-pressure dialog appears and when it recommends stopping
 - `adaptiveMemory.*`
-  - lets the viewer lean toward eager caching / full-image thumbnail reuse only on machines that actually have headroom
+  - lets the viewer bias toward aggressive caching/full-image thumbnail reuse only on machines that actually have enough headroom
+- `fetch.strategy`
+  - `sequential` behaves like the older stable ticket-link flow: fetch -> store/analyze -> enqueue render -> next source
+  - `parallel-limited` keeps multiple prefetches in flight when the upstream can tolerate it
 - `fetch.prefetchConcurrency`
-  - how many source files are prefetched in parallel before page extraction starts
-  - the customer-tuned profile in this bundle keeps concurrency at `2` but disables retries and adds an explicit fail-fast request timeout so slow upstream requests do not stall the UI for long
-- `fetch.prefetchRetryCount` / `fetch.prefetchRetryBaseDelayMs` / `fetch.prefetchRequestTimeoutMs`
-  - controls whether prefetch retries at all, how long it waits before another attempt, and when a single request is aborted as too slow
-  - this customer bundle ships with no retries and an `8000` ms request timeout to keep the UI moving
-- `sourceStore.*`
-  - whether original source bytes stay in memory or move to browser disk-backed storage; the shipped defaults keep them in memory longer and switch by size, not source count
-- `assetStore.*`
-  - whether already-rendered page blobs are kept in memory or IndexedDB so they can be reused without re-rendering; the shipped defaults prefer stability/performance and avoid releasing original single-page rasters automatically
-- `render.*`
-  - lazy full-page rendering, thumbnail sizing, adaptive thumbnail strategy, and cache limits for object URLs / open documents
+  - only matters when `fetch.strategy === 'parallel-limited'`
+- `sourceStore.*` and `assetStore.*`
+  - control where original source blobs and rendered page blobs live (RAM vs IndexedDB) and when promotion to disk-backed storage happens
+- `render.strategy`
+  - `eager-all`, `eager-nearby`, or `lazy-viewport`
+- `render.backend`
+  - `hybrid-by-format` uses workers for raster/TIFF when possible while keeping PDF on the main/pdf.js path
+  - `main-only` disables OpenDocViewer worker rendering
+- `render.workerCount`
+  - `0` means “decide automatically from hardwareConcurrency/deviceMemory”
+- `memoryPressure.*`
+  - controls the one-way `auto` degradation thresholds; a session can step from `normal` to `soft` to `hard` but never back up again
 
-Operationally, the new pipeline works like this:
+Operationally, the hybrid pipeline works like this:
 
 1. prefetch source files early so expiring one-time URLs are captured quickly
-2. store the original bytes in memory or IndexedDB depending on configured thresholds
-3. analyze page counts in stable order from the freshly fetched blob when possible, otherwise from temp storage
-4. render thumbnails and full pages only when the UI actually needs them
-5. persist rendered page blobs in a second cache layer (memory or IndexedDB) so a page is normally rasterized once per session
-6. evict old object URLs via a small LRU cache while keeping the persisted blob recoverable for later navigation / print
+2. store the original bytes in memory or IndexedDB depending on the active profile
+3. analyze page counts in stable order from the fetched blob
+4. register placeholders immediately
+5. render thumbnails and full pages either eagerly or lazily depending on the mode
+6. persist rendered page blobs in a second cache layer so a page is normally rasterized once per session
+7. keep the large viewer and thumbnail selection synchronized; if the requested page is not ready quickly enough, the large pane switches to a dedicated loading overlay instead of continuing to imply that the previous page is still active
 
 ### Thumbnail behavior
 

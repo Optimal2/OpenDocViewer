@@ -164,6 +164,10 @@
     // Large-document loading, caching, and memory behavior
     // =========================================================================
     documentLoading: {
+      // Choose one of: 'performance', 'memory', 'auto'.
+      // 'auto' starts aggressively, then degrades one-way when page count or memory pressure grows.
+      mode: 'auto',
+
       warning: {
         // Count-based warnings are disabled by default because many OpenDocViewer runs
         // consist of large numbers of single-page raster files.
@@ -195,6 +199,10 @@
       },
 
       fetch: {
+        // 'sequential' is safest for ticket links and proxy-backed document endpoints.
+        // 'parallel-limited' is faster when the upstream can tolerate multiple in-flight fetches.
+        strategy: 'sequential',
+
         // Number of concurrent network fetches used during the prefetch step.
         // Conservative by default so tokenized/proxied backends are less likely to stall.
         prefetchConcurrency: 4,

@@ -90,6 +90,9 @@ import { createContext } from 'react';
  * @property {function(number): void} setPlannedPageCount
  * @property {Array.<string>} messageQueue
  * @property {function(string): void} addMessage
+ * @property {Object} documentLoadingConfig
+ * @property {'normal'|'soft'|'hard'} memoryPressureStage
+ * @property {function(number, number): void} scheduleSourceWarmup
  */
 
 const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({}));

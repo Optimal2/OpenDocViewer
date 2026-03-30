@@ -48,6 +48,7 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @param {number} props.postZoomRight
  * @param {function(number): void} props.bumpPostZoomLeft
  * @param {function(number): void} props.bumpPostZoomRight
+ * @param {function(Object): void=} props.onPrimaryDisplayStateChange
  * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
@@ -66,6 +67,7 @@ const DocumentViewerRender = ({
   postZoomRight = 1.0,
   bumpPostZoomLeft,
   bumpPostZoomRight,
+  onPrimaryDisplayStateChange,
 }) => {
   const handlePrimaryRendered = () => {
     if (zoomMode === 'FIT_PAGE') {
@@ -115,6 +117,7 @@ const DocumentViewerRender = ({
             imageProperties={imageProperties}
             isCanvasEnabled={isExpanded}
             allPages={allPages}
+            onDisplayStateChange={onPrimaryDisplayStateChange}
           />
         </div>
       </div>
@@ -169,6 +172,7 @@ DocumentViewerRender.propTypes = {
   postZoomRight: PropTypes.number.isRequired,
   bumpPostZoomLeft: PropTypes.func.isRequired,
   bumpPostZoomRight: PropTypes.func.isRequired,
+  onPrimaryDisplayStateChange: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerRender);

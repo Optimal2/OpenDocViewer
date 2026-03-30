@@ -253,21 +253,25 @@ For deployment and precedence details, see `docs-src/runtime-configuration.md`.
 
 ### Adaptive large-document loading
 
-The viewer now supports a two-phase loading pipeline for large batches:
+The viewer now exposes three explicit runtime modes under `documentLoading.mode`:
 
-1. prefetch original source files early, which helps when bootstrap URLs are short-lived or tokenized
-2. store original bytes in memory or IndexedDB depending on configured thresholds
-3. analyze page counts in stable order from the freshly fetched blob when possible
-4. render thumbnails and full pages on demand
-5. persist rendered page blobs in a second cache layer so later navigation and printing can usually reuse the same blob without re-rendering
-6. keep the thumbnail scrollbar deterministic while object URLs are only evicted from RAM when configured limits are actually reached
+- `performance` — fetch in a ticket-safe sequential order, warm pages aggressively, prefer workers for raster/TIFF rendering, and keep larger in-memory caches
+- `memory` — stay conservative, render lazily around the viewport, persist more aggressively, and evict RAM-backed object URLs sooner
+- `auto` — start close to `performance`, then degrade one-way toward `memory` when page count or browser memory pressure crosses configured thresholds
 
-This reduces heap pressure substantially compared with eager rendering and also enables a warning dialog
-before continuing clearly large runs. The shipped defaults now favor stability in real deployments:
-network prefetch now stays conservative by default, retries transient failures once with backoff,
-and raster-image thumbnails default to full-image reuse instead of generating a second asset unless a
-site explicitly overrides the thresholds in `odv.site.config.js`. The relevant knobs live under
-`documentLoading` in `public/odv.config.js`.
+The runtime pipeline is now intentionally hybrid rather than purely eager or purely lazy:
+
+1. fetch original source files early, optionally with true sequential fetch order for short-lived ticket links
+2. store original bytes in memory or IndexedDB depending on the active mode and current pressure stage
+3. analyze page counts in stable order from the prefetched source blob
+4. insert placeholders immediately so the viewer knows the full document structure early
+5. render full pages and thumbnails either eagerly or lazily depending on the active mode
+6. persist rendered page blobs in a second cache layer so later navigation and printing can usually reuse the same blob without re-rendering
+7. evict object URLs from RAM independently of the persisted blob caches
+
+Workers are active again for raster images and TIFF whenever the configured backend allows it; PDF still uses the pdf.js rendering path. The default `auto` mode keeps the old fast-feeling behavior on capable machines but can fall back to a more memory-efficient profile when page volume or heap pressure grows.
+
+The same runtime system also fixes a serious page-consistency issue: the thumbnail selection is now tied to the actually displayed page until the viewer switches to an explicit loading overlay. This prevents the UI from showing “page X selected” while the large viewer still shows page Y.
 
 ## Printing
 

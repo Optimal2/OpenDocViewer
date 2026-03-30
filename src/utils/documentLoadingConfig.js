@@ -1,9 +1,12 @@
 // File: src/utils/documentLoadingConfig.js
 /**
- * OpenDocViewer — Large-document loading runtime configuration helpers.
+ * OpenDocViewer — runtime helpers for fetch/render/memory policies.
  *
- * The loader, temp store, and lazy renderer use this module so the deployment can tune thresholds
- * from `public/odv.config.js` without scattering normalization logic throughout the app.
+ * This module centralizes the configuration that drives the hybrid loading engine:
+ * - explicit customer-facing modes (`performance`, `memory`, `auto`)
+ * - fetch strategy selection (true sequential vs limited parallel)
+ * - worker usage and eager/lazy render behavior
+ * - memory-pressure thresholds for one-way degradation from `auto`
  */
 
 import { getRuntimeConfig } from './runtimeConfig.js';
@@ -14,6 +17,11 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 /** @typedef {'adaptive'|'eager'|'viewport'} ThumbnailLoadingStrategy */
 /** @typedef {'auto'|'dedicated'|'prefer-full-images'} ThumbnailSourceStrategy */
 /** @typedef {'unknown'|'low'|'medium'|'high'|'very-high'} RuntimeMemoryTier */
+/** @typedef {'performance'|'memory'|'auto'} DocumentLoadingMode */
+/** @typedef {'sequential'|'parallel-limited'} DocumentLoadingFetchStrategy */
+/** @typedef {'eager-all'|'eager-nearby'|'lazy-viewport'} DocumentLoadingRenderStrategy */
+/** @typedef {'worker-preferred'|'main-only'|'hybrid-by-format'} DocumentLoadingRenderBackend */
+/** @typedef {'normal'|'soft'|'hard'} DocumentLoadingMemoryPressureStage */
 
 /**
  * @typedef {Object} DocumentLoadingAdaptiveMemoryConfig
@@ -36,6 +44,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 
 /**
  * @typedef {Object} DocumentLoadingFetchConfig
+ * @property {DocumentLoadingFetchStrategy} strategy
  * @property {number} prefetchConcurrency
  * @property {number} prefetchRetryCount
  * @property {number} prefetchRetryBaseDelayMs
@@ -67,7 +76,15 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 
 /**
  * @typedef {Object} DocumentLoadingRenderConfig
+ * @property {DocumentLoadingRenderStrategy} strategy
+ * @property {DocumentLoadingRenderBackend} backend
+ * @property {number} workerCount
+ * @property {boolean} useWorkersForRasterImages
+ * @property {boolean} useWorkersForTiff
+ * @property {number} maxConcurrentMainThreadRenders
  * @property {number} maxConcurrentAssetRenders
+ * @property {number} warmupBatchSize
+ * @property {number} loadingOverlayDelayMs
  * @property {number} fullPageScale
  * @property {number} thumbnailMaxWidth
  * @property {number} thumbnailMaxHeight
@@ -84,6 +101,18 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  */
 
 /**
+ * @typedef {Object} DocumentLoadingMemoryPressureConfig
+ * @property {boolean} enabled
+ * @property {number} sampleIntervalMs
+ * @property {number} softHeapUsageRatio
+ * @property {number} hardHeapUsageRatio
+ * @property {number} softResidentMiB
+ * @property {number} hardResidentMiB
+ * @property {number} forceMemoryModeAbovePageCount
+ * @property {number} forceMemoryModeAboveSourceCount
+ */
+
+/**
  * @typedef {Object} StopRecommendationInput
  * @property {number=} sourceCount
  * @property {number=} pageCount
@@ -92,16 +121,47 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 
 /**
  * @typedef {Object} DocumentLoadingConfig
+ * @property {DocumentLoadingMode} mode
  * @property {DocumentLoadingAdaptiveMemoryConfig} adaptiveMemory
  * @property {DocumentLoadingWarningConfig} warning
  * @property {DocumentLoadingFetchConfig} fetch
  * @property {DocumentLoadingSourceStoreConfig} sourceStore
  * @property {DocumentLoadingAssetStoreConfig} assetStore
  * @property {DocumentLoadingRenderConfig} render
+ * @property {DocumentLoadingMemoryPressureConfig} memoryPressure
  */
+
+/**
+ * @param {number} preferred
+ * @param {DocumentLoadingMode=} mode
+ * @returns {number}
+ */
+export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
+  const explicit = Math.max(0, Number(preferred) || 0);
+  if (explicit > 0) return explicit;
+
+  let cores = 2;
+  let deviceMemoryGb = 0;
+  try {
+    cores = Math.max(1, Number(globalThis.navigator?.hardwareConcurrency || 2));
+    deviceMemoryGb = Math.max(0, Number(globalThis.navigator?.deviceMemory || 0));
+  } catch {}
+
+  const leaveForUi = cores > 1 ? 1 : 0;
+  let suggested = Math.max(1, cores - leaveForUi);
+
+  if (deviceMemoryGb > 0) {
+    if (deviceMemoryGb <= 2) suggested = Math.min(suggested, 1);
+    else if (deviceMemoryGb <= 4) suggested = Math.min(suggested, 2);
+  }
+
+  if (mode === 'memory') return Math.max(1, Math.min(2, suggested));
+  return Math.max(1, suggested);
+}
 
 export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
   /** @type {DocumentLoadingConfig} */ ({
+    mode: 'auto',
     adaptiveMemory: {
       enabled: true,
       preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
@@ -118,16 +178,10 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       minStopRecommendationPages: 10000,
     },
     fetch: {
-      // Customer-tuned default: stay conservative enough for proxied backends, but fail fast so
-      // slow or broken source fetches do not stall the whole thumbnail/page pipeline for long.
+      strategy: 'sequential',
       prefetchConcurrency: 4,
-      // Prefer fail-fast behavior over conservative retries in environments where the user values
-      // responsive navigation more than retrying the same timed-out request.
       prefetchRetryCount: 0,
-      // Retained for deployments that explicitly re-enable retries.
       prefetchRetryBaseDelayMs: 750,
-      // Abort a single prefetch attempt after this many milliseconds so one stuck request does not
-      // hold back later source analysis for too long.
       prefetchRequestTimeoutMs: 10000,
     },
     sourceStore: {
@@ -150,16 +204,20 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       releaseSinglePageRasterSourceAfterFullPersist: false,
     },
     render: {
-      maxConcurrentAssetRenders: 6,
+      strategy: 'eager-nearby',
+      backend: 'hybrid-by-format',
+      workerCount: resolveRecommendedWorkerCount(0, 'auto'),
+      useWorkersForRasterImages: true,
+      useWorkersForTiff: true,
+      maxConcurrentMainThreadRenders: 2,
+      maxConcurrentAssetRenders: 2,
+      warmupBatchSize: 24,
+      loadingOverlayDelayMs: 90,
       fullPageScale: 1.5,
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
-      // This customer profile prioritizes a warm thumbnail pane and quick scroll response over
-      // minimizing background work. Thumbnails are therefore queued eagerly.
-      thumbnailLoadingStrategy: 'eager',
-      // Dedicated thumbnail rasters keep the pane lighter than reusing full-size images for every
-      // thumbnail when the document set contains many large raster pages.
-      thumbnailSourceStrategy: 'dedicated',
+      thumbnailLoadingStrategy: 'adaptive',
+      thumbnailSourceStrategy: 'auto',
       thumbnailEagerPageThreshold: 10000,
       lookAheadPageCount: 12,
       lookBehindPageCount: 8,
@@ -169,16 +227,19 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       maxOpenPdfDocuments: 16,
       maxOpenTiffDocuments: 16,
     },
+    memoryPressure: {
+      enabled: true,
+      sampleIntervalMs: 2000,
+      softHeapUsageRatio: 0.6,
+      hardHeapUsageRatio: 0.78,
+      softResidentMiB: 500,
+      hardResidentMiB: 850,
+      forceMemoryModeAbovePageCount: 3500,
+      forceMemoryModeAboveSourceCount: 0,
+    },
   })
 );
 
-/**
- * @param {*} value
- * @param {number} fallback
- * @param {number} min
- * @param {number=} max
- * @returns {number}
- */
 function normalizeNumber(value, fallback, min, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return fallback;
@@ -186,28 +247,12 @@ function normalizeNumber(value, fallback, min, max) {
   return Math.floor(bounded);
 }
 
-/**
- * @param {*} value
- * @param {number} fallback
- * @param {number} min
- * @param {number=} max
- * @returns {number}
- */
 function normalizeFloat(value, fallback, min, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return fallback;
   return Math.max(min, typeof max === 'number' ? Math.min(max, next) : next);
 }
 
-
-/**
- * Normalize a threshold-like integer where 0 disables the threshold.
- *
- * @param {*} value
- * @param {number} fallback
- * @param {number=} max
- * @returns {number}
- */
 function normalizeThreshold(value, fallback, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return Math.max(0, Number(fallback) || 0);
@@ -216,14 +261,6 @@ function normalizeThreshold(value, fallback, max) {
   return Math.floor(Math.max(0, bounded));
 }
 
-/**
- * Normalize a MiB threshold where 0 disables the threshold.
- *
- * @param {*} value
- * @param {number} fallback
- * @param {number=} max
- * @returns {number}
- */
 function normalizeMiBThreshold(value, fallback, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return Math.max(0, Number(fallback) || 0);
@@ -231,55 +268,54 @@ function normalizeMiBThreshold(value, fallback, max) {
   return Math.max(0, typeof max === 'number' ? Math.min(max, next) : next);
 }
 
-/**
- * @param {*} value
- * @param {SourceStoreMode} fallback
- * @returns {SourceStoreMode}
- */
 function normalizeStoreMode(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
   if (raw === 'memory' || raw === 'indexeddb') return raw;
   return 'adaptive';
 }
 
-/**
- * @param {*} value
- * @param {SourceStoreProtection} fallback
- * @returns {SourceStoreProtection}
- */
 function normalizeProtection(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
   if (raw === 'aes-gcm-session') return 'aes-gcm-session';
   return 'none';
 }
 
-/**
- * @param {*} value
- * @param {ThumbnailLoadingStrategy} fallback
- * @returns {ThumbnailLoadingStrategy}
- */
 function normalizeThumbnailLoadingStrategy(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
   if (raw === 'eager' || raw === 'viewport') return raw;
   return 'adaptive';
 }
 
-/**
- * @param {*} value
- * @param {ThumbnailSourceStrategy} fallback
- * @returns {ThumbnailSourceStrategy}
- */
 function normalizeThumbnailSourceStrategy(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
   if (raw === 'dedicated' || raw === 'prefer-full-images') return raw;
   return 'auto';
 }
 
-/**
- * @param {*} value
- * @param {boolean} fallback
- * @returns {boolean}
- */
+function normalizeMode(value, fallback) {
+  const raw = String(value || fallback || '').toLowerCase();
+  if (raw === 'performance' || raw === 'memory') return raw;
+  return 'auto';
+}
+
+function normalizeFetchStrategy(value, fallback) {
+  const raw = String(value || fallback || '').toLowerCase();
+  if (raw === 'parallel-limited') return 'parallel-limited';
+  return 'sequential';
+}
+
+function normalizeRenderStrategy(value, fallback) {
+  const raw = String(value || fallback || '').toLowerCase();
+  if (raw === 'eager-all' || raw === 'eager-nearby') return raw;
+  return 'lazy-viewport';
+}
+
+function normalizeRenderBackend(value, fallback) {
+  const raw = String(value || fallback || '').toLowerCase();
+  if (raw === 'main-only' || raw === 'worker-preferred') return raw;
+  return 'hybrid-by-format';
+}
+
 function normalizeBoolean(value, fallback) {
   if (typeof value === 'boolean') return value;
   if (typeof value === 'string') {
@@ -290,27 +326,21 @@ function normalizeBoolean(value, fallback) {
   return fallback;
 }
 
-/**
- * @param {DocumentLoadingConfig} base
- * @returns {DocumentLoadingConfig}
- */
-function cloneDefaults(base) {
+export function cloneDocumentLoadingConfig(base = DOCUMENT_LOADING_DEFAULTS) {
   return {
+    mode: base.mode,
     adaptiveMemory: { ...base.adaptiveMemory },
     warning: { ...base.warning },
     fetch: { ...base.fetch },
     sourceStore: { ...base.sourceStore },
     assetStore: { ...base.assetStore },
     render: { ...base.render },
+    memoryPressure: { ...base.memoryPressure },
   };
 }
 
-/**
- * @param {Object=} adaptiveRaw
- * @returns {DocumentLoadingConfig}
- */
 function buildAdaptiveDefaults(adaptiveRaw = {}) {
-  const base = cloneDefaults(DOCUMENT_LOADING_DEFAULTS);
+  const base = cloneDocumentLoadingConfig(DOCUMENT_LOADING_DEFAULTS);
   const profile = getRuntimeMemoryProfile();
 
   const enabled = normalizeBoolean(
@@ -351,86 +381,42 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
     preferPerformance,
   };
 
-  if (!enabled) return base;
-
   switch (profile.tier) {
     case 'very-high':
-      base.fetch.prefetchConcurrency = 4;
-      base.fetch.prefetchRetryCount = 0;
-      base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 10000;
-      base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
+      base.fetch.prefetchConcurrency = 6;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 2048;
-      base.sourceStore.blobCacheEntries = 24;
-      base.assetStore.switchToIndexedDbAboveAssetCount = 0;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 4096;
-      base.assetStore.blobCacheEntries = 32;
+      base.render.workerCount = resolveRecommendedWorkerCount(0, 'performance');
+      base.render.maxConcurrentMainThreadRenders = 3;
       base.render.maxConcurrentAssetRenders = 3;
-      base.render.fullPageCacheLimit = 160;
-      base.render.thumbnailCacheLimit = 1536;
-      base.render.thumbnailEagerPageThreshold = 800;
-      base.render.lookAheadPageCount = 4;
-      base.render.lookBehindPageCount = 2;
-      base.render.maxOpenPdfDocuments = 10;
-      base.render.maxOpenTiffDocuments = 10;
       break;
     case 'high':
       base.fetch.prefetchConcurrency = 4;
-      base.fetch.prefetchRetryCount = 0;
-      base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 10000;
-      base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1536;
-      base.sourceStore.blobCacheEntries = 18;
-      base.assetStore.switchToIndexedDbAboveAssetCount = 0;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 3072;
-      base.assetStore.blobCacheEntries = 24;
-      base.render.maxConcurrentAssetRenders = 3;
-      base.render.fullPageCacheLimit = 120;
-      base.render.thumbnailCacheLimit = 1024;
-      base.render.thumbnailEagerPageThreshold = 600;
-      base.render.lookAheadPageCount = 3;
-      base.render.lookBehindPageCount = 2;
-      base.render.maxOpenPdfDocuments = 8;
-      base.render.maxOpenTiffDocuments = 8;
+      base.render.workerCount = resolveRecommendedWorkerCount(0, 'auto');
+      base.render.maxConcurrentMainThreadRenders = 2;
+      base.render.maxConcurrentAssetRenders = 2;
       break;
     case 'medium':
-      base.fetch.prefetchConcurrency = 4;
-      base.fetch.prefetchRetryCount = 0;
-      base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 10000;
-      base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
+      base.fetch.prefetchConcurrency = 3;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1024;
-      base.sourceStore.blobCacheEntries = 14;
-      base.assetStore.switchToIndexedDbAboveAssetCount = 0;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 2048;
-      base.assetStore.blobCacheEntries = 20;
+      base.render.workerCount = resolveRecommendedWorkerCount(0, 'auto');
+      base.render.maxConcurrentMainThreadRenders = 2;
       base.render.maxConcurrentAssetRenders = 2;
-      base.render.fullPageCacheLimit = 80;
-      base.render.thumbnailCacheLimit = 640;
-      base.render.thumbnailEagerPageThreshold = 360;
-      base.render.maxOpenPdfDocuments = 7;
-      base.render.maxOpenTiffDocuments = 7;
       break;
     case 'low':
       base.fetch.prefetchConcurrency = 1;
-      base.fetch.prefetchRetryCount = 0;
-      base.fetch.prefetchRetryBaseDelayMs = 750;
-      base.fetch.prefetchRequestTimeoutMs = 10000;
-      base.sourceStore.switchToIndexedDbAboveSourceCount = 0;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 256;
-      base.sourceStore.blobCacheEntries = 8;
-      base.assetStore.switchToIndexedDbAboveAssetCount = 0;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 512;
-      base.assetStore.blobCacheEntries = 8;
+      base.render.workerCount = resolveRecommendedWorkerCount(1, 'memory');
+      base.render.maxConcurrentMainThreadRenders = 1;
       base.render.maxConcurrentAssetRenders = 1;
       base.render.fullPageCacheLimit = 16;
       base.render.thumbnailCacheLimit = 128;
-      base.render.thumbnailEagerPageThreshold = 120;
       base.render.lookAheadPageCount = 1;
       base.render.lookBehindPageCount = 1;
-      base.render.maxOpenPdfDocuments = 3;
-      base.render.maxOpenTiffDocuments = 3;
       break;
     default:
       break;
@@ -439,37 +425,107 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
   return base;
 }
 
-/**
- * Normalize runtime config under `window.__ODV_CONFIG__.documentLoading`.
- *
- * @param {Object=} runtimeConfig
- * @returns {DocumentLoadingConfig}
- */
+export function applyDocumentLoadingMode(baseConfig, mode) {
+  const next = cloneDocumentLoadingConfig(baseConfig);
+  next.mode = normalizeMode(mode, baseConfig?.mode || 'auto');
+
+  if (next.mode === 'performance') {
+    next.fetch.strategy = 'sequential';
+    next.fetch.prefetchConcurrency = Math.max(1, next.fetch.prefetchConcurrency);
+    if (next.sourceStore.mode !== 'indexeddb') next.sourceStore.mode = 'memory';
+    if (next.assetStore.mode !== 'indexeddb') next.assetStore.mode = 'memory';
+    next.assetStore.persistThumbnails = false;
+    next.assetStore.releaseSinglePageRasterSourceAfterFullPersist = false;
+    next.render.strategy = 'eager-all';
+    next.render.backend = 'hybrid-by-format';
+    next.render.useWorkersForRasterImages = true;
+    next.render.useWorkersForTiff = true;
+    next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'performance');
+    next.render.maxConcurrentMainThreadRenders = Math.max(2, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
+    next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
+    next.render.warmupBatchSize = Math.max(24, next.render.warmupBatchSize || 0);
+    next.render.loadingOverlayDelayMs = Math.max(60, next.render.loadingOverlayDelayMs || 0);
+    next.render.thumbnailLoadingStrategy = 'eager';
+    next.render.thumbnailSourceStrategy = 'prefer-full-images';
+    next.render.fullPageCacheLimit = Math.max(256, next.render.fullPageCacheLimit || 0);
+    next.render.thumbnailCacheLimit = Math.max(4096, next.render.thumbnailCacheLimit || 0);
+    next.adaptiveMemory.preferPerformance = true;
+    return next;
+  }
+
+  if (next.mode === 'memory') {
+    next.fetch.strategy = 'sequential';
+    next.fetch.prefetchConcurrency = 1;
+    if (next.sourceStore.mode === 'memory') next.sourceStore.mode = 'adaptive';
+    if (next.assetStore.mode === 'memory') next.assetStore.mode = 'adaptive';
+    next.assetStore.persistThumbnails = true;
+    next.assetStore.releaseSinglePageRasterSourceAfterFullPersist = true;
+    next.render.strategy = 'lazy-viewport';
+    next.render.backend = next.render.backend === 'main-only' ? 'main-only' : 'hybrid-by-format';
+    next.render.useWorkersForRasterImages = true;
+    next.render.useWorkersForTiff = true;
+    next.render.workerCount = Math.min(2, resolveRecommendedWorkerCount(next.render.workerCount, 'memory'));
+    next.render.maxConcurrentMainThreadRenders = 1;
+    next.render.maxConcurrentAssetRenders = 1;
+    next.render.warmupBatchSize = Math.min(8, Math.max(1, next.render.warmupBatchSize || 8));
+    next.render.loadingOverlayDelayMs = Math.max(100, next.render.loadingOverlayDelayMs || 0);
+    next.render.thumbnailLoadingStrategy = 'viewport';
+    next.render.thumbnailSourceStrategy = 'dedicated';
+    next.render.fullPageCacheLimit = Math.min(next.render.fullPageCacheLimit || 24, 24);
+    next.render.thumbnailCacheLimit = Math.min(next.render.thumbnailCacheLimit || 256, 256);
+    next.render.lookAheadPageCount = Math.min(next.render.lookAheadPageCount || 2, 2);
+    next.render.lookBehindPageCount = Math.min(next.render.lookBehindPageCount || 1, 1);
+    next.adaptiveMemory.preferPerformance = false;
+    return next;
+  }
+
+  next.fetch.strategy = next.fetch.strategy || 'sequential';
+  next.render.strategy = next.render.strategy || 'eager-nearby';
+  next.render.backend = next.render.backend || 'hybrid-by-format';
+  next.render.useWorkersForRasterImages = normalizeBoolean(next.render.useWorkersForRasterImages, true);
+  next.render.useWorkersForTiff = normalizeBoolean(next.render.useWorkersForTiff, true);
+  next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'auto');
+  next.render.maxConcurrentMainThreadRenders = Math.max(1, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
+  next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
+  next.render.warmupBatchSize = Math.max(12, next.render.warmupBatchSize || 12);
+  next.render.loadingOverlayDelayMs = Math.max(80, next.render.loadingOverlayDelayMs || 0);
+  return next;
+}
+
+export function applyMemoryPressureStage(baseConfig, stage) {
+  const safeStage = String(stage || 'normal').toLowerCase();
+  if (safeStage === 'normal') return cloneDocumentLoadingConfig(baseConfig);
+  if (safeStage === 'hard') return applyDocumentLoadingMode(baseConfig, 'memory');
+
+  const next = cloneDocumentLoadingConfig(baseConfig);
+  next.fetch.strategy = 'sequential';
+  next.fetch.prefetchConcurrency = 1;
+  next.assetStore.persistThumbnails = true;
+  next.render.strategy = next.render.strategy === 'eager-all' ? 'eager-nearby' : next.render.strategy;
+  next.render.workerCount = Math.max(1, Math.min(2, resolveRecommendedWorkerCount(next.render.workerCount, 'memory')));
+  next.render.maxConcurrentMainThreadRenders = 1;
+  next.render.maxConcurrentAssetRenders = 1;
+  next.render.warmupBatchSize = Math.max(1, Math.min(12, next.render.warmupBatchSize || 12));
+  next.render.thumbnailLoadingStrategy = 'adaptive';
+  next.render.thumbnailSourceStrategy = 'dedicated';
+  next.render.fullPageCacheLimit = Math.max(8, Math.min(next.render.fullPageCacheLimit || 48, 48));
+  next.render.thumbnailCacheLimit = Math.max(64, Math.min(next.render.thumbnailCacheLimit || 512, 512));
+  next.assetStore.releaseSinglePageRasterSourceAfterFullPersist = true;
+  return next;
+}
+
 export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
   const raw = runtimeConfig?.documentLoading || {};
   const adaptiveDefaults = buildAdaptiveDefaults(raw?.adaptiveMemory);
+  const requestedMode = normalizeMode(raw?.mode, adaptiveDefaults.mode);
 
-  return {
+  const normalized = {
+    mode: requestedMode,
     adaptiveMemory: {
       enabled: normalizeBoolean(raw?.adaptiveMemory?.enabled, adaptiveDefaults.adaptiveMemory.enabled),
-      preferPerformanceWhenDeviceMemoryAtLeastGb: normalizeFloat(
-        raw?.adaptiveMemory?.preferPerformanceWhenDeviceMemoryAtLeastGb,
-        adaptiveDefaults.adaptiveMemory.preferPerformanceWhenDeviceMemoryAtLeastGb,
-        1,
-        1024
-      ),
-      preferPerformanceWhenJsHeapLimitAtLeastMiB: normalizeFloat(
-        raw?.adaptiveMemory?.preferPerformanceWhenJsHeapLimitAtLeastMiB,
-        adaptiveDefaults.adaptiveMemory.preferPerformanceWhenJsHeapLimitAtLeastMiB,
-        256,
-        1024 * 1024
-      ),
-      reuseFullImageThumbnailsBelowPageCount: normalizeNumber(
-        raw?.adaptiveMemory?.reuseFullImageThumbnailsBelowPageCount,
-        adaptiveDefaults.adaptiveMemory.reuseFullImageThumbnailsBelowPageCount,
-        1,
-        1000000
-      ),
+      preferPerformanceWhenDeviceMemoryAtLeastGb: normalizeFloat(raw?.adaptiveMemory?.preferPerformanceWhenDeviceMemoryAtLeastGb, adaptiveDefaults.adaptiveMemory.preferPerformanceWhenDeviceMemoryAtLeastGb, 1, 1024),
+      preferPerformanceWhenJsHeapLimitAtLeastMiB: normalizeFloat(raw?.adaptiveMemory?.preferPerformanceWhenJsHeapLimitAtLeastMiB, adaptiveDefaults.adaptiveMemory.preferPerformanceWhenJsHeapLimitAtLeastMiB, 256, 1024 * 1024),
+      reuseFullImageThumbnailsBelowPageCount: normalizeNumber(raw?.adaptiveMemory?.reuseFullImageThumbnailsBelowPageCount, adaptiveDefaults.adaptiveMemory.reuseFullImageThumbnailsBelowPageCount, 1, 1000000),
       resolvedTier: adaptiveDefaults.adaptiveMemory.resolvedTier,
       preferPerformance: adaptiveDefaults.adaptiveMemory.preferPerformance,
     },
@@ -481,7 +537,8 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       minStopRecommendationPages: normalizeThreshold(raw?.warning?.minStopRecommendationPages, adaptiveDefaults.warning.minStopRecommendationPages, 10000000),
     },
     fetch: {
-      prefetchConcurrency: normalizeNumber(raw?.fetch?.prefetchConcurrency, adaptiveDefaults.fetch.prefetchConcurrency, 1, 16),
+      strategy: normalizeFetchStrategy(raw?.fetch?.strategy, adaptiveDefaults.fetch.strategy),
+      prefetchConcurrency: normalizeNumber(raw?.fetch?.prefetchConcurrency, adaptiveDefaults.fetch.prefetchConcurrency, 1, 32),
       prefetchRetryCount: normalizeNumber(raw?.fetch?.prefetchRetryCount, adaptiveDefaults.fetch.prefetchRetryCount, 0, 5),
       prefetchRetryBaseDelayMs: normalizeNumber(raw?.fetch?.prefetchRetryBaseDelayMs, adaptiveDefaults.fetch.prefetchRetryBaseDelayMs, 100, 60000),
       prefetchRequestTimeoutMs: normalizeNumber(raw?.fetch?.prefetchRequestTimeoutMs, adaptiveDefaults.fetch.prefetchRequestTimeoutMs, 1000, 120000),
@@ -506,7 +563,15 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       releaseSinglePageRasterSourceAfterFullPersist: normalizeBoolean(raw?.assetStore?.releaseSinglePageRasterSourceAfterFullPersist, adaptiveDefaults.assetStore.releaseSinglePageRasterSourceAfterFullPersist),
     },
     render: {
+      strategy: normalizeRenderStrategy(raw?.render?.strategy, adaptiveDefaults.render.strategy),
+      backend: normalizeRenderBackend(raw?.render?.backend, adaptiveDefaults.render.backend),
+      workerCount: normalizeNumber(raw?.render?.workerCount, adaptiveDefaults.render.workerCount, 0, 32),
+      useWorkersForRasterImages: normalizeBoolean(raw?.render?.useWorkersForRasterImages, adaptiveDefaults.render.useWorkersForRasterImages),
+      useWorkersForTiff: normalizeBoolean(raw?.render?.useWorkersForTiff, adaptiveDefaults.render.useWorkersForTiff),
+      maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 8),
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),
+      warmupBatchSize: normalizeNumber(raw?.render?.warmupBatchSize, adaptiveDefaults.render.warmupBatchSize, 1, 512),
+      loadingOverlayDelayMs: normalizeNumber(raw?.render?.loadingOverlayDelayMs, adaptiveDefaults.render.loadingOverlayDelayMs, 0, 5000),
       fullPageScale: normalizeFloat(raw?.render?.fullPageScale, adaptiveDefaults.render.fullPageScale, 0.5, 4),
       thumbnailMaxWidth: normalizeNumber(raw?.render?.thumbnailMaxWidth, adaptiveDefaults.render.thumbnailMaxWidth, 32, 4096),
       thumbnailMaxHeight: normalizeNumber(raw?.render?.thumbnailMaxHeight, adaptiveDefaults.render.thumbnailMaxHeight, 32, 4096),
@@ -517,17 +582,25 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       lookBehindPageCount: normalizeNumber(raw?.render?.lookBehindPageCount, adaptiveDefaults.render.lookBehindPageCount, 0, 64),
       visibleThumbnailOverscan: normalizeNumber(raw?.render?.visibleThumbnailOverscan, adaptiveDefaults.render.visibleThumbnailOverscan, 0, 256),
       fullPageCacheLimit: normalizeNumber(raw?.render?.fullPageCacheLimit, adaptiveDefaults.render.fullPageCacheLimit, 1, 8192),
-      thumbnailCacheLimit: normalizeNumber(raw?.render?.thumbnailCacheLimit, adaptiveDefaults.render.thumbnailCacheLimit, 1, 8192),
+      thumbnailCacheLimit: normalizeNumber(raw?.render?.thumbnailCacheLimit, adaptiveDefaults.render.thumbnailCacheLimit, 1, 32768),
       maxOpenPdfDocuments: normalizeNumber(raw?.render?.maxOpenPdfDocuments, adaptiveDefaults.render.maxOpenPdfDocuments, 1, 64),
       maxOpenTiffDocuments: normalizeNumber(raw?.render?.maxOpenTiffDocuments, adaptiveDefaults.render.maxOpenTiffDocuments, 1, 64),
     },
+    memoryPressure: {
+      enabled: normalizeBoolean(raw?.memoryPressure?.enabled, adaptiveDefaults.memoryPressure.enabled),
+      sampleIntervalMs: normalizeNumber(raw?.memoryPressure?.sampleIntervalMs, adaptiveDefaults.memoryPressure.sampleIntervalMs, 250, 60000),
+      softHeapUsageRatio: normalizeFloat(raw?.memoryPressure?.softHeapUsageRatio, adaptiveDefaults.memoryPressure.softHeapUsageRatio, 0.1, 0.99),
+      hardHeapUsageRatio: normalizeFloat(raw?.memoryPressure?.hardHeapUsageRatio, adaptiveDefaults.memoryPressure.hardHeapUsageRatio, 0.1, 0.99),
+      softResidentMiB: normalizeMiBThreshold(raw?.memoryPressure?.softResidentMiB, adaptiveDefaults.memoryPressure.softResidentMiB, 1048576),
+      hardResidentMiB: normalizeMiBThreshold(raw?.memoryPressure?.hardResidentMiB, adaptiveDefaults.memoryPressure.hardResidentMiB, 1048576),
+      forceMemoryModeAbovePageCount: normalizeThreshold(raw?.memoryPressure?.forceMemoryModeAbovePageCount, adaptiveDefaults.memoryPressure.forceMemoryModeAbovePageCount, 10000000),
+      forceMemoryModeAboveSourceCount: normalizeThreshold(raw?.memoryPressure?.forceMemoryModeAboveSourceCount, adaptiveDefaults.memoryPressure.forceMemoryModeAboveSourceCount, 1000000),
+    },
   };
+
+  return applyDocumentLoadingMode(normalized, requestedMode);
 }
 
-/**
- * @param {*} value
- * @returns {boolean}
- */
 export function isRasterImageExtension(value) {
   const ext = String(value || '').trim().toLowerCase();
   return ext === 'jpg'
@@ -539,39 +612,25 @@ export function isRasterImageExtension(value) {
     || ext === 'avif';
 }
 
-/**
- * @param {DocumentLoadingConfig} config
- * @param {*} page
- * @param {number} totalPages
- * @returns {boolean}
- */
 export function shouldUseFullImagesForThumbnails(config, page, totalPages) {
   const strategy = String(config?.render?.thumbnailSourceStrategy || 'auto').toLowerCase();
   if (strategy === 'dedicated') return false;
   if (!isRasterImageExtension(page?.fileExtension)) return false;
   if (strategy === 'prefer-full-images') return true;
 
-  const preferPerformance = !!config?.adaptiveMemory?.preferPerformance;
+  const preferPerformance = !!config?.adaptiveMemory?.preferPerformance || String(config?.mode || '') === 'performance';
   const limit = Math.max(1, Number(config?.adaptiveMemory?.reuseFullImageThumbnailsBelowPageCount) || 1);
   return preferPerformance && totalPages > 0 && totalPages <= limit;
 }
 
-/**
- * @param {DocumentLoadingConfig} config
- * @param {Array<any>} pages
- * @returns {boolean}
- */
 export function shouldKeepAllFullImageAssets(config, pages) {
   const list = Array.isArray(pages) ? pages.filter(Boolean) : [];
   if (!list.length) return false;
   const totalPages = list.length;
+  if (String(config?.mode || '').toLowerCase() === 'performance') return true;
   return list.every((page) => shouldUseFullImagesForThumbnails(config, page, totalPages));
 }
 
-/**
- * @param {number} bytes
- * @returns {string}
- */
 export function formatBytes(bytes) {
   const value = Math.max(0, Number(bytes) || 0);
   if (value < 1024) return `${value} B`;
@@ -586,18 +645,10 @@ export function formatBytes(bytes) {
   return `${size.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} ${unit}`;
 }
 
-/**
- * @param {number} count
- * @returns {string}
- */
 export function formatCount(count) {
   return new Intl.NumberFormat().format(Math.max(0, Number(count) || 0));
 }
 
-/**
- * @param {StopRecommendationInput} input
- * @returns {boolean}
- */
 export function shouldRecommendStopping({
   sourceCount = 0,
   pageCount = 0,

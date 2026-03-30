@@ -1,25 +1,25 @@
 // File: src/utils/pageAssetRenderer.js
 /**
- * OpenDocViewer — Lazy page-asset renderer.
+ * OpenDocViewer — hybrid page-asset renderer.
  *
- * Converts temp-stored source bytes into either full page images or thumbnails on demand. The goal is
- * to keep the original source bytes cheap to keep on disk while only rasterizing pages that the user
- * actually needs.
+ * The renderer keeps the modern temp-store / placeholder architecture from `main`, but routes raster
+ * and TIFF work through dedicated workers when that is beneficial and supported. PDF rendering stays
+ * on the pdf.js path.
  */
 
-import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
 
 try {
   if (pdfjsLib?.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
   }
 } catch {
-  // Ignore SSR / worker-less environments.
+  // Ignore worker-less environments.
 }
-
 
 /**
  * @typedef {Object} PageAssetRendererOptions
@@ -42,71 +42,40 @@ try {
  * @property {number=} thumbnailMaxHeight
  */
 
-/**
- * @param {Map<string, any>} map
- * @param {string} key
- * @param {any} value
- * @param {number} maxEntries
- * @returns {void}
- */
-function setLru(map, key, value, maxEntries) {
-  if (map.has(key)) map.delete(key);
-  map.set(key, value);
-  while (map.size > Math.max(1, Number(maxEntries) || 1)) {
-    const oldestKey = map.keys().next().value;
-    const oldest = map.get(oldestKey);
-    try { oldest?.dispose?.(); } catch {}
-    map.delete(oldestKey);
-  }
-}
-
-/**
- * @param {Map<string, any>} map
- * @param {string} key
- * @param {number} maxEntries
- * @returns {void}
- */
-function touchLru(map, key, maxEntries) {
-  if (!map.has(key)) return;
-  const value = map.get(key);
-  map.delete(key);
-  setLru(map, key, value, maxEntries);
-}
-
-/**
- * @param {number} width
- * @param {number} height
- * @param {number} maxWidth
- * @param {number} maxHeight
- * @returns {number}
- */
 function fitScale(width, height, maxWidth, maxHeight) {
   const safeWidth = Math.max(1, Number(width) || 1);
   const safeHeight = Math.max(1, Number(height) || 1);
-  const widthRatio = Math.max(1, Number(maxWidth) || safeWidth) / safeWidth;
-  const heightRatio = Math.max(1, Number(maxHeight) || safeHeight) / safeHeight;
-  return Math.min(widthRatio, heightRatio);
+  const safeMaxWidth = Math.max(1, Number(maxWidth) || safeWidth);
+  const safeMaxHeight = Math.max(1, Number(maxHeight) || safeHeight);
+  return Math.min(1, safeMaxWidth / safeWidth, safeMaxHeight / safeHeight);
 }
 
-/**
- * @param {HTMLCanvasElement} canvas
- * @param {string} mimeType
- * @param {number=} quality
- * @returns {Promise<Blob>}
- */
-function canvasToBlob(canvas, mimeType, quality) {
+function setLru(map, key, value, limit) {
+  map.delete(key);
+  map.set(key, value);
+  while (map.size > Math.max(1, Number(limit) || 1)) {
+    const oldestKey = map.keys().next().value;
+    const oldest = map.get(oldestKey);
+    map.delete(oldestKey);
+    try { oldest?.dispose?.(); } catch {}
+  }
+}
+
+function touchLru(map, key, limit) {
+  if (!map.has(key)) return;
+  const value = map.get(key);
+  setLru(map, key, value, limit);
+}
+
+function canvasToBlob(canvas, mimeType = 'image/png', quality) {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
       if (blob) resolve(blob);
-      else reject(new Error('Failed to create blob from canvas'));
+      else reject(new Error('Canvas serialization failed'));
     }, mimeType, quality);
   });
 }
 
-/**
- * @param {Blob} blob
- * @returns {Promise<{ width:number, height:number, drawToCanvas:function(HTMLCanvasElement):void, close:function():void }>}
- */
 async function loadBlobForDrawing(blob) {
   if (typeof createImageBitmap === 'function') {
     const bitmap = await createImageBitmap(blob);
@@ -151,12 +120,6 @@ async function loadBlobForDrawing(blob) {
   }
 }
 
-/**
- * @param {Blob} blob
- * @param {number} maxWidth
- * @param {number} maxHeight
- * @returns {Promise<{ blob:Blob, width:number, height:number }>}
- */
 async function scaleBlob(blob, maxWidth, maxHeight) {
   const loaded = await loadBlobForDrawing(blob);
   try {
@@ -175,11 +138,6 @@ async function scaleBlob(blob, maxWidth, maxHeight) {
   }
 }
 
-/**
- * @param {any} ifd
- * @param {number} tagId
- * @returns {(Array<number>|undefined)}
- */
 function getTagArray(ifd, tagId) {
   const key = `t${tagId}`;
   const value = ifd && ifd[key];
@@ -187,11 +145,6 @@ function getTagArray(ifd, tagId) {
   return Array.isArray(value) ? value : [value];
 }
 
-/**
- * @param {ArrayBuffer} arrayBuffer
- * @param {any} ifd
- * @returns {(Blob|null)}
- */
 function buildOjpegJpeg(arrayBuffer, ifd) {
   try {
     const t513 = getTagArray(ifd, 513);
@@ -204,9 +157,8 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     const tablesLen = t514[0] >>> 0;
     if (!tablesLen) return null;
 
-    const u8 = new Uint8Array(arrayBuffer);
-    const parts = [];
-    parts.push(u8.subarray(tablesOffset, tablesOffset + tablesLen));
+    const bytes = new Uint8Array(arrayBuffer);
+    const parts = [bytes.subarray(tablesOffset, tablesOffset + tablesLen)];
 
     let totalScanLen = 0;
     for (let i = 0; i < t273.length && i < t279.length; i += 1) totalScanLen += (t279[i] >>> 0);
@@ -215,7 +167,7 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     for (let i = 0; i < t273.length && i < t279.length; i += 1) {
       const off = t273[i] >>> 0;
       const len = t279[i] >>> 0;
-      scanAll.set(u8.subarray(off, off + len), cursor);
+      scanAll.set(bytes.subarray(off, off + len), cursor);
       cursor += len;
     }
     parts.push(scanAll);
@@ -235,38 +187,72 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
   }
 }
 
-/**
- * @param {PageAssetRendererOptions} opts
- * @returns {PageAssetRenderer}
- */
 export function createPageAssetRenderer(opts) {
   return new PageAssetRenderer(opts);
 }
 
 export class PageAssetRenderer {
-  /**
-   * @param {PageAssetRendererOptions} opts
-   */
   constructor({ tempStore, config = {} }) {
     const normalized = getDocumentLoadingConfig();
     this.tempStore = tempStore;
     this.config = {
       ...normalized.render,
-      ...config,
+      ...(config || {}),
     };
 
-    /** @type {Map<string, ArrayBuffer>} */
     this.bufferCache = new Map();
-    /** @type {Map<string, any>} */
     this.pdfCache = new Map();
-    /** @type {Map<string, { buffer:ArrayBuffer, ifds:Array<any>, dispose:function():void }>} */
     this.tiffCache = new Map();
+    this.workerPool = null;
+    this.rebuildWorkerPool();
   }
 
-  /**
-   * @returns {Promise<void>}
-   */
+  rebuildWorkerPool() {
+    const current = this.workerPool;
+    this.workerPool = null;
+    if (current) void current.dispose?.();
+
+    const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
+    if (backend === 'main-only') return;
+
+    const workerCount = Math.max(0, Number(this.config.workerCount) || 0);
+    if (workerCount <= 0) return;
+
+    this.workerPool = createPageAssetWorkerPool({
+      enabled: true,
+      workerCount,
+      useForTiff: this.config.useWorkersForTiff !== false,
+      useForRasterImages: this.config.useWorkersForRasterImages !== false,
+    });
+  }
+
+  updateConfig(nextConfig = {}) {
+    const previousWorkerCount = this.getWorkerCount();
+    this.config = {
+      ...this.config,
+      ...(nextConfig || {}),
+    };
+    const nextWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
+    const shouldRebuild = previousWorkerCount !== nextWorkerCount
+      || !this.workerPool
+      || String(this.config.backend || '').toLowerCase() === 'main-only';
+    if (shouldRebuild) this.rebuildWorkerPool();
+  }
+
+  getWorkerCount() {
+    return Math.max(0, Number(this.workerPool?.getWorkerCount?.() || 0));
+  }
+
+  canRenderInWorker(fileExtension, variant) {
+    return !!this.workerPool?.canRender?.(fileExtension, variant);
+  }
+
   async dispose() {
+    if (this.workerPool) {
+      try { await this.workerPool.dispose?.(); } catch {}
+      this.workerPool = null;
+    }
+
     for (const entry of this.pdfCache.values()) {
       try {
         const doc = await entry.promise;
@@ -279,10 +265,6 @@ export class PageAssetRenderer {
     this.bufferCache.clear();
   }
 
-  /**
-   * @param {string} sourceKey
-   * @returns {Promise<ArrayBuffer>}
-   */
   async getSourceBuffer(sourceKey) {
     const key = String(sourceKey || '');
     if (this.bufferCache.has(key)) {
@@ -302,10 +284,6 @@ export class PageAssetRenderer {
     return buffer;
   }
 
-  /**
-   * @param {string} sourceKey
-   * @returns {Promise<any>}
-   */
   async getPdfDocument(sourceKey) {
     const key = String(sourceKey || '');
     if (!this.pdfCache.has(key)) {
@@ -328,34 +306,49 @@ export class PageAssetRenderer {
     return this.pdfCache.get(key).promise;
   }
 
-  /**
-   * @param {string} sourceKey
-   * @returns {Promise<{ buffer:ArrayBuffer, ifds:Array<any> }>}
-   */
   async getTiffDocument(sourceKey) {
     const key = String(sourceKey || '');
     if (!this.tiffCache.has(key)) {
       const buffer = await this.getSourceBuffer(key);
       const ifds = decodeUTIF(buffer);
-      setLru(this.tiffCache, key, {
-        buffer,
-        ifds,
-        dispose() {},
-      }, this.config.maxOpenTiffDocuments);
+      setLru(this.tiffCache, key, { buffer, ifds, dispose() {} }, this.config.maxOpenTiffDocuments);
     }
     touchLru(this.tiffCache, key, this.config.maxOpenTiffDocuments);
     const entry = this.tiffCache.get(key);
     return { buffer: entry.buffer, ifds: entry.ifds };
   }
 
-  /**
-   * @param {PageAssetDescriptor} descriptor
-   * @param {RenderPageAssetOptions} options
-   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
-   */
+  shouldTryWorker(fileExtension, variant) {
+    const ext = String(fileExtension || '').toLowerCase();
+    const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
+    if (backend === 'main-only') return false;
+    if (!this.workerPool) return false;
+    if (ext === 'pdf') return false;
+    return this.canRenderInWorker(ext, variant);
+  }
+
   async renderPageAsset(descriptor, options) {
     const variant = options?.variant === 'thumbnail' ? 'thumbnail' : 'full';
     const ext = String(descriptor?.fileExtension || '').toLowerCase();
+
+    if (this.shouldTryWorker(ext, variant)) {
+      try {
+        const sourceBlob = await this.tempStore.getBlob(descriptor.sourceKey);
+        if (!sourceBlob) throw new Error(`Missing source blob for worker render ${descriptor.sourceKey}`);
+        return await this.workerPool.renderAsset({
+          sourceBlob,
+          fileExtension: ext,
+          pageIndex: Math.max(0, Number(descriptor?.pageIndex) || 0),
+          variant,
+          thumbnailMaxWidth: options?.thumbnailMaxWidth,
+          thumbnailMaxHeight: options?.thumbnailMaxHeight,
+          rasterFullPageScale: Number(this.config.fullPageScale) || 1.5,
+        });
+      } catch (error) {
+        if (!error?.fallbackMainThread) throw error;
+      }
+    }
+
     if (ext === 'pdf') {
       return this.renderPdfPage(descriptor, {
         variant,
@@ -377,11 +370,6 @@ export class PageAssetRenderer {
     });
   }
 
-  /**
-   * @param {PageAssetDescriptor} descriptor
-   * @param {RenderPageAssetOptions} options
-   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
-   */
   async renderImagePage(descriptor, options) {
     const blob = await this.tempStore.getBlob(descriptor.sourceKey);
     if (!blob) throw new Error(`Missing source blob for image ${descriptor.sourceKey}`);
@@ -414,11 +402,6 @@ export class PageAssetRenderer {
     };
   }
 
-  /**
-   * @param {PageAssetDescriptor} descriptor
-   * @param {RenderPageAssetOptions} options
-   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
-   */
   async renderPdfPage(descriptor, options) {
     const pdf = await this.getPdfDocument(descriptor.sourceKey);
     const pageNumber = Number(descriptor.pageIndex || 0) + 1;
@@ -428,11 +411,11 @@ export class PageAssetRenderer {
       const baseViewport = page.getViewport({ scale: 1 });
       const targetScale = options.variant === 'thumbnail'
         ? fitScale(
-          baseViewport.width,
-          baseViewport.height,
-          Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
-          Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
-        )
+            baseViewport.width,
+            baseViewport.height,
+            Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
+            Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
+          )
         : Math.max(0.5, Number(this.config.fullPageScale) || 1.5);
       const viewport = page.getViewport({ scale: targetScale });
 
@@ -455,14 +438,9 @@ export class PageAssetRenderer {
     }
   }
 
-  /**
-   * @param {PageAssetDescriptor} descriptor
-   * @param {RenderPageAssetOptions} options
-   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
-   */
   async renderTiffPage(descriptor, options) {
     const tiff = await this.getTiffDocument(descriptor.sourceKey);
-    const ifd = tiff.ifds[Number(descriptor.pageIndex || 0)];
+    const ifd = tiff.ifds[Math.max(0, Number(descriptor.pageIndex) || 0)];
     if (!ifd) throw new Error(`Missing TIFF page ${descriptor.pageIndex} for ${descriptor.sourceKey}`);
 
     const compressionArr = getTagArray(ifd, 259);
@@ -520,25 +498,24 @@ export class PageAssetRenderer {
       };
     }
 
-    const thumbCanvas = document.createElement('canvas');
     const scale = fitScale(
       sourceCanvas.width,
       sourceCanvas.height,
       Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
       Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
     );
+    const thumbCanvas = document.createElement('canvas');
     thumbCanvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
     thumbCanvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
     const thumbCtx = thumbCanvas.getContext('2d');
     if (!thumbCtx) throw new Error('Unable to acquire TIFF thumbnail canvas context');
     thumbCtx.drawImage(sourceCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-
     const thumbBlob = await canvasToBlob(thumbCanvas, 'image/png');
     return {
       blob: thumbBlob,
       width: thumbCanvas.width,
       height: thumbCanvas.height,
-      mimeType: 'image/png',
+      mimeType: thumbBlob.type || 'image/png',
     };
   }
 }
