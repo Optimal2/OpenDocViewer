@@ -216,6 +216,12 @@
 
     // ---- LARGE-DOCUMENT LOADING -----------------------------------------------
     documentLoading: {
+      // Runtime loading mode:
+      //   'performance' -> eager worker-heavy rendering and large in-memory caches
+      //   'memory'      -> conservative lazy rendering and aggressive cache eviction
+      //   'auto'        -> start fast, then degrade one-way toward memory mode under pressure
+      mode: 'auto',
+
       // Warning thresholds. Defaults favor stability/performance and avoid source-count warnings by default.
       warning: {
         sourceCountThreshold: 0,
@@ -238,6 +244,12 @@
 
       // Network prefetch step used to grab expiring URLs before later page rendering.
       fetch: {
+        // 'sequential' behaves like the older stable ticket-link flow:
+        // fetch source 1 -> store/analyze -> enqueue render -> move on.
+        // 'parallel-limited' keeps multiple prefetches in flight.
+        strategy: 'sequential',
+
+        // Only used when strategy === 'parallel-limited'.
         // Customer-optimised profile: keep the backend pressure moderate, but fail fast so one
         // slow source does not make the whole viewer feel stuck.
         prefetchConcurrency: 4,
@@ -291,7 +303,23 @@
 
       // Lazy page rendering and in-memory object URL cache limits.
       render: {
-        maxConcurrentAssetRenders: 6,
+        // 'eager-all'     -> warm every page for each source as soon as it is discovered
+        // 'eager-nearby'  -> warm an initial range only (default for auto)
+        // 'lazy-viewport' -> render only what the viewport needs
+        strategy: 'eager-nearby',
+
+        // 'hybrid-by-format' keeps PDF on the main/pdf.js path while raster + TIFF use workers
+        // whenever possible.
+        backend: 'hybrid-by-format',
+
+        // 0 = choose from hardwareConcurrency/deviceMemory at runtime.
+        workerCount: 0,
+        useWorkersForRasterImages: true,
+        useWorkersForTiff: true,
+        maxConcurrentMainThreadRenders: 2,
+        maxConcurrentAssetRenders: 2,
+        warmupBatchSize: 24,
+        loadingOverlayDelayMs: 90,
         fullPageScale: 1.5,
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.

@@ -36,6 +36,7 @@ const DocumentViewer = () => {
   const {
     pageNumber,
     setPageNumber,
+    thumbnailSelectionPageNumber,
     zoom,
     setZoom,
     isComparing,
@@ -54,6 +55,7 @@ const DocumentViewer = () => {
     thumbnailsContainerRef,
     documentRenderRef,
     compareRef,
+    handlePrimaryDisplayStateChange,
     handlePageNumberChange,
     zoomIn,
     zoomOut,
@@ -160,7 +162,7 @@ const DocumentViewer = () => {
             <div className="thumbnail-pane-column" style={{ width: `${thumbnailWidth}px`, minWidth: `${thumbnailWidth}px`, flexShrink: 0 }}>
               <DocumentViewerThumbnails
                 allPages={allPages}
-                pageNumber={pageNumber}
+                pageNumber={thumbnailSelectionPageNumber}
                 setPageNumber={(newPageNumber) => handlePageNumberChange(newPageNumber, true)}
                 thumbnailsContainerRef={thumbnailsContainerRef}
                 width={thumbnailWidth}
@@ -204,6 +206,7 @@ const DocumentViewer = () => {
           postZoomRight={postZoomRight}
           bumpPostZoomLeft={bumpPostZoomLeft}
           bumpPostZoomRight={bumpPostZoomRight}
+          onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
         />
       </div>
     </div>

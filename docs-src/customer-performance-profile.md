@@ -1,47 +1,81 @@
 # Customer performance profile
 
-This build is tuned for an environment where RAM pressure is usually acceptable and the primary goal is that the application feels quick to use.
+This build now supports three explicit document-loading modes instead of one fixed behavior:
 
-## Goals
+- `performance`
+- `memory`
+- `auto`
 
-- keep the thumbnail pane warm and usable
-- reduce the time a single slow upstream source can block the overall loading sequence
-- avoid heavy per-thumbnail full-image reuse for large raster-image runs
-- respect manual thumbnail-pane scrolling while the document set is still growing
+## Recommended default
 
-## Runtime choices in this profile
+Use `documentLoading.mode = 'auto'` unless a specific customer explicitly wants one extreme.
 
-### Prefetch
+`auto` starts close to the old fast-feeling eager pipeline:
 
-- `documentLoading.fetch.prefetchConcurrency = 4`
-- `documentLoading.fetch.prefetchRetryCount = 0`
-- `documentLoading.fetch.prefetchRequestTimeoutMs = 10000`
+- true sequential fetch by default for ticket/proxy safety
+- worker-backed raster/TIFF rendering when supported
+- eager nearby warm-up
+- larger in-memory caches
 
-Rationale: the observed customer environment showed repeated `GetStream` timeouts. Retrying the same request made the viewer feel stuck for longer. This profile therefore fails faster and moves on.
+Then it degrades one-way when pressure rises:
 
-### Thumbnails
+- stop global eager warm-up
+- reduce concurrency
+- prefer dedicated thumbnails
+- promote more blobs to IndexedDB
+- shrink cache limits
 
-- `documentLoading.render.thumbnailLoadingStrategy = 'eager'`
-- `documentLoading.render.thumbnailSourceStrategy = 'dedicated'`
-- `documentLoading.render.thumbnailCacheLimit = 8192`
-- `documentLoading.render.maxConcurrentAssetRenders = 6`
+## When to use `performance`
 
-Rationale: the pane should behave like the older always-warm experience rather than a strictly lazy viewport. Dedicated thumbnail rasters are used because reusing full-size images for every tile can make image-heavy runs feel slower even on high-memory machines. In this profile the row DOM stays fully active during eager warm-up, so the browser is not asked to defer off-screen thumbnail subtrees with `content-visibility:auto`.
+Choose `performance` when:
 
-### Thumbnail pane scroll behaviour
+- the client machines are known to have enough RAM
+- the customer prioritizes fast thumbnail/full-page warm-up over memory usage
+- the upstream document service behaves well with sequential fetch and aggressive local rendering
 
-The thumbnail pane now avoids re-centering on the active page simply because the total discovered page count increased. This fixes the case where the user drags the scrollbar while loading is still in progress and the pane jumps back to the active page as new thumbnails arrive.
+Expected characteristics:
 
-## Trade-offs
+- eager-all source warm-up
+- worker-preferred raster/TIFF rendering
+- large in-memory caches
+- full-image thumbnail reuse whenever it is beneficial
 
-This profile intentionally spends more memory and background work to improve responsiveness. It is not the best fit for memory-constrained devices or deployments where every failed prefetch should be retried aggressively before surfacing a placeholder.
+## When to use `memory`
 
+Choose `memory` when:
 
-## Focus-first thumbnail prioritization
+- the environment has a hard browser-memory ceiling
+- thousands of pages are common
+- the customer accepts later page loads in exchange for lower resident memory
 
-The thumbnail pane now treats the user's current scroll target as the primary focus.
+Expected characteristics:
 
-- Visible thumbnails are requested before distant background pages.
-- If the active document page is elsewhere, the pane still prioritizes the visible thumbnail region the user is currently inspecting.
-- Background eager warm-up restarts around the visible center whenever the user scrolls, instead of continuing from page 1 upward.
-- Warm-up batches are intentionally small so user-driven requests can overtake background work quickly.
+- lazy viewport-first rendering
+- low render concurrency
+- dedicated thumbnail rasters
+- aggressive eviction / IndexedDB usage
+
+## Ticket-link guidance
+
+For tokenized or iframe-launched ticket links, prefer:
+
+```js
+documentLoading: {
+  mode: 'auto',
+  fetch: {
+    strategy: 'sequential'
+  }
+}
+```
+
+That keeps the older fetch ordering semantics while still allowing the new hybrid renderer to warm pages in the background after each source has been secured locally.
+
+## Page-consistency guarantee
+
+The viewer now treats “selected page” and “actually displayed page” as separate states.
+
+- If the next page is ready immediately, the switch feels instant.
+- If the next page is slower, the thumbnail highlight stays on the actually displayed page until the viewer changes to a real loading overlay.
+- Once the loading overlay is visible, the requested page may be highlighted because the large pane is no longer pretending to show the previous page.
+
+This avoids the earlier class of bugs where page X was highlighted but page Y was still visible in the large pane.

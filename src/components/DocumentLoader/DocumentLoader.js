@@ -372,6 +372,7 @@ const DocumentLoader = ({
     storeSourceBlob,
     registerSourceDescriptor,
     addMessage,
+    scheduleSourceWarmup,
   } = useContext(ViewerContext);
 
   const isMountedRef = useRef(true);
@@ -452,7 +453,9 @@ const DocumentLoader = ({
       if (shouldStopRun()) return false;
       return promptForPressure({
         ...summary,
-        prefetchConcurrency: config.fetch.prefetchConcurrency,
+        prefetchConcurrency: String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential'
+          ? 1
+          : config.fetch.prefetchConcurrency,
       });
     };
 
@@ -636,18 +639,23 @@ const DocumentLoader = ({
       setLoadingRunActive(true);
       setPlannedPageCount(0);
 
-      const prefetchTasks = entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
       let nextPageIndex = 0;
       let processedSourceCount = 0;
       let prefetchedBytes = 0;
       let pageWarningShown = false;
       let activeTempStoreMode = config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory';
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
+      const isSequentialFetch = String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential';
+      const prefetchTasks = isSequentialFetch
+        ? null
+        : entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
 
-      for (let i = 0; i < prefetchTasks.length; i += 1) {
+      for (let i = 0; i < entries.length; i += 1) {
         if (cancelled) break;
 
-        const result = await prefetchTasks[i];
+        const result = isSequentialFetch
+          ? await prefetchSource(entries[i], i)
+          : await prefetchTasks[i];
         if (shouldStopRun() || result.aborted) break;
 
         if (!result.ok) {
@@ -708,6 +716,7 @@ const DocumentLoader = ({
         });
 
         insertPagesAtIndex(placeholders, nextPageIndex);
+        scheduleSourceWarmup(nextPageIndex, placeholders.length);
         nextPageIndex += placeholders.length;
         setPlannedPageCount(nextPageIndex);
 
@@ -800,6 +809,7 @@ const DocumentLoader = ({
     insertPagesAtIndex,
     promptForPressure,
     registerSourceDescriptor,
+    scheduleSourceWarmup,
     setError,
     setLoadingRunActive,
     setPlannedPageCount,

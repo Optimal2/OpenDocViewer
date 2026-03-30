@@ -81,6 +81,7 @@ function isBlobAssetUrl(url) {
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
+ * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
  * @returns {React.ReactElement}
  */
 const DocumentRender = React.forwardRef(function DocumentRender(
@@ -94,6 +95,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     isCanvasEnabled,
     forceRender,
     allPages,
+    onDisplayStateChange = () => {},
   },
   ref
 ) {
@@ -104,9 +106,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     pinPageAsset,
     unpinPageAsset,
     getPrintablePageUrls,
+    documentLoadingConfig,
   } = useContext(ViewerContext);
 
-  const loadingConfig = useMemo(() => getDocumentLoadingConfig(), []);
+  const fallbackLoadingConfig = useMemo(() => getDocumentLoadingConfig(), []);
+  const activeLoadingConfig = documentLoadingConfig || fallbackLoadingConfig;
   const currentIndex = Math.max(0, Number(pageNumber) - 1);
   const currentPage = useMemo(() => getCurrentPage(allPages, pageNumber), [allPages, pageNumber]);
   const currentSourceKey = currentPage?.sourceKey || '';
@@ -122,6 +126,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const displayedAssetRef = useRef(/** @type {DisplayedAsset} */ ({ url: '', pageIndex: -1, pageNumber: 0 }));
   const pendingAssetRef = useRef(/** @type {(DisplayedAsset|null)} */ (null));
   const assetRetryRef = useRef({ key: '', count: 0 });
+  const loadingOverlayTimerRef = useRef(/** @type {(number|null)} */ (null));
 
   const [displayedAsset, setDisplayedAsset] = useState(/** @type {DisplayedAsset} */ ({
     url: '',
@@ -132,6 +137,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const [imageRevision, setImageRevision] = useState(0);
   const [imageLoaded, setImageLoaded] = useState(false);
   const [assetFailed, setAssetFailed] = useState(false);
+  const [transitionPending, setTransitionPending] = useState(false);
+  const [blockingLoading, setBlockingLoading] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -149,6 +156,16 @@ const DocumentRender = React.forwardRef(function DocumentRender(
    */
   const resetAssetRetry = useCallback(() => {
     assetRetryRef.current = { key: '', count: 0 };
+  }, []);
+
+  /**
+   * @returns {void}
+   */
+  const clearLoadingOverlayTimer = useCallback(() => {
+    const timerId = loadingOverlayTimerRef.current;
+    if (!timerId) return;
+    loadingOverlayTimerRef.current = null;
+    try { window.clearTimeout(timerId); } catch {}
   }, []);
 
   /**
@@ -308,35 +325,80 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const requestId = requestSeqRef.current + 1;
     requestSeqRef.current = requestId;
 
+    clearLoadingOverlayTimer();
     pinPageAsset(currentIndex, 'full');
     setAssetFailed(false);
+    setPendingAsset(null);
+
+    const beginTransition = () => {
+      const targetAlreadyDisplayed = (
+        displayedAssetRef.current.pageIndex === currentIndex
+        && !!String(displayedAssetRef.current.url || '')
+        && imageLoaded
+      );
+      if (targetAlreadyDisplayed) {
+        setTransitionPending(false);
+        setBlockingLoading(false);
+        return;
+      }
+
+      setTransitionPending(true);
+      setBlockingLoading(false);
+
+      if (!displayedAssetRef.current.url) return;
+      const delayMs = Math.max(0, Number(activeLoadingConfig?.render?.loadingOverlayDelayMs) || 0);
+      if (delayMs <= 0) {
+        setBlockingLoading(true);
+        return;
+      }
+
+      const timerId = window.setTimeout(() => {
+        if (cancelled || requestSeqRef.current !== requestId) return;
+        const targetVisible = displayedAssetRef.current.pageIndex === currentIndex
+          && !!String(displayedAssetRef.current.url || '')
+          && imageLoaded;
+        if (!targetVisible) setBlockingLoading(true);
+      }, delayMs);
+      loadingOverlayTimerRef.current = timerId;
+    };
 
     if (!currentPage) {
+      setTransitionPending(false);
+      setBlockingLoading(false);
       setPendingAsset(null);
       setDisplayedAsset({ url: '', pageIndex: -1, pageNumber: 0 });
       setImageLoaded(false);
       setNaturalSize({ width: 0, height: 0 });
       return () => {
         cancelled = true;
+        clearLoadingOverlayTimer();
         unpinPageAsset(currentIndex, 'full');
       };
     }
 
     if (currentPageStatus === -1 || currentFullStatus === -1) {
+      setTransitionPending(false);
+      setBlockingLoading(false);
       setPendingAsset(null);
       setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
       setImageLoaded(false);
       setAssetFailed(true);
       return () => {
         cancelled = true;
+        clearLoadingOverlayTimer();
         unpinPageAsset(currentIndex, 'full');
       };
     }
+
+    beginTransition();
 
     void ensurePageAsset(currentIndex, 'full', { priority: 'critical' })
       .then((url) => {
         if (cancelled || requestSeqRef.current !== requestId) return;
         if (!url) {
+          clearLoadingOverlayTimer();
+          setTransitionPending(false);
+          setBlockingLoading(false);
           setPendingAsset(null);
           setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
           setImageLoaded(false);
@@ -347,10 +409,13 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         touchPageAsset(currentIndex, 'full');
 
         const alreadyDisplayed =
-          displayedAssetRef.current.url === url &&
-          displayedAssetRef.current.pageIndex === currentIndex;
+          displayedAssetRef.current.url === url
+          && displayedAssetRef.current.pageIndex === currentIndex;
 
         if (alreadyDisplayed) {
+          clearLoadingOverlayTimer();
+          setTransitionPending(false);
+          setBlockingLoading(false);
           setPendingAsset(null);
           setImageLoaded(true);
           setAssetFailed(false);
@@ -360,8 +425,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           setAssetFailed(false);
         }
 
-        const lookBehind = Math.max(0, Number(loadingConfig.render.lookBehindPageCount) || 0);
-        const lookAhead = Math.max(0, Number(loadingConfig.render.lookAheadPageCount) || 0);
+        const lookBehind = Math.max(0, Number(activeLoadingConfig?.render?.lookBehindPageCount) || 0);
+        const lookAhead = Math.max(0, Number(activeLoadingConfig?.render?.lookAheadPageCount) || 0);
         for (let i = 1; i <= lookBehind; i += 1) {
           const idx = currentIndex - i;
           if (idx >= 0) void ensurePageAsset(idx, 'full', { priority: 'low' }).catch(() => {});
@@ -377,6 +442,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           pageNumber,
           error: String(error?.message || error),
         });
+        clearLoadingOverlayTimer();
+        setTransitionPending(false);
+        setBlockingLoading(false);
         setPendingAsset(null);
         setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
         setImageLoaded(false);
@@ -385,19 +453,23 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
     return () => {
       cancelled = true;
+      clearLoadingOverlayTimer();
       requestSeqRef.current += 1;
       unpinPageAsset(currentIndex, 'full');
     };
   }, [
+    activeLoadingConfig?.render?.loadingOverlayDelayMs,
+    activeLoadingConfig?.render?.lookAheadPageCount,
+    activeLoadingConfig?.render?.lookBehindPageCount,
     allPages.length,
+    clearLoadingOverlayTimer,
     currentFullStatus,
     currentIndex,
     currentPage,
     currentPageStatus,
     currentSourceKey,
     ensurePageAsset,
-    loadingConfig.render.lookAheadPageCount,
-    loadingConfig.render.lookBehindPageCount,
+    imageLoaded,
     pageNumber,
     pinPageAsset,
     touchPageAsset,
@@ -431,12 +503,15 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       height: Number(image?.naturalHeight || currentPage?.realHeight || 0),
     });
 
+    clearLoadingOverlayTimer();
     setDisplayedAsset({
       url: String(image?.currentSrc || image?.src || ''),
       pageIndex: target.pageIndex,
       pageNumber: target.pageNumber,
     });
     setPendingAsset(null);
+    setTransitionPending(false);
+    setBlockingLoading(false);
     setNaturalSize(nextSize);
     setImageLoaded(true);
     setAssetFailed(false);
@@ -466,6 +541,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     onRender,
     touchPageAsset,
     resetAssetRetry,
+    clearLoadingOverlayTimer,
   ]);
 
   /**
@@ -548,6 +624,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       if (!preserveDisplayedAsset) {
         setDisplayedAsset({ url: '', pageIndex: target.pageIndex, pageNumber: target.pageNumber });
       }
+      setTransitionPending(true);
+      if (!preserveDisplayedAsset) setBlockingLoading(true);
       setPendingAsset({ url: nextUrl, pageIndex: target.pageIndex, pageNumber: target.pageNumber });
       setImageLoaded(false);
       setAssetFailed(false);
@@ -582,14 +660,17 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       url: imageUrl,
     });
 
+    clearLoadingOverlayTimer();
     setPendingAsset(null);
+    setTransitionPending(false);
+    setBlockingLoading(false);
     void recoverPageAsset(target, imageUrl, true).then((recovered) => {
       if (recovered) return;
       setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
       setImageLoaded(false);
       setAssetFailed(true);
     });
-  }, [currentIndex, pageNumber, recoverPageAsset]);
+  }, [clearLoadingOverlayTimer, currentIndex, pageNumber, recoverPageAsset]);
 
   /**
    * @returns {void}
@@ -605,6 +686,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       url: activeUrl,
     });
 
+    clearLoadingOverlayTimer();
+    setTransitionPending(false);
+    setBlockingLoading(false);
     setDisplayedAsset({ url: '', pageIndex: currentIndex, pageNumber });
     setImageLoaded(false);
     void recoverPageAsset({
@@ -614,7 +698,20 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       if (recovered) return;
       setAssetFailed(true);
     });
-  }, [currentIndex, pageNumber, recoverPageAsset]);
+  }, [clearLoadingOverlayTimer, currentIndex, pageNumber, recoverPageAsset]);
+
+  const displayedPageNumber = Math.max(0, Number(displayedAsset.pageNumber) || 0);
+  const showErrorState = assetFailed || currentPageStatus === -1 || currentFullStatus === -1;
+
+  useEffect(() => {
+    onDisplayStateChange({
+      requestedPageNumber: Math.max(1, Number(pageNumber) || 1),
+      displayedPageNumber,
+      pending: !!transitionPending,
+      blockingLoading: !!blockingLoading,
+      hasError: !!showErrorState,
+    });
+  }, [blockingLoading, displayedPageNumber, onDisplayStateChange, pageNumber, showErrorState, transitionPending]);
 
   const imperativeHandle = useMemo(() => ({
     updateImageSourceAndFit() {
@@ -667,13 +764,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);
 
   const displayedUrl = displayedAsset.url;
-  const targetPageDisplayed =
-    displayedAsset.pageIndex === currentIndex &&
-    !!displayedUrl &&
-    imageLoaded &&
-    !assetFailed;
-  const showErrorState = assetFailed || currentPageStatus === -1 || currentFullStatus === -1;
-  const showLoadingOverlay = !showErrorState && !targetPageDisplayed && !displayedUrl;
+  const hideDisplayedSurface = !!blockingLoading && displayedAsset.pageIndex !== currentIndex;
+  const showLoadingOverlay = !showErrorState && (blockingLoading || (!displayedUrl && transitionPending));
   const hiddenImageStyle = isCanvasEnabled
     ? {
         opacity: 0,
@@ -687,10 +779,14 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     resetAssetRetry();
   }, [currentIndex, currentSourceKey, resetAssetRetry]);
 
+  useEffect(() => () => {
+    clearLoadingOverlayTimer();
+  }, [clearLoadingOverlayTimer]);
+
   return (
     <div ref={renderViewportRef} className="document-render-viewport">
       <div className="document-render-container" style={stageStyle}>
-        {displayedUrl && (
+        {displayedUrl && !hideDisplayedSurface && (
           <ImageRenderer
             key={`${displayedAsset.pageIndex}:${imageRevision}:${displayedUrl}`}
             ref={imgRef}
@@ -716,7 +812,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           />
         )}
 
-        {isCanvasEnabled && !!displayedUrl && !showErrorState && (
+        {isCanvasEnabled && !!displayedUrl && !hideDisplayedSurface && !showErrorState && (
           <CanvasRenderer
             ref={canvasRef}
             naturalWidth={effectiveRenderSize.width || currentPage?.realWidth || 0}

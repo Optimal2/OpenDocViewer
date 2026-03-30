@@ -284,6 +284,33 @@ export class SourceTempStore {
   }
 
   /**
+   * Update runtime thresholds for the active session. Demotion back from IndexedDB to memory is
+   * intentionally unsupported; sessions only move toward more conservative storage.
+   *
+   * @param {Object=} nextConfig
+   * @returns {void}
+   */
+  updateConfig(nextConfig = {}) {
+    this.config = {
+      ...this.config,
+      ...(nextConfig || {}),
+    };
+    this.requestedMode = String(this.config.mode || this.requestedMode || 'adaptive').toLowerCase();
+    if (this.blobCache) this.blobCache.limit = Math.max(1, Number(this.config.blobCacheEntries) || this.blobCache.limit || 1);
+  }
+
+  /**
+   * Force promotion to IndexedDB for the current session when supported.
+   *
+   * @returns {Promise<SourceStoreStats>}
+   */
+  async promoteToIndexedDb() {
+    this.requestedMode = 'indexeddb';
+    await this.maybePromote();
+    return this.getStats();
+  }
+
+  /**
    * @template T
    * @param {function(): Promise<T>} fn
    * @returns {Promise<T>}

@@ -75,6 +75,31 @@ const PageNavigationButtons = ({
     if (!focused) setDraft(String(pageNumber));
   }, [pageNumber, isFocused]);
 
+
+  const stopAllRepeatNavigation = React.useCallback(() => {
+    stopPrevPageTimer();
+    stopNextPageTimer();
+    suppressNextClickRef.current = false;
+  }, [stopNextPageTimer, stopPrevPageTimer]);
+
+  useEffect(() => {
+    const handleRelease = () => {
+      stopAllRepeatNavigation();
+    };
+
+    window.addEventListener('mouseup', handleRelease, { passive: true });
+    window.addEventListener('touchend', handleRelease, { passive: true });
+    window.addEventListener('touchcancel', handleRelease, { passive: true });
+    window.addEventListener('blur', handleRelease, { passive: true });
+
+    return () => {
+      window.removeEventListener('mouseup', handleRelease);
+      window.removeEventListener('touchend', handleRelease);
+      window.removeEventListener('touchcancel', handleRelease);
+      window.removeEventListener('blur', handleRelease);
+    };
+  }, [stopAllRepeatNavigation]);
+
   function applyDraft() {
     const next = clampPage(draft, totalPages);
     if (next == null) {
@@ -151,13 +176,10 @@ const PageNavigationButtons = ({
             startPrevPageTimer('prev');
           }
         }}
-        onMouseUp={stopPrevPageTimer}
-        onMouseLeave={() => {
-          stopPrevPageTimer();
-          suppressNextClickRef.current = false;
-        }}
+        onMouseUp={stopAllRepeatNavigation}
+        onMouseLeave={stopAllRepeatNavigation}
         onTouchStart={onTouchStartPrev}
-        onTouchEnd={stopPrevPageTimer}
+        onTouchEnd={stopAllRepeatNavigation}
         aria-label={t('toolbar.previousPage')}
         title={t('toolbar.previousPage')}
         className="odv-btn"
@@ -210,13 +232,10 @@ const PageNavigationButtons = ({
             startNextPageTimer('next');
           }
         }}
-        onMouseUp={stopNextPageTimer}
-        onMouseLeave={() => {
-          stopNextPageTimer();
-          suppressNextClickRef.current = false;
-        }}
+        onMouseUp={stopAllRepeatNavigation}
+        onMouseLeave={stopAllRepeatNavigation}
         onTouchStart={onTouchStartNext}
-        onTouchEnd={stopNextPageTimer}
+        onTouchEnd={stopAllRepeatNavigation}
         aria-label={t('toolbar.nextPage')}
         title={t('toolbar.nextPage')}
         className="odv-btn"

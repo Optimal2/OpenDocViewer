@@ -13,6 +13,8 @@ import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
 import logger from '../logging/systemLogger.js';
 import ViewerContext from './viewerContext.js';
 import {
+  applyMemoryPressureStage,
+  cloneDocumentLoadingConfig,
   getDocumentLoadingConfig,
   isRasterImageExtension,
   shouldKeepAllFullImageAssets,
@@ -203,14 +205,20 @@ export const ViewerProvider = ({ children }) => {
   const [loadingRunActive, setLoadingRunActive] = useState(false);
   const [plannedPageCount, setPlannedPageCount] = useState(0);
   const [messageQueue, setMessageQueue] = useState([]);
+  const [documentLoadingConfig, setDocumentLoadingConfig] = useState(getDocumentLoadingConfig());
+  const [memoryPressureStage, setMemoryPressureStage] = useState('normal');
 
   const allPagesRef = useRef([]);
   const sourceDescriptorsRef = useRef(new Map());
   const tempStoreRef = useRef(null);
   const pageAssetStoreRef = useRef(null);
   const pageRendererRef = useRef(null);
+  const sessionBaseConfigRef = useRef(getDocumentLoadingConfig());
   const sessionConfigRef = useRef(getDocumentLoadingConfig());
   const sessionEpochRef = useRef(0);
+  const memoryMonitorTimerRef = useRef(null);
+  const warmupQueueRef = useRef([]);
+  const warmupRunningRef = useRef(false);
   const pendingAssetPromisesRef = useRef(new Map());
   const fullPageCacheRef = useRef(new Map());
   const thumbnailCacheRef = useRef(new Map());
@@ -221,7 +229,7 @@ export const ViewerProvider = ({ children }) => {
   const releasedRasterSourceKeysRef = useRef(new Set());
 
   const renderWithLimit = useRef(createLimiter(
-    () => sessionConfigRef.current?.render?.maxConcurrentAssetRenders || 2
+    () => sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders || sessionConfigRef.current?.render?.maxConcurrentAssetRenders || 2
   )).current;
 
   /**
@@ -268,6 +276,12 @@ export const ViewerProvider = ({ children }) => {
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
+    warmupQueueRef.current = [];
+    warmupRunningRef.current = false;
+    if (memoryMonitorTimerRef.current) {
+      try { window.clearInterval(memoryMonitorTimerRef.current); } catch {}
+      memoryMonitorTimerRef.current = null;
+    }
     revokeSessionUrls();
 
     if (pageRendererRef.current) {
@@ -309,6 +323,11 @@ export const ViewerProvider = ({ children }) => {
     setLoadingRunActive(false);
     setPlannedPageCount(0);
     setMessageQueue([]);
+    const defaultConfig = getDocumentLoadingConfig();
+    sessionBaseConfigRef.current = defaultConfig;
+    sessionConfigRef.current = defaultConfig;
+    setDocumentLoadingConfig(defaultConfig);
+    setMemoryPressureStage('normal');
   }, [revokeSessionUrls, updateAllPages]);
 
   /**
@@ -372,13 +391,50 @@ export const ViewerProvider = ({ children }) => {
   }, []);
 
   /**
+   * @param {Object} nextConfig
+   * @param {'normal'|'soft'|'hard'=} stage
+   * @param {boolean=} forceIndexedDbPromotion
+   * @returns {Promise<void>}
+   */
+  const applySessionConfig = useCallback(async (nextConfig, stage = 'normal', forceIndexedDbPromotion = false) => {
+    const normalized = cloneDocumentLoadingConfig(nextConfig || sessionConfigRef.current || getDocumentLoadingConfig());
+    sessionConfigRef.current = normalized;
+    setDocumentLoadingConfig(normalized);
+    setMemoryPressureStage(String(stage || 'normal').toLowerCase());
+
+    if (tempStoreRef.current?.updateConfig) tempStoreRef.current.updateConfig(normalized.sourceStore);
+    if (pageAssetStoreRef.current?.updateConfig) pageAssetStoreRef.current.updateConfig(normalized.assetStore);
+    if (pageRendererRef.current?.updateConfig) pageRendererRef.current.updateConfig(normalized.render);
+
+    if (forceIndexedDbPromotion) {
+      try { await tempStoreRef.current?.promoteToIndexedDb?.(); } catch {}
+      try { await pageAssetStoreRef.current?.promoteToIndexedDb?.(); } catch {}
+    }
+
+    setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
+  }, []);
+
+  /**
+   * @returns {void}
+   */
+  const clearWarmupQueue = useCallback(() => {
+    warmupQueueRef.current = [];
+  }, []);
+
+
+  /**
    * @param {DocumentSessionInitOptions=} options
    * @returns {Promise<void>}
    */
   const initializeDocumentSession = useCallback(async (options = {}) => {
     await resetViewerState();
 
-    sessionConfigRef.current = options?.config || getDocumentLoadingConfig();
+    const baseConfig = cloneDocumentLoadingConfig(options?.config || getDocumentLoadingConfig());
+    sessionBaseConfigRef.current = baseConfig;
+    sessionConfigRef.current = cloneDocumentLoadingConfig(baseConfig);
+    setDocumentLoadingConfig(sessionConfigRef.current);
+    setMemoryPressureStage('normal');
+
     const tempStore = createSourceTempStore({
       ...sessionConfigRef.current.sourceStore,
       expectedSourceCount: Math.max(0, Number(options?.expectedSourceCount) || 0),
@@ -400,9 +456,11 @@ export const ViewerProvider = ({ children }) => {
     });
 
     sessionEpochRef.current += 1;
+    setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
     logger.info('Initialized document session', {
       mode: tempStore.getStats?.().mode,
       assetMode: pageAssetStoreRef.current?.getStats?.().mode || 'disabled',
+      requestedMode: sessionConfigRef.current.mode,
       expectedSourceCount: options?.expectedSourceCount || 0,
     });
   }, [resetViewerState]);
@@ -419,6 +477,12 @@ export const ViewerProvider = ({ children }) => {
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
+    warmupQueueRef.current = [];
+    warmupRunningRef.current = false;
+    if (memoryMonitorTimerRef.current) {
+      try { window.clearInterval(memoryMonitorTimerRef.current); } catch {}
+      memoryMonitorTimerRef.current = null;
+    }
     revokeSessionUrls();
 
     if (pageRendererRef.current) {
@@ -449,6 +513,12 @@ export const ViewerProvider = ({ children }) => {
     }
 
     if (clearPages) updateAllPages([]);
+    const defaultConfig = getDocumentLoadingConfig();
+    sessionBaseConfigRef.current = defaultConfig;
+    sessionConfigRef.current = defaultConfig;
+    setDocumentLoadingConfig(defaultConfig);
+    setMemoryPressureStage('normal');
+    setWorkerCount(0);
   }, [revokeSessionUrls, updateAllPages]);
 
   /**
@@ -760,6 +830,18 @@ export const ViewerProvider = ({ children }) => {
   }, [getVariantCache, getVariantCacheLimit, patchPageAtIndex]);
 
 
+
+  /**
+   * @param {number} pageIndex
+   * @returns {boolean}
+   */
+  const shouldReuseFullAssetForThumbnail = useCallback((pageIndex) => {
+    const page = getPageAt(allPagesRef.current, pageIndex);
+    if (!page || page.status === -1) return false;
+    const totalPages = Array.isArray(allPagesRef.current) ? allPagesRef.current.length : 0;
+    return shouldUseFullImagesForThumbnails(sessionConfigRef.current, page, totalPages);
+  }, []);
+
   /**
    * @param {number} pageIndex
    * @param {('full'|'thumbnail')} variant
@@ -783,6 +865,7 @@ export const ViewerProvider = ({ children }) => {
       touchCacheEntry(cache, pageIndex);
     }
 
+    const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(pageIndex);
     patchPageAtIndex(pageIndex, variant === 'thumbnail'
       ? {
           thumbnailUrl: url,
@@ -798,12 +881,19 @@ export const ViewerProvider = ({ children }) => {
           realWidth: stored.meta.width,
           realHeight: stored.meta.height,
           status: 1,
+          ...(reuseThumbnail
+            ? {
+                thumbnailUsesFullAsset: true,
+                thumbnailUrl: '',
+                thumbnailStatus: 1,
+              }
+            : {}),
         }
     );
 
     if (options.trackInCache !== false) enforceCacheLimit(variant);
     return url;
-  }, [enforceCacheLimit, getVariantCache, patchPageAtIndex]);
+  }, [enforceCacheLimit, getVariantCache, patchPageAtIndex, shouldReuseFullAssetForThumbnail]);
   /**
    * @param {number} pageIndex
    * @param {('full'|'thumbnail')} variant
@@ -818,7 +908,7 @@ export const ViewerProvider = ({ children }) => {
     if (!source) throw new Error(`Missing source descriptor for ${page.sourceKey}.`);
     if (!pageRendererRef.current) throw new Error('No active page renderer.');
 
-    return renderWithLimit(() => pageRendererRef.current.renderPageAsset({
+    const renderTask = () => pageRendererRef.current.renderPageAsset({
       sourceKey: source.sourceKey,
       fileExtension: source.fileExtension,
       fileIndex: source.fileIndex,
@@ -827,19 +917,14 @@ export const ViewerProvider = ({ children }) => {
       variant,
       thumbnailMaxWidth: sessionConfigRef.current.render.thumbnailMaxWidth,
       thumbnailMaxHeight: sessionConfigRef.current.render.thumbnailMaxHeight,
-    }), priority);
-  }, [renderWithLimit]);
+    });
 
-  /**
-   * @param {number} pageIndex
-   * @returns {boolean}
-   */
-  const shouldReuseFullAssetForThumbnail = useCallback((pageIndex) => {
-    const page = getPageAt(allPagesRef.current, pageIndex);
-    if (!page || page.status === -1) return false;
-    const totalPages = Array.isArray(allPagesRef.current) ? allPagesRef.current.length : 0;
-    return shouldUseFullImagesForThumbnails(sessionConfigRef.current, page, totalPages);
-  }, []);
+    if (pageRendererRef.current?.canRenderInWorker?.(source.fileExtension, variant)) {
+      return renderTask();
+    }
+
+    return renderWithLimit(renderTask, priority);
+  }, [renderWithLimit]);
 
   /**
    * @param {number} pageIndex
@@ -935,6 +1020,7 @@ export const ViewerProvider = ({ children }) => {
           touchCacheEntry(cache, safeIndex);
         }
 
+        const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(safeIndex);
         patchPageAtIndex(safeIndex, variant === 'thumbnail'
           ? {
               thumbnailUrl: url,
@@ -950,6 +1036,13 @@ export const ViewerProvider = ({ children }) => {
               realWidth: rendered.width,
               realHeight: rendered.height,
               status: 1,
+              ...(reuseThumbnail
+                ? {
+                    thumbnailUsesFullAsset: true,
+                    thumbnailUrl: '',
+                    thumbnailStatus: 1,
+                  }
+                : {}),
             }
         );
 
@@ -976,6 +1069,94 @@ export const ViewerProvider = ({ children }) => {
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
   }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+
+  /**
+   * Drain background eager-render work without blocking the UI thread.
+   * The queue is intentionally best-effort: memory pressure or session resets may clear it at any time.
+   *
+   * @returns {Promise<void>}
+   */
+  const pumpWarmupQueue = useCallback(async () => {
+    if (warmupRunningRef.current) return;
+    warmupRunningRef.current = true;
+
+    try {
+      while (warmupQueueRef.current.length > 0) {
+        const renderStrategy = String(sessionConfigRef.current?.render?.strategy || 'lazy-viewport').toLowerCase();
+        if (renderStrategy === 'lazy-viewport') {
+          warmupQueueRef.current = [];
+          break;
+        }
+
+        const batchSize = Math.max(1, Number(sessionConfigRef.current?.render?.warmupBatchSize) || 1);
+        const batch = warmupQueueRef.current.splice(0, batchSize);
+        for (const task of batch) {
+          try {
+            const page = getPageAt(allPagesRef.current, task?.pageIndex);
+            if (!page || page.status === -1) continue;
+            await ensurePageAsset(task.pageIndex, task.variant, {
+              priority: task.priority || 'low',
+            });
+          } catch (error) {
+            logger.debug('Warm-up task skipped after render failure', {
+              pageIndex: Number(task?.pageIndex || 0),
+              variant: String(task?.variant || 'full'),
+              error: String(error?.message || error),
+            });
+          }
+        }
+
+        await new Promise((resolve) => window.setTimeout(resolve, 0));
+      }
+    } finally {
+      warmupRunningRef.current = false;
+      if (warmupQueueRef.current.length > 0) {
+        window.setTimeout(() => {
+          void pumpWarmupQueue();
+        }, 0);
+      }
+    }
+  }, [ensurePageAsset]);
+
+  /**
+   * Enqueue eager page rendering for a newly discovered source range.
+   * Performance mode warms every page. Auto mode warms an initial nearby window. Memory mode does nothing.
+   *
+   * @param {number} startIndex
+   * @param {number} pageCount
+   * @returns {void}
+   */
+  const scheduleSourceWarmup = useCallback((startIndex, pageCount) => {
+    const renderConfig = sessionConfigRef.current?.render || {};
+    const strategy = String(renderConfig.strategy || 'lazy-viewport').toLowerCase();
+    const safeStartIndex = Math.max(0, Number(startIndex) || 0);
+    const safePageCount = Math.max(0, Number(pageCount) || 0);
+    if (safePageCount <= 0 || strategy === 'lazy-viewport') return;
+
+    const warmPageCount = strategy === 'eager-all'
+      ? safePageCount
+      : Math.min(safePageCount, Math.max(1, Number(renderConfig.warmupBatchSize) || 1));
+
+    const queue = warmupQueueRef.current.slice();
+    const queued = new Set(queue.map((item) => `${String(item?.variant || 'full')}:${Math.max(0, Number(item?.pageIndex) || 0)}`));
+    const addTask = (pageIndex, variant, priority) => {
+      const key = `${variant}:${pageIndex}`;
+      if (queued.has(key)) return;
+      queued.add(key);
+      queue.push({ pageIndex, variant, priority });
+    };
+
+    for (let offset = 0; offset < warmPageCount; offset += 1) {
+      const pageIndex = safeStartIndex + offset;
+      addTask(pageIndex, 'full', offset === 0 ? 'high' : 'low');
+      if (renderConfig.thumbnailLoadingStrategy !== 'viewport' || strategy === 'eager-all') {
+        addTask(pageIndex, 'thumbnail', offset === 0 ? 'normal' : 'low');
+      }
+    }
+
+    warmupQueueRef.current = queue;
+    void pumpWarmupQueue();
+  }, [pumpWarmupQueue]);
 
   /**
    * @param {Array<number>=} pageIndexes
@@ -1027,6 +1208,93 @@ export const ViewerProvider = ({ children }) => {
     return urls;
   }, [persistRenderedAsset, renderPageBlob, touchPageAsset]);
 
+  useEffect(() => {
+    enforceCacheLimit('full');
+    enforceCacheLimit('thumbnail');
+  }, [
+    documentLoadingConfig.render.fullPageCacheLimit,
+    documentLoadingConfig.render.thumbnailCacheLimit,
+    enforceCacheLimit,
+  ]);
+
+  useEffect(() => {
+    if (!tempStoreRef.current) return undefined;
+    if (String(sessionBaseConfigRef.current?.mode || '').toLowerCase() !== 'auto') return undefined;
+    if (documentLoadingConfig.memoryPressure.enabled === false) return undefined;
+
+    let disposed = false;
+    const rankOf = (stage) => (stage === 'hard' ? 2 : stage === 'soft' ? 1 : 0);
+
+    const evaluate = async () => {
+      if (disposed || !tempStoreRef.current) return;
+
+      const baseConfig = sessionBaseConfigRef.current || getDocumentLoadingConfig();
+      const memoryConfig = baseConfig.memoryPressure || {};
+      const tempStats = tempStoreRef.current?.getStats?.() || {};
+      const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
+      const sourceCount = sourceDescriptorsRef.current.size;
+      const pageCount = Array.isArray(allPagesRef.current) ? allPagesRef.current.length : 0;
+      const residentBytes = Math.max(0, Number(tempStats.totalBytes || 0)) + Math.max(0, Number(assetStats.totalBytes || 0));
+      const residentMiB = residentBytes / (1024 * 1024);
+
+      let heapRatio = 0;
+      try {
+        const perfMemory = globalThis.performance?.memory;
+        const used = Number(perfMemory?.usedJSHeapSize || 0);
+        const limit = Number(perfMemory?.jsHeapSizeLimit || 0);
+        if (used > 0 && limit > 0) heapRatio = used / limit;
+      } catch {}
+
+      let nextStage = 'normal';
+      if (
+        (Number(memoryConfig.forceMemoryModeAbovePageCount || 0) > 0 && pageCount >= Number(memoryConfig.forceMemoryModeAbovePageCount || 0))
+        || (Number(memoryConfig.forceMemoryModeAboveSourceCount || 0) > 0 && sourceCount >= Number(memoryConfig.forceMemoryModeAboveSourceCount || 0))
+        || (Number(memoryConfig.hardResidentMiB || 0) > 0 && residentMiB >= Number(memoryConfig.hardResidentMiB || 0))
+        || (Number(memoryConfig.hardHeapUsageRatio || 0) > 0 && heapRatio >= Number(memoryConfig.hardHeapUsageRatio || 0))
+      ) {
+        nextStage = 'hard';
+      } else if (
+        (Number(memoryConfig.softResidentMiB || 0) > 0 && residentMiB >= Number(memoryConfig.softResidentMiB || 0))
+        || (Number(memoryConfig.softHeapUsageRatio || 0) > 0 && heapRatio >= Number(memoryConfig.softHeapUsageRatio || 0))
+      ) {
+        nextStage = 'soft';
+      }
+
+      const currentStage = String(memoryPressureStage || 'normal').toLowerCase();
+      if (rankOf(nextStage) <= rankOf(currentStage)) return;
+
+      const nextConfig = applyMemoryPressureStage(baseConfig, nextStage);
+      if (nextStage !== 'normal') clearWarmupQueue();
+      await applySessionConfig(nextConfig, nextStage, nextStage === 'hard');
+
+      addMessage(
+        nextStage === 'hard'
+          ? 'Automatic memory protection activated. Switching to memory-efficient document rendering.'
+          : 'Memory pressure detected. Reducing eager rendering and cache sizes.'
+      );
+    };
+
+    void evaluate();
+    const timerId = window.setInterval(() => {
+      void evaluate();
+    }, Math.max(250, Number(documentLoadingConfig.memoryPressure.sampleIntervalMs) || 2000));
+    memoryMonitorTimerRef.current = timerId;
+
+    return () => {
+      disposed = true;
+      if (memoryMonitorTimerRef.current === timerId) memoryMonitorTimerRef.current = null;
+      try { window.clearInterval(timerId); } catch {}
+    };
+  }, [
+    addMessage,
+    allPages.length,
+    applySessionConfig,
+    clearWarmupQueue,
+    documentLoadingConfig.memoryPressure.enabled,
+    documentLoadingConfig.memoryPressure.sampleIntervalMs,
+    memoryPressureStage,
+  ]);
+
   useEffect(() => () => {
     resetViewerState().catch((e) => {
       logger.warn('ViewerProvider unmount cleanup failed', { error: String(e?.message || e) });
@@ -1060,6 +1328,9 @@ export const ViewerProvider = ({ children }) => {
     setPlannedPageCount,
     messageQueue,
     addMessage,
+    documentLoadingConfig,
+    memoryPressureStage,
+    scheduleSourceWarmup,
   }), [
     allPages,
     insertPageAtIndex,
@@ -1083,6 +1354,9 @@ export const ViewerProvider = ({ children }) => {
     plannedPageCount,
     messageQueue,
     addMessage,
+    documentLoadingConfig,
+    memoryPressureStage,
+    scheduleSourceWarmup,
   ]);
 
   return (
