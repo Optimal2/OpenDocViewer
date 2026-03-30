@@ -10,6 +10,10 @@
  *  - Global keyboard navigation/zoom/hotkeys with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
+ * The keyboard layer now understands compare-targeted navigation with Shift. When compare mode is
+ * available, Shift + page-navigation keys steer the right pane and can implicitly enable compare.
+ * That keeps keyboard behavior aligned with the existing Shift+thumbnail-click interaction.
+ *
  * @module useViewerEffects
  */
 
@@ -35,7 +39,11 @@ import { useEffect } from 'react';
  * @property {number} thumbnailWidth
  * @property {number} pageNumber
  * @property {number} totalPages
- * @property {Function} setPageNumber
+ * @property {Function} goToPreviousPage
+ * @property {Function} goToNextPage
+ * @property {Function} goToFirstPage
+ * @property {Function} goToLastPage
+ * @property {Function} closeCompare
  * @property {Function} zoomIn
  * @property {Function} zoomOut
  * @property {Function} actualSize
@@ -108,7 +116,11 @@ export function useViewerEffects(args) {
     thumbnailWidth,
     pageNumber,
     totalPages,
-    setPageNumber,
+    goToPreviousPage,
+    goToNextPage,
+    goToFirstPage,
+    goToLastPage,
+    closeCompare,
     zoomIn,
     zoomOut,
     actualSize,
@@ -201,38 +213,37 @@ export function useViewerEffects(args) {
 
   // Global keyboard navigation & zoom shortcuts.
   useEffect(() => {
-    /** Clamp page helpers (inline to avoid importing) */
-    const clampPage = (n, total) => {
-      if (!Number.isFinite(total) || total < 1) return 1;
-      const v = Math.max(1, Math.floor(Number(n) || 1));
-      return Math.min(v, total);
-    };
-    const stepPage = (current, delta, total) => clampPage(current + delta, total);
-
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
       if (shouldIgnoreViewerShortcut(e)) return;
 
       const mod = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
+      const target = e.shiftKey ? 'compare' : 'primary';
 
       switch (e.key) {
         case 'PageDown':
         case 'ArrowDown':
           e.preventDefault();
-          setPageNumber((p) => stepPage(p, 1, totalPages));
+          goToNextPage(target);
           break;
         case 'PageUp':
         case 'ArrowUp':
           e.preventDefault();
-          setPageNumber((p) => stepPage(p, -1, totalPages));
+          goToPreviousPage(target);
           break;
         case 'Home':
           e.preventDefault();
-          setPageNumber(1);
+          goToFirstPage(target);
           break;
         case 'End':
           e.preventDefault();
-          setPageNumber(totalPages || 1);
+          goToLastPage(target);
+          break;
+        case 'Escape':
+          if (e.shiftKey && isComparing) {
+            e.preventDefault();
+            closeCompare();
+          }
           break;
 
         case '+':
@@ -264,10 +275,22 @@ export function useViewerEffects(args) {
     window.addEventListener('keydown', onKeyDown, true);
     return () => { window.removeEventListener('keydown', onKeyDown, true); };
   }, [
-    totalPages, setPageNumber,
-    actualSize, fitToScreen, fitToWidth,
-    handleCompare, setIsExpandedGuarded,
-    zoomIn, zoomOut, onOpenPrintDialog, onToggleTheme,
+    totalPages,
+    actualSize,
+    fitToScreen,
+    fitToWidth,
+    goToPreviousPage,
+    goToNextPage,
+    goToFirstPage,
+    goToLastPage,
+    closeCompare,
+    isComparing,
+    handleCompare,
+    setIsExpandedGuarded,
+    zoomIn,
+    zoomOut,
+    onOpenPrintDialog,
+    onToggleTheme,
   ]);
 
   // Optional: auto-fit after first mount if renderer supports it.

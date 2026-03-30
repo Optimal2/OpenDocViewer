@@ -5,6 +5,10 @@
  * Page navigation controls with support for single-step clicks and
  * continuous stepping on press-and-hold (mouse/touch).
  *
+ * The press-and-hold buttons trigger a leading-edge navigation step on pointer-down. The following
+ * synthetic click is then consumed so a normal mouse press produces exactly one page step instead of
+ * two. This keeps toolbar navigation deterministic while still allowing fast repeat on hold.
+ *
  * Also includes an editable page field, grouped visually like the zoom control:
  *   [ « ][ ‹ ]  [  X / Y  ]  [ › ][ » ]
  * - When NOT focused, the field shows "X / Y".
@@ -18,14 +22,14 @@
  * @param {boolean} props.nextPageDisabled - Disable "next page".
  * @param {boolean} props.firstPageDisabled - Disable "first page".
  * @param {boolean} props.lastPageDisabled - Disable "last page".
- * @param {function(string):void} props.startPrevPageTimer - Start the "prev" repeat timer.
+ * @param {function(string, *=):void} props.startPrevPageTimer - Start the "prev" repeat timer.
  * @param {function():void} props.stopPrevPageTimer - Stop the "prev" repeat timer.
- * @param {function(string):void} props.startNextPageTimer - Start the "next" repeat timer.
+ * @param {function(string, *=):void} props.startNextPageTimer - Start the "next" repeat timer.
  * @param {function():void} props.stopNextPageTimer - Stop the "next" repeat timer.
- * @param {function():void} props.handleFirstPage - Jump to first page.
- * @param {function():void} props.handleLastPage - Jump to last page.
- * @param {function():void} props.handlePrevPage - Single-step to previous page.
- * @param {function():void} props.handleNextPage - Single-step to next page.
+ * @param {function(*=):void} props.handleFirstPage - Jump to first page.
+ * @param {function(*=):void} props.handleLastPage - Jump to last page.
+ * @param {function(*=):void} props.handlePrevPage - Single-step to previous page.
+ * @param {function(*=):void} props.handleNextPage - Single-step to next page.
  * @param {number} props.pageNumber - Current page number (1-based).
  * @param {number} props.totalPages - Total pages.
  * @param {function(number):void} [props.onGoToPage] - Optional: apply a specific page number (1..totalPages).
@@ -33,7 +37,7 @@
  * @returns {JSX.Element}
  */
 
-import React, { useRef, useState, useEffect } from 'react';
+import React, { useRef, useState, useEffect, useCallback } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
@@ -65,6 +69,7 @@ const PageNavigationButtons = ({
   const { t } = useTranslation();
 
   const suppressNextClickRef = useRef(false);
+  const suppressResetTimerRef = useRef(/** @type {(number|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState(String(pageNumber));
@@ -75,11 +80,25 @@ const PageNavigationButtons = ({
     if (!focused) setDraft(String(pageNumber));
   }, [pageNumber, isFocused]);
 
-
-  const stopAllRepeatNavigation = React.useCallback(() => {
+  /**
+   * Stop every repeat timer but deliberately preserve click suppression until the follow-up click has
+   * been seen. Otherwise a normal mouse press would fire once on pointer-down and once again on click.
+   *
+   * @returns {void}
+   */
+  const stopAllRepeatNavigation = useCallback(() => {
     stopPrevPageTimer();
     stopNextPageTimer();
-    suppressNextClickRef.current = false;
+    if (suppressResetTimerRef.current) {
+      try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
+      suppressResetTimerRef.current = null;
+    }
+    if (suppressNextClickRef.current) {
+      suppressResetTimerRef.current = window.setTimeout(() => {
+        suppressNextClickRef.current = false;
+        suppressResetTimerRef.current = null;
+      }, 0);
+    }
   }, [stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
@@ -100,6 +119,13 @@ const PageNavigationButtons = ({
     };
   }, [stopAllRepeatNavigation]);
 
+
+  useEffect(() => () => {
+    if (!suppressResetTimerRef.current) return;
+    try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
+    suppressResetTimerRef.current = null;
+  }, []);
+
   function applyDraft() {
     const next = clampPage(draft, totalPages);
     if (next == null) {
@@ -114,37 +140,48 @@ const PageNavigationButtons = ({
     setDraft(String(pageNumber));
   }
 
-  const onTouchStartPrev = (e) => {
-    if (!prevPageDisabled) {
-      e.preventDefault();
-      suppressNextClickRef.current = true;
-      startPrevPageTimer('prev');
-    }
-  };
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const beginPrevRepeat = useCallback((event) => {
+    if (prevPageDisabled) return;
+    event?.preventDefault?.();
+    suppressNextClickRef.current = true;
+    startPrevPageTimer('prev', event);
+  }, [prevPageDisabled, startPrevPageTimer]);
 
-  const onTouchStartNext = (e) => {
-    if (!nextPageDisabled) {
-      e.preventDefault();
-      suppressNextClickRef.current = true;
-      startNextPageTimer('next');
-    }
-  };
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const beginNextRepeat = useCallback((event) => {
+    if (nextPageDisabled) return;
+    event?.preventDefault?.();
+    suppressNextClickRef.current = true;
+    startNextPageTimer('next', event);
+  }, [nextPageDisabled, startNextPageTimer]);
 
-  const onClickPrev = () => {
+  /**
+   * Consume the trailing click that naturally follows a leading-edge repeat press.
+   *
+   * @param {*} event
+   * @param {function(*=):void} handler
+   * @returns {void}
+   */
+  const handleSingleStepClick = useCallback((event, handler) => {
     if (suppressNextClickRef.current) {
+      if (suppressResetTimerRef.current) {
+        try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
+        suppressResetTimerRef.current = null;
+      }
       suppressNextClickRef.current = false;
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
       return;
     }
-    handlePrevPage();
-  };
-
-  const onClickNext = () => {
-    if (suppressNextClickRef.current) {
-      suppressNextClickRef.current = false;
-      return;
-    }
-    handleNextPage();
-  };
+    handler?.(event);
+  }, []);
 
   const displayValue = isFocused ? draft : `${pageNumber} / ${totalPages}`;
   const pageTitle = isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page');
@@ -158,6 +195,7 @@ const PageNavigationButtons = ({
     >
       <button
         type="button"
+        onMouseDown={(event) => event.preventDefault()}
         onClick={handleFirstPage}
         aria-label={t('toolbar.firstPage')}
         title={t('toolbar.firstPage')}
@@ -169,16 +207,11 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={onClickPrev}
-        onMouseDown={() => {
-          if (!prevPageDisabled) {
-            suppressNextClickRef.current = true;
-            startPrevPageTimer('prev');
-          }
-        }}
+        onClick={(event) => handleSingleStepClick(event, handlePrevPage)}
+        onMouseDown={beginPrevRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onMouseLeave={stopAllRepeatNavigation}
-        onTouchStart={onTouchStartPrev}
+        onTouchStart={beginPrevRepeat}
         onTouchEnd={stopAllRepeatNavigation}
         aria-label={t('toolbar.previousPage')}
         title={t('toolbar.previousPage')}
@@ -194,23 +227,23 @@ const PageNavigationButtons = ({
         type="text"
         inputMode="numeric"
         value={displayValue}
-        onFocus={(e) => {
+        onFocus={(event) => {
           setIsFocused(true);
           setDraft(String(pageNumber));
-          e.currentTarget.setSelectionRange(0, String(pageNumber).length);
+          event.currentTarget.setSelectionRange(0, String(pageNumber).length);
         }}
-        onChange={(e) => setDraft(e.target.value.replace(/[^\d]/g, ''))}
+        onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ''))}
         onBlur={() => { applyDraft(); setIsFocused(false); }}
-        onKeyDown={(e) => {
-          if (e.key === 'Enter') {
+        onKeyDown={(event) => {
+          if (event.key === 'Enter') {
             applyDraft();
             setIsFocused(false);
-            e.currentTarget.blur();
-          } else if (e.key === 'Escape') {
-            e.preventDefault();
+            event.currentTarget.blur();
+          } else if (event.key === 'Escape') {
+            event.preventDefault();
             cancelDraft();
             setIsFocused(false);
-            e.currentTarget.blur();
+            event.currentTarget.blur();
           }
         }}
         aria-label={pageTitle}
@@ -225,16 +258,11 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={onClickNext}
-        onMouseDown={() => {
-          if (!nextPageDisabled) {
-            suppressNextClickRef.current = true;
-            startNextPageTimer('next');
-          }
-        }}
+        onClick={(event) => handleSingleStepClick(event, handleNextPage)}
+        onMouseDown={beginNextRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onMouseLeave={stopAllRepeatNavigation}
-        onTouchStart={onTouchStartNext}
+        onTouchStart={beginNextRepeat}
         onTouchEnd={stopAllRepeatNavigation}
         aria-label={t('toolbar.nextPage')}
         title={t('toolbar.nextPage')}
@@ -246,6 +274,7 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
+        onMouseDown={(event) => event.preventDefault()}
         onClick={handleLastPage}
         aria-label={t('toolbar.lastPage')}
         title={t('toolbar.lastPage')}

@@ -5,6 +5,10 @@
  * The thumbnail pane always exposes a stable scrollbar whose total height depends only on the number
  * of pages. Asset generation may still be on demand, but the DOM height never changes while the user
  * scrolls.
+ *
+ * In wide panes the visible/current/compare thumbnails may temporarily upgrade to full page assets
+ * when the active runtime policy allows it. That keeps the pane crisp without forcing the entire
+ * document into full-resolution thumbnail mode.
  */
 
 import React, {
@@ -21,7 +25,10 @@ import { useTranslation } from 'react-i18next';
 import ViewerContext from '../contexts/viewerContext.js';
 import logger from '../logging/systemLogger.js';
 import LoadingSpinner from './LoadingSpinner.jsx';
-import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
+import {
+  getDocumentLoadingConfig,
+  shouldUseFullImagesForThumbnails,
+} from '../utils/documentLoadingConfig.js';
 
 /**
  * @typedef {Object} ThumbnailRowProps
@@ -32,6 +39,7 @@ import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
  * @property {boolean} isPrimarySelected
  * @property {boolean} isCompareSelected
  * @property {boolean} isCompareMode
+ * @property {boolean} preferFullAssetPreview
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
  * @property {function(number, ('full'|'thumbnail')): void} onImageLoad
@@ -82,7 +90,6 @@ function getThumbnailLayout(renderConfig, paneWidth) {
   };
 }
 
-
 /**
  * @param {number} index
  * @param {{ start:number, end:number }} range
@@ -130,6 +137,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   isPrimarySelected,
   isCompareSelected,
   isCompareMode,
+  preferFullAssetPreview,
   onActivate,
   onKeyActivate,
   onImageLoad,
@@ -137,7 +145,11 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
 }) {
   const { t } = useTranslation('common');
   const pageNumber = index + 1;
-  const usesFullAsset = !!page?.thumbnailUsesFullAsset;
+  const forceVisibleFullAsset = !!preferFullAssetPreview
+    && page?.fullSizeStatus === 1
+    && typeof page?.fullSizeUrl === 'string'
+    && !!page.fullSizeUrl;
+  const usesFullAsset = forceVisibleFullAsset || !!page?.thumbnailUsesFullAsset;
   const thumbnailStatus = page?.status === -1
     ? -1
     : usesFullAsset
@@ -258,9 +270,15 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   comparePageNumber = null,
 }) {
   const { t } = useTranslation('common');
-  const { ensurePageAsset, touchPageAsset } = useContext(ViewerContext);
-  const config = useMemo(() => getDocumentLoadingConfig(), []);
-  const renderConfig = config.render;
+  const {
+    ensurePageAsset,
+    touchPageAsset,
+    documentLoadingConfig,
+    memoryPressureStage,
+  } = useContext(ViewerContext);
+  const fallbackConfig = useMemo(() => getDocumentLoadingConfig(), []);
+  const activeConfig = documentLoadingConfig || fallbackConfig;
+  const renderConfig = activeConfig.render;
   const overscan = Math.max(0, Number(renderConfig.visibleThumbnailOverscan) || 0);
 
   const containerRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -278,8 +296,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     () => shouldWarmAllThumbnails(renderConfig, totalCount),
     [renderConfig, totalCount]
   );
-  // In the eager/high-RAM profile we keep every thumbnail row fully active so the pane behaves
-  // more like the pre-lazy-load versions that mounted every thumbnail subtree immediately.
   const fullyRenderOffscreenRows = warmAllThumbnails;
   const activeDescendantId = totalCount > 0 && pageNumber >= 1 && pageNumber <= totalCount
     ? `thumbnail-${pageNumber}`
@@ -307,6 +323,30 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       Math.max(0, totalCount - 1)
     );
   }, [totalCount, visibleRange.end, visibleRange.start]);
+
+  const widePaneThreshold = Math.max(320, Number(renderConfig.thumbnailMaxWidth || 220) + 96);
+  const allowWidePaneFullPreview = containerWidth >= widePaneThreshold
+    && String(renderConfig.thumbnailSourceStrategy || 'auto').toLowerCase() !== 'dedicated'
+    && String(memoryPressureStage || 'normal').toLowerCase() !== 'hard';
+
+  const preferredFullPreviewIndexes = useMemo(() => {
+    if (!allowWidePaneFullPreview || totalCount <= 0) return new Set();
+
+    const indexes = new Set();
+    const currentIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
+    const compareIndex = isComparing && Number.isFinite(comparePageNumber)
+      ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
+      : -1;
+
+    indexes.add(currentIndex);
+    if (compareIndex >= 0) indexes.add(compareIndex);
+    for (let index = visibleRange.start; index <= visibleRange.end; index += 1) indexes.add(index);
+
+    return new Set(Array.from(indexes).filter((index) => {
+      const page = allPages[index];
+      return !!page && shouldUseFullImagesForThumbnails(activeConfig, page, totalCount);
+    }));
+  }, [activeConfig, allPages, allowWidePaneFullPreview, comparePageNumber, isComparing, pageNumber, totalCount, visibleRange.end, visibleRange.start]);
 
   /**
    * @param {(HTMLDivElement|null)} node
@@ -352,10 +392,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     const viewportTop = node.scrollTop || 0;
     const viewportBottom = viewportTop + (node.clientHeight || 0);
 
-    // Intentionally do NOT depend on the exact running total of discovered pages. During a load
-    // run the total page count grows as more sources are analyzed. If auto-scroll tracks every
-    // growth event, the pane jumps back to the active page while the user is manually scrolling.
-    // We only auto-align when the selected page index actually changes.
     if (rowTop < viewportTop) {
       node.scrollTop = rowTop;
     } else if (rowBottom > viewportBottom) {
@@ -388,10 +424,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
       : -1;
     const visibleHasPages = visibleRange.end >= visibleRange.start;
-    // Thumbnail generation should follow the user's current scroll target first. The document
-    // page selected in the viewer still matters, but when the user drags the thumbnail scrollbar
-    // elsewhere we prioritize that visible region instead of continuing to optimize around page 1
-    // or the previously active page.
     const focusIndex = visibleHasPages && visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
     const currentIsVisible = isIndexInRange(currentIndex, visibleRange);
     const compareIsVisible = compareIndex >= 0 && isIndexInRange(compareIndex, visibleRange);
@@ -452,6 +484,33 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   ]);
 
   useEffect(() => {
+    if (!allowWidePaneFullPreview || preferredFullPreviewIndexes.size <= 0) return;
+
+    preferredFullPreviewIndexes.forEach((index) => {
+      const page = allPages[index];
+      if (!page || page.status === -1 || !page.sourceKey || page.fullSizeStatus === -1) return;
+      if (page.fullSizeStatus === 1 && page.fullSizeUrl) {
+        touchPageAsset(index, 'full');
+        return;
+      }
+
+      const priority = index === pageNumber - 1
+        ? 'critical'
+        : (isComparing && comparePageNumber === index + 1 ? 'high' : 'normal');
+      void ensurePageAsset(index, 'full', { priority }).catch(() => {});
+    });
+  }, [
+    allPages,
+    allowWidePaneFullPreview,
+    comparePageNumber,
+    ensurePageAsset,
+    isComparing,
+    pageNumber,
+    preferredFullPreviewIndexes,
+    touchPageAsset,
+  ]);
+
+  useEffect(() => {
     if (!warmAllThumbnails || totalCount <= 0) return undefined;
 
     let cancelled = false;
@@ -469,9 +528,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       if (index >= 0) excluded.add(index);
     }
 
-    // When eager warm-up is enabled we still avoid marching forward from page 1. Restarting the
-    // background queue around the visible center makes page 50 show up quickly when the user jumps
-    // there, while the rest of the document continues to warm opportunistically.
     const queue = buildCenterOutQueue(totalCount, focusIndex, excluded);
 
     const pump = () => {
@@ -574,6 +630,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         isPrimarySelected={pageNumber === pageId}
         isCompareSelected={!!isComparing && comparePageNumber === pageId}
         isCompareMode={!!isComparing}
+        preferFullAssetPreview={preferredFullPreviewIndexes.has(index)}
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
         onImageLoad={handleImageLoad}
@@ -617,6 +674,7 @@ ThumbnailRow.propTypes = {
   isPrimarySelected: PropTypes.bool.isRequired,
   isCompareSelected: PropTypes.bool.isRequired,
   isCompareMode: PropTypes.bool.isRequired,
+  preferFullAssetPreview: PropTypes.bool.isRequired,
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
   onImageLoad: PropTypes.func.isRequired,

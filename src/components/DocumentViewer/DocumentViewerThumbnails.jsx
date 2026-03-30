@@ -47,6 +47,7 @@ const DocumentViewerThumbnails = ({
           <button
             type="button"
             className="thumbnail-pane-toolbar-button"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={onDecreaseWidth}
             aria-label={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
             title={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
@@ -56,6 +57,7 @@ const DocumentViewerThumbnails = ({
           <button
             type="button"
             className="thumbnail-pane-toolbar-button"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={onIncreaseWidth}
             aria-label={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
             title={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
@@ -65,6 +67,7 @@ const DocumentViewerThumbnails = ({
           <button
             type="button"
             className="thumbnail-pane-toolbar-button"
+            onMouseDown={(event) => event.preventDefault()}
             onClick={onHide}
             aria-label={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}
             title={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}

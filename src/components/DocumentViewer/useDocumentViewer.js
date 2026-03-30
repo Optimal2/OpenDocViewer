@@ -53,9 +53,16 @@ function clampPage(n, total) {
  * @property {number} scale
  */
 
+/** @typedef {'primary'|'compare'} ViewerPageTarget */
+
 /**
  * Hook that centralizes viewer UI state and event handlers.
  * Public entry – returns the full API consumed by the viewer.
+ *
+ * The hook now exposes explicit primary/compare navigation helpers so keyboard shortcuts,
+ * toolbar buttons, and thumbnail interactions can share the exact same page-target logic.
+ * That keeps compare mode deterministic and avoids accidentally steering the wrong pane.
+ *
  * @returns {Object} Returns the viewer API object (see returned keys below).
  */
 export function useDocumentViewer() {
@@ -77,11 +84,11 @@ export function useDocumentViewer() {
   const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
 
   const [isComparing, setIsComparing] = useState(false);
-  const [comparePageNumber, setComparePageNumber] = useState(/** @type {(number|null)} */ (null));
+  const [comparePageNumber, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null));
   const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
   const [imageProperties, setImageProperties] = useState(/** @type {ImageProperties} */ ({
-    rotation: 0, brightness: 100, contrast: 100
+    rotation: 0, brightness: 100, contrast: 100,
   }));
 
   const [isExpandedRaw, setIsExpandedRaw] = useState(false); // raw edit-mode flag
@@ -111,20 +118,59 @@ export function useDocumentViewer() {
 
   // --- Page navigation -----------------------------------------------------------
   /**
-   * Change the current page number safely (clamped).
-   * While compare is active, the right-hand "locked" page is unchanged.
+   * Generic primary/compare page setter that accepts either a concrete page number or a React-like
+   * updater callback. Compare-targeted updates automatically enable compare mode and reuse the left
+   * page as the base when the right page has not been chosen yet.
+   *
+   * @param {ViewerPageTarget} target
+   * @param {(number|function(number): number)} next
+   * @returns {void}
+   */
+  const updatePageTarget = useCallback((target, next) => {
+    const resolveNext = (currentBase) => {
+      const proposed = typeof next === 'function' ? next(currentBase) : next;
+      return clampPage(proposed, totalPages);
+    };
+
+    if (target === 'compare') {
+      if (isExpanded) return;
+      setComparePageNumberRaw((current) => {
+        const base = clampPage(Number.isFinite(current) ? current : pageNumber, totalPages);
+        return resolveNext(base);
+      });
+      setIsComparing(true);
+      return;
+    }
+
+    setPageNumber((current) => {
+      const base = clampPage(current, totalPages);
+      return resolveNext(base);
+    });
+  }, [isExpanded, pageNumber, totalPages]);
+
+  /**
+   * Change the primary page number safely (clamped).
    * @param {number} next
    * @param {boolean} [fromThumbnail=false]
    * @returns {void}
    */
   const handlePageNumberChange = useCallback((next, _fromThumbnail = false) => {
-    const clamped = clampPage(next, totalPages);
-    if (clamped !== pageNumber) setPageNumber(clamped);
-  }, [pageNumber, totalPages]);
+    updatePageTarget('primary', next);
+  }, [updatePageTarget]);
 
   /**
-   * Keep requested-page state and the actually displayed page in sync so thumbnails never point at
-   * a page that the large viewer is not currently showing.
+   * Change the right-hand compare page safely (clamped) and enable compare mode when possible.
+   * @param {(number|function(number): number)} next
+   * @returns {void}
+   */
+  const setComparePageNumber = useCallback((next) => {
+    updatePageTarget('compare', next);
+  }, [updatePageTarget]);
+
+  /**
+   * Keep requested-page state and the actually displayed page synchronized for diagnostics. The
+   * thumbnail highlight now follows the requested page immediately, but this state is still useful
+   * for overlays, logging, and future UI affordances.
    *
    * @param {{ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }} nextState
    * @returns {void}
@@ -152,13 +198,48 @@ export function useDocumentViewer() {
     });
   }, []);
 
-  const thumbnailSelectionPageNumber = (
-    primaryDisplayState.pending
-    && !primaryDisplayState.blockingLoading
-    && primaryDisplayState.displayedPageNumber > 0
-  )
-    ? primaryDisplayState.displayedPageNumber
-    : pageNumber;
+  /**
+   * The thumbnail pane should react immediately when the user changes page. The large pane now
+   * switches either directly to the requested page or to an explicit loading overlay, so keeping the
+   * thumbnail highlight on the requested page no longer causes the old mismatch bug.
+   */
+  const thumbnailSelectionPageNumber = pageNumber;
+
+  /**
+   * Move one page backward in the requested target pane.
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToPreviousPage = useCallback((target = 'primary') => {
+    updatePageTarget(target, (current) => current - 1);
+  }, [updatePageTarget]);
+
+  /**
+   * Move one page forward in the requested target pane.
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToNextPage = useCallback((target = 'primary') => {
+    updatePageTarget(target, (current) => current + 1);
+  }, [updatePageTarget]);
+
+  /**
+   * Jump to the first page in the requested target pane.
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToFirstPage = useCallback((target = 'primary') => {
+    updatePageTarget(target, 1);
+  }, [updatePageTarget]);
+
+  /**
+   * Jump to the last page in the requested target pane.
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToLastPage = useCallback((target = 'primary') => {
+    updatePageTarget(target, Math.max(1, totalPages || 1));
+  }, [totalPages, updatePageTarget]);
 
   // --- Print dialog --------------------------------------------------------------
   const openPrintDialog = useCallback(() => {
@@ -228,25 +309,32 @@ export function useDocumentViewer() {
     setIsExpandedRaw((curr) => {
       const wanted = resolve(curr);
       if (wanted && isComparing) {
-        // Disallow enabling edit when compare is active
+        // Disallow enabling edit when compare is active.
         return curr;
       }
       return !!wanted;
     });
   }, [isComparing]);
 
-  /** Toggle/enable compare mode; blocked if edit mode is active. */
+  /** Toggle compare mode; blocked if edit mode is active. */
   const handleCompare = useCallback(() => {
     setIsComparing((prev) => {
-      // Want to enable?
-      if (!prev && isExpanded) {
-        return prev; // blocked by active edit mode
-      }
+      if (!prev && isExpanded) return prev;
       const next = !prev;
-      if (next) setComparePageNumber(pageNumber);
+      if (next) {
+        setComparePageNumberRaw((current) => clampPage(Number.isFinite(current) ? current : pageNumber, totalPages));
+      }
       return next;
     });
-  }, [isExpanded, pageNumber]);
+  }, [isExpanded, pageNumber, totalPages]);
+
+  /**
+   * Close compare mode without affecting the left page.
+   * @returns {void}
+   */
+  const closeCompare = useCallback(() => {
+    setIsComparing(false);
+  }, []);
 
   /**
    * Select a page for the right-hand compare pane.
@@ -259,9 +347,8 @@ export function useDocumentViewer() {
     if (isExpanded) return; // blocked by active edit mode
     const clamped = clampPage(page, totalPages);
     setComparePageNumber(clamped);
-    setIsComparing(true);
     logger.info('Compare selection updated', { comparePage: clamped });
-  }, [totalPages, isExpanded]);
+  }, [setComparePageNumber, totalPages, isExpanded]);
 
   // --- Image adjustments ---------------------------------------------------------
   const handleRotationChange = useCallback((delta) => {
@@ -366,7 +453,11 @@ export function useDocumentViewer() {
     thumbnailWidth,
     pageNumber,
     totalPages,
-    setPageNumber,
+    goToPreviousPage,
+    goToNextPage,
+    goToFirstPage,
+    goToLastPage,
+    closeCompare,
     zoomIn,
     zoomOut,
     actualSize,
@@ -382,7 +473,8 @@ export function useDocumentViewer() {
   // --- Public API ---------------------------------------------------------------
   return {
     pageNumber,
-    setPageNumber,
+    setPageNumber: handlePageNumberChange,
+    setComparePageNumber,
     thumbnailSelectionPageNumber,
     primaryDisplayState,
     zoom,
@@ -406,6 +498,10 @@ export function useDocumentViewer() {
     compareRef,
     handlePrimaryDisplayStateChange,
     handlePageNumberChange,
+    goToPreviousPage,
+    goToNextPage,
+    goToFirstPage,
+    goToLastPage,
     zoomIn,
     zoomOut,
     actualSize,
@@ -413,6 +509,7 @@ export function useDocumentViewer() {
     fitToWidth,
     handleContainerClick,
     handleCompare,
+    closeCompare,
     handleRotationChange,
     handleBrightnessChange,
     handleContrastChange,

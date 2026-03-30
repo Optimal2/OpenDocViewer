@@ -14,7 +14,8 @@
     "page": "Page",
     "compare": {
       "enable": "Enable compare mode",
-      "disable": "Disable compare mode"
+      "disable": "Disable compare mode",
+      "shiftHint": "Hold Shift while using page controls to steer the right compare pane. Shift + Esc closes compare."
     },
     "editing": {
       "enable": "Enable canvas tools",
@@ -235,7 +236,23 @@
     "errorPrefix": "Error:",
     "messagesLabel": "Messages:",
     "heapNotAvailable": "N/A",
-    "heapUnsupported": "(browser does not expose heap metrics)"
+    "heapUnsupported": "(browser does not expose heap metrics)",
+    "modeLabel": "Mode:",
+    "stageLabel": "Stage:",
+    "loadRunLabel": "Load run:",
+    "loadRunActive": "running",
+    "loadRunDone": "done",
+    "fullAssetsLabel": "Full",
+    "thumbnailAssetsLabel": "Thumbs",
+    "sourceStoreLabel": "Source store:",
+    "assetStoreLabel": "Asset store:",
+    "itemsShortLabel": "items:",
+    "encryptedLabel": "encrypted",
+    "objectUrlsLabel": "Object URLs:",
+    "pendingAssetsLabel": "Pending:",
+    "warmupQueueLabel": "Warm-up:",
+    "fullCacheLabel": "Full cache:",
+    "thumbnailCacheLabel": "Thumb cache:"
   },
   "html": {
     "title": "OpenDocViewer",

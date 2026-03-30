@@ -127,6 +127,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const pendingAssetRef = useRef(/** @type {(DisplayedAsset|null)} */ (null));
   const assetRetryRef = useRef({ key: '', count: 0 });
   const loadingOverlayTimerRef = useRef(/** @type {(number|null)} */ (null));
+  const imageLoadedRef = useRef(false);
+  const totalPageCountRef = useRef(Array.isArray(allPages) ? allPages.length : 0);
 
   const [displayedAsset, setDisplayedAsset] = useState(/** @type {DisplayedAsset} */ ({
     url: '',
@@ -148,6 +150,14 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   useEffect(() => {
     pendingAssetRef.current = pendingAsset;
   }, [pendingAsset]);
+
+  useEffect(() => {
+    imageLoadedRef.current = imageLoaded;
+  }, [imageLoaded]);
+
+  useEffect(() => {
+    totalPageCountRef.current = Array.isArray(allPages) ? allPages.length : 0;
+  }, [allPages]);
 
   /**
    * Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.
@@ -334,7 +344,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       const targetAlreadyDisplayed = (
         displayedAssetRef.current.pageIndex === currentIndex
         && !!String(displayedAssetRef.current.url || '')
-        && imageLoaded
+        && imageLoadedRef.current
       );
       if (targetAlreadyDisplayed) {
         setTransitionPending(false);
@@ -344,6 +354,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
       setTransitionPending(true);
       setBlockingLoading(false);
+      setImageLoaded(false);
 
       if (!displayedAssetRef.current.url) return;
       const delayMs = Math.max(0, Number(activeLoadingConfig?.render?.loadingOverlayDelayMs) || 0);
@@ -356,7 +367,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         if (cancelled || requestSeqRef.current !== requestId) return;
         const targetVisible = displayedAssetRef.current.pageIndex === currentIndex
           && !!String(displayedAssetRef.current.url || '')
-          && imageLoaded;
+          && imageLoadedRef.current;
         if (!targetVisible) setBlockingLoading(true);
       }, delayMs);
       loadingOverlayTimerRef.current = timerId;
@@ -420,8 +431,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           setImageLoaded(true);
           setAssetFailed(false);
         } else {
-          setPendingAsset({ url, pageIndex: currentIndex, pageNumber });
-          if (!displayedAssetRef.current.url) setImageLoaded(false);
+          setDisplayedAsset({ url, pageIndex: currentIndex, pageNumber });
+          setPendingAsset(null);
+          setImageLoaded(false);
           setAssetFailed(false);
         }
 
@@ -433,7 +445,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         }
         for (let i = 1; i <= lookAhead; i += 1) {
           const idx = currentIndex + i;
-          if (idx < allPages.length) void ensurePageAsset(idx, 'full', { priority: 'low' }).catch(() => {});
+          if (idx < totalPageCountRef.current) void ensurePageAsset(idx, 'full', { priority: 'low' }).catch(() => {});
         }
       })
       .catch((error) => {
@@ -461,7 +473,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     activeLoadingConfig?.render?.loadingOverlayDelayMs,
     activeLoadingConfig?.render?.lookAheadPageCount,
     activeLoadingConfig?.render?.lookBehindPageCount,
-    allPages.length,
     clearLoadingOverlayTimer,
     currentFullStatus,
     currentIndex,
@@ -469,7 +480,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     currentPageStatus,
     currentSourceKey,
     ensurePageAsset,
-    imageLoaded,
     pageNumber,
     pinPageAsset,
     touchPageAsset,
@@ -532,6 +542,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       fitToScreen();
     }
   }, [
+    clearLoadingOverlayTimer,
     currentPage?.realHeight,
     currentPage?.realWidth,
     drawImageOnCanvas,
@@ -541,7 +552,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     onRender,
     touchPageAsset,
     resetAssetRetry,
-    clearLoadingOverlayTimer,
   ]);
 
   /**
@@ -561,6 +571,14 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     resetAssetRetry();
     touchPageAsset(displayedAssetRef.current.pageIndex, 'full');
 
+    if (displayedAssetRef.current.pageIndex === currentIndex) {
+      clearLoadingOverlayTimer();
+      setPendingAsset(null);
+      setTransitionPending(false);
+      setBlockingLoading(false);
+      setAssetFailed(false);
+    }
+
     if (isCanvasEnabled) drawImageOnCanvas(image);
 
     if (!initialRenderRef.current) {
@@ -575,6 +593,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       fitToScreen();
     }
   }, [
+    clearLoadingOverlayTimer,
+    currentIndex,
     currentPage?.realHeight,
     currentPage?.realWidth,
     drawImageOnCanvas,
@@ -764,7 +784,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);
 
   const displayedUrl = displayedAsset.url;
-  const hideDisplayedSurface = !!blockingLoading && displayedAsset.pageIndex !== currentIndex;
+  const hideDisplayedSurface = !!transitionPending && displayedAsset.pageIndex !== currentIndex;
   const showLoadingOverlay = !showErrorState && (blockingLoading || (!displayedUrl && transitionPending));
   const hiddenImageStyle = isCanvasEnabled
     ? {

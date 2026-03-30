@@ -14,7 +14,8 @@
     "page": "Sida",
     "compare": {
       "enable": "Aktivera jämför-läge",
-      "disable": "Inaktivera jämför-läge"
+      "disable": "Inaktivera jämför-läge",
+      "shiftHint": "Håll Shift medan du använder sidkontrollerna för att styra den högra jämförelsepanelen. Shift + Esc stänger jämför-läget."
     },
     "editing": {
       "enable": "Aktivera redigeringsverktyg",
@@ -235,7 +236,23 @@
     "errorPrefix": "Fel:",
     "messagesLabel": "Meddelanden:",
     "heapNotAvailable": "N/A",
-    "heapUnsupported": "(webbläsaren exponerar inte heap-metrik)"
+    "heapUnsupported": "(webbläsaren exponerar inte heap-metrik)",
+    "modeLabel": "Läge:",
+    "stageLabel": "Steg:",
+    "loadRunLabel": "Laddning:",
+    "loadRunActive": "pågår",
+    "loadRunDone": "klar",
+    "fullAssetsLabel": "Full",
+    "thumbnailAssetsLabel": "Miniatyrer",
+    "sourceStoreLabel": "Källager:",
+    "assetStoreLabel": "Tillgångslager:",
+    "itemsShortLabel": "antal:",
+    "encryptedLabel": "krypterat",
+    "objectUrlsLabel": "Objekt-URL:er:",
+    "pendingAssetsLabel": "Väntar:",
+    "warmupQueueLabel": "Uppvärmning:",
+    "fullCacheLabel": "Full-cache:",
+    "thumbnailCacheLabel": "Miniatyr-cache:"
   },
   "html": {
     "title": "OpenDocViewer",

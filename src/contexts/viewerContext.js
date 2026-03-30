@@ -62,6 +62,29 @@ import { createContext } from 'react';
  * @property {number=} sizeBytes
  */
 
+
+/**
+ * @typedef {Object} ViewerRuntimeDiagnostics
+ * @property {number} sessionStartedAtMs
+ * @property {number} loadRunStartedAtMs
+ * @property {number} loadRunCompletedAtMs
+ * @property {string} sourceStoreMode
+ * @property {string} assetStoreMode
+ * @property {number} sourceCount
+ * @property {number} assetCount
+ * @property {number} sourceBytes
+ * @property {number} assetBytes
+ * @property {number} fullReadyCount
+ * @property {number} thumbnailReadyCount
+ * @property {number} fullCacheCount
+ * @property {number} thumbnailCacheCount
+ * @property {number} trackedObjectUrlCount
+ * @property {number} warmupQueueLength
+ * @property {number} pendingAssetCount
+ * @property {boolean} sourceStoreEncrypted
+ * @property {boolean} assetStoreEncrypted
+ */
+
 /**
  * @typedef {Object} ViewerContextValue
  * @property {Array.<ViewerPageEntry>} allPages
@@ -92,6 +115,7 @@ import { createContext } from 'react';
  * @property {function(string): void} addMessage
  * @property {Object} documentLoadingConfig
  * @property {'normal'|'soft'|'hard'} memoryPressureStage
+ * @property {ViewerRuntimeDiagnostics} runtimeDiagnostics
  * @property {function(number, number): void} scheduleSourceWarmup
  */
 

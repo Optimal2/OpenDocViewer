@@ -54,6 +54,14 @@ export function isTrackedObjectUrl(url) {
   return TRACKED_URLS.has(value);
 }
 
+
+/**
+ * @returns {number}
+ */
+export function getTrackedObjectUrlCount() {
+  return TRACKED_URLS.size;
+}
+
 /**
  * Revoke every tracked object URL. Mostly useful for defensive shutdown paths.
  * @returns {void}
