@@ -559,7 +559,7 @@ const DocumentToolbar = ({
       {isComparing && (
         <div className="toolbar-inline-hint compare-shortcut-hint" role="note">
           {t('toolbar.compare.shiftHint', {
-            defaultValue: 'Hold Shift while using page controls to steer the right compare pane. Shift + Esc closes compare.'
+            defaultValue: 'Shift steers right pane. Shift + Esc closes.'
           })}
         </div>
       )}

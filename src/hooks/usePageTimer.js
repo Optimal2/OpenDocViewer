@@ -60,6 +60,8 @@ const usePageTimer = (initialDelay, handlePageChange) => {
   const delayTimerRef = useRef(null);
   /** @type {React.MutableRefObject.<(number|null)>} */
   const intervalRef = useRef(null);
+  /** @type {React.MutableRefObject.<number>} */
+  const runTokenRef = useRef(0);
 
   /**
    * Start the timer for continuous page navigation.
@@ -82,17 +84,22 @@ const usePageTimer = (initialDelay, handlePageChange) => {
           logger.info('Starting page timer', { direction });
         }
 
+        const runToken = runTokenRef.current + 1;
+        runTokenRef.current = runToken;
+
         // Leading edge: perform one step right away (snappy UX).
         try {
-          handlePageChange(direction);
+          if (runTokenRef.current === runToken) handlePageChange(direction);
         } catch (error) {
           logger.error('Error during initial page step', { error: String(error?.message || error), direction });
         }
 
         // After the initial delay, begin repeating at a steady cadence.
         delayTimerRef.current = setTimeout(() => {
+          if (runTokenRef.current !== runToken) return;
           delayTimerRef.current = null; // delay consumed
           intervalRef.current = setInterval(() => {
+            if (runTokenRef.current !== runToken) return;
             try {
               handlePageChange(direction);
             } catch (error) {
@@ -116,6 +123,7 @@ const usePageTimer = (initialDelay, handlePageChange) => {
       logger.info('Stopping page timer');
     }
     try {
+      runTokenRef.current += 1;
       if (delayTimerRef.current != null) clearTimeout(delayTimerRef.current);
       if (intervalRef.current != null) clearInterval(intervalRef.current);
     } catch (error) {

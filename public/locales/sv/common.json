@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Aktivera jämför-läge",
       "disable": "Inaktivera jämför-läge",
-      "shiftHint": "Håll Shift medan du använder sidkontrollerna för att styra den högra jämförelsepanelen. Shift + Esc stänger jämför-läget."
+      "shiftHint": "Shift styr höger vy. Shift + Esc stänger."
     },
     "editing": {
       "enable": "Aktivera redigeringsverktyg",

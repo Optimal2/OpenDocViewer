@@ -194,7 +194,10 @@ function createSourceKey(fileIndex, orderIndex) {
  * @returns {string}
  */
 function getEstimatedEntryExtension(entry) {
-  return normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
+  // Keep the warning estimator conservative. Explicit source-list extension hints can be wrong in
+  // upstream integrations that proxy mixed file types through ticket-style URLs, so only trust an
+  // extension that is visible in the URL itself.
+  return normalizeExtension(inferUrlExtension(entry?.url || ''));
 }
 
 /**

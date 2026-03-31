@@ -531,6 +531,16 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
       if (!current) return prev;
       const nextPatch = resolvePatch(patch, current);
       if (!nextPatch || Object.keys(nextPatch).length === 0) return prev;
+
+      let changed = false;
+      for (const [key, value] of Object.entries(nextPatch)) {
+        if (!Object.is(current[key], value)) {
+          changed = true;
+          break;
+        }
+      }
+      if (!changed) return prev;
+
       const next = prev.slice();
       next[safeIndex] = { ...current, ...nextPatch };
       return next;
