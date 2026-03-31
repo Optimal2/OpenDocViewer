@@ -16,6 +16,7 @@ import React, {
   useContext,
   useEffect,
   useImperativeHandle,
+  useLayoutEffect,
   useMemo,
   useRef,
   useState,
@@ -141,6 +142,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const [assetFailed, setAssetFailed] = useState(false);
   const [transitionPending, setTransitionPending] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
+  const [canvasReady, setCanvasReady] = useState(false);
   const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
 
   useEffect(() => {
@@ -241,6 +243,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     [stageHeightPx, stageWidthPx]
   );
 
+  useEffect(() => {
+    setCanvasReady(false);
+  }, [currentIndex, displayedAsset.url, isCanvasEnabled]);
 
   useEffect(() => {
     const pageIndex = Number(displayedAsset?.pageIndex);
@@ -296,6 +301,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     ctx.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
     ctx.restore();
+    setCanvasReady(true);
   }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties, normalizedRotation]);
 
   /**
@@ -498,11 +504,22 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     setImageRevision((prev) => prev + 1);
   }, [drawImageOnCanvas, forceRender, isCanvasEnabled, onRender]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     if (!isCanvasEnabled || !imageLoaded || !imgRef.current?.complete) return;
     drawImageOnCanvas(imgRef.current);
+
+    if (!initialRenderRef.current) {
+      initialRenderRef.current = true;
+      initialRenderDone();
+    }
+
     onRender();
-  }, [drawImageOnCanvas, imageLoaded, imageProperties, isCanvasEnabled, onRender, displayedAsset.url]);
+
+    if (initialFitPendingRef.current) {
+      initialFitPendingRef.current = false;
+      fitToScreen();
+    }
+  }, [drawImageOnCanvas, fitToScreen, imageLoaded, imageProperties, initialRenderDone, isCanvasEnabled, onRender, displayedAsset.url]);
 
   /**
    * @param {HTMLImageElement} image
@@ -530,24 +547,23 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     resetAssetRetry();
     touchPageAsset(target.pageIndex, 'full');
 
-    if (isCanvasEnabled && image) drawImageOnCanvas(image);
+    if (!isCanvasEnabled) {
+      if (!initialRenderRef.current) {
+        initialRenderRef.current = true;
+        initialRenderDone();
+      }
 
-    if (!initialRenderRef.current) {
-      initialRenderRef.current = true;
-      initialRenderDone();
-    }
+      onRender();
 
-    onRender();
-
-    if (initialFitPendingRef.current) {
-      initialFitPendingRef.current = false;
-      fitToScreen();
+      if (initialFitPendingRef.current) {
+        initialFitPendingRef.current = false;
+        fitToScreen();
+      }
     }
   }, [
     clearLoadingOverlayTimer,
     currentPage?.realHeight,
     currentPage?.realWidth,
-    drawImageOnCanvas,
     fitToScreen,
     initialRenderDone,
     isCanvasEnabled,
@@ -570,6 +586,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     });
 
     setNaturalSize(nextSize);
+    setImageLoaded(true);
     resetAssetRetry();
     touchPageAsset(displayedAssetRef.current.pageIndex, 'full');
 
@@ -581,25 +598,24 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       setAssetFailed(false);
     }
 
-    if (isCanvasEnabled) drawImageOnCanvas(image);
+    if (!isCanvasEnabled) {
+      if (!initialRenderRef.current) {
+        initialRenderRef.current = true;
+        initialRenderDone();
+      }
 
-    if (!initialRenderRef.current) {
-      initialRenderRef.current = true;
-      initialRenderDone();
-    }
+      onRender();
 
-    onRender();
-
-    if (initialFitPendingRef.current) {
-      initialFitPendingRef.current = false;
-      fitToScreen();
+      if (initialFitPendingRef.current) {
+        initialFitPendingRef.current = false;
+        fitToScreen();
+      }
     }
   }, [
     clearLoadingOverlayTimer,
     currentIndex,
     currentPage?.realHeight,
     currentPage?.realWidth,
-    drawImageOnCanvas,
     fitToScreen,
     initialRenderDone,
     isCanvasEnabled,
@@ -801,7 +817,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     || (!displayedUrl && transitionPending)
     || (transitionPending && displayedAsset.pageIndex !== currentIndex)
   );
-  const hiddenImageStyle = isCanvasEnabled
+  const hiddenImageStyle = isCanvasEnabled && canvasReady
     ? {
         opacity: 0,
         pointerEvents: 'none',

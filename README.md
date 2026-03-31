@@ -240,6 +240,7 @@ The config covers areas such as:
 
 - diagnostics
 - i18n defaults and translation loading (now cache-busted automatically per build)
+  - a configured `i18n.default` in `odv.site.config.js` now wins over browser/OS language detection
 - print-header overlay
 - user print logging
 - system logging

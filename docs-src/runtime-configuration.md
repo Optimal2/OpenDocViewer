@@ -77,6 +77,7 @@ Important limitation:
 
 - Do not long-cache `odv.config.js`.
 - Locale JSON URLs now include an automatic per-build version token by default (`i18n.version: 'auto'`). That reduces stale-language-cache problems after deployments without requiring manual version bumps.
+- When `i18n.default` is set to a concrete language such as `sv`, OpenDocViewer now uses that site-level default before falling back to stored browser/OS language preferences.
 - Both `systemLog.enabled` and `userLog.enabled` are disabled by default in the shipped runtime config. Enable them explicitly in `odv.site.config.js` when the deployment is ready.
 - The performance overlay heap section depends on Chromium's `performance.memory` API. In Firefox and other browsers that do not expose those values, the overlay will show `N/A` for heap metrics.
 - If using a site override file, keep it deployment-local and avoid committing machine-specific values back into the main repo.

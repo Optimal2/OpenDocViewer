@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Enable compare mode",
       "disable": "Disable compare mode",
-      "shiftHint": "Hold Shift while using page controls to steer the right compare pane. Shift + Esc closes compare."
+      "shiftHint": "Shift steers right pane. Shift + Esc closes."
     },
     "editing": {
       "enable": "Enable canvas tools",

@@ -149,6 +149,7 @@ const PageNavigationButtons = ({
    */
   const beginPrevRepeat = useCallback((event) => {
     if (prevPageDisabled) return;
+    if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
     activeRepeatButtonRef.current = 'prev';
     markSuppressedClick('prev');
@@ -161,6 +162,7 @@ const PageNavigationButtons = ({
    */
   const beginNextRepeat = useCallback((event) => {
     if (nextPageDisabled) return;
+    if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
     activeRepeatButtonRef.current = 'next';
     markSuppressedClick('next');
