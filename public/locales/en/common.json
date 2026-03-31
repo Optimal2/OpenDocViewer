@@ -119,7 +119,8 @@
       "basicGroup": "Basic choices",
       "advancedGroup": "Advanced choices",
       "userLogGroup": "User log"
-    }
+    },
+    "loadingHint": "More print options become available when document loading finishes. Only the active page can be printed for now."
   },
   "print": {
     "alt": {

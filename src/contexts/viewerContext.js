@@ -78,6 +78,8 @@ import { createContext } from 'react';
  * @property {number} thumbnailReadyCount
  * @property {number} fullCacheCount
  * @property {number} thumbnailCacheCount
+ * @property {number} fullCacheLimit
+ * @property {number} thumbnailCacheLimit
  * @property {number} trackedObjectUrlCount
  * @property {number} warmupQueueLength
  * @property {number} pendingAssetCount

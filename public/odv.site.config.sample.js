@@ -256,8 +256,10 @@
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
         blobCacheEntries: 16,
 
-        // Persist thumbnails as rendered assets as well.
-        persistThumbnails: true,
+        // Dedicated thumbnails are off by default because the preferred runtime profile reuses the
+        // full rendered page for both the main view and the thumbnail pane until memory pressure
+        // forces a downgrade.
+        persistThumbnails: false,
 
         // Keep original single-page raster sources by default for stability. Change this
         // to true only if you explicitly want the original source released after the full
@@ -289,8 +291,8 @@
         //   "auto"               -> reuse full raster-image assets when appropriate,
         //                           otherwise generate dedicated thumbnail rasters
         //   "dedicated"          -> always generate dedicated thumbnail rasters
-        //   "prefer-full-images" -> always reuse full raster-image assets for thumbnails
-        thumbnailSourceStrategy: 'dedicated',
+        //   "prefer-full-images" -> always reuse the rendered full page for thumbnails
+        thumbnailSourceStrategy: 'prefer-full-images',
 
         // In "adaptive" mode, runs at or below this page count will queue the entire
         // thumbnail set in the background while still keeping a deterministic thumbnail pane.
@@ -306,7 +308,7 @@
         // In-memory object-URL cache limits.
         // The underlying rendered blobs may still remain in the asset store even if an older
         // browser object URL is revoked from RAM.
-        fullPageCacheLimit: 256,
+        fullPageCacheLimit: 500,
         thumbnailCacheLimit: 8192,
 
         // Limits for open decoded multi-page source objects kept by the lazy renderer.

@@ -30,24 +30,6 @@ import { formatBytes } from './utils/documentLoadingConfig.js';
  */
 
 /**
- * Read a stable snapshot of runtime config without exposing a mutable reference.
- * @returns {{ showPerfOverlay: (boolean|undefined) }}
- */
-function readRuntimeConfig() {
-  try {
-    if (typeof window !== 'undefined' && typeof window.__ODV_GET_CONFIG__ === 'function') {
-      return window.__ODV_GET_CONFIG__() || {};
-    }
-    if (typeof window !== 'undefined' && window.__ODV_CONFIG__) {
-      return window.__ODV_CONFIG__ || {};
-    }
-  } catch {
-    /* ignore */
-  }
-  return {};
-}
-
-/**
  * @param {number} bytes
  * @returns {number}
  */
@@ -106,8 +88,6 @@ const PerformanceMonitor = () => {
     memoryPressureStage,
     runtimeDiagnostics,
   } = useContext(ViewerContext);
-
-  const showPerfOverlay = useMemo(() => !!readRuntimeConfig().showPerfOverlay, []);
 
   const [memory, setMemory] = useState(
     /** @type {MemorySnapshot} */ ({
@@ -185,8 +165,6 @@ const PerformanceMonitor = () => {
   }, []);
 
   useEffect(() => {
-    if (!showPerfOverlay) return undefined;
-
     rafRef.current = requestAnimationFrame(tick);
     const memoryTimerId = setInterval(updateMemory, 1000);
     const clockTimerId = setInterval(() => setClockNow(Date.now()), 250);
@@ -198,7 +176,7 @@ const PerformanceMonitor = () => {
       clearInterval(memoryTimerId);
       clearInterval(clockTimerId);
     };
-  }, [showPerfOverlay, tick, updateMemory]);
+  }, [tick, updateMemory]);
 
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
   const failedPages = useMemo(
@@ -237,8 +215,6 @@ const PerformanceMonitor = () => {
   const sectionStyle = { margin: '6px 0' };
   const labelStyle = { opacity: 0.8 };
   const valueStyle = { fontWeight: 700 };
-
-  if (!showPerfOverlay) return null;
 
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">
@@ -361,8 +337,14 @@ const PerformanceMonitor = () => {
         <div>
           <span style={labelStyle}>{t('perf.fullCacheLabel')}</span>{' '}
           <strong>{Number(runtimeDiagnostics?.fullCacheCount || 0)}</strong>
+          <span style={{ opacity: 0.7 }}>
+            {' '} / {Math.max(0, Number(runtimeDiagnostics?.fullCacheLimit || 0))}
+          </span>
           <span style={{ marginLeft: 10, opacity: 0.9 }}>
             {t('perf.thumbnailCacheLabel')} <strong>{Number(runtimeDiagnostics?.thumbnailCacheCount || 0)}</strong>
+            <span style={{ opacity: 0.7 }}>
+              {' '} / {Math.max(0, Number(runtimeDiagnostics?.thumbnailCacheLimit || 0))}
+            </span>
           </span>
         </div>
       </div>

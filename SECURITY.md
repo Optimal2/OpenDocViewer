@@ -1,26 +1,44 @@
-<!-- File: SECURITY.md -->
 # Security Policy
 
 ## Supported Versions
 
-**OpenDocViewer v1.2.0** is the current recommended release.  
-**OpenDocViewer v1.1.0** is still considered safe to run and eligible for security fixes, but it is superseded by v1.2.0 and lacks some usability improvements added later.  
-**OpenDocViewer v1.0.1** is still considered safe to run for older deployments, but it is a legacy supported release and lacks later fixes and improvements.
+**OpenDocViewer v1.4.0** is the current recommended release.
+**OpenDocViewer v1.3.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.4.0 and lacks later loading-pipeline and diagnostics improvements.
 
 Older releases are retained for historical reference only.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.2.0   | :white_check_mark: | Current recommended release |
-| 1.1.0   | :white_check_mark: | Supported safe release, superseded by 1.2.0 |
-| 1.0.1   | :white_check_mark: | Supported legacy safe release |
-| 1.0.0   | :x: | Superseded by later supported releases |
+| 1.4.0   | :white_check_mark: | Current recommended release |
+| 1.3.1   | :white_check_mark: | Supported safe release, superseded by 1.4.0 |
+| 1.3.0   | :x: | Unsupported |
+| 1.2.0   | :x: | Unsupported |
+| 1.1.0   | :x: | Unsupported |
+| 1.0.1   | :x: | Unsupported |
+| 1.0.0   | :x: | Unsupported |
 | 0.9.0   | :x: | Unsupported |
 | < 0.9.0 | :x: | Unsupported |
 
 ## Recent release context
 
-The five most recent releases are listed below for operational context:
+The seven most recent releases are listed below for operational context:
+
+### OpenDocViewer v1.4.0
+OpenDocViewer v1.4.0 improves hybrid document loading throughput, default thumbnail/full-page reuse, diagnostics accuracy, and loading-time print behavior.
+
+This release keeps the hybrid loader architecture but now reuses full rendered page assets for thumbnails by default while memory pressure allows it, increases the resident full-page cache target for performance-oriented runs, and speeds background warm-up by dispatching batches concurrently through the worker/main render schedulers instead of serializing every asset request. It also keeps performance-overlay counters updating after the initial load completes while still stopping the load-duration timer, disables overlay-specific polling entirely when the overlay is not enabled, and simplifies the print dialog to an active-page-only mode while page discovery is still in progress so the UI no longer appears to reset itself mid-load.
+
+### OpenDocViewer v1.3.1
+OpenDocViewer v1.3.1 hardens the viewer after v1.3.0 with a focus on rendered page asset reliability, safer cleanup behavior, and more predictable zoom handling.
+
+This release fixes cases where stale object URLs could cause rendered page images to fail in longer mixed-document sessions, makes single-page raster cleanup more conservative so original data is only released after verified full-asset persistence, and stabilizes Fit to Screen, Fit to Width, and Actual Size against the exact pane viewport in Edge and Chrome.
+
+### OpenDocViewer v1.3.0
+OpenDocViewer v1.3.0 improves overall stability in the document loading and rendering pipeline, with a strong focus on making the viewer behave more predictably across larger and more varied document sets.
+
+This release consolidates the work done after v1.2.0 into a more stable baseline, especially around source loading, rendered page asset handling, thumbnail behavior, temporary storage, and memory-related defaults. The result is a viewer that is more reliable in practical use while still preserving the performance and memory improvements that were safe to keep.
+
+The release also improves configuration clarity by expanding the site-level sample configuration, and updates documentation to better reflect the current runtime behavior and supported deployment model.
 
 ### OpenDocViewer v1.2.0
 OpenDocViewer v1.2.0 improves keyboard shortcut reliability and removes focus-dependent viewer command handling.
@@ -43,11 +61,6 @@ OpenDocViewer 1.0.0 establishes the first stable baseline for the project.
 This release focuses on internal stabilization and maintainability, including a clearer app structure, improved bootstrap/integration boundaries, expanded documentation, and CI validation for lint, build, and generated docs.
 
 It also includes smaller robustness improvements across the viewer, loader, diagnostics, and runtime configuration.
-
-### OpenDocViewer v0.9.0
-OpenDocViewer 0.9.0 updates project dependencies and maintenance tooling.
-
-This release primarily refreshes runtime and development dependencies, including React, Vite, i18n, PDF, and linting-related packages, without verified application-level feature changes in the source code.
 
 ## Reporting a Vulnerability
 

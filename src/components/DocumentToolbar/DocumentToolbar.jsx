@@ -652,6 +652,8 @@ const DocumentToolbar = ({
         onClose={() => closePrintDialog?.()}
         onSubmit={handlePrintSubmit}
         totalPages={totalPages}
+        isDocumentLoading={isDocumentLoading}
+        activePageNumber={pageNumber}
       />
     </div>
   );

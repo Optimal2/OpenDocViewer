@@ -13,6 +13,8 @@
  * @param {function():void} props.onClose - Called when the dialog should close.
  * @param {function(PrintSubmitDetail):void} props.onSubmit - Called with the chosen print details.
  * @param {number} props.totalPages - Total number of pages (validates range/custom).
+ * @param {boolean=} props.isDocumentLoading - Restrict the dialog to active-page printing while sources still load.
+ * @param {number=} props.activePageNumber - Current active page number.
  * @returns {(JSX.Element|null)}
  */
 
@@ -37,12 +39,12 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {string|null} [forWhom] - Optional "for whom" value.
  */
 
-export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages }) {
+export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages, isDocumentLoading = false, activePageNumber = 1 }) {
   const { t, i18n } = useTranslation('common');
 
   // No CSS Module anymore; controller doesn't need styles
   const ctrl = usePrintRangeController({
-    isOpen, onClose, onSubmit, totalPages, t, i18n
+    isOpen, onClose, onSubmit, totalPages, isDocumentLoading, activePageNumber, t, i18n
   });
 
   if (!isOpen) return null;
@@ -71,7 +73,11 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
           </div>
         ) : null}
 
-        {ctrl.modeGroup === 'basic' ? (
+        {ctrl.restrictToActivePage ? (
+          <div className="odv-prd-hint" role="note">
+            {ctrl.loadingHint}
+          </div>
+        ) : ctrl.modeGroup === 'basic' ? (
           <p className="odv-prd-modeSwitch">
             <button
               type="button"
@@ -110,16 +116,18 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                 />
                 <span>{t('printDialog.basic.active')}</span>
               </label>
-              <label className="odv-prd-radioRow">
-                <input
-                  type="radio"
-                  name="basicChoice"
-                  value="all"
-                  checked={ctrl.basicChoice === 'all'}
-                  onChange={() => ctrl.setBasicChoice('all')}
-                />
-                <span>{t('printDialog.basic.all')}</span>
-              </label>
+              {!ctrl.restrictToActivePage && (
+                <label className="odv-prd-radioRow">
+                  <input
+                    type="radio"
+                    name="basicChoice"
+                    value="all"
+                    checked={ctrl.basicChoice === 'all'}
+                    onChange={() => ctrl.setBasicChoice('all')}
+                  />
+                  <span>{t('printDialog.basic.all')}</span>
+                </label>
+              )}
             </div>
           </div>
         )}
@@ -312,4 +320,6 @@ PrintRangeDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
   totalPages: PropTypes.number.isRequired,
+  isDocumentLoading: PropTypes.bool,
+  activePageNumber: PropTypes.number,
 };

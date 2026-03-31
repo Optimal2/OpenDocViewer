@@ -200,7 +200,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
       blobCacheEntries: 24,
-      persistThumbnails: true,
+      persistThumbnails: false,
       releaseSinglePageRasterSourceAfterFullPersist: false,
     },
     render: {
@@ -217,12 +217,12 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
       thumbnailLoadingStrategy: 'adaptive',
-      thumbnailSourceStrategy: 'auto',
+      thumbnailSourceStrategy: 'prefer-full-images',
       thumbnailEagerPageThreshold: 10000,
       lookAheadPageCount: 12,
       lookBehindPageCount: 8,
       visibleThumbnailOverscan: 24,
-      fullPageCacheLimit: 256,
+      fullPageCacheLimit: 500,
       thumbnailCacheLimit: 8192,
       maxOpenPdfDocuments: 16,
       maxOpenTiffDocuments: 16,
@@ -447,7 +447,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
     next.render.loadingOverlayDelayMs = Math.max(60, next.render.loadingOverlayDelayMs || 0);
     next.render.thumbnailLoadingStrategy = 'eager';
     next.render.thumbnailSourceStrategy = 'prefer-full-images';
-    next.render.fullPageCacheLimit = Math.max(256, next.render.fullPageCacheLimit || 0);
+    next.render.fullPageCacheLimit = Math.max(500, next.render.fullPageCacheLimit || 0);
     next.render.thumbnailCacheLimit = Math.max(4096, next.render.thumbnailCacheLimit || 0);
     next.adaptiveMemory.preferPerformance = true;
     return next;
@@ -489,6 +489,11 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
   next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
   next.render.warmupBatchSize = Math.max(12, next.render.warmupBatchSize || 12);
   next.render.loadingOverlayDelayMs = Math.max(80, next.render.loadingOverlayDelayMs || 0);
+  next.render.thumbnailSourceStrategy = next.render.thumbnailSourceStrategy || 'prefer-full-images';
+  if (next.render.thumbnailSourceStrategy === 'prefer-full-images') {
+    next.assetStore.persistThumbnails = false;
+    next.render.fullPageCacheLimit = Math.max(500, next.render.fullPageCacheLimit || 0);
+  }
   return next;
 }
 
@@ -615,8 +620,8 @@ export function isRasterImageExtension(value) {
 export function shouldUseFullImagesForThumbnails(config, page, totalPages) {
   const strategy = String(config?.render?.thumbnailSourceStrategy || 'auto').toLowerCase();
   if (strategy === 'dedicated') return false;
-  if (!isRasterImageExtension(page?.fileExtension)) return false;
   if (strategy === 'prefer-full-images') return true;
+  if (!isRasterImageExtension(page?.fileExtension)) return false;
 
   const preferPerformance = !!config?.adaptiveMemory?.preferPerformance || String(config?.mode || '') === 'performance';
   const limit = Math.max(1, Number(config?.adaptiveMemory?.reuseFullImageThumbnailsBelowPageCount) || 1);

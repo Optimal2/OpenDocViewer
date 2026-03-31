@@ -119,7 +119,8 @@
       "basicGroup": "Enkla val",
       "advancedGroup": "Avancerade val",
       "userLogGroup": "Användarlogg"
-    }
+    },
+    "loadingHint": "Fler utskriftsalternativ blir tillgängliga när dokumentladdningen är klar. Just nu kan bara den aktuella sidan skrivas ut."
   },
   "print": {
     "alt": {

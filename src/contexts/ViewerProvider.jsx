@@ -196,10 +196,16 @@ function createLimiter(getLimit) {
 }
 
 /**
- * @param {{ children: React.ReactNode }} props
+ * @typedef {Object} ViewerProviderProps
+ * @property {React.ReactNode} children
+ * @property {boolean} [diagnosticsEnabled=false]
+ */
+
+/**
+ * @param {ViewerProviderProps} props
  * @returns {React.ReactElement}
  */
-export const ViewerProvider = ({ children }) => {
+export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
   const [workerCount, setWorkerCount] = useState(0);
@@ -222,6 +228,8 @@ export const ViewerProvider = ({ children }) => {
     thumbnailReadyCount: 0,
     fullCacheCount: 0,
     thumbnailCacheCount: 0,
+    fullCacheLimit: 0,
+    thumbnailCacheLimit: 0,
     trackedObjectUrlCount: 0,
     warmupQueueLength: 0,
     pendingAssetCount: 0,
@@ -253,6 +261,8 @@ export const ViewerProvider = ({ children }) => {
   const sessionStartedAtMsRef = useRef(0);
   const loadRunStartedAtMsRef = useRef(0);
   const loadRunCompletedAtMsRef = useRef(0);
+  const knownFullAssetPagesRef = useRef(new Set());
+  const knownThumbnailAssetPagesRef = useRef(new Set());
 
   const renderWithLimit = useRef(createLimiter(
     () => sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders || sessionConfigRef.current?.render?.maxConcurrentAssetRenders || 2
@@ -270,6 +280,28 @@ export const ViewerProvider = ({ children }) => {
     });
   }, []);
 
+  /**
+   * Record that a page now has a reusable full-size asset available.
+   * The overlay tracks availability cumulatively across cache eviction, so these counters are not
+   * decremented when object URLs are later revoked.
+   *
+   * @param {number} pageIndex
+   * @returns {void}
+   */
+  const noteFullAssetReady = useCallback((pageIndex) => {
+    knownFullAssetPagesRef.current.add(Math.max(0, Number(pageIndex) || 0));
+  }, []);
+
+  /**
+   * Record that a page now has a reusable thumbnail asset available.
+   *
+   * @param {number} pageIndex
+   * @returns {void}
+   */
+  const noteThumbnailAssetReady = useCallback((pageIndex) => {
+    knownThumbnailAssetPagesRef.current.add(Math.max(0, Number(pageIndex) || 0));
+  }, []);
+
 
   /**
    * Collect a stable snapshot of runtime counters for the optional diagnostics overlay.
@@ -280,17 +312,38 @@ export const ViewerProvider = ({ children }) => {
    * @returns {void}
    */
   const collectRuntimeDiagnostics = useCallback(() => {
+    if (!diagnosticsEnabled) return;
+
     const tempStats = tempStoreRef.current?.getStats?.() || {};
     const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
     const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
+    const totalPages = pages.length;
+    const renderConfig = sessionConfigRef.current?.render || {};
     let fullReadyCount = 0;
     let thumbnailReadyCount = 0;
-    for (const page of pages) {
+    const fullCacheLimit = shouldKeepAllFullImageAssets(sessionConfigRef.current, pages)
+      ? Math.max(totalPages, Math.max(1, Number(renderConfig.fullPageCacheLimit) || 1))
+      : Math.max(1, Number(renderConfig.fullPageCacheLimit) || 1);
+    const eagerThumbnailThreshold = Math.max(1, Number(renderConfig.thumbnailEagerPageThreshold) || 1);
+    const keepAllThumbnails = String(renderConfig.thumbnailLoadingStrategy || 'adaptive').toLowerCase() === 'eager'
+      || (String(renderConfig.thumbnailLoadingStrategy || 'adaptive').toLowerCase() !== 'viewport'
+          && totalPages > 0
+          && totalPages <= eagerThumbnailThreshold);
+    const thumbnailCacheLimit = keepAllThumbnails
+      ? Math.max(totalPages, Math.max(1, Number(renderConfig.thumbnailCacheLimit) || 1))
+      : Math.max(1, Number(renderConfig.thumbnailCacheLimit) || 1);
+
+    for (let pageIndex = 0; pageIndex < totalPages; pageIndex += 1) {
+      const page = pages[pageIndex];
       if (!page) continue;
-      if (page.fullSizeStatus === 1 && page.fullSizeUrl) fullReadyCount += 1;
+      const hasKnownFull = knownFullAssetPagesRef.current.has(pageIndex)
+        || (page.fullSizeStatus === 1 && !!page.fullSizeUrl);
+      if (hasKnownFull) fullReadyCount += 1;
+
       const thumbnailReady = page.thumbnailUsesFullAsset
-        ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
-        : (page.thumbnailStatus === 1 && !!page.thumbnailUrl);
+        ? hasKnownFull
+        : (knownThumbnailAssetPagesRef.current.has(pageIndex)
+            || (page.thumbnailStatus === 1 && !!page.thumbnailUrl));
       if (thumbnailReady) thumbnailReadyCount += 1;
     }
 
@@ -309,6 +362,8 @@ export const ViewerProvider = ({ children }) => {
         thumbnailReadyCount,
         fullCacheCount: fullPageCacheRef.current.size,
         thumbnailCacheCount: thumbnailCacheRef.current.size,
+        fullCacheLimit,
+        thumbnailCacheLimit,
         trackedObjectUrlCount: getTrackedObjectUrlCount(),
         warmupQueueLength: warmupQueueRef.current.length,
         pendingAssetCount: pendingAssetPromisesRef.current.size,
@@ -319,7 +374,7 @@ export const ViewerProvider = ({ children }) => {
       const same = Object.keys(next).every((key) => next[key] === current[key]);
       return same ? current : next;
     });
-  }, []);
+  }, [diagnosticsEnabled]);
 
   /**
    * @returns {void}
@@ -353,6 +408,8 @@ export const ViewerProvider = ({ children }) => {
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
+    knownFullAssetPagesRef.current.clear();
+    knownThumbnailAssetPagesRef.current.clear();
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -423,6 +480,8 @@ export const ViewerProvider = ({ children }) => {
       thumbnailReadyCount: 0,
       fullCacheCount: 0,
       thumbnailCacheCount: 0,
+      fullCacheLimit: 0,
+      thumbnailCacheLimit: 0,
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
@@ -585,6 +644,8 @@ export const ViewerProvider = ({ children }) => {
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
+    knownFullAssetPagesRef.current.clear();
+    knownThumbnailAssetPagesRef.current.clear();
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -645,6 +706,8 @@ export const ViewerProvider = ({ children }) => {
       thumbnailReadyCount: 0,
       fullCacheCount: 0,
       thumbnailCacheCount: 0,
+      fullCacheLimit: 0,
+      thumbnailCacheLimit: 0,
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
@@ -792,9 +855,12 @@ export const ViewerProvider = ({ children }) => {
       height: rendered.height,
     });
 
+    if (variant === 'thumbnail') noteThumbnailAssetReady(pageIndex);
+    else noteFullAssetReady(pageIndex);
+
     announceIndexedDbAssetMode();
     if (variant === 'full') await maybeReleaseSinglePageRasterSource(pageIndex);
-  }, [announceIndexedDbAssetMode, maybeReleaseSinglePageRasterSource]);
+  }, [announceIndexedDbAssetMode, maybeReleaseSinglePageRasterSource, noteFullAssetReady, noteThumbnailAssetReady]);
 
 
 
@@ -998,6 +1064,11 @@ export const ViewerProvider = ({ children }) => {
     }
 
     const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(pageIndex);
+    if (variant === 'thumbnail') noteThumbnailAssetReady(pageIndex);
+    else {
+      noteFullAssetReady(pageIndex);
+      if (reuseThumbnail) noteThumbnailAssetReady(pageIndex);
+    }
     patchPageAtIndex(pageIndex, variant === 'thumbnail'
       ? {
           thumbnailUrl: url,
@@ -1025,7 +1096,7 @@ export const ViewerProvider = ({ children }) => {
 
     if (options.trackInCache !== false) enforceCacheLimit(variant);
     return url;
-  }, [enforceCacheLimit, getVariantCache, patchPageAtIndex, shouldReuseFullAssetForThumbnail]);
+  }, [enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, shouldReuseFullAssetForThumbnail]);
   /**
    * @param {number} pageIndex
    * @param {('full'|'thumbnail')} variant
@@ -1083,6 +1154,7 @@ export const ViewerProvider = ({ children }) => {
     if (variant === 'thumbnail' && options.skipFullReuse !== true && shouldReuseFullAssetForThumbnail(safeIndex)) {
       const page = getPageAt(allPagesRef.current, safeIndex);
       if (page?.fullSizeStatus === 1 && page?.fullSizeUrl) {
+        noteThumbnailAssetReady(safeIndex);
         patchPageAtIndex(safeIndex, {
           thumbnailUsesFullAsset: true,
           thumbnailUrl: '',
@@ -1096,6 +1168,7 @@ export const ViewerProvider = ({ children }) => {
         ...options,
         skipFullReuse: true,
       });
+      if (fullUrl) noteThumbnailAssetReady(safeIndex);
       patchPageAtIndex(safeIndex, {
         thumbnailUsesFullAsset: true,
         thumbnailUrl: '',
@@ -1153,6 +1226,11 @@ export const ViewerProvider = ({ children }) => {
         }
 
         const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(safeIndex);
+        if (variant === 'thumbnail') noteThumbnailAssetReady(safeIndex);
+        else {
+          noteFullAssetReady(safeIndex);
+          if (reuseThumbnail) noteThumbnailAssetReady(safeIndex);
+        }
         patchPageAtIndex(safeIndex, variant === 'thumbnail'
           ? {
               thumbnailUrl: url,
@@ -1200,7 +1278,7 @@ export const ViewerProvider = ({ children }) => {
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
-  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
    * Drain background eager-render work without blocking the UI thread.
@@ -1222,10 +1300,10 @@ export const ViewerProvider = ({ children }) => {
 
         const batchSize = Math.max(1, Number(sessionConfigRef.current?.render?.warmupBatchSize) || 1);
         const batch = warmupQueueRef.current.splice(0, batchSize);
-        for (const task of batch) {
+        await Promise.allSettled(batch.map(async (task) => {
           try {
             const page = getPageAt(allPagesRef.current, task?.pageIndex);
-            if (!page || page.status === -1) continue;
+            if (!page || page.status === -1) return;
             await ensurePageAsset(task.pageIndex, task.variant, {
               priority: task.priority || 'low',
             });
@@ -1236,7 +1314,7 @@ export const ViewerProvider = ({ children }) => {
               error: String(error?.message || error),
             });
           }
-        }
+        }));
 
         await new Promise((resolve) => window.setTimeout(resolve, 0));
       }
@@ -1281,6 +1359,7 @@ export const ViewerProvider = ({ children }) => {
     for (let offset = 0; offset < warmPageCount; offset += 1) {
       const pageIndex = safeStartIndex + offset;
       addTask(pageIndex, 'full', offset === 0 ? 'high' : 'low');
+      if (shouldReuseFullAssetForThumbnail(pageIndex)) continue;
       if (renderConfig.thumbnailLoadingStrategy !== 'viewport' || strategy === 'eager-all') {
         addTask(pageIndex, 'thumbnail', offset === 0 ? 'normal' : 'low');
       }
@@ -1288,7 +1367,7 @@ export const ViewerProvider = ({ children }) => {
 
     warmupQueueRef.current = queue;
     void pumpWarmupQueue();
-  }, [pumpWarmupQueue]);
+  }, [pumpWarmupQueue, shouldReuseFullAssetForThumbnail]);
 
   /**
    * @param {Array<number>=} pageIndexes
@@ -1429,6 +1508,7 @@ export const ViewerProvider = ({ children }) => {
 
 
   useEffect(() => {
+    if (!diagnosticsEnabled) return undefined;
     const wasActive = previousLoadingRunActiveRef.current;
     if (loadingRunActive && !wasActive) {
       loadRunStartedAtMsRef.current = Date.now();
@@ -1438,17 +1518,18 @@ export const ViewerProvider = ({ children }) => {
     }
     previousLoadingRunActiveRef.current = loadingRunActive;
     collectRuntimeDiagnostics();
-  }, [collectRuntimeDiagnostics, loadingRunActive]);
+  }, [collectRuntimeDiagnostics, diagnosticsEnabled, loadingRunActive]);
 
   useEffect(() => {
+    if (!diagnosticsEnabled) return undefined;
     collectRuntimeDiagnostics();
-    const timerId = window.setInterval(collectRuntimeDiagnostics, 1000);
+    const timerId = window.setInterval(collectRuntimeDiagnostics, 500);
     diagnosticsTimerRef.current = timerId;
     return () => {
       if (diagnosticsTimerRef.current === timerId) diagnosticsTimerRef.current = null;
       try { window.clearInterval(timerId); } catch {}
     };
-  }, [collectRuntimeDiagnostics]);
+  }, [collectRuntimeDiagnostics, diagnosticsEnabled]);
 
   useEffect(() => () => {
     resetViewerState().catch((e) => {

@@ -13,15 +13,16 @@ Use `documentLoading.mode = 'auto'` unless a specific customer explicitly wants 
 `auto` starts close to the old fast-feeling eager pipeline:
 
 - true sequential fetch by default for ticket/proxy safety
-- worker-backed raster/TIFF rendering when supported
+- worker-backed raster/TIFF rendering on a per-file basis whenever that source can use workers
 - eager nearby warm-up
+- reuse the same rendered full page for both the large pane and the thumbnail pane by default
 - larger in-memory caches
 
 Then it degrades one-way when pressure rises:
 
 - stop global eager warm-up
 - reduce concurrency
-- prefer dedicated thumbnails
+- prefer dedicated thumbnails again
 - promote more blobs to IndexedDB
 - shrink cache limits
 
@@ -36,9 +37,9 @@ Choose `performance` when:
 Expected characteristics:
 
 - eager-all source warm-up
-- worker-preferred raster/TIFF rendering
+- worker-preferred raster/TIFF rendering, evaluated per source file rather than globally
 - large in-memory caches
-- full-image thumbnail reuse whenever it is beneficial
+- full-image thumbnail reuse as the default
 
 ## When to use `memory`
 
@@ -79,3 +80,7 @@ The viewer now treats “selected page” and “actually displayed page” as s
 - Once the loading overlay is visible, the requested page may be highlighted because the large pane is no longer pretending to show the previous page.
 
 This avoids the earlier class of bugs where page X was highlighted but page Y was still visible in the large pane.
+
+## Print dialog during loading
+
+While the total page count is still changing, the print dialog now stays in a very small active-page-only mode. This avoids the earlier confusion where selecting "all pages" or switching modes could appear to reset itself mid-load simply because more pages had just been discovered.
