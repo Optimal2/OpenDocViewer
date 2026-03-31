@@ -68,8 +68,9 @@ const PageNavigationButtons = ({
 }) => {
   const { t } = useTranslation();
 
-  const suppressNextClickRef = useRef(false);
-  const suppressResetTimerRef = useRef(/** @type {(number|null)} */ (null));
+  const SUPPRESS_CLICK_WINDOW_MS = 400;
+  const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
+  const activeRepeatButtonRef = useRef(/** @type {("prev"|"next"|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState(String(pageNumber));
@@ -81,25 +82,33 @@ const PageNavigationButtons = ({
   }, [pageNumber, isFocused]);
 
   /**
-   * Stop every repeat timer but deliberately preserve click suppression until the follow-up click has
-   * been seen. Otherwise a normal mouse press would fire once on pointer-down and once again on click.
+   * Record that the next synthetic click for the given repeat button should be swallowed.
+   *
+   * @param {'prev'|'next'} key
+   * @returns {void}
+   */
+  const markSuppressedClick = useCallback((key) => {
+    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
+      ? performance.now()
+      : Date.now();
+    suppressClickUntilRef.current[key] = now + SUPPRESS_CLICK_WINDOW_MS;
+  }, []);
+
+  /**
+   * Stop every repeat timer and preserve click suppression long enough to swallow the trailing click
+   * that naturally follows a press-and-hold gesture.
    *
    * @returns {void}
    */
   const stopAllRepeatNavigation = useCallback(() => {
     stopPrevPageTimer();
     stopNextPageTimer();
-    if (suppressResetTimerRef.current) {
-      try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
-      suppressResetTimerRef.current = null;
+    const activeKey = activeRepeatButtonRef.current;
+    if (activeKey === 'prev' || activeKey === 'next') {
+      markSuppressedClick(activeKey);
     }
-    if (suppressNextClickRef.current) {
-      suppressResetTimerRef.current = window.setTimeout(() => {
-        suppressNextClickRef.current = false;
-        suppressResetTimerRef.current = null;
-      }, 0);
-    }
-  }, [stopNextPageTimer, stopPrevPageTimer]);
+    activeRepeatButtonRef.current = null;
+  }, [markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
     const handleRelease = () => {
@@ -119,12 +128,6 @@ const PageNavigationButtons = ({
     };
   }, [stopAllRepeatNavigation]);
 
-
-  useEffect(() => () => {
-    if (!suppressResetTimerRef.current) return;
-    try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
-    suppressResetTimerRef.current = null;
-  }, []);
 
   function applyDraft() {
     const next = clampPage(draft, totalPages);
@@ -147,9 +150,10 @@ const PageNavigationButtons = ({
   const beginPrevRepeat = useCallback((event) => {
     if (prevPageDisabled) return;
     event?.preventDefault?.();
-    suppressNextClickRef.current = true;
+    activeRepeatButtonRef.current = 'prev';
+    markSuppressedClick('prev');
     startPrevPageTimer('prev', event);
-  }, [prevPageDisabled, startPrevPageTimer]);
+  }, [markSuppressedClick, prevPageDisabled, startPrevPageTimer]);
 
   /**
    * @param {*} event
@@ -158,9 +162,10 @@ const PageNavigationButtons = ({
   const beginNextRepeat = useCallback((event) => {
     if (nextPageDisabled) return;
     event?.preventDefault?.();
-    suppressNextClickRef.current = true;
+    activeRepeatButtonRef.current = 'next';
+    markSuppressedClick('next');
     startNextPageTimer('next', event);
-  }, [nextPageDisabled, startNextPageTimer]);
+  }, [markSuppressedClick, nextPageDisabled, startNextPageTimer]);
 
   /**
    * Consume the trailing click that naturally follows a leading-edge repeat press.
@@ -169,17 +174,18 @@ const PageNavigationButtons = ({
    * @param {function(*=):void} handler
    * @returns {void}
    */
-  const handleSingleStepClick = useCallback((event, handler) => {
-    if (suppressNextClickRef.current) {
-      if (suppressResetTimerRef.current) {
-        try { window.clearTimeout(suppressResetTimerRef.current); } catch {}
-        suppressResetTimerRef.current = null;
-      }
-      suppressNextClickRef.current = false;
+  const handleSingleStepClick = useCallback((event, key, handler) => {
+    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
+      ? performance.now()
+      : Date.now();
+    const suppressUntil = Number(suppressClickUntilRef.current[key] || 0);
+    if (suppressUntil > now) {
+      suppressClickUntilRef.current[key] = 0;
       event?.preventDefault?.();
       event?.stopPropagation?.();
       return;
     }
+    suppressClickUntilRef.current[key] = 0;
     handler?.(event);
   }, []);
 
@@ -207,7 +213,7 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={(event) => handleSingleStepClick(event, handlePrevPage)}
+        onClick={(event) => handleSingleStepClick(event, 'prev', handlePrevPage)}
         onMouseDown={beginPrevRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onMouseLeave={stopAllRepeatNavigation}
@@ -258,7 +264,7 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={(event) => handleSingleStepClick(event, handleNextPage)}
+        onClick={(event) => handleSingleStepClick(event, 'next', handleNextPage)}
         onMouseDown={beginNextRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onMouseLeave={stopAllRepeatNavigation}

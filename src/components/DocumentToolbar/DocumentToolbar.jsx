@@ -386,13 +386,10 @@ const DocumentToolbar = ({
     }
     setIsExpanded((prev) => {
       const next = !prev;
-      if (next) {
-        logger.info('Enabling canvas tools and forcing render');
-        try { documentRenderRef.current?.forceRender?.(); } catch {}
-      }
+      if (next) logger.info('Enabling canvas tools');
       return next;
     });
-  }, [isExpanded, resetImageProperties, documentRenderRef, setIsExpanded]);
+  }, [isExpanded, resetImageProperties, setIsExpanded]);
 
   /**
    * Build a compact "pages" descriptor for logging.

@@ -385,20 +385,30 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
   useEffect(() => {
     const node = containerRef.current;
-    if (!node || selectedIndexForAutoScroll < 0) return;
+    if (!node || selectedIndexForAutoScroll < 0) return undefined;
 
-    const rowTop = selectedIndexForAutoScroll * layout.rowHeight;
-    const rowBottom = rowTop + layout.rowHeight;
-    const viewportTop = node.scrollTop || 0;
-    const viewportBottom = viewportTop + (node.clientHeight || 0);
+    const rafId = window.requestAnimationFrame(() => {
+      const viewportTop = Number(node.scrollTop || 0);
+      const viewportHeightNow = Number(node.clientHeight || 0);
+      const rowTop = selectedIndexForAutoScroll * layout.rowHeight;
+      const rowBottom = rowTop + layout.rowHeight;
+      let nextScrollTop = viewportTop;
 
-    if (rowTop < viewportTop) {
-      node.scrollTop = rowTop;
-    } else if (rowBottom > viewportBottom) {
-      node.scrollTop = Math.max(0, rowBottom - (node.clientHeight || 0));
-    }
+      if (rowTop < viewportTop) {
+        nextScrollTop = rowTop;
+      } else if (rowBottom > viewportTop + viewportHeightNow) {
+        nextScrollTop = Math.max(0, rowBottom - viewportHeightNow);
+      }
 
-    setScrollTop(node.scrollTop || 0);
+      if (Math.abs(nextScrollTop - viewportTop) >= 1) {
+        node.scrollTop = nextScrollTop;
+      }
+      setScrollTop(nextScrollTop);
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
   }, [layout.rowHeight, selectedIndexForAutoScroll]);
 
   useEffect(() => {

@@ -133,21 +133,34 @@ export function useViewerEffects(args) {
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
 
-  // Keep zoomState.scale in sync with numeric zoom
+  // Keep zoomState.scale in sync with numeric zoom.
   useEffect(() => {
-    setZoomState((s) => ({ ...s, scale: zoom }));
+    setZoomState((current) => {
+      if (Number(current?.scale) === Number(zoom)) return current;
+      return { ...current, scale: zoom };
+    });
   }, [zoom, setZoomState]);
 
-  // Sticky Fit recomputation on relevant changes
+  // Sticky Fit recomputation on relevant changes.
+  // Defer the DOM reads/writes to the next animation frame so fast key-repeat navigation does not
+  // stack synchronous layout work in the middle of React state commits.
   useEffect(() => {
     const mode = zoomState.mode;
-    if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return;
+    if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return undefined;
+
     const ref = documentRenderRef.current;
-    if (!ref) return;
-    try {
-      if (mode === 'FIT_PAGE') ref.fitToScreen?.();
-      else if (mode === 'FIT_WIDTH') ref.fitToWidth?.();
-    } catch {}
+    if (!ref) return undefined;
+
+    const rafId = window.requestAnimationFrame(() => {
+      try {
+        if (mode === 'FIT_PAGE') ref.fitToScreen?.();
+        else if (mode === 'FIT_WIDTH') ref.fitToWidth?.();
+      } catch {}
+    });
+
+    return () => {
+      window.cancelAnimationFrame(rafId);
+    };
   }, [pageNumber, imageRotation, isComparing, thumbnailWidth, zoomState.mode, documentRenderRef]);
 
   // Re-fit on container resize (only in Fit modes)

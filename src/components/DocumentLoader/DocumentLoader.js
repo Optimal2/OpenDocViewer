@@ -88,6 +88,12 @@ import { createOpaqueIdFragment } from '../../utils/idUtils.js';
  */
 
 /**
+ * @typedef {Object} PageEstimateStats
+ * @property {number} sourceCount
+ * @property {number} pageCount
+ */
+
+/**
  * @typedef {Object} PrefetchResult
  * @property {boolean} ok
  * @property {string=} sourceKey
@@ -177,6 +183,70 @@ function mimeToExtension(mimeType) {
  */
 function createSourceKey(fileIndex, orderIndex) {
   return ['src', String(fileIndex), String(orderIndex), createOpaqueIdFragment(4)].join('_');
+}
+
+/**
+ * Resolve the best-effort extension we can use for page-count estimation before every source has
+ * been fetched. Unknown entries intentionally fall back to an empty string so the estimator can
+ * remain conservative instead of assuming that all unfetched sources behave like the first PDF/TIFF.
+ *
+ * @param {ResolvedEntry} entry
+ * @returns {string}
+ */
+function getEstimatedEntryExtension(entry) {
+  return normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
+}
+
+/**
+ * Update per-extension page-count statistics used by the conservative warning estimator.
+ *
+ * @param {Map<string, PageEstimateStats>} statsMap
+ * @param {string} extension
+ * @param {number} pageCount
+ * @returns {void}
+ */
+function updatePageEstimateStats(statsMap, extension, pageCount) {
+  const key = normalizeExtension(extension);
+  if (!key) return;
+  const current = statsMap.get(key) || { sourceCount: 0, pageCount: 0 };
+  current.sourceCount += 1;
+  current.pageCount += Math.max(1, Number(pageCount) || 1);
+  statsMap.set(key, current);
+}
+
+/**
+ * Estimate the final page count conservatively.
+ *
+ * The previous estimator multiplied the average pages of the already processed sources by the total
+ * number of sources. That badly overestimated mixed batches where the first few sources happened to
+ * be multipage PDFs but the remaining hundreds of sources were single-page raster images.
+ *
+ * This estimator instead keeps per-extension averages and assumes 1 page for any unfetched source
+ * whose extension is unknown or has not yet been sampled. That still catches genuinely large PDF/TIFF
+ * runs but avoids alarming false positives for mixed batches.
+ *
+ * @param {ResolvedEntry[]} entries
+ * @param {number} processedSourceCount
+ * @param {number} discoveredPageCount
+ * @param {Map<string, PageEstimateStats>} statsMap
+ * @returns {number}
+ */
+function estimateTotalPagesConservatively(entries, processedSourceCount, discoveredPageCount, statsMap) {
+  const processed = Math.max(0, Math.floor(Number(processedSourceCount) || 0));
+  const discovered = Math.max(0, Math.floor(Number(discoveredPageCount) || 0));
+  if (!Array.isArray(entries) || entries.length <= processed) return discovered;
+
+  let estimate = discovered;
+  for (let index = processed; index < entries.length; index += 1) {
+    const extension = getEstimatedEntryExtension(entries[index]);
+    const stats = extension ? statsMap.get(extension) : null;
+    const averagePages = stats && stats.sourceCount > 0
+      ? Math.max(1, Math.round(stats.pageCount / stats.sourceCount))
+      : 1;
+    estimate += averagePages;
+  }
+
+  return Math.max(discovered, estimate);
 }
 
 /**
@@ -643,6 +713,7 @@ const DocumentLoader = ({
       let processedSourceCount = 0;
       let prefetchedBytes = 0;
       let pageWarningShown = false;
+      const pageEstimateStats = new Map();
       let activeTempStoreMode = config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory';
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
       const isSequentialFetch = String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential';
@@ -694,6 +765,7 @@ const DocumentLoader = ({
         result.analysisBlob = undefined;
 
         processedSourceCount += 1;
+        updatePageEstimateStats(pageEstimateStats, result.fileExtension, pageCount);
 
         registerSourceDescriptor({
           sourceKey: result.sourceKey,
@@ -726,7 +798,7 @@ const DocumentLoader = ({
         }
 
         const estimatedTotalPages = processedSourceCount >= config.warning.probePageThresholdSources
-          ? Math.max(nextPageIndex, Math.round((nextPageIndex / processedSourceCount) * entries.length))
+          ? estimateTotalPagesConservatively(entries, processedSourceCount, nextPageIndex, pageEstimateStats)
           : nextPageIndex;
 
         const pageWarningThreshold = Math.max(0, Number(config.warning.pageCountThreshold) || 0);

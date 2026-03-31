@@ -23,7 +23,7 @@
  *     scrollable document surface never overlaps the controls.
  */
 
-import React from 'react';
+import React, { useCallback } from 'react';
 import PropTypes from 'prop-types';
 import DocumentRender from '../DocumentRender.jsx';
 import CompareZoomOverlay from './CompareZoomOverlay.jsx';
@@ -69,21 +69,21 @@ const DocumentViewerRender = ({
   bumpPostZoomRight,
   onPrimaryDisplayStateChange,
 }) => {
-  const handlePrimaryRendered = () => {
+  const handlePrimaryRendered = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') {
       documentRenderRef?.current?.fitToScreen?.();
     } else if (zoomMode === 'FIT_WIDTH') {
       documentRenderRef?.current?.fitToWidth?.();
     }
-  };
+  }, [documentRenderRef, zoomMode]);
 
-  const handleCompareRendered = () => {
+  const handleCompareRendered = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') {
       compareRef?.current?.fitToScreen?.();
     } else if (zoomMode === 'FIT_WIDTH') {
       compareRef?.current?.fitToWidth?.();
     }
-  };
+  }, [compareRef, zoomMode]);
 
   // Apply per-pane post-zoom only while comparing; single-pane stays at base zoom
   const effectiveLeftZoom = isComparing ? zoom * postZoomLeft : zoom;

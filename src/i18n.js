@@ -7,6 +7,8 @@
  * - Uses i18next + react-i18next with ICU message format.
  * - Resolves paths correctly when the app is hosted under a virtual directory
  *   (e.g. /OpenDocViewer/) or the site root.
+ * - Resolves the startup language deterministically from querystring, runtime config,
+ *   browser preferences, and the current <html lang>.
  * - Diagnostics: **dev-only**. No browser console output in production (IIS build).
  *
  * CACHING:
@@ -28,7 +30,6 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ICU from 'i18next-icu';
 import HttpBackend from 'i18next-http-backend';
-import LanguageDetector from 'i18next-browser-languagedetector';
 
 /** Dev-mode detector (Vite + Node envs). */
 const IS_DEV =
@@ -90,13 +91,108 @@ function appendQuery(url, params) {
 
 /**
  * Compute app config & defaults safely.
- * @returns {{fallbackLng:string, supportedLngs:string[]}} */
+ * @returns {{fallbackLng:string, supportedLngs:string[]}}
+ */
 function getStaticI18nDefaults() {
   const appCfg = typeof window !== 'undefined' ? (window.__ODV_CONFIG__ || {}) : {};
   const cfg = appCfg.i18n || {};
-  const fallbackLng = cfg.default || 'en';
   const supportedLngs = Array.isArray(cfg.supported) && cfg.supported.length ? cfg.supported : ['en'];
+  const configuredDefault = String(cfg.default || '').trim().toLowerCase();
+  const fallbackLng = configuredDefault && configuredDefault !== 'auto'
+    ? configuredDefault
+    : (supportedLngs.includes('en') ? 'en' : String(supportedLngs[0] || 'en').toLowerCase());
   return { fallbackLng, supportedLngs };
+}
+
+/**
+ * Normalize an arbitrary language candidate to a supported base language.
+ *
+ * @param {*} value
+ * @param {string[]} supported
+ * @returns {(string|null)}
+ */
+function normalizeSupportedLanguage(value, supported) {
+  const raw = String(value || '').trim();
+  if (!raw) return null;
+  const base = raw.toLowerCase().split('-')[0];
+  if (!base) return null;
+  const supportedList = Array.isArray(supported) ? supported : [];
+  const exact = supportedList.find((entry) => String(entry || '').toLowerCase() === base);
+  return exact || null;
+}
+
+/**
+ * Resolve the initial UI language without relying on persisted i18next cache state.
+ *
+ * Priority order:
+ *   1) querystring (?lng=sv or ?lang=sv)
+ *   2) configured runtime default (`odv.site.config.js` / `odv.config.js`)
+ *   3) a previously persisted i18next language (`localStorage.i18nextLng`)
+ *   4) browser-reported preferred languages
+ *   5) <html lang="...">
+ *   6) English / first supported fallback
+ *
+ * A configured default of "auto" skips step 2 and lets browser/html decide.
+ * This keeps deployments predictable: when a site explicitly says default=sv, the viewer starts in
+ * Swedish even on English Windows/Edge installations.
+ *
+ * @param {{ fallbackLng: string, supportedLngs: string[] }} options
+ * @returns {string}
+ */
+function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
+  const supported = Array.isArray(supportedLngs) ? supportedLngs : [];
+  const fallbackFromConfig = normalizeSupportedLanguage(fallbackLng, supported);
+  const normalizedFallback = fallbackFromConfig
+    || normalizeSupportedLanguage('en', supported)
+    || (supported.length ? String(supported[0] || '').toLowerCase() : 'en');
+
+  const queryCandidate = normalizeSupportedLanguage(readQuery('lng') || readQuery('lang'), supported);
+  if (queryCandidate) return queryCandidate;
+
+  const rawConfiguredDefault = String(fallbackLng || '').trim().toLowerCase();
+  if (fallbackFromConfig && rawConfiguredDefault !== 'auto') return fallbackFromConfig;
+
+  try {
+    const persistedCandidate = normalizeSupportedLanguage(localStorage.getItem('i18nextLng'), supported);
+    if (persistedCandidate) return persistedCandidate;
+  } catch {}
+
+  try {
+    const nav = typeof navigator !== 'undefined' ? navigator : /** @type {*} */ ({});
+    const navCandidates = Array.isArray(nav.languages) && nav.languages.length
+      ? nav.languages
+      : [nav.language, nav.userLanguage].filter(Boolean);
+    for (const candidate of navCandidates) {
+      const normalized = normalizeSupportedLanguage(candidate, supported);
+      if (normalized) return normalized;
+    }
+  } catch {}
+
+  try {
+    const htmlCandidate = normalizeSupportedLanguage(document?.documentElement?.lang, supported);
+    if (htmlCandidate) return htmlCandidate;
+  } catch {}
+
+  return normalizedFallback;
+}
+
+/**
+ * Keep the document language synchronized with the active UI language.
+ *
+ * @param {string} language
+ * @param {string[]} supportedLngs
+ * @param {string} fallbackLng
+ * @returns {void}
+ */
+function syncDocumentLanguage(language, supportedLngs, fallbackLng) {
+  try {
+    if (typeof document === 'undefined') return;
+    const next = normalizeSupportedLanguage(language, supportedLngs)
+      || normalizeSupportedLanguage(fallbackLng, supportedLngs)
+      || normalizeSupportedLanguage('en', supportedLngs)
+      || 'en';
+    document.documentElement.setAttribute('lang', next);
+  } catch {}
 }
 
 /**
@@ -114,7 +210,7 @@ function computeBaseHref() {
     appCfg.baseHref ||
     (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ||
     '/';
-  return String(baseGuess || '/').replace(/\/+$/, '/'); // ensure trailing slash
+  return String(baseGuess || '/').replace(/\/+$/, '/');
 }
 
 /**
@@ -131,12 +227,10 @@ function resolveLoadPath(lngs, namespaces) {
   const cfg = appCfg.i18n || {};
   const ver = getI18nVersion();
 
-  // Normalize language (respect i18next `load: 'languageOnly'`)
   const rawLng = Array.isArray(lngs) ? (lngs[0] || '') : (lngs || '');
   const lng = String(rawLng || '').split('-')[0] || 'en';
   const ns = Array.isArray(namespaces) ? (namespaces[0] || 'common') : (namespaces || 'common');
 
-  // 1) If config provides a static template string, expand placeholders.
   if (cfg.loadPath && typeof cfg.loadPath === 'string') {
     let out = cfg.loadPath
       .replace('{{lng}}', lng)
@@ -148,17 +242,15 @@ function resolveLoadPath(lngs, namespaces) {
     return out;
   }
 
-  // 2) Otherwise, build from baseHref (works under virtual dirs, e.g. /OpenDocViewer/)
   let out = computeBaseHref() + 'locales/' + lng + '/' + ns + '.json';
   if (ver) out = appendQuery(out, { v: ver });
   if (WANT_DIAG) console.info('[i18n] loadPath (computed):', out, { lng, ns });
   return out;
 }
 
-/** Pull early defaults (fallback + supported list). */
 const { fallbackLng, supportedLngs } = getStaticI18nDefaults();
+const initialLanguage = resolveInitialLanguage({ fallbackLng, supportedLngs });
 
-/** Diagnostics (attach only in dev). */
 if (WANT_DIAG) {
   i18next
     .on('initialized', (opts) => {
@@ -193,7 +285,6 @@ if (WANT_DIAG) {
       try { console.info('[i18n] languageChanged', { lng }); } catch {}
     });
 
-  // DevTools helper (dev-only).
   try {
     if (typeof window !== 'undefined') {
       window.__I18N_DIAG__ = {
@@ -215,11 +306,11 @@ if (WANT_DIAG) {
           try {
             const ts = new Date();
             const ver = ts.getFullYear().toString()
-              + String(ts.getMonth()+1).padStart(2,'0')
-              + String(ts.getDate()).padStart(2,'0')
-              + String(ts.getHours()).padStart(2,'0')
-              + String(ts.getMinutes()).padStart(2,'0')
-              + String(ts.getSeconds()).padStart(2,'0');
+              + String(ts.getMonth() + 1).padStart(2, '0')
+              + String(ts.getDate()).padStart(2, '0')
+              + String(ts.getHours()).padStart(2, '0')
+              + String(ts.getMinutes()).padStart(2, '0')
+              + String(ts.getSeconds()).padStart(2, '0');
             localStorage.setItem('ODV_I18N_VERSION', ver);
             console.info('[i18n] bump to', ver);
             location.reload();
@@ -227,51 +318,49 @@ if (WANT_DIAG) {
         }
       };
     }
-  } catch { /* noop */ }
+  } catch {}
 } else {
-  // Ensure the helper is not present in production builds.
   try {
     if (typeof window !== 'undefined' && window.__I18N_DIAG__) delete window.__I18N_DIAG__;
-  } catch { /* noop */ }
+  } catch {}
 }
 
-/** One-time init. Keep suspense off so UI renders immediately and updates when ready. */
 i18next
   .use(HttpBackend)
-  .use(ICU) // enables {count, plural, ...} etc.
-  .use(LanguageDetector)
+  .use(ICU)
   .use(initReactI18next)
   .init({
-    debug: IS_DEV,                // i18next’s own logs only in dev
+    debug: IS_DEV,
+    lng: initialLanguage,
     fallbackLng,
     supportedLngs,
+    nonExplicitSupportedLngs: true,
     load: 'languageOnly',
-    ns: ['common'],               // add more namespaces as you scale
+    ns: ['common'],
     defaultNS: 'common',
     interpolation: { escapeValue: false },
-    detection: {
-      order: ['querystring', 'localStorage', 'navigator', 'htmlTag'],
-      caches: ['localStorage'],
-    },
     backend: {
-      // Resolve the URL per request so it respects the IIS app path in prod
-      // AND always includes a cache-busting version token.
       loadPath: (lngs, namespaces) => resolveLoadPath(lngs, namespaces),
-      // Client-side cache bypass only in dev.
       requestOptions: IS_DEV ? { cache: 'no-store' } : {}
     },
-    react: { useSuspense: false } // render immediately; update when resources load
+    react: { useSuspense: false }
   })
   .then(() => {
+    syncDocumentLanguage(i18next.language, supportedLngs, fallbackLng);
     if (WANT_DIAG) {
       try {
         console.info('[i18n] ready', {
           resolvedLanguage: i18next.language,
+          initialLanguage,
           usingLoadPath: resolveLoadPath(i18next.language, 'common'),
           versionToken: getI18nVersion()
         });
       } catch {}
     }
   });
+
+i18next.on('languageChanged', (lng) => {
+  syncDocumentLanguage(lng, supportedLngs, fallbackLng);
+});
 
 export default i18next;

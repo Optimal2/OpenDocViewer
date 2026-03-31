@@ -275,9 +275,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
     const sourceWidth = Math.max(1, Number(image.naturalWidth || currentPage?.realWidth || 0) || 1);
     const sourceHeight = Math.max(1, Number(image.naturalHeight || currentPage?.realHeight || 0) || 1);
-    const rotation = Number(imageProperties?.rotation || 0) || 0;
-    const brightness = Number(imageProperties?.brightness || 100) || 100;
-    const contrast = Number(imageProperties?.contrast || 100) || 100;
+    const rotation = normalizedRotation;
+    const brightnessRaw = Number(imageProperties?.brightness ?? 100);
+    const contrastRaw = Number(imageProperties?.contrast ?? 100);
+    const brightness = Number.isFinite(brightnessRaw) ? brightnessRaw : 100;
+    const contrast = Number.isFinite(contrastRaw) ? contrastRaw : 100;
 
     if (rotation === 90 || rotation === 270) {
       canvas.width = sourceHeight;
@@ -294,7 +296,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
     ctx.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
     ctx.restore();
-  }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties]);
+  }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties, normalizedRotation]);
 
   /**
    * Returns the surface whose intrinsic size should drive fit calculations.
@@ -784,8 +786,21 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   useImperativeHandle(ref, () => imperativeHandle, [imperativeHandle]);
 
   const displayedUrl = displayedAsset.url;
+  const isRequestedAssetVisible = displayedAsset.pageIndex === currentIndex && !!displayedUrl && !!imageLoaded;
+
+  useEffect(() => {
+    if (!isRequestedAssetVisible) return;
+    clearLoadingOverlayTimer();
+    if (blockingLoading) setBlockingLoading(false);
+    if (transitionPending) setTransitionPending(false);
+  }, [blockingLoading, clearLoadingOverlayTimer, isRequestedAssetVisible, transitionPending]);
+
   const hideDisplayedSurface = !!transitionPending && displayedAsset.pageIndex !== currentIndex;
-  const showLoadingOverlay = !showErrorState && (blockingLoading || (!displayedUrl && transitionPending));
+  const showLoadingOverlay = !showErrorState && !isRequestedAssetVisible && (
+    blockingLoading
+    || (!displayedUrl && transitionPending)
+    || (transitionPending && displayedAsset.pageIndex !== currentIndex)
+  );
   const hiddenImageStyle = isCanvasEnabled
     ? {
         opacity: 0,
