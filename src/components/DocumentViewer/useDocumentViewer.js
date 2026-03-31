@@ -34,6 +34,21 @@ function clampPage(n, total) {
 }
 
 /**
+ * Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer.
+ *
+ * JavaScript modulo keeps negative signs, so repeated 90-degree counter-clockwise rotation would
+ * otherwise produce -90 and -180. The edit canvas expects positive quarter-turn values when it
+ * decides whether width/height should be swapped.
+ *
+ * @param {*} value
+ * @returns {number}
+ */
+function normalizeRotationDegrees(value) {
+  const numeric = Math.round(Number(value) || 0);
+  return ((numeric % 360) + 360) % 360;
+}
+
+/**
  * Image adjustment properties for canvas edit mode.
  * @typedef {Object} ImageProperties
  * @property {number} rotation       Degrees, positive clockwise. 0 is neutral.
@@ -353,29 +368,28 @@ export function useDocumentViewer() {
   // --- Image adjustments ---------------------------------------------------------
   const handleRotationChange = useCallback((delta) => {
     const d = Number(delta || 0);
-    setImageProperties((s) => ({ ...s, rotation: Math.round((s.rotation + d) % 360) }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    setImageProperties((state) => ({
+      ...state,
+      rotation: normalizeRotationDegrees((Number(state.rotation) || 0) + d),
+    }));
   }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleBrightnessChange = useCallback((e) => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((s) => ({ ...s, brightness: v }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    setImageProperties((state) => ({ ...state, brightness: v }));
   }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleContrastChange = useCallback((e) => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((s) => ({ ...s, contrast: v }));
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
+    setImageProperties((state) => ({ ...state, contrast: v }));
   }, []);
 
   const resetImageProperties = useCallback(() => {
     setImageProperties({ rotation: 0, brightness: 100, contrast: 100 });
-    try { documentRenderRef.current?.forceRender?.(); } catch {}
   }, []);
 
   // --- Thumbnail resizer ---------------------------------------------------------
