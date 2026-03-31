@@ -14,7 +14,7 @@
  * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
-import React, { useContext, useCallback, useMemo, useEffect } from 'react';
+import React, { useContext, useCallback, useMemo, useEffect, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../logging/systemLogger.js';
@@ -54,6 +54,13 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  */
 
 /**
+ * React-like numeric page setter used by the toolbar.
+ * @callback PageNumberSetter
+ * @param {(number|function(number): number)} next
+ * @returns {void}
+ */
+
+/**
  * Zoom display state used by the newer toolbar UX paths.
  * @typedef {Object} ZoomState
  * @property {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [mode]
@@ -70,8 +77,8 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
- * @property {function(number|function(number): number): void} setPageNumber
- * @property {function(number|function(number): number): void} [setComparePageNumber]
+ * @property {PageNumberSetter} setPageNumber
+ * @property {PageNumberSetter} [setComparePageNumber]
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void=} actualSize
@@ -85,6 +92,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} handleCompare
  * @property {function(): void=} closeCompare
  * @property {boolean} isComparing
+ * @property {(number|null)=} comparePageNumber
  * @property {ImageProperties} imageProperties
  * @property {function(number): void} handleRotationChange
  * @property {function({ target: { value: number } }): void} handleBrightnessChange
@@ -104,6 +112,22 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
 const SLIDER_CENTER_RANGE = 20;
 /** Epsilon for considering zoom ≈ 100% (0.5%). */
 const ONE_TO_ONE_EPS = 0.005;
+
+/**
+ * Clamp a page number into the valid viewer range while preserving a safe fallback.
+ *
+ * @param {*} value
+ * @param {number} totalPages
+ * @param {number=} fallbackPage
+ * @returns {number}
+ */
+function normalizeToolbarPageNumber(value, totalPages, fallbackPage = 1) {
+  const total = Math.max(1, Number(totalPages) || 1);
+  const fallback = Math.max(1, Math.min(total, Math.floor(Number(fallbackPage) || 1)));
+  const numeric = Math.floor(Number(value));
+  if (!Number.isFinite(numeric)) return fallback;
+  return Math.max(1, Math.min(total, numeric));
+}
 
 /**
  * Toolbar shell for page navigation, zoom, compare/edit toggles, theme switching, and print entry.
@@ -136,6 +160,7 @@ const DocumentToolbar = ({
   closePrintDialog,
   handleCompare,
   isComparing,
+  comparePageNumber = null,
   imageProperties,
   handleRotationChange,
   handleBrightnessChange,
@@ -154,6 +179,45 @@ const DocumentToolbar = ({
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
+  const [isShiftPressed, setIsShiftPressed] = useState(false);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    /**
+     * @param {KeyboardEvent} event
+     * @returns {void}
+     */
+    const syncShiftState = (event) => {
+      setIsShiftPressed(!!event?.shiftKey);
+    };
+
+    /**
+     * @returns {void}
+     */
+    const clearShiftState = () => {
+      setIsShiftPressed(false);
+    };
+
+    /**
+     * @returns {void}
+     */
+    const handleVisibilityChange = () => {
+      if (document.hidden) clearShiftState();
+    };
+
+    window.addEventListener('keydown', syncShiftState, true);
+    window.addEventListener('keyup', syncShiftState, true);
+    window.addEventListener('blur', clearShiftState, true);
+    document.addEventListener('visibilitychange', handleVisibilityChange, true);
+
+    return () => {
+      window.removeEventListener('keydown', syncShiftState, true);
+      window.removeEventListener('keyup', syncShiftState, true);
+      window.removeEventListener('blur', clearShiftState, true);
+      document.removeEventListener('visibilitychange', handleVisibilityChange, true);
+    };
+  }, []);
 
   // Seed optional user-log context once so later print actions can attach host metadata.
   useEffect(() => {
@@ -259,6 +323,26 @@ const DocumentToolbar = ({
     stopPrimaryNextPageTimer();
     stopCompareNextPageTimer();
   }, [stopCompareNextPageTimer, stopPrimaryNextPageTimer]);
+
+  const compareNavigationEnabled = !compareDisabled && typeof setComparePageNumber === 'function';
+  const compareNavigationPage = useMemo(
+    () => normalizeToolbarPageNumber(comparePageNumber, totalPages, pageNumber),
+    [comparePageNumber, pageNumber, totalPages]
+  );
+  const useCompareDisabledState = isShiftPressed && compareNavigationEnabled;
+
+  const effectivePrevPageDisabled = useCompareDisabledState
+    ? compareNavigationPage <= 1
+    : !!prevPageDisabled;
+  const effectiveNextPageDisabled = useCompareDisabledState
+    ? compareNavigationPage >= Math.max(1, totalPages || 1)
+    : !!nextPageDisabled;
+  const effectiveFirstPageDisabled = useCompareDisabledState
+    ? compareNavigationPage <= 1
+    : !!firstPageDisabled;
+  const effectiveLastPageDisabled = useCompareDisabledState
+    ? compareNavigationPage >= Math.max(1, totalPages || 1)
+    : !!lastPageDisabled;
 
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
@@ -426,10 +510,10 @@ const DocumentToolbar = ({
 
       {/* Paging controls (now include editable page field inside the group) */}
       <PageNavigationButtons
-        prevPageDisabled={prevPageDisabled}
-        nextPageDisabled={nextPageDisabled}
-        firstPageDisabled={firstPageDisabled}
-        lastPageDisabled={lastPageDisabled}
+        prevPageDisabled={effectivePrevPageDisabled}
+        nextPageDisabled={effectiveNextPageDisabled}
+        firstPageDisabled={effectiveFirstPageDisabled}
+        lastPageDisabled={effectiveLastPageDisabled}
         startPrevPageTimer={startPrevPageTimer}
         stopPrevPageTimer={stopPrevPageTimer}
         startNextPageTimer={startNextPageTimer}
@@ -596,6 +680,7 @@ DocumentToolbar.propTypes = {
   handleCompare: PropTypes.func.isRequired,
   closeCompare: PropTypes.func,
   isComparing: PropTypes.bool.isRequired,
+  comparePageNumber: PropTypes.number,
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,

@@ -20,6 +20,12 @@ let utifPromise = null;
 
 const COMPRESSION_JPEG2000 = 34712;
 
+function createFallbackMainThreadError(message) {
+  const error = new Error(message);
+  error.fallbackMainThread = true;
+  return error;
+}
+
 function createLocalCanvas(w, h) {
   try {
     if (typeof OffscreenCanvas !== 'function') return null;
@@ -69,14 +75,14 @@ async function ensureUtif() {
 
 async function createBitmap(blob) {
   if (typeof createImageBitmap !== 'function') {
-    throw new Error('createImageBitmap is unavailable in this worker');
+    throw createFallbackMainThreadError('createImageBitmap is unavailable in this worker');
   }
   return createImageBitmap(blob);
 }
 
 async function canvasToBlob(canvas, mimeType = 'image/png', quality) {
   if (!canvas || typeof canvas.convertToBlob !== 'function') {
-    throw new Error('OffscreenCanvas.convertToBlob is unavailable in this worker');
+    throw createFallbackMainThreadError('OffscreenCanvas.convertToBlob is unavailable in this worker');
   }
   return canvas.convertToBlob({ type: mimeType, quality });
 }
@@ -88,9 +94,9 @@ async function scaleBlob(blob, maxWidth, maxHeight) {
     const targetWidth = Math.max(1, Math.round(bitmap.width * scale));
     const targetHeight = Math.max(1, Math.round(bitmap.height * scale));
     const canvas = createLocalCanvas(targetWidth, targetHeight);
-    if (!canvas) throw new Error('OffscreenCanvas is unavailable in this worker');
+    if (!canvas) throw createFallbackMainThreadError('OffscreenCanvas is unavailable in this worker');
     const ctx = canvas.getContext('2d', { alpha: true });
-    if (!ctx) throw new Error('Failed to acquire OffscreenCanvas context');
+    if (!ctx) throw createFallbackMainThreadError('Failed to acquire OffscreenCanvas context');
     ctx.clearRect(0, 0, targetWidth, targetHeight);
     ctx.drawImage(bitmap, 0, 0, targetWidth, targetHeight);
     const outBlob = await canvasToBlob(canvas, 'image/png');
