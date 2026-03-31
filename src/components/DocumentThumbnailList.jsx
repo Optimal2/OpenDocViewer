@@ -282,6 +282,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const overscan = Math.max(0, Number(renderConfig.visibleThumbnailOverscan) || 0);
 
   const containerRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const scrollSyncRafRef = useRef(0);
+  const lastKnownScrollTopRef = useRef(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerWidth, setContainerWidth] = useState(Math.max(160, Number(width) || 0));
@@ -356,9 +358,13 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     containerRef.current = node;
     thumbnailsContainerRef.current = node;
     if (node) {
-      setViewportHeight(node.clientHeight || 0);
-      setScrollTop(node.scrollTop || 0);
-      setContainerWidth(node.clientWidth || Math.max(160, Number(width) || 0));
+      const nextViewportHeight = node.clientHeight || 0;
+      const nextScrollTop = node.scrollTop || 0;
+      const nextContainerWidth = node.clientWidth || Math.max(160, Number(width) || 0);
+      lastKnownScrollTopRef.current = nextScrollTop;
+      setViewportHeight(nextViewportHeight);
+      setScrollTop(nextScrollTop);
+      setContainerWidth(nextContainerWidth);
     }
   }, [thumbnailsContainerRef, width]);
 
@@ -367,9 +373,13 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     if (!node) return undefined;
 
     const updateMeasurements = () => {
-      setViewportHeight(node.clientHeight || 0);
-      setScrollTop(node.scrollTop || 0);
-      setContainerWidth(node.clientWidth || Math.max(160, Number(width) || 0));
+      const nextViewportHeight = node.clientHeight || 0;
+      const nextScrollTop = node.scrollTop || 0;
+      const nextContainerWidth = node.clientWidth || Math.max(160, Number(width) || 0);
+      lastKnownScrollTopRef.current = nextScrollTop;
+      setViewportHeight(nextViewportHeight);
+      setScrollTop(nextScrollTop);
+      setContainerWidth(nextContainerWidth);
     };
 
     updateMeasurements();
@@ -401,9 +411,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       }
 
       if (Math.abs(nextScrollTop - viewportTop) >= 1) {
+        lastKnownScrollTopRef.current = nextScrollTop;
         node.scrollTop = nextScrollTop;
       }
-      setScrollTop(nextScrollTop);
     });
 
     return () => {
@@ -521,6 +531,15 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   ]);
 
   useEffect(() => {
+    return () => {
+      if (scrollSyncRafRef.current) {
+        window.cancelAnimationFrame(scrollSyncRafRef.current);
+        scrollSyncRafRef.current = 0;
+      }
+    };
+  }, []);
+
+  useEffect(() => {
     if (!warmAllThumbnails || totalCount <= 0) return undefined;
 
     let cancelled = false;
@@ -580,7 +599,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
    */
   const handleScroll = useCallback((event) => {
     const next = Number(event?.currentTarget?.scrollTop || 0);
-    setScrollTop(next);
+    lastKnownScrollTopRef.current = next;
+    if (scrollSyncRafRef.current) window.cancelAnimationFrame(scrollSyncRafRef.current);
+    scrollSyncRafRef.current = window.requestAnimationFrame(() => {
+      scrollSyncRafRef.current = 0;
+      setScrollTop((current) => (Math.abs(current - next) >= 1 ? next : current));
+    });
   }, []);
 
   /**

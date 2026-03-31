@@ -17,7 +17,8 @@
  * @module useViewerEffects
  */
 
-import { useEffect } from 'react';
+import { useCallback, useEffect, useRef } from 'react';
+import usePageTimer from '../../../hooks/usePageTimer.js';
 
 /**
  * Sticky zoom modes used by the viewer.
@@ -115,7 +116,6 @@ export function useViewerEffects(args) {
     isComparing,
     thumbnailWidth,
     pageNumber,
-    totalPages,
     goToPreviousPage,
     goToNextPage,
     goToFirstPage,
@@ -132,6 +132,35 @@ export function useViewerEffects(args) {
     onToggleTheme,
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
+
+  const activeKeyboardRepeatKeyRef = useRef(null);
+  const keyboardRepeatTargetRef = useRef('primary');
+
+  const handleKeyboardPreviousRepeatStep = useCallback(() => {
+    const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    goToPreviousPage(target);
+  }, [goToPreviousPage]);
+
+  const handleKeyboardNextRepeatStep = useCallback(() => {
+    const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    goToNextPage(target);
+  }, [goToNextPage]);
+
+  const {
+    startPageTimer: startKeyboardPreviousRepeatTimer,
+    stopPageTimer: stopKeyboardPreviousRepeatTimer,
+  } = usePageTimer(500, handleKeyboardPreviousRepeatStep);
+
+  const {
+    startPageTimer: startKeyboardNextRepeatTimer,
+    stopPageTimer: stopKeyboardNextRepeatTimer,
+  } = usePageTimer(500, handleKeyboardNextRepeatStep);
+
+  const stopKeyboardRepeat = useCallback(() => {
+    activeKeyboardRepeatKeyRef.current = null;
+    stopKeyboardPreviousRepeatTimer();
+    stopKeyboardNextRepeatTimer();
+  }, [stopKeyboardNextRepeatTimer, stopKeyboardPreviousRepeatTimer]);
 
   // Keep zoomState.scale in sync with numeric zoom.
   useEffect(() => {
@@ -225,34 +254,68 @@ export function useViewerEffects(args) {
   }, [keyboardPrintShortcutBehavior, onOpenPrintDialog]);
 
   // Global keyboard navigation & zoom shortcuts.
+  // Repeat navigation uses the same timer hook as the toolbar buttons instead of relying on the
+  // browser's native key-repeat cadence. That keeps fast keyboard paging aligned with press-and-hold
+  // mouse behavior and avoids overdriving React state updates on long documents.
   useEffect(() => {
+    /**
+     * @param {KeyboardEvent} e
+     * @returns {'primary'|'compare'}
+     */
+    const getTarget = (e) => (e.shiftKey ? 'compare' : 'primary');
+
+    /**
+     * @param {KeyboardEvent} e
+     * @returns {boolean}
+     */
+    const isNextRepeatKey = (e) => e.key === 'PageDown' || e.key === 'ArrowDown';
+
+    /**
+     * @param {KeyboardEvent} e
+     * @returns {boolean}
+     */
+    const isPreviousRepeatKey = (e) => e.key === 'PageUp' || e.key === 'ArrowUp';
+
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
       if (shouldIgnoreViewerShortcut(e)) return;
 
       const mod = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
-      const target = e.shiftKey ? 'compare' : 'primary';
+      const target = getTarget(e);
+
+      if (isNextRepeatKey(e)) {
+        e.preventDefault();
+        if (e.repeat && activeKeyboardRepeatKeyRef.current === e.key) return;
+        stopKeyboardRepeat();
+        keyboardRepeatTargetRef.current = target;
+        activeKeyboardRepeatKeyRef.current = e.key;
+        startKeyboardNextRepeatTimer('next');
+        return;
+      }
+
+      if (isPreviousRepeatKey(e)) {
+        e.preventDefault();
+        if (e.repeat && activeKeyboardRepeatKeyRef.current === e.key) return;
+        stopKeyboardRepeat();
+        keyboardRepeatTargetRef.current = target;
+        activeKeyboardRepeatKeyRef.current = e.key;
+        startKeyboardPreviousRepeatTimer('prev');
+        return;
+      }
 
       switch (e.key) {
-        case 'PageDown':
-        case 'ArrowDown':
-          e.preventDefault();
-          goToNextPage(target);
-          break;
-        case 'PageUp':
-        case 'ArrowUp':
-          e.preventDefault();
-          goToPreviousPage(target);
-          break;
         case 'Home':
           e.preventDefault();
+          stopKeyboardRepeat();
           goToFirstPage(target);
           break;
         case 'End':
           e.preventDefault();
+          stopKeyboardRepeat();
           goToLastPage(target);
           break;
         case 'Escape':
+          stopKeyboardRepeat();
           if (e.shiftKey && isComparing) {
             e.preventDefault();
             closeCompare();
@@ -285,15 +348,38 @@ export function useViewerEffects(args) {
       }
     }
 
+    /** @param {KeyboardEvent} e */
+    function onKeyUp(e) {
+      if (activeKeyboardRepeatKeyRef.current !== e.key) return;
+      stopKeyboardRepeat();
+    }
+
+    /** @returns {void} */
+    function onWindowBlur() {
+      stopKeyboardRepeat();
+    }
+
+    /** @returns {void} */
+    function onVisibilityChange() {
+      if (document.hidden) stopKeyboardRepeat();
+    }
+
     window.addEventListener('keydown', onKeyDown, true);
-    return () => { window.removeEventListener('keydown', onKeyDown, true); };
+    window.addEventListener('keyup', onKeyUp, true);
+    window.addEventListener('blur', onWindowBlur, true);
+    document.addEventListener('visibilitychange', onVisibilityChange, true);
+
+    return () => {
+      window.removeEventListener('keydown', onKeyDown, true);
+      window.removeEventListener('keyup', onKeyUp, true);
+      window.removeEventListener('blur', onWindowBlur, true);
+      document.removeEventListener('visibilitychange', onVisibilityChange, true);
+      stopKeyboardRepeat();
+    };
   }, [
-    totalPages,
     actualSize,
     fitToScreen,
     fitToWidth,
-    goToPreviousPage,
-    goToNextPage,
     goToFirstPage,
     goToLastPage,
     closeCompare,
@@ -304,6 +390,9 @@ export function useViewerEffects(args) {
     zoomOut,
     onOpenPrintDialog,
     onToggleTheme,
+    startKeyboardNextRepeatTimer,
+    startKeyboardPreviousRepeatTimer,
+    stopKeyboardRepeat,
   ]);
 
   // Optional: auto-fit after first mount if renderer supports it.
