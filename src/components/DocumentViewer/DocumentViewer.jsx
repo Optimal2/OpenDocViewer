@@ -138,6 +138,7 @@ const DocumentViewer = () => {
         isComparing={isComparing}
         handleCompare={handleCompare}
         closeCompare={closeCompare}
+        comparePageNumber={comparePageNumber}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}

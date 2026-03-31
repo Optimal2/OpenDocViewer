@@ -270,6 +270,57 @@ export const ViewerProvider = ({ children }) => {
     });
   }, []);
 
+
+  /**
+   * Collect a stable snapshot of runtime counters for the optional diagnostics overlay.
+   *
+   * The collector reads only refs/store stats, so it remains valid across session resets and can be
+   * reused by timers as well as key session transitions.
+   *
+   * @returns {void}
+   */
+  const collectRuntimeDiagnostics = useCallback(() => {
+    const tempStats = tempStoreRef.current?.getStats?.() || {};
+    const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
+    const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
+    let fullReadyCount = 0;
+    let thumbnailReadyCount = 0;
+    for (const page of pages) {
+      if (!page) continue;
+      if (page.fullSizeStatus === 1 && page.fullSizeUrl) fullReadyCount += 1;
+      const thumbnailReady = page.thumbnailUsesFullAsset
+        ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
+        : (page.thumbnailStatus === 1 && !!page.thumbnailUrl);
+      if (thumbnailReady) thumbnailReadyCount += 1;
+    }
+
+    setRuntimeDiagnostics((current) => {
+      const next = {
+        sessionStartedAtMs: Number(sessionStartedAtMsRef.current || 0),
+        loadRunStartedAtMs: Number(loadRunStartedAtMsRef.current || 0),
+        loadRunCompletedAtMs: Number(loadRunCompletedAtMsRef.current || 0),
+        sourceStoreMode: String(tempStats.mode || 'memory'),
+        assetStoreMode: pageAssetStoreRef.current ? String(assetStats.mode || 'memory') : 'disabled',
+        sourceCount: Math.max(0, Number(tempStats.sourceCount || sourceDescriptorsRef.current.size || 0)),
+        assetCount: Math.max(0, Number(assetStats.assetCount || 0)),
+        sourceBytes: Math.max(0, Number(tempStats.totalBytes || 0)),
+        assetBytes: Math.max(0, Number(assetStats.totalBytes || 0)),
+        fullReadyCount,
+        thumbnailReadyCount,
+        fullCacheCount: fullPageCacheRef.current.size,
+        thumbnailCacheCount: thumbnailCacheRef.current.size,
+        trackedObjectUrlCount: getTrackedObjectUrlCount(),
+        warmupQueueLength: warmupQueueRef.current.length,
+        pendingAssetCount: pendingAssetPromisesRef.current.size,
+        sourceStoreEncrypted: !!tempStats.encrypted,
+        assetStoreEncrypted: !!assetStats.encrypted,
+      };
+
+      const same = Object.keys(next).every((key) => next[key] === current[key]);
+      return same ? current : next;
+    });
+  }, []);
+
   /**
    * @returns {void}
    */
@@ -354,10 +405,6 @@ export const ViewerProvider = ({ children }) => {
     sessionConfigRef.current = defaultConfig;
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
-    if (diagnosticsTimerRef.current) {
-      try { window.clearInterval(diagnosticsTimerRef.current); } catch {}
-      diagnosticsTimerRef.current = null;
-    }
     previousLoadingRunActiveRef.current = false;
     sessionStartedAtMsRef.current = 0;
     loadRunStartedAtMsRef.current = 0;
@@ -466,7 +513,8 @@ export const ViewerProvider = ({ children }) => {
     }
 
     setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
-  }, []);
+    collectRuntimeDiagnostics();
+  }, [collectRuntimeDiagnostics]);
 
   /**
    * @returns {void}
@@ -516,13 +564,14 @@ export const ViewerProvider = ({ children }) => {
     loadRunCompletedAtMsRef.current = 0;
     previousLoadingRunActiveRef.current = false;
     setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
+    collectRuntimeDiagnostics();
     logger.info('Initialized document session', {
       mode: tempStore.getStats?.().mode,
       assetMode: pageAssetStoreRef.current?.getStats?.().mode || 'disabled',
       requestedMode: sessionConfigRef.current.mode,
       expectedSourceCount: options?.expectedSourceCount || 0,
     });
-  }, [resetViewerState]);
+  }, [collectRuntimeDiagnostics, resetViewerState]);
 
   /**
    * @param {DisposeDocumentSessionOptions=} options
@@ -578,10 +627,6 @@ export const ViewerProvider = ({ children }) => {
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     setWorkerCount(0);
-    if (diagnosticsTimerRef.current) {
-      try { window.clearInterval(diagnosticsTimerRef.current); } catch {}
-      diagnosticsTimerRef.current = null;
-    }
     previousLoadingRunActiveRef.current = false;
     sessionStartedAtMsRef.current = 0;
     loadRunStartedAtMsRef.current = 0;
@@ -1392,51 +1437,10 @@ export const ViewerProvider = ({ children }) => {
       loadRunCompletedAtMsRef.current = Date.now();
     }
     previousLoadingRunActiveRef.current = loadingRunActive;
-  }, [loadingRunActive]);
+    collectRuntimeDiagnostics();
+  }, [collectRuntimeDiagnostics, loadingRunActive]);
 
   useEffect(() => {
-    const collectRuntimeDiagnostics = () => {
-      const tempStats = tempStoreRef.current?.getStats?.() || {};
-      const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
-      const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
-      let fullReadyCount = 0;
-      let thumbnailReadyCount = 0;
-      for (const page of pages) {
-        if (!page) continue;
-        if (page.fullSizeStatus === 1 && page.fullSizeUrl) fullReadyCount += 1;
-        const thumbnailReady = page.thumbnailUsesFullAsset
-          ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
-          : (page.thumbnailStatus === 1 && !!page.thumbnailUrl);
-        if (thumbnailReady) thumbnailReadyCount += 1;
-      }
-
-      setRuntimeDiagnostics((current) => {
-        const next = {
-          sessionStartedAtMs: Number(sessionStartedAtMsRef.current || 0),
-          loadRunStartedAtMs: Number(loadRunStartedAtMsRef.current || 0),
-          loadRunCompletedAtMs: Number(loadRunCompletedAtMsRef.current || 0),
-          sourceStoreMode: String(tempStats.mode || 'memory'),
-          assetStoreMode: pageAssetStoreRef.current ? String(assetStats.mode || 'memory') : 'disabled',
-          sourceCount: Math.max(0, Number(tempStats.sourceCount || sourceDescriptorsRef.current.size || 0)),
-          assetCount: Math.max(0, Number(assetStats.assetCount || 0)),
-          sourceBytes: Math.max(0, Number(tempStats.totalBytes || 0)),
-          assetBytes: Math.max(0, Number(assetStats.totalBytes || 0)),
-          fullReadyCount,
-          thumbnailReadyCount,
-          fullCacheCount: fullPageCacheRef.current.size,
-          thumbnailCacheCount: thumbnailCacheRef.current.size,
-          trackedObjectUrlCount: getTrackedObjectUrlCount(),
-          warmupQueueLength: warmupQueueRef.current.length,
-          pendingAssetCount: pendingAssetPromisesRef.current.size,
-          sourceStoreEncrypted: !!tempStats.encrypted,
-          assetStoreEncrypted: !!assetStats.encrypted,
-        };
-
-        const same = Object.keys(next).every((key) => next[key] === current[key]);
-        return same ? current : next;
-      });
-    };
-
     collectRuntimeDiagnostics();
     const timerId = window.setInterval(collectRuntimeDiagnostics, 1000);
     diagnosticsTimerRef.current = timerId;
@@ -1444,7 +1448,7 @@ export const ViewerProvider = ({ children }) => {
       if (diagnosticsTimerRef.current === timerId) diagnosticsTimerRef.current = null;
       try { window.clearInterval(timerId); } catch {}
     };
-  }, []);
+  }, [collectRuntimeDiagnostics]);
 
   useEffect(() => () => {
     resetViewerState().catch((e) => {

@@ -264,6 +264,25 @@ const PerformanceMonitor = () => {
       </div>
 
       <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.fetchLabel', { defaultValue: 'Fetch:' })}</span>{' '}
+        <strong>{String(documentLoadingConfig?.fetch?.strategy || 'sequential')}</strong>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          {t('perf.renderLabel', { defaultValue: 'Render:' })} <strong>{String(documentLoadingConfig?.render?.strategy || 'eager-nearby')}</strong>
+        </span>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          {t('perf.backendLabel', { defaultValue: 'Backend:' })} <strong>{String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}</strong>
+        </span>
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.workerRoutingLabel', { defaultValue: 'Worker routing:' })}</span>{' '}
+        <strong>Raster {documentLoadingConfig?.render?.useWorkersForRasterImages === false ? 'off' : 'on'}</strong>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          TIFF <strong>{documentLoadingConfig?.render?.useWorkersForTiff === false ? 'off' : 'on'}</strong>
+        </span>
+      </div>
+
+      <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.loadRunLabel')}</span>{' '}
         <strong>{formatDuration(loadRunElapsedMs)}</strong>
         <span style={{ marginLeft: 8, opacity: 0.75 }}>

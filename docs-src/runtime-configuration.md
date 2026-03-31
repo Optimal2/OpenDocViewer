@@ -198,6 +198,12 @@ What these knobs control:
   - `0` means “decide automatically from hardwareConcurrency/deviceMemory”
 - `memoryPressure.*`
   - controls the one-way `auto` degradation thresholds; a session can step from `normal` to `soft` to `hard` but never back up again
+- compare navigation modifiers
+  - toolbar page buttons still target the left pane by default
+  - when `Shift` is held, the same toolbar buttons target the right compare pane instead
+  - the button disabled state follows the right pane while `Shift` is held so compare navigation stays available even when the left pane sits on the first/last page
+- performance overlay
+  - the diagnostics HUD now reports fetch strategy, render strategy/backend, worker routing, load-run duration, source/asset store usage, cache counts, tracked object URLs, and pending/warm-up activity
 
 Operationally, the hybrid pipeline works like this:
 

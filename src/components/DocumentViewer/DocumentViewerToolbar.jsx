@@ -24,13 +24,20 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  */
 
 /**
+ * React-like numeric page setter used by the toolbar adapter.
+ * @callback PageNumberSetter
+ * @param {(number|function(number): number)} next
+ * @returns {void}
+ */
+
+/**
  * Props consumed by DocumentViewerToolbar.
  * @typedef {Object} DocumentViewerToolbarProps
  * @property {number} pageNumber
  * @property {number} totalPages
  * @property {boolean} isDocumentLoading
- * @property {function(number|function(number): number): void} setPageNumber
- * @property {function(number|function(number): number): void} setComparePageNumber
+ * @property {PageNumberSetter} setPageNumber
+ * @property {PageNumberSetter} setComparePageNumber
  * @property {function(string=): void} goToPreviousPage
  * @property {function(string=): void} goToNextPage
  * @property {function(string=): void} goToFirstPage
@@ -52,6 +59,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} handleCompare
  * @property {function(): void} closeCompare
  * @property {boolean} isComparing
+ * @property {(number|null)} comparePageNumber
  * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
  * @property {function(number): void} handleRotationChange
  * @property {function(*): void} handleBrightnessChange
@@ -93,6 +101,7 @@ const DocumentViewerToolbar = ({
   handleCompare,
   closeCompare,
   isComparing,
+  comparePageNumber,
   imageProperties,
   handleRotationChange,
   handleBrightnessChange,
@@ -140,6 +149,7 @@ const DocumentViewerToolbar = ({
       handleCompare={handleCompare}
       closeCompare={closeCompare}
       isComparing={isComparing}
+      comparePageNumber={comparePageNumber}
       imageProperties={imageProperties}
       handleRotationChange={handleRotationChange}
       handleBrightnessChange={handleBrightnessChange}
@@ -183,6 +193,7 @@ DocumentViewerToolbar.propTypes = {
   handleCompare: PropTypes.func.isRequired,
   closeCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
+  comparePageNumber: PropTypes.number,
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
