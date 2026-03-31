@@ -134,7 +134,7 @@ documentLoading: {
     protection: 'aes-gcm-session',
     staleSessionTtlMs: 24 * 60 * 60 * 1000,
     blobCacheEntries: 24,
-    persistThumbnails: true,
+    persistThumbnails: false,
     releaseSinglePageRasterSourceAfterFullPersist: false,
   },
   render: {
@@ -151,12 +151,12 @@ documentLoading: {
     thumbnailMaxWidth: 220,
     thumbnailMaxHeight: 310,
     thumbnailLoadingStrategy: 'adaptive',
-    thumbnailSourceStrategy: 'auto',
+    thumbnailSourceStrategy: 'prefer-full-images',
     thumbnailEagerPageThreshold: 10000,
     lookAheadPageCount: 12,
     lookBehindPageCount: 8,
     visibleThumbnailOverscan: 24,
-    fullPageCacheLimit: 256,
+    fullPageCacheLimit: 500,
     thumbnailCacheLimit: 8192,
     maxOpenPdfDocuments: 16,
     maxOpenTiffDocuments: 16,
@@ -204,6 +204,10 @@ What these knobs control:
   - the button disabled state follows the right pane while `Shift` is held so compare navigation stays available even when the left pane sits on the first/last page
 - performance overlay
   - the diagnostics HUD now reports fetch strategy, render strategy/backend, worker routing, load-run duration, source/asset store usage, cache counts, tracked object URLs, and pending/warm-up activity
+  - the load-run timer stops when the current load finishes, but the other counters continue updating while the overlay stays visible
+  - when the overlay is disabled, the viewer skips the overlay-specific polling and snapshot collection entirely
+- print dialog during loading
+  - while sources/pages are still being discovered, the print dialog stays in a simplified active-page-only mode to avoid confusing resets while total page counts are still changing
 
 Operationally, the hybrid pipeline works like this:
 
@@ -227,13 +231,13 @@ Operationally, the hybrid pipeline works like this:
 
 `documentLoading.render.thumbnailEagerPageThreshold` controls when `adaptive` changes from full background thumbnail warm-up to current/visible-first thumbnail requests. The scrollbar height remains deterministic in both modes because one row is rendered for every page.
 
-In this customer-focused configuration, the prefetch stage still keeps concurrency moderate, but it fails fast instead of retrying. Thumbnails are warmed eagerly and use dedicated thumbnail rasters so the pane stays responsive even when documents contain large source images.
+In this customer-focused configuration, the prefetch stage still keeps concurrency moderate, but it fails fast instead of retrying. The default profile now prefers reusing the full rendered page for both the large viewer and the thumbnail pane so long as memory pressure remains acceptable. When the session degrades toward memory protection, the same runtime policy can switch back to dedicated thumbnail rasters.
 
 
 `documentLoading.render.thumbnailSourceStrategy` supports:
 
-- `auto` — on high-memory machines, reuse full raster-image assets for thumbnails when the page count is low enough; otherwise build dedicated thumbnails
+- `auto` — let the active mode decide; on performance-friendly runs it prefers reuse, while memory-heavy runs can switch back to dedicated thumbnails
 - `dedicated` — always build dedicated thumbnails
-- `prefer-full-images` — always reuse full raster-image assets for image thumbnails
+- `prefer-full-images` — reuse the same rendered page asset for both the large pane and the thumbnail pane until memory-pressure rules override that choice
 
-The thumbnail pane itself always keeps a deterministic scrollbar height. Asset reuse can change what gets stored in memory, but not the pane geometry.
+The thumbnail pane itself always keeps a deterministic scrollbar height. Asset reuse changes what gets stored in memory and what gets persisted, but not the pane geometry.

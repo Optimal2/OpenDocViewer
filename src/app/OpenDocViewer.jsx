@@ -171,7 +171,7 @@ const OpenDocViewer = ({
 
   return (
     <ThemeProvider>
-      <ViewerProvider>
+      <ViewerProvider diagnosticsEnabled={showPerf}>
         <DocumentConsumerWrapper
           folder={folder}
           extension={extension}

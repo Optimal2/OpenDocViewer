@@ -90,10 +90,12 @@ export function ensureODVPrintCSS() {
  * @param {function():void} params.onClose
  * @param {function(PrintSubmitDetail):void} params.onSubmit
  * @param {number} params.totalPages
+ * @param {boolean=} params.isDocumentLoading
+ * @param {number=} params.activePageNumber
  * @param {function(string, Object=): string} params.t
  * @param {any} params.i18n
  */
-export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, t, i18n }) {
+export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, isDocumentLoading = false, activePageNumber = 1, t, i18n }) {
   const cfg = getCfg();
   const userLogCfg = cfg?.userLog || {};
   const headerCfg  = cfg?.printHeader || {};
@@ -106,6 +108,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   const showReason  = showReasonWhen  === 'always' || (showReasonWhen  === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showUserSection = !!(showReason || showForWhom);
+  const restrictToActivePage = !!isDocumentLoading;
 
   // Reason rules & options (dropdown with optional extra, or plain textbox)
   const reasonCfg = fld?.reason || {};
@@ -160,8 +163,23 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
 
   useEffect(() => { ensureODVPrintCSS(); }, []);
 
+  const wasOpenRef = useRef(false);
+  const previousDefaultReasonRef = useRef(defaultReason);
+
   useEffect(() => {
-    if (!isOpen) return;
+    if (!isOpen) {
+      wasOpenRef.current = false;
+      previousDefaultReasonRef.current = defaultReason;
+      return;
+    }
+
+    const openedNow = !wasOpenRef.current;
+    const defaultReasonChanged = previousDefaultReasonRef.current !== defaultReason;
+    wasOpenRef.current = true;
+    previousDefaultReasonRef.current = defaultReason;
+
+    if (!openedNow && !defaultReasonChanged) return;
+
     setModeGroup('basic');
     setBasicChoice('active');
     setAdvancedChoice('range');
@@ -174,6 +192,13 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     setForWhomText('');
     setError('');
   }, [isOpen, totalPages, defaultReason]);
+
+  useEffect(() => {
+    if (!isOpen || !restrictToActivePage) return;
+    setModeGroup('basic');
+    setBasicChoice('active');
+    setError('');
+  }, [isOpen, restrictToActivePage]);
 
   // Prevent outside interactions from collapsing selects (anti-flicker)
   useEffect(() => {
@@ -335,6 +360,12 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     const vf = validateUserFields();
     if (!vf.ok) { setError(vf.msg || t('printDialog.errors.review')); return; }
 
+    if (restrictToActivePage) {
+      setError('');
+      onSubmit({ mode: 'active', ...extras() });
+      return;
+    }
+
     if (modeGroup === 'basic') {
       setError('');
       onSubmit({ mode: (basicChoice === 'active' ? 'active' : 'all'), ...extras() });
@@ -360,7 +391,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   }, [
     modeGroup, basicChoice, advancedChoice,
     customText, totalPages, onSubmit,
-    extras, validateUserFields, validateRange, makeDescendingSequence, t
+    extras, restrictToActivePage, validateUserFields, validateRange, makeDescendingSequence, t
   ]);
 
   const onBackdropMouseDown = (e) => {
@@ -370,6 +401,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   const titleSuffix = modeGroup === 'basic' ? t('printDialog.mode.basic') : t('printDialog.mode.advanced');
   const switchTo = t('printDialog.modeSwitch.to', { mode: t('printDialog.mode.advanced') });
   const switchBack = t('printDialog.modeSwitch.back', { mode: t('printDialog.mode.basic') });
+  const loadingHint = t('printDialog.loadingHint', { page: activePageNumber });
   // This is a TRANSLATION hint line (not the config suffix):
   const extraSuffix = (hasOptions && needsExtra) ? t('printDialog.reason.extra.suffix') : '';
 
@@ -390,6 +422,8 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     extraText, setExtraText,
     forWhomText, setForWhomText,
     error, setError,
+    restrictToActivePage,
+    activePageNumber,
     // derived/config-driven
     showUserSection, showReason, showForWhom,
     reasonCfg, forWhomCfg,
@@ -405,7 +439,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     extraPlaceholder,
     optionLabel,
     // ui strings
-    titleSuffix, switchTo, switchBack, extraSuffix,
+    titleSuffix, switchTo, switchBack, loadingHint, extraSuffix,
     // handlers
     submit, onBackdropMouseDown
   };

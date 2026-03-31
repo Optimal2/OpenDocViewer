@@ -294,7 +294,10 @@
         protection: 'aes-gcm-session',
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
         blobCacheEntries: 16,
-        persistThumbnails: true,
+        // Dedicated thumbnails are skipped by default because the preferred runtime profile reuses
+        // the rendered full-size page for both the main view and the thumbnail pane until memory
+        // pressure forces a downgrade.
+        persistThumbnails: false,
         // Keep original single-page raster sources by default for stability.
         // Set to true in site config if you explicitly want the original source released after the
         // full-page blob has been persisted.
@@ -327,13 +330,14 @@
         thumbnailMaxWidth: 220,
         thumbnailMaxHeight: 310,
 
-        // Customer-optimised thumbnail strategy: keep the pane warm by queueing the whole set in
-        // the background. This costs more RAM/work, but the pane feels much more immediate.
+        // Customer-optimised thumbnail scheduling: warm the pane in the background while the viewer
+        // still prioritises full-size page assets.
         thumbnailLoadingStrategy: 'eager',
 
-        // Dedicated thumbnail rasters keep the pane lighter and avoid decoding full-size images
-        // for every thumbnail tile in large image-heavy runs.
-        thumbnailSourceStrategy: 'dedicated',
+        // Reuse the full rendered page for the thumbnail pane by default. Auto/hard memory
+        // protection can still switch to dedicated thumbnails later if the browser starts to run
+        // low on memory.
+        thumbnailSourceStrategy: 'prefer-full-images',
 
         // When strategy is "adaptive", documents at or below this page count queue the
         // entire thumbnail set in the background while still keeping a fixed-height pane.
@@ -343,7 +347,7 @@
         visibleThumbnailOverscan: 24,
         // In-memory object-URL cache limits. The rendered blobs may still remain in the asset store
         // even if an older object URL is later revoked from RAM.
-        fullPageCacheLimit: 256,
+        fullPageCacheLimit: 500,
         thumbnailCacheLimit: 8192,
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
         maxOpenPdfDocuments: 16,

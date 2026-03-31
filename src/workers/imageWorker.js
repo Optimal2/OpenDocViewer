@@ -18,6 +18,9 @@ let utifModule = null;
 /** @type {(Promise<any>|null)} */
 let utifPromise = null;
 
+// TIFF Tag 259 (Compression): value 34712 indicates JPEG 2000 compression. We route those pages
+// back to the main-thread fallback because worker-side decode support is not reliable enough across
+// the TIFF variants seen in production.
 const COMPRESSION_JPEG2000 = 34712;
 
 function createFallbackMainThreadError(message) {
@@ -235,6 +238,9 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
     throw error;
   }
 
+  // Intentional zero-copy view over the UTIF RGBA buffer. The worker does not mutate `rgba` after
+  // ImageData creation, so avoiding a defensive copy keeps TIFF rendering faster and lowers peak
+  // memory pressure for large pages.
   const imageData = new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength), width, height);
   ctx.putImageData(imageData, 0, 0);
 

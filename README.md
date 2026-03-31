@@ -248,6 +248,8 @@ The config covers areas such as:
 
 For deployment and precedence details, see `docs-src/runtime-configuration.md`.
 
+When the performance overlay is disabled, OpenDocViewer also disables the overlay-specific runtime polling and snapshot work instead of merely hiding the panel.
+
 ---
 
 
@@ -265,11 +267,11 @@ The runtime pipeline is now intentionally hybrid rather than purely eager or pur
 2. store original bytes in memory or IndexedDB depending on the active mode and current pressure stage
 3. analyze page counts in stable order from the prefetched source blob
 4. insert placeholders immediately so the viewer knows the full document structure early
-5. render full pages and thumbnails either eagerly or lazily depending on the active mode
+5. render full pages and thumbnails either eagerly or lazily depending on the active mode; by default the same full page asset is reused for thumbnails while memory pressure allows it
 6. persist rendered page blobs in a second cache layer so later navigation and printing can usually reuse the same blob without re-rendering
-7. evict object URLs from RAM independently of the persisted blob caches
+7. evict object URLs from RAM independently of the persisted blob caches when the active profile no longer wants everything resident
 
-Workers are active again for raster images and TIFF whenever the configured backend allows it; PDF still uses the pdf.js rendering path. The default `auto` mode keeps the old fast-feeling behavior on capable machines but can fall back to a more memory-efficient profile when page volume or heap pressure grows.
+Workers are active again for raster images and TIFF whenever the configured backend allows it, and that routing decision is made per file/page asset rather than once for the entire run. PDF still uses the pdf.js rendering path. The default `auto` mode keeps the old fast-feeling behavior on capable machines but can fall back to a more memory-efficient profile when page volume or heap pressure grows.
 
 The same runtime system also fixes a serious page-consistency issue: the thumbnail selection is now tied to the actually displayed page until the viewer switches to an explicit loading overlay. This prevents the UI from showing “page X selected” while the large viewer still shows page Y.
 
@@ -288,6 +290,7 @@ Key design points:
 - printing uses a hidden iframe instead of popups
 - current page printing prefers the renderer’s active canvas/image
 - multi-page printing can use ordered full-size URLs and page metadata
+- while the document is still loading, the print dialog intentionally stays in an active-page-only mode to avoid unstable page-range UI
 - optional header overlays are injected into the print iframe DOM
 
 ---

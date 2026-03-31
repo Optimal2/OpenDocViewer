@@ -327,6 +327,15 @@ export class PageAssetRenderer {
     return this.canRenderInWorker(ext, variant);
   }
 
+  /**
+   * Render one requested page asset. Worker routing is decided per page/source file.
+   * A PDF or fallback TIFF does not force unrelated raster files onto the main thread;
+   * only the current asset falls back when its own worker path is unavailable.
+   *
+   * @param {PageDescriptor} descriptor
+   * @param {RenderPageAssetOptions} options
+   * @returns {Promise<RenderedAsset>}
+   */
   async renderPageAsset(descriptor, options) {
     const variant = options?.variant === 'thumbnail' ? 'thumbnail' : 'full';
     const ext = String(descriptor?.fileExtension || '').toLowerCase();
