@@ -140,11 +140,12 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     const bytes = new Uint8Array(arrayBuffer);
     const parts = [bytes.subarray(tablesOffset, tablesOffset + tablesLen)];
 
+    const minLen = Math.min(t273.length, t279.length);
     let totalScanLen = 0;
-    for (let i = 0; i < t273.length && i < t279.length; i += 1) totalScanLen += (t279[i] >>> 0);
+    for (let i = 0; i < minLen; i += 1) totalScanLen += (t279[i] >>> 0);
     const scanAll = new Uint8Array(totalScanLen);
     let cursor = 0;
-    for (let i = 0; i < t273.length && i < t279.length; i += 1) {
+    for (let i = 0; i < minLen; i += 1) {
       const offset = t273[i] >>> 0;
       const len = t279[i] >>> 0;
       scanAll.set(bytes.subarray(offset, offset + len), cursor);
