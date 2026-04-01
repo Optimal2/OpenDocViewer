@@ -174,7 +174,7 @@
         sourceCountThreshold: 0,
 
         // Warn only for clearly large page volumes by default.
-        pageCountThreshold: 5000,
+        pageCountThreshold: 10000,
 
         // Start estimating total page volume after this many sources have been analyzed.
         probePageThresholdSources: 2,
@@ -195,7 +195,10 @@
         // When every page is a single raster image and the run is not too large,
         // the viewer may reuse full images for thumbnails instead of generating a
         // separate thumbnail asset for each page.
-        reuseFullImageThumbnailsBelowPageCount: 600
+        reuseFullImageThumbnailsBelowPageCount: 2000,
+        // Auto mode stays on the fast eager path up to roughly this many pages unless the browser
+        // enters a clearly catastrophic memory condition.
+        performanceWindowPageCount: 2000
       },
 
       fetch: {
@@ -229,7 +232,7 @@
         switchToIndexedDbAboveSourceCount: 0,
 
         // Switch to IndexedDB once the prefetched original source bytes grow beyond this size.
-        switchToIndexedDbAboveTotalMiB: 768,
+        switchToIndexedDbAboveTotalMiB: 1536,
 
         //   "none"            -> plain temporary storage
         //   "aes-gcm-session" -> encrypted with an in-memory per-session key
@@ -250,7 +253,7 @@
         switchToIndexedDbAboveAssetCount: 0,
 
         // Switch to IndexedDB once the rendered asset store grows beyond this size.
-        switchToIndexedDbAboveTotalMiB: 1536,
+        switchToIndexedDbAboveTotalMiB: 4096,
 
         protection: 'aes-gcm-session',
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
@@ -314,6 +317,17 @@
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
         maxOpenPdfDocuments: 16,
         maxOpenTiffDocuments: 16
+      },
+
+      memoryPressure: {
+        enabled: true,
+        sampleIntervalMs: 2000,
+        softHeapUsageRatio: 0.82,
+        hardHeapUsageRatio: 0.92,
+        softResidentMiB: 1200,
+        hardResidentMiB: 1800,
+        forceMemoryModeAbovePageCount: 10000,
+        forceMemoryModeAboveSourceCount: 0
       }
     },
 

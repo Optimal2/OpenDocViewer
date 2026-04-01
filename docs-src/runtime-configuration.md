@@ -92,7 +92,7 @@ The most important top-level knob is now `documentLoading.mode`:
 
 - `performance` — eager warm-up, worker-heavy raster/TIFF rendering, larger RAM caches
 - `memory` — lazy viewport-first rendering, aggressive eviction, IndexedDB-friendly defaults
-- `auto` — start near `performance`, then degrade one-way to softer/harder memory protection stages
+- `auto` — start on the fast eager path for ordinary runs, then degrade one-way only when page volume or memory pressure becomes genuinely large
 
 Example:
 
@@ -101,7 +101,7 @@ documentLoading: {
   mode: 'auto',
   warning: {
     sourceCountThreshold: 0,
-    pageCountThreshold: 5000,
+    pageCountThreshold: 10000,
     probePageThresholdSources: 2,
     minStopRecommendationSources: 0,
     minStopRecommendationPages: 10000,
@@ -110,7 +110,8 @@ documentLoading: {
     enabled: true,
     preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
     preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
-    reuseFullImageThumbnailsBelowPageCount: 600,
+    reuseFullImageThumbnailsBelowPageCount: 2000,
+    performanceWindowPageCount: 2000,
   },
   fetch: {
     strategy: 'sequential',
@@ -122,7 +123,7 @@ documentLoading: {
   sourceStore: {
     mode: 'adaptive',
     switchToIndexedDbAboveSourceCount: 0,
-    switchToIndexedDbAboveTotalMiB: 768,
+    switchToIndexedDbAboveTotalMiB: 1536,
     protection: 'aes-gcm-session',
     staleSessionTtlMs: 24 * 60 * 60 * 1000,
     blobCacheEntries: 16,
@@ -131,7 +132,7 @@ documentLoading: {
     enabled: true,
     mode: 'adaptive',
     switchToIndexedDbAboveAssetCount: 0,
-    switchToIndexedDbAboveTotalMiB: 3072,
+    switchToIndexedDbAboveTotalMiB: 4096,
     protection: 'aes-gcm-session',
     staleSessionTtlMs: 24 * 60 * 60 * 1000,
     blobCacheEntries: 24,
@@ -144,9 +145,9 @@ documentLoading: {
     workerCount: 0,
     useWorkersForRasterImages: true,
     useWorkersForTiff: true,
-    maxConcurrentMainThreadRenders: 2,
-    maxConcurrentAssetRenders: 2,
-    warmupBatchSize: 24,
+    maxConcurrentMainThreadRenders: 3,
+    maxConcurrentAssetRenders: 3,
+    warmupBatchSize: 48,
     loadingOverlayDelayMs: 90,
     fullPageScale: 1.5,
     thumbnailMaxWidth: 220,
@@ -165,11 +166,11 @@ documentLoading: {
   memoryPressure: {
     enabled: true,
     sampleIntervalMs: 2000,
-    softHeapUsageRatio: 0.60,
-    hardHeapUsageRatio: 0.78,
-    softResidentMiB: 500,
-    hardResidentMiB: 850,
-    forceMemoryModeAbovePageCount: 3500,
+    softHeapUsageRatio: 0.82,
+    hardHeapUsageRatio: 0.92,
+    softResidentMiB: 1200,
+    hardResidentMiB: 1800,
+    forceMemoryModeAbovePageCount: 10000,
     forceMemoryModeAboveSourceCount: 0,
   },
 }

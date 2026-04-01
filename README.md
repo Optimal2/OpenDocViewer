@@ -272,9 +272,11 @@ The runtime pipeline is now intentionally hybrid rather than purely eager or pur
 6. persist rendered page blobs in a second cache layer so later navigation and printing can usually reuse the same blob without re-rendering
 7. evict object URLs from RAM independently of the persisted blob caches when the active profile no longer wants everything resident
 
-Workers are active again for raster images and TIFF whenever the configured backend allows it, and that routing decision is made per file/page asset rather than once for the entire run. PDF still uses the pdf.js rendering path. The default `auto` mode keeps the old fast-feeling behavior on capable machines but can fall back to a more memory-efficient profile when page volume or heap pressure grows.
+Workers are active again for raster images and TIFF whenever the configured backend allows it, and that routing decision is made per file/page asset rather than once for the entire run. PDF still uses the pdf.js rendering path. The default `auto` mode now keeps the old fast-feeling eager/full-image behavior through roughly the first 2000 pages, then falls back one-way to a more memory-efficient profile only for truly large or memory-stressed runs.
 
 The same runtime system also fixes a serious page-consistency issue: the thumbnail selection is now tied to the actually displayed page until the viewer switches to an explicit loading overlay. This prevents the UI from showing “page X selected” while the large viewer still shows page Y.
+
+A thin status bar above the toolbar shows which runtime profile is currently active: green for the fast eager path, yellow for the memory-efficient path, and red if the viewer has entered an error state.
 
 ## Printing
 

@@ -225,7 +225,7 @@
       // Warning thresholds. Defaults favor stability/performance and avoid source-count warnings by default.
       warning: {
         sourceCountThreshold: 0,
-        pageCountThreshold: 5000,
+        pageCountThreshold: 10000,
         // Start estimating total page volume after this many sources were analyzed.
         probePageThresholdSources: 2,
         // Above these values the dialog will recommend stopping and retrying smaller.
@@ -239,7 +239,10 @@
         enabled: true,
         preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
         preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
-        reuseFullImageThumbnailsBelowPageCount: 600
+        reuseFullImageThumbnailsBelowPageCount: 2000,
+        // Keep auto mode on the fast eager path up to roughly this many pages unless memory usage
+        // becomes truly catastrophic. That keeps normal 1k-2k page runs smooth.
+        performanceWindowPageCount: 2000
       },
 
       // Network prefetch step used to grab expiring URLs before later page rendering.
@@ -272,7 +275,7 @@
         // "adaptive" = start in memory and switch to IndexedDB above thresholds.
         mode: 'adaptive',
         switchToIndexedDbAboveSourceCount: 0,
-        switchToIndexedDbAboveTotalMiB: 768,
+        switchToIndexedDbAboveTotalMiB: 1536,
 
         // "none" = plain temp storage,
         // "aes-gcm-session" = temp payloads encrypted with an in-memory per-session key.
@@ -290,7 +293,7 @@
         enabled: true,
         mode: 'adaptive',
         switchToIndexedDbAboveAssetCount: 0,
-        switchToIndexedDbAboveTotalMiB: 1536,
+        switchToIndexedDbAboveTotalMiB: 4096,
         protection: 'aes-gcm-session',
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
         blobCacheEntries: 16,
@@ -319,9 +322,9 @@
         workerCount: 0,
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,
-        maxConcurrentMainThreadRenders: 2,
-        maxConcurrentAssetRenders: 2,
-        warmupBatchSize: 24,
+        maxConcurrentMainThreadRenders: 3,
+        maxConcurrentAssetRenders: 3,
+        warmupBatchSize: 48,
         loadingOverlayDelayMs: 90,
         fullPageScale: 1.5,
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
@@ -352,6 +355,17 @@
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
         maxOpenPdfDocuments: 16,
         maxOpenTiffDocuments: 16
+      },
+
+      memoryPressure: {
+        enabled: true,
+        sampleIntervalMs: 2000,
+        softHeapUsageRatio: 0.82,
+        hardHeapUsageRatio: 0.92,
+        softResidentMiB: 1200,
+        hardResidentMiB: 1800,
+        forceMemoryModeAbovePageCount: 10000,
+        forceMemoryModeAboveSourceCount: 0
       }
     },
 

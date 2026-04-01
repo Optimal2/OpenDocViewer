@@ -14,13 +14,13 @@ Use `documentLoading.mode = 'auto'` unless a specific customer explicitly wants 
 
 - true sequential fetch by default for ticket/proxy safety
 - worker-backed raster/TIFF rendering on a per-file basis whenever that source can use workers
-- eager nearby warm-up
+- eager-all warm-up for ordinary runs (the default performance window now covers roughly the first 2000 pages)
 - reuse the same rendered full page for both the large pane and the thumbnail pane by default
 - larger in-memory caches
 
 Then it degrades one-way when pressure rises:
 
-- stop global eager warm-up
+- stop global eager-all warm-up
 - reduce concurrency
 - prefer dedicated thumbnails again
 - promote more blobs to IndexedDB
@@ -84,3 +84,11 @@ This avoids the earlier class of bugs where page X was highlighted but page Y wa
 ## Print dialog during loading
 
 While the total page count is still changing, the print dialog now stays in a very small active-page-only mode. This avoids the earlier confusion where selecting "all pages" or switching modes could appear to reset itself mid-load simply because more pages had just been discovered.
+
+## Runtime status hint
+
+OpenDocViewer now shows a thin status bar above the toolbar so operators can immediately see which profile is active:
+
+- green = fast eager/performance path
+- yellow = memory-efficient path
+- red = viewer error state
