@@ -214,7 +214,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
   const compressionArr = getTagArray(ifd, 259);
   const compression = compressionArr && compressionArr.length ? (compressionArr[0] >>> 0) : 0;
   if (compression === COMPRESSION_JPEG2000) {
-    throw createFallbackMainThreadError('TIFF compression requires main-thread fallback');
+    throw createFallbackMainThreadError(`TIFF JPEG 2000 compression (type ${COMPRESSION_JPEG2000}) requires main-thread fallback`);
   }
 
   if (compression === 6) {
@@ -359,7 +359,7 @@ async function processTiff(jobs, jobResults) {
       for (let i = start; i < end; i += 1) {
         try {
           const blob = new Blob([job.arrayBuffer], { type: 'image/tiff' });
-          const rendered = await renderTiffAsset(blob, i, 'full', DEFAULT_THUMBNAIL_WIDTH, DEFAULT_THUMBNAIL_HEIGHT);
+          const rendered = await renderTiffAsset(blob, i, 'full');
           jobResults.push({
             blob: rendered.blob,
             fileIndex: job.index,

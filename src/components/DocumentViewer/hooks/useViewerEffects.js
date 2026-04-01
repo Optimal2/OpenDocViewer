@@ -18,6 +18,7 @@
  */
 
 import { useCallback, useEffect, useRef } from 'react';
+import logger from '../../../logging/systemLogger.js';
 import usePageTimer from '../../../hooks/usePageTimer.js';
 
 /**
@@ -215,7 +216,13 @@ export function useViewerEffects(args) {
       try {
         if (mode === 'FIT_PAGE') ref.fitToScreen?.();
         else if (mode === 'FIT_WIDTH') ref.fitToWidth?.();
-      } catch {}
+      } catch (error) {
+        logger.warn('Sticky fit recomputation failed', {
+          mode,
+          pageNumber,
+          error: String(error?.message || error),
+        });
+      }
     });
 
     return () => {
@@ -237,7 +244,12 @@ export function useViewerEffects(args) {
         try {
           if (mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
           else if (mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
-        } catch {}
+        } catch (error) {
+          logger.warn('ResizeObserver fit recomputation failed', {
+            mode,
+            error: String(error?.message || error),
+          });
+        }
       });
     });
 
