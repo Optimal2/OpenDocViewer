@@ -22,6 +22,13 @@ let utifPromise = null;
 // back to the main-thread fallback because worker-side decode support is not reliable enough across
 // the TIFF variants seen in production.
 const COMPRESSION_JPEG2000 = 34712;
+const MIN_THUMBNAIL_DIMENSION = 24;
+const DEFAULT_THUMBNAIL_WIDTH = 220;
+const DEFAULT_THUMBNAIL_HEIGHT = 310;
+
+function normalizeThumbnailBound(value, fallback) {
+  return Math.max(MIN_THUMBNAIL_DIMENSION, Number(value) || fallback);
+}
 
 function createFallbackMainThreadError(message) {
   const error = new Error(message);
@@ -170,6 +177,8 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
 
 async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMaxWidth, thumbnailMaxHeight) {
   const ext = getNormalizedWorkerFileExtension(fileExtension);
+  const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
+  const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
   if (variant === 'full') {
     // Intentional decode: the worker still needs trustworthy intrinsic dimensions for layout/math
     // metadata, and the Blob alone does not expose width/height in a cross-format way.
@@ -188,12 +197,14 @@ async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMa
 
   return scaleBlob(
     sourceBlob,
-    Math.max(24, Number(thumbnailMaxWidth) || 220),
-    Math.max(24, Number(thumbnailMaxHeight) || 310)
+    maxThumbnailWidth,
+    maxThumbnailHeight
   );
 }
 
 async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth, thumbnailMaxHeight) {
+  const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
+  const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
   const { decode, decodeImage, toRGBA8 } = await ensureUtif();
   const arrayBuffer = await sourceBlob.arrayBuffer();
   const ifds = decode(arrayBuffer);
@@ -219,8 +230,8 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
       }
       return scaleBlob(
         jpegBlob,
-        Math.max(24, Number(thumbnailMaxWidth) || 220),
-        Math.max(24, Number(thumbnailMaxHeight) || 310)
+        maxThumbnailWidth,
+        maxThumbnailHeight
       );
     }
   }
@@ -255,7 +266,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
     };
   }
 
-  const targetScale = fitScale(width, height, thumbnailMaxWidth, thumbnailMaxHeight);
+  const targetScale = fitScale(width, height, maxThumbnailWidth, maxThumbnailHeight);
   const scaledWidth = Math.max(1, Math.round(width * targetScale));
   const scaledHeight = Math.max(1, Math.round(height * targetScale));
   const scaledCanvas = createLocalCanvas(scaledWidth, scaledHeight);
@@ -287,8 +298,8 @@ async function renderPageAssetPayload(payload) {
       sourceBlob,
       Math.max(0, Number(payload?.pageIndex) || 0),
       variant,
-      Math.max(24, Number(payload?.thumbnailMaxWidth) || 220),
-      Math.max(24, Number(payload?.thumbnailMaxHeight) || 310)
+      payload?.thumbnailMaxWidth,
+      payload?.thumbnailMaxHeight
     );
   }
 
@@ -296,8 +307,8 @@ async function renderPageAssetPayload(payload) {
     sourceBlob,
     ext,
     variant,
-    Math.max(24, Number(payload?.thumbnailMaxWidth) || 220),
-    Math.max(24, Number(payload?.thumbnailMaxHeight) || 310)
+    payload?.thumbnailMaxWidth,
+    payload?.thumbnailMaxHeight
   );
 }
 
@@ -348,7 +359,7 @@ async function processTiff(jobs, jobResults) {
       for (let i = start; i < end; i += 1) {
         try {
           const blob = new Blob([job.arrayBuffer], { type: 'image/tiff' });
-          const rendered = await renderTiffAsset(blob, i, 'full', 220, 310);
+          const rendered = await renderTiffAsset(blob, i, 'full', DEFAULT_THUMBNAIL_WIDTH, DEFAULT_THUMBNAIL_HEIGHT);
           jobResults.push({
             blob: rendered.blob,
             fileIndex: job.index,
