@@ -54,6 +54,7 @@ $hasRemote=$true; try{$null=Exec 'git' @('remote','get-url','origin') -Cwd $repo
 if($hasRemote){ $null = Exec 'git' @('fetch','--tags','--prune') -Cwd $repoRoot -Quiet }
 
 Write-Host "=== OpenDocViewer Release Helper ===`n"
+Write-Host "Note: SECURITY.md is not updated automatically by this script. Update it manually before release if the support matrix or release context has changed.`n" -ForegroundColor Yellow
 $commitMsg   = ReadNonEmpty 'Commit message (e.g. chore(deps): bump axios to 1.12.1)'
 $releaseType = ReadNonEmpty 'Release type (patch | minor | major)'
 if(@('patch','minor','major') -notcontains $releaseType.ToLower()){ throw "Invalid release type. Use: patch, minor, or major." }

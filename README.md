@@ -195,7 +195,7 @@ Then run the PowerShell helper from the repo root on Windows:
 .\release.ps1
 ```
 
-The release helper now runs the same local validation steps (`lint`, `build`, `doc`) before it creates a release commit. After validation passes, it will:
+The release helper now runs the same local validation steps (`lint`, `build`, `doc`) before it creates a release commit. It does **not** edit `SECURITY.md`, so update that file manually before invoking a release when the supported-version matrix or release-context section needs to change. After validation passes, it will:
 
 1. stage and commit the current working changes
 2. run `npm version <patch|minor|major>` to create the version-bump commit and Git tag
