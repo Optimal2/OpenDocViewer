@@ -8,7 +8,7 @@
  *   Provide a tiny utility for press-and-hold page navigation:
  *     - Invokes a caller-supplied callback immediately (leading edge)
  *       and then repeatedly after an initial delay.
- *     - Keeps interval cadence modest (default ~20Hz) to remain responsive.
+ *     - Keeps interval cadence modest (default 20Hz) to remain responsive.
  *     - Cleans up automatically on unmount.
  *
  * API
@@ -35,7 +35,9 @@
 import { useRef, useEffect, useCallback } from 'react';
 import logger from '../logging/systemLogger.js';
 
-/** Default repeat cadence (ms). Keep modest to balance CPU and responsiveness. */
+/** @typedef {'prev'|'next'} PageDirection */
+
+/** Default repeat cadence (ms). 20Hz to balance CPU and responsiveness. */
 const DEFAULT_REPEAT_INTERVAL_MS = 50;
 
 /**

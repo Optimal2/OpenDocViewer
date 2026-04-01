@@ -57,6 +57,10 @@ function normalizeExtension(ext) {
   return value;
 }
 
+function getNormalizedWorkerFileExtension(ext) {
+  return normalizeExtension(ext || '');
+}
+
 function fitScale(width, height, maxWidth, maxHeight) {
   const safeWidth = Math.max(1, Number(width) || 1);
   const safeHeight = Math.max(1, Number(height) || 1);
@@ -164,8 +168,10 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
 }
 
 async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMaxWidth, thumbnailMaxHeight) {
-  const ext = normalizeExtension(fileExtension);
+  const ext = getNormalizedWorkerFileExtension(fileExtension);
   if (variant === 'full') {
+    // Intentional decode: the worker still needs trustworthy intrinsic dimensions for layout/math
+    // metadata, and the Blob alone does not expose width/height in a cross-format way.
     const bitmap = await createBitmap(sourceBlob);
     try {
       return {
@@ -196,9 +202,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
   const compressionArr = getTagArray(ifd, 259);
   const compression = compressionArr && compressionArr.length ? (compressionArr[0] >>> 0) : 0;
   if (compression === COMPRESSION_JPEG2000) {
-    const error = new Error('TIFF compression requires main-thread fallback');
-    error.fallbackMainThread = true;
-    throw error;
+    throw createFallbackMainThreadError('TIFF compression requires main-thread fallback');
   }
 
   if (compression === 6) {
@@ -226,16 +230,12 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
   const height = Math.max(1, ifd.height >>> 0);
   const canvas = createLocalCanvas(width, height);
   if (!canvas) {
-    const error = new Error('OffscreenCanvas is unavailable for TIFF rendering');
-    error.fallbackMainThread = true;
-    throw error;
+    throw createFallbackMainThreadError('OffscreenCanvas is unavailable for TIFF rendering');
   }
 
   const ctx = canvas.getContext('2d', { alpha: true });
   if (!ctx) {
-    const error = new Error('Failed to acquire OffscreenCanvas context for TIFF rendering');
-    error.fallbackMainThread = true;
-    throw error;
+    throw createFallbackMainThreadError('Failed to acquire OffscreenCanvas context for TIFF rendering');
   }
 
   // Intentional zero-copy view over the UTIF RGBA buffer. The worker does not mutate `rgba` after
@@ -259,15 +259,11 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
   const scaledHeight = Math.max(1, Math.round(height * targetScale));
   const scaledCanvas = createLocalCanvas(scaledWidth, scaledHeight);
   if (!scaledCanvas) {
-    const error = new Error('OffscreenCanvas is unavailable for TIFF thumbnail rendering');
-    error.fallbackMainThread = true;
-    throw error;
+    throw createFallbackMainThreadError('OffscreenCanvas is unavailable for TIFF thumbnail rendering');
   }
   const scaledCtx = scaledCanvas.getContext('2d', { alpha: true });
   if (!scaledCtx) {
-    const error = new Error('Failed to acquire OffscreenCanvas context for TIFF thumbnail rendering');
-    error.fallbackMainThread = true;
-    throw error;
+    throw createFallbackMainThreadError('Failed to acquire OffscreenCanvas context for TIFF thumbnail rendering');
   }
   scaledCtx.drawImage(canvas, 0, 0, scaledWidth, scaledHeight);
   const outBlob = await canvasToBlob(scaledCanvas, 'image/png');
@@ -280,7 +276,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
 }
 
 async function renderPageAssetPayload(payload) {
-  const ext = normalizeExtension(payload?.fileExtension || '');
+  const ext = getNormalizedWorkerFileExtension(payload?.fileExtension);
   const variant = String(payload?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full';
   const sourceBlob = payload?.sourceBlob;
   if (!(sourceBlob instanceof Blob)) throw new Error('Worker payload is missing sourceBlob');
@@ -397,7 +393,7 @@ async function handleLegacyBatchMessage(event) {
   const { jobs, fileExtension } = event.data || {};
   if (!Array.isArray(jobs) || jobs.length === 0) return;
 
-  const fileExtLower = normalizeExtension(fileExtension || '');
+  const fileExtLower = getNormalizedWorkerFileExtension(fileExtension);
   try {
     const jobResults = [];
     if (fileExtLower === 'tiff') await processTiff(jobs, jobResults);
