@@ -135,16 +135,47 @@ export function useViewerEffects(args) {
 
   const activeKeyboardRepeatKeyRef = useRef(null);
   const keyboardRepeatTargetRef = useRef('primary');
+  const goToPreviousPageRef = useRef(goToPreviousPage);
+  const goToNextPageRef = useRef(goToNextPage);
+  const goToFirstPageRef = useRef(goToFirstPage);
+  const goToLastPageRef = useRef(goToLastPage);
+  const closeCompareRef = useRef(closeCompare);
+  const zoomInRef = useRef(zoomIn);
+  const zoomOutRef = useRef(zoomOut);
+  const actualSizeRef = useRef(actualSize);
+  const fitToScreenRef = useRef(fitToScreen);
+  const fitToWidthRef = useRef(fitToWidth);
+  const handleCompareRef = useRef(handleCompare);
+  const setIsExpandedGuardedRef = useRef(setIsExpandedGuarded);
+  const onOpenPrintDialogRef = useRef(onOpenPrintDialog);
+  const onToggleThemeRef = useRef(onToggleTheme);
+  const isComparingRef = useRef(isComparing);
+
+  goToPreviousPageRef.current = goToPreviousPage;
+  goToNextPageRef.current = goToNextPage;
+  goToFirstPageRef.current = goToFirstPage;
+  goToLastPageRef.current = goToLastPage;
+  closeCompareRef.current = closeCompare;
+  zoomInRef.current = zoomIn;
+  zoomOutRef.current = zoomOut;
+  actualSizeRef.current = actualSize;
+  fitToScreenRef.current = fitToScreen;
+  fitToWidthRef.current = fitToWidth;
+  handleCompareRef.current = handleCompare;
+  setIsExpandedGuardedRef.current = setIsExpandedGuarded;
+  onOpenPrintDialogRef.current = onOpenPrintDialog;
+  onToggleThemeRef.current = onToggleTheme;
+  isComparingRef.current = isComparing;
 
   const handleKeyboardPreviousRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
-    goToPreviousPage(target);
-  }, [goToPreviousPage]);
+    goToPreviousPageRef.current?.(target);
+  }, []);
 
   const handleKeyboardNextRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
-    goToNextPage(target);
-  }, [goToNextPage]);
+    goToNextPageRef.current?.(target);
+  }, []);
 
   const {
     startPageTimer: startKeyboardPreviousRepeatTimer,
@@ -285,7 +316,10 @@ export function useViewerEffects(args) {
 
       if (isNextRepeatKey(e)) {
         e.preventDefault();
-        if (e.repeat && activeKeyboardRepeatKeyRef.current === e.key) return;
+        // Native keyboard auto-repeat can keep firing while a hold session is already active.
+        // Ignore duplicate keydown events for the same physical hold so we do not restart the
+        // leading-edge timer path and accidentally drive page changes faster than the toolbar does.
+        if (activeKeyboardRepeatKeyRef.current === e.key) return;
         stopKeyboardRepeat();
         keyboardRepeatTargetRef.current = target;
         activeKeyboardRepeatKeyRef.current = e.key;
@@ -295,7 +329,7 @@ export function useViewerEffects(args) {
 
       if (isPreviousRepeatKey(e)) {
         e.preventDefault();
-        if (e.repeat && activeKeyboardRepeatKeyRef.current === e.key) return;
+        if (activeKeyboardRepeatKeyRef.current === e.key) return;
         stopKeyboardRepeat();
         keyboardRepeatTargetRef.current = target;
         activeKeyboardRepeatKeyRef.current = e.key;
@@ -307,42 +341,42 @@ export function useViewerEffects(args) {
         case 'Home':
           e.preventDefault();
           stopKeyboardRepeat();
-          goToFirstPage(target);
+          goToFirstPageRef.current?.(target);
           break;
         case 'End':
           e.preventDefault();
           stopKeyboardRepeat();
-          goToLastPage(target);
+          goToLastPageRef.current?.(target);
           break;
         case 'Escape':
           stopKeyboardRepeat();
-          if (e.shiftKey && isComparing) {
+          if (e.shiftKey && isComparingRef.current) {
             e.preventDefault();
-            closeCompare();
+            closeCompareRef.current?.();
           }
           break;
 
         case '+':
-          if (!hasModifierKey) { e.preventDefault(); zoomIn(); }
+          if (!hasModifierKey) { e.preventDefault(); zoomInRef.current?.(); }
           break;
         case '-':
-          if (!hasModifierKey) { e.preventDefault(); zoomOut(); }
+          if (!hasModifierKey) { e.preventDefault(); zoomOutRef.current?.(); }
           break;
 
         default:
           // Numpad variants
-          if (!hasModifierKey && e.code === 'NumpadAdd') { e.preventDefault(); zoomIn(); break; }
-          if (!hasModifierKey && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOut(); break; }
+          if (!hasModifierKey && e.code === 'NumpadAdd') { e.preventDefault(); zoomInRef.current?.(); break; }
+          if (!hasModifierKey && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOutRef.current?.(); break; }
 
           // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare, Edit, Theme)
           if (!hasModifierKey && !e.shiftKey && !e.altKey) {
-            if (e.key === '0') { e.preventDefault(); onOpenPrintDialog?.(); }
-            else if (e.key === '1') { e.preventDefault(); actualSize(); }
-            else if (e.key === '2') { e.preventDefault(); fitToScreen(); }
-            else if (e.key === '3') { e.preventDefault(); fitToWidth(); }
-            else if (e.key === '4') { e.preventDefault(); handleCompare(); }
-            else if (e.key === '5') { e.preventDefault(); setIsExpandedGuarded((v) => !v); }
-            else if (e.key === '6') { e.preventDefault(); onToggleTheme?.(); }
+            if (e.key === '0') { e.preventDefault(); onOpenPrintDialogRef.current?.(); }
+            else if (e.key === '1') { e.preventDefault(); actualSizeRef.current?.(); }
+            else if (e.key === '2') { e.preventDefault(); fitToScreenRef.current?.(); }
+            else if (e.key === '3') { e.preventDefault(); fitToWidthRef.current?.(); }
+            else if (e.key === '4') { e.preventDefault(); handleCompareRef.current?.(); }
+            else if (e.key === '5') { e.preventDefault(); setIsExpandedGuardedRef.current?.((v) => !v); }
+            else if (e.key === '6') { e.preventDefault(); onToggleThemeRef.current?.(); }
           }
           break;
       }
@@ -377,19 +411,6 @@ export function useViewerEffects(args) {
       stopKeyboardRepeat();
     };
   }, [
-    actualSize,
-    fitToScreen,
-    fitToWidth,
-    goToFirstPage,
-    goToLastPage,
-    closeCompare,
-    isComparing,
-    handleCompare,
-    setIsExpandedGuarded,
-    zoomIn,
-    zoomOut,
-    onOpenPrintDialog,
-    onToggleTheme,
     startKeyboardNextRepeatTimer,
     startKeyboardPreviousRepeatTimer,
     stopKeyboardRepeat,
