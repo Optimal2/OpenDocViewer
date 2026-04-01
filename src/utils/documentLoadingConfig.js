@@ -29,6 +29,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  * @property {number} preferPerformanceWhenDeviceMemoryAtLeastGb
  * @property {number} preferPerformanceWhenJsHeapLimitAtLeastMiB
  * @property {number} reuseFullImageThumbnailsBelowPageCount
+ * @property {number} performanceWindowPageCount
  * @property {RuntimeMemoryTier} resolvedTier
  * @property {boolean} preferPerformance
  */
@@ -166,13 +167,14 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       enabled: true,
       preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
       preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
-      reuseFullImageThumbnailsBelowPageCount: 600,
+      reuseFullImageThumbnailsBelowPageCount: 2000,
+      performanceWindowPageCount: 2000,
       resolvedTier: 'unknown',
       preferPerformance: false,
     },
     warning: {
       sourceCountThreshold: 0,
-      pageCountThreshold: 5000,
+      pageCountThreshold: 10000,
       probePageThresholdSources: 2,
       minStopRecommendationSources: 0,
       minStopRecommendationPages: 10000,
@@ -187,7 +189,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
     sourceStore: {
       mode: 'adaptive',
       switchToIndexedDbAboveSourceCount: 0,
-      switchToIndexedDbAboveTotalMiB: 768,
+      switchToIndexedDbAboveTotalMiB: 1536,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
       blobCacheEntries: 16,
@@ -196,7 +198,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       enabled: true,
       mode: 'adaptive',
       switchToIndexedDbAboveAssetCount: 0,
-      switchToIndexedDbAboveTotalMiB: 3072,
+      switchToIndexedDbAboveTotalMiB: 4096,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
       blobCacheEntries: 24,
@@ -209,9 +211,9 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       workerCount: resolveRecommendedWorkerCount(0, 'auto'),
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
-      maxConcurrentMainThreadRenders: 2,
-      maxConcurrentAssetRenders: 2,
-      warmupBatchSize: 24,
+      maxConcurrentMainThreadRenders: 3,
+      maxConcurrentAssetRenders: 3,
+      warmupBatchSize: 48,
       loadingOverlayDelayMs: 90,
       fullPageScale: 1.5,
       thumbnailMaxWidth: 220,
@@ -230,11 +232,11 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
     memoryPressure: {
       enabled: true,
       sampleIntervalMs: 2000,
-      softHeapUsageRatio: 0.6,
-      hardHeapUsageRatio: 0.78,
-      softResidentMiB: 500,
-      hardResidentMiB: 850,
-      forceMemoryModeAbovePageCount: 3500,
+      softHeapUsageRatio: 0.82,
+      hardHeapUsageRatio: 0.92,
+      softResidentMiB: 1200,
+      hardResidentMiB: 1800,
+      forceMemoryModeAbovePageCount: 10000,
       forceMemoryModeAboveSourceCount: 0,
     },
   })
@@ -365,6 +367,12 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
     1,
     1000000
   );
+  const performanceWindowPageCount = normalizeNumber(
+    adaptiveRaw?.performanceWindowPageCount,
+    DOCUMENT_LOADING_DEFAULTS.adaptiveMemory.performanceWindowPageCount,
+    1,
+    1000000
+  );
 
   const preferPerformance = enabled && (
     (profile.deviceMemoryGb > 0 && profile.deviceMemoryGb >= preferDeviceMemoryAtLeastGb)
@@ -377,6 +385,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
     preferPerformanceWhenDeviceMemoryAtLeastGb: preferDeviceMemoryAtLeastGb,
     preferPerformanceWhenJsHeapLimitAtLeastMiB: preferHeapAtLeastMiB,
     reuseFullImageThumbnailsBelowPageCount,
+    performanceWindowPageCount,
     resolvedTier: profile.tier,
     preferPerformance,
   };
@@ -441,9 +450,9 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
     next.render.useWorkersForRasterImages = true;
     next.render.useWorkersForTiff = true;
     next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'performance');
-    next.render.maxConcurrentMainThreadRenders = Math.max(2, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
+    next.render.maxConcurrentMainThreadRenders = Math.max(3, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
     next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
-    next.render.warmupBatchSize = Math.max(24, next.render.warmupBatchSize || 0);
+    next.render.warmupBatchSize = Math.max(48, next.render.warmupBatchSize || 0);
     next.render.loadingOverlayDelayMs = Math.max(60, next.render.loadingOverlayDelayMs || 0);
     next.render.thumbnailLoadingStrategy = 'eager';
     next.render.thumbnailSourceStrategy = 'prefer-full-images';
@@ -487,7 +496,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
   next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'auto');
   next.render.maxConcurrentMainThreadRenders = Math.max(1, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
   next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
-  next.render.warmupBatchSize = Math.max(12, next.render.warmupBatchSize || 12);
+  next.render.warmupBatchSize = Math.max(24, next.render.warmupBatchSize || 24);
   next.render.loadingOverlayDelayMs = Math.max(80, next.render.loadingOverlayDelayMs || 0);
   next.render.thumbnailSourceStrategy = next.render.thumbnailSourceStrategy || 'prefer-full-images';
   if (next.render.thumbnailSourceStrategy === 'prefer-full-images') {
@@ -507,16 +516,31 @@ export function applyMemoryPressureStage(baseConfig, stage) {
   next.fetch.prefetchConcurrency = 1;
   next.assetStore.persistThumbnails = true;
   next.render.strategy = next.render.strategy === 'eager-all' ? 'eager-nearby' : next.render.strategy;
-  next.render.workerCount = Math.max(1, Math.min(2, resolveRecommendedWorkerCount(next.render.workerCount, 'memory')));
-  next.render.maxConcurrentMainThreadRenders = 1;
-  next.render.maxConcurrentAssetRenders = 1;
+  next.render.workerCount = Math.max(1, Math.min(3, resolveRecommendedWorkerCount(next.render.workerCount, 'memory')));
+  next.render.maxConcurrentMainThreadRenders = 2;
+  next.render.maxConcurrentAssetRenders = 2;
   next.render.warmupBatchSize = Math.max(1, Math.min(12, next.render.warmupBatchSize || 12));
-  next.render.thumbnailLoadingStrategy = 'adaptive';
+  next.render.thumbnailLoadingStrategy = 'eager';
   next.render.thumbnailSourceStrategy = 'dedicated';
-  next.render.fullPageCacheLimit = Math.max(8, Math.min(next.render.fullPageCacheLimit || 48, 48));
-  next.render.thumbnailCacheLimit = Math.max(64, Math.min(next.render.thumbnailCacheLimit || 512, 512));
+  next.render.fullPageCacheLimit = Math.max(128, Math.min(next.render.fullPageCacheLimit || 512, 512));
+  next.render.thumbnailCacheLimit = Math.max(512, Math.min(next.render.thumbnailCacheLimit || 4096, 4096));
   next.assetStore.releaseSinglePageRasterSourceAfterFullPersist = true;
   return next;
+}
+
+/**
+ * Return the page-count window where auto mode should still behave like the fast, eager path.
+ * This lets ordinary large batches stay snappy while still preserving the ability to degrade for
+ * genuinely extreme document runs.
+ *
+ * @param {DocumentLoadingConfig=} config
+ * @returns {number}
+ */
+export function getPerformanceWindowPageCount(config = DOCUMENT_LOADING_DEFAULTS) {
+  return Math.max(
+    1,
+    Number(config?.adaptiveMemory?.performanceWindowPageCount || DOCUMENT_LOADING_DEFAULTS.adaptiveMemory.performanceWindowPageCount) || 1
+  );
 }
 
 export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
@@ -531,6 +555,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       preferPerformanceWhenDeviceMemoryAtLeastGb: normalizeFloat(raw?.adaptiveMemory?.preferPerformanceWhenDeviceMemoryAtLeastGb, adaptiveDefaults.adaptiveMemory.preferPerformanceWhenDeviceMemoryAtLeastGb, 1, 1024),
       preferPerformanceWhenJsHeapLimitAtLeastMiB: normalizeFloat(raw?.adaptiveMemory?.preferPerformanceWhenJsHeapLimitAtLeastMiB, adaptiveDefaults.adaptiveMemory.preferPerformanceWhenJsHeapLimitAtLeastMiB, 256, 1024 * 1024),
       reuseFullImageThumbnailsBelowPageCount: normalizeNumber(raw?.adaptiveMemory?.reuseFullImageThumbnailsBelowPageCount, adaptiveDefaults.adaptiveMemory.reuseFullImageThumbnailsBelowPageCount, 1, 1000000),
+      performanceWindowPageCount: normalizeNumber(raw?.adaptiveMemory?.performanceWindowPageCount, adaptiveDefaults.adaptiveMemory.performanceWindowPageCount, 1, 1000000),
       resolvedTier: adaptiveDefaults.adaptiveMemory.resolvedTier,
       preferPerformance: adaptiveDefaults.adaptiveMemory.preferPerformance,
     },

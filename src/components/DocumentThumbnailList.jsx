@@ -283,6 +283,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
   const containerRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const scrollSyncRafRef = useRef(0);
+  const programmaticScrollRef = useRef(false);
+  const programmaticScrollReleaseRafRef = useRef(0);
   const lastKnownScrollTopRef = useRef(0);
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
@@ -389,6 +391,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     resizeObserver?.observe(node);
 
     return () => {
+      if (programmaticScrollReleaseRafRef.current) {
+        window.cancelAnimationFrame(programmaticScrollReleaseRafRef.current);
+        programmaticScrollReleaseRafRef.current = 0;
+      }
+      programmaticScrollRef.current = false;
       resizeObserver?.disconnect();
     };
   }, [width]);
@@ -411,8 +418,21 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       }
 
       if (Math.abs(nextScrollTop - viewportTop) >= 1) {
+        if (programmaticScrollReleaseRafRef.current) {
+          window.cancelAnimationFrame(programmaticScrollReleaseRafRef.current);
+          programmaticScrollReleaseRafRef.current = 0;
+        }
+        programmaticScrollRef.current = true;
         lastKnownScrollTopRef.current = nextScrollTop;
+        setScrollTop((current) => (Math.abs(current - nextScrollTop) >= 1 ? nextScrollTop : current));
         node.scrollTop = nextScrollTop;
+        programmaticScrollReleaseRafRef.current = window.requestAnimationFrame(() => {
+          programmaticScrollReleaseRafRef.current = 0;
+          programmaticScrollRef.current = false;
+          const actualScrollTop = Number(node.scrollTop || 0);
+          lastKnownScrollTopRef.current = actualScrollTop;
+          setScrollTop((current) => (Math.abs(current - actualScrollTop) >= 1 ? actualScrollTop : current));
+        });
       }
     });
 
@@ -536,6 +556,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         window.cancelAnimationFrame(scrollSyncRafRef.current);
         scrollSyncRafRef.current = 0;
       }
+      if (programmaticScrollReleaseRafRef.current) {
+        window.cancelAnimationFrame(programmaticScrollReleaseRafRef.current);
+        programmaticScrollReleaseRafRef.current = 0;
+      }
+      programmaticScrollRef.current = false;
     };
   }, []);
 
@@ -600,12 +625,23 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleScroll = useCallback((event) => {
     const next = Number(event?.currentTarget?.scrollTop || 0);
     lastKnownScrollTopRef.current = next;
+    if (programmaticScrollRef.current) return;
     if (scrollSyncRafRef.current) window.cancelAnimationFrame(scrollSyncRafRef.current);
     scrollSyncRafRef.current = window.requestAnimationFrame(() => {
       scrollSyncRafRef.current = 0;
-      setScrollTop((current) => (Math.abs(current - next) >= 1 ? next : current));
+      setScrollTop((current) => {
+        const safeRowHeight = Math.max(1, Number(layout.rowHeight) || 1);
+        const safeViewportHeight = Math.max(viewportHeight, safeRowHeight);
+        const currentStart = Math.floor(current / safeRowHeight);
+        const currentEnd = Math.ceil((current + safeViewportHeight) / safeRowHeight);
+        const nextStart = Math.floor(next / safeRowHeight);
+        const nextEnd = Math.ceil((next + safeViewportHeight) / safeRowHeight);
+
+        if (currentStart === nextStart && currentEnd === nextEnd) return current;
+        return Math.abs(current - next) >= 1 ? next : current;
+      });
     });
-  }, []);
+  }, [layout.rowHeight, viewportHeight]);
 
   /**
    * @param {number} nextPageNumber

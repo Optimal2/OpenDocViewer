@@ -16,6 +16,7 @@ import {
   applyMemoryPressureStage,
   cloneDocumentLoadingConfig,
   getDocumentLoadingConfig,
+  getPerformanceWindowPageCount,
   isRasterImageExtension,
   shouldKeepAllFullImageAssets,
   shouldUseFullImagesForThumbnails,
@@ -1351,9 +1352,15 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     const strategy = String(renderConfig.strategy || 'lazy-viewport').toLowerCase();
     const safeStartIndex = Math.max(0, Number(startIndex) || 0);
     const safePageCount = Math.max(0, Number(pageCount) || 0);
-    if (safePageCount <= 0 || strategy === 'lazy-viewport') return;
+    const totalPages = Array.isArray(allPagesRef.current) ? allPagesRef.current.length : 0;
+    const performanceWindowPageCount = getPerformanceWindowPageCount(sessionConfigRef.current);
+    const keepFastWarmupWindow = String(sessionConfigRef.current?.mode || 'auto').toLowerCase() !== 'memory'
+      && String(memoryPressureStage || 'normal').toLowerCase() === 'normal'
+      && totalPages > 0
+      && totalPages <= performanceWindowPageCount;
+    if (safePageCount <= 0 || (strategy === 'lazy-viewport' && !keepFastWarmupWindow)) return;
 
-    const warmPageCount = strategy === 'eager-all'
+    const warmPageCount = (strategy === 'eager-all' || keepFastWarmupWindow)
       ? safePageCount
       : Math.min(safePageCount, Math.max(1, Number(renderConfig.warmupBatchSize) || 1));
 
@@ -1377,7 +1384,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
 
     warmupQueueRef.current = queue;
     void pumpWarmupQueue();
-  }, [pumpWarmupQueue, shouldReuseFullAssetForThumbnail]);
+  }, [memoryPressureStage, pumpWarmupQueue, shouldReuseFullAssetForThumbnail]);
 
   /**
    * @param {Array<number>=} pageIndexes
@@ -1467,7 +1474,29 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
       } catch {}
 
       let nextStage = 'normal';
-      if (
+      const performanceWindowPageCount = getPerformanceWindowPageCount(baseConfig);
+      const currentStage = String(memoryPressureStage || 'normal').toLowerCase();
+      const protectFastPath = pageCount > 0
+        && pageCount <= performanceWindowPageCount
+        && currentStage === 'normal';
+
+      if (protectFastPath) {
+        const catastrophicResidentMiB = Math.max(
+          Number(memoryConfig.hardResidentMiB || 0) * 2,
+          2048
+        );
+        const catastrophicHeapRatio = Math.max(
+          Number(memoryConfig.hardHeapUsageRatio || 0),
+          0.97
+        );
+
+        if (
+          (catastrophicResidentMiB > 0 && residentMiB >= catastrophicResidentMiB)
+          || (catastrophicHeapRatio > 0 && heapRatio >= catastrophicHeapRatio)
+        ) {
+          nextStage = 'hard';
+        }
+      } else if (
         (Number(memoryConfig.forceMemoryModeAbovePageCount || 0) > 0 && pageCount >= Number(memoryConfig.forceMemoryModeAbovePageCount || 0))
         || (Number(memoryConfig.forceMemoryModeAboveSourceCount || 0) > 0 && sourceCount >= Number(memoryConfig.forceMemoryModeAboveSourceCount || 0))
         || (Number(memoryConfig.hardResidentMiB || 0) > 0 && residentMiB >= Number(memoryConfig.hardResidentMiB || 0))
@@ -1481,7 +1510,6 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
         nextStage = 'soft';
       }
 
-      const currentStage = String(memoryPressureStage || 'normal').toLowerCase();
       if (rankOf(nextStage) <= rankOf(currentStage)) return;
 
       const nextConfig = applyMemoryPressureStage(baseConfig, nextStage);

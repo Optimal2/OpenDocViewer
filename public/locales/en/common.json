@@ -159,6 +159,11 @@
         "error": "Document load error"
       }
     },
+    "modeIndicator": {
+      "performance": "Performance mode active",
+      "memory": "Memory-efficient mode active",
+      "error": "Loading error detected"
+    },
     "resizer": {
       "ariaLabel": "Resize panel"
     },

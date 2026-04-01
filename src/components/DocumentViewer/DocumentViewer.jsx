@@ -30,7 +30,14 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
 
 const DocumentViewer = () => {
-  const { allPages, loadingRunActive, plannedPageCount } = useContext(ViewerContext);
+  const {
+    allPages,
+    loadingRunActive,
+    plannedPageCount,
+    documentLoadingConfig,
+    memoryPressureStage,
+    error,
+  } = useContext(ViewerContext);
   const { t } = useTranslation('common');
 
   const {
@@ -96,6 +103,30 @@ const DocumentViewer = () => {
   );
   const isDocumentLoading = !!loadingRunActive || (plannedPageCount > 0 && resolvedPageCount < plannedPageCount);
 
+  const viewerModeIndicator = useMemo(() => {
+    if (error) {
+      return {
+        className: 'is-error',
+        title: t('viewer.modeIndicator.error', { defaultValue: 'Viewer loading error' }),
+      };
+    }
+
+    const currentStage = String(memoryPressureStage || 'normal').toLowerCase();
+    const renderStrategy = String(documentLoadingConfig?.render?.strategy || 'eager-nearby').toLowerCase();
+    const mode = String(documentLoadingConfig?.mode || 'auto').toLowerCase();
+    if (currentStage !== 'normal' || mode === 'memory' || renderStrategy === 'lazy-viewport') {
+      return {
+        className: 'is-memory',
+        title: t('viewer.modeIndicator.memory', { defaultValue: 'Memory-efficient mode active' }),
+      };
+    }
+
+    return {
+      className: 'is-performance',
+      title: t('viewer.modeIndicator.performance', { defaultValue: 'Performance mode active' }),
+    };
+  }, [documentLoadingConfig?.mode, documentLoadingConfig?.render?.strategy, error, memoryPressureStage, t]);
+
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
@@ -110,6 +141,12 @@ const DocumentViewer = () => {
       role="region"
       aria-label={t('viewer.aria.containerRegion')}
     >
+      <div
+        className={`document-viewer-mode-indicator ${viewerModeIndicator.className}`}
+        title={viewerModeIndicator.title}
+        aria-hidden="true"
+      />
+
       <DocumentViewerToolbar
         /* page + totals */
         pageNumber={pageNumber}

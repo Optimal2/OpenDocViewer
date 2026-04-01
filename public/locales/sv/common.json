@@ -159,6 +159,11 @@
         "error": "Fel vid inläsning av dokument"
       }
     },
+    "modeIndicator": {
+      "performance": "Prestandaläge aktivt",
+      "memory": "Minneseffektivt läge aktivt",
+      "error": "Fel upptäckt under laddning"
+    },
     "resizer": {
       "ariaLabel": "Ändra panelstorlek"
     },
