@@ -1,9 +1,10 @@
+<!-- File: SECURITY.md -->
 # Security Policy
 
 ## Supported Versions
 
 **OpenDocViewer v1.4.0** is the current recommended release.
-**OpenDocViewer v1.3.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.4.0 and lacks later loading-pipeline and diagnostics improvements.
+**OpenDocViewer v1.3.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.4.0 and lacks later loading-pipeline, keyboard-navigation, and diagnostics improvements.
 
 Older releases are retained for historical reference only.
 
@@ -24,9 +25,9 @@ Older releases are retained for historical reference only.
 The seven most recent releases are listed below for operational context:
 
 ### OpenDocViewer v1.4.0
-OpenDocViewer v1.4.0 improves hybrid document loading throughput, default thumbnail/full-page reuse, diagnostics accuracy, and loading-time print behavior.
+OpenDocViewer v1.4.0 improves hybrid document loading throughput, rendered-page reuse, viewer stability during held navigation, diagnostics behavior, and loading-time print behavior.
 
-This release keeps the hybrid loader architecture but now reuses full rendered page assets for thumbnails by default while memory pressure allows it, increases the resident full-page cache target for performance-oriented runs, and speeds background warm-up by dispatching batches concurrently through the worker/main render schedulers instead of serializing every asset request. It also keeps performance-overlay counters updating after the initial load completes while still stopping the load-duration timer, disables overlay-specific polling entirely when the overlay is not enabled, and simplifies the print dialog to an active-page-only mode while page discovery is still in progress so the UI no longer appears to reset itself mid-load.
+This release keeps the hybrid loader architecture but now reuses full rendered page assets for thumbnails by default while memory pressure allows it, increases the resident full-page cache target for performance-oriented runs, and speeds background warm-up by dispatching batches concurrently through the worker/main render schedulers instead of serializing every asset request. It also keeps performance-overlay counters updating after the initial load completes while still stopping the load-duration timer, disables overlay-specific polling entirely when the overlay is not enabled, simplifies the print dialog to an active-page-only mode while page discovery is still in progress so the UI no longer appears to reset itself mid-load, and hardens Page Up, Page Down, Arrow Up, and Arrow Down repeat navigation so long key-holds behave like the stable toolbar press-and-hold path.
 
 ### OpenDocViewer v1.3.1
 OpenDocViewer v1.3.1 hardens the viewer after v1.3.0 with a focus on rendered page asset reliability, safer cleanup behavior, and more predictable zoom handling.
