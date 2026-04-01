@@ -88,6 +88,9 @@ export function useDocumentViewer() {
 
   // --- Core viewer interaction state ----------------------------------------------
   const [pageNumber, setPageNumber] = useState(1);
+  const pageNumberRef = useRef(1);
+  pageNumberRef.current = pageNumber;
+
   const [primaryDisplayState, setPrimaryDisplayState] = useState({
     requestedPageNumber: 1,
     displayedPageNumber: 0,
@@ -137,6 +140,10 @@ export function useDocumentViewer() {
    * updater callback. Compare-targeted updates automatically enable compare mode and reuse the left
    * page as the base when the right page has not been chosen yet.
    *
+   * The primary page is mirrored in a ref so keyboard press-and-hold navigation can keep using a
+   * stable callback identity across page changes. That avoids tearing down the global key listeners
+   * on every repeated step, which was one of the main differences from the toolbar button path.
+   *
    * @param {ViewerPageTarget} target
    * @param {(number|function(number): number)} next
    * @returns {void}
@@ -150,7 +157,7 @@ export function useDocumentViewer() {
     if (target === 'compare') {
       if (isExpanded) return;
       setComparePageNumberRaw((current) => {
-        const base = clampPage(Number.isFinite(current) ? current : pageNumber, totalPages);
+        const base = clampPage(Number.isFinite(current) ? current : pageNumberRef.current, totalPages);
         return resolveNext(base);
       });
       setIsComparing(true);
@@ -161,7 +168,7 @@ export function useDocumentViewer() {
       const base = clampPage(current, totalPages);
       return resolveNext(base);
     });
-  }, [isExpanded, pageNumber, totalPages]);
+  }, [isExpanded, totalPages]);
 
   /**
    * Change the primary page number safely (clamped).
