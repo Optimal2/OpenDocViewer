@@ -33,8 +33,8 @@ import HttpBackend from 'i18next-http-backend';
 
 /** Dev-mode detector (Vite + Node envs). */
 const IS_DEV =
-  (typeof import.meta !== 'undefined' && import.meta?.env?.MODE === 'development') ||
-  (typeof globalThis !== 'undefined' && globalThis.process?.env?.NODE_ENV === 'development');
+  import.meta?.env?.MODE === 'development' ||
+  globalThis.process?.env?.NODE_ENV === 'development';
 
 /** Read a query parameter by name (no deps). */
 function readQuery(name) {
@@ -47,6 +47,15 @@ function readQuery(name) {
 
 /** Diagnostics ON only in dev builds. */
 const WANT_DIAG = IS_DEV;
+
+/** Normalize optional version tokens from runtime config or globals. */
+function normalizeVersionToken(value) {
+  if (value == null) return '';
+  const normalized = String(value).trim();
+  if (!normalized || normalized.toLowerCase() === 'auto') return '';
+  return normalized;
+}
+
 
 /** Return cache-busting version token (see header). */
 function getI18nVersion() {
@@ -61,8 +70,8 @@ function getI18nVersion() {
 
     const w = typeof window !== 'undefined' ? window : /** @type {*} */ ({});
     const cfg = (w.__ODV_CONFIG__ && w.__ODV_CONFIG__.i18n) || {};
-    const cfgVersion = typeof cfg.version === 'string' ? cfg.version.trim() : cfg.version;
-    if (cfgVersion && String(cfgVersion).toLowerCase() !== 'auto') return String(cfgVersion);
+    const cfgVersion = normalizeVersionToken(cfg.version);
+    if (cfgVersion) return cfgVersion;
 
     const globalVer =
       (typeof import.meta !== 'undefined' && import.meta.env && (
@@ -73,7 +82,8 @@ function getI18nVersion() {
       w.__APP_VERSION__ ||
       w.__ODV_APP_VERSION__;
 
-    if (globalVer) return String(globalVer);
+    const normalizedGlobalVer = normalizeVersionToken(globalVer);
+    if (normalizedGlobalVer) return normalizedGlobalVer;
   } catch {}
   return '';
 }

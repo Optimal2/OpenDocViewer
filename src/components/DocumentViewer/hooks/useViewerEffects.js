@@ -197,12 +197,12 @@ export function useViewerEffects(args) {
     const el = /** @type {HTMLElement|null} */ (viewerContainerRef.current);
     if (!el) return;
 
-    let raf = 0;
+    let rafId = 0;
     const ro = new ResizeObserver(() => {
       const mode = zoomState.mode;
       if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return;
-      cancelAnimationFrame(raf);
-      raf = requestAnimationFrame(() => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(() => {
         try {
           if (mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
           else if (mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
@@ -212,7 +212,7 @@ export function useViewerEffects(args) {
 
     ro.observe(el);
     return () => {
-      cancelAnimationFrame(raf);
+      cancelAnimationFrame(rafId);
       ro.disconnect();
     };
   }, [viewerContainerRef, zoomState.mode, documentRenderRef]);
@@ -280,7 +280,7 @@ export function useViewerEffects(args) {
     function onKeyDown(e) {
       if (shouldIgnoreViewerShortcut(e)) return;
 
-      const mod = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
+      const hasModifierKey = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
       const target = getTarget(e);
 
       if (isNextRepeatKey(e)) {
@@ -323,19 +323,19 @@ export function useViewerEffects(args) {
           break;
 
         case '+':
-          if (!mod) { e.preventDefault(); zoomIn(); }
+          if (!hasModifierKey) { e.preventDefault(); zoomIn(); }
           break;
         case '-':
-          if (!mod) { e.preventDefault(); zoomOut(); }
+          if (!hasModifierKey) { e.preventDefault(); zoomOut(); }
           break;
 
         default:
           // Numpad variants
-          if (!mod && e.code === 'NumpadAdd') { e.preventDefault(); zoomIn(); break; }
-          if (!mod && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOut(); break; }
+          if (!hasModifierKey && e.code === 'NumpadAdd') { e.preventDefault(); zoomIn(); break; }
+          if (!hasModifierKey && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOut(); break; }
 
           // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare, Edit, Theme)
-          if (!mod && !e.shiftKey && !e.altKey) {
+          if (!hasModifierKey && !e.shiftKey && !e.altKey) {
             if (e.key === '0') { e.preventDefault(); onOpenPrintDialog?.(); }
             else if (e.key === '1') { e.preventDefault(); actualSize(); }
             else if (e.key === '2') { e.preventDefault(); fitToScreen(); }

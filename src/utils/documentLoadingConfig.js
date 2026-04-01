@@ -290,7 +290,9 @@ function normalizeThumbnailLoadingStrategy(value, fallback) {
 
 function normalizeThumbnailSourceStrategy(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
-  if (raw === 'dedicated' || raw === 'prefer-full-images') return raw;
+  if (raw === 'auto' || raw === 'dedicated' || raw === 'prefer-full-images') return raw;
+  // Invalid or unknown values intentionally normalize to `auto`, which keeps runtime behavior
+  // adaptive instead of silently pinning the viewer to a more opinionated thumbnail source mode.
   return 'auto';
 }
 
