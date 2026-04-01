@@ -48,6 +48,11 @@ function normalizeRotationDegrees(value) {
   return ((numeric % 360) + 360) % 360;
 }
 
+const THUMBNAIL_WIDTH_MIN = 160;
+const THUMBNAIL_WIDTH_MAX = 520;
+const THUMBNAIL_WIDTH_STEP = 48;
+const THUMBNAIL_WIDTH_DEFAULT = 220;
+
 /**
  * Image adjustment properties for canvas edit mode.
  * @typedef {Object} ImageProperties
@@ -112,11 +117,6 @@ export function useDocumentViewer() {
   const [isExpandedRaw, setIsExpandedRaw] = useState(false); // raw edit-mode flag
   const isExpanded = isExpandedRaw;
 
-  const THUMBNAIL_WIDTH_MIN = 160;
-  const THUMBNAIL_WIDTH_MAX = 520;
-  const THUMBNAIL_WIDTH_STEP = 48;
-  const THUMBNAIL_WIDTH_DEFAULT = 220;
-
   const [thumbnailWidth, setThumbnailWidth] = useState(THUMBNAIL_WIDTH_DEFAULT);
 
   // Refs shared with the renderer layer and the effect helpers.
@@ -173,10 +173,9 @@ export function useDocumentViewer() {
   /**
    * Change the primary page number safely (clamped).
    * @param {number} next
-   * @param {boolean} [fromThumbnail=false]
    * @returns {void}
    */
-  const handlePageNumberChange = useCallback((next, _fromThumbnail = false) => {
+  const handlePageNumberChange = useCallback((next) => {
     updatePageTarget('primary', next);
   }, [updatePageTarget]);
 
@@ -275,13 +274,17 @@ export function useDocumentViewer() {
   // --- Zoom helpers --------------------------------------------------------------
   const zoomIn = useCallback(() => {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
-    try { if (documentRenderRef.current?.zoomIn) { documentRenderRef.current.zoomIn(); return; } } catch {}
+    try { if (documentRenderRef.current?.zoomIn) { documentRenderRef.current.zoomIn(); return; } } catch (error) {
+      logger.warn('DocumentRender zoomIn failed; using state fallback', { error: String(error?.message || error) });
+    }
     setZoom((z) => Math.min(8, Math.round((z * 1.1) * 100) / 100));
   }, []);
 
   const zoomOut = useCallback(() => {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
-    try { if (documentRenderRef.current?.zoomOut) { documentRenderRef.current.zoomOut(); return; } } catch {}
+    try { if (documentRenderRef.current?.zoomOut) { documentRenderRef.current.zoomOut(); return; } } catch (error) {
+      logger.warn('DocumentRender zoomOut failed; using state fallback', { error: String(error?.message || error) });
+    }
     setZoom((z) => Math.max(0.1, Math.round((z / 1.1) * 100) / 100));
   }, []);
 
@@ -294,13 +297,17 @@ export function useDocumentViewer() {
   const fitToScreen = useCallback(() => {
     resetPostZoom();
     setZoomState({ mode: 'FIT_PAGE', scale: zoom });
-    try { documentRenderRef.current?.fitToScreen?.(); } catch {}
+    try { documentRenderRef.current?.fitToScreen?.(); } catch (error) {
+      logger.warn('DocumentRender fitToScreen failed', { error: String(error?.message || error) });
+    }
   }, [resetPostZoom, zoom]);
 
   const fitToWidth = useCallback(() => {
     resetPostZoom();
     setZoomState({ mode: 'FIT_WIDTH', scale: zoom });
-    try { documentRenderRef.current?.fitToWidth?.(); } catch {}
+    try { documentRenderRef.current?.fitToWidth?.(); } catch (error) {
+      logger.warn('DocumentRender fitToWidth failed', { error: String(error?.message || error) });
+    }
   }, [resetPostZoom, zoom]);
 
   /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'). */
@@ -459,8 +466,12 @@ export function useDocumentViewer() {
     window.addEventListener('mouseup', onUp);
   }, [thumbnailWidth]);
 
-  /** Placeholder for future focus/selection behaviors. */
-  const handleContainerClick = useCallback(function (_event) {}, []);
+  /**
+   * Intentionally a no-op. The outer viewer shell keeps an explicit click handler slot so the
+   * container API shape stays stable while focus/selection behavior is evaluated separately from
+   * page activation, compare toggling, and edit-mode interactions.
+   */
+  const handleContainerClick = useCallback(function handleContainerClick() {}, []);
 
   // --- Effects: sticky fit, global wheel, hotkeys --------------------------------
   useViewerEffects({

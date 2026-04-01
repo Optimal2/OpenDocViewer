@@ -213,7 +213,7 @@ const DocumentViewer = () => {
               <DocumentViewerThumbnails
                 allPages={allPages}
                 pageNumber={thumbnailSelectionPageNumber}
-                setPageNumber={(newPageNumber) => handlePageNumberChange(newPageNumber, true)}
+                setPageNumber={handlePageNumberChange}
                 thumbnailsContainerRef={thumbnailsContainerRef}
                 width={thumbnailWidth}
                 selectForCompare={selectForCompare}
