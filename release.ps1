@@ -54,10 +54,11 @@ $hasRemote=$true; try{$null=Exec 'git' @('remote','get-url','origin') -Cwd $repo
 if($hasRemote){ $null = Exec 'git' @('fetch','--tags','--prune') -Cwd $repoRoot -Quiet }
 
 Write-Host "=== OpenDocViewer Release Helper ===`n"
-Write-Host "Note: SECURITY.md is not updated automatically by this script. Update it manually before release if the support matrix or release context has changed.`n" -ForegroundColor Yellow
+Write-Host "Note: SECURITY.md is not updated automatically by this script. Before release, review the Supported Versions table and the Recent release context section so they match the version you are about to publish.`n" -ForegroundColor Yellow
 $commitMsg   = ReadNonEmpty 'Commit message (e.g. chore(deps): bump axios to 1.12.1)'
 $releaseType = ReadNonEmpty 'Release type (patch | minor | major)'
 if(@('patch','minor','major') -notcontains $releaseType.ToLower()){ throw "Invalid release type. Use: patch, minor, or major." }
+$releaseType = $releaseType.ToLowerInvariant()
 
 Write-Host "`nSummary:`n  Repo root:     $repoRoot`n  Branch:        $branch`n  Commit:        $commitMsg`n  Release type:  $releaseType`n"
 if((Read-Host 'Proceed? (Y/N)').ToUpper() -ne 'Y'){ Write-Host 'Aborted.'; exit 0 }
@@ -93,7 +94,15 @@ $prevHead=(Exec 'git' @('rev-parse','HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 $null = ExecNpm -NpmArgs @('run','--silent',"release:$releaseType") -Cwd $repoRoot
 
 # Resolve tag/version
-$newVersion=$null; try{ $pkg=Get-Content -Raw -Path (Join-Path $repoRoot 'package.json') | ConvertFrom-Json; $newVersion=$pkg.version }catch{}
+$newVersion=$null
+try{
+  $pkgPath = Join-Path $repoRoot 'package.json'
+  $pkg = Get-Content -Raw -Path $pkgPath | ConvertFrom-Json
+  if(-not $pkg.version){ throw "Missing version field in package.json." }
+  $newVersion=$pkg.version
+}catch{
+  Write-Warning "Unable to read package.json version after npm version. Falling back to the latest Git tag. Details: $($_.Exception.Message)"
+}
 $tagName= if($newVersion){"v$($newVersion)"}else{ (Exec 'git' @('describe','--tags','--abbrev=0') -Cwd $repoRoot -Quiet).Out.Trim() }
 
 # Push (rollback on failure)
@@ -120,7 +129,7 @@ if($hasRemote){
   $local =(Exec 'git' @('rev-parse','HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
   $remote=(Exec 'git' @('rev-parse',"origin/$branch") -Cwd $repoRoot -Quiet).Out.Trim()
   $tagRemote=(Exec 'git' @('ls-remote','--tags','origin',$tagName) -Cwd $repoRoot -AllowNonZero -Quiet).Out.Trim()
-  if($local -ne $remote){ Write-Warning "Push verification: local HEAD != origin/$branch. Try: git pull --rebase origin $branch; git push origin $branch --follow-tags" }
+  if($local -ne $remote){ Write-Warning "Push verification: local HEAD != origin/$branch. This can mean the remote advanced concurrently. Review with: git log HEAD..origin/$branch --oneline" }
   if(-not $tagRemote){ Write-Warning "Push verification: tag $tagName not visible on origin yet." }
 }
 

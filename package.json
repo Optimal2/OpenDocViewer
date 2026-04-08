@@ -23,7 +23,7 @@
     "opendocviewer"
   ],
   "engines": {
-    "node": ">=18.0.0"
+    "node": ">=20.19.0 <21 || >=22.12.0"
   },
   "scripts": {
     "dev": "vite",
@@ -95,11 +95,12 @@
     "jsdoc": "^4.0.5",
     "postcss": "^8.5.6",
     "prettier": "^3.7.4",
-    "vite": "^7.3.0",
+    "vite": "^7.3.2",
     "vite-plugin-svgr": "^4.5.0"
   },
   "overrides": {
     "flatted": "^3.4.2",
+    "lodash": "^4.18.0",
     "path-to-regexp": "^8.4.0",
     "picomatch": "^4.0.4"
   }

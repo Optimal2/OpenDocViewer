@@ -30,6 +30,14 @@ function normalizeThumbnailBound(value, fallback) {
   return Math.max(MIN_THUMBNAIL_DIMENSION, Number(value) || fallback);
 }
 
+/**
+ * Creates an error that tells the caller this worker path is unsupported and should be retried on
+ * the main thread. The custom `fallbackMainThread` flag is intentional: upstream code checks for
+ * that marker to distinguish expected capability fallbacks from real hard failures.
+ *
+ * @param {string} message
+ * @returns {Error}
+ */
 function createFallbackMainThreadError(message) {
   const error = new Error(message);
   error.fallbackMainThread = true;
@@ -252,8 +260,9 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
 
   // Intentional zero-copy view over the UTIF RGBA buffer. The worker does not mutate `rgba` after
   // ImageData creation, so avoiding a defensive copy keeps TIFF rendering faster and lowers peak
-  // memory pressure for large pages.
-  const imageData = new ImageData(new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength), width, height);
+  // memory pressure for large pages. The named view makes that ownership assumption explicit.
+  const clampedRgbaView = new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength);
+  const imageData = new ImageData(clampedRgbaView, width, height);
   ctx.putImageData(imageData, 0, 0);
 
   if (variant === 'full') {
