@@ -5,7 +5,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 $global:__REL_STASH__ = $null  # predeclare to avoid StrictMode errors
 
-function J($a){ if(-not $a){''}else{ ($a|%{ if($_ -match '[\s"|\\]'){'"'+($_ -replace '(["\\])','\\$1')+'"' }else{$_}}) -join ' ' } }
+function Format-CommandLineArgs($a){ if(-not $a){''}else{ ($a|%{ if($_ -match '[\s"|\\]'){'"'+($_ -replace '(["\\])','\\$1')+'"' }else{$_}}) -join ' ' } }
 function Exec {
   param(
     [Parameter(Mandatory)][string]$File,
@@ -14,7 +14,7 @@ function Exec {
     [switch]$AllowNonZero,
     [switch]$Quiet
   )
-  $as = J $Args
+  $as = Format-CommandLineArgs $Args
   if(-not $Quiet){
     if($Cwd){Write-Host "==> ($Cwd) $File $as" -ForegroundColor Cyan}
     else    {Write-Host "==> $File $as" -ForegroundColor Cyan}
@@ -101,7 +101,7 @@ try{
   if(-not $pkg.version){ throw "Missing version field in package.json." }
   $newVersion=$pkg.version
 }catch{
-  Write-Warning "Unable to read package.json version after npm version. Falling back to the latest Git tag. Details: $($_.Exception.Message)"
+  Write-Warning "Unable to read the package.json version field after running the npm version command. Falling back to the latest Git tag. Details: $($_.Exception.Message)"
 }
 $tagName= if($newVersion){"v$($newVersion)"}else{ (Exec 'git' @('describe','--tags','--abbrev=0') -Cwd $repoRoot -Quiet).Out.Trim() }
 
@@ -129,7 +129,7 @@ if($hasRemote){
   $local =(Exec 'git' @('rev-parse','HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
   $remote=(Exec 'git' @('rev-parse',"origin/$branch") -Cwd $repoRoot -Quiet).Out.Trim()
   $tagRemote=(Exec 'git' @('ls-remote','--tags','origin',$tagName) -Cwd $repoRoot -AllowNonZero -Quiet).Out.Trim()
-  if($local -ne $remote){ Write-Warning "Push verification: local HEAD != origin/$branch. This can mean the remote advanced concurrently. Review with: git log HEAD..origin/$branch --oneline" }
+  if($local -ne $remote){ Write-Warning "Push verification: local HEAD != origin/$branch. This can mean the remote advanced concurrently. Review divergence with: git log HEAD...origin/$branch --oneline" }
   if(-not $tagRemote){ Write-Warning "Push verification: tag $tagName not visible on origin yet." }
 }
 
