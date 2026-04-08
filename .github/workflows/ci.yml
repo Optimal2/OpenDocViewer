@@ -24,15 +24,45 @@ jobs:
           cache-dependency-path: package-lock.json
           registry-url: 'https://registry.npmjs.org'
 
+      - name: Validate lockfile registry URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'packages\.applied-caas-gateway1\.internal|artifactory' package-lock.json; then
+            echo 'package-lock.json contains non-public registry URLs.' >&2
+            echo 'Regenerate or normalize the lockfile before pushing.' >&2
+            exit 1
+          fi
+
       - name: Install deps
-        timeout-minutes: 12
+        timeout-minutes: 20
         env:
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-          NPM_CONFIG_FETCH_RETRIES: '5'
-          NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: '20000'
-          NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: '120000'
-          NPM_CONFIG_FETCH_TIMEOUT: '120000'
-        run: npm ci --prefer-offline --no-audit --fund=false
+          NPM_CONFIG_FETCH_RETRIES: '2'
+          NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: '5000'
+          NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: '30000'
+          NPM_CONFIG_FETCH_TIMEOUT: '30000'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Node: $(node --version)"
+          echo "npm:  $(npm --version)"
+          for attempt in 1 2; do
+            echo "npm ci attempt ${attempt}/2"
+            if timeout 8m npm ci --no-audit --fund=false --verbose; then
+              exit 0
+            fi
+            exit_code=$?
+            echo "npm ci attempt ${attempt} failed with exit code ${exit_code}" >&2
+            rm -rf node_modules
+            npm cache clean --force || true
+            if [ "$attempt" -lt 2 ]; then
+              echo 'Retrying after 15 seconds...' >&2
+              sleep 15
+            else
+              exit "$exit_code"
+            fi
+          done
 
       - name: Lint
         run: npm run lint

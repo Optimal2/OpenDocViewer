@@ -3,45 +3,75 @@ name: Release
 on:
   push:
     tags:
-      - 'v*.*.*'   # run only when a SemVer-like tag is pushed
+      - 'v*.*.*'
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
 
     permissions:
-      contents: write  # needed to create release & upload assets
+      contents: write
 
     steps:
       - name: Checkout
         uses: actions/checkout@v4
         with:
-          fetch-depth: 0  # useful if you auto-generate release notes
+          fetch-depth: 0
 
       - name: Use Node
         uses: actions/setup-node@v4
         with:
           node-version: '20.19.0'
           cache: 'npm'
+          cache-dependency-path: package-lock.json
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Validate lockfile registry URLs
+        shell: bash
+        run: |
+          set -euo pipefail
+          if grep -nE 'packages\.applied-caas-gateway1\.internal|artifactory' package-lock.json; then
+            echo 'package-lock.json contains non-public registry URLs.' >&2
+            echo 'Regenerate or normalize the lockfile before creating a release.' >&2
+            exit 1
+          fi
 
       - name: Install deps (clean)
+        timeout-minutes: 20
         env:
           NPM_CONFIG_REGISTRY: https://registry.npmjs.org/
-          NPM_CONFIG_FETCH_RETRIES: '5'
-          NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: '20000'
-          NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: '120000'
-          NPM_CONFIG_FETCH_TIMEOUT: '120000'
-        run: npm ci --prefer-offline --no-audit --fund=false
+          NPM_CONFIG_FETCH_RETRIES: '2'
+          NPM_CONFIG_FETCH_RETRY_MINTIMEOUT: '5000'
+          NPM_CONFIG_FETCH_RETRY_MAXTIMEOUT: '30000'
+          NPM_CONFIG_FETCH_TIMEOUT: '30000'
+        shell: bash
+        run: |
+          set -euo pipefail
+          echo "Node: $(node --version)"
+          echo "npm:  $(npm --version)"
+          for attempt in 1 2; do
+            echo "npm ci attempt ${attempt}/2"
+            if timeout 8m npm ci --no-audit --fund=false --verbose; then
+              exit 0
+            fi
+            exit_code=$?
+            echo "npm ci attempt ${attempt} failed with exit code ${exit_code}" >&2
+            rm -rf node_modules
+            npm cache clean --force || true
+            if [ "$attempt" -lt 2 ]; then
+              echo 'Retrying after 15 seconds...' >&2
+              sleep 15
+            else
+              exit "$exit_code"
+            fi
+          done
 
-      # Build your IIS portable bundle
       - name: Build
         run: npm run build
 
-      # Build docs (adjust if your docs command is different)
       - name: Build docs
         run: npm run doc
 
-      # Zip artifacts
       - name: Package dist
         run: zip -r "OpenDocViewer-dist-${{ github.ref_name }}.zip" dist/
 
@@ -53,7 +83,6 @@ jobs:
             echo "docs/ folder not found; skipping docs zip."
           fi
 
-      # Create a GitHub Release & upload assets
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:

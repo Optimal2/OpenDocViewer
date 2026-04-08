@@ -46,6 +46,16 @@ function createFallbackMainThreadError(message) {
   return error;
 }
 
+function createClampedRgbaView(rgba) {
+  if (ArrayBuffer.isView(rgba)) {
+    return new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength);
+  }
+  if (rgba instanceof ArrayBuffer) {
+    return new Uint8ClampedArray(rgba);
+  }
+  throw createFallbackMainThreadError('UTIF returned an unexpected RGBA buffer type');
+}
+
 function createLocalCanvas(w, h) {
   try {
     if (typeof OffscreenCanvas !== 'function') return null;
@@ -265,7 +275,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
   // Intentional zero-copy view over the UTIF RGBA buffer. The worker does not mutate `rgba` after
   // ImageData creation, so avoiding a defensive copy keeps TIFF rendering faster and lowers peak
   // memory pressure for large pages. The named view makes that ownership assumption explicit.
-  const clampedRgbaView = new Uint8ClampedArray(rgba.buffer, rgba.byteOffset, rgba.byteLength);
+  const clampedRgbaView = createClampedRgbaView(rgba);
   const imageData = new ImageData(clampedRgbaView, width, height);
   ctx.putImageData(imageData, 0, 0);
 
