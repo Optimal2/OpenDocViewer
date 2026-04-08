@@ -3,15 +3,15 @@
 
 ## Supported Versions
 
-**OpenDocViewer v1.4.1** is currently being prepared and is **not published yet**.
-**OpenDocViewer v1.4.0** remains the current recommended published release until v1.4.1 is released.
+**OpenDocViewer v1.4.1** is the current recommended release.
+**OpenDocViewer v1.4.0** is still considered safe to run and eligible for security fixes, but it is superseded by v1.4.1.
 
 Older releases are retained for historical reference only.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.4.1   | :white_check_mark: | Planned patch release; not published yet |
-| 1.4.0   | :white_check_mark: | Current recommended published release until 1.4.1 ships |
+| 1.4.1   | :white_check_mark: | Current recommended release |
+| 1.4.0   | :white_check_mark: | Supported safe release, superseded by v1.4.1 |
 | 1.3.1   | :white_check_mark: | Supported safe release, older feature/security baseline |
 | 1.3.0   | :x: | Unsupported |
 | 1.2.0   | :x: | Unsupported |
@@ -25,7 +25,7 @@ Older releases are retained for historical reference only.
 
 The eight most recent releases are listed below for operational context:
 
-### OpenDocViewer v1.4.1 (planned / unpublished)
+### OpenDocViewer v1.4.1
 OpenDocViewer v1.4.1 is a targeted patch release focused on maintenance and release hygiene.
 
 This release updates the development/build toolchain to remediate current Vite security advisories, keeps the existing runtime behavior intact, improves release-script clarity around manual SECURITY.md updates and post-push verification, and adds small maintainability clarifications in worker-side rendering code where GitHub AI previously raised low-confidence suggestions.
