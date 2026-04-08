@@ -3,15 +3,16 @@
 
 ## Supported Versions
 
-**OpenDocViewer v1.4.0** is the current recommended release.
-**OpenDocViewer v1.3.1** is still considered safe to run and eligible for security fixes, but it is superseded by v1.4.0 and lacks later loading-pipeline, keyboard-navigation, and diagnostics improvements.
+**OpenDocViewer v1.4.1** is the next recommended release and should be used for new deployments once published.
+**OpenDocViewer v1.4.0** remains supported in the interim, but it is superseded by v1.4.1 and should be upgraded during the normal patch rollout window.
 
 Older releases are retained for historical reference only.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.4.0   | :white_check_mark: | Current recommended release |
-| 1.3.1   | :white_check_mark: | Supported safe release, superseded by 1.4.0 |
+| 1.4.1   | :white_check_mark: | Next recommended release (prepare before publish) |
+| 1.4.0   | :white_check_mark: | Supported interim release, superseded by 1.4.1 |
+| 1.3.1   | :white_check_mark: | Supported safe release, older feature/security baseline |
 | 1.3.0   | :x: | Unsupported |
 | 1.2.0   | :x: | Unsupported |
 | 1.1.0   | :x: | Unsupported |
@@ -22,7 +23,12 @@ Older releases are retained for historical reference only.
 
 ## Recent release context
 
-The seven most recent releases are listed below for operational context:
+The eight most recent releases are listed below for operational context:
+
+### OpenDocViewer v1.4.1
+OpenDocViewer v1.4.1 is a targeted patch release focused on maintenance and release hygiene.
+
+This release updates the development/build toolchain to remediate current Vite security advisories, keeps the existing runtime behavior intact, improves release-script clarity around manual SECURITY.md updates and post-push verification, and adds small maintainability clarifications in worker-side rendering code where GitHub AI previously raised low-confidence suggestions.
 
 ### OpenDocViewer v1.4.0
 OpenDocViewer v1.4.0 improves hybrid document loading throughput, rendered-page reuse, viewer stability during held navigation, diagnostics behavior, and loading-time print behavior.

@@ -27,7 +27,9 @@ const DEFAULT_THUMBNAIL_WIDTH = 220;
 const DEFAULT_THUMBNAIL_HEIGHT = 310;
 
 function normalizeThumbnailBound(value, fallback) {
-  return Math.max(MIN_THUMBNAIL_DIMENSION, Number(value) || fallback);
+  const numericValue = Number(value);
+  const resolvedValue = Number.isFinite(numericValue) && numericValue > 0 ? numericValue : fallback;
+  return Math.max(MIN_THUMBNAIL_DIMENSION, resolvedValue);
 }
 
 /**
@@ -72,15 +74,17 @@ function normalizeExtension(ext) {
   return value;
 }
 
-function getNormalizedWorkerFileExtension(ext) {
-  return normalizeExtension(ext || '');
-}
-
 function fitScale(width, height, maxWidth, maxHeight) {
-  const safeWidth = Math.max(1, Number(width) || 1);
-  const safeHeight = Math.max(1, Number(height) || 1);
-  const safeMaxWidth = Math.max(1, Number(maxWidth) || safeWidth);
-  const safeMaxHeight = Math.max(1, Number(maxHeight) || safeHeight);
+  const numericWidth = Number(width);
+  const numericHeight = Number(height);
+  const numericMaxWidth = Number(maxWidth);
+  const numericMaxHeight = Number(maxHeight);
+  const safeWidth = Number.isFinite(numericWidth) && numericWidth > 0 ? numericWidth : 1;
+  const safeHeight = Number.isFinite(numericHeight) && numericHeight > 0 ? numericHeight : 1;
+  // Missing or non-positive max bounds are treated as "use the intrinsic dimension" so they do
+  // not accidentally force the asset down to 1 px during worker-side scaling.
+  const safeMaxWidth = Number.isFinite(numericMaxWidth) && numericMaxWidth > 0 ? numericMaxWidth : safeWidth;
+  const safeMaxHeight = Number.isFinite(numericMaxHeight) && numericMaxHeight > 0 ? numericMaxHeight : safeHeight;
   return Math.min(1, safeMaxWidth / safeWidth, safeMaxHeight / safeHeight);
 }
 
@@ -184,7 +188,7 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
 }
 
 async function renderRasterAsset(sourceBlob, fileExtension, variant, thumbnailMaxWidth, thumbnailMaxHeight) {
-  const ext = getNormalizedWorkerFileExtension(fileExtension);
+  const ext = normalizeExtension(fileExtension);
   const maxThumbnailWidth = normalizeThumbnailBound(thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH);
   const maxThumbnailHeight = normalizeThumbnailBound(thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT);
   if (variant === 'full') {
@@ -297,7 +301,7 @@ async function renderTiffAsset(sourceBlob, pageIndex, variant, thumbnailMaxWidth
 }
 
 async function renderPageAssetPayload(payload) {
-  const ext = getNormalizedWorkerFileExtension(payload?.fileExtension);
+  const ext = normalizeExtension(payload?.fileExtension);
   const variant = String(payload?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full';
   const sourceBlob = payload?.sourceBlob;
   if (!(sourceBlob instanceof Blob)) throw new Error('Worker payload is missing sourceBlob');
@@ -414,7 +418,7 @@ async function handleLegacyBatchMessage(event) {
   const { jobs, fileExtension } = event.data || {};
   if (!Array.isArray(jobs) || jobs.length === 0) return;
 
-  const fileExtLower = getNormalizedWorkerFileExtension(fileExtension);
+  const fileExtLower = normalizeExtension(fileExtension);
   try {
     const jobResults = [];
     if (fileExtLower === 'tiff') await processTiff(jobs, jobResults);
