@@ -47,7 +47,7 @@
   },
   "dependencies": {
     "@formatjs/icu-messageformat-parser": "^3.0.2",
-    "axios": "^1.13.2",
+    "axios": "^1.15.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^17.2.3",
