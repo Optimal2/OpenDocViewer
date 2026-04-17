@@ -59,6 +59,14 @@ import { makeExplicitSource } from '../components/DocumentLoader/sources/explici
  */
 
 /**
+ * Diagnostics-only bootstrap metadata.
+ * @typedef {Object} BootstrapDebugInfo
+ * @property {string} mode
+ * @property {(string|undefined)} [hostPayloadSource]
+ * @property {*=} [hostPayload]
+ */
+
+/**
  * Options for building a demo source list.
  * @typedef {Object} DemoBuildOptions
  * @property {number} count
@@ -112,6 +120,7 @@ export default function AppBootstrap() {
   const [mode, setMode] = useState(ODV_BOOTSTRAP_MODES.DEMO);
   const [bundle, setBundle] = useState(/** @type {(PortableDocumentBundle|null)} */ (null));
   const [urlConfig, setUrlConfig] = useState(/** @type {(UrlConfig|null)} */ (null));
+  const [bootstrapDebugInfo, setBootstrapDebugInfo] = useState(/** @type {(BootstrapDebugInfo|null)} */ (null));
 
   // Demo UI state (shown only when mode === DEMO and we haven't started)
   const [count, setCount] = useState(10);
@@ -127,6 +136,7 @@ export default function AppBootstrap() {
         const res = await bootstrapDetect();
         if (!mounted) return;
         setMode(res.mode);
+        setBootstrapDebugInfo(res.debugInfo || null);
         if (res.bundle) setBundle(res.bundle);
         if (res.urlConfig) setUrlConfig(res.urlConfig);
 
@@ -137,6 +147,7 @@ export default function AppBootstrap() {
           mode: res.mode,
           hasBundle: !!res.bundle,
           hasUrlConfig: !!res.urlConfig,
+          debugSource: res.debugInfo?.hostPayloadSource || null,
         });
       } catch (error) {
         logger.error('Bootstrap detection failed', { error: String(error?.message || error) });
@@ -184,6 +195,7 @@ export default function AppBootstrap() {
         folder: urlConfig.folder,
         extension: urlConfig.extension,
         endNumber: urlConfig.endNumber,
+        bootstrapDebugInfo,
       };
     }
 
@@ -195,7 +207,7 @@ export default function AppBootstrap() {
       Array.isArray(sourceListFromBundle) &&
       sourceListFromBundle.length > 0
     ) {
-      return { sourceList: sourceListFromBundle, bundle };
+      return { sourceList: sourceListFromBundle, bundle, bootstrapDebugInfo };
     }
 
     // 3) Demo launcher pressed → explicit-list mode from /public samples
@@ -203,12 +215,12 @@ export default function AppBootstrap() {
       const formats = mix ? ['jpg', 'png', 'tif', 'pdf'] : [format];
       const sourceList = buildDemoSourceList({ count, strategy: mix ? 'mix' : 'repeat', formats });
       // Pass demoMode so the loader knows it can insert simple image pages directly (no workers).
-      return { sourceList, demoMode: true };
+      return { sourceList, demoMode: true, bootstrapDebugInfo };
     }
 
     // No props yet → show demo launcher
     return null;
-  }, [mode, urlConfig, sourceListFromBundle, bundle, start, mix, format, count]);
+  }, [mode, urlConfig, sourceListFromBundle, bundle, start, mix, format, count, bootstrapDebugInfo]);
 
   // Until a startup payload exists, show the demo launcher instead of the viewer shell.
   if (!viewerProps) {
@@ -263,7 +275,6 @@ export default function AppBootstrap() {
     );
   }
 
-  // Normal path: render the viewer within an error boundary
   return (
     <ErrorBoundary>
       <OpenDocViewer {...viewerProps} />

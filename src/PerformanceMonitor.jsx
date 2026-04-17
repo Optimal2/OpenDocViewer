@@ -18,6 +18,7 @@
  */
 
 import React, { useState, useEffect, useRef, useCallback, useContext, useMemo } from 'react';
+import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import ViewerContext from './contexts/viewerContext.js';
 import { formatBytes } from './utils/documentLoadingConfig.js';
@@ -70,12 +71,144 @@ function resolveElapsedMs(startedAtMs, completedAtMs, nowMs) {
 }
 
 /**
+ * @param {*} value
+ * @returns {string}
+ */
+function describeValueType(value) {
+  if (Array.isArray(value)) return `array(${value.length})`;
+  if (value == null) return 'null';
+  return typeof value;
+}
+
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isPlainObject(value) {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+const SENSITIVE_KEY_RE = /(auth|token|secret|password|passwd|authorization|cookie|apikey|api_key)/i;
+
+/**
+ * Redact auth-like values before showing transport payloads in the diagnostics HUD.
+ *
+ * @param {*} value
+ * @param {number} depth
+ * @returns {*}
+ */
+function sanitizeForOverlay(value, depth = 0) {
+  if (depth > 8) return '[MaxDepth]';
+  if (Array.isArray(value)) return value.map((item) => sanitizeForOverlay(item, depth + 1));
+  if (!isPlainObject(value)) return value;
+
+  /** @type {Record<string, *>} */
+  const out = {};
+  for (const [key, entry] of Object.entries(value)) {
+    if (SENSITIVE_KEY_RE.test(String(key || ''))) {
+      out[key] = '[Masked]';
+      continue;
+    }
+    out[key] = sanitizeForOverlay(entry, depth + 1);
+  }
+  return out;
+}
+
+/**
+ * @param {*} value
+ * @returns {string}
+ */
+function safePrettyStringify(value) {
+  try {
+    if (typeof value === 'string') return value;
+    return JSON.stringify(sanitizeForOverlay(value), null, 2);
+  } catch {
+    try {
+      return String(value);
+    } catch {
+      return '[Unserializable]';
+    }
+  }
+}
+
+/**
+ * @param {*} payload
+ * @returns {number}
+ */
+function getPayloadTopLevelCount(payload) {
+  if (Array.isArray(payload)) return payload.length;
+  if (isPlainObject(payload)) return Object.keys(payload).length;
+  return 0;
+}
+
+/**
+ * @param {*} payload
+ * @returns {number}
+ */
+function getCaseIdCount(payload) {
+  if (Array.isArray(payload?.caseIds)) return payload.caseIds.length;
+  if (Array.isArray(payload?.CaseIds)) return payload.CaseIds.length;
+  return 0;
+}
+
+/**
+ * @param {*} bundle
+ * @returns {number}
+ */
+function countBundleMetaFields(bundle) {
+  const docs = Array.isArray(bundle?.documents) ? bundle.documents : [];
+  let count = 0;
+  for (const doc of docs) {
+    if (Array.isArray(doc?.meta)) count += doc.meta.length;
+  }
+  return count;
+}
+
+/**
+ * Copy best-effort text to clipboard without throwing.
+ *
+ * @param {string} text
+ * @returns {Promise<boolean>}
+ */
+async function copyText(text) {
+  try {
+    if (typeof navigator !== 'undefined' && navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(text);
+      return true;
+    }
+  } catch {
+    // ignore and fall back
+  }
+
+  try {
+    if (typeof document === 'undefined') return false;
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.setAttribute('readonly', 'true');
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    ta.style.pointerEvents = 'none';
+    document.body.appendChild(ta);
+    ta.select();
+    ta.setSelectionRange(0, ta.value.length);
+    const ok = document.execCommand('copy');
+    document.body.removeChild(ta);
+    return !!ok;
+  } catch {
+    return false;
+  }
+}
+
+/**
  * PerformanceMonitor component.
  * Renders nothing unless showPerfOverlay=true in runtime config.
  *
+ * @param {Object} props
+ * @param {*} [props.bundle]
+ * @param {{ mode?: string, hostPayloadSource?: string, hostPayload?: * }|null} [props.bootstrapDebugInfo]
  * @returns {(React.ReactElement|null)}
  */
-const PerformanceMonitor = () => {
+const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const { t } = useTranslation('common');
   const {
     allPages,
@@ -98,6 +231,8 @@ const PerformanceMonitor = () => {
   );
   const [hasHeapMetrics, setHasHeapMetrics] = useState(false);
   const [clockNow, setClockNow] = useState(() => Date.now());
+  const [showHostMetadata, setShowHostMetadata] = useState(false);
+  const [copyState, setCopyState] = useState('idle');
 
   const hardwareConcurrency = useMemo(() => {
     try {
@@ -119,6 +254,7 @@ const PerformanceMonitor = () => {
   const rafRef = useRef(undefined);
   const lastFrameTime = useRef(undefined);
   const smaWindow = useRef([]);
+  const copyResetTimerRef = useRef(undefined);
   const SMA_SIZE = 30;
 
   /**
@@ -173,6 +309,7 @@ const PerformanceMonitor = () => {
 
     return () => {
       try { if (rafRef.current) cancelAnimationFrame(rafRef.current); } catch {}
+      try { if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current); } catch {}
       clearInterval(memoryTimerId);
       clearInterval(clockTimerId);
     };
@@ -192,6 +329,30 @@ const PerformanceMonitor = () => {
   const fullReadyCount = Math.max(0, Number(runtimeDiagnostics?.fullReadyCount || 0));
   const thumbnailReadyCount = Math.max(0, Number(runtimeDiagnostics?.thumbnailReadyCount || 0));
   const messages = Array.isArray(messageQueue) ? messageQueue.slice(-20) : [];
+
+  const hostPayload = bootstrapDebugInfo?.hostPayload;
+  const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
+  const bundleDocumentCount = Array.isArray(bundle?.documents) ? bundle.documents.length : 0;
+  const bundleMetaFieldCount = countBundleMetaFields(bundle);
+  const caseIdCount = getCaseIdCount(hostPayload);
+  const hostPayloadPretty = useMemo(() => safePrettyStringify(hostPayload), [hostPayload]);
+  const hasHostMetadata = useMemo(() => {
+    const hasPayload = hostPayload != null
+      && ((typeof hostPayload === 'string' && hostPayload.length > 0) || getPayloadTopLevelCount(hostPayload) > 0);
+    const sessionMode = String(bootstrapDebugInfo?.mode || '') === 'session-token';
+    return sessionMode && (hasPayload || bundleDocumentCount > 0 || bundleMetaFieldCount > 0);
+  }, [bootstrapDebugInfo?.mode, hostPayload, bundleDocumentCount, bundleMetaFieldCount]);
+
+  const onCopyMetadata = useCallback(async () => {
+    const ok = await copyText(hostPayloadPretty);
+    setCopyState(ok ? 'copied' : 'failed');
+    try {
+      if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current);
+    } catch {
+      // ignore
+    }
+    copyResetTimerRef.current = setTimeout(() => setCopyState('idle'), 1800);
+  }, [hostPayloadPretty]);
 
   const wrapStyle = {
     position: 'fixed',
@@ -215,6 +376,15 @@ const PerformanceMonitor = () => {
   const sectionStyle = { margin: '6px 0' };
   const labelStyle = { opacity: 0.8 };
   const valueStyle = { fontWeight: 700 };
+  const smallButtonStyle = {
+    font: 'inherit',
+    color: '#fff',
+    background: 'rgba(255,255,255,0.12)',
+    border: '1px solid rgba(255,255,255,0.18)',
+    borderRadius: '4px',
+    padding: '2px 6px',
+    cursor: 'pointer',
+  };
 
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">
@@ -349,6 +519,63 @@ const PerformanceMonitor = () => {
         </div>
       </div>
 
+      {hasHostMetadata ? (
+        <div style={{ ...sectionStyle, marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={labelStyle}>{t('perf.hostMetadataLabel', { defaultValue: 'Host metadata:' })}</span>
+            <strong>{String(bootstrapDebugInfo?.mode || 'session-token')}</strong>
+            {hostPayloadSource ? <span style={{ opacity: 0.75 }}>({hostPayloadSource})</span> : null}
+            <button
+              type="button"
+              onClick={() => setShowHostMetadata((prev) => !prev)}
+              style={smallButtonStyle}
+              aria-expanded={showHostMetadata}
+            >
+              {showHostMetadata
+                ? t('perf.hideHostMetadata', { defaultValue: 'Hide' })
+                : t('perf.showHostMetadata', { defaultValue: 'Show metadata' })}
+            </button>
+            <button
+              type="button"
+              onClick={onCopyMetadata}
+              style={smallButtonStyle}
+              title={t('perf.copyHostMetadataTitle', { defaultValue: 'Copy sanitized host metadata JSON' })}
+            >
+              {copyState === 'copied'
+                ? t('perf.copiedLabel', { defaultValue: 'Copied' })
+                : copyState === 'failed'
+                  ? t('perf.copyFailedLabel', { defaultValue: 'Copy failed' })
+                  : t('perf.copyHostMetadata', { defaultValue: 'Copy' })}
+            </button>
+          </div>
+          <div style={{ marginTop: 4, opacity: 0.82 }}>
+            <span>{t('perf.payloadTypeLabel', { defaultValue: 'Payload:' })} <strong>{describeValueType(hostPayload)}</strong></span>
+            <span style={{ marginLeft: 10 }}>{t('perf.topLevelFieldsLabel', { defaultValue: 'Top-level:' })} <strong>{getPayloadTopLevelCount(hostPayload)}</strong></span>
+            {caseIdCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.caseIdsLabel', { defaultValue: 'caseIds:' })} <strong>{caseIdCount}</strong></span> : null}
+            {bundleDocumentCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleDocumentsLabel', { defaultValue: 'Documents:' })} <strong>{bundleDocumentCount}</strong></span> : null}
+            {bundleMetaFieldCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleMetaFieldsLabel', { defaultValue: 'Meta fields:' })} <strong>{bundleMetaFieldCount}</strong></span> : null}
+          </div>
+          {showHostMetadata ? (
+            <pre
+              style={{
+                marginTop: 8,
+                marginBottom: 0,
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+                maxHeight: '20vh',
+                overflowY: 'auto',
+                padding: '8px',
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              {hostPayloadPretty}
+            </pre>
+          ) : null}
+        </div>
+      ) : null}
+
       {error ? (
         <div style={{ ...sectionStyle, color: '#ff9c9c' }}>
           {t('perf.errorPrefix')} {String(error)}
@@ -369,6 +596,15 @@ const PerformanceMonitor = () => {
       )}
     </div>
   );
+};
+
+PerformanceMonitor.propTypes = {
+  bundle: PropTypes.any,
+  bootstrapDebugInfo: PropTypes.shape({
+    mode: PropTypes.string,
+    hostPayloadSource: PropTypes.string,
+    hostPayload: PropTypes.any,
+  }),
 };
 
 export default PerformanceMonitor;
