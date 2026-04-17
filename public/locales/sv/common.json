@@ -214,8 +214,19 @@
       "totalPageTitle": "Sida {page} av totalt {total}",
       "documentTitle": "Dokument {document} av totalt {total}",
       "documentPageTitle": "Sida {page} av totalt {total} i dokument {document}",
-      "documentPageTitleNoTotal": "Sida {page} i dokument {document}"
-    }
+      "documentPageTitleNoTotal": "Sida {page} i dokument {document}",
+      "documentPrefix": "D",
+      "documentPagePrefix": "S",
+      "totalPagePrefix": "T",
+      "documentBadgeTitle": "Dokumentnummer i aktuell session",
+      "documentPageBadgeTitle": "Sidnummer inom aktuellt dokument",
+      "totalPageBadgeTitle": "Totalt sidnummer i aktuell session"
+    },
+    "leftPaneBadgeShort": "V",
+    "rightPaneBadgeShort": "H",
+    "leftPaneBadgeTooltip": "Vänster sida i jämförelsevy",
+    "rightPaneBadgeTooltip": "Höger sida i jämförelsevy",
+    "documentBoundaryEndTitle": "Slut på dokumentpaketet"
   },
   "compareZoom": {
     "increase": "Öka panelens zoom",
