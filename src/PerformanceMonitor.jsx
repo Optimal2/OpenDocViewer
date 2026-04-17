@@ -234,7 +234,7 @@ function downloadText(filename, text) {
  *
  * @param {Object} props
  * @param {*} [props.bundle]
- * @param {{ mode?: string, hostPayloadSource?: string, hostPayload?: * }|null} [props.bootstrapDebugInfo]
+ * @param {(Object|null)} [props.bootstrapDebugInfo]
  * @returns {(React.ReactElement|null)}
  */
 const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
