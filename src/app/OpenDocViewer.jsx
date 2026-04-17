@@ -80,6 +80,15 @@ function readFlag(name, envVar, metaName, fallback = false) {
  */
 
 /**
+ * Diagnostics-only startup details surfaced through the performance overlay.
+ *
+ * @typedef {Object} BootstrapDebugInfo
+ * @property {string} mode
+ * @property {(string|undefined)} [hostPayloadSource]
+ * @property {*=} [hostPayload]
+ */
+
+/**
  * OpenDocViewer — Top-level component.
  *
  * @param {Object} props
@@ -89,6 +98,8 @@ function readFlag(name, envVar, metaName, fallback = false) {
  * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit list mode: ordered list of document sources
  * @param {Object} [props.bundle]    Optional metadata object (reserved for future)
+ * @param {BootstrapDebugInfo} [props.bootstrapDebugInfo]
+ *        Diagnostics-only transport details from startup detection
  * @param {(boolean|undefined)} [props.demoMode]
  *        Demo passthrough: when true, the loader may directly insert simple images.
  * @param {"repeat"|"mix"} [props.demoStrategy]
@@ -105,6 +116,7 @@ const OpenDocViewer = ({
   endNumber,
   sourceList,
   bundle,
+  bootstrapDebugInfo,
   // NEW: demo passthrough props
   demoMode,
   demoStrategy,
@@ -187,7 +199,7 @@ const OpenDocViewer = ({
           demoFormats={demoFormats}
         />
         {/* Render HUD only when enabled (runtime-toggleable; see public/odv.config.js) */}
-        {showPerf && <PerformanceMonitor />}
+        {showPerf && <PerformanceMonitor bundle={bundle || null} bootstrapDebugInfo={bootstrapDebugInfo || null} />}
       </ViewerProvider>
     </ThemeProvider>
   );
@@ -208,6 +220,11 @@ OpenDocViewer.propTypes = {
     })
   ),
   bundle: PropTypes.object,
+  bootstrapDebugInfo: PropTypes.shape({
+    mode: PropTypes.string,
+    hostPayloadSource: PropTypes.string,
+    hostPayload: PropTypes.any,
+  }),
 
   // Demo-mode passthrough (optional)
   demoMode: PropTypes.bool,

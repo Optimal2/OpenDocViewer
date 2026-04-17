@@ -29,9 +29,19 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
 });
 
 /**
- * @typedef {{ mode: ('parent-page'|'session-token'|'js-api'), bundle: PortableDocumentBundle }} BootstrapFromHost
- * @typedef {{ mode: 'url-params', urlConfig: { folder: string, extension: string, endNumber: number } }} BootstrapFromUrlParams
- * @typedef {{ mode: 'demo' }} BootstrapDemo
+ * Opaque information about how startup data reached the viewer.
+ * Exposed only for diagnostics / support UI and kept transport-focused.
+ *
+ * @typedef {Object} BootstrapDebugInfo
+ * @property {string} mode
+ * @property {(string|undefined)} hostPayloadSource
+ * @property {*=} hostPayload
+ */
+
+/**
+ * @typedef {{ mode: ('parent-page'|'session-token'|'js-api'), bundle: PortableDocumentBundle, debugInfo: BootstrapDebugInfo }} BootstrapFromHost
+ * @typedef {{ mode: 'url-params', urlConfig: { folder: string, extension: string, endNumber: number }, debugInfo: BootstrapDebugInfo }} BootstrapFromUrlParams
+ * @typedef {{ mode: 'demo', debugInfo: BootstrapDebugInfo }} BootstrapDemo
  * @typedef {(BootstrapFromHost|BootstrapFromUrlParams|BootstrapDemo)} BootstrapAny
  */
 
@@ -85,6 +95,10 @@ function tryNormalizeBundle(candidate) {
 
 /**
  * Detect the best available bootstrap mode.
+ *
+ * `debugInfo` is intentionally a shallow diagnostic envelope so optional tools such as the
+ * performance overlay can show what the viewer actually received from the host transport.
+ *
  * @returns {Promise.<BootstrapAny>}
  */
 export async function bootstrapDetect() {
@@ -94,7 +108,15 @@ export async function bootstrapDetect() {
     if (parent?.data) {
       const bundle = tryNormalizeBundle(parent.data);
       if (bundle) {
-        return { mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE, bundle };
+        return {
+          mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE,
+          bundle,
+          debugInfo: {
+            mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE,
+            hostPayloadSource: String(parent.source || 'parent'),
+            hostPayload: parent.data,
+          },
+        };
       }
     }
   } catch {}
@@ -105,7 +127,15 @@ export async function bootstrapDetect() {
     if (sessionTok?.data) {
       const bundle = tryNormalizeBundle(sessionTok.data);
       if (bundle) {
-        return { mode: ODV_BOOTSTRAP_MODES.SESSION_TOKEN, bundle };
+        return {
+          mode: ODV_BOOTSTRAP_MODES.SESSION_TOKEN,
+          bundle,
+          debugInfo: {
+            mode: ODV_BOOTSTRAP_MODES.SESSION_TOKEN,
+            hostPayloadSource: String(sessionTok.source || 'sessiondata'),
+            hostPayload: sessionTok.data,
+          },
+        };
       }
     }
   } catch {}
@@ -114,7 +144,15 @@ export async function bootstrapDetect() {
   try {
     const urlp = readFromUrlParams();
     if (urlp?.data && urlp.data.folder && urlp.data.extension && urlp.data.endNumber) {
-      return { mode: ODV_BOOTSTRAP_MODES.URL_PARAMS, urlConfig: urlp.data };
+      return {
+        mode: ODV_BOOTSTRAP_MODES.URL_PARAMS,
+        urlConfig: urlp.data,
+        debugInfo: {
+          mode: ODV_BOOTSTRAP_MODES.URL_PARAMS,
+          hostPayloadSource: String(urlp.source || 'url-params'),
+          hostPayload: urlp.data,
+        },
+      };
     }
   } catch {}
 
@@ -126,7 +164,17 @@ export async function bootstrapDetect() {
 
       // Try bundle first
       const bundle = tryNormalizeBundle(p?.bundle ?? p);
-      if (bundle) return { mode: ODV_BOOTSTRAP_MODES.JS_API, bundle };
+      if (bundle) {
+        return {
+          mode: ODV_BOOTSTRAP_MODES.JS_API,
+          bundle,
+          debugInfo: {
+            mode: ODV_BOOTSTRAP_MODES.JS_API,
+            hostPayloadSource: 'js-api',
+            hostPayload: p,
+          },
+        };
+      }
 
       // Else minimal pattern config
       if (p && p.folder && p.extension && p.endNumber != null) {
@@ -136,12 +184,23 @@ export async function bootstrapDetect() {
             folder: String(p.folder),
             extension: String(p.extension),
             endNumber: Number(p.endNumber)
-          }
+          },
+          debugInfo: {
+            mode: ODV_BOOTSTRAP_MODES.JS_API,
+            hostPayloadSource: 'js-api',
+            hostPayload: p,
+          },
         };
       }
     }
   } catch {}
 
   // 5) Fallback: demo
-  return { mode: ODV_BOOTSTRAP_MODES.DEMO };
+  return {
+    mode: ODV_BOOTSTRAP_MODES.DEMO,
+    debugInfo: {
+      mode: ODV_BOOTSTRAP_MODES.DEMO,
+      hostPayloadSource: 'demo',
+    },
+  };
 }
