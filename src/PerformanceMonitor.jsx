@@ -199,6 +199,35 @@ async function copyText(text) {
   }
 }
 
+
+/**
+ * Download best-effort text as a local file without throwing.
+ *
+ * @param {string} filename
+ * @param {string} text
+ * @returns {boolean}
+ */
+function downloadText(filename, text) {
+  try {
+    if (typeof window === 'undefined' || typeof document === 'undefined') return false;
+    const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = filename;
+    link.style.display = 'none';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    setTimeout(() => {
+      try { URL.revokeObjectURL(url); } catch {}
+    }, 1000);
+    return true;
+  } catch {
+    return false;
+  }
+}
+
 /**
  * PerformanceMonitor component.
  * Renders nothing unless showPerfOverlay=true in runtime config.
@@ -233,6 +262,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [showHostMetadata, setShowHostMetadata] = useState(false);
   const [copyState, setCopyState] = useState('idle');
+  const [downloadState, setDownloadState] = useState('idle');
 
   const hardwareConcurrency = useMemo(() => {
     try {
@@ -255,6 +285,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const lastFrameTime = useRef(undefined);
   const smaWindow = useRef([]);
   const copyResetTimerRef = useRef(undefined);
+  const downloadResetTimerRef = useRef(undefined);
   const SMA_SIZE = 30;
 
   /**
@@ -310,6 +341,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     return () => {
       try { if (rafRef.current) cancelAnimationFrame(rafRef.current); } catch {}
       try { if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current); } catch {}
+      try { if (downloadResetTimerRef.current) clearTimeout(downloadResetTimerRef.current); } catch {}
       clearInterval(memoryTimerId);
       clearInterval(clockTimerId);
     };
@@ -339,9 +371,25 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const hasHostMetadata = useMemo(() => {
     const hasPayload = hostPayload != null
       && ((typeof hostPayload === 'string' && hostPayload.length > 0) || getPayloadTopLevelCount(hostPayload) > 0);
-    const sessionMode = String(bootstrapDebugInfo?.mode || '') === 'session-token';
-    return sessionMode && (hasPayload || bundleDocumentCount > 0 || bundleMetaFieldCount > 0);
-  }, [bootstrapDebugInfo?.mode, hostPayload, bundleDocumentCount, bundleMetaFieldCount]);
+    const fromSessionData = hostPayloadSource === 'sessiondata';
+    const bundleBackedMode = [
+      'session-token',
+      'parent-page',
+      'js-api',
+    ].includes(String(bootstrapDebugInfo?.mode || ''));
+    return fromSessionData || (bundleBackedMode && (hasPayload || bundleDocumentCount > 0 || bundleMetaFieldCount > 0));
+  }, [bootstrapDebugInfo?.mode, hostPayload, hostPayloadSource, bundleDocumentCount, bundleMetaFieldCount]);
+
+  const metadataDownloadName = useMemo(() => {
+    const now = new Date();
+    const yyyy = String(now.getFullYear());
+    const mm = String(now.getMonth() + 1).padStart(2, '0');
+    const dd = String(now.getDate()).padStart(2, '0');
+    const hh = String(now.getHours()).padStart(2, '0');
+    const mi = String(now.getMinutes()).padStart(2, '0');
+    const ss = String(now.getSeconds()).padStart(2, '0');
+    return `odv-host-metadata-${yyyy}${mm}${dd}-${hh}${mi}${ss}.json`;
+  }, []);
 
   const onCopyMetadata = useCallback(async () => {
     const ok = await copyText(hostPayloadPretty);
@@ -353,6 +401,17 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     }
     copyResetTimerRef.current = setTimeout(() => setCopyState('idle'), 1800);
   }, [hostPayloadPretty]);
+
+  const onDownloadMetadata = useCallback(() => {
+    const ok = downloadText(metadataDownloadName, hostPayloadPretty);
+    setDownloadState(ok ? 'downloaded' : 'failed');
+    try {
+      if (downloadResetTimerRef.current) clearTimeout(downloadResetTimerRef.current);
+    } catch {
+      // ignore
+    }
+    downloadResetTimerRef.current = setTimeout(() => setDownloadState('idle'), 1800);
+  }, [hostPayloadPretty, metadataDownloadName]);
 
   const wrapStyle = {
     position: 'fixed',
@@ -389,6 +448,74 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">
       <h3 style={h3Style}>{t('perf.title')}</h3>
+
+      {hasHostMetadata ? (
+        <div style={{ ...sectionStyle, marginTop: 2, marginBottom: 10, padding: '8px', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '6px', background: 'rgba(255,255,255,0.05)' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
+            <span style={labelStyle}>{t('perf.hostMetadataLabel', { defaultValue: 'Host metadata:' })}</span>
+            <strong>{hostPayloadSource || String(bootstrapDebugInfo?.mode || 'host')}</strong>
+            <button
+              type="button"
+              onClick={() => setShowHostMetadata((prev) => !prev)}
+              style={smallButtonStyle}
+              aria-expanded={showHostMetadata}
+            >
+              {showHostMetadata
+                ? t('perf.hideHostMetadata', { defaultValue: 'Hide' })
+                : t('perf.showHostMetadata', { defaultValue: 'Show metadata' })}
+            </button>
+            <button
+              type="button"
+              onClick={onDownloadMetadata}
+              style={smallButtonStyle}
+              title={t('perf.downloadHostMetadataTitle', { defaultValue: 'Download sanitized host metadata JSON' })}
+            >
+              {downloadState === 'downloaded'
+                ? t('perf.downloadedLabel', { defaultValue: 'Downloaded' })
+                : downloadState === 'failed'
+                  ? t('perf.downloadFailedLabel', { defaultValue: 'Download failed' })
+                  : t('perf.downloadHostMetadata', { defaultValue: 'Download JSON' })}
+            </button>
+            <button
+              type="button"
+              onClick={onCopyMetadata}
+              style={smallButtonStyle}
+              title={t('perf.copyHostMetadataTitle', { defaultValue: 'Copy sanitized host metadata JSON' })}
+            >
+              {copyState === 'copied'
+                ? t('perf.copiedLabel', { defaultValue: 'Copied' })
+                : copyState === 'failed'
+                  ? t('perf.copyFailedLabel', { defaultValue: 'Copy failed' })
+                  : t('perf.copyHostMetadata', { defaultValue: 'Copy' })}
+            </button>
+          </div>
+          <div style={{ marginTop: 4, opacity: 0.82 }}>
+            <span>{t('perf.payloadTypeLabel', { defaultValue: 'Payload:' })} <strong>{describeValueType(hostPayload)}</strong></span>
+            <span style={{ marginLeft: 10 }}>{t('perf.topLevelFieldsLabel', { defaultValue: 'Top-level:' })} <strong>{getPayloadTopLevelCount(hostPayload)}</strong></span>
+            {caseIdCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.caseIdsLabel', { defaultValue: 'caseIds:' })} <strong>{caseIdCount}</strong></span> : null}
+            {bundleDocumentCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleDocumentsLabel', { defaultValue: 'Documents:' })} <strong>{bundleDocumentCount}</strong></span> : null}
+            {bundleMetaFieldCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleMetaFieldsLabel', { defaultValue: 'Meta fields:' })} <strong>{bundleMetaFieldCount}</strong></span> : null}
+          </div>
+          {showHostMetadata ? (
+            <pre
+              style={{
+                marginTop: 8,
+                marginBottom: 0,
+                whiteSpace: 'pre-wrap',
+                overflowWrap: 'anywhere',
+                maxHeight: '20vh',
+                overflowY: 'auto',
+                padding: '8px',
+                background: 'rgba(255,255,255,0.06)',
+                borderRadius: '4px',
+                border: '1px solid rgba(255,255,255,0.08)',
+              }}
+            >
+              {hostPayloadPretty}
+            </pre>
+          ) : null}
+        </div>
+      ) : null}
 
       <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.fpsLabel')}</span> <strong>{fps || 0}</strong>
@@ -519,62 +646,6 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         </div>
       </div>
 
-      {hasHostMetadata ? (
-        <div style={{ ...sectionStyle, marginTop: 10, paddingTop: 8, borderTop: '1px solid rgba(255,255,255,0.12)' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: 8, flexWrap: 'wrap' }}>
-            <span style={labelStyle}>{t('perf.hostMetadataLabel', { defaultValue: 'Host metadata:' })}</span>
-            <strong>{String(bootstrapDebugInfo?.mode || 'session-token')}</strong>
-            {hostPayloadSource ? <span style={{ opacity: 0.75 }}>({hostPayloadSource})</span> : null}
-            <button
-              type="button"
-              onClick={() => setShowHostMetadata((prev) => !prev)}
-              style={smallButtonStyle}
-              aria-expanded={showHostMetadata}
-            >
-              {showHostMetadata
-                ? t('perf.hideHostMetadata', { defaultValue: 'Hide' })
-                : t('perf.showHostMetadata', { defaultValue: 'Show metadata' })}
-            </button>
-            <button
-              type="button"
-              onClick={onCopyMetadata}
-              style={smallButtonStyle}
-              title={t('perf.copyHostMetadataTitle', { defaultValue: 'Copy sanitized host metadata JSON' })}
-            >
-              {copyState === 'copied'
-                ? t('perf.copiedLabel', { defaultValue: 'Copied' })
-                : copyState === 'failed'
-                  ? t('perf.copyFailedLabel', { defaultValue: 'Copy failed' })
-                  : t('perf.copyHostMetadata', { defaultValue: 'Copy' })}
-            </button>
-          </div>
-          <div style={{ marginTop: 4, opacity: 0.82 }}>
-            <span>{t('perf.payloadTypeLabel', { defaultValue: 'Payload:' })} <strong>{describeValueType(hostPayload)}</strong></span>
-            <span style={{ marginLeft: 10 }}>{t('perf.topLevelFieldsLabel', { defaultValue: 'Top-level:' })} <strong>{getPayloadTopLevelCount(hostPayload)}</strong></span>
-            {caseIdCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.caseIdsLabel', { defaultValue: 'caseIds:' })} <strong>{caseIdCount}</strong></span> : null}
-            {bundleDocumentCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleDocumentsLabel', { defaultValue: 'Documents:' })} <strong>{bundleDocumentCount}</strong></span> : null}
-            {bundleMetaFieldCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleMetaFieldsLabel', { defaultValue: 'Meta fields:' })} <strong>{bundleMetaFieldCount}</strong></span> : null}
-          </div>
-          {showHostMetadata ? (
-            <pre
-              style={{
-                marginTop: 8,
-                marginBottom: 0,
-                whiteSpace: 'pre-wrap',
-                overflowWrap: 'anywhere',
-                maxHeight: '20vh',
-                overflowY: 'auto',
-                padding: '8px',
-                background: 'rgba(255,255,255,0.06)',
-                borderRadius: '4px',
-                border: '1px solid rgba(255,255,255,0.08)',
-              }}
-            >
-              {hostPayloadPretty}
-            </pre>
-          ) : null}
-        </div>
-      ) : null}
 
       {error ? (
         <div style={{ ...sectionStyle, color: '#ff9c9c' }}>
