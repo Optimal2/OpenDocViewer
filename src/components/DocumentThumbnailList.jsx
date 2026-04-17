@@ -40,6 +40,9 @@ import {
  * @property {boolean} isCompareSelected
  * @property {boolean} isCompareMode
  * @property {boolean} preferFullAssetPreview
+ * @property {number} totalPages
+ * @property {number} containerWidth
+ * @property {boolean} documentGroupingActive
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
  * @property {function(number, ('full'|'thumbnail')): void} onImageLoad
@@ -72,9 +75,10 @@ function shouldWarmAllThumbnails(renderConfig, totalCount) {
 /**
  * @param {*} renderConfig
  * @param {number} paneWidth
+ * @param {boolean} documentGroupingActive
  * @returns {{ rowHeight:number, imageStageHeight:number }}
  */
-function getThumbnailLayout(renderConfig, paneWidth) {
+function getThumbnailLayout(renderConfig, paneWidth, documentGroupingActive) {
   const configuredMaxWidth = Math.max(80, Number(renderConfig?.thumbnailMaxWidth) || 220);
   const configuredMaxHeight = Math.max(96, Number(renderConfig?.thumbnailMaxHeight) || 310);
   const safePaneWidth = Math.max(160, Number(paneWidth) || 0);
@@ -82,7 +86,7 @@ function getThumbnailLayout(renderConfig, paneWidth) {
   const usableWidth = Math.min(stageWidth, Math.max(configuredMaxWidth, Math.round(stageWidth * 0.96)));
   const imageAspectRatio = configuredMaxHeight / Math.max(1, configuredMaxWidth);
   const imageStageHeight = Math.max(120, Math.round(usableWidth * imageAspectRatio));
-  const rowHeight = imageStageHeight + 56;
+  const rowHeight = imageStageHeight + (documentGroupingActive ? 80 : 56);
 
   return {
     rowHeight,
@@ -126,6 +130,80 @@ function buildCenterOutQueue(totalCount, focusIndex, excluded) {
 }
 
 /**
+ * @param {*} page
+ * @returns {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number, documentPageNumber:number, documentPageCount:number, isDocumentStart:boolean, isDocumentEnd:boolean }}
+ */
+function getPageDocumentContext(page) {
+  const documentNumber = Math.max(0, Number(page?.documentNumber) || 0);
+  const totalDocuments = Math.max(0, Number(page?.totalDocuments) || 0);
+  const documentPageNumber = Math.max(0, Number(page?.documentPageNumber) || 0);
+  const documentPageCount = Math.max(0, Number(page?.documentPageCount) || 0);
+  const hasMultipleDocuments = totalDocuments > 1 && documentNumber > 0 && documentPageNumber > 0;
+
+  return {
+    hasMultipleDocuments,
+    documentNumber,
+    totalDocuments,
+    documentPageNumber,
+    documentPageCount,
+    isDocumentStart: hasMultipleDocuments && (!!page?.isDocumentStart || documentPageNumber === 1),
+    isDocumentEnd: hasMultipleDocuments && (
+      !!page?.isDocumentEnd
+      || (documentPageCount > 0 && documentPageNumber === documentPageCount)
+    ),
+  };
+}
+
+/**
+ * @param {ReturnType<typeof useTranslation>['t']} t
+ * @param {number} pageNumber
+ * @param {number} totalPages
+ * @param {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number, documentPageNumber:number, documentPageCount:number }} documentContext
+ * @returns {{ totalPageTitle:string, documentTitle:string, documentPageTitle:string, combinedTitle:string }}
+ */
+function getMetricTitles(t, pageNumber, totalPages, documentContext) {
+  const totalPageTitle = t('thumbnails.metrics.totalPageTitle', {
+    page: pageNumber,
+    total: totalPages,
+    defaultValue: `Page ${pageNumber} of ${totalPages}`,
+  });
+
+  if (!documentContext.hasMultipleDocuments) {
+    return {
+      totalPageTitle,
+      documentTitle: '',
+      documentPageTitle: '',
+      combinedTitle: totalPageTitle,
+    };
+  }
+
+  const documentTitle = t('thumbnails.metrics.documentTitle', {
+    document: documentContext.documentNumber,
+    total: documentContext.totalDocuments,
+    defaultValue: `Document ${documentContext.documentNumber} of ${documentContext.totalDocuments}`,
+  });
+  const documentPageTitle = documentContext.documentPageCount > 0
+    ? t('thumbnails.metrics.documentPageTitle', {
+        page: documentContext.documentPageNumber,
+        total: documentContext.documentPageCount,
+        document: documentContext.documentNumber,
+        defaultValue: `Page ${documentContext.documentPageNumber} of ${documentContext.documentPageCount} in document ${documentContext.documentNumber}`,
+      })
+    : t('thumbnails.metrics.documentPageTitleNoTotal', {
+        page: documentContext.documentPageNumber,
+        document: documentContext.documentNumber,
+        defaultValue: `Page ${documentContext.documentPageNumber} in document ${documentContext.documentNumber}`,
+      });
+
+  return {
+    totalPageTitle,
+    documentTitle,
+    documentPageTitle,
+    combinedTitle: [totalPageTitle, documentTitle, documentPageTitle].filter(Boolean).join(' • '),
+  };
+}
+
+/**
  * @param {ThumbnailRowProps} props
  * @returns {React.ReactElement}
  */
@@ -138,6 +216,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   isCompareSelected,
   isCompareMode,
   preferFullAssetPreview,
+  totalPages,
+  containerWidth,
+  documentGroupingActive,
   onActivate,
   onKeyActivate,
   onImageLoad,
@@ -159,6 +240,18 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
     ? (typeof page?.fullSizeUrl === 'string' ? page.fullSizeUrl : '')
     : (typeof page?.thumbnailUrl === 'string' ? page.thumbnailUrl : '');
   const isDualSelected = isPrimarySelected && isCompareSelected;
+  const hasSelectionBadges = isCompareMode && (isPrimarySelected || isCompareSelected);
+  const documentContext = getPageDocumentContext(page);
+  const metricTitles = getMetricTitles(t, pageNumber, totalPages, documentContext);
+  const showExtendedMetrics = documentContext.hasMultipleDocuments
+    && containerWidth >= (hasSelectionBadges ? 280 : 208);
+
+  const rowShellClassName = [
+    'thumbnail-row-shell',
+    documentGroupingActive ? 'document-aware' : '',
+    documentContext.isDocumentStart ? 'has-document-start' : '',
+    documentContext.isDocumentEnd ? 'has-document-end' : '',
+  ].filter(Boolean).join(' ');
 
   const wrapperClassName = [
     'thumbnail-wrapper',
@@ -167,7 +260,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
     isDualSelected ? 'selected-dual' : '',
   ].filter(Boolean).join(' ');
 
-  const title = isDualSelected
+  const navigationTitle = isDualSelected
     ? t('thumbnails.goToPageBothPanes', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (shown in both panes)` })
     : isCompareSelected
       ? t('thumbnails.goToPageRightPane', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (right pane)` })
@@ -175,9 +268,13 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         ? t('thumbnails.goToPageLeftPane', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (left pane)` })
         : t('thumbnails.goToPage', { page: pageNumber });
 
+  const rowTitle = documentContext.hasMultipleDocuments
+    ? `${navigationTitle} — ${metricTitles.combinedTitle}`
+    : navigationTitle;
+
   return (
     <div
-      className="thumbnail-row-shell"
+      className={rowShellClassName}
       style={{
         height: `${rowHeight}px`,
         ...(fullyRenderOffscreenRows
@@ -188,6 +285,20 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
             }),
       }}
     >
+      {documentGroupingActive && documentContext.isDocumentStart ? (
+        <div className="thumbnail-document-boundary start" aria-hidden="true">
+          <span className="thumbnail-document-boundary-line" />
+          <span className="thumbnail-document-boundary-label">
+            {t('thumbnails.documentBoundaryStartShort', {
+              document: documentContext.documentNumber,
+              total: documentContext.totalDocuments,
+              defaultValue: `Doc ${documentContext.documentNumber}/${documentContext.totalDocuments}`,
+            })}
+          </span>
+          <span className="thumbnail-document-boundary-line" />
+        </div>
+      ) : null}
+
       <div
         id={`thumbnail-${pageNumber}`}
         className={wrapperClassName}
@@ -195,12 +306,31 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         onKeyDown={(event) => onKeyActivate(event, pageNumber)}
         role="option"
         tabIndex={isPrimarySelected ? 0 : -1}
-        aria-label={title}
+        aria-label={rowTitle}
         aria-selected={isPrimarySelected}
-        title={title}
+        title={rowTitle}
       >
         <div className="thumbnail-number-bar">
-          <div className="thumbnail-number">{pageNumber}</div>
+          <div className="thumbnail-metric-cluster" aria-hidden="true">
+            <span
+              className="thumbnail-number"
+              title={showExtendedMetrics ? metricTitles.totalPageTitle : metricTitles.combinedTitle}
+            >
+              {pageNumber}
+            </span>
+            {showExtendedMetrics ? (
+              <>
+                <span className="thumbnail-metric-badge secondary" title={metricTitles.documentTitle}>
+                  <span className="thumbnail-metric-prefix">D</span>
+                  <span>{documentContext.documentNumber}</span>
+                </span>
+                <span className="thumbnail-metric-badge secondary" title={metricTitles.documentPageTitle}>
+                  <span className="thumbnail-metric-prefix">#</span>
+                  <span>{documentContext.documentPageNumber}</span>
+                </span>
+              </>
+            ) : null}
+          </div>
           {isCompareMode && (isPrimarySelected || isCompareSelected) && (
             <div className="thumbnail-selection-badges" aria-hidden="true">
               {isPrimarySelected && (
@@ -243,6 +373,16 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           )}
         </div>
       </div>
+
+      {documentGroupingActive && documentContext.isDocumentEnd ? (
+        <div className="thumbnail-document-boundary end" aria-hidden="true">
+          <span className="thumbnail-document-boundary-line" />
+          <span className="thumbnail-document-boundary-label end-label">
+            {t('thumbnails.documentBoundaryEndShort', { defaultValue: 'End' })}
+          </span>
+          <span className="thumbnail-document-boundary-line" />
+        </div>
+      ) : null}
     </div>
   );
 });
@@ -291,9 +431,13 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [containerWidth, setContainerWidth] = useState(Math.max(160, Number(width) || 0));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
+  const documentGroupingActive = useMemo(
+    () => Array.isArray(allPages) && allPages.some((page) => (Number(page?.totalDocuments) || 0) > 1 && (Number(page?.documentNumber) || 0) > 0),
+    [allPages]
+  );
   const layout = useMemo(
-    () => getThumbnailLayout(renderConfig, containerWidth || width),
-    [containerWidth, renderConfig, width]
+    () => getThumbnailLayout(renderConfig, containerWidth || width, documentGroupingActive),
+    [containerWidth, documentGroupingActive, renderConfig, width]
   );
   const totalHeight = totalCount * layout.rowHeight;
   const warmAllThumbnails = useMemo(
@@ -701,6 +845,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         isCompareSelected={!!isComparing && comparePageNumber === pageId}
         isCompareMode={!!isComparing}
         preferFullAssetPreview={preferredFullPreviewIndexes.has(index)}
+        totalPages={totalCount}
+        containerWidth={containerWidth}
+        documentGroupingActive={documentGroupingActive}
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
         onImageLoad={handleImageLoad}
@@ -745,6 +892,9 @@ ThumbnailRow.propTypes = {
   isCompareSelected: PropTypes.bool.isRequired,
   isCompareMode: PropTypes.bool.isRequired,
   preferFullAssetPreview: PropTypes.bool.isRequired,
+  totalPages: PropTypes.number.isRequired,
+  containerWidth: PropTypes.number.isRequired,
+  documentGroupingActive: PropTypes.bool.isRequired,
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
   onImageLoad: PropTypes.func.isRequired,

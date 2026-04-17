@@ -286,12 +286,13 @@ function fromLegacyParentModel(model) {
       files.push(toTicket(ticket));
     }
 
-    // Preserve metadata in a compact array (id/value/lookupValue)
+    // Preserve metadata in a compact array (id/value/lookupValue). The legacy payload nests the
+    // actual fields one level below `MetaDataCollection[documentId]`, so flatten that level here.
     const mappedMeta = [];
-    for (const [metaKey, m] of Object.entries(docVal.MetaDataCollection || {})) {
+    for (const [metaKey, m] of Object.entries(md || {})) {
       if (metaKey === '$id') continue;
       mappedMeta.push({
-        id: m?.DataId,
+        id: m?.DataId ?? metaKey,
         value: m?.Value,
         lookupValue: m?.LookupValue,
       });

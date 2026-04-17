@@ -52,6 +52,13 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
  * @property {(*|undefined)} __pending
  */
 
+/**
+ * Options controlling bootstrap diagnostics collection.
+ *
+ * @typedef {Object} BootstrapDetectOptions
+ * @property {boolean=} diagnosticsEnabled
+ */
+
 // Expose a tiny host API on window.ODV
 (function exposeApi() {
   try {
@@ -94,44 +101,91 @@ function tryNormalizeBundle(candidate) {
 }
 
 /**
+ * Build the debug envelope returned to the app shell.
+ * Host payloads are only retained when diagnostics are enabled.
+ *
+ * @param {string} mode
+ * @param {(string|undefined)} hostPayloadSource
+ * @param {*} hostPayload
+ * @param {boolean} diagnosticsEnabled
+ * @returns {BootstrapDebugInfo}
+ */
+function makeDebugInfo(mode, hostPayloadSource, hostPayload, diagnosticsEnabled) {
+  return diagnosticsEnabled
+    ? { mode, hostPayloadSource, hostPayload }
+    : { mode, hostPayloadSource };
+}
+
+/**
  * Detect the best available bootstrap mode.
  *
  * `debugInfo` is intentionally a shallow diagnostic envelope so optional tools such as the
  * performance overlay can show what the viewer actually received from the host transport.
+ * The potentially large raw host payload is only retained when diagnostics are explicitly enabled.
  *
+ * @param {BootstrapDetectOptions=} options
  * @returns {Promise.<BootstrapAny>}
  */
-export async function bootstrapDetect() {
+export async function bootstrapDetect(options = {}) {
+  const diagnosticsEnabled = !!options?.diagnosticsEnabled;
+
+  let parentProbed = false;
+  let sessionTokenProbed = false;
   let parent = null;
   let sessionTok = null;
 
-  // Probe once up front so raw host/session metadata can still be surfaced in diagnostics
-  // even when another startup mode (for example pattern-mode URL params) ends up driving the viewer.
-  try {
-    parent = readFromParent();
-  } catch {
-    parent = null;
-  }
+  /**
+   * @returns {*}
+   */
+  const probeParent = () => {
+    if (parentProbed) return parent;
+    parentProbed = true;
+    try {
+      parent = readFromParent();
+    } catch {
+      parent = null;
+    }
+    return parent;
+  };
 
-  try {
-    sessionTok = readFromSessionToken();
-  } catch {
-    sessionTok = null;
+  /**
+   * @returns {*}
+   */
+  const probeSessionToken = () => {
+    if (sessionTokenProbed) return sessionTok;
+    sessionTokenProbed = true;
+    try {
+      sessionTok = readFromSessionToken();
+    } catch {
+      sessionTok = null;
+    }
+    return sessionTok;
+  };
+
+  // When diagnostics are enabled we probe once up front so the optional overlay can still show the
+  // original host payload even if another startup surface (for example pattern-mode URL params)
+  // ultimately drives the viewer. Without diagnostics we stay minimal and only read each source when
+  // it is needed for actual startup selection.
+  if (diagnosticsEnabled) {
+    probeParent();
+    probeSessionToken();
   }
 
   // 1) Parent page (same-origin bridge)
   try {
-    if (parent?.data) {
-      const bundle = tryNormalizeBundle(parent.data);
+    const parentCandidate = probeParent();
+    if (parentCandidate?.data) {
+      const bundle = tryNormalizeBundle(parentCandidate.data);
       if (bundle) {
         return {
           mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE,
           bundle,
-          debugInfo: {
-            mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE,
-            hostPayloadSource: String(parent.source || 'parent'),
-            hostPayload: parent.data,
-          },
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.PARENT_PAGE,
+            String(parentCandidate.source || 'parent'),
+            parentCandidate.data,
+            diagnosticsEnabled
+          ),
         };
       }
     }
@@ -139,17 +193,19 @@ export async function bootstrapDetect() {
 
   // 2) Session token (?sessiondata=…)
   try {
-    if (sessionTok?.data) {
-      const bundle = tryNormalizeBundle(sessionTok.data);
+    const sessionCandidate = probeSessionToken();
+    if (sessionCandidate?.data) {
+      const bundle = tryNormalizeBundle(sessionCandidate.data);
       if (bundle) {
         return {
           mode: ODV_BOOTSTRAP_MODES.SESSION_TOKEN,
           bundle,
-          debugInfo: {
-            mode: ODV_BOOTSTRAP_MODES.SESSION_TOKEN,
-            hostPayloadSource: String(sessionTok.source || 'sessiondata'),
-            hostPayload: sessionTok.data,
-          },
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.SESSION_TOKEN,
+            String(sessionCandidate.source || 'sessiondata'),
+            sessionCandidate.data,
+            diagnosticsEnabled
+          ),
         };
       }
     }
@@ -159,14 +215,16 @@ export async function bootstrapDetect() {
   try {
     const urlp = readFromUrlParams();
     if (urlp?.data && urlp.data.folder && urlp.data.extension && urlp.data.endNumber) {
+      const sessionCandidate = diagnosticsEnabled ? probeSessionToken() : null;
       return {
         mode: ODV_BOOTSTRAP_MODES.URL_PARAMS,
         urlConfig: urlp.data,
-        debugInfo: {
-          mode: ODV_BOOTSTRAP_MODES.URL_PARAMS,
-          hostPayloadSource: sessionTok?.data ? String(sessionTok.source || 'sessiondata') : undefined,
-          hostPayload: sessionTok?.data ?? undefined,
-        },
+        debugInfo: makeDebugInfo(
+          ODV_BOOTSTRAP_MODES.URL_PARAMS,
+          sessionCandidate?.data ? String(sessionCandidate.source || 'sessiondata') : undefined,
+          sessionCandidate?.data ?? undefined,
+          diagnosticsEnabled
+        ),
       };
     }
   } catch {}
@@ -174,37 +232,39 @@ export async function bootstrapDetect() {
   // 4) JS API (window.ODV.start)
   try {
     if (typeof window !== 'undefined' && window.ODV?.__pending) {
-      const p = window.ODV.__pending;
+      const pending = window.ODV.__pending;
       window.ODV.__pending = undefined; // consume once
 
       // Try bundle first
-      const bundle = tryNormalizeBundle(p?.bundle ?? p);
+      const bundle = tryNormalizeBundle(pending?.bundle ?? pending);
       if (bundle) {
         return {
           mode: ODV_BOOTSTRAP_MODES.JS_API,
           bundle,
-          debugInfo: {
-            mode: ODV_BOOTSTRAP_MODES.JS_API,
-            hostPayloadSource: 'js-api',
-            hostPayload: p,
-          },
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.JS_API,
+            'js-api',
+            pending,
+            diagnosticsEnabled
+          ),
         };
       }
 
       // Else minimal pattern config
-      if (p && p.folder && p.extension && p.endNumber != null) {
+      if (pending && pending.folder && pending.extension && pending.endNumber != null) {
         return {
           mode: ODV_BOOTSTRAP_MODES.JS_API,
           urlConfig: {
-            folder: String(p.folder),
-            extension: String(p.extension),
-            endNumber: Number(p.endNumber)
+            folder: String(pending.folder),
+            extension: String(pending.extension),
+            endNumber: Number(pending.endNumber)
           },
-          debugInfo: {
-            mode: ODV_BOOTSTRAP_MODES.JS_API,
-            hostPayloadSource: 'js-api',
-            hostPayload: p,
-          },
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.JS_API,
+            'js-api',
+            pending,
+            diagnosticsEnabled
+          ),
         };
       }
     }
@@ -213,9 +273,11 @@ export async function bootstrapDetect() {
   // 5) Fallback: demo
   return {
     mode: ODV_BOOTSTRAP_MODES.DEMO,
-    debugInfo: {
-      mode: ODV_BOOTSTRAP_MODES.DEMO,
-      hostPayloadSource: 'demo',
-    },
+    debugInfo: makeDebugInfo(
+      ODV_BOOTSTRAP_MODES.DEMO,
+      'demo',
+      undefined,
+      diagnosticsEnabled
+    ),
   };
 }
