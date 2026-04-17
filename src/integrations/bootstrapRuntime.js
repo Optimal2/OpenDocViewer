@@ -102,9 +102,25 @@ function tryNormalizeBundle(candidate) {
  * @returns {Promise.<BootstrapAny>}
  */
 export async function bootstrapDetect() {
+  let parent = null;
+  let sessionTok = null;
+
+  // Probe once up front so raw host/session metadata can still be surfaced in diagnostics
+  // even when another startup mode (for example pattern-mode URL params) ends up driving the viewer.
+  try {
+    parent = readFromParent();
+  } catch {
+    parent = null;
+  }
+
+  try {
+    sessionTok = readFromSessionToken();
+  } catch {
+    sessionTok = null;
+  }
+
   // 1) Parent page (same-origin bridge)
   try {
-    const parent = readFromParent();
     if (parent?.data) {
       const bundle = tryNormalizeBundle(parent.data);
       if (bundle) {
@@ -123,7 +139,6 @@ export async function bootstrapDetect() {
 
   // 2) Session token (?sessiondata=…)
   try {
-    const sessionTok = readFromSessionToken();
     if (sessionTok?.data) {
       const bundle = tryNormalizeBundle(sessionTok.data);
       if (bundle) {
@@ -149,8 +164,8 @@ export async function bootstrapDetect() {
         urlConfig: urlp.data,
         debugInfo: {
           mode: ODV_BOOTSTRAP_MODES.URL_PARAMS,
-          hostPayloadSource: String(urlp.source || 'url-params'),
-          hostPayload: urlp.data,
+          hostPayloadSource: sessionTok?.data ? String(sessionTok.source || 'sessiondata') : undefined,
+          hostPayload: sessionTok?.data ?? undefined,
         },
       };
     }
