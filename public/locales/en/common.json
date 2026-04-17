@@ -207,6 +207,14 @@
       "wider": "Make thumbnail pane wider",
       "hidePane": "Hide thumbnails",
       "showPane": "Show thumbnails"
+    },
+    "documentBoundaryStartShort": "Doc {document}/{total}",
+    "documentBoundaryEndShort": "End",
+    "metrics": {
+      "totalPageTitle": "Page {page} of {total}",
+      "documentTitle": "Document {document} of {total}",
+      "documentPageTitle": "Page {page} of {total} in document {document}",
+      "documentPageTitleNoTotal": "Page {page} in document {document}"
     }
   },
   "compareZoom": {

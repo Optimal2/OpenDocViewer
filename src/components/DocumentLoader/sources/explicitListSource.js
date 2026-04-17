@@ -1,4 +1,4 @@
-﻿// File: src/components/DocumentLoader/sources/explicitListSource.js
+// File: src/components/DocumentLoader/sources/explicitListSource.js
 
 /**
  * OpenDocViewer — Explicit Source List Normalizer
@@ -13,6 +13,11 @@
  *   @property {string} url
  *   @property {(string|undefined)} ext
  *   @property {number} fileIndex
+ *   @property {(string|undefined)} documentId
+ *   @property {(number|undefined)} documentNumber
+ *   @property {(number|undefined)} totalDocuments
+ *   @property {(number|undefined)} documentFileNumber
+ *   @property {(number|undefined)} documentFileCount
  *
  *   @typedef {Object} ExplicitSourceList
  *   @property {number} total
@@ -29,6 +34,7 @@
 /**
  * Portable document containing a list of files.
  * @typedef {Object} PortableDoc
+ * @property {(string|undefined)} documentId
  * @property {(Array.<PortableFile>|undefined)} files
  */
 
@@ -59,6 +65,9 @@ function inferExtFromUrl(url) {
  * We preserve the document order and file order given, and assign a stable,
  * continuous `fileIndex` across the entire bundle.
  *
+ * The source list also keeps just enough document context for the loader to rebuild document-aware
+ * page numbering after multi-page TIFF/PDF analysis has completed.
+ *
  * @param {(PortableDocumentBundle|null|undefined)} bundle
  * @returns {ExplicitSourceList}
  */
@@ -69,15 +78,29 @@ export function makeExplicitSource(bundle) {
   /** @type {Array.<ExplicitSourceItem>} */
   const items = [];
   let idx = 0;
+  const totalDocuments = docs.length;
 
-  for (const doc of docs) {
+  for (let docIndex = 0; docIndex < docs.length; docIndex += 1) {
+    const doc = docs[docIndex];
     const files = Array.isArray(doc?.files) ? doc.files : [];
-    for (const f of files) {
-      const url = typeof f?.url === 'string' && f.url.trim() ? f.url : '';
+    const documentNumber = docIndex + 1;
+
+    for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
+      const file = files[fileIndex];
+      const url = typeof file?.url === 'string' && file.url.trim() ? file.url : '';
       if (!url) continue;
 
-      const ext = (typeof f.ext === 'string' && f.ext.trim()) ? f.ext : inferExtFromUrl(url);
-      items.push({ url, ext, fileIndex: idx++ });
+      const ext = (typeof file.ext === 'string' && file.ext.trim()) ? file.ext : inferExtFromUrl(url);
+      items.push({
+        url,
+        ext,
+        fileIndex: idx++,
+        documentId: typeof doc?.documentId === 'string' && doc.documentId ? doc.documentId : undefined,
+        documentNumber,
+        totalDocuments,
+        documentFileNumber: fileIndex + 1,
+        documentFileCount: files.length,
+      });
     }
   }
 

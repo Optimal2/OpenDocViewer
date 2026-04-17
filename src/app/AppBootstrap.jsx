@@ -26,6 +26,7 @@ import ErrorBoundary from '../ErrorBoundary.jsx';
 import OpenDocViewer from './OpenDocViewer.jsx';
 import { bootstrapDetect, ODV_BOOTSTRAP_MODES } from '../integrations/bootstrapRuntime.js';
 import { makeExplicitSource } from '../components/DocumentLoader/sources/explicitListSource.js';
+import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js';
 
 /**
  * Session metadata for a bundle.
@@ -122,6 +123,8 @@ export default function AppBootstrap() {
   const [urlConfig, setUrlConfig] = useState(/** @type {(UrlConfig|null)} */ (null));
   const [bootstrapDebugInfo, setBootstrapDebugInfo] = useState(/** @type {(BootstrapDebugInfo|null)} */ (null));
 
+  const perfOverlayEnabled = useMemo(() => isPerformanceOverlayEnabled(), []);
+
   // Demo UI state (shown only when mode === DEMO and we haven't started)
   const [count, setCount] = useState(10);
   const [format, setFormat] = useState('png'); // 'jpg'|'png'|'tif'|'pdf'
@@ -133,10 +136,10 @@ export default function AppBootstrap() {
     let mounted = true;
     (async () => {
       try {
-        const res = await bootstrapDetect();
+        const res = await bootstrapDetect({ diagnosticsEnabled: perfOverlayEnabled });
         if (!mounted) return;
         setMode(res.mode);
-        setBootstrapDebugInfo(res.debugInfo || null);
+        setBootstrapDebugInfo(perfOverlayEnabled ? (res.debugInfo || null) : null);
         if (res.bundle) setBundle(res.bundle);
         if (res.urlConfig) setUrlConfig(res.urlConfig);
 
@@ -154,7 +157,7 @@ export default function AppBootstrap() {
       }
     })();
     return () => { mounted = false; };
-  }, []);
+  }, [perfOverlayEnabled]);
 
   const onEndChange = useCallback((e) => {
     const v = Math.max(1, Math.min(DEMO_MAX, Number(e?.target?.value) || 1));

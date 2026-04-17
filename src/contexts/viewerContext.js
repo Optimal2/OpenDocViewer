@@ -19,6 +19,13 @@ import { createContext } from 'react';
  * @property {(number|undefined)} realHeight
  * @property {(string|undefined)} sourceMimeType
  * @property {(number|undefined)} sourceSizeBytes
+ * @property {(string|undefined)} documentId
+ * @property {(number|undefined)} documentNumber
+ * @property {(number|undefined)} totalDocuments
+ * @property {(number|undefined)} documentPageNumber
+ * @property {(number|undefined)} documentPageCount
+ * @property {(boolean|undefined)} isDocumentStart
+ * @property {(boolean|undefined)} isDocumentEnd
  */
 
 

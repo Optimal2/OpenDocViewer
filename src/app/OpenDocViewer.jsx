@@ -14,62 +14,14 @@
  * Those concerns live deeper in the component tree.
  */
 
-import React, { useState, useEffect, useCallback, useRef } from 'react';
+import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import logger from '../logging/systemLogger.js';
 import { ThemeProvider } from '../contexts/ThemeProvider.jsx';
 import { ViewerProvider } from '../contexts/ViewerProvider.jsx';
 import PerformanceMonitor from '../PerformanceMonitor.jsx';
 import DocumentConsumerWrapper from '../components/DocumentConsumerWrapper.jsx';
-
-/**
- * Resolve a boolean flag from (precedence order):
- *   1) window.__ODV_CONFIG__[name] (runtime config, best for ops)
- *   2) import.meta.env[envVar]      (Vite env at build time)
- *   3) <meta name="{metaName}" content="true|false"> (HTML-controlled)
- *   4) fallback (default)
- *
- * @param {string} name              Key inside window.__ODV_CONFIG__
- * @param {string} envVar            Vite env key (e.g., 'VITE_SHOW_PERF_OVERLAY')
- * @param {string} metaName          Meta tag name (e.g., 'odv-show-perf-overlay')
- * @param {boolean} [fallback=false] Default value if no sources specify a value
- * @returns {boolean}
- */
-function readFlag(name, envVar, metaName, fallback = false) {
-  try {
-    // 1) Runtime config (preferred: portable builds)
-    const cfg = (typeof window !== 'undefined' && window.__ODV_CONFIG__) || undefined;
-    if (cfg && typeof cfg[name] === 'boolean') return cfg[name];
-
-    // 2) Vite env (build-time only)
-    // IMPORTANT: guard with `typeof import.meta !== 'undefined'` (NOT `typeof import`)
-    const envVal =
-      (typeof import.meta !== 'undefined' &&
-        import.meta &&
-        import.meta.env &&
-        import.meta.env[envVar]) ||
-      '';
-    if (typeof envVal === 'string') {
-      const v = envVal.toLowerCase();
-      if (v === 'true' || v === '1') return true;
-      if (v === 'false' || v === '0') return false;
-    }
-
-    // 3) <meta> tag in index.html
-    if (typeof document !== 'undefined' && metaName) {
-      const meta = document.querySelector(`meta[name="${metaName}"]`);
-      const content = meta && meta.getAttribute('content');
-      if (typeof content === 'string') {
-        const c = content.toLowerCase();
-        if (c === 'true' || c === '1') return true;
-        if (c === 'false' || c === '0') return false;
-      }
-    }
-  } catch {
-    // ignore and fall through
-  }
-  return fallback;
-}
+import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js';
 
 /**
  * Item in the explicit source list mode.
@@ -176,10 +128,7 @@ const OpenDocViewer = ({
    * - Runtime flag (config/env/meta)
    * - OR explicit URL opt-in: ?perf=1 (handy during support sessions)
    */
-  const showPerf =
-    readFlag('showPerfOverlay', 'VITE_SHOW_PERF_OVERLAY', 'odv-show-perf-overlay', false) ||
-    (typeof window !== 'undefined' &&
-      new URLSearchParams(window.location.search).get('perf') === '1');
+  const showPerf = useMemo(() => isPerformanceOverlayEnabled(), []);
 
   return (
     <ThemeProvider>

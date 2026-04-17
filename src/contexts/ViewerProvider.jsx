@@ -500,7 +500,10 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     const safeIndex = Math.max(0, Number(index) || 0);
     updateAllPages((prev) => {
       const next = prev.slice();
-      next[safeIndex] = page;
+      const current = next[safeIndex];
+      next[safeIndex] = current && page && typeof current === 'object' && typeof page === 'object'
+        ? { ...current, ...page }
+        : page;
       return next;
     });
   }, [updateAllPages]);
@@ -515,7 +518,13 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     if (!Array.isArray(pages) || pages.length === 0) return;
     updateAllPages((prev) => {
       const next = prev.slice();
-      for (let i = 0; i < pages.length; i += 1) next[start + i] = pages[i];
+      for (let i = 0; i < pages.length; i += 1) {
+        const current = next[start + i];
+        const incoming = pages[i];
+        next[start + i] = current && incoming && typeof current === 'object' && typeof incoming === 'object'
+          ? { ...current, ...incoming }
+          : incoming;
+      }
       return next;
     });
   }, [updateAllPages]);

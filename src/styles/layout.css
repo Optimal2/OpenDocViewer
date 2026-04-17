@@ -436,6 +436,107 @@ canvas {
   background: var(--thumbnail-compare-color);
 }
 
+.thumbnail-row-shell.document-aware {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.thumbnail-document-boundary {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  min-height: 14px;
+  color: color-mix(in srgb, var(--primary-color) 72%, transparent 28%);
+  font-size: 0.67rem;
+  font-weight: 700;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+}
+
+.thumbnail-document-boundary.start {
+  margin-top: 1px;
+}
+
+.thumbnail-document-boundary.end {
+  margin-top: 2px;
+}
+
+.thumbnail-document-boundary-line {
+  flex: 1 1 auto;
+  min-width: 10px;
+  height: 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 30%, var(--thumbnail-border-color) 70%);
+}
+
+.thumbnail-document-boundary-label {
+  flex: 0 0 auto;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 18px;
+  padding: 0 8px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 12%, var(--canvas-background-color) 88%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-primary-color) 25%, var(--thumbnail-border-color) 75%);
+  color: var(--primary-color-active);
+  white-space: nowrap;
+}
+
+.thumbnail-document-boundary-label.end-label {
+  background: color-mix(in srgb, var(--primary-color) 9%, var(--canvas-background-color) 91%);
+  border-color: color-mix(in srgb, var(--primary-color) 14%, var(--thumbnail-border-color) 86%);
+  font-weight: 600;
+}
+
+.thumbnail-metric-cluster {
+  display: inline-flex;
+  align-items: flex-start;
+  gap: 6px;
+  min-width: 0;
+  flex-wrap: nowrap;
+  overflow: hidden;
+}
+
+.thumbnail-metric-cluster .thumbnail-number {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 auto;
+  min-height: 20px;
+  white-space: nowrap;
+}
+
+.thumbnail-metric-badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  min-height: 20px;
+  padding: 0 7px;
+  border-radius: 999px;
+  white-space: nowrap;
+  font-size: 0.72rem;
+  font-weight: 700;
+  line-height: 1;
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 16%, var(--canvas-background-color) 84%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-primary-color) 24%, var(--thumbnail-border-color) 76%);
+  color: var(--primary-color-active);
+}
+
+.thumbnail-metric-badge.secondary {
+  background: color-mix(in srgb, var(--primary-color) 10%, var(--canvas-background-color) 90%);
+  border-color: color-mix(in srgb, var(--primary-color) 14%, var(--thumbnail-border-color) 86%);
+}
+
+.thumbnail-metric-prefix {
+  font-size: 0.66rem;
+  font-weight: 800;
+  letter-spacing: 0.03em;
+  opacity: 0.78;
+}
+
 .thumbnail-image-stage {
   position: relative;
   display: flex;

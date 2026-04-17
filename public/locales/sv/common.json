@@ -207,6 +207,14 @@
       "wider": "Gör miniatyrpanelen bredare",
       "hidePane": "Dölj miniatyrer",
       "showPane": "Visa miniatyrer"
+    },
+    "documentBoundaryStartShort": "Dok {document}/{total}",
+    "documentBoundaryEndShort": "Slut",
+    "metrics": {
+      "totalPageTitle": "Sida {page} av totalt {total}",
+      "documentTitle": "Dokument {document} av totalt {total}",
+      "documentPageTitle": "Sida {page} av totalt {total} i dokument {document}",
+      "documentPageTitleNoTotal": "Sida {page} i dokument {document}"
     }
   },
   "compareZoom": {

@@ -33,6 +33,11 @@ import { createOpaqueIdFragment } from '../../utils/idUtils.js';
  * @property {string} url
  * @property {string=} ext
  * @property {number=} fileIndex
+ * @property {string=} documentId
+ * @property {number=} documentNumber
+ * @property {number=} totalDocuments
+ * @property {number=} documentFileNumber
+ * @property {number=} documentFileCount
  */
 
 /**
@@ -59,12 +64,22 @@ import { createOpaqueIdFragment } from '../../utils/idUtils.js';
  * @property {string} mimeType
  * @property {number} sizeBytes
  * @property {number} startIndex
+ * @property {string=} documentId
+ * @property {number=} documentNumber
+ * @property {number=} totalDocuments
+ * @property {number=} documentPageStart
+ * @property {number=} documentPageCount
  */
 
 /**
  * @typedef {Object} FailedPlaceholderInput
  * @property {number} fileIndex
  * @property {number} startIndex
+ * @property {string=} documentId
+ * @property {number=} documentNumber
+ * @property {number=} totalDocuments
+ * @property {number=} documentPageStart
+ * @property {number=} documentPageCount
  */
 
 /**
@@ -72,6 +87,11 @@ import { createOpaqueIdFragment } from '../../utils/idUtils.js';
  * @property {string} url
  * @property {number} fileIndex
  * @property {string} ext
+ * @property {string=} documentId
+ * @property {number=} documentNumber
+ * @property {number=} totalDocuments
+ * @property {number=} documentFileNumber
+ * @property {number=} documentFileCount
  */
 
 /**
@@ -320,12 +340,95 @@ function isTransientPrefetchError(error) {
 }
 
 /**
+ * @param {*} value
+ * @returns {(number|undefined)}
+ */
+function toPositiveIntOrUndefined(value) {
+  const numeric = Math.floor(Number(value) || 0);
+  return numeric > 0 ? numeric : undefined;
+}
+
+/**
+ * Extract multi-document source context from an entry or placeholder input.
+ *
+ * @param {*} value
+ * @returns {{ documentId:(string|undefined), documentNumber:(number|undefined), totalDocuments:(number|undefined), documentFileNumber:(number|undefined), documentFileCount:(number|undefined), hasMultipleDocuments:boolean }}
+ */
+function resolveDocumentSourceContext(value) {
+  const documentNumber = toPositiveIntOrUndefined(value?.documentNumber);
+  const totalDocuments = toPositiveIntOrUndefined(value?.totalDocuments);
+  const documentFileNumber = toPositiveIntOrUndefined(value?.documentFileNumber);
+  const documentFileCount = toPositiveIntOrUndefined(value?.documentFileCount);
+  const rawDocumentId = value?.documentId;
+  const documentId = rawDocumentId != null && String(rawDocumentId).trim()
+    ? String(rawDocumentId)
+    : undefined;
+
+  return {
+    documentId,
+    documentNumber,
+    totalDocuments,
+    documentFileNumber,
+    documentFileCount,
+    hasMultipleDocuments: !!documentNumber && !!totalDocuments && totalDocuments > 1,
+  };
+}
+
+/**
+ * @param {*} entry
+ * @returns {string}
+ */
+function getDocumentProgressKey(entry) {
+  const context = resolveDocumentSourceContext(entry);
+  if (!context.hasMultipleDocuments) return '';
+  return context.documentId ? `doc:${context.documentId}` : `doc:${context.documentNumber}`;
+}
+
+/**
+ * Patch the final page-count and boundary flags onto every page in a document once the loader knows
+ * where that document ends.
+ *
+ * @param {function(number, Object|function(*): Object): void} patchPageAtIndex
+ * @param {number} startIndex
+ * @param {number} endIndex
+ * @param {number} documentPageCount
+ * @returns {void}
+ */
+function finalizeDocumentPages(patchPageAtIndex, startIndex, endIndex, documentPageCount) {
+  const start = Math.max(0, Number(startIndex) || 0);
+  const end = Math.max(start, Number(endIndex) || 0);
+  const total = Math.max(1, Number(documentPageCount) || 1);
+
+  for (let index = start; index <= end; index += 1) {
+    patchPageAtIndex(index, (current) => {
+      if (!current) return {};
+      const documentPageNumber = toPositiveIntOrUndefined(current.documentPageNumber)
+        || (index - start + 1);
+      return {
+        documentPageNumber,
+        documentPageCount: total,
+        isDocumentStart: index === start,
+        isDocumentEnd: index === end,
+      };
+    });
+  }
+}
+
+/**
  * @param {PagePlaceholderInput} input
  * @returns {Array<Object>}
  */
 function createPagePlaceholders(input) {
   const pages = [];
+  const documentContext = resolveDocumentSourceContext(input);
+  const documentPageStart = Math.max(0, Number(input.documentPageStart) || 0);
+  const finalDocumentPageCount = toPositiveIntOrUndefined(input.documentPageCount);
+
   for (let pageIndex = 0; pageIndex < input.pageCount; pageIndex += 1) {
+    const documentPageNumber = documentContext.hasMultipleDocuments
+      ? documentPageStart + pageIndex + 1
+      : undefined;
+
     pages.push({
       sourceKey: input.sourceKey,
       status: 1,
@@ -341,6 +444,13 @@ function createPagePlaceholders(input) {
       allPagesIndex: input.startIndex + pageIndex,
       sourceMimeType: input.mimeType,
       sourceSizeBytes: input.sizeBytes,
+      documentId: documentContext.documentId,
+      documentNumber: documentContext.documentNumber,
+      totalDocuments: documentContext.totalDocuments,
+      documentPageNumber,
+      documentPageCount: finalDocumentPageCount,
+      isDocumentStart: !!documentPageNumber && documentPageNumber === 1,
+      isDocumentEnd: !!documentPageNumber && !!finalDocumentPageCount && documentPageNumber === finalDocumentPageCount,
     });
   }
   return pages;
@@ -351,6 +461,13 @@ function createPagePlaceholders(input) {
  * @returns {Array<Object>}
  */
 function createFailedPlaceholder(input) {
+  const documentContext = resolveDocumentSourceContext(input);
+  const documentPageStart = Math.max(0, Number(input.documentPageStart) || 0);
+  const finalDocumentPageCount = toPositiveIntOrUndefined(input.documentPageCount);
+  const documentPageNumber = documentContext.hasMultipleDocuments
+    ? documentPageStart + 1
+    : undefined;
+
   return [{
     sourceKey: `failed_${input.fileIndex}_${input.startIndex}`,
     status: -1,
@@ -364,6 +481,13 @@ function createFailedPlaceholder(input) {
     fileIndex: input.fileIndex,
     pageIndex: 0,
     allPagesIndex: input.startIndex,
+    documentId: documentContext.documentId,
+    documentNumber: documentContext.documentNumber,
+    totalDocuments: documentContext.totalDocuments,
+    documentPageNumber,
+    documentPageCount: finalDocumentPageCount,
+    isDocumentStart: !!documentPageNumber && documentPageNumber === 1,
+    isDocumentEnd: !!documentPageNumber && !!finalDocumentPageCount && documentPageNumber === finalDocumentPageCount,
   }];
 }
 
@@ -385,6 +509,13 @@ function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoForma
         url: String(item?.url || ''),
         fileIndex: Number.isFinite(item?.fileIndex) ? Number(item.fileIndex) : index,
         ext: normalizeExtension(item?.ext || inferUrlExtension(item?.url || '')),
+        documentId: item?.documentId != null && String(item.documentId).trim()
+          ? String(item.documentId)
+          : undefined,
+        documentNumber: toPositiveIntOrUndefined(item?.documentNumber),
+        totalDocuments: toPositiveIntOrUndefined(item?.totalDocuments),
+        documentFileNumber: toPositiveIntOrUndefined(item?.documentFileNumber),
+        documentFileCount: toPositiveIntOrUndefined(item?.documentFileCount),
       }))
       .filter((item) => !!item.url);
   }
@@ -441,6 +572,7 @@ const DocumentLoader = ({
     setWorkerCount,
     setLoadingRunActive,
     setPlannedPageCount,
+    patchPageAtIndex,
     initializeDocumentSession,
     storeSourceBlob,
     registerSourceDescriptor,
@@ -723,21 +855,59 @@ const DocumentLoader = ({
       const prefetchTasks = isSequentialFetch
         ? null
         : entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
+      const documentProgress = new Map();
 
       for (let i = 0; i < entries.length; i += 1) {
         if (cancelled) break;
 
+        const entry = entries[i];
         const result = isSequentialFetch
-          ? await prefetchSource(entries[i], i)
+          ? await prefetchSource(entry, i)
           : await prefetchTasks[i];
         if (shouldStopRun() || result.aborted) break;
+
+        const documentContext = resolveDocumentSourceContext(entry);
+        const documentKey = getDocumentProgressKey(entry);
+        let documentState = null;
+        if (documentKey) {
+          documentState = documentProgress.get(documentKey) || {
+            startIndex: nextPageIndex,
+            pageCount: 0,
+          };
+          if (!documentProgress.has(documentKey)) documentProgress.set(documentKey, documentState);
+        }
+
+        const documentPageStart = documentState ? documentState.pageCount : 0;
+        const isLastFileInDocument = !!documentState
+          && !!documentContext.documentFileNumber
+          && !!documentContext.documentFileCount
+          && documentContext.documentFileNumber >= documentContext.documentFileCount;
 
         if (!result.ok) {
           const failedPages = createFailedPlaceholder({
             fileIndex: result.fileIndex,
             startIndex: nextPageIndex,
+            documentId: documentContext.documentId,
+            documentNumber: documentContext.documentNumber,
+            totalDocuments: documentContext.totalDocuments,
+            documentPageStart,
+            documentPageCount: isLastFileInDocument ? documentPageStart + 1 : undefined,
           });
           insertPagesAtIndex(failedPages, nextPageIndex);
+
+          if (documentState) {
+            documentState.pageCount += failedPages.length;
+            if (isLastFileInDocument) {
+              finalizeDocumentPages(
+                patchPageAtIndex,
+                documentState.startIndex,
+                nextPageIndex + failedPages.length - 1,
+                documentState.pageCount
+              );
+              documentProgress.delete(documentKey);
+            }
+          }
+
           nextPageIndex += failedPages.length;
           processedSourceCount += 1;
           setPlannedPageCount(nextPageIndex);
@@ -788,10 +958,29 @@ const DocumentLoader = ({
           mimeType: result.mimeType,
           sizeBytes: Number(result.sizeBytes || 0),
           startIndex: nextPageIndex,
+          documentId: documentContext.documentId,
+          documentNumber: documentContext.documentNumber,
+          totalDocuments: documentContext.totalDocuments,
+          documentPageStart,
+          documentPageCount: isLastFileInDocument ? documentPageStart + pageCount : undefined,
         });
 
         insertPagesAtIndex(placeholders, nextPageIndex);
         scheduleSourceWarmup(nextPageIndex, placeholders.length);
+
+        if (documentState) {
+          documentState.pageCount += placeholders.length;
+          if (isLastFileInDocument) {
+            finalizeDocumentPages(
+              patchPageAtIndex,
+              documentState.startIndex,
+              nextPageIndex + placeholders.length - 1,
+              documentState.pageCount
+            );
+            documentProgress.delete(documentKey);
+          }
+        }
+
         nextPageIndex += placeholders.length;
         setPlannedPageCount(nextPageIndex);
 
@@ -882,6 +1071,7 @@ const DocumentLoader = ({
     folder,
     initializeDocumentSession,
     insertPagesAtIndex,
+    patchPageAtIndex,
     promptForPressure,
     registerSourceDescriptor,
     scheduleSourceWarmup,
