@@ -214,8 +214,19 @@
       "totalPageTitle": "Page {page} of {total}",
       "documentTitle": "Document {document} of {total}",
       "documentPageTitle": "Page {page} of {total} in document {document}",
-      "documentPageTitleNoTotal": "Page {page} in document {document}"
-    }
+      "documentPageTitleNoTotal": "Page {page} in document {document}",
+      "documentPrefix": "D",
+      "documentPagePrefix": "P",
+      "totalPagePrefix": "T",
+      "documentBadgeTitle": "Document number in current session",
+      "documentPageBadgeTitle": "Page number within the current document",
+      "totalPageBadgeTitle": "Total page number in current session"
+    },
+    "leftPaneBadgeShort": "L",
+    "rightPaneBadgeShort": "R",
+    "leftPaneBadgeTooltip": "Left pane in compare view",
+    "rightPaneBadgeTooltip": "Right pane in compare view",
+    "documentBoundaryEndTitle": "End of document bundle"
   },
   "compareZoom": {
     "increase": "Increase pane zoom",
