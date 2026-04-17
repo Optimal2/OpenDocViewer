@@ -155,7 +155,7 @@ function getPageDocumentContext(page) {
 }
 
 /**
- * @param {ReturnType<typeof useTranslation>['t']} t
+ * @param {Function} t
  * @param {number} pageNumber
  * @param {number} totalPages
  * @param {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number, documentPageNumber:number, documentPageCount:number }} documentContext

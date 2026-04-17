@@ -388,7 +388,7 @@ function getDocumentProgressKey(entry) {
  * Patch the final page-count and boundary flags onto every page in a document once the loader knows
  * where that document ends.
  *
- * @param {function(number, Object|function(*): Object): void} patchPageAtIndex
+ * @param {Function} patchPageAtIndex
  * @param {number} startIndex
  * @param {number} endIndex
  * @param {number} documentPageCount
