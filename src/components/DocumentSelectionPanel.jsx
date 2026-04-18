@@ -6,9 +6,13 @@
  * - users can tick/untick freely without immediately affecting the viewer
  * - Save applies the filtered page set
  * - Cancel restores the last applied selection
+ *
+ * Documents are collapsible so very large sessions remain manageable. Documents with a mixed
+ * selection state (some pages included, some excluded) expand by default until the user chooses
+ * otherwise.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
@@ -96,12 +100,48 @@ export default function DocumentSelectionPanel({
   onCancel,
 }) {
   const { t } = useTranslation('common');
+  const [expandedDocuments, setExpandedDocuments] = useState(() => ({}));
 
   const safeTotalSessionPages = Math.max(0, Number(totalSessionPages) || 0);
   const masterChecked = safeTotalSessionPages > 0 && draftIncludedCount >= safeTotalSessionPages;
   const masterIndeterminate = draftIncludedCount > 0 && draftIncludedCount < safeTotalSessionPages;
   const saveDisabled = !enabled || !draftSelectionDirty;
   const cancelDisabled = !draftSelectionDirty;
+
+  const documentSummaries = useMemo(() => {
+    return documents.map((document) => {
+      const documentPages = Array.isArray(document.pages) ? document.pages : [];
+      const selectedCount = documentPages.reduce((count, page) => count + (draftSelectionMask[page.originalIndex] === false ? 0 : 1), 0);
+      const pageCount = documentPages.length;
+      return {
+        document,
+        documentPages,
+        selectedCount,
+        pageCount,
+        checked: pageCount > 0 && selectedCount === pageCount,
+        indeterminate: selectedCount > 0 && selectedCount < pageCount,
+      };
+    });
+  }, [documents, draftSelectionMask]);
+
+  useEffect(() => {
+    setExpandedDocuments((current) => {
+      const next = {};
+      for (const summary of documentSummaries) {
+        if (Object.prototype.hasOwnProperty.call(current, summary.document.key)) {
+          next[summary.document.key] = current[summary.document.key];
+        }
+      }
+      return next;
+    });
+  }, [documentSummaries]);
+
+  const toggleDocumentExpanded = useCallback((documentKey, currentExpanded) => {
+    setExpandedDocuments((current) => ({
+      ...current,
+      [documentKey]: !currentExpanded,
+    }));
+  }, []);
 
   const statusText = useMemo(() => {
     if (!enabled) {
@@ -149,54 +189,73 @@ export default function DocumentSelectionPanel({
           {t('thumbnails.selection.allPages', { defaultValue: 'All pages' })}
         </SelectionCheckboxRow>
 
-        {documents.map((document) => {
-          const documentPages = Array.isArray(document.pages) ? document.pages : [];
-          const selectedCount = documentPages.reduce((count, page) => count + (draftSelectionMask[page.originalIndex] === false ? 0 : 1), 0);
-          const docChecked = documentPages.length > 0 && selectedCount === documentPages.length;
-          const docIndeterminate = selectedCount > 0 && selectedCount < documentPages.length;
+        {documentSummaries.map((summary) => {
+          const { document, documentPages, selectedCount, pageCount, checked, indeterminate } = summary;
+          const isExpanded = Object.prototype.hasOwnProperty.call(expandedDocuments, document.key)
+            ? !!expandedDocuments[document.key]
+            : !!indeterminate;
+          const expandTitle = isExpanded
+            ? t('thumbnails.selection.collapseDocument', { current: document.documentNumber, defaultValue: `Collapse document ${document.documentNumber}` })
+            : t('thumbnails.selection.expandDocument', { current: document.documentNumber, defaultValue: `Expand document ${document.documentNumber}` });
 
           return (
             <div key={document.key} className="thumbnail-selection-document">
-              <SelectionCheckboxRow
-                className="is-document"
-                checked={docChecked}
-                indeterminate={docIndeterminate}
-                disabled={!enabled}
-                onChange={(event) => onToggleDocument(document.key, event.target.checked)}
-                meta={t('thumbnails.selection.pagesSummary', {
-                  selected: selectedCount,
-                  total: documentPages.length,
-                  defaultValue: `${selectedCount}/${documentPages.length}`,
-                })}
-              >
-                {t('thumbnails.selection.documentLabel', {
-                  current: document.documentNumber,
-                  total: document.totalDocuments,
-                  defaultValue: `Document ${document.documentNumber}/${document.totalDocuments}`,
-                })}
-              </SelectionCheckboxRow>
+              <div className="thumbnail-selection-document-header">
+                <SelectionCheckboxRow
+                  className="is-document"
+                  checked={checked}
+                  indeterminate={indeterminate}
+                  disabled={!enabled}
+                  onChange={(event) => onToggleDocument(document.key, event.target.checked)}
+                  meta={t('thumbnails.selection.pagesSummary', {
+                    selected: selectedCount,
+                    total: pageCount,
+                    defaultValue: `${selectedCount}/${pageCount}`,
+                  })}
+                >
+                  {t('thumbnails.selection.documentLabelShort', {
+                    current: document.documentNumber,
+                    defaultValue: `Document ${document.documentNumber}`,
+                  })}
+                </SelectionCheckboxRow>
 
-              <div className="thumbnail-selection-page-list">
-                {documentPages.map((page) => {
-                  const checked = draftSelectionMask[page.originalIndex] !== false;
-                  return (
-                    <SelectionCheckboxRow
-                      key={`page-${document.key}-${page.originalIndex}`}
-                      className="is-page"
-                      checked={checked}
-                      indeterminate={false}
-                      disabled={!enabled}
-                      onChange={(event) => onTogglePage(page.originalIndex, event.target.checked)}
-                    >
-                      {t('thumbnails.selection.pageLabel', {
-                        documentPage: page.documentPageNumber,
-                        globalPage: page.originalPageNumber,
-                        defaultValue: `Page ${page.documentPageNumber}`,
-                      })}
-                    </SelectionCheckboxRow>
-                  );
-                })}
+                <button
+                  type="button"
+                  className="thumbnail-selection-toggle"
+                  onClick={() => toggleDocumentExpanded(document.key, isExpanded)}
+                  aria-expanded={isExpanded}
+                  aria-label={expandTitle}
+                  title={expandTitle}
+                >
+                  <span className="material-icons" aria-hidden="true">
+                    {isExpanded ? 'expand_less' : 'expand_more'}
+                  </span>
+                </button>
               </div>
+
+              {isExpanded ? (
+                <div className="thumbnail-selection-page-list">
+                  {documentPages.map((page) => {
+                    const checkedPage = draftSelectionMask[page.originalIndex] !== false;
+                    return (
+                      <SelectionCheckboxRow
+                        key={`page-${document.key}-${page.originalIndex}`}
+                        className="is-page"
+                        checked={checkedPage}
+                        indeterminate={false}
+                        disabled={!enabled}
+                        onChange={(event) => onTogglePage(page.originalIndex, event.target.checked)}
+                      >
+                        {t('thumbnails.selection.pageLabel', {
+                          documentPage: page.documentPageNumber,
+                          globalPage: page.originalPageNumber,
+                          defaultValue: `Page ${page.documentPageNumber}`,
+                        })}
+                      </SelectionCheckboxRow>
+                    );
+                  })}
+                </div>
+              ) : null}
             </div>
           );
         })}

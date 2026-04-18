@@ -17,7 +17,7 @@
   color: inherit;
   border-radius: 18px;
   padding: 0;
-  width: min(760px, 96vw);
+  width: min(820px, 96vw);
   max-width: 96vw;
   max-height: min(92vh, 920px);
   display: flex;
@@ -505,4 +505,105 @@
   padding: 14px 22px 20px;
   border-top: 1px solid var(--odv-border, #d5dae1);
   background: rgba(247, 249, 252, 0.92);
+}
+
+.odv-prd-card-first {
+  margin-top: 18px;
+}
+
+.odv-prd-labelBlock-wide {
+  width: 100%;
+}
+
+.odv-prd-summary {
+  display: block;
+  padding: 12px 14px;
+  border-radius: 12px;
+  background: rgba(37, 99, 235, 0.06);
+  border: 1px solid rgba(37, 99, 235, 0.14);
+  line-height: 1.45;
+  font-size: 13px;
+}
+
+.odv-prd-staticValue {
+  display: inline-flex;
+  align-items: center;
+  min-height: 40px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: rgba(127, 127, 127, 0.06);
+  border: 1px solid var(--odv-border, #d5dae1);
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.odv-print-preparing-backdrop {
+  position: fixed;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  background: rgba(13, 18, 28, 0.34);
+  z-index: 10020;
+}
+
+.odv-print-preparing-dialog {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  width: min(620px, 92vw);
+  padding: 18px 20px;
+  border-radius: 18px;
+  background: var(--odv-surface, #ffffff);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.28);
+}
+
+.odv-print-preparing-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 48px;
+  min-width: 48px;
+  height: 48px;
+  border-radius: 14px;
+  background: rgba(37, 99, 235, 0.08);
+  color: var(--primary-color, #2563eb);
+}
+
+.odv-print-preparing-icon .material-icons {
+  font-size: 26px;
+}
+
+.odv-print-preparing-copy {
+  min-width: 0;
+  flex: 1 1 auto;
+}
+
+.odv-print-preparing-copy h3 {
+  margin: 0 0 4px 0;
+  font-size: 18px;
+}
+
+.odv-print-preparing-copy p {
+  margin: 0;
+  line-height: 1.45;
+  color: rgba(0, 0, 0, 0.76);
+}
+
+.odv-print-preparing-close {
+  min-height: 38px;
+  padding: 0 14px;
+  border-radius: 10px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: #ffffff;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.odv-print-preparing-close:hover,
+.odv-print-preparing-close:focus-visible {
+  outline: none;
+  background: rgba(0, 0, 0, 0.04);
 }

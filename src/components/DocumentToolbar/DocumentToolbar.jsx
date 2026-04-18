@@ -26,6 +26,7 @@ import LanguageMenuButton from './LanguageMenuButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpOverlayDialog from './HelpOverlayDialog.jsx';
+import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 
 
 /**
@@ -206,6 +207,7 @@ const DocumentToolbar = ({
   const [navigationModifierState, setNavigationModifierState] = useState({ shift: false, ctrl: false });
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
+  const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
   const documentRepeatTargetRef = useRef('primary');
   const modifierStateRef = useRef({ shift: false, ctrl: false });
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
@@ -298,6 +300,14 @@ const DocumentToolbar = ({
     setOpenAdjustmentMenu(null);
   }, [comparePageNumber, isComparing, pageNumber]);
 
+  useEffect(() => {
+    if (!printPreparationNotice.open) return undefined;
+    const timeoutId = window.setTimeout(() => {
+      setPrintPreparationNotice({ open: false, pageCount: 0 });
+    }, 6000);
+    return () => window.clearTimeout(timeoutId);
+  }, [printPreparationNotice.open]);
+
   // Seed optional user-log context once so later print actions can attach host metadata.
   useEffect(() => {
     try {
@@ -326,6 +336,12 @@ const DocumentToolbar = ({
     canGoFirst: !!compareDocumentNavigation?.canGoFirst,
     canGoLast: !!compareDocumentNavigation?.canGoLast,
   }), [compareDocumentNavigation]);
+
+  const printPreparationNoticeThreshold = useMemo(() => {
+    const cfg = getRuntimeConfig();
+    const raw = Number(cfg?.print?.preparationNoticeThresholdPages);
+    return Number.isFinite(raw) && raw > 0 ? Math.max(1, Math.floor(raw)) : 200;
+  }, []);
 
   // Navigation helpers (single-step handlers + press-and-hold timers).
   // Shift steers the right compare pane when compare mode is available. Ctrl switches the scope to
@@ -743,17 +759,11 @@ const DocumentToolbar = ({
   }, [resolvePrintPageCount, toPagesString]);
 
   /**
-   * Handle the dialog submit event and dispatch the correct print action.
+   * Execute the actual print helper after the dialog has resolved the user's choices.
    * @param {PrintSubmitDetail} detail
    * @returns {void}
    */
-  const handlePrintSubmit = useCallback((detail) => {
-    closePrintDialog?.();
-
-    // Kick off user-log submission first (non-blocking).
-    submitUserPrintLog(detail);
-
-    // Common options passed to print helpers to enable header token substitution.
+  const dispatchPrintRequest = useCallback((detail) => {
     const commonOpts = {
       viewerContainerRef,
       reason: detail?.reason || '',
@@ -782,9 +792,28 @@ const DocumentToolbar = ({
     }
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
-      return;
     }
-  }, [closePrintDialog, compareRef, documentRenderRef, isComparing, submitUserPrintLog, viewerContainerRef, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, isComparing, viewerContainerRef, visibleOriginalPageNumbers]);
+
+  /**
+   * Handle the dialog submit event and dispatch the correct print action.
+   * @param {PrintSubmitDetail} detail
+   * @returns {void}
+   */
+  const handlePrintSubmit = useCallback((detail) => {
+    closePrintDialog?.();
+
+    submitUserPrintLog(detail);
+
+    const pageCount = resolvePrintPageCount(detail);
+    if (Number.isFinite(pageCount) && pageCount >= printPreparationNoticeThreshold) {
+      setPrintPreparationNotice({ open: true, pageCount: pageCount });
+    }
+
+    window.setTimeout(() => {
+      dispatchPrintRequest(detail);
+    }, 30);
+  }, [closePrintDialog, dispatchPrintRequest, printPreparationNoticeThreshold, resolvePrintPageCount, submitUserPrintLog]);
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
@@ -1041,18 +1070,19 @@ const DocumentToolbar = ({
 
       <div className="toolbar-spacer" />
 
-      <LanguageMenuButton />
+      <div className="toolbar-end-actions">
+        <LanguageMenuButton />
 
-      <button
-        type="button"
-        onClick={() => setIsHelpDialogOpen(true)}
-        aria-label={t('help.open', { defaultValue: 'Open help' })}
-        title={t('help.open', { defaultValue: 'Open help' })}
-        className="odv-btn help-button"
-      >
-        <span className="material-icons" aria-hidden="true">help_outline</span>
-      </button>
-
+        <button
+          type="button"
+          onClick={() => setIsHelpDialogOpen(true)}
+          aria-label={t('help.open', { defaultValue: 'Open help' })}
+          title={t('help.open', { defaultValue: 'Open help' })}
+          className="odv-btn help-button"
+        >
+          <span className="material-icons" aria-hidden="true">help_outline</span>
+        </button>
+      </div>
 
       {/* Modal for print selection + reason/forWhom */}
       <PrintRangeDialog
@@ -1073,6 +1103,30 @@ const DocumentToolbar = ({
         isOpen={isHelpDialogOpen}
         onClose={() => setIsHelpDialogOpen(false)}
       />
+
+      {printPreparationNotice.open ? (
+        <div className="odv-print-preparing-backdrop" role="status" aria-live="polite">
+          <div className="odv-print-preparing-dialog">
+            <div className="odv-print-preparing-icon" aria-hidden="true">
+              <span className="material-icons">hourglass_top</span>
+            </div>
+            <div className="odv-print-preparing-copy">
+              <h3>{t('printDialog.preparing.title', { defaultValue: 'Preparing print job' })}</h3>
+              <p>{t('printDialog.preparing.body', {
+                count: printPreparationNotice.pageCount,
+                defaultValue: `A print request for ${printPreparationNotice.pageCount} pages has been sent to the browser. It can take a moment before the browser's print preview opens.`,
+              })}</p>
+            </div>
+            <button
+              type="button"
+              className="odv-print-preparing-close"
+              onClick={() => setPrintPreparationNotice({ open: false, pageCount: 0 })}
+            >
+              {t('printDialog.preparing.dismiss', { defaultValue: 'Close' })}
+            </button>
+          </div>
+        </div>
+      ) : null}
     </div>
   );
 };
