@@ -45,7 +45,10 @@
       "targetCompare": "right compare pane",
       "modeTitle": "{{scope}} · {{target}}",
       "shiftHint": "Shift = right compare pane",
-      "ctrlHint": "Ctrl = document mode"
+      "ctrlHint": "Ctrl = document mode",
+      "groupDescription": "{{scope}} for {{target}}.",
+      "loadingAnnounce": "Page navigation is still loading pages.",
+      "readyAnnounce": "Page navigation is ready."
     },
     "firstDocument": "First document",
     "previousDocument": "Previous document",
@@ -225,7 +228,10 @@
       "narrower": "Make thumbnail pane narrower",
       "wider": "Make thumbnail pane wider",
       "hidePane": "Hide thumbnails",
-      "showPane": "Show thumbnails"
+      "showPane": "Show thumbnails",
+      "minimumWidth": "Set thumbnail pane to minimum width",
+      "resetWidth": "Reset thumbnail pane to default width",
+      "maximumWidth": "Set thumbnail pane to maximum width"
     },
     "documentBoundaryStartShort": "Doc {document}/{total}",
     "documentBoundaryEndShort": "End",
@@ -239,7 +245,7 @@
       "totalPagePrefix": "T",
       "documentBadgeTitle": "Document number in current session",
       "documentPageBadgeTitle": "Page number within the current document",
-      "totalPageBadgeTitle": "Total page number in current session"
+      "totalPageBadgeTitle": "Visible page number in the current selection"
     },
     "leftPaneBadgeShort": "L",
     "rightPaneBadgeShort": "R",
@@ -260,7 +266,13 @@
       "pageLabel": "Page {documentPage}",
       "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Save selection",
-      "cancel": "Cancel"
+      "cancel": "Cancel",
+      "clearFilter": "Clear the selection filter and show all pages"
+    },
+    "contextMenu": {
+      "hidePageFromSelection": "Hide this page from the current selection",
+      "hidePageFromSelectionLabel": "Hide this page",
+      "hidePageUnavailable": "At least one visible page must remain selected."
     }
   },
   "compareZoom": {

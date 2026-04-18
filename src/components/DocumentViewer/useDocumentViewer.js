@@ -342,6 +342,9 @@ export function useDocumentViewer() {
     [normalizedDraftSelectionMask]
   );
   const selectionPanelEnabled = !!pageLoadState?.allPagesReady && totalSessionPages > 0;
+  const thumbnailWidthMin = THUMBNAIL_WIDTH_MIN;
+  const thumbnailWidthMax = THUMBNAIL_WIDTH_MAX;
+  const thumbnailWidthDefault = THUMBNAIL_WIDTH_DEFAULT;
 
   const visibleOriginalIndexes = useMemo(() => {
     const indexes = [];
@@ -614,6 +617,41 @@ export function useDocumentViewer() {
     setDraftSelectionMask(normalizedAppliedSelectionMask.slice());
   }, [normalizedAppliedSelectionMask]);
 
+  const clearSelectionFilter = useCallback(() => {
+    const nextMask = Array(totalSessionPages).fill(true);
+    setAppliedSelectionMask(nextMask);
+    setDraftSelectionMask(nextMask);
+    setThumbnailPaneMode('thumbnails');
+  }, [totalSessionPages]);
+
+  /**
+   * Immediately exclude a page from the active selection and apply the filtered session.
+   * Used by direct thumbnail affordances such as the custom context menu.
+   *
+   * @param {number} originalIndex
+   * @returns {boolean}
+   */
+  const hidePageFromSelection = useCallback((originalIndex) => {
+    if (!selectionPanelEnabled) return false;
+
+    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+    if (safeOriginalIndex < 0 || safeOriginalIndex >= totalSessionPages) return false;
+
+    const base = normalizeSelectionMask(normalizedAppliedSelectionMask, totalSessionPages);
+    if (base[safeOriginalIndex] === false) return false;
+
+    const includedCount = base.reduce((count, included) => count + (included === false ? 0 : 1), 0);
+    if (includedCount <= 1) return false;
+
+    const nextMask = base.slice();
+    nextMask[safeOriginalIndex] = false;
+
+    setAppliedSelectionMask(nextMask);
+    setDraftSelectionMask(nextMask);
+    setThumbnailPaneMode('thumbnails');
+    return true;
+  }, [normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
+
   // --- Page navigation -----------------------------------------------------------
   /**
    * Resolve the next original 1-based page number from a visible-page update.
@@ -691,6 +729,20 @@ export function useDocumentViewer() {
     lastRequestedOriginalIndexRef.current = Math.max(0, resolvedOriginalPage - 1);
     setPageNumberRaw(resolvedOriginalPage);
   }, [resolveTargetOriginalPageNumber, totalPages]);
+
+  /**
+   * Change the compare page by a visible page number from the toolbar page field.
+   *
+   * @param {number} nextVisiblePageNumber
+   * @returns {void}
+   */
+  const setVisibleComparePageNumber = useCallback((nextVisiblePageNumber) => {
+    if (isExpanded || totalPages <= 0) return;
+    const resolvedOriginalPage = resolveTargetOriginalPageNumber('compare', nextVisiblePageNumber);
+    lastRequestedCompareOriginalIndexRef.current = Math.max(0, resolvedOriginalPage - 1);
+    setComparePageNumberRaw(resolvedOriginalPage);
+    setIsComparing(true);
+  }, [isExpanded, resolveTargetOriginalPageNumber, totalPages]);
 
   /**
    * Change the compare page using an original page number (or a visible-page updater function when
@@ -1014,6 +1066,18 @@ export function useDocumentViewer() {
     });
   }, []);
 
+  const setThumbnailPaneToMinimumWidth = useCallback(() => {
+    applyThumbnailWidth(THUMBNAIL_WIDTH_MIN);
+  }, [applyThumbnailWidth]);
+
+  const resetThumbnailPaneWidth = useCallback(() => {
+    applyThumbnailWidth(THUMBNAIL_WIDTH_DEFAULT);
+  }, [applyThumbnailWidth]);
+
+  const setThumbnailPaneToMaximumWidth = useCallback(() => {
+    applyThumbnailWidth(THUMBNAIL_WIDTH_MAX);
+  }, [applyThumbnailWidth]);
+
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
     const startX = e.clientX;
@@ -1085,6 +1149,7 @@ export function useDocumentViewer() {
 
     // compare page numbers
     setComparePageNumber,
+    setVisibleComparePageNumber,
     comparePageNumber: compareVisiblePageNumber,
     renderComparePageNumber: compareOriginalPageNumber,
 
@@ -1100,9 +1165,15 @@ export function useDocumentViewer() {
     imageProperties,
     isExpanded,
     thumbnailWidth,
+    thumbnailWidthMin,
+    thumbnailWidthMax,
+    thumbnailWidthDefault,
     applyThumbnailWidth,
     increaseThumbnailWidth,
     decreaseThumbnailWidth,
+    setThumbnailPaneToMinimumWidth,
+    resetThumbnailPaneWidth,
+    setThumbnailPaneToMaximumWidth,
     hideThumbnailPane,
     showThumbnailPane,
     viewerContainerRef,
@@ -1158,6 +1229,8 @@ export function useDocumentViewer() {
     toggleDraftPage,
     saveDraftSelection,
     cancelDraftSelection,
+    clearSelectionFilter,
+    hidePageFromSelection,
 
     // per-pane post-zoom
     postZoomLeft,

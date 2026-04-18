@@ -47,7 +47,6 @@ import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
  * @property {string=} extension
  * @property {number=} endNumber
  * @property {Array.<DocumentSourceItem>=} sourceList
- * @property {boolean=} sameBlob
  * @property {boolean=} demoMode
  * @property {'repeat'|'mix'=} demoStrategy
  * @property {number=} demoCount

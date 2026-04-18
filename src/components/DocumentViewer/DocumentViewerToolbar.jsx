@@ -42,7 +42,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {number} totalPagesDisplay - Total original session pages.
  * @property {boolean} isDocumentLoading
  * @property {PageNumberSetter} setPageNumber
+ * @property {PageNumberSetter} setVisiblePageNumber
  * @property {PageNumberSetter} setComparePageNumber
+ * @property {PageNumberSetter} setVisibleComparePageNumber
  * @property {function(string=): void} goToPreviousPage
  * @property {function(string=): void} goToNextPage
  * @property {function(string=): void} goToFirstPage
@@ -100,7 +102,9 @@ const DocumentViewerToolbar = ({
   totalPagesDisplay,
   isDocumentLoading,
   setPageNumber,
+  setVisiblePageNumber,
   setComparePageNumber,
+  setVisibleComparePageNumber,
   goToPreviousPage,
   goToNextPage,
   goToFirstPage,
@@ -156,7 +160,9 @@ const DocumentViewerToolbar = ({
       totalPagesDisplay={totalPagesDisplay}
       isDocumentLoading={isDocumentLoading}
       setPageNumber={setPageNumber}
+      setVisiblePageNumber={setVisiblePageNumber}
       setComparePageNumber={setComparePageNumber}
+      setVisibleComparePageNumber={setVisibleComparePageNumber}
       goToPreviousPage={goToPreviousPage}
       goToNextPage={goToNextPage}
       goToFirstPage={goToFirstPage}
@@ -213,7 +219,9 @@ DocumentViewerToolbar.propTypes = {
   totalPagesDisplay: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
+  setVisiblePageNumber: PropTypes.func.isRequired,
   setComparePageNumber: PropTypes.func.isRequired,
+  setVisibleComparePageNumber: PropTypes.func.isRequired,
   goToPreviousPage: PropTypes.func.isRequired,
   goToNextPage: PropTypes.func.isRequired,
   goToFirstPage: PropTypes.func.isRequired,

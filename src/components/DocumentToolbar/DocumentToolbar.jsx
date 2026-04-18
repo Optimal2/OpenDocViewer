@@ -82,7 +82,9 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
  * @property {PageNumberSetter} setPageNumber
+ * @property {PageNumberSetter=} setVisiblePageNumber
  * @property {PageNumberSetter} [setComparePageNumber]
+ * @property {PageNumberSetter=} [setVisibleComparePageNumber]
  * @property {function(string=): void} [goToPreviousDocument]
  * @property {function(string=): void} [goToNextDocument]
  * @property {function(string=): void} [goToFirstDocument]
@@ -163,7 +165,9 @@ const DocumentToolbar = ({
   firstPageDisabled,
   lastPageDisabled,
   setPageNumber,
+  setVisiblePageNumber,
   setComparePageNumber,
+  setVisibleComparePageNumber,
   goToPreviousDocument,
   goToNextDocument,
   goToFirstDocument,
@@ -543,13 +547,17 @@ const DocumentToolbar = ({
     return parts.join(' · ');
   }, [compareNavigationEnabled, documentNavigationEnabled, t]);
 
-  const handleGoToPageInput = useCallback((nextOriginalPageNumber) => {
-    if (navigationTargetMode === 'compare' && compareNavigationEnabled && typeof setComparePageNumber === 'function') {
-      setComparePageNumber(nextOriginalPageNumber);
+  const handleGoToPageInput = useCallback((nextVisiblePageNumber) => {
+    if (navigationTargetMode === 'compare' && compareNavigationEnabled && typeof setVisibleComparePageNumber === 'function') {
+      setVisibleComparePageNumber(nextVisiblePageNumber);
       return;
     }
-    setPageNumber(nextOriginalPageNumber);
-  }, [compareNavigationEnabled, navigationTargetMode, setComparePageNumber, setPageNumber]);
+    if (typeof setVisiblePageNumber === 'function') {
+      setVisiblePageNumber(nextVisiblePageNumber);
+      return;
+    }
+    setPageNumber(nextVisiblePageNumber);
+  }, [compareNavigationEnabled, navigationTargetMode, setPageNumber, setVisibleComparePageNumber, setVisiblePageNumber]);
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
   const snapToZero = useMemo(
@@ -751,9 +759,9 @@ const DocumentToolbar = ({
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
         pageNumber={pageNumber}
-        pageNumberDisplay={pageNumberDisplay}
+        pageNumberDisplay={pageNumber}
         totalPages={totalPages}
-        totalPagesDisplay={totalPagesDisplay}
+        totalPagesDisplay={totalPages}
         navigationTarget={navigationTargetMode}
         navigationScope={navigationScopeMode}
         navigationGroupTitle={navigationModeTitle}
@@ -907,7 +915,9 @@ DocumentToolbar.propTypes = {
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
+  setVisiblePageNumber: PropTypes.func,
   setComparePageNumber: PropTypes.func,
+  setVisibleComparePageNumber: PropTypes.func,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func,

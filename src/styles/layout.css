@@ -256,29 +256,44 @@ canvas {
   border-right: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
 }
 
-.thumbnail-pane-toolbar {
+.thumbnail-pane-toolbar-stack {
   position: sticky;
   top: 0;
   z-index: 4;
   display: flex;
-  align-items: center;
-  justify-content: flex-start;
-  gap: 8px;
-  padding: 6px 8px;
+  flex-direction: column;
+  gap: 6px;
+  padding: 6px 8px 8px;
   background: color-mix(in srgb, var(--toolbar-background-color) 78%, var(--background-color) 22%);
   border-bottom: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 75%, transparent 25%);
+}
+
+.thumbnail-pane-toolbar-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  min-width: 0;
+}
+
+.thumbnail-pane-toolbar-row.is-actions {
+  justify-content: flex-end;
+}
+
+.thumbnail-pane-toolbar-row.is-tabs {
+  justify-content: space-between;
 }
 
 .thumbnail-pane-toolbar-actions {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: 2px;
 }
 
-.thumbnail-pane-toolbar,
+.thumbnail-pane-toolbar-stack,
 .thumbnail-pane-toolbar-button,
 .thumbnail-pane-collapsed-toggle,
-.thumbnail-pane-toolbar .material-icons {
+.thumbnail-pane-toolbar-stack .material-icons {
   -webkit-user-select: none;
   user-select: none;
   -webkit-touch-callout: none;
@@ -294,15 +309,26 @@ canvas {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  width: 30px;
-  height: 30px;
+  width: 28px;
+  height: 28px;
   padding: 0;
   border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
   border-radius: 6px;
-  background: var(--canvas-background-color);
-  color: var(--primary-color-active);
+  background: color-mix(in srgb, var(--canvas-background-color) 90%, transparent 10%);
+  color: color-mix(in srgb, var(--text-color) 78%, var(--primary-color-active) 22%);
   cursor: pointer;
-  box-shadow: var(--box-shadow);
+  box-shadow: none;
+  transition: border-color 0.15s ease, color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.thumbnail-pane-toolbar-button.is-compact {
+  width: 22px;
+  height: 22px;
+}
+
+.thumbnail-pane-toolbar-button .material-icons,
+.thumbnail-pane-collapsed-toggle .material-icons {
+  font-size: 16px;
 }
 
 .thumbnail-pane-toolbar-button:hover,
@@ -314,15 +340,25 @@ canvas {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 22%, transparent 78%);
 }
 
+.thumbnail-pane-toolbar-button.is-danger {
+  color: color-mix(in srgb, #b91c1c 72%, var(--text-color) 28%);
+}
+
+.thumbnail-pane-toolbar-button:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .thumbnail-pane-mode-switch {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  margin-left: auto;
   padding: 2px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--canvas-background-color) 78%, transparent 22%);
   border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+  min-width: 0;
 }
 
 .thumbnail-pane-mode-button {
@@ -357,6 +393,13 @@ canvas {
 .thumbnail-pane-mode-button.has-selection:not(.is-active) {
   background: color-mix(in srgb, var(--thumbnail-compare-color) 14%, transparent 86%);
   color: color-mix(in srgb, var(--thumbnail-compare-color) 78%, var(--text-color) 22%);
+}
+
+.thumbnail-pane-tab-tools {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
 }
 
 .thumbnail-pane-collapsed-rail {
@@ -785,6 +828,49 @@ canvas {
   flex-direction: column;
   gap: 6px;
   padding-left: 28px;
+}
+
+.odv-context-menu {
+  position: fixed;
+  z-index: 80;
+  min-width: 216px;
+  padding: 6px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--canvas-background-color) 96%, transparent 4%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 78%, transparent 22%);
+  box-shadow: 0 16px 36px rgba(0, 0, 0, 0.24);
+}
+
+.odv-context-menu-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  min-height: 34px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 8px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-align: left;
+  cursor: pointer;
+}
+
+.odv-context-menu-item:hover,
+.odv-context-menu-item:focus {
+  outline: none;
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 10%, transparent 90%);
+}
+
+.odv-context-menu-item:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+}
+
+.odv-context-menu-item .material-icons {
+  font-size: 18px;
 }
 
 .thumbnail-selection-footer {
