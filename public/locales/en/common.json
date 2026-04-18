@@ -48,7 +48,9 @@
       "ctrlHint": "Ctrl = document mode",
       "groupDescription": "{{scope}} for {{target}}.",
       "loadingAnnounce": "Page navigation is still loading pages.",
-      "readyAnnounce": "Page navigation is ready."
+      "readyAnnounce": "Page navigation is ready.",
+      "noPagesTitle": "No visible pages available",
+      "noPagesAnnounce": "No visible pages are currently available."
     },
     "firstDocument": "First document",
     "previousDocument": "Previous document",
@@ -209,6 +211,12 @@
       "stop": "Stop loading",
       "continue": "Continue anyway",
       "stoppedMessage": "Loading was stopped before the remaining pages were analyzed."
+    },
+    "selectionEmpty": {
+      "title": "No pages remain in the current selection",
+      "description": "The active selection currently hides every page. Reset the selection filter to show the full session again, or open the selection tab to choose a new subset.",
+      "showAll": "Show all pages",
+      "openSelection": "Open selection"
     }
   },
   "thumbnails": {
@@ -272,7 +280,10 @@
     "contextMenu": {
       "hidePageFromSelection": "Hide this page from the current selection",
       "hidePageFromSelectionLabel": "Hide this page",
-      "hidePageUnavailable": "At least one visible page must remain selected."
+      "hidePageUnavailable": "At least one visible page must remain selected.",
+      "hideDocumentFromSelection": "Hide the entire document from the current selection",
+      "hideDocumentFromSelectionLabel": "Hide document {{document}}/{{total}}",
+      "hideUnavailable": "Selection tools become available when all pages are fully loaded."
     }
   },
   "compareZoom": {

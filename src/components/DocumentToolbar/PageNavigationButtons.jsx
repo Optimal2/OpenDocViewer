@@ -83,13 +83,14 @@ const PageNavigationButtons = ({
   const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [draft, setDraft] = useState(String(pageNumberDisplay));
+  const hasPages = Math.max(0, Number(totalPagesDisplay) || 0) > 0;
+  const [draft, setDraft] = useState(hasPages ? String(pageNumberDisplay) : '0');
 
   useEffect(() => {
     const el = inputRef.current;
     const focused = !!(el && document.activeElement === el) || isFocused;
-    if (!focused) setDraft(String(pageNumberDisplay));
-  }, [pageNumberDisplay, isFocused]);
+    if (!focused) setDraft(hasPages ? String(pageNumberDisplay) : '0');
+  }, [hasPages, pageNumberDisplay, isFocused]);
 
   /**
    * @param {'prev'|'next'} key
@@ -134,6 +135,10 @@ const PageNavigationButtons = ({
   }, [stopAllRepeatNavigation]);
 
   const applyDraft = useCallback(() => {
+    if (!hasPages) {
+      setDraft('0');
+      return;
+    }
     const next = clampPage(draft, totalPagesDisplay);
     if (next == null) {
       setDraft(String(pageNumberDisplay));
@@ -141,11 +146,11 @@ const PageNavigationButtons = ({
     }
     if (typeof onGoToPage === 'function') onGoToPage(next);
     setDraft(String(next));
-  }, [draft, onGoToPage, pageNumberDisplay, totalPagesDisplay]);
+  }, [draft, hasPages, onGoToPage, pageNumberDisplay, totalPagesDisplay]);
 
   const cancelDraft = useCallback(() => {
-    setDraft(String(pageNumberDisplay));
-  }, [pageNumberDisplay]);
+    setDraft(hasPages ? String(pageNumberDisplay) : '0');
+  }, [hasPages, pageNumberDisplay]);
 
   /**
    * @param {*} event
@@ -195,12 +200,16 @@ const PageNavigationButtons = ({
   }, []);
 
   const groupTitle = navigationGroupTitle || t('toolbar.page');
-  const pageTitle = isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page');
+  const pageTitle = !hasPages
+    ? t('toolbar.navigation.noPagesTitle', { defaultValue: 'No visible pages available' })
+    : (isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page'));
   const resolvedFirstButtonTitle = firstButtonTitle || t('toolbar.firstPage');
   const resolvedPreviousButtonTitle = previousButtonTitle || t('toolbar.previousPage');
   const resolvedNextButtonTitle = nextButtonTitle || t('toolbar.nextPage');
   const resolvedLastButtonTitle = lastButtonTitle || t('toolbar.lastPage');
-  const displayValue = isFocused ? draft : `${pageNumberDisplay} / ${totalPagesDisplay}`;
+  const displayValue = hasPages
+    ? (isFocused ? draft : `${pageNumberDisplay} / ${totalPagesDisplay}`)
+    : '0 / 0';
   const navigationTargetClass = navigationTarget === 'compare'
     ? 'navigation-target-compare'
     : 'navigation-target-primary';
@@ -220,9 +229,11 @@ const PageNavigationButtons = ({
     target: targetDescription,
     defaultValue: `${scopeDescription} for ${targetDescription}.`,
   }), [scopeDescription, t, targetDescription]);
-  const loadingAnnouncement = isDocumentLoading
-    ? t('toolbar.navigation.loadingAnnounce', { defaultValue: 'Page navigation is still loading.' })
-    : t('toolbar.navigation.readyAnnounce', { defaultValue: 'Page navigation is ready.' });
+  const loadingAnnouncement = !hasPages
+    ? t('toolbar.navigation.noPagesAnnounce', { defaultValue: 'No visible pages are currently available.' })
+    : (isDocumentLoading
+      ? t('toolbar.navigation.loadingAnnounce', { defaultValue: 'Page navigation is still loading.' })
+      : t('toolbar.navigation.readyAnnounce', { defaultValue: 'Page navigation is ready.' }));
 
   return (
     <div
@@ -270,10 +281,11 @@ const PageNavigationButtons = ({
         type="text"
         inputMode="numeric"
         value={displayValue}
+        disabled={!hasPages}
         onFocus={(event) => {
           setIsFocused(true);
-          setDraft(String(pageNumberDisplay));
-          event.currentTarget.setSelectionRange(0, String(pageNumberDisplay).length);
+          setDraft(hasPages ? String(pageNumberDisplay) : '0');
+          event.currentTarget.setSelectionRange(0, String(hasPages ? pageNumberDisplay : 0).length);
         }}
         onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ''))}
         onBlur={() => { applyDraft(); setIsFocused(false); }}
@@ -291,10 +303,12 @@ const PageNavigationButtons = ({
         }}
         aria-label={pageTitle}
         role="spinbutton"
-        aria-valuemin={1}
-        aria-valuemax={Math.max(1, totalPagesDisplay || 1)}
-        aria-valuenow={pageNumberDisplay}
-        aria-valuetext={`${t('toolbar.page')} ${pageNumberDisplay} / ${totalPagesDisplay}`}
+        aria-valuemin={hasPages ? 1 : 0}
+        aria-valuemax={Math.max(0, totalPagesDisplay || 0)}
+        aria-valuenow={hasPages ? pageNumberDisplay : 0}
+        aria-valuetext={hasPages
+          ? `${t('toolbar.page')} ${pageNumberDisplay} / ${totalPagesDisplay}`
+          : t('toolbar.navigation.noPagesTitle', { defaultValue: 'No visible pages available' })}
         aria-busy={isDocumentLoading}
         aria-describedby={`${descriptionId} ${statusId}`}
         title={groupTitle}

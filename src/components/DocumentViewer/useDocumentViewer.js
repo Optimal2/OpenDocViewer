@@ -118,13 +118,13 @@ function findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex) {
 
 /**
  * @param {Array<any>} pages
- * @returns {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number, label:string }> }>}
+ * @returns {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number }> }>}
  */
 function buildDocumentSelectionModel(pages) {
   const sourcePages = Array.isArray(pages) ? pages : [];
   if (sourcePages.length <= 0) return [];
 
-  /** @type {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number, label:string }> }>}
+  /** @type {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number }> }>}
    */
   const documents = [];
 
@@ -162,7 +162,6 @@ function buildDocumentSelectionModel(pages) {
       originalIndex,
       originalPageNumber: originalIndex + 1,
       documentPageNumber,
-      label: `S ${documentPageNumber} · T ${originalIndex + 1}`,
     });
   }
 
@@ -245,7 +244,7 @@ function buildVisibleDocumentNavigationModel(pages, visibleOriginalIndexes) {
   };
 }
 
-const THUMBNAIL_WIDTH_MIN = 160;
+const THUMBNAIL_WIDTH_MIN = 196;
 const THUMBNAIL_WIDTH_MAX = 520;
 const THUMBNAIL_WIDTH_STEP = 48;
 const THUMBNAIL_WIDTH_DEFAULT = 220;
@@ -606,10 +605,9 @@ export function useDocumentViewer() {
 
   const saveDraftSelection = useCallback(() => {
     const nextMask = normalizeSelectionMask(normalizedDraftSelectionMask, totalSessionPages);
-    const includedCount = nextMask.reduce((count, included) => count + (included === false ? 0 : 1), 0);
-    if (includedCount <= 0) return;
     if (masksEqual(nextMask, normalizedAppliedSelectionMask, totalSessionPages)) return;
     setAppliedSelectionMask(nextMask);
+    setDraftSelectionMask(nextMask);
     setThumbnailPaneMode('thumbnails');
   }, [normalizedAppliedSelectionMask, normalizedDraftSelectionMask, totalSessionPages]);
 
@@ -640,9 +638,6 @@ export function useDocumentViewer() {
     const base = normalizeSelectionMask(normalizedAppliedSelectionMask, totalSessionPages);
     if (base[safeOriginalIndex] === false) return false;
 
-    const includedCount = base.reduce((count, included) => count + (included === false ? 0 : 1), 0);
-    if (includedCount <= 1) return false;
-
     const nextMask = base.slice();
     nextMask[safeOriginalIndex] = false;
 
@@ -651,6 +646,45 @@ export function useDocumentViewer() {
     setThumbnailPaneMode('thumbnails');
     return true;
   }, [normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
+
+  /**
+   * Immediately exclude every page that belongs to the same document as the provided original page
+   * index. Used by the thumbnail context menu. This may intentionally result in an empty active
+   * selection so the viewer can present an explicit "no pages in selection" state.
+   *
+   * @param {number} originalIndex
+   * @returns {boolean}
+   */
+  const hideDocumentFromSelection = useCallback((originalIndex) => {
+    if (!selectionPanelEnabled) return false;
+
+    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+    if (safeOriginalIndex < 0 || safeOriginalIndex >= totalSessionPages) return false;
+
+    const sourcePage = allPages[safeOriginalIndex] || null;
+    const documentId = String(sourcePage?.documentId || '').trim();
+    const documentNumber = Math.max(1, Number(sourcePage?.documentNumber) || 1);
+    const base = normalizeSelectionMask(normalizedAppliedSelectionMask, totalSessionPages);
+    const nextMask = base.slice();
+    let changed = false;
+
+    for (let index = 0; index < totalSessionPages; index += 1) {
+      const page = allPages[index] || null;
+      const sameDocument = documentId
+        ? String(page?.documentId || '').trim() === documentId
+        : Math.max(1, Number(page?.documentNumber) || 1) === documentNumber;
+      if (!sameDocument || nextMask[index] === false) continue;
+      nextMask[index] = false;
+      changed = true;
+    }
+
+    if (!changed) return false;
+
+    setAppliedSelectionMask(nextMask);
+    setDraftSelectionMask(nextMask);
+    setThumbnailPaneMode('thumbnails');
+    return true;
+  }, [allPages, normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
 
   // --- Page navigation -----------------------------------------------------------
   /**
@@ -1141,8 +1175,8 @@ export function useDocumentViewer() {
   // --- Public API ---------------------------------------------------------------
   return {
     // viewer/render page numbers
-    pageNumber: currentVisiblePageNumber,
-    pageNumberDisplay: currentOriginalPageNumber,
+    pageNumber: totalPages > 0 ? currentVisiblePageNumber : 0,
+    pageNumberDisplay: totalPages > 0 ? currentOriginalPageNumber : 0,
     renderPageNumber: currentOriginalPageNumber,
     setPageNumber: handlePageNumberChange,
     setVisiblePageNumber: handleVisiblePageNumberChange,
@@ -1150,7 +1184,7 @@ export function useDocumentViewer() {
     // compare page numbers
     setComparePageNumber,
     setVisibleComparePageNumber,
-    comparePageNumber: compareVisiblePageNumber,
+    comparePageNumber: totalPages > 0 ? compareVisiblePageNumber : null,
     renderComparePageNumber: compareOriginalPageNumber,
 
     thumbnailSelectionPageNumber,
@@ -1231,6 +1265,7 @@ export function useDocumentViewer() {
     cancelDraftSelection,
     clearSelectionFilter,
     hidePageFromSelection,
+    hideDocumentFromSelection,
 
     // per-pane post-zoom
     postZoomLeft,

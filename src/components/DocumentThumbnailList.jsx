@@ -82,12 +82,12 @@ function shouldWarmAllThumbnails(renderConfig, totalCount) {
 function getThumbnailLayout(renderConfig, paneWidth, documentGroupingActive) {
   const configuredMaxWidth = Math.max(80, Number(renderConfig?.thumbnailMaxWidth) || 220);
   const configuredMaxHeight = Math.max(96, Number(renderConfig?.thumbnailMaxHeight) || 310);
-  const safePaneWidth = Math.max(160, Number(paneWidth) || 0);
-  const stageWidth = Math.max(88, safePaneWidth - 28);
+  const safePaneWidth = Math.max(196, Number(paneWidth) || 0);
+  const stageWidth = Math.max(96, safePaneWidth - 18);
   const usableWidth = Math.min(stageWidth, Math.max(configuredMaxWidth, Math.round(stageWidth * 0.96)));
   const imageAspectRatio = configuredMaxHeight / Math.max(1, configuredMaxWidth);
   const imageStageHeight = Math.max(120, Math.round(usableWidth * imageAspectRatio));
-  const rowHeight = imageStageHeight + (documentGroupingActive ? 96 : 56);
+  const rowHeight = imageStageHeight + (documentGroupingActive ? 58 : 34);
 
   return {
     rowHeight,
@@ -104,6 +104,14 @@ function formatMetricFraction(current, total) {
   const safeCurrent = Math.max(0, Number(current) || 0);
   const safeTotal = Math.max(0, Number(total) || 0);
   return safeTotal > 0 ? `${safeCurrent}/${safeTotal}` : `${safeCurrent}/–`;
+}
+
+/**
+ * @param {number} value
+ * @returns {string}
+ */
+function formatMetricValue(value) {
+  return String(Math.max(0, Number(value) || 0));
 }
 
 /**
@@ -234,34 +242,52 @@ function getMetricTitles(t, pageNumber, totalPages, documentContext) {
  * @returns {Array<Object>}
  */
 function getMetricBadges(t, pageNumber, totalPages, documentContext) {
-  if (!documentContext.hasMultipleDocuments) return [];
+  const totalTitle = t('thumbnails.metrics.totalPageTitle', {
+    page: pageNumber,
+    total: totalPages,
+    defaultValue: `Page ${pageNumber} of ${totalPages}`,
+  });
+  const badges = [
+    {
+      key: 'total-page',
+      prefix: t('thumbnails.metrics.totalPagePrefix', { defaultValue: 'T' }),
+      value: formatMetricValue(pageNumber),
+      title: `${t('thumbnails.metrics.totalPageBadgeTitle', {
+        defaultValue: 'Total page number in the current selection',
+      })} — ${totalTitle}`,
+      position: 'top-left',
+    },
+  ];
 
-  return [
+  if (!documentContext.hasMultipleDocuments) return badges;
+
+  const documentFraction = formatMetricFraction(documentContext.documentNumber, documentContext.totalDocuments);
+  const documentPageFraction = documentContext.documentPageCount > 0
+    ? formatMetricFraction(documentContext.documentPageNumber, documentContext.documentPageCount)
+    : formatMetricValue(documentContext.documentPageNumber);
+
+  badges.push(
     {
       key: 'document',
       prefix: t('thumbnails.metrics.documentPrefix', { defaultValue: 'D' }),
-      value: formatMetricFraction(documentContext.documentNumber, documentContext.totalDocuments),
-      title: t('thumbnails.metrics.documentBadgeTitle', {
+      value: formatMetricValue(documentContext.documentNumber),
+      title: `${t('thumbnails.metrics.documentBadgeTitle', {
         defaultValue: 'Document number in current session',
-      }),
+      })} — ${documentFraction}`,
+      position: 'bottom-left',
     },
     {
       key: 'document-page',
       prefix: t('thumbnails.metrics.documentPagePrefix', { defaultValue: 'S' }),
-      value: formatMetricFraction(documentContext.documentPageNumber, documentContext.documentPageCount),
-      title: t('thumbnails.metrics.documentPageBadgeTitle', {
+      value: formatMetricValue(documentContext.documentPageNumber),
+      title: `${t('thumbnails.metrics.documentPageBadgeTitle', {
         defaultValue: 'Page number within the current document',
-      }),
-    },
-    {
-      key: 'total-page',
-      prefix: t('thumbnails.metrics.totalPagePrefix', { defaultValue: 'T' }),
-      value: formatMetricFraction(pageNumber, totalPages),
-      title: t('thumbnails.metrics.totalPageBadgeTitle', {
-        defaultValue: 'Total page number in current session',
-      }),
-    },
-  ];
+      })} — ${documentPageFraction}`,
+      position: 'bottom-right',
+    }
+  );
+
+  return badges;
 }
 
 /**
@@ -398,53 +424,42 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         aria-label={rowTitle}
         aria-selected={isPrimarySelected}
       >
-        <div className="thumbnail-number-bar">
-          <div className="thumbnail-metric-cluster" aria-hidden="true">
-            {documentContext.hasMultipleDocuments ? (
-              metricBadges.map((metric) => (
-                <span
-                  key={metric.key}
-                  className={`thumbnail-metric-badge metric-${metric.key}`}
-                  title={metric.title}
-                >
-                  <span className="thumbnail-metric-prefix">{metric.prefix}</span>
-                  <span className="thumbnail-metric-separator">:</span>
-                  <span className="thumbnail-metric-value">{metric.value}</span>
-                </span>
-              ))
-            ) : null}
-            {!documentContext.hasMultipleDocuments ? (
-              <span className="thumbnail-number" title={metricTitles.totalPageTitle}>
-                {visiblePageNumber}
-              </span>
-            ) : null}
-          </div>
-          {isCompareMode && (isPrimarySelected || isCompareSelected) && (
-            <div className="thumbnail-selection-badges" aria-hidden="true">
-              {isPrimarySelected && (
+        <div
+          className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
+          style={{ height: `${imageStageHeight}px` }}
+        >
+          {metricBadges.map((metric) => (
+            <span
+              key={metric.key}
+              className={`thumbnail-overlay-badge metric-${metric.key} position-${metric.position}`}
+              title={metric.title}
+            >
+              <span className="thumbnail-overlay-badge-prefix">{metric.prefix}</span>
+              <span className="thumbnail-overlay-badge-value">{metric.value}</span>
+            </span>
+          ))}
+
+          {isCompareMode && (isPrimarySelected || isCompareSelected) ? (
+            <div className="thumbnail-selection-badges overlay-corner" aria-hidden="true">
+              {isPrimarySelected ? (
                 <span
                   className="thumbnail-selection-badge primary"
                   title={t('thumbnails.leftPaneBadgeTooltip', { defaultValue: 'Left pane in compare view' })}
                 >
                   {t('thumbnails.leftPaneBadgeShort', { defaultValue: 'L' })}
                 </span>
-              )}
-              {isCompareSelected && (
+              ) : null}
+              {isCompareSelected ? (
                 <span
                   className="thumbnail-selection-badge compare"
                   title={t('thumbnails.rightPaneBadgeTooltip', { defaultValue: 'Right pane in compare view' })}
                 >
                   {t('thumbnails.rightPaneBadgeShort', { defaultValue: 'R' })}
                 </span>
-              )}
+              ) : null}
             </div>
-          )}
-        </div>
+          ) : null}
 
-        <div
-          className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
-          style={{ height: `${imageStageHeight}px` }}
-        >
           {thumbnailStatus === 0 && <LoadingSpinner />}
           {thumbnailStatus === -1 && (
             <img
@@ -484,6 +499,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
+ * @param {function(number): boolean} [props.onHideDocumentFromSelection]
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -497,6 +513,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   comparePageNumber = null,
   selectionPanelEnabled = false,
   onHidePageFromSelection,
+  onHideDocumentFromSelection,
 }) {
   const { t } = useTranslation('common');
   const {
@@ -520,7 +537,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerWidth, setContainerWidth] = useState(Math.max(160, Number(width) || 0));
-  const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number })} */ (null));
+  const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number })} */ (null));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
   const documentGroupingActive = useMemo(
@@ -993,24 +1010,33 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleOpenContextMenu = useCallback((event, originalPageNumber, page) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
-    if (!selectionPanelEnabled || typeof onHidePageFromSelection !== 'function') {
+    if (!selectionPanelEnabled || (typeof onHidePageFromSelection !== 'function' && typeof onHideDocumentFromSelection !== 'function')) {
       closeContextMenu();
       return;
     }
 
     const originalIndex = getSessionPageIndex(page, Math.max(0, Number(originalPageNumber) - 1));
+    const documentContext = getPageDocumentContext(page);
     setContextMenuState({
       x: Math.max(8, Number(event?.clientX) || 0),
       y: Math.max(8, Number(event?.clientY) || 0),
       originalIndex,
+      documentNumber: documentContext.documentNumber,
+      totalDocuments: documentContext.totalDocuments,
     });
-  }, [closeContextMenu, onHidePageFromSelection, selectionPanelEnabled]);
+  }, [closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, selectionPanelEnabled]);
 
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
     onHidePageFromSelection(contextMenuState.originalIndex);
     closeContextMenu();
   }, [closeContextMenu, contextMenuState, onHidePageFromSelection]);
+
+  const handleHideDocumentFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onHideDocumentFromSelection !== 'function') return;
+    onHideDocumentFromSelection(contextMenuState.originalIndex);
+    closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onHideDocumentFromSelection]);
 
   /**
    * @param {number} sessionIndex
@@ -1046,14 +1072,15 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     );
   }
 
-  const canHideFromSelection = !!selectionPanelEnabled
-    && typeof onHidePageFromSelection === 'function'
-    && totalCount > 1;
+  const canHidePageFromSelection = !!selectionPanelEnabled
+    && typeof onHidePageFromSelection === 'function';
+  const canHideDocumentFromSelection = !!selectionPanelEnabled
+    && typeof onHideDocumentFromSelection === 'function';
   const contextMenuLeft = contextMenuState
-    ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 220) - 228)))
+    ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 240) - 248)))
     : 0;
   const contextMenuTop = contextMenuState
-    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 96) - 84)))
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 132) - 140)))
     : 0;
 
   return (
@@ -1111,20 +1138,45 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
             type="button"
             className="odv-context-menu-item"
             role="menuitem"
-            disabled={!canHideFromSelection}
+            disabled={!canHidePageFromSelection}
             onClick={handleHidePageFromContextMenu}
-            title={canHideFromSelection
+            title={canHidePageFromSelection
               ? t('thumbnails.contextMenu.hidePageFromSelection', {
                   defaultValue: 'Hide this page from the current selection',
                 })
-              : t('thumbnails.contextMenu.hidePageUnavailable', {
-                  defaultValue: 'At least one visible page must remain selected.',
+              : t('thumbnails.contextMenu.hideUnavailable', {
+                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
                 })}
           >
             <span className="material-icons" aria-hidden="true">remove_circle_outline</span>
             <span>
               {t('thumbnails.contextMenu.hidePageFromSelectionLabel', {
                 defaultValue: 'Hide this page',
+              })}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="odv-context-menu-item"
+            role="menuitem"
+            disabled={!canHideDocumentFromSelection}
+            onClick={handleHideDocumentFromContextMenu}
+            title={canHideDocumentFromSelection
+              ? t('thumbnails.contextMenu.hideDocumentFromSelection', {
+                  document: contextMenuState.documentNumber || 1,
+                  total: contextMenuState.totalDocuments || 1,
+                  defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1} from the current selection`,
+                })
+              : t('thumbnails.contextMenu.hideUnavailable', {
+                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
+                })}
+          >
+            <span className="material-icons" aria-hidden="true">folder_off</span>
+            <span>
+              {t('thumbnails.contextMenu.hideDocumentFromSelectionLabel', {
+                document: contextMenuState.documentNumber || 1,
+                total: contextMenuState.totalDocuments || 1,
+                defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`,
               })}
             </span>
           </button>
@@ -1165,6 +1217,7 @@ DocumentThumbnailList.propTypes = {
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,
+  onHideDocumentFromSelection: PropTypes.func,
 };
 
 export default DocumentThumbnailList;
