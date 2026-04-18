@@ -1084,6 +1084,14 @@ export function useDocumentViewer() {
     getImagePropertiesSetter(updateTarget)({ ...DEFAULT_IMAGE_PROPERTIES });
   }, [getImagePropertiesSetter]);
 
+  const rotateLeftPage = useCallback((target = 'primary') => {
+    handleRotationChange(-90, target);
+  }, [handleRotationChange]);
+
+  const rotateRightPage = useCallback((target = 'primary') => {
+    handleRotationChange(90, target);
+  }, [handleRotationChange]);
+
   // --- Thumbnail resizer ---------------------------------------------------------
   /**
    * Mouse down handler for the thumbnail resizer; listens for mousemove/up on window.
@@ -1191,6 +1199,8 @@ export function useDocumentViewer() {
     fitToScreen,
     fitToWidth,
     handleCompare,
+    rotateLeft: rotateLeftPage,
+    rotateRight: rotateRightPage,
     onOpenPrintDialog: openPrintDialog,
     keyboardPrintShortcutBehavior,
   });

@@ -58,6 +58,8 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} fitToScreen
  * @property {Function} fitToWidth
  * @property {Function} handleCompare
+ * @property {Function} rotateLeft
+ * @property {Function} rotateRight
  * @property {Function=} onOpenPrintDialog
  * @property {KeyboardPrintShortcutBehavior=} keyboardPrintShortcutBehavior
  */
@@ -137,6 +139,8 @@ export function useViewerEffects(args) {
     fitToScreen,
     fitToWidth,
     handleCompare,
+    rotateLeft,
+    rotateRight,
     onOpenPrintDialog,
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
@@ -160,6 +164,8 @@ export function useViewerEffects(args) {
   const fitToScreenRef = useRef(fitToScreen);
   const fitToWidthRef = useRef(fitToWidth);
   const handleCompareRef = useRef(handleCompare);
+  const rotateLeftRef = useRef(rotateLeft);
+  const rotateRightRef = useRef(rotateRight);
   const onOpenPrintDialogRef = useRef(onOpenPrintDialog);
 
   goToPreviousPageRef.current = goToPreviousPage;
@@ -178,6 +184,8 @@ export function useViewerEffects(args) {
   fitToScreenRef.current = fitToScreen;
   fitToWidthRef.current = fitToWidth;
   handleCompareRef.current = handleCompare;
+  rotateLeftRef.current = rotateLeft;
+  rotateRightRef.current = rotateRight;
   onOpenPrintDialogRef.current = onOpenPrintDialog;
 
   const handleKeyboardPreviousRepeatStep = useCallback(() => {
@@ -344,13 +352,13 @@ export function useViewerEffects(args) {
      * @param {KeyboardEvent} e
      * @returns {boolean}
      */
-    const isNextRepeatKey = (e) => e.key === 'PageDown' || e.key === 'ArrowDown';
+    const isNextRepeatKey = (e) => e.key === 'ArrowDown';
 
     /**
      * @param {KeyboardEvent} e
      * @returns {boolean}
      */
-    const isPreviousRepeatKey = (e) => e.key === 'PageUp' || e.key === 'ArrowUp';
+    const isPreviousRepeatKey = (e) => e.key === 'ArrowUp';
 
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
@@ -400,6 +408,21 @@ export function useViewerEffects(args) {
           break;
         case 'Escape':
           stopKeyboardRepeat();
+          break;
+
+        case 'ArrowLeft':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            e.preventDefault();
+            stopKeyboardRepeat();
+            rotateLeftRef.current?.(target);
+          }
+          break;
+        case 'ArrowRight':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            e.preventDefault();
+            stopKeyboardRepeat();
+            rotateRightRef.current?.(target);
+          }
           break;
 
         case '+':

@@ -10,7 +10,8 @@
   background-color: var(--toolbar-background-color);
   box-shadow: var(--box-shadow);
   border-radius: 8px;
-  padding: 4px 10px;
+  box-sizing: border-box;
+  padding: 4px 24px 4px 10px;
   flex-shrink: 0;
 }
 .toolbar > * { margin: 0 0.06rem; }
@@ -168,6 +169,18 @@
 .toolbar-spacer {
   flex: 1 1 auto;
   min-width: 0;
+}
+
+.toolbar-end-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  margin-right: 14px;
+  flex-shrink: 0;
+}
+
+.toolbar-end-actions .toolbar-menu-shell {
+  margin: 0;
 }
 
 .toolbar-inline-hint {

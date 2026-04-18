@@ -99,7 +99,8 @@
     },
     "custom": {
       "placeholder": "e.g. 7 6 5 4 2   or   1-3, 2, 2, 5-2",
-      "hint": "Separate with spaces or commas. Ranges can be ascending or descending."
+      "hint": "Separate with spaces or commas. Ranges can be ascending or descending.",
+      "label": "Pages"
     },
     "userSection": {
       "header": "Print details"
@@ -120,7 +121,8 @@
     },
     "footer": {
       "cancel": "Cancel",
-      "continue": "Start printing"
+      "continue": "Start printing",
+      "prepare": "Prepare printing"
     },
     "errors": {
       "selectValidPages": "Select valid pages.",
@@ -148,7 +150,11 @@
     "aria": {
       "basicGroup": "Basic choices",
       "advancedGroup": "Advanced choices",
-      "userLogGroup": "User log"
+      "userLogGroup": "Print details",
+      "activeGroup": "Active page options",
+      "allGroup": "All pages options",
+      "rangeGroup": "Simple range options",
+      "customGroup": "Custom pages options"
     },
     "loadingHint": "More print options become available when all pages have finished loading. For now, only the active page can be printed.",
     "allScope": {
@@ -164,7 +170,29 @@
       "hint": "When compare mode is active, current-page printing can include only the left page or both pages shown side by side."
     },
     "subtitle": "Choose what to print and how this print job should be described. Current mode: {mode}.",
-    "close": "Close"
+    "close": "Close",
+    "subtitleUnified": "Choose a print method and review the print details before the browser prepares the preview.",
+    "methodHeader": "Print method",
+    "methodLabel": "Method",
+    "modes": {
+      "active": "Active page",
+      "all": "All pages",
+      "range": "Simple range",
+      "custom": "Custom pages"
+    },
+    "summaryActiveOnly": "Only the active page ({page}) is currently available for printing.",
+    "summaryCompareBoth": "Prepare both compare pages currently shown for page {page}.",
+    "summaryActive": "Prepare the active page ({page}).",
+    "summaryAll": "Prepare {count} pages.",
+    "summaryRange": "Prepare pages {from}–{to}.",
+    "summaryCustom": "Prepare the pages listed under Custom pages.",
+    "activePageValue": "Active page: {page}",
+    "allPagesValue": "All {count} session pages will be prepared.",
+    "preparing": {
+      "title": "Preparing print job",
+      "body": "A print request for {count} pages has been sent to the browser. It can take a moment before the browser print preview opens.",
+      "dismiss": "Close"
+    }
   },
   "print": {
     "alt": {
@@ -295,7 +323,10 @@
       "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Save selection",
       "cancel": "Cancel",
-      "clearFilter": "Clear the selection filter and show all pages"
+      "clearFilter": "Clear the selection filter and show all pages",
+      "documentLabelShort": "Document {current}",
+      "expandDocument": "Show pages in document {current}",
+      "collapseDocument": "Hide pages in document {current}"
     },
     "contextMenu": {
       "hidePageFromSelection": "Hide this page from the current selection",
@@ -381,7 +412,7 @@
     "sections": {
       "navigation": {
         "title": "Navigation",
-        "intro": "Use the toolbar, Page Up/Page Down, Arrow Up/Arrow Down, Home, and End to move through the material.",
+        "intro": "Use the toolbar, Arrow Up/Arrow Down, Home, and End to move through the material.",
         "pageMode": "Normal navigation moves one page at a time.",
         "shiftMode": "Hold Shift in compare mode to steer the right pane instead of the left/main pane.",
         "ctrlMode": "Hold Ctrl when more than one document is loaded to move document by document instead of page by page.",
@@ -400,18 +431,20 @@
       "selection": {
         "title": "Selection",
         "body": "The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel restores the last saved selection.",
-        "empty": "If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab."
+        "empty": "If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.",
+        "collapse": "Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage."
       },
       "adjustments": {
         "title": "Image adjustments",
         "body": "Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
         "primary": "Without Shift, adjustments target the left/primary page.",
         "compare": "With Shift in compare mode, adjustments target the right page.",
-        "reset": "Adjustments reset when you move to another page."
+        "reset": "Adjustments reset when you move to another page.",
+        "shortcut": "Use Arrow Left and Arrow Right to rotate the active pane. Hold Shift in compare mode to rotate the right pane instead."
       },
       "printing": {
         "title": "Printing",
-        "body": "Open the print dialog from the toolbar. In basic mode you can print the active page or all pages. When compare mode is active, current-page printing can include only the main page or both compare pages.",
+        "body": "Open the print dialog from the toolbar. Choose a print method from the list, then review the print details before the browser prepares the preview.",
         "selection": "If a saved selection hides pages, “All pages” can use either the current selection or the full session."
       },
       "shortcuts": {

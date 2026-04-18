@@ -99,7 +99,8 @@
     },
     "custom": {
       "placeholder": "t.ex. 7 6 5 4 2   eller   1-3, 2, 2, 5-2",
-      "hint": "Separera med mellanslag eller kommatecken. Intervall kan vara stigande eller fallande."
+      "hint": "Separera med mellanslag eller kommatecken. Intervall kan vara stigande eller fallande.",
+      "label": "Sidor"
     },
     "userSection": {
       "header": "Utskriftsuppgifter"
@@ -120,7 +121,8 @@
     },
     "footer": {
       "cancel": "Avbryt",
-      "continue": "Starta utskrift"
+      "continue": "Starta utskrift",
+      "prepare": "Förbered utskrift"
     },
     "errors": {
       "selectValidPages": "Välj giltiga sidor.",
@@ -148,7 +150,11 @@
     "aria": {
       "basicGroup": "Enkla val",
       "advancedGroup": "Avancerade val",
-      "userLogGroup": "Användarlogg"
+      "userLogGroup": "Utskriftsuppgifter",
+      "activeGroup": "Val för aktiv sida",
+      "allGroup": "Val för alla sidor",
+      "rangeGroup": "Val för enkelt intervall",
+      "customGroup": "Val för anpassade sidor"
     },
     "loadingHint": "Fler utskriftsval blir tillgängliga när alla sidor är färdigladdade. Just nu kan bara aktuell sida skrivas ut.",
     "allScope": {
@@ -164,7 +170,29 @@
       "hint": "När jämförelse är aktiv kan aktuell utskrift avse bara vänstersidan eller båda sidorna som visas."
     },
     "subtitle": "Välj vad som ska skrivas ut och hur utskriften ska beskrivas. Läget just nu: {mode}.",
-    "close": "Stäng"
+    "close": "Stäng",
+    "subtitleUnified": "Välj utskriftsmetod och granska utskriftsuppgifterna innan webbläsaren förbereder förhandsgranskningen.",
+    "methodHeader": "Utskriftsmetod",
+    "methodLabel": "Metod",
+    "modes": {
+      "active": "Aktiv sida",
+      "all": "Alla sidor",
+      "range": "Enkelt intervall",
+      "custom": "Anpassade sidor"
+    },
+    "summaryActiveOnly": "Endast den aktiva sidan ({page}) kan skrivas ut just nu.",
+    "summaryCompareBoth": "Förbered båda jämförelsesidorna som visas för sida {page}.",
+    "summaryActive": "Förbered den aktiva sidan ({page}).",
+    "summaryAll": "Förbered {count} sidor.",
+    "summaryRange": "Förbered sidorna {from}–{to}.",
+    "summaryCustom": "Förbered sidorna som anges under Anpassade sidor.",
+    "activePageValue": "Aktiv sida: {page}",
+    "allPagesValue": "Alla {count} sidor i sessionen kommer att förberedas.",
+    "preparing": {
+      "title": "Förbereder utskrift",
+      "body": "En utskriftsbegäran för {count} sidor har skickats till webbläsaren. Det kan ta en stund innan webbläsarens utskriftsförhandsgranskning öppnas.",
+      "dismiss": "Stäng"
+    }
   },
   "print": {
     "alt": {
@@ -295,7 +323,10 @@
       "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Spara urval",
       "cancel": "Avbryt",
-      "clearFilter": "Ta bort urval/filtrering och visa alla sidor"
+      "clearFilter": "Ta bort urval/filtrering och visa alla sidor",
+      "documentLabelShort": "Dokument {current}",
+      "expandDocument": "Visa sidor i dokument {current}",
+      "collapseDocument": "Dölj sidor i dokument {current}"
     },
     "contextMenu": {
       "hidePageFromSelection": "Dölj denna sida från aktuellt urval",
@@ -381,7 +412,7 @@
     "sections": {
       "navigation": {
         "title": "Navigering",
-        "intro": "Använd verktygsfältet, Page Up/Page Down, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
+        "intro": "Använd verktygsfältet, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
         "pageMode": "Vanlig navigering flyttar en sida i taget.",
         "shiftMode": "Håll nere Shift i jämförelsevy för att styra högra sidan i stället för vänster/huvudsidan.",
         "ctrlMode": "Håll nere Ctrl när fler än ett dokument är öppnat för att flytta dokument för dokument i stället för sida för sida.",
@@ -400,18 +431,20 @@
       "selection": {
         "title": "Urval",
         "body": "Fliken Urval låter dig inkludera eller exkludera hela dokument eller enskilda sidor. Spara verkställer urvalet. Avbryt återgår till senast sparade urval.",
-        "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen."
+        "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen.",
+        "collapse": "Varje dokument kan expanderas eller fällas ihop i fliken Urval så att stora sessioner blir lättare att hantera."
       },
       "adjustments": {
         "title": "Bildjusteringar",
         "body": "Rotation, ljus, kontrast och återställning finns alltid tillgängliga i verktygsfältet. Ljus och kontrast öppnas från sina ikoner. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
         "primary": "Utan Shift avser justeringarna vänster/huvudsidan.",
         "compare": "Med Shift i jämförelsevy avser justeringarna högersidan.",
-        "reset": "Justeringar återställs när du byter till en annan sida."
+        "reset": "Justeringar återställs när du byter till en annan sida.",
+        "shortcut": "Använd pil vänster och pil höger för att rotera aktiv sida. Håll nere Shift i jämförelsevy för att rotera den högra sidan i stället."
       },
       "printing": {
         "title": "Utskrift",
-        "body": "Öppna utskriftsdialogen från verktygsfältet. I enkelt läge kan du skriva ut aktuell sida eller alla sidor. När jämförelsevy är aktiv kan aktuell sida avse bara huvudsidan eller båda jämförelsesidorna.",
+        "body": "Öppna utskriftsdialogen från verktygsfältet. Välj en utskriftsmetod i listan och granska sedan utskriftsuppgifterna innan webbläsaren förbereder förhandsgranskningen.",
         "selection": "Om ett sparat urval döljer sidor kan “Alla sidor” avse antingen det aktuella urvalet eller hela sessionen."
       },
       "shortcuts": {

@@ -2,46 +2,25 @@
 /**
  * File: src/components/DocumentToolbar/PrintRangeDialog.jsx
  *
- * Print dialog with Basic/Advanced modes and optional user-log fields.
- *
- * Exposes a modal that lets users pick "active/all/range/custom" pages and,
- * when configured, collect reason/forWhom for logging and header overlays.
- *
- * @component
- * @param {Object} props
- * @param {boolean} props.isOpen - Whether the dialog is open.
- * @param {function():void} props.onClose - Called when the dialog should close.
- * @param {function(PrintSubmitDetail):void} props.onSubmit - Called with the chosen print details.
- * @param {number} props.totalPages - Total number of pages (validates range/custom).
- * @param {boolean=} props.isDocumentLoading - Restrict the dialog to active-page printing while sources still load.
- * @param {number=} props.activePageNumber - Current active page number.
- * @param {boolean=} props.isComparing - Whether compare mode is currently active.
- * @param {boolean=} props.hasActiveSelection - Whether the viewer currently hides at least one page.
- * @param {number=} props.selectionIncludedCount - Number of currently included pages when selection is active.
- * @param {number=} props.sessionTotalPages - Total pages in the underlying session before filtering.
- * @returns {(JSX.Element|null)}
+ * Unified print dialog with a single print-method selector and shared print-details section.
  */
 
-import React from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { usePrintRangeController } from './usePrintRangeDialog.js';
 
 /**
- * Allowed print modes (string-literal union for JSDoc).
- * @typedef {("active"|"all"|"range"|"advanced")} PrintMode
- */
-
-/**
  * Structured payload returned to the caller on submit.
  * @typedef {Object} PrintSubmitDetail
- * @property {PrintMode} mode
- * @property {number} [from] - Start page for "range" mode.
- * @property {number} [to] - End page for "range" mode.
- * @property {Array.<number>} [sequence] - Explicit page order for "advanced" mode.
- * @property {'selection'|'session'} [allScope] - Scope for "all pages" in basic mode when a filtered selection exists.
- * @property {string|null} [reason] - Optional print reason (may be composed from option + extra text).
- * @property {string|null} [forWhom] - Optional "for whom" value.
+ * @property {('active'|'all'|'range'|'advanced')} mode
+ * @property {number} [from]
+ * @property {number} [to]
+ * @property {Array.<number>} [sequence]
+ * @property {'selection'|'session'} [allScope]
+ * @property {'primary'|'compare-both'} [activeScope]
+ * @property {string|null} [reason]
+ * @property {string|null} [forWhom]
  */
 
 export default function PrintRangeDialog({
@@ -58,7 +37,6 @@ export default function PrintRangeDialog({
 }) {
   const { t, i18n } = useTranslation('common');
 
-  // No CSS Module anymore; controller doesn't need styles
   const ctrl = usePrintRangeController({
     isOpen,
     onClose,
@@ -73,6 +51,70 @@ export default function PrintRangeDialog({
     t,
     i18n,
   });
+
+  const modeOptions = useMemo(() => ([
+    { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
+    { value: 'all', label: t('printDialog.modes.all', { defaultValue: 'All pages' }) },
+    { value: 'range', label: t('printDialog.modes.range', { defaultValue: 'Simple range' }) },
+    { value: 'custom', label: t('printDialog.modes.custom', { defaultValue: 'Custom pages' }) },
+  ]), [t]);
+
+  const summaryText = useMemo(() => {
+    if (ctrl.restrictToActivePage) {
+      return t('printDialog.summaryActiveOnly', {
+        page: activePageNumber,
+        defaultValue: `Only the active page (${activePageNumber}) is currently available for printing.`,
+      });
+    }
+
+    if (ctrl.printMode === 'active') {
+      if (ctrl.isComparing && ctrl.activeScope === 'compare-both') {
+        return t('printDialog.summaryCompareBoth', {
+          page: activePageNumber,
+          defaultValue: `Prepare both compare pages currently shown for page ${activePageNumber}.`,
+        });
+      }
+      return t('printDialog.summaryActive', {
+        page: activePageNumber,
+        defaultValue: `Prepare the active page (${activePageNumber}).`,
+      });
+    }
+
+    if (ctrl.printMode === 'all') {
+      const count = ctrl.canPrintSelectionScope && ctrl.allScope === 'selection'
+        ? ctrl.selectionIncludedCount
+        : ctrl.sessionTotalPages;
+      return t('printDialog.summaryAll', {
+        count,
+        defaultValue: `Prepare ${count} pages.`,
+      });
+    }
+
+    if (ctrl.printMode === 'range') {
+      return t('printDialog.summaryRange', {
+        from: ctrl.fromValue,
+        to: ctrl.toValue,
+        defaultValue: `Prepare pages ${ctrl.fromValue}–${ctrl.toValue}.`,
+      });
+    }
+
+    return t('printDialog.summaryCustom', {
+      defaultValue: 'Prepare the pages listed under Custom pages.',
+    });
+  }, [
+    activePageNumber,
+    ctrl.activeScope,
+    ctrl.allScope,
+    ctrl.canPrintSelectionScope,
+    ctrl.fromValue,
+    ctrl.isComparing,
+    ctrl.printMode,
+    ctrl.restrictToActivePage,
+    ctrl.selectionIncludedCount,
+    ctrl.sessionTotalPages,
+    ctrl.toValue,
+    t,
+  ]);
 
   if (!isOpen) return null;
 
@@ -95,13 +137,10 @@ export default function PrintRangeDialog({
       >
         <div className="odv-prd-header">
           <div className="odv-prd-headerText">
-            <h3 id="print-title" className="odv-prd-title">
-              {t('printDialog.title')}
-            </h3>
+            <h3 id="print-title" className="odv-prd-title">{t('printDialog.title')}</h3>
             <p className="odv-prd-subtitle">
-              {t('printDialog.subtitle', {
-                mode: ctrl.titleSuffix,
-                defaultValue: `Choose what to print and how the current print job should be described. (${ctrl.titleSuffix})`,
+              {t('printDialog.subtitleUnified', {
+                defaultValue: 'Choose a print method, then review the print details before preparing the job in your browser.',
               })}
             </p>
           </div>
@@ -117,310 +156,268 @@ export default function PrintRangeDialog({
         </div>
 
         <div className="odv-prd-content">
-          <div className="odv-prd-introCard">
-          <p className="odv-prd-desc">
-            {t('printDialog.desc', { active: t('printDialog.basic.active') })}
-          </p>
-
-          {ctrl.headerCfg?.enabled ? (
-            <div className="odv-prd-hint" role="note">
-              {t('printDialog.headerNote')}
-            </div>
-          ) : null}
-
-          {ctrl.restrictToActivePage ? (
-            <div className="odv-prd-hint" role="note">
-              {ctrl.loadingHint}
-            </div>
-          ) : ctrl.modeGroup === 'basic' ? (
-            <p className="odv-prd-modeSwitch">
-              <button
-                type="button"
-                className="odv-prd-linkBtn"
-                onClick={() => ctrl.setModeGroup('advanced')}
-                aria-label={ctrl.switchTo}
-              >
-                {ctrl.switchTo}
-              </button>
-            </p>
-          ) : (
-            <p className="odv-prd-modeSwitch">
-              <button
-                type="button"
-                className="odv-prd-linkBtn"
-                onClick={() => ctrl.setModeGroup('basic')}
-                aria-label={ctrl.switchBack}
-              >
-                {ctrl.switchBack}
-              </button>
-            </p>
-          )}
-        </div>
-
-        <section className="odv-prd-card" aria-labelledby="odv-prd-pages-header">
-          <h4 id="odv-prd-pages-header" className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
-
-          {ctrl.modeGroup === 'basic' && (
-          <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.basicGroup')}>
-            <div className="odv-prd-radioList">
-              <label className="odv-prd-radioRow">
-                <input
-                  type="radio"
-                  name="basicChoice"
-                  value="active"
-                  checked={ctrl.basicChoice === 'active'}
-                  onChange={() => ctrl.setBasicChoice('active')}
-                />
-                <span>{t('printDialog.basic.active')}</span>
+          <section className="odv-prd-card odv-prd-card-first" aria-labelledby="odv-prd-method-header">
+            <h4 id="odv-prd-method-header" className="odv-prd-sectionHeader">{t('printDialog.methodHeader', { defaultValue: 'Print method' })}</h4>
+            <div className="odv-prd-fieldCol">
+              <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
+                <span>{t('printDialog.methodLabel', { defaultValue: 'Method' })}</span>
+                <select
+                  className="odv-prd-select odv-prd-selectWide"
+                  value={ctrl.printMode}
+                  onChange={(event) => ctrl.setPrintMode(event.target.value)}
+                  disabled={ctrl.restrictToActivePage}
+                  aria-label={t('printDialog.methodLabel', { defaultValue: 'Method' })}
+                >
+                  {modeOptions.map((option) => (
+                    <option key={option.value} value={option.value}>{option.label}</option>
+                  ))}
+                </select>
               </label>
-              {!ctrl.restrictToActivePage && (
-                <label className="odv-prd-radioRow">
-                  <input
-                    type="radio"
-                    name="basicChoice"
-                    value="all"
-                    checked={ctrl.basicChoice === 'all'}
-                    onChange={() => ctrl.setBasicChoice('all')}
-                  />
-                  <span>{t('printDialog.basic.all')}</span>
-                </label>
-              )}
-            </div>
 
-            {ctrl.basicChoice === 'all' && ctrl.hasActiveSelection && !ctrl.restrictToActivePage && (
-              <div className="odv-prd-subField" role="group" aria-label={t('printDialog.allScope.label')}>
-                <div className="odv-prd-radioList odv-prd-subRadioList">
-                  <label className="odv-prd-radioRow">
-                    <input
-                      type="radio"
-                      name="allScope"
-                      value="selection"
-                      checked={ctrl.allScope === 'selection'}
-                      onChange={() => ctrl.setAllScope('selection')}
-                    />
-                    <span>{t('printDialog.allScope.selection', { count: ctrl.selectionIncludedCount })}</span>
-                  </label>
-                  <label className="odv-prd-radioRow">
-                    <input
-                      type="radio"
-                      name="allScope"
-                      value="session"
-                      checked={ctrl.allScope === 'session'}
-                      onChange={() => ctrl.setAllScope('session')}
-                    />
-                    <span>{t('printDialog.allScope.session', { count: ctrl.sessionTotalPages })}</span>
-                  </label>
+              <div className="odv-prd-summary" role="status" aria-live="polite">
+                {summaryText}
+              </div>
+
+              {ctrl.headerCfg?.enabled ? (
+                <div className="odv-prd-hint" role="note">
+                  {t('printDialog.headerNote')}
                 </div>
-                <span className="odv-prd-hint">{t('printDialog.allScope.hint')}</span>
-              </div>
-            )}
+              ) : null}
 
-            {ctrl.basicChoice === 'active' && ctrl.isComparing && !ctrl.restrictToActivePage && (
-              <div className="odv-prd-subField" role="group" aria-label={t('printDialog.activeScope.label')}>
-                <div className="odv-prd-radioList odv-prd-subRadioList">
-                  <label className="odv-prd-radioRow">
-                    <input
-                      type="radio"
-                      name="activeScope"
-                      value="primary"
-                      checked={ctrl.activeScope === 'primary'}
-                      onChange={() => ctrl.setActiveScope('primary')}
-                    />
-                    <span>{t('printDialog.activeScope.primary')}</span>
-                  </label>
-                  <label className="odv-prd-radioRow">
-                    <input
-                      type="radio"
-                      name="activeScope"
-                      value="compare-both"
-                      checked={ctrl.activeScope === 'compare-both'}
-                      onChange={() => ctrl.setActiveScope('compare-both')}
-                    />
-                    <span>{t('printDialog.activeScope.compareBoth')}</span>
-                  </label>
-                </div>
-                <span className="odv-prd-hint">{t('printDialog.activeScope.hint')}</span>
-              </div>
-            )}
-          </div>
-        )}
-
-          {ctrl.modeGroup === 'advanced' && (
-          <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.advancedGroup')}>
-            <div className="odv-prd-radioList">
-              <label className="odv-prd-radioRow">
-                <input
-                  type="radio"
-                  name="advancedChoice"
-                  value="range"
-                  checked={ctrl.advancedChoice === 'range'}
-                  onChange={() => ctrl.setAdvancedChoice('range')}
-                />
-                <span>{t('printDialog.advanced.range')}</span>
-              </label>
-              <label className="odv-prd-radioRow">
-                <input
-                  type="radio"
-                  name="advancedChoice"
-                  value="custom"
-                  checked={ctrl.advancedChoice === 'custom'}
-                  onChange={() => ctrl.setAdvancedChoice('custom')}
-                />
-                <span>{t('printDialog.advanced.custom')}</span>
-              </label>
+              {ctrl.restrictToActivePage ? (
+                <div className="odv-prd-hint" role="note">{ctrl.loadingHint}</div>
+              ) : null}
             </div>
+          </section>
 
-            {ctrl.advancedChoice === 'range' && (
-              <div className="odv-prd-rangeRow">
-                <label className="odv-prd-label">
-                  {t('printDialog.range.from')}
-                  <select
-                    value={ctrl.fromValue}
-                    onChange={(e) => ctrl.setFromValue(e.target.value)}
-                    className="odv-prd-select"
-                    aria-label={t('printDialog.range.from')}
-                  >
-                    {ctrl.pageOptions.map((v) => <option key={'from-' + v} value={v}>{v}</option>)}
-                  </select>
-                </label>
+          <section className="odv-prd-card" aria-labelledby="odv-prd-pages-header">
+            <h4 id="odv-prd-pages-header" className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
 
-                <label className="odv-prd-label">
-                  {t('printDialog.range.to')}
-                  <select
-                    value={ctrl.toValue}
-                    onChange={(e) => ctrl.setToValue(e.target.value)}
-                    className="odv-prd-select"
-                    aria-label={t('printDialog.range.to')}
-                  >
-                    {ctrl.pageOptions.map((v) => <option key={'to-' + v} value={v}>{v}</option>)}
-                  </select>
-                </label>
+            {ctrl.printMode === 'active' ? (
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.activeGroup', { defaultValue: 'Active page options' })}>
+                <div className="odv-prd-staticValue">
+                  {t('printDialog.activePageValue', {
+                    page: activePageNumber,
+                    defaultValue: `Current active page: ${activePageNumber}`,
+                  })}
+                </div>
 
-                <span className="odv-prd-hint">
-                  {t('printDialog.range.allowedHint', { total: totalPages })}
-                </span>
+                {ctrl.isComparing && !ctrl.restrictToActivePage ? (
+                  <div className="odv-prd-subField" role="group" aria-label={t('printDialog.activeScope.label')}>
+                    <div className="odv-prd-radioList odv-prd-subRadioList">
+                      <label className="odv-prd-radioRow">
+                        <input
+                          type="radio"
+                          name="activeScope"
+                          value="primary"
+                          checked={ctrl.activeScope === 'primary'}
+                          onChange={() => ctrl.setActiveScope('primary')}
+                        />
+                        <span>{t('printDialog.activeScope.primary')}</span>
+                      </label>
+                      <label className="odv-prd-radioRow">
+                        <input
+                          type="radio"
+                          name="activeScope"
+                          value="compare-both"
+                          checked={ctrl.activeScope === 'compare-both'}
+                          onChange={() => ctrl.setActiveScope('compare-both')}
+                        />
+                        <span>{t('printDialog.activeScope.compareBoth')}</span>
+                      </label>
+                    </div>
+                    <span className="odv-prd-hint">{t('printDialog.activeScope.hint')}</span>
+                  </div>
+                ) : null}
               </div>
-            )}
+            ) : null}
 
-            {ctrl.advancedChoice === 'custom' && (
-              <div className="odv-prd-advancedRow">
-                <label className="odv-prd-label" style={{ width: '100%' }}>
-                  <span className="odv-prd-visuallyHidden">{t('printDialog.advanced.custom')}</span>
-                  <input
-                    type="text"
-                    className="odv-prd-inputWide"
-                    placeholder={t('printDialog.custom.placeholder')}
-                    value={ctrl.customText}
-                    onChange={(e) => ctrl.setCustomText(e.target.value)}
-                    aria-label={t('printDialog.advanced.custom')}
-                    inputMode="numeric"
-                  />
-                </label>
-                <span className="odv-prd-hint">{t('printDialog.custom.hint')}</span>
-              </div>
-            )}
-          </div>
-          )}
-        </section>
-
-        {ctrl.showUserSection && (
-          <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
-            <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
-            <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
-              <div className="odv-prd-fieldCol">
-                {ctrl.showReason && (
-                  <label className="odv-prd-labelBlock">
-                    {t('printDialog.reason.label')} {ctrl.reasonCfg?.required ? <span aria-hidden="true">*</span> : null}
-                    {ctrl.hasOptions ? (
-                      <>
-                        <select
-                          className="odv-prd-select odv-prd-selectWide"
-                          value={ctrl.selectedReason}
-                          onChange={(e) => ctrl.setSelectedReason(e.target.value)}
-                          aria-label={t('printDialog.reason.label')}
-                        >
-                          {ctrl.reasonOptions.map(opt => (
-                            <option key={String(opt.value)} value={opt.value}>
-                              {ctrl.optionLabel(opt)}
-                            </option>
-                          ))}
-                        </select>
-
-                        {ctrl.needsExtra && (
-                          <div className="odv-prd-subField">
-                            <label className="odv-prd-visuallyHidden">{t('printDialog.reason.extra.placeholder')}</label>
-                            <input
-                              type="text"
-                              className="odv-prd-inputWide"
-                              placeholder={ctrl.extraPlaceholder || t('printDialog.reason.extra.placeholder')}
-                              maxLength={ctrl.extraMax || undefined}
-                              value={ctrl.extraText}
-                              onChange={(e) => ctrl.setExtraText(e.target.value)}
-                              aria-label={t('printDialog.reason.extra.placeholder')}
-                            />
-                          </div>
-                        )}
-                      </>
-                    ) : (
-                      <input
-                        type="text"
-                        className="odv-prd-inputWide"
-                        placeholder={ctrl.reasonPlaceholder || t('printDialog.reason.label')}
-                        maxLength={ctrl.reasonMax || undefined}
-                        value={ctrl.freeReason}
-                        onChange={(e) => ctrl.setFreeReason(e.target.value)}
-                        aria-label={t('printDialog.reason.label')}
-                      />
-                    )}
-                    <span className="odv-prd-hint">
-                      {ctrl.reasonCfg?.required
-                        ? t('printDialog.reason.requiredHint', { max: (ctrl.hasOptions && ctrl.needsExtra && ctrl.extraMax) ? ctrl.extraMax : ctrl.reasonMax, extra: ctrl.extraSuffix })
-                        : t('printDialog.reason.optionalHint', { max: (ctrl.hasOptions && ctrl.needsExtra && ctrl.extraMax) ? ctrl.extraMax : ctrl.reasonMax, extra: ctrl.extraSuffix })
-                      }
-                    </span>
-                  </label>
+            {ctrl.printMode === 'all' ? (
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.allGroup', { defaultValue: 'All pages options' })}>
+                {ctrl.canPrintSelectionScope ? (
+                  <div className="odv-prd-subField" role="group" aria-label={t('printDialog.allScope.label')}>
+                    <div className="odv-prd-radioList odv-prd-subRadioList">
+                      <label className="odv-prd-radioRow">
+                        <input
+                          type="radio"
+                          name="allScope"
+                          value="selection"
+                          checked={ctrl.allScope === 'selection'}
+                          onChange={() => ctrl.setAllScope('selection')}
+                        />
+                        <span>{t('printDialog.allScope.selection', { count: ctrl.selectionIncludedCount })}</span>
+                      </label>
+                      <label className="odv-prd-radioRow">
+                        <input
+                          type="radio"
+                          name="allScope"
+                          value="session"
+                          checked={ctrl.allScope === 'session'}
+                          onChange={() => ctrl.setAllScope('session')}
+                        />
+                        <span>{t('printDialog.allScope.session', { count: ctrl.sessionTotalPages })}</span>
+                      </label>
+                    </div>
+                    <span className="odv-prd-hint">{t('printDialog.allScope.hint')}</span>
+                  </div>
+                ) : (
+                  <div className="odv-prd-staticValue">
+                    {t('printDialog.allPagesValue', {
+                      count: ctrl.sessionTotalPages,
+                      defaultValue: `All ${ctrl.sessionTotalPages} session pages will be prepared.`,
+                    })}
+                  </div>
                 )}
+              </div>
+            ) : null}
 
-                {ctrl.showForWhom && (
+            {ctrl.printMode === 'range' ? (
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.rangeGroup', { defaultValue: 'Simple range options' })}>
+                <div className="odv-prd-rangeRow">
                   <label className="odv-prd-labelBlock">
-                    {t('printDialog.forWhom.label')} {ctrl.forWhomCfg?.required ? <span aria-hidden="true">*</span> : null}
+                    <span>{t('printDialog.range.from')}</span>
+                    <select
+                      value={ctrl.fromValue}
+                      onChange={(event) => ctrl.setFromValue(event.target.value)}
+                      className="odv-prd-select"
+                      aria-label={t('printDialog.range.from')}
+                    >
+                      {ctrl.pageOptions.map((value) => <option key={`from-${value}`} value={value}>{value}</option>)}
+                    </select>
+                  </label>
+
+                  <label className="odv-prd-labelBlock">
+                    <span>{t('printDialog.range.to')}</span>
+                    <select
+                      value={ctrl.toValue}
+                      onChange={(event) => ctrl.setToValue(event.target.value)}
+                      className="odv-prd-select"
+                      aria-label={t('printDialog.range.to')}
+                    >
+                      {ctrl.pageOptions.map((value) => <option key={`to-${value}`} value={value}>{value}</option>)}
+                    </select>
+                  </label>
+                </div>
+                <span className="odv-prd-hint">{t('printDialog.range.allowedHint', { total: totalPages })}</span>
+              </div>
+            ) : null}
+
+            {ctrl.printMode === 'custom' ? (
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.customGroup', { defaultValue: 'Custom pages options' })}>
+                <div className="odv-prd-advancedRow">
+                  <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
+                    <span>{t('printDialog.custom.label', { defaultValue: 'Pages' })}</span>
                     <input
                       type="text"
                       className="odv-prd-inputWide"
-                      placeholder={ctrl.forWhomPlaceholder || t('printDialog.forWhom.label')}
-                      maxLength={ctrl.forWhomMax || undefined}
-                      value={ctrl.forWhomText}
-                      onChange={(e) => ctrl.setForWhomText(e.target.value)}
-                      aria-label={t('printDialog.forWhom.label')}
+                      placeholder={t('printDialog.custom.placeholder')}
+                      value={ctrl.customText}
+                      onChange={(event) => ctrl.setCustomText(event.target.value)}
+                      aria-label={t('printDialog.custom.label', { defaultValue: 'Pages' })}
+                      inputMode="numeric"
                     />
-                    <span className="odv-prd-hint">
-                      {ctrl.forWhomCfg?.required
-                        ? t('printDialog.forWhom.requiredHint', { max: ctrl.forWhomMax })
-                        : t('printDialog.forWhom.optionalHint', { max: ctrl.forWhomMax })
-                      }
-                    </span>
                   </label>
-                )}
+                </div>
+                <span className="odv-prd-hint">{t('printDialog.custom.hint')}</span>
               </div>
-              <span className="odv-prd-hint" />
-            </div>
+            ) : null}
           </section>
-        )}
 
-          {ctrl.error ? <div role="alert" className="odv-prd-error">{ctrl.error}</div> : null}
+          {ctrl.showUserSection ? (
+            <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
+              <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
+                <div className="odv-prd-fieldCol">
+                  {ctrl.showReason ? (
+                    <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
+                      <span>{t('printDialog.reason.label')} {ctrl.reasonCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
+                      {ctrl.hasOptions ? (
+                        <>
+                          <select
+                            className="odv-prd-select odv-prd-selectWide"
+                            value={ctrl.selectedReason}
+                            onChange={(event) => ctrl.setSelectedReason(event.target.value)}
+                            aria-label={t('printDialog.reason.label')}
+                          >
+                            {ctrl.reasonOptions.map((opt) => (
+                              <option key={String(opt.value)} value={opt.value}>{ctrl.optionLabel(opt)}</option>
+                            ))}
+                          </select>
+
+                          {ctrl.needsExtra ? (
+                            <div className="odv-prd-subField">
+                              <label className="odv-prd-visuallyHidden">{t('printDialog.reason.extra.placeholder')}</label>
+                              <input
+                                type="text"
+                                className="odv-prd-inputWide"
+                                placeholder={ctrl.extraPlaceholder || t('printDialog.reason.extra.placeholder')}
+                                maxLength={ctrl.extraMax || undefined}
+                                value={ctrl.extraText}
+                                onChange={(event) => ctrl.setExtraText(event.target.value)}
+                                aria-label={t('printDialog.reason.extra.placeholder')}
+                              />
+                              <span className="odv-prd-hint">
+                                {ctrl.reasonCfg?.required
+                                  ? t('printDialog.reason.requiredHint', { max: ctrl.extraMax || ctrl.reasonMax, extra: ctrl.extraSuffix })
+                                  : t('printDialog.reason.optionalHint', { max: ctrl.extraMax || ctrl.reasonMax, extra: ctrl.extraSuffix })}
+                              </span>
+                            </div>
+                          ) : null}
+                        </>
+                      ) : (
+                        <>
+                          <input
+                            type="text"
+                            className="odv-prd-inputWide"
+                            placeholder={ctrl.reasonPlaceholder || t('printDialog.reason.label')}
+                            maxLength={ctrl.reasonMax || undefined}
+                            value={ctrl.freeReason}
+                            onChange={(event) => ctrl.setFreeReason(event.target.value)}
+                            aria-label={t('printDialog.reason.label')}
+                          />
+                          <span className="odv-prd-hint">
+                            {ctrl.reasonCfg?.required
+                              ? t('printDialog.reason.requiredHint', { max: ctrl.reasonMax, extra: '' })
+                              : t('printDialog.reason.optionalHint', { max: ctrl.reasonMax, extra: '' })}
+                          </span>
+                        </>
+                      )}
+                    </label>
+                  ) : null}
+
+                  {ctrl.showForWhom ? (
+                    <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
+                      <span>{t('printDialog.forWhom.label')} {ctrl.forWhomCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
+                      <input
+                        type="text"
+                        className="odv-prd-inputWide"
+                        placeholder={ctrl.forWhomPlaceholder || t('printDialog.forWhom.label')}
+                        maxLength={ctrl.forWhomMax || undefined}
+                        value={ctrl.forWhomText}
+                        onChange={(event) => ctrl.setForWhomText(event.target.value)}
+                        aria-label={t('printDialog.forWhom.label')}
+                      />
+                      <span className="odv-prd-hint">
+                        {ctrl.forWhomCfg?.required
+                          ? t('printDialog.forWhom.requiredHint', { max: ctrl.forWhomMax })
+                          : t('printDialog.forWhom.optionalHint', { max: ctrl.forWhomMax })}
+                      </span>
+                    </label>
+                  ) : null}
+                </div>
+              </div>
+            </section>
+          ) : null}
         </div>
 
+        {ctrl.error ? <div className="odv-prd-error" role="alert">{ctrl.error}</div> : null}
+
         <div className="odv-prd-footer">
-          <button
-            type="button"
-            className="odv-prd-action secondary"
-            onClick={() => { ctrl.setError(''); onClose(); }}
-            aria-label={t('printDialog.footer.cancel')}
-          >
+          <button type="button" className="odv-prd-action secondary" onClick={onClose}>
             {t('printDialog.footer.cancel')}
           </button>
-          <button type="submit" className="odv-prd-action primary" aria-label={t('printDialog.footer.continue')}>
-            {t('printDialog.footer.continue')}
+          <button type="submit" className="odv-prd-action primary">
+            {t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}
           </button>
         </div>
       </form>

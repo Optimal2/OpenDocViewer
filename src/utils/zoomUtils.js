@@ -15,6 +15,8 @@ const MIN_ZOOM = 0.05;
 const MAX_ZOOM = 8;
 /** Zoom step multiplier: 1.1x for zoom in, divide by 1.1 for zoom out. */
 const ZOOM_STEP = 1.1;
+/** Treat zoom deltas smaller than this as unchanged to avoid redundant React updates. */
+const ZOOM_CHANGE_THRESHOLD = 0.0005;
 
 /**
  * Optional calculation overrides.
@@ -96,7 +98,7 @@ function getViewportSize(viewport, opts) {
 
 /**
  * Set a new zoom value using the provided setter, clamped to [MIN_ZOOM, MAX_ZOOM].
- * @param {SetNumberState} setZoom
+ * @param {function((number|function(number): number)): void} setZoom React-like numeric state setter.
  * @param {number} next
  * @returns {void}
  */
@@ -104,7 +106,7 @@ function applyZoom(setZoom, next) {
   const clamped = clamp(next, MIN_ZOOM, MAX_ZOOM);
   setZoom((current) => {
     const numericCurrent = Number(current);
-    if (Number.isFinite(numericCurrent) && Math.abs(numericCurrent - clamped) < 0.0005) {
+    if (Number.isFinite(numericCurrent) && Math.abs(numericCurrent - clamped) < ZOOM_CHANGE_THRESHOLD) {
       return numericCurrent;
     }
     return clamped;
@@ -116,7 +118,7 @@ function applyZoom(setZoom, next) {
  *
  * @param {(HTMLImageElement|HTMLCanvasElement|null|undefined)} surface Active image/canvas.
  * @param {(HTMLElement|{ current: HTMLElement|null }|null|undefined)} viewportOrRef Exact pane viewport.
- * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {function((number|function(number): number)): void} setZoom React-like state setter for zoom.
  * @param {ZoomCalcOptions=} opts Optional conservative inset.
  * @returns {void}
  */
@@ -156,7 +158,7 @@ export function calculateFitToScreenZoom(surface, viewportOrRef, setZoom, opts) 
  *
  * @param {(HTMLImageElement|HTMLCanvasElement|null|undefined)} surface Active image/canvas.
  * @param {(HTMLElement|{ current: HTMLElement|null }|null|undefined)} viewportOrRef Exact pane viewport.
- * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {function((number|function(number): number)): void} setZoom React-like state setter for zoom.
  * @param {ZoomCalcOptions=} opts Optional conservative inset.
  * @returns {void}
  */
@@ -193,7 +195,7 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
 /**
  * Increase the zoom level by 10% (multiplicative), clamped to the safe range.
  *
- * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {function((number|function(number): number)): void} setZoom React-like state setter for zoom.
  * @returns {void}
  */
 export function handleZoomIn(setZoom) {
@@ -208,7 +210,7 @@ export function handleZoomIn(setZoom) {
 /**
  * Decrease the zoom level by ~9.09% (inverse of +10%), clamped to the safe range.
  *
- * @param {SetNumberState} setZoom React-like state setter for zoom.
+ * @param {function((number|function(number): number)): void} setZoom React-like state setter for zoom.
  * @returns {void}
  */
 export function handleZoomOut(setZoom) {

@@ -92,7 +92,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.navigation.title', { defaultValue: 'Navigation' })}</h3>
             <p>{t('help.sections.navigation.intro', {
-              defaultValue: 'Use the toolbar, Page Up/Page Down, Arrow Up/Arrow Down, Home, and End to move through the material.',
+              defaultValue: 'Use the toolbar, Arrow Up/Arrow Down, Home, and End to move through the material.',
             })}</p>
             <ul>
               <li>{t('help.sections.navigation.pageMode', {
@@ -137,6 +137,11 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             <p>{t('help.sections.selection.body', {
               defaultValue: 'The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel restores the last saved selection.',
             })}</p>
+            <ul>
+              <li>{t('help.sections.selection.collapse', {
+                defaultValue: 'Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.',
+              })}</li>
+            </ul>
             <p>{t('help.sections.selection.empty', {
               defaultValue: 'If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.',
             })}</p>
@@ -157,13 +162,16 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
               <li>{t('help.sections.adjustments.reset', {
                 defaultValue: 'Adjustments reset when you move to another page.',
               })}</li>
+              <li>{t('help.sections.adjustments.shortcut', {
+                defaultValue: 'Use Arrow Left and Arrow Right to rotate the active pane. Hold Shift in compare mode to rotate the right pane instead.',
+              })}</li>
             </ul>
           </section>
 
           <section className="odv-help-section">
             <h3>{t('help.sections.printing.title', { defaultValue: 'Printing' })}</h3>
             <p>{t('help.sections.printing.body', {
-              defaultValue: 'Open the print dialog from the toolbar. In simple mode you can print the current page or all pages. When compare mode is active, current-page printing can include either only the main page or both compare pages.',
+              defaultValue: 'Open the print dialog from the toolbar. Choose a print method from the list, then review the print details before preparing the browser print preview.',
             })}</p>
             <p>{t('help.sections.printing.selection', {
               defaultValue: 'If a saved selection hides any pages, “All pages” can use either the current selection or the full session.',
