@@ -126,6 +126,7 @@ const DocumentViewer = () => {
     cancelDraftSelection,
     clearSelectionFilter,
     hidePageFromSelection,
+    hideDocumentFromSelection,
   } = useDocumentViewer();
 
   const isDocumentLoading = useMemo(() => {
@@ -158,6 +159,11 @@ const DocumentViewer = () => {
       title: t('viewer.modeIndicator.performance', { defaultValue: 'Performance mode active' }),
     };
   }, [documentLoadingConfig?.mode, documentLoadingConfig?.render?.strategy, error, memoryPressureStage, t]);
+
+
+  const hasVisiblePages = totalPages > 0;
+  const hasPrintableSelection = selectionActive && visibleOriginalPageNumbers.length > 0;
+  const showEmptySelectionState = selectionActive && !hasVisiblePages;
 
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
@@ -233,7 +239,7 @@ const DocumentViewer = () => {
         isPrintDialogOpen={isPrintDialogOpen}
         openPrintDialog={openPrintDialog}
         closePrintDialog={closePrintDialog}
-        hasActiveSelection={selectionActive}
+        hasActiveSelection={hasPrintableSelection}
         visibleOriginalPageNumbers={visibleOriginalPageNumbers}
         selectionIncludedCount={visibleOriginalPageNumbers.length}
         sessionTotalPages={totalPagesDisplay}
@@ -305,6 +311,7 @@ const DocumentViewer = () => {
                 cancelDraftSelection={cancelDraftSelection}
                 clearSelectionFilter={clearSelectionFilter}
                 hidePageFromSelection={hidePageFromSelection}
+                hideDocumentFromSelection={hideDocumentFromSelection}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -333,24 +340,50 @@ const DocumentViewer = () => {
           </div>
         )}
 
-        <DocumentViewerRender
-          pageNumber={renderPageNumber}
-          zoom={zoom}
-          setZoom={setZoom}
-          isComparing={isComparing}
-          imageProperties={imageProperties}
-          isExpanded={isExpanded}
-          documentRenderRef={documentRenderRef}
-          comparePageNumber={renderComparePageNumber}
-          compareRef={compareRef}
-          allPages={allPages}
-          zoomMode={zoomState?.mode}
-          postZoomLeft={postZoomLeft}
-          postZoomRight={postZoomRight}
-          bumpPostZoomLeft={bumpPostZoomLeft}
-          bumpPostZoomRight={bumpPostZoomRight}
-          onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
-        />
+        {showEmptySelectionState ? (
+          <div className="viewer-empty-state" role="status" aria-live="polite">
+            <div className="viewer-empty-state-card">
+              <span className="material-icons viewer-empty-state-icon" aria-hidden="true">filter_alt_off</span>
+              <h2>{t('viewer.selectionEmpty.title', { defaultValue: 'No pages remain in the current selection' })}</h2>
+              <p>{t('viewer.selectionEmpty.description', { defaultValue: 'The active selection currently hides every page. Reset the selection filter to show the full session again, or open the selection tab to choose a new subset.' })}</p>
+              <div className="viewer-empty-state-actions">
+                <button
+                  type="button"
+                  className="viewer-empty-state-button primary"
+                  onClick={clearSelectionFilter}
+                >
+                  {t('viewer.selectionEmpty.showAll', { defaultValue: 'Show all pages' })}
+                </button>
+                <button
+                  type="button"
+                  className="viewer-empty-state-button secondary"
+                  onClick={() => setThumbnailPaneMode('selection')}
+                >
+                  {t('viewer.selectionEmpty.openSelection', { defaultValue: 'Open selection' })}
+                </button>
+              </div>
+            </div>
+          </div>
+        ) : (
+          <DocumentViewerRender
+            pageNumber={renderPageNumber}
+            zoom={zoom}
+            setZoom={setZoom}
+            isComparing={isComparing}
+            imageProperties={imageProperties}
+            isExpanded={isExpanded}
+            documentRenderRef={documentRenderRef}
+            comparePageNumber={renderComparePageNumber}
+            compareRef={compareRef}
+            allPages={allPages}
+            zoomMode={zoomState?.mode}
+            postZoomLeft={postZoomLeft}
+            postZoomRight={postZoomRight}
+            bumpPostZoomLeft={bumpPostZoomLeft}
+            bumpPostZoomRight={bumpPostZoomRight}
+            onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
+          />
+        )}
       </div>
     </div>
   );

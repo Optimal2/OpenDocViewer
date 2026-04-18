@@ -100,7 +100,7 @@ export default function DocumentSelectionPanel({
   const safeTotalSessionPages = Math.max(0, Number(totalSessionPages) || 0);
   const masterChecked = safeTotalSessionPages > 0 && draftIncludedCount >= safeTotalSessionPages;
   const masterIndeterminate = draftIncludedCount > 0 && draftIncludedCount < safeTotalSessionPages;
-  const saveDisabled = !enabled || !draftSelectionDirty || draftIncludedCount <= 0;
+  const saveDisabled = !enabled || !draftSelectionDirty;
   const cancelDisabled = !draftSelectionDirty;
 
   const statusText = useMemo(() => {

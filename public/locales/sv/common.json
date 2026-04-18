@@ -48,7 +48,9 @@
       "ctrlHint": "Ctrl = dokumentläge",
       "groupDescription": "{{scope}} för {{target}}.",
       "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
-      "readyAnnounce": "Sidnavigeringen är redo."
+      "readyAnnounce": "Sidnavigeringen är redo.",
+      "noPagesTitle": "Inga synliga sidor tillgängliga",
+      "noPagesAnnounce": "Det finns för närvarande inga synliga sidor."
     },
     "firstDocument": "Första dokumentet",
     "previousDocument": "Föregående dokument",
@@ -209,6 +211,12 @@
       "stop": "Stoppa laddningen",
       "continue": "Fortsätt ändå",
       "stoppedMessage": "Laddningen stoppades innan resterande sidor hann analyseras."
+    },
+    "selectionEmpty": {
+      "title": "Inga sidor återstår i det aktuella urvalet",
+      "description": "Det aktiva urvalet döljer just nu alla sidor. Återställ urvalsfiltreringen för att visa hela sessionen igen, eller öppna urvalsfliken och välj ett nytt delmängdsurval.",
+      "showAll": "Visa alla sidor",
+      "openSelection": "Öppna urval"
     }
   },
   "thumbnails": {
@@ -272,7 +280,10 @@
     "contextMenu": {
       "hidePageFromSelection": "Dölj denna sida från aktuellt urval",
       "hidePageFromSelectionLabel": "Dölj denna sida",
-      "hidePageUnavailable": "Minst en synlig sida måste vara vald."
+      "hidePageUnavailable": "Minst en synlig sida måste vara vald.",
+      "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
+      "hideDocumentFromSelectionLabel": "Dölj dokument {{document}}/{{total}}",
+      "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade."
     }
   },
   "compareZoom": {
