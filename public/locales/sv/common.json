@@ -404,7 +404,7 @@
       },
       "adjustments": {
         "title": "Bildjusteringar",
-        "body": "Rotation, ljus, kontrast och återställning finns alltid synliga i verktygsfältet. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
+        "body": "Rotation, ljus, kontrast och återställning finns alltid tillgängliga i verktygsfältet. Ljus och kontrast öppnas från sina ikoner. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
         "primary": "Utan Shift avser justeringarna vänster/huvudsidan.",
         "compare": "Med Shift i jämförelsevy avser justeringarna högersidan.",
         "reset": "Justeringar återställs när du byter till en annan sida."
