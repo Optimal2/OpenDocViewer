@@ -16,7 +16,6 @@
 import { useState, useRef, useMemo, useEffect, useCallback, useContext } from 'react';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
-import ThemeContext from '../../contexts/themeContext.js';
 import { getKeyboardPrintShortcutBehavior } from '../../utils/runtimeConfig.js';
 import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
@@ -289,7 +288,6 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
  */
 export function useDocumentViewer() {
   const { allPages, pageLoadState } = useContext(ViewerContext);
-  const { toggleTheme } = useContext(ThemeContext);
   const totalSessionPages = Array.isArray(allPages) ? allPages.length : 0;
   const keyboardPrintShortcutBehavior = getKeyboardPrintShortcutBehavior();
 
@@ -1193,9 +1191,7 @@ export function useDocumentViewer() {
     fitToScreen,
     fitToWidth,
     handleCompare,
-    setIsExpandedGuarded: setIsExpanded,
     onOpenPrintDialog: openPrintDialog,
-    onToggleTheme: toggleTheme,
     keyboardPrintShortcutBehavior,
   });
 

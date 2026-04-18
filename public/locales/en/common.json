@@ -77,13 +77,13 @@
     },
     "modeSwitch": {
       "to": "Switch to {mode}.",
-      "back": "Switch back to {mode}."
+      "back": "Back to {mode}."
     },
-    "desc": "Pick what to print. Default is {active}.",
-    "headerNote": "A header will be stamped on printed pages. This is configured by your administrator and cannot be disabled here.",
+    "desc": "Choose what to print. The default option is {active}.",
+    "headerNote": "A print header will be added according to system configuration. It cannot be disabled here.",
     "switchToAdvanced": "advanced mode",
     "switchToBasic": "basic mode",
-    "pagesHeader": "Pages",
+    "pagesHeader": "Pages and scope",
     "basic": {
       "active": "Active page",
       "all": "All pages"
@@ -95,14 +95,14 @@
     "range": {
       "from": "From",
       "to": "To",
-      "allowedHint": "Allowed: 1–{total}. Ascending (2→5) or descending (5–2)."
+      "allowedHint": "Allowed range: 1–{total}. You can print ascending or descending ranges."
     },
     "custom": {
       "placeholder": "e.g. 7 6 5 4 2   or   1-3, 2, 2, 5-2",
-      "hint": "Spaces or commas. Ranges can ascend (2-5) or descend (5-2)."
+      "hint": "Separate with spaces or commas. Ranges can be ascending or descending."
     },
     "userSection": {
-      "header": "Reason & recipient"
+      "header": "Print details"
     },
     "reason": {
       "label": "Reason",
@@ -120,7 +120,7 @@
     },
     "footer": {
       "cancel": "Cancel",
-      "continue": "Continue"
+      "continue": "Start printing"
     },
     "errors": {
       "selectValidPages": "Select valid pages.",
@@ -150,19 +150,21 @@
       "advancedGroup": "Advanced choices",
       "userLogGroup": "User log"
     },
-    "loadingHint": "More print options become available when document loading finishes. Only the active page can be printed for now.",
+    "loadingHint": "More print options become available when all pages have finished loading. For now, only the active page can be printed.",
     "allScope": {
       "label": "What should “All pages” include?",
       "selection": "Current selection ({count} pages)",
       "session": "Entire session ({count} pages)",
-      "hint": "Use the current filtered selection or ignore the selection and print the complete session."
+      "hint": "Choose whether printing should follow the current selection or ignore the selection and print the full session."
     },
     "activeScope": {
-      "label": "How should the active compare view be printed?",
-      "primary": "Only the primary / left page",
-      "compareBoth": "Both compare pages (2 printed pages)",
-      "hint": "Use the primary page only, or print both currently visible compare panes with their current adjustments."
-    }
+      "label": "What should “Active page” mean in compare view?",
+      "primary": "Left / primary page only",
+      "compareBoth": "Both compare pages",
+      "hint": "When compare mode is active, current-page printing can include only the left page or both pages shown side by side."
+    },
+    "subtitle": "Choose what to print and how this print job should be described. Current mode: {mode}.",
+    "close": "Close"
   },
   "print": {
     "alt": {
@@ -259,7 +261,7 @@
       "resetWidth": "Reset thumbnail pane to default width",
       "maximumWidth": "Set thumbnail pane to maximum width"
     },
-    "documentBoundaryStartShort": "Doc {document}/{total}",
+    "documentBoundaryStartShort": "Doc {document}",
     "documentBoundaryEndShort": "End",
     "metrics": {
       "totalPageTitle": "Page {page} of {total}",
@@ -300,10 +302,11 @@
       "hidePageFromSelectionLabel": "Hide this page",
       "hidePageUnavailable": "At least one visible page must remain selected.",
       "hideDocumentFromSelection": "Hide the entire document from the current selection",
-      "hideDocumentFromSelectionLabel": "Hide document {document}/{total}",
+      "hideDocumentFromSelectionLabel": "Hide document {document}",
       "hideUnavailable": "Selection tools become available when all pages are fully loaded.",
       "hideDocumentFromSelectionLabelPrefix": "Hide document"
-    }
+    },
+    "documentBoundaryStartTitle": "Document {document}"
   },
   "compareZoom": {
     "increase": "Increase pane zoom",
@@ -368,6 +371,53 @@
     "noscript": {
       "title": "JavaScript is disabled",
       "message": "You need to enable JavaScript to run this app. Please enable JavaScript in your browser settings and refresh this page."
+    }
+  },
+  "help": {
+    "title": "OpenDocViewer help",
+    "subtitle": "A short guide to navigation, comparison, thumbnails, selection, image adjustments, and printing.",
+    "open": "Open help",
+    "close": "Close",
+    "sections": {
+      "navigation": {
+        "title": "Navigation",
+        "intro": "Use the toolbar, Page Up/Page Down, Arrow Up/Arrow Down, Home, and End to move through the material.",
+        "pageMode": "Normal navigation moves one page at a time.",
+        "shiftMode": "Hold Shift in compare mode to steer the right pane instead of the left/main pane.",
+        "ctrlMode": "Hold Ctrl when more than one document is loaded to move document by document instead of page by page.",
+        "ctrlShiftMode": "Hold Ctrl + Shift in compare mode to navigate whole documents in the right pane."
+      },
+      "compare": {
+        "title": "Compare mode",
+        "body": "Compare mode shows two pages side by side. The left page is the primary page and the right page is the compare page."
+      },
+      "thumbnails": {
+        "title": "Thumbnails and document grouping",
+        "body": "The thumbnail pane shows document boundaries and page metadata. T shows the visible page number in the current selection. D shows the document number. S shows the page number inside that document.",
+        "boundaries": "The sticky document label at the top of the thumbnail pane follows your current position in the list.",
+        "contextMenu": "Right-click a thumbnail or a large page to hide the current page or the whole document from the active selection."
+      },
+      "selection": {
+        "title": "Selection",
+        "body": "The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel restores the last saved selection.",
+        "empty": "If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab."
+      },
+      "adjustments": {
+        "title": "Image adjustments",
+        "body": "Rotation, brightness, contrast, and reset are always visible in the toolbar. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
+        "primary": "Without Shift, adjustments target the left/primary page.",
+        "compare": "With Shift in compare mode, adjustments target the right page.",
+        "reset": "Adjustments reset when you move to another page."
+      },
+      "printing": {
+        "title": "Printing",
+        "body": "Open the print dialog from the toolbar. In basic mode you can print the active page or all pages. When compare mode is active, current-page printing can include only the main page or both compare pages.",
+        "selection": "If a saved selection hides pages, “All pages” can use either the current selection or the full session."
+      },
+      "shortcuts": {
+        "title": "Close dialogs",
+        "body": "Press Escape to close the print dialog or this help overlay."
+      }
     }
   }
 }

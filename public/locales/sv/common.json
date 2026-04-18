@@ -77,32 +77,32 @@
     },
     "modeSwitch": {
       "to": "Byt till {mode}.",
-      "back": "Byt tillbaka till {mode}."
+      "back": "Gå tillbaka till {mode}."
     },
-    "desc": "Välj vad som ska skrivas ut. Standard är {active}.",
-    "headerNote": "Ett sidhuvud stämplas på utskrivna sidor. Detta är konfigurerat av administratören och kan inte stängas av här.",
+    "desc": "Välj vad som ska skrivas ut. Standardvalet är {active}.",
+    "headerNote": "Ett sidhuvud läggs på utskriften enligt systemkonfigurationen. Det går inte att slå av här.",
     "switchToAdvanced": "avancerat läge",
     "switchToBasic": "enkelt läge",
-    "pagesHeader": "Sidor",
+    "pagesHeader": "Sidor och omfång",
     "basic": {
       "active": "Aktuell sida",
       "all": "Alla sidor"
     },
     "advanced": {
-      "range": "Enkelt intervall",
+      "range": "Enkelt sidintervall",
       "custom": "Egna sidor"
     },
     "range": {
       "from": "Från",
       "to": "Till",
-      "allowedHint": "Tillåtet: 1–{total}. Stigande (2-5) eller fallande (5–2)."
+      "allowedHint": "Tillåtet intervall: 1–{total}. Du kan skriva ut stigande eller fallande intervall."
     },
     "custom": {
       "placeholder": "t.ex. 7 6 5 4 2   eller   1-3, 2, 2, 5-2",
-      "hint": "Mellanslag eller kommatecken. Intervall kan vara stigande (2-5) eller fallande (5-2)."
+      "hint": "Separera med mellanslag eller kommatecken. Intervall kan vara stigande eller fallande."
     },
     "userSection": {
-      "header": "Orsak & mottagare"
+      "header": "Utskriftsuppgifter"
     },
     "reason": {
       "label": "Orsak",
@@ -120,7 +120,7 @@
     },
     "footer": {
       "cancel": "Avbryt",
-      "continue": "Fortsätt"
+      "continue": "Starta utskrift"
     },
     "errors": {
       "selectValidPages": "Välj giltiga sidor.",
@@ -150,19 +150,21 @@
       "advancedGroup": "Avancerade val",
       "userLogGroup": "Användarlogg"
     },
-    "loadingHint": "Fler utskriftsalternativ blir tillgängliga när dokumentladdningen är klar. Just nu kan bara den aktuella sidan skrivas ut.",
+    "loadingHint": "Fler utskriftsval blir tillgängliga när alla sidor är färdigladdade. Just nu kan bara aktuell sida skrivas ut.",
     "allScope": {
-      "label": "Vad ska ”Alla sidor” omfatta?",
+      "label": "Vad ska “Alla sidor” avse?",
       "selection": "Aktuellt urval ({count} sidor)",
       "session": "Hela sessionen ({count} sidor)",
-      "hint": "Använd aktuellt filtrerat urval eller ignorera urvalet och skriv ut hela sessionen."
+      "hint": "Välj om utskriften ska följa aktuellt urval eller ignorera urvalet och skriva ut allt som finns i sessionen."
     },
     "activeScope": {
-      "label": "Hur ska den aktuella jämförelsevyn skrivas ut?",
-      "primary": "Bara vänster/huvudsidan",
-      "compareBoth": "Båda jämförelsesidorna (2 utskriftssidor)",
-      "hint": "Skriv ut bara huvudsidan eller båda de jämförda sidorna så som de visas just nu."
-    }
+      "label": "Vad ska “Aktuell sida” avse i jämförelsevy?",
+      "primary": "Endast vänster / huvudsida",
+      "compareBoth": "Båda jämförelsesidorna",
+      "hint": "När jämförelse är aktiv kan aktuell utskrift avse bara vänstersidan eller båda sidorna som visas."
+    },
+    "subtitle": "Välj vad som ska skrivas ut och hur utskriften ska beskrivas. Läget just nu: {mode}.",
+    "close": "Stäng"
   },
   "print": {
     "alt": {
@@ -259,7 +261,7 @@
       "resetWidth": "Återställ miniatyrpanelen till standardbredd",
       "maximumWidth": "Ställ miniatyrpanelen till största bredd"
     },
-    "documentBoundaryStartShort": "Dok {document}/{total}",
+    "documentBoundaryStartShort": "Dok {document}",
     "documentBoundaryEndShort": "Slut",
     "metrics": {
       "totalPageTitle": "Sida {page} av totalt {total}",
@@ -300,10 +302,11 @@
       "hidePageFromSelectionLabel": "Dölj denna sida",
       "hidePageUnavailable": "Minst en synlig sida måste vara vald.",
       "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
-      "hideDocumentFromSelectionLabel": "Dölj dokument {document}/{total}",
+      "hideDocumentFromSelectionLabel": "Dölj dokument {document}",
       "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade.",
       "hideDocumentFromSelectionLabelPrefix": "Dölj dokument"
-    }
+    },
+    "documentBoundaryStartTitle": "Dokument {document}"
   },
   "compareZoom": {
     "increase": "Öka panelens zoom",
@@ -368,6 +371,53 @@
     "noscript": {
       "title": "JavaScript är inaktiverat",
       "message": "Du måste aktivera JavaScript för att köra appen. Aktivera JavaScript i din webbläsares inställningar och ladda om sidan."
+    }
+  },
+  "help": {
+    "title": "Hjälp för OpenDocViewer",
+    "subtitle": "Kort manual för navigering, jämförelse, miniatyrer, urval, bildjusteringar och utskrift.",
+    "open": "Öppna hjälp",
+    "close": "Stäng",
+    "sections": {
+      "navigation": {
+        "title": "Navigering",
+        "intro": "Använd verktygsfältet, Page Up/Page Down, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
+        "pageMode": "Vanlig navigering flyttar en sida i taget.",
+        "shiftMode": "Håll nere Shift i jämförelsevy för att styra högra sidan i stället för vänster/huvudsidan.",
+        "ctrlMode": "Håll nere Ctrl när fler än ett dokument är öppnat för att flytta dokument för dokument i stället för sida för sida.",
+        "ctrlShiftMode": "Håll nere Ctrl + Shift i jämförelsevy för att navigera hela dokument i den högra sidan."
+      },
+      "compare": {
+        "title": "Jämförelsevy",
+        "body": "Jämförelsevy visar två sidor bredvid varandra. Vänster sida är huvudsidan och höger sida är jämförelsesidan."
+      },
+      "thumbnails": {
+        "title": "Miniatyrer och dokumentindelning",
+        "body": "Miniatyrpanelen visar dokumentgränser och sidinformation. T visar sidnummer i det synliga urvalet. D visar dokumentnummer. S visar sidnummer inom dokumentet.",
+        "boundaries": "Den flytande dokumentrubriken högst upp i miniatyrpanelen följer din nuvarande position i listan.",
+        "contextMenu": "Högerklicka på en miniatyr eller en stor sida för att dölja aktuell sida eller hela dokumentet från det aktiva urvalet."
+      },
+      "selection": {
+        "title": "Urval",
+        "body": "Fliken Urval låter dig inkludera eller exkludera hela dokument eller enskilda sidor. Spara verkställer urvalet. Avbryt återgår till senast sparade urval.",
+        "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen."
+      },
+      "adjustments": {
+        "title": "Bildjusteringar",
+        "body": "Rotation, ljus, kontrast och återställning finns alltid synliga i verktygsfältet. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
+        "primary": "Utan Shift avser justeringarna vänster/huvudsidan.",
+        "compare": "Med Shift i jämförelsevy avser justeringarna högersidan.",
+        "reset": "Justeringar återställs när du byter till en annan sida."
+      },
+      "printing": {
+        "title": "Utskrift",
+        "body": "Öppna utskriftsdialogen från verktygsfältet. I enkelt läge kan du skriva ut aktuell sida eller alla sidor. När jämförelsevy är aktiv kan aktuell sida avse bara huvudsidan eller båda jämförelsesidorna.",
+        "selection": "Om ett sparat urval döljer sidor kan “Alla sidor” avse antingen det aktuella urvalet eller hela sessionen."
+      },
+      "shortcuts": {
+        "title": "Stäng dialoger",
+        "body": "Tryck Escape för att stänga utskriftsdialogen eller hjälprutan."
+      }
     }
   }
 }

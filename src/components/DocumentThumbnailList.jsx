@@ -43,6 +43,8 @@ import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
  * @property {boolean} preferFullAssetPreview
  * @property {number} totalPages
  * @property {boolean} documentGroupingActive
+ * @property {*} prevPage
+ * @property {*} nextPage
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
  * @property {function(*, number, *): void} onOpenContextMenu
@@ -162,14 +164,30 @@ function buildCenterOutQueue(totalCount, focusIndex, excluded) {
 
 /**
  * @param {*} page
+ * @returns {string}
+ */
+function getPageDocumentKey(page) {
+  const documentId = String(page?.documentId || '').trim();
+  if (documentId) return documentId;
+  const documentNumber = Math.max(0, Number(page?.documentNumber) || 0);
+  return documentNumber > 0 ? `doc:${documentNumber}` : '';
+}
+
+/**
+ * @param {*} page
+ * @param {*} [prevPage]
+ * @param {*} [nextPage]
  * @returns {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number, documentPageNumber:number, documentPageCount:number, isDocumentStart:boolean, isDocumentEnd:boolean }}
  */
-function getPageDocumentContext(page) {
+function getPageDocumentContext(page, prevPage = null, nextPage = null) {
   const documentNumber = Math.max(0, Number(page?.documentNumber) || 0);
   const totalDocuments = Math.max(0, Number(page?.totalDocuments) || 0);
   const documentPageNumber = Math.max(0, Number(page?.documentPageNumber) || 0);
   const documentPageCount = Math.max(0, Number(page?.documentPageCount) || 0);
   const hasMultipleDocuments = totalDocuments > 1 && documentNumber > 0 && documentPageNumber > 0;
+  const currentKey = getPageDocumentKey(page);
+  const previousKey = getPageDocumentKey(prevPage);
+  const nextKey = getPageDocumentKey(nextPage);
 
   return {
     hasMultipleDocuments,
@@ -177,11 +195,8 @@ function getPageDocumentContext(page) {
     totalDocuments,
     documentPageNumber,
     documentPageCount,
-    isDocumentStart: hasMultipleDocuments && (!!page?.isDocumentStart || documentPageNumber === 1),
-    isDocumentEnd: hasMultipleDocuments && (
-      !!page?.isDocumentEnd
-      || (documentPageCount > 0 && documentPageNumber === documentPageCount)
-    ),
+    isDocumentStart: hasMultipleDocuments && (!previousKey || previousKey !== currentKey),
+    isDocumentEnd: hasMultipleDocuments && (!nextKey || nextKey !== currentKey),
   };
 }
 
@@ -300,7 +315,7 @@ function getDocumentBoundaryLabel(t, documentContext) {
   return t('thumbnails.documentBoundaryStartShort', {
     document: documentContext.documentNumber,
     total: documentContext.totalDocuments,
-    defaultValue: `Doc ${documentContext.documentNumber}/${documentContext.totalDocuments}`,
+    defaultValue: `Doc ${documentContext.documentNumber}`,
   });
 }
 
@@ -311,10 +326,10 @@ function getDocumentBoundaryLabel(t, documentContext) {
  */
 function getDocumentBoundaryTitle(t, documentContext) {
   if (!documentContext.hasMultipleDocuments) return '';
-  return t('thumbnails.metrics.documentTitle', {
+  return t('thumbnails.documentBoundaryStartTitle', {
     document: documentContext.documentNumber,
     total: documentContext.totalDocuments,
-    defaultValue: `Document ${documentContext.documentNumber} of ${documentContext.totalDocuments}`,
+    defaultValue: `Document ${documentContext.documentNumber}`,
   });
 }
 
@@ -333,6 +348,8 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   preferFullAssetPreview,
   totalPages,
   documentGroupingActive,
+  prevPage,
+  nextPage,
   onActivate,
   onKeyActivate,
   onOpenContextMenu,
@@ -357,7 +374,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
     ? (typeof page?.fullSizeUrl === 'string' ? page.fullSizeUrl : '')
     : (typeof page?.thumbnailUrl === 'string' ? page.thumbnailUrl : '');
   const isDualSelected = isPrimarySelected && isCompareSelected;
-  const documentContext = getPageDocumentContext(page);
+  const documentContext = getPageDocumentContext(page, prevPage, nextPage);
   const metricTitles = getMetricTitles(t, visiblePageNumber, totalPages, documentContext);
   const metricBadges = getMetricBadges(t, visiblePageNumber, totalPages, documentContext);
 
@@ -556,7 +573,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       0,
       Math.max(0, totalCount - 1)
     );
-    return getPageDocumentContext(allPages[topIndex] || null);
+    return getPageDocumentContext(allPages[topIndex] || null, allPages[topIndex - 1] || null, allPages[topIndex + 1] || null);
   }, [allPages, documentGroupingActive, layout.rowHeight, scrollTop, totalCount]);
   const showStickyDocumentHeader = !!stickyDocumentContext?.hasMultipleDocuments && scrollTop > 8;
   const warmAllThumbnails = useMemo(
@@ -1063,6 +1080,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         preferFullAssetPreview={preferredFullPreviewIndexes.has(index)}
         totalPages={totalCount}
         documentGroupingActive={documentGroupingActive}
+        prevPage={index > 0 ? (allPages[index - 1] || null) : null}
+        nextPage={index + 1 < totalCount ? (allPages[index + 1] || null) : null}
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
         onOpenContextMenu={handleOpenContextMenu}
