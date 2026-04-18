@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Enable compare mode",
       "disable": "Disable compare mode",
-      "shiftHint": "Shift steers right pane. Shift + Esc closes."
+      "shiftHint": "Shift targets the right compare pane."
     },
     "editing": {
       "enable": "Enable canvas tools",
@@ -37,7 +37,20 @@
     },
     "focusWarningTitle": "Shortcuts inactive",
     "focusWarningAction": "Focus viewer",
-    "pageLoadingTitle": "Page indicator (pages are still loading)"
+    "pageLoadingTitle": "Page indicator (pages are still loading)",
+    "navigation": {
+      "scopePage": "Page navigation",
+      "scopeDocument": "Document navigation",
+      "targetPrimary": "primary / left pane",
+      "targetCompare": "right compare pane",
+      "modeTitle": "{{scope}} · {{target}}",
+      "shiftHint": "Shift = right compare pane",
+      "ctrlHint": "Ctrl = document mode"
+    },
+    "firstDocument": "First document",
+    "previousDocument": "Previous document",
+    "nextDocument": "Next document",
+    "lastDocument": "Last document"
   },
   "printDialog": {
     "title": "Print",

@@ -113,6 +113,48 @@
 }
 .zoom-fixed-group .odv-btn { margin: 0; }
 
+.page-navigation-group {
+  --page-navigation-accent: var(--thumbnail-primary-color);
+  border-color: color-mix(in srgb, var(--page-navigation-accent) 40%, var(--thumbnail-border-color) 60%);
+  transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease;
+}
+
+.page-navigation-group.navigation-target-primary {
+  --page-navigation-accent: var(--thumbnail-primary-color);
+}
+
+.page-navigation-group.navigation-target-compare {
+  --page-navigation-accent: var(--thumbnail-compare-color);
+}
+
+.page-navigation-group.navigation-scope-page {
+  border-style: solid;
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--page-navigation-accent) 16%, transparent 84%);
+}
+
+.page-navigation-group.navigation-scope-document {
+  border-style: dashed;
+  box-shadow:
+    0 0 0 1px color-mix(in srgb, var(--page-navigation-accent) 18%, transparent 82%),
+    inset 0 0 0 1px color-mix(in srgb, var(--page-navigation-accent) 20%, transparent 80%);
+}
+
+.page-navigation-group.is-loading {
+  background-color: #fff4bf;
+}
+
+.page-navigation-group.is-loading .page-number-input {
+  background-color: #ffe082;
+}
+
+[data-theme='dark'] .page-navigation-group.is-loading {
+  background-color: #5b4200;
+}
+
+[data-theme='dark'] .page-navigation-group.is-loading .page-number-input {
+  background-color: #7a5a00;
+}
+
 .separator {
   width: 1px;
   height: 30px;
@@ -135,7 +177,7 @@
   opacity: 0.88;
 }
 
-.compare-shortcut-hint {
+.navigation-shortcut-hint {
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
@@ -201,6 +243,13 @@
 }
 .page-number-input.is-loading:focus {
   box-shadow: 0 0 0 2px rgba(201, 151, 0, 0.35);
+}
+
+.page-navigation-group.is-loading {
+  border-color: color-mix(in srgb, var(--page-navigation-accent) 48%, #c99700 52%);
+}
+[data-theme='dark'] .page-navigation-group.is-loading {
+  border-color: color-mix(in srgb, var(--page-navigation-accent) 52%, #e0a800 48%);
 }
 
 /* Sliders inside the editing group */

@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Aktivera jämför-läge",
       "disable": "Inaktivera jämför-läge",
-      "shiftHint": "Shift styr höger vy. Shift + Esc stänger."
+      "shiftHint": "Shift styr höger jämförelsevy."
     },
     "editing": {
       "enable": "Aktivera redigeringsverktyg",
@@ -37,7 +37,20 @@
     },
     "focusWarningTitle": "Genvägar inaktiva",
     "focusWarningAction": "Fokusera visaren",
-    "pageLoadingTitle": "Sidindikator (sidor läses fortfarande in)"
+    "pageLoadingTitle": "Sidindikator (sidor läses fortfarande in)",
+    "navigation": {
+      "scopePage": "Sidnavigering",
+      "scopeDocument": "Dokumentnavigering",
+      "targetPrimary": "huvudvy / vänster vy",
+      "targetCompare": "höger jämförelsevy",
+      "modeTitle": "{{scope}} · {{target}}",
+      "shiftHint": "Shift = höger jämförelsevy",
+      "ctrlHint": "Ctrl = dokumentläge"
+    },
+    "firstDocument": "Första dokumentet",
+    "previousDocument": "Föregående dokument",
+    "nextDocument": "Nästa dokument",
+    "lastDocument": "Sista dokumentet"
   },
   "printDialog": {
     "title": "Skriv ut",

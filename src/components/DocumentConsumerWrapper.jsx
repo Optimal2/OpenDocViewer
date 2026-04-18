@@ -28,7 +28,6 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import ViewerContext from '../contexts/viewerContext.js';
 import logger from '../logging/systemLogger.js';
-import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 
 // Lazy-load heavy subtrees to keep initial bundle small
 const DocumentViewer = lazy(() => import('./DocumentViewer/DocumentViewer'));
@@ -109,7 +108,8 @@ const DocumentConsumerWrapper = ({
             extension={extension}
             endNumber={endNumber}
             sourceList={sourceList || null}
-            placeholderImage={getPublicAssetUrl('placeholder.png')}
+            // Intentional internal optimization: reuse the full-size blob for thumbnails when
+            // the loader can do so safely. Consumers are not expected to toggle this path.
             sameBlob={true}
             // Forward NEW demo props (undefined values are harmless):
             demoMode={demoMode}

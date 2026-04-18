@@ -47,6 +47,10 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(string=): void} goToNextPage
  * @property {function(string=): void} goToFirstPage
  * @property {function(string=): void} goToLastPage
+ * @property {function(string=): void} goToPreviousDocument
+ * @property {function(string=): void} goToNextDocument
+ * @property {function(string=): void} goToFirstDocument
+ * @property {function(string=): void} goToLastDocument
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void} actualSize
@@ -65,8 +69,10 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {Array<number>} visibleOriginalPageNumbers
  * @property {number} selectionIncludedCount
  * @property {number} sessionTotalPages
+ * @property {boolean} documentNavigationEnabled
+ * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} primaryDocumentNavigation
+ * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} compareDocumentNavigation
  * @property {function(): void} handleCompare
- * @property {function(): void} closeCompare
  * @property {boolean} isComparing
  * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
  * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
@@ -99,6 +105,10 @@ const DocumentViewerToolbar = ({
   goToNextPage,
   goToFirstPage,
   goToLastPage,
+  goToPreviousDocument,
+  goToNextDocument,
+  goToFirstDocument,
+  goToLastDocument,
   zoomIn,
   zoomOut,
   actualSize,
@@ -110,7 +120,6 @@ const DocumentViewerToolbar = ({
   setZoom,
   viewerContainerRef,
   handleCompare,
-  closeCompare,
   isComparing,
   comparePageNumber,
   imageProperties,
@@ -126,6 +135,9 @@ const DocumentViewerToolbar = ({
   visibleOriginalPageNumbers,
   selectionIncludedCount,
   sessionTotalPages,
+  documentNavigationEnabled,
+  primaryDocumentNavigation,
+  compareDocumentNavigation,
   isExpanded,
   setIsExpanded,
   prevPageDisabled,
@@ -149,6 +161,10 @@ const DocumentViewerToolbar = ({
       goToNextPage={goToNextPage}
       goToFirstPage={goToFirstPage}
       goToLastPage={goToLastPage}
+      goToPreviousDocument={goToPreviousDocument}
+      goToNextDocument={goToNextDocument}
+      goToFirstDocument={goToFirstDocument}
+      goToLastDocument={goToLastDocument}
       zoom={zoom}
       zoomState={zoomState}
       setZoomMode={setZoomMode}
@@ -167,8 +183,10 @@ const DocumentViewerToolbar = ({
       visibleOriginalPageNumbers={visibleOriginalPageNumbers}
       selectionIncludedCount={selectionIncludedCount}
       sessionTotalPages={sessionTotalPages}
+      documentNavigationEnabled={documentNavigationEnabled}
+      primaryDocumentNavigation={primaryDocumentNavigation}
+      compareDocumentNavigation={compareDocumentNavigation}
       handleCompare={handleCompare}
-      closeCompare={closeCompare}
       isComparing={isComparing}
       comparePageNumber={comparePageNumber}
       imageProperties={imageProperties}
@@ -200,6 +218,10 @@ DocumentViewerToolbar.propTypes = {
   goToNextPage: PropTypes.func.isRequired,
   goToFirstPage: PropTypes.func.isRequired,
   goToLastPage: PropTypes.func.isRequired,
+  goToPreviousDocument: PropTypes.func.isRequired,
+  goToNextDocument: PropTypes.func.isRequired,
+  goToFirstDocument: PropTypes.func.isRequired,
+  goToLastDocument: PropTypes.func.isRequired,
   zoomIn: PropTypes.func.isRequired,
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func.isRequired,
@@ -214,7 +236,6 @@ DocumentViewerToolbar.propTypes = {
   setZoom: PropTypes.func.isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
-  closeCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   comparePageNumber: PropTypes.number,
   imageProperties: PropTypes.shape({
@@ -234,6 +255,19 @@ DocumentViewerToolbar.propTypes = {
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
   selectionIncludedCount: PropTypes.number.isRequired,
   sessionTotalPages: PropTypes.number.isRequired,
+  documentNavigationEnabled: PropTypes.bool.isRequired,
+  primaryDocumentNavigation: PropTypes.shape({
+    canGoPrevious: PropTypes.bool.isRequired,
+    canGoNext: PropTypes.bool.isRequired,
+    canGoFirst: PropTypes.bool.isRequired,
+    canGoLast: PropTypes.bool.isRequired,
+  }).isRequired,
+  compareDocumentNavigation: PropTypes.shape({
+    canGoPrevious: PropTypes.bool.isRequired,
+    canGoNext: PropTypes.bool.isRequired,
+    canGoFirst: PropTypes.bool.isRequired,
+    canGoLast: PropTypes.bool.isRequired,
+  }).isRequired,
   isExpanded: PropTypes.bool.isRequired,
   setIsExpanded: PropTypes.func.isRequired,
   prevPageDisabled: PropTypes.bool.isRequired,

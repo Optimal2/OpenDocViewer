@@ -1,41 +1,39 @@
 // File: src/components/DocumentToolbar/PageNavigationButtons.jsx
 /**
- * File: src/components/DocumentToolbar/PageNavigationButtons.jsx
- *
- * Page navigation controls with support for single-step clicks and
- * continuous stepping on press-and-hold (mouse/touch).
+ * Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.
  *
  * The press-and-hold buttons trigger a leading-edge navigation step on pointer-down. The following
- * synthetic click is then consumed so a normal mouse press produces exactly one page step instead of
- * two. This keeps toolbar navigation deterministic while still allowing fast repeat on hold.
- *
- * Also includes an editable page field, grouped visually like the zoom control:
- *   [ « ][ ‹ ]  [  X / Y  ]  [ › ][ » ]
- * - When NOT focused, the field shows "X / Y".
- * - When focused, it shows only the current page "X" for editing.
- * - Enter/Blur applies (clamped 1..Y). Escape cancels and restores.
- * - During document loading the page field gets a warning-style background.
+ * synthetic click is then consumed so a normal mouse press produces exactly one step instead of
+ * two. The group can also expose the currently active navigation target/scope so the toolbar may
+ * visually indicate whether actions affect the primary pane, the compare pane, pages, or documents.
  *
  * @component
  * @param {Object} props
- * @param {boolean} props.prevPageDisabled - Disable "previous page".
- * @param {boolean} props.nextPageDisabled - Disable "next page".
- * @param {boolean} props.firstPageDisabled - Disable "first page".
- * @param {boolean} props.lastPageDisabled - Disable "last page".
- * @param {function(string, *=):void} props.startPrevPageTimer - Start the "prev" repeat timer.
- * @param {function():void} props.stopPrevPageTimer - Stop the "prev" repeat timer.
- * @param {function(string, *=):void} props.startNextPageTimer - Start the "next" repeat timer.
- * @param {function():void} props.stopNextPageTimer - Stop the "next" repeat timer.
- * @param {function(*=):void} props.handleFirstPage - Jump to first page.
- * @param {function(*=):void} props.handleLastPage - Jump to last page.
- * @param {function(*=):void} props.handlePrevPage - Single-step to previous page.
- * @param {function(*=):void} props.handleNextPage - Single-step to next page.
- * @param {number} props.pageNumber - Current visible page number (1-based).
- * @param {number} props.pageNumberDisplay - Current original/session page number (1-based).
- * @param {number} props.totalPages - Total visible pages.
- * @param {number} props.totalPagesDisplay - Total original/session pages.
- * @param {function(number):void} [props.onGoToPage] - Optional: apply a specific original page number (1..totalPagesDisplay).
- * @param {boolean} [props.isDocumentLoading=false] - Whether the document set is still loading.
+ * @param {boolean} props.prevPageDisabled
+ * @param {boolean} props.nextPageDisabled
+ * @param {boolean} props.firstPageDisabled
+ * @param {boolean} props.lastPageDisabled
+ * @param {function(string, *=):void} props.startPrevPageTimer
+ * @param {function():void} props.stopPrevPageTimer
+ * @param {function(string, *=):void} props.startNextPageTimer
+ * @param {function():void} props.stopNextPageTimer
+ * @param {function(*=):void} props.handleFirstPage
+ * @param {function(*=):void} props.handleLastPage
+ * @param {function(*=):void} props.handlePrevPage
+ * @param {function(*=):void} props.handleNextPage
+ * @param {number} props.pageNumber
+ * @param {number} [props.pageNumberDisplay]
+ * @param {number} props.totalPages
+ * @param {number} [props.totalPagesDisplay]
+ * @param {function(number):void} [props.onGoToPage]
+ * @param {boolean} [props.isDocumentLoading=false]
+ * @param {'primary'|'compare'} [props.navigationTarget='primary']
+ * @param {'page'|'document'} [props.navigationScope='page']
+ * @param {string} [props.navigationGroupTitle]
+ * @param {string} [props.firstButtonTitle]
+ * @param {string} [props.previousButtonTitle]
+ * @param {string} [props.nextButtonTitle]
+ * @param {string} [props.lastButtonTitle]
  * @returns {JSX.Element}
  */
 
@@ -44,10 +42,10 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
 function clampPage(n, total) {
-  const t = Number.isFinite(total) && total > 0 ? Math.floor(total) : 1;
-  const v = Math.floor(Number(n));
-  if (!Number.isFinite(v)) return null;
-  return Math.max(1, Math.min(t, v));
+  const safeTotal = Number.isFinite(total) && total > 0 ? Math.floor(total) : 1;
+  const value = Math.floor(Number(n));
+  if (!Number.isFinite(value)) return null;
+  return Math.max(1, Math.min(safeTotal, value));
 }
 
 const PageNavigationButtons = ({
@@ -69,12 +67,19 @@ const PageNavigationButtons = ({
   totalPagesDisplay = totalPages,
   onGoToPage,
   isDocumentLoading = false,
+  navigationTarget = 'primary',
+  navigationScope = 'page',
+  navigationGroupTitle = '',
+  firstButtonTitle,
+  previousButtonTitle,
+  nextButtonTitle,
+  lastButtonTitle,
 }) => {
   const { t } = useTranslation();
 
   const SUPPRESS_CLICK_WINDOW_MS = 400;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
-  const activeRepeatButtonRef = useRef(/** @type {("prev"|"next"|null)} */ (null));
+  const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const [draft, setDraft] = useState(String(pageNumberDisplay));
@@ -86,8 +91,6 @@ const PageNavigationButtons = ({
   }, [pageNumberDisplay, isFocused]);
 
   /**
-   * Record that the next synthetic click for the given repeat button should be swallowed.
-   *
    * @param {'prev'|'next'} key
    * @returns {void}
    */
@@ -99,9 +102,6 @@ const PageNavigationButtons = ({
   }, []);
 
   /**
-   * Stop every repeat timer and preserve click suppression long enough to swallow the trailing click
-   * that naturally follows a press-and-hold gesture.
-   *
    * @returns {void}
    */
   const stopAllRepeatNavigation = useCallback(() => {
@@ -132,8 +132,7 @@ const PageNavigationButtons = ({
     };
   }, [stopAllRepeatNavigation]);
 
-
-  function applyDraft() {
+  const applyDraft = useCallback(() => {
     const next = clampPage(draft, totalPagesDisplay);
     if (next == null) {
       setDraft(String(pageNumberDisplay));
@@ -141,11 +140,11 @@ const PageNavigationButtons = ({
     }
     if (typeof onGoToPage === 'function') onGoToPage(next);
     setDraft(String(next));
-  }
+  }, [draft, onGoToPage, pageNumberDisplay, totalPagesDisplay]);
 
-  function cancelDraft() {
+  const cancelDraft = useCallback(() => {
     setDraft(String(pageNumberDisplay));
-  }
+  }, [pageNumberDisplay]);
 
   /**
    * @param {*} event
@@ -174,9 +173,8 @@ const PageNavigationButtons = ({
   }, [markSuppressedClick, nextPageDisabled, startNextPageTimer]);
 
   /**
-   * Consume the trailing click that naturally follows a leading-edge repeat press.
-   *
    * @param {*} event
+   * @param {'prev'|'next'} key
    * @param {function(*=):void} handler
    * @returns {void}
    */
@@ -195,22 +193,34 @@ const PageNavigationButtons = ({
     handler?.(event);
   }, []);
 
-  const displayValue = isFocused ? draft : `${pageNumberDisplay} / ${totalPagesDisplay}`;
+  const groupTitle = navigationGroupTitle || t('toolbar.page');
   const pageTitle = isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page');
+  const resolvedFirstButtonTitle = firstButtonTitle || t('toolbar.firstPage');
+  const resolvedPreviousButtonTitle = previousButtonTitle || t('toolbar.previousPage');
+  const resolvedNextButtonTitle = nextButtonTitle || t('toolbar.nextPage');
+  const resolvedLastButtonTitle = lastButtonTitle || t('toolbar.lastPage');
+  const displayValue = isFocused ? draft : `${pageNumberDisplay} / ${totalPagesDisplay}`;
+  const navigationTargetClass = navigationTarget === 'compare'
+    ? 'navigation-target-compare'
+    : 'navigation-target-primary';
+  const navigationScopeClass = navigationScope === 'document'
+    ? 'navigation-scope-document'
+    : 'navigation-scope-page';
 
   return (
     <div
-      className={`zoom-fixed-group${isDocumentLoading ? ' is-loading' : ''}`}
+      className={`zoom-fixed-group page-navigation-group ${navigationTargetClass} ${navigationScopeClass}${isDocumentLoading ? ' is-loading' : ''}`}
       role="group"
-      aria-label={t('toolbar.page')}
+      aria-label={groupTitle}
+      title={groupTitle}
       aria-busy={isDocumentLoading}
     >
       <button
         type="button"
         onMouseDown={(event) => event.preventDefault()}
         onClick={handleFirstPage}
-        aria-label={t('toolbar.firstPage')}
-        title={t('toolbar.firstPage')}
+        aria-label={resolvedFirstButtonTitle}
+        title={resolvedFirstButtonTitle}
         className="odv-btn"
         disabled={firstPageDisabled}
       >
@@ -225,8 +235,8 @@ const PageNavigationButtons = ({
         onMouseLeave={stopAllRepeatNavigation}
         onTouchStart={beginPrevRepeat}
         onTouchEnd={stopAllRepeatNavigation}
-        aria-label={t('toolbar.previousPage')}
-        title={t('toolbar.previousPage')}
+        aria-label={resolvedPreviousButtonTitle}
+        title={resolvedPreviousButtonTitle}
         className="odv-btn"
         disabled={prevPageDisabled}
       >
@@ -263,9 +273,9 @@ const PageNavigationButtons = ({
         aria-valuemin={1}
         aria-valuemax={Math.max(1, totalPagesDisplay || 1)}
         aria-valuenow={pageNumberDisplay}
-        aria-valuetext={t('toolbar.page') + ` ${pageNumberDisplay} / ${totalPagesDisplay}`}
+        aria-valuetext={`${t('toolbar.page')} ${pageNumberDisplay} / ${totalPagesDisplay}`}
         aria-busy={isDocumentLoading}
-        title={pageTitle}
+        title={groupTitle}
       />
 
       <button
@@ -276,8 +286,8 @@ const PageNavigationButtons = ({
         onMouseLeave={stopAllRepeatNavigation}
         onTouchStart={beginNextRepeat}
         onTouchEnd={stopAllRepeatNavigation}
-        aria-label={t('toolbar.nextPage')}
-        title={t('toolbar.nextPage')}
+        aria-label={resolvedNextButtonTitle}
+        title={resolvedNextButtonTitle}
         className="odv-btn"
         disabled={nextPageDisabled}
       >
@@ -288,8 +298,8 @@ const PageNavigationButtons = ({
         type="button"
         onMouseDown={(event) => event.preventDefault()}
         onClick={handleLastPage}
-        aria-label={t('toolbar.lastPage')}
-        title={t('toolbar.lastPage')}
+        aria-label={resolvedLastButtonTitle}
+        title={resolvedLastButtonTitle}
         className="odv-btn"
         disabled={lastPageDisabled}
       >
@@ -318,6 +328,13 @@ PageNavigationButtons.propTypes = {
   totalPagesDisplay: PropTypes.number,
   onGoToPage: PropTypes.func,
   isDocumentLoading: PropTypes.bool,
+  navigationTarget: PropTypes.oneOf(['primary', 'compare']),
+  navigationScope: PropTypes.oneOf(['page', 'document']),
+  navigationGroupTitle: PropTypes.string,
+  firstButtonTitle: PropTypes.string,
+  previousButtonTitle: PropTypes.string,
+  nextButtonTitle: PropTypes.string,
+  lastButtonTitle: PropTypes.string,
 };
 
 export default React.memo(PageNavigationButtons);

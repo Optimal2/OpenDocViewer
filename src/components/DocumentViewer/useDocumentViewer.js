@@ -174,6 +174,77 @@ function buildDocumentSelectionModel(pages) {
   }));
 }
 
+/**
+ * @param {*} page
+ * @returns {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number, documentPageNumber:number, documentId:string }}
+ */
+function getPageDocumentNavigationMeta(page) {
+  const documentNumber = Math.max(0, Number(page?.documentNumber) || 0);
+  const totalDocuments = Math.max(documentNumber, Number(page?.totalDocuments) || 0);
+  const documentPageNumber = Math.max(0, Number(page?.documentPageNumber) || 0);
+  const documentId = String(page?.documentId || '').trim();
+  const hasMultipleDocuments = totalDocuments > 1 && documentNumber > 0 && documentPageNumber > 0;
+
+  return {
+    hasMultipleDocuments,
+    documentNumber,
+    totalDocuments,
+    documentPageNumber,
+    documentId,
+  };
+}
+
+/**
+ * Build the visible-document grouping used by document-level navigation.
+ *
+ * The grouping operates on the currently visible (selection-filtered) pages so document stepping and
+ * toolbar/keyboard affordances match what the user can actually see and navigate.
+ *
+ * @param {Array<any>} pages
+ * @param {Array<number>} visibleOriginalIndexes
+ * @returns {{ groups:Array<{ key:string, documentNumber:number, totalDocuments:number, firstOriginalIndex:number, firstOriginalPageNumber:number, visiblePageCount:number }>, groupIndexByOriginalIndex: Map<number, number> }}
+ */
+function buildVisibleDocumentNavigationModel(pages, visibleOriginalIndexes) {
+  const sourcePages = Array.isArray(pages) ? pages : [];
+  const visibleIndexes = Array.isArray(visibleOriginalIndexes) ? visibleOriginalIndexes : [];
+  /** @type {Array<{ key:string, documentNumber:number, totalDocuments:number, firstOriginalIndex:number, firstOriginalPageNumber:number, visiblePageCount:number }>}
+   */
+  const groups = [];
+  const groupIndexByOriginalIndex = new Map();
+  let currentKey = '';
+
+  for (const rawOriginalIndex of visibleIndexes) {
+    const originalIndex = Math.max(0, Math.floor(Number(rawOriginalIndex) || 0));
+    const page = sourcePages[originalIndex] || null;
+    const documentMeta = getPageDocumentNavigationMeta(page);
+    if (!documentMeta.hasMultipleDocuments) continue;
+
+    const key = documentMeta.documentId || `doc:${documentMeta.documentNumber}`;
+    if (!key) continue;
+
+    if (groups.length <= 0 || currentKey !== key) {
+      groups.push({
+        key,
+        documentNumber: documentMeta.documentNumber,
+        totalDocuments: documentMeta.totalDocuments,
+        firstOriginalIndex: originalIndex,
+        firstOriginalPageNumber: originalIndex + 1,
+        visiblePageCount: 0,
+      });
+      currentKey = key;
+    }
+
+    const activeGroupIndex = groups.length - 1;
+    groups[activeGroupIndex].visiblePageCount += 1;
+    groupIndexByOriginalIndex.set(originalIndex, activeGroupIndex);
+  }
+
+  return {
+    groups,
+    groupIndexByOriginalIndex,
+  };
+}
+
 const THUMBNAIL_WIDTH_MIN = 160;
 const THUMBNAIL_WIDTH_MAX = 520;
 const THUMBNAIL_WIDTH_STEP = 48;
@@ -302,6 +373,13 @@ export function useDocumentViewer() {
     () => visibleOriginalIndexes.map((index) => index + 1),
     [visibleOriginalIndexes]
   );
+  const visibleDocumentNavigationModel = useMemo(
+    () => buildVisibleDocumentNavigationModel(allPages, visibleOriginalIndexes),
+    [allPages, visibleOriginalIndexes]
+  );
+  const visibleDocumentGroups = visibleDocumentNavigationModel.groups;
+  const visibleDocumentGroupIndexByOriginalIndex = visibleDocumentNavigationModel.groupIndexByOriginalIndex;
+  const documentNavigationEnabled = visibleDocumentGroups.length > 1;
 
   const currentOriginalPageNumber = clampPage(pageNumberRaw, Math.max(1, totalSessionPages || 1));
   const currentOriginalPageIndex = Math.max(0, currentOriginalPageNumber - 1);
@@ -343,6 +421,90 @@ export function useDocumentViewer() {
   useEffect(() => {
     if (compareOriginalPageIndex >= 0) lastRequestedCompareOriginalIndexRef.current = compareOriginalPageIndex;
   }, [compareOriginalPageIndex]);
+
+  /**
+   * Resolve document-navigation state for the requested pane.
+   *
+   * Ctrl-based navigation operates on the currently visible (selection-filtered) document groups.
+   * When the requested pane points inside the first visible document, Ctrl+Previous may still jump
+   * back to that document's first page. Forward navigation only advances when another visible
+   * document exists.
+   *
+   * @param {ViewerPageTarget} target
+   * @returns {{ enabled:boolean, totalVisibleDocuments:number, currentDocumentNumber:number, currentDocumentStartPageNumber:number, firstDocumentPageNumber:number, lastDocumentPageNumber:number, previousDocumentPageNumber:number, nextDocumentPageNumber:number, canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }}
+   */
+  const getDocumentNavigationState = useCallback((target) => {
+    const safeTarget = target === 'compare' ? 'compare' : 'primary';
+    const baseOriginalPageNumber = safeTarget === 'compare'
+      ? (compareOriginalPageNumber ?? currentOriginalPageNumber)
+      : currentOriginalPageNumber;
+    const baseOriginalIndex = safeTarget === 'compare'
+      ? (compareOriginalPageIndex >= 0 ? compareOriginalPageIndex : currentOriginalPageIndex)
+      : currentOriginalPageIndex;
+
+    if (!documentNavigationEnabled || visibleDocumentGroups.length <= 0) {
+      return {
+        enabled: false,
+        totalVisibleDocuments: 0,
+        currentDocumentNumber: 1,
+        currentDocumentStartPageNumber: baseOriginalPageNumber,
+        firstDocumentPageNumber: 1,
+        lastDocumentPageNumber: 1,
+        previousDocumentPageNumber: baseOriginalPageNumber,
+        nextDocumentPageNumber: baseOriginalPageNumber,
+        canGoPrevious: false,
+        canGoNext: false,
+        canGoFirst: false,
+        canGoLast: false,
+      };
+    }
+
+    const rawGroupIndex = visibleDocumentGroupIndexByOriginalIndex.get(baseOriginalIndex);
+    const groupIndex = Number.isFinite(rawGroupIndex) ? rawGroupIndex : 0;
+    const currentGroup = visibleDocumentGroups[groupIndex] || visibleDocumentGroups[0];
+    const firstGroup = visibleDocumentGroups[0] || currentGroup;
+    const lastGroup = visibleDocumentGroups[visibleDocumentGroups.length - 1] || currentGroup;
+    const previousGroup = groupIndex > 0 ? visibleDocumentGroups[groupIndex - 1] : currentGroup;
+    const nextGroup = groupIndex < visibleDocumentGroups.length - 1
+      ? visibleDocumentGroups[groupIndex + 1]
+      : currentGroup;
+    const currentDocumentStartPageNumber = Math.max(1, Number(currentGroup?.firstOriginalPageNumber) || baseOriginalPageNumber || 1);
+    const firstDocumentPageNumber = Math.max(1, Number(firstGroup?.firstOriginalPageNumber) || currentDocumentStartPageNumber);
+    const lastDocumentPageNumber = Math.max(1, Number(lastGroup?.firstOriginalPageNumber) || currentDocumentStartPageNumber);
+    const currentPageNumber = Math.max(1, Number(baseOriginalPageNumber) || currentDocumentStartPageNumber);
+
+    return {
+      enabled: true,
+      totalVisibleDocuments: visibleDocumentGroups.length,
+      currentDocumentNumber: Math.max(1, Number(currentGroup?.documentNumber) || groupIndex + 1),
+      currentDocumentStartPageNumber,
+      firstDocumentPageNumber,
+      lastDocumentPageNumber,
+      previousDocumentPageNumber: Math.max(1, Number(previousGroup?.firstOriginalPageNumber) || currentDocumentStartPageNumber),
+      nextDocumentPageNumber: Math.max(1, Number(nextGroup?.firstOriginalPageNumber) || currentPageNumber),
+      canGoPrevious: groupIndex > 0 || currentPageNumber !== currentDocumentStartPageNumber,
+      canGoNext: groupIndex < visibleDocumentGroups.length - 1,
+      canGoFirst: currentPageNumber !== firstDocumentPageNumber,
+      canGoLast: currentPageNumber !== lastDocumentPageNumber,
+    };
+  }, [
+    compareOriginalPageIndex,
+    compareOriginalPageNumber,
+    currentOriginalPageIndex,
+    currentOriginalPageNumber,
+    documentNavigationEnabled,
+    visibleDocumentGroupIndexByOriginalIndex,
+    visibleDocumentGroups,
+  ]);
+
+  const primaryDocumentNavigation = useMemo(
+    () => getDocumentNavigationState('primary'),
+    [getDocumentNavigationState]
+  );
+  const compareDocumentNavigation = useMemo(
+    () => getDocumentNavigationState('compare'),
+    [getDocumentNavigationState]
+  );
 
   /**
    * @param {number} originalIndex
@@ -615,6 +777,55 @@ export function useDocumentViewer() {
     updatePageTarget(target, () => Math.max(1, totalPages || 1));
   }, [totalPages, updatePageTarget]);
 
+  /**
+   * Jump to the first page of the previous visible document (or to the current document start when
+   * the active pane already points inside the first visible document).
+   *
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToPreviousDocument = useCallback((target = 'primary') => {
+    const navigationState = target === 'compare' ? compareDocumentNavigation : primaryDocumentNavigation;
+    if (!navigationState.enabled || !navigationState.canGoPrevious) return;
+    updatePageTarget(target, navigationState.previousDocumentPageNumber);
+  }, [compareDocumentNavigation, primaryDocumentNavigation, updatePageTarget]);
+
+  /**
+   * Jump to the first page of the next visible document.
+   *
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToNextDocument = useCallback((target = 'primary') => {
+    const navigationState = target === 'compare' ? compareDocumentNavigation : primaryDocumentNavigation;
+    if (!navigationState.enabled || !navigationState.canGoNext) return;
+    updatePageTarget(target, navigationState.nextDocumentPageNumber);
+  }, [compareDocumentNavigation, primaryDocumentNavigation, updatePageTarget]);
+
+  /**
+   * Jump to the first page of the first visible document.
+   *
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToFirstDocument = useCallback((target = 'primary') => {
+    const navigationState = target === 'compare' ? compareDocumentNavigation : primaryDocumentNavigation;
+    if (!navigationState.enabled || !navigationState.canGoFirst) return;
+    updatePageTarget(target, navigationState.firstDocumentPageNumber);
+  }, [compareDocumentNavigation, primaryDocumentNavigation, updatePageTarget]);
+
+  /**
+   * Jump to the first page of the last visible document.
+   *
+   * @param {ViewerPageTarget=} target
+   * @returns {void}
+   */
+  const goToLastDocument = useCallback((target = 'primary') => {
+    const navigationState = target === 'compare' ? compareDocumentNavigation : primaryDocumentNavigation;
+    if (!navigationState.enabled || !navigationState.canGoLast) return;
+    updatePageTarget(target, navigationState.lastDocumentPageNumber);
+  }, [compareDocumentNavigation, primaryDocumentNavigation, updatePageTarget]);
+
   // --- Print dialog --------------------------------------------------------------
   const openPrintDialog = useCallback(() => {
     setPrintDialogOpen(true);
@@ -845,7 +1056,12 @@ export function useDocumentViewer() {
     goToNextPage,
     goToFirstPage,
     goToLastPage,
-    closeCompare,
+    goToPreviousDocument,
+    goToNextDocument,
+    goToFirstDocument,
+    goToLastDocument,
+    documentNavigationEnabled,
+    compareNavigationEnabled: !isExpanded,
     zoomIn,
     zoomOut,
     actualSize,
@@ -899,6 +1115,10 @@ export function useDocumentViewer() {
     goToNextPage,
     goToFirstPage,
     goToLastPage,
+    goToPreviousDocument,
+    goToNextDocument,
+    goToFirstDocument,
+    goToLastDocument,
     zoomIn,
     zoomOut,
     actualSize,
@@ -922,6 +1142,9 @@ export function useDocumentViewer() {
     totalPages,
     totalPagesDisplay: totalSessionPages,
     visibleOriginalPageNumbers,
+    documentNavigationEnabled,
+    primaryDocumentNavigation,
+    compareDocumentNavigation,
     selectionPanelEnabled,
     selectionDocuments,
     selectionActive,
