@@ -27,7 +27,10 @@ function normalizePreferences(value) {
   const source = /** @type {Record<string, any>} */ (value);
   const next = {};
   if (source.theme === 'light' || source.theme === 'dark') next.theme = source.theme;
-  if (typeof source.language === 'string' && source.language.trim()) next.language = source.language.trim().toLowerCase();
+  if (typeof source.language === 'string') {
+    const trimmedLanguage = source.language.trim();
+    if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
+  }
   return next;
 }
 

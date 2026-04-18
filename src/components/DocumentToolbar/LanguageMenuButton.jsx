@@ -73,6 +73,26 @@ const LanguageMenuButton = ({ className = '' }) => {
     };
   }, [open]);
 
+  /**
+   * @param {string} code
+   * @returns {Promise<void>}
+   */
+  const handleSelectLanguage = async (code) => {
+    const normalized = String(code || '').trim().toLowerCase();
+    if (!normalized) {
+      setOpen(false);
+      return;
+    }
+
+    try {
+      if (normalized !== currentLanguage) {
+        await i18n.changeLanguage(normalized);
+      }
+    } finally {
+      setOpen(false);
+    }
+  };
+
   return (
     <div className="toolbar-menu-shell">
       <button
@@ -104,17 +124,17 @@ const LanguageMenuButton = ({ className = '' }) => {
                 className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
                 role="menuitemradio"
                 aria-checked={selected}
-                onClick={() => {
-                  i18n.changeLanguage(code);
-                  setOpen(false);
-                }}
+                onClick={() => { void handleSelectLanguage(code); }}
                 title={t('toolbar.language.switchTo', {
                   language: label,
                   defaultValue: `Switch language to ${label}`,
                 })}
               >
-                <span className="toolbar-popup-menu-check material-icons" aria-hidden="true">
-                  {selected ? 'check' : 'language'}
+                <span
+                  className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`}
+                  aria-hidden="true"
+                >
+                  {selected ? 'check' : ''}
                 </span>
                 <span>{label}</span>
               </button>

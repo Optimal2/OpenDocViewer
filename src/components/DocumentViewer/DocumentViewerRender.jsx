@@ -23,10 +23,28 @@
  *     scrollable document surface never overlaps the controls.
  */
 
-import React, { useCallback } from 'react';
+import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
 import DocumentRender from '../DocumentRender.jsx';
 import CompareZoomOverlay from './CompareZoomOverlay.jsx';
+
+/**
+ * @param {Array<any>} allPages
+ * @param {number} originalPageNumber
+ * @returns {{ originalIndex:number, documentNumber:number, totalDocuments:number } | null}
+ */
+function getPageSelectionContext(allPages, originalPageNumber) {
+  const safePageNumber = Math.max(1, Math.floor(Number(originalPageNumber) || 0));
+  const page = Array.isArray(allPages) ? (allPages[safePageNumber - 1] || null) : null;
+  if (!page) return null;
+
+  return {
+    originalIndex: safePageNumber - 1,
+    documentNumber: Math.max(1, Number(page?.documentNumber) || 1),
+    totalDocuments: Math.max(1, Number(page?.totalDocuments) || 1),
+  };
+}
 
 /**
  * DocumentViewerRender
@@ -49,6 +67,9 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @param {function(number): void} props.bumpPostZoomLeft
  * @param {function(number): void} props.bumpPostZoomRight
  * @param {function(Object): void=} props.onPrimaryDisplayStateChange
+ * @param {boolean=} props.selectionPanelEnabled
+ * @param {function(number): boolean=} props.onHidePageFromSelection
+ * @param {function(number): boolean=} props.onHideDocumentFromSelection
  * @returns {React.ReactElement}
  */
 const DocumentViewerRender = ({
@@ -68,7 +89,16 @@ const DocumentViewerRender = ({
   bumpPostZoomLeft,
   bumpPostZoomRight,
   onPrimaryDisplayStateChange,
+  selectionPanelEnabled = false,
+  onHidePageFromSelection,
+  onHideDocumentFromSelection,
 }) => {
+  const { t } = useTranslation('common');
+  const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const [contextMenuState, setContextMenuState] = useState(
+    /** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number })} */ (null)
+  );
+
   const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
     || Number(primaryImageProperties?.brightness || 100) !== 100
     || Number(primaryImageProperties?.contrast || 100) !== 100;
@@ -92,70 +122,217 @@ const DocumentViewerRender = ({
     }
   }, [compareRef, zoomMode]);
 
+  const closeContextMenu = useCallback(() => {
+    setContextMenuState(null);
+  }, []);
+
+  useEffect(() => {
+    closeContextMenu();
+  }, [closeContextMenu, comparePageNumber, pageNumber]);
+
+  useEffect(() => {
+    if (!contextMenuState) return undefined;
+
+    /** @param {*} event */
+    const handlePointerDown = (event) => {
+      if (contextMenuRef.current && contextMenuRef.current.contains(event?.target)) return;
+      closeContextMenu();
+    };
+
+    /** @param {KeyboardEvent} event */
+    const handleKeyDown = (event) => {
+      if (String(event?.key || '') !== 'Escape') return;
+      closeContextMenu();
+    };
+
+    window.addEventListener('mousedown', handlePointerDown, true);
+    window.addEventListener('touchstart', handlePointerDown, true);
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('resize', closeContextMenu, true);
+    window.addEventListener('scroll', closeContextMenu, true);
+
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown, true);
+      window.removeEventListener('touchstart', handlePointerDown, true);
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('resize', closeContextMenu, true);
+      window.removeEventListener('scroll', closeContextMenu, true);
+    };
+  }, [closeContextMenu, contextMenuState]);
+
+  /**
+   * @param {*} event
+   * @param {(number|null|undefined)} originalPageNumber
+   * @returns {void}
+   */
+  const handlePaneContextMenu = useCallback((event, originalPageNumber) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+
+    if (!selectionPanelEnabled || (typeof onHidePageFromSelection !== 'function' && typeof onHideDocumentFromSelection !== 'function')) {
+      closeContextMenu();
+      return;
+    }
+
+    const selectionContext = getPageSelectionContext(allPages, Number(originalPageNumber) || 0);
+    if (!selectionContext) {
+      closeContextMenu();
+      return;
+    }
+
+    setContextMenuState({
+      x: Math.max(8, Number(event?.clientX) || 0),
+      y: Math.max(8, Number(event?.clientY) || 0),
+      ...selectionContext,
+    });
+  }, [allPages, closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, selectionPanelEnabled]);
+
+  const handleHidePageFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
+    onHidePageFromSelection(contextMenuState.originalIndex);
+    closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onHidePageFromSelection]);
+
+  const handleHideDocumentFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onHideDocumentFromSelection !== 'function') return;
+    onHideDocumentFromSelection(contextMenuState.originalIndex);
+    closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onHideDocumentFromSelection]);
+
   // Apply per-pane post-zoom only while comparing; single-pane stays at base zoom
   const effectiveLeftZoom = isComparing ? zoom * postZoomLeft : zoom;
   const effectiveRightZoom = isComparing ? zoom * postZoomRight : zoom;
+  const canHidePageFromSelection = !!selectionPanelEnabled && typeof onHidePageFromSelection === 'function';
+  const canHideDocumentFromSelection = !!selectionPanelEnabled && typeof onHideDocumentFromSelection === 'function';
+  const contextMenuLeft = contextMenuState
+    ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 240) - 248)))
+    : 0;
+  const contextMenuTop = contextMenuState
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 132) - 140)))
+    : 0;
 
   return (
-    <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
-      {/* LEFT / PRIMARY PANE */}
-      <div
-        className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
-        style={{ position: 'relative' }}
-      >
-        <div className={`document-pane-frame ${isComparing ? 'is-primary-pane' : 'is-single-pane'}`}>
-          {isComparing && (
-            <div className="compare-zoom-sticky">
-              <CompareZoomOverlay
-                value={postZoomLeft}
-                onInc={() => bumpPostZoomLeft?.(1)}
-                onDec={() => bumpPostZoomLeft?.(-1)}
-              />
-            </div>
-          )}
-
-          <DocumentRender
-            ref={documentRenderRef}
-            pageNumber={pageNumber}
-            zoom={effectiveLeftZoom}
-            initialRenderDone={() => {}}
-            onRender={handlePrimaryRendered}
-            setZoom={setZoom}
-            imageProperties={primaryImageProperties}
-            isCanvasEnabled={primaryCanvasEnabled}
-            allPages={allPages}
-            onDisplayStateChange={onPrimaryDisplayStateChange}
-          />
-        </div>
-      </div>
-
-      {/* RIGHT / COMPARE PANE */}
-      {isComparing && comparePageNumber !== null && (
-        <div className="document-render-container-comparison" style={{ position: 'relative' }}>
-          <div className="document-pane-frame is-compare-pane">
-            <div className="compare-zoom-sticky">
-              <CompareZoomOverlay
-                value={postZoomRight}
-                onInc={() => bumpPostZoomRight?.(1)}
-                onDec={() => bumpPostZoomRight?.(-1)}
-              />
-            </div>
+    <>
+      <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
+        {/* LEFT / PRIMARY PANE */}
+        <div
+          className={isComparing ? 'document-render-container-comparison' : 'document-render-container-single'}
+          style={{ position: 'relative' }}
+        >
+          <div
+            className={`document-pane-frame ${isComparing ? 'is-primary-pane' : 'is-single-pane'}`}
+            onContextMenu={(event) => handlePaneContextMenu(event, pageNumber)}
+          >
+            {isComparing && (
+              <div className="compare-zoom-sticky">
+                <CompareZoomOverlay
+                  value={postZoomLeft}
+                  onInc={() => bumpPostZoomLeft?.(1)}
+                  onDec={() => bumpPostZoomLeft?.(-1)}
+                />
+              </div>
+            )}
 
             <DocumentRender
-              ref={compareRef}
-              pageNumber={comparePageNumber}
-              zoom={effectiveRightZoom}
+              ref={documentRenderRef}
+              pageNumber={pageNumber}
+              zoom={effectiveLeftZoom}
               initialRenderDone={() => {}}
-              onRender={handleCompareRendered}
+              onRender={handlePrimaryRendered}
               setZoom={setZoom}
-              imageProperties={compareImageProperties}
-              isCanvasEnabled={compareCanvasEnabled}
+              imageProperties={primaryImageProperties}
+              isCanvasEnabled={primaryCanvasEnabled}
               allPages={allPages}
+              onDisplayStateChange={onPrimaryDisplayStateChange}
             />
           </div>
         </div>
-      )}
-    </div>
+
+        {/* RIGHT / COMPARE PANE */}
+        {isComparing && comparePageNumber !== null && (
+          <div className="document-render-container-comparison" style={{ position: 'relative' }}>
+            <div
+              className="document-pane-frame is-compare-pane"
+              onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber)}
+            >
+              <div className="compare-zoom-sticky">
+                <CompareZoomOverlay
+                  value={postZoomRight}
+                  onInc={() => bumpPostZoomRight?.(1)}
+                  onDec={() => bumpPostZoomRight?.(-1)}
+                />
+              </div>
+
+              <DocumentRender
+                ref={compareRef}
+                pageNumber={comparePageNumber}
+                zoom={effectiveRightZoom}
+                initialRenderDone={() => {}}
+                onRender={handleCompareRendered}
+                setZoom={setZoom}
+                imageProperties={compareImageProperties}
+                isCanvasEnabled={compareCanvasEnabled}
+                allPages={allPages}
+              />
+            </div>
+          </div>
+        )}
+      </div>
+
+      {contextMenuState ? (
+        <div
+          ref={contextMenuRef}
+          className="odv-context-menu"
+          role="menu"
+          style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
+        >
+          <button
+            type="button"
+            className="odv-context-menu-item"
+            role="menuitem"
+            disabled={!canHidePageFromSelection}
+            onClick={handleHidePageFromContextMenu}
+            title={canHidePageFromSelection
+              ? t('thumbnails.contextMenu.hidePageFromSelection', {
+                  defaultValue: 'Hide this page from the current selection',
+                })
+              : t('thumbnails.contextMenu.hideUnavailable', {
+                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
+                })}
+          >
+            <span className="material-icons" aria-hidden="true">remove_circle_outline</span>
+            <span>
+              {t('thumbnails.contextMenu.hidePageFromSelectionLabel', {
+                defaultValue: 'Hide this page',
+              })}
+            </span>
+          </button>
+          <button
+            type="button"
+            className="odv-context-menu-item"
+            role="menuitem"
+            disabled={!canHideDocumentFromSelection}
+            onClick={handleHideDocumentFromContextMenu}
+            title={canHideDocumentFromSelection
+              ? t('thumbnails.contextMenu.hideDocumentFromSelection', {
+                  document: contextMenuState.documentNumber || 1,
+                  total: contextMenuState.totalDocuments || 1,
+                  defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1} from the current selection`,
+                })
+              : t('thumbnails.contextMenu.hideUnavailable', {
+                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
+                })}
+          >
+            <span className="material-icons" aria-hidden="true">folder_off</span>
+            <span>
+              {`${t('thumbnails.contextMenu.hideDocumentFromSelectionLabelPrefix', {
+                defaultValue: 'Hide document',
+              })} ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`}
+            </span>
+          </button>
+        </div>
+      ) : null}
+    </>
   );
 };
 
@@ -184,6 +361,9 @@ DocumentViewerRender.propTypes = {
   bumpPostZoomLeft: PropTypes.func.isRequired,
   bumpPostZoomRight: PropTypes.func.isRequired,
   onPrimaryDisplayStateChange: PropTypes.func,
+  selectionPanelEnabled: PropTypes.bool,
+  onHidePageFromSelection: PropTypes.func,
+  onHideDocumentFromSelection: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerRender);
