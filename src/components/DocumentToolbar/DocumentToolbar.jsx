@@ -35,6 +35,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {number=} from
  * @property {number=} to
  * @property {Array<number>=} sequence
+ * @property {'selection'|'session'=} allScope
  * @property {string=} reason
  * @property {string=} forWhom
  */
@@ -71,7 +72,9 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * Props for {@link DocumentToolbar}.
  * @typedef {Object} DocumentToolbarProps
  * @property {number} pageNumber
+ * @property {number} pageNumberDisplay
  * @property {number} totalPages
+ * @property {number} totalPagesDisplay
  * @property {boolean} isDocumentLoading
  * @property {boolean} prevPageDisabled
  * @property {boolean} nextPageDisabled
@@ -106,6 +109,10 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(number): void=} setZoom
  * @property {boolean=} compareDisabled
  * @property {boolean=} editDisabled
+ * @property {boolean=} hasActiveSelection
+ * @property {Array<number>=} visibleOriginalPageNumbers
+ * @property {number=} selectionIncludedCount
+ * @property {number=} sessionTotalPages
  */
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -140,7 +147,9 @@ function normalizeToolbarPageNumber(value, totalPages, fallbackPage = 1) {
  */
 const DocumentToolbar = ({
   pageNumber,
+  pageNumberDisplay = pageNumber,
   totalPages,
+  totalPagesDisplay = totalPages,
   isDocumentLoading = false,
   prevPageDisabled,
   nextPageDisabled,
@@ -176,6 +185,10 @@ const DocumentToolbar = ({
   // Optional UI flags that keep Compare and Edit mutually exclusive.
   compareDisabled = false,
   editDisabled = false,
+  hasActiveSelection = false,
+  visibleOriginalPageNumbers = [],
+  selectionIncludedCount = 0,
+  sessionTotalPages = totalPagesDisplay,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
@@ -398,8 +411,8 @@ const DocumentToolbar = ({
    */
   const toPagesString = useCallback((detail) => {
     if (!detail) return null;
-    if (detail.mode === 'all') return 'all';
-    if (detail.mode === 'active') return String(pageNumber);
+    if (detail.mode === 'all') return detail.allScope === 'selection' ? 'selection' : 'all';
+    if (detail.mode === 'active') return String(pageNumberDisplay);
     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
       return `${detail.from}-${detail.to}`;
     }
@@ -407,7 +420,28 @@ const DocumentToolbar = ({
       return detail.sequence.join(',');
     }
     return null;
-  }, [pageNumber]);
+  }, [pageNumberDisplay]);
+
+  /**
+   * Estimate the number of pages the user is about to print.
+   * @param {PrintSubmitDetail} detail
+   * @returns {(number|null)}
+   */
+  const resolvePrintPageCount = useCallback((detail) => {
+    if (!detail) return 1;
+    if (detail.mode === 'active') return 1;
+    if (detail.mode === 'all') {
+      if (detail.allScope === 'selection' && hasActiveSelection) return visibleOriginalPageNumbers.length;
+      return Math.max(0, Number(sessionTotalPages) || 0);
+    }
+    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+      return Math.abs(Math.floor(detail.to) - Math.floor(detail.from)) + 1;
+    }
+    if (detail.mode === 'advanced' && Array.isArray(detail.sequence)) {
+      return detail.sequence.length;
+    }
+    return null;
+  }, [hasActiveSelection, sessionTotalPages, visibleOriginalPageNumbers]);
 
   /**
    * Fire-and-forget user print log. Must never block the print action.
@@ -422,12 +456,12 @@ const DocumentToolbar = ({
         forWhom: detail?.forWhom ?? null,
         docId: null,
         fileName: null,
-        pageCount: totalPages ?? null,
+        pageCount: resolvePrintPageCount(detail),
         pages: toPagesString(detail),
         copies: 1
       });
     } catch { /* never throw */ }
-  }, [toPagesString, totalPages]);
+  }, [resolvePrintPageCount, toPagesString]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -452,6 +486,10 @@ const DocumentToolbar = ({
       return;
     }
     if (detail.mode === 'all') {
+      if (detail.allScope === 'selection' && Array.isArray(visibleOriginalPageNumbers) && visibleOriginalPageNumbers.length) {
+        handlePrintSequence(documentRenderRef, visibleOriginalPageNumbers, commonOpts);
+        return;
+      }
       handlePrintAll(documentRenderRef, commonOpts);
       return;
     }
@@ -463,7 +501,7 @@ const DocumentToolbar = ({
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
       return;
     }
-  }, [closePrintDialog, documentRenderRef, viewerContainerRef, submitUserPrintLog]);
+  }, [closePrintDialog, documentRenderRef, submitUserPrintLog, viewerContainerRef, visibleOriginalPageNumbers]);
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
@@ -520,7 +558,9 @@ const DocumentToolbar = ({
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
         pageNumber={pageNumber}
+        pageNumberDisplay={pageNumberDisplay}
         totalPages={totalPages}
+        totalPagesDisplay={totalPagesDisplay}
         /* NEW: allow manual page entry to apply immediately */
         onGoToPage={setPageNumber}
         isDocumentLoading={isDocumentLoading}
@@ -648,9 +688,12 @@ const DocumentToolbar = ({
         isOpen={isPrintDialogOpen}
         onClose={() => closePrintDialog?.()}
         onSubmit={handlePrintSubmit}
-        totalPages={totalPages}
+        totalPages={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
-        activePageNumber={pageNumber}
+        activePageNumber={pageNumberDisplay}
+        hasActiveSelection={hasActiveSelection}
+        selectionIncludedCount={selectionIncludedCount}
+        sessionTotalPages={sessionTotalPages}
       />
     </div>
   );
@@ -658,7 +701,9 @@ const DocumentToolbar = ({
 
 DocumentToolbar.propTypes = {
   pageNumber: PropTypes.number.isRequired,
+  pageNumberDisplay: PropTypes.number,
   totalPages: PropTypes.number.isRequired,
+  totalPagesDisplay: PropTypes.number,
   isDocumentLoading: PropTypes.bool,
   prevPageDisabled: PropTypes.bool.isRequired,
   nextPageDisabled: PropTypes.bool.isRequired,
@@ -700,6 +745,10 @@ DocumentToolbar.propTypes = {
   setZoom: PropTypes.func,
   compareDisabled: PropTypes.bool,
   editDisabled: PropTypes.bool,
+  hasActiveSelection: PropTypes.bool,
+  visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number),
+  selectionIncludedCount: PropTypes.number,
+  sessionTotalPages: PropTypes.number,
 };
 
 export default React.memo(DocumentToolbar);

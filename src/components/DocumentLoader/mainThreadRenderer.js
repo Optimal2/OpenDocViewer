@@ -25,6 +25,7 @@ import { generateThumbnail } from './documentLoaderUtils.js';
 // Import the matching pdf.js API and resolve the worker URL from the same package version
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 
 /**
  * Render job passed to the main-thread renderer.
@@ -203,7 +204,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
         : job.pageStartIndex; // best-effort when pageIndex is not supplied
 
     const at = job.allPagesStartingIndex + (idx - job.pageStartIndex);
-    const placeholderImageUrl = 'placeholder.png';
+    const placeholderImageUrl = getPublicAssetUrl('placeholder.png');
 
     logger.error('Error processing PDF in main thread', { error: String(error?.message || error), runId: job.runId });
 
@@ -443,7 +444,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
       } catch (perPageError) {
         // Per-page failure should not abort the whole job — insert placeholder and continue.
         const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
-        const placeholderImageUrl = 'placeholder.png';
+        const placeholderImageUrl = getPublicAssetUrl('placeholder.png');
 
         logger.warn('TIFF page failed to decode on main thread; inserting placeholder', {
           pageIndex: i,
@@ -482,7 +483,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
         : job.pageStartIndex;
 
     const at = job.allPagesStartingIndex + (idx - job.pageStartIndex);
-    const placeholderImageUrl = 'placeholder.png';
+    const placeholderImageUrl = getPublicAssetUrl('placeholder.png');
 
     logger.error('Error processing TIFF in main thread', { error: String(error?.message || error), runId: job.runId });
 

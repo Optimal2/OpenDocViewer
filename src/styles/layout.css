@@ -314,6 +314,51 @@ canvas {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 22%, transparent 78%);
 }
 
+.thumbnail-pane-mode-switch {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  margin-left: auto;
+  padding: 2px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--canvas-background-color) 78%, transparent 22%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+}
+
+.thumbnail-pane-mode-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 28px;
+  padding: 0 10px;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: var(--text-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.thumbnail-pane-mode-button:hover,
+.thumbnail-pane-mode-button:focus {
+  outline: none;
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 10%, transparent 90%);
+}
+
+.thumbnail-pane-mode-button.is-active {
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 14%, var(--canvas-background-color) 86%);
+  color: var(--primary-color-active);
+  box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--thumbnail-primary-color) 24%, var(--thumbnail-border-color) 76%);
+}
+
+.thumbnail-pane-mode-button.has-selection:not(.is-active) {
+  background: color-mix(in srgb, var(--thumbnail-compare-color) 14%, transparent 86%);
+  color: color-mix(in srgb, var(--thumbnail-compare-color) 78%, var(--text-color) 22%);
+}
+
 .thumbnail-pane-collapsed-rail {
   display: flex;
   align-items: flex-start;
@@ -642,6 +687,148 @@ canvas {
 .thumbnail {
   margin: 0 auto;
   background: transparent;
+}
+
+.thumbnail-selection-panel {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 10px 10px 12px;
+  gap: 10px;
+  overflow: hidden;
+}
+
+.thumbnail-selection-panel.is-disabled {
+  opacity: 0.88;
+}
+
+.thumbnail-selection-status {
+  flex: 0 0 auto;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--canvas-background-color) 88%, transparent 12%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+  font-size: 0.78rem;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--text-color) 86%, transparent 14%);
+}
+
+.thumbnail-selection-tree {
+  flex: 1 1 auto;
+  min-height: 0;
+  overflow: auto;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-right: 2px;
+}
+
+.thumbnail-selection-document {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--canvas-background-color) 92%, transparent 8%);
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+}
+
+.thumbnail-selection-row {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  cursor: pointer;
+  font-size: 0.8rem;
+}
+
+.thumbnail-selection-row input[type='checkbox'] {
+  margin: 0;
+  inline-size: 16px;
+  block-size: 16px;
+  accent-color: var(--thumbnail-primary-color);
+  cursor: pointer;
+}
+
+.thumbnail-selection-row input[type='checkbox']:disabled {
+  cursor: not-allowed;
+}
+
+.thumbnail-selection-row-label {
+  min-width: 0;
+  font-weight: 600;
+  color: var(--text-color);
+}
+
+.thumbnail-selection-row-meta {
+  flex: 0 0 auto;
+  font-size: 0.72rem;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--text-color) 68%, transparent 32%);
+  font-variant-numeric: tabular-nums;
+  white-space: nowrap;
+}
+
+.thumbnail-selection-row.is-master .thumbnail-selection-row-label,
+.thumbnail-selection-row.is-document .thumbnail-selection-row-label {
+  font-weight: 700;
+}
+
+.thumbnail-selection-row.is-page .thumbnail-selection-row-label {
+  font-weight: 500;
+}
+
+.thumbnail-selection-page-list {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  padding-left: 28px;
+}
+
+.thumbnail-selection-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 4px;
+}
+
+.thumbnail-selection-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 32px;
+  padding: 0 12px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+  background: var(--canvas-background-color);
+  color: var(--text-color);
+  font-size: 0.8rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thumbnail-selection-button.primary {
+  background: color-mix(in srgb, var(--thumbnail-primary-color) 14%, var(--canvas-background-color) 86%);
+  color: var(--primary-color-active);
+}
+
+.thumbnail-selection-button:hover,
+.thumbnail-selection-button:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--thumbnail-primary-color) 60%, transparent 40%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 18%, transparent 82%);
+}
+
+.thumbnail-selection-button:disabled,
+.thumbnail-selection-row input[type='checkbox']:disabled + .thumbnail-selection-row-label {
+  opacity: 0.55;
+}
+
+.thumbnail-selection-button:disabled {
+  cursor: not-allowed;
+  box-shadow: none;
 }
 /* Resizer (drag handle between panes) */
 .resizer {

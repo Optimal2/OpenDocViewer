@@ -28,6 +28,7 @@ import {
   renderPDFInMainThread as importedRenderPDFInMainThread,
 } from './mainThreadRenderer.js';
 import { generateThumbnail } from './documentLoaderUtils.js';
+import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 
 /**
  * ✅ IMPORTANT:
@@ -230,8 +231,8 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
         scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts);
       } else {
         const placeholder = {
-          fullSizeUrl: 'placeholder.png',
-          thumbnailUrl: 'placeholder.png',
+          fullSizeUrl: getPublicAssetUrl('placeholder.png'),
+          thumbnailUrl: getPublicAssetUrl('placeholder.png'),
           loaded: false,
           status: -1,
           fileExtension: ext,
@@ -307,8 +308,8 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
         insertPageAtIndex(page, allPagesIndex);
       } else {
         const placeholder = {
-          fullSizeUrl: 'placeholder.png',
-          thumbnailUrl: 'placeholder.png',
+          fullSizeUrl: getPublicAssetUrl('placeholder.png'),
+          thumbnailUrl: getPublicAssetUrl('placeholder.png'),
           loaded: false,
           status: -1,
           fileExtension: fileExt,

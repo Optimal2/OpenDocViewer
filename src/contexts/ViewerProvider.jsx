@@ -135,6 +135,22 @@ function isReusableAssetUrl(url) {
 }
 
 /**
+ * @param {*} page
+ * @returns {boolean}
+ */
+function isPageReadyForSession(page) {
+  return !!page && (Number(page.fullSizeStatus) === 1 || Number(page.fullSizeStatus) === -1 || Number(page.status) === -1);
+}
+
+/**
+ * @param {*} page
+ * @returns {boolean}
+ */
+function isPageFailedForSession(page) {
+  return !!page && (Number(page.fullSizeStatus) === -1 || Number(page.status) === -1);
+}
+
+/**
  * @param {function(): number} getLimit
  * @returns {function(function(): Promise<any>, ('critical'|'high'|'normal'|'low'|number)=): Promise<any>}
  */
@@ -247,7 +263,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
   const sessionConfigRef = useRef(getDocumentLoadingConfig());
   const sessionEpochRef = useRef(0);
   const memoryMonitorTimerRef = useRef(null);
-  const warmupQueueRef = useRef([]);
+  const warmupQueueRef = useRef(/** @type {Array<{ pageIndex:number, variant:('full'|'thumbnail'), priority:('critical'|'high'|'normal'|'low'|number), reason:(('warmup'|'readiness')|undefined) }>} */ ([]));
   const warmupRunningRef = useRef(false);
   const pendingAssetPromisesRef = useRef(new Map());
   const fullPageCacheRef = useRef(new Map());
@@ -1314,8 +1330,12 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
       while (warmupQueueRef.current.length > 0) {
         const renderStrategy = String(sessionConfigRef.current?.render?.strategy || 'lazy-viewport').toLowerCase();
         if (renderStrategy === 'lazy-viewport') {
-          warmupQueueRef.current = [];
-          break;
+          const readinessTasks = warmupQueueRef.current.filter((task) => String(task?.reason || '') === 'readiness');
+          if (readinessTasks.length <= 0) {
+            warmupQueueRef.current = [];
+            break;
+          }
+          warmupQueueRef.current = readinessTasks;
         }
 
         const batchSize = Math.max(1, Number(sessionConfigRef.current?.render?.warmupBatchSize) || 1);
@@ -1375,11 +1395,11 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
 
     const queue = warmupQueueRef.current.slice();
     const queued = new Set(queue.map((item) => `${String(item?.variant || 'full')}:${Math.max(0, Number(item?.pageIndex) || 0)}`));
-    const addTask = (pageIndex, variant, priority) => {
+    const addTask = (pageIndex, variant, priority, reason = 'warmup') => {
       const key = `${variant}:${pageIndex}`;
       if (queued.has(key)) return;
       queued.add(key);
-      queue.push({ pageIndex, variant, priority });
+      queue.push({ pageIndex, variant, priority, reason });
     };
 
     for (let offset = 0; offset < warmPageCount; offset += 1) {
@@ -1578,6 +1598,64 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     };
   }, [collectRuntimeDiagnostics, diagnosticsEnabled]);
 
+  const pageLoadState = useMemo(() => {
+    const pages = Array.isArray(allPages) ? allPages : [];
+    const discoveredPages = pages.length;
+    let readyPages = 0;
+    let failedPages = 0;
+
+    for (const page of pages) {
+      if (isPageFailedForSession(page)) {
+        failedPages += 1;
+        continue;
+      }
+      if (isPageReadyForSession(page)) readyPages += 1;
+    }
+
+    const pendingPages = Math.max(0, discoveredPages - readyPages - failedPages);
+    const expectedPages = Math.max(discoveredPages, Number(plannedPageCount) || 0);
+    const allPagesReady = expectedPages > 0
+      && !loadingRunActive
+      && discoveredPages >= expectedPages
+      && pendingPages === 0;
+
+    return {
+      discoveredPages,
+      expectedPages,
+      readyPages,
+      failedPages,
+      pendingPages,
+      allPagesReady,
+    };
+  }, [allPages, loadingRunActive, plannedPageCount]);
+
+  useEffect(() => {
+    if (loadingRunActive) return undefined;
+    if (pageLoadState.allPagesReady) return undefined;
+    if (pageLoadState.discoveredPages <= 0) return undefined;
+
+    const queue = warmupQueueRef.current.slice();
+    const queued = new Set(queue.map((task) => `${String(task?.variant || 'full')}:${Math.max(0, Number(task?.pageIndex) || 0)}`));
+    let added = 0;
+
+    for (let pageIndex = 0; pageIndex < pageLoadState.discoveredPages; pageIndex += 1) {
+      const page = allPages[pageIndex];
+      if (!page || isPageReadyForSession(page)) continue;
+      const key = `full:${pageIndex}`;
+      if (queued.has(key)) continue;
+      queued.add(key);
+      queue.push({ pageIndex, variant: 'full', priority: 'low', reason: 'readiness' });
+      added += 1;
+    }
+
+    if (added > 0) {
+      warmupQueueRef.current = queue;
+      void pumpWarmupQueue();
+    }
+
+    return undefined;
+  }, [allPages, loadingRunActive, pageLoadState, pumpWarmupQueue]);
+
   useEffect(() => () => {
     resetViewerState().catch((e) => {
       logger.warn('ViewerProvider unmount cleanup failed', { error: String(e?.message || e) });
@@ -1614,6 +1692,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     documentLoadingConfig,
     memoryPressureStage,
     runtimeDiagnostics,
+    pageLoadState,
     scheduleSourceWarmup,
   }), [
     allPages,
@@ -1641,6 +1720,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     documentLoadingConfig,
     memoryPressureStage,
     runtimeDiagnostics,
+    pageLoadState,
     scheduleSourceWarmup,
   ]);
 

@@ -15,6 +15,9 @@
  * @param {number} props.totalPages - Total number of pages (validates range/custom).
  * @param {boolean=} props.isDocumentLoading - Restrict the dialog to active-page printing while sources still load.
  * @param {number=} props.activePageNumber - Current active page number.
+ * @param {boolean=} props.hasActiveSelection - Whether the viewer currently hides at least one page.
+ * @param {number=} props.selectionIncludedCount - Number of currently included pages when selection is active.
+ * @param {number=} props.sessionTotalPages - Total pages in the underlying session before filtering.
  * @returns {(JSX.Element|null)}
  */
 
@@ -35,16 +38,37 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {number} [from] - Start page for "range" mode.
  * @property {number} [to] - End page for "range" mode.
  * @property {Array.<number>} [sequence] - Explicit page order for "advanced" mode.
+ * @property {'selection'|'session'} [allScope] - Scope for "all pages" in basic mode when a filtered selection exists.
  * @property {string|null} [reason] - Optional print reason (may be composed from option + extra text).
  * @property {string|null} [forWhom] - Optional "for whom" value.
  */
 
-export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages, isDocumentLoading = false, activePageNumber = 1 }) {
+export default function PrintRangeDialog({
+  isOpen,
+  onClose,
+  onSubmit,
+  totalPages,
+  isDocumentLoading = false,
+  activePageNumber = 1,
+  hasActiveSelection = false,
+  selectionIncludedCount = 0,
+  sessionTotalPages = totalPages,
+}) {
   const { t, i18n } = useTranslation('common');
 
   // No CSS Module anymore; controller doesn't need styles
   const ctrl = usePrintRangeController({
-    isOpen, onClose, onSubmit, totalPages, isDocumentLoading, activePageNumber, t, i18n
+    isOpen,
+    onClose,
+    onSubmit,
+    totalPages,
+    isDocumentLoading,
+    activePageNumber,
+    hasActiveSelection,
+    selectionIncludedCount,
+    sessionTotalPages,
+    t,
+    i18n,
   });
 
   if (!isOpen) return null;
@@ -129,6 +153,34 @@ export default function PrintRangeDialog({ isOpen, onClose, onSubmit, totalPages
                 </label>
               )}
             </div>
+
+            {ctrl.basicChoice === 'all' && ctrl.hasActiveSelection && !ctrl.restrictToActivePage && (
+              <div className="odv-prd-subField" role="group" aria-label={t('printDialog.allScope.label')}>
+                <div className="odv-prd-radioList odv-prd-subRadioList">
+                  <label className="odv-prd-radioRow">
+                    <input
+                      type="radio"
+                      name="allScope"
+                      value="selection"
+                      checked={ctrl.allScope === 'selection'}
+                      onChange={() => ctrl.setAllScope('selection')}
+                    />
+                    <span>{t('printDialog.allScope.selection', { count: ctrl.selectionIncludedCount })}</span>
+                  </label>
+                  <label className="odv-prd-radioRow">
+                    <input
+                      type="radio"
+                      name="allScope"
+                      value="session"
+                      checked={ctrl.allScope === 'session'}
+                      onChange={() => ctrl.setAllScope('session')}
+                    />
+                    <span>{t('printDialog.allScope.session', { count: ctrl.sessionTotalPages })}</span>
+                  </label>
+                </div>
+                <span className="odv-prd-hint">{t('printDialog.allScope.hint')}</span>
+              </div>
+            )}
           </div>
         )}
 

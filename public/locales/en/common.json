@@ -120,7 +120,13 @@
       "advancedGroup": "Advanced choices",
       "userLogGroup": "User log"
     },
-    "loadingHint": "More print options become available when document loading finishes. Only the active page can be printed for now."
+    "loadingHint": "More print options become available when document loading finishes. Only the active page can be printed for now.",
+    "allScope": {
+      "label": "What should “All pages” include?",
+      "selection": "Current selection ({count} pages)",
+      "session": "Entire session ({count} pages)",
+      "hint": "Use the current filtered selection or ignore the selection and print the complete session."
+    }
   },
   "print": {
     "alt": {
@@ -226,7 +232,23 @@
     "rightPaneBadgeShort": "R",
     "leftPaneBadgeTooltip": "Left pane in compare view",
     "rightPaneBadgeTooltip": "Right pane in compare view",
-    "documentBoundaryEndTitle": "End of document bundle"
+    "documentBoundaryEndTitle": "End of document bundle",
+    "selection": {
+      "thumbnailsTab": "Thumbnails",
+      "selectionTab": "Selection",
+      "tabGroup": "Thumbnail pane content",
+      "loadingStatus": "Selection becomes available when all pages are fully loaded ({ready}/{total} ready, {pending} remaining).",
+      "loadingStatusShort": "Selection will be available when all pages are fully loaded.",
+      "activeStatus": "{selected} of {total} pages are currently included.",
+      "readyStatus": "All {total} pages are currently included.",
+      "allPages": "All pages",
+      "documentLabel": "Document {current}/{total}",
+      "pagesSummary": "{selected}/{total}",
+      "pageLabel": "Page {documentPage}",
+      "pageMeta": "S {documentPage} · T {globalPage}",
+      "save": "Save selection",
+      "cancel": "Cancel"
+    }
   },
   "compareZoom": {
     "increase": "Increase pane zoom",

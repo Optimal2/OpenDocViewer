@@ -259,3 +259,10 @@
   outline: 2px solid var(--primary-color, #2563eb);
   outline-offset: 2px;
 }
+
+.odv-prd-subRadioList {
+  margin-top: 10px;
+  margin-left: 22px;
+  padding-left: 12px;
+  border-left: 2px solid color-mix(in srgb, var(--odv-border, #ccd1d8) 70%, transparent 30%);
+}

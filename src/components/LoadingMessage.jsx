@@ -26,6 +26,7 @@
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 
 /**
  * LoadingMessage component.
@@ -43,8 +44,8 @@ const LoadingMessage = ({
   pageStatus,
   loadingText,
   errorText,
-  loadingImageSrc = 'placeholder.png',
-  errorImageSrc = 'lost.png',
+  loadingImageSrc,
+  errorImageSrc,
   className = '',
   // Note: React supports 'data-testid' as a prop, but we omit it from JSDoc to avoid Closure parser issues with dashed names.
   'data-testid': testId,
@@ -56,7 +57,9 @@ const LoadingMessage = ({
     ? (errorText || t('viewer.loadingMessage.errorText'))
     : (loadingText || t('viewer.loadingMessage.loadingText'));
 
-  const imageUrl = isError ? errorImageSrc : loadingImageSrc;
+  const resolvedLoadingImageSrc = loadingImageSrc || getPublicAssetUrl('placeholder.png');
+  const resolvedErrorImageSrc = errorImageSrc || getPublicAssetUrl('lost.png');
+  const imageUrl = isError ? resolvedErrorImageSrc : resolvedLoadingImageSrc;
   const alt = isError ? t('viewer.loadingMessage.alt.error') : t('viewer.loadingMessage.alt.loading');
 
   return (

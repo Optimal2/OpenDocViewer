@@ -24,7 +24,10 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  */
 
 /**
- * React-like numeric page setter used by the toolbar adapter.
+ * React-like numeric/original page setter used by the toolbar adapter.
+ * Numeric values are interpreted as original session page numbers while updater functions operate on
+ * the filtered visible page ordinal.
+ *
  * @callback PageNumberSetter
  * @param {(number|function(number): number)} next
  * @returns {void}
@@ -33,8 +36,10 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 /**
  * Props consumed by DocumentViewerToolbar.
  * @typedef {Object} DocumentViewerToolbarProps
- * @property {number} pageNumber
- * @property {number} totalPages
+ * @property {number} pageNumber - Current visible page ordinal.
+ * @property {number} pageNumberDisplay - Current original session page number.
+ * @property {number} totalPages - Total visible pages.
+ * @property {number} totalPagesDisplay - Total original session pages.
  * @property {boolean} isDocumentLoading
  * @property {PageNumberSetter} setPageNumber
  * @property {PageNumberSetter} setComparePageNumber
@@ -56,10 +61,14 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} isPrintDialogOpen
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
+ * @property {boolean} hasActiveSelection
+ * @property {Array<number>} visibleOriginalPageNumbers
+ * @property {number} selectionIncludedCount
+ * @property {number} sessionTotalPages
  * @property {function(): void} handleCompare
  * @property {function(): void} closeCompare
  * @property {boolean} isComparing
- * @property {(number|null)} comparePageNumber
+ * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
  * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
  * @property {function(number): void} handleRotationChange
  * @property {function(*): void} handleBrightnessChange
@@ -80,7 +89,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  */
 const DocumentViewerToolbar = ({
   pageNumber,
+  pageNumberDisplay,
   totalPages,
+  totalPagesDisplay,
   isDocumentLoading,
   setPageNumber,
   setComparePageNumber,
@@ -111,6 +122,10 @@ const DocumentViewerToolbar = ({
   isPrintDialogOpen,
   openPrintDialog,
   closePrintDialog,
+  hasActiveSelection,
+  visibleOriginalPageNumbers,
+  selectionIncludedCount,
+  sessionTotalPages,
   isExpanded,
   setIsExpanded,
   prevPageDisabled,
@@ -124,7 +139,9 @@ const DocumentViewerToolbar = ({
   return (
     <DocumentToolbar
       pageNumber={pageNumber}
+      pageNumberDisplay={pageNumberDisplay}
       totalPages={totalPages}
+      totalPagesDisplay={totalPagesDisplay}
       isDocumentLoading={isDocumentLoading}
       setPageNumber={setPageNumber}
       setComparePageNumber={setComparePageNumber}
@@ -146,6 +163,10 @@ const DocumentViewerToolbar = ({
       isPrintDialogOpen={isPrintDialogOpen}
       openPrintDialog={openPrintDialog}
       closePrintDialog={closePrintDialog}
+      hasActiveSelection={hasActiveSelection}
+      visibleOriginalPageNumbers={visibleOriginalPageNumbers}
+      selectionIncludedCount={selectionIncludedCount}
+      sessionTotalPages={sessionTotalPages}
       handleCompare={handleCompare}
       closeCompare={closeCompare}
       isComparing={isComparing}
@@ -169,7 +190,9 @@ const DocumentViewerToolbar = ({
 
 DocumentViewerToolbar.propTypes = {
   pageNumber: PropTypes.number.isRequired,
+  pageNumberDisplay: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
+  totalPagesDisplay: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool.isRequired,
   setPageNumber: PropTypes.func.isRequired,
   setComparePageNumber: PropTypes.func.isRequired,
@@ -207,6 +230,10 @@ DocumentViewerToolbar.propTypes = {
   isPrintDialogOpen: PropTypes.bool.isRequired,
   openPrintDialog: PropTypes.func.isRequired,
   closePrintDialog: PropTypes.func.isRequired,
+  hasActiveSelection: PropTypes.bool.isRequired,
+  visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
+  selectionIncludedCount: PropTypes.number.isRequired,
+  sessionTotalPages: PropTypes.number.isRequired,
   isExpanded: PropTypes.bool.isRequired,
   setIsExpanded: PropTypes.func.isRequired,
   prevPageDisabled: PropTypes.bool.isRequired,
