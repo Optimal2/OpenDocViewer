@@ -7,7 +7,7 @@
  * PURPOSE
  *   Tie together:
  *     • Toolbar (actions, zoom, adjustments)
- *     • Thumbnails (navigation)
+ *     • Thumbnails / selection pane (navigation + filtering)
  *     • Main renderer (canvas/img)
  *   This component wires ViewerContext state into the viewer UI and delegates
  *   heavy logic to the dedicated hook `useDocumentViewer`.
@@ -33,21 +33,26 @@ const DocumentViewer = () => {
   const {
     allPages,
     loadingRunActive,
-    plannedPageCount,
     documentLoadingConfig,
     memoryPressureStage,
     error,
+    pageLoadState,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
 
   const {
     pageNumber,
+    pageNumberDisplay,
+    renderPageNumber,
     setPageNumber,
+    setVisiblePageNumber,
     thumbnailSelectionPageNumber,
+    compareThumbnailPageNumber,
     zoom,
     setZoom,
     isComparing,
     comparePageNumber,
+    renderComparePageNumber,
     setComparePageNumber,
     isPrintDialogOpen,
     openPrintDialog,
@@ -64,7 +69,6 @@ const DocumentViewer = () => {
     documentRenderRef,
     compareRef,
     handlePrimaryDisplayStateChange,
-    handlePageNumberChange,
     goToPreviousPage,
     goToNextPage,
     goToFirstPage,
@@ -84,24 +88,37 @@ const DocumentViewer = () => {
     handleMouseDown,
     selectForCompare,
     setIsExpanded,
-    // sticky fit semantics
     zoomState,
     setZoomMode,
-    // per-pane post-zoom (compare mode only)
     postZoomLeft,
     postZoomRight,
     bumpPostZoomLeft,
     bumpPostZoomRight,
+    viewerPages,
+    totalPages,
+    totalPagesDisplay,
+    visibleOriginalPageNumbers,
+    selectionPanelEnabled,
+    selectionDocuments,
+    selectionActive,
+    draftSelectionMask,
+    draftSelectionDirty,
+    draftIncludedCount,
+    thumbnailPaneMode,
+    setThumbnailPaneMode,
+    toggleDraftSelectAll,
+    toggleDraftDocument,
+    toggleDraftPage,
+    saveDraftSelection,
+    cancelDraftSelection,
   } = useDocumentViewer();
 
-  const totalPages = Array.isArray(allPages) ? allPages.length : 0;
-  const resolvedPageCount = useMemo(
-    () => (Array.isArray(allPages)
-      ? allPages.reduce((count, page) => count + (page && typeof page.status === 'number' ? 1 : 0), 0)
-      : 0),
-    [allPages]
-  );
-  const isDocumentLoading = !!loadingRunActive || (plannedPageCount > 0 && resolvedPageCount < plannedPageCount);
+  const isDocumentLoading = useMemo(() => {
+    if (loadingRunActive) return true;
+    if (!pageLoadState) return false;
+    if ((Number(pageLoadState.expectedPages) || 0) <= 0) return false;
+    return !pageLoadState.allPagesReady;
+  }, [loadingRunActive, pageLoadState]);
 
   const viewerModeIndicator = useMemo(() => {
     if (error) {
@@ -132,7 +149,14 @@ const DocumentViewer = () => {
   const firstPageDisabled = pageNumber <= 1;
   const lastPageDisabled = pageNumber >= totalPages;
 
-  logger.debug('Rendering DocumentViewer', { totalPages, plannedPageCount, resolvedPageCount, isDocumentLoading });
+  logger.debug('Rendering DocumentViewer', {
+    totalSessionPages: Array.isArray(allPages) ? allPages.length : 0,
+    totalVisiblePages: totalPages,
+    readyPages: pageLoadState?.readyPages,
+    expectedPages: pageLoadState?.expectedPages,
+    isDocumentLoading,
+    selectionActive,
+  });
 
   return (
     <div
@@ -148,14 +172,14 @@ const DocumentViewer = () => {
       />
 
       <DocumentViewerToolbar
-        /* page + totals */
         pageNumber={pageNumber}
+        pageNumberDisplay={pageNumberDisplay}
         setPageNumber={setPageNumber}
         setComparePageNumber={setComparePageNumber}
         totalPages={totalPages}
+        totalPagesDisplay={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
 
-        /* zoom controls */
         zoom={zoom}
         setZoom={setZoom}
         zoomIn={zoomIn}
@@ -166,29 +190,29 @@ const DocumentViewer = () => {
         zoomState={zoomState}
         setZoomMode={setZoomMode}
 
-        /* print */
         isPrintDialogOpen={isPrintDialogOpen}
         openPrintDialog={openPrintDialog}
         closePrintDialog={closePrintDialog}
+        hasActiveSelection={selectionActive}
+        visibleOriginalPageNumbers={visibleOriginalPageNumbers}
+        selectionIncludedCount={visibleOriginalPageNumbers.length}
+        sessionTotalPages={totalPagesDisplay}
 
-        /* compare + editing */
         isComparing={isComparing}
         handleCompare={handleCompare}
         closeCompare={closeCompare}
         comparePageNumber={comparePageNumber}
+        imageProperties={imageProperties}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
         resetImageProperties={resetImageProperties}
-        imageProperties={imageProperties}
         isExpanded={isExpanded}
         setIsExpanded={setIsExpanded}
 
-        /* imperative + layout refs used by toolbar/print */
         documentRenderRef={documentRenderRef}
         viewerContainerRef={viewerContainerRef}
 
-        /* nav button disabled states */
         prevPageDisabled={prevPageDisabled}
         nextPageDisabled={nextPageDisabled}
         firstPageDisabled={firstPageDisabled}
@@ -197,7 +221,6 @@ const DocumentViewer = () => {
         goToNextPage={goToNextPage}
         goToFirstPage={goToFirstPage}
         goToLastPage={goToLastPage}
-
       />
 
       <div
@@ -211,14 +234,29 @@ const DocumentViewer = () => {
           <>
             <div className="thumbnail-pane-column" style={{ width: `${thumbnailWidth}px`, minWidth: `${thumbnailWidth}px`, flexShrink: 0 }}>
               <DocumentViewerThumbnails
-                allPages={allPages}
+                allPages={viewerPages}
                 pageNumber={thumbnailSelectionPageNumber}
-                setPageNumber={handlePageNumberChange}
+                setPageNumber={setPageNumber}
                 thumbnailsContainerRef={thumbnailsContainerRef}
                 width={thumbnailWidth}
+                sessionTotalPages={totalPagesDisplay}
                 selectForCompare={selectForCompare}
                 isComparing={isComparing}
-                comparePageNumber={comparePageNumber}
+                comparePageNumber={compareThumbnailPageNumber}
+                paneMode={thumbnailPaneMode}
+                setPaneMode={setThumbnailPaneMode}
+                selectionPanelEnabled={selectionPanelEnabled}
+                pageLoadState={pageLoadState}
+                selectionDocuments={selectionDocuments}
+                draftSelectionMask={draftSelectionMask}
+                draftSelectionDirty={draftSelectionDirty}
+                selectionActive={selectionActive}
+                draftIncludedCount={draftIncludedCount}
+                toggleDraftSelectAll={toggleDraftSelectAll}
+                toggleDraftDocument={toggleDraftDocument}
+                toggleDraftPage={toggleDraftPage}
+                saveDraftSelection={saveDraftSelection}
+                cancelDraftSelection={cancelDraftSelection}
                 onIncreaseWidth={increaseThumbnailWidth}
                 onDecreaseWidth={decreaseThumbnailWidth}
                 onHide={hideThumbnailPane}
@@ -242,14 +280,14 @@ const DocumentViewer = () => {
         )}
 
         <DocumentViewerRender
-          pageNumber={pageNumber}
+          pageNumber={renderPageNumber}
           zoom={zoom}
           setZoom={setZoom}
           isComparing={isComparing}
           imageProperties={imageProperties}
           isExpanded={isExpanded}
           documentRenderRef={documentRenderRef}
-          comparePageNumber={comparePageNumber}
+          comparePageNumber={renderComparePageNumber}
           compareRef={compareRef}
           allPages={allPages}
           zoomMode={zoomState?.mode}

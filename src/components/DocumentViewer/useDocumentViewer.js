@@ -13,7 +13,7 @@
  * returned API from this module should remain stable unless a deliberate consumer-facing refactor is made.
  */
 
-import { useState, useRef, useCallback, useContext } from 'react';
+import { useState, useRef, useMemo, useEffect, useCallback, useContext } from 'react';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import ThemeContext from '../../contexts/themeContext.js';
@@ -46,6 +46,132 @@ function clampPage(n, total) {
 function normalizeRotationDegrees(value) {
   const numeric = Math.round(Number(value) || 0);
   return ((numeric % 360) + 360) % 360;
+}
+
+/**
+ * @param {(Array<boolean>|null|undefined)} mask
+ * @param {number} total
+ * @returns {Array<boolean>}
+ */
+function normalizeSelectionMask(mask, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  const base = Array(safeTotal).fill(true);
+  if (!Array.isArray(mask) || mask.length <= 0) return base;
+
+  for (let index = 0; index < safeTotal; index += 1) {
+    if (index < mask.length && mask[index] === false) base[index] = false;
+  }
+  return base;
+}
+
+/**
+ * @param {Array<boolean>} mask
+ * @param {number} total
+ * @returns {boolean}
+ */
+function hasExcludedPages(mask, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  for (let index = 0; index < safeTotal; index += 1) {
+    if (mask[index] === false) return true;
+  }
+  return false;
+}
+
+/**
+ * @param {Array<boolean>} a
+ * @param {Array<boolean>} b
+ * @param {number} total
+ * @returns {boolean}
+ */
+function masksEqual(a, b, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  for (let index = 0; index < safeTotal; index += 1) {
+    if (!!a[index] !== !!b[index]) return false;
+  }
+  return true;
+}
+
+/**
+ * Resolve the nearest visible page number for a requested original page index.
+ * Exact matches win. Otherwise the function prefers the first visible page after the requested
+ * original index and falls back to the nearest visible page before it.
+ *
+ * @param {Array<number>} visibleOriginalIndexes
+ * @param {number} originalIndex
+ * @returns {number}
+ */
+function findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex) {
+  if (!Array.isArray(visibleOriginalIndexes) || visibleOriginalIndexes.length <= 0) return 1;
+
+  const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+  let fallbackBefore = -1;
+
+  for (let visibleIndex = 0; visibleIndex < visibleOriginalIndexes.length; visibleIndex += 1) {
+    const currentOriginalIndex = Math.max(0, Math.floor(Number(visibleOriginalIndexes[visibleIndex]) || 0));
+    if (currentOriginalIndex === safeOriginalIndex) return visibleIndex + 1;
+    if (currentOriginalIndex > safeOriginalIndex) return visibleIndex + 1;
+    fallbackBefore = visibleIndex;
+  }
+
+  return fallbackBefore >= 0 ? fallbackBefore + 1 : 1;
+}
+
+/**
+ * @param {Array<any>} pages
+ * @returns {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number, label:string }> }>}
+ */
+function buildDocumentSelectionModel(pages) {
+  const sourcePages = Array.isArray(pages) ? pages : [];
+  if (sourcePages.length <= 0) return [];
+
+  /** @type {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number, label:string }> }>}
+   */
+  const documents = [];
+
+  for (let originalIndex = 0; originalIndex < sourcePages.length; originalIndex += 1) {
+    const page = sourcePages[originalIndex] || null;
+    const documentNumber = Math.max(1, Number(page?.documentNumber) || 1);
+    const totalDocuments = Math.max(documentNumber, Number(page?.totalDocuments) || 1);
+    const documentId = String(page?.documentId || '').trim();
+    const key = documentId || `doc:${documentNumber}`;
+    const documentPageNumber = Math.max(
+      1,
+      Number(page?.documentPageNumber)
+      || ((documents[documents.length - 1]?.documentNumber === documentNumber
+        ? documents[documents.length - 1].pages.length
+        : 0) + 1)
+    );
+
+    let current = documents[documents.length - 1] || null;
+    if (!current || current.key !== key) {
+      current = {
+        key,
+        documentNumber,
+        totalDocuments,
+        startOriginalIndex: originalIndex,
+        endOriginalIndex: originalIndex,
+        pageCount: Math.max(1, Number(page?.documentPageCount) || 0),
+        pages: [],
+      };
+      documents.push(current);
+    }
+
+    current.endOriginalIndex = originalIndex;
+    current.pageCount = Math.max(current.pageCount, Number(page?.documentPageCount) || (current.pages.length + 1));
+    current.pages.push({
+      originalIndex,
+      originalPageNumber: originalIndex + 1,
+      documentPageNumber,
+      label: `S ${documentPageNumber} · T ${originalIndex + 1}`,
+    });
+  }
+
+  return documents.map((document, index) => ({
+    ...document,
+    documentNumber: Math.max(1, Number(document.documentNumber) || index + 1),
+    totalDocuments: Math.max(1, Number(document.totalDocuments) || documents.length),
+    pageCount: Math.max(document.pages.length, Number(document.pageCount) || document.pages.length || 1),
+  }));
 }
 
 const THUMBNAIL_WIDTH_MIN = 160;
@@ -83,18 +209,111 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
  * toolbar buttons, and thumbnail interactions can share the exact same page-target logic.
  * That keeps compare mode deterministic and avoids accidentally steering the wrong pane.
  *
+ * Page selection/filtering keeps the render layer bound to original session page numbers while the
+ * thumbnail pane and navigation helpers may operate on the filtered visible subset.
+ *
  * @returns {Object} Returns the viewer API object (see returned keys below).
  */
 export function useDocumentViewer() {
-  const { allPages } = useContext(ViewerContext);
+  const { allPages, pageLoadState } = useContext(ViewerContext);
   const { toggleTheme } = useContext(ThemeContext);
-  const totalPages = Array.isArray(allPages) ? allPages.length : 0;
+  const totalSessionPages = Array.isArray(allPages) ? allPages.length : 0;
   const keyboardPrintShortcutBehavior = getKeyboardPrintShortcutBehavior();
 
   // --- Core viewer interaction state ----------------------------------------------
-  const [pageNumber, setPageNumber] = useState(1);
+  const [pageNumberRaw, setPageNumberRaw] = useState(1); // original 1-based page number
   const pageNumberRef = useRef(1);
-  pageNumberRef.current = pageNumber;
+  pageNumberRef.current = pageNumberRaw;
+  const [thumbnailPaneMode, setThumbnailPaneMode] = useState('thumbnails');
+  const [appliedSelectionMask, setAppliedSelectionMask] = useState(/** @type {(Array<boolean>|null)} */ (null));
+  const [draftSelectionMask, setDraftSelectionMask] = useState(/** @type {Array<boolean>} */ ([]));
+  const lastRequestedOriginalIndexRef = useRef(0);
+  const lastRequestedCompareOriginalIndexRef = useRef(0);
+
+  const pageStructureSignature = useMemo(() => {
+    if (!Array.isArray(allPages) || allPages.length <= 0) return '0';
+    const firstPage = allPages[0] || null;
+    const lastPage = allPages[allPages.length - 1] || null;
+    return [
+      allPages.length,
+      String(firstPage?.sourceKey || ''),
+      String(firstPage?.documentId || ''),
+      String(lastPage?.sourceKey || ''),
+      String(lastPage?.documentId || ''),
+    ].join('|');
+  }, [allPages]);
+
+  useEffect(() => {
+    const nextMask = Array(totalSessionPages).fill(true);
+    setAppliedSelectionMask(null);
+    setDraftSelectionMask(nextMask);
+    setThumbnailPaneMode('thumbnails');
+  }, [pageStructureSignature, totalSessionPages]);
+
+  const normalizedAppliedSelectionMask = useMemo(
+    () => normalizeSelectionMask(appliedSelectionMask, totalSessionPages),
+    [appliedSelectionMask, totalSessionPages]
+  );
+  const normalizedDraftSelectionMask = useMemo(
+    () => normalizeSelectionMask(draftSelectionMask, totalSessionPages),
+    [draftSelectionMask, totalSessionPages]
+  );
+  const selectionActive = useMemo(
+    () => hasExcludedPages(normalizedAppliedSelectionMask, totalSessionPages),
+    [normalizedAppliedSelectionMask, totalSessionPages]
+  );
+  const draftSelectionDirty = useMemo(
+    () => !masksEqual(normalizedDraftSelectionMask, normalizedAppliedSelectionMask, totalSessionPages),
+    [normalizedAppliedSelectionMask, normalizedDraftSelectionMask, totalSessionPages]
+  );
+  const draftIncludedCount = useMemo(
+    () => normalizedDraftSelectionMask.reduce((count, included) => count + (included === false ? 0 : 1), 0),
+    [normalizedDraftSelectionMask]
+  );
+  const selectionPanelEnabled = !!pageLoadState?.allPagesReady && totalSessionPages > 0;
+
+  const visibleOriginalIndexes = useMemo(() => {
+    const indexes = [];
+    for (let originalIndex = 0; originalIndex < totalSessionPages; originalIndex += 1) {
+      if (normalizedAppliedSelectionMask[originalIndex] === false) continue;
+      if (!allPages[originalIndex]) continue;
+      indexes.push(originalIndex);
+    }
+    return indexes;
+  }, [allPages, normalizedAppliedSelectionMask, totalSessionPages]);
+
+  const visiblePages = useMemo(
+    () => visibleOriginalIndexes.map((originalIndex) => allPages[originalIndex]).filter(Boolean),
+    [allPages, visibleOriginalIndexes]
+  );
+  const totalPages = visiblePages.length; // visible pages
+  const originalIndexToVisiblePageNumber = useMemo(() => {
+    const map = new Map();
+    visibleOriginalIndexes.forEach((originalIndex, visibleIndex) => {
+      map.set(originalIndex, visibleIndex + 1);
+    });
+    return map;
+  }, [visibleOriginalIndexes]);
+  const selectionDocuments = useMemo(
+    () => buildDocumentSelectionModel(allPages),
+    [allPages]
+  );
+  const visibleOriginalPageNumbers = useMemo(
+    () => visibleOriginalIndexes.map((index) => index + 1),
+    [visibleOriginalIndexes]
+  );
+
+  const currentOriginalPageNumber = clampPage(pageNumberRaw, Math.max(1, totalSessionPages || 1));
+  const currentOriginalPageIndex = Math.max(0, currentOriginalPageNumber - 1);
+  const currentVisiblePageNumber = useMemo(() => {
+    const direct = originalIndexToVisiblePageNumber.get(currentOriginalPageIndex);
+    if (Number.isFinite(direct)) return direct;
+    return findNearestVisiblePageNumber(visibleOriginalIndexes, currentOriginalPageIndex);
+  }, [currentOriginalPageIndex, originalIndexToVisiblePageNumber, visibleOriginalIndexes]);
+
+  useEffect(() => {
+    lastRequestedOriginalIndexRef.current = currentOriginalPageIndex;
+  }, [currentOriginalPageIndex]);
 
   const [primaryDisplayState, setPrimaryDisplayState] = useState({
     requestedPageNumber: 1,
@@ -107,8 +326,63 @@ export function useDocumentViewer() {
   const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
 
   const [isComparing, setIsComparing] = useState(false);
-  const [comparePageNumber, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null));
+  const [comparePageNumberRaw, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null)); // original 1-based
   const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
+
+  const compareOriginalPageNumber = comparePageNumberRaw == null
+    ? null
+    : clampPage(comparePageNumberRaw, Math.max(1, totalSessionPages || 1));
+  const compareOriginalPageIndex = compareOriginalPageNumber == null ? -1 : Math.max(0, compareOriginalPageNumber - 1);
+  const compareVisiblePageNumber = useMemo(() => {
+    if (compareOriginalPageIndex < 0) return null;
+    const direct = originalIndexToVisiblePageNumber.get(compareOriginalPageIndex);
+    if (Number.isFinite(direct)) return direct;
+    return findNearestVisiblePageNumber(visibleOriginalIndexes, compareOriginalPageIndex);
+  }, [compareOriginalPageIndex, originalIndexToVisiblePageNumber, visibleOriginalIndexes]);
+
+  useEffect(() => {
+    if (compareOriginalPageIndex >= 0) lastRequestedCompareOriginalIndexRef.current = compareOriginalPageIndex;
+  }, [compareOriginalPageIndex]);
+
+  /**
+   * @param {number} originalIndex
+   * @returns {number}
+   */
+  const resolveNearestVisibleOriginalPageNumber = useCallback((originalIndex) => {
+    if (visibleOriginalIndexes.length <= 0) return 1;
+    const visiblePageNumber = findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex);
+    const resolvedOriginalIndex = visibleOriginalIndexes[Math.max(0, visiblePageNumber - 1)] ?? visibleOriginalIndexes[0] ?? 0;
+    return resolvedOriginalIndex + 1;
+  }, [visibleOriginalIndexes]);
+
+  useEffect(() => {
+    if (totalPages <= 0) {
+      if (pageNumberRaw !== 1) setPageNumberRaw(1);
+      if (comparePageNumberRaw !== null) setComparePageNumberRaw(null);
+      if (isComparing) setIsComparing(false);
+      return;
+    }
+
+    if (!originalIndexToVisiblePageNumber.has(currentOriginalPageIndex)) {
+      const nextPrimaryPage = resolveNearestVisibleOriginalPageNumber(lastRequestedOriginalIndexRef.current);
+      if (pageNumberRaw !== nextPrimaryPage) setPageNumberRaw(nextPrimaryPage);
+    }
+
+    if (!isComparing) return;
+    if (compareOriginalPageIndex < 0 || !originalIndexToVisiblePageNumber.has(compareOriginalPageIndex)) {
+      const nextComparePage = resolveNearestVisibleOriginalPageNumber(lastRequestedCompareOriginalIndexRef.current);
+      if (comparePageNumberRaw !== nextComparePage) setComparePageNumberRaw(nextComparePage);
+    }
+  }, [
+    compareOriginalPageIndex,
+    comparePageNumberRaw,
+    currentOriginalPageIndex,
+    isComparing,
+    originalIndexToVisiblePageNumber,
+    pageNumberRaw,
+    resolveNearestVisibleOriginalPageNumber,
+    totalPages,
+  ]);
 
   const [imageProperties, setImageProperties] = useState(/** @type {ImageProperties} */ ({
     rotation: 0, brightness: 100, contrast: 100,
@@ -134,45 +408,110 @@ export function useDocumentViewer() {
     resetPostZoom,
   } = useViewerPostZoom(isComparing);
 
+  // --- Selection helpers ---------------------------------------------------------
+  const toggleDraftSelectAll = useCallback((checked) => {
+    const next = Array(totalSessionPages).fill(!!checked);
+    setDraftSelectionMask(next);
+  }, [totalSessionPages]);
+
+  const toggleDraftDocument = useCallback((documentKey, checked) => {
+    const key = String(documentKey || '');
+    setDraftSelectionMask((current) => {
+      const base = normalizeSelectionMask(current, totalSessionPages);
+      const document = selectionDocuments.find((item) => item.key === key);
+      if (!document) return base;
+      const next = base.slice();
+      document.pages.forEach((page) => {
+        next[page.originalIndex] = !!checked;
+      });
+      return next;
+    });
+  }, [selectionDocuments, totalSessionPages]);
+
+  const toggleDraftPage = useCallback((originalIndex, checked) => {
+    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+    setDraftSelectionMask((current) => {
+      const base = normalizeSelectionMask(current, totalSessionPages);
+      if (safeOriginalIndex >= base.length) return base;
+      const next = base.slice();
+      next[safeOriginalIndex] = !!checked;
+      return next;
+    });
+  }, [totalSessionPages]);
+
+  const saveDraftSelection = useCallback(() => {
+    const nextMask = normalizeSelectionMask(normalizedDraftSelectionMask, totalSessionPages);
+    const includedCount = nextMask.reduce((count, included) => count + (included === false ? 0 : 1), 0);
+    if (includedCount <= 0) return;
+    if (masksEqual(nextMask, normalizedAppliedSelectionMask, totalSessionPages)) return;
+    setAppliedSelectionMask(nextMask);
+    setThumbnailPaneMode('thumbnails');
+  }, [normalizedAppliedSelectionMask, normalizedDraftSelectionMask, totalSessionPages]);
+
+  const cancelDraftSelection = useCallback(() => {
+    setDraftSelectionMask(normalizedAppliedSelectionMask.slice());
+  }, [normalizedAppliedSelectionMask]);
+
   // --- Page navigation -----------------------------------------------------------
   /**
-   * Generic primary/compare page setter that accepts either a concrete page number or a React-like
-   * updater callback. Compare-targeted updates automatically enable compare mode and reuse the left
-   * page as the base when the right page has not been chosen yet.
+   * Resolve the next original 1-based page number from a visible-page update.
    *
-   * The primary page is mirrored in a ref so keyboard press-and-hold navigation can keep using a
-   * stable callback identity across page changes. That avoids tearing down the global key listeners
-   * on every repeated step, which was one of the main differences from the toolbar button path.
+   * @param {ViewerPageTarget} target
+   * @param {(number|function(number): number)} next
+   * @returns {number}
+   */
+  const resolveTargetOriginalPageNumber = useCallback((target, next) => {
+    if (totalPages <= 0 || visibleOriginalIndexes.length <= 0) return 1;
+
+    const compareBase = compareVisiblePageNumber == null ? currentVisiblePageNumber : compareVisiblePageNumber;
+    const currentBase = target === 'compare' ? compareBase : currentVisiblePageNumber;
+    const safeBase = clampPage(currentBase, totalPages);
+    const proposedVisiblePageNumber = clampPage(
+      typeof next === 'function' ? next(safeBase) : next,
+      totalPages
+    );
+    const resolvedOriginalIndex = visibleOriginalIndexes[Math.max(0, proposedVisiblePageNumber - 1)] ?? 0;
+    return resolvedOriginalIndex + 1;
+  }, [compareVisiblePageNumber, currentVisiblePageNumber, totalPages, visibleOriginalIndexes]);
+
+  /**
+   * Generic primary/compare page setter that accepts either a visible-page updater function or a
+   * concrete original page number.
+   *
+   * - updater functions operate on the current filtered visible page ordinal and are used by the
+   *   toolbar press-and-hold navigation hooks
+   * - numeric values are interpreted as original session page numbers and are used by direct input
+   *   and by thumbnail activation
    *
    * @param {ViewerPageTarget} target
    * @param {(number|function(number): number)} next
    * @returns {void}
    */
   const updatePageTarget = useCallback((target, next) => {
-    const resolveNext = (currentBase) => {
-      const proposed = typeof next === 'function' ? next(currentBase) : next;
-      return clampPage(proposed, totalPages);
-    };
+    if (target === 'compare' && isExpanded) return;
+
+    const numericNext = typeof next === 'function'
+      ? resolveTargetOriginalPageNumber(target, next)
+      : clampPage(next, Math.max(1, totalSessionPages || 1));
+    const finalOriginalPage = typeof next === 'function'
+      ? numericNext
+      : resolveNearestVisibleOriginalPageNumber(Math.max(0, numericNext - 1));
 
     if (target === 'compare') {
-      if (isExpanded) return;
-      setComparePageNumberRaw((current) => {
-        const base = clampPage(Number.isFinite(current) ? current : pageNumberRef.current, totalPages);
-        return resolveNext(base);
-      });
+      lastRequestedCompareOriginalIndexRef.current = Math.max(0, numericNext - 1);
+      setComparePageNumberRaw(finalOriginalPage);
       setIsComparing(true);
       return;
     }
 
-    setPageNumber((current) => {
-      const base = clampPage(current, totalPages);
-      return resolveNext(base);
-    });
-  }, [isExpanded, totalPages]);
+    lastRequestedOriginalIndexRef.current = Math.max(0, numericNext - 1);
+    setPageNumberRaw(finalOriginalPage);
+  }, [isExpanded, resolveNearestVisibleOriginalPageNumber, resolveTargetOriginalPageNumber, totalSessionPages]);
 
   /**
-   * Change the primary page number safely (clamped).
-   * @param {number} next
+   * Change the primary page using an original page number (or a visible-page updater function when
+   * called from navigation helpers).
+   * @param {(number|function(number): number)} next
    * @returns {void}
    */
   const handlePageNumberChange = useCallback((next) => {
@@ -180,7 +519,20 @@ export function useDocumentViewer() {
   }, [updatePageTarget]);
 
   /**
-   * Change the right-hand compare page safely (clamped) and enable compare mode when possible.
+   * Change the primary page by a visible page number from the thumbnail strip.
+   * @param {number} nextVisiblePageNumber
+   * @returns {void}
+   */
+  const handleVisiblePageNumberChange = useCallback((nextVisiblePageNumber) => {
+    if (totalPages <= 0) return;
+    const resolvedOriginalPage = resolveTargetOriginalPageNumber('primary', nextVisiblePageNumber);
+    lastRequestedOriginalIndexRef.current = Math.max(0, resolvedOriginalPage - 1);
+    setPageNumberRaw(resolvedOriginalPage);
+  }, [resolveTargetOriginalPageNumber, totalPages]);
+
+  /**
+   * Change the compare page using an original page number (or a visible-page updater function when
+   * called from compare navigation helpers).
    * @param {(number|function(number): number)} next
    * @returns {void}
    */
@@ -224,7 +576,8 @@ export function useDocumentViewer() {
    * switches either directly to the requested page or to an explicit loading overlay, so keeping the
    * thumbnail highlight on the requested page no longer causes the old mismatch bug.
    */
-  const thumbnailSelectionPageNumber = pageNumber;
+  const thumbnailSelectionPageNumber = currentOriginalPageNumber;
+  const compareThumbnailPageNumber = compareOriginalPageNumber;
 
   /**
    * Move one page backward in the requested target pane.
@@ -245,21 +598,21 @@ export function useDocumentViewer() {
   }, [updatePageTarget]);
 
   /**
-   * Jump to the first page in the requested target pane.
+   * Jump to the first visible page in the requested target pane.
    * @param {ViewerPageTarget=} target
    * @returns {void}
    */
   const goToFirstPage = useCallback((target = 'primary') => {
-    updatePageTarget(target, 1);
+    updatePageTarget(target, () => 1);
   }, [updatePageTarget]);
 
   /**
-   * Jump to the last page in the requested target pane.
+   * Jump to the last visible page in the requested target pane.
    * @param {ViewerPageTarget=} target
    * @returns {void}
    */
   const goToLastPage = useCallback((target = 'primary') => {
-    updatePageTarget(target, Math.max(1, totalPages || 1));
+    updatePageTarget(target, () => Math.max(1, totalPages || 1));
   }, [totalPages, updatePageTarget]);
 
   // --- Print dialog --------------------------------------------------------------
@@ -351,11 +704,14 @@ export function useDocumentViewer() {
       if (!prev && isExpanded) return prev;
       const next = !prev;
       if (next) {
-        setComparePageNumberRaw((current) => clampPage(Number.isFinite(current) ? current : pageNumber, totalPages));
+        const fallbackOriginalPage = compareOriginalPageNumber != null
+          ? compareOriginalPageNumber
+          : currentOriginalPageNumber;
+        setComparePageNumberRaw(fallbackOriginalPage);
       }
       return next;
     });
-  }, [isExpanded, pageNumber, totalPages]);
+  }, [compareOriginalPageNumber, currentOriginalPageNumber, isExpanded]);
 
   /**
    * Close compare mode without affecting the left page.
@@ -369,15 +725,15 @@ export function useDocumentViewer() {
    * Select a page for the right-hand compare pane.
    * If compare is OFF, enables it unless edit mode is active (then no-op).
    * If compare is ON, just replaces the right-hand page.
+   *
    * @param {number} page
    * @returns {void}
    */
   const selectForCompare = useCallback((page) => {
     if (isExpanded) return; // blocked by active edit mode
-    const clamped = clampPage(page, totalPages);
-    setComparePageNumber(clamped);
-    logger.info('Compare selection updated', { comparePage: clamped });
-  }, [setComparePageNumber, totalPages, isExpanded]);
+    setComparePageNumber(page);
+    logger.info('Compare selection updated', { comparePage: page });
+  }, [setComparePageNumber, isExpanded]);
 
   // --- Image adjustments ---------------------------------------------------------
   const handleRotationChange = useCallback((delta) => {
@@ -483,7 +839,7 @@ export function useDocumentViewer() {
     imageRotation: imageProperties.rotation,
     isComparing,
     thumbnailWidth,
-    pageNumber,
+    pageNumber: currentOriginalPageNumber,
     totalPages,
     goToPreviousPage,
     goToNextPage,
@@ -504,15 +860,24 @@ export function useDocumentViewer() {
 
   // --- Public API ---------------------------------------------------------------
   return {
-    pageNumber,
+    // viewer/render page numbers
+    pageNumber: currentVisiblePageNumber,
+    pageNumberDisplay: currentOriginalPageNumber,
+    renderPageNumber: currentOriginalPageNumber,
     setPageNumber: handlePageNumberChange,
+    setVisiblePageNumber: handleVisiblePageNumberChange,
+
+    // compare page numbers
     setComparePageNumber,
+    comparePageNumber: compareVisiblePageNumber,
+    renderComparePageNumber: compareOriginalPageNumber,
+
     thumbnailSelectionPageNumber,
+    compareThumbnailPageNumber,
     primaryDisplayState,
     zoom,
     setZoom,
     isComparing,
-    comparePageNumber,
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
@@ -551,6 +916,25 @@ export function useDocumentViewer() {
     setIsExpanded, // guarded setter
     zoomState,
     setZoomMode,
+
+    // visible/selection data
+    viewerPages: visiblePages,
+    totalPages,
+    totalPagesDisplay: totalSessionPages,
+    visibleOriginalPageNumbers,
+    selectionPanelEnabled,
+    selectionDocuments,
+    selectionActive,
+    draftSelectionMask: normalizedDraftSelectionMask,
+    draftSelectionDirty,
+    draftIncludedCount,
+    thumbnailPaneMode,
+    setThumbnailPaneMode,
+    toggleDraftSelectAll,
+    toggleDraftDocument,
+    toggleDraftPage,
+    saveDraftSelection,
+    cancelDraftSelection,
 
     // per-pane post-zoom
     postZoomLeft,

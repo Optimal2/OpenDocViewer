@@ -120,7 +120,13 @@
       "advancedGroup": "Avancerade val",
       "userLogGroup": "Användarlogg"
     },
-    "loadingHint": "Fler utskriftsalternativ blir tillgängliga när dokumentladdningen är klar. Just nu kan bara den aktuella sidan skrivas ut."
+    "loadingHint": "Fler utskriftsalternativ blir tillgängliga när dokumentladdningen är klar. Just nu kan bara den aktuella sidan skrivas ut.",
+    "allScope": {
+      "label": "Vad ska ”Alla sidor” omfatta?",
+      "selection": "Aktuellt urval ({count} sidor)",
+      "session": "Hela sessionen ({count} sidor)",
+      "hint": "Använd aktuellt filtrerat urval eller ignorera urvalet och skriv ut hela sessionen."
+    }
   },
   "print": {
     "alt": {
@@ -226,7 +232,23 @@
     "rightPaneBadgeShort": "H",
     "leftPaneBadgeTooltip": "Vänster sida i jämförelsevy",
     "rightPaneBadgeTooltip": "Höger sida i jämförelsevy",
-    "documentBoundaryEndTitle": "Slut på dokumentpaketet"
+    "documentBoundaryEndTitle": "Slut på dokumentpaketet",
+    "selection": {
+      "thumbnailsTab": "Miniatyrer",
+      "selectionTab": "Urval",
+      "tabGroup": "Miniatyrpanelens innehåll",
+      "loadingStatus": "Urval blir tillgängligt när alla sidor är helt inlästa ({ready}/{total} klara, {pending} återstår).",
+      "loadingStatusShort": "Urval blir tillgängligt när alla sidor är helt inlästa.",
+      "activeStatus": "{selected} av {total} sidor ingår just nu.",
+      "readyStatus": "Alla {total} sidor ingår just nu.",
+      "allPages": "Alla sidor",
+      "documentLabel": "Dokument {current}/{total}",
+      "pagesSummary": "{selected}/{total}",
+      "pageLabel": "Sida {documentPage}",
+      "pageMeta": "S {documentPage} · T {globalPage}",
+      "save": "Spara urval",
+      "cancel": "Avbryt"
+    }
   },
   "compareZoom": {
     "increase": "Öka panelens zoom",

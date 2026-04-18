@@ -29,6 +29,7 @@ import {
   getDocumentLoadingConfig,
   shouldUseFullImagesForThumbnails,
 } from '../utils/documentLoadingConfig.js';
+import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 
 /**
  * @typedef {Object} ThumbnailRowProps
@@ -41,6 +42,7 @@ import {
  * @property {boolean} isCompareMode
  * @property {boolean} preferFullAssetPreview
  * @property {number} totalPages
+ * @property {number} sessionTotalPages
  * @property {boolean} documentGroupingActive
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
@@ -102,6 +104,17 @@ function formatMetricFraction(current, total) {
   const safeCurrent = Math.max(0, Number(current) || 0);
   const safeTotal = Math.max(0, Number(total) || 0);
   return safeTotal > 0 ? `${safeCurrent}/${safeTotal}` : `${safeCurrent}/–`;
+}
+
+/**
+ * @param {*} page
+ * @param {number} fallbackIndex
+ * @returns {number}
+ */
+function getSessionPageIndex(page, fallbackIndex) {
+  const raw = Number(page?.allPagesIndex);
+  if (Number.isFinite(raw) && raw >= 0) return Math.floor(raw);
+  return Math.max(0, Math.floor(Number(fallbackIndex) || 0));
 }
 
 /**
@@ -293,6 +306,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   isCompareMode,
   preferFullAssetPreview,
   totalPages,
+  sessionTotalPages,
   documentGroupingActive,
   onActivate,
   onKeyActivate,
@@ -300,7 +314,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   fullyRenderOffscreenRows,
 }) {
   const { t } = useTranslation('common');
-  const pageNumber = index + 1;
+  const visiblePageNumber = index + 1;
+  const pageNumber = getSessionPageIndex(page, index) + 1;
+  const rowId = `thumbnail-${visiblePageNumber}`;
   const forceVisibleFullAsset = !!preferFullAssetPreview
     && page?.fullSizeStatus === 1
     && typeof page?.fullSizeUrl === 'string'
@@ -316,8 +332,8 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
     : (typeof page?.thumbnailUrl === 'string' ? page.thumbnailUrl : '');
   const isDualSelected = isPrimarySelected && isCompareSelected;
   const documentContext = getPageDocumentContext(page);
-  const metricTitles = getMetricTitles(t, pageNumber, totalPages, documentContext);
-  const metricBadges = getMetricBadges(t, pageNumber, totalPages, documentContext);
+  const metricTitles = getMetricTitles(t, pageNumber, sessionTotalPages || totalPages, documentContext);
+  const metricBadges = getMetricBadges(t, pageNumber, sessionTotalPages || totalPages, documentContext);
 
   const rowShellClassName = [
     'thumbnail-row-shell',
@@ -372,7 +388,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       ) : null}
 
       <div
-        id={`thumbnail-${pageNumber}`}
+        id={rowId}
         className={wrapperClassName}
         onClick={(event) => onActivate(pageNumber, event)}
         onKeyDown={(event) => onKeyActivate(event, pageNumber)}
@@ -431,7 +447,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           {thumbnailStatus === 0 && <LoadingSpinner />}
           {thumbnailStatus === -1 && (
             <img
-              src="lost.png"
+              src={getPublicAssetUrl('lost.png')}
               alt={t('thumbnails.pageFailedAlt', { page: pageNumber })}
               className="thumbnail"
               decoding="async"
@@ -445,7 +461,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
               className="thumbnail"
               decoding="async"
               draggable={false}
-              onLoad={() => onImageLoad(index, usesFullAsset ? 'full' : 'thumbnail')}
+              onLoad={() => onImageLoad(getSessionPageIndex(page, index), usesFullAsset ? 'full' : 'thumbnail')}
             />
           )}
         </div>
@@ -458,13 +474,14 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
 /**
  * @param {Object} props
  * @param {Array<any>} props.allPages
- * @param {number} props.pageNumber
- * @param {function(number): void} props.setPageNumber
+ * @param {number} props.pageNumber - Original 1-based selected page number in the session.
+ * @param {function(number): void} props.setPageNumber - Accepts an original 1-based page number.
  * @param {{ current:(HTMLElement|null) }} props.thumbnailsContainerRef
  * @param {number} props.width
+ * @param {number=} props.sessionTotalPages
  * @param {function(number): void} [props.selectForCompare]
  * @param {boolean=} props.isComparing
- * @param {(number|null)=} props.comparePageNumber
+ * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -473,6 +490,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   setPageNumber,
   thumbnailsContainerRef,
   width,
+  sessionTotalPages = undefined,
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
@@ -524,13 +542,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     [renderConfig, totalCount]
   );
   const fullyRenderOffscreenRows = warmAllThumbnails;
-  const activeDescendantId = totalCount > 0 && pageNumber >= 1 && pageNumber <= totalCount
-    ? `thumbnail-${pageNumber}`
-    : undefined;
-  const selectedIndexForAutoScroll = useMemo(
-    () => (totalCount > 0 ? clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1)) : -1),
-    [pageNumber, totalCount]
-  );
+  const selectedIndexForAutoScroll = useMemo(() => {
+    if (totalCount <= 0) return -1;
+    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === pageNumber);
+  }, [allPages, pageNumber, totalCount]);
+  const activeDescendantId = selectedIndexForAutoScroll >= 0 ? `thumbnail-${selectedIndexForAutoScroll + 1}` : undefined;
 
   const visibleRange = useMemo(() => {
     if (totalCount <= 0) return { start: 0, end: -1 };
@@ -560,12 +576,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     if (!allowWidePaneFullPreview || totalCount <= 0) return new Set();
 
     const indexes = new Set();
-    const currentIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
+    const currentIndex = selectedIndexForAutoScroll;
     const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
+      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
       : -1;
 
-    indexes.add(currentIndex);
+    if (currentIndex >= 0) indexes.add(currentIndex);
     if (compareIndex >= 0) indexes.add(compareIndex);
     for (let index = visibleRange.start; index <= visibleRange.end; index += 1) indexes.add(index);
 
@@ -573,7 +589,17 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       const page = allPages[index];
       return !!page && shouldUseFullImagesForThumbnails(activeConfig, page, totalCount);
     }));
-  }, [activeConfig, allPages, allowWidePaneFullPreview, comparePageNumber, isComparing, pageNumber, totalCount, visibleRange.end, visibleRange.start]);
+  }, [
+    activeConfig,
+    allPages,
+    allowWidePaneFullPreview,
+    comparePageNumber,
+    isComparing,
+    selectedIndexForAutoScroll,
+    totalCount,
+    visibleRange.end,
+    visibleRange.start,
+  ]);
 
   /**
    * @param {(HTMLDivElement|null)} node
@@ -672,36 +698,44 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     const isThumbnailReady = (page) => !!page && (page.thumbnailUsesFullAsset
       ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
       : page.thumbnailStatus === 1 && !!page.thumbnailUrl);
-    const pushIndex = (index, priority) => {
-      if (index < 0 || index >= totalCount) return;
-      const page = allPages[index];
+    const pushIndex = (visibleIndex, priority) => {
+      if (visibleIndex < 0 || visibleIndex >= totalCount) return;
+      const page = allPages[visibleIndex];
+      const sessionIndex = getSessionPageIndex(page, visibleIndex);
       if (!page || page.status === -1 || page.thumbnailStatus === -1 || !page.sourceKey || isThumbnailReady(page)) return;
-      const previous = requested.get(index);
+      const previous = requested.get(sessionIndex);
       const previousRank = previous ? (ranks[previous] || 0) : 0;
       const nextRank = ranks[priority] || 0;
-      if (nextRank > previousRank) requested.set(index, priority);
+      if (nextRank > previousRank) requested.set(sessionIndex, priority);
     };
 
-    const currentIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
+    const currentIndex = selectedIndexForAutoScroll;
     const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
+      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
       : -1;
     const visibleHasPages = visibleRange.end >= visibleRange.start;
     const focusIndex = visibleHasPages && visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
-    const currentIsVisible = isIndexInRange(currentIndex, visibleRange);
+    const currentIsVisible = currentIndex >= 0 && isIndexInRange(currentIndex, visibleRange);
     const compareIsVisible = compareIndex >= 0 && isIndexInRange(compareIndex, visibleRange);
 
+    const touchVisibleIndex = (visibleIndex) => {
+      if (visibleIndex < 0 || visibleIndex >= totalCount) return;
+      const page = allPages[visibleIndex];
+      const sessionIndex = getSessionPageIndex(page, visibleIndex);
+      touchPageAsset(sessionIndex, page?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+    };
+
     pushIndex(focusIndex, 'critical');
-    touchPageAsset(focusIndex, allPages[focusIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+    touchVisibleIndex(focusIndex);
 
     if (currentIndex >= 0) {
       pushIndex(currentIndex, currentIsVisible ? 'critical' : 'normal');
-      touchPageAsset(currentIndex, allPages[currentIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+      touchVisibleIndex(currentIndex);
     }
 
     if (compareIndex >= 0) {
       pushIndex(compareIndex, compareIsVisible ? 'high' : 'normal');
-      touchPageAsset(compareIndex, allPages[compareIndex]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+      touchVisibleIndex(compareIndex);
     }
 
     for (let index = visibleRange.start; index <= visibleRange.end; index += 1) {
@@ -713,14 +747,14 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
             ? 'high'
             : 'high';
       pushIndex(index, priority);
-      touchPageAsset(index, allPages[index]?.thumbnailUsesFullAsset ? 'full' : 'thumbnail');
+      touchVisibleIndex(index);
     }
 
     const ahead = Math.max(0, Number(renderConfig.lookAheadPageCount) || 0);
     const behind = Math.max(0, Number(renderConfig.lookBehindPageCount) || 0);
     for (let offset = 1; offset <= ahead; offset += 1) pushIndex(focusIndex + offset, 'normal');
     for (let offset = 1; offset <= behind; offset += 1) pushIndex(focusIndex - offset, 'normal');
-    if (currentIndex !== focusIndex) {
+    if (currentIndex >= 0 && currentIndex !== focusIndex) {
       for (let offset = 1; offset <= Math.min(2, ahead); offset += 1) pushIndex(currentIndex + offset, 'low');
       for (let offset = 1; offset <= Math.min(2, behind); offset += 1) pushIndex(currentIndex - offset, 'low');
     }
@@ -729,17 +763,17 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       for (let offset = 1; offset <= Math.min(2, behind); offset += 1) pushIndex(compareIndex - offset, 'low');
     }
 
-    for (const [index, priority] of requested.entries()) {
-      void ensurePageAsset(index, 'thumbnail', { priority }).catch(() => {});
+    for (const [sessionIndex, priority] of requested.entries()) {
+      void ensurePageAsset(sessionIndex, 'thumbnail', { priority }).catch(() => {});
     }
   }, [
     allPages,
     comparePageNumber,
     ensurePageAsset,
     isComparing,
-    pageNumber,
     renderConfig.lookAheadPageCount,
     renderConfig.lookBehindPageCount,
+    selectedIndexForAutoScroll,
     totalCount,
     touchPageAsset,
     visibleCenterIndex,
@@ -751,16 +785,17 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
     preferredFullPreviewIndexes.forEach((index) => {
       const page = allPages[index];
+      const sessionIndex = getSessionPageIndex(page, index);
       if (!page || page.status === -1 || !page.sourceKey || page.fullSizeStatus === -1) return;
       if (page.fullSizeStatus === 1 && page.fullSizeUrl) {
-        touchPageAsset(index, 'full');
+        touchPageAsset(sessionIndex, 'full');
         return;
       }
 
-      const priority = index === pageNumber - 1
+      const priority = index === selectedIndexForAutoScroll
         ? 'critical'
-        : (isComparing && comparePageNumber === index + 1 ? 'high' : 'normal');
-      void ensurePageAsset(index, 'full', { priority }).catch(() => {});
+        : (isComparing && comparePageNumber === sessionIndex + 1 ? 'high' : 'normal');
+      void ensurePageAsset(sessionIndex, 'full', { priority }).catch(() => {});
     });
   }, [
     allPages,
@@ -768,8 +803,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     comparePageNumber,
     ensurePageAsset,
     isComparing,
-    pageNumber,
     preferredFullPreviewIndexes,
+    selectedIndexForAutoScroll,
     touchPageAsset,
   ]);
 
@@ -792,9 +827,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
     let cancelled = false;
     let timeoutId = 0;
-    const currentIndex = clamp(pageNumber - 1, 0, Math.max(0, totalCount - 1));
+    const currentIndex = selectedIndexForAutoScroll;
     const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? clamp(Number(comparePageNumber) - 1, 0, Math.max(0, totalCount - 1))
+      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
       : -1;
     const focusIndex = visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
 
@@ -813,11 +848,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       const batch = queue.splice(0, batchSize);
       for (const index of batch) {
         const page = allPages[index];
+        const sessionIndex = getSessionPageIndex(page, index);
         const isThumbnailReady = !!page && (page.thumbnailUsesFullAsset
           ? (page.fullSizeStatus === 1 && !!page.fullSizeUrl)
           : page.thumbnailStatus === 1 && !!page.thumbnailUrl);
         if (!page || page.status === -1 || page.thumbnailStatus === -1 || !page.sourceKey || isThumbnailReady) continue;
-        void ensurePageAsset(index, 'thumbnail', { priority: 'low' }).catch(() => {});
+        void ensurePageAsset(sessionIndex, 'thumbnail', { priority: 'low' }).catch(() => {});
       }
       if (queue.length > 0) timeoutId = window.setTimeout(pump, 16);
     };
@@ -832,8 +868,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     comparePageNumber,
     ensurePageAsset,
     isComparing,
-    pageNumber,
     renderConfig.maxConcurrentAssetRenders,
+    selectedIndexForAutoScroll,
     totalCount,
     visibleCenterIndex,
     visibleRange.end,
@@ -902,29 +938,30 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, [handleActivate]);
 
   /**
-   * @param {number} index
+   * @param {number} sessionIndex
    * @param {('full'|'thumbnail')} variant
    * @returns {void}
    */
-  const handleImageLoad = useCallback((index, variant) => {
-    touchPageAsset(index, variant);
+  const handleImageLoad = useCallback((sessionIndex, variant) => {
+    touchPageAsset(sessionIndex, variant);
   }, [touchPageAsset]);
 
   const rows = [];
   for (let index = 0; index < totalCount; index += 1) {
-    const pageId = index + 1;
+    const originalPageNumber = getSessionPageIndex(allPages[index], index) + 1;
     rows.push(
       <ThumbnailRow
-        key={index}
+        key={String(allPages[index]?.sourceKey || index)}
         page={allPages[index] || null}
         index={index}
         rowHeight={layout.rowHeight}
         imageStageHeight={layout.imageStageHeight}
-        isPrimarySelected={pageNumber === pageId}
-        isCompareSelected={!!isComparing && comparePageNumber === pageId}
+        isPrimarySelected={originalPageNumber === pageNumber}
+        isCompareSelected={!!isComparing && originalPageNumber === comparePageNumber}
         isCompareMode={!!isComparing}
         preferFullAssetPreview={preferredFullPreviewIndexes.has(index)}
         totalPages={totalCount}
+        sessionTotalPages={Math.max(totalCount, Number(sessionTotalPages) || 0)}
         documentGroupingActive={documentGroupingActive}
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
@@ -991,6 +1028,7 @@ ThumbnailRow.propTypes = {
   isCompareMode: PropTypes.bool.isRequired,
   preferFullAssetPreview: PropTypes.bool.isRequired,
   totalPages: PropTypes.number.isRequired,
+  sessionTotalPages: PropTypes.number.isRequired,
   documentGroupingActive: PropTypes.bool.isRequired,
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
@@ -1006,6 +1044,7 @@ DocumentThumbnailList.propTypes = {
     current: PropTypes.any,
   }).isRequired,
   width: PropTypes.number.isRequired,
+  sessionTotalPages: PropTypes.number,
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),

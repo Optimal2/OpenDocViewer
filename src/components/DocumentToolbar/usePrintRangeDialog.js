@@ -22,6 +22,7 @@ import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localized
  * @property {number} [from]
  * @property {number} [to]
  * @property {Array.<number>} [sequence]
+ * @property {'selection'|'session'} [allScope]
  * @property {string|null} [reason]
  * @property {string|null} [forWhom]
  */
@@ -92,10 +93,25 @@ export function ensureODVPrintCSS() {
  * @param {number} params.totalPages
  * @param {boolean=} params.isDocumentLoading
  * @param {number=} params.activePageNumber
+ * @param {boolean=} params.hasActiveSelection
+ * @param {number=} params.selectionIncludedCount
+ * @param {number=} params.sessionTotalPages
  * @param {function(string, Object=): string} params.t
  * @param {any} params.i18n
  */
-export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages, isDocumentLoading = false, activePageNumber = 1, t, i18n }) {
+export function usePrintRangeController({
+  isOpen,
+  onClose,
+  onSubmit,
+  totalPages,
+  isDocumentLoading = false,
+  activePageNumber = 1,
+  hasActiveSelection = false,
+  selectionIncludedCount = 0,
+  sessionTotalPages = totalPages,
+  t,
+  i18n,
+}) {
   const cfg = getCfg();
   const userLogCfg = cfg?.userLog || {};
   const headerCfg  = cfg?.printHeader || {};
@@ -129,6 +145,8 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
   const [modeGroup, setModeGroup] = useState('basic');
   /** @type {'active'|'all'} */
   const [basicChoice, setBasicChoice] = useState('active');
+  /** @type {'selection'|'session'} */
+  const [allScope, setAllScope] = useState(hasActiveSelection ? 'selection' : 'session');
   /** @type {'range'|'custom'} */
   const [advancedChoice, setAdvancedChoice] = useState('range');
 
@@ -183,6 +201,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     setModeGroup('basic');
     setBasicChoice('active');
     setAdvancedChoice('range');
+    setAllScope(hasActiveSelection ? 'selection' : 'session');
     setFromValue('1');
     setToValue(String(totalPages || 1));
     setCustomText('');
@@ -191,7 +210,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     setExtraText('');
     setForWhomText('');
     setError('');
-  }, [isOpen, totalPages, defaultReason]);
+  }, [defaultReason, hasActiveSelection, isOpen, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -368,7 +387,11 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
 
     if (modeGroup === 'basic') {
       setError('');
-      onSubmit({ mode: (basicChoice === 'active' ? 'active' : 'all'), ...extras() });
+      if (basicChoice === 'active') {
+        onSubmit({ mode: 'active', ...extras() });
+      } else {
+        onSubmit({ mode: 'all', allScope: hasActiveSelection ? allScope : 'session', ...extras() });
+      }
       return;
     }
 
@@ -389,9 +412,9 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     setError('');
     onSubmit({ mode: 'advanced', sequence, ...extras() });
   }, [
-    modeGroup, basicChoice, advancedChoice,
-    customText, totalPages, onSubmit,
-    extras, restrictToActivePage, validateUserFields, validateRange, makeDescendingSequence, t
+    advancedChoice, allScope, basicChoice,
+    customText, extras, hasActiveSelection, makeDescendingSequence, modeGroup, onSubmit,
+    restrictToActivePage, t, totalPages, validateRange, validateUserFields
   ]);
 
   const onBackdropMouseDown = (e) => {
@@ -413,6 +436,7 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     // state
     modeGroup, setModeGroup,
     basicChoice, setBasicChoice,
+    allScope, setAllScope,
     advancedChoice, setAdvancedChoice,
     fromValue, setFromValue,
     toValue, setToValue,
@@ -424,6 +448,9 @@ export function usePrintRangeController({ isOpen, onClose, onSubmit, totalPages,
     error, setError,
     restrictToActivePage,
     activePageNumber,
+    hasActiveSelection,
+    selectionIncludedCount,
+    sessionTotalPages,
     // derived/config-driven
     showUserSection, showReason, showForWhom,
     reasonCfg, forWhomCfg,

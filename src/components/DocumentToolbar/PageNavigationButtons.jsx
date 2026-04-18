@@ -30,9 +30,11 @@
  * @param {function(*=):void} props.handleLastPage - Jump to last page.
  * @param {function(*=):void} props.handlePrevPage - Single-step to previous page.
  * @param {function(*=):void} props.handleNextPage - Single-step to next page.
- * @param {number} props.pageNumber - Current page number (1-based).
- * @param {number} props.totalPages - Total pages.
- * @param {function(number):void} [props.onGoToPage] - Optional: apply a specific page number (1..totalPages).
+ * @param {number} props.pageNumber - Current visible page number (1-based).
+ * @param {number} props.pageNumberDisplay - Current original/session page number (1-based).
+ * @param {number} props.totalPages - Total visible pages.
+ * @param {number} props.totalPagesDisplay - Total original/session pages.
+ * @param {function(number):void} [props.onGoToPage] - Optional: apply a specific original page number (1..totalPagesDisplay).
  * @param {boolean} [props.isDocumentLoading=false] - Whether the document set is still loading.
  * @returns {JSX.Element}
  */
@@ -62,7 +64,9 @@ const PageNavigationButtons = ({
   handlePrevPage,
   handleNextPage,
   pageNumber,
+  pageNumberDisplay = pageNumber,
   totalPages,
+  totalPagesDisplay = totalPages,
   onGoToPage,
   isDocumentLoading = false,
 }) => {
@@ -73,13 +77,13 @@ const PageNavigationButtons = ({
   const activeRepeatButtonRef = useRef(/** @type {("prev"|"next"|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
-  const [draft, setDraft] = useState(String(pageNumber));
+  const [draft, setDraft] = useState(String(pageNumberDisplay));
 
   useEffect(() => {
     const el = inputRef.current;
     const focused = !!(el && document.activeElement === el) || isFocused;
-    if (!focused) setDraft(String(pageNumber));
-  }, [pageNumber, isFocused]);
+    if (!focused) setDraft(String(pageNumberDisplay));
+  }, [pageNumberDisplay, isFocused]);
 
   /**
    * Record that the next synthetic click for the given repeat button should be swallowed.
@@ -130,9 +134,9 @@ const PageNavigationButtons = ({
 
 
   function applyDraft() {
-    const next = clampPage(draft, totalPages);
+    const next = clampPage(draft, totalPagesDisplay);
     if (next == null) {
-      setDraft(String(pageNumber));
+      setDraft(String(pageNumberDisplay));
       return;
     }
     if (typeof onGoToPage === 'function') onGoToPage(next);
@@ -140,7 +144,7 @@ const PageNavigationButtons = ({
   }
 
   function cancelDraft() {
-    setDraft(String(pageNumber));
+    setDraft(String(pageNumberDisplay));
   }
 
   /**
@@ -191,7 +195,7 @@ const PageNavigationButtons = ({
     handler?.(event);
   }, []);
 
-  const displayValue = isFocused ? draft : `${pageNumber} / ${totalPages}`;
+  const displayValue = isFocused ? draft : `${pageNumberDisplay} / ${totalPagesDisplay}`;
   const pageTitle = isDocumentLoading ? t('toolbar.pageLoadingTitle') : t('toolbar.page');
 
   return (
@@ -237,8 +241,8 @@ const PageNavigationButtons = ({
         value={displayValue}
         onFocus={(event) => {
           setIsFocused(true);
-          setDraft(String(pageNumber));
-          event.currentTarget.setSelectionRange(0, String(pageNumber).length);
+          setDraft(String(pageNumberDisplay));
+          event.currentTarget.setSelectionRange(0, String(pageNumberDisplay).length);
         }}
         onChange={(event) => setDraft(event.target.value.replace(/[^\d]/g, ''))}
         onBlur={() => { applyDraft(); setIsFocused(false); }}
@@ -257,9 +261,9 @@ const PageNavigationButtons = ({
         aria-label={pageTitle}
         role="spinbutton"
         aria-valuemin={1}
-        aria-valuemax={Math.max(1, totalPages || 1)}
-        aria-valuenow={pageNumber}
-        aria-valuetext={t('toolbar.page') + ` ${pageNumber} / ${totalPages}`}
+        aria-valuemax={Math.max(1, totalPagesDisplay || 1)}
+        aria-valuenow={pageNumberDisplay}
+        aria-valuetext={t('toolbar.page') + ` ${pageNumberDisplay} / ${totalPagesDisplay}`}
         aria-busy={isDocumentLoading}
         title={pageTitle}
       />
@@ -309,7 +313,9 @@ PageNavigationButtons.propTypes = {
   handlePrevPage: PropTypes.func.isRequired,
   handleNextPage: PropTypes.func.isRequired,
   pageNumber: PropTypes.number.isRequired,
+  pageNumberDisplay: PropTypes.number,
   totalPages: PropTypes.number.isRequired,
+  totalPagesDisplay: PropTypes.number,
   onGoToPage: PropTypes.func,
   isDocumentLoading: PropTypes.bool,
 };

@@ -27,6 +27,7 @@ import {
 } from '../../utils/documentLoadingConfig.js';
 import LoadPressureDialog from './LoadPressureDialog.jsx';
 import { createOpaqueIdFragment } from '../../utils/idUtils.js';
+import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 
 /**
  * @typedef {Object} DocumentSourceItem
@@ -473,8 +474,8 @@ function createFailedPlaceholder(input) {
     status: -1,
     fullSizeStatus: -1,
     thumbnailStatus: -1,
-    fullSizeUrl: 'lost.png',
-    thumbnailUrl: 'lost.png',
+    fullSizeUrl: getPublicAssetUrl('lost.png'),
+    thumbnailUrl: getPublicAssetUrl('lost.png'),
     thumbnailUsesFullAsset: false,
     loaded: false,
     fileExtension: 'png',

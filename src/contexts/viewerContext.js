@@ -95,6 +95,16 @@ import { createContext } from 'react';
  */
 
 /**
+ * @typedef {Object} ViewerPageLoadState
+ * @property {number} discoveredPages
+ * @property {number} expectedPages
+ * @property {number} readyPages
+ * @property {number} failedPages
+ * @property {number} pendingPages
+ * @property {boolean} allPagesReady
+ */
+
+/**
  * @typedef {Object} ViewerContextValue
  * @property {Array.<ViewerPageEntry>} allPages
  * @property {function(ViewerPageEntry, number): void} insertPageAtIndex
@@ -125,6 +135,7 @@ import { createContext } from 'react';
  * @property {Object} documentLoadingConfig
  * @property {'normal'|'soft'|'hard'} memoryPressureStage
  * @property {ViewerRuntimeDiagnostics} runtimeDiagnostics
+ * @property {ViewerPageLoadState} pageLoadState
  * @property {function(number, number): void} scheduleSourceWarmup
  */
 

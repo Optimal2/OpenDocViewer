@@ -8,6 +8,17 @@
  */
 
 /**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeMetaName(value) {
+  if (typeof CSS !== 'undefined' && typeof CSS.escape === 'function') {
+    return CSS.escape(value);
+  }
+  return String(value || '').replace(/\\/g, '\\\\').replace(/"/g, '\\"');
+}
+
+/**
  * Resolve a boolean flag from (precedence order):
  *   1) window.__ODV_CONFIG__[name]
  *   2) import.meta.env[envVar]
@@ -26,19 +37,20 @@ export function readRuntimeBooleanFlag(name, envVar, metaName, fallback = false)
     if (cfg && typeof cfg[name] === 'boolean') return cfg[name];
 
     const envVal =
-      (typeof import.meta !== 'undefined'
-        && import.meta
-        && import.meta.env
-        && import.meta.env[envVar])
-      || '';
-    if (typeof envVal === 'string') {
+      typeof import.meta !== 'undefined'
+      && import.meta
+      && import.meta.env
+      && typeof import.meta.env[envVar] === 'string'
+        ? String(import.meta.env[envVar]).trim()
+        : '';
+    if (envVal) {
       const normalized = envVal.toLowerCase();
       if (normalized === 'true' || normalized === '1') return true;
       if (normalized === 'false' || normalized === '0') return false;
     }
 
     if (typeof document !== 'undefined' && metaName) {
-      const meta = document.querySelector(`meta[name="${metaName}"]`);
+      const meta = document.querySelector(`meta[name="${escapeMetaName(metaName)}"]`);
       const content = meta && meta.getAttribute('content');
       if (typeof content === 'string') {
         const normalized = content.toLowerCase();
