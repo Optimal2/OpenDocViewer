@@ -42,10 +42,10 @@ import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
  * @property {boolean} isCompareMode
  * @property {boolean} preferFullAssetPreview
  * @property {number} totalPages
- * @property {number} sessionTotalPages
  * @property {boolean} documentGroupingActive
  * @property {function(number, *): void} onActivate
  * @property {function(*, number): void} onKeyActivate
+ * @property {function(*, number, *): void} onOpenContextMenu
  * @property {function(number, ('full'|'thumbnail')): void} onImageLoad
  * @property {boolean} fullyRenderOffscreenRows
  */
@@ -306,16 +306,16 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   isCompareMode,
   preferFullAssetPreview,
   totalPages,
-  sessionTotalPages,
   documentGroupingActive,
   onActivate,
   onKeyActivate,
+  onOpenContextMenu,
   onImageLoad,
   fullyRenderOffscreenRows,
 }) {
   const { t } = useTranslation('common');
   const visiblePageNumber = index + 1;
-  const pageNumber = getSessionPageIndex(page, index) + 1;
+  const originalPageNumber = getSessionPageIndex(page, index) + 1;
   const rowId = `thumbnail-${visiblePageNumber}`;
   const forceVisibleFullAsset = !!preferFullAssetPreview
     && page?.fullSizeStatus === 1
@@ -332,8 +332,8 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
     : (typeof page?.thumbnailUrl === 'string' ? page.thumbnailUrl : '');
   const isDualSelected = isPrimarySelected && isCompareSelected;
   const documentContext = getPageDocumentContext(page);
-  const metricTitles = getMetricTitles(t, pageNumber, sessionTotalPages || totalPages, documentContext);
-  const metricBadges = getMetricBadges(t, pageNumber, sessionTotalPages || totalPages, documentContext);
+  const metricTitles = getMetricTitles(t, visiblePageNumber, totalPages, documentContext);
+  const metricBadges = getMetricBadges(t, visiblePageNumber, totalPages, documentContext);
 
   const rowShellClassName = [
     'thumbnail-row-shell',
@@ -350,12 +350,12 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   ].filter(Boolean).join(' ');
 
   const navigationTitle = isDualSelected
-    ? t('thumbnails.goToPageBothPanes', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (shown in both panes)` })
+    ? t('thumbnails.goToPageBothPanes', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber} (shown in both panes)` })
     : isCompareSelected
-      ? t('thumbnails.goToPageRightPane', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (right pane)` })
+      ? t('thumbnails.goToPageRightPane', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber} (right pane)` })
       : isPrimarySelected
-        ? t('thumbnails.goToPageLeftPane', { page: pageNumber, defaultValue: `Go to page ${pageNumber} (left pane)` })
-        : t('thumbnails.goToPage', { page: pageNumber });
+        ? t('thumbnails.goToPageLeftPane', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber} (left pane)` })
+        : t('thumbnails.goToPage', { page: visiblePageNumber });
 
   const rowTitle = documentContext.hasMultipleDocuments
     ? `${navigationTitle} — ${metricTitles.combinedTitle}`
@@ -390,8 +390,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       <div
         id={rowId}
         className={wrapperClassName}
-        onClick={(event) => onActivate(pageNumber, event)}
-        onKeyDown={(event) => onKeyActivate(event, pageNumber)}
+        onClick={(event) => onActivate(originalPageNumber, event)}
+        onKeyDown={(event) => onKeyActivate(event, originalPageNumber)}
+        onContextMenu={(event) => onOpenContextMenu(event, originalPageNumber, page)}
         role="option"
         tabIndex={isPrimarySelected ? 0 : -1}
         aria-label={rowTitle}
@@ -414,7 +415,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
             ) : null}
             {!documentContext.hasMultipleDocuments ? (
               <span className="thumbnail-number" title={metricTitles.totalPageTitle}>
-                {pageNumber}
+                {visiblePageNumber}
               </span>
             ) : null}
           </div>
@@ -448,7 +449,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           {thumbnailStatus === -1 && (
             <img
               src={getPublicAssetUrl('lost.png')}
-              alt={t('thumbnails.pageFailedAlt', { page: pageNumber })}
+              alt={t('thumbnails.pageFailedAlt', { page: visiblePageNumber })}
               className="thumbnail"
               decoding="async"
               draggable={false}
@@ -457,7 +458,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           {thumbnailStatus === 1 && thumbnailUrl && (
             <img
               src={thumbnailUrl}
-              alt={t('viewer.pageAlt', { page: pageNumber })}
+              alt={t('viewer.pageAlt', { page: visiblePageNumber })}
               className="thumbnail"
               decoding="async"
               draggable={false}
@@ -478,10 +479,11 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {function(number): void} props.setPageNumber - Accepts an original 1-based page number.
  * @param {{ current:(HTMLElement|null) }} props.thumbnailsContainerRef
  * @param {number} props.width
- * @param {number=} props.sessionTotalPages
  * @param {function(number): void} [props.selectForCompare]
  * @param {boolean=} props.isComparing
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
+ * @param {boolean=} props.selectionPanelEnabled
+ * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -490,10 +492,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   setPageNumber,
   thumbnailsContainerRef,
   width,
-  sessionTotalPages = undefined,
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
+  selectionPanelEnabled = false,
+  onHidePageFromSelection,
 }) {
   const { t } = useTranslation('common');
   const {
@@ -509,6 +512,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const overscan = Math.max(0, Number(renderConfig.visibleThumbnailOverscan) || 0);
 
   const containerRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const scrollSyncRafRef = useRef(0);
   const programmaticScrollRef = useRef(false);
   const programmaticScrollReleaseRafRef = useRef(0);
@@ -516,6 +520,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerWidth, setContainerWidth] = useState(Math.max(160, Number(width) || 0));
+  const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number })} */ (null));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
   const documentGroupingActive = useMemo(
@@ -822,6 +827,46 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     };
   }, []);
 
+  const closeContextMenu = useCallback(() => {
+    setContextMenuState(null);
+  }, []);
+
+  useEffect(() => {
+    if (!contextMenuState) return undefined;
+
+    /**
+     * @param {*} event
+     * @returns {void}
+     */
+    const handlePointerDown = (event) => {
+      if (contextMenuRef.current && contextMenuRef.current.contains(event?.target)) return;
+      closeContextMenu();
+    };
+
+    /**
+     * @param {KeyboardEvent} event
+     * @returns {void}
+     */
+    const handleKeyDown = (event) => {
+      if (String(event?.key || '') !== 'Escape') return;
+      closeContextMenu();
+    };
+
+    window.addEventListener('mousedown', handlePointerDown, true);
+    window.addEventListener('touchstart', handlePointerDown, true);
+    window.addEventListener('keydown', handleKeyDown, true);
+    window.addEventListener('resize', closeContextMenu, true);
+    window.addEventListener('scroll', closeContextMenu, true);
+
+    return () => {
+      window.removeEventListener('mousedown', handlePointerDown, true);
+      window.removeEventListener('touchstart', handlePointerDown, true);
+      window.removeEventListener('keydown', handleKeyDown, true);
+      window.removeEventListener('resize', closeContextMenu, true);
+      window.removeEventListener('scroll', closeContextMenu, true);
+    };
+  }, [closeContextMenu, contextMenuState]);
+
   useEffect(() => {
     if (!warmAllThumbnails || totalCount <= 0) return undefined;
 
@@ -884,6 +929,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleScroll = useCallback((event) => {
     const next = Number(event?.currentTarget?.scrollTop || 0);
     lastKnownScrollTopRef.current = next;
+    closeContextMenu();
     if (programmaticScrollRef.current) return;
     if (scrollSyncRafRef.current) window.cancelAnimationFrame(scrollSyncRafRef.current);
     scrollSyncRafRef.current = window.requestAnimationFrame(() => {
@@ -900,7 +946,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         return Math.abs(current - next) >= 1 ? next : current;
       });
     });
-  }, [layout.rowHeight, viewportHeight]);
+  }, [closeContextMenu, layout.rowHeight, viewportHeight]);
 
   /**
    * @param {number} nextPageNumber
@@ -908,6 +954,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
    * @returns {void}
    */
   const handleActivate = useCallback((nextPageNumber, event) => {
+    closeContextMenu();
     try {
       if (event?.shiftKey && typeof selectForCompare === 'function') {
         event.preventDefault?.();
@@ -923,7 +970,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         error: String(error?.message || error),
       });
     }
-  }, [selectForCompare, setPageNumber]);
+  }, [closeContextMenu, selectForCompare, setPageNumber]);
 
   /**
    * @param {*} event
@@ -936,6 +983,34 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     event.preventDefault?.();
     handleActivate(nextPageNumber, event);
   }, [handleActivate]);
+
+  /**
+   * @param {*} event
+   * @param {number} originalPageNumber
+   * @param {*} page
+   * @returns {void}
+   */
+  const handleOpenContextMenu = useCallback((event, originalPageNumber, page) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    if (!selectionPanelEnabled || typeof onHidePageFromSelection !== 'function') {
+      closeContextMenu();
+      return;
+    }
+
+    const originalIndex = getSessionPageIndex(page, Math.max(0, Number(originalPageNumber) - 1));
+    setContextMenuState({
+      x: Math.max(8, Number(event?.clientX) || 0),
+      y: Math.max(8, Number(event?.clientY) || 0),
+      originalIndex,
+    });
+  }, [closeContextMenu, onHidePageFromSelection, selectionPanelEnabled]);
+
+  const handleHidePageFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
+    onHidePageFromSelection(contextMenuState.originalIndex);
+    closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onHidePageFromSelection]);
 
   /**
    * @param {number} sessionIndex
@@ -961,15 +1036,25 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         isCompareMode={!!isComparing}
         preferFullAssetPreview={preferredFullPreviewIndexes.has(index)}
         totalPages={totalCount}
-        sessionTotalPages={Math.max(totalCount, Number(sessionTotalPages) || 0)}
         documentGroupingActive={documentGroupingActive}
         onActivate={handleActivate}
         onKeyActivate={handleKeyActivate}
+        onOpenContextMenu={handleOpenContextMenu}
         onImageLoad={handleImageLoad}
         fullyRenderOffscreenRows={fullyRenderOffscreenRows}
       />
     );
   }
+
+  const canHideFromSelection = !!selectionPanelEnabled
+    && typeof onHidePageFromSelection === 'function'
+    && totalCount > 1;
+  const contextMenuLeft = contextMenuState
+    ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 220) - 228)))
+    : 0;
+  const contextMenuTop = contextMenuState
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 96) - 84)))
+    : 0;
 
   return (
     <div
@@ -1014,6 +1099,37 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
           </div>
         ) : null}
       </div>
+
+      {contextMenuState ? (
+        <div
+          ref={contextMenuRef}
+          className="odv-context-menu"
+          role="menu"
+          style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
+        >
+          <button
+            type="button"
+            className="odv-context-menu-item"
+            role="menuitem"
+            disabled={!canHideFromSelection}
+            onClick={handleHidePageFromContextMenu}
+            title={canHideFromSelection
+              ? t('thumbnails.contextMenu.hidePageFromSelection', {
+                  defaultValue: 'Hide this page from the current selection',
+                })
+              : t('thumbnails.contextMenu.hidePageUnavailable', {
+                  defaultValue: 'At least one visible page must remain selected.',
+                })}
+          >
+            <span className="material-icons" aria-hidden="true">remove_circle_outline</span>
+            <span>
+              {t('thumbnails.contextMenu.hidePageFromSelectionLabel', {
+                defaultValue: 'Hide this page',
+              })}
+            </span>
+          </button>
+        </div>
+      ) : null}
     </div>
   );
 });
@@ -1028,10 +1144,10 @@ ThumbnailRow.propTypes = {
   isCompareMode: PropTypes.bool.isRequired,
   preferFullAssetPreview: PropTypes.bool.isRequired,
   totalPages: PropTypes.number.isRequired,
-  sessionTotalPages: PropTypes.number.isRequired,
   documentGroupingActive: PropTypes.bool.isRequired,
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
+  onOpenContextMenu: PropTypes.func.isRequired,
   onImageLoad: PropTypes.func.isRequired,
   fullyRenderOffscreenRows: PropTypes.bool.isRequired,
 };
@@ -1044,10 +1160,11 @@ DocumentThumbnailList.propTypes = {
     current: PropTypes.any,
   }).isRequired,
   width: PropTypes.number.isRequired,
-  sessionTotalPages: PropTypes.number,
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  selectionPanelEnabled: PropTypes.bool,
+  onHidePageFromSelection: PropTypes.func,
 };
 
 export default DocumentThumbnailList;

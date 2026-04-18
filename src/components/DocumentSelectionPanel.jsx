@@ -187,11 +187,6 @@ export default function DocumentSelectionPanel({
                       indeterminate={false}
                       disabled={!enabled}
                       onChange={(event) => onTogglePage(page.originalIndex, event.target.checked)}
-                      meta={t('thumbnails.selection.pageMeta', {
-                        documentPage: page.documentPageNumber,
-                        globalPage: page.originalPageNumber,
-                        defaultValue: `S ${page.documentPageNumber} · T ${page.originalPageNumber}`,
-                      })}
                     >
                       {t('thumbnails.selection.pageLabel', {
                         documentPage: page.documentPageNumber,

@@ -92,7 +92,6 @@ export default function DemoControls({ children }) {
         demoStrategy={mix ? 'mix' : 'repeat'}
         demoCount={count}
         demoFormats={mix ? ['jpg', 'png', 'tif', 'pdf'] : [format]}
-        sameBlob={true}
       >
         {children}
       </DocumentLoader>

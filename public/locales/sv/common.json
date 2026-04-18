@@ -45,7 +45,10 @@
       "targetCompare": "höger jämförelsevy",
       "modeTitle": "{{scope}} · {{target}}",
       "shiftHint": "Shift = höger jämförelsevy",
-      "ctrlHint": "Ctrl = dokumentläge"
+      "ctrlHint": "Ctrl = dokumentläge",
+      "groupDescription": "{{scope}} för {{target}}.",
+      "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
+      "readyAnnounce": "Sidnavigeringen är redo."
     },
     "firstDocument": "Första dokumentet",
     "previousDocument": "Föregående dokument",
@@ -225,7 +228,10 @@
       "narrower": "Gör miniatyrpanelen smalare",
       "wider": "Gör miniatyrpanelen bredare",
       "hidePane": "Dölj miniatyrer",
-      "showPane": "Visa miniatyrer"
+      "showPane": "Visa miniatyrer",
+      "minimumWidth": "Ställ miniatyrpanelen till minsta bredd",
+      "resetWidth": "Återställ miniatyrpanelen till standardbredd",
+      "maximumWidth": "Ställ miniatyrpanelen till största bredd"
     },
     "documentBoundaryStartShort": "Dok {document}/{total}",
     "documentBoundaryEndShort": "Slut",
@@ -239,7 +245,7 @@
       "totalPagePrefix": "T",
       "documentBadgeTitle": "Dokumentnummer i aktuell session",
       "documentPageBadgeTitle": "Sidnummer inom aktuellt dokument",
-      "totalPageBadgeTitle": "Totalt sidnummer i aktuell session"
+      "totalPageBadgeTitle": "Synligt sidnummer i aktuellt urval"
     },
     "leftPaneBadgeShort": "V",
     "rightPaneBadgeShort": "H",
@@ -260,7 +266,13 @@
       "pageLabel": "Sida {documentPage}",
       "pageMeta": "S {documentPage} · T {globalPage}",
       "save": "Spara urval",
-      "cancel": "Avbryt"
+      "cancel": "Avbryt",
+      "clearFilter": "Ta bort urval/filtrering och visa alla sidor"
+    },
+    "contextMenu": {
+      "hidePageFromSelection": "Dölj denna sida från aktuellt urval",
+      "hidePageFromSelectionLabel": "Dölj denna sida",
+      "hidePageUnavailable": "Minst en synlig sida måste vara vald."
     }
   },
   "compareZoom": {

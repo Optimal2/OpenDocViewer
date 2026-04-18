@@ -36,6 +36,14 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {function(number, boolean): void} props.toggleDraftPage
  * @param {function(): void} props.saveDraftSelection
  * @param {function(): void} props.cancelDraftSelection
+ * @param {function(): void} props.clearSelectionFilter
+ * @param {function(number): boolean} props.hidePageFromSelection
+ * @param {number} props.minWidth
+ * @param {number} props.maxWidth
+ * @param {number} props.defaultWidth
+ * @param {function(): void} props.onSetMinWidth
+ * @param {function(): void} props.onResetWidth
+ * @param {function(): void} props.onSetMaxWidth
  * @param {function(): void} props.onIncreaseWidth
  * @param {function(): void} props.onDecreaseWidth
  * @param {function(): void} props.onHide
@@ -65,79 +73,143 @@ const DocumentViewerThumbnails = ({
   toggleDraftPage,
   saveDraftSelection,
   cancelDraftSelection,
+  clearSelectionFilter,
+  hidePageFromSelection,
+  minWidth,
+  maxWidth,
+  defaultWidth,
+  onSetMinWidth,
+  onResetWidth,
+  onSetMaxWidth,
   onIncreaseWidth,
   onDecreaseWidth,
   onHide,
 }) => {
   const { t } = useTranslation('common');
+  const widthAtMin = width <= minWidth;
+  const widthAtMax = width >= maxWidth;
+  const widthAtDefault = width === defaultWidth;
+  const canClearSelection = selectionActive || draftSelectionDirty;
 
   return (
     <div className="thumbnail-pane-shell" style={{ width: `${width}px`, minWidth: `${width}px` }}>
-      <div className="thumbnail-pane-toolbar" aria-label={t('thumbnails.controls.groupLabel', { defaultValue: 'Thumbnail pane controls' })}>
-        <div className="thumbnail-pane-toolbar-actions">
-          <button
-            type="button"
-            className="thumbnail-pane-toolbar-button"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onDecreaseWidth}
-            aria-label={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
-            title={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
-          >
-            <span className="material-icons" aria-hidden="true">chevron_left</span>
-          </button>
-          <button
-            type="button"
-            className="thumbnail-pane-toolbar-button"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onIncreaseWidth}
-            aria-label={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
-            title={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
-          >
-            <span className="material-icons" aria-hidden="true">chevron_right</span>
-          </button>
-          <button
-            type="button"
-            className="thumbnail-pane-toolbar-button"
-            onMouseDown={(event) => event.preventDefault()}
-            onClick={onHide}
-            aria-label={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}
-            title={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}
-          >
-            <span className="material-icons" aria-hidden="true">visibility_off</span>
-          </button>
+      <div className="thumbnail-pane-toolbar-stack" aria-label={t('thumbnails.controls.groupLabel', { defaultValue: 'Thumbnail pane controls' })}>
+        <div className="thumbnail-pane-toolbar-row is-actions">
+          <div className="thumbnail-pane-toolbar-actions">
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onSetMinWidth}
+              aria-label={t('thumbnails.controls.minimumWidth', { defaultValue: 'Set thumbnail pane to minimum width' })}
+              title={t('thumbnails.controls.minimumWidth', { defaultValue: 'Set thumbnail pane to minimum width' })}
+              disabled={widthAtMin}
+            >
+              <span className="material-icons" aria-hidden="true">keyboard_double_arrow_left</span>
+            </button>
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onDecreaseWidth}
+              aria-label={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
+              title={t('thumbnails.controls.narrower', { defaultValue: 'Make thumbnail pane narrower' })}
+              disabled={widthAtMin}
+            >
+              <span className="material-icons" aria-hidden="true">chevron_left</span>
+            </button>
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onResetWidth}
+              aria-label={t('thumbnails.controls.resetWidth', { defaultValue: 'Reset thumbnail pane to default width' })}
+              title={t('thumbnails.controls.resetWidth', { defaultValue: 'Reset thumbnail pane to default width' })}
+              disabled={widthAtDefault}
+            >
+              <span className="material-icons" aria-hidden="true">restart_alt</span>
+            </button>
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onIncreaseWidth}
+              aria-label={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
+              title={t('thumbnails.controls.wider', { defaultValue: 'Make thumbnail pane wider' })}
+              disabled={widthAtMax}
+            >
+              <span className="material-icons" aria-hidden="true">chevron_right</span>
+            </button>
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onSetMaxWidth}
+              aria-label={t('thumbnails.controls.maximumWidth', { defaultValue: 'Set thumbnail pane to maximum width' })}
+              title={t('thumbnails.controls.maximumWidth', { defaultValue: 'Set thumbnail pane to maximum width' })}
+              disabled={widthAtMax}
+            >
+              <span className="material-icons" aria-hidden="true">keyboard_double_arrow_right</span>
+            </button>
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={onHide}
+              aria-label={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}
+              title={t('thumbnails.controls.hidePane', { defaultValue: 'Hide thumbnails' })}
+            >
+              <span className="material-icons" aria-hidden="true">visibility_off</span>
+            </button>
+          </div>
         </div>
 
-        <div className="thumbnail-pane-mode-switch" role="tablist" aria-label={t('thumbnails.selection.tabGroup', { defaultValue: 'Thumbnail pane content' })}>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={paneMode === 'thumbnails'}
-            className={`thumbnail-pane-mode-button ${paneMode === 'thumbnails' ? 'is-active' : ''}`}
-            onClick={() => setPaneMode('thumbnails')}
-            title={t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
-          >
-            {t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
-          </button>
-          <button
-            type="button"
-            role="tab"
-            aria-selected={paneMode === 'selection'}
-            className={[
-              'thumbnail-pane-mode-button',
-              paneMode === 'selection' ? 'is-active' : '',
-              selectionActive ? 'has-selection' : '',
-            ].filter(Boolean).join(' ')}
-            onClick={() => setPaneMode('selection')}
-            title={selectionPanelEnabled
-              ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
-              : t('thumbnails.selection.loadingStatusShort', {
-                  ready: Number(pageLoadState?.readyPages) || 0,
-                  total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
-                  defaultValue: 'Selection will be available when all pages are fully loaded.',
-                })}
-          >
-            {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
-          </button>
+        <div className="thumbnail-pane-toolbar-row is-tabs">
+          <div className="thumbnail-pane-mode-switch" role="tablist" aria-label={t('thumbnails.selection.tabGroup', { defaultValue: 'Thumbnail pane content' })}>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={paneMode === 'thumbnails'}
+              className={`thumbnail-pane-mode-button ${paneMode === 'thumbnails' ? 'is-active' : ''}`}
+              onClick={() => setPaneMode('thumbnails')}
+              title={t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
+            >
+              {t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
+            </button>
+            <button
+              type="button"
+              role="tab"
+              aria-selected={paneMode === 'selection'}
+              className={[
+                'thumbnail-pane-mode-button',
+                paneMode === 'selection' ? 'is-active' : '',
+                selectionActive ? 'has-selection' : '',
+              ].filter(Boolean).join(' ')}
+              onClick={() => setPaneMode('selection')}
+              title={selectionPanelEnabled
+                ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
+                : t('thumbnails.selection.loadingStatusShort', {
+                    ready: Number(pageLoadState?.readyPages) || 0,
+                    total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
+                    defaultValue: 'Selection will be available when all pages are fully loaded.',
+                  })}
+            >
+              {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
+            </button>
+          </div>
+
+          {canClearSelection ? (
+            <button
+              type="button"
+              className="thumbnail-pane-toolbar-button is-compact is-danger"
+              onMouseDown={(event) => event.preventDefault()}
+              onClick={clearSelectionFilter}
+              aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
+              title={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
+            >
+              <span className="material-icons" aria-hidden="true">filter_alt_off</span>
+            </button>
+          ) : null}
         </div>
       </div>
 
@@ -164,10 +236,11 @@ const DocumentViewerThumbnails = ({
           setPageNumber={setPageNumber}
           thumbnailsContainerRef={thumbnailsContainerRef}
           width={width}
-          sessionTotalPages={sessionTotalPages}
           selectForCompare={selectForCompare}
           isComparing={isComparing}
           comparePageNumber={comparePageNumber}
+          selectionPanelEnabled={selectionPanelEnabled}
+          onHidePageFromSelection={hidePageFromSelection}
         />
       )}
     </div>
@@ -205,6 +278,14 @@ DocumentViewerThumbnails.propTypes = {
   toggleDraftPage: PropTypes.func.isRequired,
   saveDraftSelection: PropTypes.func.isRequired,
   cancelDraftSelection: PropTypes.func.isRequired,
+  clearSelectionFilter: PropTypes.func.isRequired,
+  hidePageFromSelection: PropTypes.func.isRequired,
+  minWidth: PropTypes.number.isRequired,
+  maxWidth: PropTypes.number.isRequired,
+  defaultWidth: PropTypes.number.isRequired,
+  onSetMinWidth: PropTypes.func.isRequired,
+  onResetWidth: PropTypes.func.isRequired,
+  onSetMaxWidth: PropTypes.func.isRequired,
   onIncreaseWidth: PropTypes.func.isRequired,
   onDecreaseWidth: PropTypes.func.isRequired,
   onHide: PropTypes.func.isRequired,

@@ -108,9 +108,6 @@ const DocumentConsumerWrapper = ({
             extension={extension}
             endNumber={endNumber}
             sourceList={sourceList || null}
-            // Intentional internal optimization: reuse the full-size blob for thumbnails when
-            // the loader can do so safely. Consumers are not expected to toggle this path.
-            sameBlob={true}
             // Forward NEW demo props (undefined values are harmless):
             demoMode={demoMode}
             demoStrategy={demoStrategy}

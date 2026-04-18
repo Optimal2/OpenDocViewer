@@ -37,7 +37,7 @@
  * @returns {JSX.Element}
  */
 
-import React, { useRef, useState, useEffect, useCallback } from 'react';
+import React, { useRef, useState, useEffect, useCallback, useId, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 
@@ -76,6 +76,7 @@ const PageNavigationButtons = ({
   lastButtonTitle,
 }) => {
   const { t } = useTranslation();
+  const groupId = useId();
 
   const SUPPRESS_CLICK_WINDOW_MS = 400;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
@@ -206,15 +207,35 @@ const PageNavigationButtons = ({
   const navigationScopeClass = navigationScope === 'document'
     ? 'navigation-scope-document'
     : 'navigation-scope-page';
+  const descriptionId = `${groupId}-description`;
+  const statusId = `${groupId}-status`;
+  const scopeDescription = navigationScope === 'document'
+    ? t('toolbar.navigation.scopeDocument', { defaultValue: 'Document navigation' })
+    : t('toolbar.navigation.scopePage', { defaultValue: 'Page navigation' });
+  const targetDescription = navigationTarget === 'compare'
+    ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
+    : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' });
+  const navigationDescription = useMemo(() => t('toolbar.navigation.groupDescription', {
+    scope: scopeDescription,
+    target: targetDescription,
+    defaultValue: `${scopeDescription} for ${targetDescription}.`,
+  }), [scopeDescription, t, targetDescription]);
+  const loadingAnnouncement = isDocumentLoading
+    ? t('toolbar.navigation.loadingAnnounce', { defaultValue: 'Page navigation is still loading.' })
+    : t('toolbar.navigation.readyAnnounce', { defaultValue: 'Page navigation is ready.' });
 
   return (
     <div
       className={`zoom-fixed-group page-navigation-group ${navigationTargetClass} ${navigationScopeClass}${isDocumentLoading ? ' is-loading' : ''}`}
       role="group"
       aria-label={groupTitle}
+      aria-describedby={`${descriptionId} ${statusId}`}
       title={groupTitle}
       aria-busy={isDocumentLoading}
     >
+      <span id={descriptionId} className="sr-only">{navigationDescription}</span>
+      <span id={statusId} className="sr-only" role="status" aria-live="polite">{loadingAnnouncement}</span>
+
       <button
         type="button"
         onMouseDown={(event) => event.preventDefault()}
@@ -275,6 +296,7 @@ const PageNavigationButtons = ({
         aria-valuenow={pageNumberDisplay}
         aria-valuetext={`${t('toolbar.page')} ${pageNumberDisplay} / ${totalPagesDisplay}`}
         aria-busy={isDocumentLoading}
+        aria-describedby={`${descriptionId} ${statusId}`}
         title={groupTitle}
       />
 

@@ -45,6 +45,7 @@ const DocumentViewer = () => {
     pageNumberDisplay,
     renderPageNumber,
     setPageNumber,
+    setVisiblePageNumber,
     thumbnailSelectionPageNumber,
     compareThumbnailPageNumber,
     zoom,
@@ -53,14 +54,21 @@ const DocumentViewer = () => {
     comparePageNumber,
     renderComparePageNumber,
     setComparePageNumber,
+    setVisibleComparePageNumber,
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
     imageProperties,
     isExpanded,
     thumbnailWidth,
+    thumbnailWidthMin,
+    thumbnailWidthMax,
+    thumbnailWidthDefault,
     increaseThumbnailWidth,
     decreaseThumbnailWidth,
+    setThumbnailPaneToMinimumWidth,
+    resetThumbnailPaneWidth,
+    setThumbnailPaneToMaximumWidth,
     hideThumbnailPane,
     showThumbnailPane,
     viewerContainerRef,
@@ -116,6 +124,8 @@ const DocumentViewer = () => {
     toggleDraftPage,
     saveDraftSelection,
     cancelDraftSelection,
+    clearSelectionFilter,
+    hidePageFromSelection,
   } = useDocumentViewer();
 
   const isDocumentLoading = useMemo(() => {
@@ -163,10 +173,33 @@ const DocumentViewer = () => {
     selectionActive,
   });
 
+  const handleViewerContextMenu = useMemo(() => {
+    /**
+     * @param {*} target
+     * @returns {boolean}
+     */
+    const allowNativeContextMenu = (target) => {
+      if (!(target instanceof Element)) return false;
+      return !!target.closest(
+        'input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"], [data-odv-allow-native-contextmenu="true"]'
+      );
+    };
+
+    /**
+     * @param {*} event
+     * @returns {void}
+     */
+    return (event) => {
+      if (allowNativeContextMenu(event?.target)) return;
+      event?.preventDefault?.();
+    };
+  }, []);
+
   return (
     <div
       className="document-viewer-container"
       onClick={handleContainerClick}
+      onContextMenu={handleViewerContextMenu}
       role="region"
       aria-label={t('viewer.aria.containerRegion')}
     >
@@ -180,7 +213,9 @@ const DocumentViewer = () => {
         pageNumber={pageNumber}
         pageNumberDisplay={pageNumberDisplay}
         setPageNumber={setPageNumber}
+        setVisiblePageNumber={setVisiblePageNumber}
         setComparePageNumber={setComparePageNumber}
+        setVisibleComparePageNumber={setVisibleComparePageNumber}
         totalPages={totalPages}
         totalPagesDisplay={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
@@ -268,6 +303,14 @@ const DocumentViewer = () => {
                 toggleDraftPage={toggleDraftPage}
                 saveDraftSelection={saveDraftSelection}
                 cancelDraftSelection={cancelDraftSelection}
+                clearSelectionFilter={clearSelectionFilter}
+                hidePageFromSelection={hidePageFromSelection}
+                minWidth={thumbnailWidthMin}
+                maxWidth={thumbnailWidthMax}
+                defaultWidth={thumbnailWidthDefault}
+                onSetMinWidth={setThumbnailPaneToMinimumWidth}
+                onResetWidth={resetThumbnailPaneWidth}
+                onSetMaxWidth={setThumbnailPaneToMaximumWidth}
                 onIncreaseWidth={increaseThumbnailWidth}
                 onDecreaseWidth={decreaseThumbnailWidth}
                 onHide={hideThumbnailPane}
