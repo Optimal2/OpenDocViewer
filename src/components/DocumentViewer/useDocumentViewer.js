@@ -48,6 +48,9 @@ function normalizeRotationDegrees(value) {
   return ((numeric % 360) + 360) % 360;
 }
 
+/** Neutral per-page image adjustment state. */
+const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, contrast: 100 });
+
 /**
  * @param {(Array<boolean>|null|undefined)} mask
  * @param {number} total
@@ -548,11 +551,14 @@ export function useDocumentViewer() {
     totalPages,
   ]);
 
-  const [imageProperties, setImageProperties] = useState(/** @type {ImageProperties} */ ({
-    rotation: 0, brightness: 100, contrast: 100,
+  const [primaryImageProperties, setPrimaryImageProperties] = useState(/** @type {ImageProperties} */ ({
+    ...DEFAULT_IMAGE_PROPERTIES,
+  }));
+  const [compareImageProperties, setCompareImageProperties] = useState(/** @type {ImageProperties} */ ({
+    ...DEFAULT_IMAGE_PROPERTIES,
   }));
 
-  const [isExpandedRaw, setIsExpandedRaw] = useState(false); // raw edit-mode flag
+  const [isExpandedRaw, setIsExpandedRaw] = useState(false); // editing-controls visibility
   const isExpanded = isExpandedRaw;
 
   const [thumbnailWidth, setThumbnailWidth] = useState(THUMBNAIL_WIDTH_DEFAULT);
@@ -562,6 +568,25 @@ export function useDocumentViewer() {
   /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
   /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
   /** @type {{ current: any }} */ const compareRef = useRef(null);
+  const previousPrimaryOriginalPageRef = useRef(currentOriginalPageNumber);
+  const previousCompareOriginalPageRef = useRef(compareOriginalPageNumber);
+
+  useEffect(() => {
+    if (previousPrimaryOriginalPageRef.current === currentOriginalPageNumber) return;
+    previousPrimaryOriginalPageRef.current = currentOriginalPageNumber;
+    setPrimaryImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+  }, [currentOriginalPageNumber]);
+
+  useEffect(() => {
+    if (!isComparing) {
+      previousCompareOriginalPageRef.current = compareOriginalPageNumber;
+      setCompareImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+      return;
+    }
+    if (previousCompareOriginalPageRef.current === compareOriginalPageNumber) return;
+    previousCompareOriginalPageRef.current = compareOriginalPageNumber;
+    setCompareImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+  }, [compareOriginalPageNumber, isComparing]);
 
   // --- Post-zoom (compare panes) -------------------------------------------------
   const {
@@ -722,8 +747,6 @@ export function useDocumentViewer() {
    * @returns {void}
    */
   const updatePageTarget = useCallback((target, next) => {
-    if (target === 'compare' && isExpanded) return;
-
     const numericNext = typeof next === 'function'
       ? resolveTargetOriginalPageNumber(target, next)
       : clampPage(next, Math.max(1, totalSessionPages || 1));
@@ -740,7 +763,7 @@ export function useDocumentViewer() {
 
     lastRequestedOriginalIndexRef.current = Math.max(0, numericNext - 1);
     setPageNumberRaw(finalOriginalPage);
-  }, [isExpanded, resolveNearestVisibleOriginalPageNumber, resolveTargetOriginalPageNumber, totalSessionPages]);
+  }, [resolveNearestVisibleOriginalPageNumber, resolveTargetOriginalPageNumber, totalSessionPages]);
 
   /**
    * Change the primary page using an original page number (or a visible-page updater function when
@@ -771,12 +794,12 @@ export function useDocumentViewer() {
    * @returns {void}
    */
   const setVisibleComparePageNumber = useCallback((nextVisiblePageNumber) => {
-    if (isExpanded || totalPages <= 0) return;
+    if (totalPages <= 0) return;
     const resolvedOriginalPage = resolveTargetOriginalPageNumber('compare', nextVisiblePageNumber);
     lastRequestedCompareOriginalIndexRef.current = Math.max(0, resolvedOriginalPage - 1);
     setComparePageNumberRaw(resolvedOriginalPage);
     setIsComparing(true);
-  }, [isExpanded, resolveTargetOriginalPageNumber, totalPages]);
+  }, [resolveTargetOriginalPageNumber, totalPages]);
 
   /**
    * Change the compare page using an original page number (or a visible-page updater function when
@@ -977,28 +1000,21 @@ export function useDocumentViewer() {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
   }, [actualSize, fitToScreen, fitToWidth]);
 
-  // --- Compare/Edit mutual exclusivity + handlers --------------------------------
+  // --- Compare + editing controls -------------------------------------------------
   /**
-   * Guarded setter for edit mode: refuses to enable while compare is active.
-   * Supports boolean or updater function forms.
+   * Setter for the editing controls visibility. The controls may now stay open while compare mode
+   * is active because each pane keeps its own transient image-adjustment state.
+   *
    * @param {boolean|Function} next
    */
   const setIsExpanded = useCallback((next) => {
     const resolve = (curr) => (typeof next === 'function' ? next(curr) : next);
-    setIsExpandedRaw((curr) => {
-      const wanted = resolve(curr);
-      if (wanted && isComparing) {
-        // Disallow enabling edit when compare is active.
-        return curr;
-      }
-      return !!wanted;
-    });
-  }, [isComparing]);
+    setIsExpandedRaw((curr) => !!resolve(curr));
+  }, []);
 
-  /** Toggle compare mode; blocked if edit mode is active. */
+  /** Toggle compare mode. */
   const handleCompare = useCallback(() => {
     setIsComparing((prev) => {
-      if (!prev && isExpanded) return prev;
       const next = !prev;
       if (next) {
         const fallbackOriginalPage = compareOriginalPageNumber != null
@@ -1008,7 +1024,7 @@ export function useDocumentViewer() {
       }
       return next;
     });
-  }, [compareOriginalPageNumber, currentOriginalPageNumber, isExpanded]);
+  }, [compareOriginalPageNumber, currentOriginalPageNumber]);
 
   /**
    * Close compare mode without affecting the left page.
@@ -1020,44 +1036,55 @@ export function useDocumentViewer() {
 
   /**
    * Select a page for the right-hand compare pane.
-   * If compare is OFF, enables it unless edit mode is active (then no-op).
+   * If compare is OFF, enables it.
    * If compare is ON, just replaces the right-hand page.
    *
    * @param {number} page
    * @returns {void}
    */
   const selectForCompare = useCallback((page) => {
-    if (isExpanded) return; // blocked by active edit mode
     setComparePageNumber(page);
     logger.info('Compare selection updated', { comparePage: page });
-  }, [setComparePageNumber, isExpanded]);
+  }, [setComparePageNumber]);
 
   // --- Image adjustments ---------------------------------------------------------
-  const handleRotationChange = useCallback((delta) => {
+  /**
+   * @param {'primary'|'compare'} target
+   * @returns {function((ImageProperties|function(ImageProperties): ImageProperties)): void}
+   */
+  const getImagePropertiesSetter = useCallback((target) => (
+    target === 'compare' ? setCompareImageProperties : setPrimaryImageProperties
+  ), []);
+
+  const handleRotationChange = useCallback((delta, target = 'primary') => {
     const d = Number(delta || 0);
-    setImageProperties((state) => ({
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    getImagePropertiesSetter(updateTarget)((state) => ({
       ...state,
       rotation: normalizeRotationDegrees((Number(state.rotation) || 0) + d),
     }));
-  }, []);
+  }, [getImagePropertiesSetter]);
 
   /** @param {{target:{value:*}}} e */
-  const handleBrightnessChange = useCallback((e) => {
+  const handleBrightnessChange = useCallback((e, target = 'primary') => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((state) => ({ ...state, brightness: v }));
-  }, []);
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    getImagePropertiesSetter(updateTarget)((state) => ({ ...state, brightness: v }));
+  }, [getImagePropertiesSetter]);
 
   /** @param {{target:{value:*}}} e */
-  const handleContrastChange = useCallback((e) => {
+  const handleContrastChange = useCallback((e, target = 'primary') => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    setImageProperties((state) => ({ ...state, contrast: v }));
-  }, []);
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    getImagePropertiesSetter(updateTarget)((state) => ({ ...state, contrast: v }));
+  }, [getImagePropertiesSetter]);
 
-  const resetImageProperties = useCallback(() => {
-    setImageProperties({ rotation: 0, brightness: 100, contrast: 100 });
-  }, []);
+  const resetImageProperties = useCallback((target = 'primary') => {
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    getImagePropertiesSetter(updateTarget)({ ...DEFAULT_IMAGE_PROPERTIES });
+  }, [getImagePropertiesSetter]);
 
   // --- Thumbnail resizer ---------------------------------------------------------
   /**
@@ -1145,7 +1172,7 @@ export function useDocumentViewer() {
     setZoomState,
     documentRenderRef,
     viewerContainerRef,
-    imageRotation: imageProperties.rotation,
+    imageRotation: (Number(primaryImageProperties.rotation) || 0) + ((Number(compareImageProperties.rotation) || 0) * 1000),
     isComparing,
     thumbnailWidth,
     pageNumber: currentOriginalPageNumber,
@@ -1159,7 +1186,7 @@ export function useDocumentViewer() {
     goToFirstDocument,
     goToLastDocument,
     documentNavigationEnabled,
-    compareNavigationEnabled: !isExpanded,
+    compareNavigationEnabled: true,
     zoomIn,
     zoomOut,
     actualSize,
@@ -1196,7 +1223,8 @@ export function useDocumentViewer() {
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
-    imageProperties,
+    primaryImageProperties,
+    compareImageProperties,
     isExpanded,
     thumbnailWidth,
     thumbnailWidthMin,

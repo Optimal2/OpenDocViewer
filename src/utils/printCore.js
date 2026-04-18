@@ -305,6 +305,55 @@ export function handlePrint(documentRenderRef, options = {}) {
 }
 
 /**
+ * Print both currently visible compare panes as a two-page print job.
+ *
+ * The helper intentionally prints the currently rendered surfaces instead of the raw session assets
+ * so transient per-pane adjustments (rotation / brightness / contrast) are preserved in the output.
+ *
+ * @param {{ current: (DocumentRenderHandle|null) }} primaryRenderRef
+ * @param {{ current: (DocumentRenderHandle|null) }} compareRenderRef
+ * @param {PrintOptions} [options]
+ * @returns {void}
+ */
+export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
+  logger.info('handlePrintCurrentComparison invoked');
+
+  const { printDelayMs = 0, reason = '', forWhom = '' } = options;
+  const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
+  const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
+  if (!primaryNode || !compareNode) {
+    logger.error('Compare print requested without two active render surfaces');
+    return;
+  }
+
+  const primaryData = getPrintableDataUrl(primaryNode);
+  const compareData = getPrintableDataUrl(compareNode);
+  const dataUrls = [primaryData.dataUrl, compareData.dataUrl].filter((value) => typeof value === 'string' && value);
+  if (dataUrls.length !== 2) {
+    logger.error('Unable to derive printable data URLs for both compare panes');
+    return;
+  }
+
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+
+  const { frame } = createHiddenIframe(MIN_MULTI_PAGE_CLEANUP_MS);
+  const doc = frame.contentDocument || frame.contentWindow?.document;
+  if (!doc) {
+    logger.error('Failed to get iframe document for compare printing');
+    return;
+  }
+
+  renderMultiDocument(doc, {
+    dataUrls,
+    printDelayMs,
+    printHeaderCfg: odv.printHeader || {},
+    tokenContext,
+  });
+}
+
+/**
  * Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide
  * an explicit all-pages list.
  *

@@ -43,10 +43,10 @@
       "scopeDocument": "Dokumentnavigering",
       "targetPrimary": "huvudvy / vänster vy",
       "targetCompare": "höger jämförelsevy",
-      "modeTitle": "{{scope}} · {{target}}",
+      "modeTitle": "{scope} · {target}",
       "shiftHint": "Shift = höger jämförelsevy",
       "ctrlHint": "Ctrl = dokumentläge",
-      "groupDescription": "{{scope}} för {{target}}.",
+      "groupDescription": "{scope} för {target}.",
       "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
       "readyAnnounce": "Sidnavigeringen är redo.",
       "noPagesTitle": "Inga synliga sidor tillgängliga",
@@ -55,7 +55,19 @@
     "firstDocument": "Första dokumentet",
     "previousDocument": "Föregående dokument",
     "nextDocument": "Nästa dokument",
-    "lastDocument": "Sista dokumentet"
+    "lastDocument": "Sista dokumentet",
+    "language": {
+      "openMenu": "Välj språk",
+      "current": "Språk: {language}",
+      "switchTo": "Byt språk till {language}",
+      "options": {
+        "en": "English",
+        "sv": "Svenska"
+      }
+    },
+    "editingTargetPrimary": "Redigerar vänster/huvudsida",
+    "editingTargetCompare": "Redigerar höger jämförelsesida (Shift)",
+    "resetAdjustments": "Återställ justeringar"
   },
   "printDialog": {
     "title": "Skriv ut",
@@ -144,6 +156,12 @@
       "selection": "Aktuellt urval ({count} sidor)",
       "session": "Hela sessionen ({count} sidor)",
       "hint": "Använd aktuellt filtrerat urval eller ignorera urvalet och skriv ut hela sessionen."
+    },
+    "activeScope": {
+      "label": "Hur ska den aktuella jämförelsevyn skrivas ut?",
+      "primary": "Bara vänster/huvudsidan",
+      "compareBoth": "Båda jämförelsesidorna (2 utskriftssidor)",
+      "hint": "Skriv ut bara huvudsidan eller båda de jämförda sidorna så som de visas just nu."
     }
   },
   "print": {
@@ -282,7 +300,7 @@
       "hidePageFromSelectionLabel": "Dölj denna sida",
       "hidePageUnavailable": "Minst en synlig sida måste vara vald.",
       "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
-      "hideDocumentFromSelectionLabel": "Dölj dokument {{document}}/{{total}}",
+      "hideDocumentFromSelectionLabel": "Dölj dokument {document}/{total}",
       "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade."
     }
   },
