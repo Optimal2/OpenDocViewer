@@ -15,6 +15,7 @@
  * @param {number} props.totalPages - Total number of pages (validates range/custom).
  * @param {boolean=} props.isDocumentLoading - Restrict the dialog to active-page printing while sources still load.
  * @param {number=} props.activePageNumber - Current active page number.
+ * @param {boolean=} props.isComparing - Whether compare mode is currently active.
  * @param {boolean=} props.hasActiveSelection - Whether the viewer currently hides at least one page.
  * @param {number=} props.selectionIncludedCount - Number of currently included pages when selection is active.
  * @param {number=} props.sessionTotalPages - Total pages in the underlying session before filtering.
@@ -50,6 +51,7 @@ export default function PrintRangeDialog({
   totalPages,
   isDocumentLoading = false,
   activePageNumber = 1,
+  isComparing = false,
   hasActiveSelection = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
@@ -64,6 +66,7 @@ export default function PrintRangeDialog({
     totalPages,
     isDocumentLoading,
     activePageNumber,
+    isComparing,
     hasActiveSelection,
     selectionIncludedCount,
     sessionTotalPages,
@@ -179,6 +182,34 @@ export default function PrintRangeDialog({
                   </label>
                 </div>
                 <span className="odv-prd-hint">{t('printDialog.allScope.hint')}</span>
+              </div>
+            )}
+
+            {ctrl.basicChoice === 'active' && ctrl.isComparing && !ctrl.restrictToActivePage && (
+              <div className="odv-prd-subField" role="group" aria-label={t('printDialog.activeScope.label')}>
+                <div className="odv-prd-radioList odv-prd-subRadioList">
+                  <label className="odv-prd-radioRow">
+                    <input
+                      type="radio"
+                      name="activeScope"
+                      value="primary"
+                      checked={ctrl.activeScope === 'primary'}
+                      onChange={() => ctrl.setActiveScope('primary')}
+                    />
+                    <span>{t('printDialog.activeScope.primary')}</span>
+                  </label>
+                  <label className="odv-prd-radioRow">
+                    <input
+                      type="radio"
+                      name="activeScope"
+                      value="compare-both"
+                      checked={ctrl.activeScope === 'compare-both'}
+                      onChange={() => ctrl.setActiveScope('compare-both')}
+                    />
+                    <span>{t('printDialog.activeScope.compareBoth')}</span>
+                  </label>
+                </div>
+                <span className="odv-prd-hint">{t('printDialog.activeScope.hint')}</span>
               </div>
             )}
           </div>
@@ -374,4 +405,8 @@ PrintRangeDialog.propTypes = {
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool,
   activePageNumber: PropTypes.number,
+  isComparing: PropTypes.bool,
+  hasActiveSelection: PropTypes.bool,
+  selectionIncludedCount: PropTypes.number,
+  sessionTotalPages: PropTypes.number,
 };

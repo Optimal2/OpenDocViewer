@@ -24,8 +24,9 @@ import usePageNavigation from '../../hooks/usePageNavigation.js';
 import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
+import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeToggleButton from './ThemeToggleButton.jsx';
-import { handlePrint, handlePrintAll, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 
 
@@ -37,6 +38,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {number=} to
  * @property {Array<number>=} sequence
  * @property {'selection'|'session'=} allScope
+ * @property {'primary'|'compare-both'=} activeScope
  * @property {string=} reason
  * @property {string=} forWhom
  */
@@ -102,19 +104,18 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {(number|null)=} comparePageNumber
- * @property {ImageProperties} imageProperties
- * @property {function(number): void} handleRotationChange
- * @property {function({ target: { value: number } }): void} handleBrightnessChange
- * @property {function({ target: { value: number } }): void} handleContrastChange
- * @property {function(): void} resetImageProperties
+ * @property {ImageProperties} primaryImageProperties
+ * @property {ImageProperties} compareImageProperties
+ * @property {function(number, ('primary'|'compare')=): void} handleRotationChange
+ * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleBrightnessChange
+ * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleContrastChange
+ * @property {function(('primary'|'compare')=): void} resetImageProperties
  * @property {boolean} isExpanded
  * @property {function(*): void} setIsExpanded
  * @property {number=} zoom
  * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
  * @property {function(number): void=} setZoom
- * @property {boolean=} compareDisabled
- * @property {boolean=} editDisabled
  * @property {boolean=} hasActiveSelection
  * @property {Array<number>=} visibleOriginalPageNumbers
  * @property {number=} selectionIncludedCount
@@ -178,6 +179,7 @@ const DocumentToolbar = ({
   fitToScreen,
   fitToWidth,
   documentRenderRef,
+  compareRef,
   viewerContainerRef,
   isPrintDialogOpen = false,
   openPrintDialog,
@@ -185,7 +187,8 @@ const DocumentToolbar = ({
   handleCompare,
   isComparing,
   comparePageNumber = null,
-  imageProperties,
+  primaryImageProperties,
+  compareImageProperties,
   handleRotationChange,
   handleBrightnessChange,
   handleContrastChange,
@@ -197,9 +200,6 @@ const DocumentToolbar = ({
   zoomState,
   setZoomMode,
   setZoom,
-  // Optional UI flags that keep Compare and Edit mutually exclusive.
-  compareDisabled = false,
-  editDisabled = false,
   hasActiveSelection = false,
   visibleOriginalPageNumbers = [],
   selectionIncludedCount = 0,
@@ -214,7 +214,7 @@ const DocumentToolbar = ({
   const documentRepeatTargetRef = useRef('primary');
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
-  const compareNavigationEnabled = !compareDisabled && typeof setComparePageNumber === 'function';
+  const compareNavigationEnabled = typeof setComparePageNumber === 'function';
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -487,6 +487,11 @@ const DocumentToolbar = ({
   );
   const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
   const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
+  const editingTargetMode = isComparing && isShiftPressed ? 'compare' : 'primary';
+  const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
+  const editingTargetLabel = editingTargetMode === 'compare'
+    ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page (Shift)' })
+    : t('toolbar.editingTargetPrimary', { defaultValue: 'Editing the primary / left page' });
   const activeDocumentNavigation = navigationTargetMode === 'compare'
     ? normalizedCompareDocumentNavigation
     : normalizedPrimaryDocumentNavigation;
@@ -574,9 +579,9 @@ const DocumentToolbar = ({
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
       const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
-      handleBrightnessChange({ target: { value } });
+      handleBrightnessChange({ target: { value } }, editingTargetMode);
     },
-    [handleBrightnessChange, snapToZero]
+    [editingTargetMode, handleBrightnessChange, snapToZero]
   );
 
   /**
@@ -588,22 +593,19 @@ const DocumentToolbar = ({
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
       const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
-      handleContrastChange({ target: { value } });
+      handleContrastChange({ target: { value } }, editingTargetMode);
     },
-    [handleContrastChange, snapToZero]
+    [editingTargetMode, handleContrastChange, snapToZero]
   );
 
-  /** Toggle the canvas editing tools. Reset adjustments when turning the tools off. */
+  /** Toggle the visibility of the editing controls. The actual renderer only switches to canvas once a non-neutral adjustment is applied. */
   const toggleExpand = useCallback(() => {
-    if (isExpanded) {
-      resetImageProperties();
-    }
     setIsExpanded((prev) => {
       const next = !prev;
-      if (next) logger.info('Enabling canvas tools');
+      if (next) logger.info('Opening image adjustment controls', { target: editingTargetMode });
       return next;
     });
-  }, [isExpanded, resetImageProperties, setIsExpanded]);
+  }, [editingTargetMode, setIsExpanded]);
 
   /**
    * Build a compact "pages" descriptor for logging.
@@ -613,7 +615,9 @@ const DocumentToolbar = ({
   const toPagesString = useCallback((detail) => {
     if (!detail) return null;
     if (detail.mode === 'all') return detail.allScope === 'selection' ? 'selection' : 'all';
-    if (detail.mode === 'active') return String(pageNumberDisplay);
+    if (detail.mode === 'active') return detail.activeScope === 'compare-both'
+      ? `${pageNumberDisplay},compare`
+      : String(pageNumberDisplay);
     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
       return `${detail.from}-${detail.to}`;
     }
@@ -630,7 +634,7 @@ const DocumentToolbar = ({
    */
   const resolvePrintPageCount = useCallback((detail) => {
     if (!detail) return 1;
-    if (detail.mode === 'active') return 1;
+    if (detail.mode === 'active') return detail.activeScope === 'compare-both' ? 2 : 1;
     if (detail.mode === 'all') {
       if (detail.allScope === 'selection' && hasActiveSelection) return visibleOriginalPageNumbers.length;
       return Math.max(0, Number(sessionTotalPages) || 0);
@@ -683,6 +687,10 @@ const DocumentToolbar = ({
     };
 
     if (!detail || detail.mode === 'active') {
+      if (detail?.activeScope === 'compare-both' && isComparing) {
+        handlePrintCurrentComparison(documentRenderRef, compareRef, commonOpts);
+        return;
+      }
       handlePrint(documentRenderRef, commonOpts);
       return;
     }
@@ -702,7 +710,7 @@ const DocumentToolbar = ({
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
       return;
     }
-  }, [closePrintDialog, documentRenderRef, submitUserPrintLog, viewerContainerRef, visibleOriginalPageNumbers]);
+  }, [closePrintDialog, compareRef, documentRenderRef, isComparing, submitUserPrintLog, viewerContainerRef, visibleOriginalPageNumbers]);
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
@@ -797,8 +805,6 @@ const DocumentToolbar = ({
         aria-label={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
         title={t(isComparing ? 'toolbar.compare.disable' : 'toolbar.compare.enable')}
         className={`odv-btn compare-button ${isComparing ? 'compare-enabled' : 'compare-disabled'}`}
-        disabled={!!compareDisabled}
-        aria-disabled={!!compareDisabled}
       >
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
@@ -816,10 +822,8 @@ const DocumentToolbar = ({
         type="button"
         onClick={toggleExpand}
         aria-label={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
-        title={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
+        title={`${t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')} · ${editingTargetLabel}`}
         className={`odv-btn editing-button ${isExpanded ? 'editing-enabled' : 'editing-disabled'}`}
-        disabled={!!editDisabled}
-        aria-disabled={!!editDisabled}
       >
         <span className="material-icons" aria-hidden="true">edit</span>
       </button>
@@ -827,10 +831,15 @@ const DocumentToolbar = ({
       {/* Editing controls (visible only when canvas tools are enabled).
           Wrapped in a white "group" to match the zoom/paging clusters. */}
       {isExpanded && (
-        <div className="zoom-fixed-group editing-tools" aria-label={t('toolbar.imageAdjustments')}>
+        <div className="zoom-fixed-group editing-tools" aria-label={t('toolbar.imageAdjustments')} title={editingTargetLabel}>
+          <span className={`editing-target-chip ${editingTargetMode === 'compare' ? 'is-compare' : 'is-primary'}`}>
+            {editingTargetMode === 'compare'
+              ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
+              : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' })}
+          </span>
           <button
             type="button"
-            onClick={() => handleRotationChange(-90)}
+            onClick={() => handleRotationChange(-90, editingTargetMode)}
             aria-label={t('toolbar.rotateLeft90')}
             title={t('toolbar.rotateLeft90')}
             className="odv-btn"
@@ -839,7 +848,7 @@ const DocumentToolbar = ({
           </button>
           <button
             type="button"
-            onClick={() => handleRotationChange(90)}
+            onClick={() => handleRotationChange(90, editingTargetMode)}
             aria-label={t('toolbar.rotateRight90')}
             title={t('toolbar.rotateRight90')}
             className="odv-btn"
@@ -853,12 +862,12 @@ const DocumentToolbar = ({
               type="range"
               min="0"
               max="200"
-              value={imageProperties.brightness}
+              value={editingProperties.brightness}
               onChange={handleBrightnessSliderChange}
-              className={imageProperties.brightness === 100 ? 'resting' : 'active'}
+              className={editingProperties.brightness === 100 ? 'resting' : 'active'}
               aria-valuemin={0}
               aria-valuemax={200}
-              aria-valuenow={imageProperties.brightness}
+              aria-valuenow={editingProperties.brightness}
               aria-label={t('toolbar.adjustBrightness')}
             />
           </label>
@@ -869,19 +878,31 @@ const DocumentToolbar = ({
               type="range"
               min="0"
               max="200"
-              value={imageProperties.contrast}
+              value={editingProperties.contrast}
               onChange={handleContrastSliderChange}
-              className={imageProperties.contrast === 100 ? 'resting' : 'active'}
+              className={editingProperties.contrast === 100 ? 'resting' : 'active'}
               aria-valuemin={0}
               aria-valuemax={200}
-              aria-valuenow={imageProperties.contrast}
+              aria-valuenow={editingProperties.contrast}
               aria-label={t('toolbar.adjustContrast')}
             />
           </label>
+
+          <button
+            type="button"
+            onClick={() => resetImageProperties(editingTargetMode)}
+            aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+            title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+            className="odv-btn"
+          >
+            <span className="material-icons" aria-hidden="true">restart_alt</span>
+          </button>
         </div>
       )}
 
       <div className="separator" />
+
+      <LanguageMenuButton />
 
       {/* Theme toggle (also mapped to key "6") */}
       <ThemeToggleButton toggleTheme={toggleTheme} />
@@ -896,6 +917,7 @@ const DocumentToolbar = ({
         totalPages={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
         activePageNumber={pageNumberDisplay}
+        isComparing={isComparing}
         hasActiveSelection={hasActiveSelection}
         selectionIncludedCount={selectionIncludedCount}
         sessionTotalPages={sessionTotalPages}
@@ -930,12 +952,13 @@ DocumentToolbar.propTypes = {
   closePrintDialog: PropTypes.func,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
-  comparePageNumber: PropTypes.number,
+  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   goToPreviousDocument: PropTypes.func,
   goToNextDocument: PropTypes.func,
   goToFirstDocument: PropTypes.func,
   goToLastDocument: PropTypes.func,
   documentNavigationEnabled: PropTypes.bool,
+  compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   primaryDocumentNavigation: PropTypes.shape({
     canGoPrevious: PropTypes.bool,
     canGoNext: PropTypes.bool,
@@ -948,7 +971,12 @@ DocumentToolbar.propTypes = {
     canGoFirst: PropTypes.bool,
     canGoLast: PropTypes.bool,
   }),
-  imageProperties: PropTypes.shape({
+  primaryImageProperties: PropTypes.shape({
+    rotation: PropTypes.number.isRequired,
+    brightness: PropTypes.number.isRequired,
+    contrast: PropTypes.number.isRequired,
+  }).isRequired,
+  compareImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
@@ -966,8 +994,6 @@ DocumentToolbar.propTypes = {
   }),
   setZoomMode: PropTypes.func,
   setZoom: PropTypes.func,
-  compareDisabled: PropTypes.bool,
-  editDisabled: PropTypes.bool,
   hasActiveSelection: PropTypes.bool,
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number),
   selectionIncludedCount: PropTypes.number,

@@ -22,6 +22,7 @@
 import { useState, useEffect, useMemo, useCallback } from 'react';
 import logger from '../logging/systemLogger.js';
 import ThemeContext from './themeContext.js';
+import { getThemePreference, setThemePreference } from '../utils/viewerPreferences.js';
 
 /**
  * Theme identifier.
@@ -35,39 +36,6 @@ import ThemeContext from './themeContext.js';
  * @property {function(): void} toggleTheme          Toggle between light/dark
  * @property {function(ThemeName): void} setThemeExplicit  Explicitly set a theme
  */
-
-/** Storage key for persisting theme choice. */
-const LS_KEY = 'theme';
-
-/**
- * Try to read a string value from localStorage.
- * @param {string} key
- * @returns {(string|null)}
- */
-function lsGet(key) {
-  try {
-    if (typeof window === 'undefined') return null;
-    return window.localStorage.getItem(key);
-  } catch {
-    return null;
-  }
-}
-
-/**
- * Try to write a string value to localStorage.
- * @param {string} key
- * @param {string} value
- * @returns {boolean} success
- */
-function lsSet(key, value) {
-  try {
-    if (typeof window === 'undefined') return false;
-    window.localStorage.setItem(key, value);
-    return true;
-  } catch {
-    return false;
-  }
-}
 
 /**
  * Detect system preferred color scheme (SSR-safe; defaults to light).
@@ -114,9 +82,9 @@ export const ThemeProvider = ({ children }) => {
    *  3) 'light' fallback
    */
   const [theme, setTheme] = useState/** @type {function(): ThemeName} */(() => {
-    const saved = lsGet(LS_KEY);
+    const saved = getThemePreference();
     if (saved === 'light' || saved === 'dark') {
-      logger.info('Theme loaded from localStorage', { theme: saved });
+      logger.info('Theme loaded from persisted preferences', { theme: saved });
       return /** @type {ThemeName} */ (saved);
     }
     const sys = detectSystemTheme();
@@ -132,11 +100,7 @@ export const ThemeProvider = ({ children }) => {
   const setThemeExplicit = useCallback((next) => {
     const value = next === 'dark' ? 'dark' : 'light';
     applyThemeToDocument(value);
-    const ok = lsSet(LS_KEY, value);
-    if (!ok) {
-      // Storage might be unavailable; not fatal.
-      logger.debug('Theme persist skipped or failed (storage unavailable)', { theme: value });
-    }
+    setThemePreference(value);
     setTheme(value);
     logger.info('Theme applied', { theme: value });
   }, []);
@@ -166,10 +130,10 @@ export const ThemeProvider = ({ children }) => {
      */
     const onChange = (e) => {
       const next = e.matches ? 'dark' : 'light';
-      // Only auto-switch if the user hasn't explicitly chosen a theme before.
-      // If you want user settings to always override, uncomment the guard below:
-      // if (lsGet(LS_KEY)) return;
-      setThemeExplicit(next);
+      // Only auto-switch if the user has not explicitly chosen a theme.
+      if (getThemePreference()) return;
+      applyThemeToDocument(next);
+      setTheme(next);
     };
 
     try {

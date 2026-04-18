@@ -23,6 +23,7 @@ import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localized
  * @property {number} [to]
  * @property {Array.<number>} [sequence]
  * @property {'selection'|'session'} [allScope]
+ * @property {'primary'|'compare-both'} [activeScope]
  * @property {string|null} [reason]
  * @property {string|null} [forWhom]
  */
@@ -93,6 +94,7 @@ export function ensureODVPrintCSS() {
  * @param {number} params.totalPages
  * @param {boolean=} params.isDocumentLoading
  * @param {number=} params.activePageNumber
+ * @param {boolean=} params.isComparing
  * @param {boolean=} params.hasActiveSelection
  * @param {number=} params.selectionIncludedCount
  * @param {number=} params.sessionTotalPages
@@ -106,6 +108,7 @@ export function usePrintRangeController({
   totalPages,
   isDocumentLoading = false,
   activePageNumber = 1,
+  isComparing = false,
   hasActiveSelection = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
@@ -145,6 +148,8 @@ export function usePrintRangeController({
   const [modeGroup, setModeGroup] = useState('basic');
   /** @type {'active'|'all'} */
   const [basicChoice, setBasicChoice] = useState('active');
+  /** @type {'primary'|'compare-both'} */
+  const [activeScope, setActiveScope] = useState('primary');
   /** @type {'selection'|'session'} */
   const [allScope, setAllScope] = useState(hasActiveSelection ? 'selection' : 'session');
   /** @type {'range'|'custom'} */
@@ -200,6 +205,7 @@ export function usePrintRangeController({
 
     setModeGroup('basic');
     setBasicChoice('active');
+    setActiveScope('primary');
     setAdvancedChoice('range');
     setAllScope(hasActiveSelection ? 'selection' : 'session');
     setFromValue('1');
@@ -216,8 +222,14 @@ export function usePrintRangeController({
     if (!isOpen || !restrictToActivePage) return;
     setModeGroup('basic');
     setBasicChoice('active');
+    setActiveScope('primary');
     setError('');
   }, [isOpen, restrictToActivePage]);
+
+  useEffect(() => {
+    if (isComparing) return;
+    setActiveScope('primary');
+  }, [isComparing]);
 
   // Prevent outside interactions from collapsing selects (anti-flicker)
   useEffect(() => {
@@ -381,14 +393,14 @@ export function usePrintRangeController({
 
     if (restrictToActivePage) {
       setError('');
-      onSubmit({ mode: 'active', ...extras() });
+      onSubmit({ mode: 'active', activeScope: 'primary', ...extras() });
       return;
     }
 
     if (modeGroup === 'basic') {
       setError('');
       if (basicChoice === 'active') {
-        onSubmit({ mode: 'active', ...extras() });
+        onSubmit({ mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...extras() });
       } else {
         onSubmit({ mode: 'all', allScope: hasActiveSelection ? allScope : 'session', ...extras() });
       }
@@ -412,9 +424,9 @@ export function usePrintRangeController({
     setError('');
     onSubmit({ mode: 'advanced', sequence, ...extras() });
   }, [
-    advancedChoice, allScope, basicChoice,
+    activeScope, advancedChoice, allScope, basicChoice,
     customText, extras, hasActiveSelection, makeDescendingSequence, modeGroup, onSubmit,
-    restrictToActivePage, t, totalPages, validateRange, validateUserFields
+    isComparing, restrictToActivePage, t, totalPages, validateRange, validateUserFields
   ]);
 
   const onBackdropMouseDown = (e) => {
@@ -436,6 +448,7 @@ export function usePrintRangeController({
     // state
     modeGroup, setModeGroup,
     basicChoice, setBasicChoice,
+    activeScope, setActiveScope,
     allScope, setAllScope,
     advancedChoice, setAdvancedChoice,
     fromValue, setFromValue,
@@ -448,6 +461,7 @@ export function usePrintRangeController({
     error, setError,
     restrictToActivePage,
     activePageNumber,
+    isComparing,
     hasActiveSelection,
     selectionIncludedCount,
     sessionTotalPages,

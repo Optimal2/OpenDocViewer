@@ -58,7 +58,8 @@ const DocumentViewer = () => {
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
-    imageProperties,
+    primaryImageProperties,
+    compareImageProperties,
     isExpanded,
     thumbnailWidth,
     thumbnailWidthMin,
@@ -247,7 +248,8 @@ const DocumentViewer = () => {
         isComparing={isComparing}
         handleCompare={handleCompare}
         comparePageNumber={comparePageNumber}
-        imageProperties={imageProperties}
+        primaryImageProperties={primaryImageProperties}
+        compareImageProperties={compareImageProperties}
         handleRotationChange={handleRotationChange}
         handleBrightnessChange={handleBrightnessChange}
         handleContrastChange={handleContrastChange}
@@ -256,6 +258,7 @@ const DocumentViewer = () => {
         setIsExpanded={setIsExpanded}
 
         documentRenderRef={documentRenderRef}
+        compareRef={compareRef}
         viewerContainerRef={viewerContainerRef}
 
         prevPageDisabled={prevPageDisabled}
@@ -370,8 +373,8 @@ const DocumentViewer = () => {
             zoom={zoom}
             setZoom={setZoom}
             isComparing={isComparing}
-            imageProperties={imageProperties}
-            isExpanded={isExpanded}
+            primaryImageProperties={primaryImageProperties}
+            compareImageProperties={compareImageProperties}
             documentRenderRef={documentRenderRef}
             comparePageNumber={renderComparePageNumber}
             compareRef={compareRef}

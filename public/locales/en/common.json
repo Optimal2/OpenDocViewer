@@ -43,10 +43,10 @@
       "scopeDocument": "Document navigation",
       "targetPrimary": "primary / left pane",
       "targetCompare": "right compare pane",
-      "modeTitle": "{{scope}} · {{target}}",
+      "modeTitle": "{scope} · {target}",
       "shiftHint": "Shift = right compare pane",
       "ctrlHint": "Ctrl = document mode",
-      "groupDescription": "{{scope}} for {{target}}.",
+      "groupDescription": "{scope} for {target}.",
       "loadingAnnounce": "Page navigation is still loading pages.",
       "readyAnnounce": "Page navigation is ready.",
       "noPagesTitle": "No visible pages available",
@@ -55,7 +55,19 @@
     "firstDocument": "First document",
     "previousDocument": "Previous document",
     "nextDocument": "Next document",
-    "lastDocument": "Last document"
+    "lastDocument": "Last document",
+    "language": {
+      "openMenu": "Choose language",
+      "current": "Language: {language}",
+      "switchTo": "Switch language to {language}",
+      "options": {
+        "en": "English",
+        "sv": "Svenska"
+      }
+    },
+    "editingTargetPrimary": "Editing the primary / left page",
+    "editingTargetCompare": "Editing the right compare page (Shift)",
+    "resetAdjustments": "Reset adjustments"
   },
   "printDialog": {
     "title": "Print",
@@ -144,6 +156,12 @@
       "selection": "Current selection ({count} pages)",
       "session": "Entire session ({count} pages)",
       "hint": "Use the current filtered selection or ignore the selection and print the complete session."
+    },
+    "activeScope": {
+      "label": "How should the active compare view be printed?",
+      "primary": "Only the primary / left page",
+      "compareBoth": "Both compare pages (2 printed pages)",
+      "hint": "Use the primary page only, or print both currently visible compare panes with their current adjustments."
     }
   },
   "print": {
@@ -282,7 +300,7 @@
       "hidePageFromSelectionLabel": "Hide this page",
       "hidePageUnavailable": "At least one visible page must remain selected.",
       "hideDocumentFromSelection": "Hide the entire document from the current selection",
-      "hideDocumentFromSelectionLabel": "Hide document {{document}}/{{total}}",
+      "hideDocumentFromSelectionLabel": "Hide document {document}/{total}",
       "hideUnavailable": "Selection tools become available when all pages are fully loaded."
     }
   },

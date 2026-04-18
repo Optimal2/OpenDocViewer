@@ -37,8 +37,8 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @param {number} props.zoom
  * @param {SetNumberState} props.setZoom
  * @param {boolean} props.isComparing
- * @param {{ rotation:number, brightness:number, contrast:number }} props.imageProperties
- * @param {boolean} props.isExpanded
+ * @param {{ rotation:number, brightness:number, contrast:number }} props.primaryImageProperties
+ * @param {{ rotation:number, brightness:number, contrast:number }} props.compareImageProperties
  * @param {RefLike} props.documentRenderRef
  * @param {(number|null)} props.comparePageNumber
  * @param {RefLike} props.compareRef
@@ -56,8 +56,8 @@ const DocumentViewerRender = ({
   zoom,
   setZoom,
   isComparing,
-  imageProperties,
-  isExpanded,
+  primaryImageProperties,
+  compareImageProperties,
   documentRenderRef,
   comparePageNumber,
   compareRef,
@@ -69,6 +69,13 @@ const DocumentViewerRender = ({
   bumpPostZoomRight,
   onPrimaryDisplayStateChange,
 }) => {
+  const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
+    || Number(primaryImageProperties?.brightness || 100) !== 100
+    || Number(primaryImageProperties?.contrast || 100) !== 100;
+  const compareCanvasEnabled = Number(compareImageProperties?.rotation || 0) !== 0
+    || Number(compareImageProperties?.brightness || 100) !== 100
+    || Number(compareImageProperties?.contrast || 100) !== 100;
+
   const handlePrimaryRendered = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') {
       documentRenderRef?.current?.fitToScreen?.();
@@ -114,8 +121,8 @@ const DocumentViewerRender = ({
             initialRenderDone={() => {}}
             onRender={handlePrimaryRendered}
             setZoom={setZoom}
-            imageProperties={imageProperties}
-            isCanvasEnabled={isExpanded}
+            imageProperties={primaryImageProperties}
+            isCanvasEnabled={primaryCanvasEnabled}
             allPages={allPages}
             onDisplayStateChange={onPrimaryDisplayStateChange}
           />
@@ -141,8 +148,8 @@ const DocumentViewerRender = ({
               initialRenderDone={() => {}}
               onRender={handleCompareRendered}
               setZoom={setZoom}
-              imageProperties={imageProperties}
-              isCanvasEnabled={isExpanded}
+              imageProperties={compareImageProperties}
+              isCanvasEnabled={compareCanvasEnabled}
               allPages={allPages}
             />
           </div>
@@ -157,12 +164,16 @@ DocumentViewerRender.propTypes = {
   zoom: PropTypes.number.isRequired,
   setZoom: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
-  imageProperties: PropTypes.shape({
+  primaryImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
   }).isRequired,
-  isExpanded: PropTypes.bool.isRequired,
+  compareImageProperties: PropTypes.shape({
+    rotation: PropTypes.number.isRequired,
+    brightness: PropTypes.number.isRequired,
+    contrast: PropTypes.number.isRequired,
+  }).isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,

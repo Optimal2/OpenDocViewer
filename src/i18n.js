@@ -30,6 +30,7 @@ import i18next from 'i18next';
 import { initReactI18next } from 'react-i18next';
 import ICU from 'i18next-icu';
 import HttpBackend from 'i18next-http-backend';
+import { getLanguagePreference, setLanguagePreference } from './utils/viewerPreferences.js';
 
 /** Dev-mode detector (Vite + Node envs). */
 const IS_DEV =
@@ -136,11 +137,12 @@ function normalizeSupportedLanguage(value, supported) {
  *
  * Priority order:
  *   1) querystring (?lng=sv or ?lang=sv)
- *   2) configured runtime default (`odv.site.config.js` / `odv.config.js`)
- *   3) a previously persisted i18next language (`localStorage.i18nextLng`)
- *   4) browser-reported preferred languages
- *   5) <html lang="...">
- *   6) English / first supported fallback
+ *   2) previously persisted viewer preference
+ *   3) configured runtime default (`odv.site.config.js` / `odv.config.js`)
+ *   4) a previously persisted i18next language (`localStorage.i18nextLng`)
+ *   5) browser-reported preferred languages
+ *   6) <html lang="...">
+ *   7) English / first supported fallback
  *
  * A configured default of "auto" skips step 2 and lets browser/html decide.
  * This keeps deployments predictable: when a site explicitly says default=sv, the viewer starts in
@@ -158,6 +160,9 @@ function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
 
   const queryCandidate = normalizeSupportedLanguage(readQuery('lng') || readQuery('lang'), supported);
   if (queryCandidate) return queryCandidate;
+
+  const persistedPreference = normalizeSupportedLanguage(getLanguagePreference(), supported);
+  if (persistedPreference) return persistedPreference;
 
   const rawConfiguredDefault = String(fallbackLng || '').trim().toLowerCase();
   if (fallbackFromConfig && rawConfiguredDefault !== 'auto') return fallbackFromConfig;
@@ -371,6 +376,10 @@ i18next
 
 i18next.on('languageChanged', (lng) => {
   syncDocumentLanguage(lng, supportedLngs, fallbackLng);
+  try {
+    const normalized = normalizeSupportedLanguage(lng, supportedLngs);
+    if (normalized) setLanguagePreference(normalized);
+  } catch {}
 });
 
 export default i18next;

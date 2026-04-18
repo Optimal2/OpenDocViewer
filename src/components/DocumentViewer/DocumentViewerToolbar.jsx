@@ -64,6 +64,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
  * @property {RefLike} documentRenderRef
+ * @property {RefLike} compareRef
  * @property {boolean} isPrintDialogOpen
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
@@ -77,11 +78,12 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
- * @property {{ rotation:number, brightness:number, contrast:number }} imageProperties
- * @property {function(number): void} handleRotationChange
- * @property {function(*): void} handleBrightnessChange
- * @property {function(*): void} handleContrastChange
- * @property {function(): void} resetImageProperties
+ * @property {{ rotation:number, brightness:number, contrast:number }} primaryImageProperties
+ * @property {{ rotation:number, brightness:number, contrast:number }} compareImageProperties
+ * @property {function(number, string=): void} handleRotationChange
+ * @property {function(*, string=): void} handleBrightnessChange
+ * @property {function(*, string=): void} handleContrastChange
+ * @property {function(string=): void} resetImageProperties
  * @property {boolean} isExpanded
  * @property {SetBooleanState} setIsExpanded
  * @property {boolean} prevPageDisabled
@@ -126,12 +128,14 @@ const DocumentViewerToolbar = ({
   handleCompare,
   isComparing,
   comparePageNumber,
-  imageProperties,
+  primaryImageProperties,
+  compareImageProperties,
   handleRotationChange,
   handleBrightnessChange,
   handleContrastChange,
   resetImageProperties,
   documentRenderRef,
+  compareRef,
   isPrintDialogOpen,
   openPrintDialog,
   closePrintDialog,
@@ -149,9 +153,6 @@ const DocumentViewerToolbar = ({
   firstPageDisabled,
   lastPageDisabled,
 }) => {
-  const compareDisabled = isExpanded;
-  const editDisabled = isComparing;
-
   return (
     <DocumentToolbar
       pageNumber={pageNumber}
@@ -195,19 +196,19 @@ const DocumentViewerToolbar = ({
       handleCompare={handleCompare}
       isComparing={isComparing}
       comparePageNumber={comparePageNumber}
-      imageProperties={imageProperties}
+      primaryImageProperties={primaryImageProperties}
+      compareImageProperties={compareImageProperties}
       handleRotationChange={handleRotationChange}
       handleBrightnessChange={handleBrightnessChange}
       handleContrastChange={handleContrastChange}
       resetImageProperties={resetImageProperties}
       isExpanded={isExpanded}
       setIsExpanded={setIsExpanded}
-      compareDisabled={compareDisabled}
-      editDisabled={editDisabled}
       prevPageDisabled={prevPageDisabled}
       nextPageDisabled={nextPageDisabled}
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
+      compareRef={compareRef}
     />
   );
 };
@@ -245,8 +246,13 @@ DocumentViewerToolbar.propTypes = {
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
-  comparePageNumber: PropTypes.number,
-  imageProperties: PropTypes.shape({
+  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  primaryImageProperties: PropTypes.shape({
+    rotation: PropTypes.number.isRequired,
+    brightness: PropTypes.number.isRequired,
+    contrast: PropTypes.number.isRequired,
+  }).isRequired,
+  compareImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,
     contrast: PropTypes.number.isRequired,
@@ -256,6 +262,7 @@ DocumentViewerToolbar.propTypes = {
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
+  compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   isPrintDialogOpen: PropTypes.bool.isRequired,
   openPrintDialog: PropTypes.func.isRequired,
   closePrintDialog: PropTypes.func.isRequired,
