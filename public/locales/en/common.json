@@ -301,7 +301,8 @@
       "hidePageUnavailable": "At least one visible page must remain selected.",
       "hideDocumentFromSelection": "Hide the entire document from the current selection",
       "hideDocumentFromSelectionLabel": "Hide document {document}/{total}",
-      "hideUnavailable": "Selection tools become available when all pages are fully loaded."
+      "hideUnavailable": "Selection tools become available when all pages are fully loaded.",
+      "hideDocumentFromSelectionLabelPrefix": "Hide document"
     }
   },
   "compareZoom": {

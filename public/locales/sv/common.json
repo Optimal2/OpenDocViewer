@@ -301,7 +301,8 @@
       "hidePageUnavailable": "Minst en synlig sida måste vara vald.",
       "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
       "hideDocumentFromSelectionLabel": "Dölj dokument {document}/{total}",
-      "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade."
+      "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade.",
+      "hideDocumentFromSelectionLabelPrefix": "Dölj dokument"
     }
   },
   "compareZoom": {

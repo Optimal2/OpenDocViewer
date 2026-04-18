@@ -385,6 +385,9 @@ const DocumentViewer = () => {
             bumpPostZoomLeft={bumpPostZoomLeft}
             bumpPostZoomRight={bumpPostZoomRight}
             onPrimaryDisplayStateChange={handlePrimaryDisplayStateChange}
+            selectionPanelEnabled={selectionPanelEnabled}
+            onHidePageFromSelection={hidePageFromSelection}
+            onHideDocumentFromSelection={hideDocumentFromSelection}
           />
         )}
       </div>

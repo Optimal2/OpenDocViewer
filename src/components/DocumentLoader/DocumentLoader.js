@@ -565,6 +565,7 @@ const DocumentLoader = ({
   demoFormats,
 }) => {
   const { t } = useTranslation('common');
+  const translateRef = useRef(t);
   const {
     insertPagesAtIndex,
     ensurePageAsset,
@@ -584,6 +585,10 @@ const DocumentLoader = ({
   const activeControllersRef = useRef(new Set());
   const promptResolverRef = useRef(null);
   const [pressureSummary, setPressureSummary] = useState(null);
+
+  useEffect(() => {
+    translateRef.current = t;
+  }, [t]);
 
   /**
    * @param {*} summary
@@ -827,7 +832,7 @@ const DocumentLoader = ({
         });
 
         if (!accepted || shouldStopRun()) {
-          const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
+          const msg = safeMessage(translateRef.current('viewer.loadPressure.stoppedMessage'));
           if (msg) addMessage(msg);
           setLoadingRunActive(false);
           return;
@@ -1021,7 +1026,7 @@ const DocumentLoader = ({
 
           if (!accepted || shouldStopRun()) {
             abortAllFetches();
-            const msg = safeMessage(t('viewer.loadPressure.stoppedMessage'));
+            const msg = safeMessage(translateRef.current('viewer.loadPressure.stoppedMessage'));
             if (msg) addMessage(msg);
             setLoadingRunActive(false);
             setPlannedPageCount(nextPageIndex);
@@ -1081,7 +1086,6 @@ const DocumentLoader = ({
     setWorkerCount,
     sourceList,
     storeSourceBlob,
-    t,
   ]);
 
   return React.createElement(

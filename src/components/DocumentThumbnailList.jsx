@@ -1173,11 +1173,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
           >
             <span className="material-icons" aria-hidden="true">folder_off</span>
             <span>
-              {t('thumbnails.contextMenu.hideDocumentFromSelectionLabel', {
-                document: contextMenuState.documentNumber || 1,
-                total: contextMenuState.totalDocuments || 1,
-                defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`,
-              })}
+              {`${t('thumbnails.contextMenu.hideDocumentFromSelectionLabelPrefix', {
+                defaultValue: 'Hide document',
+              })} ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`}
             </span>
           </button>
         </div>

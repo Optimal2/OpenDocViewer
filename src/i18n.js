@@ -49,6 +49,14 @@ function readQuery(name) {
 /** Diagnostics ON only in dev builds. */
 const WANT_DIAG = IS_DEV;
 
+/**
+ * Fallback cache-busting token for bundled locale resources.
+ *
+ * Some deployments do not inject a per-build ID. Bump this revision whenever locale placeholders or
+ * message syntax changes so browsers do not keep serving stale JSON after a viewer upgrade.
+ */
+const BUNDLED_I18N_RESOURCE_REVISION = '20250418-01';
+
 /** Normalize optional version tokens from runtime config or globals. */
 function normalizeVersionToken(value) {
   if (value == null) return '';
@@ -86,7 +94,7 @@ function getI18nVersion() {
     const normalizedGlobalVer = normalizeVersionToken(globalVer);
     if (normalizedGlobalVer) return normalizedGlobalVer;
   } catch {}
-  return '';
+  return BUNDLED_I18N_RESOURCE_REVISION;
 }
 
 /** Helper: append query params safely to a URL. */
