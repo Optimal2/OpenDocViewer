@@ -3,9 +3,8 @@
  * Lightweight persisted viewer preferences.
  *
  * Preferences are stored in both localStorage and a same-origin cookie so the viewer can remember
- * language/theme choices across reloads while still degrading gracefully when one storage backend is
- * unavailable. The cookie intentionally uses a compact JSON payload because the current preference
- * surface is tiny (language + theme only).
+ * language choices across reloads while still degrading gracefully when one storage backend is
+ * unavailable. Legacy theme values are still tolerated for backwards compatibility with older builds.
  */
 
 /**

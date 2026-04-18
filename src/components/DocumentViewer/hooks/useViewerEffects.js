@@ -58,9 +58,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} fitToScreen
  * @property {Function} fitToWidth
  * @property {Function} handleCompare
- * @property {Function} setIsExpandedGuarded
  * @property {Function=} onOpenPrintDialog
- * @property {Function=} onToggleTheme
  * @property {KeyboardPrintShortcutBehavior=} keyboardPrintShortcutBehavior
  */
 
@@ -139,9 +137,7 @@ export function useViewerEffects(args) {
     fitToScreen,
     fitToWidth,
     handleCompare,
-    setIsExpandedGuarded,
     onOpenPrintDialog,
-    onToggleTheme,
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
 
@@ -164,9 +160,7 @@ export function useViewerEffects(args) {
   const fitToScreenRef = useRef(fitToScreen);
   const fitToWidthRef = useRef(fitToWidth);
   const handleCompareRef = useRef(handleCompare);
-  const setIsExpandedGuardedRef = useRef(setIsExpandedGuarded);
   const onOpenPrintDialogRef = useRef(onOpenPrintDialog);
-  const onToggleThemeRef = useRef(onToggleTheme);
 
   goToPreviousPageRef.current = goToPreviousPage;
   goToNextPageRef.current = goToNextPage;
@@ -184,9 +178,7 @@ export function useViewerEffects(args) {
   fitToScreenRef.current = fitToScreen;
   fitToWidthRef.current = fitToWidth;
   handleCompareRef.current = handleCompare;
-  setIsExpandedGuardedRef.current = setIsExpandedGuarded;
   onOpenPrintDialogRef.current = onOpenPrintDialog;
-  onToggleThemeRef.current = onToggleTheme;
 
   const handleKeyboardPreviousRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
@@ -422,15 +414,13 @@ export function useViewerEffects(args) {
           if (!hasModifierKey && e.code === 'NumpadAdd') { e.preventDefault(); zoomInRef.current?.(); break; }
           if (!hasModifierKey && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOutRef.current?.(); break; }
 
-          // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare, Edit, Theme)
+          // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare)
           if (!hasModifierKey && !e.shiftKey && !e.altKey) {
             if (e.key === '0') { e.preventDefault(); onOpenPrintDialogRef.current?.(); }
             else if (e.key === '1') { e.preventDefault(); actualSizeRef.current?.(); }
             else if (e.key === '2') { e.preventDefault(); fitToScreenRef.current?.(); }
             else if (e.key === '3') { e.preventDefault(); fitToWidthRef.current?.(); }
             else if (e.key === '4') { e.preventDefault(); handleCompareRef.current?.(); }
-            else if (e.key === '5') { e.preventDefault(); setIsExpandedGuardedRef.current?.((v) => !v); }
-            else if (e.key === '6') { e.preventDefault(); onToggleThemeRef.current?.(); }
           }
           break;
       }

@@ -5,7 +5,7 @@
  * Main application shell for the viewer.
  *
  * Responsibilities:
- * - mount theme and viewer providers
+ * - mount the viewer provider and top-level shell utilities
  * - keep a lightweight responsive/mobile flag for the shell
  * - decide whether optional diagnostics such as the performance overlay should render
  * - pass the selected startup payload into `DocumentConsumerWrapper`
@@ -17,7 +17,6 @@
 import React, { useState, useEffect, useCallback, useRef, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import logger from '../logging/systemLogger.js';
-import { ThemeProvider } from '../contexts/ThemeProvider.jsx';
 import { ViewerProvider } from '../contexts/ViewerProvider.jsx';
 import PerformanceMonitor from '../PerformanceMonitor.jsx';
 import DocumentConsumerWrapper from '../components/DocumentConsumerWrapper.jsx';
@@ -131,26 +130,24 @@ const OpenDocViewer = ({
   const showPerf = useMemo(() => isPerformanceOverlayEnabled(), []);
 
   return (
-    <ThemeProvider>
-      <ViewerProvider diagnosticsEnabled={showPerf}>
-        <DocumentConsumerWrapper
-          folder={folder}
-          extension={extension}
-          endNumber={endNumber}
-          sourceList={sourceList || null}  // explicit list passthrough
-          bundle={bundle || null}          // optional metadata
-          isMobileView={isMobileView}
-          initialized={initialized}
-          /* NEW: forward demo-mode props so the loader can engage demo fast-paths */
-          demoMode={demoMode}
-          demoStrategy={demoStrategy}
-          demoCount={demoCount}
-          demoFormats={demoFormats}
-        />
-        {/* Render HUD only when enabled (runtime-toggleable; see public/odv.config.js) */}
-        {showPerf && <PerformanceMonitor bundle={bundle || null} bootstrapDebugInfo={bootstrapDebugInfo || null} />}
-      </ViewerProvider>
-    </ThemeProvider>
+    <ViewerProvider diagnosticsEnabled={showPerf}>
+      <DocumentConsumerWrapper
+        folder={folder}
+        extension={extension}
+        endNumber={endNumber}
+        sourceList={sourceList || null}  // explicit list passthrough
+        bundle={bundle || null}          // optional metadata
+        isMobileView={isMobileView}
+        initialized={initialized}
+        /* NEW: forward demo-mode props so the loader can engage demo fast-paths */
+        demoMode={demoMode}
+        demoStrategy={demoStrategy}
+        demoCount={demoCount}
+        demoFormats={demoFormats}
+      />
+      {/* Render HUD only when enabled (runtime-toggleable; see public/odv.config.js) */}
+      {showPerf && <PerformanceMonitor bundle={bundle || null} bootstrapDebugInfo={bootstrapDebugInfo || null} />}
+    </ViewerProvider>
   );
 };
 

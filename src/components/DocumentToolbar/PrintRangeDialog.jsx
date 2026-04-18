@@ -85,52 +85,82 @@ export default function PrintRangeDialog({
       aria-labelledby="print-title"
       onMouseDown={ctrl.onBackdropMouseDown}
     >
-      <form ref={ctrl.dialogRef} onSubmit={ctrl.submit} className="odv-prd-dialog" noValidate>
-        <h3 id="print-title" className="odv-prd-title">
-          {t('printDialog.title')} – {ctrl.titleSuffix}
-        </h3>
-
-        <p className="odv-prd-desc">
-          {t('printDialog.desc', { active: t('printDialog.basic.active') })}
-        </p>
-
-        {ctrl.headerCfg?.enabled ? (
-          <div className="odv-prd-hint" role="note">
-            {t('printDialog.headerNote')}
+      <form
+        ref={ctrl.dialogRef}
+        onSubmit={ctrl.submit}
+        className="odv-prd-dialog"
+        noValidate
+        tabIndex={-1}
+        onKeyDown={ctrl.onDialogKeyDown}
+      >
+        <div className="odv-prd-header">
+          <div className="odv-prd-headerText">
+            <h3 id="print-title" className="odv-prd-title">
+              {t('printDialog.title')}
+            </h3>
+            <p className="odv-prd-subtitle">
+              {t('printDialog.subtitle', {
+                mode: ctrl.titleSuffix,
+                defaultValue: `Choose what to print and how the current print job should be described. (${ctrl.titleSuffix})`,
+              })}
+            </p>
           </div>
-        ) : null}
+          <button
+            type="button"
+            className="odv-prd-closeIcon"
+            onClick={() => { ctrl.setError(''); onClose(); }}
+            aria-label={t('printDialog.close', { defaultValue: 'Close' })}
+            title={t('printDialog.close', { defaultValue: 'Close' })}
+          >
+            <span className="material-icons" aria-hidden="true">close</span>
+          </button>
+        </div>
 
-        {ctrl.restrictToActivePage ? (
-          <div className="odv-prd-hint" role="note">
-            {ctrl.loadingHint}
-          </div>
-        ) : ctrl.modeGroup === 'basic' ? (
-          <p className="odv-prd-modeSwitch">
-            <button
-              type="button"
-              className="odv-prd-linkBtn"
-              onClick={() => ctrl.setModeGroup('advanced')}
-              aria-label={ctrl.switchTo}
-            >
-              {ctrl.switchTo}
-            </button>
+        <div className="odv-prd-content">
+          <div className="odv-prd-introCard">
+          <p className="odv-prd-desc">
+            {t('printDialog.desc', { active: t('printDialog.basic.active') })}
           </p>
-        ) : (
-          <p className="odv-prd-modeSwitch">
-            <button
-              type="button"
-              className="odv-prd-linkBtn"
-              onClick={() => ctrl.setModeGroup('basic')}
-              aria-label={ctrl.switchBack}
-            >
-              {ctrl.switchBack}
-            </button>
-          </p>
-        )}
 
-        <h4 className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
+          {ctrl.headerCfg?.enabled ? (
+            <div className="odv-prd-hint" role="note">
+              {t('printDialog.headerNote')}
+            </div>
+          ) : null}
 
-        {ctrl.modeGroup === 'basic' && (
+          {ctrl.restrictToActivePage ? (
+            <div className="odv-prd-hint" role="note">
+              {ctrl.loadingHint}
+            </div>
+          ) : ctrl.modeGroup === 'basic' ? (
+            <p className="odv-prd-modeSwitch">
+              <button
+                type="button"
+                className="odv-prd-linkBtn"
+                onClick={() => ctrl.setModeGroup('advanced')}
+                aria-label={ctrl.switchTo}
+              >
+                {ctrl.switchTo}
+              </button>
+            </p>
+          ) : (
+            <p className="odv-prd-modeSwitch">
+              <button
+                type="button"
+                className="odv-prd-linkBtn"
+                onClick={() => ctrl.setModeGroup('basic')}
+                aria-label={ctrl.switchBack}
+              >
+                {ctrl.switchBack}
+              </button>
+            </p>
+          )}
+        </div>
+
+        <section className="odv-prd-card" aria-labelledby="odv-prd-pages-header">
+          <h4 id="odv-prd-pages-header" className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
+
+          {ctrl.modeGroup === 'basic' && (
           <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.basicGroup')}>
             <div className="odv-prd-radioList">
               <label className="odv-prd-radioRow">
@@ -215,7 +245,7 @@ export default function PrintRangeDialog({
           </div>
         )}
 
-        {ctrl.modeGroup === 'advanced' && (
+          {ctrl.modeGroup === 'advanced' && (
           <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.advancedGroup')}>
             <div className="odv-prd-radioList">
               <label className="odv-prd-radioRow">
@@ -290,13 +320,12 @@ export default function PrintRangeDialog({
               </div>
             )}
           </div>
-        )}
-
-        <hr className="odv-prd-divider" />
+          )}
+        </section>
 
         {ctrl.showUserSection && (
-          <>
-            <h4 className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
+          <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
+            <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
             <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
               <div className="odv-prd-fieldCol">
                 {ctrl.showReason && (
@@ -305,7 +334,7 @@ export default function PrintRangeDialog({
                     {ctrl.hasOptions ? (
                       <>
                         <select
-                          className="odv-prd-select"
+                          className="odv-prd-select odv-prd-selectWide"
                           value={ctrl.selectedReason}
                           onChange={(e) => ctrl.setSelectedReason(e.target.value)}
                           aria-label={t('printDialog.reason.label')}
@@ -375,21 +404,22 @@ export default function PrintRangeDialog({
               </div>
               <span className="odv-prd-hint" />
             </div>
-          </>
+          </section>
         )}
 
-        {ctrl.error ? <div role="alert" className="odv-prd-error">{ctrl.error}</div> : null}
+          {ctrl.error ? <div role="alert" className="odv-prd-error">{ctrl.error}</div> : null}
+        </div>
 
         <div className="odv-prd-footer">
           <button
             type="button"
-            className="odv-btn"
+            className="odv-prd-action secondary"
             onClick={() => { ctrl.setError(''); onClose(); }}
             aria-label={t('printDialog.footer.cancel')}
           >
             {t('printDialog.footer.cancel')}
           </button>
-          <button type="submit" className="odv-btn" aria-label={t('printDialog.footer.continue')}>
+          <button type="submit" className="odv-prd-action primary" aria-label={t('printDialog.footer.continue')}>
             {t('printDialog.footer.continue')}
           </button>
         </div>

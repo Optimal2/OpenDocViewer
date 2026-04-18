@@ -2,7 +2,7 @@
 /**
  * File: src/components/DocumentToolbar/DocumentToolbar.jsx
  *
- * Main toolbar UI for page navigation, zoom, compare/edit toggles, theme switching, and print entry.
+ * Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
  *
  * Responsibilities:
  * - render the visible toolbar controls and local dialog state
@@ -14,20 +14,18 @@
  * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
-import React, { useContext, useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import logger from '../../logging/systemLogger.js';
 import userLog from '../../logging/userLogger.js';
-import ThemeContext from '../../contexts/themeContext.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
 import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
-import ThemeToggleButton from './ThemeToggleButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
+import HelpOverlayDialog from './HelpOverlayDialog.jsx';
 
 
 /**
@@ -110,8 +108,6 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleBrightnessChange
  * @property {function({ target: { value: number } }, ('primary'|'compare')=): void} handleContrastChange
  * @property {function(('primary'|'compare')=): void} resetImageProperties
- * @property {boolean} isExpanded
- * @property {function(*): void} setIsExpanded
  * @property {number=} zoom
  * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
@@ -147,7 +143,7 @@ function normalizeToolbarPageNumber(value, totalPages, fallbackPage = 1) {
 }
 
 /**
- * Toolbar shell for page navigation, zoom, compare/edit toggles, theme switching, and print entry.
+ * Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
  *
  * The component owns only local toolbar UI state. Page rendering, zoom math, and print execution
  * are delegated to dedicated hooks and helper modules.
@@ -193,8 +189,6 @@ const DocumentToolbar = ({
   handleBrightnessChange,
   handleContrastChange,
   resetImageProperties,
-  isExpanded,
-  setIsExpanded,
   // Optional zoom-display state used by newer toolbar UX paths.
   zoom,
   zoomState,
@@ -208,9 +202,9 @@ const DocumentToolbar = ({
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
 }) => {
-  const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
   const [navigationModifierState, setNavigationModifierState] = useState({ shift: false, ctrl: false });
+  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const documentRepeatTargetRef = useRef('primary');
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
@@ -541,17 +535,6 @@ const DocumentToolbar = ({
       : t('toolbar.lastPage'),
   }), [navigationScopeMode, t]);
 
-  const navigationShortcutHint = useMemo(() => {
-    const parts = [];
-    if (compareNavigationEnabled) {
-      parts.push(t('toolbar.navigation.shiftHint', { defaultValue: 'Shift targets the right compare pane' }));
-    }
-    if (documentNavigationEnabled) {
-      parts.push(t('toolbar.navigation.ctrlHint', { defaultValue: 'Ctrl changes navigation to document mode' }));
-    }
-    return parts.join(' · ');
-  }, [compareNavigationEnabled, documentNavigationEnabled, t]);
-
   const handleGoToPageInput = useCallback((nextVisiblePageNumber) => {
     if (navigationTargetMode === 'compare' && compareNavigationEnabled && typeof setVisibleComparePageNumber === 'function') {
       setVisibleComparePageNumber(nextVisiblePageNumber);
@@ -597,15 +580,6 @@ const DocumentToolbar = ({
     },
     [editingTargetMode, handleContrastChange, snapToZero]
   );
-
-  /** Toggle the visibility of the editing controls. The actual renderer only switches to canvas once a non-neutral adjustment is applied. */
-  const toggleExpand = useCallback(() => {
-    setIsExpanded((prev) => {
-      const next = !prev;
-      if (next) logger.info('Opening image adjustment controls', { target: editingTargetMode });
-      return next;
-    });
-  }, [editingTargetMode, setIsExpanded]);
 
   /**
    * Build a compact "pages" descriptor for logging.
@@ -809,104 +783,94 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
 
-      {(compareNavigationEnabled || documentNavigationEnabled) && navigationShortcutHint ? (
-        <div className="toolbar-inline-hint navigation-shortcut-hint" role="note">
-          {navigationShortcutHint}
-        </div>
-      ) : null}
+      <button
+        type="button"
+        onClick={() => setIsHelpDialogOpen(true)}
+        aria-label={t('help.open', { defaultValue: 'Open help' })}
+        title={t('help.open', { defaultValue: 'Open help' })}
+        className="odv-btn help-button"
+      >
+        <span className="material-icons" aria-hidden="true">help_outline</span>
+      </button>
 
       <div className="separator" />
 
-      {/* Canvas editing tools toggle */}
-      <button
-        type="button"
-        onClick={toggleExpand}
-        aria-label={t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')}
-        title={`${t(isExpanded ? 'toolbar.editing.disable' : 'toolbar.editing.enable')} · ${editingTargetLabel}`}
-        className={`odv-btn editing-button ${isExpanded ? 'editing-enabled' : 'editing-disabled'}`}
+      {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
+      <div
+        className={`zoom-fixed-group editing-tools ${editingTargetMode === 'compare' ? 'editing-target-compare' : 'editing-target-primary'}`}
+        aria-label={t('toolbar.imageAdjustments')}
+        title={editingTargetLabel}
       >
-        <span className="material-icons" aria-hidden="true">edit</span>
-      </button>
+        <span className={`editing-target-chip ${editingTargetMode === 'compare' ? 'is-compare' : 'is-primary'}`}>
+          {editingTargetMode === 'compare'
+            ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
+            : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' })}
+        </span>
+        <button
+          type="button"
+          onClick={() => handleRotationChange(-90, editingTargetMode)}
+          aria-label={t('toolbar.rotateLeft90')}
+          title={t('toolbar.rotateLeft90')}
+          className="odv-btn"
+        >
+          ⟲
+        </button>
+        <button
+          type="button"
+          onClick={() => handleRotationChange(90, editingTargetMode)}
+          aria-label={t('toolbar.rotateRight90')}
+          title={t('toolbar.rotateRight90')}
+          className="odv-btn"
+        >
+          ⟳
+        </button>
 
-      {/* Editing controls (visible only when canvas tools are enabled).
-          Wrapped in a white "group" to match the zoom/paging clusters. */}
-      {isExpanded && (
-        <div className="zoom-fixed-group editing-tools" aria-label={t('toolbar.imageAdjustments')} title={editingTargetLabel}>
-          <span className={`editing-target-chip ${editingTargetMode === 'compare' ? 'is-compare' : 'is-primary'}`}>
-            {editingTargetMode === 'compare'
-              ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
-              : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' })}
-          </span>
-          <button
-            type="button"
-            onClick={() => handleRotationChange(-90, editingTargetMode)}
-            aria-label={t('toolbar.rotateLeft90')}
-            title={t('toolbar.rotateLeft90')}
-            className="odv-btn"
-          >
-            ⟲
-          </button>
-          <button
-            type="button"
-            onClick={() => handleRotationChange(90, editingTargetMode)}
-            aria-label={t('toolbar.rotateRight90')}
-            title={t('toolbar.rotateRight90')}
-            className="odv-btn"
-          >
-            ⟳
-          </button>
+        <label className="slider-label">
+          {t('toolbar.brightness')}
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={editingProperties.brightness}
+            onChange={handleBrightnessSliderChange}
+            className={editingProperties.brightness === 100 ? 'resting' : 'active'}
+            aria-valuemin={0}
+            aria-valuemax={200}
+            aria-valuenow={editingProperties.brightness}
+            aria-label={t('toolbar.adjustBrightness')}
+          />
+        </label>
 
-          <label className="slider-label">
-            {t('toolbar.brightness')}
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value={editingProperties.brightness}
-              onChange={handleBrightnessSliderChange}
-              className={editingProperties.brightness === 100 ? 'resting' : 'active'}
-              aria-valuemin={0}
-              aria-valuemax={200}
-              aria-valuenow={editingProperties.brightness}
-              aria-label={t('toolbar.adjustBrightness')}
-            />
-          </label>
+        <label className="slider-label">
+          {t('toolbar.contrast')}
+          <input
+            type="range"
+            min="0"
+            max="200"
+            value={editingProperties.contrast}
+            onChange={handleContrastSliderChange}
+            className={editingProperties.contrast === 100 ? 'resting' : 'active'}
+            aria-valuemin={0}
+            aria-valuemax={200}
+            aria-valuenow={editingProperties.contrast}
+            aria-label={t('toolbar.adjustContrast')}
+          />
+        </label>
 
-          <label className="slider-label">
-            {t('toolbar.contrast')}
-            <input
-              type="range"
-              min="0"
-              max="200"
-              value={editingProperties.contrast}
-              onChange={handleContrastSliderChange}
-              className={editingProperties.contrast === 100 ? 'resting' : 'active'}
-              aria-valuemin={0}
-              aria-valuemax={200}
-              aria-valuenow={editingProperties.contrast}
-              aria-label={t('toolbar.adjustContrast')}
-            />
-          </label>
-
-          <button
-            type="button"
-            onClick={() => resetImageProperties(editingTargetMode)}
-            aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-            title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-            className="odv-btn"
-          >
-            <span className="material-icons" aria-hidden="true">restart_alt</span>
-          </button>
-        </div>
-      )}
+        <button
+          type="button"
+          onClick={() => resetImageProperties(editingTargetMode)}
+          aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+          title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+          className="odv-btn"
+        >
+          <span className="material-icons" aria-hidden="true">restart_alt</span>
+        </button>
+      </div>
 
       <div className="separator" />
 
       <LanguageMenuButton />
-
-      {/* Theme toggle (also mapped to key "6") */}
-      <ThemeToggleButton toggleTheme={toggleTheme} />
-
 
 
       {/* Modal for print selection + reason/forWhom */}
@@ -921,6 +885,12 @@ const DocumentToolbar = ({
         hasActiveSelection={hasActiveSelection}
         selectionIncludedCount={selectionIncludedCount}
         sessionTotalPages={sessionTotalPages}
+      />
+
+
+      <HelpOverlayDialog
+        isOpen={isHelpDialogOpen}
+        onClose={() => setIsHelpDialogOpen(false)}
       />
     </div>
   );
@@ -985,8 +955,6 @@ DocumentToolbar.propTypes = {
   handleBrightnessChange: PropTypes.func.isRequired,
   handleContrastChange: PropTypes.func.isRequired,
   resetImageProperties: PropTypes.func.isRequired,
-  isExpanded: PropTypes.bool.isRequired,
-  setIsExpanded: PropTypes.func.isRequired,
   zoom: PropTypes.number,
   zoomState: PropTypes.shape({
     mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
