@@ -243,7 +243,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     [stageHeightPx, stageWidthPx]
   );
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     setCanvasReady(false);
   }, [currentIndex, displayedAsset.url, isCanvasEnabled]);
 
@@ -819,6 +819,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   );
   const hiddenImageStyle = isCanvasEnabled && canvasReady
     ? {
+        visibility: 'hidden',
         opacity: 0,
         pointerEvents: 'none',
       }

@@ -102,7 +102,13 @@ function getViewportSize(viewport, opts) {
  */
 function applyZoom(setZoom, next) {
   const clamped = clamp(next, MIN_ZOOM, MAX_ZOOM);
-  setZoom(clamped);
+  setZoom((current) => {
+    const numericCurrent = Number(current);
+    if (Number.isFinite(numericCurrent) && Math.abs(numericCurrent - clamped) < 0.0005) {
+      return numericCurrent;
+    }
+    return clamped;
+  });
 }
 
 /**

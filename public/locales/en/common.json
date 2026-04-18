@@ -404,7 +404,7 @@
       },
       "adjustments": {
         "title": "Image adjustments",
-        "body": "Rotation, brightness, contrast, and reset are always visible in the toolbar. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
+        "body": "Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
         "primary": "Without Shift, adjustments target the left/primary page.",
         "compare": "With Shift in compare mode, adjustments target the right page.",
         "reset": "Adjustments reset when you move to another page."

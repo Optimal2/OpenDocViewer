@@ -33,8 +33,10 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
       onClose?.();
     };
 
+    document.addEventListener('keydown', handleEscape, true);
     window.addEventListener('keydown', handleEscape, true);
     return () => {
+      document.removeEventListener('keydown', handleEscape, true);
       window.removeEventListener('keydown', handleEscape, true);
     };
   }, [isOpen, onClose]);
@@ -47,6 +49,12 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="odv-help-title"
+      onKeyDownCapture={(event) => {
+        if (String(event?.key || '') !== 'Escape') return;
+        event.preventDefault();
+        event.stopPropagation();
+        onClose?.();
+      }}
       onMouseDown={(event) => {
         if (event.target !== event.currentTarget) return;
         onClose?.();

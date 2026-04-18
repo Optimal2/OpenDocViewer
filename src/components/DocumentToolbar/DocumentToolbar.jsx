@@ -205,7 +205,13 @@ const DocumentToolbar = ({
   const { t } = useTranslation();
   const [navigationModifierState, setNavigationModifierState] = useState({ shift: false, ctrl: false });
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
+  const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const documentRepeatTargetRef = useRef('primary');
+  const modifierStateRef = useRef({ shift: false, ctrl: false });
+  const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
+  const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
+  const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const contrastMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
   const compareNavigationEnabled = typeof setComparePageNumber === 'function';
@@ -218,17 +224,21 @@ const DocumentToolbar = ({
      * @returns {void}
      */
     const syncModifierState = (event) => {
-      setNavigationModifierState({
-        shift: !!event?.shiftKey,
-        ctrl: !!event?.ctrlKey && !event?.metaKey && !event?.altKey,
-      });
+      const nextState = {
+        shift: !!event?.getModifierState?.('Shift') || !!event?.shiftKey,
+        ctrl: (!!event?.getModifierState?.('Control') || !!event?.ctrlKey) && !event?.metaKey && !event?.altKey,
+      };
+      modifierStateRef.current = nextState;
+      setNavigationModifierState(nextState);
     };
 
     /**
      * @returns {void}
      */
     const clearModifierState = () => {
-      setNavigationModifierState({ shift: false, ctrl: false });
+      const nextState = { shift: false, ctrl: false };
+      modifierStateRef.current = nextState;
+      setNavigationModifierState(nextState);
     };
 
     /**
@@ -250,6 +260,43 @@ const DocumentToolbar = ({
       document.removeEventListener('visibilitychange', handleVisibilityChange, true);
     };
   }, []);
+
+  useEffect(() => {
+    if (!openAdjustmentMenu) return undefined;
+
+    const activeButtonRef = openAdjustmentMenu === 'brightness' ? brightnessButtonRef : contrastButtonRef;
+    const activeMenuRef = openAdjustmentMenu === 'brightness' ? brightnessMenuRef : contrastMenuRef;
+
+    /** @param {MouseEvent | TouchEvent} event */
+    const handlePointerDown = (event) => {
+      const target = event?.target;
+      if (activeButtonRef.current && activeButtonRef.current.contains(target)) return;
+      if (activeMenuRef.current && activeMenuRef.current.contains(target)) return;
+      setOpenAdjustmentMenu(null);
+    };
+
+    /** @param {KeyboardEvent} event */
+    const handleEscape = (event) => {
+      if (String(event?.key || '') !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      setOpenAdjustmentMenu(null);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown, true);
+    document.addEventListener('touchstart', handlePointerDown, true);
+    document.addEventListener('keydown', handleEscape, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown, true);
+      document.removeEventListener('touchstart', handlePointerDown, true);
+      document.removeEventListener('keydown', handleEscape, true);
+    };
+  }, [openAdjustmentMenu]);
+
+  useEffect(() => {
+    setOpenAdjustmentMenu(null);
+  }, [comparePageNumber, isComparing, pageNumber]);
 
   // Seed optional user-log context once so later print actions can attach host metadata.
   useEffect(() => {
@@ -323,10 +370,21 @@ const DocumentToolbar = ({
     stopPageTimer: stopDocumentNextPageTimer,
   } = usePageTimer(500, handleDocumentNextRepeatStep);
 
-  const wantsCompareTarget = useCallback((event) => !!event?.shiftKey, []);
+  const getEffectiveModifierState = useCallback((event) => {
+    const base = modifierStateRef.current || { shift: false, ctrl: false };
+    const shift = typeof event?.shiftKey === 'boolean'
+      ? !!event.shiftKey
+      : !!base.shift;
+    const ctrl = typeof event?.ctrlKey === 'boolean'
+      ? (!!event.ctrlKey && !event?.metaKey && !event?.altKey)
+      : !!base.ctrl;
+    return { shift, ctrl };
+  }, []);
+
+  const wantsCompareTarget = useCallback((event) => getEffectiveModifierState(event).shift, [getEffectiveModifierState]);
   const wantsDocumentScope = useCallback(
-    (event) => !!event?.ctrlKey && !event?.metaKey && !event?.altKey && !!documentNavigationEnabled,
-    [documentNavigationEnabled]
+    (event) => getEffectiveModifierState(event).ctrl && !!documentNavigationEnabled,
+    [documentNavigationEnabled, getEffectiveModifierState]
   );
 
   const canTargetCompare = useCallback((event) => {
@@ -343,6 +401,11 @@ const DocumentToolbar = ({
   const resolveNavigationScope = useCallback((event) => (
     wantsDocumentScope(event) ? 'document' : 'page'
   ), [wantsDocumentScope]);
+
+  const resolveEditingTarget = useCallback((event) => {
+    if (!isComparing) return 'primary';
+    return wantsCompareTarget(event) ? 'compare' : 'primary';
+  }, [isComparing, wantsCompareTarget]);
 
   const blockUnavailableCompareTarget = useCallback((event) => {
     if (!wantsCompareTarget(event)) return false;
@@ -481,9 +544,9 @@ const DocumentToolbar = ({
   );
   const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
   const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
-  const editingTargetMode = isComparing && isShiftPressed ? 'compare' : 'primary';
+  const editingTargetMode = resolveEditingTarget();
   const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
-  const editingTargetLabel = editingTargetMode === 'compare'
+  const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page (Shift)' })
     : t('toolbar.editingTargetPrimary', { defaultValue: 'Editing the primary / left page' });
   const activeDocumentNavigation = navigationTargetMode === 'compare'
@@ -562,9 +625,9 @@ const DocumentToolbar = ({
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
       const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
-      handleBrightnessChange({ target: { value } }, editingTargetMode);
+      handleBrightnessChange({ target: { value } }, resolveEditingTarget(event));
     },
-    [editingTargetMode, handleBrightnessChange, snapToZero]
+    [handleBrightnessChange, resolveEditingTarget, snapToZero]
   );
 
   /**
@@ -576,10 +639,47 @@ const DocumentToolbar = ({
     (event) => {
       const raw = parseInt(event?.target?.value, 10);
       const value = Number.isFinite(raw) ? snapToZero(raw) : 100;
-      handleContrastChange({ target: { value } }, editingTargetMode);
+      handleContrastChange({ target: { value } }, resolveEditingTarget(event));
     },
-    [editingTargetMode, handleContrastChange, snapToZero]
+    [handleContrastChange, resolveEditingTarget, snapToZero]
   );
+
+  /**
+   * @param {*} event
+   * @param {number} delta
+   * @returns {void}
+   */
+  const handleRotationButtonClick = useCallback((event, delta) => {
+    handleRotationChange(delta, resolveEditingTarget(event));
+  }, [handleRotationChange, resolveEditingTarget]);
+
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
+  const handleResetAdjustmentsClick = useCallback((event) => {
+    resetImageProperties(resolveEditingTarget(event));
+    setOpenAdjustmentMenu(null);
+  }, [resetImageProperties, resolveEditingTarget]);
+
+  /**
+   * @param {'brightness'|'contrast'} menuKey
+   * @returns {void}
+   */
+  const toggleAdjustmentMenu = useCallback((menuKey) => {
+    setOpenAdjustmentMenu((current) => (current === menuKey ? null : menuKey));
+  }, []);
+
+  const handleBrightnessReset = useCallback((event) => {
+    handleBrightnessChange({ target: { value: 100 } }, resolveEditingTarget(event));
+  }, [handleBrightnessChange, resolveEditingTarget]);
+
+  const handleContrastReset = useCallback((event) => {
+    handleContrastChange({ target: { value: 100 } }, resolveEditingTarget(event));
+  }, [handleContrastChange, resolveEditingTarget]);
+
+  const isBrightnessAdjusted = Number(editingProperties?.brightness || 100) !== 100;
+  const isContrastAdjusted = Number(editingProperties?.contrast || 100) !== 100;
 
   /**
    * Build a compact "pages" descriptor for logging.
@@ -783,6 +883,166 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
 
+      <div className="separator" />
+
+      {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
+      <div
+        className={`zoom-fixed-group editing-tools ${editingTargetMode === 'compare' ? 'editing-target-compare' : 'editing-target-primary'}`}
+        aria-label={t('toolbar.imageAdjustments')}
+        title={editingGroupTitle}
+      >
+        <button
+          type="button"
+          onClick={(event) => handleRotationButtonClick(event, -90)}
+          aria-label={t('toolbar.rotateLeft90')}
+          title={t('toolbar.rotateLeft90')}
+          className="odv-btn"
+        >
+          <span className="material-icons" aria-hidden="true">rotate_left</span>
+        </button>
+        <button
+          type="button"
+          onClick={(event) => handleRotationButtonClick(event, 90)}
+          aria-label={t('toolbar.rotateRight90')}
+          title={t('toolbar.rotateRight90')}
+          className="odv-btn"
+        >
+          <span className="material-icons" aria-hidden="true">rotate_right</span>
+        </button>
+
+        <div className="toolbar-menu-shell toolbar-adjustment-shell">
+          <button
+            ref={brightnessButtonRef}
+            type="button"
+            onClick={() => toggleAdjustmentMenu('brightness')}
+            aria-label={t('toolbar.adjustBrightness')}
+            title={t('toolbar.adjustBrightness')}
+            aria-haspopup="dialog"
+            aria-expanded={openAdjustmentMenu === 'brightness'}
+            className={`odv-btn toolbar-adjustment-button${isBrightnessAdjusted ? ' is-active' : ''}`}
+          >
+            <span className="material-icons" aria-hidden="true">brightness_6</span>
+          </button>
+
+          {openAdjustmentMenu === 'brightness' ? (
+            <div
+              ref={brightnessMenuRef}
+              className="toolbar-adjustment-menu"
+              role="dialog"
+              aria-label={t('toolbar.adjustBrightness')}
+            >
+              <div className="toolbar-adjustment-menu-header">
+                <span className="toolbar-adjustment-menu-title">
+                  <span className="material-icons" aria-hidden="true">brightness_6</span>
+                  <span>{t('toolbar.brightness')}</span>
+                </span>
+                <button
+                  type="button"
+                  className="toolbar-adjustment-reset-btn"
+                  onClick={handleBrightnessReset}
+                  title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+                >
+                  100%
+                </button>
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={editingProperties.brightness}
+                onChange={handleBrightnessSliderChange}
+                onInput={handleBrightnessSliderChange}
+                className="toolbar-adjustment-slider"
+                aria-valuemin={0}
+                aria-valuemax={200}
+                aria-valuenow={editingProperties.brightness}
+                aria-label={t('toolbar.adjustBrightness')}
+              />
+
+              <div className="toolbar-adjustment-scale" aria-hidden="true">
+                <span>0</span>
+                <span>{editingProperties.brightness}%</span>
+                <span>200</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <div className="toolbar-menu-shell toolbar-adjustment-shell">
+          <button
+            ref={contrastButtonRef}
+            type="button"
+            onClick={() => toggleAdjustmentMenu('contrast')}
+            aria-label={t('toolbar.adjustContrast')}
+            title={t('toolbar.adjustContrast')}
+            aria-haspopup="dialog"
+            aria-expanded={openAdjustmentMenu === 'contrast'}
+            className={`odv-btn toolbar-adjustment-button${isContrastAdjusted ? ' is-active' : ''}`}
+          >
+            <span className="material-icons" aria-hidden="true">tonality</span>
+          </button>
+
+          {openAdjustmentMenu === 'contrast' ? (
+            <div
+              ref={contrastMenuRef}
+              className="toolbar-adjustment-menu"
+              role="dialog"
+              aria-label={t('toolbar.adjustContrast')}
+            >
+              <div className="toolbar-adjustment-menu-header">
+                <span className="toolbar-adjustment-menu-title">
+                  <span className="material-icons" aria-hidden="true">tonality</span>
+                  <span>{t('toolbar.contrast')}</span>
+                </span>
+                <button
+                  type="button"
+                  className="toolbar-adjustment-reset-btn"
+                  onClick={handleContrastReset}
+                  title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+                >
+                  100%
+                </button>
+              </div>
+
+              <input
+                type="range"
+                min="0"
+                max="200"
+                value={editingProperties.contrast}
+                onChange={handleContrastSliderChange}
+                onInput={handleContrastSliderChange}
+                className="toolbar-adjustment-slider"
+                aria-valuemin={0}
+                aria-valuemax={200}
+                aria-valuenow={editingProperties.contrast}
+                aria-label={t('toolbar.adjustContrast')}
+              />
+
+              <div className="toolbar-adjustment-scale" aria-hidden="true">
+                <span>0</span>
+                <span>{editingProperties.contrast}%</span>
+                <span>200</span>
+              </div>
+            </div>
+          ) : null}
+        </div>
+
+        <button
+          type="button"
+          onClick={handleResetAdjustmentsClick}
+          aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+          title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
+          className="odv-btn"
+        >
+          <span className="material-icons" aria-hidden="true">restart_alt</span>
+        </button>
+      </div>
+
+      <div className="toolbar-spacer" />
+
+      <LanguageMenuButton />
+
       <button
         type="button"
         onClick={() => setIsHelpDialogOpen(true)}
@@ -792,85 +1052,6 @@ const DocumentToolbar = ({
       >
         <span className="material-icons" aria-hidden="true">help_outline</span>
       </button>
-
-      <div className="separator" />
-
-      {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
-      <div
-        className={`zoom-fixed-group editing-tools ${editingTargetMode === 'compare' ? 'editing-target-compare' : 'editing-target-primary'}`}
-        aria-label={t('toolbar.imageAdjustments')}
-        title={editingTargetLabel}
-      >
-        <span className={`editing-target-chip ${editingTargetMode === 'compare' ? 'is-compare' : 'is-primary'}`}>
-          {editingTargetMode === 'compare'
-            ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
-            : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' })}
-        </span>
-        <button
-          type="button"
-          onClick={() => handleRotationChange(-90, editingTargetMode)}
-          aria-label={t('toolbar.rotateLeft90')}
-          title={t('toolbar.rotateLeft90')}
-          className="odv-btn"
-        >
-          ⟲
-        </button>
-        <button
-          type="button"
-          onClick={() => handleRotationChange(90, editingTargetMode)}
-          aria-label={t('toolbar.rotateRight90')}
-          title={t('toolbar.rotateRight90')}
-          className="odv-btn"
-        >
-          ⟳
-        </button>
-
-        <label className="slider-label">
-          {t('toolbar.brightness')}
-          <input
-            type="range"
-            min="0"
-            max="200"
-            value={editingProperties.brightness}
-            onChange={handleBrightnessSliderChange}
-            className={editingProperties.brightness === 100 ? 'resting' : 'active'}
-            aria-valuemin={0}
-            aria-valuemax={200}
-            aria-valuenow={editingProperties.brightness}
-            aria-label={t('toolbar.adjustBrightness')}
-          />
-        </label>
-
-        <label className="slider-label">
-          {t('toolbar.contrast')}
-          <input
-            type="range"
-            min="0"
-            max="200"
-            value={editingProperties.contrast}
-            onChange={handleContrastSliderChange}
-            className={editingProperties.contrast === 100 ? 'resting' : 'active'}
-            aria-valuemin={0}
-            aria-valuemax={200}
-            aria-valuenow={editingProperties.contrast}
-            aria-label={t('toolbar.adjustContrast')}
-          />
-        </label>
-
-        <button
-          type="button"
-          onClick={() => resetImageProperties(editingTargetMode)}
-          aria-label={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-          title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-          className="odv-btn"
-        >
-          <span className="material-icons" aria-hidden="true">restart_alt</span>
-        </button>
-      </div>
-
-      <div className="separator" />
-
-      <LanguageMenuButton />
 
 
       {/* Modal for print selection + reason/forWhom */}
