@@ -14,13 +14,14 @@
  * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
-import React, { useContext, useCallback, useMemo, useEffect, useState } from 'react';
+import React, { useContext, useCallback, useMemo, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import logger from '../../logging/systemLogger.js';
 import userLog from '../../logging/userLogger.js';
 import ThemeContext from '../../contexts/themeContext.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
+import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import ThemeToggleButton from './ThemeToggleButton.jsx';
@@ -82,6 +83,10 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {boolean} lastPageDisabled
  * @property {PageNumberSetter} setPageNumber
  * @property {PageNumberSetter} [setComparePageNumber]
+ * @property {function(string=): void} [goToPreviousDocument]
+ * @property {function(string=): void} [goToNextDocument]
+ * @property {function(string=): void} [goToFirstDocument]
+ * @property {function(string=): void} [goToLastDocument]
  * @property {function(): void} zoomIn
  * @property {function(): void} zoomOut
  * @property {function(): void=} actualSize
@@ -93,7 +98,6 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
  * @property {function(): void} handleCompare
- * @property {function(): void=} closeCompare
  * @property {boolean} isComparing
  * @property {(number|null)=} comparePageNumber
  * @property {ImageProperties} imageProperties
@@ -113,6 +117,9 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
  * @property {Array<number>=} visibleOriginalPageNumbers
  * @property {number=} selectionIncludedCount
  * @property {number=} sessionTotalPages
+ * @property {boolean=} documentNavigationEnabled
+ * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} primaryDocumentNavigation
+ * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} compareDocumentNavigation
  */
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -157,6 +164,10 @@ const DocumentToolbar = ({
   lastPageDisabled,
   setPageNumber,
   setComparePageNumber,
+  goToPreviousDocument,
+  goToNextDocument,
+  goToFirstDocument,
+  goToLastDocument,
   zoomIn,
   zoomOut,
   actualSize,
@@ -189,10 +200,17 @@ const DocumentToolbar = ({
   visibleOriginalPageNumbers = [],
   selectionIncludedCount = 0,
   sessionTotalPages = totalPagesDisplay,
+  documentNavigationEnabled = false,
+  primaryDocumentNavigation = undefined,
+  compareDocumentNavigation = undefined,
 }) => {
   const { toggleTheme } = useContext(ThemeContext);
   const { t } = useTranslation();
-  const [isShiftPressed, setIsShiftPressed] = useState(false);
+  const [navigationModifierState, setNavigationModifierState] = useState({ shift: false, ctrl: false });
+  const documentRepeatTargetRef = useRef('primary');
+  const isShiftPressed = navigationModifierState.shift;
+  const isCtrlPressed = navigationModifierState.ctrl;
+  const compareNavigationEnabled = !compareDisabled && typeof setComparePageNumber === 'function';
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -201,33 +219,36 @@ const DocumentToolbar = ({
      * @param {KeyboardEvent} event
      * @returns {void}
      */
-    const syncShiftState = (event) => {
-      setIsShiftPressed(!!event?.shiftKey);
+    const syncModifierState = (event) => {
+      setNavigationModifierState({
+        shift: !!event?.shiftKey,
+        ctrl: !!event?.ctrlKey && !event?.metaKey && !event?.altKey,
+      });
     };
 
     /**
      * @returns {void}
      */
-    const clearShiftState = () => {
-      setIsShiftPressed(false);
+    const clearModifierState = () => {
+      setNavigationModifierState({ shift: false, ctrl: false });
     };
 
     /**
      * @returns {void}
      */
     const handleVisibilityChange = () => {
-      if (document.hidden) clearShiftState();
+      if (document.hidden) clearModifierState();
     };
 
-    window.addEventListener('keydown', syncShiftState, true);
-    window.addEventListener('keyup', syncShiftState, true);
-    window.addEventListener('blur', clearShiftState, true);
+    window.addEventListener('keydown', syncModifierState, true);
+    window.addEventListener('keyup', syncModifierState, true);
+    window.addEventListener('blur', clearModifierState, true);
     document.addEventListener('visibilitychange', handleVisibilityChange, true);
 
     return () => {
-      window.removeEventListener('keydown', syncShiftState, true);
-      window.removeEventListener('keyup', syncShiftState, true);
-      window.removeEventListener('blur', clearShiftState, true);
+      window.removeEventListener('keydown', syncModifierState, true);
+      window.removeEventListener('keyup', syncModifierState, true);
+      window.removeEventListener('blur', clearModifierState, true);
       document.removeEventListener('visibilitychange', handleVisibilityChange, true);
     };
   }, []);
@@ -248,9 +269,22 @@ const DocumentToolbar = ({
     } catch {}
   }, []);
 
+  const normalizedPrimaryDocumentNavigation = useMemo(() => ({
+    canGoPrevious: !!primaryDocumentNavigation?.canGoPrevious,
+    canGoNext: !!primaryDocumentNavigation?.canGoNext,
+    canGoFirst: !!primaryDocumentNavigation?.canGoFirst,
+    canGoLast: !!primaryDocumentNavigation?.canGoLast,
+  }), [primaryDocumentNavigation]);
+  const normalizedCompareDocumentNavigation = useMemo(() => ({
+    canGoPrevious: !!compareDocumentNavigation?.canGoPrevious,
+    canGoNext: !!compareDocumentNavigation?.canGoNext,
+    canGoFirst: !!compareDocumentNavigation?.canGoFirst,
+    canGoLast: !!compareDocumentNavigation?.canGoLast,
+  }), [compareDocumentNavigation]);
+
   // Navigation helpers (single-step handlers + press-and-hold timers).
-  // Shift steers the right compare pane when compare mode is available. The compare-targeted setter
-  // already enables compare mode automatically, so toolbar clicks behave like Shift+thumbnail-click.
+  // Shift steers the right compare pane when compare mode is available. Ctrl switches the scope to
+  // whole-document stepping when more than one visible document exists.
   const primaryNavigation = usePageNavigation(setPageNumber, totalPages);
   const compareNavigation = usePageNavigation(setComparePageNumber, totalPages);
   const {
@@ -274,89 +308,248 @@ const DocumentToolbar = ({
     stopNextPageTimer: stopCompareNextPageTimer,
   } = compareNavigation;
 
+  const handleDocumentPrevRepeatStep = useCallback(() => {
+    const target = documentRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    goToPreviousDocument?.(target);
+  }, [goToPreviousDocument]);
+  const handleDocumentNextRepeatStep = useCallback(() => {
+    const target = documentRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    goToNextDocument?.(target);
+  }, [goToNextDocument]);
+  const {
+    startPageTimer: startDocumentPrevPageTimer,
+    stopPageTimer: stopDocumentPrevPageTimer,
+  } = usePageTimer(500, handleDocumentPrevRepeatStep);
+  const {
+    startPageTimer: startDocumentNextPageTimer,
+    stopPageTimer: stopDocumentNextPageTimer,
+  } = usePageTimer(500, handleDocumentNextRepeatStep);
+
   const wantsCompareTarget = useCallback((event) => !!event?.shiftKey, []);
+  const wantsDocumentScope = useCallback(
+    (event) => !!event?.ctrlKey && !event?.metaKey && !event?.altKey && !!documentNavigationEnabled,
+    [documentNavigationEnabled]
+  );
 
   const canTargetCompare = useCallback((event) => {
     if (!wantsCompareTarget(event)) return false;
-    if (compareDisabled) return false;
+    if (!compareNavigationEnabled) return false;
     return typeof setComparePageNumber === 'function';
-  }, [compareDisabled, setComparePageNumber, wantsCompareTarget]);
+  }, [compareNavigationEnabled, setComparePageNumber, wantsCompareTarget]);
 
-  const invokeNavigation = useCallback((event, primaryHandler, compareHandler) => {
-    if (wantsCompareTarget(event)) {
-      if (canTargetCompare(event)) {
-        compareHandler?.();
-      } else {
-        event?.preventDefault?.();
-        event?.stopPropagation?.();
-      }
-      return;
-    }
-    primaryHandler?.();
+  const resolveNavigationTarget = useCallback((event) => {
+    if (wantsCompareTarget(event) && canTargetCompare(event)) return 'compare';
+    return 'primary';
   }, [canTargetCompare, wantsCompareTarget]);
 
-  const handlePrevPage = useCallback((event) => {
-    invokeNavigation(event, handlePrimaryPrevPage, handleComparePrevPage);
-  }, [handleComparePrevPage, handlePrimaryPrevPage, invokeNavigation]);
+  const resolveNavigationScope = useCallback((event) => (
+    wantsDocumentScope(event) ? 'document' : 'page'
+  ), [wantsDocumentScope]);
 
-  const handleNextPage = useCallback((event) => {
-    invokeNavigation(event, handlePrimaryNextPage, handleCompareNextPage);
-  }, [handleCompareNextPage, handlePrimaryNextPage, invokeNavigation]);
+  const blockUnavailableCompareTarget = useCallback((event) => {
+    if (!wantsCompareTarget(event)) return false;
+    if (canTargetCompare(event)) return false;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+    return true;
+  }, [canTargetCompare, wantsCompareTarget]);
 
-  const handleFirstPage = useCallback((event) => {
-    invokeNavigation(event, handlePrimaryFirstPage, handleCompareFirstPage);
-  }, [handleCompareFirstPage, handlePrimaryFirstPage, invokeNavigation]);
-
-  const handleLastPage = useCallback((event) => {
-    invokeNavigation(event, handlePrimaryLastPage, handleCompareLastPage);
-  }, [handleCompareLastPage, handlePrimaryLastPage, invokeNavigation]);
-
-  const startPrevPageTimer = useCallback((direction, event) => {
-    if (wantsCompareTarget(event)) {
-      if (canTargetCompare(event)) startComparePrevPageTimer(direction);
+  const invokePageNavigationForTarget = useCallback((target, direction) => {
+    const safeTarget = target === 'compare' ? 'compare' : 'primary';
+    if (direction === 'prev') {
+      if (safeTarget === 'compare') handleComparePrevPage?.();
+      else handlePrimaryPrevPage?.();
       return;
     }
-    startPrimaryPrevPageTimer(direction);
-  }, [canTargetCompare, startComparePrevPageTimer, startPrimaryPrevPageTimer, wantsCompareTarget]);
+    if (direction === 'next') {
+      if (safeTarget === 'compare') handleCompareNextPage?.();
+      else handlePrimaryNextPage?.();
+      return;
+    }
+    if (direction === 'first') {
+      if (safeTarget === 'compare') handleCompareFirstPage?.();
+      else handlePrimaryFirstPage?.();
+      return;
+    }
+    if (safeTarget === 'compare') handleCompareLastPage?.();
+    else handlePrimaryLastPage?.();
+  }, [
+    handleCompareFirstPage,
+    handleCompareLastPage,
+    handleCompareNextPage,
+    handleComparePrevPage,
+    handlePrimaryFirstPage,
+    handlePrimaryLastPage,
+    handlePrimaryNextPage,
+    handlePrimaryPrevPage,
+  ]);
+
+  const invokeDocumentNavigationForTarget = useCallback((target, direction) => {
+    const safeTarget = target === 'compare' ? 'compare' : 'primary';
+    if (direction === 'prev') { goToPreviousDocument?.(safeTarget); return; }
+    if (direction === 'next') { goToNextDocument?.(safeTarget); return; }
+    if (direction === 'first') { goToFirstDocument?.(safeTarget); return; }
+    goToLastDocument?.(safeTarget);
+  }, [goToFirstDocument, goToLastDocument, goToNextDocument, goToPreviousDocument]);
+
+  const invokeNavigation = useCallback((event, direction) => {
+    if (blockUnavailableCompareTarget(event)) return;
+    const target = resolveNavigationTarget(event);
+    const scope = resolveNavigationScope(event);
+    if (scope === 'document') {
+      invokeDocumentNavigationForTarget(target, direction);
+      return;
+    }
+    invokePageNavigationForTarget(target, direction);
+  }, [
+    blockUnavailableCompareTarget,
+    invokeDocumentNavigationForTarget,
+    invokePageNavigationForTarget,
+    resolveNavigationScope,
+    resolveNavigationTarget,
+  ]);
+
+  const handlePrevPage = useCallback((event) => {
+    invokeNavigation(event, 'prev');
+  }, [invokeNavigation]);
+
+  const handleNextPage = useCallback((event) => {
+    invokeNavigation(event, 'next');
+  }, [invokeNavigation]);
+
+  const handleFirstPage = useCallback((event) => {
+    invokeNavigation(event, 'first');
+  }, [invokeNavigation]);
+
+  const handleLastPage = useCallback((event) => {
+    invokeNavigation(event, 'last');
+  }, [invokeNavigation]);
+
+  const startPrevPageTimer = useCallback((direction, event) => {
+    if (blockUnavailableCompareTarget(event)) return;
+    const target = resolveNavigationTarget(event);
+    const scope = resolveNavigationScope(event);
+    if (scope === 'document') {
+      documentRepeatTargetRef.current = target;
+      startDocumentPrevPageTimer(direction);
+      return;
+    }
+    if (target === 'compare') startComparePrevPageTimer(direction);
+    else startPrimaryPrevPageTimer(direction);
+  }, [
+    blockUnavailableCompareTarget,
+    resolveNavigationScope,
+    resolveNavigationTarget,
+    startComparePrevPageTimer,
+    startDocumentPrevPageTimer,
+    startPrimaryPrevPageTimer,
+  ]);
 
   const stopPrevPageTimer = useCallback(() => {
     stopPrimaryPrevPageTimer();
     stopComparePrevPageTimer();
-  }, [stopComparePrevPageTimer, stopPrimaryPrevPageTimer]);
+    stopDocumentPrevPageTimer();
+  }, [stopComparePrevPageTimer, stopDocumentPrevPageTimer, stopPrimaryPrevPageTimer]);
 
   const startNextPageTimer = useCallback((direction, event) => {
-    if (wantsCompareTarget(event)) {
-      if (canTargetCompare(event)) startCompareNextPageTimer(direction);
+    if (blockUnavailableCompareTarget(event)) return;
+    const target = resolveNavigationTarget(event);
+    const scope = resolveNavigationScope(event);
+    if (scope === 'document') {
+      documentRepeatTargetRef.current = target;
+      startDocumentNextPageTimer(direction);
       return;
     }
-    startPrimaryNextPageTimer(direction);
-  }, [canTargetCompare, startCompareNextPageTimer, startPrimaryNextPageTimer, wantsCompareTarget]);
+    if (target === 'compare') startCompareNextPageTimer(direction);
+    else startPrimaryNextPageTimer(direction);
+  }, [
+    blockUnavailableCompareTarget,
+    resolveNavigationScope,
+    resolveNavigationTarget,
+    startCompareNextPageTimer,
+    startDocumentNextPageTimer,
+    startPrimaryNextPageTimer,
+  ]);
 
   const stopNextPageTimer = useCallback(() => {
     stopPrimaryNextPageTimer();
     stopCompareNextPageTimer();
-  }, [stopCompareNextPageTimer, stopPrimaryNextPageTimer]);
+    stopDocumentNextPageTimer();
+  }, [stopCompareNextPageTimer, stopDocumentNextPageTimer, stopPrimaryNextPageTimer]);
 
-  const compareNavigationEnabled = !compareDisabled && typeof setComparePageNumber === 'function';
   const compareNavigationPage = useMemo(
     () => normalizeToolbarPageNumber(comparePageNumber, totalPages, pageNumber),
     [comparePageNumber, pageNumber, totalPages]
   );
-  const useCompareDisabledState = isShiftPressed && compareNavigationEnabled;
+  const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
+  const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
+  const activeDocumentNavigation = navigationTargetMode === 'compare'
+    ? normalizedCompareDocumentNavigation
+    : normalizedPrimaryDocumentNavigation;
+  const useComparePageDisabledState = navigationScopeMode === 'page'
+    && navigationTargetMode === 'compare'
+    && compareNavigationEnabled;
 
-  const effectivePrevPageDisabled = useCompareDisabledState
-    ? compareNavigationPage <= 1
-    : !!prevPageDisabled;
-  const effectiveNextPageDisabled = useCompareDisabledState
-    ? compareNavigationPage >= Math.max(1, totalPages || 1)
-    : !!nextPageDisabled;
-  const effectiveFirstPageDisabled = useCompareDisabledState
-    ? compareNavigationPage <= 1
-    : !!firstPageDisabled;
-  const effectiveLastPageDisabled = useCompareDisabledState
-    ? compareNavigationPage >= Math.max(1, totalPages || 1)
-    : !!lastPageDisabled;
+  const effectivePrevPageDisabled = navigationScopeMode === 'document'
+    ? !activeDocumentNavigation.canGoPrevious
+    : (useComparePageDisabledState ? compareNavigationPage <= 1 : !!prevPageDisabled);
+  const effectiveNextPageDisabled = navigationScopeMode === 'document'
+    ? !activeDocumentNavigation.canGoNext
+    : (useComparePageDisabledState ? compareNavigationPage >= Math.max(1, totalPages || 1) : !!nextPageDisabled);
+  const effectiveFirstPageDisabled = navigationScopeMode === 'document'
+    ? !activeDocumentNavigation.canGoFirst
+    : (useComparePageDisabledState ? compareNavigationPage <= 1 : !!firstPageDisabled);
+  const effectiveLastPageDisabled = navigationScopeMode === 'document'
+    ? !activeDocumentNavigation.canGoLast
+    : (useComparePageDisabledState ? compareNavigationPage >= Math.max(1, totalPages || 1) : !!lastPageDisabled);
 
+  const navigationModeTitle = useMemo(() => {
+    const scopeLabel = navigationScopeMode === 'document'
+      ? t('toolbar.navigation.scopeDocument', { defaultValue: 'Document navigation' })
+      : t('toolbar.navigation.scopePage', { defaultValue: 'Page navigation' });
+    const targetLabel = navigationTargetMode === 'compare'
+      ? t('toolbar.navigation.targetCompare', { defaultValue: 'right compare pane' })
+      : t('toolbar.navigation.targetPrimary', { defaultValue: 'primary / left pane' });
+    return t('toolbar.navigation.modeTitle', {
+      scope: scopeLabel,
+      target: targetLabel,
+      defaultValue: `${scopeLabel} · ${targetLabel}`,
+    });
+  }, [navigationScopeMode, navigationTargetMode, t]);
+
+  const navigationButtonTitles = useMemo(() => ({
+    first: navigationScopeMode === 'document'
+      ? t('toolbar.firstDocument', { defaultValue: 'First document' })
+      : t('toolbar.firstPage'),
+    previous: navigationScopeMode === 'document'
+      ? t('toolbar.previousDocument', { defaultValue: 'Previous document' })
+      : t('toolbar.previousPage'),
+    next: navigationScopeMode === 'document'
+      ? t('toolbar.nextDocument', { defaultValue: 'Next document' })
+      : t('toolbar.nextPage'),
+    last: navigationScopeMode === 'document'
+      ? t('toolbar.lastDocument', { defaultValue: 'Last document' })
+      : t('toolbar.lastPage'),
+  }), [navigationScopeMode, t]);
+
+  const navigationShortcutHint = useMemo(() => {
+    const parts = [];
+    if (compareNavigationEnabled) {
+      parts.push(t('toolbar.navigation.shiftHint', { defaultValue: 'Shift targets the right compare pane' }));
+    }
+    if (documentNavigationEnabled) {
+      parts.push(t('toolbar.navigation.ctrlHint', { defaultValue: 'Ctrl changes navigation to document mode' }));
+    }
+    return parts.join(' · ');
+  }, [compareNavigationEnabled, documentNavigationEnabled, t]);
+
+  const handleGoToPageInput = useCallback((nextOriginalPageNumber) => {
+    if (navigationTargetMode === 'compare' && compareNavigationEnabled && typeof setComparePageNumber === 'function') {
+      setComparePageNumber(nextOriginalPageNumber);
+      return;
+    }
+    setPageNumber(nextOriginalPageNumber);
+  }, [compareNavigationEnabled, navigationTargetMode, setComparePageNumber, setPageNumber]);
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
   const snapToZero = useMemo(
@@ -561,8 +754,14 @@ const DocumentToolbar = ({
         pageNumberDisplay={pageNumberDisplay}
         totalPages={totalPages}
         totalPagesDisplay={totalPagesDisplay}
-        /* NEW: allow manual page entry to apply immediately */
-        onGoToPage={setPageNumber}
+        navigationTarget={navigationTargetMode}
+        navigationScope={navigationScopeMode}
+        navigationGroupTitle={navigationModeTitle}
+        firstButtonTitle={navigationButtonTitles.first}
+        previousButtonTitle={navigationButtonTitles.previous}
+        nextButtonTitle={navigationButtonTitles.next}
+        lastButtonTitle={navigationButtonTitles.last}
+        onGoToPage={handleGoToPageInput}
         isDocumentLoading={isDocumentLoading}
       />
 
@@ -596,13 +795,11 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
 
-      {isComparing && (
-        <div className="toolbar-inline-hint compare-shortcut-hint" role="note">
-          {t('toolbar.compare.shiftHint', {
-            defaultValue: 'Shift steers right pane. Shift + Esc closes.'
-          })}
+      {(compareNavigationEnabled || documentNavigationEnabled) && navigationShortcutHint ? (
+        <div className="toolbar-inline-hint navigation-shortcut-hint" role="note">
+          {navigationShortcutHint}
         </div>
-      )}
+      ) : null}
 
       <div className="separator" />
 
@@ -722,9 +919,25 @@ DocumentToolbar.propTypes = {
   openPrintDialog: PropTypes.func,
   closePrintDialog: PropTypes.func,
   handleCompare: PropTypes.func.isRequired,
-  closeCompare: PropTypes.func,
   isComparing: PropTypes.bool.isRequired,
   comparePageNumber: PropTypes.number,
+  goToPreviousDocument: PropTypes.func,
+  goToNextDocument: PropTypes.func,
+  goToFirstDocument: PropTypes.func,
+  goToLastDocument: PropTypes.func,
+  documentNavigationEnabled: PropTypes.bool,
+  primaryDocumentNavigation: PropTypes.shape({
+    canGoPrevious: PropTypes.bool,
+    canGoNext: PropTypes.bool,
+    canGoFirst: PropTypes.bool,
+    canGoLast: PropTypes.bool,
+  }),
+  compareDocumentNavigation: PropTypes.shape({
+    canGoPrevious: PropTypes.bool,
+    canGoNext: PropTypes.bool,
+    canGoFirst: PropTypes.bool,
+    canGoLast: PropTypes.bool,
+  }),
   imageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,

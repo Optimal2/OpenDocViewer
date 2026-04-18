@@ -45,7 +45,6 @@ const DocumentViewer = () => {
     pageNumberDisplay,
     renderPageNumber,
     setPageNumber,
-    setVisiblePageNumber,
     thumbnailSelectionPageNumber,
     compareThumbnailPageNumber,
     zoom,
@@ -73,6 +72,10 @@ const DocumentViewer = () => {
     goToNextPage,
     goToFirstPage,
     goToLastPage,
+    goToPreviousDocument,
+    goToNextDocument,
+    goToFirstDocument,
+    goToLastDocument,
     zoomIn,
     zoomOut,
     actualSize,
@@ -80,7 +83,6 @@ const DocumentViewer = () => {
     fitToWidth,
     handleContainerClick,
     handleCompare,
-    closeCompare,
     handleRotationChange,
     handleBrightnessChange,
     handleContrastChange,
@@ -98,6 +100,9 @@ const DocumentViewer = () => {
     totalPages,
     totalPagesDisplay,
     visibleOriginalPageNumbers,
+    documentNavigationEnabled,
+    primaryDocumentNavigation,
+    compareDocumentNavigation,
     selectionPanelEnabled,
     selectionDocuments,
     selectionActive,
@@ -200,7 +205,6 @@ const DocumentViewer = () => {
 
         isComparing={isComparing}
         handleCompare={handleCompare}
-        closeCompare={closeCompare}
         comparePageNumber={comparePageNumber}
         imageProperties={imageProperties}
         handleRotationChange={handleRotationChange}
@@ -221,6 +225,13 @@ const DocumentViewer = () => {
         goToNextPage={goToNextPage}
         goToFirstPage={goToFirstPage}
         goToLastPage={goToLastPage}
+        goToPreviousDocument={goToPreviousDocument}
+        goToNextDocument={goToNextDocument}
+        goToFirstDocument={goToFirstDocument}
+        goToLastDocument={goToLastDocument}
+        documentNavigationEnabled={documentNavigationEnabled}
+        primaryDocumentNavigation={primaryDocumentNavigation}
+        compareDocumentNavigation={compareDocumentNavigation}
       />
 
       <div

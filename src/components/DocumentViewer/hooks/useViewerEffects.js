@@ -10,9 +10,10 @@
  *  - Global keyboard navigation/zoom/hotkeys with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
- * The keyboard layer now understands compare-targeted navigation with Shift. When compare mode is
- * available, Shift + page-navigation keys steer the right pane and can implicitly enable compare.
- * That keeps keyboard behavior aligned with the existing Shift+thumbnail-click interaction.
+ * The keyboard layer now understands compare-targeted navigation with Shift and document-level
+ * navigation with Ctrl. When compare mode is available, Shift + navigation keys steer the right
+ * pane. When multiple visible documents exist, Ctrl + navigation keys step whole documents instead
+ * of pages.
  *
  * @module useViewerEffects
  */
@@ -45,7 +46,12 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} goToNextPage
  * @property {Function} goToFirstPage
  * @property {Function} goToLastPage
- * @property {Function} closeCompare
+ * @property {Function} goToPreviousDocument
+ * @property {Function} goToNextDocument
+ * @property {Function} goToFirstDocument
+ * @property {Function} goToLastDocument
+ * @property {boolean} documentNavigationEnabled
+ * @property {boolean} compareNavigationEnabled
  * @property {Function} zoomIn
  * @property {Function} zoomOut
  * @property {Function} actualSize
@@ -121,7 +127,12 @@ export function useViewerEffects(args) {
     goToNextPage,
     goToFirstPage,
     goToLastPage,
-    closeCompare,
+    goToPreviousDocument,
+    goToNextDocument,
+    goToFirstDocument,
+    goToLastDocument,
+    documentNavigationEnabled,
+    compareNavigationEnabled,
     zoomIn,
     zoomOut,
     actualSize,
@@ -136,11 +147,17 @@ export function useViewerEffects(args) {
 
   const activeKeyboardRepeatKeyRef = useRef(null);
   const keyboardRepeatTargetRef = useRef('primary');
+  const keyboardRepeatScopeRef = useRef('page');
   const goToPreviousPageRef = useRef(goToPreviousPage);
   const goToNextPageRef = useRef(goToNextPage);
   const goToFirstPageRef = useRef(goToFirstPage);
   const goToLastPageRef = useRef(goToLastPage);
-  const closeCompareRef = useRef(closeCompare);
+  const goToPreviousDocumentRef = useRef(goToPreviousDocument);
+  const goToNextDocumentRef = useRef(goToNextDocument);
+  const goToFirstDocumentRef = useRef(goToFirstDocument);
+  const goToLastDocumentRef = useRef(goToLastDocument);
+  const documentNavigationEnabledRef = useRef(documentNavigationEnabled);
+  const compareNavigationEnabledRef = useRef(compareNavigationEnabled);
   const zoomInRef = useRef(zoomIn);
   const zoomOutRef = useRef(zoomOut);
   const actualSizeRef = useRef(actualSize);
@@ -150,13 +167,17 @@ export function useViewerEffects(args) {
   const setIsExpandedGuardedRef = useRef(setIsExpandedGuarded);
   const onOpenPrintDialogRef = useRef(onOpenPrintDialog);
   const onToggleThemeRef = useRef(onToggleTheme);
-  const isComparingRef = useRef(isComparing);
 
   goToPreviousPageRef.current = goToPreviousPage;
   goToNextPageRef.current = goToNextPage;
   goToFirstPageRef.current = goToFirstPage;
   goToLastPageRef.current = goToLastPage;
-  closeCompareRef.current = closeCompare;
+  goToPreviousDocumentRef.current = goToPreviousDocument;
+  goToNextDocumentRef.current = goToNextDocument;
+  goToFirstDocumentRef.current = goToFirstDocument;
+  goToLastDocumentRef.current = goToLastDocument;
+  documentNavigationEnabledRef.current = documentNavigationEnabled;
+  compareNavigationEnabledRef.current = compareNavigationEnabled;
   zoomInRef.current = zoomIn;
   zoomOutRef.current = zoomOut;
   actualSizeRef.current = actualSize;
@@ -166,15 +187,22 @@ export function useViewerEffects(args) {
   setIsExpandedGuardedRef.current = setIsExpandedGuarded;
   onOpenPrintDialogRef.current = onOpenPrintDialog;
   onToggleThemeRef.current = onToggleTheme;
-  isComparingRef.current = isComparing;
 
   const handleKeyboardPreviousRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    if (keyboardRepeatScopeRef.current === 'document') {
+      goToPreviousDocumentRef.current?.(target);
+      return;
+    }
     goToPreviousPageRef.current?.(target);
   }, []);
 
   const handleKeyboardNextRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
+    if (keyboardRepeatScopeRef.current === 'document') {
+      goToNextDocumentRef.current?.(target);
+      return;
+    }
     goToNextPageRef.current?.(target);
   }, []);
 
@@ -190,6 +218,7 @@ export function useViewerEffects(args) {
 
   const stopKeyboardRepeat = useCallback(() => {
     activeKeyboardRepeatKeyRef.current = null;
+    keyboardRepeatScopeRef.current = 'page';
     stopKeyboardPreviousRepeatTimer();
     stopKeyboardNextRepeatTimer();
   }, [stopKeyboardNextRepeatTimer, stopKeyboardPreviousRepeatTimer]);
@@ -305,7 +334,19 @@ export function useViewerEffects(args) {
      * @param {KeyboardEvent} e
      * @returns {'primary'|'compare'}
      */
-    const getTarget = (e) => (e.shiftKey ? 'compare' : 'primary');
+    const getTarget = (e) => (
+      e.shiftKey && compareNavigationEnabledRef.current ? 'compare' : 'primary'
+    );
+
+    /**
+     * @param {KeyboardEvent} e
+     * @returns {'page'|'document'}
+     */
+    const getScope = (e) => (
+      e.ctrlKey && !e.altKey && !e.metaKey && documentNavigationEnabledRef.current
+        ? 'document'
+        : 'page'
+    );
 
     /**
      * @param {KeyboardEvent} e
@@ -323,8 +364,9 @@ export function useViewerEffects(args) {
     function onKeyDown(e) {
       if (shouldIgnoreViewerShortcut(e)) return;
 
-      const hasModifierKey = e.ctrlKey || e.metaKey; // don’t collide with browser zoom reset
+      const hasModifierKey = e.ctrlKey || e.metaKey;
       const target = getTarget(e);
+      const scope = getScope(e);
 
       if (isNextRepeatKey(e)) {
         e.preventDefault();
@@ -334,6 +376,7 @@ export function useViewerEffects(args) {
         if (activeKeyboardRepeatKeyRef.current === e.key) return;
         stopKeyboardRepeat();
         keyboardRepeatTargetRef.current = target;
+        keyboardRepeatScopeRef.current = scope;
         activeKeyboardRepeatKeyRef.current = e.key;
         startKeyboardNextRepeatTimer('next');
         return;
@@ -344,6 +387,7 @@ export function useViewerEffects(args) {
         if (activeKeyboardRepeatKeyRef.current === e.key) return;
         stopKeyboardRepeat();
         keyboardRepeatTargetRef.current = target;
+        keyboardRepeatScopeRef.current = scope;
         activeKeyboardRepeatKeyRef.current = e.key;
         startKeyboardPreviousRepeatTimer('prev');
         return;
@@ -353,19 +397,17 @@ export function useViewerEffects(args) {
         case 'Home':
           e.preventDefault();
           stopKeyboardRepeat();
-          goToFirstPageRef.current?.(target);
+          if (scope === 'document') goToFirstDocumentRef.current?.(target);
+          else goToFirstPageRef.current?.(target);
           break;
         case 'End':
           e.preventDefault();
           stopKeyboardRepeat();
-          goToLastPageRef.current?.(target);
+          if (scope === 'document') goToLastDocumentRef.current?.(target);
+          else goToLastPageRef.current?.(target);
           break;
         case 'Escape':
           stopKeyboardRepeat();
-          if (e.shiftKey && isComparingRef.current) {
-            e.preventDefault();
-            closeCompareRef.current?.();
-          }
           break;
 
         case '+':
