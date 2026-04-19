@@ -30,6 +30,7 @@ import {
   shouldUseFullImagesForThumbnails,
 } from '../utils/documentLoadingConfig.js';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
+import useNavigationModifierState from '../hooks/useNavigationModifierState.js';
 
 /**
  * @typedef {Object} ThumbnailRowProps
@@ -37,6 +38,7 @@ import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
  * @property {number} index
  * @property {number} rowHeight
  * @property {number} imageStageHeight
+ * @property {boolean} isFocusedSelected
  * @property {boolean} isPrimarySelected
  * @property {boolean} isCompareSelected
  * @property {boolean} isCompareMode
@@ -342,6 +344,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   index,
   rowHeight,
   imageStageHeight,
+  isFocusedSelected,
   isPrimarySelected,
   isCompareSelected,
   isCompareMode,
@@ -387,6 +390,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
 
   const wrapperClassName = [
     'thumbnail-wrapper',
+    isFocusedSelected ? 'selected-focus' : '',
     isPrimarySelected ? 'selected-primary' : '',
     isCompareSelected ? 'selected-compare' : '',
     isDualSelected ? 'selected-dual' : '',
@@ -437,9 +441,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         onKeyDown={(event) => onKeyActivate(event, originalPageNumber)}
         onContextMenu={(event) => onOpenContextMenu(event, originalPageNumber, page)}
         role="option"
-        tabIndex={isPrimarySelected ? 0 : -1}
+        tabIndex={isFocusedSelected ? 0 : -1}
         aria-label={rowTitle}
-        aria-selected={isPrimarySelected}
+        aria-selected={isFocusedSelected}
       >
         <div
           className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
@@ -533,6 +537,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   onHideDocumentFromSelection,
 }) {
   const { t } = useTranslation('common');
+  const navigationModifierState = useNavigationModifierState();
+  const isShiftPressed = !!navigationModifierState.shift;
   const {
     ensurePageAsset,
     touchPageAsset,
@@ -557,6 +563,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number })} */ (null));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
+  const focusPageNumber = isComparing && isShiftPressed && Number.isFinite(comparePageNumber)
+    ? Number(comparePageNumber)
+    : Number(pageNumber);
   const documentGroupingActive = useMemo(
     () => Array.isArray(allPages) && allPages.some((page) => (Number(page?.totalDocuments) || 0) > 1 && (Number(page?.documentNumber) || 0) > 0),
     [allPages]
@@ -583,8 +592,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const fullyRenderOffscreenRows = warmAllThumbnails;
   const selectedIndexForAutoScroll = useMemo(() => {
     if (totalCount <= 0) return -1;
-    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === pageNumber);
-  }, [allPages, pageNumber, totalCount]);
+    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === focusPageNumber);
+  }, [allPages, focusPageNumber, totalCount]);
   const activeDescendantId = selectedIndexForAutoScroll >= 0 ? `thumbnail-${selectedIndexForAutoScroll + 1}` : undefined;
 
   const visibleRange = useMemo(() => {
@@ -1074,6 +1083,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         index={index}
         rowHeight={layout.rowHeight}
         imageStageHeight={layout.imageStageHeight}
+        isFocusedSelected={originalPageNumber === focusPageNumber}
         isPrimarySelected={originalPageNumber === pageNumber}
         isCompareSelected={!!isComparing && originalPageNumber === comparePageNumber}
         isCompareMode={!!isComparing}

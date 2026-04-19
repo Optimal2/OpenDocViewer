@@ -11,16 +11,16 @@
   box-shadow: var(--box-shadow);
   border-radius: 8px;
   box-sizing: border-box;
-  padding: 4px 24px 4px 10px;
+  padding: 4px 28px 4px 10px;
   flex-shrink: 0;
 }
 .toolbar > * { margin: 0 0.06rem; }
 
 .toolbar button,
 .toolbar .toggle-collapse {
-  min-height: 34px;
-  min-width: 34px;
-  padding: 0.18rem 0.36rem;
+  min-height: 36px;
+  min-width: 36px;
+  padding: 0.24rem 0.42rem;
   font-size: 0.98rem;
   cursor: pointer;
   background-color: var(--primary-color);
@@ -175,7 +175,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-right: 14px;
+  margin-right: 24px;
+  padding-right: 2px;
   flex-shrink: 0;
 }
 

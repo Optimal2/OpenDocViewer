@@ -217,22 +217,14 @@ export function usePrintRangeController({
     const isInside = (node) => dialogRef.current && (node === dialogRef.current || dialogRef.current.contains(node));
     const isBackdrop = (node) => backdropRef.current && node === backdropRef.current;
     const blockPointer = (event) => { const target = event.target; if (isInside(target) || isBackdrop(target)) return; event.stopPropagation(); };
-    const blockKeys = (event) => {
-      if (event.key === 'Escape' || event.key === 'Tab') return;
-      const target = event.target;
-      if (isInside(target) || isInside(document.activeElement)) return;
-      event.stopPropagation();
-    };
 
     document.addEventListener('pointerdown', blockPointer, true);
     document.addEventListener('mousedown', blockPointer, true);
     document.addEventListener('click', blockPointer, true);
-    window.addEventListener('keydown', blockKeys, true);
     return () => {
       document.removeEventListener('pointerdown', blockPointer, true);
       document.removeEventListener('mousedown', blockPointer, true);
       document.removeEventListener('click', blockPointer, true);
-      window.removeEventListener('keydown', blockKeys, true);
     };
   }, [isOpen]);
 

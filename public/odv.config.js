@@ -123,6 +123,13 @@
       }
     },
 
+    // ---- PRINT UI ------------------------------------------------------------
+    print: {
+      // Show an informational "preparing print" overlay when the requested print job is large.
+      // Use 0 to disable the notice entirely.
+      preparationNoticeThresholdPages: 200
+    },
+
     // ---- USER LOG -------------------------------------------------------------
     userLog: {
       enabled:  false,

@@ -39,7 +39,7 @@ Good runtime-config candidates:
 
 - logging endpoints and enable/disable flags
 - i18n defaults and translation versioning / build-based cache busting
-- print-header settings
+- print-dialog thresholds and print-header settings
 - diagnostics toggles
 - keyboard shortcut policy for browser-print interception
 - deployment base path / base href
@@ -73,6 +73,26 @@ Important limitation:
 - This applies to keyboard interception only.
 - Browser menus, toolbar print buttons, and native context-menu print entries cannot be reliably overridden from normal page JavaScript.
 
+## Print preparation notice
+
+OpenDocViewer can optionally show a temporary informational overlay after the user clicks
+**Prepare printing** for a large job. This is useful when the browser takes noticeable time to build
+its preview/print dialog for several hundred pages.
+
+Configuration surface:
+
+```js
+print: {
+  preparationNoticeThresholdPages: 200 // 0 disables the notice
+}
+```
+
+Behavior:
+
+- if the resolved print job contains at least this many pages, the notice is shown
+- if the threshold is `0`, the notice is disabled entirely
+- this does not alter the actual print payload; it only reduces accidental double-submission by users
+
 ## Operational advice
 
 - Do not long-cache `odv.config.js`.
@@ -80,6 +100,9 @@ Important limitation:
 - When `i18n.default` is set to a concrete language such as `sv`, OpenDocViewer now uses that site-level default before falling back to stored browser/OS language preferences.
 - Both `systemLog.enabled` and `userLog.enabled` are disabled by default in the shipped runtime config. Enable them explicitly in `odv.site.config.js` when the deployment is ready.
 - The performance overlay heap section depends on Chromium's `performance.memory` API. In Firefox and other browsers that do not expose those values, the overlay will show `N/A` for heap metrics.
+- `public/odv.site.config.sample.js` is intended to mirror the full safe site-override surface. The
+  only intentionally-commented entries are the environment-derived `basePath` and `baseHref`
+  examples, because hard-overriding those two values unnecessarily can break deployment routing.
 - If using a site override file, keep it deployment-local and avoid committing machine-specific values back into the main repo.
 - Prefer stable, same-origin logging endpoints when possible.
 - Re-check config precedence after any change to `bootConfig.js` or hosting rules.
