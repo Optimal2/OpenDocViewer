@@ -342,6 +342,7 @@ export function useDocumentViewer() {
     [normalizedDraftSelectionMask]
   );
   const selectionPanelEnabled = !!pageLoadState?.allPagesReady && totalSessionPages > 0;
+  const printEnabled = !!pageLoadState?.allPagesReady && totalSessionPages > 0;
   const thumbnailWidthMin = THUMBNAIL_WIDTH_MIN;
   const thumbnailWidthMax = THUMBNAIL_WIDTH_MAX;
   const thumbnailWidthDefault = THUMBNAIL_WIDTH_DEFAULT;
@@ -936,12 +937,18 @@ export function useDocumentViewer() {
 
   // --- Print dialog --------------------------------------------------------------
   const openPrintDialog = useCallback(() => {
+    if (!printEnabled) return;
     setPrintDialogOpen(true);
-  }, []);
+  }, [printEnabled]);
 
   const closePrintDialog = useCallback(() => {
     setPrintDialogOpen(false);
   }, []);
+
+  useEffect(() => {
+    if (printEnabled) return;
+    setPrintDialogOpen(false);
+  }, [printEnabled]);
 
   // --- Zoom helpers --------------------------------------------------------------
   const zoomIn = useCallback(() => {
@@ -1204,6 +1211,7 @@ export function useDocumentViewer() {
     rotateRight: rotateRightPage,
     onOpenPrintDialog: openPrintDialog,
     keyboardPrintShortcutBehavior,
+    printEnabled,
   });
 
   // --- Public API ---------------------------------------------------------------
@@ -1286,6 +1294,7 @@ export function useDocumentViewer() {
     primaryDocumentNavigation,
     compareDocumentNavigation,
     selectionPanelEnabled,
+    printEnabled,
     selectionDocuments,
     selectionActive,
     draftSelectionMask: normalizedDraftSelectionMask,

@@ -69,7 +69,8 @@
     "editingTargetCompare": "Redigerar höger jämförelsesida (Shift)",
     "resetAdjustments": "Återställ justeringar",
     "resetBrightness": "Återställ ljusstyrka",
-    "resetContrast": "Återställ kontrast"
+    "resetContrast": "Återställ kontrast",
+    "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa."
   },
   "printDialog": {
     "title": "Skriv ut",

@@ -1022,7 +1022,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleActivate = useCallback((nextPageNumber, event) => {
     closeContextMenu();
     try {
-      if (event?.shiftKey && typeof selectForCompare === 'function') {
+      const wantsCompareTarget = !!(event?.shiftKey || isShiftPressed) && typeof selectForCompare === 'function';
+      if (wantsCompareTarget) {
         event.preventDefault?.();
         event.stopPropagation?.();
         selectForCompare(nextPageNumber);
@@ -1036,7 +1037,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         error: String(error?.message || error),
       });
     }
-  }, [closeContextMenu, selectForCompare, setPageNumber]);
+  }, [closeContextMenu, isShiftPressed, selectForCompare, setPageNumber]);
 
   /**
    * @param {*} event

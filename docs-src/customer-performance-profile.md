@@ -83,7 +83,9 @@ This avoids the earlier class of bugs where page X was highlighted but page Y wa
 
 ## Print dialog during loading
 
-While the total page count is still changing, the print dialog now stays in a very small active-page-only mode. This avoids the earlier confusion where selecting "all pages" or switching modes could appear to reset itself mid-load simply because more pages had just been discovered.
+Printing now stays unavailable until all pages are fully loaded. This avoids the earlier confusion where the print dialog appeared to reset itself mid-load simply because more pages had just been discovered, and it prevents the browser print preview from being triggered against a still-changing page set.
+
+For the same reason, the selection tab also stays unavailable until every page has reached a terminal loaded/failed state.
 
 ## Runtime status hint
 

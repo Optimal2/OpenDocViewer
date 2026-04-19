@@ -116,6 +116,7 @@ const DocumentViewer = () => {
     primaryDocumentNavigation,
     compareDocumentNavigation,
     selectionPanelEnabled,
+    printEnabled,
     selectionDocuments,
     selectionActive,
     draftSelectionMask,
@@ -243,6 +244,7 @@ const DocumentViewer = () => {
         isPrintDialogOpen={isPrintDialogOpen}
         openPrintDialog={openPrintDialog}
         closePrintDialog={closePrintDialog}
+        printEnabled={printEnabled}
         hasActiveSelection={hasPrintableSelection}
         visibleOriginalPageNumbers={visibleOriginalPageNumbers}
         selectionIncludedCount={visibleOriginalPageNumbers.length}

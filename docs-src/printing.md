@@ -49,6 +49,10 @@ When compare mode is active and the user prints the active page, the dialog can 
 When the user chooses both compare panes, the summary text now names both page numbers explicitly so
 the dialog reflects the actual pair that will be prepared.
 
+Printing is intentionally unavailable until every page has reached a terminal loaded/failed state.
+That keeps the dialog stable while totals are still changing and prevents accidental duplicate
+submissions while the browser is still discovering new pages.
+
 ### Single-page print
 
 1. resolve the active canvas or image
