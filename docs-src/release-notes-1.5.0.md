@@ -64,10 +64,13 @@ Compare mode now has consistent modifier-based behavior across:
 - keyboard navigation
 - page rotation
 - brightness / contrast targeting
-- thumbnail following
+- thumbnail following when an actual page or document change happens
 
 `Shift` targets the right compare pane. If compare mode is not already open, modifier-aware
 toolbar/keyboard navigation can now open it directly on the requested page/document step.
+Holding `Shift` by itself no longer yanks the thumbnail strip away from the page the user is
+currently browsing; the strip follows the right pane only after an explicit compare navigation or
+compare-page selection.
 
 `Ctrl` switches page navigation into document navigation when more than one visible document is
 available.

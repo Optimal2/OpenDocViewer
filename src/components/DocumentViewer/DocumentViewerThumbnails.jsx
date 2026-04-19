@@ -185,42 +185,46 @@ const DocumentViewerThumbnails = ({
             >
               {t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
             </button>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={paneMode === 'selection'}
-              aria-disabled={!selectionPanelEnabled}
-              className={[
-                'thumbnail-pane-mode-button',
-                paneMode === 'selection' ? 'is-active' : '',
-                selectionActive ? 'has-selection' : '',
-              ].filter(Boolean).join(' ')}
-              onClick={() => { if (selectionPanelEnabled) setPaneMode('selection'); }}
-              title={selectionPanelEnabled
-                ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
-                : t('thumbnails.selection.loadingStatusShort', {
-                    ready: Number(pageLoadState?.readyPages) || 0,
-                    total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
-                    defaultValue: 'Selection will be available when all pages are fully loaded.',
-                  })}
-              disabled={!selectionPanelEnabled}
-            >
-              {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
-            </button>
+            <div className={`thumbnail-pane-mode-button-wrap ${canClearSelection ? 'has-inline-tool' : ''}`}>
+              <button
+                type="button"
+                role="tab"
+                aria-selected={paneMode === 'selection'}
+                aria-disabled={!selectionPanelEnabled}
+                className={[
+                  'thumbnail-pane-mode-button',
+                  paneMode === 'selection' ? 'is-active' : '',
+                  selectionActive ? 'has-selection' : '',
+                  canClearSelection ? 'has-inline-tool' : '',
+                ].filter(Boolean).join(' ')}
+                onClick={() => { if (selectionPanelEnabled) setPaneMode('selection'); }}
+                title={selectionPanelEnabled
+                  ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
+                  : t('thumbnails.selection.loadingStatusShort', {
+                      ready: Number(pageLoadState?.readyPages) || 0,
+                      total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
+                      defaultValue: 'Selection will be available when all pages are fully loaded.',
+                    })}
+                disabled={!selectionPanelEnabled}
+              >
+                <span className="thumbnail-pane-mode-button-label">
+                  {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
+                </span>
+              </button>
+              {canClearSelection ? (
+                <button
+                  type="button"
+                  className="thumbnail-pane-mode-inline-tool is-danger"
+                  onMouseDown={(event) => event.preventDefault()}
+                  onClick={(event) => { event.preventDefault(); event.stopPropagation(); clearSelectionFilter(); }}
+                  aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
+                  title={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
+                >
+                  <span className="material-icons" aria-hidden="true">close</span>
+                </button>
+              ) : null}
+            </div>
           </div>
-
-          {canClearSelection ? (
-            <button
-              type="button"
-              className="thumbnail-pane-toolbar-button is-compact is-danger"
-              onMouseDown={(event) => event.preventDefault()}
-              onClick={clearSelectionFilter}
-              aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
-              title={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
-            >
-              <span className="material-icons" aria-hidden="true">filter_alt_off</span>
-            </button>
-          ) : null}
         </div>
       </div>
 

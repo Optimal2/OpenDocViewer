@@ -110,6 +110,66 @@ function shouldIgnoreViewerShortcut(event) {
 }
 
 /**
+ * @param {*} node
+ * @returns {boolean}
+ */
+function isVerticallyScrollable(node) {
+  if (!(node instanceof HTMLElement)) return false;
+  const style = window.getComputedStyle(node);
+  const overflowY = String(style.overflowY || '').toLowerCase();
+  if (!/(auto|scroll|overlay)/.test(overflowY)) return false;
+  return node.scrollHeight > node.clientHeight + 1;
+}
+
+/**
+ * @param {*} start
+ * @param {(HTMLElement|null)=} stopAt
+ * @returns {(HTMLElement|null)}
+ */
+function findScrollableAncestor(start, stopAt = null) {
+  let node = start instanceof HTMLElement ? start : null;
+  const stopNode = stopAt instanceof HTMLElement ? stopAt : null;
+  while (node) {
+    if (isVerticallyScrollable(node)) return node;
+    if (stopNode && node === stopNode) break;
+    node = node.parentElement;
+  }
+  return null;
+}
+
+/**
+ * @param {(HTMLElement|null)} viewerRoot
+ * @returns {(HTMLElement|null)}
+ */
+function findHoveredScrollableContainer(viewerRoot) {
+  if (!(viewerRoot instanceof HTMLElement)) return null;
+  const candidates = viewerRoot.querySelectorAll('.thumbnails-container, .thumbnails-list-wrapper, .thumbnail-selection-panel, .document-render-viewport, .viewer-section');
+  for (const candidate of candidates) {
+    if (!(candidate instanceof HTMLElement)) continue;
+    if (!candidate.matches(':hover')) continue;
+    if (isVerticallyScrollable(candidate)) return candidate;
+  }
+  return null;
+}
+
+/**
+ * Resolve the scroll container that should receive Page Up / Page Down style movement.
+ *
+ * @param {(HTMLElement|null)} viewerRoot
+ * @returns {(HTMLElement|null)}
+ */
+function resolvePageScrollContainer(viewerRoot) {
+  const activeElement = document.activeElement;
+  const activeScrollable = findScrollableAncestor(activeElement, viewerRoot);
+  if (activeScrollable) return activeScrollable;
+  const hoveredScrollable = findHoveredScrollableContainer(viewerRoot);
+  if (hoveredScrollable) return hoveredScrollable;
+  if (!(viewerRoot instanceof HTMLElement)) return null;
+  const defaultViewport = viewerRoot.querySelector('.document-render-viewport');
+  return defaultViewport instanceof HTMLElement && isVerticallyScrollable(defaultViewport) ? defaultViewport : null;
+}
+
+/**
  * @param {UseViewerEffectsArgs} args
  * @returns {void}
  */
@@ -412,6 +472,20 @@ export function useViewerEffects(args) {
           if (scope === 'document') goToLastDocumentRef.current?.(target);
           else goToLastPageRef.current?.(target);
           break;
+        case 'PageUp':
+        case 'PageDown': {
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            const scrollContainer = resolvePageScrollContainer(viewerContainerRef.current);
+            if (scrollContainer) {
+              e.preventDefault();
+              stopKeyboardRepeat();
+              const delta = Math.max(64, Math.round((Number(scrollContainer.clientHeight) || 0) * 0.9));
+              const direction = e.key === 'PageDown' ? 1 : -1;
+              scrollContainer.scrollBy({ top: direction * delta, behavior: 'auto' });
+            }
+          }
+          break;
+        }
         case 'Escape':
           stopKeyboardRepeat();
           break;
@@ -488,6 +562,7 @@ export function useViewerEffects(args) {
     startKeyboardNextRepeatTimer,
     startKeyboardPreviousRepeatTimer,
     stopKeyboardRepeat,
+    viewerContainerRef,
   ]);
 
   // Optional: auto-fit after first mount if renderer supports it.

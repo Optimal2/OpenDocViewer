@@ -564,9 +564,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number })} */ (null));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
-  const focusPageNumber = isComparing && isShiftPressed && Number.isFinite(comparePageNumber)
-    ? Number(comparePageNumber)
-    : Number(pageNumber);
   const documentGroupingActive = useMemo(
     () => Array.isArray(allPages) && allPages.some((page) => (Number(page?.totalDocuments) || 0) > 1 && (Number(page?.documentNumber) || 0) > 0),
     [allPages]
@@ -591,11 +588,54 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     [renderConfig, totalCount]
   );
   const fullyRenderOffscreenRows = warmAllThumbnails;
+  const primarySelectedIndex = useMemo(() => {
+    if (totalCount <= 0) return -1;
+    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(pageNumber));
+  }, [allPages, pageNumber, totalCount]);
+  const compareSelectedIndex = useMemo(() => {
+    if (!isComparing || !Number.isFinite(comparePageNumber) || totalCount <= 0) return -1;
+    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber));
+  }, [allPages, comparePageNumber, isComparing, totalCount]);
+  // Follow actual page/document changes only. Holding Shift by itself must not yank the strip to
+  // the compare thumbnail; the right pane should only take over after an explicit compare page
+  // change coming from keyboard navigation, toolbar navigation, or compare selection.
+  const [autoScrollPageNumber, setAutoScrollPageNumber] = useState(Math.max(1, Number(pageNumber) || 1));
+  const previousPrimaryPageNumberRef = useRef(Number(pageNumber) || 0);
+  const previousComparePageNumberRef = useRef(Number.isFinite(comparePageNumber) ? Number(comparePageNumber) : 0);
   const selectedIndexForAutoScroll = useMemo(() => {
     if (totalCount <= 0) return -1;
-    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === focusPageNumber);
-  }, [allPages, focusPageNumber, totalCount]);
+    const targetPageNumber = Math.max(1, Number(autoScrollPageNumber) || Number(pageNumber) || 1);
+    return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === targetPageNumber);
+  }, [allPages, autoScrollPageNumber, pageNumber, totalCount]);
   const activeDescendantId = selectedIndexForAutoScroll >= 0 ? `thumbnail-${selectedIndexForAutoScroll + 1}` : undefined;
+  const focusedOriginalPageNumber = Math.max(1, Number(autoScrollPageNumber) || Number(pageNumber) || 1);
+
+  useEffect(() => {
+    if (totalCount <= 0) {
+      previousPrimaryPageNumberRef.current = Number(pageNumber) || 0;
+      setAutoScrollPageNumber(Math.max(1, Number(pageNumber) || 1));
+      return;
+    }
+    const nextPrimaryPageNumber = Number(pageNumber) || 0;
+    const previousPrimaryPageNumber = Number(previousPrimaryPageNumberRef.current) || 0;
+    previousPrimaryPageNumberRef.current = nextPrimaryPageNumber;
+    if (nextPrimaryPageNumber !== previousPrimaryPageNumber && primarySelectedIndex >= 0) {
+      setAutoScrollPageNumber(nextPrimaryPageNumber);
+    }
+  }, [pageNumber, primarySelectedIndex, totalCount]);
+
+  useEffect(() => {
+    if (totalCount <= 0) {
+      previousComparePageNumberRef.current = Number.isFinite(comparePageNumber) ? Number(comparePageNumber) : 0;
+      return;
+    }
+    const nextComparePageNumber = Number.isFinite(comparePageNumber) ? Number(comparePageNumber) : 0;
+    const previousComparePageNumber = Number(previousComparePageNumberRef.current) || 0;
+    previousComparePageNumberRef.current = nextComparePageNumber;
+    if (isComparing && nextComparePageNumber > 0 && nextComparePageNumber !== previousComparePageNumber && compareSelectedIndex >= 0) {
+      setAutoScrollPageNumber(nextComparePageNumber);
+    }
+  }, [comparePageNumber, compareSelectedIndex, isComparing, totalCount]);
 
   const visibleRange = useMemo(() => {
     if (totalCount <= 0) return { start: 0, end: -1 };
@@ -626,9 +666,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 
     const indexes = new Set();
     const currentIndex = selectedIndexForAutoScroll;
-    const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
-      : -1;
+    const compareIndex = compareSelectedIndex;
 
     if (currentIndex >= 0) indexes.add(currentIndex);
     if (compareIndex >= 0) indexes.add(compareIndex);
@@ -642,8 +680,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     activeConfig,
     allPages,
     allowWidePaneFullPreview,
-    comparePageNumber,
-    isComparing,
+    compareSelectedIndex,
     selectedIndexForAutoScroll,
     totalCount,
     visibleRange.end,
@@ -759,9 +796,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     };
 
     const currentIndex = selectedIndexForAutoScroll;
-    const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
-      : -1;
+    const compareIndex = compareSelectedIndex;
     const visibleHasPages = visibleRange.end >= visibleRange.start;
     const focusIndex = visibleHasPages && visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
     const currentIsVisible = currentIndex >= 0 && isIndexInRange(currentIndex, visibleRange);
@@ -818,6 +853,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, [
     allPages,
     comparePageNumber,
+    compareSelectedIndex,
     ensurePageAsset,
     isComparing,
     renderConfig.lookAheadPageCount,
@@ -917,9 +953,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     let cancelled = false;
     let timeoutId = 0;
     const currentIndex = selectedIndexForAutoScroll;
-    const compareIndex = isComparing && Number.isFinite(comparePageNumber)
-      ? allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber))
-      : -1;
+    const compareIndex = compareSelectedIndex;
     const focusIndex = visibleCenterIndex >= 0 ? visibleCenterIndex : currentIndex;
 
     const excluded = new Set();
@@ -955,6 +989,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, [
     allPages,
     comparePageNumber,
+    compareSelectedIndex,
     ensurePageAsset,
     isComparing,
     renderConfig.maxConcurrentAssetRenders,
@@ -991,28 +1026,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       });
     });
   }, [closeContextMenu, layout.rowHeight, viewportHeight]);
-
-  /**
-   * Keep Shift + wheel vertical inside the thumbnail pane so users can browse to a far-away page
-   * while the right compare target is active.
-   *
-   * @param {*} event
-   * @returns {void}
-   */
-  const handleWheel = useCallback((event) => {
-    if (!event?.shiftKey || event?.ctrlKey || event?.metaKey || event?.altKey) return;
-    const node = containerRef.current;
-    if (!node) return;
-    const delta = Number(event.deltaY || 0) || Number(event.deltaX || 0);
-    if (!Number.isFinite(delta) || delta === 0) return;
-    event.preventDefault?.();
-    event.stopPropagation?.();
-    closeContextMenu();
-    const nextScrollTop = Math.max(0, Number(node.scrollTop || 0) + delta);
-    node.scrollTop = nextScrollTop;
-    lastKnownScrollTopRef.current = nextScrollTop;
-    setScrollTop((current) => (Math.abs(current - nextScrollTop) >= 1 ? nextScrollTop : current));
-  }, [closeContextMenu]);
 
   /**
    * @param {number} nextPageNumber
@@ -1116,7 +1129,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         index={index}
         rowHeight={layout.rowHeight}
         imageStageHeight={layout.imageStageHeight}
-        isFocusedSelected={originalPageNumber === focusPageNumber}
+        isFocusedSelected={originalPageNumber === focusedOriginalPageNumber}
         isPrimarySelected={originalPageNumber === pageNumber}
         isCompareSelected={!!isComparing && originalPageNumber === comparePageNumber}
         isCompareMode={!!isComparing}
@@ -1154,7 +1167,6 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       aria-label={t('thumbnails.aria.container')}
       aria-activedescendant={activeDescendantId}
       onScroll={handleScroll}
-      onWheel={handleWheel}
       style={{
         width: `${Math.max(0, Number(width) || 0)}px`,
         minWidth: `${Math.max(0, Number(width) || 0)}px`,
