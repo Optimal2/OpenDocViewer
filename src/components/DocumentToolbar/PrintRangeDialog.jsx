@@ -30,6 +30,7 @@ export default function PrintRangeDialog({
   totalPages,
   isDocumentLoading = false,
   activePageNumber = 1,
+  comparePageNumber = null,
   isComparing = false,
   hasActiveSelection = false,
   selectionIncludedCount = 0,
@@ -69,9 +70,11 @@ export default function PrintRangeDialog({
 
     if (ctrl.printMode === 'active') {
       if (ctrl.isComparing && ctrl.activeScope === 'compare-both') {
+        const comparePage = Number.isFinite(comparePageNumber) ? Math.max(1, Number(comparePageNumber)) : activePageNumber;
         return t('printDialog.summaryCompareBoth', {
-          page: activePageNumber,
-          defaultValue: `Prepare both compare pages currently shown for page ${activePageNumber}.`,
+          primary: activePageNumber,
+          compare: comparePage,
+          defaultValue: `Prepare both compare pages (${activePageNumber} and ${comparePage}).`,
         });
       }
       return t('printDialog.summaryActive', {
@@ -99,10 +102,11 @@ export default function PrintRangeDialog({
     }
 
     return t('printDialog.summaryCustom', {
-      defaultValue: 'Prepare the pages listed under Custom pages.',
+      defaultValue: 'Prepare the pages listed in the Pages field under Pages and scope.',
     });
   }, [
     activePageNumber,
+    comparePageNumber,
     ctrl.activeScope,
     ctrl.allScope,
     ctrl.canPrintSelectionScope,
@@ -115,6 +119,14 @@ export default function PrintRangeDialog({
     ctrl.toValue,
     t,
   ]);
+
+  const showPagesSection = useMemo(() => {
+    if (ctrl.restrictToActivePage) return false;
+    if (ctrl.printMode === 'active') return !!ctrl.isComparing;
+    if (ctrl.printMode === 'all') return !!ctrl.canPrintSelectionScope;
+    if (ctrl.printMode === 'range' || ctrl.printMode === 'custom') return true;
+    return false;
+  }, [ctrl.canPrintSelectionScope, ctrl.isComparing, ctrl.printMode, ctrl.restrictToActivePage]);
 
   if (!isOpen) return null;
 
@@ -179,31 +191,18 @@ export default function PrintRangeDialog({
               <div className="odv-prd-summary" role="status" aria-live="polite">
                 {summaryText}
               </div>
-
-              {ctrl.headerCfg?.enabled ? (
-                <div className="odv-prd-hint" role="note">
-                  {t('printDialog.headerNote')}
-                </div>
-              ) : null}
-
               {ctrl.restrictToActivePage ? (
                 <div className="odv-prd-hint" role="note">{ctrl.loadingHint}</div>
               ) : null}
             </div>
           </section>
 
+          {showPagesSection ? (
           <section className="odv-prd-card" aria-labelledby="odv-prd-pages-header">
             <h4 id="odv-prd-pages-header" className="odv-prd-sectionHeader">{t('printDialog.pagesHeader')}</h4>
 
             {ctrl.printMode === 'active' ? (
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.activeGroup', { defaultValue: 'Active page options' })}>
-                <div className="odv-prd-staticValue">
-                  {t('printDialog.activePageValue', {
-                    page: activePageNumber,
-                    defaultValue: `Current active page: ${activePageNumber}`,
-                  })}
-                </div>
-
                 {ctrl.isComparing && !ctrl.restrictToActivePage ? (
                   <div className="odv-prd-subField" role="group" aria-label={t('printDialog.activeScope.label')}>
                     <div className="odv-prd-radioList odv-prd-subRadioList">
@@ -324,6 +323,7 @@ export default function PrintRangeDialog({
               </div>
             ) : null}
           </section>
+          ) : null}
 
           {ctrl.showUserSection ? (
             <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
@@ -434,6 +434,7 @@ PrintRangeDialog.propTypes = {
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool,
   activePageNumber: PropTypes.number,
+  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   isComparing: PropTypes.bool,
   hasActiveSelection: PropTypes.bool,
   selectionIncludedCount: PropTypes.number,

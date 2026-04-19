@@ -27,7 +27,6 @@ import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintR
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpOverlayDialog from './HelpOverlayDialog.jsx';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
-import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 
 
 /**
@@ -104,6 +103,8 @@ import useNavigationModifierState from '../../hooks/useNavigationModifierState.j
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {(number|null)=} comparePageNumber
+ * @property {(number|null)=} comparePageNumberDisplay
+ * @property {{ shift:boolean, ctrl:boolean }=} navigationModifierState
  * @property {ImageProperties} primaryImageProperties
  * @property {ImageProperties} compareImageProperties
  * @property {function(number, ('primary'|'compare')=): void} handleRotationChange
@@ -185,6 +186,8 @@ const DocumentToolbar = ({
   handleCompare,
   isComparing,
   comparePageNumber = null,
+  comparePageNumberDisplay = null,
+  navigationModifierState = { shift: false, ctrl: false },
   primaryImageProperties,
   compareImageProperties,
   handleRotationChange,
@@ -205,12 +208,10 @@ const DocumentToolbar = ({
   compareDocumentNavigation = undefined,
 }) => {
   const { t } = useTranslation();
-  const navigationModifierState = useNavigationModifierState();
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
   const documentRepeatTargetRef = useRef('primary');
-  const modifierStateRef = useRef(navigationModifierState);
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -218,10 +219,6 @@ const DocumentToolbar = ({
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
   const compareNavigationEnabled = typeof setComparePageNumber === 'function' && isComparing && Number.isFinite(comparePageNumber);
-
-  useEffect(() => {
-    modifierStateRef.current = navigationModifierState;
-  }, [navigationModifierState]);
 
   useEffect(() => {
     if (!openAdjustmentMenu) return undefined;
@@ -347,7 +344,7 @@ const DocumentToolbar = ({
   } = usePageTimer(500, handleDocumentNextRepeatStep);
 
   const getEffectiveModifierState = useCallback((event) => {
-    const base = modifierStateRef.current || { shift: false, ctrl: false };
+    const base = navigationModifierState || { shift: false, ctrl: false };
     const shift = typeof event?.shiftKey === 'boolean'
       ? !!event.shiftKey
       : !!base.shift;
@@ -355,7 +352,7 @@ const DocumentToolbar = ({
       ? (!!event.ctrlKey && !event?.metaKey && !event?.altKey)
       : !!base.ctrl;
     return { shift, ctrl };
-  }, []);
+  }, [navigationModifierState]);
 
   const wantsCompareTarget = useCallback((event) => getEffectiveModifierState(event).shift, [getEffectiveModifierState]);
   const wantsDocumentScope = useCallback(
@@ -518,12 +515,18 @@ const DocumentToolbar = ({
     () => normalizeToolbarPageNumber(comparePageNumber, totalPages, pageNumber),
     [comparePageNumber, pageNumber, totalPages]
   );
+  const compareNavigationPageDisplay = useMemo(
+    () => (Number.isFinite(comparePageNumberDisplay)
+      ? Math.max(1, Number(comparePageNumberDisplay))
+      : compareNavigationPage),
+    [compareNavigationPage, comparePageNumberDisplay]
+  );
   const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
   const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
   const activeNavigationPageNumber = navigationTargetMode === 'compare'
     ? compareNavigationPage
     : normalizeToolbarPageNumber(pageNumber, totalPages, 1);
-  const editingTargetMode = resolveEditingTarget();
+  const editingTargetMode = navigationTargetMode;
   const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
   const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page (Shift)' })
@@ -669,7 +672,7 @@ const DocumentToolbar = ({
     if (!detail) return null;
     if (detail.mode === 'all') return detail.allScope === 'selection' ? 'selection' : 'all';
     if (detail.mode === 'active') return detail.activeScope === 'compare-both'
-      ? `${pageNumberDisplay},compare`
+      ? `${pageNumberDisplay},${compareNavigationPageDisplay ?? pageNumberDisplay}`
       : String(pageNumberDisplay);
     if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
       return `${detail.from}-${detail.to}`;
@@ -678,7 +681,7 @@ const DocumentToolbar = ({
       return detail.sequence.join(',');
     }
     return null;
-  }, [pageNumberDisplay]);
+  }, [compareNavigationPageDisplay, pageNumberDisplay]);
 
   /**
    * Estimate the number of pages the user is about to print.
@@ -928,14 +931,19 @@ const DocumentToolbar = ({
                   <span className="material-icons" aria-hidden="true">brightness_6</span>
                   <span>{t('toolbar.brightness')}</span>
                 </span>
-                <button
-                  type="button"
-                  className="toolbar-adjustment-reset-btn"
-                  onClick={handleBrightnessReset}
-                  title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-                >
-                  100%
-                </button>
+                <div className="toolbar-adjustment-menu-actions">
+                  <span className="toolbar-adjustment-current">{editingProperties.brightness}%</span>
+                  <button
+                    type="button"
+                    className="toolbar-adjustment-reset-btn"
+                    onClick={handleBrightnessReset}
+                    disabled={!isBrightnessAdjusted}
+                    aria-label={t('toolbar.resetBrightness', { defaultValue: 'Reset brightness' })}
+                    title={t('toolbar.resetBrightness', { defaultValue: 'Reset brightness' })}
+                  >
+                    <span className="material-icons" aria-hidden="true">restart_alt</span>
+                  </button>
+                </div>
               </div>
 
               <input
@@ -954,7 +962,6 @@ const DocumentToolbar = ({
 
               <div className="toolbar-adjustment-scale" aria-hidden="true">
                 <span>0</span>
-                <span>{editingProperties.brightness}%</span>
                 <span>200</span>
               </div>
             </div>
@@ -987,14 +994,19 @@ const DocumentToolbar = ({
                   <span className="material-icons" aria-hidden="true">tonality</span>
                   <span>{t('toolbar.contrast')}</span>
                 </span>
-                <button
-                  type="button"
-                  className="toolbar-adjustment-reset-btn"
-                  onClick={handleContrastReset}
-                  title={t('toolbar.resetAdjustments', { defaultValue: 'Reset adjustments' })}
-                >
-                  100%
-                </button>
+                <div className="toolbar-adjustment-menu-actions">
+                  <span className="toolbar-adjustment-current">{editingProperties.contrast}%</span>
+                  <button
+                    type="button"
+                    className="toolbar-adjustment-reset-btn"
+                    onClick={handleContrastReset}
+                    disabled={!isContrastAdjusted}
+                    aria-label={t('toolbar.resetContrast', { defaultValue: 'Reset contrast' })}
+                    title={t('toolbar.resetContrast', { defaultValue: 'Reset contrast' })}
+                  >
+                    <span className="material-icons" aria-hidden="true">restart_alt</span>
+                  </button>
+                </div>
               </div>
 
               <input
@@ -1013,7 +1025,6 @@ const DocumentToolbar = ({
 
               <div className="toolbar-adjustment-scale" aria-hidden="true">
                 <span>0</span>
-                <span>{editingProperties.contrast}%</span>
                 <span>200</span>
               </div>
             </div>
@@ -1055,6 +1066,7 @@ const DocumentToolbar = ({
         totalPages={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
         activePageNumber={pageNumberDisplay}
+        comparePageNumber={compareNavigationEnabled ? compareNavigationPageDisplay : null}
         isComparing={isComparing}
         hasActiveSelection={hasActiveSelection}
         selectionIncludedCount={selectionIncludedCount}
@@ -1121,6 +1133,11 @@ DocumentToolbar.propTypes = {
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  comparePageNumberDisplay: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  navigationModifierState: PropTypes.shape({
+    shift: PropTypes.bool.isRequired,
+    ctrl: PropTypes.bool.isRequired,
+  }),
   goToPreviousDocument: PropTypes.func,
   goToNextDocument: PropTypes.func,
   goToFirstDocument: PropTypes.func,

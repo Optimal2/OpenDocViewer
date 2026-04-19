@@ -28,6 +28,7 @@ import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
+import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 
 const DocumentViewer = () => {
   const {
@@ -39,6 +40,7 @@ const DocumentViewer = () => {
     pageLoadState,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
+  const navigationModifierState = useNavigationModifierState();
 
   const {
     pageNumber,
@@ -248,6 +250,7 @@ const DocumentViewer = () => {
         isComparing={isComparing}
         handleCompare={handleCompare}
         comparePageNumber={comparePageNumber}
+        comparePageNumberDisplay={renderComparePageNumber}
         primaryImageProperties={primaryImageProperties}
         compareImageProperties={compareImageProperties}
         handleRotationChange={handleRotationChange}
@@ -276,6 +279,7 @@ const DocumentViewer = () => {
         documentNavigationEnabled={documentNavigationEnabled}
         primaryDocumentNavigation={primaryDocumentNavigation}
         compareDocumentNavigation={compareDocumentNavigation}
+        navigationModifierState={navigationModifierState}
       />
 
       <div
@@ -298,6 +302,7 @@ const DocumentViewer = () => {
                 selectForCompare={selectForCompare}
                 isComparing={isComparing}
                 comparePageNumber={compareThumbnailPageNumber}
+          navigationModifierState={navigationModifierState}
                 paneMode={thumbnailPaneMode}
                 setPaneMode={setThumbnailPaneMode}
                 selectionPanelEnabled={selectionPanelEnabled}

@@ -78,6 +78,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
+ * @property {(number|null)} comparePageNumberDisplay - Current original session compare-page number.
+ * @property {{ shift:boolean, ctrl:boolean }} navigationModifierState
  * @property {{ rotation:number, brightness:number, contrast:number }} primaryImageProperties
  * @property {{ rotation:number, brightness:number, contrast:number }} compareImageProperties
  * @property {function(number, string=): void} handleRotationChange
@@ -128,6 +130,8 @@ const DocumentViewerToolbar = ({
   handleCompare,
   isComparing,
   comparePageNumber,
+  comparePageNumberDisplay,
+  navigationModifierState,
   primaryImageProperties,
   compareImageProperties,
   handleRotationChange,
@@ -196,6 +200,8 @@ const DocumentViewerToolbar = ({
       handleCompare={handleCompare}
       isComparing={isComparing}
       comparePageNumber={comparePageNumber}
+      comparePageNumberDisplay={comparePageNumberDisplay}
+      navigationModifierState={navigationModifierState}
       primaryImageProperties={primaryImageProperties}
       compareImageProperties={compareImageProperties}
       handleRotationChange={handleRotationChange}
@@ -247,6 +253,11 @@ DocumentViewerToolbar.propTypes = {
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  comparePageNumberDisplay: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  navigationModifierState: PropTypes.shape({
+    shift: PropTypes.bool.isRequired,
+    ctrl: PropTypes.bool.isRequired,
+  }).isRequired,
   primaryImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,

@@ -30,7 +30,6 @@ import {
   shouldUseFullImagesForThumbnails,
 } from '../utils/documentLoadingConfig.js';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
-import useNavigationModifierState from '../hooks/useNavigationModifierState.js';
 
 /**
  * @typedef {Object} ThumbnailRowProps
@@ -518,6 +517,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {function(number): void} [props.selectForCompare]
  * @param {boolean=} props.isComparing
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
+ * @param {{ shift:boolean, ctrl:boolean }} props.navigationModifierState
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
@@ -532,12 +532,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
+  navigationModifierState,
   selectionPanelEnabled = false,
   onHidePageFromSelection,
   onHideDocumentFromSelection,
 }) {
   const { t } = useTranslation('common');
-  const navigationModifierState = useNavigationModifierState();
   const isShiftPressed = !!navigationModifierState.shift;
   const {
     ensurePageAsset,
@@ -1242,6 +1242,10 @@ DocumentThumbnailList.propTypes = {
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  navigationModifierState: PropTypes.shape({
+    shift: PropTypes.bool.isRequired,
+    ctrl: PropTypes.bool.isRequired,
+  }).isRequired,
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,
   onHideDocumentFromSelection: PropTypes.func,

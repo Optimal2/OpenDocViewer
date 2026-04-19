@@ -37,10 +37,17 @@ single dropdown:
 The dialog then shows only the extra fields relevant to the chosen method, while the shared print
 details section (reason / for-whom / optional header metadata) stays consistent across modes.
 
+To keep the dialog compact, the **Pages and scope** card is hidden entirely when the chosen method
+does not need any extra scope input (for example **Active page** outside compare mode, or **All
+pages** when no saved selection/filter is active).
+
 When compare mode is active and the user prints the active page, the dialog can also prepare either:
 
 - the left / primary page only
 - both compare panes as a two-page print job
+
+When the user chooses both compare panes, the summary text now names both page numbers explicitly so
+the dialog reflects the actual pair that will be prepared.
 
 ### Single-page print
 
