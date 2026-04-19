@@ -337,7 +337,12 @@
       "hideDocumentFromSelection": "Dölj hela dokumentet från aktuellt urval",
       "hideDocumentFromSelectionLabel": "Dölj dokument {document}",
       "hideUnavailable": "Urvalsverktyg blir tillgängliga när alla sidor är färdigladdade.",
-      "hideDocumentFromSelectionLabelPrefix": "Dölj dokument"
+      "hideDocumentFromSelectionLabelPrefix": "Dölj dokument",
+      "showToRight": "Visa denna sida i den högra jämförelsepanelen",
+      "openCompareFromThumbnail": "Öppna jämförelsevy och visa denna sida till höger",
+      "showToRightLabel": "Visa till höger",
+      "closeCompare": "Stäng jämförelsevy",
+      "closeCompareLabel": "Avsluta jämförelse"
     },
     "documentBoundaryStartTitle": "Dokument {document}"
   },
@@ -416,7 +421,7 @@
         "title": "Navigering",
         "intro": "Använd verktygsfältet, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
         "pageMode": "Vanlig navigering flyttar en sida i taget.",
-        "shiftMode": "Håll nere Shift i jämförelsevy för att styra högra sidan i stället för vänster/huvudsidan.",
+        "shiftMode": "Håll nere Shift för att styra den högra jämförelsepanelen. Om jämförelsevyn inte redan är öppen startar Shift + navigering den till höger.",
         "ctrlMode": "Håll nere Ctrl när fler än ett dokument är öppnat för att flytta dokument för dokument i stället för sida för sida.",
         "ctrlShiftMode": "Håll nere Ctrl + Shift i jämförelsevy för att navigera hela dokument i den högra sidan."
       },
@@ -428,7 +433,7 @@
         "title": "Miniatyrer och dokumentindelning",
         "body": "Miniatyrpanelen visar dokumentgränser och sidinformation. T visar sidnummer i det synliga urvalet. D visar dokumentnummer. S visar sidnummer inom dokumentet.",
         "boundaries": "Den flytande dokumentrubriken högst upp i miniatyrpanelen följer din nuvarande position i listan.",
-        "contextMenu": "Högerklicka på en miniatyr eller en stor sida för att dölja aktuell sida eller hela dokumentet från det aktiva urvalet."
+        "contextMenu": "Högerklicka på en miniatyr för att visa sidan till höger i jämförelsevyn eller för att dölja sidan/dokumentet från aktuellt urval. Högerklicka på den stora högra sidan för att avsluta jämförelsen."
       },
       "selection": {
         "title": "Urval",

@@ -521,6 +521,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
+ * @param {function(number): void} [props.selectForCompare]
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -992,6 +993,28 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, [closeContextMenu, layout.rowHeight, viewportHeight]);
 
   /**
+   * Keep Shift + wheel vertical inside the thumbnail pane so users can browse to a far-away page
+   * while the right compare target is active.
+   *
+   * @param {*} event
+   * @returns {void}
+   */
+  const handleWheel = useCallback((event) => {
+    if (!event?.shiftKey || event?.ctrlKey || event?.metaKey || event?.altKey) return;
+    const node = containerRef.current;
+    if (!node) return;
+    const delta = Number(event.deltaY || 0) || Number(event.deltaX || 0);
+    if (!Number.isFinite(delta) || delta === 0) return;
+    event.preventDefault?.();
+    event.stopPropagation?.();
+    closeContextMenu();
+    const nextScrollTop = Math.max(0, Number(node.scrollTop || 0) + delta);
+    node.scrollTop = nextScrollTop;
+    lastKnownScrollTopRef.current = nextScrollTop;
+    setScrollTop((current) => (Math.abs(current - nextScrollTop) >= 1 ? nextScrollTop : current));
+  }, [closeContextMenu]);
+
+  /**
    * @param {number} nextPageNumber
    * @param {*} event
    * @returns {void}
@@ -1036,7 +1059,10 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleOpenContextMenu = useCallback((event, originalPageNumber, page) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
-    if (!selectionPanelEnabled || (typeof onHidePageFromSelection !== 'function' && typeof onHideDocumentFromSelection !== 'function')) {
+    const hasSelectionActions = !!selectionPanelEnabled
+      && (typeof onHidePageFromSelection === 'function' || typeof onHideDocumentFromSelection === 'function');
+    const hasCompareAction = typeof selectForCompare === 'function';
+    if (!hasSelectionActions && !hasCompareAction) {
       closeContextMenu();
       return;
     }
@@ -1050,7 +1076,13 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       documentNumber: documentContext.documentNumber,
       totalDocuments: documentContext.totalDocuments,
     });
-  }, [closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, selectionPanelEnabled]);
+  }, [closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, selectForCompare, selectionPanelEnabled]);
+
+  const handleCompareFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof selectForCompare !== 'function') return;
+    selectForCompare(contextMenuState.originalIndex + 1);
+    closeContextMenu();
+  }, [closeContextMenu, contextMenuState, selectForCompare]);
 
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
@@ -1105,11 +1137,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     && typeof onHidePageFromSelection === 'function';
   const canHideDocumentFromSelection = !!selectionPanelEnabled
     && typeof onHideDocumentFromSelection === 'function';
+  const canCompareFromContextMenu = typeof selectForCompare === 'function';
   const contextMenuLeft = contextMenuState
     ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 240) - 248)))
     : 0;
   const contextMenuTop = contextMenuState
-    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 132) - 140)))
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 196) - 196)))
     : 0;
 
   return (
@@ -1120,6 +1153,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       aria-label={t('thumbnails.aria.container')}
       aria-activedescendant={activeDescendantId}
       onScroll={handleScroll}
+      onWheel={handleWheel}
       style={{
         width: `${Math.max(0, Number(width) || 0)}px`,
         minWidth: `${Math.max(0, Number(width) || 0)}px`,
@@ -1163,50 +1197,66 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
           role="menu"
           style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
         >
-          <button
-            type="button"
-            className="odv-context-menu-item"
-            role="menuitem"
-            disabled={!canHidePageFromSelection}
-            onClick={handleHidePageFromContextMenu}
-            title={canHidePageFromSelection
-              ? t('thumbnails.contextMenu.hidePageFromSelection', {
-                  defaultValue: 'Hide this page from the current selection',
-                })
-              : t('thumbnails.contextMenu.hideUnavailable', {
-                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
+          {canCompareFromContextMenu ? (
+            <button
+              type="button"
+              className="odv-context-menu-item"
+              role="menuitem"
+              onClick={handleCompareFromContextMenu}
+              title={isComparing
+                ? t('thumbnails.contextMenu.showToRight', {
+                    defaultValue: 'Show this page in the right compare pane',
+                  })
+                : t('thumbnails.contextMenu.openCompareFromThumbnail', {
+                    defaultValue: 'Open compare view and show this page on the right',
+                  })}
+            >
+              <span className="material-icons" aria-hidden="true">compare_arrows</span>
+              <span>
+                {t('thumbnails.contextMenu.showToRightLabel', {
+                  defaultValue: 'Show to right',
                 })}
-          >
-            <span className="material-icons" aria-hidden="true">remove_circle_outline</span>
-            <span>
-              {t('thumbnails.contextMenu.hidePageFromSelectionLabel', {
-                defaultValue: 'Hide this page',
+              </span>
+            </button>
+          ) : null}
+          {canHidePageFromSelection ? (
+            <button
+              type="button"
+              className="odv-context-menu-item"
+              role="menuitem"
+              onClick={handleHidePageFromContextMenu}
+              title={t('thumbnails.contextMenu.hidePageFromSelection', {
+                defaultValue: 'Hide this page from the current selection',
               })}
-            </span>
-          </button>
-          <button
-            type="button"
-            className="odv-context-menu-item"
-            role="menuitem"
-            disabled={!canHideDocumentFromSelection}
-            onClick={handleHideDocumentFromContextMenu}
-            title={canHideDocumentFromSelection
-              ? t('thumbnails.contextMenu.hideDocumentFromSelection', {
-                  document: contextMenuState.documentNumber || 1,
-                  total: contextMenuState.totalDocuments || 1,
-                  defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1} from the current selection`,
-                })
-              : t('thumbnails.contextMenu.hideUnavailable', {
-                  defaultValue: 'Selection tools become available when all pages are fully loaded.',
+            >
+              <span className="material-icons" aria-hidden="true">remove_circle_outline</span>
+              <span>
+                {t('thumbnails.contextMenu.hidePageFromSelectionLabel', {
+                  defaultValue: 'Hide this page',
                 })}
-          >
-            <span className="material-icons" aria-hidden="true">folder_off</span>
-            <span>
-              {`${t('thumbnails.contextMenu.hideDocumentFromSelectionLabelPrefix', {
-                defaultValue: 'Hide document',
-              })} ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`}
-            </span>
-          </button>
+              </span>
+            </button>
+          ) : null}
+          {canHideDocumentFromSelection ? (
+            <button
+              type="button"
+              className="odv-context-menu-item"
+              role="menuitem"
+              onClick={handleHideDocumentFromContextMenu}
+              title={t('thumbnails.contextMenu.hideDocumentFromSelection', {
+                document: contextMenuState.documentNumber || 1,
+                total: contextMenuState.totalDocuments || 1,
+                defaultValue: `Hide document ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1} from the current selection`,
+              })}
+            >
+              <span className="material-icons" aria-hidden="true">folder_off</span>
+              <span>
+                {`${t('thumbnails.contextMenu.hideDocumentFromSelectionLabelPrefix', {
+                  defaultValue: 'Hide document',
+                })} ${contextMenuState.documentNumber || 1}/${contextMenuState.totalDocuments || 1}`}
+              </span>
+            </button>
+          ) : null}
         </div>
       ) : null}
     </div>

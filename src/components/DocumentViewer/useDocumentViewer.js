@@ -439,10 +439,10 @@ export function useDocumentViewer() {
   const getDocumentNavigationState = useCallback((target) => {
     const safeTarget = target === 'compare' ? 'compare' : 'primary';
     const baseOriginalPageNumber = safeTarget === 'compare'
-      ? (compareOriginalPageNumber ?? currentOriginalPageNumber)
+      ? (isComparing && compareOriginalPageNumber != null ? compareOriginalPageNumber : currentOriginalPageNumber)
       : currentOriginalPageNumber;
     const baseOriginalIndex = safeTarget === 'compare'
-      ? (compareOriginalPageIndex >= 0 ? compareOriginalPageIndex : currentOriginalPageIndex)
+      ? (isComparing && compareOriginalPageIndex >= 0 ? compareOriginalPageIndex : currentOriginalPageIndex)
       : currentOriginalPageIndex;
 
     if (!documentNavigationEnabled || visibleDocumentGroups.length <= 0) {
@@ -496,6 +496,7 @@ export function useDocumentViewer() {
     currentOriginalPageIndex,
     currentOriginalPageNumber,
     documentNavigationEnabled,
+    isComparing,
     visibleDocumentGroupIndexByOriginalIndex,
     visibleDocumentGroups,
   ]);
@@ -720,7 +721,7 @@ export function useDocumentViewer() {
   const resolveTargetOriginalPageNumber = useCallback((target, next) => {
     if (totalPages <= 0 || visibleOriginalIndexes.length <= 0) return 1;
 
-    const compareBase = compareVisiblePageNumber == null ? currentVisiblePageNumber : compareVisiblePageNumber;
+    const compareBase = !isComparing || compareVisiblePageNumber == null ? currentVisiblePageNumber : compareVisiblePageNumber;
     const currentBase = target === 'compare' ? compareBase : currentVisiblePageNumber;
     const safeBase = clampPage(currentBase, totalPages);
     const proposedVisiblePageNumber = clampPage(
@@ -729,7 +730,7 @@ export function useDocumentViewer() {
     );
     const resolvedOriginalIndex = visibleOriginalIndexes[Math.max(0, proposedVisiblePageNumber - 1)] ?? 0;
     return resolvedOriginalIndex + 1;
-  }, [compareVisiblePageNumber, currentVisiblePageNumber, totalPages, visibleOriginalIndexes]);
+  }, [compareVisiblePageNumber, currentVisiblePageNumber, isComparing, totalPages, visibleOriginalIndexes]);
 
   /**
    * Generic primary/compare page setter that accepts either a visible-page updater function or a
@@ -846,7 +847,7 @@ export function useDocumentViewer() {
    * thumbnail highlight on the requested page no longer causes the old mismatch bug.
    */
   const thumbnailSelectionPageNumber = currentOriginalPageNumber;
-  const compareThumbnailPageNumber = compareOriginalPageNumber;
+  const compareThumbnailPageNumber = isComparing ? compareOriginalPageNumber : null;
 
   /**
    * Move one page backward in the requested target pane.
@@ -1217,8 +1218,8 @@ export function useDocumentViewer() {
     // compare page numbers
     setComparePageNumber,
     setVisibleComparePageNumber,
-    comparePageNumber: totalPages > 0 ? compareVisiblePageNumber : null,
-    renderComparePageNumber: compareOriginalPageNumber,
+    comparePageNumber: isComparing && totalPages > 0 ? compareVisiblePageNumber : null,
+    renderComparePageNumber: isComparing ? compareOriginalPageNumber : null,
 
     thumbnailSelectionPageNumber,
     compareThumbnailPageNumber,
