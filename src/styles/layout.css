@@ -389,6 +389,12 @@ canvas {
   box-shadow: inset 0 0 0 1px color-mix(in srgb, var(--thumbnail-primary-color) 24%, var(--thumbnail-border-color) 76%);
 }
 
+.thumbnail-pane-mode-button:disabled {
+  opacity: 0.52;
+  cursor: not-allowed;
+  box-shadow: none;
+}
+
 .thumbnail-pane-mode-button.has-selection:not(.is-active) {
   background: color-mix(in srgb, var(--thumbnail-compare-color) 14%, transparent 86%);
   color: color-mix(in srgb, var(--thumbnail-compare-color) 78%, var(--text-color) 22%);

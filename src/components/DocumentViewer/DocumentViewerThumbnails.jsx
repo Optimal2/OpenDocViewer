@@ -95,6 +95,11 @@ const DocumentViewerThumbnails = ({
   const widthAtDefault = width === defaultWidth;
   const canClearSelection = selectionActive || draftSelectionDirty;
 
+  React.useEffect(() => {
+    if (selectionPanelEnabled) return;
+    if (paneMode === 'selection') setPaneMode('thumbnails');
+  }, [paneMode, selectionPanelEnabled, setPaneMode]);
+
   return (
     <div className="thumbnail-pane-shell" style={{ width: `${width}px`, minWidth: `${width}px` }}>
       <div className="thumbnail-pane-toolbar-stack" aria-label={t('thumbnails.controls.groupLabel', { defaultValue: 'Thumbnail pane controls' })}>
@@ -184,12 +189,13 @@ const DocumentViewerThumbnails = ({
               type="button"
               role="tab"
               aria-selected={paneMode === 'selection'}
+              aria-disabled={!selectionPanelEnabled}
               className={[
                 'thumbnail-pane-mode-button',
                 paneMode === 'selection' ? 'is-active' : '',
                 selectionActive ? 'has-selection' : '',
               ].filter(Boolean).join(' ')}
-              onClick={() => setPaneMode('selection')}
+              onClick={() => { if (selectionPanelEnabled) setPaneMode('selection'); }}
               title={selectionPanelEnabled
                 ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
                 : t('thumbnails.selection.loadingStatusShort', {
@@ -197,6 +203,7 @@ const DocumentViewerThumbnails = ({
                     total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
                     defaultValue: 'Selection will be available when all pages are fully loaded.',
                   })}
+              disabled={!selectionPanelEnabled}
             >
               {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
             </button>

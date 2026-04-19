@@ -100,6 +100,7 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
  * @property {boolean} isPrintDialogOpen
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
+ * @property {boolean=} printEnabled
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
  * @property {(number|null)=} comparePageNumber
@@ -183,6 +184,7 @@ const DocumentToolbar = ({
   isPrintDialogOpen = false,
   openPrintDialog,
   closePrintDialog,
+  printEnabled = true,
   handleCompare,
   isComparing,
   comparePageNumber = null,
@@ -257,6 +259,11 @@ const DocumentToolbar = ({
   useEffect(() => {
     setOpenAdjustmentMenu(null);
   }, [comparePageNumber, isComparing, pageNumber]);
+
+  useEffect(() => {
+    if (!isDocumentLoading) return;
+    if (isPrintDialogOpen) closePrintDialog?.();
+  }, [closePrintDialog, isDocumentLoading, isPrintDialogOpen]);
 
   useEffect(() => {
     if (!printPreparationNotice.open) return undefined;
@@ -781,6 +788,12 @@ const DocumentToolbar = ({
     }, 30);
   }, [closePrintDialog, dispatchPrintRequest, printPreparationNoticeThreshold, resolvePrintPageCount, submitUserPrintLog]);
 
+  const printActionTitle = printEnabled
+    ? t('toolbar.print')
+    : t('toolbar.printDisabledLoading', {
+        defaultValue: 'Printing becomes available when all pages are fully loaded.',
+      });
+
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
   const zoomMode = zoomState?.mode || 'CUSTOM';
@@ -811,10 +824,11 @@ const DocumentToolbar = ({
       {/* Print button → opens dialog */}
       <button
         type="button"
-        onClick={() => openPrintDialog?.()}
-        aria-label={t('toolbar.print')}
-        title={t('toolbar.print')}
+        onClick={() => { if (printEnabled) openPrintDialog?.(); }}
+        aria-label={printActionTitle}
+        title={printActionTitle}
         className="odv-btn"
+        disabled={!printEnabled}
       >
         <span className="material-icons" aria-hidden="true">print</span>
       </button>
@@ -1130,6 +1144,7 @@ DocumentToolbar.propTypes = {
   isPrintDialogOpen: PropTypes.bool,
   openPrintDialog: PropTypes.func,
   closePrintDialog: PropTypes.func,
+  printEnabled: PropTypes.bool,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),

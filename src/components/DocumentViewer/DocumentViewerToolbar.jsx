@@ -68,6 +68,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} isPrintDialogOpen
  * @property {function(): void} openPrintDialog
  * @property {function(): void} closePrintDialog
+ * @property {boolean} printEnabled
  * @property {boolean} hasActiveSelection
  * @property {Array<number>} visibleOriginalPageNumbers
  * @property {number} selectionIncludedCount
@@ -143,6 +144,7 @@ const DocumentViewerToolbar = ({
   isPrintDialogOpen,
   openPrintDialog,
   closePrintDialog,
+  printEnabled,
   hasActiveSelection,
   visibleOriginalPageNumbers,
   selectionIncludedCount,
@@ -190,6 +192,7 @@ const DocumentViewerToolbar = ({
       isPrintDialogOpen={isPrintDialogOpen}
       openPrintDialog={openPrintDialog}
       closePrintDialog={closePrintDialog}
+      printEnabled={printEnabled}
       hasActiveSelection={hasActiveSelection}
       visibleOriginalPageNumbers={visibleOriginalPageNumbers}
       selectionIncludedCount={selectionIncludedCount}
@@ -277,6 +280,7 @@ DocumentViewerToolbar.propTypes = {
   isPrintDialogOpen: PropTypes.bool.isRequired,
   openPrintDialog: PropTypes.func.isRequired,
   closePrintDialog: PropTypes.func.isRequired,
+  printEnabled: PropTypes.bool.isRequired,
   hasActiveSelection: PropTypes.bool.isRequired,
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
   selectionIncludedCount: PropTypes.number.isRequired,

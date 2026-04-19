@@ -69,7 +69,8 @@
     "editingTargetCompare": "Editing the right compare page (Shift)",
     "resetAdjustments": "Reset adjustments",
     "resetBrightness": "Reset brightness",
-    "resetContrast": "Reset contrast"
+    "resetContrast": "Reset contrast",
+    "printDisabledLoading": "Printing becomes available when all pages are fully loaded."
   },
   "printDialog": {
     "title": "Print",

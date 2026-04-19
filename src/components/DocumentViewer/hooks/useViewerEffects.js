@@ -61,6 +61,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} rotateLeft
  * @property {Function} rotateRight
  * @property {Function=} onOpenPrintDialog
+ * @property {boolean=} printEnabled
  * @property {KeyboardPrintShortcutBehavior=} keyboardPrintShortcutBehavior
  */
 
@@ -142,6 +143,7 @@ export function useViewerEffects(args) {
     rotateLeft,
     rotateRight,
     onOpenPrintDialog,
+    printEnabled = true,
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
 
@@ -312,8 +314,12 @@ export function useViewerEffects(args) {
       const key = String(e.key || '').toLowerCase();
       if (key !== 'p') return;
       if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
-      if (keyboardPrintShortcutBehavior === 'browser') return;
       if (hasActiveModalDialog()) return;
+      if (!printEnabled) {
+        e.preventDefault();
+        return;
+      }
+      if (keyboardPrintShortcutBehavior === 'browser') return;
 
       e.preventDefault();
       if (keyboardPrintShortcutBehavior === 'dialog') {
@@ -323,7 +329,7 @@ export function useViewerEffects(args) {
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => { window.removeEventListener('keydown', onKeyDown, true); };
-  }, [keyboardPrintShortcutBehavior, onOpenPrintDialog]);
+  }, [keyboardPrintShortcutBehavior, onOpenPrintDialog, printEnabled]);
 
   // Global keyboard navigation & zoom shortcuts.
   // Repeat navigation uses the same timer hook as the toolbar buttons instead of relying on the
@@ -439,7 +445,7 @@ export function useViewerEffects(args) {
 
           // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare)
           if (!hasModifierKey && !e.shiftKey && !e.altKey) {
-            if (e.key === '0') { e.preventDefault(); onOpenPrintDialogRef.current?.(); }
+            if (e.key === '0') { e.preventDefault(); if (printEnabled) onOpenPrintDialogRef.current?.(); }
             else if (e.key === '1') { e.preventDefault(); actualSizeRef.current?.(); }
             else if (e.key === '2') { e.preventDefault(); fitToScreenRef.current?.(); }
             else if (e.key === '3') { e.preventDefault(); fitToWidthRef.current?.(); }
@@ -478,6 +484,7 @@ export function useViewerEffects(args) {
       stopKeyboardRepeat();
     };
   }, [
+    printEnabled,
     startKeyboardNextRepeatTimer,
     startKeyboardPreviousRepeatTimer,
     stopKeyboardRepeat,

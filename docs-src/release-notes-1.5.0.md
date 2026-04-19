@@ -15,6 +15,7 @@ that combines:
 - selection-aware filtering/navigation/printing
 - compare-aware navigation and editing behavior
 - the current runtime configuration surface and sample coverage
+- the stabilized rule that printing and selection stay disabled until all pages are fully loaded
 
 ## Security and dependency baseline
 

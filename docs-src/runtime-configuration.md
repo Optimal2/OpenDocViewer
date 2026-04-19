@@ -235,7 +235,9 @@ What these knobs control:
   - the load-run timer stops when the current load finishes, but the other counters continue updating while the overlay stays visible
   - when the overlay is disabled, the viewer skips the overlay-specific polling and snapshot collection entirely
 - print dialog during loading
-  - while sources/pages are still being discovered, the print dialog stays in a simplified active-page-only mode to avoid confusing resets while total page counts are still changing
+  - printing stays unavailable until all pages are fully loaded so the dialog, totals, and browser print preview cannot be destabilized by pages still arriving in the background
+- selection pane during loading
+  - the selection tab also stays unavailable until all pages are fully loaded so document/page checkboxes only appear once the final visible page universe is known
 
 Operationally, the hybrid pipeline works like this:
 
