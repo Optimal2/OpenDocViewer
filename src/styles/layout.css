@@ -360,6 +360,13 @@ canvas {
   min-width: 0;
 }
 
+.thumbnail-pane-mode-button-wrap {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  min-width: 0;
+}
+
 .thumbnail-pane-mode-button {
   display: inline-flex;
   align-items: center;
@@ -375,6 +382,17 @@ canvas {
   letter-spacing: 0.02em;
   cursor: pointer;
   transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.thumbnail-pane-mode-button.has-inline-tool {
+  padding-right: 25px;
+}
+
+.thumbnail-pane-mode-button-label {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
 }
 
 .thumbnail-pane-mode-button:hover,
@@ -400,11 +418,40 @@ canvas {
   color: color-mix(in srgb, var(--thumbnail-compare-color) 78%, var(--text-color) 22%);
 }
 
-.thumbnail-pane-tab-tools {
+.thumbnail-pane-mode-inline-tool {
+  position: absolute;
+  top: 50%;
+  right: 4px;
+  transform: translateY(-50%);
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  margin-left: auto;
+  justify-content: center;
+  width: 18px;
+  height: 18px;
+  padding: 0;
+  border: none;
+  border-radius: 999px;
+  background: transparent;
+  color: color-mix(in srgb, #b91c1c 72%, var(--text-color) 28%);
+  cursor: pointer;
+  transition: background-color 0.15s ease, color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.thumbnail-pane-mode-inline-tool .material-icons {
+  font-size: 14px;
+}
+
+.thumbnail-pane-mode-inline-tool:hover,
+.thumbnail-pane-mode-inline-tool:focus {
+  outline: none;
+  background: color-mix(in srgb, #b91c1c 12%, transparent 88%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, #b91c1c 18%, transparent 82%);
+}
+
+.thumbnail-pane-mode-inline-tool:disabled {
+  opacity: 0.48;
+  cursor: not-allowed;
+  box-shadow: none;
 }
 
 .thumbnail-pane-collapsed-rail {
