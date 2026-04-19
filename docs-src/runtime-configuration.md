@@ -103,6 +103,8 @@ Behavior:
 - `public/odv.site.config.sample.js` is intended to mirror the full safe site-override surface. The
   only intentionally-commented entries are the environment-derived `basePath` and `baseHref`
   examples, because hard-overriding those two values unnecessarily can break deployment routing.
+- When new runtime-config keys are introduced, update `public/odv.site.config.sample.js` in the same
+  change so operators can see the full supported override surface without diffing source files.
 - If using a site override file, keep it deployment-local and avoid committing machine-specific values back into the main repo.
 - Prefer stable, same-origin logging endpoints when possible.
 - Re-check config precedence after any change to `bootConfig.js` or hosting rules.

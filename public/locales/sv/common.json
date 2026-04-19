@@ -67,7 +67,9 @@
     },
     "editingTargetPrimary": "Redigerar vänster/huvudsida",
     "editingTargetCompare": "Redigerar höger jämförelsesida (Shift)",
-    "resetAdjustments": "Återställ justeringar"
+    "resetAdjustments": "Återställ justeringar",
+    "resetBrightness": "Återställ ljusstyrka",
+    "resetContrast": "Återställ kontrast"
   },
   "printDialog": {
     "title": "Skriv ut",
@@ -181,11 +183,11 @@
       "custom": "Anpassade sidor"
     },
     "summaryActiveOnly": "Endast den aktiva sidan ({page}) kan skrivas ut just nu.",
-    "summaryCompareBoth": "Förbered båda jämförelsesidorna som visas för sida {page}.",
+    "summaryCompareBoth": "Förbered båda jämförelsesidorna ({primary} och {compare}).",
     "summaryActive": "Förbered den aktiva sidan ({page}).",
     "summaryAll": "Förbered {count} sidor.",
     "summaryRange": "Förbered sidorna {from}–{to}.",
-    "summaryCustom": "Förbered sidorna som anges under Anpassade sidor.",
+    "summaryCustom": "Förbered sidorna som anges i fältet Sidor under Sidor och omfång.",
     "activePageValue": "Aktiv sida: {page}",
     "allPagesValue": "Alla {count} sidor i sessionen kommer att förberedas.",
     "preparing": {

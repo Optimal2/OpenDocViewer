@@ -28,17 +28,21 @@ production deployments, even if they were previously marked as safe.
 The eight most recent releases are listed below for operational context.
 
 ### OpenDocViewer v1.5.0
-OpenDocViewer v1.5.0 consolidates the current document-aware viewer experience and the latest
-security baseline into one recommended release.
+OpenDocViewer v1.5.0 is the consolidated production baseline that combines the latest supported
+viewer workflow with the current security/dependency baseline.
 
-This release adds stable multi-document navigation, selection-aware page filtering, compare-aware
-toolbar targeting, language persistence without reloading the viewer session, configurable print-job
-preparation notices, improved print-dialog flow, updated runtime/sample configuration coverage, and
-multiple fixes in compare rendering, thumbnail grouping, help/print overlays, and input handling.
+From a security perspective this release is the first one in the current line that combines the
+recommended dependency set (`axios` 1.15.0 and the corresponding resolved `follow-redirects` /
+`dompurify` updates in the lockfile) with the current runtime hardening around gated diagnostics,
+safer context-menu behavior inside the viewer, and version-aware language-resource loading.
 
-From a support and deployment perspective, v1.5.0 is the only recommended version going forward
-because it combines the latest dependency/security updates with the current viewer workflow and
-configuration model.
+From a functional/support perspective it also introduces the document-aware viewer model now present
+on `main`: portable-document grouping, selection-aware filtering, compare-aware modifier targeting,
+unified print-dialog flow, configurable large-print preparation notices, persisted language
+preferences, and synchronized runtime/sample configuration coverage.
+
+Only v1.5.0 is recommended going forward because earlier versions do not combine both the latest
+security baseline and the latest viewer functionality/configuration model.
 
 ### OpenDocViewer v1.4.1
 OpenDocViewer v1.4.1 is a targeted patch release focused on maintenance and release hygiene.

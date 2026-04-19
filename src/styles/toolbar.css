@@ -11,7 +11,7 @@
   box-shadow: var(--box-shadow);
   border-radius: 8px;
   box-sizing: border-box;
-  padding: 4px 28px 4px 10px;
+  padding: 4px 40px 4px 10px;
   flex-shrink: 0;
 }
 .toolbar > * { margin: 0 0.06rem; }
@@ -175,8 +175,8 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  margin-right: 24px;
-  padding-right: 2px;
+  margin-right: 34px;
+  padding-right: 6px;
   flex-shrink: 0;
 }
 
@@ -428,10 +428,25 @@
   color: var(--text-color);
 }
 
+.toolbar-adjustment-menu-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.toolbar-adjustment-current {
+  font-size: 0.76rem;
+  font-variant-numeric: tabular-nums;
+  color: color-mix(in srgb, var(--text-color) 82%, transparent 18%);
+}
+
 .toolbar-adjustment-reset-btn {
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
   min-height: 24px !important;
-  min-width: auto !important;
-  padding: 0.08rem 0.44rem !important;
+  min-width: 24px !important;
+  padding: 0.08rem !important;
   font-size: 0.74rem !important;
   background: color-mix(in srgb, var(--thumbnail-shell-color) 82%, transparent 18%) !important;
   color: var(--text-color) !important;
@@ -439,10 +454,20 @@
   box-shadow: none !important;
 }
 
+.toolbar-adjustment-reset-btn:disabled {
+  opacity: 0.45;
+  cursor: default;
+}
+
 .toolbar-adjustment-reset-btn:hover,
 .toolbar-adjustment-reset-btn:focus {
   background: color-mix(in srgb, var(--thumbnail-shell-color) 88%, transparent 12%) !important;
   transform: none !important;
+}
+
+.toolbar-adjustment-reset-btn:disabled:hover,
+.toolbar-adjustment-reset-btn:disabled:focus {
+  background: color-mix(in srgb, var(--thumbnail-shell-color) 82%, transparent 18%) !important;
 }
 
 .toolbar-adjustment-slider {

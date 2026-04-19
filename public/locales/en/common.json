@@ -67,7 +67,9 @@
     },
     "editingTargetPrimary": "Editing the primary / left page",
     "editingTargetCompare": "Editing the right compare page (Shift)",
-    "resetAdjustments": "Reset adjustments"
+    "resetAdjustments": "Reset adjustments",
+    "resetBrightness": "Reset brightness",
+    "resetContrast": "Reset contrast"
   },
   "printDialog": {
     "title": "Print",
@@ -181,11 +183,11 @@
       "custom": "Custom pages"
     },
     "summaryActiveOnly": "Only the active page ({page}) is currently available for printing.",
-    "summaryCompareBoth": "Prepare both compare pages currently shown for page {page}.",
+    "summaryCompareBoth": "Prepare both compare pages ({primary} and {compare}).",
     "summaryActive": "Prepare the active page ({page}).",
     "summaryAll": "Prepare {count} pages.",
     "summaryRange": "Prepare pages {from}–{to}.",
-    "summaryCustom": "Prepare the pages listed under Custom pages.",
+    "summaryCustom": "Prepare the pages listed in the Pages field under Pages and scope.",
     "activePageValue": "Active page: {page}",
     "allPagesValue": "All {count} session pages will be prepared.",
     "preparing": {
