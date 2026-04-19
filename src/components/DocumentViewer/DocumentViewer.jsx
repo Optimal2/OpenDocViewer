@@ -94,6 +94,7 @@ const DocumentViewer = () => {
     fitToWidth,
     handleContainerClick,
     handleCompare,
+    closeCompare,
     handleRotationChange,
     handleBrightnessChange,
     handleContrastChange,
@@ -393,6 +394,7 @@ const DocumentViewer = () => {
             selectionPanelEnabled={selectionPanelEnabled}
             onHidePageFromSelection={hidePageFromSelection}
             onHideDocumentFromSelection={hideDocumentFromSelection}
+            closeCompare={closeCompare}
           />
         )}
       </div>

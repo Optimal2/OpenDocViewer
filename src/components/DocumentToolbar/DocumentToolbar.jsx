@@ -218,7 +218,8 @@ const DocumentToolbar = ({
   const contrastMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
-  const compareNavigationEnabled = typeof setComparePageNumber === 'function' && isComparing && Number.isFinite(comparePageNumber);
+  const compareTargetAvailable = typeof setComparePageNumber === 'function' && totalPages > 0;
+  const comparePaneVisible = compareTargetAvailable && isComparing && Number.isFinite(comparePageNumber);
 
   useEffect(() => {
     if (!openAdjustmentMenu) return undefined;
@@ -301,8 +302,8 @@ const DocumentToolbar = ({
   }, []);
 
   // Navigation helpers (single-step handlers + press-and-hold timers).
-  // Shift steers the right compare pane when compare mode is available. Ctrl switches the scope to
-  // whole-document stepping when more than one visible document exists.
+  // Shift steers the right compare pane and can open compare mode on demand. Ctrl switches the
+  // scope to whole-document stepping when more than one visible document exists.
   const primaryNavigation = usePageNavigation(setPageNumber, totalPages);
   const compareNavigation = usePageNavigation(setComparePageNumber, totalPages);
   const {
@@ -354,17 +355,16 @@ const DocumentToolbar = ({
     return { shift, ctrl };
   }, [navigationModifierState]);
 
-  const wantsCompareTarget = useCallback((event) => getEffectiveModifierState(event).shift, [getEffectiveModifierState]);
+  const wantsCompareTarget = useCallback(
+    (event) => getEffectiveModifierState(event).shift && compareTargetAvailable,
+    [compareTargetAvailable, getEffectiveModifierState]
+  );
   const wantsDocumentScope = useCallback(
     (event) => getEffectiveModifierState(event).ctrl && !!documentNavigationEnabled,
     [documentNavigationEnabled, getEffectiveModifierState]
   );
 
-  const canTargetCompare = useCallback((event) => {
-    if (!wantsCompareTarget(event)) return false;
-    if (!compareNavigationEnabled) return false;
-    return typeof setComparePageNumber === 'function';
-  }, [compareNavigationEnabled, setComparePageNumber, wantsCompareTarget]);
+  const canTargetCompare = useCallback((event) => wantsCompareTarget(event), [wantsCompareTarget]);
 
   const resolveNavigationTarget = useCallback((event) => {
     if (wantsCompareTarget(event) && canTargetCompare(event)) return 'compare';
@@ -376,9 +376,9 @@ const DocumentToolbar = ({
   ), [wantsDocumentScope]);
 
   const resolveEditingTarget = useCallback((event) => {
-    if (!compareNavigationEnabled) return 'primary';
+    if (!comparePaneVisible) return 'primary';
     return wantsCompareTarget(event) ? 'compare' : 'primary';
-  }, [compareNavigationEnabled, wantsCompareTarget]);
+  }, [comparePaneVisible, wantsCompareTarget]);
 
   const blockUnavailableCompareTarget = useCallback((event) => {
     if (!wantsCompareTarget(event)) return false;
@@ -521,12 +521,12 @@ const DocumentToolbar = ({
       : compareNavigationPage),
     [compareNavigationPage, comparePageNumberDisplay]
   );
-  const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
+  const navigationTargetMode = isShiftPressed && compareTargetAvailable ? 'compare' : 'primary';
   const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
   const activeNavigationPageNumber = navigationTargetMode === 'compare'
     ? compareNavigationPage
     : normalizeToolbarPageNumber(pageNumber, totalPages, 1);
-  const editingTargetMode = navigationTargetMode;
+  const editingTargetMode = comparePaneVisible && navigationTargetMode === 'compare' ? 'compare' : 'primary';
   const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
   const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page (Shift)' })
@@ -536,7 +536,7 @@ const DocumentToolbar = ({
     : normalizedPrimaryDocumentNavigation;
   const useComparePageDisabledState = navigationScopeMode === 'page'
     && navigationTargetMode === 'compare'
-    && compareNavigationEnabled;
+    && comparePaneVisible;
 
   const effectivePrevPageDisabled = navigationScopeMode === 'document'
     ? !activeDocumentNavigation.canGoPrevious
@@ -581,7 +581,7 @@ const DocumentToolbar = ({
   }), [navigationScopeMode, t]);
 
   const handleGoToPageInput = useCallback((nextVisiblePageNumber) => {
-    if (navigationTargetMode === 'compare' && compareNavigationEnabled && typeof setVisibleComparePageNumber === 'function') {
+    if (navigationTargetMode === 'compare' && compareTargetAvailable && typeof setVisibleComparePageNumber === 'function') {
       setVisibleComparePageNumber(nextVisiblePageNumber);
       return;
     }
@@ -590,7 +590,7 @@ const DocumentToolbar = ({
       return;
     }
     setPageNumber(nextVisiblePageNumber);
-  }, [compareNavigationEnabled, navigationTargetMode, setPageNumber, setVisibleComparePageNumber, setVisiblePageNumber]);
+  }, [compareTargetAvailable, navigationTargetMode, setPageNumber, setVisibleComparePageNumber, setVisiblePageNumber]);
 
   // Snap slider values near 100% to exactly 100% to make "neutral" easy to hit.
   const snapToZero = useMemo(
@@ -1066,7 +1066,7 @@ const DocumentToolbar = ({
         totalPages={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
         activePageNumber={pageNumberDisplay}
-        comparePageNumber={compareNavigationEnabled ? compareNavigationPageDisplay : null}
+        comparePageNumber={comparePaneVisible ? compareNavigationPageDisplay : null}
         isComparing={isComparing}
         hasActiveSelection={hasActiveSelection}
         selectionIncludedCount={selectionIncludedCount}

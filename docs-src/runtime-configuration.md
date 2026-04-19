@@ -228,6 +228,7 @@ What these knobs control:
 - compare navigation modifiers
   - toolbar page buttons still target the left pane by default
   - when `Shift` is held, the same toolbar buttons target the right compare pane instead
+  - if compare mode is not open yet, `Shift` + toolbar/keyboard navigation opens it and seeds the right pane from the requested page/document move
   - the button disabled state follows the right pane while `Shift` is held so compare navigation stays available even when the left pane sits on the first/last page
 - performance overlay
   - the diagnostics HUD now reports fetch strategy, render strategy/backend, worker routing, load-run duration, source/asset store usage, cache counts, tracked object URLs, and pending/warm-up activity

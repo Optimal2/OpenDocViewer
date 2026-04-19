@@ -65,7 +65,8 @@ Compare mode now has consistent modifier-based behavior across:
 - brightness / contrast targeting
 - thumbnail following
 
-`Shift` targets the right compare pane when compare mode is active.
+`Shift` targets the right compare pane. If compare mode is not already open, modifier-aware
+toolbar/keyboard navigation can now open it directly on the requested page/document step.
 
 `Ctrl` switches page navigation into document navigation when more than one visible document is
 available.

@@ -337,7 +337,12 @@
       "hideDocumentFromSelection": "Hide the entire document from the current selection",
       "hideDocumentFromSelectionLabel": "Hide document {document}",
       "hideUnavailable": "Selection tools become available when all pages are fully loaded.",
-      "hideDocumentFromSelectionLabelPrefix": "Hide document"
+      "hideDocumentFromSelectionLabelPrefix": "Hide document",
+      "showToRight": "Show this page in the right compare pane",
+      "openCompareFromThumbnail": "Open compare view and show this page on the right",
+      "showToRightLabel": "Show to right",
+      "closeCompare": "Close compare view",
+      "closeCompareLabel": "Close comparison"
     },
     "documentBoundaryStartTitle": "Document {document}"
   },
@@ -416,7 +421,7 @@
         "title": "Navigation",
         "intro": "Use the toolbar, Arrow Up/Arrow Down, Home, and End to move through the material.",
         "pageMode": "Normal navigation moves one page at a time.",
-        "shiftMode": "Hold Shift in compare mode to steer the right pane instead of the left/main pane.",
+        "shiftMode": "Hold Shift to target the right compare pane. If compare mode is not open yet, Shift + navigation opens it on the right.",
         "ctrlMode": "Hold Ctrl when more than one document is loaded to move document by document instead of page by page.",
         "ctrlShiftMode": "Hold Ctrl + Shift in compare mode to navigate whole documents in the right pane."
       },
@@ -428,7 +433,7 @@
         "title": "Thumbnails and document grouping",
         "body": "The thumbnail pane shows document boundaries and page metadata. T shows the visible page number in the current selection. D shows the document number. S shows the page number inside that document.",
         "boundaries": "The sticky document label at the top of the thumbnail pane follows your current position in the list.",
-        "contextMenu": "Right-click a thumbnail or a large page to hide the current page or the whole document from the active selection."
+        "contextMenu": "Right-click a thumbnail to show that page on the right compare pane, or to hide the page/document from the active selection. Right-click the large right pane to close compare mode."
       },
       "selection": {
         "title": "Selection",
