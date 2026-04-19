@@ -26,6 +26,22 @@ The print flow is deliberately separated from the main viewer UI because printin
 
 ## Current high-level flow
 
+The current viewer uses one unified print dialog. The user first chooses a print method from a
+single dropdown:
+
+- Active page
+- All pages
+- Simple range
+- Custom pages
+
+The dialog then shows only the extra fields relevant to the chosen method, while the shared print
+details section (reason / for-whom / optional header metadata) stays consistent across modes.
+
+When compare mode is active and the user prints the active page, the dialog can also prepare either:
+
+- the left / primary page only
+- both compare panes as a two-page print job
+
 ### Single-page print
 
 1. resolve the active canvas or image
@@ -44,6 +60,23 @@ The print flow is deliberately separated from the main viewer UI because printin
 3. compute a cleanup delay that scales with the page count
 4. render a multi-page document into the hidden iframe
 5. call `print()` and remove the iframe afterwards
+
+## Large print preparation notice
+
+Large print jobs can take noticeable time before the browser preview actually appears. To reduce the
+chance that users click the print action multiple times, the toolbar can show a temporary “print
+request has been sent” overlay once the job size passes the configured threshold.
+
+The threshold is controlled by runtime config:
+
+```js
+print: {
+  preparationNoticeThresholdPages: 200
+}
+```
+
+This notice is informational only. It does not modify the generated print DOM or the actual pages
+selected for printing.
 
 ## Why hidden iframes are used
 

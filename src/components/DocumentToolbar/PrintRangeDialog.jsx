@@ -125,6 +125,7 @@ export default function PrintRangeDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="print-title"
+      data-odv-shortcuts="off"
       onMouseDown={ctrl.onBackdropMouseDown}
     >
       <form
@@ -133,6 +134,7 @@ export default function PrintRangeDialog({
         className="odv-prd-dialog"
         noValidate
         tabIndex={-1}
+        data-odv-shortcuts="off"
         onKeyDown={ctrl.onDialogKeyDown}
       >
         <div className="odv-prd-header">

@@ -27,6 +27,7 @@ import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintR
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpOverlayDialog from './HelpOverlayDialog.jsx';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 
 
 /**
@@ -204,64 +205,23 @@ const DocumentToolbar = ({
   compareDocumentNavigation = undefined,
 }) => {
   const { t } = useTranslation();
-  const [navigationModifierState, setNavigationModifierState] = useState({ shift: false, ctrl: false });
+  const navigationModifierState = useNavigationModifierState();
   const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
   const documentRepeatTargetRef = useRef('primary');
-  const modifierStateRef = useRef({ shift: false, ctrl: false });
+  const modifierStateRef = useRef(navigationModifierState);
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const contrastMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
-  const compareNavigationEnabled = typeof setComparePageNumber === 'function';
+  const compareNavigationEnabled = typeof setComparePageNumber === 'function' && isComparing && Number.isFinite(comparePageNumber);
 
   useEffect(() => {
-    if (typeof window === 'undefined') return undefined;
-
-    /**
-     * @param {KeyboardEvent} event
-     * @returns {void}
-     */
-    const syncModifierState = (event) => {
-      const nextState = {
-        shift: !!event?.getModifierState?.('Shift') || !!event?.shiftKey,
-        ctrl: (!!event?.getModifierState?.('Control') || !!event?.ctrlKey) && !event?.metaKey && !event?.altKey,
-      };
-      modifierStateRef.current = nextState;
-      setNavigationModifierState(nextState);
-    };
-
-    /**
-     * @returns {void}
-     */
-    const clearModifierState = () => {
-      const nextState = { shift: false, ctrl: false };
-      modifierStateRef.current = nextState;
-      setNavigationModifierState(nextState);
-    };
-
-    /**
-     * @returns {void}
-     */
-    const handleVisibilityChange = () => {
-      if (document.hidden) clearModifierState();
-    };
-
-    window.addEventListener('keydown', syncModifierState, true);
-    window.addEventListener('keyup', syncModifierState, true);
-    window.addEventListener('blur', clearModifierState, true);
-    document.addEventListener('visibilitychange', handleVisibilityChange, true);
-
-    return () => {
-      window.removeEventListener('keydown', syncModifierState, true);
-      window.removeEventListener('keyup', syncModifierState, true);
-      window.removeEventListener('blur', clearModifierState, true);
-      document.removeEventListener('visibilitychange', handleVisibilityChange, true);
-    };
-  }, []);
+    modifierStateRef.current = navigationModifierState;
+  }, [navigationModifierState]);
 
   useEffect(() => {
     if (!openAdjustmentMenu) return undefined;
@@ -419,9 +379,9 @@ const DocumentToolbar = ({
   ), [wantsDocumentScope]);
 
   const resolveEditingTarget = useCallback((event) => {
-    if (!isComparing) return 'primary';
+    if (!compareNavigationEnabled) return 'primary';
     return wantsCompareTarget(event) ? 'compare' : 'primary';
-  }, [isComparing, wantsCompareTarget]);
+  }, [compareNavigationEnabled, wantsCompareTarget]);
 
   const blockUnavailableCompareTarget = useCallback((event) => {
     if (!wantsCompareTarget(event)) return false;
@@ -560,6 +520,9 @@ const DocumentToolbar = ({
   );
   const navigationTargetMode = isShiftPressed && compareNavigationEnabled ? 'compare' : 'primary';
   const navigationScopeMode = isCtrlPressed && documentNavigationEnabled ? 'document' : 'page';
+  const activeNavigationPageNumber = navigationTargetMode === 'compare'
+    ? compareNavigationPage
+    : normalizeToolbarPageNumber(pageNumber, totalPages, 1);
   const editingTargetMode = resolveEditingTarget();
   const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
   const editingGroupTitle = editingTargetMode === 'compare'
@@ -869,8 +832,8 @@ const DocumentToolbar = ({
         handleLastPage={handleLastPage}
         handlePrevPage={handlePrevPage}
         handleNextPage={handleNextPage}
-        pageNumber={pageNumber}
-        pageNumberDisplay={pageNumber}
+        pageNumber={activeNavigationPageNumber}
+        pageNumberDisplay={activeNavigationPageNumber}
         totalPages={totalPages}
         totalPagesDisplay={totalPages}
         navigationTarget={navigationTargetMode}

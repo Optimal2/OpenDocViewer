@@ -37,6 +37,11 @@
  *   For the numeric count/threshold settings below:
  *     - use a positive number to enable the threshold
  *     - use 0 to disable that specific threshold
+ *
+ * INTENTIONALLY COMMENTED KEYS
+ *   `basePath` and `baseHref` are still shown as commented examples rather than active values
+ *   because they are normally derived automatically from the deployed script URL. Leaving them
+ *   commented avoids accidental routing overrides when a site copies this sample unchanged.
  */
 (function (w) {
   w.__ODV_SITE_CONFIG__ = {
@@ -74,6 +79,17 @@
         //   "dialog"  -> intercept and open the OpenDocViewer print dialog
         ctrlOrCmdP: 'dialog'
       }
+    },
+
+    // =========================================================================
+    // Print UI behavior
+    // =========================================================================
+    print: {
+      // When a print request includes at least this many pages, the viewer shows a temporary
+      // informational overlay after the user clicks “Prepare printing”. This helps prevent users
+      // from launching multiple identical jobs while the browser is still building the preview.
+      // Use 0 to disable the notice.
+      preparationNoticeThresholdPages: 200
     },
 
     // =========================================================================
@@ -271,9 +287,33 @@
       },
 
       render: {
+        // Rendering strategy:
+        //   "eager-all"     -> render every page as soon as the source is known
+        //   "eager-nearby"  -> render a warm window around the active page
+        //   "lazy-viewport" -> render only what the viewport currently needs
+        strategy: 'eager-nearby',
+
+        // Rendering backend:
+        //   "hybrid-by-format" -> prefer worker-backed raster/TIFF paths when possible
+        //   "main-only"        -> keep rendering on the main thread only
+        backend: 'hybrid-by-format',
+
+        // 0 means “decide automatically from the current browser/runtime”.
+        workerCount: 0,
+        useWorkersForRasterImages: true,
+        useWorkersForTiff: true,
+
+        // Maximum number of main-thread renders allowed when the worker path is unavailable.
+        maxConcurrentMainThreadRenders: 3,
+
         // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
         maxConcurrentAssetRenders: 6,
+
+        // How many page assets to queue per warm-up batch, and how long to wait before the
+        // large-pane loading overlay appears for an individual page.
+        warmupBatchSize: 48,
+        loadingOverlayDelayMs: 90,
 
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.

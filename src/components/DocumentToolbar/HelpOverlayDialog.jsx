@@ -49,6 +49,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
       role="dialog"
       aria-modal="true"
       aria-labelledby="odv-help-title"
+      data-odv-shortcuts="off"
       onKeyDownCapture={(event) => {
         if (String(event?.key || '') !== 'Escape') return;
         event.preventDefault();
@@ -64,6 +65,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
         ref={dialogRef}
         className="odv-help-dialog"
         tabIndex={-1}
+        data-odv-shortcuts="off"
         onMouseDown={(event) => event.stopPropagation()}
       >
         <div className="odv-help-header">
