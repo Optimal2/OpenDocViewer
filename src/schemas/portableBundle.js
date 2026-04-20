@@ -45,9 +45,8 @@ export const __portableBundleSchemaVersion = 1;
  *
  * @typedef {Object} PortableDocumentEntry
  * @property {string} documentId                                   - Required stable ID for the document.
- * @property {string} [created]                                    - ISO timestamp when created.
- * @property {string} [modified]                                   - ISO timestamp when last modified.
- * @property {*} [meta]                                            - Arbitrary metadata bag (client-defined).
+ * @property {*} [meta]                                            - Raw metadata records (client-defined).
+ * @property {(Object.<string, string>|undefined)} [metadata]      - Optional semantic metadata aliases.
  * @property {Array.<(string|PortableDocumentFile)>} files         - Required list of file refs.
  */
 
@@ -104,6 +103,30 @@ function extFromString(s) {
   return undefined;
 }
 
+
+/**
+ * Normalize an alias-based metadata object to a predictable string map.
+ *
+ * @param {*} input
+ * @returns {(Object.<string, string>|undefined)}
+ */
+function normalizeMetadataAliases(input) {
+  const obj = toObject(input);
+  if (!obj) return undefined;
+
+  /** @type {Object.<string, string>} */
+  const out = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const normalizedKey = String(key || '').trim();
+    if (!normalizedKey || value == null) continue;
+    const normalizedValue = String(value);
+    if (normalizedValue === '') continue;
+    out[normalizedKey] = normalizedValue;
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
 /**
  * Normalize a file entry. Strings become `{ url }`. Missing `ext` is inferred best-effort.
  * Unknown properties are preserved.
@@ -145,9 +168,8 @@ export function normalizeDocumentEntry(input) {
   /** @type {PortableDocumentEntry} */
   const out = {
     documentId: String(obj.documentId || ''),
-    created: obj.created ? String(obj.created) : undefined,
-    modified: obj.modified ? String(obj.modified) : undefined,
     meta: obj.meta,
+    metadata: normalizeMetadataAliases(obj.metadata),
     files,
   };
   // Preserve unknown fields

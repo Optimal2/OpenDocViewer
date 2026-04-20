@@ -133,13 +133,10 @@
     // ---- INTEGRATION ADAPTERS -------------------------------------------------
     integrations: {
       portableBundle: {
-        // Optional mapping from semantic document fields to metadata-record identifiers used by
-        // an embedding host's object-document payload. Leave these unset in the generic public
-        // config and provide site-specific values only in a deployment-local override file.
-        metadataFieldMap: {
-          created: null,
-          modified: null
-        }
+        // Optional mapping from semantic metadata aliases to metadata-record identifiers used by
+        // an embedding host's object-document payload. Keep concrete deployment values out of
+        // the public repo and set them only in a deployment-local override file when needed.
+        metadataAliases: {}
       }
     },
 

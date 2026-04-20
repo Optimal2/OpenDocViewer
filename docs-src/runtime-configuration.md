@@ -55,16 +55,17 @@ Poor runtime-config candidates:
 ## Integration adapter mappings
 
 Some embedding hosts send an object-document payload where document-level metadata records need to
-be promoted into semantic bundle fields such as `created` or `modified`.
+be promoted into a deployment-defined semantic metadata alias map.
 
 That mapping is runtime-configurable under:
 
 ```js
 integrations: {
   portableBundle: {
-    metadataFieldMap: {
-      created: null,
-      modified: null
+    metadataAliases: {
+      documentDate: ['primary-date', 'fallback-date'],
+      patientId: 'patient-id',
+      unitName: 'unit-name'
     }
   }
 }
@@ -72,10 +73,11 @@ integrations: {
 
 Notes:
 
-- The shipped public repo keeps these values unset on purpose.
-- A deployment that needs host-specific metadata promotion can set one identifier per field, or an
-  ordered fallback array of identifiers, in its local `odv.site.config.js`.
-- Keep those concrete host-specific identifiers out of the public repo and in deployment-local
+- The shipped public repo keeps this object empty on purpose.
+- A deployment that needs host-specific metadata mapping can define any number of semantic aliases.
+- Each alias may point to one identifier or to an ordered fallback array of identifiers.
+- If no metadata aliasing is needed, leave the object empty or omit it entirely.
+- Keep concrete deployment-specific identifiers out of the public repo and in deployment-local
   integration documentation/configuration instead.
 
 ## Print shortcut policy
