@@ -93,6 +93,21 @@
     },
 
     // =========================================================================
+    // Integration adapters
+    // =========================================================================
+    integrations: {
+      portableBundle: {
+        // Optional mapping from semantic document fields to metadata-record identifiers used by
+        // a specific host payload. Keep the generic sample neutral; add deployment-specific values
+        // only in a local `odv.site.config.js` that stays outside the public source repo.
+        metadataFieldMap: {
+          created: null,
+          modified: null
+        }
+      }
+    },
+
+    // =========================================================================
     // User log (proxied via /ODVProxy/)
     // =========================================================================
     userLog: {

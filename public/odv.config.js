@@ -130,6 +130,19 @@
       preparationNoticeThresholdPages: 200
     },
 
+    // ---- INTEGRATION ADAPTERS -------------------------------------------------
+    integrations: {
+      portableBundle: {
+        // Optional mapping from semantic document fields to metadata-record identifiers used by
+        // an embedding host's object-document payload. Leave these unset in the generic public
+        // config and provide site-specific values only in a deployment-local override file.
+        metadataFieldMap: {
+          created: null,
+          modified: null
+        }
+      }
+    },
+
     // ---- USER LOG -------------------------------------------------------------
     userLog: {
       enabled:  false,
