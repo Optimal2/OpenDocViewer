@@ -143,6 +143,9 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
               <li>{t('help.sections.selection.collapse', {
                 defaultValue: 'Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.',
               })}</li>
+              <li>{t('help.sections.selection.shortcut', {
+                defaultValue: 'Press Delete to hide the current left/main page from the saved selection. Hold Shift in compare mode to hide the right page instead.',
+              })}</li>
             </ul>
             <p>{t('help.sections.selection.empty', {
               defaultValue: 'If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.',

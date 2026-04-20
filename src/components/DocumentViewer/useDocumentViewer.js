@@ -711,6 +711,13 @@ export function useDocumentViewer() {
     return true;
   }, [allPages, normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
 
+  const hideCurrentPageFromSelection = useCallback((target = 'primary') => {
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    const originalPageNumber = updateTarget === 'compare' ? compareOriginalPageNumber : currentOriginalPageNumber;
+    const originalIndex = Math.max(0, Math.floor(Number(originalPageNumber) || 0) - 1);
+    return hidePageFromSelection(originalIndex);
+  }, [compareOriginalPageNumber, currentOriginalPageNumber, hidePageFromSelection]);
+
   // --- Page navigation -----------------------------------------------------------
   /**
    * Resolve the next original 1-based page number from a visible-page update.
@@ -1201,6 +1208,7 @@ export function useDocumentViewer() {
     goToLastDocument,
     documentNavigationEnabled,
     compareNavigationEnabled: true,
+    hideCurrentPageFromSelection,
     zoomIn,
     zoomOut,
     actualSize,

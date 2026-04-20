@@ -283,7 +283,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const knownThumbnailAssetPagesRef = useRef(new Set());
 
   const renderWithLimit = useRef(createLimiter(
-    () => sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders || sessionConfigRef.current?.render?.maxConcurrentAssetRenders || 2
+    () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
   )).current;
 
   /**
