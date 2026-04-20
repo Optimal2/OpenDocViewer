@@ -52,6 +52,7 @@ Used when the frontend needs to fetch or resolve a previously prepared payload i
 - structural cleanup
 - tolerant field mapping
 - runtime-configurable metadata alias mapping
+- metadata preservation for later UI/print logic
 - defaulting / compatibility shaping
 
 It should not become a general-purpose transport layer or viewer state manager.
@@ -62,15 +63,99 @@ It should not become a general-purpose transport layer or viewer state manager.
 - keep integration-specific logging close to the integration layer
 - do not let viewer components depend directly on transport-specific payload shapes
 
+## Metadata preservation model
+
+The normalized bundle now keeps three parallel metadata surfaces per document:
+
+- `document.meta`
+  - ordered, rich raw records
+  - keeps `id`, `value`, `lookupValue`, labels when known, and unknown record properties
+- `document.metaById`
+  - object lookup keyed by metadata field id
+  - useful for direct access without rescanning the ordered array
+- `document.metadata` and `document.metadataDetails`
+  - optional semantic aliases derived from runtime config
+  - `metadata` is the simple alias -> selected text map
+  - `metadataDetails` keeps the richer alias resolution details
+
+This means the app can stay generic:
+
+- if no alias mapping is configured, no semantic aliases are produced
+- raw metadata still remains available in the normalized bundle
+- future UI or print features can consume either raw records or semantic aliases depending on need
+
+## Media configuration preservation
+
+When a host payload includes a document/media presentation object, the integration layer now keeps a
+normalized copy at `bundle.integration.mediaConfiguration`.
+
+That normalized structure preserves, when available:
+
+- large metadata field definitions
+- metadata sort field definitions
+- description / short-description / print-reference field lists
+- a merged `metadataFieldsById` catalog with known captions by source
+
+The viewer does not blindly execute host formatter strings. The data is preserved so future features
+can use the field ordering, captions, and format hints in a controlled way.
 
 ## Host-specific metadata alias mapping
 
-`normalizePortableBundle.js` may resolve selected metadata records into a semantic alias map on
-OpenDocViewer's neutral bundle model. That mapping is controlled by runtime config rather than by
-hardcoded identifiers in source.
+`normalizePortableBundle.js` may resolve selected metadata records into a semantic alias map on the
+neutral bundle model. That mapping is controlled by runtime config rather than by hardcoded identifiers
+in source.
 
-Use deployment-local runtime config when a particular embedding host needs to map one or more
-metadata-record identifiers to aliases such as `patientId`, `documentDate`, or other deployment-
-defined names. Resolved aliases are stored on `document.metadata`, while the normalized raw records
-remain available on `document.meta`.
+Supported runtime-config values per alias:
 
+- string
+  - one field id
+- array
+  - ordered fallback field ids
+- object
+  - `fieldId` / `fieldIds`
+  - `prefer`: `value`, `lookupValue`, `valueThenLookup`, or `lookupThenValue`
+  - optional `label`, `type`, and `contexts`
+
+Example:
+
+```js
+integrations: {
+  portableBundle: {
+    metadataAliases: {
+      patientId: 'patient-id',
+      documentDate: ['primary-date', 'fallback-date'],
+      unitName: {
+        fieldId: 'unit',
+        prefer: 'lookupValue',
+        label: 'Unit',
+        type: 'string',
+        contexts: ['screen', 'print']
+      }
+    }
+  }
+}
+```
+
+Resolved aliases are stored on:
+
+- `document.metadata`
+- `document.metadataDetails`
+
+while the normalized raw records remain available on:
+
+- `document.meta`
+- `document.metaById`
+
+## Access inside the app
+
+The full normalized bundle is now also exposed through `ViewerContext` as `bundle`.
+
+That gives future components a stable access path for:
+
+- document-level metadata panels
+- metadata-based print headers
+- document tooltips
+- document-aware context menus
+- diagnostics or support views
+
+without forcing metadata copies onto every page entry.

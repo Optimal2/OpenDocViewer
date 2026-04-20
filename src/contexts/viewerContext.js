@@ -106,6 +106,7 @@ import { createContext } from 'react';
 
 /**
  * @typedef {Object} ViewerContextValue
+ * @property {(Object|null)} bundle
  * @property {Array.<ViewerPageEntry>} allPages
  * @property {function(ViewerPageEntry, number): void} insertPageAtIndex
  * @property {function(Array.<ViewerPageEntry>, number): void} insertPagesAtIndex
@@ -139,6 +140,6 @@ import { createContext } from 'react';
  * @property {function(number, number): void} scheduleSourceWarmup
  */
 
-const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({}));
+const ViewerContext = createContext(/** @type {ViewerContextValue} */ ({ bundle: null }));
 
 export default ViewerContext;

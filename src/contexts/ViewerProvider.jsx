@@ -215,6 +215,7 @@ function createLimiter(getLimit) {
 /**
  * @typedef {Object} ViewerProviderProps
  * @property {React.ReactNode} children
+ * @property {(Object|null|undefined)} [bundle]
  * @property {boolean} [diagnosticsEnabled=false]
  */
 
@@ -222,7 +223,7 @@ function createLimiter(getLimit) {
  * @param {ViewerProviderProps} props
  * @returns {React.ReactElement}
  */
-export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
+export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
   const [workerCount, setWorkerCount] = useState(0);
@@ -1663,6 +1664,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
   }, [resetViewerState]);
 
   const contextValue = useMemo(() => ({
+    bundle,
     allPages,
     insertPageAtIndex,
     insertPagesAtIndex,
@@ -1695,6 +1697,7 @@ export const ViewerProvider = ({ children, diagnosticsEnabled = false }) => {
     pageLoadState,
     scheduleSourceWarmup,
   }), [
+    bundle,
     allPages,
     insertPageAtIndex,
     insertPagesAtIndex,

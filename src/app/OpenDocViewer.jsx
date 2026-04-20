@@ -48,7 +48,7 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
  * @param {number} [props.endNumber] Pattern mode: number of files to load
  * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit list mode: ordered list of document sources
- * @param {Object} [props.bundle]    Optional metadata object (reserved for future)
+ * @param {Object} [props.bundle]    Optional normalized bundle with document metadata and integration hints
  * @param {BootstrapDebugInfo} [props.bootstrapDebugInfo]
  *        Diagnostics-only transport details from startup detection
  * @param {(boolean|undefined)} [props.demoMode]
@@ -130,7 +130,7 @@ const OpenDocViewer = ({
   const showPerf = useMemo(() => isPerformanceOverlayEnabled(), []);
 
   return (
-    <ViewerProvider diagnosticsEnabled={showPerf}>
+    <ViewerProvider bundle={bundle || null} diagnosticsEnabled={showPerf}>
       <DocumentConsumerWrapper
         folder={folder}
         extension={extension}
