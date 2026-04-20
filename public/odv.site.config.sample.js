@@ -98,8 +98,15 @@
     integrations: {
       portableBundle: {
         // Optional mapping from semantic metadata aliases to metadata-record identifiers used by
-        // a specific host payload. Keep the generic sample neutral; add deployment-specific values
-        // only in a local `odv.site.config.js` that stays outside the public source repo.
+        // an embedding host's object-document payload. Supported values per alias:
+        //   - string:  one field id
+        //   - array:   ordered fallback field ids
+        //   - object:  { fieldId|fieldIds, prefer, label, type, contexts }
+        //
+        // The integration layer keeps all raw metadata records even when this object is empty.
+        // Use aliases only when a deployment wants stable semantic names for later UI/print logic.
+        // Keep deployment-specific values only in a local `odv.site.config.js` that stays outside
+        // the public source repo.
         metadataAliases: {}
       }
     },

@@ -134,8 +134,21 @@
     integrations: {
       portableBundle: {
         // Optional mapping from semantic metadata aliases to metadata-record identifiers used by
-        // an embedding host's object-document payload. Keep concrete deployment values out of
-        // the public repo and set them only in a deployment-local override file when needed.
+        // an embedding host's object-document payload. Supported values per alias:
+        //   - string:  one field id
+        //   - array:   ordered fallback field ids
+        //   - object:  { fieldId|fieldIds, prefer, label, type, contexts }
+        //
+        // `prefer` may be one of:
+        //   - 'value'
+        //   - 'lookupValue'
+        //   - 'valueThenLookup'   (default)
+        //   - 'lookupThenValue'
+        //
+        // The integration layer always preserves raw metadata records. This alias map is only for
+        // convenient semantic names and optional presentation hints used later inside the app.
+        // Keep concrete deployment values out of the public repo and set them only in a
+        // deployment-local override file when needed.
         metadataAliases: {}
       }
     },

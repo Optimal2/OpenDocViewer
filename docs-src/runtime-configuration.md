@@ -51,11 +51,10 @@ Poor runtime-config candidates:
 - secrets that should not be visible to the browser
 - values that need strong server-side enforcement
 
-
 ## Integration adapter mappings
 
 Some embedding hosts send an object-document payload where document-level metadata records need to
-be promoted into a deployment-defined semantic metadata alias map.
+be promoted into deployment-defined semantic aliases.
 
 That mapping is runtime-configurable under:
 
@@ -65,7 +64,13 @@ integrations: {
     metadataAliases: {
       documentDate: ['primary-date', 'fallback-date'],
       patientId: 'patient-id',
-      unitName: 'unit-name'
+      unitName: {
+        fieldId: 'unit-name',
+        prefer: 'lookupValue',
+        label: 'Unit',
+        type: 'string',
+        contexts: ['screen', 'print']
+      }
     }
   }
 }
@@ -75,10 +80,31 @@ Notes:
 
 - The shipped public repo keeps this object empty on purpose.
 - A deployment that needs host-specific metadata mapping can define any number of semantic aliases.
-- Each alias may point to one identifier or to an ordered fallback array of identifiers.
+- Each alias may point to one identifier, an ordered fallback list, or a richer selector object.
 - If no metadata aliasing is needed, leave the object empty or omit it entirely.
+- Raw metadata records are preserved regardless of alias configuration.
 - Keep concrete deployment-specific identifiers out of the public repo and in deployment-local
   integration documentation/configuration instead.
+
+### Alias selector object
+
+Supported selector properties:
+
+- `fieldId`
+  - one metadata field id
+- `fieldIds`
+  - ordered fallback ids
+- `prefer`
+  - `value`
+  - `lookupValue`
+  - `valueThenLookup` (default)
+  - `lookupThenValue`
+- `label`
+  - optional human-facing label for later UI/print use
+- `type`
+  - optional semantic hint such as `string`, `integer`, `date`, `datetime`
+- `contexts`
+  - optional list of intended usage targets such as `screen`, `print`, `sort`, `filter`, `debug`
 
 ## Print shortcut policy
 
@@ -138,7 +164,6 @@ Behavior:
 - If using a site override file, keep it deployment-local and avoid committing machine-specific values back into the main repo.
 - Prefer stable, same-origin logging endpoints when possible.
 - Re-check config precedence after any change to `bootConfig.js` or hosting rules.
-
 
 ## Large-document loading
 
@@ -258,46 +283,3 @@ What these knobs control:
 - compare navigation modifiers
   - toolbar page buttons still target the left pane by default
   - when `Shift` is held, the same toolbar buttons target the right compare pane instead
-  - if compare mode is not open yet, `Shift` + toolbar/keyboard navigation opens it and seeds the right pane from the requested page/document move
-  - the button disabled state follows the right pane while `Shift` is held so compare navigation stays available even when the left pane sits on the first/last page
-- performance overlay
-  - the diagnostics HUD now reports fetch strategy, render strategy/backend, worker routing, load-run duration, source/asset store usage, cache counts, tracked object URLs, and pending/warm-up activity
-  - the load-run timer stops when the current load finishes, but the other counters continue updating while the overlay stays visible
-  - when the overlay is disabled, the viewer skips the overlay-specific polling and snapshot collection entirely
-- print dialog during loading
-  - printing stays unavailable until all pages are fully loaded so the dialog, totals, and browser print preview cannot be destabilized by pages still arriving in the background
-- selection pane during loading
-  - the selection tab also stays unavailable until all pages are fully loaded so document/page checkboxes only appear once the final visible page universe is known
-
-Operationally, the hybrid pipeline works like this:
-
-1. prefetch source files early so expiring one-time URLs are captured quickly
-2. store the original bytes in memory or IndexedDB depending on the active profile
-3. analyze page counts in stable order from the fetched blob
-4. register placeholders immediately
-5. render thumbnails and full pages either eagerly or lazily depending on the mode
-6. persist rendered page blobs in a second cache layer so a page is normally rasterized once per session
-7. keep the large viewer and thumbnail selection synchronized; if the requested page is not ready quickly enough, the large pane switches to a dedicated loading overlay instead of continuing to imply that the previous page is still active
-
-### Thumbnail behavior
-
-`documentLoading.render.thumbnailMaxWidth` and `thumbnailMaxHeight` define the actual maximum raster size of generated thumbnails.
-
-`documentLoading.render.thumbnailLoadingStrategy` supports:
-
-- `adaptive` — keep a fixed-height thumbnail pane; eager-build all thumbnails for smaller documents, then switch to current/visible-first requests for larger ones
-- `eager` — keep a fixed-height thumbnail pane and build all thumbnails in the background
-- `viewport` — keep a fixed-height thumbnail pane but request only the current/visible thumbnails and nearby neighbors
-
-`documentLoading.render.thumbnailEagerPageThreshold` controls when `adaptive` changes from full background thumbnail warm-up to current/visible-first thumbnail requests. The scrollbar height remains deterministic in both modes because one row is rendered for every page.
-
-In this customer-focused configuration, the prefetch stage still keeps concurrency moderate, but it fails fast instead of retrying. The default profile now prefers reusing the full rendered page for both the large viewer and the thumbnail pane so long as memory pressure remains acceptable. When the session degrades toward memory protection, the same runtime policy can switch back to dedicated thumbnail rasters.
-
-
-`documentLoading.render.thumbnailSourceStrategy` supports:
-
-- `auto` — let the active mode decide; on performance-friendly runs it prefers reuse, while memory-heavy runs can switch back to dedicated thumbnails
-- `dedicated` — always build dedicated thumbnails
-- `prefer-full-images` — reuse the same rendered page asset for both the large pane and the thumbnail pane until memory-pressure rules override that choice
-
-The thumbnail pane itself always keeps a deterministic scrollbar height. Asset reuse changes what gets stored in memory and what gets persisted, but not the pane geometry.

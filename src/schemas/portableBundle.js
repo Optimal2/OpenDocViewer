@@ -45,8 +45,10 @@ export const __portableBundleSchemaVersion = 1;
  *
  * @typedef {Object} PortableDocumentEntry
  * @property {string} documentId                                   - Required stable ID for the document.
- * @property {*} [meta]                                            - Raw metadata records (client-defined).
- * @property {(Object.<string, string>|undefined)} [metadata]      - Optional semantic metadata aliases.
+ * @property {*} [meta]                                            - Rich raw metadata records (client-defined).
+ * @property {*} [metaById]                                        - Optional metadata lookup map by field id.
+ * @property {(Object.<string, string>|undefined)} [metadata]      - Optional semantic metadata alias -> text map.
+ * @property {*} [metadataDetails]                                 - Optional rich semantic metadata alias map.
  * @property {Array.<(string|PortableDocumentFile)>} files         - Required list of file refs.
  */
 
@@ -56,6 +58,7 @@ export const __portableBundleSchemaVersion = 1;
  * @typedef {Object} PortableDocumentBundle
  * @property {PortableSession} session
  * @property {Array.<PortableDocumentEntry>} documents
+ * @property {Object=} integration
  */
 
 /**
@@ -128,6 +131,51 @@ function normalizeMetadataAliases(input) {
 }
 
 /**
+ * Preserve a richer semantic alias object map without trying to deeply validate every property.
+ * The integration layer owns the detailed shape; the schema helper only keeps it object-based.
+ *
+ * @param {*} input
+ * @returns {(Object.<string, Object>|undefined)}
+ */
+function normalizeMetadataAliasDetails(input) {
+  const obj = toObject(input);
+  if (!obj) return undefined;
+
+  /** @type {Object.<string, Object>} */
+  const out = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const normalizedKey = String(key || '').trim();
+    const normalizedValue = toObject(value);
+    if (!normalizedKey || !normalizedValue) continue;
+    out[normalizedKey] = normalizedValue;
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
+ * Preserve a raw metadata lookup map without imposing a rigid record schema here.
+ *
+ * @param {*} input
+ * @returns {(Object.<string, Object>|undefined)}
+ */
+function normalizeMetadataIndex(input) {
+  const obj = toObject(input);
+  if (!obj) return undefined;
+
+  /** @type {Object.<string, Object>} */
+  const out = {};
+  for (const [key, value] of Object.entries(obj)) {
+    const normalizedKey = String(key || '').trim();
+    const normalizedValue = toObject(value);
+    if (!normalizedKey || !normalizedValue) continue;
+    out[normalizedKey] = normalizedValue;
+  }
+
+  return Object.keys(out).length > 0 ? out : undefined;
+}
+
+/**
  * Normalize a file entry. Strings become `{ url }`. Missing `ext` is inferred best-effort.
  * Unknown properties are preserved.
  *
@@ -169,7 +217,9 @@ export function normalizeDocumentEntry(input) {
   const out = {
     documentId: String(obj.documentId || ''),
     meta: obj.meta,
+    metaById: normalizeMetadataIndex(obj.metaById),
     metadata: normalizeMetadataAliases(obj.metadata),
+    metadataDetails: normalizeMetadataAliasDetails(obj.metadataDetails),
     files,
   };
   // Preserve unknown fields
@@ -201,6 +251,7 @@ export function normalizePortableBundle(input) {
       issuedAt: sessionIn.issuedAt != null ? String(sessionIn.issuedAt) : undefined,
     },
     documents: docsIn.map(normalizeDocumentEntry),
+    integration: toObject(obj.integration) || undefined,
   };
 
   return out;
