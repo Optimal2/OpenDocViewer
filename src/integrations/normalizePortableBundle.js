@@ -39,9 +39,8 @@ import { createOpaqueId } from '../utils/idUtils.js';
  *
  * @typedef {Object} PortableDocumentEntry
  * @property {string} documentId
- * @property {string} [created]
- * @property {string} [modified]
- * @property {*}      [meta]          Caller-defined metadata bag (kept as-is).
+ * @property {*}      [meta]          Raw metadata records kept in normalized array form.
+ * @property {(Object.<string, string>|undefined)} [metadata] Optional semantic metadata aliases.
  * @property {Array.<(string|PortableDocumentFile)>} files
  */
 
@@ -54,12 +53,12 @@ import { createOpaqueId } from '../utils/idUtils.js';
  */
 
 /**
- * Runtime-configurable mapping between semantic document fields and metadata record identifiers used
+ * Runtime-configurable mapping between semantic metadata aliases and metadata record identifiers used
  * by a host-specific object-document payload.
  *
- * @typedef {Object} PortableBundleMetadataFieldMap
- * @property {(string|Array.<string>|null|undefined)} [created]
- * @property {(string|Array.<string>|null|undefined)} [modified]
+ * Example: `{ patientId: 'patient-id', documentDate: ['primary-date', 'fallback-date'] }`
+ *
+ * @typedef {Object.<string, (string|Array.<string>|null|undefined)>} PortableBundleMetadataAliasMap
  */
 
 /* ========================================================================== *
@@ -191,7 +190,7 @@ function fromUrlArray(arr) {
 function fromObjectDocumentModel(model) {
   const sessId = String(model.SessionId ?? model.sessionId ?? nowId());
   const userId = model.UserId ?? model.userId ?? '';
-  const metadataFieldMap = getPortableBundleMetadataFieldMap();
+  const metadataAliasMap = getPortableBundleMetadataAliasMap();
 
   const documents = [];
 
@@ -200,10 +199,7 @@ function fromObjectDocumentModel(model) {
 
     const documentValue = isObject(docVal) ? docVal : {};
     const md = resolveMetadataBag(documentValue, docKey);
-    const created = resolveSemanticMetadataValue(md, metadataFieldMap.created)
-      ?? coerceOptionalString(documentValue.Created ?? documentValue.created);
-    const modified = resolveSemanticMetadataValue(md, metadataFieldMap.modified)
-      ?? coerceOptionalString(documentValue.Modified ?? documentValue.modified);
+    const resolvedMetadata = resolveMetadataAliases(md, metadataAliasMap);
 
     const files = [];
 
@@ -229,9 +225,8 @@ function fromObjectDocumentModel(model) {
 
     documents.push({
       documentId: String(docKey),
-      created,
-      modified,
       meta: mappedMeta,
+      metadata: hasOwnKeys(resolvedMetadata) ? resolvedMetadata : undefined,
       files,
     });
   }
@@ -242,15 +237,20 @@ function fromObjectDocumentModel(model) {
   });
 }
 
-function getPortableBundleMetadataFieldMap() {
+function getPortableBundleMetadataAliasMap() {
   try {
     const cfg = getRuntimeConfig();
-    const map = cfg?.integrations?.portableBundle?.metadataFieldMap;
+    const map = cfg?.integrations?.portableBundle?.metadataAliases;
     if (!isObject(map)) return {};
-    return {
-      created: normalizeMetadataSelector(map.created),
-      modified: normalizeMetadataSelector(map.modified),
-    };
+
+    const out = {};
+    for (const [alias, selector] of Object.entries(map)) {
+      const normalizedAlias = String(alias || '').trim();
+      const normalizedSelector = normalizeMetadataSelector(selector);
+      if (!normalizedAlias || !normalizedSelector) continue;
+      out[normalizedAlias] = normalizedSelector;
+    }
+    return out;
   } catch {
     return {};
   }
@@ -277,14 +277,21 @@ function resolveMetadataBag(documentValue, documentKey) {
   return /** @type {Object.<string, *>} */ (candidate);
 }
 
-function resolveSemanticMetadataValue(md, selector) {
-  if (!md || !selector) return undefined;
-  const keys = Array.isArray(selector) ? selector : [selector];
-  for (const key of keys) {
-    const value = pickMeta(md, key);
-    if (value != null && value !== '') return value;
+function resolveMetadataAliases(md, aliasMap) {
+  const out = {};
+  if (!md || !isObject(aliasMap)) return out;
+
+  for (const [alias, selector] of Object.entries(aliasMap)) {
+    const keys = Array.isArray(selector) ? selector : [selector];
+    for (const key of keys) {
+      const value = pickMeta(md, key);
+      if (value == null || value === '') continue;
+      out[alias] = value;
+      break;
+    }
   }
-  return undefined;
+
+  return out;
 }
 
 function pickMeta(md, key) {
@@ -314,6 +321,24 @@ function coerceOptionalString(value) {
   return out === '' ? undefined : out;
 }
 
+function sanitizeDocumentMetadata(value) {
+  if (!isObject(value)) return undefined;
+
+  const out = {};
+  for (const [key, entry] of Object.entries(value)) {
+    const normalizedKey = String(key || '').trim();
+    const normalizedValue = coerceOptionalString(entry);
+    if (!normalizedKey || normalizedValue == null) continue;
+    out[normalizedKey] = normalizedValue;
+  }
+
+  return hasOwnKeys(out) ? out : undefined;
+}
+
+function hasOwnKeys(value) {
+  return !!value && typeof value === 'object' && Object.keys(value).length > 0;
+}
+
 function sanitizeBundle(b) {
   const session = {
     id: String(b?.session?.id ?? nowId()),
@@ -324,11 +349,10 @@ function sanitizeBundle(b) {
   const documents = Array.isArray(b?.documents)
     ? b.documents.map((d) => ({
         documentId: String(d?.documentId ?? createOpaqueId('doc', 8)),
-        created: d?.created,
-        modified: d?.modified,
         meta: d?.meta,
+        metadata: sanitizeDocumentMetadata(d?.metadata),
         files: Array.isArray(d?.files) ? d.files.map(toTicket) : [],
-        ...spreadUnknown(d || {}, ['documentId', 'created', 'modified', 'meta', 'files']),
+        ...spreadUnknown(d || {}, ['documentId', 'meta', 'metadata', 'files']),
       }))
     : [];
 

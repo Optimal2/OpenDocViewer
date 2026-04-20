@@ -245,7 +245,7 @@ The config covers areas such as:
 - user print logging
 - system logging
 - application base path/base href
-- optional integration-adapter metadata mappings
+- optional integration-adapter metadata alias mappings
 - large-document loading (`documentLoading`) for warnings, temp storage, lazy rendering, and cache limits
 
 For deployment and precedence details, see `docs-src/runtime-configuration.md`.

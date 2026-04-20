@@ -51,7 +51,7 @@ Used when the frontend needs to fetch or resolve a previously prepared payload i
 
 - structural cleanup
 - tolerant field mapping
-- runtime-configurable metadata promotion
+- runtime-configurable metadata alias mapping
 - defaulting / compatibility shaping
 
 It should not become a general-purpose transport layer or viewer state manager.
@@ -63,12 +63,14 @@ It should not become a general-purpose transport layer or viewer state manager.
 - do not let viewer components depend directly on transport-specific payload shapes
 
 
-## Host-specific metadata promotion
+## Host-specific metadata alias mapping
 
-`normalizePortableBundle.js` may promote selected metadata records into semantic document fields on
+`normalizePortableBundle.js` may resolve selected metadata records into a semantic alias map on
 OpenDocViewer's neutral bundle model. That mapping is controlled by runtime config rather than by
 hardcoded identifiers in source.
 
 Use deployment-local runtime config when a particular embedding host needs to map one or more
-metadata-record identifiers to semantic fields such as `created` or `modified`.
+metadata-record identifiers to aliases such as `patientId`, `documentDate`, or other deployment-
+defined names. Resolved aliases are stored on `document.metadata`, while the normalized raw records
+remain available on `document.meta`.
 
