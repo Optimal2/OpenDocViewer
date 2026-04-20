@@ -7,7 +7,7 @@
  *  - Sticky Fit recomputation on relevant changes
  *  - ResizeObserver to re-fit on container resize
  *  - Global Ctrl/Cmd + wheel zoom
- *  - Global keyboard navigation/zoom/hotkeys with context guards
+ *  - Global keyboard navigation/zoom shortcuts with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
  * The keyboard layer now understands compare-targeted navigation with Shift and document-level
@@ -54,10 +54,6 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {boolean} compareNavigationEnabled
  * @property {Function} zoomIn
  * @property {Function} zoomOut
- * @property {Function} actualSize
- * @property {Function} fitToScreen
- * @property {Function} fitToWidth
- * @property {Function} handleCompare
  * @property {Function} rotateLeft
  * @property {Function} rotateRight
  * @property {Function=} onOpenPrintDialog
@@ -196,10 +192,6 @@ export function useViewerEffects(args) {
     compareNavigationEnabled,
     zoomIn,
     zoomOut,
-    actualSize,
-    fitToScreen,
-    fitToWidth,
-    handleCompare,
     rotateLeft,
     rotateRight,
     onOpenPrintDialog,
@@ -222,13 +214,8 @@ export function useViewerEffects(args) {
   const compareNavigationEnabledRef = useRef(compareNavigationEnabled);
   const zoomInRef = useRef(zoomIn);
   const zoomOutRef = useRef(zoomOut);
-  const actualSizeRef = useRef(actualSize);
-  const fitToScreenRef = useRef(fitToScreen);
-  const fitToWidthRef = useRef(fitToWidth);
-  const handleCompareRef = useRef(handleCompare);
   const rotateLeftRef = useRef(rotateLeft);
   const rotateRightRef = useRef(rotateRight);
-  const onOpenPrintDialogRef = useRef(onOpenPrintDialog);
 
   goToPreviousPageRef.current = goToPreviousPage;
   goToNextPageRef.current = goToNextPage;
@@ -242,13 +229,8 @@ export function useViewerEffects(args) {
   compareNavigationEnabledRef.current = compareNavigationEnabled;
   zoomInRef.current = zoomIn;
   zoomOutRef.current = zoomOut;
-  actualSizeRef.current = actualSize;
-  fitToScreenRef.current = fitToScreen;
-  fitToWidthRef.current = fitToWidth;
-  handleCompareRef.current = handleCompare;
   rotateLeftRef.current = rotateLeft;
   rotateRightRef.current = rotateRight;
-  onOpenPrintDialogRef.current = onOpenPrintDialog;
 
   const handleKeyboardPreviousRepeatStep = useCallback(() => {
     const target = keyboardRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
@@ -517,14 +499,9 @@ export function useViewerEffects(args) {
           if (!hasModifierKey && e.code === 'NumpadAdd') { e.preventDefault(); zoomInRef.current?.(); break; }
           if (!hasModifierKey && e.code === 'NumpadSubtract') { e.preventDefault(); zoomOutRef.current?.(); break; }
 
-          // Number hotkeys (Print, 1:1, Fit Page, Fit Width, Compare)
-          if (!hasModifierKey && !e.shiftKey && !e.altKey) {
-            if (e.key === '0') { e.preventDefault(); if (printEnabled) onOpenPrintDialogRef.current?.(); }
-            else if (e.key === '1') { e.preventDefault(); actualSizeRef.current?.(); }
-            else if (e.key === '2') { e.preventDefault(); fitToScreenRef.current?.(); }
-            else if (e.key === '3') { e.preventDefault(); fitToWidthRef.current?.(); }
-            else if (e.key === '4') { e.preventDefault(); handleCompareRef.current?.(); }
-          }
+          // Plain number keys are intentionally not used as global viewer shortcuts anymore.
+          // The next shortcut revision will introduce modifier-based letter combinations so we
+          // avoid collisions with assistive technology, browser features, and form-like contexts.
           break;
       }
     }
