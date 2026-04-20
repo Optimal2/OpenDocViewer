@@ -5,7 +5,7 @@
  * Normalizes multiple host payload shapes into the project’s neutral portable bundle shape.
  *
  * Responsibilities:
- * - accept already-normalized bundles, legacy parent-page models, URL arrays, and single URLs
+ * - accept already-normalized bundles, object-document host models, URL arrays, and single URLs
  * - sanitize the result into a predictable shape for the rest of the app
  * - avoid network access or heavy runtime dependencies
  *
@@ -13,6 +13,7 @@
  * branching on host-specific input shapes.
  */
 
+import { getRuntimeConfig } from '../utils/runtimeConfig.js';
 import { createOpaqueId } from '../utils/idUtils.js';
 
 /**
@@ -52,6 +53,15 @@ import { createOpaqueId } from '../utils/idUtils.js';
  * @property {Array.<PortableDocumentEntry>} documents
  */
 
+/**
+ * Runtime-configurable mapping between semantic document fields and metadata record identifiers used
+ * by a host-specific object-document payload.
+ *
+ * @typedef {Object} PortableBundleMetadataFieldMap
+ * @property {(string|Array.<string>|null|undefined)} [created]
+ * @property {(string|Array.<string>|null|undefined)} [modified]
+ */
+
 /* ========================================================================== *
  * Public API
  * ========================================================================== */
@@ -65,27 +75,22 @@ import { createOpaqueId } from '../utils/idUtils.js';
 export function normalizeToPortableBundle(input) {
   if (!input) return null;
 
-  // 1) Already in neutral form
   if (isObject(input) && hasNeutralShape(/** @type {*} */ (input))) {
     return sanitizeBundle(/** @type {*} */ (input));
   }
 
-  // 2) Legacy-like parent-page model → neutral
-  if (isObject(input) && looksLikeLegacyParentModel(/** @type {*} */ (input))) {
-    return fromLegacyParentModel(/** @type {*} */ (input));
+  if (isObject(input) && looksLikeObjectDocumentModel(/** @type {*} */ (input))) {
+    return fromObjectDocumentModel(/** @type {*} */ (input));
   }
 
-  // 3) Array of URLs or ticket objects/strings
   if (Array.isArray(input)) {
     return fromUrlArray(/** @type {Array.<*>} */ (input));
   }
 
-  // 4) Single URL string?
   if (typeof input === 'string') {
     return fromUrlArray([input]);
   }
 
-  // 5) Unknown shape; coerce minimally to a sanitized bundle with empty docs.
   return sanitizeBundle({
     session: {
       id: String(/** @type {*} */ (input)?.sessionId || /** @type {*} */ (input)?.SessionId || nowId()),
@@ -95,42 +100,19 @@ export function normalizeToPortableBundle(input) {
   });
 }
 
-/* ========================================================================== *
- * Implementation
- * ========================================================================== */
-
-/**
- * Is a plain object (and not an array / null).
- * @param {*} v
- * @returns {boolean}
- */
 function isObject(v) {
   return !!v && typeof v === 'object' && !Array.isArray(v);
 }
 
-/**
- * Generate a simple, unique-ish id using current time (for fallbacks).
- * @returns {string}
- */
 function nowId() {
   try { return String(Date.now()); } catch { return '0'; }
 }
 
-/**
- * Determine if an input object appears to already have the neutral shape.
- * @param {*} obj
- * @returns {boolean}
- */
 function hasNeutralShape(obj) {
   return isObject(obj?.session) && Array.isArray(obj?.documents);
 }
 
-/**
- * Determine if an input object resembles the legacy parent-page model.
- * @param {*} obj
- * @returns {boolean}
- */
-function looksLikeLegacyParentModel(obj) {
+function looksLikeObjectDocumentModel(obj) {
   return (
     isObject(obj) &&
     isObject(obj.PortableDocuments) &&
@@ -139,14 +121,6 @@ function looksLikeLegacyParentModel(obj) {
   );
 }
 
-/**
- * Resolve a URL-like string against the current document base (SSR-safe).
- * If the string begins with "/", treat it as app-relative (strip the slash)
- * so "/images/a.png" becomes "<base>/images/a.png" instead of site-root.
- *
- * @param {*} u
- * @returns {string}
- */
 function absUrl(u) {
   try {
     const s = String(u || '');
@@ -161,11 +135,6 @@ function absUrl(u) {
   }
 }
 
-/**
- * Best-effort extension extraction from a url/path string.
- * @param {string} s
- * @returns {(string|undefined)}
- */
 function extFromString(s) {
   try {
     const q = String(s || '');
@@ -174,20 +143,12 @@ function extFromString(s) {
     if (lastDot > lastSlash && lastDot !== -1 && lastDot < q.length - 1) {
       return q.slice(lastDot + 1).toLowerCase();
     }
-  } catch { /* ignore */ }
+  } catch {}
   return undefined;
 }
 
-/**
- * Convert a "ticket" (string or object) into a normalized PortableDocumentFile (minimal).
- * Strings may be raw URLs or "id|ext|path" triples; objects may contain { id, ext, path, url }.
- *
- * @param {*} objOrStr
- * @returns {PortableDocumentFile}
- */
 function toTicket(objOrStr) {
   if (typeof objOrStr === 'string') {
-    // Could be "id|ext|path" or a URL
     if (objOrStr.includes('|')) {
       const [id, ext, path] = objOrStr.split('|');
       const url = path ? absUrl(path) : undefined;
@@ -204,7 +165,6 @@ function toTicket(objOrStr) {
       ext: (ext || extFromString(resolved || path || ''))?.toLowerCase(),
       path: path != null ? String(path) : undefined,
       url: resolved,
-      // Preserve unknown fields (non-destructive shaping)
       ...spreadUnknown(/** @type {Object.<string, *>} */ (objOrStr), ['id', 'ext', 'path', 'url']),
     };
   }
@@ -212,14 +172,7 @@ function toTicket(objOrStr) {
   return {};
 }
 
-/**
- * Return a shallow copy of obj without the listed keys (for preserving unknown fields).
- * @param {Object.<string, *>} obj
- * @param {Array.<string>} exclude
- * @returns {Object.<string, *>}
- */
 function spreadUnknown(obj, exclude) {
-  /** @type {Object.<string, *>} */
   const out = {};
   for (const k in obj) {
     if (!exclude.includes(k)) out[k] = obj[k];
@@ -227,11 +180,6 @@ function spreadUnknown(obj, exclude) {
   return out;
 }
 
-/**
- * Build a neutral bundle from an array of tickets/URLs.
- * @param {Array.<*>} arr
- * @returns {PortableDocumentBundle}
- */
 function fromUrlArray(arr) {
   const files = arr.map(toTicket);
   return sanitizeBundle({
@@ -240,45 +188,28 @@ function fromUrlArray(arr) {
   });
 }
 
-/**
- * Map a legacy parent-page model to a neutral bundle.
- *
- * Expected (partial) legacy shape:
- *   {
- *     SessionId: string|number,
- *     UserId?: string|number,
- *     PortableDocuments: {
- *       [documentId]: {
- *         FileCollection: { [k]: { FileId?, FileName?, FilePath?|Path?|Url? } },
- *         MetaDataCollection: { [k]: { DataId, Value?, LookupValue? } }
- *       },
- *       $id?: ...
- *     }
- *   }
- *
- * @param {Object.<string, *>} model
- * @returns {PortableDocumentBundle}
- */
-function fromLegacyParentModel(model) {
+function fromObjectDocumentModel(model) {
   const sessId = String(model.SessionId ?? model.sessionId ?? nowId());
   const userId = model.UserId ?? model.userId ?? '';
+  const metadataFieldMap = getPortableBundleMetadataFieldMap();
 
-  /** @type {Array.<PortableDocumentEntry>} */
   const documents = [];
 
-  // Shape: PortableDocuments is an object keyed by documentId
   for (const [docKey, docVal] of Object.entries(model.PortableDocuments || {})) {
     if (docKey === '$id') continue;
 
-    const md = (docVal.MetaDataCollection && docVal.MetaDataCollection[docKey]) || {};
-    const created = pickMeta(/** @type {Object.<string, *>} */ (md), '500');
-    const modified = pickMeta(/** @type {Object.<string, *>} */ (md), '502');
+    const documentValue = isObject(docVal) ? docVal : {};
+    const md = resolveMetadataBag(documentValue, docKey);
+    const created = resolveSemanticMetadataValue(md, metadataFieldMap.created)
+      ?? coerceOptionalString(documentValue.Created ?? documentValue.created);
+    const modified = resolveSemanticMetadataValue(md, metadataFieldMap.modified)
+      ?? coerceOptionalString(documentValue.Modified ?? documentValue.modified);
 
-    /** @type {Array.<PortableDocumentFile>} */
     const files = [];
 
-    for (const [fileKey, f] of Object.entries(docVal.FileCollection || {})) {
+    for (const [fileKey, f] of Object.entries(documentValue.FileCollection || {})) {
       if (fileKey === '$id') continue;
+      if (!isObject(f)) continue;
       const fileName = String(f.FileName || '');
       const ext = (fileName.split('.').pop() || '').toLowerCase();
       const path = f.FilePath || f.Path || f.Url || '';
@@ -286,8 +217,6 @@ function fromLegacyParentModel(model) {
       files.push(toTicket(ticket));
     }
 
-    // Preserve metadata in a compact array (id/value/lookupValue). The legacy payload nests the
-    // actual fields one level below `MetaDataCollection[documentId]`, so flatten that level here.
     const mappedMeta = [];
     for (const [metaKey, m] of Object.entries(md || {})) {
       if (metaKey === '$id') continue;
@@ -313,29 +242,78 @@ function fromLegacyParentModel(model) {
   });
 }
 
-/**
- * Pick a metadata value by key (best-effort).
- * @param {Object.<string, *>} md
- * @param {string} key
- * @returns {(string|undefined)}
- */
-function pickMeta(md, key) {
-  if (!md || !md[key]) return undefined;
-  return md[key].Value ?? md[key].value ?? undefined;
+function getPortableBundleMetadataFieldMap() {
+  try {
+    const cfg = getRuntimeConfig();
+    const map = cfg?.integrations?.portableBundle?.metadataFieldMap;
+    if (!isObject(map)) return {};
+    return {
+      created: normalizeMetadataSelector(map.created),
+      modified: normalizeMetadataSelector(map.modified),
+    };
+  } catch {
+    return {};
+  }
 }
 
-/**
- * Sanitize a possibly-partial bundle to the canonical shape:
- *  - Ensure session.id exists and is stringified
- *  - Ensure documents[] exists (array)
- *  - Ensure each document has a string documentId
- *  - Ensure each document.files[] exists and is normalized via toTicket()
- *
- * Unknown keys are preserved at both bundle and document/file levels.
- *
- * @param {*} b
- * @returns {PortableDocumentBundle}
- */
+function normalizeMetadataSelector(value) {
+  if (Array.isArray(value)) {
+    const cleaned = value
+      .map((entry) => (entry == null ? '' : String(entry).trim()))
+      .filter(Boolean);
+    return cleaned.length > 0 ? cleaned : undefined;
+  }
+  if (value == null) return undefined;
+  const single = String(value).trim();
+  return single || undefined;
+}
+
+function resolveMetadataBag(documentValue, documentKey) {
+  const candidate = documentValue.MetaDataCollection;
+  if (!isObject(candidate)) return {};
+
+  const nested = candidate[documentKey];
+  if (isObject(nested)) return /** @type {Object.<string, *>} */ (nested);
+  return /** @type {Object.<string, *>} */ (candidate);
+}
+
+function resolveSemanticMetadataValue(md, selector) {
+  if (!md || !selector) return undefined;
+  const keys = Array.isArray(selector) ? selector : [selector];
+  for (const key of keys) {
+    const value = pickMeta(md, key);
+    if (value != null && value !== '') return value;
+  }
+  return undefined;
+}
+
+function pickMeta(md, key) {
+  if (!md || !key) return undefined;
+
+  const direct = md[key];
+  if (isObject(direct)) {
+    return coerceOptionalString(direct.Value ?? direct.value ?? direct.LookupValue ?? direct.lookupValue);
+  }
+  if (direct != null && typeof direct !== 'object') {
+    return coerceOptionalString(direct);
+  }
+
+  for (const value of Object.values(md)) {
+    if (!isObject(value)) continue;
+    const dataId = value.DataId ?? value.dataId ?? value.Id ?? value.id;
+    if (dataId == null || String(dataId) !== key) continue;
+    return coerceOptionalString(value.Value ?? value.value ?? value.LookupValue ?? value.lookupValue);
+  }
+
+  return undefined;
+}
+
+function coerceOptionalString(value) {
+  if (value == null) return undefined;
+  const out = String(value);
+  return out === '' ? undefined : out;
+}
+
 function sanitizeBundle(b) {
   const session = {
     id: String(b?.session?.id ?? nowId()),

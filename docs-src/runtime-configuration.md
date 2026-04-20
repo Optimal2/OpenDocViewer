@@ -43,12 +43,40 @@ Good runtime-config candidates:
 - diagnostics toggles
 - keyboard shortcut policy for browser-print interception
 - deployment base path / base href
+- optional integration-adapter mappings for host payload metadata
 
 Poor runtime-config candidates:
 
 - logic that should be compile-time code
 - secrets that should not be visible to the browser
 - values that need strong server-side enforcement
+
+
+## Integration adapter mappings
+
+Some embedding hosts send an object-document payload where document-level metadata records need to
+be promoted into semantic bundle fields such as `created` or `modified`.
+
+That mapping is runtime-configurable under:
+
+```js
+integrations: {
+  portableBundle: {
+    metadataFieldMap: {
+      created: null,
+      modified: null
+    }
+  }
+}
+```
+
+Notes:
+
+- The shipped public repo keeps these values unset on purpose.
+- A deployment that needs host-specific metadata promotion can set one identifier per field, or an
+  ordered fallback array of identifiers, in its local `odv.site.config.js`.
+- Keep those concrete host-specific identifiers out of the public repo and in deployment-local
+  integration documentation/configuration instead.
 
 ## Print shortcut policy
 
