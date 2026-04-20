@@ -23,11 +23,13 @@
  *     scrollable document surface never overlaps the controls.
  */
 
-import React, { useCallback, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import DocumentRender from '../DocumentRender.jsx';
 import CompareZoomOverlay from './CompareZoomOverlay.jsx';
+import ViewerContext from '../../contexts/viewerContext.js';
+import { bundleDocumentHasMetadata } from '../../utils/documentMetadata.js';
 
 /**
  * @typedef {'primary'|'compare'} ViewerPaneKey
@@ -40,13 +42,14 @@ import CompareZoomOverlay from './CompareZoomOverlay.jsx';
  * @property {number} originalIndex
  * @property {number} documentNumber
  * @property {number} totalDocuments
+ * @property {(string|undefined)} [documentId]
  * @property {ViewerPaneKey} pane
  */
 
 /**
  * @param {Array<any>} allPages
  * @param {number} originalPageNumber
- * @returns {{ originalIndex:number, documentNumber:number, totalDocuments:number } | null}
+ * @returns {{ originalIndex:number, documentNumber:number, totalDocuments:number, documentId:(string|undefined) } | null}
  */
 function getPageSelectionContext(allPages, originalPageNumber) {
   const safePageNumber = Math.max(1, Math.floor(Number(originalPageNumber) || 0));
@@ -57,6 +60,7 @@ function getPageSelectionContext(allPages, originalPageNumber) {
     originalIndex: safePageNumber - 1,
     documentNumber: Math.max(1, Number(page?.documentNumber) || 1),
     totalDocuments: Math.max(1, Number(page?.totalDocuments) || 1),
+    documentId: String(page?.documentId || '').trim() || undefined,
   };
 }
 
@@ -84,6 +88,7 @@ function getPageSelectionContext(allPages, originalPageNumber) {
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean=} props.onHidePageFromSelection
  * @param {function(number): boolean=} props.onHideDocumentFromSelection
+ * @param {function(number): boolean=} [props.onOpenDocumentMetadata]
  * @param {function(): void=} props.closeCompare
  * @returns {React.ReactElement}
  */
@@ -107,9 +112,11 @@ const DocumentViewerRender = ({
   selectionPanelEnabled = false,
   onHidePageFromSelection,
   onHideDocumentFromSelection,
+  onOpenDocumentMetadata,
   closeCompare,
 }) => {
   const { t } = useTranslation('common');
+  const { bundle } = useContext(ViewerContext);
   const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const [contextMenuState, setContextMenuState] = useState(
     /** @type {(ViewerContextMenuState|null)} */ (null)
@@ -189,8 +196,10 @@ const DocumentViewerRender = ({
     const hasSelectionActions = !!selectionPanelEnabled
       && (typeof onHidePageFromSelection === 'function' || typeof onHideDocumentFromSelection === 'function');
     const hasCompareCloseAction = pane === 'compare' && isComparing && typeof closeCompare === 'function';
+    const hasMetadataAction = typeof onOpenDocumentMetadata === 'function'
+      && bundleDocumentHasMetadata(bundle, Array.isArray(allPages) ? allPages[Math.max(0, (Number(originalPageNumber) || 1) - 1)]?.documentId : undefined);
 
-    if (!hasSelectionActions && !hasCompareCloseAction) {
+    if (!hasSelectionActions && !hasCompareCloseAction && !hasMetadataAction) {
       closeContextMenu();
       return;
     }
@@ -207,7 +216,7 @@ const DocumentViewerRender = ({
       pane,
       ...selectionContext,
     });
-  }, [allPages, closeCompare, closeContextMenu, isComparing, onHideDocumentFromSelection, onHidePageFromSelection, selectionPanelEnabled]);
+  }, [allPages, bundle, closeCompare, closeContextMenu, isComparing, onHideDocumentFromSelection, onHidePageFromSelection, onOpenDocumentMetadata, selectionPanelEnabled]);
 
   const handleHidePageFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof onHidePageFromSelection !== 'function') return;
@@ -221,6 +230,12 @@ const DocumentViewerRender = ({
     closeContextMenu();
   }, [closeContextMenu, contextMenuState, onHideDocumentFromSelection]);
 
+  const handleOpenMetadataFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onOpenDocumentMetadata !== 'function') return;
+    const opened = onOpenDocumentMetadata(contextMenuState.originalIndex);
+    if (opened !== false) closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onOpenDocumentMetadata]);
+
   const handleCloseCompareFromContextMenu = useCallback(() => {
     if (!contextMenuState || contextMenuState.pane !== 'compare' || typeof closeCompare !== 'function') return;
     closeCompare();
@@ -232,12 +247,15 @@ const DocumentViewerRender = ({
   const effectiveRightZoom = isComparing ? zoom * postZoomRight : zoom;
   const canHidePageFromSelection = !!selectionPanelEnabled && typeof onHidePageFromSelection === 'function';
   const canHideDocumentFromSelection = !!selectionPanelEnabled && typeof onHideDocumentFromSelection === 'function';
+  const canOpenMetadataFromContextMenu = !!contextMenuState
+    && typeof onOpenDocumentMetadata === 'function'
+    && bundleDocumentHasMetadata(bundle, contextMenuState.documentId);
   const canCloseCompareFromContextMenu = !!contextMenuState && contextMenuState.pane === 'compare' && isComparing && typeof closeCompare === 'function';
   const contextMenuLeft = contextMenuState
     ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 240) - 248)))
     : 0;
   const contextMenuTop = contextMenuState
-    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 196) - 196)))
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 256) - 256)))
     : 0;
 
   return (
@@ -315,6 +333,24 @@ const DocumentViewerRender = ({
           role="menu"
           style={{ left: `${contextMenuLeft}px`, top: `${contextMenuTop}px` }}
         >
+          {canOpenMetadataFromContextMenu ? (
+            <button
+              type="button"
+              className="odv-context-menu-item"
+              role="menuitem"
+              onClick={handleOpenMetadataFromContextMenu}
+              title={t('thumbnails.contextMenu.showDocumentMetadata', {
+                defaultValue: 'Show metadata for this document',
+              })}
+            >
+              <span className="material-icons" aria-hidden="true">table_view</span>
+              <span>
+                {t('thumbnails.contextMenu.showDocumentMetadataLabel', {
+                  defaultValue: 'Show document metadata',
+                })}
+              </span>
+            </button>
+          ) : null}
           {canHidePageFromSelection ? (
             <button
               type="button"
@@ -405,6 +441,7 @@ DocumentViewerRender.propTypes = {
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,
   onHideDocumentFromSelection: PropTypes.func,
+  onOpenDocumentMetadata: PropTypes.func,
   closeCompare: PropTypes.func,
 };
 

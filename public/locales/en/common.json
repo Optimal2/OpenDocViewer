@@ -343,7 +343,9 @@
       "openCompareFromThumbnail": "Open compare view and show this page on the right",
       "showToRightLabel": "Show to right",
       "closeCompare": "Close compare view",
-      "closeCompareLabel": "Close comparison"
+      "closeCompareLabel": "Close comparison",
+      "showDocumentMetadata": "Show metadata for this document",
+      "showDocumentMetadataLabel": "Show document metadata"
     },
     "documentBoundaryStartTitle": "Document {document}"
   },
@@ -434,7 +436,7 @@
         "title": "Thumbnails and document grouping",
         "body": "The thumbnail pane shows document boundaries and page metadata. T shows the visible page number in the current selection. D shows the document number. S shows the page number inside that document.",
         "boundaries": "The sticky document label at the top of the thumbnail pane follows your current position in the list.",
-        "contextMenu": "Right-click a thumbnail to show that page on the right compare pane, or to hide the page/document from the active selection. Right-click the large right pane to close compare mode."
+        "contextMenu": "Right-click a thumbnail or a large page to hide the current page, hide the whole document from the active selection, or show document metadata when it is available."
       },
       "selection": {
         "title": "Selection",
@@ -461,5 +463,18 @@
         "body": "Press Escape to close the print dialog or this help overlay."
       }
     }
+  },
+  "metadataOverlay": {
+    "title": "Document metadata",
+    "subtitle": "{{count}} metadata rows available for this document.",
+    "subtitleDocumentPosition": "Document {{document}} of {{total}}",
+    "close": "Close",
+    "columns": {
+      "field": "Field",
+      "value": "Value",
+      "id": "Id"
+    },
+    "alias": "Alias: {{alias}}",
+    "rawValue": "Raw value: {{value}}"
   }
 }

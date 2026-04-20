@@ -40,6 +40,7 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {function(): void} props.clearSelectionFilter
  * @param {function(number): boolean} props.hidePageFromSelection
  * @param {function(number): boolean} props.hideDocumentFromSelection
+ * @param {function(number): boolean} [props.onOpenDocumentMetadata]
  * @param {number} props.minWidth
  * @param {number} props.maxWidth
  * @param {number} props.defaultWidth
@@ -79,6 +80,7 @@ const DocumentViewerThumbnails = ({
   clearSelectionFilter,
   hidePageFromSelection,
   hideDocumentFromSelection,
+  onOpenDocumentMetadata,
   minWidth,
   maxWidth,
   defaultWidth,
@@ -258,6 +260,7 @@ const DocumentViewerThumbnails = ({
           selectionPanelEnabled={selectionPanelEnabled}
           onHidePageFromSelection={hidePageFromSelection}
           onHideDocumentFromSelection={hideDocumentFromSelection}
+          onOpenDocumentMetadata={onOpenDocumentMetadata}
         />
       )}
     </div>
@@ -302,6 +305,7 @@ DocumentViewerThumbnails.propTypes = {
   clearSelectionFilter: PropTypes.func.isRequired,
   hidePageFromSelection: PropTypes.func.isRequired,
   hideDocumentFromSelection: PropTypes.func.isRequired,
+  onOpenDocumentMetadata: PropTypes.func,
   minWidth: PropTypes.number.isRequired,
   maxWidth: PropTypes.number.isRequired,
   defaultWidth: PropTypes.number.isRequired,

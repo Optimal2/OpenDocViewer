@@ -156,6 +156,7 @@ That gives future components a stable access path for:
 - metadata-based print headers
 - document tooltips
 - document-aware context menus
+- document metadata overlay from page/thumbnail context menus when metadata is available
 - diagnostics or support views
 
 without forcing metadata copies onto every page entry.

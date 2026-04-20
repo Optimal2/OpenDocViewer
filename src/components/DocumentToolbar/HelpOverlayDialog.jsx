@@ -129,7 +129,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
                 defaultValue: 'The sticky document label at the top of the strip follows your current scroll position.',
               })}</li>
               <li>{t('help.sections.thumbnails.contextMenu', {
-                defaultValue: 'Right-click a thumbnail or a large page to hide the current page or the whole document from the active selection.',
+                defaultValue: 'Right-click a thumbnail or a large page to hide the current page, hide the whole document from the active selection, or show document metadata when it is available.',
               })}</li>
             </ul>
           </section>
