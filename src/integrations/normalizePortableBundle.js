@@ -191,9 +191,18 @@ function extFromString(s) {
 function toTicket(objOrStr) {
   if (typeof objOrStr === 'string') {
     if (objOrStr.includes('|')) {
-      const [id, ext, path] = objOrStr.split('|');
-      const url = path ? absUrl(path) : undefined;
-      return { id, ext: (ext || undefined)?.toLowerCase(), url };
+      const parts = objOrStr.split('|');
+      if (parts.length >= 3) {
+        const [rawId, rawExt, ...rawLocationParts] = parts;
+        const rawLocation = rawLocationParts.join('|');
+        const normalizedLocation = rawLocation ? absUrl(rawLocation) : undefined;
+        return {
+          id: rawId ? String(rawId) : undefined,
+          ext: (rawExt || undefined)?.toLowerCase(),
+          path: rawLocation || undefined,
+          url: normalizedLocation,
+        };
+      }
     }
     return { url: absUrl(objOrStr), ext: extFromString(objOrStr) };
   }
@@ -213,10 +222,23 @@ function toTicket(objOrStr) {
   return {};
 }
 
+/**
+ * Preserve unknown own enumerable properties from host input while excluding keys that were already
+ * normalized explicitly. The helper intentionally skips prototype-shaping keys so arbitrary input
+ * cannot influence object prototypes when the preserved data is later spread into plain objects.
+ *
+ * @param {Object.<string, *>} obj
+ * @param {Array<string>} exclude
+ * @returns {Object.<string, *>}
+ */
 function spreadUnknown(obj, exclude) {
+  if (!isObject(obj)) return {};
+  const excluded = new Set((Array.isArray(exclude) ? exclude : []).map((entry) => String(entry)));
   const out = {};
-  for (const k in obj) {
-    if (!exclude.includes(k)) out[k] = obj[k];
+  for (const [key, value] of Object.entries(obj)) {
+    if (key === '__proto__' || key === 'prototype' || key === 'constructor') continue;
+    if (excluded.has(key)) continue;
+    out[key] = value;
   }
   return out;
 }

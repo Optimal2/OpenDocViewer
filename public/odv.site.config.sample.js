@@ -327,7 +327,7 @@
 
         // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
-        maxConcurrentAssetRenders: 6,
+        maxConcurrentAssetRenders: 3,
 
         // How many page assets to queue per warm-up batch, and how long to wait before the
         // large-pane loading overlay appears for an individual page.

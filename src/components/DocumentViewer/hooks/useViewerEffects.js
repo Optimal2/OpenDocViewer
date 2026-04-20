@@ -52,6 +52,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} goToLastDocument
  * @property {boolean} documentNavigationEnabled
  * @property {boolean} compareNavigationEnabled
+ * @property {Function=} hideCurrentPageFromSelection
  * @property {Function} zoomIn
  * @property {Function} zoomOut
  * @property {Function} rotateLeft
@@ -190,6 +191,7 @@ export function useViewerEffects(args) {
     goToLastDocument,
     documentNavigationEnabled,
     compareNavigationEnabled,
+    hideCurrentPageFromSelection,
     zoomIn,
     zoomOut,
     rotateLeft,
@@ -212,6 +214,7 @@ export function useViewerEffects(args) {
   const goToLastDocumentRef = useRef(goToLastDocument);
   const documentNavigationEnabledRef = useRef(documentNavigationEnabled);
   const compareNavigationEnabledRef = useRef(compareNavigationEnabled);
+  const hideCurrentPageFromSelectionRef = useRef(hideCurrentPageFromSelection);
   const zoomInRef = useRef(zoomIn);
   const zoomOutRef = useRef(zoomOut);
   const rotateLeftRef = useRef(rotateLeft);
@@ -227,6 +230,7 @@ export function useViewerEffects(args) {
   goToLastDocumentRef.current = goToLastDocument;
   documentNavigationEnabledRef.current = documentNavigationEnabled;
   compareNavigationEnabledRef.current = compareNavigationEnabled;
+  hideCurrentPageFromSelectionRef.current = hideCurrentPageFromSelection;
   zoomInRef.current = zoomIn;
   zoomOutRef.current = zoomOut;
   rotateLeftRef.current = rotateLeft;
@@ -484,6 +488,14 @@ export function useViewerEffects(args) {
             e.preventDefault();
             stopKeyboardRepeat();
             rotateRightRef.current?.(target);
+          }
+          break;
+
+        case 'Delete':
+          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+            e.preventDefault();
+            stopKeyboardRepeat();
+            hideCurrentPageFromSelectionRef.current?.(target);
           }
           break;
 

@@ -19,7 +19,7 @@
  */
 
 /** Schema version of this portable bundle definition. Increase on breaking changes. */
-export const __portableBundleSchemaVersion = 1;
+export const PORTABLE_BUNDLE_SCHEMA_VERSION = 1;
 
 /**
  * Session context for a bundle.
@@ -296,7 +296,7 @@ export function validatePortableBundle(input) {
     });
   }
 
-  return { ok: errors.length === 0, errors, version: __portableBundleSchemaVersion };
+  return { ok: errors.length === 0, errors, version: PORTABLE_BUNDLE_SCHEMA_VERSION };
 }
 
 /**
@@ -335,7 +335,7 @@ export function createPortableBundle(input, opts = {}) {
 }
 
 export default {
-  __portableBundleSchemaVersion,
+  PORTABLE_BUNDLE_SCHEMA_VERSION,
   normalizeDocumentFile,
   normalizeDocumentEntry,
   normalizePortableBundle,
