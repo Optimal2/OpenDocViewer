@@ -18,7 +18,14 @@
  *
  */
 
-/** Schema version of this portable bundle definition. Increase on breaking changes. */
+/**
+ * Schema version of this portable bundle definition.
+ *
+ * Increment this only when the normalized bundle shape changes in a way that would break a reader
+ * expecting the previous contract, for example if a required top-level key changes name, a field's
+ * semantic type changes incompatibly, or a normalization rule stops producing data that callers may
+ * already rely on. Additive optional fields normally do not require a version bump.
+ */
 export const PORTABLE_BUNDLE_SCHEMA_VERSION = 1;
 
 /**
@@ -177,7 +184,9 @@ function normalizeMetadataIndex(input) {
 
 /**
  * Normalize a file entry. Strings become `{ url }`. Missing `ext` is inferred best-effort.
- * Unknown properties are preserved.
+ * Unknown properties are preserved only for object input because primitive string input carries no
+ * additional named fields to retain. That asymmetry is intentional: a string is the compact form
+ * of a file reference, whereas an object is the extensible carrier for extra metadata.
  *
  * @param {(string|PortableDocumentFile)} input
  * @returns {PortableDocumentFile}
@@ -302,6 +311,11 @@ export function validatePortableBundle(input) {
 /**
  * Create a shallow, immutable copy of a normalized bundle (Object.freeze tree).
  * Useful when you want to ensure read-only behavior in Redux/Context.
+ *
+ * This freeze is intentionally shallow for nested metadata payloads. The bundle container, document
+ * list, documents, and per-document file arrays become immutable, while richer nested objects such
+ * as `meta`, `metaById`, `metadata`, and `metadataDetails` remain caller-owned references. Keeping
+ * it shallow avoids surprising deep-clone/deep-freeze costs at the schema boundary.
  *
  * @param {PortableDocumentBundle} bundle
  * @returns {PortableDocumentBundle}

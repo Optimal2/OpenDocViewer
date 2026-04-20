@@ -343,7 +343,9 @@
       "openCompareFromThumbnail": "Öppna jämförelsevy och visa denna sida till höger",
       "showToRightLabel": "Visa till höger",
       "closeCompare": "Stäng jämförelsevy",
-      "closeCompareLabel": "Avsluta jämförelse"
+      "closeCompareLabel": "Avsluta jämförelse",
+      "showDocumentMetadata": "Visa metadata för detta dokument",
+      "showDocumentMetadataLabel": "Visa metadata för dokument"
     },
     "documentBoundaryStartTitle": "Dokument {document}"
   },
@@ -434,7 +436,7 @@
         "title": "Miniatyrer och dokumentindelning",
         "body": "Miniatyrpanelen visar dokumentgränser och sidinformation. T visar sidnummer i det synliga urvalet. D visar dokumentnummer. S visar sidnummer inom dokumentet.",
         "boundaries": "Den flytande dokumentrubriken högst upp i miniatyrpanelen följer din nuvarande position i listan.",
-        "contextMenu": "Högerklicka på en miniatyr för att visa sidan till höger i jämförelsevyn eller för att dölja sidan/dokumentet från aktuellt urval. Högerklicka på den stora högra sidan för att avsluta jämförelsen."
+        "contextMenu": "Högerklicka på en miniatyr eller en stor sida för att dölja aktuell sida, dölja hela dokumentet från det aktiva urvalet eller visa dokumentmetadata när den finns tillgänglig."
       },
       "selection": {
         "title": "Urval",
@@ -461,5 +463,18 @@
         "body": "Tryck Escape för att stänga utskriftsdialogen eller hjälprutan."
       }
     }
+  },
+  "metadataOverlay": {
+    "title": "Dokumentmetadata",
+    "subtitle": "{{count}} metadata-rader är tillgängliga för detta dokument.",
+    "subtitleDocumentPosition": "Dokument {{document}} av {{total}}",
+    "close": "Stäng",
+    "columns": {
+      "field": "Fält",
+      "value": "Värde",
+      "id": "Id"
+    },
+    "alias": "Alias: {{alias}}",
+    "rawValue": "Råvärde: {{value}}"
   }
 }

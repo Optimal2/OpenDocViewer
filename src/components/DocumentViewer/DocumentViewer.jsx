@@ -19,7 +19,7 @@
  *
  * @returns {React.ReactElement}
  */
-import React, { useContext, useMemo } from 'react';
+import React, { useCallback, useContext, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
@@ -29,10 +29,13 @@ import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
 import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
+import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
+import { buildDocumentMetadataView } from '../../utils/documentMetadata.js';
 
 const DocumentViewer = () => {
   const {
     allPages,
+    bundle,
     loadingRunActive,
     documentLoadingConfig,
     memoryPressureStage,
@@ -140,6 +143,29 @@ const DocumentViewer = () => {
     if ((Number(pageLoadState.expectedPages) || 0) <= 0) return false;
     return !pageLoadState.allPagesReady;
   }, [loadingRunActive, pageLoadState]);
+
+  const [metadataOverlayState, setMetadataOverlayState] = useState(null);
+
+  const openDocumentMetadataForOriginalIndex = useCallback((originalIndex) => {
+    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+    const sourcePage = Array.isArray(allPages) ? (allPages[safeOriginalIndex] || null) : null;
+    const documentId = String(sourcePage?.documentId || '').trim();
+    if (!documentId) return false;
+
+    const metadataView = buildDocumentMetadataView(bundle, documentId);
+    if (!metadataView) return false;
+
+    setMetadataOverlayState({
+      metadataView,
+      documentNumber: Math.max(0, Number(sourcePage?.documentNumber) || 0),
+      totalDocuments: Math.max(0, Number(sourcePage?.totalDocuments) || 0),
+    });
+    return true;
+  }, [allPages, bundle]);
+
+  const closeMetadataOverlay = useCallback(() => {
+    setMetadataOverlayState(null);
+  }, []);
 
   const viewerModeIndicator = useMemo(() => {
     if (error) {
@@ -323,6 +349,7 @@ const DocumentViewer = () => {
                 clearSelectionFilter={clearSelectionFilter}
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
+                onOpenDocumentMetadata={openDocumentMetadataForOriginalIndex}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -396,10 +423,19 @@ const DocumentViewer = () => {
             selectionPanelEnabled={selectionPanelEnabled}
             onHidePageFromSelection={hidePageFromSelection}
             onHideDocumentFromSelection={hideDocumentFromSelection}
+            onOpenDocumentMetadata={openDocumentMetadataForOriginalIndex}
             closeCompare={closeCompare}
           />
         )}
       </div>
+
+      <DocumentMetadataOverlayDialog
+        isOpen={!!metadataOverlayState}
+        onClose={closeMetadataOverlay}
+        metadataView={metadataOverlayState?.metadataView || null}
+        documentNumber={metadataOverlayState?.documentNumber ?? null}
+        totalDocuments={metadataOverlayState?.totalDocuments ?? null}
+      />
     </div>
   );
 };

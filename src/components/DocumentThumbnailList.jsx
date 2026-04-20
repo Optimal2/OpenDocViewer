@@ -30,6 +30,7 @@ import {
   shouldUseFullImagesForThumbnails,
 } from '../utils/documentLoadingConfig.js';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
+import { bundleDocumentHasMetadata } from '../utils/documentMetadata.js';
 
 /**
  * @typedef {Object} ThumbnailRowProps
@@ -521,6 +522,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
+ * @param {function(number): boolean} [props.onOpenDocumentMetadata]
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -536,10 +538,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   selectionPanelEnabled = false,
   onHidePageFromSelection,
   onHideDocumentFromSelection,
+  onOpenDocumentMetadata,
 }) {
   const { t } = useTranslation('common');
   const isShiftPressed = !!navigationModifierState.shift;
   const {
+    bundle,
     ensurePageAsset,
     touchPageAsset,
     documentLoadingConfig,
@@ -560,7 +564,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const [viewportHeight, setViewportHeight] = useState(0);
   const [scrollTop, setScrollTop] = useState(0);
   const [containerWidth, setContainerWidth] = useState(Math.max(160, Number(width) || 0));
-  const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number })} */ (null));
+  const [contextMenuState, setContextMenuState] = useState(/** @type {(null|{ x:number, y:number, originalIndex:number, documentNumber:number, totalDocuments:number, documentId:(string|undefined) })} */ (null));
 
   const totalCount = Array.isArray(allPages) ? allPages.length : 0;
   const documentGroupingActive = useMemo(
@@ -1075,7 +1079,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     const hasSelectionActions = !!selectionPanelEnabled
       && (typeof onHidePageFromSelection === 'function' || typeof onHideDocumentFromSelection === 'function');
     const hasCompareAction = typeof selectForCompare === 'function';
-    if (!hasSelectionActions && !hasCompareAction) {
+    const hasMetadataAction = typeof onOpenDocumentMetadata === 'function'
+      && bundleDocumentHasMetadata(bundle, page?.documentId);
+    if (!hasSelectionActions && !hasCompareAction && !hasMetadataAction) {
       closeContextMenu();
       return;
     }
@@ -1088,8 +1094,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       originalIndex,
       documentNumber: documentContext.documentNumber,
       totalDocuments: documentContext.totalDocuments,
+      documentId: String(page?.documentId || '').trim() || undefined,
     });
-  }, [closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, selectForCompare, selectionPanelEnabled]);
+  }, [bundle, closeContextMenu, onHideDocumentFromSelection, onHidePageFromSelection, onOpenDocumentMetadata, selectForCompare, selectionPanelEnabled]);
 
   const handleCompareFromContextMenu = useCallback(() => {
     if (!contextMenuState || typeof selectForCompare !== 'function') return;
@@ -1108,6 +1115,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     onHideDocumentFromSelection(contextMenuState.originalIndex);
     closeContextMenu();
   }, [closeContextMenu, contextMenuState, onHideDocumentFromSelection]);
+
+  const handleOpenMetadataFromContextMenu = useCallback(() => {
+    if (!contextMenuState || typeof onOpenDocumentMetadata !== 'function') return;
+    const opened = onOpenDocumentMetadata(contextMenuState.originalIndex);
+    if (opened !== false) closeContextMenu();
+  }, [closeContextMenu, contextMenuState, onOpenDocumentMetadata]);
 
   /**
    * @param {number} sessionIndex
@@ -1151,11 +1164,14 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const canHideDocumentFromSelection = !!selectionPanelEnabled
     && typeof onHideDocumentFromSelection === 'function';
   const canCompareFromContextMenu = typeof selectForCompare === 'function';
+  const canOpenMetadataFromContextMenu = !!contextMenuState
+    && typeof onOpenDocumentMetadata === 'function'
+    && bundleDocumentHasMetadata(bundle, contextMenuState.documentId);
   const contextMenuLeft = contextMenuState
     ? Math.max(8, Math.min(contextMenuState.x, Math.max(8, (typeof window !== 'undefined' ? window.innerWidth : contextMenuState.x + 240) - 248)))
     : 0;
   const contextMenuTop = contextMenuState
-    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 196) - 196)))
+    ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 256) - 256)))
     : 0;
 
   return (
@@ -1227,6 +1243,24 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
               <span>
                 {t('thumbnails.contextMenu.showToRightLabel', {
                   defaultValue: 'Show to right',
+                })}
+              </span>
+            </button>
+          ) : null}
+          {canOpenMetadataFromContextMenu ? (
+            <button
+              type="button"
+              className="odv-context-menu-item"
+              role="menuitem"
+              onClick={handleOpenMetadataFromContextMenu}
+              title={t('thumbnails.contextMenu.showDocumentMetadata', {
+                defaultValue: 'Show metadata for this document',
+              })}
+            >
+              <span className="material-icons" aria-hidden="true">table_view</span>
+              <span>
+                {t('thumbnails.contextMenu.showDocumentMetadataLabel', {
+                  defaultValue: 'Show document metadata',
                 })}
               </span>
             </button>
@@ -1314,6 +1348,7 @@ DocumentThumbnailList.propTypes = {
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,
   onHideDocumentFromSelection: PropTypes.func,
+  onOpenDocumentMetadata: PropTypes.func,
 };
 
 export default DocumentThumbnailList;
