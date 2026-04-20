@@ -521,7 +521,6 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
- * @param {function(number): void} [props.selectForCompare]
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -1281,12 +1280,15 @@ ThumbnailRow.propTypes = {
   index: PropTypes.number.isRequired,
   rowHeight: PropTypes.number.isRequired,
   imageStageHeight: PropTypes.number.isRequired,
+  isFocusedSelected: PropTypes.bool.isRequired,
   isPrimarySelected: PropTypes.bool.isRequired,
   isCompareSelected: PropTypes.bool.isRequired,
   isCompareMode: PropTypes.bool.isRequired,
   preferFullAssetPreview: PropTypes.bool.isRequired,
   totalPages: PropTypes.number.isRequired,
   documentGroupingActive: PropTypes.bool.isRequired,
+  prevPage: PropTypes.any,
+  nextPage: PropTypes.any,
   onActivate: PropTypes.func.isRequired,
   onKeyActivate: PropTypes.func.isRequired,
   onOpenContextMenu: PropTypes.func.isRequired,

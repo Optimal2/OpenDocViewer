@@ -731,13 +731,6 @@ canvas {
   padding: 2px 7px 0;
 }
 
-.thumbnail-number {
-  font-weight: 800;
-  font-size: 1rem;
-  line-height: 1.1;
-  padding-top: 1px;
-}
-
 
 .thumbnail-image-stage {
   position: relative;
