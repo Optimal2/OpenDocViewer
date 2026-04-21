@@ -17,6 +17,36 @@
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
 const COOKIE_KEY = 'ODV_USER_PREFERENCES';
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+const EXPLICIT_THEMES = Object.freeze(['normal', 'light', 'dark']);
+const THEME_MODES = Object.freeze(['system', 'normal', 'light', 'dark']);
+
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isExplicitTheme(value) {
+  return EXPLICIT_THEMES.includes(/** @type {any} */ (value));
+}
+
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isThemeMode(value) {
+  return THEME_MODES.includes(/** @type {any} */ (value));
+}
+
+/**
+ * Normalize legacy theme-mode values.
+ *
+ * @param {*} value
+ * @returns {('system'|'normal'|'light'|'dark'|null)}
+ */
+function normalizeThemeModeValue(value) {
+  if (value === 'auto') return 'system';
+  if (isThemeMode(value)) return value;
+  return null;
+}
 
 /**
  * @param {*} value
@@ -26,9 +56,9 @@ function normalizePreferences(value) {
   if (!value || typeof value !== 'object' || Array.isArray(value)) return {};
   const source = /** @type {Record<string, any>} */ (value);
   const next = {};
-  if (source.theme === 'normal' || source.theme === 'light' || source.theme === 'dark') next.theme = source.theme;
-  if (source.themeMode === 'system' || source.themeMode === 'normal' || source.themeMode === 'light' || source.themeMode === 'dark') next.themeMode = source.themeMode;
-  else if (source.themeMode === 'auto') next.themeMode = 'system';
+  if (isExplicitTheme(source.theme)) next.theme = source.theme;
+  const normalizedThemeMode = normalizeThemeModeValue(source.themeMode);
+  if (normalizedThemeMode) next.themeMode = normalizedThemeMode;
   if (typeof source.language === 'string') {
     const trimmedLanguage = source.language.trim();
     if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
@@ -135,13 +165,13 @@ export function setViewerPreferences(next) {
  */
 export function getThemePreference() {
   const prefs = getViewerPreferences();
-  if (prefs.themeMode === 'normal' || prefs.themeMode === 'light' || prefs.themeMode === 'dark') return prefs.themeMode;
-  if (prefs.theme === 'normal' || prefs.theme === 'light' || prefs.theme === 'dark') return prefs.theme;
+  if (isExplicitTheme(prefs.themeMode)) return prefs.themeMode;
+  if (isExplicitTheme(prefs.theme)) return prefs.theme;
 
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
       const legacy = window.localStorage.getItem('theme');
-      if (legacy === 'normal' || legacy === 'light' || legacy === 'dark') return legacy;
+      if (isExplicitTheme(legacy)) return legacy;
     }
   } catch {}
 
@@ -153,7 +183,9 @@ export function getThemePreference() {
  * @returns {ViewerPreferences}
  */
 export function setThemePreference(theme) {
-  const normalized = theme === 'dark' ? 'dark' : (theme === 'normal' ? 'normal' : 'light');
+  let normalized = 'light';
+  if (theme === 'dark') normalized = 'dark';
+  else if (theme === 'normal') normalized = 'normal';
   return setViewerPreferences({ theme: normalized, themeMode: normalized });
 }
 
@@ -162,11 +194,9 @@ export function setThemePreference(theme) {
  */
 export function getThemeModePreference() {
   const prefs = getViewerPreferences();
-  if (prefs.themeMode === 'system' || prefs.themeMode === 'normal' || prefs.themeMode === 'light' || prefs.themeMode === 'dark') {
-    return prefs.themeMode;
-  }
-  if (prefs.themeMode === 'auto') return 'system';
-  if (prefs.theme === 'normal' || prefs.theme === 'light' || prefs.theme === 'dark') return prefs.theme;
+  const normalizedThemeMode = normalizeThemeModeValue(prefs.themeMode);
+  if (normalizedThemeMode) return normalizedThemeMode;
+  if (isExplicitTheme(prefs.theme)) return prefs.theme;
   return null;
 }
 
@@ -180,12 +210,7 @@ export function getThemeModePreference() {
  * @returns {ViewerPreferences}
  */
 export function setThemeModePreference(mode) {
-  const normalized = mode === 'dark'
-    ? 'dark'
-    : (mode === 'light'
-      ? 'light'
-      : (mode === 'normal' ? 'normal' : 'system'));
-
+  const normalized = normalizeThemeModeValue(mode) || 'system';
   const next = normalizePreferences({ ...getViewerPreferences(), themeMode: normalized });
   if (normalized === 'system') delete next.theme;
   else next.theme = normalized;

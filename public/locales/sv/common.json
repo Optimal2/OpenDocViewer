@@ -427,7 +427,7 @@
   "help": {
     "title": "Hjälp för OpenDocViewer",
     "subtitle": "Kort manual för navigering, jämförelse, miniatyrer, urval, bildjusteringar och utskrift.",
-    "open": "Öppna hjälp",
+    "open": "Öppna hjälpmeny",
     "close": "Stäng",
     "sections": {
       "navigation": {
@@ -472,6 +472,14 @@
         "title": "Stäng dialoger",
         "body": "Tryck Escape för att stänga utskriftsdialogen eller hjälprutan."
       }
+    },
+    "loadedFrom": "Laddad från {path}",
+    "loading": "Laddar manual…",
+    "manualNotAvailable": "Ingen manualfil kunde laddas för detta språk.",
+    "manualPathsHint": "Lägg en lokal HTML-fil under help/site/ eller använd den inbyggda fallback-filen under help/default/.",
+    "menu": {
+      "manual": "Manual",
+      "about": "Om OpenDocViewer"
     }
   },
   "metadataOverlay": {
@@ -486,5 +494,26 @@
     },
     "alias": "Alias: {alias}",
     "rawValue": "Råvärde: {value}"
+  },
+  "about": {
+    "title": "Om OpenDocViewer",
+    "subtitle": "Versionsinformation, projektlänkar och kontaktuppgifter.",
+    "close": "Stäng",
+    "version": "Version",
+    "buildId": "Build-id",
+    "project": "Projekt",
+    "contact": "Kontakt"
+  },
+  "metadataMatrix": {
+    "title": "Metadataöversikt",
+    "subtitle": "{documents} dokument och {fields} metadatafält ingår i denna översikt.",
+    "open": "Metadata-tabell",
+    "openShort": "Metadata-tabell",
+    "close": "Stäng",
+    "columns": {
+      "document": "Dokument"
+    },
+    "documentLabel": "Dokument {document}",
+    "documentMeta": "{pages} sidor"
   }
 }

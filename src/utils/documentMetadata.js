@@ -3,8 +3,8 @@
  * Helpers for resolving document-level metadata from the normalized portable bundle.
  *
  * The viewer keeps raw metadata (`document.meta` / `metaById`) as the primary truth and may also
- * carry semantic aliases (`metadata` / `metadataDetails`). These helpers provide a UI-friendly
- * projection without discarding the richer underlying structures.
+ * carry semantic aliases (`metadata` / `metadataDetails`). These helpers provide UI-friendly
+ * projections without discarding the richer underlying structures.
  */
 
 /**
@@ -224,6 +224,11 @@ function buildAliasLabelsByFieldId(bundleDocument) {
   return out;
 }
 
+/**
+ * @param {*} bundleDocument
+ * @param {*} mediaConfiguration
+ * @returns {Array<Object>}
+ */
 function buildRowsFromRawMetadata(bundleDocument, mediaConfiguration) {
   const meta = Array.isArray(bundleDocument?.meta) ? bundleDocument.meta : [];
   if (meta.length <= 0) return [];
@@ -281,6 +286,18 @@ function buildRowsFromMetadataAliases(bundleDocument) {
 }
 
 /**
+ * @param {*} bundleDocument
+ * @param {*} mediaConfiguration
+ * @returns {Array<Object>}
+ */
+function buildDocumentRows(bundleDocument, mediaConfiguration) {
+  let rows = buildRowsFromRawMetadata(bundleDocument, mediaConfiguration);
+  if (rows.length <= 0) rows = buildRowsFromMetadataDetails(bundleDocument);
+  if (rows.length <= 0) rows = buildRowsFromMetadataAliases(bundleDocument);
+  return rows;
+}
+
+/**
  * Build a UI-friendly projection of one document's metadata.
  *
  * Raw metadata rows are preferred because they preserve field ids, lookup-vs-raw distinctions,
@@ -296,14 +313,91 @@ export function buildDocumentMetadataView(bundle, documentId) {
   if (!bundleDocument || !documentHasMetadata(bundleDocument)) return null;
 
   const mediaConfiguration = bundle?.integration?.mediaConfiguration;
-  let rows = buildRowsFromRawMetadata(bundleDocument, mediaConfiguration);
-  if (rows.length <= 0) rows = buildRowsFromMetadataDetails(bundleDocument);
-  if (rows.length <= 0) rows = buildRowsFromMetadataAliases(bundleDocument);
+  const rows = buildDocumentRows(bundleDocument, mediaConfiguration);
   if (rows.length <= 0) return null;
 
   return {
     documentId: String(bundleDocument.documentId || documentId || ''),
     rows,
     metadataRowCount: rows.length,
+  };
+}
+
+/**
+ * Build a session-wide metadata matrix with one row per document and one column per metadata field.
+ *
+ * @param {*} bundle
+ * @returns {(null|{
+ *   columns:Array<{ fieldId:string, label:string }>,
+ *   documents:Array<{
+ *     documentId:string,
+ *     documentNumber:number,
+ *     totalDocuments:number,
+ *     pageCount:number,
+ *     cells:Object<string, { displayValue:string, secondaryValue:(string|undefined), label:string, fieldId:string }>
+ *   }>
+ * })}
+ */
+export function buildDocumentMetadataMatrixView(bundle) {
+  const documents = Array.isArray(bundle?.documents) ? bundle.documents : [];
+  if (documents.length <= 0) return null;
+
+  const mediaConfiguration = bundle?.integration?.mediaConfiguration;
+  const { order } = buildFieldPresentationHints(mediaConfiguration);
+  const metadataDocuments = [];
+  const columnsById = new Map();
+
+  documents.forEach((bundleDocument, index) => {
+    if (!documentHasMetadata(bundleDocument)) return;
+    const rows = buildDocumentRows(bundleDocument, mediaConfiguration);
+    if (rows.length <= 0) return;
+
+    /** @type {Record<string, { displayValue:string, secondaryValue:(string|undefined), label:string, fieldId:string }>} */
+    const cells = {};
+    rows.forEach((row, rowIndex) => {
+      const fieldId = toOptionalText(row?.fieldId) || `field-${rowIndex + 1}`;
+      cells[fieldId] = {
+        displayValue: String(row?.displayValue || '—'),
+        secondaryValue: toOptionalText(row?.secondaryValue),
+        label: String(row?.label || fieldId),
+        fieldId,
+      };
+
+      const existing = columnsById.get(fieldId);
+      const currentLabel = String(row?.label || fieldId);
+      const nextSortOrder = order.has(fieldId) ? order.get(fieldId) : (Number.MAX_SAFE_INTEGER - 1024 + columnsById.size);
+      if (!existing) {
+        columnsById.set(fieldId, {
+          fieldId,
+          label: currentLabel,
+          sortOrder: nextSortOrder,
+          sourceIndex: rowIndex,
+        });
+      } else if ((existing.label === existing.fieldId || !existing.label) && currentLabel && currentLabel !== fieldId) {
+        existing.label = currentLabel;
+      }
+    });
+
+    metadataDocuments.push({
+      documentId: String(bundleDocument?.documentId || ''),
+      documentNumber: index + 1,
+      totalDocuments: documents.length,
+      pageCount: Array.isArray(bundleDocument?.files) ? bundleDocument.files.length : 0,
+      cells,
+    });
+  });
+
+  if (metadataDocuments.length <= 0 || columnsById.size <= 0) return null;
+
+  const columns = Array.from(columnsById.values())
+    .sort((a, b) => {
+      if (a.sortOrder !== b.sortOrder) return a.sortOrder - b.sortOrder;
+      return a.sourceIndex - b.sourceIndex;
+    })
+    .map(({ fieldId, label }) => ({ fieldId, label: label || fieldId }));
+
+  return {
+    columns,
+    documents: metadataDocuments,
   };
 }

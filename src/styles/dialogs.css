@@ -825,3 +825,136 @@
 [data-theme='dark'] .odv-prd-label select {
   accent-color: var(--thumbnail-primary-color);
 }
+
+.odv-metadata-dialog-matrix {
+  width: min(1280px, 98vw);
+  max-width: 98vw;
+}
+
+.odv-metadata-body-matrix {
+  padding-top: 12px;
+}
+
+.odv-metadata-table-matrix {
+  min-width: max-content;
+}
+
+.odv-metadata-table-matrix thead th:first-child,
+.odv-metadata-table-matrix tbody th {
+  position: sticky;
+  left: 0;
+  z-index: 2;
+  background: var(--odv-surface, #ffffff);
+}
+
+.odv-metadata-table-matrix thead th:first-child {
+  z-index: 3;
+}
+
+.odv-metadata-table-matrix tbody th {
+  min-width: 180px;
+}
+
+.odv-help-body-manual {
+  padding-top: 12px;
+}
+
+.odv-help-placeholder {
+  margin: 0;
+  padding: 16px 18px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--odv-surface-elevated) 92%, transparent 8%);
+  border: 1px solid var(--odv-border, #d5dae1);
+  line-height: 1.5;
+}
+
+.odv-help-placeholder.is-error {
+  color: var(--text-color);
+}
+
+.odv-manual-content {
+  color: inherit;
+  line-height: 1.6;
+}
+
+.odv-manual-content :first-child {
+  margin-top: 0;
+}
+
+.odv-manual-content :last-child {
+  margin-bottom: 0;
+}
+
+.odv-manual-content h1,
+.odv-manual-content h2,
+.odv-manual-content h3 {
+  color: var(--text-color-strong);
+}
+
+.odv-manual-content a {
+  color: var(--thumbnail-primary-color);
+}
+
+.odv-manual-content code,
+.odv-about-value code {
+  display: inline-block;
+  padding: 2px 6px;
+  border-radius: 6px;
+  background: var(--odv-surface-muted);
+  border: 1px solid var(--odv-border, #d5dae1);
+}
+
+.odv-about-dialog {
+  width: min(720px, 94vw);
+}
+
+.odv-about-body {
+  padding-top: 12px;
+}
+
+.odv-about-grid {
+  display: grid;
+  gap: 12px;
+}
+
+.odv-about-row {
+  display: grid;
+  grid-template-columns: minmax(140px, 180px) minmax(0, 1fr);
+  gap: 10px 16px;
+  align-items: start;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: color-mix(in srgb, var(--odv-surface-elevated) 94%, transparent 6%);
+}
+
+.odv-about-label {
+  font-size: 0.8rem;
+  font-weight: 700;
+  color: var(--text-muted-color);
+}
+
+.odv-about-value {
+  min-width: 0;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.odv-about-value a {
+  color: var(--thumbnail-primary-color);
+}
+
+@media (max-width: 720px) {
+  .thumbnail-selection-status-row {
+    flex-direction: column;
+  }
+
+  .thumbnail-selection-inline-action {
+    width: 100%;
+    justify-content: center;
+  }
+
+  .odv-about-row {
+    grid-template-columns: 1fr;
+  }
+}

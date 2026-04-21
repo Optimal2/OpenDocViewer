@@ -19,7 +19,7 @@
  *
  * @returns {React.ReactElement}
  */
-import React, { useCallback, useContext, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
@@ -30,7 +30,8 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import { useDocumentViewer } from './useDocumentViewer.js';
 import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
-import { buildDocumentMetadataView } from '../../utils/documentMetadata.js';
+import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
+import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
 
 const DocumentViewer = () => {
   const {
@@ -145,6 +146,10 @@ const DocumentViewer = () => {
   }, [loadingRunActive, pageLoadState]);
 
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
+  const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
+
+  const metadataMatrixView = useMemo(() => buildDocumentMetadataMatrixView(bundle), [bundle]);
+  const canOpenMetadataMatrix = !!metadataMatrixView && Array.isArray(metadataMatrixView.columns) && metadataMatrixView.columns.length > 0;
 
   const openDocumentMetadataForOriginalIndex = useCallback((originalIndex) => {
     const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
@@ -166,6 +171,52 @@ const DocumentViewer = () => {
   const closeMetadataOverlay = useCallback(() => {
     setMetadataOverlayState(null);
   }, []);
+
+  const openMetadataMatrix = useCallback(() => {
+    if (!canOpenMetadataMatrix) return false;
+    setMetadataOverlayState(null);
+    setIsMetadataMatrixOpen(true);
+    return true;
+  }, [canOpenMetadataMatrix]);
+
+  const closeMetadataMatrix = useCallback(() => {
+    setIsMetadataMatrixOpen(false);
+  }, []);
+
+  useEffect(() => {
+    if (!canOpenMetadataMatrix) {
+      setIsMetadataMatrixOpen(false);
+    }
+  }, [canOpenMetadataMatrix]);
+
+  useEffect(() => {
+    /** @param {*} target */
+    const isEditableTarget = (target) => {
+      if (!(target instanceof Element)) return false;
+      if (target.isContentEditable) return true;
+      return !!target.closest('input, textarea, select, [contenteditable="true"], [contenteditable=""], [contenteditable="plaintext-only"], [data-odv-shortcuts="off"]');
+    };
+
+    /** @returns {boolean} */
+    const hasActiveModalDialog = () => (typeof document !== 'undefined')
+      && !!document.querySelector('[role="dialog"][aria-modal="true"], dialog[open][aria-modal="true"]');
+
+    /** @param {KeyboardEvent} event */
+    const onKeyDown = (event) => {
+      if (!canOpenMetadataMatrix) return;
+      if (event.defaultPrevented || event.isComposing) return;
+      const key = String(event.key || '').toLowerCase();
+      if (key !== 'm') return;
+      if (event.ctrlKey || event.metaKey || event.altKey) return;
+      if (hasActiveModalDialog()) return;
+      if (isEditableTarget(event.target) || isEditableTarget(document.activeElement)) return;
+      event.preventDefault();
+      openMetadataMatrix();
+    };
+
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [canOpenMetadataMatrix, openMetadataMatrix]);
 
   const viewerModeIndicator = useMemo(() => {
     if (error) {
@@ -350,6 +401,8 @@ const DocumentViewer = () => {
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
                 onOpenDocumentMetadata={openDocumentMetadataForOriginalIndex}
+          canOpenMetadataMatrix={canOpenMetadataMatrix}
+          onOpenMetadataMatrix={openMetadataMatrix}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -435,6 +488,14 @@ const DocumentViewer = () => {
         metadataView={metadataOverlayState?.metadataView || null}
         documentNumber={metadataOverlayState?.documentNumber ?? null}
         totalDocuments={metadataOverlayState?.totalDocuments ?? null}
+        canOpenMatrix={canOpenMetadataMatrix}
+        onOpenMatrix={openMetadataMatrix}
+      />
+
+      <DocumentMetadataMatrixOverlayDialog
+        isOpen={isMetadataMatrixOpen}
+        onClose={closeMetadataMatrix}
+        matrixView={metadataMatrixView}
       />
     </div>
   );

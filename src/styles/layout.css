@@ -1189,3 +1189,40 @@ canvas {
   width: min(520px, calc(100% - 24px));
 }
 
+
+.thumbnail-selection-status-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.thumbnail-selection-status-row .thumbnail-selection-status {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.thumbnail-selection-inline-action {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 10px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 70%, transparent 30%);
+  background: color-mix(in srgb, var(--canvas-background-color) 92%, transparent 8%);
+  color: var(--text-color);
+  font-size: 0.75rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.thumbnail-selection-inline-action:hover,
+.thumbnail-selection-inline-action:focus {
+  outline: none;
+  border-color: color-mix(in srgb, var(--thumbnail-primary-color) 58%, transparent 42%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 16%, transparent 84%);
+}
+
+.thumbnail-selection-inline-action .material-icons {
+  font-size: 18px;
+}

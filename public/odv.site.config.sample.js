@@ -112,6 +112,23 @@
     },
 
     // =========================================================================
+    // Help / About
+    // =========================================================================
+    help: {
+      manual: {
+        // Site-local HTML fragments can be added without rebuilding the React app.
+        // Create `help/site/manual.sv.html` / `help/site/manual.en.html` locally to override.
+        sitePathTemplate: 'help/site/manual.{{lng}}.html',
+        fallbackPathTemplate: 'help/default/manual.{{lng}}.html',
+        fallbackLanguage: 'en'
+      },
+      about: {
+        githubUrl: 'https://github.com/Optimal2/OpenDocViewer',
+        contactEmail: 'dev@optimal2.se'
+      }
+    },
+
+    // =========================================================================
     // User log (proxied via /ODVProxy/)
     // =========================================================================
     userLog: {
@@ -188,11 +205,11 @@
         en: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
         sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
       },
-      css: [
-        '.odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;',
-        '  background:rgba(255,255,255,.85); padding:4mm 6mm; }',
-        '.odv-print-header strong{ color:#000; }'
-      ].join('\n')
+      css: `
+.odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.85); padding:4mm 6mm; }
+.odv-print-header strong{ color:#000; }
+`.trim()
     },
 
     // =========================================================================
