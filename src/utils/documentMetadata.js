@@ -121,7 +121,7 @@ function buildFieldPresentationHints(mediaConfiguration) {
  * @param {Object<string, string>} labelsById
  * @returns {string}
  */
-function resolveMetadataLabel(record, labelsById) {
+function resolveMetadataLabel(record, labelsById, aliasLabelsById = {}) {
   const fieldId = toOptionalText(record?.id) || toOptionalText(record?.key) || '—';
   const directLabel = toOptionalText(record?.label);
   if (directLabel) return directLabel;
@@ -135,6 +135,17 @@ function resolveMetadataLabel(record, labelsById) {
     if (sourcedLabel) return sourcedLabel;
   }
   if (labelsById[fieldId]) return labelsById[fieldId];
+  const aliasCandidates = Array.isArray(aliasLabelsById[fieldId]) ? aliasLabelsById[fieldId] : [];
+  if (aliasCandidates.length > 0) {
+    const value = toOptionalText(record?.value);
+    const lookupValue = toOptionalText(record?.lookupValue);
+    const preferredLookup = aliasCandidates.find((entry) => entry?.selectedSource === 'lookupValue');
+    if (preferredLookup && lookupValue && lookupValue !== value) return preferredLookup.label;
+    const preferredValue = aliasCandidates.find((entry) => entry?.selectedSource === 'value');
+    if (preferredValue) return preferredValue.label;
+    const anyAlias = aliasCandidates.find((entry) => toOptionalText(entry?.label));
+    if (anyAlias) return anyAlias.label;
+  }
   return fieldId;
 }
 
@@ -188,13 +199,31 @@ function buildAliasDetailRow(detail, alias) {
 
 /**
  * @param {*} bundleDocument
- * @param {*} mediaConfiguration
- * @returns {Array<Object>}
+ * @returns {Object<string, Array<{ label:string, selectedSource:(string|undefined) }>>}
  */
+function buildAliasLabelsByFieldId(bundleDocument) {
+  const details = isObject(bundleDocument?.metadataDetails) ? bundleDocument.metadataDetails : null;
+  if (!details) return {};
+  const out = {};
+  for (const detail of Object.values(details)) {
+    const fieldId = toOptionalText(detail?.fieldId);
+    const label = toOptionalText(detail?.label);
+    if (!fieldId || !label) continue;
+    const bucket = Array.isArray(out[fieldId]) ? out[fieldId] : [];
+    const selectedSource = toOptionalText(detail?.selectedSource);
+    if (!bucket.some((entry) => entry?.label === label && entry?.selectedSource === selectedSource)) {
+      bucket.push({ label, selectedSource });
+    }
+    out[fieldId] = bucket;
+  }
+  return out;
+}
+
 function buildRowsFromRawMetadata(bundleDocument, mediaConfiguration) {
   const meta = Array.isArray(bundleDocument?.meta) ? bundleDocument.meta : [];
   if (meta.length <= 0) return [];
   const { order, labelsById } = buildFieldPresentationHints(mediaConfiguration);
+  const aliasLabelsById = buildAliasLabelsByFieldId(bundleDocument);
 
   return meta
     .map((record, index) => {
@@ -203,7 +232,7 @@ function buildRowsFromRawMetadata(bundleDocument, mediaConfiguration) {
       return {
         key: `meta:${fieldId}:${index}`,
         fieldId,
-        label: resolveMetadataLabel(record, labelsById),
+        label: resolveMetadataLabel(record, labelsById, aliasLabelsById),
         displayValue: valueInfo.displayValue,
         secondaryValue: valueInfo.secondaryValue,
         alias: undefined,

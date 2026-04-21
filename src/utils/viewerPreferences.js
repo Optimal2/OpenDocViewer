@@ -10,6 +10,7 @@
 /**
  * @typedef {Object} ViewerPreferences
  * @property {('light'|'dark')=} theme
+ * @property {('auto'|'light'|'dark')=} themeMode
  * @property {string=} language
  */
 
@@ -26,6 +27,7 @@ function normalizePreferences(value) {
   const source = /** @type {Record<string, any>} */ (value);
   const next = {};
   if (source.theme === 'light' || source.theme === 'dark') next.theme = source.theme;
+  if (source.themeMode === 'auto' || source.themeMode === 'light' || source.themeMode === 'dark') next.themeMode = source.themeMode;
   if (typeof source.language === 'string') {
     const trimmedLanguage = source.language.trim();
     if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
@@ -132,6 +134,7 @@ export function setViewerPreferences(next) {
  */
 export function getThemePreference() {
   const prefs = getViewerPreferences();
+  if (prefs.themeMode === 'light' || prefs.themeMode === 'dark') return prefs.themeMode;
   if (prefs.theme === 'light' || prefs.theme === 'dark') return prefs.theme;
 
   try {
@@ -149,7 +152,45 @@ export function getThemePreference() {
  * @returns {ViewerPreferences}
  */
 export function setThemePreference(theme) {
-  return setViewerPreferences({ theme });
+  const normalized = theme === 'dark' ? 'dark' : 'light';
+  return setViewerPreferences({ theme: normalized, themeMode: normalized });
+}
+
+/**
+ * @returns {(('auto'|'light'|'dark')|null)}
+ */
+export function getThemeModePreference() {
+  const prefs = getViewerPreferences();
+  if (prefs.themeMode === 'auto' || prefs.themeMode === 'light' || prefs.themeMode === 'dark') {
+    return prefs.themeMode;
+  }
+  if (prefs.theme === 'light' || prefs.theme === 'dark') return prefs.theme;
+  return null;
+}
+
+/**
+ * Persist the user's theme mode preference.
+ * - 'auto' follows the current browser/OS preference and falls back to light when unavailable.
+ * - explicit 'light' / 'dark' modes override the system preference.
+ *
+ * @param {('auto'|'light'|'dark')} mode
+ * @returns {ViewerPreferences}
+ */
+export function setThemeModePreference(mode) {
+  const normalized = mode === 'dark' ? 'dark' : (mode === 'light' ? 'light' : 'auto');
+  const next = setViewerPreferences({
+    themeMode: normalized,
+    theme: normalized === 'auto' ? undefined : normalized,
+  });
+
+  try {
+    if (typeof window !== 'undefined' && window.localStorage) {
+      if (normalized === 'auto') window.localStorage.removeItem('theme');
+      else window.localStorage.setItem('theme', normalized);
+    }
+  } catch {}
+
+  return next;
 }
 
 /**

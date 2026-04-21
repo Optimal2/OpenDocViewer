@@ -327,6 +327,9 @@
 
         // Maximum number of concurrent page-asset renders allowed in the lazy renderer.
         // This pipeline renders page assets in the main thread, so keep this value moderate.
+        // Keep this aligned with the normalized runtime defaults from
+        // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6
+        // for this setting in the current code path.
         maxConcurrentAssetRenders: 3,
 
         // How many page assets to queue per warm-up batch, and how long to wait before the

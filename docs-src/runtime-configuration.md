@@ -226,6 +226,9 @@ documentLoading: {
     useWorkersForRasterImages: true,
     useWorkersForTiff: true,
     maxConcurrentMainThreadRenders: 3,
+    // Keep this aligned with the normalized runtime defaults from
+    // src/utils/documentLoadingConfig.js. The current ViewerProvider path does not apply
+    // a separate hidden default of 6 for maxConcurrentAssetRenders.
     maxConcurrentAssetRenders: 3,
     warmupBatchSize: 48,
     loadingOverlayDelayMs: 90,

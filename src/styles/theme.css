@@ -2,21 +2,35 @@
    Root variables (light/dark) + global base elements */
 
 :root {
+  color-scheme: light;
+
   /* Primary Colors */
   --primary-color: #4a4a4a;
-  --primary-color-hover: #333;
-  --primary-color-active: #000;
+  --primary-color-hover: #333333;
+  --primary-color-active: #151515;
 
-  /* Background Colors */
+  /* Background / Surface Colors */
   --background-color: #f7f7f7;
   --canvas-background-color: #ffffff;
   --toolbar-background-color: #d6d6d6;
+  --odv-surface: #ffffff;
+  --odv-surface-elevated: #f7f9fc;
+  --odv-surface-muted: rgba(127, 127, 127, 0.06);
+  --odv-hover-overlay: rgba(0, 0, 0, 0.06);
+
+  /* Text Colors */
+  --text-color: #1b1f24;
+  --text-color-strong: #111111;
+  --text-muted-color: rgba(0, 0, 0, 0.68);
+  --text-faint-color: rgba(0, 0, 0, 0.76);
 
   /* Shadow and Border Colors */
   --selected-shadow-color: rgba(74, 74, 74, 0.5);
   --thumbnail-border-color: #bdbdbd;
   --focus-shadow: rgba(74, 74, 74, 0.5);
   --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+  --odv-border: #d5dae1;
+  --odv-border-strong: #ccd1d8;
 
   /* Miscellaneous */
   --disabled-color: #9e9e9e;
@@ -29,24 +43,38 @@
 }
 
 [data-theme='dark'] {
-  /* Primary Colors */
-  --primary-color: #bbbbbb;
-  --primary-color-hover: #888;
-  --primary-color-active: #555;
+  color-scheme: dark;
 
-  /* Background Colors */
-  --background-color: #121212;
-  --canvas-background-color: #1e1e1e;
-  --toolbar-background-color: #333;
+  /* Primary Colors */
+  --primary-color: #5b6470;
+  --primary-color-hover: #707989;
+  --primary-color-active: #8d96a3;
+
+  /* Background / Surface Colors */
+  --background-color: #12161c;
+  --canvas-background-color: #171c24;
+  --toolbar-background-color: #202734;
+  --odv-surface: #1e2631;
+  --odv-surface-elevated: #24303d;
+  --odv-surface-muted: rgba(255, 255, 255, 0.06);
+  --odv-hover-overlay: rgba(255, 255, 255, 0.08);
+
+  /* Text Colors */
+  --text-color: #e8edf3;
+  --text-color-strong: #f8fbff;
+  --text-muted-color: rgba(232, 237, 243, 0.72);
+  --text-faint-color: rgba(232, 237, 243, 0.84);
 
   /* Shadow and Border Colors */
   --selected-shadow-color: rgba(187, 187, 187, 0.5);
-  --thumbnail-border-color: #444;
+  --thumbnail-border-color: #4f5c69;
   --focus-shadow: rgba(187, 187, 187, 0.5);
-  --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.5);
+  --box-shadow: 0 8px 24px rgba(0, 0, 0, 0.42);
+  --odv-border: #3b4a5a;
+  --odv-border-strong: #556577;
 
   /* Miscellaneous */
-  --disabled-color: #555;
+  --disabled-color: #556270;
   --warning-color: #cf6679;
   --thumbnail-primary-color: #8ab4f8;
   --thumbnail-compare-color: #f6ad55;
@@ -54,18 +82,16 @@
   --thumbnail-shell-color: rgba(138, 180, 248, 0.12);
 }
 
-/* Global Layout / Base Elements */
 body {
   margin: 0;
   padding: 0;
   font-family: Arial, sans-serif;
   background-color: var(--background-color);
-  color: var(--primary-color-active);
+  color: var(--text-color);
   -webkit-user-select: none;
-  user-select: none; /* Prevent drag-select on large canvases/images */
+  user-select: none;
 }
 
-/* Re-enable text selection/caret for typical form controls */
 input, textarea, select, label, button, [contenteditable="true"], .odv-allow-select {
   -webkit-user-select: text;
   user-select: text;

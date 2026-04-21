@@ -23,6 +23,7 @@ import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
+import ThemeMenuButton from './ThemeMenuButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpOverlayDialog from './HelpOverlayDialog.jsx';
@@ -1059,6 +1060,7 @@ const DocumentToolbar = ({
       <div className="toolbar-spacer" />
 
       <div className="toolbar-end-actions">
+        <ThemeMenuButton />
         <LanguageMenuButton />
 
         <button

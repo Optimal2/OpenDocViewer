@@ -33,7 +33,15 @@
     },
     "theme": {
       "switchToLight": "Switch to light theme",
-      "switchToDark": "Switch to dark theme"
+      "switchToDark": "Switch to dark theme",
+      "openMenu": "Choose theme",
+      "current": "Theme: {theme}",
+      "switchToMode": "Switch theme to {theme}",
+      "options": {
+        "auto": "Normal",
+        "light": "Light",
+        "dark": "Dark"
+      }
     },
     "focusWarningTitle": "Shortcuts inactive",
     "focusWarningAction": "Focus viewer",
@@ -466,15 +474,15 @@
   },
   "metadataOverlay": {
     "title": "Document metadata",
-    "subtitle": "{{count}} metadata rows available for this document.",
-    "subtitleDocumentPosition": "Document {{document}} of {{total}}",
+    "subtitle": "{count} metadata rows available for this document.",
+    "subtitleDocumentPosition": "Document {document} of {total}",
     "close": "Close",
     "columns": {
       "field": "Field",
       "value": "Value",
       "id": "Id"
     },
-    "alias": "Alias: {{alias}}",
-    "rawValue": "Raw value: {{value}}"
+    "alias": "Alias: {alias}",
+    "rawValue": "Raw value: {value}"
   }
 }
