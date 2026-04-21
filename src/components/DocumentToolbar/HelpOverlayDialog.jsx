@@ -173,6 +173,14 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             </ul>
           </section>
 
+
+          <section className="odv-help-section">
+            <h3>{t('help.sections.appearance.title', { defaultValue: 'Appearance' })}</h3>
+            <p>{t('help.sections.appearance.body', {
+              defaultValue: 'Use the theme menu in the toolbar to switch between Normal, Light, and Dark. Normal follows the browser or operating-system preference and falls back to light when that preference is unavailable.',
+            })}</p>
+          </section>
+
           <section className="odv-help-section">
             <h3>{t('help.sections.printing.title', { defaultValue: 'Printing' })}</h3>
             <p>{t('help.sections.printing.body', {

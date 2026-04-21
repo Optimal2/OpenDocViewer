@@ -33,7 +33,15 @@
     },
     "theme": {
       "switchToLight": "Byt till ljust tema",
-      "switchToDark": "Byt till mörkt tema"
+      "switchToDark": "Byt till mörkt tema",
+      "openMenu": "Välj tema",
+      "current": "Tema: {theme}",
+      "switchToMode": "Byt tema till {theme}",
+      "options": {
+        "auto": "Normal",
+        "light": "Ljust",
+        "dark": "Mörkt"
+      }
     },
     "focusWarningTitle": "Genvägar inaktiva",
     "focusWarningAction": "Fokusera visaren",
@@ -466,15 +474,15 @@
   },
   "metadataOverlay": {
     "title": "Dokumentmetadata",
-    "subtitle": "{{count}} metadata-rader är tillgängliga för detta dokument.",
-    "subtitleDocumentPosition": "Dokument {{document}} av {{total}}",
+    "subtitle": "{count} metadata-rader är tillgängliga för detta dokument.",
+    "subtitleDocumentPosition": "Dokument {document} av {total}",
     "close": "Stäng",
     "columns": {
       "field": "Fält",
       "value": "Värde",
       "id": "Id"
     },
-    "alias": "Alias: {{alias}}",
-    "rawValue": "Råvärde: {{value}}"
+    "alias": "Alias: {alias}",
+    "rawValue": "Råvärde: {value}"
   }
 }

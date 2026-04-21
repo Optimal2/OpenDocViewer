@@ -23,6 +23,7 @@ import './styles.css';
 import './i18n'; // initialize i18n before rendering
 import logger from './logging/systemLogger.js';
 import AppBootstrap from './app/AppBootstrap.jsx';
+import { ThemeProvider } from './contexts/ThemeProvider.jsx';
 
 /**
  * Determine environment and set a sensible client-side log level.
@@ -48,7 +49,9 @@ if (!container) {
   const root = createRoot(container);
   root.render(
     <React.StrictMode>
-      <AppBootstrap />
+      <ThemeProvider>
+        <AppBootstrap />
+      </ThemeProvider>
     </React.StrictMode>
   );
 }
