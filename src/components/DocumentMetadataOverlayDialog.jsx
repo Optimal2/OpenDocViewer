@@ -14,6 +14,8 @@ import { useTranslation } from 'react-i18next';
  * @param {*} props.metadataView
  * @param {(number|null|undefined)} [props.documentNumber]
  * @param {(number|null|undefined)} [props.totalDocuments]
+ * @param {boolean} [props.canOpenMatrix]
+ * @param {function(): void} [props.onOpenMatrix]
  * @returns {(React.ReactElement|null)}
  */
 export default function DocumentMetadataOverlayDialog({
@@ -22,6 +24,8 @@ export default function DocumentMetadataOverlayDialog({
   metadataView,
   documentNumber = null,
   totalDocuments = null,
+  canOpenMatrix = false,
+  onOpenMatrix = undefined,
 }) {
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -146,6 +150,15 @@ export default function DocumentMetadataOverlayDialog({
         </div>
 
         <div className="odv-metadata-footer">
+          {canOpenMatrix ? (
+            <button
+              type="button"
+              className="odv-metadata-close-button secondary"
+              onClick={onOpenMatrix}
+            >
+              {t('metadataMatrix.open', { defaultValue: 'Metadata table' })}
+            </button>
+          ) : null}
           <button type="button" className="odv-metadata-close-button" onClick={onClose}>
             {t('metadataOverlay.close', { defaultValue: 'Close' })}
           </button>
@@ -172,4 +185,6 @@ DocumentMetadataOverlayDialog.propTypes = {
   }),
   documentNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   totalDocuments: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  canOpenMatrix: PropTypes.bool,
+  onOpenMatrix: PropTypes.func,
 };

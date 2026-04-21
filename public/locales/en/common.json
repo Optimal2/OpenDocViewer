@@ -427,7 +427,7 @@
   "help": {
     "title": "OpenDocViewer help",
     "subtitle": "A short guide to navigation, comparison, thumbnails, selection, image adjustments, and printing.",
-    "open": "Open help",
+    "open": "Open help menu",
     "close": "Close",
     "sections": {
       "navigation": {
@@ -472,6 +472,14 @@
         "title": "Close dialogs",
         "body": "Press Escape to close the print dialog or this help overlay."
       }
+    },
+    "loadedFrom": "Loaded from {path}",
+    "loading": "Loading manual…",
+    "manualNotAvailable": "No manual file could be loaded for this language.",
+    "manualPathsHint": "Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.",
+    "menu": {
+      "manual": "Manual",
+      "about": "About OpenDocViewer"
     }
   },
   "metadataOverlay": {
@@ -486,5 +494,26 @@
     },
     "alias": "Alias: {alias}",
     "rawValue": "Raw value: {value}"
+  },
+  "about": {
+    "title": "About OpenDocViewer",
+    "subtitle": "Version, project links, and support contact.",
+    "close": "Close",
+    "version": "Version",
+    "buildId": "Build id",
+    "project": "Project",
+    "contact": "Contact"
+  },
+  "metadataMatrix": {
+    "title": "Document metadata overview",
+    "subtitle": "{documents} documents and {fields} metadata fields are included in this overview.",
+    "open": "Metadata table",
+    "openShort": "Metadata table",
+    "close": "Close",
+    "columns": {
+      "document": "Document"
+    },
+    "documentLabel": "Document {document}",
+    "documentMeta": "{pages} pages"
   }
 }

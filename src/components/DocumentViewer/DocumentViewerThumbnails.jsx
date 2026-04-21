@@ -40,6 +40,8 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {function(): void} props.clearSelectionFilter
  * @param {function(number): boolean} props.hidePageFromSelection
  * @param {function(number): boolean} props.hideDocumentFromSelection
+ * @param {boolean} [props.canOpenMetadataMatrix]
+ * @param {function(): boolean} [props.onOpenMetadataMatrix]
  * @param {function(number): boolean} [props.onOpenDocumentMetadata]
  * @param {number} props.minWidth
  * @param {number} props.maxWidth
@@ -81,6 +83,8 @@ const DocumentViewerThumbnails = ({
   hidePageFromSelection,
   hideDocumentFromSelection,
   onOpenDocumentMetadata,
+  canOpenMetadataMatrix = false,
+  onOpenMetadataMatrix = undefined,
   minWidth,
   maxWidth,
   defaultWidth,
@@ -245,6 +249,8 @@ const DocumentViewerThumbnails = ({
           onTogglePage={toggleDraftPage}
           onSave={saveDraftSelection}
           onCancel={cancelDraftSelection}
+          canOpenMetadataMatrix={canOpenMetadataMatrix}
+          onOpenMetadataMatrix={onOpenMetadataMatrix}
         />
       ) : (
         <DocumentThumbnailList
@@ -306,6 +312,8 @@ DocumentViewerThumbnails.propTypes = {
   hidePageFromSelection: PropTypes.func.isRequired,
   hideDocumentFromSelection: PropTypes.func.isRequired,
   onOpenDocumentMetadata: PropTypes.func,
+  canOpenMetadataMatrix: PropTypes.bool,
+  onOpenMetadataMatrix: PropTypes.func,
   minWidth: PropTypes.number.isRequired,
   maxWidth: PropTypes.number.isRequired,
   defaultWidth: PropTypes.number.isRequired,

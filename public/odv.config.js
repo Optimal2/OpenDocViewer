@@ -153,6 +153,21 @@
       }
     },
 
+    // ---- HELP / ABOUT ---------------------------------------------------------
+    help: {
+      manual: {
+        // Site-local HTML fragments can be added without rebuilding the React app.
+        // The loader tries the site path first and falls back to the bundled default file.
+        sitePathTemplate: baseHref + 'help/site/manual.{{lng}}.html',
+        fallbackPathTemplate: baseHref + 'help/default/manual.{{lng}}.html',
+        fallbackLanguage: 'en'
+      },
+      about: {
+        githubUrl: 'https://github.com/Optimal2/OpenDocViewer',
+        contactEmail: 'dev@optimal2.se'
+      }
+    },
+
     // ---- USER LOG -------------------------------------------------------------
     userLog: {
       enabled:  false,
@@ -237,11 +252,11 @@
         sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
       },
       // Print-only CSS scoped to `.odv-print-header`
-      css: [
-        ".odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444; ",
-        "  background:rgba(255,255,255,.85); padding:4mm 6mm; }",
-        ".odv-print-header strong{ color:#000; }"
-      ].join("\n")
+      css: `
+.odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.85); padding:4mm 6mm; }
+.odv-print-header strong{ color:#000; }
+`.trim()
     },
 
     // ---- LARGE-DOCUMENT LOADING -----------------------------------------------

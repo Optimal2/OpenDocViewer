@@ -106,6 +106,42 @@ Supported selector properties:
 - `contexts`
   - optional list of intended usage targets such as `screen`, `print`, `sort`, `filter`, `debug`
 
+
+## Help and About content
+
+The runtime config now also exposes a lightweight help/about surface so deployments can replace the
+manual content without rebuilding the React bundle.
+
+Configuration surface:
+
+```js
+help: {
+  manual: {
+    sitePathTemplate: 'help/site/manual.{{lng}}.html',
+    fallbackPathTemplate: 'help/default/manual.{{lng}}.html',
+    fallbackLanguage: 'en'
+  },
+  about: {
+    githubUrl: 'https://github.com/Optimal2/OpenDocViewer',
+    contactEmail: 'dev@optimal2.se'
+  }
+}
+```
+
+Behavior:
+
+- the manual dialog first tries the site-local HTML fragment under `help/site/`
+- if no site-local file exists for the current language, it falls back to the bundled default under `help/default/`
+- site-local manuals can therefore be upgraded independently of the app bundle as long as the deployment keeps `help/site/manual.<lng>.html` outside the tracked repo
+- relative links inside the loaded HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
+
+Shipped public files:
+
+- `public/help/default/manual.en.html`
+- `public/help/default/manual.sv.html`
+- `public/help/site/manual.en.sample.html`
+- `public/help/site/manual.sv.sample.html`
+
 ## Print shortcut policy
 
 The runtime config now supports a keyboard-only print policy surface under:

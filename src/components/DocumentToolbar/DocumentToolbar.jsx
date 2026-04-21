@@ -27,7 +27,9 @@ import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeMenuButton from './ThemeMenuButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
-import HelpOverlayDialog from './HelpOverlayDialog.jsx';
+import HelpMenuButton from './HelpMenuButton.jsx';
+import ManualOverlayDialog from './ManualOverlayDialog.jsx';
+import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 
 
@@ -212,7 +214,8 @@ const DocumentToolbar = ({
   compareDocumentNavigation = undefined,
 }) => {
   const { t } = useTranslation();
-  const [isHelpDialogOpen, setIsHelpDialogOpen] = useState(false);
+  const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
+  const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
   const documentRepeatTargetRef = useRef('primary');
@@ -1069,16 +1072,10 @@ const DocumentToolbar = ({
       <div className="toolbar-end-actions">
         <ThemeMenuButton />
         <LanguageMenuButton />
-
-        <button
-          type="button"
-          onClick={() => setIsHelpDialogOpen(true)}
-          aria-label={t('help.open', { defaultValue: 'Open help' })}
-          title={t('help.open', { defaultValue: 'Open help' })}
-          className="odv-btn help-button"
-        >
-          <span className="material-icons" aria-hidden="true">help_outline</span>
-        </button>
+        <HelpMenuButton
+          onOpenManual={() => setIsManualDialogOpen(true)}
+          onOpenAbout={() => setIsAboutDialogOpen(true)}
+        />
       </div>
 
       {/* Modal for print selection + reason/forWhom */}
@@ -1097,9 +1094,14 @@ const DocumentToolbar = ({
       />
 
 
-      <HelpOverlayDialog
-        isOpen={isHelpDialogOpen}
-        onClose={() => setIsHelpDialogOpen(false)}
+      <ManualOverlayDialog
+        isOpen={isManualDialogOpen}
+        onClose={() => setIsManualDialogOpen(false)}
+      />
+
+      <AboutOverlayDialog
+        isOpen={isAboutDialogOpen}
+        onClose={() => setIsAboutDialogOpen(false)}
       />
 
       {printPreparationNotice.open ? (

@@ -82,6 +82,8 @@ SelectionCheckboxRow.propTypes = {
  * @param {function(number, boolean): void} props.onTogglePage
  * @param {function(): void} props.onSave
  * @param {function(): void} props.onCancel
+ * @param {boolean} [props.canOpenMetadataMatrix]
+ * @param {function(): boolean} [props.onOpenMetadataMatrix]
  * @returns {React.ReactElement}
  */
 export default function DocumentSelectionPanel({
@@ -98,6 +100,8 @@ export default function DocumentSelectionPanel({
   onTogglePage,
   onSave,
   onCancel,
+  canOpenMetadataMatrix = false,
+  onOpenMetadataMatrix = undefined,
 }) {
   const { t } = useTranslation('common');
   const [expandedDocuments, setExpandedDocuments] = useState(() => ({}));
@@ -169,8 +173,22 @@ export default function DocumentSelectionPanel({
 
   return (
     <div className={['thumbnail-selection-panel', enabled ? 'is-enabled' : 'is-disabled'].join(' ')}>
-      <div className="thumbnail-selection-status" role="status" aria-live="polite">
-        {statusText}
+      <div className="thumbnail-selection-status-row">
+        <div className="thumbnail-selection-status" role="status" aria-live="polite">
+          {statusText}
+        </div>
+        {canOpenMetadataMatrix ? (
+          <button
+            type="button"
+            className="thumbnail-selection-inline-action"
+            onClick={() => { onOpenMetadataMatrix?.(); }}
+            title={t('metadataMatrix.open', { defaultValue: 'Metadata table' })}
+            aria-label={t('metadataMatrix.open', { defaultValue: 'Metadata table' })}
+          >
+            <span className="material-icons" aria-hidden="true">table_chart</span>
+            <span>{t('metadataMatrix.openShort', { defaultValue: 'Metadata table' })}</span>
+          </button>
+        ) : null}
       </div>
 
       <div className="thumbnail-selection-tree">
@@ -313,4 +331,6 @@ DocumentSelectionPanel.propTypes = {
   onTogglePage: PropTypes.func.isRequired,
   onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
+  canOpenMetadataMatrix: PropTypes.bool,
+  onOpenMetadataMatrix: PropTypes.func,
 };

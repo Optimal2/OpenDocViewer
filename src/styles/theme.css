@@ -46,40 +46,40 @@
   color-scheme: light;
 
   /* Primary Colors */
-  --primary-color: #536170;
-  --primary-color-hover: #44505d;
-  --primary-color-active: #2f3944;
+  --primary-color: #4f5d6d;
+  --primary-color-hover: #414d5b;
+  --primary-color-active: #2b3540;
 
   /* Background / Surface Colors */
-  --background-color: #e9eef3;
-  --canvas-background-color: #f4f7fb;
-  --toolbar-background-color: #c8d1db;
-  --odv-surface: #f3f6fa;
-  --odv-surface-elevated: #ffffff;
-  --odv-surface-muted: rgba(59, 71, 87, 0.06);
-  --odv-hover-overlay: rgba(31, 41, 55, 0.08);
+  --background-color: #dde5ee;
+  --canvas-background-color: #edf2f7;
+  --toolbar-background-color: #bcc8d5;
+  --odv-surface: #e8eef5;
+  --odv-surface-elevated: #f6f9fc;
+  --odv-surface-muted: rgba(59, 71, 87, 0.09);
+  --odv-hover-overlay: rgba(31, 41, 55, 0.1);
 
   /* Text Colors */
-  --text-color: #1d242c;
-  --text-color-strong: #0f1720;
-  --text-muted-color: rgba(15, 23, 32, 0.72);
-  --text-faint-color: rgba(15, 23, 32, 0.84);
+  --text-color: #17202a;
+  --text-color-strong: #0d141c;
+  --text-muted-color: rgba(13, 20, 28, 0.74);
+  --text-faint-color: rgba(13, 20, 28, 0.86);
 
   /* Shadow and Border Colors */
-  --selected-shadow-color: rgba(83, 97, 112, 0.42);
-  --thumbnail-border-color: #a9b6c2;
-  --focus-shadow: rgba(83, 97, 112, 0.42);
-  --box-shadow: 0 4px 14px rgba(36, 48, 63, 0.14);
-  --odv-border: #c3ccd6;
-  --odv-border-strong: #adb8c4;
+  --selected-shadow-color: rgba(79, 93, 109, 0.42);
+  --thumbnail-border-color: #98a8ba;
+  --focus-shadow: rgba(79, 93, 109, 0.42);
+  --box-shadow: 0 6px 18px rgba(28, 39, 53, 0.16);
+  --odv-border: #b6c2cf;
+  --odv-border-strong: #98a8ba;
 
   /* Miscellaneous */
-  --disabled-color: #7d8894;
-  --warning-color: #d14343;
-  --thumbnail-primary-color: #255db3;
-  --thumbnail-compare-color: #a75a00;
-  --thumbnail-dual-color: #7a3aa6;
-  --thumbnail-shell-color: rgba(37, 93, 179, 0.1);
+  --disabled-color: #758292;
+  --warning-color: #c64242;
+  --thumbnail-primary-color: #2558ad;
+  --thumbnail-compare-color: #9b5600;
+  --thumbnail-dual-color: #7438a0;
+  --thumbnail-shell-color: rgba(37, 88, 173, 0.12);
 }
 
 [data-theme='dark'] {
