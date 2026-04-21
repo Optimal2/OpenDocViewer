@@ -38,10 +38,12 @@
       "current": "Theme: {theme}",
       "switchToMode": "Switch theme to {theme}",
       "options": {
-        "auto": "Normal",
         "light": "Light",
-        "dark": "Dark"
-      }
+        "dark": "Dark",
+        "normal": "Normal"
+      },
+      "currentSystem": "System ({theme})",
+      "system": "System"
     },
     "focusWarningTitle": "Shortcuts inactive",
     "focusWarningAction": "Focus viewer",

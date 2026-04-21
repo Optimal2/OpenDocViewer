@@ -18,6 +18,7 @@ import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react'
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import userLog from '../../logging/userLogger.js';
+import logger from '../../logging/systemLogger.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
 import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
@@ -279,7 +280,13 @@ const DocumentToolbar = ({
     try {
       const iframeId = typeof window !== 'undefined' && window.frameElement ? (window.frameElement.id || null) : null;
       userLog.initContext({ iframeId });
-    } catch {}
+    } catch (error) {
+      const name = String(error?.name || '');
+      logger.info('Could not resolve iframe element context', {
+        reason: name || 'unknown',
+        crossOriginRestricted: name === 'SecurityError',
+      });
+    }
     try {
       // If the host/build injects a version variable, attach it.
       const ver =
