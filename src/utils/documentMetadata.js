@@ -117,8 +117,13 @@ function buildFieldPresentationHints(mediaConfiguration) {
 }
 
 /**
+ * Resolve the label shown for one metadata row.
+ *
  * @param {*} record
- * @param {Object<string, string>} labelsById
+ * @param {Object<string, string>} labelsById Captions from media-configuration field catalogs.
+ * @param {Object<string, Array<{ label:string, selectedSource:(string|undefined) }>>} aliasLabelsById
+ *   Alias-derived labels grouped by metadata field id. This lets the UI fall back to deployment
+ *   alias labels when the host payload does not provide a usable caption.
  * @returns {string}
  */
 function resolveMetadataLabel(record, labelsById, aliasLabelsById = {}) {

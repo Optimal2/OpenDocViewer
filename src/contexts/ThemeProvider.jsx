@@ -6,31 +6,34 @@
  *
  * PURPOSE
  *   Centralize theme handling with:
- *     - explicit modes: auto / light / dark
+ *     - explicit themes: normal / light / dark
+ *     - an implicit system-following startup mode when the user has not chosen a theme yet
  *     - robust initialization (persisted preference → system preference → light fallback)
  *     - resilient DOM updates (SSR-safe, try/catch)
- *     - live reaction to `prefers-color-scheme` changes while the mode is `auto`
+ *     - live reaction to `prefers-color-scheme` changes while the mode is `system`
  *     - memoized context value for predictable renders
  */
 
-import { useState, useEffect, useMemo, useCallback } from 'react';
+import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import logger from '../logging/systemLogger.js';
 import ThemeContext from './themeContext.js';
 import { getThemeModePreference, setThemeModePreference } from '../utils/viewerPreferences.js';
 
 /**
  * Theme identifier.
- * @typedef {('light'|'dark')} ThemeName
+ * @typedef {('normal'|'light'|'dark')} ThemeName
  */
 
 /**
  * Theme mode identifier.
- * @typedef {('auto'|'light'|'dark')} ThemeMode
+ * - `system` means no explicit saved theme is active; follow the browser/OS preference.
+ * - `normal`, `light`, and `dark` are explicit user-selected themes.
+ * @typedef {('system'|'normal'|'light'|'dark')} ThemeMode
  */
 
 /**
  * Detect system preferred color scheme (SSR-safe; defaults to light).
- * @returns {ThemeName}
+ * @returns {('light'|'dark')}
  */
 function detectSystemTheme() {
   try {
@@ -43,17 +46,22 @@ function detectSystemTheme() {
 
 /**
  * Resolve the concrete theme for a theme mode.
+ * `system` follows the browser/OS preference; the explicit `normal` theme is a separate, slightly
+ * softer light theme intended to stay visually distinct from the plain light palette.
+ *
  * @param {ThemeMode} mode
  * @returns {ThemeName}
  */
 function resolveThemeForMode(mode) {
   if (mode === 'dark') return 'dark';
   if (mode === 'light') return 'light';
-  return detectSystemTheme();
+  if (mode === 'normal') return 'normal';
+  return detectSystemTheme() === 'dark' ? 'dark' : 'light';
 }
 
 /**
  * Apply the resolved theme to the DOM (SSR-safe).
+ *
  * @param {ThemeName} resolvedTheme
  * @param {ThemeMode} mode
  * @returns {void}
@@ -64,10 +72,26 @@ function applyThemeToDocument(resolvedTheme, mode) {
     const root = document.documentElement;
     root.setAttribute('data-theme', resolvedTheme);
     root.setAttribute('data-theme-mode', mode);
-    root.style.colorScheme = resolvedTheme;
+    root.style.colorScheme = resolvedTheme === 'dark' ? 'dark' : 'light';
   } catch {
     // ignore; DOM not available or locked down
   }
+}
+
+
+/**
+ * Resolve the initial theme mode once during provider initialization.
+ *
+ * @returns {ThemeMode}
+ */
+function resolveInitialThemeMode() {
+  const saved = getThemeModePreference();
+  if (saved === 'system' || saved === 'normal' || saved === 'light' || saved === 'dark') {
+    logger.info('Theme mode loaded from persisted preferences', { themeMode: saved });
+    return saved;
+  }
+  logger.info('Theme mode defaults to browser/OS-following mode until the user chooses an explicit theme');
+  return 'system';
 }
 
 /**
@@ -77,29 +101,27 @@ function applyThemeToDocument(resolvedTheme, mode) {
  * @returns {React.ReactElement}
  */
 export const ThemeProvider = ({ children }) => {
-  const [themeMode, setThemeModeState] = useState/** @type {function(): ThemeMode} */(() => {
-    const saved = getThemeModePreference();
-    if (saved === 'auto' || saved === 'light' || saved === 'dark') {
-      logger.info('Theme mode loaded from persisted preferences', { themeMode: saved });
-      return saved;
-    }
-    logger.info('Theme mode defaults to automatic system-following mode');
-    return 'auto';
-  });
+  const initialStateRef = useRef(null);
+  if (!initialStateRef.current) {
+    const mode = resolveInitialThemeMode();
+    initialStateRef.current = { mode, theme: resolveThemeForMode(mode) };
+  }
 
-  const [theme, setTheme] = useState/** @type {function(): ThemeName} */(() => resolveThemeForMode(
-    (getThemeModePreference() === 'light' || getThemeModePreference() === 'dark' || getThemeModePreference() === 'auto')
-      ? /** @type {ThemeMode} */ (getThemeModePreference())
-      : 'auto'
-  ));
+  const [themeMode, setThemeModeState] = useState/** @type {function(): ThemeMode} */(() => initialStateRef.current.mode);
+  const [theme, setTheme] = useState/** @type {function(): ThemeName} */(() => initialStateRef.current.theme);
 
   /**
    * Persist and apply a theme mode.
+   *
    * @param {ThemeMode} nextMode
    * @returns {void}
    */
   const setThemeMode = useCallback((nextMode) => {
-    const normalized = nextMode === 'dark' ? 'dark' : (nextMode === 'light' ? 'light' : 'auto');
+    const normalized = nextMode === 'dark'
+      ? 'dark'
+      : (nextMode === 'light'
+        ? 'light'
+        : (nextMode === 'normal' ? 'normal' : 'system'));
     const resolved = resolveThemeForMode(normalized);
     setThemeModePreference(normalized);
     setThemeModeState(normalized);
@@ -110,16 +132,18 @@ export const ThemeProvider = ({ children }) => {
 
   /**
    * Apply an explicit concrete theme.
+   *
    * @param {ThemeName} nextTheme
    * @returns {void}
    */
   const setThemeExplicit = useCallback((nextTheme) => {
-    setThemeMode(nextTheme === 'dark' ? 'dark' : 'light');
+    setThemeMode(nextTheme === 'dark' ? 'dark' : (nextTheme === 'normal' ? 'normal' : 'light'));
   }, [setThemeMode]);
 
   /**
-   * Toggle between light and dark explicit modes.
-   * Auto resolves first, then toggles to the opposite explicit mode.
+   * Toggle between the two highest-contrast explicit themes.
+   * This helper is retained for compatibility with older consumers.
+   *
    * @returns {void}
    */
   const toggleTheme = useCallback(() => {
@@ -136,10 +160,10 @@ export const ThemeProvider = ({ children }) => {
     let mq;
     /** @param {MediaQueryListEvent|MediaQueryList} event */
     const onChange = (event) => {
-      if (themeMode !== 'auto') return;
+      if (themeMode !== 'system') return;
       const next = event.matches ? 'dark' : 'light';
       setTheme((current) => (current === next ? current : next));
-      applyThemeToDocument(next, 'auto');
+      applyThemeToDocument(next, 'system');
       logger.info('Theme updated from system preference', { resolvedTheme: next });
     };
 

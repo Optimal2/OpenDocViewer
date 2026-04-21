@@ -1,5 +1,5 @@
 /* File: src/styles/theme.css
-   Root variables (light/dark) + global base elements */
+   Root variables (light / normal / dark) + global base elements */
 
 :root {
   color-scheme: light;
@@ -40,6 +40,46 @@
   --thumbnail-compare-color: #b25d00;
   --thumbnail-dual-color: #7b1fa2;
   --thumbnail-shell-color: rgba(11, 87, 208, 0.08);
+}
+
+[data-theme='normal'] {
+  color-scheme: light;
+
+  /* Primary Colors */
+  --primary-color: #536170;
+  --primary-color-hover: #44505d;
+  --primary-color-active: #2f3944;
+
+  /* Background / Surface Colors */
+  --background-color: #e9eef3;
+  --canvas-background-color: #f4f7fb;
+  --toolbar-background-color: #c8d1db;
+  --odv-surface: #f3f6fa;
+  --odv-surface-elevated: #ffffff;
+  --odv-surface-muted: rgba(59, 71, 87, 0.06);
+  --odv-hover-overlay: rgba(31, 41, 55, 0.08);
+
+  /* Text Colors */
+  --text-color: #1d242c;
+  --text-color-strong: #0f1720;
+  --text-muted-color: rgba(15, 23, 32, 0.72);
+  --text-faint-color: rgba(15, 23, 32, 0.84);
+
+  /* Shadow and Border Colors */
+  --selected-shadow-color: rgba(83, 97, 112, 0.42);
+  --thumbnail-border-color: #a9b6c2;
+  --focus-shadow: rgba(83, 97, 112, 0.42);
+  --box-shadow: 0 4px 14px rgba(36, 48, 63, 0.14);
+  --odv-border: #c3ccd6;
+  --odv-border-strong: #adb8c4;
+
+  /* Miscellaneous */
+  --disabled-color: #7d8894;
+  --warning-color: #d14343;
+  --thumbnail-primary-color: #255db3;
+  --thumbnail-compare-color: #a75a00;
+  --thumbnail-dual-color: #7a3aa6;
+  --thumbnail-shell-color: rgba(37, 93, 179, 0.1);
 }
 
 [data-theme='dark'] {

@@ -177,7 +177,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.appearance.title', { defaultValue: 'Appearance' })}</h3>
             <p>{t('help.sections.appearance.body', {
-              defaultValue: 'Use the theme menu in the toolbar to switch between Normal, Light, and Dark. Normal follows the browser or operating-system preference and falls back to light when that preference is unavailable.',
+              defaultValue: 'Use the theme menu in the toolbar to switch between Normal, Light, and Dark. Normal is the balanced middle theme. When no explicit theme has been chosen yet, the viewer follows the browser or operating-system preference and falls back to light when that preference is unavailable.',
             })}</p>
           </section>
 

@@ -3,8 +3,8 @@ import { createContext } from 'react';
 
 /**
  * Theme identifier.
- * @typedef {('light'|'dark')} ThemeName
- * @typedef {('auto'|'light'|'dark')} ThemeMode
+ * @typedef {('normal'|'light'|'dark')} ThemeName
+ * @typedef {('system'|'normal'|'light'|'dark')} ThemeMode
  */
 
 /**
@@ -26,7 +26,7 @@ import { createContext } from 'react';
 const ThemeContext = createContext(
   /** @type {ThemeContextValue} */ ({
     theme: 'light',
-    themeMode: 'auto',
+    themeMode: 'system',
     toggleTheme: function () {},
     setThemeExplicit: function (_next) {},
     setThemeMode: function (_next) {}

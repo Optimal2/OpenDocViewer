@@ -38,10 +38,12 @@
       "current": "Tema: {theme}",
       "switchToMode": "Byt tema till {theme}",
       "options": {
-        "auto": "Normal",
         "light": "Ljust",
-        "dark": "Mörkt"
-      }
+        "dark": "Mörkt",
+        "normal": "Normal"
+      },
+      "currentSystem": "System ({theme})",
+      "system": "System"
     },
     "focusWarningTitle": "Genvägar inaktiva",
     "focusWarningAction": "Fokusera visaren",
