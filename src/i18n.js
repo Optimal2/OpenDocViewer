@@ -159,9 +159,16 @@ function getStaticI18nDefaults() {
   const cfg = appCfg.i18n || {};
   const supportedLngs = Array.isArray(cfg.supported) && cfg.supported.length ? cfg.supported : ['en'];
   const configuredDefault = String(cfg.default || '').trim().toLowerCase();
-  const fallbackLng = configuredDefault && configuredDefault !== 'auto'
-    ? configuredDefault
-    : (supportedLngs.includes('en') ? 'en' : String(supportedLngs[0] || 'en').toLowerCase());
+  let fallbackLng;
+
+  if (configuredDefault && configuredDefault !== 'auto') {
+    fallbackLng = configuredDefault;
+  } else if (supportedLngs.includes('en')) {
+    fallbackLng = 'en';
+  } else {
+    fallbackLng = String(supportedLngs[0] || 'en').toLowerCase();
+  }
+
   return { fallbackLng, supportedLngs };
 }
 
@@ -223,10 +230,12 @@ function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
   } catch {}
 
   try {
-    const nav = typeof navigator !== 'undefined' ? navigator : /** @type {*} */ ({});
-    const navCandidates = Array.isArray(nav.languages) && nav.languages.length
-      ? nav.languages
-      : [nav.language, nav.userLanguage].filter(Boolean);
+    const hasNavigator = typeof navigator !== 'undefined';
+    const navCandidates = hasNavigator
+      ? (Array.isArray(navigator.languages) && navigator.languages.length
+        ? navigator.languages
+        : [navigator.language, navigator.userLanguage].filter(Boolean))
+      : [];
     for (const candidate of navCandidates) {
       const normalized = normalizeSupportedLanguage(candidate, supported);
       if (normalized) return normalized;
@@ -395,12 +404,14 @@ if (WANT_DIAG) {
         bump: () => {
           try {
             const ts = new Date();
-            const ver = ts.getFullYear().toString()
-              + String(ts.getMonth() + 1).padStart(2, '0')
-              + String(ts.getDate()).padStart(2, '0')
-              + String(ts.getHours()).padStart(2, '0')
-              + String(ts.getMinutes()).padStart(2, '0')
-              + String(ts.getSeconds()).padStart(2, '0');
+            const ver = [
+              ts.getFullYear().toString(),
+              String(ts.getMonth() + 1).padStart(2, '0'),
+              String(ts.getDate()).padStart(2, '0'),
+              String(ts.getHours()).padStart(2, '0'),
+              String(ts.getMinutes()).padStart(2, '0'),
+              String(ts.getSeconds()).padStart(2, '0')
+            ].join('-');
             localStorage.setItem('ODV_I18N_VERSION', ver);
             console.info('[i18n] bump to', ver);
             reloadAfterDiagnosticStorageWrite();
