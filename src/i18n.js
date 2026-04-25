@@ -41,8 +41,9 @@ const IS_DEV =
 function readQuery(name) {
   try {
     const q = typeof location !== 'undefined' ? location.search : '';
-    const m = new RegExp('(?:[?&])' + name + '=([^&]+)', 'i').exec(q);
-    return m ? decodeURIComponent(m[1]) : null;
+    const params = new URLSearchParams(q);
+    const value = params.get(String(name));
+    return value !== null ? value : null;
   } catch { return null; }
 }
 
@@ -246,7 +247,7 @@ function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
     const navCandidates = hasNavigator
       ? (Array.isArray(navigator.languages) && navigator.languages.length
         ? navigator.languages
-        : [navigator.language, navigator.userLanguage].filter(Boolean))
+        : [navigator.language].filter(Boolean))
       : [];
     for (const candidate of navCandidates) {
       const normalized = normalizeSupportedLanguage(candidate, supported);
@@ -337,7 +338,7 @@ function resolveLoadPath(lngs, namespaces) {
         (match) => match[0]
       ).filter((token) => !/^\{\{ver(sion)?\}\}$/i.test(token));
       if (suspiciousVersionTokens.length) {
-        console.warn('[i18n] unsupported version-like loadPath placeholder', {
+        console.warn('[i18n] unsupported version-like loadPath placeholders', {
           loadPath: cfg.loadPath,
           placeholders: suspiciousVersionTokens
         });
