@@ -128,14 +128,14 @@ function sanitizeI18nPathSegment(value, fallback) {
 /**
  * Reload after a diagnostic localStorage write.
  *
- * localStorage.setItem() is synchronous, but deferring the reload one task keeps the write path explicit
- * and avoids static-analysis false positives around immediate navigation after persistence changes.
+ * localStorage.setItem() is synchronous in supported browsers, but this dev-only helper
+ * delays navigation slightly so the persistence step is complete before reload-sensitive tooling runs.
  *
  * @returns {void}
  */
 function reloadAfterDiagnosticStorageWrite() {
   try {
-    setTimeout(() => { location.reload(); }, 0);
+    setTimeout(() => { location.reload(); }, 25);
   } catch {
     try { location.reload(); } catch {}
   }
