@@ -135,16 +135,27 @@ function sanitizeI18nPathSegment(value, fallback) {
 }
 
 /**
- * Reload after a diagnostic localStorage write.
+ * Refresh i18n resources after a diagnostic localStorage write.
  *
- * localStorage.setItem() is synchronous in supported browsers; this dev-only helper
- * uses DIAGNOSTIC_RELOAD_DELAY_MS to defer navigation slightly for reload-sensitive tooling.
+ * localStorage.setItem() is synchronous in supported browsers. This dev-only helper
+ * waits DIAGNOSTIC_RELOAD_DELAY_MS, then reloads i18next resources programmatically
+ * so diagnostics can pick up the new cache-busting token without losing app state.
+ * A full page reload is kept only as a last-resort fallback if resource reload fails.
  *
  * @returns {void}
  */
 function reloadAfterDiagnosticStorageWrite() {
   try {
-    setTimeout(() => { location.reload(); }, DIAGNOSTIC_RELOAD_DELAY_MS);
+    setTimeout(async () => {
+      try {
+        await i18next.reloadResources();
+        if (i18next.language) {
+          await i18next.changeLanguage(i18next.language);
+        }
+      } catch {
+        try { location.reload(); } catch {}
+      }
+    }, DIAGNOSTIC_RELOAD_DELAY_MS);
   } catch {
     try { location.reload(); } catch {}
   }
@@ -221,8 +232,9 @@ function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
   const persistedPreference = normalizeSupportedLanguage(getLanguagePreference(), supported);
   if (persistedPreference) return persistedPreference;
 
-  const rawConfiguredDefault = String(fallbackLng || '').trim().toLowerCase();
-  if (fallbackFromConfig && rawConfiguredDefault !== 'auto') return fallbackFromConfig;
+  if (fallbackFromConfig && String(fallbackLng || '').trim().toLowerCase() !== 'auto') {
+    return fallbackFromConfig;
+  }
 
   try {
     const persistedCandidate = normalizeSupportedLanguage(localStorage.getItem('i18nextLng'), supported);
