@@ -32,9 +32,41 @@ import ICU from 'i18next-icu';
 import HttpBackend from 'i18next-http-backend';
 import { getLanguagePreference, setLanguagePreference } from './utils/viewerPreferences.js';
 
+/**
+ * Return browser window safely in browser, SSR, test, and documentation contexts.
+ *
+ * @returns {*}
+ */
+function getSafeWindow() {
+  try {
+    return typeof window !== 'undefined' ? window : {};
+  } catch {
+    return {};
+  }
+}
+
+/**
+ * Return Vite import.meta.env safely.
+ *
+ * This file is shipped as an ES module, so import.meta is valid in the supported
+ * runtime. The helper keeps all access guarded and avoids optional chaining on
+ * import.meta for tools that parse this module outside the normal Vite pipeline.
+ *
+ * @returns {*}
+ */
+function getImportMetaEnv() {
+  try {
+    return import.meta && import.meta.env ? import.meta.env : {};
+  } catch {
+    return {};
+  }
+}
+
+const IMPORT_META_ENV = getImportMetaEnv();
+
 /** Dev-mode detector (Vite + Node envs). */
 const IS_DEV =
-  import.meta?.env?.MODE === 'development' ||
+  IMPORT_META_ENV.MODE === 'development' ||
   globalThis.process?.env?.NODE_ENV === 'development';
 
 /** Read a query parameter by name (no deps). */
@@ -86,17 +118,15 @@ function getI18nVersion() {
       if (v) return v;
     } catch {}
 
-    const w = typeof window !== 'undefined' ? window : /** @type {*} */ ({});
+    const w = getSafeWindow();
     const cfg = (w.__ODV_CONFIG__ && w.__ODV_CONFIG__.i18n) || {};
     const cfgVersion = normalizeVersionToken(cfg.version);
     if (cfgVersion) return cfgVersion;
 
     const globalVer =
-      (typeof import.meta !== 'undefined' && import.meta.env && (
-        import.meta.env.ODV_BUILD_ID ||
-        import.meta.env.VITE_APP_VERSION ||
-        import.meta.env.APP_VERSION
-      )) ||
+      IMPORT_META_ENV.ODV_BUILD_ID ||
+      IMPORT_META_ENV.VITE_APP_VERSION ||
+      IMPORT_META_ENV.APP_VERSION ||
       w.__APP_VERSION__ ||
       w.__ODV_APP_VERSION__;
 
@@ -135,6 +165,25 @@ function sanitizeI18nPathSegment(value, fallback) {
 }
 
 /**
+ * Find malformed version-like placeholders in loadPath without extra array passes.
+ *
+ * @param {string} loadPath
+ * @returns {string[]}
+ */
+function getUnsupportedVersionPlaceholders(loadPath) {
+  const unsupported = [];
+  const versionLikeTokenPattern = /\{\{([^}]*ver[^}]*)\}\}/gi;
+  let match;
+
+  while ((match = versionLikeTokenPattern.exec(loadPath)) !== null) {
+    const token = match[0];
+    if (!/^\{\{ver(sion)?\}\}$/i.test(token)) unsupported.push(token);
+  }
+
+  return unsupported;
+}
+
+/**
  * Refresh i18n resources after a diagnostic localStorage write.
  *
  * localStorage.setItem() is synchronous in supported browsers. This dev-only helper
@@ -166,9 +215,9 @@ function reloadAfterDiagnosticStorageWrite() {
  * @returns {{fallbackLng:string, supportedLngs:string[], configuredDefaultIsAuto:boolean}}
  */
 function getStaticI18nDefaults() {
-  const appCfg = typeof window !== 'undefined' ? (window.__ODV_CONFIG__ || {}) : {};
+  const appCfg = getSafeWindow().__ODV_CONFIG__ || {};
   const cfg = appCfg.i18n || {};
-  const supportedLngs = Array.isArray(cfg.supported) && cfg.supported.length ? cfg.supported : ['en'];
+  const supportedLngs = getNormalizedSupportedLanguages(cfg.supported);
   const configuredDefault = String(cfg.default || '').trim().toLowerCase();
   const configuredDefaultIsAuto = configuredDefault === 'auto';
   let fallbackLng;
@@ -195,6 +244,22 @@ function getBaseLanguageCode(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
   return raw.toLowerCase().split(/[-_]/)[0];
+}
+
+/**
+ * Normalize configured supported languages to non-empty base language codes.
+ * Empty or malformed entries are ignored so fallback logic never depends on
+ * whitespace-only values inside a non-empty supported array.
+ *
+ * @param {*} value
+ * @returns {string[]}
+ */
+function getNormalizedSupportedLanguages(value) {
+  const source = Array.isArray(value) ? value : [];
+  const normalized = source
+    .map((entry) => getBaseLanguageCode(entry))
+    .filter((entry) => entry && sanitizeI18nPathSegment(entry, '') === entry);
+  return normalized.length ? Array.from(new Set(normalized)) : ['en'];
 }
 
 /**
@@ -305,11 +370,11 @@ function syncDocumentLanguage(language, supportedLngs, fallbackLng) {
  * @returns {string}
  */
 function computeBaseHref() {
-  const w = typeof window !== 'undefined' ? window : /** @type {*} */ ({});
+  const w = getSafeWindow();
   const appCfg = w.__ODV_CONFIG__ || {};
   const baseGuess =
     appCfg.baseHref ||
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ||
+    IMPORT_META_ENV.BASE_URL ||
     '/';
   return String(baseGuess || '/').replace(/\/+$/, '') + '/';
 }
@@ -323,7 +388,7 @@ function computeBaseHref() {
  * @returns {string} Absolute or app-relative URL to a JSON file.
  */
 function resolveLoadPath(lngs, namespaces) {
-  const w = typeof window !== 'undefined' ? window : /** @type {*} */ ({});
+  const w = getSafeWindow();
   const appCfg = w.__ODV_CONFIG__ || {};
   const cfg = appCfg.i18n || {};
   const ver = getI18nVersion();
@@ -347,10 +412,7 @@ function resolveLoadPath(lngs, namespaces) {
     // Malformed version-like placeholders are not treated as cache busters; warn in dev so
     // configuration typos such as {{verison}} are visible without changing production behavior.
     if (WANT_DIAG) {
-      const suspiciousVersionTokens = Array.from(
-        cfg.loadPath.matchAll(/\{\{([^}]*ver[^}]*)\}\}/gi),
-        (match) => match[0]
-      ).filter((token) => !/^\{\{ver(sion)?\}\}$/i.test(token));
+      const suspiciousVersionTokens = getUnsupportedVersionPlaceholders(cfg.loadPath);
       if (suspiciousVersionTokens.length) {
         console.warn('[i18n] unsupported version-like loadPath placeholders', {
           loadPath: cfg.loadPath,
@@ -453,6 +515,11 @@ if (WANT_DIAG) {
   } catch {}
 }
 
+// Development bypasses browser caches so diagnostics see locale edits immediately.
+// Production intentionally relies on normal HTTP/browser caching because every
+// locale URL includes a stable version token from resolveLoadPath().
+const I18N_BACKEND_REQUEST_OPTIONS = IS_DEV ? { cache: 'no-store' } : {};
+
 i18next
   .use(HttpBackend)
   .use(ICU)
@@ -469,7 +536,7 @@ i18next
     interpolation: { escapeValue: false },
     backend: {
       loadPath: (lngs, namespaces) => resolveLoadPath(lngs, namespaces),
-      requestOptions: IS_DEV ? { cache: 'no-store' } : {}
+      requestOptions: I18N_BACKEND_REQUEST_OPTIONS
     },
     react: { useSuspense: false }
   })
