@@ -250,7 +250,7 @@ function computeBaseHref() {
     appCfg.baseHref ||
     (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.BASE_URL) ||
     '/';
-  return String(baseGuess || '/').replace(/\/+$/, '/');
+  return String(baseGuess || '/').replace(/\/+$/, '') + '/';
 }
 
 /**
@@ -280,7 +280,7 @@ function resolveLoadPath(lngs, namespaces) {
       .replace('{{ns}}', encodedNs)
       .replace('{{ver}}', ver)
       .replace('{{version}}', ver);
-    if (!/\{\{ver(sion)?\}\}/.test(cfg.loadPath) && ver) out = appendQuery(out, { v: ver });
+    if (!/\{\{ver(sion)?\}\}/.test(out) && ver) out = appendQuery(out, { v: ver });
     if (WANT_DIAG) console.info('[i18n] loadPath (from config):', out);
     return out;
   }
