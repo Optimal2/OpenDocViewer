@@ -42,8 +42,7 @@ function readQuery(name) {
   try {
     const q = typeof location !== 'undefined' ? location.search : '';
     const params = new URLSearchParams(q);
-    const value = params.get(String(name));
-    return value !== null ? value : null;
+    return params.get(String(name));
   } catch { return null; }
 }
 
@@ -164,24 +163,38 @@ function reloadAfterDiagnosticStorageWrite() {
 
 /**
  * Compute app config & defaults safely.
- * @returns {{fallbackLng:string, supportedLngs:string[]}}
+ * @returns {{fallbackLng:string, supportedLngs:string[], configuredDefaultIsAuto:boolean}}
  */
 function getStaticI18nDefaults() {
   const appCfg = typeof window !== 'undefined' ? (window.__ODV_CONFIG__ || {}) : {};
   const cfg = appCfg.i18n || {};
   const supportedLngs = Array.isArray(cfg.supported) && cfg.supported.length ? cfg.supported : ['en'];
   const configuredDefault = String(cfg.default || '').trim().toLowerCase();
+  const configuredDefaultIsAuto = configuredDefault === 'auto';
   let fallbackLng;
 
-  if (configuredDefault && configuredDefault !== 'auto') {
+  if (configuredDefault && !configuredDefaultIsAuto) {
     fallbackLng = configuredDefault;
   } else if (supportedLngs.includes('en')) {
     fallbackLng = 'en';
   } else {
-    fallbackLng = String(supportedLngs[0] || 'en').toLowerCase();
+    fallbackLng = getBaseLanguageCode(supportedLngs[0]) || 'en';
   }
 
-  return { fallbackLng, supportedLngs };
+  return { fallbackLng, supportedLngs, configuredDefaultIsAuto };
+}
+
+/**
+ * Extract the lowercase base language code from a locale candidate.
+ * Examples: "sv-SE" -> "sv", "EN_us" -> "en_us".
+ *
+ * @param {*} value
+ * @returns {string}
+ */
+function getBaseLanguageCode(value) {
+  const raw = String(value || '').trim();
+  if (!raw) return '';
+  return raw.toLowerCase().split('-')[0];
 }
 
 /**
@@ -192,9 +205,7 @@ function getStaticI18nDefaults() {
  * @returns {(string|null)}
  */
 function normalizeSupportedLanguage(value, supported) {
-  const raw = String(value || '').trim();
-  if (!raw) return null;
-  const base = raw.toLowerCase().split('-')[0];
+  const base = getBaseLanguageCode(value);
   if (!base) return null;
   const supportedList = Array.isArray(supported) ? supported : [];
   const exact = supportedList.find((entry) => String(entry || '').toLowerCase() === base);
@@ -213,19 +224,19 @@ function normalizeSupportedLanguage(value, supported) {
  *   6) <html lang="...">
  *   7) English / first supported fallback
  *
- * A configured default of "auto" skips step 2 and lets browser/html decide.
+ * A configured default of "auto" skips the configured-default return and lets browser/html decide.
  * This keeps deployments predictable: when a site explicitly says default=sv, the viewer starts in
  * Swedish even on English Windows/Edge installations.
  *
- * @param {{ fallbackLng: string, supportedLngs: string[] }} options
+ * @param {{ fallbackLng: string, supportedLngs: string[], configuredDefaultIsAuto?: boolean }} options
  * @returns {string}
  */
-function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
+function resolveInitialLanguage({ fallbackLng, supportedLngs, configuredDefaultIsAuto = false }) {
   const supported = Array.isArray(supportedLngs) ? supportedLngs : [];
   const fallbackFromConfig = normalizeSupportedLanguage(fallbackLng, supported);
   const normalizedFallback = fallbackFromConfig
     || normalizeSupportedLanguage('en', supported)
-    || (supported.length ? String(supported[0] || '').toLowerCase() : 'en');
+    || (supported.length ? getBaseLanguageCode(supported[0]) : 'en');
 
   const queryCandidate = normalizeSupportedLanguage(readQuery('lng') || readQuery('lang'), supported);
   if (queryCandidate) return queryCandidate;
@@ -233,7 +244,7 @@ function resolveInitialLanguage({ fallbackLng, supportedLngs }) {
   const persistedPreference = normalizeSupportedLanguage(getLanguagePreference(), supported);
   if (persistedPreference) return persistedPreference;
 
-  if (fallbackFromConfig && String(fallbackLng || '').trim().toLowerCase() !== 'auto') {
+  if (!configuredDefaultIsAuto && fallbackFromConfig) {
     return fallbackFromConfig;
   }
 
@@ -316,7 +327,7 @@ function resolveLoadPath(lngs, namespaces) {
 
   const rawLng = Array.isArray(lngs) ? (lngs[0] || '') : (lngs || '');
   const rawNs = Array.isArray(namespaces) ? (namespaces[0] || 'common') : (namespaces || 'common');
-  const lng = sanitizeI18nPathSegment(String(rawLng || '').split('-')[0].toLowerCase(), 'en');
+  const lng = sanitizeI18nPathSegment(getBaseLanguageCode(rawLng), 'en');
   const ns = sanitizeI18nPathSegment(rawNs, 'common');
   const encodedLng = encodeURIComponent(lng);
   const encodedNs = encodeURIComponent(ns);
@@ -355,8 +366,8 @@ function resolveLoadPath(lngs, namespaces) {
   return out;
 }
 
-const { fallbackLng, supportedLngs } = getStaticI18nDefaults();
-const initialLanguage = resolveInitialLanguage({ fallbackLng, supportedLngs });
+const { fallbackLng, supportedLngs, configuredDefaultIsAuto } = getStaticI18nDefaults();
+const initialLanguage = resolveInitialLanguage({ fallbackLng, supportedLngs, configuredDefaultIsAuto });
 
 if (WANT_DIAG) {
   i18next
