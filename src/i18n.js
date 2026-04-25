@@ -186,7 +186,7 @@ function getStaticI18nDefaults() {
 
 /**
  * Extract the lowercase base language code from a locale candidate.
- * Examples: "sv-SE" -> "sv", "EN_us" -> "en_us".
+ * Examples: "sv-SE" -> "sv", "EN_us" -> "en", "en_US-variant" -> "en".
  *
  * @param {*} value
  * @returns {string}
@@ -194,7 +194,7 @@ function getStaticI18nDefaults() {
 function getBaseLanguageCode(value) {
   const raw = String(value || '').trim();
   if (!raw) return '';
-  return raw.toLowerCase().split('-')[0];
+  return raw.toLowerCase().split(/[-_]/)[0];
 }
 
 /**
@@ -208,8 +208,8 @@ function normalizeSupportedLanguage(value, supported) {
   const base = getBaseLanguageCode(value);
   if (!base) return null;
   const supportedList = Array.isArray(supported) ? supported : [];
-  const exact = supportedList.find((entry) => String(entry || '').toLowerCase() === base);
-  return exact || null;
+  const exact = supportedList.find((entry) => getBaseLanguageCode(entry) === base);
+  return exact ? getBaseLanguageCode(exact) : null;
 }
 
 /**
@@ -228,7 +228,10 @@ function normalizeSupportedLanguage(value, supported) {
  * This keeps deployments predictable: when a site explicitly says default=sv, the viewer starts in
  * Swedish even on English Windows/Edge installations.
  *
- * @param {{ fallbackLng: string, supportedLngs: string[], configuredDefaultIsAuto?: boolean }} options
+ * @param {Object} options
+ * @param {string} options.fallbackLng
+ * @param {string[]} options.supportedLngs
+ * @param {boolean} options.configuredDefaultIsAuto
  * @returns {string}
  */
 function resolveInitialLanguage({ fallbackLng, supportedLngs, configuredDefaultIsAuto = false }) {
@@ -459,7 +462,7 @@ i18next
     lng: initialLanguage,
     fallbackLng,
     supportedLngs,
-    nonExplicitSupportedLngs: true,
+    nonExplicitSupportedLngs: false,
     load: 'languageOnly',
     ns: ['common'],
     defaultNS: 'common',
