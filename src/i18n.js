@@ -109,6 +109,23 @@ function appendQuery(url, params) {
 }
 
 /**
+ * Keep i18n URL template substitutions constrained to plain path segments.
+ *
+ * This is intentionally stricter than URL encoding alone: language and namespace
+ * values are used inside configurable path templates, so path separators, dots,
+ * query delimiters, and absolute-URL markers must never survive into the final URL.
+ *
+ * @param {*} value
+ * @param {string} fallback
+ * @returns {string}
+ */
+function sanitizeI18nPathSegment(value, fallback) {
+  const raw = String(value || '').trim();
+  if (/^[A-Za-z0-9_-]+$/.test(raw)) return raw;
+  return fallback;
+}
+
+/**
  * Compute app config & defaults safely.
  * @returns {{fallbackLng:string, supportedLngs:string[]}}
  */
@@ -251,13 +268,16 @@ function resolveLoadPath(lngs, namespaces) {
   const ver = getI18nVersion();
 
   const rawLng = Array.isArray(lngs) ? (lngs[0] || '') : (lngs || '');
-  const lng = String(rawLng || '').split('-')[0] || 'en';
-  const ns = Array.isArray(namespaces) ? (namespaces[0] || 'common') : (namespaces || 'common');
+  const rawNs = Array.isArray(namespaces) ? (namespaces[0] || 'common') : (namespaces || 'common');
+  const lng = sanitizeI18nPathSegment(String(rawLng || '').split('-')[0], 'en').toLowerCase();
+  const ns = sanitizeI18nPathSegment(rawNs, 'common');
+  const encodedLng = encodeURIComponent(lng);
+  const encodedNs = encodeURIComponent(ns);
 
   if (cfg.loadPath && typeof cfg.loadPath === 'string') {
     let out = cfg.loadPath
-      .replace('{{lng}}', lng)
-      .replace('{{ns}}', ns)
+      .replace('{{lng}}', encodedLng)
+      .replace('{{ns}}', encodedNs)
       .replace('{{ver}}', ver)
       .replace('{{version}}', ver);
     if (!/\{\{ver(sion)?\}\}/.test(cfg.loadPath) && ver) out = appendQuery(out, { v: ver });
@@ -265,7 +285,7 @@ function resolveLoadPath(lngs, namespaces) {
     return out;
   }
 
-  let out = computeBaseHref() + 'locales/' + lng + '/' + ns + '.json';
+  let out = computeBaseHref() + 'locales/' + encodedLng + '/' + encodedNs + '.json';
   if (ver) out = appendQuery(out, { v: ver });
   if (WANT_DIAG) console.info('[i18n] loadPath (computed):', out, { lng, ns });
   return out;
