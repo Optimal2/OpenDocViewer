@@ -57,6 +57,15 @@ const WANT_DIAG = IS_DEV;
  */
 const BUNDLED_I18N_RESOURCE_REVISION = '20250418-01';
 
+/**
+ * Dev-only reload delay after diagnostic localStorage writes.
+ *
+ * localStorage.setItem() is synchronous in supported browsers. 25 ms is a
+ * deliberately small, dev-only grace period: above a zero-delay timer tick, below
+ * any user-visible delay, and only used by window.__I18N_DIAG__ helpers.
+ */
+const DIAGNOSTIC_RELOAD_DELAY_MS = 25;
+
 /** Normalize optional version tokens from runtime config or globals. */
 function normalizeVersionToken(value) {
   if (value == null) return '';
@@ -128,14 +137,14 @@ function sanitizeI18nPathSegment(value, fallback) {
 /**
  * Reload after a diagnostic localStorage write.
  *
- * localStorage.setItem() is synchronous in supported browsers, but this dev-only helper
- * delays navigation slightly so the persistence step is complete before reload-sensitive tooling runs.
+ * localStorage.setItem() is synchronous in supported browsers; this dev-only helper
+ * uses DIAGNOSTIC_RELOAD_DELAY_MS to defer navigation slightly for reload-sensitive tooling.
  *
  * @returns {void}
  */
 function reloadAfterDiagnosticStorageWrite() {
   try {
-    setTimeout(() => { location.reload(); }, 25);
+    setTimeout(() => { location.reload(); }, DIAGNOSTIC_RELOAD_DELAY_MS);
   } catch {
     try { location.reload(); } catch {}
   }
@@ -299,7 +308,20 @@ function resolveLoadPath(lngs, namespaces) {
       .replace('{{version}}', ver);
 
     // Append a query fallback only when the original template did not use a supported version token.
-    // Malformed placeholders such as {{verison}} are intentionally not treated as cache busters.
+    // Malformed version-like placeholders are not treated as cache busters; warn in dev so
+    // configuration typos such as {{verison}} are visible without changing production behavior.
+    if (WANT_DIAG) {
+      const suspiciousVersionTokens = Array.from(
+        cfg.loadPath.matchAll(/\{\{([^}]*ver[^}]*)\}\}/gi),
+        (match) => match[0]
+      ).filter((token) => !/^\{\{ver(sion)?\}\}$/i.test(token));
+      if (suspiciousVersionTokens.length) {
+        console.warn('[i18n] unsupported version-like loadPath placeholder', {
+          loadPath: cfg.loadPath,
+          placeholders: suspiciousVersionTokens
+        });
+      }
+    }
     if (!hasSupportedVersionToken && ver) out = appendQuery(out, { v: ver });
     if (WANT_DIAG) console.info('[i18n] loadPath (from config):', out);
     return out;
