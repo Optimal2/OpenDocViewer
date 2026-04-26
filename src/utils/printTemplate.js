@@ -43,9 +43,7 @@ export function escapeHtml(s) {
     }
   }).replace(/___ODV_ENTITY_(\d+)___/g, (_m, index) => {
     const numericIndex = Number(index);
-    return Number.isInteger(numericIndex) && numericIndex >= 0 && numericIndex < entities.length
-      ? entities[numericIndex]
-      : '';
+    return numericIndex >= 0 && numericIndex < entities.length ? entities[numericIndex] : '';
   });
 }
 
@@ -356,6 +354,9 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
     session,
     bundle,
     doc,
+    // Page-specific print flows replace these placeholders in makePageTokenContext().
+    // They remain present in the base context so header/footer templates can safely
+    // resolve document/metadata tokens even when a non-page-specific print path is used.
     document: {},
     metadata: {},
     viewer
@@ -480,11 +481,16 @@ function decodeTemplateLiteral(text) {
 
 // Conditional block grammar:
 //   [[{{condition.path}}, "template content"]]
-// Capture groups:
+//
+// Regex capture groups:
 //   1 = condition token path/expression inside {{ }}
 //   2 = double-quoted content, with backslash escapes allowed
 //   3 = single-quoted content, with backslash escapes allowed
 //   4 = bare unquoted content up to the closing block
+//
+// Conditional blocks must be resolved before normal token substitution because
+// the block content itself may contain {{...}} or ${...} tokens. Resolving tokens
+// first would erase missing condition values and make the block condition ambiguous.
 const CONDITIONAL_BLOCK_RE = /\[\[\s*\{\{\s*([^}]+?)\s*\}\}\s*,\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\]]*?))\s*\]\]/g;
 
 /**
@@ -531,6 +537,10 @@ function convertNewlinesToBreaks(html) {
  */
 export function applyTemplateTokensEscaped(tpl, tokenContext) {
   if (typeof tpl !== 'string' || !tpl) return '';
+  // Resolution order is intentional:
+  //   1) conditional blocks decide whether complete label/value fragments are emitted,
+  //   2) legacy ${...} tokens are expanded for backward compatibility,
+  //   3) preferred {{...}} tokens are expanded inside the remaining template.
   let out = applyConditionalBlocks(tpl, tokenContext);
   out = out.replace(/\$\{([^}]+)\}/g, function (_m, inner) {
     return resolveTokenExpressionEscaped(inner, tokenContext);
