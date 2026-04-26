@@ -25,7 +25,7 @@ import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeMenuButton from './ThemeMenuButton.jsx';
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
@@ -51,6 +51,8 @@ import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame
  * @property {string=} printFormatValue
  * @property {Object=} reasonSelection
  * @property {Object=} printFormatSelection
+ * @property {'html'|'pdf'=} printBackend
+ * @property {'print'|'download'=} printAction
  */
 
 /**
@@ -804,7 +806,14 @@ const DocumentToolbar = ({
       reasonSelection: detail?.reasonSelection || null,
       printFormatSelection: detail?.printFormatSelection || null,
       bundle: bundle || null,
+      pageNumbers,
       pageContexts: resolvePrintPageContexts(pageNumbers),
+      printHeaderCfg: getRuntimeConfig().printHeader || {},
+      printFooterCfg: getRuntimeConfig().printFooter || {},
+      printFormatCfg: getRuntimeConfig().print?.format || {},
+      pdfCfg: getRuntimeConfig().print?.pdf || {},
+      action: detail?.printAction === 'download' ? 'download' : 'print',
+      filename: getRuntimeConfig().print?.pdf?.filename || 'opendocviewer-print.pdf',
     };
   }, [bundle, documentRenderRef, resolvePrintPageContexts, resolvePrintPageNumbers, viewerContainerRef]);
 
@@ -816,7 +825,7 @@ const DocumentToolbar = ({
   const submitUserPrintLog = useCallback((detail) => {
     try {
       userLog.submitPrint({
-        action: 'print',
+        action: detail?.printAction === 'download' ? 'download-pdf' : (detail?.printBackend === 'pdf' ? 'print-pdf' : 'print'),
         reason: detail?.reason ?? null,
         forWhom: detail?.forWhom ?? null,
         printFormat: detail?.printFormat ?? null,
@@ -943,6 +952,20 @@ const DocumentToolbar = ({
    */
   const dispatchPrintRequest = useCallback((detail) => {
     const commonOpts = makePrintOptions(detail);
+    const pageNumbers = Array.isArray(commonOpts.pageNumbers) ? commonOpts.pageNumbers : resolvePrintPageNumbers(detail);
+
+    if (detail?.printBackend === 'pdf') {
+      const pdfTask = detail?.mode === 'active'
+        ? (detail?.activeScope === 'compare-both' && isComparing
+            ? handlePdfCurrentComparison(documentRenderRef, compareRef, commonOpts)
+            : handlePdfCurrent(documentRenderRef, commonOpts))
+        : handlePdfOutput(documentRenderRef, pageNumbers, commonOpts);
+      pdfTask.catch((error) => {
+        logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
+      });
+      return;
+    }
+
     const warmIndexes = getWarmCompatibleIndexes(detail);
     const warmFrame = warmPrintFrameRef.current;
     if (warmIndexes && warmFrame?.status === 'ready') {
@@ -973,7 +996,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.

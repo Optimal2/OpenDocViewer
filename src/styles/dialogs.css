@@ -962,3 +962,22 @@
     grid-template-columns: 1fr;
   }
 }
+
+.odv-prd-radioRow-info {
+  gap: 8px;
+}
+
+.odv-prd-infoIcon {
+  font-size: 16px;
+  line-height: 1;
+  color: var(--text-muted-color);
+  opacity: 0.85;
+  cursor: help;
+  user-select: none;
+}
+
+.odv-prd-infoIcon:hover,
+.odv-prd-infoIcon:focus-visible {
+  opacity: 1;
+  color: var(--thumbnail-primary-color, var(--primary-color, #2563eb));
+}

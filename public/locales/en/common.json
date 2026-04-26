@@ -142,7 +142,8 @@
     "footer": {
       "cancel": "Cancel",
       "continue": "Start printing",
-      "prepare": "Prepare printing"
+      "prepare": "Prepare printing",
+      "downloadPdf": "Save PDF"
     },
     "errors": {
       "selectValidPages": "Select valid pages.",
@@ -217,6 +218,19 @@
       "label": "Add copy watermark",
       "hint": "When selected, the configured copy marker is available to header/footer templates and is printed as a watermark.",
       "checkboxLabel": "Add copy watermark"
+    },
+    "output": {
+      "header": "Print output",
+      "aria": "Print output mode",
+      "direct": {
+        "label": "Direct print",
+        "hint": "The browser prints the prepared OpenDocViewer print view directly."
+      },
+      "safe": {
+        "label": "Safe print",
+        "hint": "OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.",
+        "info": "OpenDocViewer takes responsibility for creating the print job as a PDF file. The PDF is then printed in the browser. This can be more stable for larger print jobs."
+      }
     }
   },
   "print": {

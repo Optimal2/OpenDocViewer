@@ -25,6 +25,8 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {string|null} [printFormatValue]
  * @property {Object} [reasonSelection]
  * @property {Object} [printFormatSelection]
+ * @property {'html'|'pdf'} [printBackend]
+ * @property {'print'|'download'} [printAction]
  */
 
 export default function PrintRangeDialog({
@@ -329,6 +331,49 @@ export default function PrintRangeDialog({
           </section>
           ) : null}
 
+
+          {ctrl.pdfPrintEnabled ? (
+            <section className="odv-prd-card" aria-labelledby="odv-prd-output-header">
+              <h4 id="odv-prd-output-header" className="odv-prd-sectionHeader">
+                {t('printDialog.output.header', { defaultValue: 'Print output' })}
+              </h4>
+              <div className="odv-prd-section" role="group" aria-label={t('printDialog.output.aria', { defaultValue: 'Print output mode' })}>
+                <div className="odv-prd-radioList odv-prd-subRadioList">
+                  <label className="odv-prd-radioRow">
+                    <input
+                      type="radio"
+                      name="printBackend"
+                      value="html"
+                      checked={ctrl.printBackend !== 'pdf'}
+                      onChange={() => ctrl.setPrintBackend('html')}
+                    />
+                    <span>{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
+                  </label>
+                  <label className="odv-prd-radioRow odv-prd-radioRow-info">
+                    <input
+                      type="radio"
+                      name="printBackend"
+                      value="pdf"
+                      checked={ctrl.printBackend === 'pdf'}
+                      onChange={() => ctrl.setPrintBackend('pdf')}
+                    />
+                    <span>{t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}</span>
+                    <span
+                      className="material-icons odv-prd-infoIcon"
+                      aria-label={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
+                      title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
+                    >info</span>
+                  </label>
+                </div>
+                <span className="odv-prd-hint">
+                  {ctrl.printBackend === 'pdf'
+                    ? t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer creates a generated PDF before sending the job to the browser print dialog.' })
+                    : t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}
+                </span>
+              </div>
+            </section>
+          ) : null}
+
           {ctrl.showUserSection ? (
             <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
               <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
@@ -443,6 +488,11 @@ export default function PrintRangeDialog({
           <button type="button" className="odv-prd-action secondary" onClick={onClose}>
             {t('printDialog.footer.cancel')}
           </button>
+          {ctrl.pdfDownloadEnabled ? (
+            <button type="button" className="odv-prd-action secondary" onClick={ctrl.submitPdfDownload}>
+              {t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' })}
+            </button>
+          ) : null}
           <button type="submit" className="odv-prd-action primary">
             {t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}
           </button>

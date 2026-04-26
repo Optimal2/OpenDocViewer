@@ -23,6 +23,8 @@ import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localized
  * @property {string|null} [forWhom]
  * @property {string|null} [printFormat]
  * @property {string|null} [printFormatValue]
+ * @property {'html'|'pdf'} [printBackend]
+ * @property {'print'|'download'} [printAction]
  */
 
 /**
@@ -179,6 +181,10 @@ export function usePrintRangeController({
   const reasonCfg = fld?.reason || {};
   const forWhomCfg = fld?.forWhom || {};
   const printFormatCfg = cfg?.print?.format || {};
+  const pdfPrintCfg = cfg?.print?.pdf || {};
+  const pdfPrintEnabled = pdfPrintCfg?.enabled === true;
+  const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true;
+  const defaultPrintBackend = pdfPrintEnabled && String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe' ? 'pdf' : 'html';
   const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
   const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
   const nonEmptyPrintFormatOptions = printFormatOptions.filter((option) => hasTextValue(option?.value));
@@ -222,6 +228,7 @@ export function usePrintRangeController({
   const [extraText, setExtraText] = useState('');
   const [forWhomText, setForWhomText] = useState('');
   const [printFormatChecked, setPrintFormatChecked] = useState(defaultPrintFormatChecked);
+  const [printBackend, setPrintBackend] = useState(/** @type {'html'|'pdf'} */ (defaultPrintBackend));
 
   const [error, setError] = useState('');
   const dialogRef = useRef(/** @type {(HTMLFormElement|null)} */ (null));
@@ -266,8 +273,9 @@ export function usePrintRangeController({
     setExtraText('');
     setForWhomText('');
     setPrintFormatChecked(defaultPrintFormatChecked);
+    setPrintBackend(defaultPrintBackend);
     setError('');
-  }, [canPrintSelectionScope, defaultPrintFormatChecked, defaultReason, isOpen, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultReason, isOpen, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -476,67 +484,52 @@ export function usePrintRangeController({
   }, [composePrintFormat, composeReason, forWhomText, showForWhom]);
 
   /**
-   * @param {Event} [event]
-   * @returns {void}
+   * Compose and validate the print payload for the current dialog state.
+   * @param {'print'|'download'} action
+   * @returns {(PrintSubmitDetail|null)}
    */
-  const submit = useCallback((event) => {
-    event?.preventDefault?.();
-
+  const composeSubmitDetail = useCallback((action = 'print') => {
     const userValidation = validateUserFields();
     if (!userValidation.ok) {
       setError(userValidation.msg || t('printDialog.errors.review'));
-      return;
+      return null;
     }
 
-    if (restrictToActivePage) {
-      setError('');
-      onSubmit({ mode: 'active', activeScope: 'primary', ...extras() });
-      return;
-    }
+    const backend = action === 'download' ? 'pdf' : (pdfPrintEnabled && printBackend === 'pdf' ? 'pdf' : 'html');
+    const common = { ...extras(), printBackend: backend, printAction: action };
 
-    if (printMode === 'active') {
-      setError('');
-      onSubmit({ mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...extras() });
-      return;
-    }
-
-    if (printMode === 'all') {
-      setError('');
-      onSubmit({ mode: 'all', allScope: canPrintSelectionScope ? allScope : 'session', ...extras() });
-      return;
-    }
+    if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
+    if (printMode === 'active') return { mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...common };
+    if (printMode === 'all') return { mode: 'all', allScope: canPrintSelectionScope ? allScope : 'session', ...common };
 
     if (printMode === 'range') {
       const rangeValidation = validateRange();
       if (!rangeValidation.ok) {
         setError(rangeValidation.msg || t('printDialog.errors.selectValidPages'));
-        return;
+        return null;
       }
-      setError('');
       if (rangeValidation.from > rangeValidation.to) {
-        onSubmit({ mode: 'advanced', sequence: makeDescendingSequence(rangeValidation.from, rangeValidation.to), ...extras() });
-      } else {
-        onSubmit({ mode: 'range', from: rangeValidation.from, to: rangeValidation.to, ...extras() });
+        return { mode: 'advanced', sequence: makeDescendingSequence(rangeValidation.from, rangeValidation.to), ...common };
       }
-      return;
+      return { mode: 'range', from: rangeValidation.from, to: rangeValidation.to, ...common };
     }
 
     const { ok, error: parseError, sequence } = parsePrintSequence(customText, totalPages);
     if (!ok || !sequence?.length) {
       setError(parseError || t('printDialog.errors.invalidCustom'));
-      return;
+      return null;
     }
-    setError('');
-    onSubmit({ mode: 'advanced', sequence, ...extras() });
+    return { mode: 'advanced', sequence, ...common };
   }, [
     activeScope,
-    allScope,
     canPrintSelectionScope,
+    allScope,
     customText,
     extras,
     isComparing,
     makeDescendingSequence,
-    onSubmit,
+    pdfPrintEnabled,
+    printBackend,
     printMode,
     restrictToActivePage,
     t,
@@ -544,6 +537,28 @@ export function usePrintRangeController({
     validateRange,
     validateUserFields,
   ]);
+
+  /**
+   * @param {Event} [event]
+   * @returns {void}
+   */
+  const submit = useCallback((event) => {
+    event?.preventDefault?.();
+    const detail = composeSubmitDetail('print');
+    if (!detail) return;
+    setError('');
+    onSubmit(detail);
+  }, [composeSubmitDetail, onSubmit]);
+
+  /**
+   * @returns {void}
+   */
+  const submitPdfDownload = useCallback(() => {
+    const detail = composeSubmitDetail('download');
+    if (!detail) return;
+    setError('');
+    onSubmit(detail);
+  }, [composeSubmitDetail, onSubmit]);
 
   const onBackdropMouseDown = useCallback((event) => {
     if (event.target === event.currentTarget) {
@@ -575,6 +590,10 @@ export function usePrintRangeController({
     setSelectedReason,
     printFormatChecked,
     setPrintFormatChecked,
+    printBackend,
+    setPrintBackend,
+    pdfPrintEnabled,
+    pdfDownloadEnabled,
     freeReason,
     setFreeReason,
     extraText,
@@ -613,6 +632,7 @@ export function usePrintRangeController({
     loadingHint,
     extraSuffix,
     submit,
+    submitPdfDownload,
     onBackdropMouseDown,
     onDialogKeyDown,
   };
