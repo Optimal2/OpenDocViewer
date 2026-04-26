@@ -82,7 +82,16 @@ The threshold is controlled by runtime config:
 
 ```js
 print: {
-  preparationNoticeThresholdPages: 200
+  preparationNoticeThresholdPages: 200,
+  format: {
+    enabled: true,
+    useValueForOutput: true,
+    default: '',
+    options: [
+      { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
+      { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+    ]
+  }
 }
 ```
 
@@ -108,3 +117,15 @@ If print code grows further, the most natural split points are:
 - active-page source resolution
 - all-page / range / sequence resolution
 - print-header token preparation
+
+## Print format marker and watermark
+
+OpenDocViewer can expose a **Print format** selector in the print dialog. When the selected option resolves to a non-empty output text, that text is added as a prominent print-only header marker and as a semi-transparent watermark centered on every printed page.
+
+The format options use the same stable-value/localized-label pattern as print reasons:
+
+- `value` is the stable configured value and is used on the physical print when `useValueForOutput: true`
+- `label` is localized UI text
+- when `useValueForOutput: false`, the localized `label` is also used as the physical print text
+
+This allows one installation to print exactly `KOPIA`, while another can print a different configured word or allow the print text to follow the active UI language.

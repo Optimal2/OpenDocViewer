@@ -205,6 +205,10 @@
       "title": "Förbereder utskrift",
       "body": "En utskriftsbegäran för {count} sidor har skickats till webbläsaren. Det kan ta en stund innan webbläsarens utskriftsförhandsgranskning öppnas.",
       "dismiss": "Stäng"
+    },
+    "printFormat": {
+      "label": "Utskriftsformat",
+      "hint": "Valt utskriftsformat kan lägga till konfigurerad sidhuvudstext och vattenstämpel på utskrivna sidor."
     }
   },
   "print": {

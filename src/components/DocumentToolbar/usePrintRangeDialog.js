@@ -21,6 +21,8 @@ import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localized
  * @property {'primary'|'compare-both'} [activeScope]
  * @property {string|null} [reason]
  * @property {string|null} [forWhom]
+ * @property {string|null} [printFormat]
+ * @property {string|null} [printFormatValue]
  */
 
 /**
@@ -117,14 +119,17 @@ export function usePrintRangeController({
 
   const showReasonWhen = uiCfg?.showReasonWhen || 'auto';
   const showForWhomWhen = uiCfg?.showForWhomWhen || 'auto';
-  const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showUserSection = !!(showReason || showForWhom);
-  const restrictToActivePage = !!isDocumentLoading;
-  const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
-
   const reasonCfg = fld?.reason || {};
   const forWhomCfg = fld?.forWhom || {};
+  const printFormatCfg = cfg?.print?.format || {};
+  const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
+  const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
+  const defaultPrintFormat = printFormatCfg?.default ?? (hasPrintFormatOptions ? (printFormatOptions[0]?.value ?? '') : '');
+  const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
+  const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
+  const showUserSection = !!(showReason || showForWhom || hasPrintFormatOptions);
+  const restrictToActivePage = !!isDocumentLoading;
+  const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
   const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
   const forWhomRegex = safeRegex(forWhomCfg?.regex, forWhomCfg?.regexFlags);
   const reasonMax = Number.isFinite(reasonCfg?.maxLen) ? reasonCfg.maxLen : 255;
@@ -153,6 +158,7 @@ export function usePrintRangeController({
   const extraMax = Number.isFinite(extraCfg?.maxLen) ? extraCfg.maxLen : undefined;
   const [extraText, setExtraText] = useState('');
   const [forWhomText, setForWhomText] = useState('');
+  const [selectedPrintFormat, setSelectedPrintFormat] = useState(defaultPrintFormat);
 
   const [error, setError] = useState('');
   const dialogRef = useRef(/** @type {(HTMLFormElement|null)} */ (null));
@@ -192,8 +198,9 @@ export function usePrintRangeController({
     setFreeReason('');
     setExtraText('');
     setForWhomText('');
+    setSelectedPrintFormat(defaultPrintFormat);
     setError('');
-  }, [canPrintSelectionScope, defaultReason, isOpen, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintFormat, defaultReason, isOpen, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -339,6 +346,29 @@ export function usePrintRangeController({
   const extraPrefixResolved = resolveLocalizedValue(extraCfg?.prefix, i18n);
   const extraSuffixResolved = resolveLocalizedValue(extraCfg?.suffix, i18n);
   const optionLabel = useCallback((opt) => resolveOptionLabel(opt, i18n), [i18n]);
+  const selectedPrintFormatOption = useMemo(() => {
+    if (!hasPrintFormatOptions) return null;
+    return printFormatOptions.find((option) => (option?.value ?? '') === (selectedPrintFormat ?? '')) || null;
+  }, [hasPrintFormatOptions, printFormatOptions, selectedPrintFormat]);
+
+  /**
+   * @returns {{printFormat:(string|null), printFormatValue:(string|null)}}
+   */
+  const composePrintFormat = useCallback(() => {
+    if (!hasPrintFormatOptions || !selectedPrintFormatOption) {
+      return { printFormat: null, printFormatValue: null };
+    }
+
+    const rawValue = selectedPrintFormatOption?.value == null ? '' : String(selectedPrintFormatOption.value);
+    const label = resolveOptionLabel(selectedPrintFormatOption, i18n);
+    const useValue = printFormatCfg?.useValueForOutput !== false;
+    const text = String(useValue ? rawValue : label || rawValue).trim();
+
+    return {
+      printFormat: text || null,
+      printFormatValue: rawValue || null,
+    };
+  }, [hasPrintFormatOptions, i18n, printFormatCfg?.useValueForOutput, selectedPrintFormatOption]);
 
   /**
    * @returns {(string|null)}
@@ -346,26 +376,30 @@ export function usePrintRangeController({
   const composeReason = useCallback(() => {
     if (!showReason) return null;
     if (hasOptions) {
-      const base = selectedReason || '';
+      const rawValue = selectedReason || '';
+      const outputUsesValue = reasonCfg?.useValueForOutput !== false;
+      const base = outputUsesValue ? rawValue : resolveOptionLabel(selectedOption || { value: rawValue }, i18n) || rawValue;
       if (!needsExtra) return base || null;
       const txt = String(extraText || '');
       return base + (txt ? (extraPrefixResolved + txt + extraSuffixResolved) : '');
     }
     const reason = String(freeReason || '').trim();
     return reason || null;
-  }, [extraPrefixResolved, extraSuffixResolved, extraText, freeReason, hasOptions, needsExtra, selectedReason, showReason]);
+  }, [extraPrefixResolved, extraSuffixResolved, extraText, freeReason, hasOptions, i18n, needsExtra, reasonCfg?.useValueForOutput, selectedOption, selectedReason, showReason]);
 
   /**
-   * @returns {{reason:(string|null), forWhom:(string|null)}}
+   * @returns {{reason:(string|null), forWhom:(string|null), printFormat:(string|null), printFormatValue:(string|null)}}
    */
   const extras = useCallback(() => {
     const reason = composeReason();
     const forWhom = String(forWhomText || '').trim();
+    const printFormat = composePrintFormat();
     return {
       reason: reason && reason.length ? reason : null,
       forWhom: showForWhom ? (forWhom.length ? forWhom : null) : null,
+      ...printFormat,
     };
-  }, [composeReason, forWhomText, showForWhom]);
+  }, [composePrintFormat, composeReason, forWhomText, showForWhom]);
 
   /**
    * @param {Event} [event]
@@ -465,6 +499,8 @@ export function usePrintRangeController({
     setCustomText,
     selectedReason,
     setSelectedReason,
+    selectedPrintFormat,
+    setSelectedPrintFormat,
     freeReason,
     setFreeReason,
     extraText,
@@ -482,6 +518,9 @@ export function usePrintRangeController({
     sessionTotalPages,
     showUserSection,
     showReason,
+    showPrintFormat: hasPrintFormatOptions,
+    printFormatCfg,
+    printFormatOptions,
     showForWhom,
     reasonCfg,
     forWhomCfg,

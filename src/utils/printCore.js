@@ -33,6 +33,7 @@ const PER_PAGE_CLEANUP_MS = 5;
  * @property {{ current: HTMLElement|null }} [viewerContainerRef]   Optional viewer root for DOM fallbacks.
  * @property {string} [reason]                                      Optional reason text to propagate to header tokens.
  * @property {string} [forWhom]                                     Optional "for whom" text to propagate to header tokens.
+ * @property {string} [printFormat]                                 Optional print format marker text for header/watermark output.
  */
 
 /**
@@ -49,7 +50,8 @@ const PER_PAGE_CLEANUP_MS = 5;
  * @property {{ current: HTMLElement|null }} [viewerContainerRef]
  * @property {PageRange} [pageRange]
  * @property {string} [reason]
- * @property {string} [forWhom]
+ * @property {string} [forWhom]                                     Optional "for whom" text to propagate to header tokens.
+ * @property {string} [printFormat]                                 Optional print format marker text for header/watermark output.
  */
 
 /**
@@ -255,7 +257,7 @@ function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
 export function handlePrint(documentRenderRef, options = {}) {
   logger.info('handlePrint invoked');
 
-  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '' } = options;
+  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '' } = options;
 
   const active = resolveActiveNode(documentRenderRef, viewerContainerRef);
   if (!active) {
@@ -286,7 +288,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
 
   const { frame } = createHiddenIframe(DEFAULT_IFRAME_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -318,7 +320,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   logger.info('handlePrintCurrentComparison invoked');
 
-  const { printDelayMs = 0, reason = '', forWhom = '' } = options;
+  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '' } = options;
   const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
   const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
   if (!primaryNode || !compareNode) {
@@ -336,7 +338,7 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
 
   const { frame } = createHiddenIframe(MIN_MULTI_PAGE_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -416,7 +418,7 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
 export async function handlePrintAll(documentRenderRef, options = {}) {
   logger.info('handlePrintAll invoked');
 
-  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '' } = options;
+  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '', printFormat = '' } = options;
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!dataUrls.length) {
@@ -447,7 +449,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
 
   const { frame } = createHiddenIframe(
     Math.max(
@@ -478,7 +480,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
  * @returns {Promise<void>}
  */
 export async function handlePrintSequence(documentRenderRef, sequence, options = {}) {
-  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '' } = options || {};
+  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '' } = options || {};
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!Array.isArray(sequence) || !sequence.length) {
@@ -504,7 +506,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
 
   const { frame } = createHiddenIframe(
     Math.max(

@@ -27,6 +27,10 @@
  * @property {LocalizedString} [label]  // optional localized display label (falls back to value)
  * @property {boolean} [allowFreeText]
  * @property {ReasonFreeText} [input]
+ *
+ * @typedef {Object} PrintFormatOption
+ * @property {string} value             // text/id used on the physical print when print.format.useValueForOutput=true
+ * @property {LocalizedString} [label]  // localized display label, and optionally print text when useValueForOutput=false
  */
 
 (function (w, d) {
@@ -127,7 +131,22 @@
     print: {
       // Show an informational "preparing print" overlay when the requested print job is large.
       // Use 0 to disable the notice entirely.
-      preparationNoticeThresholdPages: 200
+      preparationNoticeThresholdPages: 200,
+
+      // Optional print format marker. Non-empty selected output text is printed in the page header
+      // and as a semi-transparent watermark on every printed page.
+      format: {
+        enabled: true,
+        // true  -> print option.value, while label is UI-only
+        // false -> print the localized option.label when available
+        useValueForOutput: true,
+        default: '',
+        /** @type {PrintFormatOption[]} */
+        options: [
+          { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
+          { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+        ]
+      }
     },
 
     // ---- INTEGRATION ADAPTERS -------------------------------------------------
@@ -189,6 +208,8 @@
         fields: {
           reason: {
             required: true,
+            // true keeps stable option.value on print/logs; false prints localized option.label when available.
+            useValueForOutput: true,
             maxLen: 255,
             regex: null,
             regexFlags: "",

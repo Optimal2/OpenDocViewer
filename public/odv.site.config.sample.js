@@ -89,7 +89,23 @@
       // informational overlay after the user clicks “Prepare printing”. This helps prevent users
       // from launching multiple identical jobs while the browser is still building the preview.
       // Use 0 to disable the notice.
-      preparationNoticeThresholdPages: 200
+      preparationNoticeThresholdPages: 200,
+
+      // Optional print format marker. Selecting a non-empty format adds the configured text to
+      // the printed page header and as a semi-transparent watermark on every printed page.
+      format: {
+        enabled: true,
+
+        // true  -> use option.value on the physical print; option.label is only UI text
+        // false -> use the localized option.label on the physical print when available
+        useValueForOutput: true,
+
+        default: '',
+        options: [
+          { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
+          { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+        ]
+      }
     },
 
     // =========================================================================
@@ -147,6 +163,8 @@
         fields: {
           reason: {
             required: true,
+            // true keeps stable option.value on print/logs; false prints localized option.label when available.
+            useValueForOutput: true,
             maxLen: 255,
             regex: null,
             regexFlags: '',

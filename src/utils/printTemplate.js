@@ -35,9 +35,10 @@ function z2(n) { return (n < 10 ? '0' : '') + n; }
  * @param {Object|undefined} handle
  * @param {string} reason
  * @param {string} forWhom
- * @returns {{ now: string, date: string, time: string, reason: string, forWhom: string, user: Object, doc: Object, viewer: Object }}
+ * @param {string} printFormat
+ * @returns {{ now: string, date: string, time: string, reason: string, forWhom: string, printFormat: string, user: Object, doc: Object, viewer: Object }}
  */
-export function makeBaseTokenContext(handle, reason, forWhom) {
+export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '') {
   /** @type {any} */
   const user = (/** @type {any} */ (window)).__ODV_USER__ || {};
   /** @type {any} */
@@ -70,6 +71,7 @@ export function makeBaseTokenContext(handle, reason, forWhom) {
     time: hh + ':' + mm,              // HH:MM (24h)
     reason: reason || '',
     forWhom: forWhom || '',
+    printFormat: printFormat || '',
     user,
     doc,
     viewer

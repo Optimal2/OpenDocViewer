@@ -44,6 +44,8 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
  * @property {'primary'|'compare-both'=} activeScope
  * @property {string=} reason
  * @property {string=} forWhom
+ * @property {string=} printFormat
+ * @property {string=} printFormatValue
  */
 
 /**
@@ -733,6 +735,8 @@ const DocumentToolbar = ({
         action: 'print',
         reason: detail?.reason ?? null,
         forWhom: detail?.forWhom ?? null,
+        printFormat: detail?.printFormat ?? null,
+        printFormatValue: detail?.printFormatValue ?? null,
         docId: null,
         fileName: null,
         pageCount: resolvePrintPageCount(detail),
@@ -751,7 +755,8 @@ const DocumentToolbar = ({
     const commonOpts = {
       viewerContainerRef,
       reason: detail?.reason || '',
-      forWhom: detail?.forWhom || ''
+      forWhom: detail?.forWhom || '',
+      printFormat: detail?.printFormat || ''
     };
 
     if (!detail || detail.mode === 'active') {

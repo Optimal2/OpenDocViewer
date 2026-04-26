@@ -45,6 +45,8 @@
  * @property {string}  [action]     Name of action, e.g., "print".
  * @property {?string} [reason]
  * @property {?string} [forWhom]
+ * @property {?string} [printFormat]
+ * @property {?string} [printFormatValue]
  * @property {?string} [docId]
  * @property {?string} [fileName]
  * @property {?number} [pageCount]
@@ -251,6 +253,8 @@ class UserLogController {
         meta:   {
           reason: payload.reason ?? null,
           forWhom: payload.forWhom ?? null,
+          printFormat: payload.printFormat ?? null,
+          printFormatValue: payload.printFormatValue ?? null,
           viewerVersion: this.viewerVersion ?? null,
           pages: payload.pages ?? null,
           copies: (typeof payload.copies === 'number') ? payload.copies : (payload.copies ?? null)

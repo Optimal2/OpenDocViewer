@@ -21,6 +21,8 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {'primary'|'compare-both'} [activeScope]
  * @property {string|null} [reason]
  * @property {string|null} [forWhom]
+ * @property {string|null} [printFormat]
+ * @property {string|null} [printFormatValue]
  */
 
 export default function PrintRangeDialog({
@@ -330,6 +332,27 @@ export default function PrintRangeDialog({
               <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
                 <div className="odv-prd-fieldCol">
+                  {ctrl.showPrintFormat ? (
+                    <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
+                      <span>{t('printDialog.printFormat.label', { defaultValue: 'Print format' })}</span>
+                      <select
+                        className="odv-prd-select odv-prd-selectWide"
+                        value={ctrl.selectedPrintFormat}
+                        onChange={(event) => ctrl.setSelectedPrintFormat(event.target.value)}
+                        aria-label={t('printDialog.printFormat.label', { defaultValue: 'Print format' })}
+                      >
+                        {ctrl.printFormatOptions.map((opt) => (
+                          <option key={String(opt.value)} value={opt.value}>{ctrl.optionLabel(opt)}</option>
+                        ))}
+                      </select>
+                      <span className="odv-prd-hint">
+                        {t('printDialog.printFormat.hint', {
+                          defaultValue: 'Selected print format can add configured header text and watermark to the printed pages.',
+                        })}
+                      </span>
+                    </label>
+                  ) : null}
+
                   {ctrl.showReason ? (
                     <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
                       <span>{t('printDialog.reason.label')} {ctrl.reasonCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
