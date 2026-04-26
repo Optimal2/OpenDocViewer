@@ -153,7 +153,23 @@ Supported token forms:
 {{doc.documentPageNumber}}
 {{doc.documentPageCount}}
 {{metadata.1001}}
+{{metadata.patientId}}
+{{metadataAlias.patientId.value}}
+{{metadataAlias.patientId.lookupValue}}
 ```
+
+`doc.title` is a derived convenience value. It comes from the normalized bundle document `title`,
+then `name`, then `documentId` as fallback. It is not expected to exist as a literal `doc.title`
+field in the host session payload.
+
+For metadata aliases configured through `integrations.portableBundle.metadataAliases`, use:
+
+- `{{metadata.<alias>}}` for the selected alias value, respecting the alias `prefer` rule.
+- `{{metadataAlias.<alias>.value}}` to force the raw metadata `Value`.
+- `{{metadataAlias.<alias>.lookupValue}}` to force the raw metadata `LookupValue`.
+
+Example: if `patientId` maps to field id `1001` with `prefer: 'value'`, use
+`{{metadata.patientId}}` or `{{metadataAlias.patientId.value}}`.
 
 `{{isCopy}}` is an alias for the resolved print-format output text, for example `KOPIA`.
 It is intentionally available for configurable header/footer placement while the watermark remains
