@@ -126,7 +126,7 @@
         // false -> use the localized option.label on physical print output when option.printValue is missing
         useValueForOutput: true,
 
-        // Usually keep this disabled and place {{isCopy}} explicitly in printHeader/printFooter.
+        // Usually keep this disabled and place {{copyMarkerText}} or {{isCopy}} explicitly in printHeader/printFooter.
         // Enable only if you want OpenDocViewer to inject a separate automatic header marker.
         headerMarker: { enabled: false },
 

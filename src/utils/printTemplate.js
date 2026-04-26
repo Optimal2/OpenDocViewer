@@ -243,6 +243,19 @@ function buildMetadataTokenMap(bundleDocument) {
  * @param {*} pageInfo
  * @returns {(Object|null)}
  */
+
+/**
+ * Normalize host document numbers to the print-template convention.
+ * Document numbers are 1-based ordinals; 0 means absent/unknown and is never used
+ * as an array index.
+ * @param {*} value
+ * @returns {number}
+ */
+function normalizeDocumentOrdinal(value) {
+  const ordinal = Math.floor(Number(value) || 0);
+  return ordinal >= 1 ? ordinal : 0;
+}
+
 function resolveBundleDocumentForPage(bundle, pageInfo) {
   const documents = Array.isArray(bundle?.documents) ? bundle.documents : [];
   if (!documents.length) return null;
@@ -256,7 +269,7 @@ function resolveBundleDocumentForPage(bundle, pageInfo) {
   // documentNumber is normalized as a 1-based document ordinal throughout the print
   // token pipeline. Values below 1 mean "no document ordinal supplied" and are not
   // interpreted as zero-based array indexes.
-  const documentNumber = Math.floor(Number(pageInfo?.documentNumber) || 0);
+  const documentNumber = normalizeDocumentOrdinal(pageInfo?.documentNumber);
   if (documentNumber >= 1 && documentNumber <= documents.length) return documents[documentNumber - 1];
   return null;
 }
@@ -393,8 +406,7 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const documentId = optionalText(pageInfo?.documentId) || optionalText(bundleDocument.documentId) || '';
   // Keep ordinal normalization consistent with resolveBundleDocumentForPage():
   // documentNumber is 1-based when present; 0 means absent/unknown.
-  const rawDocumentNumber = Math.floor(Number(pageInfo?.documentNumber) || 0);
-  const documentNumber = rawDocumentNumber >= 1 ? rawDocumentNumber : 0;
+  const documentNumber = normalizeDocumentOrdinal(pageInfo?.documentNumber);
   const totalDocuments = Math.max(0, Math.floor(Number(pageInfo?.totalDocuments) || 0));
   const documentPageNumber = Math.max(0, Math.floor(Number(pageInfo?.documentPageNumber) || 0));
   const documentPageCount = Math.max(0, Math.floor(Number(pageInfo?.documentPageCount) || 0));

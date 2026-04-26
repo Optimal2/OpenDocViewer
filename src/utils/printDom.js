@@ -37,7 +37,9 @@ import { resolveLocalizedValue } from './localizedValue.js';
  * @property {string} reason
  * @property {string} forWhom
  * @property {string} printFormat
- * @property {string} isCopy
+ * @property {string} printFormatOutput
+ * @property {string} copyMarkerText
+ * @property {string} isCopy Backward-compatible alias for copyMarkerText; contains text, not a boolean.
  * @property {Object} user
  * @property {Object} session
  * @property {Object} doc
@@ -380,6 +382,23 @@ function waitForImagesToLoadAsync(list) {
 }
 
 /**
+ * Best-effort image decode step used by warm print iframes. This makes the status LED more
+ * representative of browser-side readiness and can reduce later print-preview decode work.
+ * Decode failures are ignored because a loaded image is still printable.
+ * @param {Array<HTMLImageElement>} list
+ * @returns {Promise<void>}
+ */
+async function decodeImagesAsync(list) {
+  if (!Array.isArray(list) || list.length === 0) return;
+  await Promise.allSettled(list.map((img) => {
+    try {
+      if (typeof img.decode === 'function') return img.decode();
+    } catch {}
+    return Promise.resolve();
+  }));
+}
+
+/**
  * Remove dynamic print-only decorations from a warmed page wrapper.
  * The page image stays in place so the iframe can remain warm between print jobs.
  * @param {HTMLElement} pageWrapper
@@ -435,6 +454,7 @@ export async function buildWarmMultiDocument(doc, opts) {
   }
 
   await waitForImagesToLoadAsync(imgs);
+  await decodeImagesAsync(imgs);
 }
 
 /**

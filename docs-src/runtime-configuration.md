@@ -376,7 +376,7 @@ Useful token scopes:
 
 - session-level: `{{UserId}}`, `{{SessionId}}`, `{{session.userId}}`, `{{session.id}}`
 - print-dialog: `{{reason}}`, `{{reasonSelection.output}}`, `{{reasonSelection.label.sv}}`, `{{reasonSelection.printValue.sv}}`, `{{forWhom}}`
-- print format: `{{printFormat}}`, `{{printFormatSelection.output}}`, `{{printFormatSelection.label.sv}}`, `{{printFormatSelection.printValue.sv}}`, `{{isCopy}}`
+- print format: `{{printFormat}}`, `{{printFormatSelection.output}}`, `{{printFormatSelection.label.sv}}`, `{{printFormatSelection.printValue.sv}}`, `{{copyMarkerText}}`, `{{printFormatOutput}}`, `{{isCopy}}`
 - document-level: `{{doc.documentId}}`, `{{doc.documentPageNumber}}`, `{{doc.documentPageCount}}`
 - metadata-level by field id: `{{metadata.<fieldId>}}`, for example `{{metadata.1001}}`
 - metadata aliases: `{{metadata.<alias>}}`, for example `{{metadata.patientId}}`
