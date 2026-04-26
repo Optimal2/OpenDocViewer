@@ -223,7 +223,7 @@
       applyTo: 'all',
       // Supported tokens: {{date}}, {{time}}, {{page}}, {{totalPages}}, {{reason}},
       // {{forWhom}}, {{printFormat}}, {{isCopy}}, {{UserId}}, {{session.userId}},
-      // {{doc.documentId}}, {{doc.title}}, {{metadata.1001}}, etc.
+      // {{doc.documentId}}, {{doc.title}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}, etc.
       // Conditional block syntax:
       //   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
       // The block is omitted completely when UserId is null/empty/missing.

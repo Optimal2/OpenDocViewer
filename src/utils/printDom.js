@@ -365,7 +365,15 @@ function mergeOverlayCss(printHeaderCfg, printFooterCfg) {
 /**
  * Render a single-page print document in the given print iframe document.
  * @param {Document} doc
- * @param {{ dataUrl: string, orientation: ('portrait'|'landscape'), printDelayMs: number, printHeaderCfg: PrintOverlayCfg, printFooterCfg?: PrintOverlayCfg, printFormatCfg?: *, tokenContext: TokenContext, pageContexts?: Array<*> }} opts
+ * @param {Object} opts
+ * @param {string} opts.dataUrl
+ * @param {('portrait'|'landscape')} opts.orientation
+ * @param {number} opts.printDelayMs
+ * @param {PrintOverlayCfg} opts.printHeaderCfg
+ * @param {PrintOverlayCfg=} opts.printFooterCfg
+ * @param {*=} opts.printFormatCfg
+ * @param {TokenContext} opts.tokenContext
+ * @param {Array<*>=} opts.pageContexts
  * @returns {void}
  */
 export function renderSingleDocument(doc, opts) {
@@ -387,7 +395,14 @@ export function renderSingleDocument(doc, opts) {
 /**
  * Render a multi-page print document in the given print iframe document.
  * @param {Document} doc
- * @param {{ dataUrls: Array.<string>, printDelayMs: number, printHeaderCfg: PrintOverlayCfg, printFooterCfg?: PrintOverlayCfg, printFormatCfg?: *, tokenContext: TokenContext, pageContexts?: Array<*> }} opts
+ * @param {Object} opts
+ * @param {Array.<string>} opts.dataUrls
+ * @param {number} opts.printDelayMs
+ * @param {PrintOverlayCfg} opts.printHeaderCfg
+ * @param {PrintOverlayCfg=} opts.printFooterCfg
+ * @param {*=} opts.printFormatCfg
+ * @param {TokenContext} opts.tokenContext
+ * @param {Array<*>=} opts.pageContexts
  * @returns {void}
  */
 export function renderMultiDocument(doc, opts) {

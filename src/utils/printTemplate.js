@@ -15,18 +15,33 @@
  *                                                   when path resolves to a non-empty value.
  */
 
+const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]+);/g;
+
 /**
- * Escape a string for safe insertion into HTML (text context).
+ * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
+ * preserved so already-normalized host values such as "&lt;" are not rendered as "&amp;lt;".
  * @param {string} s
  * @returns {string}
  */
 export function escapeHtml(s) {
-  return String(s)
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;')
-    .replace(/"/g, '&quot;')
-    .replace(/'/g, '&#39;');
+  const text = String(s);
+  const entities = [];
+  const protectedText = text.replace(HTML_ENTITY_RE, (entity) => {
+    const token = '___ODV_ENTITY_' + entities.length + '___';
+    entities.push(entity);
+    return token;
+  });
+
+  return protectedText.replace(/[&<>"']/g, (ch) => {
+    switch (ch) {
+      case '&': return '&amp;';
+      case '<': return '&lt;';
+      case '>': return '&gt;';
+      case '"': return '&quot;';
+      case "'": return '&#39;';
+      default: return ch;
+    }
+  }).replace(/___ODV_ENTITY_(\d+)___/g, (_m, index) => entities[Number(index)] || '');
 }
 
 /** Zero-pad helper. */
@@ -261,13 +276,37 @@ function buildSessionTokenAliases(session) {
 }
 
 /**
+ * Read document metadata from a viewer handle without leaking handle-specific checks into the
+ * token-context builder. This is best-effort because print rendering must not fail if a host
+ * implementation exposes no metadata methods or throws.
+ * @param {*} handle
+ * @returns {Object}
+ */
+function tryGetDocumentMetadata(handle) {
+  if (!handle) return {};
+  const candidateMethods = ['getDocumentMeta', 'getDocumentSummary'];
+  for (const methodName of candidateMethods) {
+    try {
+      const method = handle?.[methodName];
+      if (typeof method !== 'function') continue;
+      const result = method.call(handle);
+      if (isPlainObject(result)) return result;
+    } catch {
+      // Try the next compatible handle method.
+    }
+  }
+  return {};
+}
+
+/**
  * Build the base token context used by print templates.
  *
  * @param {Object|undefined} handle
  * @param {string} reason
  * @param {string} forWhom
  * @param {string} printFormat
- * @param {{ bundle?: Object }=} options
+ * @param {Object=} options
+ * @param {Object=} options.bundle
  * @returns {Object}
  */
 export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', options = {}) {
@@ -280,19 +319,7 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
   const bundle = isPlainObject(options?.bundle) ? options.bundle : {};
   const session = isPlainObject(bundle?.session) ? bundle.session : (isPlainObject(win.__ODV_SESSION__) ? win.__ODV_SESSION__ : {});
 
-  /** @type {any} */
-  let doc = {};
-  try {
-    if (handle && typeof (/** @type {any} */ (handle)).getDocumentMeta === 'function') {
-      const meta = (/** @type {any} */ (handle)).getDocumentMeta();
-      if (meta && typeof meta === 'object') doc = meta;
-    } else if (handle && typeof (/** @type {any} */ (handle)).getDocumentSummary === 'function') {
-      const meta = (/** @type {any} */ (handle)).getDocumentSummary();
-      if (meta && typeof meta === 'object') doc = meta;
-    }
-  } catch {
-    // best-effort only
-  }
+  const doc = tryGetDocumentMetadata(handle);
 
   const now = new Date();
   const y = now.getFullYear();
@@ -332,6 +359,7 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
 export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const bundleDocument = resolveBundleDocumentForPage(bundle || baseContext?.bundle, pageInfo) || {};
   const metadata = buildMetadataTokenMap(bundleDocument);
+  const metadataAlias = isPlainObject(bundleDocument.metadataDetails) ? bundleDocument.metadataDetails : {};
   const documentId = optionalText(pageInfo?.documentId) || optionalText(bundleDocument.documentId) || '';
   const documentNumber = Math.max(0, Math.floor(Number(pageInfo?.documentNumber) || 0));
   const totalDocuments = Math.max(documentNumber, Math.floor(Number(pageInfo?.totalDocuments) || 0));
@@ -351,6 +379,9 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     pageCount: documentPageCount || fileCount || '',
     title: optionalText(bundleDocument.title) || optionalText(bundleDocument.name) || documentId || '',
     metadata,
+    metadataAlias,
+    metadataAliases: metadataAlias,
+    metadataDetails: metadataAlias,
     metaById: isPlainObject(bundleDocument.metaById) ? bundleDocument.metaById : {},
   };
 
@@ -359,6 +390,9 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     doc,
     document: bundleDocument,
     metadata,
+    metadataAlias,
+    metadataAliases: metadataAlias,
+    metadataDetails: metadataAlias,
     pageInfo: pageInfo || {},
   };
 }
@@ -407,14 +441,38 @@ function applyBraceTokensEscaped(tpl, tokenContext) {
  * @returns {string}
  */
 function decodeTemplateLiteral(text) {
-  return String(text || '')
-    .replace(/\\n/g, '\n')
-    .replace(/\\r/g, '\r')
-    .replace(/\\t/g, '\t')
-    .replace(/\\"/g, '"')
-    .replace(/\\'/g, "'")
-    .replace(/\\\\/g, '\\');
+  const input = String(text || '');
+  let out = '';
+  for (let i = 0; i < input.length; i += 1) {
+    const ch = input[i];
+    if (ch !== '\\' || i === input.length - 1) {
+      out += ch;
+      continue;
+    }
+
+    const next = input[i + 1];
+    i += 1;
+    switch (next) {
+      case 'n': out += '\n'; break;
+      case 'r': out += '\r'; break;
+      case 't': out += '\t'; break;
+      case '"': out += '"'; break;
+      case "'": out += "'"; break;
+      case '\\': out += '\\'; break;
+      default: out += next; break;
+    }
+  }
+  return out;
 }
+
+// Conditional block grammar:
+//   [[{{condition.path}}, "template content"]]
+// Capture groups:
+//   1 = condition token path/expression inside {{ }}
+//   2 = double-quoted content, with backslash escapes allowed
+//   3 = single-quoted content, with backslash escapes allowed
+//   4 = bare unquoted content up to the closing block
+const CONDITIONAL_BLOCK_RE = /\[\[\s*\{\{\s*([^}]+?)\s*\}\}\s*,\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\]]*?))\s*\]\]/g;
 
 /**
  * Resolve conditional blocks of the form [[{{path}}, "content"]].
@@ -423,8 +481,7 @@ function decodeTemplateLiteral(text) {
  * @returns {string}
  */
 function applyConditionalBlocks(tpl, tokenContext) {
-  const re = /\[\[\s*\{\{\s*([^}]+?)\s*\}\}\s*,\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\]]*?))\s*\]\]/g;
-  return String(tpl || '').replace(re, function (_match, conditionPath, doubleQuoted, singleQuoted, bare) {
+  return String(tpl || '').replace(CONDITIONAL_BLOCK_RE, function (_match, conditionPath, doubleQuoted, singleQuoted, bare) {
     const { path } = parseTokenExpression(conditionPath);
     const value = path ? getByPath(tokenContext, path) : undefined;
     if (!hasPrintableValue(value)) return '';

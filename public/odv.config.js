@@ -270,7 +270,7 @@
        *   - {{date}}, {{time}}, {{page}}, {{totalPages}}
        *   - {{reason}}, {{forWhom}}, {{printFormat}}, {{isCopy}}
        *   - session tokens such as {{UserId}} / {{session.userId}}
-       *   - document tokens such as {{doc.documentId}}, {{doc.title}}, {{metadata.1001}}
+       *   - document tokens such as {{doc.documentId}}, {{doc.title}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}
        * Conditional blocks suppress surrounding labels when the value is missing:
        *   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
        * Newlines in the template are rendered as print line breaks.

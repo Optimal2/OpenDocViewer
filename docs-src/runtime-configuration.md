@@ -365,7 +365,11 @@ Useful token scopes:
 - print-dialog: `{{reason}}`, `{{forWhom}}`
 - print format: `{{printFormat}}`, `{{isCopy}}`
 - document-level: `{{doc.documentId}}`, `{{doc.documentPageNumber}}`, `{{doc.documentPageCount}}`
-- metadata-level: `{{metadata.<fieldId>}}`, for example `{{metadata.1001}}`
+- metadata-level by field id: `{{metadata.<fieldId>}}`, for example `{{metadata.1001}}`
+- metadata aliases: `{{metadata.<alias>}}`, for example `{{metadata.patientId}}`
+- raw alias details: `{{metadataAlias.<alias>.value}}` and `{{metadataAlias.<alias>.lookupValue}}`
+
+`doc.title` is derived by OpenDocViewer from normalized document metadata (`title`, `name`, then `documentId`). It is not a literal host-session field. For metadata aliases from `integrations.portableBundle.metadataAliases`, prefer `{{metadata.<alias>}}` for the selected value or `{{metadataAlias.<alias>.value}}` when the raw `Value` field must be used explicitly.
 
 Conditional syntax:
 
