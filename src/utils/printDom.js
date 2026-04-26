@@ -25,6 +25,7 @@ import { resolveLocalizedValue } from './localizedValue.js';
  * @property {number=} heightPx
  * @property {(string|Object.<string,string>)=} template
  * @property {string=} css
+ * @property {"flow"|"overlay"=} layout Flow reserves page space; overlay preserves legacy absolute positioning.
  */
 
 /**
@@ -131,12 +132,14 @@ function buildPrintCss(extraCss, pageOrientation) {
     `@media print{${pageRule}html,body{height:100%;}}` +
     'html,body{margin:0;padding:0;background:#fff;height:100%;}' +
     '.page{break-after:page;-webkit-break-after:page;page-break-after:always;' +
-      'display:flex;align-items:center;justify-content:center;min-height:100vh;' +
-      'box-sizing:border-box;overflow:hidden;position:relative;}' +
+      'display:flex;flex-direction:column;align-items:stretch;justify-content:stretch;' +
+      'height:100vh;box-sizing:border-box;overflow:hidden;position:relative;}' +
     '.page.last{break-after:auto;-webkit-break-after:auto;page-break-after:auto;}' +
-    '.page img{display:block;width:auto;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;' +
+    '.page-content{flex:1 1 auto;min-height:0;display:flex;align-items:center;justify-content:center;' +
+      'box-sizing:border-box;overflow:hidden;}' +
+    '.page-content img{display:block;width:auto;height:auto;max-width:100vw;max-height:100%;object-fit:contain;' +
       'page-break-inside:avoid;break-inside:avoid;}' +
-    '.odv-print-header,.odv-print-footer{pointer-events:none;z-index:2147483647;}' +
+    '.odv-print-header,.odv-print-footer{flex:0 0 auto;pointer-events:none;z-index:2147483647;box-sizing:border-box;}' +
     '.odv-print-format-header{position:absolute;top:0;left:0;right:0;text-align:center;' +
       'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
       'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
@@ -211,6 +214,7 @@ function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
 
   const defaultPosition = kind === 'footer' ? 'bottom' : 'top';
   const posBottom = (cfg.position || defaultPosition) === 'bottom';
+  const layout = cfg.layout === 'overlay' ? 'overlay' : 'flow';
   const tpl = resolveLocalizedValue(cfg.template || '', i18next);
   const content = applyTemplateTokensEscaped(tpl, {
     ...tokenContext,
@@ -222,13 +226,14 @@ function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
   const heightPx = normalizeNonNegativeNumber(cfg.heightPx);
   const div = doc.createElement('div');
   div.className = kind === 'footer' ? 'odv-print-footer' : 'odv-print-header';
-  div.setAttribute(
-    'style',
-    'position:absolute;' +
-    (posBottom ? 'bottom:0;' : 'top:0;') +
-    'left:0;right:0;' +
-    (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '')
-  );
+  const style = layout === 'overlay'
+    ? 'position:absolute;' +
+      (posBottom ? 'bottom:0;' : 'top:0;') +
+      'left:0;right:0;' +
+      (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '')
+    : 'position:relative;' +
+      (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '');
+  div.setAttribute('style', style);
 
   // Token values are escaped in applyTemplateTokensEscaped; admin-authored markup is preserved.
   div.innerHTML = content;
@@ -324,17 +329,21 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, printFoo
     if (header) pageWrapper.appendChild(header);
     if (printFormatElements.header) pageWrapper.appendChild(printFormatElements.header);
 
-    const footer = buildOverlayElement(doc, printFooterCfg, pageTokenContext, i + 1, total, 'footer');
-    if (footer) pageWrapper.appendChild(footer);
+    const contentWrapper = doc.createElement('div');
+    contentWrapper.className = 'page-content';
 
     const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
     if (safeSrc) {
       const img = doc.createElement('img');
       img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
       img.src = safeSrc;
-      pageWrapper.appendChild(img);
+      contentWrapper.appendChild(img);
       imgs.push(img);
     }
+    pageWrapper.appendChild(contentWrapper);
+
+    const footer = buildOverlayElement(doc, printFooterCfg, pageTokenContext, i + 1, total, 'footer');
+    if (footer) pageWrapper.appendChild(footer);
 
     body.appendChild(pageWrapper);
   }
