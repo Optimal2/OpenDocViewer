@@ -29,9 +29,24 @@
  *     - a plain string
  *     - or a localized object map: { en: "Text", sv: "Text" }
  *
+ * PRINT TEMPLATE TOKENS
+ *   Header/footer templates support:
+ *     - {{date}}, {{time}}, {{page}}, {{totalPages}}
+ *     - {{UserId}}, {{session.userId}}, {{SessionId}}, {{session.sessionId}}
+ *     - {{reason}}, {{reasonSelection.output}}, {{reasonSelection.label.sv}}, {{reasonSelection.printValue.sv}}
+ *     - {{forWhom}}
+ *     - {{isCopy}}, {{printFormat}}, {{printFormatSelection.output}}, {{printFormatSelection.printValue.sv}}
+ *     - {{doc.documentId}}, {{doc.documentPageNumber}}, {{doc.documentPageCount}}
+ *     - {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.<fieldId>}}
+ *
+ *   Conditional block syntax:
+ *     [[{{UserId}}, "Utskriven av: {{UserId}}"]]
+ *   The whole block is omitted when the condition value is null, undefined, empty or null-like.
+ *   Newlines in template strings are rendered as print line breaks.
+ *
  * STABLE IDENTIFIERS
  *   Values used for logging or integration identifiers should stay stable and non-localized.
- *   Example: reason option `value` should remain a stable plain string, while `label` may be localized.
+ *   Use localized `label` for UI text and localized `printValue` for physical print output.
  *
  * THRESHOLD CONVENTION
  *   For the numeric count/threshold settings below:
@@ -39,9 +54,8 @@
  *     - use 0 to disable that specific threshold
  *
  * INTENTIONALLY COMMENTED KEYS
- *   `basePath` and `baseHref` are still shown as commented examples rather than active values
- *   because they are normally derived automatically from the deployed script URL. Leaving them
- *   commented avoids accidental routing overrides when a site copies this sample unchanged.
+ *   `basePath` and `baseHref` are shown as commented examples rather than active values
+ *   because they are normally derived automatically from the deployed script URL.
  */
 (function (w) {
   w.__ODV_SITE_CONFIG__ = {
@@ -62,7 +76,7 @@
     // baseHref: "/OpenDocViewer/",
 
     i18n: {
-      default: 'en',
+      default: 'sv',
       supported: ['en', 'sv'],
       loadPath: 'locales/{{lng}}/{{ns}}.json?v={{ver}}',
       version: 'auto'
@@ -91,7 +105,7 @@
       // Use 0 to disable the notice.
       preparationNoticeThresholdPages: 200,
 
-      // Optional copy marker. The dialog uses a checkbox, not a format dropdown.
+      // Optional copy marker. The print dialog uses a checkbox, not a format dropdown.
       // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {
         enabled: true,
@@ -100,7 +114,10 @@
         // false -> use the localized option.label on physical print output when option.printValue is missing
         useValueForOutput: true,
 
+        // Usually keep this disabled and place {{isCopy}} explicitly in printHeader/printFooter.
+        // Enable only if you want OpenDocViewer to inject a separate automatic header marker.
         headerMarker: { enabled: false },
+
         watermark: {
           enabled: true,
           // true  -> show a user-controlled checkbox in the print dialog
@@ -109,9 +126,12 @@
           // false -> normal print by default; user must explicitly choose copy watermark
           defaultChecked: false
         },
+
+        // Only one non-empty option is used by the checkbox UI. Keep value stable for logging;
+        // use localized printValue for the actual physical print text.
         options: [
           {
-            value: 'KOPIA',
+            value: 'copy',
             label: { en: 'Copy', sv: 'Kopia' },
             checkboxLabel: { en: 'Add copy watermark', sv: 'Lägg till KOPIA-vattenstämpel' },
             printValue: { en: 'COPY', sv: 'KOPIA' }
@@ -131,11 +151,81 @@
         //   - array:   ordered fallback field ids
         //   - object:  { fieldId|fieldIds, prefer, label, type, contexts }
         //
-        // The integration layer keeps all raw metadata records even when this object is empty.
-        // Use aliases only when a deployment wants stable semantic names for later UI/print logic.
-        // Keep deployment-specific values only in a local `odv.site.config.js` that stays outside
-        // the public source repo.
-        metadataAliases: {}
+        // Raw metadata records remain available even when this object is empty.
+        // Use aliases when a deployment wants stable semantic names for UI/print logic.
+        // Field ids below are illustrative examples and should be adjusted per installation.
+        metadataAliases: {
+          patientId: {
+            fieldId: '1001',
+            prefer: 'value',
+            label: { en: 'Patient ID', sv: 'Personnummer' },
+            type: 'string',
+            contexts: ['screen', 'print', 'sort', 'filter', 'selection']
+          },
+          patientName: {
+            fieldId: '1002',
+            prefer: 'value',
+            label: { en: 'Name', sv: 'Namn' },
+            type: 'string',
+            contexts: ['screen', 'print', 'sort', 'filter', 'selection']
+          },
+          unitCode: {
+            fieldId: '1011',
+            prefer: 'value',
+            label: { en: 'Unit code', sv: 'Avd/Mott kod' },
+            type: 'string',
+            contexts: ['screen', 'print', 'filter', 'debug']
+          },
+          unitName: {
+            fieldId: '1011',
+            prefer: 'lookupValue',
+            label: { en: 'Unit name', sv: 'Avd/Mott namn' },
+            type: 'string',
+            contexts: ['screen', 'print', 'filter']
+          },
+          careContact: {
+            fieldId: '1003',
+            prefer: 'value',
+            label: { en: 'Care contact', sv: 'Vårdkontakt' },
+            type: 'string',
+            contexts: ['screen', 'print', 'filter']
+          },
+          documentDate: {
+            fieldId: '1007',
+            prefer: 'value',
+            label: { en: 'Document date', sv: 'Dokumentdatum' },
+            type: 'datetime',
+            contexts: ['screen', 'print', 'sort', 'filter', 'selection']
+          },
+          createdTimestamp: {
+            fieldId: '500',
+            prefer: 'value',
+            label: { en: 'Created timestamp', sv: 'Skapad' },
+            type: 'datetime',
+            contexts: ['debug', 'support', 'sort']
+          },
+          modifiedTimestamp: {
+            fieldId: '502',
+            prefer: 'value',
+            label: { en: 'Modified timestamp', sv: 'Ändrad' },
+            type: 'datetime',
+            contexts: ['debug', 'support', 'sort']
+          },
+          numberOfPages: {
+            fieldId: '504',
+            prefer: 'value',
+            label: { en: 'Number of pages', sv: 'Antal sidor' },
+            type: 'integer',
+            contexts: ['screen', 'print', 'validation']
+          },
+          documentGuidPart: {
+            fieldId: '15',
+            prefer: 'value',
+            label: { en: 'Document ID', sv: 'Dokument-id' },
+            type: 'string',
+            contexts: ['screen', 'print', 'debug', 'validation']
+          }
+        }
       }
     },
 
@@ -160,6 +250,7 @@
     // User log (proxied via /ODVProxy/)
     // =========================================================================
     userLog: {
+      // Enable this in a local site config only when the host endpoint is available.
       enabled: false,
       endpoint: '/ODVProxy/userlog/record',
       transport: 'form',
@@ -175,7 +266,8 @@
         fields: {
           reason: {
             required: true,
-            // true keeps stable option.value on print/logs; false prints localized option.label when available.
+            // true keeps stable option.value on print/logs when option.printValue is missing.
+            // Prefer option.printValue for localized print output that differs from the UI label.
             useValueForOutput: true,
             maxLen: 255,
             regex: null,
@@ -185,12 +277,28 @@
             source: {
               // IMPORTANT: if you override this array, include the complete final list.
               options: [
-                { value: 'Patient copy',    label: { en: 'Patient copy',    sv: 'Patientkopia' } },
-                { value: 'Internal review', label: { en: 'Internal review', sv: 'Intern granskning' } },
-                { value: 'Legal request',   label: { en: 'Legal request',   sv: 'Juridisk begäran' } },
                 {
-                  value: 'Other',
+                  value: 'patient-copy',
+                  label: {
+                    en: 'Patient copy (verify recipient identity before printing)',
+                    sv: 'Patientkopia (kontrollera mottagarens identitet före utskrift)'
+                  },
+                  printValue: { en: 'Patient copy', sv: 'Patientkopia' }
+                },
+                {
+                  value: 'internal-review',
+                  label: { en: 'Internal review', sv: 'Intern granskning' },
+                  printValue: { en: 'Internal review', sv: 'Intern granskning' }
+                },
+                {
+                  value: 'legal-request',
+                  label: { en: 'Legal request', sv: 'Juridisk begäran' },
+                  printValue: { en: 'Legal request', sv: 'Juridisk begäran' }
+                },
+                {
+                  value: 'other',
                   label: { en: 'Other', sv: 'Annat' },
+                  printValue: { en: 'Other', sv: 'Annat' },
                   allowFreeText: true,
                   input: {
                     required: true,
@@ -199,7 +307,7 @@
                     regexFlags: '',
                     placeholder: { en: 'Type other reason…', sv: 'Ange annan orsak…' },
                     prefix: { en: 'Other: ', sv: 'Annan: ' },
-                    suffix: { en: ' (specify)', sv: ' (ange)' }
+                    suffix: { en: ' (specified)', sv: ' (angiven)' }
                   }
                 }
               ]
@@ -229,25 +337,20 @@
     printHeader: {
       enabled: true,
       position: 'top',
-      heightPx: 40,
+      heightPx: 58,
       applyTo: 'all',
-      // Supported tokens: {{date}}, {{time}}, {{page}}, {{totalPages}}, {{reason}},
-      // {{reasonSelection.output}}, {{reasonSelection.label.sv}}, {{reasonSelection.printValue.sv}},
-      // {{forWhom}}, {{printFormat}}, {{printFormatSelection.output}}, {{printFormatSelection.label.sv}},
-      // {{printFormatSelection.printValue.sv}}, {{isCopy}}, {{UserId}}, {{session.userId}},
-      // {{doc.documentId}}, {{doc.documentPageNumber}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}, etc.
-      // Conditional block syntax:
-      //   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
-      // The block is omitted completely when UserId is null/empty/missing.
-      // Newlines in the template are rendered as print line breaks.
+      // This template demonstrates the preferred pattern:
+      //   - {{isCopy}} is emitted only when copy watermark is selected/forced.
+      //   - Each metadata/user/reason row is conditional, so labels are not printed with empty values.
+      //   - {{reasonSelection.output}} uses the selected option's localized printValue when present.
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong>\\n"]]{{date}} {{time}} | Page {{page}}/{{totalPages}}\n[[{{metadata.patientId}}, "Patient ID: {{metadata.patientId}}\\n"]][[{{metadata.patientName}}, "Name: {{metadata.patientName}}\\n"]][[{{metadata.unitName}}, "Unit: {{metadata.unitName}}\\n"]][[{{metadata.documentDate}}, "Document date: {{metadata.documentDate}}\\n"]][[{{reasonSelection.output}}, "Reason: {{reasonSelection.output}}\\n"]][[{{forWhom}}, "For: {{forWhom}}\\n"]][[{{UserId}}, "Printed by: {{UserId}}"]]',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong>\\n"]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}\n[[{{metadata.patientId}}, "Patient-ID: {{metadata.patientId}}\\n"]][[{{metadata.patientName}}, "Namn: {{metadata.patientName}}\\n"]][[{{metadata.unitName}}, "Avd/Mott: {{metadata.unitName}}\\n"]][[{{metadata.documentDate}}, "Dokumentdatum: {{metadata.documentDate}}\\n"]][[{{reasonSelection.output}}, "Orsak: {{reasonSelection.output}}\\n"]][[{{forWhom}}, "För: {{forWhom}}\\n"]][[{{UserId}}, "Utskriven av: {{UserId}}"]]'
       },
       css: `
-.odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
-  background:rgba(255,255,255,.88); padding:4mm 6mm; }
-.odv-print-header strong{ color:#000; }
+.odv-print-header{ font:11px/1.28 Arial,Helvetica,sans-serif; color:#333;
+  background:rgba(255,255,255,.90); padding:3.5mm 6mm; }
+.odv-print-header strong{ display:inline-block; color:#000; font-size:16px; letter-spacing:.08em; }
 `.trim()
     },
 
@@ -259,13 +362,15 @@
       position: 'bottom',
       heightPx: 28,
       applyTo: 'all',
+      // Shows the source/original document id and the page number inside that original document.
+      // This is different from {{page}}/{{totalPages}}, which refers to the whole print job.
       template: {
-        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (page: {{doc.documentPageNumber}})"]]',
-        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
+        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (page: {{doc.documentPageNumber}}"]][[{{doc.documentPageCount}}, "/{{doc.documentPageCount}}"]][[{{doc.documentPageNumber}}, ")"]]',
+        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}}"]][[{{doc.documentPageCount}}, "/{{doc.documentPageCount}}"]][[{{doc.documentPageNumber}}, ")"]]'
       },
       css: `
-.odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;
-  background:rgba(255,255,255,.82); padding:3mm 6mm; }
+.odv-print-footer{ font:10.5px/1.25 Arial,Helvetica,sans-serif; color:#555;
+  background:rgba(255,255,255,.84); padding:3mm 6mm; }
 `.trim()
     },
 
@@ -298,16 +403,16 @@
         // stability/performance and only become conservative when the browser signals
         // a lower-memory environment.
         enabled: true,
-        preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
-        preferPerformanceWhenJsHeapLimitAtLeastMiB: 2048,
+        preferPerformanceWhenDeviceMemoryAtLeastGb: 4,
+        preferPerformanceWhenJsHeapLimitAtLeastMiB: 1024,
 
         // When every page is a single raster image and the run is not too large,
         // the viewer may reuse full images for thumbnails instead of generating a
         // separate thumbnail asset for each page.
-        reuseFullImageThumbnailsBelowPageCount: 2000,
+        reuseFullImageThumbnailsBelowPageCount: 3000,
         // Auto mode stays on the fast eager path up to roughly this many pages unless the browser
         // enters a clearly catastrophic memory condition.
-        performanceWindowPageCount: 2000
+        performanceWindowPageCount: 3000
       },
 
       fetch: {
@@ -341,7 +446,7 @@
         switchToIndexedDbAboveSourceCount: 0,
 
         // Switch to IndexedDB once the prefetched original source bytes grow beyond this size.
-        switchToIndexedDbAboveTotalMiB: 1536,
+        switchToIndexedDbAboveTotalMiB: 2048,
 
         //   "none"            -> plain temporary storage
         //   "aes-gcm-session" -> encrypted with an in-memory per-session key
@@ -384,7 +489,7 @@
         //   "eager-all"     -> render every page as soon as the source is known
         //   "eager-nearby"  -> render a warm window around the active page
         //   "lazy-viewport" -> render only what the viewport currently needs
-        strategy: 'eager-nearby',
+        strategy: 'eager-all',
 
         // Rendering backend:
         //   "hybrid-by-format" -> prefer worker-backed raster/TIFF paths when possible
@@ -413,7 +518,7 @@
 
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
-        fullPageScale: 1.5,
+        fullPageScale: 1.0,
 
         // Real thumbnail raster size. The thumbnail pane may still scale the image to fit
         // the currently available width.
@@ -447,8 +552,8 @@
         // In-memory object-URL cache limits.
         // The underlying rendered blobs may still remain in the asset store even if an older
         // browser object URL is revoked from RAM.
-        fullPageCacheLimit: 500,
-        thumbnailCacheLimit: 8192,
+        fullPageCacheLimit: 2048,
+        thumbnailCacheLimit: 4096,
 
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
         maxOpenPdfDocuments: 16,
