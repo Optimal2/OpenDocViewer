@@ -12,7 +12,7 @@
 
 import i18next from 'i18next';
 import logger from '../logging/systemLogger.js';
-import { applyTemplateTokensEscaped, makePageTokenContext } from './printTemplate.js';
+import { applyTemplateTokensEscaped, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveLocalizedValue } from './localizedValue.js';
 
@@ -258,7 +258,7 @@ function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
  * @returns {{ header: HTMLElement|null, watermark: HTMLElement|null }}
  */
 function buildPrintFormatElements(doc, tokenContext, printFormatCfg) {
-  const text = String(tokenContext?.printFormat || '').trim();
+  const text = resolveCopyMarkerText(tokenContext);
   if (!text) return { header: null, watermark: null };
 
   let header = null;

@@ -1,24 +1,116 @@
-<section>
-  <h1>Manual för OpenDocViewer</h1>
-  <p>Den här manualen laddas från en enkel HTML-fil i den publika help-mappen, så att varje installation kan byta innehåll utan att bygga om React-appen.</p>
-</section>
-<section>
-  <h2>Navigering</h2>
-  <ul>
-    <li>Pil upp / Pil ned flyttar sida för sida.</li>
-    <li>Håll <strong>Ctrl</strong> när flera dokument är synliga för att flytta dokument för dokument.</li>
-    <li>Håll <strong>Shift</strong> i jämförelseläge för att styra högersidan.</li>
-  </ul>
-</section>
-<section>
-  <h2>Urval och metadata</h2>
-  <ul>
-    <li>Använd fliken Urval för att inkludera eller exkludera sidor och dokument.</li>
-    <li>Tryck <strong>Delete</strong> för att dölja aktuell vänster-/huvudsida från det sparade urvalet. Håll <strong>Shift</strong> i jämförelseläge för att dölja högersidan i stället.</li>
-    <li>Tryck <strong>M</strong> för att öppna metadata-tabellen för hela sessionen när dokumentmetadata finns.</li>
-  </ul>
-</section>
-<section>
-  <h2>Utskrift</h2>
-  <p>Öppna utskriftsdialogen från verktygsfältet och välj utskriftsmetod innan webbläsaren förbereder förhandsgranskningen.</p>
-</section>
+<h1>OpenDocViewer manual</h1>
+<p>OpenDocViewer används för att öppna, granska, jämföra, välja och skriva ut dokument i en webbläsare. Manualen beskriver standardfunktionerna. En installation kan ha egna fält, egna utskriftsorsaker, egna hjälptexter och egna regler.</p>
+
+<h2>Grundläggande arbetssätt</h2>
+<ol>
+  <li>Vänta tills dokumenten har laddats klart. Utskrift och vissa dokumentåtgärder är inaktiva medan laddningen pågår.</li>
+  <li>Använd sidlistan med miniatyrer för att hoppa mellan sidor.</li>
+  <li>Använd verktygsfältet för zoom, passning, rotation, jämförelse, urval, metadata och utskrift.</li>
+  <li>Kontrollera alltid att rätt dokument och rätt sidor är valda innan du skriver ut eller sparar PDF.</li>
+</ol>
+
+<h2>Navigering</h2>
+<p>Du kan byta sida med verktygsfältets sidkontroller, miniatyrerna, musens rullhjul och tangentbordet. Sidräknaren visar aktuell sida i den laddade sessionen.</p>
+<ul>
+  <li><strong>Föregående/nästa sida:</strong> använd pilknapparna i verktygsfältet eller tangentbordets piltangenter.</li>
+  <li><strong>Page Up/Page Down:</strong> flyttar normalt en sida bakåt eller framåt.</li>
+  <li><strong>Home/End:</strong> kan användas för att gå till början eller slutet om webbläsaren ger fokus till visningsytan.</li>
+  <li><strong>Miniatyrer:</strong> klicka på en miniatyr för att öppna motsvarande sida.</li>
+</ul>
+<p>Tangentbordsgenvägar ignoreras i textfält, listor och andra inmatningsfält så att du kan skriva utan att råka styra visaren.</p>
+
+<h2>Zoom och visning</h2>
+<p>Verktygsfältet innehåller vanliga zoom- och passningslägen. Exakta namn kan skilja något mellan installationer.</p>
+<ul>
+  <li><strong>Anpassa till sida:</strong> visar hela sidan i tillgängligt utrymme.</li>
+  <li><strong>Anpassa till bredd:</strong> gör sidan lika bred som visningsytan.</li>
+  <li><strong>Faktisk storlek:</strong> visar sidan utan passningsskalning.</li>
+  <li><strong>Zooma in/ut:</strong> ändrar visningsskalan stegvis.</li>
+</ul>
+<p>Zoom påverkar hur sidan visas i OpenDocViewer. Normal utskrift bygger på utskriftsflödet, inte på exakt aktuell zoomnivå.</p>
+
+<h2>Miniatyrer och sidlista</h2>
+<p>Miniatyrpanelen visar sidorna i sessionen. Om flera dokument ingår kan sidlistan visa dokumentgränser eller dokumentinformation beroende på installationens konfiguration.</p>
+<ul>
+  <li>Markera en sida genom att klicka på miniatyren.</li>
+  <li>Använd miniatyrerna för snabb översikt över längre sessioner.</li>
+  <li>Vid mycket stora sessioner kan vissa miniatyrer laddas först när de behövs.</li>
+</ul>
+
+<h2>Dokument och metadata</h2>
+<p>OpenDocViewer kan visa metadata från de dokument som ingår i sessionen. Exempel kan vara patient-id, namn, enhet, dokumentdatum, sidantal eller dokument-id. Vilka metadata som finns beror på systemet som öppnar OpenDocViewer.</p>
+<ul>
+  <li><strong>Sidmetadata:</strong> visar metadata för en viss sida eller dokumentdel.</li>
+  <li><strong>Metadatamatris:</strong> visar metadata för flera dokument i samma session.</li>
+  <li><strong>Utskriftsmetadata:</strong> vissa metadata kan också användas i sidhuvud och sidfot vid utskrift.</li>
+</ul>
+<p>Om ett fält saknas visas det normalt inte i utskriften när mallen är konfigurerad med villkorade fält.</p>
+
+<h2>Urval</h2>
+<p>Om dokumenturval är aktiverat kan du välja vilka dokument eller sidor som ska ingå i arbetsflöden som stödjer urval. Urvalet påverkar exempelvis utskrift av valda sidor.</p>
+<ul>
+  <li>Kontrollera urvalet innan du skriver ut.</li>
+  <li>Urval kan vara dokumentbaserat eller sidbaserat beroende på installation.</li>
+  <li>Om inget särskilt urval används gäller normalt hela sessionen eller det val som anges i utskriftsdialogen.</li>
+</ul>
+
+<h2>Jämförelse</h2>
+<p>Jämförelseläge används för att visa två sidor eller dokumentdelar bredvid varandra. Det kan vara användbart vid manuell kontroll av versioner, kopior eller relaterade dokument.</p>
+<ul>
+  <li>Aktivera jämförelse från verktygsfältet om funktionen är tillgänglig.</li>
+  <li>Välj primär sida och jämförelsesida.</li>
+  <li>Utskrift av aktiv jämförelse kan hanteras annorlunda än utskrift av alla sidor.</li>
+</ul>
+
+<h2>Bildjusteringar och aktiv sida</h2>
+<p>Vissa installationer kan tillåta visuell justering av en aktiv sida, till exempel rotation eller annan visningsanpassning. Sådana justeringar hör normalt till aktiv-sida-flödet och bör kontrolleras noggrant före utskrift.</p>
+<p>Utskrift av <strong>aktiv sida</strong> kan därför skilja sig från utskrift av alla sidor, eftersom aktiv sida kan behöva använda den aktuella visuella ytan i stället för originalbilden.</p>
+
+<h2>Utskrift</h2>
+<p>Öppna utskriftsdialogen från verktygsfältets utskriftsknapp. Dialogen kan innehålla fält för utskriftsorsak, mottagare/för vem, vattenstämpel och sidval beroende på installation.</p>
+
+<h3>Sidval</h3>
+<ul>
+  <li><strong>Aktiv sida:</strong> skriver ut sidan som är aktiv i visaren. Detta är bäst när aktuell sida har särskild visuell hantering.</li>
+  <li><strong>Alla sidor:</strong> skriver ut hela sessionen eller hela aktuellt urval.</li>
+  <li><strong>Enkelt intervall:</strong> skriver ut ett sammanhängande sidintervall.</li>
+  <li><strong>Anpassade sidor:</strong> skriver ut en angiven lista, exempelvis <code>1,3,5-8</code>.</li>
+</ul>
+
+<h3>Direktutskrift via HTML</h3>
+<p><strong>Skriv ut via HTML</strong> använder webbläsarens vanliga utskriftsflöde för OpenDocViewers förberedda utskriftsvy. Webbläsarens val för stående eller liggande format gäller normalt hela utskriften.</p>
+<p>Detta läge är enkelt och direkt, men webbläsarens förhandsgranskning kan vara långsam för många stora bildsidor.</p>
+
+<h3>Utskrift via PDF</h3>
+<p><strong>Skriv ut via PDF</strong> gör att OpenDocViewer först skapar en PDF-fil av utskriftsjobbet och sedan skickar PDF-filen till webbläsarens utskrift. Under PDF-genereringen visas status för hur många sidor som är klara.</p>
+<p>I PDF-läget kan varje sida automatiskt få stående eller liggande format baserat på sidbildens form. Det kan därför skilja sig från direktutskrift där webbläsarens formatval gäller mer generellt.</p>
+
+<h3>Spara PDF</h3>
+<p>Om installationen tillåter det visas knappen <strong>Spara PDF</strong>. Den skapar samma typ av PDF som PDF-utskrift, men laddar ned filen i stället för att öppna utskrift.</p>
+
+<h3>KOPIA-vattenstämpel</h3>
+<p>Om installationen tillåter det kan du markera <strong>Lägg till KOPIA-vattenstämpel</strong>. Då läggs en tydlig men transparent märkning på utskriften. Installationen avgör exakt text, språk och utseende.</p>
+
+<h2>Sidhuvud och sidfot</h2>
+<p>Utskrifter kan ha sidhuvud och sidfot. Dessa kan innehålla datum, tid, utskriftsorsak, användare, sidnummer, dokument-id och metadata. Fält som saknar värde kan döljas automatiskt om mallen är konfigurerad så.</p>
+<p>Sidnumret i utskriftens sidhuvud är normalt sidans position i utskriftsjobbet. Dokumentets egna sidnummer kan visas separat i sidfoten.</p>
+
+<h2>Prestanda och stora dokument</h2>
+<p>OpenDocViewer försöker balansera prestanda och minnesanvändning. På kraftfulla datorer kan fler sidor och miniatyrer förberedas i förväg. På datorer med mindre minne kan visaren bli mer återhållsam.</p>
+<ul>
+  <li>Vänta tills laddningen är klar innan du startar stora utskrifter.</li>
+  <li>PDF-utskrift kan ge tydligare progress vid stora utskrifter.</li>
+  <li>Webbläsarens egen förhandsgranskning kan fortfarande ta tid, särskilt i Edge/Chromium.</li>
+</ul>
+
+<h2>Felsökning</h2>
+<ul>
+  <li><strong>Utskriftsknappen är inaktiv:</strong> vänta tills dokumenten har laddats klart.</li>
+  <li><strong>Förhandsgranskningen är långsam:</strong> prova PDF-utskrift om funktionen finns.</li>
+  <li><strong>Fel sidor skrivs ut:</strong> kontrollera sidval, intervall och urval i dialogen.</li>
+  <li><strong>Metadata saknas i utskrift:</strong> kontrollera att metadata finns i sessionen och att installationens mall använder rätt fält.</li>
+  <li><strong>Manualen saknar lokal information:</strong> installationen kan lägga en egen manualfil under <code>help/site/</code>.</li>
+</ul>
+
+<h2>Lokal anpassning</h2>
+<p>Den här standardmanualen kan ersättas per installation utan att bygga om OpenDocViewer. Lägg en lokal manual under <code>help/site/manual.sv.html</code> och motsvarande engelsk version under <code>help/site/manual.en.html</code>.</p>
