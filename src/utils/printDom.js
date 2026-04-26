@@ -5,36 +5,20 @@
  * OpenDocViewer — Print DOM Builder
  *
  * PURPOSE
- *   Safely construct the print iframe’s DOM using DOM APIs (no doc.write),
- *   wait until images reach a terminal state, then trigger window.print().
- *
- * DESIGN NOTES
- *   - We intentionally build the print document with DOM APIs instead of string-based document writing.
- *   - We intentionally wait for each image to reach a terminal state before printing.
- *     "Terminal state" means either:
- *       1) the image loaded successfully, or
- *       2) the image failed to load.
- *     The print flow must not hang forever just because one image errors.
- *   - The print header template may be either:
- *       * a plain string, or
- *       * a localized object such as { sv: '...', en: '...' }.
- *     We resolve the localized form at runtime.
- *   - Only allow-listed image sources are assigned to <img>. This prevents unsafe sources
- *     from being injected into the print document.
- *   - The CSS fragment passed in through runtime config is treated as trusted admin configuration,
- *     not as untrusted end-user input. We normalize it to a string, but do not attempt to "sanitize"
- *     arbitrary CSS because a fake sanitizer would provide misleading security guarantees.
+ *   Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach
+ *   a terminal state, then trigger window.print(). Header/footer templates are expanded per printed
+ *   page so document-specific metadata can follow the actual printed page sequence.
  */
 
 import i18next from 'i18next';
 import logger from '../logging/systemLogger.js';
-import { applyTemplateTokensEscaped } from './printTemplate.js';
+import { applyTemplateTokensEscaped, makePageTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveLocalizedValue } from './localizedValue.js';
 
 /**
- * Print header config (runtime) consumed by the print overlay logic.
- * @typedef {Object} PrintHeaderCfg
+ * Print overlay config (runtime) consumed by the print overlay logic.
+ * @typedef {Object} PrintOverlayCfg
  * @property {boolean=} enabled
  * @property {"top"|"bottom"=} position
  * @property {"all"|"first"|"last"=} applyTo
@@ -52,8 +36,11 @@ import { resolveLocalizedValue } from './localizedValue.js';
  * @property {string} reason
  * @property {string} forWhom
  * @property {string} printFormat
+ * @property {string} isCopy
  * @property {Object} user
+ * @property {Object} session
  * @property {Object} doc
+ * @property {Object} metadata
  * @property {Object} viewer
  */
 
@@ -74,12 +61,6 @@ function tr(key, defaultValue, options) {
 
 /**
  * Normalize an unknown configuration value to a non-negative number.
- * Returns 0 if the coerced value is not finite.
- *
- * IMPORTANT
- *   This helper performs its own Number(...) coercion so callers can pass
- *   runtime configuration values without repeating that conversion at each site.
- *
  * @param {*} value
  * @returns {number}
  */
@@ -89,63 +70,37 @@ function normalizeNonNegativeNumber(value) {
 }
 
 /**
- * Normalize runtime header application mode to the only values supported by the print header logic.
- *
- * WHY THIS EXISTS
- *   JSDoc constrains callers to 'all' | 'first' | 'last',
- *   but we also validate at runtime so invalid values do not silently flow through.
- *
+ * Normalize runtime overlay application mode.
  * @param {unknown} applyTo
  * @returns {('all'|'first'|'last')}
  */
 function normalizeApplyTo(applyTo) {
-  if (applyTo === 'first' || applyTo === 'last' || applyTo === 'all') {
-    return applyTo;
-  }
+  if (applyTo === 'first' || applyTo === 'last' || applyTo === 'all') return applyTo;
   return 'all';
 }
 
 /**
- * Decide if a header should be applied to the i-th page in a sequence of N,
- * according to "all" | "first" | "last".
  * @param {"all"|"first"|"last"} applyTo
- * @param {number} index1  1-based index within the printed sequence
- * @param {number} total   total printed pages in the sequence
+ * @param {number} index1
+ * @param {number} total
  * @returns {boolean}
  */
-function shouldApplyHeader(applyTo, index1, total) {
+function shouldApplyOverlay(applyTo, index1, total) {
   if (applyTo === 'first') return index1 === 1;
   if (applyTo === 'last') return index1 === total;
-  return true; // "all" or any unknown → default all
+  return true;
 }
 
 /**
- * Normalize runtime orientation to the only values this print CSS supports.
- *
- * WHY THIS EXISTS
- *   JSDoc already constrains callers to 'portrait' | 'landscape' | undefined,
- *   but we also validate at runtime before interpolating into CSS.
- *   That makes the contract explicit and prevents arbitrary values from being
- *   inserted into the @page rule.
- *
  * @param {unknown} pageOrientation
  * @returns {('portrait'|'landscape'|undefined)}
  */
 function normalizePageOrientation(pageOrientation) {
-  if (pageOrientation === 'portrait' || pageOrientation === 'landscape') {
-    return pageOrientation;
-  }
+  if (pageOrientation === 'portrait' || pageOrientation === 'landscape') return pageOrientation;
   return undefined;
 }
 
 /**
- * Normalize trusted extra CSS from runtime config.
- *
- * IMPORTANT
- *   This is intentionally NOT a general CSS sanitizer.
- *   The source is expected to be trusted admin/runtime configuration.
- *   We only keep the value if it is already a string.
- *
  * @param {unknown} extraCss
  * @returns {string}
  */
@@ -154,14 +109,15 @@ function normalizeTrustedExtraCss(extraCss) {
 }
 
 /**
+ * @param {unknown} value
+ * @returns {boolean}
+ */
+function enabled(value) {
+  return value !== false;
+}
+
+/**
  * Build the print-only CSS string (inlined within the print iframe).
- *
- * IMPORTANT
- *   - We intentionally generate a single @page rule when orientation is present.
- *   - We intentionally keep these styles under print media only.
- *     The iframe is used as a dedicated print host, not as a general screen-rendered surface.
- *     Therefore media="print" on the style element is correct for this design.
- *
  * @param {string} extraCss
  * @param {('portrait'|'landscape'|undefined)} pageOrientation
  * @returns {string}
@@ -169,7 +125,6 @@ function normalizeTrustedExtraCss(extraCss) {
 function buildPrintCss(extraCss, pageOrientation) {
   const safeOrientation = normalizePageOrientation(pageOrientation);
   const trustedExtraCss = normalizeTrustedExtraCss(extraCss);
-
   const pageRule = `@page{margin:0;${safeOrientation ? `size:${safeOrientation};` : ''}}`;
 
   const base =
@@ -181,7 +136,7 @@ function buildPrintCss(extraCss, pageOrientation) {
     '.page.last{break-after:auto;-webkit-break-after:auto;page-break-after:auto;}' +
     '.page img{display:block;width:auto;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;' +
       'page-break-inside:avoid;break-inside:avoid;}' +
-    '.odv-print-header{pointer-events:none;z-index:2147483647;}' +
+    '.odv-print-header,.odv-print-footer{pointer-events:none;z-index:2147483647;}' +
     '.odv-print-format-header{position:absolute;top:0;left:0;right:0;text-align:center;' +
       'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
       'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
@@ -193,7 +148,6 @@ function buildPrintCss(extraCss, pageOrientation) {
 }
 
 /**
- * Ensure there is exactly one <head>, clear it, and append meta+style.
  * @param {Document} doc
  * @param {string} cssText
  * @returns {void}
@@ -208,7 +162,6 @@ function ensureHead(doc, cssText) {
     html.appendChild(head);
   }
 
-  // Clear existing <head> content so each print render starts from a known clean state.
   while (head.firstChild) head.removeChild(head.firstChild);
 
   const meta = doc.createElement('meta');
@@ -216,16 +169,12 @@ function ensureHead(doc, cssText) {
   head.appendChild(meta);
 
   const style = doc.createElement('style');
-  // Intentionally limited to print media.
-  // This iframe is used as a dedicated print host, so these styles are only meant
-  // to affect print rendering / print preview, not general screen styling.
   style.setAttribute('media', 'print');
   style.textContent = cssText;
   head.appendChild(style);
 }
 
 /**
- * Ensure there is exactly one <body> and clear it.
  * @param {Document} doc
  * @returns {HTMLBodyElement}
  */
@@ -239,50 +188,40 @@ function ensureBody(doc) {
     html.appendChild(body);
   }
 
-  // Clear existing <body> content so repeated print attempts do not accumulate stale nodes.
   while (body.firstChild) body.removeChild(body.firstChild);
   return body;
 }
 
 /**
- * Build a header DIV element for a page using config + tokens (values escaped).
- *
- * SECURITY / CORRECTNESS NOTES
- *   - Token values are escaped before insertion.
- *   - The admin-defined template itself may contain intentional markup, so it is inserted as HTML.
- *   - The template can be localized; we resolve it for the active i18n language before token expansion.
+ * Build a header/footer DIV element for a page using config + tokens.
  *
  * @param {Document} doc
- * @param {PrintHeaderCfg} cfg
+ * @param {PrintOverlayCfg} cfg
  * @param {TokenContext} tokenContext
- * @param {number} page     1-based page number in the current printed sequence
- * @param {number} total    total pages in the current printed sequence
+ * @param {number} page
+ * @param {number} total
+ * @param {'header'|'footer'} kind
  * @returns {HTMLElement|null}
  */
-function buildHeaderElement(doc, cfg, tokenContext, page, total) {
+function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
   if (!cfg || !cfg.enabled) return null;
 
   const applyTo = normalizeApplyTo(cfg.applyTo);
-  if (!shouldApplyHeader(applyTo, page, total)) return null;
+  if (!shouldApplyOverlay(applyTo, page, total)) return null;
 
-  const posBottom = (cfg.position || 'top') === 'bottom';
-
-  // The template may be a localized object instead of a plain string.
-  // Resolve that here so printing works consistently across languages.
+  const defaultPosition = kind === 'footer' ? 'bottom' : 'top';
+  const posBottom = (cfg.position || defaultPosition) === 'bottom';
   const tpl = resolveLocalizedValue(cfg.template || '', i18next);
   const content = applyTemplateTokensEscaped(tpl, {
     ...tokenContext,
     page,
     totalPages: total,
   });
-
-  // If the resolved/expanded template becomes empty, do not create a header node.
   if (!content) return null;
 
   const heightPx = normalizeNonNegativeNumber(cfg.heightPx);
-
   const div = doc.createElement('div');
-  div.className = 'odv-print-header';
+  div.className = kind === 'footer' ? 'odv-print-footer' : 'odv-print-header';
   div.setAttribute(
     'style',
     'position:absolute;' +
@@ -291,79 +230,65 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
     (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '')
   );
 
-  // Intentionally using innerHTML:
-  // - token values are already escaped
-  // - template markup is considered admin-authored formatting
+  // Token values are escaped in applyTemplateTokensEscaped; admin-authored markup is preserved.
   div.innerHTML = content;
   return div;
 }
 
 /**
- * Wait until every image in the list has reached a terminal state, then invoke the callback.
- *
- * WHY THIS IS WRITTEN THIS WAY
- *   - We use one Promise per image and resolve it on either "load" or "error".
- *   - This avoids manual shared-counter bookkeeping and makes the completion contract explicit.
- *   - Event listeners are attached BEFORE the immediate `complete` re-check to avoid the classic
- *     timing gap where an image finishes between an initial state check and listener registration.
- *   - We intentionally treat `complete === true` as a terminal state here, even if the image failed,
- *     because the goal of this function is "do not hang forever", not "verify successful decode".
- *     Success/failure is already represented by the browser's load/error lifecycle.
- *
- * @param {Array<HTMLImageElement>} list
- * @param {function(): void} cb
- * @returns {void}
- */
-
-/**
  * Build configured print-format header/watermark elements for a page.
  * @param {Document} doc
  * @param {TokenContext} tokenContext
+ * @param {*} printFormatCfg
  * @returns {{ header: HTMLElement|null, watermark: HTMLElement|null }}
  */
-function buildPrintFormatElements(doc, tokenContext) {
+function buildPrintFormatElements(doc, tokenContext, printFormatCfg) {
   const text = String(tokenContext?.printFormat || '').trim();
   if (!text) return { header: null, watermark: null };
 
-  const header = doc.createElement('div');
-  header.className = 'odv-print-format-header';
-  header.textContent = text;
+  let header = null;
+  if (enabled(printFormatCfg?.headerMarker?.enabled)) {
+    header = doc.createElement('div');
+    header.className = 'odv-print-format-header';
+    header.textContent = text;
+  }
 
-  const watermark = doc.createElement('div');
-  watermark.className = 'odv-print-watermark';
-  watermark.textContent = text;
+  let watermark = null;
+  if (enabled(printFormatCfg?.watermark?.enabled)) {
+    watermark = doc.createElement('div');
+    watermark.className = 'odv-print-watermark';
+    watermark.textContent = text;
+  }
 
   return { header, watermark };
 }
 
+/**
+ * @param {Array<HTMLImageElement>} list
+ * @param {function(): void} cb
+ * @returns {void}
+ */
 function waitForImagesToLoad(list, cb) {
   if (!Array.isArray(list) || list.length === 0) {
     cb();
     return;
   }
 
-  const promises = list.map((im) => {
-    return new Promise((resolve) => {
-      let settled = false;
+  const promises = list.map((im) => new Promise((resolve) => {
+    let settled = false;
 
-      const onDone = () => {
-        if (settled) return;
-        settled = true;
-        im.removeEventListener('load', onDone);
-        im.removeEventListener('error', onDone);
-        resolve();
-      };
+    const onDone = () => {
+      if (settled) return;
+      settled = true;
+      im.removeEventListener('load', onDone);
+      im.removeEventListener('error', onDone);
+      resolve();
+    };
 
-      im.addEventListener('load', onDone);
-      im.addEventListener('error', onDone);
-
-      // Re-check after listeners are attached.
-      // If the image already reached a terminal state very quickly, resolve immediately.
-      if (im.complete) {
-        onDone();
-      }
-    });
-  });
+    im.addEventListener('load', onDone);
+    im.addEventListener('error', onDone);
+    if (im.complete) onDone();
+  }));
 
   Promise.all(promises).then(() => cb());
 }
@@ -371,43 +296,40 @@ function waitForImagesToLoad(list, cb) {
 /**
  * Attach pages and images into the (cleared) body, wait for image terminal states, then print.
  *
- * IMPORTANT BEHAVIOR
- *   - We only create and track an <img> when the source is allow-listed.
- *   - Unsafe or disallowed sources are not assigned to the DOM image element.
- *   - The page wrapper is still created so page ordering and header numbering remain stable.
- *     This is intentional low-risk behavior: we avoid silently re-numbering pages in print output.
- *
  * @param {Document} doc
  * @param {Array.<{src: string, alt: string}>} pages
  * @param {number} printDelayMs
- * @param {PrintHeaderCfg} printHeaderCfg
+ * @param {PrintOverlayCfg} printHeaderCfg
+ * @param {PrintOverlayCfg} printFooterCfg
+ * @param {*} printFormatCfg
  * @param {TokenContext} tokenContext
+ * @param {Array<*>} pageContexts
  * @returns {void}
  */
-function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenContext) {
+function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, printFooterCfg, printFormatCfg, tokenContext, pageContexts) {
   const body = ensureBody(doc);
-
   const total = pages.length;
   const imgs = [];
+  const bundle = tokenContext?.bundle || {};
 
-  for (let i = 0; i < pages.length; i++) {
+  for (let i = 0; i < pages.length; i += 1) {
     const pageWrapper = doc.createElement('div');
     pageWrapper.className = 'page' + (i === total - 1 ? ' last' : '');
 
-    const printFormatElements = buildPrintFormatElements(doc, tokenContext);
+    const pageTokenContext = makePageTokenContext(tokenContext || {}, Array.isArray(pageContexts) ? pageContexts[i] : null, bundle);
+    const printFormatElements = buildPrintFormatElements(doc, pageTokenContext, printFormatCfg || {});
     if (printFormatElements.watermark) pageWrapper.appendChild(printFormatElements.watermark);
 
-    const header = buildHeaderElement(doc, printHeaderCfg, tokenContext, i + 1, total);
+    const header = buildOverlayElement(doc, printHeaderCfg, pageTokenContext, i + 1, total, 'header');
     if (header) pageWrapper.appendChild(header);
     if (printFormatElements.header) pageWrapper.appendChild(printFormatElements.header);
 
-    const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
+    const footer = buildOverlayElement(doc, printFooterCfg, pageTokenContext, i + 1, total, 'footer');
+    if (footer) pageWrapper.appendChild(footer);
 
+    const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
     if (safeSrc) {
       const img = doc.createElement('img');
-      // Intentionally reusing the generic page-alt translation here.
-      // Multi-page print pages conceptually map to viewer pages ("Page {page}") and
-      // this avoids introducing a second near-identical translation key.
       img.setAttribute('alt', pages[i].alt || tr('viewer.pageAlt', 'Page {page}', { page: i + 1 }));
       img.src = safeSrc;
       pageWrapper.appendChild(img);
@@ -418,31 +340,36 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
   }
 
   const delay = normalizeNonNegativeNumber(printDelayMs);
-
   waitForImagesToLoad(imgs, () => {
     setTimeout(() => {
       try {
         doc.defaultView?.print();
       } catch (error) {
-        // Intentionally logged instead of silently swallowed.
-        // Printing may fail because of browser-specific restrictions, blocked dialogs,
-        // or iframe/window state. Logging preserves diagnosability without changing UX flow.
-        logger.warn('Print invocation failed', {
-          error: String(error?.message || error),
-        });
+        logger.warn('Print invocation failed', { error: String(error?.message || error) });
       }
     }, delay);
   });
 }
 
 /**
+ * @param {*} printHeaderCfg
+ * @param {*} printFooterCfg
+ * @returns {string}
+ */
+function mergeOverlayCss(printHeaderCfg, printFooterCfg) {
+  return [printHeaderCfg?.css, printFooterCfg?.css]
+    .filter((entry) => typeof entry === 'string' && entry)
+    .join('\n');
+}
+
+/**
  * Render a single-page print document in the given print iframe document.
  * @param {Document} doc
- * @param {{ dataUrl: string, orientation: ('portrait'|'landscape'), printDelayMs: number, printHeaderCfg: PrintHeaderCfg, tokenContext: TokenContext }} opts
+ * @param {{ dataUrl: string, orientation: ('portrait'|'landscape'), printDelayMs: number, printHeaderCfg: PrintOverlayCfg, printFooterCfg?: PrintOverlayCfg, printFormatCfg?: *, tokenContext: TokenContext, pageContexts?: Array<*> }} opts
  * @returns {void}
  */
 export function renderSingleDocument(doc, opts) {
-  const cssText = buildPrintCss((opts.printHeaderCfg?.css) || '', opts.orientation);
+  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), opts.orientation);
   ensureHead(doc, cssText);
 
   populateBodyAndPrint(
@@ -450,18 +377,21 @@ export function renderSingleDocument(doc, opts) {
     [{ src: opts.dataUrl, alt: tr('print.alt.printableDocument', 'Printable Document') }],
     opts.printDelayMs,
     opts.printHeaderCfg || {},
-    opts.tokenContext
+    opts.printFooterCfg || {},
+    opts.printFormatCfg || {},
+    opts.tokenContext,
+    opts.pageContexts || []
   );
 }
 
 /**
  * Render a multi-page print document in the given print iframe document.
  * @param {Document} doc
- * @param {{ dataUrls: Array.<string>, printDelayMs: number, printHeaderCfg: PrintHeaderCfg, tokenContext: TokenContext }} opts
+ * @param {{ dataUrls: Array.<string>, printDelayMs: number, printHeaderCfg: PrintOverlayCfg, printFooterCfg?: PrintOverlayCfg, printFormatCfg?: *, tokenContext: TokenContext, pageContexts?: Array<*> }} opts
  * @returns {void}
  */
 export function renderMultiDocument(doc, opts) {
-  const cssText = buildPrintCss((opts.printHeaderCfg?.css) || '', undefined);
+  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), undefined);
   ensureHead(doc, cssText);
 
   const pages = (opts.dataUrls || []).map((src, i) => ({
@@ -474,6 +404,9 @@ export function renderMultiDocument(doc, opts) {
     pages,
     opts.printDelayMs,
     opts.printHeaderCfg || {},
-    opts.tokenContext
+    opts.printFooterCfg || {},
+    opts.printFormatCfg || {},
+    opts.tokenContext,
+    opts.pageContexts || []
   );
 }

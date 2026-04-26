@@ -120,7 +120,7 @@ If print code grows further, the most natural split points are:
 
 ## Print format marker and watermark
 
-OpenDocViewer can expose a **Print format** selector in the print dialog. When the selected option resolves to a non-empty output text, that text is added as a prominent print-only header marker and as a semi-transparent watermark centered on every printed page.
+OpenDocViewer can expose a **Print format** selector in the print dialog. When the selected option resolves to a non-empty output text, that text is available as the {{isCopy}}/ {{printFormat}} template value and, by default, as a semi-transparent watermark centered on every printed page. A separate automatic header marker can be enabled with print.format.headerMarker.enabled.
 
 The format options use the same stable-value/localized-label pattern as print reasons:
 
@@ -129,3 +129,46 @@ The format options use the same stable-value/localized-label pattern as print re
 - when `useValueForOutput: false`, the localized `label` is also used as the physical print text
 
 This allows one installation to print exactly `KOPIA`, while another can print a different configured word or allow the print text to follow the active UI language.
+
+## Print header/footer metadata templates
+
+Print header and footer are configured independently through `printHeader` and `printFooter`.
+Both use the same template engine and both are evaluated per printed page.
+
+Supported token forms:
+
+```text
+{{date}}
+{{time}}
+{{page}}
+{{totalPages}}
+{{reason}}
+{{forWhom}}
+{{printFormat}}
+{{isCopy}}
+{{UserId}}
+{{session.userId}}
+{{doc.documentId}}
+{{doc.title}}
+{{doc.documentPageNumber}}
+{{doc.documentPageCount}}
+{{metadata.1001}}
+```
+
+`{{isCopy}}` is an alias for the resolved print-format output text, for example `KOPIA`.
+It is intentionally available for configurable header/footer placement while the watermark remains
+controlled by `print.format.watermark.enabled`.
+
+Conditional blocks prevent empty labels from being printed:
+
+```text
+[[{{UserId}}, "Utskriven av: {{UserId}} | "]]
+[[{{reason}}, "Orsak: {{reason}} | "]]
+```
+
+If the condition token is `null`, `undefined`, an empty string, or a null-like string, the entire
+block is omitted. This avoids output such as `Utskriven av: | Orsak: |` when the host session lacks
+those values.
+
+Newlines in configured templates are rendered as print line breaks. Token values are HTML-escaped
+before insertion. Admin-authored template markup, such as `<strong>`, is preserved.

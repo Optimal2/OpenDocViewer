@@ -73,6 +73,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {Array<number>} visibleOriginalPageNumbers
  * @property {number} selectionIncludedCount
  * @property {number} sessionTotalPages
+ * @property {Object|null} bundle
+ * @property {Array<*>} allPages
  * @property {boolean} documentNavigationEnabled
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} primaryDocumentNavigation
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} compareDocumentNavigation
@@ -149,6 +151,8 @@ const DocumentViewerToolbar = ({
   visibleOriginalPageNumbers,
   selectionIncludedCount,
   sessionTotalPages,
+  bundle,
+  allPages,
   documentNavigationEnabled,
   primaryDocumentNavigation,
   compareDocumentNavigation,
@@ -197,6 +201,8 @@ const DocumentViewerToolbar = ({
       visibleOriginalPageNumbers={visibleOriginalPageNumbers}
       selectionIncludedCount={selectionIncludedCount}
       sessionTotalPages={sessionTotalPages}
+      bundle={bundle || null}
+      allPages={allPages || []}
       documentNavigationEnabled={documentNavigationEnabled}
       primaryDocumentNavigation={primaryDocumentNavigation}
       compareDocumentNavigation={compareDocumentNavigation}
@@ -285,6 +291,8 @@ DocumentViewerToolbar.propTypes = {
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
   selectionIncludedCount: PropTypes.number.isRequired,
   sessionTotalPages: PropTypes.number.isRequired,
+  bundle: PropTypes.object,
+  allPages: PropTypes.arrayOf(PropTypes.any),
   documentNavigationEnabled: PropTypes.bool.isRequired,
   primaryDocumentNavigation: PropTypes.shape({
     canGoPrevious: PropTypes.bool.isRequired,
