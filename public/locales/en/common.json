@@ -224,12 +224,13 @@
       "aria": "Print output mode",
       "direct": {
         "label": "Direct print",
-        "hint": "The browser prints the prepared OpenDocViewer print view directly."
+        "hint": "Uses the browser print preview. The browser portrait/landscape setting applies to the whole print job.",
+        "info": "Direct print uses the browser print preview. The browser portrait/landscape setting applies to the whole print job."
       },
       "safe": {
         "label": "Safe print",
-        "hint": "OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.",
-        "info": "OpenDocViewer takes responsibility for creating the print job as a PDF file. The PDF is then printed in the browser. This can be more stable for larger print jobs."
+        "hint": "Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.",
+        "info": "OpenDocViewer creates the print job as a PDF. Each PDF page gets automatic portrait/landscape orientation from the page image before the PDF is printed in the browser."
       },
       "menuLabel": "Choose print output mode"
     },
