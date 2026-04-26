@@ -207,8 +207,9 @@
       "dismiss": "Stäng"
     },
     "printFormat": {
-      "label": "Utskriftsformat",
-      "hint": "Valt utskriftsformat kan lägga till konfigurerad sidhuvudstext och vattenstämpel på utskrivna sidor."
+      "label": "Lägg till KOPIA-vattenstämpel",
+      "hint": "Om rutan är ibockad används den konfigurerade kopiemarkeringen i sidhuvud/sidfot och som vattenstämpel.",
+      "checkboxLabel": "Lägg till KOPIA-vattenstämpel"
     }
   },
   "print": {

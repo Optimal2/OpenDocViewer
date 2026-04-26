@@ -38,6 +38,8 @@ function normalizePageContexts(value) {
  * @property {string} [reason]                                      Optional reason text to propagate to header tokens.
  * @property {string} [forWhom]                                     Optional "for whom" text to propagate to header tokens.
  * @property {string} [printFormat]                                 Optional print format marker text for header/watermark output.
+ * @property {Object} [reasonSelection]                              Structured details for the selected print reason.
+ * @property {Object} [printFormatSelection]                         Structured details for the selected print format marker.
  */
 
 /**
@@ -56,6 +58,8 @@ function normalizePageContexts(value) {
  * @property {string} [reason]
  * @property {string} [forWhom]                                     Optional "for whom" text to propagate to header tokens.
  * @property {string} [printFormat]                                 Optional print format marker text for header/watermark output.
+ * @property {Object} [reasonSelection]                              Structured details for the selected print reason.
+ * @property {Object} [printFormatSelection]                         Structured details for the selected print format marker.
  */
 
 /**
@@ -261,7 +265,7 @@ function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
 export function handlePrint(documentRenderRef, options = {}) {
   logger.info('handlePrint invoked');
 
-  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
+  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options;
 
   const active = resolveActiveNode(documentRenderRef, viewerContainerRef);
   if (!active) {
@@ -292,7 +296,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
   const { frame } = createHiddenIframe(DEFAULT_IFRAME_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -327,7 +331,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   logger.info('handlePrintCurrentComparison invoked');
 
-  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
+  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options;
   const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
   const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
   if (!primaryNode || !compareNode) {
@@ -345,7 +349,7 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
   const { frame } = createHiddenIframe(MIN_MULTI_PAGE_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -428,7 +432,7 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
 export async function handlePrintAll(documentRenderRef, options = {}) {
   logger.info('handlePrintAll invoked');
 
-  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
+  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options;
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!dataUrls.length) {
@@ -461,7 +465,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
   const { frame } = createHiddenIframe(
     Math.max(
@@ -495,7 +499,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
  * @returns {Promise<void>}
  */
 export async function handlePrintSequence(documentRenderRef, sequence, options = {}) {
-  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options || {};
+  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null, pageContexts = [] } = options || {};
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!Array.isArray(sequence) || !sequence.length) {
@@ -521,7 +525,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
   const { frame } = createHiddenIframe(
     Math.max(

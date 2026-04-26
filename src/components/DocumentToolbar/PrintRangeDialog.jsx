@@ -23,6 +23,8 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {string|null} [forWhom]
  * @property {string|null} [printFormat]
  * @property {string|null} [printFormatValue]
+ * @property {Object} [reasonSelection]
+ * @property {Object} [printFormatSelection]
  */
 
 export default function PrintRangeDialog({
@@ -333,21 +335,21 @@ export default function PrintRangeDialog({
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
                 <div className="odv-prd-fieldCol">
                   {ctrl.showPrintFormat ? (
-                    <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
-                      <span>{t('printDialog.printFormat.label', { defaultValue: 'Print format' })}</span>
-                      <select
-                        className="odv-prd-select odv-prd-selectWide"
-                        value={ctrl.selectedPrintFormat}
-                        onChange={(event) => ctrl.setSelectedPrintFormat(event.target.value)}
-                        aria-label={t('printDialog.printFormat.label', { defaultValue: 'Print format' })}
-                      >
-                        {ctrl.printFormatOptions.map((opt) => (
-                          <option key={String(opt.value)} value={opt.value}>{ctrl.optionLabel(opt)}</option>
-                        ))}
-                      </select>
+                    <label className="odv-prd-checkRow odv-prd-checkRow-wide">
+                      <input
+                        type="checkbox"
+                        checked={!!ctrl.printFormatChecked}
+                        onChange={(event) => ctrl.setPrintFormatChecked(event.target.checked)}
+                        aria-label={t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
+                      />
+                      <span>
+                        {ctrl.checkboxPrintFormatOption?.checkboxLabel
+                          ? ctrl.optionLabel({ value: ctrl.checkboxPrintFormatOption.value, label: ctrl.checkboxPrintFormatOption.checkboxLabel })
+                          : t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
+                      </span>
                       <span className="odv-prd-hint">
                         {t('printDialog.printFormat.hint', {
-                          defaultValue: 'Selected print format can add configured header text and watermark to the printed pages.',
+                          defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
                         })}
                       </span>
                     </label>

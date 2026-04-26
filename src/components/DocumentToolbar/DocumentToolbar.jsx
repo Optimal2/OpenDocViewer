@@ -46,6 +46,8 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
  * @property {string=} forWhom
  * @property {string=} printFormat
  * @property {string=} printFormatValue
+ * @property {Object=} reasonSelection
+ * @property {Object=} printFormatSelection
  */
 
 /**
@@ -791,6 +793,8 @@ const DocumentToolbar = ({
       reason: detail?.reason || '',
       forWhom: detail?.forWhom || '',
       printFormat: detail?.printFormat || '',
+      reasonSelection: detail?.reasonSelection || null,
+      printFormatSelection: detail?.printFormatSelection || null,
       bundle: bundle || null,
       pageContexts: resolvePrintPageContexts(pageNumbers),
     };

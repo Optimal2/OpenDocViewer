@@ -24,13 +24,16 @@
  *
  * @typedef {Object} ReasonOption
  * @property {string} value             // stable id sent to logs (keep as plain string)
- * @property {LocalizedString} [label]  // optional localized display label (falls back to value)
+ * @property {LocalizedString} [label]       // optional localized display label (falls back to value)
+ * @property {LocalizedString} [printValue]  // optional localized text used on physical print/log output
  * @property {boolean} [allowFreeText]
  * @property {ReasonFreeText} [input]
  *
  * @typedef {Object} PrintFormatOption
- * @property {string} value             // text/id used on the physical print when print.format.useValueForOutput=true
- * @property {LocalizedString} [label]  // localized display label, and optionally print text when useValueForOutput=false
+ * @property {string} value                  // stable id for the marker option
+ * @property {LocalizedString} [label]       // localized display label
+ * @property {LocalizedString} [checkboxLabel] // optional localized checkbox label
+ * @property {LocalizedString} [printValue]  // optional localized text used on physical print output
  */
 
 (function (w, d) {
@@ -133,20 +136,30 @@
       // Use 0 to disable the notice entirely.
       preparationNoticeThresholdPages: 200,
 
-      // Optional print format marker. Non-empty selected output text is printed in the page header
-      // and as a semi-transparent watermark on every printed page.
+      // Optional copy marker. The dialog uses a checkbox, not a format dropdown.
+      // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {
         enabled: true,
-        // true  -> print option.value, while label is UI-only
-        // false -> print the localized option.label when available
+        // true  -> use option.value on physical print output when option.printValue is missing
+        // false -> use the localized option.label on physical print output when option.printValue is missing
         useValueForOutput: true,
-        default: '',
         headerMarker: { enabled: false },
-        watermark: { enabled: true },
+        watermark: {
+          enabled: true,
+          // true  -> show a user-controlled checkbox in the print dialog
+          // false -> hide the checkbox; combine with defaultChecked=true for forced copy watermark
+          showOption: true,
+          // false -> normal print by default; user must explicitly choose copy watermark
+          defaultChecked: false
+        },
         /** @type {PrintFormatOption[]} */
         options: [
-          { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
-          { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+          {
+            value: 'KOPIA',
+            label: { en: 'Copy', sv: 'Kopia' },
+            checkboxLabel: { en: 'Add copy watermark', sv: 'Lägg till KOPIA-vattenstämpel' },
+            printValue: { en: 'COPY', sv: 'KOPIA' }
+          }
         ]
       }
     },
@@ -268,17 +281,18 @@
        * Tokenized template.
        * Supported tokens:
        *   - {{date}}, {{time}}, {{page}}, {{totalPages}}
-       *   - {{reason}}, {{forWhom}}, {{printFormat}}, {{isCopy}}
+       *   - {{reason}}, {{reasonSelection.output}}, {{reasonSelection.label.sv}}, {{reasonSelection.printValue.sv}}, {{forWhom}}
+       *   - {{printFormat}}, {{printFormatSelection.output}}, {{printFormatSelection.label.sv}}, {{printFormatSelection.printValue.sv}}, {{isCopy}}
        *   - session tokens such as {{UserId}} / {{session.userId}}
-       *   - document tokens such as {{doc.documentId}}, {{doc.title}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}
+       *   - document tokens such as {{doc.documentId}}, {{doc.documentPageNumber}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}
        * Conditional blocks suppress surrounding labels when the value is missing:
        *   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
        * Newlines in the template are rendered as print line breaks.
        * @type {LocalizedString}
        */
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
       },
       css: `
 .odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
@@ -289,13 +303,13 @@
 
     // ---- PRINT FOOTER ---------------------------------------------------------
     printFooter: {
-      enabled: false,
+      enabled: true,
       position: "bottom",
       heightPx: 28,
       applyTo: "all",
       template: {
-        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}} | "]]Page {{page}}/{{totalPages}}',
-        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (page: {{doc.documentPageNumber}})"]]',
+        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
       },
       css: `
 .odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;

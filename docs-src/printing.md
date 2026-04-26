@@ -118,17 +118,42 @@ If print code grows further, the most natural split points are:
 - all-page / range / sequence resolution
 - print-header token preparation
 
-## Print format marker and watermark
+## Copy marker and watermark
 
-OpenDocViewer can expose a **Print format** selector in the print dialog. When the selected option resolves to a non-empty output text, that text is available as the {{isCopy}}/ {{printFormat}} template value and, by default, as a semi-transparent watermark centered on every printed page. A separate automatic header marker can be enabled with print.format.headerMarker.enabled.
+OpenDocViewer can expose a **copy watermark** checkbox in the print dialog. By default it is not checked, so normal prints do not get a watermark and `{{isCopy}}` / `{{printFormat}}` are empty.
 
-The format options use the same stable-value/localized-label pattern as print reasons:
+Relevant config:
 
-- `value` is the stable configured value and is used on the physical print when `useValueForOutput: true`
-- `label` is localized UI text
-- when `useValueForOutput: false`, the localized `label` is also used as the physical print text
+```js
+print: {
+  format: {
+    enabled: true,
+    useValueForOutput: true,
+    headerMarker: { enabled: false },
+    watermark: {
+      enabled: true,
+      showOption: true,
+      defaultChecked: false
+    },
+    options: [
+      {
+        value: 'KOPIA',
+        label: { en: 'Copy', sv: 'Kopia' },
+        checkboxLabel: { en: 'Add copy watermark', sv: 'Lägg till KOPIA-vattenstämpel' },
+        printValue: { en: 'COPY', sv: 'KOPIA' }
+      }
+    ]
+  }
+}
+```
 
-This allows one installation to print exactly `KOPIA`, while another can print a different configured word or allow the print text to follow the active UI language.
+Behavior:
+
+- `watermark.showOption: true` shows the checkbox to the user.
+- `watermark.defaultChecked: false` makes normal print the default.
+- `watermark.showOption: false` and `watermark.defaultChecked: true` forces the configured marker without allowing the user to disable it.
+- `printValue` is the preferred output text for print/header/footer tokens and may be localized.
+- If `printValue` is missing, legacy `useValueForOutput` decides whether `value` or localized `label` is used.
 
 ## Print header/footer metadata templates
 
@@ -143,13 +168,18 @@ Supported token forms:
 {{page}}
 {{totalPages}}
 {{reason}}
+{{reasonSelection.output}}
+{{reasonSelection.label.sv}}
+{{reasonSelection.printValue.sv}}
 {{forWhom}}
 {{printFormat}}
+{{printFormatSelection.output}}
+{{printFormatSelection.label.sv}}
+{{printFormatSelection.printValue.sv}}
 {{isCopy}}
 {{UserId}}
 {{session.userId}}
 {{doc.documentId}}
-{{doc.title}}
 {{doc.documentPageNumber}}
 {{doc.documentPageCount}}
 {{metadata.1001}}
@@ -173,7 +203,7 @@ Example: if `patientId` maps to field id `1001` with `prefer: 'value'`, use
 
 `{{isCopy}}` is an alias for the resolved print-format output text, for example `KOPIA`.
 It is intentionally available for configurable header/footer placement while the watermark remains
-controlled by `print.format.watermark.enabled`.
+controlled by `print.format.watermark.enabled` and by the checkbox/forced default configuration.
 
 Conditional blocks prevent empty labels from being printed:
 
