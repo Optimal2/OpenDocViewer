@@ -180,6 +180,17 @@ print: {
     enabled: 'auto', // 'auto', true, or false
     maxPages: 0     // 0 = reuse existing documentLoading thresholds
   },
+  pdf: {
+    enabled: true,
+    defaultMode: 'direct',
+    allowDownload: false,
+    filename: 'opendocviewer-print.pdf',
+    marginPt: 8,
+    headerReservePt: 18,
+    footerReservePt: 14,
+    textFontSize: 7,
+    imageFallbackQuality: 0.9
+  },
   format: {
     enabled: true,
     useValueForOutput: true, // true=value on print, false=localized label on print
@@ -395,3 +406,7 @@ The configured block is rendered only when the first token resolves to a non-emp
 ### Warm print iframe
 
 `print.prewarmIframe.enabled` controls the optional hidden print iframe used to speed up compatible multi-page print jobs. `auto` follows the existing `documentLoading` and memory-pressure profile, `true` forces eligibility unless hard memory pressure is detected, and `false` disables the optimization. `maxPages: 0` means that OpenDocViewer reuses existing document-loading thresholds instead of adding a separate print-specific page limit.
+
+`print.pdf.enabled` controls whether the dialog offers generated-PDF output as **Safe print**. `defaultMode: 'direct'` keeps browser HTML printing selected by default, while `defaultMode: 'safe'` selects generated PDF printing by default. `allowDownload: true` adds a separate **Save PDF** action to the print dialog.
+
+The generated-PDF backend is intended for deployments where the browser is slow to build print preview from large HTML/IMG print documents. It reuses already rendered page image blobs for multi-page jobs. Active-page PDF output uses the current rendered surface to preserve transient image edits.

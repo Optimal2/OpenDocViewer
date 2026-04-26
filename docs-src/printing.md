@@ -249,3 +249,32 @@ print: {
 ```
 
 A small LED-style status indicator on the toolbar print button shows whether the warm print cache is inactive, being prepared, ready, or using fallback.
+
+## Generated PDF print backend
+
+The print dialog can optionally offer **Direct print** and **Safe print**:
+
+- **Direct print** uses the normal browser HTML/iframe print pipeline.
+- **Safe print** generates a PDF inside OpenDocViewer from the selected page images, applies configured header/footer text and copy watermark text, then sends that PDF to the browser's PDF print flow.
+
+This is intended as an alternative for browsers that are slow to create print previews from large HTML documents with many image pages. It is configurable and direct print remains the default.
+
+Configuration surface:
+
+```js
+print: {
+  pdf: {
+    enabled: true,
+    defaultMode: 'direct', // 'direct' or 'safe'
+    allowDownload: false,
+    filename: 'opendocviewer-print.pdf',
+    marginPt: 8,
+    headerReservePt: 18,
+    footerReservePt: 14,
+    textFontSize: 7,
+    imageFallbackQuality: 0.9
+  }
+}
+```
+
+If `allowDownload` is `true`, the dialog also shows a **Save PDF** action. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.

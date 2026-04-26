@@ -65,7 +65,7 @@ function createPersistentHiddenIframe() {
  */
 export async function createWarmPrintFrame(opts) {
   const frame = createPersistentHiddenIframe();
-  const doc = frame.contentDocument || frame.contentWindow?.document;
+  const doc = frame.contentDocument || frame.contentWindow?.document || null;
   if (!doc) {
     try { frame.remove(); } catch {}
     throw new Error('Unable to access warm print iframe document.');
@@ -138,9 +138,10 @@ export function shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage =
   if (Number.isFinite(explicitMax) && explicitMax > 0 && pageCount > explicitMax) return false;
 
   const mode = String(cfg?.documentLoading?.mode || 'auto').toLowerCase();
-  if (mode === 'memory' && enabled !== true && String(enabled).toLowerCase() !== 'true') return false;
+  const forcedEnabled = enabled === true || enabled === 'true';
+  if (mode === 'memory' && !forcedEnabled) return false;
 
-  if (enabled === true || String(enabled).toLowerCase() === 'true') return true;
+  if (forcedEnabled) return true;
 
   const performanceWindow = Number(cfg?.documentLoading?.adaptiveMemory?.performanceWindowPageCount || 0);
   if (Number.isFinite(performanceWindow) && performanceWindow > 0 && pageCount > performanceWindow) return false;

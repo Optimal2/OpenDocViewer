@@ -16,8 +16,9 @@
 
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame } from './printCore.js';
 import { parsePrintSequence } from './printParse.js';
+import { handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob } from './printPdf.js';
 
-export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, parsePrintSequence };
+export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, parsePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob };
 
 export default {
   handlePrint,
@@ -26,5 +27,11 @@ export default {
   handlePrintRange,
   handlePrintSequence,
   handlePrintWarmFrame,
-  parsePrintSequence
+  parsePrintSequence,
+  handlePdfOutput,
+  handlePdfCurrent,
+  handlePdfCurrentComparison,
+  createPrintPdfBlob,
+  printPdfBlob,
+  downloadPdfBlob
 };

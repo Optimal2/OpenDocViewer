@@ -117,6 +117,25 @@
         maxPages: 0
       },
 
+
+      // Optional generated-PDF backend for print output. Direct print remains the default.
+      // Safe print generates a PDF inside OpenDocViewer and lets the browser print that PDF.
+      pdf: {
+        enabled: true,
+        // "direct" -> browser HTML print is selected by default.
+        // "safe"   -> generated-PDF print is selected by default.
+        defaultMode: 'direct',
+        // When true, the print dialog also shows a separate "Save PDF" action.
+        allowDownload: false,
+        filename: 'opendocviewer-print.pdf',
+        // PDF layout tuning in points. Keep these small so document content keeps maximum space.
+        marginPt: 8,
+        headerReservePt: 18,
+        footerReservePt: 14,
+        textFontSize: 7,
+        imageFallbackQuality: 0.9
+      },
+
       // Optional copy marker. The print dialog uses a checkbox, not a format dropdown.
       // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {

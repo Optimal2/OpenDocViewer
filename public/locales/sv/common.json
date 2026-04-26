@@ -142,7 +142,8 @@
     "footer": {
       "cancel": "Avbryt",
       "continue": "Starta utskrift",
-      "prepare": "Förbered utskrift"
+      "prepare": "Förbered utskrift",
+      "downloadPdf": "Spara PDF"
     },
     "errors": {
       "selectValidPages": "Välj giltiga sidor.",
@@ -217,6 +218,19 @@
       "label": "Lägg till KOPIA-vattenstämpel",
       "hint": "Om rutan är ibockad används den konfigurerade kopiemarkeringen i sidhuvud/sidfot och som vattenstämpel.",
       "checkboxLabel": "Lägg till KOPIA-vattenstämpel"
+    },
+    "output": {
+      "header": "Utskriftsläge",
+      "aria": "Utskriftsläge",
+      "direct": {
+        "label": "Direktutskrift",
+        "hint": "Webbläsaren skriver ut OpenDocViewers förberedda utskriftsvy direkt."
+      },
+      "safe": {
+        "label": "Säker utskrift",
+        "hint": "OpenDocViewer skapar först en PDF och skickar sedan PDF-filen till webbläsarens utskrift.",
+        "info": "OpenDocViewer tar ansvar för att skapa utskriften som en PDF-fil. PDF-filen skrivs sedan ut i webbläsaren. Detta kan vara stabilare för större utskrifter."
+      }
     }
   },
   "print": {
