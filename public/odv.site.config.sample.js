@@ -124,7 +124,10 @@
           // false -> hide the checkbox; combine with defaultChecked=true for forced copy watermark
           showOption: true,
           // false -> normal print by default; user must explicitly choose copy watermark
-          defaultChecked: false
+          defaultChecked: false,
+          // Optional extra CSS appended inside the isolated print iframe for the watermark element.
+          // Use this only for trusted, site-local visual tweaks.
+          css: ''
         },
 
         // Only one non-empty option is used by the checkbox UI. Keep value stable for logging;
@@ -403,9 +406,9 @@
       },
 
       adaptiveMemory: {
-        // Runtime heuristics remain enabled by default, but the defaults now favor
-        // stability/performance and only become conservative when the browser signals
-        // a lower-memory environment.
+        // Runtime heuristics remain enabled by default, but this SAMPLE intentionally
+        // shows a more conservative profile than the built-in defaults in public/odv.config.js.
+        // Copy whichever profile best matches the deployment's typical client hardware.
         enabled: true,
         preferPerformanceWhenDeviceMemoryAtLeastGb: 4,
         preferPerformanceWhenJsHeapLimitAtLeastMiB: 1024,
