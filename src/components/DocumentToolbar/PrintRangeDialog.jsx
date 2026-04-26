@@ -495,27 +495,34 @@ export default function PrintRangeDialog({
                   type="button"
                   role="menuitem"
                   className="odv-prd-splitMenuItem"
+                  title={t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}
                   onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintDirect(); }}
                 >
-                  <span>{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
-                  <small>{t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}</small>
+                  <span className="odv-prd-menuItemIcon material-icons" aria-hidden="true">print</span>
+                  <span className="odv-prd-menuItemCopy">
+                    <span className="odv-prd-menuItemTitle">{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
+                    <small>{t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}</small>
+                  </span>
                 </button>
                 {ctrl.pdfPrintEnabled ? (
                   <button
                     type="button"
                     role="menuitem"
                     className="odv-prd-splitMenuItem"
+                    title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
                     onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintPdf(); }}
                   >
-                    <span className="odv-prd-menuItemTitle">
-                      {t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}
-                      <span
-                        className="material-icons odv-prd-infoIcon"
-                        aria-hidden="true"
-                        title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
-                      >info</span>
+                    <span className="odv-prd-menuItemIcon material-icons" aria-hidden="true">picture_as_pdf</span>
+                    <span className="odv-prd-menuItemCopy">
+                      <span className="odv-prd-menuItemTitle">
+                        {t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}
+                        <span
+                          className="material-icons odv-prd-infoIcon"
+                          aria-hidden="true"
+                        >info</span>
+                      </span>
+                      <small>{t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.' })}</small>
                     </span>
-                    <small>{t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.' })}</small>
                   </button>
                 ) : null}
               </div>

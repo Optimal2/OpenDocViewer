@@ -236,8 +236,8 @@
     "pdfProgress": {
       "downloadTitle": "Skapar PDF",
       "printTitle": "Förbereder säker utskrift",
-      "body": "Genererat {{current}} av {{total}} sidor.",
-      "error": "PDF-generering misslyckades: {{error}}"
+      "body": "Genererat {current} av {total} sidor.",
+      "error": "PDF-generering misslyckades: {error}"
     }
   },
   "print": {
