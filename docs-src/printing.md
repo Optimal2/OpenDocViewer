@@ -221,3 +221,29 @@ those values.
 
 Newlines in configured templates are rendered as print line breaks. Token values are HTML-escaped
 before insertion. Admin-authored template markup, such as `<strong>`, is preserved.
+
+## Warm print iframe
+
+OpenDocViewer can prewarm a hidden print iframe after all pages are loaded. The warm frame reuses the existing original page image blob URLs, loads them in natural session order, and keeps the iframe ready for compatible print jobs. At print time OpenDocViewer updates dynamic header/footer text, toggles included pages, and invokes `print()` without rebuilding and reloading the whole print DOM.
+
+The warm frame is deliberately limited to order-preserving original-page jobs. It is used for:
+
+- all pages in the session
+- all pages in the active selection, when the selected pages are already in natural order and unique
+- simple ascending ranges
+- custom page lists that are strictly increasing and contain no duplicates
+
+It is not used for active-page printing, compare active-page printing, descending ranges, reordered custom lists, or repeated pages. Those jobs continue to use the regular robust print path because active-page printing may include transient image edits and reordered jobs cannot be represented by hiding pages in a natural-order iframe.
+
+Configuration is intentionally small and reuses the existing document-loading memory/performance profile:
+
+```js
+print: {
+  prewarmIframe: {
+    enabled: 'auto', // 'auto', true, or false
+    maxPages: 0     // 0 = use existing documentLoading thresholds
+  }
+}
+```
+
+A small LED-style status indicator on the toolbar print button shows whether the warm print cache is inactive, being prepared, ready, or using fallback.

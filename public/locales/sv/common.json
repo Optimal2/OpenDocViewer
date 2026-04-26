@@ -80,7 +80,14 @@
     "resetAdjustments": "Återställ justeringar",
     "resetBrightness": "Återställ ljusstyrka",
     "resetContrast": "Återställ kontrast",
-    "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa."
+    "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa.",
+    "printPrewarm": {
+      "off": "Utskriftscache är inaktiv",
+      "pending": "Förbereder utskriftscache…",
+      "ready": "Utskriftscache klar",
+      "warning": "Utskriftscache använder fallback",
+      "error": "Utskriftscache misslyckades"
+    }
   },
   "printDialog": {
     "title": "Skriv ut",

@@ -80,7 +80,14 @@
     "resetAdjustments": "Reset adjustments",
     "resetBrightness": "Reset brightness",
     "resetContrast": "Reset contrast",
-    "printDisabledLoading": "Printing becomes available when all pages are fully loaded."
+    "printDisabledLoading": "Printing becomes available when all pages are fully loaded.",
+    "printPrewarm": {
+      "off": "Print cache inactive",
+      "pending": "Preparing print cache…",
+      "ready": "Print cache ready",
+      "warning": "Print cache fallback active",
+      "error": "Print cache failed"
+    }
   },
   "printDialog": {
     "title": "Print",

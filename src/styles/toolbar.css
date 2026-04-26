@@ -559,3 +559,71 @@
 .toggle-collapse .material-icons { font-size: 1.08rem; }
 .toggle-collapse.collapsed .material-icons { transform: rotate(180deg); }
 .toggle-collapse.expanded .material-icons { transform: rotate(0); }
+
+/* Reusable LED-style status indicator. */
+.odv-status-led {
+  --odv-led-size: 7px;
+  --odv-led-base: #6b7280;
+  --odv-led-edge: rgba(0,0,0,.55);
+  --odv-led-glow: rgba(107,114,128,.25);
+  position: relative;
+  display: inline-block;
+  width: var(--odv-led-size);
+  height: var(--odv-led-size);
+  border-radius: 999px;
+  background:
+    radial-gradient(circle at 32% 28%, rgba(255,255,255,.95) 0 12%, rgba(255,255,255,.35) 13% 24%, transparent 25%),
+    radial-gradient(circle at 52% 58%, color-mix(in srgb, var(--odv-led-base), white 18%) 0 35%, var(--odv-led-base) 58%, color-mix(in srgb, var(--odv-led-base), black 38%) 100%);
+  box-shadow:
+    inset 0 0 0 1px var(--odv-led-edge),
+    0 0 0 1px rgba(255,255,255,.18),
+    0 0 4px var(--odv-led-glow);
+  vertical-align: middle;
+}
+.odv-status-led--xs { --odv-led-size: 6px; }
+.odv-status-led--sm { --odv-led-size: 7px; }
+.odv-status-led--md { --odv-led-size: 9px; }
+.odv-status-led--off {
+  --odv-led-base: #4b5563;
+  --odv-led-edge: rgba(0,0,0,.50);
+  --odv-led-glow: rgba(75,85,99,.10);
+  opacity: .42;
+  filter: saturate(.55);
+}
+.odv-status-led--pending,
+.odv-status-led--active {
+  --odv-led-base: #f59e0b;
+  --odv-led-edge: rgba(91,52,0,.68);
+  --odv-led-glow: rgba(245,158,11,.45);
+  animation: odv-led-pulse 1.35s ease-in-out infinite;
+}
+.odv-status-led--ready {
+  --odv-led-base: #22c55e;
+  --odv-led-edge: rgba(6,78,37,.72);
+  --odv-led-glow: rgba(34,197,94,.42);
+}
+.odv-status-led--warning {
+  --odv-led-base: #fb923c;
+  --odv-led-edge: rgba(124,45,18,.70);
+  --odv-led-glow: rgba(251,146,60,.42);
+}
+.odv-status-led--error {
+  --odv-led-base: #ef4444;
+  --odv-led-edge: rgba(127,29,29,.72);
+  --odv-led-glow: rgba(239,68,68,.45);
+}
+.odv-btn--with-status-led { position: relative; }
+.odv-toolbar-print-led {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  pointer-events: none;
+}
+@keyframes odv-led-pulse {
+  0%, 100% { opacity: .68; box-shadow: inset 0 0 0 1px var(--odv-led-edge), 0 0 0 1px rgba(255,255,255,.18), 0 0 3px var(--odv-led-glow); }
+  50% { opacity: 1; box-shadow: inset 0 0 0 1px var(--odv-led-edge), 0 0 0 1px rgba(255,255,255,.22), 0 0 7px var(--odv-led-glow); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .odv-status-led--pending,
+  .odv-status-led--active { animation: none; }
+}

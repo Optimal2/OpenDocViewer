@@ -176,6 +176,10 @@ Configuration surface:
 ```js
 print: {
   preparationNoticeThresholdPages: 200, // 0 disables the notice
+  prewarmIframe: {
+    enabled: 'auto', // 'auto', true, or false
+    maxPages: 0     // 0 = reuse existing documentLoading thresholds
+  },
   format: {
     enabled: true,
     useValueForOutput: true, // true=value on print, false=localized label on print
@@ -387,3 +391,7 @@ Conditional syntax:
 ```
 
 The configured block is rendered only when the first token resolves to a non-empty value.
+
+### Warm print iframe
+
+`print.prewarmIframe.enabled` controls the optional hidden print iframe used to speed up compatible multi-page print jobs. `auto` follows the existing `documentLoading` and memory-pressure profile, `true` forces eligibility unless hard memory pressure is detected, and `false` disables the optimization. `maxPages: 0` means that OpenDocViewer reuses existing document-loading thresholds instead of adding a separate print-specific page limit.
