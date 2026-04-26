@@ -253,8 +253,11 @@ function resolveBundleDocumentForPage(bundle, pageInfo) {
     if (byId) return byId;
   }
 
+  // documentNumber is normalized as a 1-based document ordinal throughout the print
+  // token pipeline. Values below 1 mean "no document ordinal supplied" and are not
+  // interpreted as zero-based array indexes.
   const documentNumber = Math.floor(Number(pageInfo?.documentNumber) || 0);
-  if (documentNumber > 0 && documentNumber <= documents.length) return documents[documentNumber - 1];
+  if (documentNumber >= 1 && documentNumber <= documents.length) return documents[documentNumber - 1];
   return null;
 }
 
@@ -388,7 +391,10 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const metadata = buildMetadataTokenMap(bundleDocument);
   const metadataAlias = isPlainObject(bundleDocument.metadataDetails) ? bundleDocument.metadataDetails : {};
   const documentId = optionalText(pageInfo?.documentId) || optionalText(bundleDocument.documentId) || '';
-  const documentNumber = Math.max(0, Math.floor(Number(pageInfo?.documentNumber) || 0));
+  // Keep ordinal normalization consistent with resolveBundleDocumentForPage():
+  // documentNumber is 1-based when present; 0 means absent/unknown.
+  const rawDocumentNumber = Math.floor(Number(pageInfo?.documentNumber) || 0);
+  const documentNumber = rawDocumentNumber >= 1 ? rawDocumentNumber : 0;
   const totalDocuments = Math.max(0, Math.floor(Number(pageInfo?.totalDocuments) || 0));
   const documentPageNumber = Math.max(0, Math.floor(Number(pageInfo?.documentPageNumber) || 0));
   const documentPageCount = Math.max(0, Math.floor(Number(pageInfo?.documentPageCount) || 0));
@@ -404,6 +410,8 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     documentPageNumber: documentPageNumber || '',
     documentPageCount: documentPageCount || '',
     pageCount: documentPageCount || fileCount || '',
+    // Convenience title fallback for legacy templates and generic deployments:
+    // prefer explicit title, then host-provided name, then stable document id.
     title: optionalText(bundleDocument.title) || optionalText(bundleDocument.name) || documentId || '',
     metadata,
     metadataAlias,

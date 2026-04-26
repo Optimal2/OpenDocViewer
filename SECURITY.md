@@ -3,16 +3,17 @@
 
 ## Supported Versions
 
-**OpenDocViewer v1.6.0** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v1.7.0** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v1.5.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v1.6.0 to get the latest supported viewer functionality, metadata tooling, documentation/help model, and theme/runtime refinements.
+**OpenDocViewer v1.6.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v1.7.0 to get the latest supported print controls, metadata-aware print templating, safer print layout behavior, i18n hardening, documentation updates, and dependency refreshes.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.6.0   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 1.5.0   | :white_check_mark: | Still supported, but superseded by v1.6.0 and not the preferred target for new deployments |
+| 1.7.0   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 1.6.0   | :white_check_mark: | Still supported, but superseded by v1.7.0 and not the preferred target for new deployments |
+| 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.4.1   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.4.0   | :x: | Unsupported |
 | 1.3.1   | :x: | Unsupported |
@@ -28,6 +29,19 @@ Earlier releases are retained for historical reference only and are **not recomm
 
 The eight most recent releases are listed below for operational context.
 
+### OpenDocViewer v1.7.0
+OpenDocViewer v1.7.0 extends the v1.6.0 metadata-aware viewer baseline with a substantially richer and safer print customization model.
+
+From a print-control perspective this release adds a configurable copy-marker workflow for physical print output. Deployments can expose a user-controlled copy watermark checkbox, default it on or off, hide it while forcing the configured marker, localize display labels separately from physical print output, and use `printValue` for clean print text while keeping longer UI instructions in the print dialog. Normal printing remains unmarked by default unless the deployment explicitly configures otherwise.
+
+From a print-template perspective this release adds metadata-aware header and footer templates with `{{...}}` tokens, conditional blocks that suppress empty labels, page-specific document metadata, session-level tokens, structured reason/format selection tokens, metadata alias tokens, newline support, and a dedicated print footer. Token values are escaped before insertion while trusted administrator-authored template markup remains supported.
+
+From a print-layout perspective the default header/footer model now reserves page space instead of drawing over the original page image. This avoids obscuring document content while still allowing explicit legacy overlay behavior through configuration. The copy watermark has also been adjusted to be larger, more transparent, and more visible across both light and dark source pages by combining low-opacity text with contrast stroke/glow styling.
+
+From a maintainability and hardening perspective this release fixes JSDoc parser issues in the print modules, documents the print token and layout model, tightens i18n path/default handling, improves robustness around `import.meta`/window access, adds safer i18n path segment handling, updates print-related logging payloads, and refreshes selected dependencies including `i18next-http-backend` and `postcss`.
+
+OpenDocViewer v1.7.0 is recommended going forward because it preserves the v1.6.0 document metadata functionality while improving print auditability, deployment-specific configurability, documentation clarity, and CI/documentation reliability.
+
 ### OpenDocViewer v1.6.0
 OpenDocViewer v1.6.0 extends the document-aware viewer baseline from v1.5.0 with richer metadata handling, improved operator-facing overlays, configurable HTML-based help content, and broader runtime/UI refinement.
 
@@ -37,7 +51,7 @@ From a viewer workflow perspective it adds document metadata overlays from page 
 
 This release also reintroduces theme support in a more controlled form with explicit Normal / Light / Dark modes, persisted user preference handling, and broader theme-token cleanup across dialogs and interactive surfaces so the viewer remains usable in all supported themes.
 
-OpenDocViewer v1.6.0 is recommended going forward because it keeps the v1.5.0 security/dependency baseline while improving metadata transparency, site-local documentation flexibility, usability, and long-term integration maintainability.
+v1.6.0 remains supported, but v1.7.0 is preferred for current deployments.
 
 ### OpenDocViewer v1.5.0
 OpenDocViewer v1.5.0 is the consolidated production baseline that combines the latest supported viewer workflow with the current security/dependency baseline.
@@ -46,7 +60,7 @@ From a security perspective this release is the first one in the current line th
 
 From a functional/support perspective it also introduces the document-aware viewer model: portable-document grouping, selection-aware filtering, compare-aware modifier targeting, unified print-dialog flow, configurable large-print preparation notices, persisted language preferences, and synchronized runtime/sample configuration coverage.
 
-v1.5.0 remains supported, but v1.6.0 is preferred for current deployments.
+v1.5.0 is superseded by v1.7.0 and is no longer recommended for current deployments.
 
 ### OpenDocViewer v1.4.1
 OpenDocViewer v1.4.1 is a targeted patch release focused on maintenance and release hygiene.
@@ -79,11 +93,6 @@ This release changes shortcut routing so viewer commands continue to work when f
 OpenDocViewer v1.1.0 improves print integration, keyboard usability, and document loading feedback.
 
 This release adds configurable handling for Ctrl/Cmd+P, introduces a dedicated print shortcut on 0, fixes an issue where shortcut 6 could override numeric input in toolbar fields, and makes ongoing page loading more visible in the navigation UI. It also updates SECURITY.md and refines runtime configuration examples to better reflect the current application behavior.
-
-### OpenDocViewer v1.0.1
-OpenDocViewer v1.0.1 improves print header reliability and overall print-flow robustness.
-
-This release fixes a critical issue introduced in v1.0.0 where print headers did not render correctly, and strengthens the print pipeline with safer DOM handling and improved readiness checks before printing.
 
 ## Reporting a Vulnerability
 

@@ -133,9 +133,9 @@ print: {
     watermark: {
       enabled: true,
       showOption: true,
-      defaultChecked: false
-          // Optional trusted CSS appended to the isolated print iframe watermark rule.
-          css: ''
+      defaultChecked: false,
+      // Optional trusted CSS appended to the isolated print iframe watermark rule.
+      css: ''
     },
     options: [
       {
@@ -152,9 +152,8 @@ print: {
 Behavior:
 
 - `watermark.showOption: true` shows the checkbox to the user.
-- `watermark.defaultChecked: false
-          // Optional trusted CSS appended to the isolated print iframe watermark rule.
-          css: ''` makes normal print the default.
+- `watermark.defaultChecked: false` makes normal print the default.
+- `watermark.css` can append trusted site-local CSS for the watermark element inside the isolated print iframe.
 - `watermark.showOption: false` and `watermark.defaultChecked: true` forces the configured marker without allowing the user to disable it.
 - `printValue` is the preferred output text for print/header/footer tokens and may be localized.
 - If `printValue` is missing, legacy `useValueForOutput` decides whether `value` or localized `label` is used.

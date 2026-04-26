@@ -181,7 +181,12 @@ print: {
     useValueForOutput: true, // true=value on print, false=localized label on print
     default: '',
     headerMarker: { enabled: false },
-    watermark: { enabled: true },
+    watermark: {
+      enabled: true,
+      showOption: true,
+      defaultChecked: false,
+      css: ''
+    },
     options: [
       { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
       { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
