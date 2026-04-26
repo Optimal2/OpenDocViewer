@@ -91,21 +91,31 @@
       // Use 0 to disable the notice.
       preparationNoticeThresholdPages: 200,
 
-      // Optional print format marker. Selecting a non-empty format adds the configured text to
-      // the printed page header and as a semi-transparent watermark on every printed page.
+      // Optional copy marker. The dialog uses a checkbox, not a format dropdown.
+      // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {
         enabled: true,
 
-        // true  -> use option.value on the physical print; option.label is only UI text
-        // false -> use the localized option.label on the physical print when available
+        // true  -> use option.value on physical print output when option.printValue is missing
+        // false -> use the localized option.label on physical print output when option.printValue is missing
         useValueForOutput: true,
 
-        default: '',
         headerMarker: { enabled: false },
-        watermark: { enabled: true },
+        watermark: {
+          enabled: true,
+          // true  -> show a user-controlled checkbox in the print dialog
+          // false -> hide the checkbox; combine with defaultChecked=true for forced copy watermark
+          showOption: true,
+          // false -> normal print by default; user must explicitly choose copy watermark
+          defaultChecked: false
+        },
         options: [
-          { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
-          { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+          {
+            value: 'KOPIA',
+            label: { en: 'Copy', sv: 'Kopia' },
+            checkboxLabel: { en: 'Add copy watermark', sv: 'Lägg till KOPIA-vattenstämpel' },
+            printValue: { en: 'COPY', sv: 'KOPIA' }
+          }
         ]
       }
     },
@@ -222,15 +232,17 @@
       heightPx: 40,
       applyTo: 'all',
       // Supported tokens: {{date}}, {{time}}, {{page}}, {{totalPages}}, {{reason}},
-      // {{forWhom}}, {{printFormat}}, {{isCopy}}, {{UserId}}, {{session.userId}},
-      // {{doc.documentId}}, {{doc.title}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}, etc.
+      // {{reasonSelection.output}}, {{reasonSelection.label.sv}}, {{reasonSelection.printValue.sv}},
+      // {{forWhom}}, {{printFormat}}, {{printFormatSelection.output}}, {{printFormatSelection.label.sv}},
+      // {{printFormatSelection.printValue.sv}}, {{isCopy}}, {{UserId}}, {{session.userId}},
+      // {{doc.documentId}}, {{doc.documentPageNumber}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}, etc.
       // Conditional block syntax:
       //   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
       // The block is omitted completely when UserId is null/empty/missing.
       // Newlines in the template are rendered as print line breaks.
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
       },
       css: `
 .odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
@@ -243,13 +255,13 @@
     // Print footer
     // =========================================================================
     printFooter: {
-      enabled: false,
+      enabled: true,
       position: 'bottom',
       heightPx: 28,
       applyTo: 'all',
       template: {
-        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}} | "]]Page {{page}}/{{totalPages}}',
-        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (page: {{doc.documentPageNumber}})"]]',
+        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
       },
       css: `
 .odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;

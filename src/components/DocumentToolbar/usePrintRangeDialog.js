@@ -45,6 +45,63 @@ export function safeRegex(pattern, flags) {
   try { return new RegExp(pattern, flags || ''); } catch { return null; }
 }
 
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function hasTextValue(value) {
+  if (value === undefined || value === null) return false;
+  const text = String(value).trim();
+  if (!text) return false;
+  const lowered = text.toLowerCase();
+  return lowered !== 'null' && lowered !== 'undefined';
+}
+
+/**
+ * Resolve the string that should be used on physical print/log output for an option.
+ * `printValue` may be localized and is preferred over legacy value/label behavior.
+ * @param {*} option
+ * @param {*} i18n
+ * @param {boolean} useValueForOutput
+ * @returns {string}
+ */
+function resolveOptionPrintText(option, i18n, useValueForOutput) {
+  if (!option) return '';
+  if (option.printValue !== undefined) {
+    return resolveLocalizedValue(option.printValue, i18n) || String(option.value ?? '');
+  }
+  if (option.output !== undefined) {
+    return resolveLocalizedValue(option.output, i18n) || String(option.value ?? '');
+  }
+  if (option.printLabel !== undefined) {
+    return resolveLocalizedValue(option.printLabel, i18n) || String(option.value ?? '');
+  }
+  if (useValueForOutput) return String(option.value ?? '');
+  return resolveOptionLabel(option, i18n) || String(option.value ?? '');
+}
+
+/**
+ * Build token-friendly details for the selected option without forcing templates to use list indexes.
+ * @param {*} option
+ * @param {*} i18n
+ * @param {string} output
+ * @param {Object=} extra
+ * @returns {Object}
+ */
+function buildSelectedOptionDetails(option, i18n, output, extra = {}) {
+  const value = option?.value == null ? '' : String(option.value);
+  return {
+    value,
+    label: option?.label ?? value,
+    uiLabel: resolveOptionLabel(option || { value }, i18n) || value,
+    printValue: option?.printValue ?? option?.output ?? option?.printLabel ?? value,
+    output: output || '',
+    selectedText: output || '',
+    option: option || null,
+    ...extra,
+  };
+}
+
 const ODV_PRINT_CSS = `
 @media print {
   @page { margin: 0; size: A4 portrait; }
@@ -124,10 +181,16 @@ export function usePrintRangeController({
   const printFormatCfg = cfg?.print?.format || {};
   const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
   const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
-  const defaultPrintFormat = printFormatCfg?.default ?? (hasPrintFormatOptions ? (printFormatOptions[0]?.value ?? '') : '');
+  const nonEmptyPrintFormatOptions = printFormatOptions.filter((option) => hasTextValue(option?.value));
+  const checkboxPrintFormatOption = nonEmptyPrintFormatOptions[0] || null;
+  const watermarkCfg = printFormatCfg?.watermark || {};
+  const watermarkEnabled = watermarkCfg?.enabled !== false;
+  const showPrintFormatCheckbox = !!hasPrintFormatOptions && !!checkboxPrintFormatOption && watermarkEnabled && watermarkCfg?.showOption !== false;
+  const forcePrintFormatActive = !!hasPrintFormatOptions && !!checkboxPrintFormatOption && watermarkEnabled && watermarkCfg?.showOption === false && watermarkCfg?.defaultChecked === true;
+  const defaultPrintFormatChecked = !!checkboxPrintFormatOption && watermarkEnabled && (forcePrintFormatActive || watermarkCfg?.defaultChecked === true);
   const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showUserSection = !!(showReason || showForWhom || hasPrintFormatOptions);
+  const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox);
   const restrictToActivePage = !!isDocumentLoading;
   const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
   const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
@@ -158,7 +221,7 @@ export function usePrintRangeController({
   const extraMax = Number.isFinite(extraCfg?.maxLen) ? extraCfg.maxLen : undefined;
   const [extraText, setExtraText] = useState('');
   const [forWhomText, setForWhomText] = useState('');
-  const [selectedPrintFormat, setSelectedPrintFormat] = useState(defaultPrintFormat);
+  const [printFormatChecked, setPrintFormatChecked] = useState(defaultPrintFormatChecked);
 
   const [error, setError] = useState('');
   const dialogRef = useRef(/** @type {(HTMLFormElement|null)} */ (null));
@@ -172,21 +235,25 @@ export function usePrintRangeController({
   useEffect(() => { ensureODVPrintCSS(); }, []);
 
   const previousDefaultReasonRef = useRef(defaultReason);
+  const previousDefaultPrintFormatCheckedRef = useRef(defaultPrintFormatChecked);
   const wasOpenRef = useRef(false);
 
   useEffect(() => {
     if (!isOpen) {
       wasOpenRef.current = false;
       previousDefaultReasonRef.current = defaultReason;
+      previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
       return;
     }
 
     const openedNow = !wasOpenRef.current;
     const defaultReasonChanged = previousDefaultReasonRef.current !== defaultReason;
+    const defaultPrintFormatChanged = previousDefaultPrintFormatCheckedRef.current !== defaultPrintFormatChecked;
     wasOpenRef.current = true;
     previousDefaultReasonRef.current = defaultReason;
+    previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
 
-    if (!openedNow && !defaultReasonChanged) return;
+    if (!openedNow && !defaultReasonChanged && !defaultPrintFormatChanged) return;
 
     setPrintMode('active');
     setActiveScope('primary');
@@ -198,9 +265,9 @@ export function usePrintRangeController({
     setFreeReason('');
     setExtraText('');
     setForWhomText('');
-    setSelectedPrintFormat(defaultPrintFormat);
+    setPrintFormatChecked(defaultPrintFormatChecked);
     setError('');
-  }, [canPrintSelectionScope, defaultPrintFormat, defaultReason, isOpen, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintFormatChecked, defaultReason, isOpen, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -347,44 +414,51 @@ export function usePrintRangeController({
   const extraSuffixResolved = resolveLocalizedValue(extraCfg?.suffix, i18n);
   const optionLabel = useCallback((opt) => resolveOptionLabel(opt, i18n), [i18n]);
   const selectedPrintFormatOption = useMemo(() => {
-    if (!hasPrintFormatOptions) return null;
-    return printFormatOptions.find((option) => (option?.value ?? '') === (selectedPrintFormat ?? '')) || null;
-  }, [hasPrintFormatOptions, printFormatOptions, selectedPrintFormat]);
+    if (!hasPrintFormatOptions || !checkboxPrintFormatOption) return null;
+    if (!printFormatChecked && !forcePrintFormatActive) return null;
+    return checkboxPrintFormatOption;
+  }, [checkboxPrintFormatOption, forcePrintFormatActive, hasPrintFormatOptions, printFormatChecked]);
 
   /**
-   * @returns {{printFormat:(string|null), printFormatValue:(string|null)}}
+   * @returns {{printFormat:(string|null), printFormatValue:(string|null), printFormatSelection:Object}}
    */
   const composePrintFormat = useCallback(() => {
     if (!hasPrintFormatOptions || !selectedPrintFormatOption) {
-      return { printFormat: null, printFormatValue: null };
+      return { printFormat: null, printFormatValue: null, printFormatSelection: buildSelectedOptionDetails(null, i18n, '') };
     }
 
     const rawValue = selectedPrintFormatOption?.value == null ? '' : String(selectedPrintFormatOption.value);
-    const label = resolveOptionLabel(selectedPrintFormatOption, i18n);
     const useValue = printFormatCfg?.useValueForOutput !== false;
-    const text = String(useValue ? rawValue : label || rawValue).trim();
+    const text = String(resolveOptionPrintText(selectedPrintFormatOption, i18n, useValue)).trim();
 
     return {
       printFormat: text || null,
       printFormatValue: rawValue || null,
+      printFormatSelection: buildSelectedOptionDetails(selectedPrintFormatOption, i18n, text),
     };
   }, [hasPrintFormatOptions, i18n, printFormatCfg?.useValueForOutput, selectedPrintFormatOption]);
 
   /**
-   * @returns {(string|null)}
+   * @returns {{reason:(string|null), reasonSelection:Object}}
    */
   const composeReason = useCallback(() => {
-    if (!showReason) return null;
+    if (!showReason) return { reason: null, reasonSelection: buildSelectedOptionDetails(null, i18n, '') };
     if (hasOptions) {
       const rawValue = selectedReason || '';
       const outputUsesValue = reasonCfg?.useValueForOutput !== false;
-      const base = outputUsesValue ? rawValue : resolveOptionLabel(selectedOption || { value: rawValue }, i18n) || rawValue;
-      if (!needsExtra) return base || null;
+      const base = resolveOptionPrintText(selectedOption || { value: rawValue }, i18n, outputUsesValue) || rawValue;
       const txt = String(extraText || '');
-      return base + (txt ? (extraPrefixResolved + txt + extraSuffixResolved) : '');
+      const output = base + (needsExtra && txt ? (extraPrefixResolved + txt + extraSuffixResolved) : '');
+      return {
+        reason: output || null,
+        reasonSelection: buildSelectedOptionDetails(selectedOption || { value: rawValue }, i18n, output, { freeText: txt }),
+      };
     }
     const reason = String(freeReason || '').trim();
-    return reason || null;
+    return {
+      reason: reason || null,
+      reasonSelection: buildSelectedOptionDetails({ value: reason, label: reason, printValue: reason }, i18n, reason),
+    };
   }, [extraPrefixResolved, extraSuffixResolved, extraText, freeReason, hasOptions, i18n, needsExtra, reasonCfg?.useValueForOutput, selectedOption, selectedReason, showReason]);
 
   /**
@@ -395,7 +469,7 @@ export function usePrintRangeController({
     const forWhom = String(forWhomText || '').trim();
     const printFormat = composePrintFormat();
     return {
-      reason: reason && reason.length ? reason : null,
+      ...reason,
       forWhom: showForWhom ? (forWhom.length ? forWhom : null) : null,
       ...printFormat,
     };
@@ -499,8 +573,8 @@ export function usePrintRangeController({
     setCustomText,
     selectedReason,
     setSelectedReason,
-    selectedPrintFormat,
-    setSelectedPrintFormat,
+    printFormatChecked,
+    setPrintFormatChecked,
     freeReason,
     setFreeReason,
     extraText,
@@ -518,9 +592,10 @@ export function usePrintRangeController({
     sessionTotalPages,
     showUserSection,
     showReason,
-    showPrintFormat: hasPrintFormatOptions,
+    showPrintFormat: showPrintFormatCheckbox,
     printFormatCfg,
     printFormatOptions,
+    checkboxPrintFormatOption,
     showForWhom,
     reasonCfg,
     forWhomCfg,

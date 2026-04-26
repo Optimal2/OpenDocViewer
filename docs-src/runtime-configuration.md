@@ -347,14 +347,14 @@ printHeader: {
   position: 'top',
   applyTo: 'all',
   template: {
-    sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+    sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
   }
 },
 printFooter: {
   enabled: true,
   position: 'bottom',
   template: {
-    sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+    sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
   }
 }
 ```
@@ -362,8 +362,8 @@ printFooter: {
 Useful token scopes:
 
 - session-level: `{{UserId}}`, `{{SessionId}}`, `{{session.userId}}`, `{{session.id}}`
-- print-dialog: `{{reason}}`, `{{forWhom}}`
-- print format: `{{printFormat}}`, `{{isCopy}}`
+- print-dialog: `{{reason}}`, `{{reasonSelection.output}}`, `{{reasonSelection.label.sv}}`, `{{reasonSelection.printValue.sv}}`, `{{forWhom}}`
+- print format: `{{printFormat}}`, `{{printFormatSelection.output}}`, `{{printFormatSelection.label.sv}}`, `{{printFormatSelection.printValue.sv}}`, `{{isCopy}}`
 - document-level: `{{doc.documentId}}`, `{{doc.documentPageNumber}}`, `{{doc.documentPageCount}}`
 - metadata-level by field id: `{{metadata.<fieldId>}}`, for example `{{metadata.1001}}`
 - metadata aliases: `{{metadata.<alias>}}`, for example `{{metadata.patientId}}`

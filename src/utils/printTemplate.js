@@ -41,7 +41,12 @@ export function escapeHtml(s) {
       case "'": return '&#39;';
       default: return ch;
     }
-  }).replace(/___ODV_ENTITY_(\d+)___/g, (_m, index) => entities[Number(index)] || '');
+  }).replace(/___ODV_ENTITY_(\d+)___/g, (_m, index) => {
+    const numericIndex = Number(index);
+    return Number.isInteger(numericIndex) && numericIndex >= 0 && numericIndex < entities.length
+      ? entities[numericIndex]
+      : '';
+  });
 }
 
 /** Zero-pad helper. */
@@ -307,6 +312,8 @@ function tryGetDocumentMetadata(handle) {
  * @param {string} printFormat
  * @param {Object=} options
  * @param {Object=} options.bundle
+ * @param {Object=} options.reasonSelection
+ * @param {Object=} options.printFormatSelection
  * @returns {Object}
  */
 export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', options = {}) {
@@ -329,6 +336,8 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
   const mm = z2(now.getMinutes());
   const printFormatText = valueToText(printFormat);
   const sessionAliases = buildSessionTokenAliases(session);
+  const reasonSelection = isPlainObject(options?.reasonSelection) ? options.reasonSelection : {};
+  const printFormatSelection = isPlainObject(options?.printFormatSelection) ? options.printFormatSelection : {};
 
   return {
     ...sessionAliases,
@@ -336,8 +345,12 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
     date: y + '-' + m + '-' + d,
     time: hh + ':' + mm,
     reason: reason || '',
+    reasonSelection,
+    reasonOption: reasonSelection,
     forWhom: forWhom || '',
     printFormat: printFormatText,
+    printFormatSelection,
+    printFormatOption: printFormatSelection,
     isCopy: printFormatText,
     user,
     session,
@@ -362,9 +375,9 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const metadataAlias = isPlainObject(bundleDocument.metadataDetails) ? bundleDocument.metadataDetails : {};
   const documentId = optionalText(pageInfo?.documentId) || optionalText(bundleDocument.documentId) || '';
   const documentNumber = Math.max(0, Math.floor(Number(pageInfo?.documentNumber) || 0));
-  const totalDocuments = Math.max(documentNumber, Math.floor(Number(pageInfo?.totalDocuments) || 0));
+  const totalDocuments = Math.max(0, Math.floor(Number(pageInfo?.totalDocuments) || 0));
   const documentPageNumber = Math.max(0, Math.floor(Number(pageInfo?.documentPageNumber) || 0));
-  const documentPageCount = Math.max(documentPageNumber, Math.floor(Number(pageInfo?.documentPageCount) || 0));
+  const documentPageCount = Math.max(0, Math.floor(Number(pageInfo?.documentPageCount) || 0));
   const fileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
 
   const doc = {

@@ -207,8 +207,9 @@
       "dismiss": "Close"
     },
     "printFormat": {
-      "label": "Print format",
-      "hint": "Selected print format can add configured header text and watermark to the printed pages."
+      "label": "Add copy watermark",
+      "hint": "When selected, the configured copy marker is available to header/footer templates and is printed as a watermark.",
+      "checkboxLabel": "Add copy watermark"
     }
   },
   "print": {

@@ -166,6 +166,9 @@
 
 .odv-prd-label { display: flex; align-items: center; gap: 8px; }
 .odv-prd-labelBlock { display: flex; flex-direction: column; gap: 6px; }
+.odv-prd-checkRow { display: grid; grid-template-columns: auto 1fr; gap: 6px 10px; align-items: start; font-size: 14px; }
+.odv-prd-checkRow input[type="checkbox"] { margin-top: 2px; }
+.odv-prd-checkRow .odv-prd-hint { grid-column: 2; }
 
 .odv-prd-fieldCol { display: grid; gap: 14px; margin-top: 4px; }
 
@@ -511,7 +514,8 @@
   margin-top: 18px;
 }
 
-.odv-prd-labelBlock-wide {
+.odv-prd-labelBlock-wide,
+.odv-prd-checkRow-wide {
   width: 100%;
 }
 
