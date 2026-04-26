@@ -197,29 +197,26 @@ export default function PrintRangeDialog({
         <div className="odv-prd-content">
           <section className="odv-prd-card odv-prd-card-first" aria-labelledby="odv-prd-method-header">
             <h4 id="odv-prd-method-header" className="odv-prd-sectionHeader">{t('printDialog.methodHeader', { defaultValue: 'Print method' })}</h4>
-            <div className="odv-prd-fieldCol">
-              <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
-                <span>{t('printDialog.methodLabel', { defaultValue: 'Method' })}</span>
-                <select
-                  className="odv-prd-select odv-prd-selectWide"
-                  value={ctrl.printMode}
-                  onChange={(event) => ctrl.setPrintMode(event.target.value)}
-                  disabled={ctrl.restrictToActivePage}
-                  aria-label={t('printDialog.methodLabel', { defaultValue: 'Method' })}
-                >
-                  {modeOptions.map((option) => (
-                    <option key={option.value} value={option.value}>{option.label}</option>
-                  ))}
-                </select>
-              </label>
+            <div className="odv-prd-methodRow">
+              <select
+                className="odv-prd-select odv-prd-methodSelect"
+                value={ctrl.printMode}
+                onChange={(event) => ctrl.setPrintMode(event.target.value)}
+                disabled={ctrl.restrictToActivePage}
+                aria-label={t('printDialog.methodLabel', { defaultValue: 'Method' })}
+              >
+                {modeOptions.map((option) => (
+                  <option key={option.value} value={option.value}>{option.label}</option>
+                ))}
+              </select>
 
-              <div className="odv-prd-summary" role="status" aria-live="polite">
+              <div className="odv-prd-summary odv-prd-methodSummary" role="status" aria-live="polite">
                 {summaryText}
               </div>
-              {ctrl.restrictToActivePage ? (
-                <div className="odv-prd-hint" role="note">{ctrl.loadingHint}</div>
-              ) : null}
             </div>
+            {ctrl.restrictToActivePage ? (
+              <div className="odv-prd-hint" role="note">{ctrl.loadingHint}</div>
+            ) : null}
           </section>
 
           {showPagesSection ? (
@@ -470,57 +467,41 @@ export default function PrintRangeDialog({
               {t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' })}
             </button>
           ) : null}
-          <div className="odv-prd-splitAction" ref={printMenuRef}>
+          <div className="odv-prd-printActionMenu" ref={printMenuRef}>
             <button
               type="button"
-              className="odv-prd-action primary odv-prd-splitAction-main"
-              onClick={ctrl.submitPrintDirect}
-            >
-              {t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}
-            </button>
-            <button
-              type="button"
-              className="odv-prd-action primary odv-prd-splitAction-toggle"
+              className="odv-prd-action secondary odv-prd-menuButton"
               aria-haspopup="menu"
               aria-expanded={isPrintMenuOpen}
               aria-label={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
               title={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
               onClick={() => setIsPrintMenuOpen((value) => !value)}
             >
+              <span>{t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}</span>
               <span className="material-icons" aria-hidden="true">expand_more</span>
             </button>
             {isPrintMenuOpen ? (
-              <div className="odv-prd-splitMenu" role="menu">
+              <div className="odv-prd-printMenu" role="menu">
                 <button
                   type="button"
                   role="menuitem"
-                  className="odv-prd-splitMenuItem"
+                  className="odv-prd-printMenuItem"
                   title={t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' })}
                   onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintDirect(); }}
                 >
-                  <span className="odv-prd-menuItemCopy">
-                    <span className="odv-prd-menuItemTitle">{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
-                    <small>{t('printDialog.output.direct.hint', { defaultValue: 'Uses the browser print preview. Browser orientation applies to the whole job.' })}</small>
-                  </span>
+                  <span className="odv-prd-printMenuTitle">{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
+                  <span className="odv-prd-printMenuHint">{t('printDialog.output.direct.hint', { defaultValue: 'Uses the browser print preview. Browser orientation applies to the whole job.' })}</span>
                 </button>
                 {ctrl.pdfPrintEnabled ? (
                   <button
                     type="button"
                     role="menuitem"
-                    className="odv-prd-splitMenuItem"
+                    className="odv-prd-printMenuItem"
                     title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' })}
                     onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintPdf(); }}
                   >
-                    <span className="odv-prd-menuItemCopy">
-                      <span className="odv-prd-menuItemTitle">
-                        {t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}
-                        <span
-                          className="material-icons odv-prd-infoIcon"
-                          aria-hidden="true"
-                        >info</span>
-                      </span>
-                      <small>{t('printDialog.output.safe.hint', { defaultValue: 'Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.' })}</small>
-                    </span>
+                    <span className="odv-prd-printMenuTitle">{t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}</span>
+                    <span className="odv-prd-printMenuHint">{t('printDialog.output.safe.hint', { defaultValue: 'Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.' })}</span>
                   </button>
                 ) : null}
               </div>

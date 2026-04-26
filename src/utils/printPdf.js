@@ -152,7 +152,11 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
     try {
       pdf.addImage(img, format, x, y, width, height, undefined, 'FAST');
       return;
-    } catch {}
+    } catch (error) {
+      // jsPDF accepts different image inputs depending on browser and source format.
+      // Try the next supported format before falling back to canvas conversion.
+      logger.debug('PDF addImage attempt failed', { format, error: String(error?.message || error) });
+    }
   }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) throw new Error('Unable to add image to generated PDF.');
@@ -199,17 +203,38 @@ function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize) {
 function drawWatermark(pdf, text, pageWidth, pageHeight) {
   const clean = String(text || '').trim();
   if (!clean) return;
-  const fontSize = Math.max(52, Math.min(pageWidth, pageHeight) * 0.14);
+  const fontSize = Math.max(70, Math.min(pageWidth, pageHeight) * 0.19);
   const x = pageWidth / 2;
   const y = pageHeight / 2;
   pdf.setFont('helvetica', 'bold');
   pdf.setFontSize(fontSize);
-  // jsPDF has limited alpha support across versions. Draw a light text and a darker offset text
-  // to preserve contrast on both bright and dark page images without depending on advanced PDF GStates.
-  pdf.setTextColor(235, 235, 235);
+
+  let restoreGState = false;
+  try {
+    if (typeof pdf.GState === 'function' && typeof pdf.setGState === 'function') {
+      pdf.setGState(new pdf.GState({ opacity: 0.18 }));
+      restoreGState = true;
+    }
+  } catch (error) {
+    // Older jsPDF builds can lack GState support. The fallback colors below still keep the
+    // watermark visible without making PDF generation fail.
+    logger.debug('PDF watermark opacity setup skipped', { error: String(error?.message || error) });
+  }
+
+  // Match the HTML print watermark as closely as jsPDF allows: large, rotated, light fill
+  // with a darker contrast layer so it remains visible on both bright and dark page images.
+  pdf.setTextColor(255, 255, 255);
   pdf.text(clean, x, y, { align: 'center', angle: -32 });
-  pdf.setTextColor(80, 80, 80);
-  pdf.text(clean, x + 1.2, y + 1.2, { align: 'center', angle: -32 });
+  pdf.setTextColor(0, 0, 0);
+  pdf.text(clean, x + 1.4, y + 1.4, { align: 'center', angle: -32 });
+
+  if (restoreGState) {
+    try {
+      pdf.setGState(new pdf.GState({ opacity: 1 }));
+    } catch (error) {
+      logger.debug('PDF watermark opacity restore skipped', { error: String(error?.message || error) });
+    }
+  }
 }
 
 /**
@@ -232,7 +257,10 @@ function makeTokenContext(options) {
 function reportProgress(options, event) {
   try {
     if (typeof options?.onProgress === 'function') options.onProgress(event);
-  } catch {}
+  } catch (error) {
+    // Progress reporting is best-effort UI feedback only; never fail the actual PDF job.
+    logger.debug('PDF progress callback failed', { error: String(error?.message || error) });
+  }
 }
 
 /**
@@ -250,7 +278,8 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const headerReservePt = Math.max(0, asNumber(pdfCfg.headerReservePt) || 18);
   const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
   const textFontSize = Math.max(5, asNumber(pdfCfg.textFontSize) || 7);
-  const imageFallbackQuality = Number.isFinite(Number(pdfCfg.imageFallbackQuality)) ? Number(pdfCfg.imageFallbackQuality) : 0.9;
+  const rawImageFallbackQuality = Number(pdfCfg.imageFallbackQuality);
+  const imageFallbackQuality = Number.isFinite(rawImageFallbackQuality) ? rawImageFallbackQuality : 0.9;
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
@@ -326,7 +355,11 @@ export function downloadPdfBlob(blob, filename = DEFAULT_PDF_FILENAME) {
   a.download = filename || DEFAULT_PDF_FILENAME;
   document.body.appendChild(a);
   a.click();
-  try { a.remove(); } catch {}
+  try {
+    a.remove();
+  } catch (error) {
+    logger.debug('PDF download anchor cleanup failed', { error: String(error?.message || error) });
+  }
   window.setTimeout(() => URL.revokeObjectURL(url), 30000);
 }
 
@@ -355,8 +388,16 @@ export function printPdfBlob(blob) {
     if (cleaned) return;
     cleaned = true;
     window.setTimeout(() => {
-      try { frame.remove(); } catch {}
-      try { URL.revokeObjectURL(url); } catch {}
+      try {
+        frame.remove();
+      } catch (error) {
+        logger.debug('PDF print iframe cleanup failed', { error: String(error?.message || error) });
+      }
+      try {
+        URL.revokeObjectURL(url);
+      } catch (error) {
+        logger.debug('PDF print object URL cleanup failed', { error: String(error?.message || error) });
+      }
     }, Math.max(0, delayMs));
   };
   const scheduleFallbackCleanup = () => {
@@ -370,11 +411,24 @@ export function printPdfBlob(blob) {
   const invokePrint = () => {
     if (printed) return;
     printed = true;
-    try { frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true }); } catch {}
-    try { window.addEventListener('afterprint', afterPrint, { once: true }); } catch {}
+    try {
+      frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true });
+    } catch (error) {
+      logger.debug('PDF iframe afterprint listener setup failed', { error: String(error?.message || error) });
+    }
+    try {
+      window.addEventListener('afterprint', afterPrint, { once: true });
+    } catch (error) {
+      logger.debug('Window afterprint listener setup failed', { error: String(error?.message || error) });
+    }
     window.setTimeout(() => {
-      try { frame.contentWindow?.focus?.(); frame.contentWindow?.print?.(); }
-      catch (error) { logger.warn('Generated PDF print invocation failed', { error: String(error?.message || error) }); window.open(url, '_blank', 'noopener,noreferrer'); }
+      try {
+        frame.contentWindow?.focus?.();
+        frame.contentWindow?.print?.();
+      } catch (error) {
+        logger.warn('Generated PDF print invocation failed', { error: String(error?.message || error) });
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
       scheduleFallbackCleanup();
     }, 250);
   };
