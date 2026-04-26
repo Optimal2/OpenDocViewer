@@ -337,7 +337,9 @@ What these knobs control:
 ## Print header/footer templates
 
 `printHeader` and `printFooter` are independent runtime-config sections. Both support localized
-`template` values, `position`, `heightPx`, `applyTo`, and trusted print-only `css`.
+`template` values, `position`, `layout`, `heightPx`, `applyTo`, and trusted print-only `css`.
+Default `layout: 'flow'` reserves page space so source content is not covered; `layout: 'overlay'`
+preserves the legacy absolute overlay behavior.
 
 Example:
 
@@ -345,6 +347,7 @@ Example:
 printHeader: {
   enabled: true,
   position: 'top',
+  layout: 'flow',
   applyTo: 'all',
   template: {
     sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
@@ -353,6 +356,7 @@ printHeader: {
 printFooter: {
   enabled: true,
   position: 'bottom',
+  layout: 'flow',
   template: {
     sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
   }

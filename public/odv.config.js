@@ -275,29 +275,23 @@
     printHeader: {
       enabled: true,
       position: "top",
-      heightPx: 40,
+      layout: "flow",
+      heightPx: 22,
       applyTo: "all",
       /**
        * Tokenized template.
-       * Supported tokens:
-       *   - {{date}}, {{time}}, {{page}}, {{totalPages}}
-       *   - {{reason}}, {{reasonSelection.output}}, {{reasonSelection.label.sv}}, {{reasonSelection.printValue.sv}}, {{forWhom}}
-       *   - {{printFormat}}, {{printFormatSelection.output}}, {{printFormatSelection.label.sv}}, {{printFormatSelection.printValue.sv}}, {{isCopy}}
-       *   - session tokens such as {{UserId}} / {{session.userId}}
-       *   - document tokens such as {{doc.documentId}}, {{doc.documentPageNumber}}, {{metadata.<alias>}}, {{metadataAlias.<alias>.value}}, {{metadata.1001}}
-       * Conditional blocks suppress surrounding labels when the value is missing:
-       *   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
-       * Newlines in the template are rendered as print line breaks.
+       * Default layout is "flow", which reserves page space so the header does not cover
+       * the printed source image. Use layout: "overlay" only for explicit overlay behavior.
        * @type {LocalizedString}
        */
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Page {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{reasonSelection.output}}, " | Reason: {{reasonSelection.output}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]]',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{reasonSelection.output}}, " | Orsak: {{reasonSelection.output}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]]'
       },
       css: `
-.odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
-  background:rgba(255,255,255,.88); padding:4mm 6mm; }
-.odv-print-header strong{ color:#000; }
+.odv-print-header{ font:8.5px/1.15 Arial,Helvetica,sans-serif; color:#222;
+  background:rgba(255,255,255,.35); padding:1.2mm 3mm; overflow:hidden; }
+.odv-print-header strong{ color:#000; font-size:10px; letter-spacing:.06em; }
 `.trim()
     },
 
@@ -305,15 +299,16 @@
     printFooter: {
       enabled: true,
       position: "bottom",
-      heightPx: 28,
+      layout: "flow",
+      heightPx: 14,
       applyTo: "all",
       template: {
         en: '[[{{doc.documentId}}, "Document: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (page: {{doc.documentPageNumber}})"]]',
         sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}})"]]'
       },
       css: `
-.odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;
-  background:rgba(255,255,255,.82); padding:3mm 6mm; }
+.odv-print-footer{ font:8px/1.1 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.25); padding:.9mm 3mm; overflow:hidden; }
 `.trim()
     },
 

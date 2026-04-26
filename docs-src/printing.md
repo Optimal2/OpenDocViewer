@@ -158,7 +158,7 @@ Behavior:
 ## Print header/footer metadata templates
 
 Print header and footer are configured independently through `printHeader` and `printFooter`.
-Both use the same template engine and both are evaluated per printed page.
+Both use the same template engine and both are evaluated per printed page. By default, `layout: 'flow'` reserves space for header/footer so the source page image is scaled into the remaining page area instead of being covered. Use `layout: 'overlay'` only when a deployment explicitly accepts drawing the header/footer on top of the page.
 
 Supported token forms:
 

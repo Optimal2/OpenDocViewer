@@ -23,16 +23,8 @@ const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]+);/g;
  * @param {string} s
  * @returns {string}
  */
-export function escapeHtml(s) {
-  const text = String(s);
-  const entities = [];
-  const protectedText = text.replace(HTML_ENTITY_RE, (entity) => {
-    const token = '___ODV_ENTITY_' + entities.length + '___';
-    entities.push(entity);
-    return token;
-  });
-
-  return protectedText.replace(/[&<>"']/g, (ch) => {
+function escapeHtmlSegment(s) {
+  return String(s).replace(/[&<>"']/g, (ch) => {
     switch (ch) {
       case '&': return '&amp;';
       case '<': return '&lt;';
@@ -41,10 +33,23 @@ export function escapeHtml(s) {
       case "'": return '&#39;';
       default: return ch;
     }
-  }).replace(/___ODV_ENTITY_(\d+)___/g, (_m, index) => {
-    const numericIndex = Number(index);
-    return numericIndex >= 0 && numericIndex < entities.length ? entities[numericIndex] : '';
   });
+}
+
+export function escapeHtml(s) {
+  const text = String(s);
+  let out = '';
+  let lastIndex = 0;
+  HTML_ENTITY_RE.lastIndex = 0;
+  let match = HTML_ENTITY_RE.exec(text);
+  while (match) {
+    out += escapeHtmlSegment(text.slice(lastIndex, match.index));
+    out += match[0];
+    lastIndex = match.index + match[0].length;
+    match = HTML_ENTITY_RE.exec(text);
+  }
+  out += escapeHtmlSegment(text.slice(lastIndex));
+  return out;
 }
 
 /** Zero-pad helper. */
@@ -249,7 +254,7 @@ function resolveBundleDocumentForPage(bundle, pageInfo) {
   }
 
   const documentNumber = Math.floor(Number(pageInfo?.documentNumber) || 0);
-  if (documentNumber > 0 && documents[documentNumber - 1]) return documents[documentNumber - 1];
+  if (documentNumber > 0 && documentNumber <= documents.length) return documents[documentNumber - 1];
   return null;
 }
 
@@ -302,6 +307,11 @@ function tryGetDocumentMetadata(handle) {
 }
 
 /**
+ * Window-level values optionally supplied by embedding hosts.
+ * @typedef {Window & { __ODV_USER__?: Object, __ODV_VERSION__?: string, __ODV_SESSION__?: Object }} ODVPrintWindow
+ */
+
+/**
  * Build the base token context used by print templates.
  *
  * @param {Object|undefined} handle
@@ -315,12 +325,10 @@ function tryGetDocumentMetadata(handle) {
  * @returns {Object}
  */
 export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', options = {}) {
-  /** @type {any} */
-  const win = typeof window !== 'undefined' ? /** @type {any} */ (window) : {};
-  /** @type {any} */
-  const user = win.__ODV_USER__ || {};
-  /** @type {any} */
-  const viewer = { version: win.__ODV_VERSION__ || '' };
+  /** @type {Partial<ODVPrintWindow>} */
+  const win = typeof window !== 'undefined' ? /** @type {ODVPrintWindow} */ (window) : {};
+  const user = isPlainObject(win.__ODV_USER__) ? win.__ODV_USER__ : {};
+  const viewer = { version: optionalText(win.__ODV_VERSION__) || '' };
   const bundle = isPlainObject(options?.bundle) ? options.bundle : {};
   const session = isPlainObject(bundle?.session) ? bundle.session : (isPlainObject(win.__ODV_SESSION__) ? win.__ODV_SESSION__ : {});
 
@@ -482,16 +490,31 @@ function decodeTemplateLiteral(text) {
 // Conditional block grammar:
 //   [[{{condition.path}}, "template content"]]
 //
-// Regex capture groups:
-//   1 = condition token path/expression inside {{ }}
-//   2 = double-quoted content, with backslash escapes allowed
-//   3 = single-quoted content, with backslash escapes allowed
-//   4 = bare unquoted content up to the closing block
+// Regex parts / capture groups:
+//   CONDITIONAL_OPEN       = opening [[ and optional whitespace
+//   CONDITIONAL_EXPR       = group 1: condition token path/expression inside {{ }}
+//   CONDITIONAL_SEPARATOR  = comma separator between condition and emitted content
+//   CONDITIONAL_CONTENT    = group 2, 3 or 4:
+//     group 2 = double-quoted content, with backslash escapes allowed
+//     group 3 = single-quoted content, with backslash escapes allowed
+//     group 4 = bare unquoted content up to the closing block
+//   CONDITIONAL_CLOSE      = optional whitespace and closing ]]
 //
 // Conditional blocks must be resolved before normal token substitution because
 // the block content itself may contain {{...}} or ${...} tokens. Resolving tokens
 // first would erase missing condition values and make the block condition ambiguous.
-const CONDITIONAL_BLOCK_RE = /\[\[\s*\{\{\s*([^}]+?)\s*\}\}\s*,\s*(?:"((?:\\.|[^"\\])*)"|'((?:\\.|[^'\\])*)'|([^\]]*?))\s*\]\]/g;
+const CONDITIONAL_OPEN = String.raw`\[\[\s*`;
+const CONDITIONAL_EXPR = String.raw`\{\{\s*([^}]+?)\s*\}\}`;
+const CONDITIONAL_SEPARATOR = String.raw`\s*,\s*`;
+const CONDITIONAL_DOUBLE_QUOTED = String.raw`"((?:\\.|[^"\\])*)"`;
+const CONDITIONAL_SINGLE_QUOTED = String.raw`'((?:\\.|[^'\\])*)'`;
+const CONDITIONAL_BARE = String.raw`([^\]]*?)`;
+const CONDITIONAL_CONTENT = `(?:${CONDITIONAL_DOUBLE_QUOTED}|${CONDITIONAL_SINGLE_QUOTED}|${CONDITIONAL_BARE})`;
+const CONDITIONAL_CLOSE = String.raw`\s*\]\]`;
+const CONDITIONAL_BLOCK_RE = new RegExp(
+  CONDITIONAL_OPEN + CONDITIONAL_EXPR + CONDITIONAL_SEPARATOR + CONDITIONAL_CONTENT + CONDITIONAL_CLOSE,
+  'g'
+);
 
 /**
  * Resolve conditional blocks of the form [[{{path}}, "content"]].
@@ -521,6 +544,45 @@ function convertNewlinesToBreaks(html) {
 }
 
 /**
+ * Expand legacy ${...} tokens. This intentionally supports only a simple, single-level
+ * expression and skips malformed/nested expressions rather than matching across unintended
+ * spans. The preferred syntax for new templates is {{...}}.
+ * @param {string} tpl
+ * @param {Object} tokenContext
+ * @returns {string}
+ */
+function applyLegacyTokensEscaped(tpl, tokenContext) {
+  const input = String(tpl || '');
+  let out = '';
+  let index = 0;
+
+  while (index < input.length) {
+    const start = input.indexOf('${', index);
+    if (start === -1) {
+      out += input.slice(index);
+      break;
+    }
+
+    out += input.slice(index, start);
+    const end = input.indexOf('}', start + 2);
+    if (end === -1) {
+      out += input.slice(start);
+      break;
+    }
+
+    const inner = input.slice(start + 2, end);
+    if (!inner || inner.includes('{') || inner.includes('}')) {
+      out += input.slice(start, end + 1);
+    } else {
+      out += resolveTokenExpressionEscaped(inner, tokenContext);
+    }
+    index = end + 1;
+  }
+
+  return out;
+}
+
+/**
  * Perform safe token substitution for print templates.
  *
  * Supported forms:
@@ -542,9 +604,7 @@ export function applyTemplateTokensEscaped(tpl, tokenContext) {
   //   2) legacy ${...} tokens are expanded for backward compatibility,
   //   3) preferred {{...}} tokens are expanded inside the remaining template.
   let out = applyConditionalBlocks(tpl, tokenContext);
-  out = out.replace(/\$\{([^}]+)\}/g, function (_m, inner) {
-    return resolveTokenExpressionEscaped(inner, tokenContext);
-  });
+  out = applyLegacyTokensEscaped(out, tokenContext);
   out = applyBraceTokensEscaped(out, tokenContext);
   return convertNewlinesToBreaks(out).trim();
 }

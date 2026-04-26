@@ -337,20 +337,23 @@
     printHeader: {
       enabled: true,
       position: 'top',
-      heightPx: 58,
+      // Default layout is "flow": the header reserves page space and does not cover the
+      // source page image. Use layout: 'overlay' only when a deployment explicitly accepts
+      // that the header/footer may be drawn on top of the printed page.
+      layout: 'flow',
+      heightPx: 22,
       applyTo: 'all',
-      // This template demonstrates the preferred pattern:
-      //   - {{isCopy}} is emitted only when copy watermark is selected/forced.
-      //   - Each metadata/user/reason row is conditional, so labels are not printed with empty values.
-      //   - {{reasonSelection.output}} uses the selected option's localized printValue when present.
+      // Keep the default header compact: at most two short rows. The rendered page image is
+      // scaled into the remaining page area, so large headers reduce image size instead of
+      // covering source content.
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong>\\n"]]{{date}} {{time}} | Page {{page}}/{{totalPages}}\n[[{{metadata.patientId}}, "Patient ID: {{metadata.patientId}}\\n"]][[{{metadata.patientName}}, "Name: {{metadata.patientName}}\\n"]][[{{metadata.unitName}}, "Unit: {{metadata.unitName}}\\n"]][[{{metadata.documentDate}}, "Document date: {{metadata.documentDate}}\\n"]][[{{reasonSelection.output}}, "Reason: {{reasonSelection.output}}\\n"]][[{{forWhom}}, "For: {{forWhom}}\\n"]][[{{UserId}}, "Printed by: {{UserId}}"]]',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong>\\n"]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}\n[[{{metadata.patientId}}, "Patient-ID: {{metadata.patientId}}\\n"]][[{{metadata.patientName}}, "Namn: {{metadata.patientName}}\\n"]][[{{metadata.unitName}}, "Avd/Mott: {{metadata.unitName}}\\n"]][[{{metadata.documentDate}}, "Dokumentdatum: {{metadata.documentDate}}\\n"]][[{{reasonSelection.output}}, "Orsak: {{reasonSelection.output}}\\n"]][[{{forWhom}}, "För: {{forWhom}}\\n"]][[{{UserId}}, "Utskriven av: {{UserId}}"]]'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Page {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{metadata.patientName}}, " | Name: {{metadata.patientName}}"]]\n[[{{metadata.unitName}}, "Unit: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Reason: {{reasonSelection.output}} | "]][[{{forWhom}}, "For: {{forWhom}} | "]][[{{UserId}}, "Printed by: {{UserId}}"]]',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{metadata.patientName}}, " | Namn: {{metadata.patientName}}"]]\n[[{{metadata.unitName}}, "Avd/Mott: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Orsak: {{reasonSelection.output}} | "]][[{{forWhom}}, "För: {{forWhom}} | "]][[{{UserId}}, "Utskriven av: {{UserId}}"]]'
       },
       css: `
-.odv-print-header{ font:11px/1.28 Arial,Helvetica,sans-serif; color:#333;
-  background:rgba(255,255,255,.90); padding:3.5mm 6mm; }
-.odv-print-header strong{ display:inline-block; color:#000; font-size:16px; letter-spacing:.08em; }
+.odv-print-header{ font:8.5px/1.15 Arial,Helvetica,sans-serif; color:#222;
+  background:rgba(255,255,255,.35); padding:1.2mm 3mm; overflow:hidden; }
+.odv-print-header strong{ color:#000; font-size:10px; letter-spacing:.06em; }
 `.trim()
     },
 
@@ -360,7 +363,8 @@
     printFooter: {
       enabled: true,
       position: 'bottom',
-      heightPx: 28,
+      layout: 'flow',
+      heightPx: 14,
       applyTo: 'all',
       // Shows the source/original document id and the page number inside that original document.
       // This is different from {{page}}/{{totalPages}}, which refers to the whole print job.
@@ -369,8 +373,8 @@
         sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}}"]][[{{doc.documentPageNumber}}, " (sida: {{doc.documentPageNumber}}"]][[{{doc.documentPageCount}}, "/{{doc.documentPageCount}}"]][[{{doc.documentPageNumber}}, ")"]]'
       },
       css: `
-.odv-print-footer{ font:10.5px/1.25 Arial,Helvetica,sans-serif; color:#555;
-  background:rgba(255,255,255,.84); padding:3mm 6mm; }
+.odv-print-footer{ font:8px/1.1 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.25); padding:.9mm 3mm; overflow:hidden; }
 `.trim()
     },
 
