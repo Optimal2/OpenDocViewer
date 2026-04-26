@@ -175,7 +175,16 @@ Configuration surface:
 
 ```js
 print: {
-  preparationNoticeThresholdPages: 200 // 0 disables the notice
+  preparationNoticeThresholdPages: 200, // 0 disables the notice
+  format: {
+    enabled: true,
+    useValueForOutput: true, // true=value on print, false=localized label on print
+    default: '',
+    options: [
+      { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
+      { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
+    ]
+  }
 }
 ```
 

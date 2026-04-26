@@ -205,6 +205,10 @@
       "title": "Preparing print job",
       "body": "A print request for {count} pages has been sent to the browser. It can take a moment before the browser print preview opens.",
       "dismiss": "Close"
+    },
+    "printFormat": {
+      "label": "Print format",
+      "hint": "Selected print format can add configured header text and watermark to the printed pages."
     }
   },
   "print": {

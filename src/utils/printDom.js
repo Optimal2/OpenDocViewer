@@ -51,6 +51,7 @@ import { resolveLocalizedValue } from './localizedValue.js';
  * @property {string} time
  * @property {string} reason
  * @property {string} forWhom
+ * @property {string} printFormat
  * @property {Object} user
  * @property {Object} doc
  * @property {Object} viewer
@@ -180,7 +181,13 @@ function buildPrintCss(extraCss, pageOrientation) {
     '.page.last{break-after:auto;-webkit-break-after:auto;page-break-after:auto;}' +
     '.page img{display:block;width:auto;height:auto;max-width:100vw;max-height:100vh;object-fit:contain;' +
       'page-break-inside:avoid;break-inside:avoid;}' +
-    '.odv-print-header{pointer-events:none;z-index:2147483647;}';
+    '.odv-print-header{pointer-events:none;z-index:2147483647;}' +
+    '.odv-print-format-header{position:absolute;top:0;left:0;right:0;text-align:center;' +
+      'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
+      'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
+    '.odv-print-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-32deg);' +
+      'font:bold 84px/1 Arial,Helvetica,sans-serif;letter-spacing:.12em;color:rgba(0,0,0,.16);' +
+      'white-space:nowrap;pointer-events:none;user-select:none;z-index:2147483645;}';
 
   return base + trustedExtraCss;
 }
@@ -307,6 +314,28 @@ function buildHeaderElement(doc, cfg, tokenContext, page, total) {
  * @param {function(): void} cb
  * @returns {void}
  */
+
+/**
+ * Build configured print-format header/watermark elements for a page.
+ * @param {Document} doc
+ * @param {TokenContext} tokenContext
+ * @returns {{ header: HTMLElement|null, watermark: HTMLElement|null }}
+ */
+function buildPrintFormatElements(doc, tokenContext) {
+  const text = String(tokenContext?.printFormat || '').trim();
+  if (!text) return { header: null, watermark: null };
+
+  const header = doc.createElement('div');
+  header.className = 'odv-print-format-header';
+  header.textContent = text;
+
+  const watermark = doc.createElement('div');
+  watermark.className = 'odv-print-watermark';
+  watermark.textContent = text;
+
+  return { header, watermark };
+}
+
 function waitForImagesToLoad(list, cb) {
   if (!Array.isArray(list) || list.length === 0) {
     cb();
@@ -365,8 +394,12 @@ function populateBodyAndPrint(doc, pages, printDelayMs, printHeaderCfg, tokenCon
     const pageWrapper = doc.createElement('div');
     pageWrapper.className = 'page' + (i === total - 1 ? ' last' : '');
 
+    const printFormatElements = buildPrintFormatElements(doc, tokenContext);
+    if (printFormatElements.watermark) pageWrapper.appendChild(printFormatElements.watermark);
+
     const header = buildHeaderElement(doc, printHeaderCfg, tokenContext, i + 1, total);
     if (header) pageWrapper.appendChild(header);
+    if (printFormatElements.header) pageWrapper.appendChild(printFormatElements.header);
 
     const safeSrc = isSafeImageSrc(pages[i].src) ? pages[i].src : '';
 
