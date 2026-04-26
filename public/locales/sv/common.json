@@ -230,7 +230,14 @@
         "label": "Säker utskrift",
         "hint": "OpenDocViewer skapar först en PDF och skickar sedan PDF-filen till webbläsarens utskrift.",
         "info": "OpenDocViewer tar ansvar för att skapa utskriften som en PDF-fil. PDF-filen skrivs sedan ut i webbläsaren. Detta kan vara stabilare för större utskrifter."
-      }
+      },
+      "menuLabel": "Välj utskriftsläge"
+    },
+    "pdfProgress": {
+      "downloadTitle": "Skapar PDF",
+      "printTitle": "Förbereder säker utskrift",
+      "body": "Genererat {{current}} av {{total}} sidor.",
+      "error": "PDF-generering misslyckades: {{error}}"
     }
   },
   "print": {

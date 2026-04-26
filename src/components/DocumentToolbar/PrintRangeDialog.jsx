@@ -5,7 +5,7 @@
  * Unified print dialog with a single print-method selector and shared print-details section.
  */
 
-import React, { useMemo } from 'react';
+import React, { useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { usePrintRangeController } from './usePrintRangeDialog.js';
@@ -43,6 +43,8 @@ export default function PrintRangeDialog({
   sessionTotalPages = totalPages,
 }) {
   const { t, i18n } = useTranslation('common');
+  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
+  const printMenuRef = useRef(null);
 
   const ctrl = usePrintRangeController({
     isOpen,
@@ -58,6 +60,23 @@ export default function PrintRangeDialog({
     t,
     i18n,
   });
+
+  useEffect(() => {
+    if (!isPrintMenuOpen) return undefined;
+    const onPointerDown = (event) => {
+      if (printMenuRef.current?.contains?.(event.target)) return;
+      setIsPrintMenuOpen(false);
+    };
+    const onKeyDown = (event) => {
+      if (event.key === 'Escape') setIsPrintMenuOpen(false);
+    };
+    document.addEventListener('pointerdown', onPointerDown, true);
+    document.addEventListener('keydown', onKeyDown, true);
+    return () => {
+      document.removeEventListener('pointerdown', onPointerDown, true);
+      document.removeEventListener('keydown', onKeyDown, true);
+    };
+  }, [isPrintMenuOpen]);
 
   const modeOptions = useMemo(() => ([
     { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
@@ -332,55 +351,18 @@ export default function PrintRangeDialog({
           ) : null}
 
 
-          {ctrl.pdfPrintEnabled ? (
-            <section className="odv-prd-card" aria-labelledby="odv-prd-output-header">
-              <h4 id="odv-prd-output-header" className="odv-prd-sectionHeader">
-                {t('printDialog.output.header', { defaultValue: 'Print output' })}
-              </h4>
-              <div className="odv-prd-section" role="group" aria-label={t('printDialog.output.aria', { defaultValue: 'Print output mode' })}>
-                <div className="odv-prd-radioList odv-prd-subRadioList">
-                  <label className="odv-prd-radioRow">
-                    <input
-                      type="radio"
-                      name="printBackend"
-                      value="html"
-                      checked={ctrl.printBackend !== 'pdf'}
-                      onChange={() => ctrl.setPrintBackend('html')}
-                    />
-                    <span>{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
-                  </label>
-                  <label className="odv-prd-radioRow odv-prd-radioRow-info">
-                    <input
-                      type="radio"
-                      name="printBackend"
-                      value="pdf"
-                      checked={ctrl.printBackend === 'pdf'}
-                      onChange={() => ctrl.setPrintBackend('pdf')}
-                    />
-                    <span>{t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}</span>
-                    <span
-                      className="material-icons odv-prd-infoIcon"
-                      aria-label={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
-                      title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
-                    >info</span>
-                  </label>
-                </div>
-                <span className="odv-prd-hint">
-                  {ctrl.printBackend === 'pdf'
-                    ? t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer creates a generated PDF before sending the job to the browser print dialog.' })
-                    : t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}
-                </span>
-              </div>
-            </section>
-          ) : null}
-
           {ctrl.showUserSection ? (
             <section className="odv-prd-card" aria-labelledby="odv-prd-log-header">
               <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
                 <div className="odv-prd-fieldCol">
                   {ctrl.showPrintFormat ? (
-                    <label className="odv-prd-checkRow odv-prd-checkRow-wide">
+                    <label
+                      className="odv-prd-checkRow odv-prd-checkRow-inline"
+                      title={t('printDialog.printFormat.hint', {
+                        defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
+                      })}
+                    >
                       <input
                         type="checkbox"
                         checked={!!ctrl.printFormatChecked}
@@ -391,11 +373,6 @@ export default function PrintRangeDialog({
                         {ctrl.checkboxPrintFormatOption?.checkboxLabel
                           ? ctrl.optionLabel({ value: ctrl.checkboxPrintFormatOption.value, label: ctrl.checkboxPrintFormatOption.checkboxLabel })
                           : t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
-                      </span>
-                      <span className="odv-prd-hint">
-                        {t('printDialog.printFormat.hint', {
-                          defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
-                        })}
                       </span>
                     </label>
                   ) : null}
@@ -493,9 +470,57 @@ export default function PrintRangeDialog({
               {t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' })}
             </button>
           ) : null}
-          <button type="submit" className="odv-prd-action primary">
-            {t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}
-          </button>
+          <div className="odv-prd-splitAction" ref={printMenuRef}>
+            <button
+              type="button"
+              className="odv-prd-action primary odv-prd-splitAction-main"
+              onClick={ctrl.submitPrintDirect}
+            >
+              {t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}
+            </button>
+            <button
+              type="button"
+              className="odv-prd-action primary odv-prd-splitAction-toggle"
+              aria-haspopup="menu"
+              aria-expanded={isPrintMenuOpen}
+              aria-label={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
+              title={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
+              onClick={() => setIsPrintMenuOpen((value) => !value)}
+            >
+              <span className="material-icons" aria-hidden="true">expand_more</span>
+            </button>
+            {isPrintMenuOpen ? (
+              <div className="odv-prd-splitMenu" role="menu">
+                <button
+                  type="button"
+                  role="menuitem"
+                  className="odv-prd-splitMenuItem"
+                  onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintDirect(); }}
+                >
+                  <span>{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
+                  <small>{t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}</small>
+                </button>
+                {ctrl.pdfPrintEnabled ? (
+                  <button
+                    type="button"
+                    role="menuitem"
+                    className="odv-prd-splitMenuItem"
+                    onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintPdf(); }}
+                  >
+                    <span className="odv-prd-menuItemTitle">
+                      {t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}
+                      <span
+                        className="material-icons odv-prd-infoIcon"
+                        aria-hidden="true"
+                        title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
+                      >info</span>
+                    </span>
+                    <small>{t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.' })}</small>
+                  </button>
+                ) : null}
+              </div>
+            ) : null}
+          </div>
         </div>
       </form>
     </div>

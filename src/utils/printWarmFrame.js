@@ -65,7 +65,9 @@ function createPersistentHiddenIframe() {
  */
 export async function createWarmPrintFrame(opts) {
   const frame = createPersistentHiddenIframe();
-  const doc = frame.contentDocument || frame.contentWindow?.document || null;
+  const contentDocument = frame.contentDocument || null;
+  const contentWindowDocument = frame.contentWindow?.document || null;
+  const doc = contentDocument || contentWindowDocument;
   if (!doc) {
     try { frame.remove(); } catch {}
     throw new Error('Unable to access warm print iframe document.');
@@ -124,7 +126,9 @@ export function disposeWarmPrintFrame(warmFrame) {
  *
  * @param {*} cfg Runtime configuration object.
  * @param {number} pageCount Number of source pages in natural session order.
- * @param {string} memoryPressureStage Current memory-pressure stage, typically `none`, `soft`, or `hard`.
+ * @param {string} memoryPressureStage Current memory-pressure stage. Expected values are `none`
+ *   (normal operation), `soft` (memory pressure has been observed but prewarm may continue),
+ *   or `hard` (prewarm is disabled and existing warm frames should be discarded).
  * @returns {boolean}
  */
 export function shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage = 'none') {
@@ -138,7 +142,7 @@ export function shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage =
   if (Number.isFinite(explicitMax) && explicitMax > 0 && pageCount > explicitMax) return false;
 
   const mode = String(cfg?.documentLoading?.mode || 'auto').toLowerCase();
-  const forcedEnabled = enabled === true || enabled === 'true';
+  const forcedEnabled = enabled === true || String(enabled).toLowerCase() === 'true';
   if (mode === 'memory' && !forcedEnabled) return false;
 
   if (forcedEnabled) return true;
