@@ -14,10 +14,10 @@
  *   structure changes later.
  */
 
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from './printCore.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame } from './printCore.js';
 import { parsePrintSequence } from './printParse.js';
 
-export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, parsePrintSequence };
+export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, parsePrintSequence };
 
 export default {
   handlePrint,
@@ -25,5 +25,6 @@ export default {
   handlePrintCurrentComparison,
   handlePrintRange,
   handlePrintSequence,
+  handlePrintWarmFrame,
   parsePrintSequence
 };

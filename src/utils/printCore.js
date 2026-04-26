@@ -15,7 +15,7 @@
  */
 
 import logger from '../logging/systemLogger.js';
-import { renderSingleDocument, renderMultiDocument } from './printDom.js';
+import { renderSingleDocument, renderMultiDocument, printWarmMultiDocument } from './printDom.js';
 import { makeBaseTokenContext } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
@@ -548,6 +548,34 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
     tokenContext,
     pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
   });
+}
+
+
+/**
+ * Print an order-preserving subset from a prepared warm print iframe.
+ * @param {*} warmFrame
+ * @param {Array<number>} includedPageIndexes 0-based source page indexes in natural order.
+ * @param {PrintAllOptions} [options]
+ * @returns {boolean}
+ */
+export function handlePrintWarmFrame(warmFrame, includedPageIndexes, options = {}) {
+  const doc = warmFrame?.doc || warmFrame?.frame?.contentDocument || warmFrame?.frame?.contentWindow?.document;
+  if (!doc || warmFrame?.status !== 'ready') return false;
+  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', reasonSelection = null, printFormatSelection = null, bundle = null } = options || {};
+  const odv = getODVConfig();
+  const anyHandle = /** @type {*} */ (options?.documentRenderRef?.current || null);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
+
+  printWarmMultiDocument(doc, {
+    includedPageIndexes: Array.isArray(includedPageIndexes) ? includedPageIndexes : [],
+    printDelayMs,
+    printHeaderCfg: odv.printHeader || {},
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
+    tokenContext,
+    pageContexts: Array.isArray(warmFrame.pageContexts) ? warmFrame.pageContexts : [],
+  });
+  return true;
 }
 
 /**

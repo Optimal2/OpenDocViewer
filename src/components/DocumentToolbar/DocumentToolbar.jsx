@@ -14,7 +14,7 @@
  * insertion, and zoom math belong in dedicated helpers or hooks.
  */
 
-import React, { useCallback, useMemo, useEffect, useRef, useState } from 'react';
+import React, { useCallback, useMemo, useEffect, useRef, useState, useContext } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import userLog from '../../logging/userLogger.js';
@@ -25,12 +25,15 @@ import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeMenuButton from './ThemeMenuButton.jsx';
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import ViewerContext from '../../contexts/viewerContext.js';
+import StatusLed from '../common/StatusLed.jsx';
+import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame } from '../../utils/printWarmFrame.js';
 
 
 /**
@@ -221,11 +224,15 @@ const DocumentToolbar = ({
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
 }) => {
-  const { t } = useTranslation();
+  const { t, i18n } = useTranslation();
+  const viewerContext = useContext(ViewerContext);
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
+  const [printWarmFrameStatus, setPrintWarmFrameStatus] = useState(/** @type {'off'|'pending'|'ready'|'warning'|'error'} */ ('off'));
+  const warmPrintFrameRef = useRef(/** @type {*} */ (null));
+  const warmPrintBuildSeqRef = useRef(0);
   const documentRepeatTargetRef = useRef('primary');
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
@@ -790,6 +797,7 @@ const DocumentToolbar = ({
     const pageNumbers = resolvePrintPageNumbers(detail);
     return {
       viewerContainerRef,
+      documentRenderRef,
       reason: detail?.reason || '',
       forWhom: detail?.forWhom || '',
       printFormat: detail?.printFormat || '',
@@ -798,7 +806,7 @@ const DocumentToolbar = ({
       bundle: bundle || null,
       pageContexts: resolvePrintPageContexts(pageNumbers),
     };
-  }, [bundle, resolvePrintPageContexts, resolvePrintPageNumbers, viewerContainerRef]);
+  }, [bundle, documentRenderRef, resolvePrintPageContexts, resolvePrintPageNumbers, viewerContainerRef]);
 
   /**
    * Fire-and-forget user print log. Must never block the print action.
@@ -822,6 +830,112 @@ const DocumentToolbar = ({
     } catch { /* never throw */ }
   }, [resolvePrintPageCount, toPagesString]);
 
+
+  const allSessionPageContexts = useMemo(() => {
+    const count = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
+    if (count <= 0) return [];
+    return resolvePrintPageContexts(Array.from({ length: count }, (_value, index) => index + 1));
+  }, [resolvePrintPageContexts, sessionTotalPages]);
+
+  const warmPrintFrameTitle = useMemo(() => {
+    if (!printEnabled) return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache unavailable' });
+    if (printWarmFrameStatus === 'ready') return t('toolbar.printPrewarm.ready', { defaultValue: 'Print cache ready' });
+    if (printWarmFrameStatus === 'pending') return t('toolbar.printPrewarm.pending', { defaultValue: 'Preparing print cache…' });
+    if (printWarmFrameStatus === 'warning') return t('toolbar.printPrewarm.warning', { defaultValue: 'Print cache fallback active' });
+    if (printWarmFrameStatus === 'error') return t('toolbar.printPrewarm.error', { defaultValue: 'Print cache failed' });
+    return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache inactive' });
+  }, [printEnabled, printWarmFrameStatus, t]);
+
+  const getWarmCompatibleIndexes = useCallback((detail) => {
+    if (!detail || detail.mode === 'active') return null;
+    const pageNumbers = resolvePrintPageNumbers(detail);
+    if (!Array.isArray(pageNumbers) || pageNumbers.length === 0) return null;
+    const indexes = [];
+    let previous = -1;
+    const seen = new Set();
+    const total = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
+    for (const rawPageNumber of pageNumbers) {
+      const pageNumberValue = Math.floor(Number(rawPageNumber));
+      if (!Number.isFinite(pageNumberValue) || pageNumberValue < 1 || pageNumberValue > total) return null;
+      const index = pageNumberValue - 1;
+      if (seen.has(index) || index <= previous) return null;
+      seen.add(index);
+      indexes.push(index);
+      previous = index;
+    }
+    return indexes;
+  }, [resolvePrintPageNumbers, sessionTotalPages]);
+
+  useEffect(() => {
+    const cfg = getRuntimeConfig();
+    const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
+    const memoryPressureStage = String(viewerContext?.memoryPressureStage || 'none');
+    const enabled = printEnabled && shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage);
+    const currentSeq = warmPrintBuildSeqRef.current + 1;
+    warmPrintBuildSeqRef.current = currentSeq;
+
+    disposeWarmPrintFrame(warmPrintFrameRef.current);
+    warmPrintFrameRef.current = null;
+
+    if (!enabled || !documentRenderRef?.current || pageCount <= 0) {
+      setPrintWarmFrameStatus('off');
+      return undefined;
+    }
+
+    let cancelled = false;
+    setPrintWarmFrameStatus('pending');
+
+    const timeoutId = window.setTimeout(() => {
+      (async () => {
+        try {
+          const handle = documentRenderRef.current;
+          const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
+          if (typeof getUrls !== 'function') {
+            if (!cancelled && warmPrintBuildSeqRef.current === currentSeq) setPrintWarmFrameStatus('off');
+            return;
+          }
+
+          const dataUrls = await getUrls.call(handle);
+          if (cancelled || warmPrintBuildSeqRef.current !== currentSeq) return;
+          if (!Array.isArray(dataUrls) || dataUrls.length !== pageCount) {
+            setPrintWarmFrameStatus('warning');
+            return;
+          }
+
+          const warmFrame = await createWarmPrintFrame({
+            dataUrls,
+            pageContexts: allSessionPageContexts,
+            printHeaderCfg: cfg.printHeader || {},
+            printFooterCfg: cfg.printFooter || {},
+            printFormatCfg: cfg.print?.format || {},
+            key: `${pageCount}:${i18n?.language || ''}`,
+          });
+          if (cancelled || warmPrintBuildSeqRef.current !== currentSeq) {
+            disposeWarmPrintFrame(warmFrame);
+            return;
+          }
+          warmPrintFrameRef.current = warmFrame;
+          setPrintWarmFrameStatus('ready');
+        } catch (error) {
+          if (!cancelled && warmPrintBuildSeqRef.current === currentSeq) {
+            logger.warn('Warm print preloading failed', { error: String(error?.message || error) });
+            setPrintWarmFrameStatus('error');
+          }
+        }
+      })();
+    }, 250);
+
+    return () => {
+      cancelled = true;
+      window.clearTimeout(timeoutId);
+    };
+  }, [allSessionPageContexts, documentRenderRef, i18n?.language, printEnabled, sessionTotalPages, viewerContext?.memoryPressureStage]);
+
+  useEffect(() => () => {
+    disposeWarmPrintFrame(warmPrintFrameRef.current);
+    warmPrintFrameRef.current = null;
+  }, []);
+
   /**
    * Execute the actual print helper after the dialog has resolved the user's choices.
    * @param {PrintSubmitDetail} detail
@@ -829,6 +943,12 @@ const DocumentToolbar = ({
    */
   const dispatchPrintRequest = useCallback((detail) => {
     const commonOpts = makePrintOptions(detail);
+    const warmIndexes = getWarmCompatibleIndexes(detail);
+    const warmFrame = warmPrintFrameRef.current;
+    if (warmIndexes && warmFrame?.status === 'ready') {
+      const usedWarmFrame = handlePrintWarmFrame(warmFrame, warmIndexes, commonOpts);
+      if (usedWarmFrame) return;
+    }
 
     if (!detail || detail.mode === 'active') {
       if (detail?.activeScope === 'compare-both' && isComparing) {
@@ -853,7 +973,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, isComparing, makePrintOptions, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -914,10 +1034,11 @@ const DocumentToolbar = ({
         onClick={() => { if (printEnabled) openPrintDialog?.(); }}
         aria-label={printActionTitle}
         title={printActionTitle}
-        className="odv-btn"
+        className="odv-btn odv-btn--with-status-led"
         disabled={!printEnabled}
       >
         <span className="material-icons" aria-hidden="true">print</span>
+        <StatusLed state={printEnabled ? printWarmFrameStatus : 'off'} size="xs" title={warmPrintFrameTitle} className="odv-toolbar-print-led" />
       </button>
 
       <div className="separator" />

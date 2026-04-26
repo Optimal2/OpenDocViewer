@@ -105,6 +105,18 @@
       // Use 0 to disable the notice.
       preparationNoticeThresholdPages: 200,
 
+      // Warm print iframe preloads original page image blobs in a hidden iframe after all pages
+      // are ready. It is only used for order-preserving multi-page jobs; active-page and reordered
+      // custom jobs continue to use the regular print path.
+      prewarmIframe: {
+        // "auto" follows the existing documentLoading/memory profile; true forces eligibility
+        // unless hard memory pressure is detected; false disables the optimization.
+        enabled: 'auto',
+        // 0 means reuse the existing documentLoading adaptive thresholds instead of adding a
+        // separate print-specific page limit.
+        maxPages: 0
+      },
+
       // Optional copy marker. The print dialog uses a checkbox, not a format dropdown.
       // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {
