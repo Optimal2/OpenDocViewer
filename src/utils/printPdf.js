@@ -350,19 +350,32 @@ export function printPdfBlob(blob) {
   });
 
   let printed = false;
-  const cleanup = () => {
+  let cleaned = false;
+  const cleanup = (delayMs = 0) => {
+    if (cleaned) return;
+    cleaned = true;
     window.setTimeout(() => {
       try { frame.remove(); } catch {}
       try { URL.revokeObjectURL(url); } catch {}
-    }, 60000);
+    }, Math.max(0, delayMs));
   };
+  const scheduleFallbackCleanup = () => {
+    // Edge/Chromium may keep the PDF preview dependent on the iframe/blob URL while
+    // the preview dialog is open. Do not remove the iframe shortly after print(); it
+    // can make the PDF preview disappear. afterprint normally cleans it up; this long
+    // fallback avoids leaking the object URL if afterprint is not fired.
+    window.setTimeout(() => cleanup(0), 10 * 60 * 1000);
+  };
+  const afterPrint = () => cleanup(120000);
   const invokePrint = () => {
     if (printed) return;
     printed = true;
+    try { frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true }); } catch {}
+    try { window.addEventListener('afterprint', afterPrint, { once: true }); } catch {}
     window.setTimeout(() => {
       try { frame.contentWindow?.focus?.(); frame.contentWindow?.print?.(); }
       catch (error) { logger.warn('Generated PDF print invocation failed', { error: String(error?.message || error) }); window.open(url, '_blank', 'noopener,noreferrer'); }
-      cleanup();
+      scheduleFallbackCleanup();
     }, 250);
   };
   frame.addEventListener('load', invokePrint, { once: true });

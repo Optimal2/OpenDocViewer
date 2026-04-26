@@ -224,12 +224,13 @@
       "aria": "Utskriftsläge",
       "direct": {
         "label": "Direktutskrift",
-        "hint": "Webbläsaren skriver ut OpenDocViewers förberedda utskriftsvy direkt."
+        "hint": "Använder webbläsarens utskriftsförhandsgranskning. Valet stående/liggande i webbläsaren gäller hela utskriften.",
+        "info": "Direktutskrift använder webbläsarens utskriftsförhandsgranskning. Webbläsarens val för stående eller liggande format gäller hela utskriften."
       },
       "safe": {
         "label": "Säker utskrift",
-        "hint": "OpenDocViewer skapar först en PDF och skickar sedan PDF-filen till webbläsarens utskrift.",
-        "info": "OpenDocViewer tar ansvar för att skapa utskriften som en PDF-fil. PDF-filen skrivs sedan ut i webbläsaren. Detta kan vara stabilare för större utskrifter."
+        "hint": "Skapar först en PDF. Varje PDF-sida får automatiskt stående eller liggande format.",
+        "info": "OpenDocViewer skapar utskriften som en PDF. Varje PDF-sida får automatiskt stående eller liggande format utifrån sidbilden innan PDF-filen skrivs ut i webbläsaren."
       },
       "menuLabel": "Välj utskriftsläge"
     },

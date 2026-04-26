@@ -357,19 +357,19 @@ export default function PrintRangeDialog({
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
                 <div className="odv-prd-fieldCol">
                   {ctrl.showPrintFormat ? (
-                    <label
-                      className="odv-prd-checkRow odv-prd-checkRow-inline"
-                      title={t('printDialog.printFormat.hint', {
-                        defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
-                      })}
-                    >
+                    <label className="odv-prd-checkRow odv-prd-checkRow-inline">
                       <input
                         type="checkbox"
                         checked={!!ctrl.printFormatChecked}
                         onChange={(event) => ctrl.setPrintFormatChecked(event.target.checked)}
                         aria-label={t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
                       />
-                      <span>
+                      <span
+                        className="odv-prd-tooltipText"
+                        title={t('printDialog.printFormat.hint', {
+                          defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
+                        })}
+                      >
                         {ctrl.checkboxPrintFormatOption?.checkboxLabel
                           ? ctrl.optionLabel({ value: ctrl.checkboxPrintFormatOption.value, label: ctrl.checkboxPrintFormatOption.checkboxLabel })
                           : t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
@@ -495,13 +495,12 @@ export default function PrintRangeDialog({
                   type="button"
                   role="menuitem"
                   className="odv-prd-splitMenuItem"
-                  title={t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}
+                  title={t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' })}
                   onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintDirect(); }}
                 >
-                  <span className="odv-prd-menuItemIcon material-icons" aria-hidden="true">print</span>
                   <span className="odv-prd-menuItemCopy">
                     <span className="odv-prd-menuItemTitle">{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
-                    <small>{t('printDialog.output.direct.hint', { defaultValue: 'The browser prints the prepared OpenDocViewer print view directly.' })}</small>
+                    <small>{t('printDialog.output.direct.hint', { defaultValue: 'Uses the browser print preview. Browser orientation applies to the whole job.' })}</small>
                   </span>
                 </button>
                 {ctrl.pdfPrintEnabled ? (
@@ -509,10 +508,9 @@ export default function PrintRangeDialog({
                     type="button"
                     role="menuitem"
                     className="odv-prd-splitMenuItem"
-                    title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF for the print job and prints that PDF in the browser.' })}
+                    title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' })}
                     onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintPdf(); }}
                   >
-                    <span className="odv-prd-menuItemIcon material-icons" aria-hidden="true">picture_as_pdf</span>
                     <span className="odv-prd-menuItemCopy">
                       <span className="odv-prd-menuItemTitle">
                         {t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}
@@ -521,7 +519,7 @@ export default function PrintRangeDialog({
                           aria-hidden="true"
                         >info</span>
                       </span>
-                      <small>{t('printDialog.output.safe.hint', { defaultValue: 'OpenDocViewer first creates a PDF and then sends that PDF to the browser print dialog.' })}</small>
+                      <small>{t('printDialog.output.safe.hint', { defaultValue: 'Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.' })}</small>
                     </span>
                   </button>
                 ) : null}
