@@ -115,6 +115,23 @@ function findCaseInsensitiveKey(obj, key) {
   return Object.keys(obj).find((candidate) => candidate.toLowerCase() === wanted);
 }
 
+
+/**
+ * Resolve the configured copy/print-format marker text consistently across print backends.
+ * The fallback order preserves older templates while preferring the explicit marker tokens.
+ * @param {*} tokenContext
+ * @returns {string}
+ */
+export function resolveCopyMarkerText(tokenContext) {
+  return valueToText(
+    tokenContext?.copyMarkerText
+      || tokenContext?.printFormatOutput
+      || tokenContext?.printFormat
+      || tokenContext?.isCopy
+      || ''
+  );
+}
+
 /**
  * Resolve a dotted-path property from an object (e.g., "doc.title").
  * Resolution is exact first, then case-insensitive per segment to tolerate host payload casing.
@@ -376,8 +393,11 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
     reasonOption: reasonSelection,
     forWhom: forWhom || '',
     printFormat: printFormatText,
+    printFormatOutput: printFormatText,
+    copyMarkerText: printFormatText,
     printFormatSelection,
     printFormatOption: printFormatSelection,
+    // Backward-compatible alias: contains marker text, not a boolean.
     isCopy: printFormatText,
     user,
     session,

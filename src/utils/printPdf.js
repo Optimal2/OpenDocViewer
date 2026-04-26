@@ -12,7 +12,7 @@
 
 import i18next from 'i18next';
 import logger from '../logging/systemLogger.js';
-import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext } from './printTemplate.js';
+import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
@@ -21,10 +21,11 @@ const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89, unit: 'pt' });
 const A4_PORTRAIT = [A4_PAGE_PT.width, A4_PAGE_PT.height];
 const A4_LANDSCAPE = [A4_PAGE_PT.height, A4_PAGE_PT.width];
 const DEFAULT_PDF_FILENAME = 'opendocviewer-print.pdf';
-const HEADER_FOOTER_COLOR = Object.freeze([55, 55, 55]);
-const FOOTER_COLOR = Object.freeze([75, 75, 75]);
+const HEADER_FOOTER_COLOR = Object.freeze([35, 35, 35]);
+const FOOTER_COLOR = Object.freeze([70, 70, 70]);
 const MAX_HEADER_FOOTER_LINES = 3;
 const MAX_FOOTER_LINES = 2;
+const HEADER_FOOTER_LINE_HEIGHT = 1.18;
 const MIN_WATERMARK_FONT_SIZE = 70;
 const WATERMARK_FONT_SCALE = 0.19;
 const WATERMARK_OPACITY = 0.18;
@@ -55,6 +56,19 @@ const WATERMARK_SHADOW_OFFSET = 1.4;
 function asNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * Normalize canvas/PDF image quality to the browser-supported 0..1 range.
+ * @param {*} value
+ * @param {number} defaultValue
+ * @returns {number}
+ */
+function normalizeQuality(value, defaultValue) {
+  const n = Number(value);
+  const fallback = Number.isFinite(defaultValue) ? defaultValue : 0.9;
+  if (!Number.isFinite(n)) return Math.min(1, Math.max(0, fallback));
+  return Math.min(1, Math.max(0, n));
 }
 
 /**
@@ -193,15 +207,29 @@ function pageFormatForImage(width, height) {
  * @param {number} fontSize
  * @returns {number} height consumed
  */
-function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize) {
+function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize, options = {}) {
   const clean = String(text || '').trim();
   if (!clean) return 0;
-  pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(fontSize);
   pdf.setTextColor(...HEADER_FOOTER_COLOR);
   const lines = pdf.splitTextToSize(clean, maxWidth).slice(0, MAX_HEADER_FOOTER_LINES);
-  const lineHeight = fontSize * 1.18;
-  lines.forEach((line, index) => pdf.text(String(line), x, y + (index * lineHeight)));
+  const lineHeight = fontSize * HEADER_FOOTER_LINE_HEIGHT;
+  const boldLeadingText = String(options.boldLeadingText || '').trim();
+
+  lines.forEach((line, index) => {
+    const lineText = String(line);
+    const yPos = y + (index * lineHeight);
+    if (index === 0 && boldLeadingText && lineText.startsWith(boldLeadingText)) {
+      pdf.setFont('helvetica', 'bold');
+      pdf.text(boldLeadingText, x, yPos);
+      const offset = pdf.getTextWidth(boldLeadingText);
+      pdf.setFont('helvetica', 'normal');
+      pdf.text(lineText.slice(boldLeadingText.length), x + offset, yPos);
+      return;
+    }
+    pdf.setFont('helvetica', 'normal');
+    pdf.text(lineText, x, yPos);
+  });
   return lines.length * lineHeight;
 }
 
@@ -290,10 +318,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const headerReservePt = Math.max(0, asNumber(pdfCfg.headerReservePt) || 18);
   const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
   const textFontSize = Math.max(5, asNumber(pdfCfg.textFontSize) || 7);
-  const rawImageFallbackQuality = Number(pdfCfg.imageFallbackQuality);
-  const imageFallbackQuality = Number.isFinite(rawImageFallbackQuality)
-    ? Math.min(1, Math.max(0, rawImageFallbackQuality))
-    : 0.9;
+  const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, 0.9);
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
@@ -310,25 +335,27 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
     const [pageWidth, pageHeight] = pageFormatForImage(naturalWidth, naturalHeight);
+    const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
 
     if (!pdf) {
-      pdf = new jsPDF({ orientation: pageWidth > pageHeight ? 'landscape' : 'portrait', unit: 'pt', format: [pageWidth, pageHeight], compress: true });
+      pdf = new jsPDF({ orientation, unit: 'pt', format: [pageWidth, pageHeight], compress: true });
     } else {
-      pdf.addPage([pageWidth, pageHeight], pageWidth > pageHeight ? 'landscape' : 'portrait');
+      pdf.addPage([pageWidth, pageHeight], orientation);
     }
 
     const pageInfo = Array.isArray(options.pageContexts) ? options.pageContexts[i] : null;
     const pageContext = makePageTokenContext(baseContext, pageInfo, bundle);
     const headerText = renderOverlayText(options.printHeaderCfg || {}, pageContext, i + 1, total);
     const footerText = renderOverlayText(options.printFooterCfg || {}, pageContext, i + 1, total);
+    const copyText = resolveCopyMarkerText(pageContext);
 
-    if (headerText) drawSmallTextBlock(pdf, headerText, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize);
+    if (headerText) drawSmallTextBlock(pdf, headerText, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize, { boldLeadingText: copyText });
     if (footerText) {
       const footerLines = pdf.splitTextToSize(footerText, pageWidth - (marginPt * 2)).slice(0, MAX_FOOTER_LINES);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(Math.max(5, textFontSize - 0.5));
       pdf.setTextColor(...FOOTER_COLOR);
-      const lineHeight = Math.max(5, textFontSize * 1.15);
+      const lineHeight = Math.max(5, textFontSize * HEADER_FOOTER_LINE_HEIGHT);
       footerLines.forEach((line, idx) => pdf.text(String(line), marginPt, pageHeight - marginPt - ((footerLines.length - 1 - idx) * lineHeight)));
     }
 
@@ -343,7 +370,6 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     const drawY = imageBoxY + ((imageBoxHeight - drawHeight) / 2);
     addImageWithFallback(pdf, img, drawX, drawY, drawWidth, drawHeight, imageFallbackQuality);
 
-    const copyText = String(pageContext.copyMarkerText || pageContext.printFormatOutput || pageContext.printFormat || '').trim();
     if (copyText && options.printFormatCfg?.watermark?.enabled !== false) {
       drawWatermark(pdf, copyText, pageWidth, pageHeight);
     }

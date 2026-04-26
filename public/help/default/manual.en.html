@@ -1,24 +1,116 @@
-<section>
-  <h1>OpenDocViewer manual</h1>
-  <p>This manual is loaded from a simple HTML file in the public help folder, so deployments can replace it without rebuilding the React app.</p>
-</section>
-<section>
-  <h2>Navigation</h2>
-  <ul>
-    <li>Arrow Up / Arrow Down move page by page.</li>
-    <li>Hold <strong>Ctrl</strong> when multiple documents are visible to move document by document.</li>
-    <li>Hold <strong>Shift</strong> in compare mode to target the right pane.</li>
-  </ul>
-</section>
-<section>
-  <h2>Selection and metadata</h2>
-  <ul>
-    <li>Use the Selection tab to include or exclude pages and documents.</li>
-    <li>Press <strong>Delete</strong> to hide the current left/main page from the saved selection. Hold <strong>Shift</strong> in compare mode to hide the right page instead.</li>
-    <li>Press <strong>M</strong> to open the session-wide metadata table when document metadata is available.</li>
-  </ul>
-</section>
-<section>
-  <h2>Printing</h2>
-  <p>Open the print dialog from the toolbar and choose a print method before preparing the browser preview.</p>
-</section>
+<h1>OpenDocViewer manual</h1>
+<p>OpenDocViewer is used to open, review, compare, select, and print documents in a web browser. This manual describes the standard features. A deployment may have its own fields, print reasons, help text, and rules.</p>
+
+<h2>Basic workflow</h2>
+<ol>
+  <li>Wait until the documents have finished loading. Printing and some document actions are disabled while loading is in progress.</li>
+  <li>Use the thumbnail page list to move between pages.</li>
+  <li>Use the toolbar for zoom, fitting, rotation, comparison, selection, metadata, and printing.</li>
+  <li>Always verify that the correct document and pages are selected before printing or saving a PDF.</li>
+</ol>
+
+<h2>Navigation</h2>
+<p>You can change page using the toolbar page controls, thumbnails, the mouse wheel, and the keyboard. The page counter shows the current page in the loaded session.</p>
+<ul>
+  <li><strong>Previous/next page:</strong> use the toolbar arrow buttons or the keyboard arrow keys.</li>
+  <li><strong>Page Up/Page Down:</strong> normally moves one page backward or forward.</li>
+  <li><strong>Home/End:</strong> can be used to move to the beginning or end if the browser gives focus to the viewer area.</li>
+  <li><strong>Thumbnails:</strong> click a thumbnail to open the corresponding page.</li>
+</ul>
+<p>Keyboard shortcuts are ignored in text fields, lists, and other input fields so that typing does not accidentally control the viewer.</p>
+
+<h2>Zoom and viewing</h2>
+<p>The toolbar contains common zoom and fitting modes. Exact names may differ slightly between deployments.</p>
+<ul>
+  <li><strong>Fit to page:</strong> shows the whole page in the available area.</li>
+  <li><strong>Fit to width:</strong> makes the page as wide as the viewer area.</li>
+  <li><strong>Actual size:</strong> shows the page without fit scaling.</li>
+  <li><strong>Zoom in/out:</strong> changes the viewing scale step by step.</li>
+</ul>
+<p>Zoom affects how the page is displayed in OpenDocViewer. Normal printing uses the print flow, not the exact current zoom level.</p>
+
+<h2>Thumbnails and page list</h2>
+<p>The thumbnail panel shows the pages in the session. If multiple documents are included, the page list may show document boundaries or document information depending on deployment configuration.</p>
+<ul>
+  <li>Select a page by clicking its thumbnail.</li>
+  <li>Use thumbnails for a quick overview of longer sessions.</li>
+  <li>For very large sessions, some thumbnails may load only when needed.</li>
+</ul>
+
+<h2>Documents and metadata</h2>
+<p>OpenDocViewer can display metadata from the documents in the session. Examples may include patient ID, name, unit, document date, page count, or document ID. The available metadata depends on the system that opens OpenDocViewer.</p>
+<ul>
+  <li><strong>Page metadata:</strong> shows metadata for a specific page or document part.</li>
+  <li><strong>Metadata matrix:</strong> shows metadata for multiple documents in the same session.</li>
+  <li><strong>Print metadata:</strong> some metadata can also be used in print headers and footers.</li>
+</ul>
+<p>If a field is missing, it is normally not shown in the printout when the template is configured with conditional fields.</p>
+
+<h2>Selection</h2>
+<p>If document selection is enabled, you can choose which documents or pages should be included in workflows that support selection. Selection can affect printing of selected pages.</p>
+<ul>
+  <li>Verify the selection before printing.</li>
+  <li>Selection may be document-based or page-based depending on deployment.</li>
+  <li>If no specific selection is used, the whole session or the print dialog choice normally applies.</li>
+</ul>
+
+<h2>Comparison</h2>
+<p>Comparison mode is used to show two pages or document parts side by side. It can be useful for manual review of versions, copies, or related documents.</p>
+<ul>
+  <li>Enable comparison from the toolbar if the feature is available.</li>
+  <li>Select the primary page and the comparison page.</li>
+  <li>Printing an active comparison may be handled differently from printing all pages.</li>
+</ul>
+
+<h2>Image adjustments and active page</h2>
+<p>Some deployments may allow visual adjustment of an active page, such as rotation or other viewing adjustments. Such adjustments normally belong to the active-page flow and should be checked carefully before printing.</p>
+<p>Printing the <strong>active page</strong> may therefore differ from printing all pages, because the active page may need to use the current visual surface instead of the original image.</p>
+
+<h2>Printing</h2>
+<p>Open the print dialog from the toolbar print button. The dialog may contain fields for print reason, recipient/for whom, watermark, and page choice depending on deployment.</p>
+
+<h3>Page choice</h3>
+<ul>
+  <li><strong>Active page:</strong> prints the page currently active in the viewer. This is best when the current page has special visual handling.</li>
+  <li><strong>All pages:</strong> prints the whole session or the current selection.</li>
+  <li><strong>Simple range:</strong> prints one continuous page range.</li>
+  <li><strong>Custom pages:</strong> prints a specified list, for example <code>1,3,5-8</code>.</li>
+</ul>
+
+<h3>Direct print via HTML</h3>
+<p><strong>Print via HTML</strong> uses the browser's normal print flow for OpenDocViewer's prepared print view. The browser's portrait or landscape choice normally applies to the whole print job.</p>
+<p>This mode is simple and direct, but the browser print preview can be slow for many large image pages.</p>
+
+<h3>Print via PDF</h3>
+<p><strong>Print via PDF</strong> makes OpenDocViewer create a PDF file from the print job first and then sends that PDF to the browser for printing. During PDF generation, progress shows how many pages are done.</p>
+<p>In PDF mode, each page can automatically get portrait or landscape format based on the page image. This can therefore differ from direct print where the browser's format choice applies more generally.</p>
+
+<h3>Save PDF</h3>
+<p>If the deployment allows it, the <strong>Save PDF</strong> button is shown. It creates the same type of PDF as PDF printing, but downloads the file instead of opening print.</p>
+
+<h3>Copy watermark</h3>
+<p>If the deployment allows it, you can select <strong>Add copy watermark</strong>. A clear but transparent marker is then added to the printout. The deployment controls the exact text, language, and appearance.</p>
+
+<h2>Header and footer</h2>
+<p>Printouts can have a header and footer. These may contain date, time, print reason, user, page number, document ID, and metadata. Fields without values can be hidden automatically when the template is configured that way.</p>
+<p>The page number in the print header normally means the page's position in the print job. The document's own page number can be shown separately in the footer.</p>
+
+<h2>Performance and large documents</h2>
+<p>OpenDocViewer tries to balance performance and memory use. On powerful computers, more pages and thumbnails can be prepared in advance. On computers with less memory, the viewer may be more conservative.</p>
+<ul>
+  <li>Wait until loading is complete before starting large print jobs.</li>
+  <li>PDF printing can provide clearer progress feedback for large print jobs.</li>
+  <li>The browser's own print preview can still take time, especially in Edge/Chromium.</li>
+</ul>
+
+<h2>Troubleshooting</h2>
+<ul>
+  <li><strong>The print button is disabled:</strong> wait until the documents have finished loading.</li>
+  <li><strong>The print preview is slow:</strong> try PDF printing if the feature is available.</li>
+  <li><strong>The wrong pages are printed:</strong> check page choice, range, and selection in the dialog.</li>
+  <li><strong>Metadata is missing in print:</strong> verify that the metadata exists in the session and that the deployment template uses the correct field.</li>
+  <li><strong>The manual lacks local information:</strong> the deployment can add its own manual file under <code>help/site/</code>.</li>
+</ul>
+
+<h2>Local customization</h2>
+<p>This default manual can be replaced per deployment without rebuilding OpenDocViewer. Place a local manual under <code>help/site/manual.en.html</code> and the corresponding Swedish version under <code>help/site/manual.sv.html</code>.</p>
