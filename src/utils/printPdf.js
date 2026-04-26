@@ -28,8 +28,8 @@ const MAX_FOOTER_LINES = 2;
 const MIN_WATERMARK_FONT_SIZE = 70;
 const WATERMARK_FONT_SCALE = 0.19;
 const WATERMARK_OPACITY = 0.18;
-// jsPDF's positive angle matches the visual direction used by the CSS rotate(-32deg) watermark.
-const WATERMARK_ROTATION_ANGLE = 32;
+// Keep PDF and HTML watermarks visually aligned. 0 degrees means centered horizontal text.
+const WATERMARK_ROTATION_ANGLE = 0;
 const WATERMARK_SHADOW_OFFSET = 1.4;
 
 /**
@@ -159,7 +159,7 @@ function imageToJpegDataUrl(img, quality) {
  */
 function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
   const preferred = inferImageFormat(img);
-  const attempts = [preferred, preferred === 'PNG' ? 'JPEG' : 'PNG'];
+  const attempts = Array.from(new Set([preferred, 'PNG', 'JPEG']));
   for (const format of attempts) {
     try {
       pdf.addImage(img, format, x, y, width, height, undefined, 'FAST');
@@ -233,7 +233,7 @@ function drawWatermark(pdf, text, pageWidth, pageHeight) {
     logger.debug('PDF watermark opacity setup skipped', { error: String(error?.message || error) });
   }
 
-  // Match the HTML print watermark as closely as jsPDF allows: large, rotated, light fill
+  // Match the HTML print watermark as closely as jsPDF allows: large, centered, light fill
   // with a darker contrast layer so it remains visible on both bright and dark page images.
   pdf.setTextColor(255, 255, 255);
   pdf.text(clean, x, y, { align: 'center', angle: WATERMARK_ROTATION_ANGLE });
@@ -291,7 +291,9 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
   const textFontSize = Math.max(5, asNumber(pdfCfg.textFontSize) || 7);
   const rawImageFallbackQuality = Number(pdfCfg.imageFallbackQuality);
-  const imageFallbackQuality = Number.isFinite(rawImageFallbackQuality) ? rawImageFallbackQuality : 0.9;
+  const imageFallbackQuality = Number.isFinite(rawImageFallbackQuality)
+    ? Math.min(1, Math.max(0, rawImageFallbackQuality))
+    : 0.9;
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
@@ -475,7 +477,7 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  * @returns {Promise<void>}
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
-  const selectedCount = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : 1);
+  const selectedCount = Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : 1;
   const blob = await createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: selectedCount, total: selectedCount });

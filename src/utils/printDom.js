@@ -148,7 +148,7 @@ function buildPrintCss(extraCss, pageOrientation, printFormatCfg) {
     '.odv-print-format-header{position:absolute;top:0;left:0;right:0;text-align:center;' +
       'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
       'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
-    '.odv-print-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-32deg);' +
+    '.odv-print-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(0deg);' +
       'font:bold 19vmin/1 Arial,Helvetica,sans-serif;letter-spacing:.16em;color:rgba(255,255,255,.16);' +
       'paint-order:stroke fill;-webkit-text-stroke:1.2px rgba(0,0,0,.20);' +
       'text-shadow:0 0 .4px rgba(0,0,0,.26),0 0 2px rgba(0,0,0,.18),0 0 12px rgba(255,255,255,.20);' +
