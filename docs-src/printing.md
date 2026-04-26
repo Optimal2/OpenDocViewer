@@ -120,7 +120,7 @@ If print code grows further, the most natural split points are:
 
 ## Copy marker and watermark
 
-OpenDocViewer can expose a **copy watermark** checkbox in the print dialog. By default it is not checked, so normal prints do not get a watermark and `{{isCopy}}` / `{{printFormat}}` are empty.
+OpenDocViewer can expose a **copy watermark** checkbox in the print dialog. By default it is not checked, so normal prints do not get a watermark and `{{copyMarkerText}}` / `{{printFormat}}` (`{{isCopy}}` remains as a backward-compatible alias) are empty.
 
 Relevant config:
 
@@ -179,6 +179,8 @@ Supported token forms:
 {{printFormatSelection.output}}
 {{printFormatSelection.label.sv}}
 {{printFormatSelection.printValue.sv}}
+{{copyMarkerText}}
+{{printFormatOutput}}
 {{isCopy}}
 {{UserId}}
 {{session.userId}}
@@ -204,7 +206,7 @@ For metadata aliases configured through `integrations.portableBundle.metadataAli
 Example: if `patientId` maps to field id `1001` with `prefer: 'value'`, use
 `{{metadata.patientId}}` or `{{metadataAlias.patientId.value}}`.
 
-`{{isCopy}}` is an alias for the resolved print-format output text, for example `KOPIA`.
+`{{copyMarkerText}}` and `{{printFormatOutput}}` contain the resolved print-format output text, for example `KOPIA`. `{{isCopy}}` is kept as a backward-compatible alias even though it contains text rather than a boolean value.
 It is intentionally available for configurable header/footer placement while the watermark remains
 controlled by `print.format.watermark.enabled` and by the checkbox/forced default configuration.
 

@@ -161,14 +161,14 @@ Remote HEAD: $remoteHead
 "@
 }
 
-Write-Host '=== OpenDocViewer Release Helper ===`n'
+Write-Host "=== OpenDocViewer Release Helper ===`n"
 Write-Host 'Release-only mode: application code must already be committed and pushed.' -ForegroundColor Yellow
 Write-Host 'This script will not run git add, will not commit application changes, and will not stash.' -ForegroundColor Yellow
-Write-Host 'It will only validate, run npm version, create the release commit/tag, and push that release commit/tag.`n' -ForegroundColor Yellow
+Write-Host "It will only validate, run npm version, create the release commit/tag, and push that release commit/tag.`n" -ForegroundColor Yellow
 Write-Host 'Note: SECURITY.md is not updated automatically by this script.' -ForegroundColor Yellow
 Write-Host 'Before release, make sure SECURITY.md already matches the version you are about to publish:' -ForegroundColor Yellow
 Write-Host '  - Supported Versions' -ForegroundColor Yellow
-Write-Host '  - Recent release context`n' -ForegroundColor Yellow
+Write-Host "  - Recent release context`n" -ForegroundColor Yellow
 
 if ([string]::IsNullOrWhiteSpace($ReleaseType)) {
   $ReleaseType = ReadNonEmpty 'Release type (patch | minor | major)'

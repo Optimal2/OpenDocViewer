@@ -47,6 +47,13 @@ function createPersistentHiddenIframe() {
 
 /**
  * Create and fully load a warm print iframe.
+ *
+ * The returned frame is ready only after its image elements have reached terminal load state.
+ * On success, `status` is `ready` and the caller may reuse the iframe for order-preserving
+ * original-page print jobs by hiding excluded pages. During creation the status is `pending`.
+ * If preparation fails, this function cleans up the iframe, logs a warning, sets the transient
+ * object status to `error`, and rejects. Callers should then fall back to the regular print path.
+ *
  * @param {Object} opts
  * @param {Array<string>} opts.dataUrls
  * @param {Array<*>} opts.pageContexts
@@ -54,7 +61,7 @@ function createPersistentHiddenIframe() {
  * @param {*} opts.printFooterCfg
  * @param {*} opts.printFormatCfg
  * @param {string=} opts.key
- * @returns {Promise<WarmPrintFrame>}
+ * @returns {Promise<WarmPrintFrame>} Resolves with a reusable warm frame whose status is `ready`; rejects after cleanup on failure.
  */
 export async function createWarmPrintFrame(opts) {
   const frame = createPersistentHiddenIframe();
@@ -104,9 +111,20 @@ export function disposeWarmPrintFrame(warmFrame) {
 }
 
 /**
- * @param {*} cfg
- * @param {number} pageCount
- * @param {string} memoryPressureStage
+ * Decide whether warm print iframe preparation is allowed for the current runtime.
+ *
+ * `false` or the string `'false'` disables the feature. `true` or the string `'true'` forces it
+ * on except for invalid page counts, explicit max-page limits, or hard memory pressure. The default
+ * `'auto'` mode follows the existing document-loading profile: it is disabled in memory mode and
+ * respects `documentLoading.adaptiveMemory.performanceWindowPageCount` when that threshold is set.
+ *
+ * Return value semantics:
+ * - `true`: the caller may start or keep a warm print iframe for this session.
+ * - `false`: the caller should dispose any existing warm frame and use the regular print path.
+ *
+ * @param {*} cfg Runtime configuration object.
+ * @param {number} pageCount Number of source pages in natural session order.
+ * @param {string} memoryPressureStage Current memory-pressure stage, typically `none`, `soft`, or `hard`.
  * @returns {boolean}
  */
 export function shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage = 'none') {
