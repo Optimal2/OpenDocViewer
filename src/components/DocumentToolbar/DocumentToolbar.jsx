@@ -232,6 +232,7 @@ const DocumentToolbar = ({
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
+  const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, total:number, error:string }} */ ({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }));
   const [printWarmFrameStatus, setPrintWarmFrameStatus] = useState(/** @type {'off'|'pending'|'ready'|'warning'|'error'} */ ('off'));
   const warmPrintFrameRef = useRef(/** @type {*} */ (null));
   const warmPrintBuildSeqRef = useRef(0);
@@ -955,14 +956,31 @@ const DocumentToolbar = ({
     const pageNumbers = Array.isArray(commonOpts.pageNumbers) ? commonOpts.pageNumbers : resolvePrintPageNumbers(detail);
 
     if (detail?.printBackend === 'pdf') {
+      const total = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : resolvePrintPageCount(detail));
+      const action = detail?.printAction === 'download' ? 'download' : 'print';
+      setPdfProgress({ open: true, action, phase: 'starting', current: 0, total, error: '' });
+      const pdfOpts = {
+        ...commonOpts,
+        onProgress: (event) => {
+          const current = Math.max(0, Math.min(total, Math.floor(Number(event?.current) || 0)));
+          const nextTotal = Math.max(1, Math.floor(Number(event?.total) || total));
+          setPdfProgress({ open: true, action, phase: String(event?.phase || 'generating'), current, total: nextTotal, error: '' });
+        },
+      };
       const pdfTask = detail?.mode === 'active'
         ? (detail?.activeScope === 'compare-both' && isComparing
-            ? handlePdfCurrentComparison(documentRenderRef, compareRef, commonOpts)
-            : handlePdfCurrent(documentRenderRef, commonOpts))
-        : handlePdfOutput(documentRenderRef, pageNumbers, commonOpts);
-      pdfTask.catch((error) => {
-        logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
-      });
+            ? handlePdfCurrentComparison(documentRenderRef, compareRef, pdfOpts)
+            : handlePdfCurrent(documentRenderRef, pdfOpts))
+        : handlePdfOutput(documentRenderRef, pageNumbers, pdfOpts);
+      pdfTask
+        .then(() => {
+          setPdfProgress({ open: true, action, phase: action === 'download' ? 'downloaded' : 'opening-preview', current: total, total, error: '' });
+          window.setTimeout(() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }), 1800);
+        })
+        .catch((error) => {
+          logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
+          setPdfProgress({ open: true, action, phase: 'error', current: 0, total, error: String(error?.message || error) });
+        });
       return;
     }
 
@@ -996,7 +1014,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -1323,6 +1341,46 @@ const DocumentToolbar = ({
         isOpen={isAboutDialogOpen}
         onClose={() => setIsAboutDialogOpen(false)}
       />
+
+      {pdfProgress.open ? (
+        <div className="odv-print-preparing-backdrop" role="status" aria-live="polite">
+          <div className="odv-print-preparing-dialog odv-pdf-progress-dialog">
+            <div className="odv-print-preparing-icon" aria-hidden="true">
+              <span className="material-icons">picture_as_pdf</span>
+            </div>
+            <div className="odv-print-preparing-copy">
+              <h3>{pdfProgress.action === 'download'
+                ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Creating PDF' })
+                : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing safe print' })}</h3>
+              <p>{pdfProgress.error
+                ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `PDF generation failed: ${pdfProgress.error}` })
+                : t('printDialog.pdfProgress.body', {
+                    current: pdfProgress.current,
+                    total: pdfProgress.total,
+                    phase: pdfProgress.phase,
+                    defaultValue: `Generated ${pdfProgress.current} of ${pdfProgress.total} pages.`,
+                  })}</p>
+              {!pdfProgress.error ? (
+                <div className="odv-pdf-progress-track" aria-hidden="true">
+                  <div
+                    className="odv-pdf-progress-bar"
+                    style={{ width: `${Math.max(4, Math.min(100, Math.round((pdfProgress.current / Math.max(1, pdfProgress.total)) * 100)))}%` }}
+                  />
+                </div>
+              ) : null}
+            </div>
+            {pdfProgress.error ? (
+              <button
+                type="button"
+                className="odv-print-preparing-close"
+                onClick={() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' })}
+              >
+                {t('printDialog.preparing.dismiss', { defaultValue: 'Close' })}
+              </button>
+            ) : null}
+          </div>
+        </div>
+      ) : null}
 
       {printPreparationNotice.open ? (
         <div className="odv-print-preparing-backdrop" role="status" aria-live="polite">

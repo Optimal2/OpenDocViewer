@@ -33,6 +33,7 @@ const DEFAULT_PDF_FILENAME = 'opendocviewer-print.pdf';
  * @property {Object=} printFooterCfg
  * @property {Object=} printFormatCfg
  * @property {Object=} pdfCfg
+ * @property {function(Object): void=} onProgress
  */
 
 /**
@@ -49,13 +50,19 @@ function asNumber(value) {
  * @returns {string}
  */
 function htmlToPlainText(html) {
-  const withBreaks = String(html || '').replace(/<\s*br\s*\/?>/gi, '\n');
-  let out = withBreaks.replace(/<[^>]+>/g, '');
+  const input = String(html || '');
   try {
-    const doc = new DOMParser().parseFromString(`<!doctype html><body>${out}`, 'text/html');
-    out = doc.body?.textContent || out;
-  } catch {}
-  return out.replace(/\u00a0/g, ' ').replace(/[ \t]+\n/g, '\n').replace(/\n{3,}/g, '\n\n').trim();
+    const doc = new DOMParser().parseFromString(`<!doctype html><body>${input}`, 'text/html');
+    doc.body?.querySelectorAll?.('script,style,template,noscript,iframe,object,embed')?.forEach((node) => node.remove());
+    doc.body?.querySelectorAll?.('br')?.forEach((node) => node.replaceWith(doc.createTextNode('\n')));
+    return (doc.body?.textContent || '')
+      .replace(/\u00a0/g, ' ')
+      .replace(/[ \t]+\n/g, '\n')
+      .replace(/\n{3,}/g, '\n\n')
+      .trim();
+  } catch {
+    return input.replace(/\u00a0/g, ' ').trim();
+  }
 }
 
 /**
@@ -218,6 +225,17 @@ function makeTokenContext(options) {
 }
 
 /**
+ * @param {PdfPrintOptions} options
+ * @param {Object} event
+ * @returns {void}
+ */
+function reportProgress(options, event) {
+  try {
+    if (typeof options?.onProgress === 'function') options.onProgress(event);
+  } catch {}
+}
+
+/**
  * Build a PDF blob from page image URLs and print metadata.
  * @param {Array<string>} dataUrls
  * @param {PdfPrintOptions=} options
@@ -237,11 +255,14 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const baseContext = makeTokenContext(options);
   const total = urls.length;
 
+  reportProgress(options, { phase: 'loading-library', current: 0, total });
   const { jsPDF } = await import('jspdf');
+  reportProgress(options, { phase: 'generating', current: 0, total });
   /** @type {*|null} */
   let pdf = null;
 
   for (let i = 0; i < urls.length; i += 1) {
+    reportProgress(options, { phase: 'generating', current: i, total });
     const img = await loadImage(urls[i]);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
@@ -283,10 +304,14 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     if (copyText && options.printFormatCfg?.watermark?.enabled !== false) {
       drawWatermark(pdf, copyText, pageWidth, pageHeight);
     }
+    reportProgress(options, { phase: 'generating', current: i + 1, total });
   }
 
   if (!pdf) throw new Error('PDF generation produced no document.');
-  return pdf.output('blob');
+  reportProgress(options, { phase: 'finalizing', current: total, total });
+  const blob = pdf.output('blob');
+  reportProgress(options, { phase: 'done', current: total, total });
+  return blob;
 }
 
 /**
@@ -371,9 +396,15 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  * @returns {Promise<void>}
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
+  const selectedCount = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : 1);
   const blob = await createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options);
-  if (options.action === 'download') downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  else printPdfBlob(blob);
+  if (options.action === 'download') {
+    reportProgress(options, { phase: 'downloading', current: selectedCount, total: selectedCount });
+    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
+  } else {
+    reportProgress(options, { phase: 'opening-preview', current: selectedCount, total: selectedCount });
+    printPdfBlob(blob);
+  }
 }
 
 
@@ -411,8 +442,13 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   const src = printableSourceFromElement(node);
   if (!src) throw new Error('No active printable surface was available for generated PDF output.');
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 1) : [] });
-  if (options.action === 'download') downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  else printPdfBlob(blob);
+  if (options.action === 'download') {
+    reportProgress(options, { phase: 'downloading', current: 1, total: 1 });
+    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
+  } else {
+    reportProgress(options, { phase: 'opening-preview', current: 1, total: 1 });
+    printPdfBlob(blob);
+  }
 }
 
 /**
@@ -428,6 +464,11 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   const urls = [primary, compare].filter(Boolean);
   if (urls.length !== 2) throw new Error('Both comparison surfaces are required for generated PDF output.');
   const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 2) : [] });
-  if (options.action === 'download') downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  else printPdfBlob(blob);
+  if (options.action === 'download') {
+    reportProgress(options, { phase: 'downloading', current: urls.length, total: urls.length });
+    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
+  } else {
+    reportProgress(options, { phase: 'opening-preview', current: urls.length, total: urls.length });
+    printPdfBlob(blob);
+  }
 }

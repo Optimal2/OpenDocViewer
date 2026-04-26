@@ -488,14 +488,15 @@ export function usePrintRangeController({
    * @param {'print'|'download'} action
    * @returns {(PrintSubmitDetail|null)}
    */
-  const composeSubmitDetail = useCallback((action = 'print') => {
+  const composeSubmitDetail = useCallback((action = 'print', backendOverride = null) => {
     const userValidation = validateUserFields();
     if (!userValidation.ok) {
       setError(userValidation.msg || t('printDialog.errors.review'));
       return null;
     }
 
-    const backend = action === 'download' ? 'pdf' : (pdfPrintEnabled && printBackend === 'pdf' ? 'pdf' : 'html');
+    const requestedBackend = backendOverride || printBackend;
+    const backend = action === 'download' ? 'pdf' : (pdfPrintEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
     const common = { ...extras(), printBackend: backend, printAction: action };
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
@@ -542,23 +543,30 @@ export function usePrintRangeController({
    * @param {Event} [event]
    * @returns {void}
    */
-  const submit = useCallback((event) => {
-    event?.preventDefault?.();
-    const detail = composeSubmitDetail('print');
+  const submitWithBackend = useCallback((backend = 'html', action = 'print') => {
+    const detail = composeSubmitDetail(action, backend);
     if (!detail) return;
     setError('');
     onSubmit(detail);
   }, [composeSubmitDetail, onSubmit]);
 
+  const submit = useCallback((event) => {
+    event?.preventDefault?.();
+    submitWithBackend('html', 'print');
+  }, [submitWithBackend]);
+
+  /** @returns {void} */
+  const submitPrintDirect = useCallback(() => { submitWithBackend('html', 'print'); }, [submitWithBackend]);
+
+  /** @returns {void} */
+  const submitPrintPdf = useCallback(() => { submitWithBackend('pdf', 'print'); }, [submitWithBackend]);
+
   /**
    * @returns {void}
    */
   const submitPdfDownload = useCallback(() => {
-    const detail = composeSubmitDetail('download');
-    if (!detail) return;
-    setError('');
-    onSubmit(detail);
-  }, [composeSubmitDetail, onSubmit]);
+    submitWithBackend('pdf', 'download');
+  }, [submitWithBackend]);
 
   const onBackdropMouseDown = useCallback((event) => {
     if (event.target === event.currentTarget) {
@@ -632,6 +640,8 @@ export function usePrintRangeController({
     loadingHint,
     extraSuffix,
     submit,
+    submitPrintDirect,
+    submitPrintPdf,
     submitPdfDownload,
     onBackdropMouseDown,
     onDialogKeyDown,
