@@ -16,9 +16,21 @@ import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext 
 import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
 
-const A4_PORTRAIT = [595.28, 841.89];
-const A4_LANDSCAPE = [841.89, 595.28];
+// A4 page dimensions in PostScript points. jsPDF uses 1 pt = 1/72 inch.
+const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89, unit: 'pt' });
+const A4_PORTRAIT = [A4_PAGE_PT.width, A4_PAGE_PT.height];
+const A4_LANDSCAPE = [A4_PAGE_PT.height, A4_PAGE_PT.width];
 const DEFAULT_PDF_FILENAME = 'opendocviewer-print.pdf';
+const HEADER_FOOTER_COLOR = Object.freeze([55, 55, 55]);
+const FOOTER_COLOR = Object.freeze([75, 75, 75]);
+const MAX_HEADER_FOOTER_LINES = 3;
+const MAX_FOOTER_LINES = 2;
+const MIN_WATERMARK_FONT_SIZE = 70;
+const WATERMARK_FONT_SCALE = 0.19;
+const WATERMARK_OPACITY = 0.18;
+// jsPDF's positive angle matches the visual direction used by the CSS rotate(-32deg) watermark.
+const WATERMARK_ROTATION_ANGLE = 32;
+const WATERMARK_SHADOW_OFFSET = 1.4;
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -186,8 +198,8 @@ function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize) {
   if (!clean) return 0;
   pdf.setFont('helvetica', 'normal');
   pdf.setFontSize(fontSize);
-  pdf.setTextColor(55, 55, 55);
-  const lines = pdf.splitTextToSize(clean, maxWidth).slice(0, 3);
+  pdf.setTextColor(...HEADER_FOOTER_COLOR);
+  const lines = pdf.splitTextToSize(clean, maxWidth).slice(0, MAX_HEADER_FOOTER_LINES);
   const lineHeight = fontSize * 1.18;
   lines.forEach((line, index) => pdf.text(String(line), x, y + (index * lineHeight)));
   return lines.length * lineHeight;
@@ -203,7 +215,7 @@ function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize) {
 function drawWatermark(pdf, text, pageWidth, pageHeight) {
   const clean = String(text || '').trim();
   if (!clean) return;
-  const fontSize = Math.max(70, Math.min(pageWidth, pageHeight) * 0.19);
+  const fontSize = Math.max(MIN_WATERMARK_FONT_SIZE, Math.min(pageWidth, pageHeight) * WATERMARK_FONT_SCALE);
   const x = pageWidth / 2;
   const y = pageHeight / 2;
   pdf.setFont('helvetica', 'bold');
@@ -212,7 +224,7 @@ function drawWatermark(pdf, text, pageWidth, pageHeight) {
   let restoreGState = false;
   try {
     if (typeof pdf.GState === 'function' && typeof pdf.setGState === 'function') {
-      pdf.setGState(new pdf.GState({ opacity: 0.18 }));
+      pdf.setGState(new pdf.GState({ opacity: WATERMARK_OPACITY }));
       restoreGState = true;
     }
   } catch (error) {
@@ -224,9 +236,9 @@ function drawWatermark(pdf, text, pageWidth, pageHeight) {
   // Match the HTML print watermark as closely as jsPDF allows: large, rotated, light fill
   // with a darker contrast layer so it remains visible on both bright and dark page images.
   pdf.setTextColor(255, 255, 255);
-  pdf.text(clean, x, y, { align: 'center', angle: -32 });
+  pdf.text(clean, x, y, { align: 'center', angle: WATERMARK_ROTATION_ANGLE });
   pdf.setTextColor(0, 0, 0);
-  pdf.text(clean, x + 1.4, y + 1.4, { align: 'center', angle: -32 });
+  pdf.text(clean, x + WATERMARK_SHADOW_OFFSET, y + WATERMARK_SHADOW_OFFSET, { align: 'center', angle: WATERMARK_ROTATION_ANGLE });
 
   if (restoreGState) {
     try {
@@ -310,10 +322,10 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
     if (headerText) drawSmallTextBlock(pdf, headerText, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize);
     if (footerText) {
-      const footerLines = pdf.splitTextToSize(footerText, pageWidth - (marginPt * 2)).slice(0, 2);
+      const footerLines = pdf.splitTextToSize(footerText, pageWidth - (marginPt * 2)).slice(0, MAX_FOOTER_LINES);
       pdf.setFont('helvetica', 'normal');
       pdf.setFontSize(Math.max(5, textFontSize - 0.5));
-      pdf.setTextColor(75, 75, 75);
+      pdf.setTextColor(...FOOTER_COLOR);
       const lineHeight = Math.max(5, textFontSize * 1.15);
       footerLines.forEach((line, idx) => pdf.text(String(line), marginPt, pageHeight - marginPt - ((footerLines.length - 1 - idx) * lineHeight)));
     }
