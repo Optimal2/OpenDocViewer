@@ -11,9 +11,6 @@
 # and does NOT stash changes. The working tree must be clean and the current branch must
 # already match origin/<branch> before the release version bump is created.
 
-Set-StrictMode -Version Latest
-$ErrorActionPreference = 'Stop'
-
 param(
   [ValidateSet('patch', 'minor', 'major')]
   [string]$ReleaseType = '',
@@ -22,6 +19,9 @@ param(
 
   [switch]$SkipValidation
 )
+
+Set-StrictMode -Version Latest
+$ErrorActionPreference = 'Stop'
 
 function Format-CommandLineArgs($a) {
   if (-not $a) { return '' }
