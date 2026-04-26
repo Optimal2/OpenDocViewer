@@ -5,7 +5,7 @@
  * Unified print dialog with a single print-method selector and shared print-details section.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { usePrintRangeController } from './usePrintRangeDialog.js';
@@ -43,9 +43,6 @@ export default function PrintRangeDialog({
   sessionTotalPages = totalPages,
 }) {
   const { t, i18n } = useTranslation('common');
-  const [isPrintMenuOpen, setIsPrintMenuOpen] = useState(false);
-  const printMenuRef = useRef(null);
-
   const ctrl = usePrintRangeController({
     isOpen,
     onClose,
@@ -60,23 +57,6 @@ export default function PrintRangeDialog({
     t,
     i18n,
   });
-
-  useEffect(() => {
-    if (!isPrintMenuOpen) return undefined;
-    const onPointerDown = (event) => {
-      if (printMenuRef.current?.contains?.(event.target)) return;
-      setIsPrintMenuOpen(false);
-    };
-    const onKeyDown = (event) => {
-      if (event.key === 'Escape') setIsPrintMenuOpen(false);
-    };
-    document.addEventListener('pointerdown', onPointerDown, true);
-    document.addEventListener('keydown', onKeyDown, true);
-    return () => {
-      document.removeEventListener('pointerdown', onPointerDown, true);
-      document.removeEventListener('keydown', onKeyDown, true);
-    };
-  }, [isPrintMenuOpen]);
 
   const modeOptions = useMemo(() => ([
     { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
@@ -467,46 +447,24 @@ export default function PrintRangeDialog({
               {t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' })}
             </button>
           ) : null}
-          <div className="odv-prd-printActionMenu" ref={printMenuRef}>
+          <button
+            type="button"
+            className="odv-prd-action secondary"
+            title={t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' })}
+            onClick={ctrl.submitPrintDirect}
+          >
+            {t('printDialog.footer.printHtml', { defaultValue: 'Print via HTML' })}
+          </button>
+          {ctrl.pdfPrintEnabled ? (
             <button
               type="button"
-              className="odv-prd-action secondary odv-prd-menuButton"
-              aria-haspopup="menu"
-              aria-expanded={isPrintMenuOpen}
-              aria-label={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
-              title={t('printDialog.output.menuLabel', { defaultValue: 'Choose print output mode' })}
-              onClick={() => setIsPrintMenuOpen((value) => !value)}
+              className="odv-prd-action secondary"
+              title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' })}
+              onClick={ctrl.submitPrintPdf}
             >
-              <span>{t('printDialog.footer.prepare', { defaultValue: 'Prepare printing' })}</span>
-              <span className="material-icons" aria-hidden="true">expand_more</span>
+              {t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' })}
             </button>
-            {isPrintMenuOpen ? (
-              <div className="odv-prd-printMenu" role="menu">
-                <button
-                  type="button"
-                  role="menuitem"
-                  className="odv-prd-printMenuItem"
-                  title={t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' })}
-                  onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintDirect(); }}
-                >
-                  <span className="odv-prd-printMenuTitle">{t('printDialog.output.direct.label', { defaultValue: 'Direct print' })}</span>
-                  <span className="odv-prd-printMenuHint">{t('printDialog.output.direct.hint', { defaultValue: 'Uses the browser print preview. Browser orientation applies to the whole job.' })}</span>
-                </button>
-                {ctrl.pdfPrintEnabled ? (
-                  <button
-                    type="button"
-                    role="menuitem"
-                    className="odv-prd-printMenuItem"
-                    title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' })}
-                    onClick={() => { setIsPrintMenuOpen(false); ctrl.submitPrintPdf(); }}
-                  >
-                    <span className="odv-prd-printMenuTitle">{t('printDialog.output.safe.label', { defaultValue: 'Safe print' })}</span>
-                    <span className="odv-prd-printMenuHint">{t('printDialog.output.safe.hint', { defaultValue: 'Creates a PDF first. Each PDF page gets automatic portrait/landscape orientation.' })}</span>
-                  </button>
-                ) : null}
-              </div>
-            ) : null}
-          </div>
+          ) : null}
         </div>
       </form>
     </div>

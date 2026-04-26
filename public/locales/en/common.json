@@ -143,7 +143,9 @@
       "cancel": "Cancel",
       "continue": "Start printing",
       "prepare": "Prepare printing",
-      "downloadPdf": "Save PDF"
+      "downloadPdf": "Save PDF",
+      "printHtml": "Print via HTML",
+      "printPdf": "Print via PDF"
     },
     "errors": {
       "selectValidPages": "Select valid pages.",
@@ -192,7 +194,7 @@
     },
     "subtitle": "Choose what to print and how this print job should be described. Current mode: {mode}.",
     "close": "Close",
-    "subtitleUnified": "Choose a print method and review the print details before the browser prepares the preview.",
+    "subtitleUnified": "Choose what to print and fill in any print details.",
     "methodHeader": "Print method",
     "methodLabel": "Method",
     "modes": {

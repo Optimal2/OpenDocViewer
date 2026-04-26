@@ -143,7 +143,9 @@
       "cancel": "Avbryt",
       "continue": "Starta utskrift",
       "prepare": "Förbered utskrift",
-      "downloadPdf": "Spara PDF"
+      "downloadPdf": "Spara PDF",
+      "printHtml": "Skriv ut via HTML",
+      "printPdf": "Skriv ut via PDF"
     },
     "errors": {
       "selectValidPages": "Välj giltiga sidor.",
@@ -192,7 +194,7 @@
     },
     "subtitle": "Välj vad som ska skrivas ut och hur utskriften ska beskrivas. Läget just nu: {mode}.",
     "close": "Stäng",
-    "subtitleUnified": "Välj utskriftsmetod och granska utskriftsuppgifterna innan webbläsaren förbereder förhandsgranskningen.",
+    "subtitleUnified": "Välj vad som ska skrivas ut och fyll i eventuella utskriftsuppgifter.",
     "methodHeader": "Utskriftsmetod",
     "methodLabel": "Metod",
     "modes": {
