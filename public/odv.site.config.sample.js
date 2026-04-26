@@ -101,6 +101,8 @@
         useValueForOutput: true,
 
         default: '',
+        headerMarker: { enabled: false },
+        watermark: { enabled: true },
         options: [
           { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
           { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
@@ -217,16 +219,41 @@
     printHeader: {
       enabled: true,
       position: 'top',
-      heightPx: 32,
+      heightPx: 40,
       applyTo: 'all',
+      // Supported tokens: {{date}}, {{time}}, {{page}}, {{totalPages}}, {{reason}},
+      // {{forWhom}}, {{printFormat}}, {{isCopy}}, {{UserId}}, {{session.userId}},
+      // {{doc.documentId}}, {{doc.title}}, {{metadata.1001}}, etc.
+      // Conditional block syntax:
+      //   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
+      // The block is omitted completely when UserId is null/empty/missing.
+      // Newlines in the template are rendered as print line breaks.
       template: {
-        en: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
-        sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
       },
       css: `
-.odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;
-  background:rgba(255,255,255,.85); padding:4mm 6mm; }
+.odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.88); padding:4mm 6mm; }
 .odv-print-header strong{ color:#000; }
+`.trim()
+    },
+
+    // =========================================================================
+    // Print footer
+    // =========================================================================
+    printFooter: {
+      enabled: false,
+      position: 'bottom',
+      heightPx: 28,
+      applyTo: 'all',
+      template: {
+        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}} | "]]Page {{page}}/{{totalPages}}',
+        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+      },
+      css: `
+.odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;
+  background:rgba(255,255,255,.82); padding:3mm 6mm; }
 `.trim()
     },
 

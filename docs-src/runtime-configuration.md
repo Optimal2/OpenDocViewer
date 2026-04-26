@@ -180,6 +180,8 @@ print: {
     enabled: true,
     useValueForOutput: true, // true=value on print, false=localized label on print
     default: '',
+    headerMarker: { enabled: false },
+    watermark: { enabled: true },
     options: [
       { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
       { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
@@ -331,3 +333,44 @@ What these knobs control:
 - compare navigation modifiers
   - toolbar page buttons still target the left pane by default
   - when `Shift` is held, the same toolbar buttons target the right compare pane instead
+
+## Print header/footer templates
+
+`printHeader` and `printFooter` are independent runtime-config sections. Both support localized
+`template` values, `position`, `heightPx`, `applyTo`, and trusted print-only `css`.
+
+Example:
+
+```js
+printHeader: {
+  enabled: true,
+  position: 'top',
+  applyTo: 'all',
+  template: {
+    sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
+  }
+},
+printFooter: {
+  enabled: true,
+  position: 'bottom',
+  template: {
+    sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+  }
+}
+```
+
+Useful token scopes:
+
+- session-level: `{{UserId}}`, `{{SessionId}}`, `{{session.userId}}`, `{{session.id}}`
+- print-dialog: `{{reason}}`, `{{forWhom}}`
+- print format: `{{printFormat}}`, `{{isCopy}}`
+- document-level: `{{doc.documentId}}`, `{{doc.documentPageNumber}}`, `{{doc.documentPageCount}}`
+- metadata-level: `{{metadata.<fieldId>}}`, for example `{{metadata.1001}}`
+
+Conditional syntax:
+
+```text
+[[{{UserId}}, "Utskriven av: {{UserId}} | "]]
+```
+
+The configured block is rendered only when the first token resolves to a non-empty value.

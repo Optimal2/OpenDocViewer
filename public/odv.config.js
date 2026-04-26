@@ -141,6 +141,8 @@
         // false -> print the localized option.label when available
         useValueForOutput: true,
         default: '',
+        headerMarker: { enabled: false },
+        watermark: { enabled: true },
         /** @type {PrintFormatOption[]} */
         options: [
           { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
@@ -258,25 +260,46 @@
 
     // ---- PRINT HEADER ---------------------------------------------------------
     printHeader: {
-      enabled: true,            // non-optional when enabled
-      position: "top",          // "top" | "bottom"
-      heightPx: 32,
-      applyTo: "all",           // "all" | "first" | "last"
+      enabled: true,
+      position: "top",
+      heightPx: 40,
+      applyTo: "all",
       /**
-       * Tokenized template (simple ${...} substitution).
-       * Available tokens: date (YYYY-MM-DD), time (HH:MM 24h), now, page, totalPages,
-       * reason, forWhom, user.id, user.name, doc.id, doc.title, doc.pageCount, viewer.version
+       * Tokenized template.
+       * Supported tokens:
+       *   - {{date}}, {{time}}, {{page}}, {{totalPages}}
+       *   - {{reason}}, {{forWhom}}, {{printFormat}}, {{isCopy}}
+       *   - session tokens such as {{UserId}} / {{session.userId}}
+       *   - document tokens such as {{doc.documentId}}, {{doc.title}}, {{metadata.1001}}
+       * Conditional blocks suppress surrounding labels when the value is missing:
+       *   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
+       * Newlines in the template are rendered as print line breaks.
        * @type {LocalizedString}
        */
       template: {
-        en: "${date} ${time} | ${doc.title||''} | Reason: ${reason||''} | For: ${forWhom||''} | Page ${page}/${totalPages}",
-        sv: "${date} ${time} | ${doc.title||''} | Orsak: ${reason||''} | För: ${forWhom||''} | Sida ${page}/${totalPages}"
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Reason: {{reason}}"]][[{{forWhom}}, " | For: {{forWhom}}"]][[{{UserId}}, " | Printed by: {{UserId}}"]] | Page {{page}}/{{totalPages}}',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}}[[{{doc.title}}, " | {{doc.title}}"]][[{{reason}}, " | Orsak: {{reason}}"]][[{{forWhom}}, " | För: {{forWhom}}"]][[{{UserId}}, " | Utskriven av: {{UserId}}"]] | Sida {{page}}/{{totalPages}}'
       },
-      // Print-only CSS scoped to `.odv-print-header`
       css: `
-.odv-print-header{ font:12px/1.2 Arial,Helvetica,sans-serif; color:#444;
-  background:rgba(255,255,255,.85); padding:4mm 6mm; }
+.odv-print-header{ font:12px/1.25 Arial,Helvetica,sans-serif; color:#444;
+  background:rgba(255,255,255,.88); padding:4mm 6mm; }
 .odv-print-header strong{ color:#000; }
+`.trim()
+    },
+
+    // ---- PRINT FOOTER ---------------------------------------------------------
+    printFooter: {
+      enabled: false,
+      position: "bottom",
+      heightPx: 28,
+      applyTo: "all",
+      template: {
+        en: '[[{{doc.documentId}}, "Document: {{doc.documentId}} | "]]Page {{page}}/{{totalPages}}',
+        sv: '[[{{doc.documentId}}, "Dokument: {{doc.documentId}} | "]]Sida {{page}}/{{totalPages}}'
+      },
+      css: `
+.odv-print-footer{ font:11px/1.25 Arial,Helvetica,sans-serif; color:#555;
+  background:rgba(255,255,255,.82); padding:3mm 6mm; }
 `.trim()
     },
 

@@ -25,6 +25,10 @@ const MIN_MULTI_PAGE_CLEANUP_MS = 2500;
 const BASE_MULTI_PAGE_CLEANUP_MS = 1000;
 const PER_PAGE_CLEANUP_MS = 5;
 
+function normalizePageContexts(value) {
+  return Array.isArray(value) ? value : [];
+}
+
 /**
  * Options for single-page printing.
  * @typedef {Object} PrintOptions
@@ -257,7 +261,7 @@ function createHiddenIframe(cleanupDelayMs = DEFAULT_IFRAME_CLEANUP_MS) {
 export function handlePrint(documentRenderRef, options = {}) {
   logger.info('handlePrint invoked');
 
-  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '' } = options;
+  const { orientation = 'auto', printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
 
   const active = resolveActiveNode(documentRenderRef, viewerContainerRef);
   if (!active) {
@@ -288,7 +292,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
 
   const { frame } = createHiddenIframe(DEFAULT_IFRAME_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -302,7 +306,10 @@ export function handlePrint(documentRenderRef, options = {}) {
     orientation: pageOrientation,
     printDelayMs,
     printHeaderCfg: odv.printHeader || {},
-    tokenContext
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
+    tokenContext,
+    pageContexts: normalizePageContexts(pageContexts).slice(0, 1)
   });
 }
 
@@ -320,7 +327,7 @@ export function handlePrint(documentRenderRef, options = {}) {
 export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   logger.info('handlePrintCurrentComparison invoked');
 
-  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '' } = options;
+  const { printDelayMs = 0, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
   const primaryNode = primaryRenderRef?.current?.getActiveCanvas?.();
   const compareNode = compareRenderRef?.current?.getActiveCanvas?.();
   if (!primaryNode || !compareNode) {
@@ -338,7 +345,7 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
 
   const { frame } = createHiddenIframe(MIN_MULTI_PAGE_CLEANUP_MS);
   const doc = frame.contentDocument || frame.contentWindow?.document;
@@ -351,7 +358,10 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
     dataUrls,
     printDelayMs,
     printHeaderCfg: odv.printHeader || {},
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
     tokenContext,
+    pageContexts: normalizePageContexts(pageContexts).slice(0, dataUrls.length),
   });
 }
 
@@ -418,7 +428,7 @@ async function resolveAllPageDataUrls(documentRenderRef, viewerContainerRef) {
 export async function handlePrintAll(documentRenderRef, options = {}) {
   logger.info('handlePrintAll invoked');
 
-  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '', printFormat = '' } = options;
+  const { printDelayMs = 0, viewerContainerRef, pageRange, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options;
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!dataUrls.length) {
@@ -441,7 +451,9 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
       logger.info('Printing selected page range (ascending)', { from, to, count: toPrint.length, total });
     } else {
       const seq = [];
-      for (let n = from; n >= to; n--) seq.push(dataUrls[n - 1]);
+      for (let n = from; n >= to; n -= 1) {
+        seq.push(dataUrls[n - 1]);
+      }
       toPrint = seq;
       logger.info('Printing selected page range (descending)', { from, to, count: toPrint.length, total });
     }
@@ -449,7 +461,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
 
   const { frame } = createHiddenIframe(
     Math.max(
@@ -467,7 +479,10 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
     dataUrls: toPrint,
     printDelayMs,
     printHeaderCfg: odv.printHeader || {},
-    tokenContext
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
+    tokenContext,
+    pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
   });
 }
 
@@ -480,7 +495,7 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
  * @returns {Promise<void>}
  */
 export async function handlePrintSequence(documentRenderRef, sequence, options = {}) {
-  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '' } = options || {};
+  const { printDelayMs = 0, viewerContainerRef, reason = '', forWhom = '', printFormat = '', bundle = null, pageContexts = [] } = options || {};
 
   const dataUrls = await resolveAllPageDataUrls(documentRenderRef, viewerContainerRef);
   if (!Array.isArray(sequence) || !sequence.length) {
@@ -506,7 +521,7 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
 
   const odv = getODVConfig();
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
-  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat);
+  const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle });
 
   const { frame } = createHiddenIframe(
     Math.max(
@@ -524,7 +539,10 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
     dataUrls: toPrint,
     printDelayMs,
     printHeaderCfg: odv.printHeader || {},
-    tokenContext
+    printFooterCfg: odv.printFooter || {},
+    printFormatCfg: odv.print?.format || {},
+    tokenContext,
+    pageContexts: normalizePageContexts(pageContexts).slice(0, toPrint.length)
   });
 }
 

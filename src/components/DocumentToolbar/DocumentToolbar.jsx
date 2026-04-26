@@ -126,6 +126,8 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
  * @property {Array<number>=} visibleOriginalPageNumbers
  * @property {number=} selectionIncludedCount
  * @property {number=} sessionTotalPages
+ * @property {Object|null=} bundle
+ * @property {Array<*>=} allPages
  * @property {boolean=} documentNavigationEnabled
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} primaryDocumentNavigation
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} compareDocumentNavigation
@@ -211,6 +213,8 @@ const DocumentToolbar = ({
   visibleOriginalPageNumbers = [],
   selectionIncludedCount = 0,
   sessionTotalPages = totalPagesDisplay,
+  bundle = null,
+  allPages = [],
   documentNavigationEnabled = false,
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
@@ -725,6 +729,74 @@ const DocumentToolbar = ({
   }, [hasActiveSelection, sessionTotalPages, visibleOriginalPageNumbers]);
 
   /**
+   * Resolve page metadata objects aligned with the printed page sequence.
+   * Page numbers are 1-based original session page numbers.
+   * @param {Array<number>} pageNumbers
+   * @returns {Array<*>}
+   */
+  const resolvePrintPageContexts = useCallback((pageNumbers) => {
+    if (!Array.isArray(pageNumbers) || !pageNumbers.length) return [];
+    const pages = Array.isArray(allPages) ? allPages : [];
+    return pageNumbers.map((pageNumber) => {
+      const index = Math.floor(Number(pageNumber) || 0) - 1;
+      const page = index >= 0 ? (pages[index] || null) : null;
+      return page ? { ...page, originalPageNumber: index + 1 } : { originalPageNumber: index + 1 };
+    });
+  }, [allPages]);
+
+  /**
+   * @param {PrintSubmitDetail} detail
+   * @returns {Array<number>}
+   */
+  const resolvePrintPageNumbers = useCallback((detail) => {
+    if (!detail || detail.mode === 'active') {
+      if (detail?.activeScope === 'compare-both' && isComparing) {
+        return [pageNumberDisplay, compareNavigationPageDisplay]
+          .map((value) => Math.floor(Number(value) || 0))
+          .filter((value) => value > 0);
+      }
+      const active = Math.floor(Number(pageNumberDisplay) || 0);
+      return active > 0 ? [active] : [];
+    }
+    if (detail.mode === 'all') {
+      if (detail.allScope === 'selection' && Array.isArray(visibleOriginalPageNumbers) && visibleOriginalPageNumbers.length) {
+        return visibleOriginalPageNumbers.slice();
+      }
+      return Array.from({ length: Math.max(0, Math.floor(Number(sessionTotalPages) || 0)) }, (_value, index) => index + 1);
+    }
+    if (detail.mode === 'range' && Number.isFinite(detail.from) && Number.isFinite(detail.to)) {
+      const total = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
+      const from = Math.max(1, Math.min(total, Math.floor(Number(detail.from) || 1)));
+      const to = Math.max(1, Math.min(total, Math.floor(Number(detail.to) || 1)));
+      const out = [];
+      if (from <= to) {
+        for (let n = from; n <= to; n += 1) out.push(n);
+      } else {
+        for (let n = from; n >= to; n -= 1) out.push(n);
+      }
+      return out;
+    }
+    if (detail.mode === 'advanced' && Array.isArray(detail.sequence)) return detail.sequence.slice();
+    return [];
+  }, [compareNavigationPageDisplay, isComparing, pageNumberDisplay, sessionTotalPages, visibleOriginalPageNumbers]);
+
+  /**
+   * @param {PrintSubmitDetail} detail
+   * @returns {Object}
+   */
+  const makePrintOptions = useCallback((detail) => {
+    const pageNumbers = resolvePrintPageNumbers(detail);
+    return {
+      viewerContainerRef,
+      reason: detail?.reason || '',
+      forWhom: detail?.forWhom || '',
+      printFormat: detail?.printFormat || '',
+      bundle: bundle || null,
+      pageContexts: resolvePrintPageContexts(pageNumbers),
+    };
+  }, [bundle, resolvePrintPageContexts, resolvePrintPageNumbers, viewerContainerRef]);
+
+  /**
    * Fire-and-forget user print log. Must never block the print action.
    * @param {PrintSubmitDetail} detail
    * @returns {void}
@@ -752,12 +824,7 @@ const DocumentToolbar = ({
    * @returns {void}
    */
   const dispatchPrintRequest = useCallback((detail) => {
-    const commonOpts = {
-      viewerContainerRef,
-      reason: detail?.reason || '',
-      forWhom: detail?.forWhom || '',
-      printFormat: detail?.printFormat || ''
-    };
+    const commonOpts = makePrintOptions(detail);
 
     if (!detail || detail.mode === 'active') {
       if (detail?.activeScope === 'compare-both' && isComparing) {
@@ -782,7 +849,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, isComparing, viewerContainerRef, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, isComparing, makePrintOptions, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -1212,6 +1279,8 @@ DocumentToolbar.propTypes = {
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number),
   selectionIncludedCount: PropTypes.number,
   sessionTotalPages: PropTypes.number,
+  bundle: PropTypes.object,
+  allPages: PropTypes.arrayOf(PropTypes.any),
 };
 
 export default React.memo(DocumentToolbar);

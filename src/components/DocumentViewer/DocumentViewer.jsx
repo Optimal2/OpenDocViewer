@@ -326,6 +326,8 @@ const DocumentViewer = () => {
         visibleOriginalPageNumbers={visibleOriginalPageNumbers}
         selectionIncludedCount={visibleOriginalPageNumbers.length}
         sessionTotalPages={totalPagesDisplay}
+        bundle={bundle || null}
+        allPages={allPages || []}
 
         isComparing={isComparing}
         handleCompare={handleCompare}
