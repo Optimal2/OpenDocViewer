@@ -121,12 +121,15 @@ function enabled(value) {
  * Build the print-only CSS string (inlined within the print iframe).
  * @param {string} extraCss
  * @param {('portrait'|'landscape'|undefined)} pageOrientation
+ * @param {*} printFormatCfg
  * @returns {string}
  */
-function buildPrintCss(extraCss, pageOrientation) {
+function buildPrintCss(extraCss, pageOrientation, printFormatCfg) {
   const safeOrientation = normalizePageOrientation(pageOrientation);
   const trustedExtraCss = normalizeTrustedExtraCss(extraCss);
   const pageRule = `@page{margin:0;${safeOrientation ? `size:${safeOrientation};` : ''}}`;
+  const watermarkExtraCss = normalizeTrustedExtraCss(printFormatCfg?.watermark?.css || '');
+  const headerMarkerExtraCss = normalizeTrustedExtraCss(printFormatCfg?.headerMarker?.css || '');
 
   const base =
     `@media print{${pageRule}html,body{height:100%;}}` +
@@ -144,10 +147,15 @@ function buildPrintCss(extraCss, pageOrientation) {
       'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
       'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
     '.odv-print-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(-32deg);' +
-      'font:bold 84px/1 Arial,Helvetica,sans-serif;letter-spacing:.12em;color:rgba(0,0,0,.16);' +
-      'white-space:nowrap;pointer-events:none;user-select:none;z-index:2147483645;}';
+      'font:bold 19vmin/1 Arial,Helvetica,sans-serif;letter-spacing:.16em;color:rgba(255,255,255,.16);' +
+      'paint-order:stroke fill;-webkit-text-stroke:1.2px rgba(0,0,0,.20);' +
+      'text-shadow:0 0 .4px rgba(0,0,0,.26),0 0 2px rgba(0,0,0,.18),0 0 12px rgba(255,255,255,.20);' +
+      'white-space:nowrap;pointer-events:none;user-select:none;z-index:2147483645;}' +
+    '.odv-print-watermark::after{content:attr(data-text);position:absolute;left:0;top:0;' +
+      'color:rgba(0,0,0,.10);text-shadow:0 0 1px rgba(255,255,255,.32),0 0 6px rgba(255,255,255,.22);' +
+      'pointer-events:none;z-index:-1;}';
 
-  return base + trustedExtraCss;
+  return base + trustedExtraCss + headerMarkerExtraCss + watermarkExtraCss;
 }
 
 /**
@@ -263,6 +271,7 @@ function buildPrintFormatElements(doc, tokenContext, printFormatCfg) {
     watermark = doc.createElement('div');
     watermark.className = 'odv-print-watermark';
     watermark.textContent = text;
+    watermark.setAttribute('data-text', text);
   }
 
   return { header, watermark };
@@ -386,7 +395,7 @@ function mergeOverlayCss(printHeaderCfg, printFooterCfg) {
  * @returns {void}
  */
 export function renderSingleDocument(doc, opts) {
-  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), opts.orientation);
+  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), opts.orientation, opts.printFormatCfg || {});
   ensureHead(doc, cssText);
 
   populateBodyAndPrint(
@@ -415,7 +424,7 @@ export function renderSingleDocument(doc, opts) {
  * @returns {void}
  */
 export function renderMultiDocument(doc, opts) {
-  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), undefined);
+  const cssText = buildPrintCss(mergeOverlayCss(opts.printHeaderCfg, opts.printFooterCfg), undefined, opts.printFormatCfg || {});
   ensureHead(doc, cssText);
 
   const pages = (opts.dataUrls || []).map((src, i) => ({

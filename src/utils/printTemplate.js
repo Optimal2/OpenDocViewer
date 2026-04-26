@@ -15,7 +15,7 @@
  *                                                   when path resolves to a non-empty value.
  */
 
-const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]+);/g;
+const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
 
 /**
  * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
@@ -52,8 +52,8 @@ export function escapeHtml(s) {
   return out;
 }
 
-/** Zero-pad helper. */
-function z2(n) { return (n < 10 ? '0' : '') + n; }
+/** Zero-pad helper for two-digit date/time fields. */
+function zeroPad2(n) { return (n < 10 ? '0' : '') + n; }
 
 /**
  * @param {*} value
@@ -308,7 +308,12 @@ function tryGetDocumentMetadata(handle) {
 
 /**
  * Window-level values optionally supplied by embedding hosts.
- * @typedef {Window & { __ODV_USER__?: Object, __ODV_VERSION__?: string, __ODV_SESSION__?: Object }} ODVPrintWindow
+ * This stays as a plain object typedef because JSDoc's type parser in our CI does not
+ * accept intersection syntax like `Window & {...}`.
+ * @typedef {Object} ODVPrintWindow
+ * @property {Object=} __ODV_USER__
+ * @property {string=} __ODV_VERSION__
+ * @property {Object=} __ODV_SESSION__
  */
 
 /**
@@ -325,7 +330,7 @@ function tryGetDocumentMetadata(handle) {
  * @returns {Object}
  */
 export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', options = {}) {
-  /** @type {Partial<ODVPrintWindow>} */
+  /** @type {ODVPrintWindow} */
   const win = typeof window !== 'undefined' ? /** @type {ODVPrintWindow} */ (window) : {};
   const user = isPlainObject(win.__ODV_USER__) ? win.__ODV_USER__ : {};
   const viewer = { version: optionalText(win.__ODV_VERSION__) || '' };
@@ -336,10 +341,10 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
 
   const now = new Date();
   const y = now.getFullYear();
-  const m = z2(now.getMonth() + 1);
-  const d = z2(now.getDate());
-  const hh = z2(now.getHours());
-  const mm = z2(now.getMinutes());
+  const m = zeroPad2(now.getMonth() + 1);
+  const d = zeroPad2(now.getDate());
+  const hh = zeroPad2(now.getHours());
+  const mm = zeroPad2(now.getMinutes());
   const printFormatText = valueToText(printFormat);
   const sessionAliases = buildSessionTokenAliases(session);
   const reasonSelection = isPlainObject(options?.reasonSelection) ? options.reasonSelection : {};

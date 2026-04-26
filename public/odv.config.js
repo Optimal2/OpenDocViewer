@@ -150,7 +150,10 @@
           // false -> hide the checkbox; combine with defaultChecked=true for forced copy watermark
           showOption: true,
           // false -> normal print by default; user must explicitly choose copy watermark
-          defaultChecked: false
+          defaultChecked: false,
+          // Optional extra CSS appended inside the isolated print iframe for the watermark element.
+          // Use this only for trusted, site-local visual tweaks.
+          css: ''
         },
         /** @type {PrintFormatOption[]} */
         options: [
@@ -333,6 +336,9 @@
 
       // Runtime memory heuristics. High-memory machines get more eager caching/warm-up,
       // while lower-memory machines stay conservative.
+      // NOTE: the sample file intentionally shows a more conservative profile (4 GB / 1024 MiB)
+      // as a broadly safe starting point, while these application defaults are more performance-
+      // oriented for stronger desktops (8 GB / 2048 MiB).
       adaptiveMemory: {
         enabled: true,
         preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
