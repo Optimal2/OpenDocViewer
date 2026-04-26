@@ -236,8 +236,8 @@
     "pdfProgress": {
       "downloadTitle": "Creating PDF",
       "printTitle": "Preparing safe print",
-      "body": "Generated {{current}} of {{total}} pages.",
-      "error": "PDF generation failed: {{error}}"
+      "body": "Generated {current} of {total} pages.",
+      "error": "PDF generation failed: {error}"
     }
   },
   "print": {

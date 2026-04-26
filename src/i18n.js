@@ -87,7 +87,7 @@ const WANT_DIAG = IS_DEV;
  * Some deployments do not inject a per-build ID. Bump this revision whenever locale placeholders or
  * message syntax changes so browsers do not keep serving stale JSON after a viewer upgrade.
  */
-const BUNDLED_I18N_RESOURCE_REVISION = '20250418-01';
+const BUNDLED_I18N_RESOURCE_REVISION = '20250418-02';
 
 /**
  * Dev-only reload delay after diagnostic localStorage writes.
