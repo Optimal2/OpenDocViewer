@@ -72,31 +72,18 @@ submissions while the browser is still discovering new pages.
 4. render a multi-page document into the hidden iframe
 5. call `print()` and remove the iframe afterwards
 
-## Large print preparation notice
+## Print progress overlays
 
-Large print jobs can take noticeable time before the browser preview actually appears. To reduce the
-chance that users click the print action multiple times, the toolbar can show a temporary “print
-request has been sent” overlay once the job size passes the configured threshold.
+OpenDocViewer no longer shows the older informational overlay for HTML/browser printing. In
+practice, that notice appeared too briefly to be useful and could visually compete with the PDF
+progress dialog.
 
-The threshold is controlled by runtime config:
+Progress is now shown only when OpenDocViewer actively generates a PDF, either for **Print via
+PDF** or **Save PDF**. The progress dialog reports how many pages have been processed before the
+browser PDF print preview or download is started.
 
-```js
-print: {
-  preparationNoticeThresholdPages: 200,
-  format: {
-    enabled: true,
-    useValueForOutput: true,
-    default: '',
-    options: [
-      { value: '', label: { en: 'Normal print', sv: 'Normal utskrift' } },
-      { value: 'KOPIA', label: { en: 'Copy', sv: 'Kopia' } }
-    ]
-  }
-}
-```
-
-This notice is informational only. It does not modify the generated print DOM or the actual pages
-selected for printing.
+The legacy `print.preparationNoticeThresholdPages` runtime key is ignored and remains only as a
+harmless compatibility key for older site-local configuration files.
 
 ## Why hidden iframes are used
 

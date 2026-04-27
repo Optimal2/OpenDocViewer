@@ -231,7 +231,6 @@ const DocumentToolbar = ({
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
-  const [printPreparationNotice, setPrintPreparationNotice] = useState(/** @type {{ open:boolean, pageCount:number }} */ ({ open: false, pageCount: 0 }));
   const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, total:number, error:string }} */ ({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }));
   const [printWarmFrameStatus, setPrintWarmFrameStatus] = useState(/** @type {'off'|'pending'|'ready'|'warning'|'error'} */ ('off'));
   const warmPrintFrameRef = useRef(/** @type {*} */ (null));
@@ -288,14 +287,6 @@ const DocumentToolbar = ({
     if (isPrintDialogOpen) closePrintDialog?.();
   }, [closePrintDialog, isDocumentLoading, isPrintDialogOpen]);
 
-  useEffect(() => {
-    if (!printPreparationNotice.open) return undefined;
-    const timeoutId = window.setTimeout(() => {
-      setPrintPreparationNotice({ open: false, pageCount: 0 });
-    }, 6000);
-    return () => window.clearTimeout(timeoutId);
-  }, [printPreparationNotice.open]);
-
   // Seed optional user-log context once so later print actions can attach host metadata.
   useEffect(() => {
     try {
@@ -330,12 +321,6 @@ const DocumentToolbar = ({
     canGoFirst: !!compareDocumentNavigation?.canGoFirst,
     canGoLast: !!compareDocumentNavigation?.canGoLast,
   }), [compareDocumentNavigation]);
-
-  const printPreparationNoticeThreshold = useMemo(() => {
-    const cfg = getRuntimeConfig();
-    const raw = Number(cfg?.print?.preparationNoticeThresholdPages);
-    return Number.isFinite(raw) && raw > 0 ? Math.max(1, Math.floor(raw)) : 200;
-  }, []);
 
   // Navigation helpers (single-step handlers + press-and-hold timers).
   // Shift steers the right compare pane and can open compare mode on demand. Ctrl switches the
@@ -967,20 +952,25 @@ const DocumentToolbar = ({
           setPdfProgress({ open: true, action, phase: String(event?.phase || 'generating'), current, total: nextTotal, error: '' });
         },
       };
-      const pdfTask = detail?.mode === 'active'
-        ? (detail?.activeScope === 'compare-both' && isComparing
-            ? handlePdfCurrentComparison(documentRenderRef, compareRef, pdfOpts)
-            : handlePdfCurrent(documentRenderRef, pdfOpts))
-        : handlePdfOutput(documentRenderRef, pageNumbers, pdfOpts);
-      pdfTask
-        .then(() => {
-          setPdfProgress({ open: true, action, phase: action === 'download' ? 'downloaded' : 'opening-preview', current: total, total, error: '' });
-          window.setTimeout(() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }), 1800);
-        })
-        .catch((error) => {
-          logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
-          setPdfProgress({ open: true, action, phase: 'error', current: 0, total, error: String(error?.message || error) });
-        });
+      // Give React/the browser one paint opportunity before PDF generation starts. On fast
+      // machines the dynamic import may already be cached, and jsPDF work can otherwise begin
+      // before the progress overlay becomes visible.
+      window.setTimeout(() => {
+        const pdfTask = detail?.mode === 'active'
+          ? (detail?.activeScope === 'compare-both' && isComparing
+              ? handlePdfCurrentComparison(documentRenderRef, compareRef, pdfOpts)
+              : handlePdfCurrent(documentRenderRef, pdfOpts))
+          : handlePdfOutput(documentRenderRef, pageNumbers, pdfOpts);
+        pdfTask
+          .then(() => {
+            setPdfProgress({ open: true, action, phase: action === 'download' ? 'downloaded' : 'opening-preview', current: total, total, error: '' });
+            window.setTimeout(() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }), 1800);
+          })
+          .catch((error) => {
+            logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
+            setPdfProgress({ open: true, action, phase: 'error', current: 0, total, error: String(error?.message || error) });
+          });
+      }, 50);
       return;
     }
 
@@ -1026,15 +1016,10 @@ const DocumentToolbar = ({
 
     submitUserPrintLog(detail);
 
-    const pageCount = resolvePrintPageCount(detail);
-    if (Number.isFinite(pageCount) && pageCount >= printPreparationNoticeThreshold) {
-      setPrintPreparationNotice({ open: true, pageCount: pageCount });
-    }
-
     window.setTimeout(() => {
       dispatchPrintRequest(detail);
     }, 30);
-  }, [closePrintDialog, dispatchPrintRequest, printPreparationNoticeThreshold, resolvePrintPageCount, submitUserPrintLog]);
+  }, [closePrintDialog, dispatchPrintRequest, submitUserPrintLog]);
 
   const printActionTitle = printEnabled
     ? t('toolbar.print')
@@ -1382,29 +1367,6 @@ const DocumentToolbar = ({
         </div>
       ) : null}
 
-      {printPreparationNotice.open ? (
-        <div className="odv-print-preparing-backdrop" role="status" aria-live="polite">
-          <div className="odv-print-preparing-dialog">
-            <div className="odv-print-preparing-icon" aria-hidden="true">
-              <span className="material-icons">hourglass_top</span>
-            </div>
-            <div className="odv-print-preparing-copy">
-              <h3>{t('printDialog.preparing.title', { defaultValue: 'Preparing print job' })}</h3>
-              <p>{t('printDialog.preparing.body', {
-                count: printPreparationNotice.pageCount,
-                defaultValue: `A print request for ${printPreparationNotice.pageCount} pages has been sent to the browser. It can take a moment before the browser's print preview opens.`,
-              })}</p>
-            </div>
-            <button
-              type="button"
-              className="odv-print-preparing-close"
-              onClick={() => setPrintPreparationNotice({ open: false, pageCount: 0 })}
-            >
-              {t('printDialog.preparing.dismiss', { defaultValue: 'Close' })}
-            </button>
-          </div>
-        </div>
-      ) : null}
     </div>
   );
 };
