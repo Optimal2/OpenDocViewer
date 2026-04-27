@@ -99,11 +99,9 @@
     // Print UI behavior
     // =========================================================================
     print: {
-      // When a print request includes at least this many pages, the viewer shows a temporary
-      // informational overlay after the user clicks “Prepare printing”. This helps prevent users
-      // from launching multiple identical jobs while the browser is still building the preview.
-      // Use 0 to disable the notice.
-      preparationNoticeThresholdPages: 200,
+      // Deprecated/no-op since PDF progress became the only print progress overlay.
+      // Kept as a harmless compatibility key for older site-local configs.
+      preparationNoticeThresholdPages: 0,
 
       // Warm print iframe preloads original page image blobs in a hidden iframe after all pages
       // are ready. It is only used for order-preserving multi-page jobs; active-page and reordered
