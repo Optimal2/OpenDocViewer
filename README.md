@@ -129,8 +129,10 @@ The viewer can start in several different ways. `src/integrations/bootstrapRunti
 
 - **Parent page**
   - same-origin host page passes bootstrap data through `window.parent`
+- **Session URL**
+  - bootstrap data is fetched from a short host-provided `sessionurl` / `bundleUrl`
 - **Session token**
-  - bootstrap data is supplied through a URL token/payload
+  - small bootstrap data is supplied through a URL token/payload
 - **URL parameters**
   - legacy pattern mode using folder + extension + end number
 - **JS API**

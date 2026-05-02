@@ -205,6 +205,7 @@ export default function AppBootstrap() {
     // 2) Bundle-backed modes → explicit-list mode
     if (
       (mode === ODV_BOOTSTRAP_MODES.PARENT_PAGE ||
+        mode === ODV_BOOTSTRAP_MODES.SESSION_URL ||
         mode === ODV_BOOTSTRAP_MODES.SESSION_TOKEN ||
         mode === ODV_BOOTSTRAP_MODES.JS_API) &&
       Array.isArray(sourceListFromBundle) &&

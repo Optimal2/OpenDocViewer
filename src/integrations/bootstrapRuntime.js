@@ -13,6 +13,7 @@
 
 import { readFromParent } from './parentBridge.js';
 import { readFromSessionToken } from './sessionToken.js';
+import { readFromSessionUrl } from './sessionUrl.js';
 import { readFromUrlParams } from './urlParams.js';
 import { normalizeToPortableBundle } from './normalizePortableBundle.js';
 
@@ -22,6 +23,7 @@ import { normalizeToPortableBundle } from './normalizePortableBundle.js';
  */
 export const ODV_BOOTSTRAP_MODES = Object.freeze({
   PARENT_PAGE: 'parent-page',
+  SESSION_URL: 'session-url',
   SESSION_TOKEN: 'session-token',
   URL_PARAMS: 'url-params',
   JS_API: 'js-api',
@@ -39,7 +41,7 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
  */
 
 /**
- * @typedef {{ mode: ('parent-page'|'session-token'|'js-api'), bundle: PortableDocumentBundle, debugInfo: BootstrapDebugInfo }} BootstrapFromHost
+ * @typedef {{ mode: ('parent-page'|'session-url'|'session-token'|'js-api'), bundle: PortableDocumentBundle, debugInfo: BootstrapDebugInfo }} BootstrapFromHost
  * @typedef {{ mode: 'url-params', urlConfig: { folder: string, extension: string, endNumber: number }, debugInfo: BootstrapDebugInfo }} BootstrapFromUrlParams
  * @typedef {{ mode: 'demo', debugInfo: BootstrapDebugInfo }} BootstrapDemo
  * @typedef {(BootstrapFromHost|BootstrapFromUrlParams|BootstrapDemo)} BootstrapAny
@@ -130,8 +132,10 @@ export async function bootstrapDetect(options = {}) {
   const diagnosticsEnabled = !!options?.diagnosticsEnabled;
 
   let parentProbed = false;
+  let sessionUrlProbed = false;
   let sessionTokenProbed = false;
   let parent = null;
+  let sessionUrl = null;
   let sessionTok = null;
 
   /**
@@ -146,6 +150,20 @@ export async function bootstrapDetect(options = {}) {
       parent = null;
     }
     return parent;
+  };
+
+  /**
+   * @returns {Promise.<*>}
+   */
+  const probeSessionUrl = async () => {
+    if (sessionUrlProbed) return sessionUrl;
+    sessionUrlProbed = true;
+    try {
+      sessionUrl = await readFromSessionUrl();
+    } catch {
+      sessionUrl = null;
+    }
+    return sessionUrl;
   };
 
   /**
@@ -168,6 +186,7 @@ export async function bootstrapDetect(options = {}) {
   // it is needed for actual startup selection.
   if (diagnosticsEnabled) {
     probeParent();
+    await probeSessionUrl();
     probeSessionToken();
   }
 
@@ -191,7 +210,27 @@ export async function bootstrapDetect(options = {}) {
     }
   } catch {}
 
-  // 2) Session token (?sessiondata=…)
+  // 2) Session URL (?sessionurl=…)
+  try {
+    const sessionUrlCandidate = await probeSessionUrl();
+    if (sessionUrlCandidate?.data) {
+      const bundle = tryNormalizeBundle(sessionUrlCandidate.data);
+      if (bundle) {
+        return {
+          mode: ODV_BOOTSTRAP_MODES.SESSION_URL,
+          bundle,
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.SESSION_URL,
+            String(sessionUrlCandidate.source || 'sessionurl'),
+            sessionUrlCandidate.data,
+            diagnosticsEnabled
+          ),
+        };
+      }
+    }
+  } catch {}
+
+  // 3) Session token (?sessiondata=…)
   try {
     const sessionCandidate = probeSessionToken();
     if (sessionCandidate?.data) {
@@ -211,7 +250,7 @@ export async function bootstrapDetect(options = {}) {
     }
   } catch {}
 
-  // 3) URL params (pattern mode)
+  // 4) URL params (pattern mode)
   try {
     const urlp = readFromUrlParams();
     if (urlp?.data && urlp.data.folder && urlp.data.extension && urlp.data.endNumber) {
@@ -229,7 +268,7 @@ export async function bootstrapDetect(options = {}) {
     }
   } catch {}
 
-  // 4) JS API (window.ODV.start)
+  // 5) JS API (window.ODV.start)
   try {
     if (typeof window !== 'undefined' && window.ODV?.__pending) {
       const pending = window.ODV.__pending;
@@ -270,7 +309,7 @@ export async function bootstrapDetect(options = {}) {
     }
   } catch {}
 
-  // 5) Fallback: demo
+  // 6) Fallback: demo
   return {
     mode: ODV_BOOTSTRAP_MODES.DEMO,
     debugInfo: makeDebugInfo(
