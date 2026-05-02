@@ -18,6 +18,8 @@ OpenDocViewer should stay a generic viewer:
   - reads same-origin parent-window bootstrap data from `window.parent.ODV_BOOTSTRAP`
 - `src/integrations/sessionToken.js`
   - decodes `?sessiondata=<base64-json>` payloads
+- `src/integrations/sessionUrl.js`
+  - fetches host-prepared JSON from `?sessionurl=<url>` or `?bundleUrl=<url>`
 - `src/integrations/urlParams.js`
   - supports legacy pattern mode from URL query parameters
 - `src/integrations/normalizePortableBundle.js`
@@ -232,10 +234,11 @@ Resolved aliases are stored on `document.metadata` and `document.metadataDetails
 `bootstrapRuntime.js` probes startup sources in this order:
 
 1. Parent page bridge (`parent-page`)
-2. Session token (`session-token`)
-3. URL parameters (`url-params`)
-4. JavaScript API (`js-api`)
-5. Demo mode (`demo`)
+2. Session URL (`session-url`)
+3. Session token (`session-token`)
+4. URL parameters (`url-params`)
+5. JavaScript API (`js-api`)
+6. Demo mode (`demo`)
 
 Use this decision table for new integrations:
 
@@ -243,7 +246,8 @@ Use this decision table for new integrations:
 | --- | --- | --- | --- |
 | JS API | ODV is mounted by host script on the same page | `window.ODV.start({ bundle })` | Easiest for controlled same-page integrations. |
 | Parent bridge | ODV is embedded in a same-origin iframe | `window.parent.ODV_BOOTSTRAP` | Works only when iframe and parent are same-origin. |
-| Session token | Payload is large, sensitive, or prepared server-side | `?sessiondata=<base64-json>` | Current implementation decodes the token locally; do not place secrets in it. |
+| Session URL | Payload is large or prepared server-side | `?sessionurl=<encoded-url>` or `?bundleUrl=<encoded-url>` | Recommended for manual review because the viewer URL stays short and the host endpoint keeps authorization. |
+| Session token | Payload is small and self-contained | `?sessiondata=<base64-json>` | Decodes the token locally; do not place secrets in it. Avoid this for large document bundles. |
 | URL params | Host can derive a simple numbered source pattern | `?folder=...&ext=...&pages=...` | Legacy/simple mode; not recommended for manual review metadata. |
 | Demo | No host data exists | bundled public sample assets | Development fallback. |
 
