@@ -1,118 +1,184 @@
-# Integration notes
+# Integration Guide
 
-This document describes the startup and host-integration layer. The goal of the integration code is to normalize many possible host payload shapes into one viewer-facing input model.
+This document defines how host applications should provide OpenDocViewer with files and document metadata. It is both the human integration guide and the Codex-facing contract for future host work, including IbsPackager manual review.
 
-## Modules
+## Goals
+
+OpenDocViewer should stay a generic viewer:
+
+- Host applications own authentication, authorization, workflow state, review decisions, and audit rules.
+- OpenDocViewer owns file loading, rendering, navigation, metadata display, printing, and viewer diagnostics.
+- Host-specific data must cross the boundary as a documented payload, not as hardcoded viewer behavior.
+
+## Main Modules
 
 - `src/integrations/bootstrapRuntime.js`
-  - main startup decision point
-- `src/integrations/urlParams.js`
-  - legacy query-string driven startup
+  - chooses the startup source and exposes `window.ODV.start(...)`
 - `src/integrations/parentBridge.js`
-  - same-origin parent window bridge
+  - reads same-origin parent-window bootstrap data from `window.parent.ODV_BOOTSTRAP`
 - `src/integrations/sessionToken.js`
-  - token-based startup retrieval
+  - decodes `?sessiondata=<base64-json>` payloads
+- `src/integrations/urlParams.js`
+  - supports legacy pattern mode from URL query parameters
 - `src/integrations/normalizePortableBundle.js`
-  - converts different host bundle shapes into one neutral form
+  - normalizes host payloads into the Portable Document Bundle shape
+- `src/schemas/portableBundle.js`
+  - documents the schema version and lightweight validation helpers
+- `src/components/DocumentLoader/sources/explicitListSource.js`
+  - converts a normalized bundle into the ordered file URL list consumed by the loader
+- `src/utils/documentMetadata.js`
+  - builds UI-friendly metadata views from the normalized bundle
 
-## Design intent
+## Recommended Contract
 
-The rest of the app should not care whether the source data arrived from:
+Use Portable Document Bundle v1 for new integrations.
 
-- URL parameters
-- a same-origin embedding parent
-- a session-token lookup
-- a direct JavaScript bootstrap object
-- demo mode
+The bundle is JSON-serializable and should contain:
 
-That knowledge should stop at the integration layer.
+- `session`
+  - `id`: stable viewer-session identifier
+  - `userId`: optional display/audit context
+  - `issuedAt`: optional ISO timestamp
+- `documents`
+  - ordered list of logical documents
+  - each document has a stable `documentId`
+  - each document has an ordered `files` list
+  - each document may include raw and semantic metadata
+- `integration`
+  - optional transport and host context
+  - optional `mediaConfiguration` describing metadata captions, ordering, and presentation hints
 
-## Bootstrap modes in practice
+Minimal example:
 
-### Pattern mode
+```js
+window.ODV.start({
+  bundle: {
+    session: {
+      id: 'manual-review:review-item-123',
+      userId: 'DOMAIN\\user',
+      issuedAt: new Date().toISOString()
+    },
+    documents: [
+      {
+        documentId: 'review-item-123',
+        files: [
+          {
+            id: 'file-1',
+            url: '/ibspackager/manual-review/files/file-1',
+            ext: 'pdf',
+            displayName: 'Invoice 4711.pdf'
+          }
+        ],
+        meta: [
+          { id: 'jobId', key: 'jobId', value: 'job-456', label: 'Job ID' },
+          { id: 'reviewItemId', key: 'reviewItemId', value: 'review-item-123', label: 'Review item ID' },
+          { id: 'channelKey', key: 'channelKey', value: 'local_file_drop_test', label: 'Channel' }
+        ],
+        metadata: {
+          jobId: 'job-456',
+          reviewItemId: 'review-item-123',
+          channelKey: 'local_file_drop_test'
+        }
+      }
+    ],
+    integration: {
+      source: 'IbsPackager.ManualReview'
+    }
+  }
+});
+```
 
-Used when the app can derive source URLs from folder + extension + page count.
+## File References
 
-### Explicit list mode
+For hosted browser integrations, each file entry should provide a browser-reachable `url`.
 
-Used when a host already knows the exact ordered source list.
+```js
+{
+  id: 'file-1',
+  url: '/ibspackager/manual-review/files/file-1',
+  ext: 'pdf',
+  displayName: 'Invoice 4711.pdf'
+}
+```
 
-### Parent bridge mode
+File reference rules:
 
-Used when the viewer is embedded and can synchronously read host-provided same-origin data.
+- `url` should be an absolute URL or a same-origin relative URL.
+- `ext` should be supplied when known: `pdf`, `tif`, `tiff`, `png`, `jpg`, or `jpeg`.
+- `id` should be stable for the physical file or file ticket.
+- File order must be deterministic because the loader preserves document order and file order.
+- Avoid raw Windows file paths in browser payloads.
+- Use a controller, proxy, or file-ticket endpoint when the source file lives outside the web root.
+- Short-lived URLs must remain valid long enough for lazy loading, thumbnails, printing, reloads, and retries.
+- Prefer same-origin file URLs to avoid CORS and cookie/authentication issues.
 
-### Session-token mode
+`path` is preserved by normalization, but the explicit-list loader currently needs `url` for actual browser loading. Treat `path` as diagnostic or host-context data unless a deployment explicitly maps it to a URL before startup.
 
-Used when the frontend needs to fetch or resolve a previously prepared payload identified by a token.
+## Metadata Contract
 
-## Normalization boundary
+OpenDocViewer preserves metadata in parallel forms so hosts can keep their raw data while the viewer can display useful rows.
 
-`normalizePortableBundle.js` is the critical adapter. It should remain focused on:
+Preferred per-document metadata:
 
-- structural cleanup
-- tolerant field mapping
-- runtime-configurable metadata alias mapping
-- metadata preservation for later UI/print logic
-- defaulting / compatibility shaping
+- `meta`
+  - ordered rich raw records
+  - best source for metadata dialogs and future print/header features
+- `metaById`
+  - optional lookup keyed by metadata field id
+  - useful when host code already has a keyed dictionary
+- `metadata`
+  - optional semantic alias to selected display text
+  - useful for common tokens such as `jobId`, `documentDate`, or `channelKey`
+- `metadataDetails`
+  - optional richer semantic alias map
+  - useful when alias text needs source, field id, label, type, or context details
 
-It should not become a general-purpose transport layer or viewer state manager.
+Raw metadata record example:
 
-## Operational advice
+```js
+{
+  id: 'sourceFileName',
+  key: 'sourceFileName',
+  value: 'invoice-4711.pdf',
+  lookupValue: undefined,
+  label: 'Source file'
+}
+```
 
-- prefer adding new host formats by extending normalization rather than branching inside UI components
-- keep integration-specific logging close to the integration layer
-- do not let viewer components depend directly on transport-specific payload shapes
+Metadata rules:
 
-## Metadata preservation model
+- Keep raw metadata in `meta` whenever possible.
+- Use stable field ids; avoid UI captions as primary identifiers.
+- Use `label` for display captions.
+- Use `value` for stored/raw values and `lookupValue` for human-friendly lookup captions.
+- Do not put secrets, connection strings, raw access tokens, or hidden authorization decisions in metadata.
+- Treat metadata as display and audit context only. Authorization must be enforced by the host endpoints.
 
-The normalized bundle now keeps three parallel metadata surfaces per document:
+## Media Configuration
 
-- `document.meta`
-  - ordered, rich raw records
-  - keeps `id`, `value`, `lookupValue`, labels when known, and unknown record properties
-- `document.metaById`
-  - object lookup keyed by metadata field id
-  - useful for direct access without rescanning the ordered array
-- `document.metadata` and `document.metadataDetails`
-  - optional semantic aliases derived from runtime config
-  - `metadata` is the simple alias -> selected text map
-  - `metadataDetails` keeps the richer alias resolution details
+When a host has metadata presentation rules, pass them under `bundle.integration.mediaConfiguration`.
 
-This means the app can stay generic:
-
-- if no alias mapping is configured, no semantic aliases are produced
-- raw metadata still remains available in the normalized bundle
-- future UI or print features can consume either raw records or semantic aliases depending on need
-
-## Media configuration preservation
-
-When a host payload includes a document/media presentation object, the integration layer now keeps a
-normalized copy at `bundle.integration.mediaConfiguration`.
-
-That normalized structure preserves, when available:
+The normalizer preserves:
 
 - large metadata field definitions
 - metadata sort field definitions
-- description / short-description / print-reference field lists
-- a merged `metadataFieldsById` catalog with known captions by source
+- document description field lists
+- short-description field lists
+- print-reference field lists
+- `metadataFieldsById` catalogs with known captions
 
-The viewer does not blindly execute host formatter strings. The data is preserved so future features
-can use the field ordering, captions, and format hints in a controlled way.
+OpenDocViewer does not blindly execute host formatter strings. The data is preserved so viewer features can use ordering, captions, and hints in controlled code paths.
 
-## Host-specific metadata alias mapping
+## Metadata Alias Mapping
 
-`normalizePortableBundle.js` may resolve selected metadata records into a semantic alias map on the
-neutral bundle model. That mapping is controlled by runtime config rather than by hardcoded identifiers
-in source.
+`normalizePortableBundle.js` can resolve selected metadata records into semantic aliases through runtime config. This keeps host field ids out of source code.
 
-Supported runtime-config values per alias:
+Supported runtime config forms per alias:
 
-- string
-  - one field id
-- array
-  - ordered fallback field ids
-- object
-  - `fieldId` / `fieldIds`
+- string: one field id
+- array: ordered fallback field ids
+- object:
+  - `fieldId` or `fieldIds`
   - `prefer`: `value`, `lookupValue`, `valueThenLookup`, or `lookupThenValue`
   - optional `label`, `type`, and `contexts`
 
@@ -122,12 +188,12 @@ Example:
 integrations: {
   portableBundle: {
     metadataAliases: {
-      patientId: 'patient-id',
-      documentDate: ['primary-date', 'fallback-date'],
-      unitName: {
-        fieldId: 'unit',
+      jobId: 'job-id',
+      documentDate: ['document-date', 'created-at'],
+      channelName: {
+        fieldId: 'channel',
         prefer: 'lookupValue',
-        label: 'Unit',
+        label: 'Channel',
         type: 'string',
         contexts: ['screen', 'print']
       }
@@ -136,27 +202,104 @@ integrations: {
 }
 ```
 
-Resolved aliases are stored on:
+Resolved aliases are stored on `document.metadata` and `document.metadataDetails`. Raw records remain available on `document.meta` and `document.metaById`.
 
-- `document.metadata`
-- `document.metadataDetails`
+## Bootstrap Modes
 
-while the normalized raw records remain available on:
+`bootstrapRuntime.js` probes startup sources in this order:
 
-- `document.meta`
-- `document.metaById`
+1. Parent page bridge (`parent-page`)
+2. Session token (`session-token`)
+3. URL parameters (`url-params`)
+4. JavaScript API (`js-api`)
+5. Demo mode (`demo`)
 
-## Access inside the app
+Use this decision table for new integrations:
 
-The full normalized bundle is now also exposed through `ViewerContext` as `bundle`.
+| Mode | Use When | Payload Location | Notes |
+| --- | --- | --- | --- |
+| JS API | ODV is mounted by host script on the same page | `window.ODV.start({ bundle })` | Easiest for controlled same-page integrations. |
+| Parent bridge | ODV is embedded in a same-origin iframe | `window.parent.ODV_BOOTSTRAP` | Works only when iframe and parent are same-origin. |
+| Session token | Payload is large, sensitive, or prepared server-side | `?sessiondata=<base64-json>` | Current implementation decodes the token locally; do not place secrets in it. |
+| URL params | Host can derive a simple numbered source pattern | `?folder=...&ext=...&pages=...` | Legacy/simple mode; not recommended for manual review metadata. |
+| Demo | No host data exists | bundled public sample assets | Development fallback. |
 
-That gives future components a stable access path for:
+## IbsPackager Manual Review Guidance
+
+For the upcoming IbsPackager manual-review integration, prefer this boundary:
+
+- IbsPackager supplies one Portable Document Bundle for the active review item or review batch.
+- IbsPackager exposes file URLs through authenticated same-origin endpoints.
+- IbsPackager owns review commands such as approve, reject, retry, route, or save comment.
+- OpenDocViewer displays files and metadata and may emit generic viewer events only if such a bridge is explicitly added later.
+
+Recommended metadata for manual review:
+
+- job id
+- review item id
+- package id or package name, when available
+- channel key/name
+- source file name/path as display context
+- detected document type, when available
+- validation or failure reason
+- attempt count
+- created/received timestamp
+- last updated timestamp
+- current manual-review status
+
+Do not let ODV infer business meaning from IbsPackager-specific field ids. Either display raw metadata generically or use runtime-configured aliases.
+
+## Versioning
+
+Portable Document Bundle schema version is currently `1` in `src/schemas/portableBundle.js`.
+
+Versioning rules:
+
+- Add optional fields without changing the version.
+- Preserve existing field names and semantic types whenever possible.
+- Increment the schema version only for breaking changes that a v1 reader could misinterpret.
+- Keep `docs-src/integrations.md`, `src/schemas/portableBundle.js`, and `src/integrations/normalizePortableBundle.js` aligned.
+
+## Validation Checklist For Hosts
+
+Before wiring a host to OpenDocViewer, verify:
+
+- The startup mode is intentional and documented.
+- Every visible file has a browser-reachable `url`.
+- File URLs work after reload and during lazy rendering/printing.
+- File endpoint authorization is enforced server-side.
+- CORS and cookies work for the chosen iframe/same-page deployment.
+- `documentId` and file `id` values are stable across reloads.
+- Metadata contains no secrets or raw bearer/session tokens.
+- Raw metadata is available in `meta` when the host has it.
+- Runtime-configured aliases are used instead of hardcoded viewer field ids.
+- Large batches stay within the configured loading and cache profile.
+
+## Normalization Boundary
+
+`normalizePortableBundle.js` should remain focused on:
+
+- structural cleanup
+- tolerant field mapping
+- runtime-configurable metadata alias mapping
+- metadata preservation for later UI/print logic
+- defaulting and compatibility shaping
+
+It should not become a transport layer, permission system, workflow engine, or viewer state manager.
+
+When adding a new host shape, prefer extending normalization rather than branching inside UI components. Viewer components should consume the normalized bundle model.
+
+## Access Inside The App
+
+The full normalized bundle is exposed through `ViewerContext` as `bundle`.
+
+This gives components a stable access path for:
 
 - document-level metadata panels
 - metadata-based print headers
 - document tooltips
 - document-aware context menus
-- document metadata overlay from page/thumbnail context menus when metadata is available
+- document metadata overlay from page/thumbnail context menus
 - diagnostics or support views
 
-without forcing metadata copies onto every page entry.
+Avoid copying host-specific metadata onto every page entry unless the rendering pipeline genuinely needs page-level data.

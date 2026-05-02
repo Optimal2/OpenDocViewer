@@ -2,10 +2,11 @@
 
 OpenDocViewer is a client-side **React + Vite** document viewer for **PDF**, **TIFF**, and common raster image formats. The project is designed to be deployable as static files, with optional companion log servers for operational tracing and print auditing.
 
-The codebase now has three documentation layers:
+The codebase now has four documentation layers:
 
 - `README.md` — product-level overview, setup, deployment, and developer workflow
 - `CONTRIBUTING.md` — repository conventions, naming rules, and review checklist
+- `AGENTS.md` and `docs-src/CODEX_DEVELOPMENT.md` — compact instructions for Codex and other coding agents
 - `docs-src/` — deeper architecture and runtime-configuration notes for maintainers
 
 ---
@@ -69,6 +70,10 @@ Use the following files depending on what you are trying to understand:
   - product scope, setup, deployment, and quick orientation
 - `CONTRIBUTING.md`
   - naming conventions, `js`/`jsx` policy, review expectations
+- `AGENTS.md`
+  - operational rules for Codex and other coding agents in this Windows workspace
+- `docs-src/CODEX_DEVELOPMENT.md`
+  - agent-friendly repository map, validation ladder, and local workflow notes
 - `docs-src/architecture.md`
   - module responsibilities and request/data flow through the app
 - `docs-src/runtime-configuration.md`
@@ -80,7 +85,7 @@ Use the following files depending on what you are trying to understand:
 - `docs-src/printing.md`
   - print pipeline design and the responsibilities of the print helper modules
 - `docs-src/integrations.md`
-  - bootstrap modes, host payload shapes, and where integration logic belongs
+  - Portable Document Bundle contract, host file URLs, metadata guidance, and bootstrap modes
 - `docs-src/customer-performance-profile.md`
   - rationale for the high-memory, fast-feeling customer profile bundled in this build
 - `src/types/jsdoc-types.js`
@@ -354,6 +359,7 @@ OpenDocViewer/
 │  ├─ utils/
 │  └─ workers/
 ├─ docs-src/
+├─ AGENTS.md
 ├─ CONTRIBUTING.md
 └─ README.md
 ```
