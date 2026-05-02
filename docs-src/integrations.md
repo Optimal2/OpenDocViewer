@@ -114,6 +114,29 @@ File reference rules:
 
 `path` is preserved by normalization, but the explicit-list loader currently needs `url` for actual browser loading. Treat `path` as diagnostic or host-context data unless a deployment explicitly maps it to a URL before startup.
 
+## Database-Backed Host Files
+
+Some host applications intentionally keep the web tier away from worker-only file shares. In that topology, the worker can copy reviewable source bytes into a database table and the web application can expose a short, authenticated file endpoint.
+
+For OpenDocViewer this still looks like a normal file URL:
+
+```js
+{
+  id: '9f4c4d8e-3b64-4b0f-bce8-b8bd3fd90d83',
+  url: 'https://host/ibspackager/ManualReview/File/9f4c4d8e-3b64-4b0f-bce8-b8bd3fd90d83',
+  ext: 'pdf',
+  displayName: 'invoice-4711.pdf'
+}
+```
+
+Host responsibilities for this pattern:
+
+- enforce authorization on the file endpoint
+- return the correct content type and support ordinary browser range/retry behavior when possible
+- avoid exposing worker-local paths as URLs
+- keep database retention and cleanup rules in the host application
+- keep the endpoint stable for the lifetime of the viewer session
+
 ## Metadata Contract
 
 OpenDocViewer preserves metadata in parallel forms so hosts can keep their raw data while the viewer can display useful rows.
