@@ -256,12 +256,6 @@ function buildMetadataTokenMap(bundleDocument) {
 }
 
 /**
- * @param {*} bundle
- * @param {*} pageInfo
- * @returns {(Object|null)}
- */
-
-/**
  * Normalize host document numbers to the print-template convention.
  * Document numbers are 1-based ordinals; 0 means absent/unknown and is never used
  * as an array index.
@@ -273,6 +267,11 @@ function normalizeDocumentOrdinal(value) {
   return ordinal >= 1 ? ordinal : 0;
 }
 
+/**
+ * @param {*} bundle
+ * @param {*} pageInfo
+ * @returns {(Object|null)}
+ */
 function resolveBundleDocumentForPage(bundle, pageInfo) {
   const documents = Array.isArray(bundle?.documents) ? bundle.documents : [];
   if (!documents.length) return null;
