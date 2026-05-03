@@ -16,6 +16,7 @@
  */
 
 const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
+const BRACE_RE = /[{}]/;
 
 /**
  * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
@@ -53,7 +54,31 @@ export function escapeHtml(s) {
 }
 
 /** Zero-pad helper for two-digit date/time fields. */
-function zeroPad2(n) { return (n < 10 ? '0' : '') + n; }
+function zeroPad2(n) {
+  const value = Number(n);
+  const whole = Number.isFinite(value) ? Math.trunc(value) : 0;
+  const sign = whole < 0 ? '-' : '';
+  return sign + String(Math.abs(whole)).padStart(2, '0');
+}
+
+/**
+ * Format the built-in print date tokens.
+ * @param {Date} date
+ * @returns {{ now: string, date: string, time: string }}
+ */
+function formatDateTokens(date) {
+  const y = date.getFullYear();
+  const m = zeroPad2(date.getMonth() + 1);
+  const d = zeroPad2(date.getDate());
+  const hh = zeroPad2(date.getHours());
+  const mm = zeroPad2(date.getMinutes());
+
+  return {
+    now: date.toLocaleString(),
+    date: y + '-' + m + '-' + d,
+    time: hh + ':' + mm,
+  };
+}
 
 /**
  * @param {*} value
@@ -371,12 +396,7 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
 
   const doc = tryGetDocumentMetadata(handle);
 
-  const now = new Date();
-  const y = now.getFullYear();
-  const m = zeroPad2(now.getMonth() + 1);
-  const d = zeroPad2(now.getDate());
-  const hh = zeroPad2(now.getHours());
-  const mm = zeroPad2(now.getMinutes());
+  const dateTokens = formatDateTokens(new Date());
   const printFormatText = valueToText(printFormat);
   const sessionAliases = buildSessionTokenAliases(session);
   const reasonSelection = isPlainObject(options?.reasonSelection) ? options.reasonSelection : {};
@@ -384,9 +404,9 @@ export function makeBaseTokenContext(handle, reason, forWhom, printFormat = '', 
 
   return {
     ...sessionAliases,
-    now: now.toLocaleString ? now.toLocaleString() : now.toISOString(),
-    date: y + '-' + m + '-' + d,
-    time: hh + ':' + mm,
+    now: dateTokens.now,
+    date: dateTokens.date,
+    time: dateTokens.time,
     reason: reason || '',
     reasonSelection,
     reasonOption: reasonSelection,
@@ -615,7 +635,7 @@ function applyLegacyTokensEscaped(tpl, tokenContext) {
     }
 
     const inner = input.slice(start + 2, end);
-    if (!inner || inner.includes('{') || inner.includes('}')) {
+    if (!inner || BRACE_RE.test(inner)) {
       out += input.slice(start, end + 1);
     } else {
       out += resolveTokenExpressionEscaped(inner, tokenContext);
