@@ -19,6 +19,7 @@
 // Unknown named entities are escaped deliberately so ambiguous entity-like input stays inert.
 const PRESERVED_NAMED_HTML_ENTITIES = new Set(['amp', 'lt', 'gt', 'quot', 'apos', 'nbsp']);
 const MAX_VALUE_TO_TEXT_DEPTH = 20;
+const DISPLAY_VALUE_PROPERTY_ORDER = ['selectedValue', 'lookupValue', 'value', 'displayValue'];
 
 /**
  * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
@@ -39,24 +40,23 @@ function escapeHtmlSegment(s) {
   });
 }
 
+function isValidUnicodeCodePoint(codePoint) {
+  return Number.isInteger(codePoint)
+    && codePoint > 0
+    && codePoint <= 0x10FFFF
+    && (codePoint < 0xD800 || codePoint > 0xDFFF);
+}
+
 function isPreservedHtmlEntity(entity) {
   const text = String(entity || '');
   const numeric = text.match(/^&#(\d{1,7});$/);
   if (numeric) {
-    const codePoint = Number(numeric[1]);
-    return Number.isInteger(codePoint)
-      && codePoint > 0
-      && codePoint <= 0x10FFFF
-      && (codePoint < 0xD800 || codePoint > 0xDFFF);
+    return isValidUnicodeCodePoint(Number(numeric[1]));
   }
 
   const hex = text.match(/^&#x([0-9a-fA-F]{1,6});$/);
   if (hex) {
-    const codePoint = Number.parseInt(hex[1], 16);
-    return Number.isInteger(codePoint)
-      && codePoint > 0
-      && codePoint <= 0x10FFFF
-      && (codePoint < 0xD800 || codePoint > 0xDFFF);
+    return isValidUnicodeCodePoint(Number.parseInt(hex[1], 16));
   }
 
   const named = text.match(/^&([a-zA-Z][a-zA-Z0-9]{0,31});$/);
@@ -139,6 +139,14 @@ function hasPrintableValue(value) {
   return lowered !== 'null' && lowered !== 'undefined';
 }
 
+function resolvePriorityObjectValueText(value) {
+  for (const propertyName of DISPLAY_VALUE_PROPERTY_ORDER) {
+    if (hasPrintableValue(value[propertyName])) return String(value[propertyName]);
+  }
+
+  return '';
+}
+
 /**
  * @param {*} value
  * @param {number} depth
@@ -149,11 +157,7 @@ function valueToText(value, depth = 0) {
   if (!hasPrintableValue(value)) return '';
   if (Array.isArray(value)) return value.map((entry) => valueToText(entry, depth + 1)).filter(Boolean).join(', ');
   if (typeof value === 'object') {
-    if (hasPrintableValue(value.selectedValue)) return String(value.selectedValue);
-    if (hasPrintableValue(value.lookupValue)) return String(value.lookupValue);
-    if (hasPrintableValue(value.value)) return String(value.value);
-    if (hasPrintableValue(value.displayValue)) return String(value.displayValue);
-    return '';
+    return resolvePriorityObjectValueText(value);
   }
   return String(value).trim();
 }
@@ -233,10 +237,7 @@ export function getByPath(obj, path) {
  */
 function resolveMetadataRecordValue(record) {
   if (!isPlainObject(record)) return optionalText(record);
-  return optionalText(record.selectedValue)
-    || optionalText(record.lookupValue)
-    || optionalText(record.value)
-    || optionalText(record.displayValue);
+  return optionalText(resolvePriorityObjectValueText(record));
 }
 
 /**
@@ -494,6 +495,8 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const totalDocuments = normalizePositiveInteger(pageInfo?.totalDocuments);
   const documentPageNumber = normalizePositiveInteger(pageInfo?.documentPageNumber);
   const documentPageCount = normalizePositiveInteger(pageInfo?.documentPageCount);
+  const bundleFileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
+  const pageCount = documentPageCount || bundleFileCount || '';
 
   const doc = {
     ...(isPlainObject(baseContext?.doc) ? baseContext.doc : {}),
@@ -504,7 +507,7 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     totalDocuments: totalDocuments || '',
     documentPageNumber: documentPageNumber || '',
     documentPageCount: documentPageCount || '',
-    pageCount: documentPageCount || (Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0) || '',
+    pageCount,
     // Convenience title fallback for legacy templates and generic deployments:
     // prefer explicit title, then host-provided name, then stable document id.
     title: optionalText(bundleDocument.title) || optionalText(bundleDocument.name) || documentId || '',
@@ -722,9 +725,10 @@ function applyLegacyTokensEscaped(tpl, tokenContext) {
     }
 
     const inner = input.slice(start + 2, end);
-    // Legacy tokens intentionally reject nested braces. Keeping the original
-    // text avoids accidentally matching across malformed template spans.
-    if (!inner || /[{}]/.test(inner)) {
+    // Legacy tokens intentionally reject nested braces and nested ${...}
+    // starts. Keeping the original text avoids accidentally matching across
+    // malformed template spans.
+    if (!inner || inner.includes('${') || /[{}]/.test(inner)) {
       out += input.slice(start, end + 1);
     } else {
       out += resolveTokenExpressionEscaped(inner, tokenContext);
