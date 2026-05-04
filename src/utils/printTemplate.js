@@ -57,7 +57,7 @@ function isPreservedHtmlEntity(entity) {
       && (codePoint < 0xD800 || codePoint > 0xDFFF);
   }
 
-  const named = text.match(/^&([a-zA-Z][a-zA-Z0-9]{1,31});$/);
+  const named = text.match(/^&([a-zA-Z][a-zA-Z0-9]{0,31});$/);
   return !!named && PRESERVED_NAMED_HTML_ENTITIES.has(named[1]);
 }
 
@@ -65,10 +65,13 @@ export function escapeHtml(s) {
   const text = String(s);
   let out = '';
   let lastIndex = 0;
-  const entityRe = /&(?:#\d{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});/g;
+  const entityRe = /&(?:#\d{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{0,31});/g;
   let match = entityRe.exec(text);
   while (match) {
     if (!isPreservedHtmlEntity(match[0])) {
+      const invalidEntityEnd = match.index + match[0].length;
+      out += escapeHtmlSegment(text.slice(lastIndex, invalidEntityEnd));
+      lastIndex = invalidEntityEnd;
       match = entityRe.exec(text);
       continue;
     }
