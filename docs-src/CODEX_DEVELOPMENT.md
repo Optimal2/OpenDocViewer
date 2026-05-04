@@ -55,9 +55,9 @@ Avoid running `npm install` unless dependency files need to change. Use `npm ci`
 Default local paths and endpoints:
 
 ```text
-OpenDocViewer repo:      E:\Linus Dunkers\Documents\GitHub\OpenDocViewer
-OpenModulePlatform repo: E:\Linus Dunkers\Documents\GitHub\OpenModulePlatform
-IbsPackager repo:        E:\Linus Dunkers\Documents\GitHub\IbsPackager
+OpenDocViewer repo:      <workspace>\OpenDocViewer
+Optional platform repo:  <workspace>\OpenModulePlatform
+Optional host repo:      <workspace>\IbsPackager
 Runtime root:            E:\OMP
 Portal URL:              http://localhost:8088/
 IbsPackager URL:         http://localhost:8088/ibspackager/

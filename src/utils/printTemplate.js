@@ -15,7 +15,6 @@
  *                                                   when path resolves to a non-empty value.
  */
 
-const HTML_ENTITY_RE = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
 const BRACE_RE = /[{}]/;
 
 /**
@@ -41,13 +40,13 @@ export function escapeHtml(s) {
   const text = String(s);
   let out = '';
   let lastIndex = 0;
-  HTML_ENTITY_RE.lastIndex = 0;
-  let match = HTML_ENTITY_RE.exec(text);
+  const entityRe = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
+  let match = entityRe.exec(text);
   while (match) {
     out += escapeHtmlSegment(text.slice(lastIndex, match.index));
     out += match[0];
     lastIndex = match.index + match[0].length;
-    match = HTML_ENTITY_RE.exec(text);
+    match = entityRe.exec(text);
   }
   out += escapeHtmlSegment(text.slice(lastIndex));
   return out;
@@ -90,6 +89,7 @@ function isPlainObject(value) {
 
 /**
  * Treat null-like host values as absent so conditional blocks suppress their whole label/value pair.
+ * Other sentinel text such as "N/A" is left printable because hosts may use it deliberately.
  * @param {*} value
  * @returns {boolean}
  */
@@ -127,6 +127,10 @@ function valueToText(value) {
 function optionalText(value) {
   const text = valueToText(value);
   return text ? text : undefined;
+}
+
+function isPresentText(value) {
+  return value !== undefined && value !== '';
 }
 
 /**
@@ -214,9 +218,9 @@ function resolveMetadataRecordLabel(record) {
   if (!isPlainObject(record)) return undefined;
   const direct = optionalText(record.label) || optionalText(record.caption);
   if (direct) return direct;
-  if (Array.isArray(record.labels)) return record.labels.map(optionalText).find(Boolean);
+  if (Array.isArray(record.labels)) return record.labels.map(optionalText).find(isPresentText);
   if (isPlainObject(record.labelsBySource)) {
-    return Object.values(record.labelsBySource).map(optionalText).find(Boolean);
+    return Object.values(record.labelsBySource).map(optionalText).find(isPresentText);
   }
   return undefined;
 }
@@ -311,7 +315,10 @@ function resolveBundleDocumentForPage(bundle, pageInfo) {
   // token pipeline. Values below 1 mean "no document ordinal supplied" and are not
   // interpreted as zero-based array indexes.
   const documentNumber = normalizeDocumentOrdinal(pageInfo?.documentNumber);
-  if (documentNumber >= 1 && documentNumber <= documents.length) return documents[documentNumber - 1];
+  if (documentNumber >= 1 && documentNumber <= documents.length) {
+    const document = documents[documentNumber - 1];
+    return isPlainObject(document) ? document : null;
+  }
   return null;
 }
 
