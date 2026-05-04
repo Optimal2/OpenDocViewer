@@ -15,7 +15,10 @@
  *                                                   when path resolves to a non-empty value.
  */
 
+// Preserve only the small, common entity set that hosts typically send after normalizing text.
+// Unknown named entities are escaped deliberately so ambiguous entity-like input stays inert.
 const PRESERVED_NAMED_HTML_ENTITIES = new Set(['amp', 'lt', 'gt', 'quot', 'apos', 'nbsp']);
+const MAX_VALUE_TO_TEXT_DEPTH = 20;
 
 /**
  * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
@@ -24,14 +27,13 @@ const PRESERVED_NAMED_HTML_ENTITIES = new Set(['amp', 'lt', 'gt', 'quot', 'apos'
  * @returns {string}
  */
 function escapeHtmlSegment(s) {
-  return String(s).replace(/[&<>"'`]/g, (ch) => {
+  return String(s).replace(/[&<>"']/g, (ch) => {
     switch (ch) {
       case '&': return '&amp;';
       case '<': return '&lt;';
       case '>': return '&gt;';
       case '"': return '&quot;';
       case "'": return '&#39;';
-      case '`': return '&#96;';
       default: return ch;
     }
   });
@@ -66,20 +68,17 @@ export function escapeHtml(s) {
   let out = '';
   let lastIndex = 0;
   const entityRe = /&(?:#\d{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{0,31});/g;
-  let match = entityRe.exec(text);
-  while (match) {
+  for (const match of text.matchAll(entityRe)) {
     if (!isPreservedHtmlEntity(match[0])) {
       const invalidEntityEnd = match.index + match[0].length;
       out += escapeHtmlSegment(text.slice(lastIndex, invalidEntityEnd));
       lastIndex = invalidEntityEnd;
-      match = entityRe.exec(text);
       continue;
     }
 
     out += escapeHtmlSegment(text.slice(lastIndex, match.index));
     out += match[0];
     lastIndex = match.index + match[0].length;
-    match = entityRe.exec(text);
   }
   out += escapeHtmlSegment(text.slice(lastIndex));
   return out;
@@ -142,11 +141,13 @@ function hasPrintableValue(value) {
 
 /**
  * @param {*} value
+ * @param {number} depth
  * @returns {string}
  */
-function valueToText(value) {
+function valueToText(value, depth = 0) {
+  if (depth > MAX_VALUE_TO_TEXT_DEPTH) return '';
   if (!hasPrintableValue(value)) return '';
-  if (Array.isArray(value)) return value.map((entry) => valueToText(entry)).filter(Boolean).join(', ');
+  if (Array.isArray(value)) return value.map((entry) => valueToText(entry, depth + 1)).filter(Boolean).join(', ');
   if (typeof value === 'object') {
     if (hasPrintableValue(value.selectedValue)) return String(value.selectedValue);
     if (hasPrintableValue(value.lookupValue)) return String(value.lookupValue);
@@ -206,7 +207,7 @@ export function resolveCopyMarkerText(tokenContext) {
  * @returns {any}
  */
 export function getByPath(obj, path) {
-  if (!obj || !path) return undefined;
+  if (obj === null || obj === undefined || !path) return undefined;
   const parts = String(path).split('.').map((part) => part.trim()).filter(Boolean);
   /** @type {any} */
   let cur = obj;
