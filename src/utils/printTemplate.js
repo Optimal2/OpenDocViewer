@@ -22,8 +22,8 @@ const MAX_VALUE_TO_TEXT_DEPTH = 20;
 const DISPLAY_VALUE_PROPERTY_ORDER = ['selectedValue', 'lookupValue', 'value', 'displayValue'];
 
 /**
- * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
- * preserved so already-normalized host values such as "&lt;" are not rendered as "&amp;lt;".
+ * Escape raw text characters for HTML text context. This helper does not preserve existing
+ * entities; entity preservation is handled by escapeHtml().
  * @param {string} s
  * @returns {string}
  */
@@ -755,7 +755,7 @@ function applyLegacyTokensEscaped(tpl, tokenContext) {
  * Supported forms:
  *   ${now} | ${doc.title||''} | Page ${page}/${totalPages}
  *   {{now}} | {{doc.title||''}} | Page {{page}}/{{totalPages}}
- *   [[{{UserId}}, "Utskriven av: {{UserId}} | "]]
+ *   [[{{UserId}}, "Printed by: {{UserId}} | "]]
  *
  * Values are HTML-escaped before substitution. Admin-authored markup in the template itself is
  * preserved, matching the previous print-header behavior.
