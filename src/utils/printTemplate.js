@@ -87,9 +87,8 @@ export function escapeHtml(s) {
 /** Zero-pad helper for two-digit date/time fields. */
 function zeroPad2(n) {
   const value = Number(n);
-  const whole = Number.isFinite(value) ? Math.trunc(value) : 0;
-  const sign = whole < 0 ? '-' : '';
-  return sign + String(Math.abs(whole)).padStart(2, '0');
+  const whole = Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
+  return String(whole).padStart(2, '0');
 }
 
 /**
@@ -140,6 +139,8 @@ function hasPrintableValue(value) {
 }
 
 function resolvePriorityObjectValueText(value) {
+  if (!isPlainObject(value)) return '';
+
   for (const propertyName of DISPLAY_VALUE_PROPERTY_ORDER) {
     if (hasPrintableValue(value[propertyName])) return String(value[propertyName]);
   }
@@ -168,11 +169,20 @@ function valueToText(value, depth = 0) {
  */
 function optionalText(value) {
   const text = valueToText(value);
-  return text ? text : undefined;
+  return text || undefined;
 }
 
 function isPresentText(value) {
   return value !== undefined && value !== '';
+}
+
+function findFirstPresentText(values) {
+  for (const value of values) {
+    const text = optionalText(value);
+    if (isPresentText(text)) return text;
+  }
+
+  return undefined;
 }
 
 /**
@@ -257,9 +267,9 @@ function resolveMetadataRecordLabel(record) {
   if (!isPlainObject(record)) return undefined;
   const direct = optionalText(record.label) || optionalText(record.caption);
   if (direct) return direct;
-  if (Array.isArray(record.labels)) return record.labels.map(optionalText).find(isPresentText);
+  if (Array.isArray(record.labels)) return findFirstPresentText(record.labels);
   if (isPlainObject(record.labelsBySource)) {
-    return Object.values(record.labelsBySource).map(optionalText).find(isPresentText);
+    return findFirstPresentText(Object.values(record.labelsBySource));
   }
   return undefined;
 }
@@ -559,7 +569,7 @@ function findFallbackSeparator(text) {
   let quote = '';
   let escaped = false;
 
-  for (let i = 0; i < text.length - 1; i += 1) {
+  for (let i = 0; i < text.length; i += 1) {
     const ch = text[i];
 
     if (escaped) {
@@ -582,7 +592,7 @@ function findFallbackSeparator(text) {
       continue;
     }
 
-    if (ch === '|' && text[i + 1] === '|') return i;
+    if (ch === '|' && i + 1 < text.length && text[i + 1] === '|') return i;
   }
 
   return -1;
