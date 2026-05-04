@@ -84,7 +84,11 @@ function formatDateTokens(date) {
  * @returns {boolean}
  */
 function isPlainObject(value) {
-  return !!value && typeof value === 'object' && !Array.isArray(value);
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizePositiveInteger(value) {
+  return Math.max(0, Math.floor(Number(value) || 0));
 }
 
 /**
@@ -453,9 +457,9 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   // Keep ordinal normalization consistent with resolveBundleDocumentForPage():
   // documentNumber is 1-based when present; 0 means absent/unknown.
   const documentNumber = normalizeDocumentOrdinal(pageInfo?.documentNumber);
-  const totalDocuments = Math.max(0, Math.floor(Number(pageInfo?.totalDocuments) || 0));
-  const documentPageNumber = Math.max(0, Math.floor(Number(pageInfo?.documentPageNumber) || 0));
-  const documentPageCount = Math.max(0, Math.floor(Number(pageInfo?.documentPageCount) || 0));
+  const totalDocuments = normalizePositiveInteger(pageInfo?.totalDocuments);
+  const documentPageNumber = normalizePositiveInteger(pageInfo?.documentPageNumber);
+  const documentPageCount = normalizePositiveInteger(pageInfo?.documentPageCount);
   const fileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
 
   const doc = {
@@ -497,12 +501,45 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
  */
 function parseTokenExpression(raw) {
   const text = String(raw || '').trim();
-  const parts = text.split('||');
-  const path = (parts[0] || '').trim();
-  if (parts.length <= 1) return { path, fallback: undefined };
-  const fb = parts.slice(1).join('||').trim();
+  const separatorIndex = findFallbackSeparator(text);
+  const path = separatorIndex === -1 ? text.trim() : text.slice(0, separatorIndex).trim();
+  if (separatorIndex === -1) return { path, fallback: undefined };
+  const fb = text.slice(separatorIndex + 2).trim();
   const m = fb.match(/^(['"])(.*)\1$/);
   return { path, fallback: m ? m[2] : fb };
+}
+
+function findFallbackSeparator(text) {
+  let quote = '';
+  let escaped = false;
+
+  for (let i = 0; i < text.length - 1; i += 1) {
+    const ch = text[i];
+
+    if (escaped) {
+      escaped = false;
+      continue;
+    }
+
+    if (ch === '\\') {
+      escaped = true;
+      continue;
+    }
+
+    if (quote) {
+      if (ch === quote) quote = '';
+      continue;
+    }
+
+    if (ch === '"' || ch === "'") {
+      quote = ch;
+      continue;
+    }
+
+    if (ch === '|' && text[i + 1] === '|') return i;
+  }
+
+  return -1;
 }
 
 /**
@@ -642,6 +679,8 @@ function applyLegacyTokensEscaped(tpl, tokenContext) {
     }
 
     const inner = input.slice(start + 2, end);
+    // Legacy tokens intentionally reject nested braces. Keeping the original
+    // text avoids accidentally matching across malformed template spans.
     if (!inner || BRACE_RE.test(inner)) {
       out += input.slice(start, end + 1);
     } else {
