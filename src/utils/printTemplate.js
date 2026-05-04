@@ -15,7 +15,7 @@
  *                                                   when path resolves to a non-empty value.
  */
 
-const BRACE_RE = /[{}]/;
+const PRESERVED_NAMED_HTML_ENTITIES = new Set(['amp', 'lt', 'gt', 'quot', 'apos', 'nbsp']);
 
 /**
  * Escape a string for safe insertion into HTML (text context). Existing HTML entities are
@@ -24,25 +24,55 @@ const BRACE_RE = /[{}]/;
  * @returns {string}
  */
 function escapeHtmlSegment(s) {
-  return String(s).replace(/[&<>"']/g, (ch) => {
+  return String(s).replace(/[&<>"'`]/g, (ch) => {
     switch (ch) {
       case '&': return '&amp;';
       case '<': return '&lt;';
       case '>': return '&gt;';
       case '"': return '&quot;';
       case "'": return '&#39;';
+      case '`': return '&#96;';
       default: return ch;
     }
   });
+}
+
+function isPreservedHtmlEntity(entity) {
+  const text = String(entity || '');
+  const numeric = text.match(/^&#(\d{1,7});$/);
+  if (numeric) {
+    const codePoint = Number(numeric[1]);
+    return Number.isInteger(codePoint)
+      && codePoint > 0
+      && codePoint <= 0x10FFFF
+      && (codePoint < 0xD800 || codePoint > 0xDFFF);
+  }
+
+  const hex = text.match(/^&#x([0-9a-fA-F]{1,6});$/);
+  if (hex) {
+    const codePoint = Number.parseInt(hex[1], 16);
+    return Number.isInteger(codePoint)
+      && codePoint > 0
+      && codePoint <= 0x10FFFF
+      && (codePoint < 0xD800 || codePoint > 0xDFFF);
+  }
+
+  const named = text.match(/^&([a-zA-Z][a-zA-Z0-9]{1,31});$/);
+  return !!named && PRESERVED_NAMED_HTML_ENTITIES.has(named[1]);
 }
 
 export function escapeHtml(s) {
   const text = String(s);
   let out = '';
   let lastIndex = 0;
-  const entityRe = /&(?:#\d+|#x[0-9a-fA-F]+|[a-zA-Z][a-zA-Z0-9]*);/g;
+  const entityRe = /&(?:#\d{1,7}|#x[0-9a-fA-F]{1,6}|[a-zA-Z][a-zA-Z0-9]{1,31});/g;
   let match = entityRe.exec(text);
   while (match) {
+    if (!isPreservedHtmlEntity(match[0])) {
+      match = entityRe.exec(text);
+      continue;
+    }
+
     out += escapeHtmlSegment(text.slice(lastIndex, match.index));
     out += match[0];
     lastIndex = match.index + match[0].length;
@@ -460,7 +490,6 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const totalDocuments = normalizePositiveInteger(pageInfo?.totalDocuments);
   const documentPageNumber = normalizePositiveInteger(pageInfo?.documentPageNumber);
   const documentPageCount = normalizePositiveInteger(pageInfo?.documentPageCount);
-  const fileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
 
   const doc = {
     ...(isPlainObject(baseContext?.doc) ? baseContext.doc : {}),
@@ -471,7 +500,7 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     totalDocuments: totalDocuments || '',
     documentPageNumber: documentPageNumber || '',
     documentPageCount: documentPageCount || '',
-    pageCount: documentPageCount || fileCount || '',
+    pageCount: documentPageCount || (Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0) || '',
     // Convenience title fallback for legacy templates and generic deployments:
     // prefer explicit title, then host-provided name, then stable document id.
     title: optionalText(bundleDocument.title) || optionalText(bundleDocument.name) || documentId || '',
@@ -505,8 +534,18 @@ function parseTokenExpression(raw) {
   const path = separatorIndex === -1 ? text.trim() : text.slice(0, separatorIndex).trim();
   if (separatorIndex === -1) return { path, fallback: undefined };
   const fb = text.slice(separatorIndex + 2).trim();
-  const m = fb.match(/^(['"])(.*)\1$/);
-  return { path, fallback: m ? m[2] : fb };
+  const quotedFallback = parseQuotedFallback(fb);
+  return { path, fallback: quotedFallback !== undefined ? quotedFallback : fb };
+}
+
+function parseQuotedFallback(value) {
+  const doubleQuoted = value.match(/^"((?:\\.|[^"\\])*)"$/);
+  if (doubleQuoted) return decodeTemplateLiteral(doubleQuoted[1]);
+
+  const singleQuoted = value.match(/^'((?:\\.|[^'\\])*)'$/);
+  if (singleQuoted) return decodeTemplateLiteral(singleQuoted[1]);
+
+  return undefined;
 }
 
 function findFallbackSeparator(text) {
@@ -681,7 +720,7 @@ function applyLegacyTokensEscaped(tpl, tokenContext) {
     const inner = input.slice(start + 2, end);
     // Legacy tokens intentionally reject nested braces. Keeping the original
     // text avoids accidentally matching across malformed template spans.
-    if (!inner || BRACE_RE.test(inner)) {
+    if (!inner || /[{}]/.test(inner)) {
       out += input.slice(start, end + 1);
     } else {
       out += resolveTokenExpressionEscaped(inner, tokenContext);
