@@ -508,12 +508,14 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const bundleFileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
   const pageCount = documentPageCount || bundleFileCount || 0;
 
+  // Numeric print tokens keep 0 as the absent/unknown sentinel. That keeps the
+  // token context type-stable and matches normalizeDocumentOrdinal().
   const doc = {
     ...(isPlainObject(baseContext?.doc) ? baseContext.doc : {}),
     ...(isPlainObject(bundleDocument.metadata) ? bundleDocument.metadata : {}),
     id: documentId,
     documentId,
-    documentNumber: documentNumber || '',
+    documentNumber,
     totalDocuments,
     documentPageNumber,
     documentPageCount,
