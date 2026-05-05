@@ -42,7 +42,7 @@ function escapeHtmlSegment(s) {
 
 function isValidUnicodeCodePoint(codePoint) {
   return Number.isInteger(codePoint)
-    && codePoint > 0
+    && codePoint >= 0
     && codePoint <= 0x10FFFF
     && (codePoint < 0xD800 || codePoint > 0xDFFF);
 }
@@ -115,7 +115,7 @@ function formatDateTokens(date) {
  * @returns {boolean}
  */
 function isPlainObject(value) {
-  return value !== null && typeof value === 'object' && !Array.isArray(value);
+  return Object.prototype.toString.call(value) === '[object Object]';
 }
 
 function normalizePositiveInteger(value) {
