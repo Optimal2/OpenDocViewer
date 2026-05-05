@@ -84,7 +84,13 @@ export function escapeHtml(s) {
   return out;
 }
 
-/** Zero-pad helper for two-digit date/time fields. */
+/**
+ * Format a non-negative date/time component as at least two digits.
+ * Non-numeric and negative inputs are clamped to 0 because JavaScript Date
+ * components used here should never be negative.
+ * @param {*} n
+ * @returns {string}
+ */
 function zeroPad2(n) {
   const value = Number(n);
   const whole = Number.isFinite(value) ? Math.max(0, Math.trunc(value)) : 0;
@@ -118,6 +124,12 @@ function isPlainObject(value) {
   return Object.prototype.toString.call(value) === '[object Object]';
 }
 
+/**
+ * Normalize page/document counters to a non-negative integer.
+ * Missing, non-numeric, and negative values resolve to 0.
+ * @param {*} value
+ * @returns {number}
+ */
 function normalizePositiveInteger(value) {
   return Math.max(0, Math.floor(Number(value) || 0));
 }
@@ -138,6 +150,12 @@ function hasPrintableValue(value) {
   return lowered !== 'null' && lowered !== 'undefined';
 }
 
+/**
+ * Resolve the first printable display value from a host-supplied metadata object.
+ * Property precedence is defined by DISPLAY_VALUE_PROPERTY_ORDER.
+ * @param {*} value
+ * @returns {string}
+ */
 function resolvePriorityObjectValueText(value) {
   if (!isPlainObject(value)) return '';
 
@@ -172,10 +190,21 @@ function optionalText(value) {
   return text || undefined;
 }
 
+/**
+ * Test whether optionalText returned a usable string.
+ * Undefined and the empty string are treated as absent.
+ * @param {(string|undefined)} value
+ * @returns {boolean}
+ */
 function isPresentText(value) {
   return value !== undefined && value !== '';
 }
 
+/**
+ * Return the first present text value from an iterable collection.
+ * @param {Iterable<*>} values
+ * @returns {(string|undefined)}
+ */
 function findFirstPresentText(values) {
   for (const value of values) {
     const text = optionalText(value);
