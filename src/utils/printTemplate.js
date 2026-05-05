@@ -506,7 +506,7 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
   const documentPageNumber = normalizePositiveInteger(pageInfo?.documentPageNumber);
   const documentPageCount = normalizePositiveInteger(pageInfo?.documentPageCount);
   const bundleFileCount = Array.isArray(bundleDocument.files) ? bundleDocument.files.length : 0;
-  const pageCount = documentPageCount || bundleFileCount || '';
+  const pageCount = documentPageCount || bundleFileCount || 0;
 
   const doc = {
     ...(isPlainObject(baseContext?.doc) ? baseContext.doc : {}),
@@ -514,9 +514,9 @@ export function makePageTokenContext(baseContext, pageInfo, bundle) {
     id: documentId,
     documentId,
     documentNumber: documentNumber || '',
-    totalDocuments: totalDocuments || '',
-    documentPageNumber: documentPageNumber || '',
-    documentPageCount: documentPageCount || '',
+    totalDocuments,
+    documentPageNumber,
+    documentPageCount,
     pageCount,
     // Convenience title fallback for legacy templates and generic deployments:
     // prefer explicit title, then host-provided name, then stable document id.
