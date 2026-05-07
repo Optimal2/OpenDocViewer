@@ -131,11 +131,11 @@
       "optionalHint": "Optional. Max {max}{extra} characters.",
       "extra": {
         "placeholder": "Add details…",
-        "suffix": " (additional text)"
+        "suffix": ""
       }
     },
     "forWhom": {
-      "label": "For whom",
+      "label": "Recipient (optional)",
       "requiredHint": "Required. Max {max} characters.",
       "optionalHint": "Optional. Max {max} characters."
     },
@@ -158,9 +158,9 @@
       "enterReason": "Please enter a reason.",
       "reasonTooLong": "Reason is too long (max {max}).",
       "reasonFormat": "Reason format is not allowed.",
-      "enterForWhom": "Please enter who requested this.",
-      "forWhomTooLong": "“For whom” is too long (max {max}).",
-      "forWhomFormat": "“For whom” format is not allowed.",
+      "enterForWhom": "Enter print recipient.",
+      "forWhomTooLong": "“Recipient” is too long (max {max}).",
+      "forWhomFormat": "“Recipient” format is not allowed.",
       "invalidCustom": "Invalid custom pages input.",
       "review": "Please review the required fields.",
       "enterAtLeastOne": "Enter at least one page or range.",

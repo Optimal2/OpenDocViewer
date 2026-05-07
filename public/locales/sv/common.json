@@ -131,11 +131,11 @@
       "optionalHint": "Valfritt. Max {max}{extra} tecken.",
       "extra": {
         "placeholder": "Lägg till detaljer…",
-        "suffix": " (ytterligare text)"
+        "suffix": ""
       }
     },
     "forWhom": {
-      "label": "För vem",
+      "label": "Mottagare (valfritt)",
       "requiredHint": "Obligatoriskt. Max {max} tecken.",
       "optionalHint": "Valfritt. Max {max} tecken."
     },
@@ -158,9 +158,9 @@
       "enterReason": "Ange en orsak.",
       "reasonTooLong": "Orsaken är för lång (max {max}).",
       "reasonFormat": "Formatet på orsaken är inte tillåtet.",
-      "enterForWhom": "Ange vem som begärde detta.",
-      "forWhomTooLong": "”För vem” är för långt (max {max}).",
-      "forWhomFormat": "Formatet på ”För vem” är inte tillåtet.",
+      "enterForWhom": "Ange mottagare av utskrift.",
+      "forWhomTooLong": "”Mottagare” är för långt (max {max}).",
+      "forWhomFormat": "Formatet på ”Mottagare” är inte tillåtet.",
       "invalidCustom": "Ogiltig inmatning av egna sidor.",
       "review": "Kontrollera obligatoriska fält.",
       "enterAtLeastOne": "Ange minst en sida eller ett intervall.",
