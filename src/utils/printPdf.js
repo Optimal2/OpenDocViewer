@@ -49,6 +49,7 @@ const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
  * @property {Object=} printFooterCfg
  * @property {Object=} printFormatCfg
  * @property {Object=} pdfCfg
+ * @property {AbortSignal=} signal
  * @property {function(Object): void=} onProgress
  */
 
@@ -75,23 +76,168 @@ function normalizeQuality(value, defaultValue) {
 }
 
 /**
- * @param {string} html
- * @returns {string}
+ * @returns {Error}
  */
-function htmlToPlainText(html) {
+function createAbortError() {
+  try {
+    return new DOMException('PDF generation was cancelled.', 'AbortError');
+  } catch {
+    const error = new Error('PDF generation was cancelled.');
+    error.name = 'AbortError';
+    return error;
+  }
+}
+
+/**
+ * @param {AbortSignal|undefined} signal
+ * @returns {void}
+ */
+function throwIfAborted(signal) {
+  if (signal?.aborted) throw createAbortError();
+}
+
+/**
+ * @param {*} value
+ * @returns {boolean}
+ */
+function isBoldFontWeight(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (!text) return false;
+  if (text === 'bold' || text === 'bolder') return true;
+  const numeric = Number.parseInt(text, 10);
+  return Number.isFinite(numeric) && numeric >= 600;
+}
+
+/**
+ * @param {string} style
+ * @returns {{ bold?: boolean, italic?: boolean }}
+ */
+function parseInlineTextStyle(style) {
+  const result = {};
+  const text = String(style || '');
+  if (!text) return result;
+  text.split(';').forEach((part) => {
+    const separator = part.indexOf(':');
+    if (separator === -1) return;
+    const property = part.slice(0, separator).trim().toLowerCase();
+    const value = part.slice(separator + 1).trim().toLowerCase();
+    if (property === 'font-weight' && isBoldFontWeight(value)) result.bold = true;
+    if (property === 'font-style' && (value === 'italic' || value === 'oblique')) result.italic = true;
+  });
+  return result;
+}
+
+/**
+ * @param {string} nodeName
+ * @returns {boolean}
+ */
+function isBlockNode(nodeName) {
+  return ['address', 'article', 'aside', 'blockquote', 'div', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'main', 'p', 'section', 'tr'].includes(nodeName);
+}
+
+/**
+ * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @returns {void}
+ */
+function ensureWritableRichLine(lines) {
+  if (!lines.length) lines.push([]);
+}
+
+/**
+ * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @returns {void}
+ */
+function appendRichLineBreak(lines) {
+  if (!lines.length || lines[lines.length - 1].length > 0) lines.push([]);
+}
+
+/**
+ * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @param {string} text
+ * @param {{ bold?: boolean, italic?: boolean }} style
+ * @returns {void}
+ */
+function appendRichText(lines, text, style) {
+  const normalized = String(text || '').replace(/\u00a0/g, ' ');
+  if (!normalized) return;
+  const parts = normalized.split(/\r\n|\r|\n/);
+  parts.forEach((part, index) => {
+    if (index > 0) appendRichLineBreak(lines);
+    const collapsed = part.replace(/[ \t\f\v]+/g, ' ');
+    if (!collapsed.trim()) {
+      if (lines.length && lines[lines.length - 1].length > 0) {
+        const line = lines[lines.length - 1];
+        line[line.length - 1].text += ' ';
+      }
+      return;
+    }
+    ensureWritableRichLine(lines);
+    lines[lines.length - 1].push({
+      text: collapsed,
+      bold: !!style?.bold,
+      italic: !!style?.italic,
+    });
+  });
+}
+
+/**
+ * Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF.
+ * Full browser CSS layout is intentionally not attempted here; this supports the formatting
+ * commonly used by ODV print headers/footers: line breaks, block breaks, bold, italic and
+ * equivalent inline styles.
+ * @param {string} html
+ * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
+ */
+function htmlToRichLines(html) {
   const input = String(html || '');
+  /** @type {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} */
+  const lines = [[]];
   try {
     const doc = new DOMParser().parseFromString(`<!doctype html><body>${input}`, 'text/html');
     doc.body?.querySelectorAll?.('script,style,template,noscript,iframe,object,embed')?.forEach((node) => node.remove());
-    doc.body?.querySelectorAll?.('br')?.forEach((node) => node.replaceWith(doc.createTextNode('\n')));
-    return (doc.body?.textContent || '')
-      .replace(/\u00a0/g, ' ')
-      .replace(/[ \t]+\n/g, '\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trim();
+
+    /**
+     * @param {Node} node
+     * @param {{ bold?: boolean, italic?: boolean }} inherited
+     * @returns {void}
+     */
+    const walk = (node, inherited) => {
+      if (node.nodeType === 3) {
+        appendRichText(lines, node.textContent || '', inherited);
+        return;
+      }
+
+      if (node.nodeType !== 1) return;
+      const element = /** @type {Element} */ (node);
+      const nodeName = element.nodeName.toLowerCase();
+      if (nodeName === 'br') {
+        appendRichLineBreak(lines);
+        return;
+      }
+
+      const inlineStyle = parseInlineTextStyle(element.getAttribute('style') || '');
+      const next = {
+        bold: !!(inherited.bold || inlineStyle.bold || nodeName === 'b' || nodeName === 'strong' || nodeName === 'bold'),
+        italic: !!(inherited.italic || inlineStyle.italic || nodeName === 'i' || nodeName === 'em'),
+      };
+
+      const block = isBlockNode(nodeName);
+      if (block) appendRichLineBreak(lines);
+      if (nodeName === 'li') appendRichText(lines, '- ', next);
+      Array.from(element.childNodes || []).forEach((child) => walk(child, next));
+      if (block) appendRichLineBreak(lines);
+    };
+
+    Array.from(doc.body?.childNodes || []).forEach((node) => walk(node, {}));
   } catch {
-    return input.replace(/\u00a0/g, ' ').trim();
+    appendRichText(lines, input.replace(/\u00a0/g, ' '), {});
   }
+
+  return lines
+    .map((line) => line
+      .map((segment) => ({ ...segment, text: segment.text.replace(/\s+/g, ' ') }))
+      .filter((segment) => segment.text))
+    .filter((line) => line.length > 0);
 }
 
 /**
@@ -99,32 +245,54 @@ function htmlToPlainText(html) {
  * @param {Object} tokenContext
  * @param {number} page
  * @param {number} total
- * @returns {string}
+ * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
  */
-function renderOverlayText(cfg, tokenContext, page, total) {
-  if (!cfg || cfg.enabled === false) return '';
+function renderOverlayRichLines(cfg, tokenContext, page, total) {
+  if (!cfg || cfg.enabled === false) return [];
   const applyTo = cfg.applyTo || 'all';
-  if (applyTo === 'first' && page !== 1) return '';
-  if (applyTo === 'last' && page !== total) return '';
+  if (applyTo === 'first' && page !== 1) return [];
+  if (applyTo === 'last' && page !== total) return [];
   const tpl = resolveLocalizedValue(cfg.template || '', i18next);
-  if (!tpl) return '';
+  if (!tpl) return [];
   const html = applyTemplateTokensEscaped(tpl, { ...tokenContext, page, totalPages: total });
-  return htmlToPlainText(html);
+  return htmlToRichLines(html);
 }
 
 /**
  * @param {string} src
+ * @param {AbortSignal=} signal
  * @returns {Promise<HTMLImageElement>}
  */
-function loadImage(src) {
+function loadImage(src, signal) {
   return new Promise((resolve, reject) => {
     if (!isSafeImageSrc(src)) {
       reject(new Error('Unsafe image source rejected for PDF generation.'));
       return;
     }
+    if (signal?.aborted) {
+      reject(createAbortError());
+      return;
+    }
     const img = new Image();
-    img.onload = () => resolve(img);
-    img.onerror = () => reject(new Error('Failed to load image for PDF generation.'));
+    const cleanup = () => {
+      img.onload = null;
+      img.onerror = null;
+      try { signal?.removeEventListener?.('abort', onAbort); } catch {}
+    };
+    const onAbort = () => {
+      cleanup();
+      try { img.src = ''; } catch {}
+      reject(createAbortError());
+    };
+    img.onload = () => {
+      cleanup();
+      resolve(img);
+    };
+    img.onerror = () => {
+      cleanup();
+      reject(new Error('Failed to load image for PDF generation.'));
+    };
+    try { signal?.addEventListener?.('abort', onAbort, { once: true }); } catch {}
     img.src = src;
   });
 }
@@ -203,35 +371,107 @@ function pageFormatForImage(width, height) {
 
 /**
  * @param {*} pdf
- * @param {string} text
+ * @param {Array<{ text: string, bold: boolean, italic: boolean }>} line
+ * @returns {boolean}
+ */
+function richLineHasText(line) {
+  return Array.isArray(line) && line.some((segment) => String(segment?.text || '').trim());
+}
+
+/**
+ * @param {{ bold?: boolean, italic?: boolean }} segment
+ * @returns {'normal'|'bold'|'italic'|'bolditalic'}
+ */
+function segmentFontStyle(segment) {
+  if (segment?.bold && segment?.italic) return 'bolditalic';
+  if (segment?.bold) return 'bold';
+  if (segment?.italic) return 'italic';
+  return 'normal';
+}
+
+/**
+ * @param {*} pdf
+ * @param {{ text: string, bold?: boolean, italic?: boolean }} segment
+ * @param {number} fontSize
+ * @returns {number}
+ */
+function measureRichSegment(pdf, segment, fontSize) {
+  pdf.setFont('helvetica', segmentFontStyle(segment));
+  pdf.setFontSize(fontSize);
+  return pdf.getTextWidth(String(segment?.text || ''));
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} richLines
+ * @param {number} maxWidth
+ * @param {number} fontSize
+ * @param {number} maxLines
+ * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
+ */
+function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
+  /** @type {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} */
+  const out = [];
+  const sourceLines = (Array.isArray(richLines) ? richLines : []).filter(richLineHasText);
+
+  for (const sourceLine of sourceLines) {
+    /** @type {Array<{ text: string, bold: boolean, italic: boolean }>} */
+    let current = [];
+    let currentWidth = 0;
+
+    for (const segment of sourceLine) {
+      const tokens = String(segment.text || '').match(/\S+\s*/g) || [];
+      for (const token of tokens) {
+        const nextSegment = { ...segment, text: token };
+        const tokenWidth = measureRichSegment(pdf, nextSegment, fontSize);
+        if (current.length && currentWidth + tokenWidth > maxWidth) {
+          out.push(current);
+          if (out.length >= maxLines) return out;
+          current = [];
+          currentWidth = 0;
+        }
+        current.push(nextSegment);
+        currentWidth += tokenWidth;
+      }
+    }
+
+    if (current.length) {
+      out.push(current);
+      if (out.length >= maxLines) return out;
+    }
+  }
+
+  return out.slice(0, maxLines);
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} richLines
  * @param {number} x
  * @param {number} y
  * @param {number} maxWidth
  * @param {number} fontSize
+ * @param {Array<number>} color
+ * @param {number} maxLines
  * @returns {number} height consumed
  */
-function drawSmallTextBlock(pdf, text, x, y, maxWidth, fontSize, options = {}) {
-  const clean = String(text || '').trim();
-  if (!clean) return 0;
-  pdf.setFontSize(fontSize);
-  pdf.setTextColor(...HEADER_FOOTER_COLOR);
-  const lines = pdf.splitTextToSize(clean, maxWidth).slice(0, MAX_HEADER_FOOTER_LINES);
+function drawRichTextBlock(pdf, richLines, x, y, maxWidth, fontSize, color, maxLines) {
+  const lines = wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines);
+  if (!lines.length) return 0;
   const lineHeight = fontSize * HEADER_FOOTER_LINE_HEIGHT;
-  const boldLeadingText = String(options.boldLeadingText || '').trim();
+  pdf.setFontSize(fontSize);
+  pdf.setTextColor(...color);
 
   lines.forEach((line, index) => {
-    const lineText = String(line);
     const yPos = y + (index * lineHeight);
-    if (index === 0 && boldLeadingText && lineText.startsWith(boldLeadingText)) {
-      pdf.setFont('helvetica', 'bold');
-      pdf.text(boldLeadingText, x, yPos);
-      const offset = pdf.getTextWidth(boldLeadingText);
-      pdf.setFont('helvetica', 'normal');
-      pdf.text(lineText.slice(boldLeadingText.length), x + offset, yPos);
-      return;
-    }
-    pdf.setFont('helvetica', 'normal');
-    pdf.text(lineText, x, yPos);
+    let offset = 0;
+    line.forEach((segment) => {
+      const text = String(segment.text || '');
+      if (!text) return;
+      pdf.setFont('helvetica', segmentFontStyle(segment));
+      pdf.text(text, x + offset, yPos);
+      offset += pdf.getTextWidth(text);
+    });
   });
   return lines.length * lineHeight;
 }
@@ -345,6 +585,7 @@ function reportProgress(options, event) {
  * @returns {Promise<Blob>}
  */
 export async function createPrintPdfBlob(dataUrls, options = {}) {
+  throwIfAborted(options.signal);
   const urls = (Array.isArray(dataUrls) ? dataUrls : []).filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
   if (!urls.length) throw new Error('No printable image URLs were available for PDF generation.');
 
@@ -361,21 +602,26 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const watermarkAssetSrc = resolveWatermarkAssetSrc(options.printFormatCfg?.watermark || {}, i18next);
   if (watermarkAssetSrc) {
     try {
-      watermarkImage = await loadImage(watermarkAssetSrc);
+      watermarkImage = await loadImage(watermarkAssetSrc, options.signal);
     } catch (error) {
+      throwIfAborted(options.signal);
       logger.warn('PDF watermark image could not be loaded; falling back to text watermark', { error: String(error?.message || error) });
     }
   }
 
   reportProgress(options, { phase: 'loading-library', current: 0, total });
+  throwIfAborted(options.signal);
   const { jsPDF } = await import('jspdf');
+  throwIfAborted(options.signal);
   reportProgress(options, { phase: 'generating', current: 0, total });
   /** @type {*|null} */
   let pdf = null;
 
   for (let i = 0; i < urls.length; i += 1) {
+    throwIfAborted(options.signal);
     reportProgress(options, { phase: 'generating', current: i, total });
-    const img = await loadImage(urls[i]);
+    const img = await loadImage(urls[i], options.signal);
+    throwIfAborted(options.signal);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
     const [pageWidth, pageHeight] = pageFormatForImage(naturalWidth, naturalHeight);
@@ -389,24 +635,30 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
     const pageInfo = Array.isArray(options.pageContexts) ? options.pageContexts[i] : null;
     const pageContext = makePageTokenContext(baseContext, pageInfo, bundle);
-    const headerText = renderOverlayText(options.printHeaderCfg || {}, pageContext, i + 1, total);
-    const footerText = renderOverlayText(options.printFooterCfg || {}, pageContext, i + 1, total);
+    const headerLines = renderOverlayRichLines(options.printHeaderCfg || {}, pageContext, i + 1, total);
+    const footerLines = renderOverlayRichLines(options.printFooterCfg || {}, pageContext, i + 1, total);
+    const headerDrawLines = wrapRichLines(pdf, headerLines, pageWidth - (marginPt * 2), textFontSize, MAX_HEADER_FOOTER_LINES);
+    const footerFontSize = Math.max(5, textFontSize - 0.5);
+    const footerDrawLines = wrapRichLines(pdf, footerLines, pageWidth - (marginPt * 2), footerFontSize, MAX_FOOTER_LINES);
+    const hasHeader = headerDrawLines.length > 0;
+    const hasFooter = footerDrawLines.length > 0;
     const copyText = resolveCopyMarkerText(pageContext);
+    const headerReserve = hasHeader ? Math.max(headerReservePt, (headerDrawLines.length * textFontSize * HEADER_FOOTER_LINE_HEIGHT) + 2) : 0;
+    const footerReserve = hasFooter ? Math.max(footerReservePt, (footerDrawLines.length * footerFontSize * HEADER_FOOTER_LINE_HEIGHT) + 2) : 0;
 
-    if (headerText) drawSmallTextBlock(pdf, headerText, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize, { boldLeadingText: copyText });
-    if (footerText) {
-      const footerLines = pdf.splitTextToSize(footerText, pageWidth - (marginPt * 2)).slice(0, MAX_FOOTER_LINES);
-      pdf.setFont('helvetica', 'normal');
-      pdf.setFontSize(Math.max(5, textFontSize - 0.5));
-      pdf.setTextColor(...FOOTER_COLOR);
-      const lineHeight = Math.max(5, textFontSize * HEADER_FOOTER_LINE_HEIGHT);
-      footerLines.forEach((line, idx) => pdf.text(String(line), marginPt, pageHeight - marginPt - ((footerLines.length - 1 - idx) * lineHeight)));
+    if (hasHeader) {
+      drawRichTextBlock(pdf, headerDrawLines, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize, HEADER_FOOTER_COLOR, MAX_HEADER_FOOTER_LINES);
+    }
+    if (hasFooter) {
+      const lineHeight = Math.max(5, footerFontSize * HEADER_FOOTER_LINE_HEIGHT);
+      const firstY = pageHeight - marginPt - ((footerDrawLines.length - 1) * lineHeight);
+      drawRichTextBlock(pdf, footerDrawLines, marginPt, firstY, pageWidth - (marginPt * 2), footerFontSize, FOOTER_COLOR, MAX_FOOTER_LINES);
     }
 
     const imageBoxX = marginPt;
-    const imageBoxY = marginPt + (headerText ? headerReservePt : 0);
+    const imageBoxY = marginPt + headerReserve;
     const imageBoxWidth = pageWidth - (marginPt * 2);
-    const imageBoxHeight = pageHeight - (marginPt * 2) - (headerText ? headerReservePt : 0) - (footerText ? footerReservePt : 0);
+    const imageBoxHeight = Math.max(1, pageHeight - (marginPt * 2) - headerReserve - footerReserve);
     const scale = Math.min(imageBoxWidth / naturalWidth, imageBoxHeight / naturalHeight);
     const drawWidth = naturalWidth * scale;
     const drawHeight = naturalHeight * scale;
@@ -426,7 +678,9 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
   if (!pdf) throw new Error('PDF generation produced no document.');
   reportProgress(options, { phase: 'finalizing', current: total, total });
+  throwIfAborted(options.signal);
   const blob = pdf.output('blob');
+  throwIfAborted(options.signal);
   reportProgress(options, { phase: 'done', current: total, total });
   return blob;
 }
@@ -533,10 +787,12 @@ export function printPdfBlob(blob) {
  * @returns {Promise<Blob>}
  */
 export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options = {}) {
+  throwIfAborted(options.signal);
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') throw new Error('Document handle does not expose printable page URLs.');
   const allUrls = await getUrls.call(handle);
+  throwIfAborted(options.signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
   const selected = Array.isArray(pageNumbers) && pageNumbers.length
     ? pageNumbers.map((pageNumber) => allUrls[Math.floor(Number(pageNumber)) - 1]).filter(Boolean)
@@ -551,8 +807,10 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  * @returns {Promise<void>}
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
+  throwIfAborted(options.signal);
   const selectedCount = Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : 1;
   const blob = await createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options);
+  throwIfAborted(options.signal);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: selectedCount, total: selectedCount });
     downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
@@ -593,10 +851,12 @@ function printableSourceFromElement(el) {
  * @returns {Promise<void>}
  */
 export async function handlePdfCurrent(documentRenderRef, options = {}) {
+  throwIfAborted(options.signal);
   const node = documentRenderRef?.current?.getActiveCanvas?.();
   const src = printableSourceFromElement(node);
   if (!src) throw new Error('No active printable surface was available for generated PDF output.');
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 1) : [] });
+  throwIfAborted(options.signal);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: 1, total: 1 });
     downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
@@ -614,11 +874,13 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
  * @returns {Promise<void>}
  */
 export async function handlePdfCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
+  throwIfAborted(options.signal);
   const primary = printableSourceFromElement(primaryRenderRef?.current?.getActiveCanvas?.());
   const compare = printableSourceFromElement(compareRenderRef?.current?.getActiveCanvas?.());
   const urls = [primary, compare].filter(Boolean);
   if (urls.length !== 2) throw new Error('Both comparison surfaces are required for generated PDF output.');
   const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 2) : [] });
+  throwIfAborted(options.signal);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: urls.length, total: urls.length });
     downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);

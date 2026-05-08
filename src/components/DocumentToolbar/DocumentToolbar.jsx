@@ -35,6 +35,16 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame } from '../../utils/printWarmFrame.js';
 
+const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, total: 0, error: '' });
+
+/**
+ * @param {*} error
+ * @returns {boolean}
+ */
+function isPdfAbortError(error) {
+  return String(error?.name || '') === 'AbortError';
+}
+
 
 /**
  * Detail payload emitted by the print dialog.
@@ -231,10 +241,13 @@ const DocumentToolbar = ({
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
-  const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, total:number, error:string }} */ ({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }));
+  const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, total:number, error:string }} */ (EMPTY_PDF_PROGRESS));
   const [printWarmFrameStatus, setPrintWarmFrameStatus] = useState(/** @type {'off'|'pending'|'ready'|'warning'|'error'} */ ('off'));
   const warmPrintFrameRef = useRef(/** @type {*} */ (null));
   const warmPrintBuildSeqRef = useRef(0);
+  const pdfAbortControllerRef = useRef(/** @type {AbortController|null} */ (null));
+  const pdfStartTimeoutRef = useRef(/** @type {number|null} */ (null));
+  const pdfRunSeqRef = useRef(0);
   const documentRepeatTargetRef = useRef('primary');
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
@@ -931,6 +944,49 @@ const DocumentToolbar = ({
     warmPrintFrameRef.current = null;
   }, []);
 
+  const resetPdfProgress = useCallback(() => {
+    setPdfProgress(EMPTY_PDF_PROGRESS);
+  }, []);
+
+  const requestCancelPdfProgress = useCallback(() => {
+    if (!pdfProgress.open || pdfProgress.error || pdfProgress.phase === 'cancelled' || pdfProgress.phase === 'cancelling') return;
+    const confirmed = window.confirm(t('printDialog.pdfProgress.cancelConfirm', {
+      defaultValue: 'Cancel PDF generation?',
+    }));
+    if (!confirmed) return;
+
+    const hadPendingStart = pdfStartTimeoutRef.current !== null;
+    if (hadPendingStart) {
+      window.clearTimeout(pdfStartTimeoutRef.current);
+      pdfStartTimeoutRef.current = null;
+    }
+    try { pdfAbortControllerRef.current?.abort(); } catch {}
+    setPdfProgress((current) => current.open
+      ? { ...current, phase: hadPendingStart ? 'cancelled' : 'cancelling', error: '' }
+      : current);
+    if (hadPendingStart) window.setTimeout(resetPdfProgress, 900);
+  }, [pdfProgress.error, pdfProgress.open, pdfProgress.phase, resetPdfProgress, t]);
+
+  useEffect(() => {
+    if (!pdfProgress.open || pdfProgress.error || pdfProgress.phase === 'cancelled' || pdfProgress.phase === 'cancelling') return undefined;
+    const onKeyDown = (event) => {
+      if (event.key !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      requestCancelPdfProgress();
+    };
+    window.addEventListener('keydown', onKeyDown, true);
+    return () => window.removeEventListener('keydown', onKeyDown, true);
+  }, [pdfProgress.error, pdfProgress.open, pdfProgress.phase, requestCancelPdfProgress]);
+
+  useEffect(() => () => {
+    if (pdfStartTimeoutRef.current !== null) {
+      window.clearTimeout(pdfStartTimeoutRef.current);
+      pdfStartTimeoutRef.current = null;
+    }
+    try { pdfAbortControllerRef.current?.abort(); } catch {}
+  }, []);
+
   /**
    * Execute the actual print helper after the dialog has resolved the user's choices.
    * @param {PrintSubmitDetail} detail
@@ -943,10 +999,17 @@ const DocumentToolbar = ({
     if (detail?.printBackend === 'pdf') {
       const total = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : resolvePrintPageCount(detail));
       const action = detail?.printAction === 'download' ? 'download' : 'print';
+      const runSeq = pdfRunSeqRef.current + 1;
+      pdfRunSeqRef.current = runSeq;
+      try { pdfAbortControllerRef.current?.abort(); } catch {}
+      const abortController = new AbortController();
+      pdfAbortControllerRef.current = abortController;
       setPdfProgress({ open: true, action, phase: 'starting', current: 0, total, error: '' });
       const pdfOpts = {
         ...commonOpts,
+        signal: abortController.signal,
         onProgress: (event) => {
+          if (pdfRunSeqRef.current !== runSeq) return;
           const current = Math.max(0, Math.min(total, Math.floor(Number(event?.current) || 0)));
           const nextTotal = Math.max(1, Math.floor(Number(event?.total) || total));
           setPdfProgress({ open: true, action, phase: String(event?.phase || 'generating'), current, total: nextTotal, error: '' });
@@ -955,7 +1018,9 @@ const DocumentToolbar = ({
       // Give React/the browser one paint opportunity before PDF generation starts. On fast
       // machines the dynamic import may already be cached, and jsPDF work can otherwise begin
       // before the progress overlay becomes visible.
-      window.setTimeout(() => {
+      pdfStartTimeoutRef.current = window.setTimeout(() => {
+        pdfStartTimeoutRef.current = null;
+        if (abortController.signal.aborted || pdfRunSeqRef.current !== runSeq) return;
         const pdfTask = detail?.mode === 'active'
           ? (detail?.activeScope === 'compare-both' && isComparing
               ? handlePdfCurrentComparison(documentRenderRef, compareRef, pdfOpts)
@@ -963,10 +1028,17 @@ const DocumentToolbar = ({
           : handlePdfOutput(documentRenderRef, pageNumbers, pdfOpts);
         pdfTask
           .then(() => {
+            if (pdfRunSeqRef.current !== runSeq) return;
             setPdfProgress({ open: true, action, phase: action === 'download' ? 'downloaded' : 'opening-preview', current: total, total, error: '' });
-            window.setTimeout(() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' }), 1800);
+            window.setTimeout(resetPdfProgress, 1800);
           })
           .catch((error) => {
+            if (pdfRunSeqRef.current !== runSeq) return;
+            if (isPdfAbortError(error)) {
+              setPdfProgress({ open: true, action, phase: 'cancelled', current: 0, total, error: '' });
+              window.setTimeout(resetPdfProgress, 900);
+              return;
+            }
             logger.warn('Generated PDF print failed', { error: String(error?.message || error) });
             setPdfProgress({ open: true, action, phase: 'error', current: 0, total, error: String(error?.message || error) });
           });
@@ -1004,7 +1076,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -1026,6 +1098,8 @@ const DocumentToolbar = ({
     : t('toolbar.printDisabledLoading', {
         defaultValue: 'Printing becomes available when all pages are fully loaded.',
       });
+  const isPdfProgressCancelling = pdfProgress.phase === 'cancelling';
+  const isPdfProgressCancelled = pdfProgress.phase === 'cancelled';
 
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
@@ -1328,24 +1402,34 @@ const DocumentToolbar = ({
       />
 
       {pdfProgress.open ? (
-        <div className="odv-print-preparing-backdrop" role="status" aria-live="polite">
+        <div
+          className="odv-print-preparing-backdrop"
+          role="dialog"
+          aria-modal="true"
+          aria-live="polite"
+          aria-labelledby="odv-pdf-progress-title"
+        >
           <div className="odv-print-preparing-dialog odv-pdf-progress-dialog">
             <div className="odv-print-preparing-icon" aria-hidden="true">
               <span className="material-icons">picture_as_pdf</span>
             </div>
             <div className="odv-print-preparing-copy">
-              <h3>{pdfProgress.action === 'download'
+              <h3 id="odv-pdf-progress-title">{pdfProgress.action === 'download'
                 ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Creating PDF' })
-                : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing safe print' })}</h3>
+                : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing PDF print' })}</h3>
               <p>{pdfProgress.error
                 ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `PDF generation failed: ${pdfProgress.error}` })
-                : t('printDialog.pdfProgress.body', {
-                    current: pdfProgress.current,
-                    total: pdfProgress.total,
-                    phase: pdfProgress.phase,
-                    defaultValue: `Generated ${pdfProgress.current} of ${pdfProgress.total} pages.`,
-                  })}</p>
-              {!pdfProgress.error ? (
+                : isPdfProgressCancelled
+                  ? t('printDialog.pdfProgress.cancelled', { defaultValue: 'PDF generation was cancelled.' })
+                  : isPdfProgressCancelling
+                    ? t('printDialog.pdfProgress.cancelling', { defaultValue: 'Cancelling PDF generation…' })
+                    : t('printDialog.pdfProgress.body', {
+                        current: pdfProgress.current,
+                        total: pdfProgress.total,
+                        phase: pdfProgress.phase,
+                        defaultValue: `Generated ${pdfProgress.current} of ${pdfProgress.total} pages.`,
+                      })}</p>
+              {!pdfProgress.error && !isPdfProgressCancelled ? (
                 <div className="odv-pdf-progress-track" aria-hidden="true">
                   <div
                     className="odv-pdf-progress-bar"
@@ -1358,9 +1442,20 @@ const DocumentToolbar = ({
               <button
                 type="button"
                 className="odv-print-preparing-close"
-                onClick={() => setPdfProgress({ open: false, action: '', phase: '', current: 0, total: 0, error: '' })}
+                onClick={resetPdfProgress}
               >
                 {t('printDialog.preparing.dismiss', { defaultValue: 'Close' })}
+              </button>
+            ) : !isPdfProgressCancelled ? (
+              <button
+                type="button"
+                className="odv-print-preparing-close"
+                onClick={requestCancelPdfProgress}
+                disabled={isPdfProgressCancelling}
+              >
+                {isPdfProgressCancelling
+                  ? t('printDialog.pdfProgress.cancellingButton', { defaultValue: 'Cancelling…' })
+                  : t('printDialog.pdfProgress.cancel', { defaultValue: 'Cancel' })}
               </button>
             ) : null}
           </div>

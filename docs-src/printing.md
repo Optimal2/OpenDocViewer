@@ -159,6 +159,12 @@ Behavior:
 Print header and footer are configured independently through `printHeader` and `printFooter`.
 Both use the same template engine and both are evaluated per printed page. By default, `layout: 'flow'` reserves space for header/footer so the source page image is scaled into the remaining page area instead of being covered. Use `layout: 'overlay'` only when a deployment explicitly accepts drawing the header/footer on top of the page.
 
+The HTML/browser print path renders the configured header/footer as real HTML inside the print
+iframe and can therefore use normal print CSS. The generated-PDF backend uses jsPDF and does not
+attempt full browser layout, but it supports the small rich-text subset expected in headers and
+footers: line breaks, block breaks, `<b>`, `<strong>`, `<bold>`, `<i>`, `<em>`, and equivalent inline
+`font-weight`/`font-style` declarations. More advanced CSS should stay in the HTML print path.
+
 Supported token forms:
 
 ```text
@@ -253,7 +259,7 @@ The print dialog can optionally offer two separate print actions:
 - **Print via HTML** uses the normal browser HTML/iframe print pipeline.
 - **Print via PDF** generates a PDF inside OpenDocViewer from the selected page images, applies configured header/footer text and copy watermark text, then sends that PDF to the browser's PDF print flow.
 
-This is intended as an alternative for browsers that are slow to create print previews from large HTML documents with many image pages. It is configurable and direct print remains the default primary action. PDF generation shows an OpenDocViewer progress indicator before the browser PDF print preview opens.
+This is intended as an alternative for browsers that are slow to create print previews from large HTML documents with many image pages. It is configurable and direct print remains the default primary action. PDF generation shows an OpenDocViewer progress indicator before the browser PDF print preview opens. The progress dialog can be cancelled with the visible cancel button or Escape; OpenDocViewer asks for confirmation before aborting the generation run.
 
 Configuration surface:
 

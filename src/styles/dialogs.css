@@ -622,6 +622,11 @@
   background: rgba(0, 0, 0, 0.04);
 }
 
+.odv-print-preparing-close:disabled {
+  cursor: default;
+  opacity: .62;
+}
+
 
 .odv-metadata-backdrop {
   position: fixed;

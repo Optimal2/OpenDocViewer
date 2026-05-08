@@ -117,7 +117,7 @@
 
 
       // Optional generated-PDF backend for print output. Direct print remains the default.
-      // Safe print generates a PDF inside OpenDocViewer and lets the browser print that PDF.
+      // PDF print generates a PDF inside OpenDocViewer and lets the browser print that PDF.
       pdf: {
         enabled: true,
         // "direct" -> browser HTML print is selected by default.
