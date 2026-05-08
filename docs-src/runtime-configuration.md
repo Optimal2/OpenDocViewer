@@ -172,6 +172,8 @@ now goes directly to the browser print preview without an OpenDocViewer informat
 
 OpenDocViewer shows progress only while generating a PDF for **Print via PDF** or **Save PDF**.
 This progress dialog reports page generation progress and is the only print progress overlay.
+The dialog can be cancelled with its cancel button or Escape; cancellation asks for confirmation
+before aborting the current PDF generation run.
 
 The legacy `print.preparationNoticeThresholdPages` key is ignored and remains only for backward
 compatibility with existing site-local configuration files. Set it to `0` in new configuration files.

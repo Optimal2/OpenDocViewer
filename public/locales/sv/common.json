@@ -230,7 +230,7 @@
         "info": "Direktutskrift använder webbläsarens utskriftsförhandsgranskning. Webbläsarens val för stående eller liggande format gäller hela utskriften."
       },
       "safe": {
-        "label": "Säker utskrift",
+        "label": "PDF-utskrift",
         "hint": "Skapar först en PDF. Varje PDF-sida får automatiskt stående eller liggande format.",
         "info": "OpenDocViewer skapar utskriften som en PDF. Varje PDF-sida får automatiskt stående eller liggande format utifrån sidbilden innan PDF-filen skrivs ut i webbläsaren."
       },
@@ -238,9 +238,14 @@
     },
     "pdfProgress": {
       "downloadTitle": "Skapar PDF",
-      "printTitle": "Förbereder säker utskrift",
+      "printTitle": "Förbereder PDF-utskrift",
       "body": "Genererat {current} av {total} sidor.",
-      "error": "PDF-generering misslyckades: {error}"
+      "error": "PDF-generering misslyckades: {error}",
+      "cancel": "Avbryt",
+      "cancelConfirm": "Vill du avbryta PDF-genereringen?",
+      "cancelling": "Avbryter PDF-generering…",
+      "cancellingButton": "Avbryter…",
+      "cancelled": "PDF-genereringen avbröts."
     }
   },
   "print": {
