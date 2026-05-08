@@ -12,8 +12,8 @@
  * Important notes:
  *  - **Web Workers as ES modules**: `worker.format = 'es'` ensures worker code is bundled
  *    as native ES modules, matching how pdf.js ships its worker entry.
- *  - **JSX loaders**: App source is parsed as JSX only for `.jsx` files. Dependency pre-bundling
- *    keeps explicit `.js/.jsx` loaders because some third-party packages still ship JSX in `.js`.
+ *  - **JSX loaders**: App source uses Vite's default `.jsx` handling. Dependency pre-bundling
+ *    keeps explicit module types because some third-party packages still ship JSX in `.js`.
  *    DO NOT widen this
  *    to all node_modules—some packages use `.js` for non-JSX content.
  *  - **Base path**: In production we use `./` (relative) so the app works under an IIS
@@ -62,29 +62,17 @@ export default defineConfig(({ mode }) => {
     ],
 
     /**
-     * Dependency pre-bundling (optimizeDeps) runs with esbuild. Some libraries ship
-     * JSX in `.js` or `.jsx`. We explicitly tell esbuild to parse those extensions
-     * as JSX to avoid syntax errors during pre-bundle.
+     * Dependency pre-bundling (optimizeDeps) runs with Rolldown in Vite 8. Some
+     * libraries ship JSX in `.js` or `.jsx`, so moduleTypes keeps the previous
+     * parser behavior without relying on deprecated esbuild optimizer options.
      */
     optimizeDeps: {
-      esbuildOptions: {
-        loader: {
+      rolldownOptions: {
+        moduleTypes: {
           '.js': 'jsx',
           '.jsx': 'jsx',
         },
       },
-    },
-
-    /**
-     * App source compilation via esbuild:
-     * - Treat only `.jsx` files under **src/** as JSX
-     * - Let plain `.js` files compile as standard JavaScript
-     * - Use the automatic JSX runtime (no need to import React in every file)
-     */
-    esbuild: {
-      loader: 'jsx',
-      include: /src\/.*\.jsx$/,
-      jsx: 'automatic',
     },
 
     /**
