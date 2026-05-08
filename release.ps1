@@ -1,4 +1,35 @@
 # File: release.ps1
+<#
+.SYNOPSIS
+Validates OpenDocViewer, creates the npm version commit/tag, and pushes the release.
+
+.DESCRIPTION
+The helper can run interactively, but every prompt can also be answered through parameters.
+Use -ReleaseType to provide the version bump type and -Yes to skip the confirmation prompt.
+
+The script intentionally does not stage or commit normal application changes. Commit and push
+those changes first, then run this helper from a clean working tree.
+
+.PARAMETER ReleaseType
+Version bump type passed to the matching npm release script: patch, minor, or major.
+
+.PARAMETER Yes
+Confirms the release summary without prompting.
+
+.PARAMETER SkipValidation
+Skips lint/build/JSDoc validation. Use only when those checks have already been run for the
+exact commit being released.
+
+.EXAMPLE
+.\release.ps1 -ReleaseType minor -Yes
+
+Runs a non-interactive minor release after validation.
+
+.EXAMPLE
+.\release.ps1 -ReleaseType patch -Yes -SkipValidation
+
+Runs a non-interactive patch release without repeating validation.
+#>
 # OpenDocViewer release helper (release-only workflow, Windows-friendly)
 #
 # Expected workflow:

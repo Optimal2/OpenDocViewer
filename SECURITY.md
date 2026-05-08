@@ -2,16 +2,17 @@
 
 ## Supported Versions
 
-**OpenDocViewer v1.8.0** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v1.9.0** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v1.7.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v1.8.0 to get the latest supported generated-PDF print backend, simplified print dialog, print progress feedback, warm-print readiness indicator, improved default manuals, PDF/HTML print visual alignment, and release-script hardening.
+**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v1.9.0 to get the latest supported print configuration model, generated-PDF header/footer improvements, prepared COPY/KOPIA watermark assets, dependency/security baseline, and release-script documentation.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 1.8.0   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 1.7.0   | :white_check_mark: | Still supported, but superseded by v1.8.0 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v1.9.0 and not the preferred target for new deployments |
+| 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.4.1   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -28,6 +29,21 @@ Earlier releases are retained for historical reference only and are **not recomm
 ## Recent release context
 
 The eight most recent releases are listed below for operational context.
+
+### OpenDocViewer v1.9.0
+OpenDocViewer v1.9.0 builds on the v1.8.0 generated-PDF print baseline with a safer dependency set, clearer print configuration, and closer visual parity between HTML print and generated-PDF print.
+
+From a security and maintenance perspective this release refreshes the npm dependency baseline, including `axios` 1.16.0, `express-rate-limit` 8.5.1, resolved `ip-address` 10.2.0, React 19.2.6, pdf.js 5.7.284, Vite 8.0.11, and the matching lint/build tooling updates. The release validation baseline is `npm audit --audit-level=low`, `npm run lint`, `npm run build`, and `npm run doc`.
+
+From a print-configuration perspective this release adds prepared transparent COPY and KOPIA watermark image assets, introduces explicit watermark modes (`auto`, `copy`, `kopia`, and `custom`), keeps custom text watermarking available, and makes generated-PDF watermarks more subtle so they do not obscure the underlying document content. Print actions can also be configured and localized for HTML print, generated-PDF print, and generated-PDF download labels and tooltips.
+
+From a generated-PDF output perspective this release improves header and footer rendering for the trusted print-template subset used by OpenDocViewer deployments. The generated-PDF backend now preserves common inline styling such as bold and italic, supports simple left/right/center text alignment, handles the common two-column `display:flex; justify-content:space-between` header/footer pattern, and documents the intentionally limited CSS parsing model instead of attempting to behave like a full browser layout engine.
+
+From an operator workflow perspective this release makes generated-PDF output cancellable while pages are being prepared, supports Escape as a cancel shortcut with confirmation, uses neutral terminology instead of "secure print" in the progress UI, and keeps print pre-warming configurable with the default disabled because it has not shown a reliable performance benefit.
+
+From an integration and release-readiness perspective this release adds a session-URL integration helper, improves related error handling, updates the runtime configuration documentation for the expanded print options, keeps customer-specific packaging out of the public repository through ignored local files, and documents non-interactive release-script usage through `.\release.ps1 -ReleaseType minor -Yes`.
+
+OpenDocViewer v1.9.0 is recommended going forward because it combines the v1.8.0 generated-PDF print workflow with a cleaner print configuration model, improved PDF/HTML print consistency, and a refreshed security/dependency baseline.
 
 ### OpenDocViewer v1.8.0
 OpenDocViewer v1.8.0 builds on the v1.7.0 print customization baseline with a more practical, operator-friendly print workflow and a generated-PDF print backend.
@@ -55,7 +71,7 @@ From a print-layout perspective the default header/footer model now reserves pag
 
 From a maintainability and hardening perspective this release fixes JSDoc parser issues in the print modules, documents the print token and layout model, tightens i18n path/default handling, improves robustness around `import.meta`/window access, adds safer i18n path segment handling, updates print-related logging payloads, and refreshes selected dependencies including `i18next-http-backend` and `postcss`.
 
-v1.7.0 remains supported, but v1.8.0 is preferred for current deployments.
+v1.7.0 is superseded by later releases and is not recommended for current deployments.
 
 ### OpenDocViewer v1.6.0
 OpenDocViewer v1.6.0 extends the document-aware viewer baseline from v1.5.0 with richer metadata handling, improved operator-facing overlays, configurable HTML-based help content, and broader runtime/UI refinement.
@@ -87,13 +103,6 @@ This release keeps the hybrid loader architecture but now reuses full rendered p
 OpenDocViewer v1.3.1 hardens the viewer after v1.3.0 with a focus on rendered page asset reliability, safer cleanup behavior, and more predictable zoom handling.
 
 This release fixes cases where stale object URLs could cause rendered page images to fail in longer mixed-document sessions, makes single-page raster cleanup more conservative so original data is only released after verified full-asset persistence, and stabilizes Fit to Screen, Fit to Width, and Actual Size against the exact pane viewport in Edge and Chrome.
-
-### OpenDocViewer v1.3.0
-OpenDocViewer v1.3.0 improves overall stability in the document loading and rendering pipeline, with a strong focus on making the viewer behave more predictably across larger and more varied document sets.
-
-This release consolidates the work done after v1.2.0 into a more stable baseline, especially around source loading, rendered page asset handling, thumbnail behavior, temporary storage, and memory-related defaults. The result is a viewer that is more reliable in practical use while still preserving the performance and memory improvements that were safe to keep.
-
-The release also improves configuration clarity by expanding the site-level sample configuration, and updates documentation to better reflect the current runtime behavior and supported deployment model.
 
 ## Reporting a Vulnerability
 
