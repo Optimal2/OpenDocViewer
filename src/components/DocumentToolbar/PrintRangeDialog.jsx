@@ -443,26 +443,33 @@ export default function PrintRangeDialog({
             {t('printDialog.footer.cancel')}
           </button>
           {ctrl.pdfDownloadEnabled ? (
-            <button type="button" className="odv-prd-action secondary" onClick={ctrl.submitPdfDownload}>
-              {t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' })}
+            <button
+              type="button"
+              className="odv-prd-action secondary"
+              title={ctrl.downloadPdfAction.tooltip}
+              onClick={ctrl.submitPdfDownload}
+            >
+              {ctrl.downloadPdfAction.label}
             </button>
           ) : null}
-          <button
-            type="button"
-            className="odv-prd-action secondary"
-            title={t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' })}
-            onClick={ctrl.submitPrintDirect}
-          >
-            {t('printDialog.footer.printHtml', { defaultValue: 'Print via HTML' })}
-          </button>
+          {ctrl.printHtmlEnabled ? (
+            <button
+              type="button"
+              className="odv-prd-action secondary"
+              title={ctrl.printHtmlAction.tooltip}
+              onClick={ctrl.submitPrintDirect}
+            >
+              {ctrl.printHtmlAction.label}
+            </button>
+          ) : null}
           {ctrl.pdfPrintEnabled ? (
             <button
               type="button"
               className="odv-prd-action secondary"
-              title={t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' })}
+              title={ctrl.printPdfAction.tooltip}
               onClick={ctrl.submitPrintPdf}
             >
-              {t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' })}
+              {ctrl.printPdfAction.label}
             </button>
           ) : null}
         </div>

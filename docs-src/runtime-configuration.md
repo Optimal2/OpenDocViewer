@@ -182,8 +182,31 @@ Configuration surface:
 print: {
   preparationNoticeThresholdPages: 0, // deprecated/no-op compatibility key
   prewarmIframe: {
-    enabled: 'auto', // 'auto', true, or false
+    enabled: false,  // false by default; can be 'auto' or true
     maxPages: 0     // 0 = reuse existing documentLoading thresholds
+  },
+  actions: {
+    downloadPdf: {
+      enabled: true,
+      label: { en: 'Save PDF', sv: 'Spara PDF' },
+      tooltip: { en: 'Save the generated PDF.', sv: 'Spara den genererade PDF-filen.' }
+    },
+    printHtml: {
+      enabled: true,
+      label: { en: 'Print via HTML', sv: 'Skriv ut via HTML' },
+      tooltip: {
+        en: 'Use the browser print preview.',
+        sv: 'Använd webbläsarens utskriftsförhandsgranskning.'
+      }
+    },
+    printPdf: {
+      enabled: true,
+      label: { en: 'Print via PDF', sv: 'Skriv ut via PDF' },
+      tooltip: {
+        en: 'OpenDocViewer generates a PDF before printing.',
+        sv: 'OpenDocViewer skapar en PDF innan utskrift.'
+      }
+    }
   },
   pdf: {
     enabled: true,
@@ -199,8 +222,8 @@ print: {
 }
 ```
 
-`print.prewarmIframe.enabled` controls the optional hidden print iframe used to speed up compatible multi-page print jobs. `auto` follows the existing `documentLoading` and memory-pressure profile, `true` forces eligibility unless hard memory pressure is detected, and `false` disables the optimization. `maxPages: 0` means that OpenDocViewer reuses existing document-loading thresholds instead of adding a separate print-specific page limit.
+`print.prewarmIframe.enabled` controls the optional hidden print iframe used to speed up compatible multi-page print jobs. The default is `false`. `auto` follows the existing `documentLoading` and memory-pressure profile, `true` forces eligibility unless hard memory pressure is detected, and `false` disables the optimization. `maxPages: 0` means that OpenDocViewer reuses existing document-loading thresholds instead of adding a separate print-specific page limit.
 
-`print.pdf.enabled` controls whether the print dialog offers a separate **Print via PDF** action next to the normal **Print via HTML** action. `allowDownload: true` adds a separate **Save PDF** action to the print dialog.
+`print.pdf.enabled` controls whether the print dialog offers a separate **Print via PDF** action next to the normal **Print via HTML** action. `allowDownload: true` adds a separate **Save PDF** action to the print dialog. `print.actions.*.enabled` can hide individual footer buttons, while localized `label` and `tooltip` values override the button text without code changes.
 
 The generated-PDF backend is intended for deployments where the browser is slow to build print preview from large HTML/IMG print documents. It reuses already rendered page image blobs for multi-page jobs. Active-page PDF output uses the current rendered surface to preserve transient image edits.

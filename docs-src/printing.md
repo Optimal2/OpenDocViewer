@@ -121,6 +121,11 @@ print: {
       enabled: true,
       showOption: true,
       defaultChecked: false,
+      mode: 'auto', // 'auto', 'copy', 'kopia', or 'custom'
+      assets: {
+        copy: 'assets/watermarks/copy.png',
+        kopia: 'assets/watermarks/kopia.png'
+      },
       // Optional trusted CSS appended to the isolated print iframe watermark rule.
       css: ''
     },
@@ -140,6 +145,10 @@ Behavior:
 
 - `watermark.showOption: true` shows the checkbox to the user.
 - `watermark.defaultChecked: false` makes normal print the default.
+- `watermark.mode: 'auto'` uses the bundled transparent PNG watermark matching the current UI language: COPY for English and KOPIA for Swedish.
+- `watermark.mode: 'copy'` or `'kopia'` forces one bundled PNG regardless of language.
+- `watermark.mode: 'custom'` keeps the generated text overlay based on the resolved configured marker text.
+- `watermark.assets` can point to deployment-local transparent PNGs when the built-in COPY/KOPIA files should be replaced.
 - `watermark.css` can append trusted site-local CSS for the watermark element inside the isolated print iframe.
 - `watermark.showOption: false` and `watermark.defaultChecked: true` forces the configured marker without allowing the user to disable it.
 - `printValue` is the preferred output text for print/header/footer tokens and may be localized.
@@ -229,7 +238,7 @@ Configuration is intentionally small and reuses the existing document-loading me
 ```js
 print: {
   prewarmIframe: {
-    enabled: 'auto', // 'auto', true, or false
+    enabled: false,  // false by default; can be 'auto' or true
     maxPages: 0     // 0 = use existing documentLoading thresholds
   }
 }
@@ -250,6 +259,29 @@ Configuration surface:
 
 ```js
 print: {
+  actions: {
+    downloadPdf: {
+      enabled: true,
+      label: { en: 'Save PDF', sv: 'Spara PDF' },
+      tooltip: { en: 'Save the generated PDF.', sv: 'Spara den genererade PDF-filen.' }
+    },
+    printHtml: {
+      enabled: true,
+      label: { en: 'Print via HTML', sv: 'Skriv ut via HTML' },
+      tooltip: {
+        en: 'Use the browser print preview.',
+        sv: 'Använd webbläsarens utskriftsförhandsgranskning.'
+      }
+    },
+    printPdf: {
+      enabled: true,
+      label: { en: 'Print via PDF', sv: 'Skriv ut via PDF' },
+      tooltip: {
+        en: 'OpenDocViewer generates a PDF before printing.',
+        sv: 'OpenDocViewer skapar en PDF innan utskrift.'
+      }
+    }
+  },
   pdf: {
     enabled: true,
     defaultMode: 'direct', // 'direct' or 'safe'
@@ -264,4 +296,4 @@ print: {
 }
 ```
 
-If `allowDownload` is `true`, the dialog also shows a **Save PDF** action. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.
+If `allowDownload` is `true`, the dialog also shows a **Save PDF** action unless `print.actions.downloadPdf.enabled` is `false`. The HTML and PDF print buttons can likewise be hidden with `print.actions.printHtml.enabled` and `print.actions.printPdf.enabled`, and each action can use localized `label` and `tooltip` values. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.
