@@ -36,7 +36,7 @@ function toAbsoluteUrl(src) {
  * @returns {'auto'|'copy'|'kopia'|'custom'}
  */
 export function normalizeWatermarkMode(mode) {
-  const value = String(mode || 'custom').trim().toLowerCase();
+  const value = String(mode || 'auto').trim().toLowerCase();
   if (value === 'copy') return 'copy';
   if (value === 'kopia') return 'kopia';
   if (value === 'auto') return 'auto';
