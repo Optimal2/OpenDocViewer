@@ -57,6 +57,31 @@ const ELLIPSIS = '...';
  */
 
 /**
+ * @typedef {Object} PdfTextStyleHints
+ * @property {boolean=} bold
+ * @property {boolean=} italic
+ * @property {string=} align
+ * @property {boolean=} displayFlex
+ * @property {boolean=} spaceBetween
+ */
+
+/**
+ * @typedef {Object} PdfRichSegment
+ * @property {string} text
+ * @property {boolean=} bold
+ * @property {boolean=} italic
+ * @property {string=} align
+ */
+
+/**
+ * @typedef {Object} PdfRichColumn
+ * @property {string} align
+ * @property {Array<PdfRichSegment>} segments
+ * @property {number=} width
+ * @property {number=} xOffset
+ */
+
+/**
  * @param {*} value
  * @returns {number}
  */
@@ -113,7 +138,7 @@ function isBoldFontWeight(value) {
 
 /**
  * @param {string} style
- * @returns {{ bold?: boolean, italic?: boolean }}
+ * @returns {PdfTextStyleHints}
  */
 function parseTextStyleDeclarations(style) {
   const result = {};
@@ -135,7 +160,7 @@ function parseTextStyleDeclarations(style) {
 
 /**
  * @param {string} css
- * @returns {Map<string, { bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }>}
+ * @returns {Map<string, PdfTextStyleHints>}
  */
 function parseTemplateCssClassStyles(css) {
   const styles = new Map();
@@ -162,8 +187,8 @@ function parseTemplateCssClassStyles(css) {
 
 /**
  * @param {Element} element
- * @param {Map<string, { bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }>} classStyles
- * @returns {{ bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }}
+ * @param {Map<string, PdfTextStyleHints>} classStyles
+ * @returns {PdfTextStyleHints}
  */
 function getElementStyleHints(element, classStyles) {
   const result = {};
@@ -184,7 +209,7 @@ function isBlockNode(nodeName) {
 }
 
 /**
- * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @param {Array<*>} lines
  * @returns {void}
  */
 function richLineIsEmpty(line) {
@@ -202,7 +227,7 @@ function ensureWritableRichLine(lines) {
 }
 
 /**
- * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @param {Array<*>} lines
  * @returns {void}
  */
 function appendRichLineBreak(lines) {
@@ -210,9 +235,9 @@ function appendRichLineBreak(lines) {
 }
 
 /**
- * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
+ * @param {Array<*>} lines
  * @param {string} text
- * @param {{ bold?: boolean, italic?: boolean }} style
+ * @param {PdfTextStyleHints} style
  * @returns {void}
  */
 function appendRichText(lines, text, style) {
@@ -241,7 +266,7 @@ function appendRichText(lines, text, style) {
 
 /**
  * @param {Array<*>} lines
- * @param {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }> }>} columns
+ * @param {Array<PdfRichColumn>} columns
  * @returns {void}
  */
 function appendRichColumnLine(lines, columns) {
@@ -262,7 +287,7 @@ function appendRichColumnLine(lines, columns) {
 
 /**
  * @param {Array<*>} richLines
- * @returns {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>}
+ * @returns {Array<PdfRichSegment>}
  */
 function flattenRichLines(richLines) {
   const segments = [];
@@ -299,7 +324,7 @@ function htmlToRichLines(html, css = '') {
 
     /**
      * @param {Node} node
-     * @param {{ bold?: boolean, italic?: boolean, align?: string }} inherited
+     * @param {PdfTextStyleHints} inherited
      * @returns {void}
      */
     const walk = (node, inherited) => {
@@ -500,7 +525,7 @@ function pageFormatForImage(width, height) {
 }
 
 /**
- * @param {Array<{ text: string, bold?: boolean, italic?: boolean, align?: string }>} segments
+ * @param {Array<PdfRichSegment>} segments
  * @returns {boolean}
  */
 function richLineHasText(segments) {
@@ -508,8 +533,8 @@ function richLineHasText(segments) {
 }
 
 /**
- * @param {Array<{ text: string, bold?: boolean, italic?: boolean, align?: string }>} segments
- * @returns {Array<{ text: string, bold: boolean, italic: boolean, align: string }>}
+ * @param {Array<PdfRichSegment>} segments
+ * @returns {Array<PdfRichSegment>}
  */
 function normalizeRichSegments(segments) {
   return (Array.isArray(segments) ? segments : [])
@@ -526,7 +551,7 @@ function normalizeRichSegments(segments) {
 
 /**
  * @param {*} line
- * @returns {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align: string }>, width?: number, xOffset?: number }>}
+ * @returns {Array<PdfRichColumn>}
  */
 function getRichLineColumns(line) {
   if (Array.isArray(line?.columns)) {
@@ -561,7 +586,7 @@ function normalizeRichLine(line) {
 }
 
 /**
- * @param {{ bold?: boolean, italic?: boolean }} segment
+ * @param {PdfRichSegment} segment
  * @returns {'normal'|'bold'|'italic'|'bolditalic'}
  */
 function segmentFontStyle(segment) {
@@ -573,7 +598,7 @@ function segmentFontStyle(segment) {
 
 /**
  * @param {*} pdf
- * @param {{ text: string, bold?: boolean, italic?: boolean }} segment
+ * @param {PdfRichSegment} segment
  * @param {number} fontSize
  * @returns {number}
  */
@@ -585,7 +610,7 @@ function measureRichSegment(pdf, segment, fontSize) {
 
 /**
  * @param {*} pdf
- * @param {Array<{ text: string, bold?: boolean, italic?: boolean }>} segments
+ * @param {Array<PdfRichSegment>} segments
  * @param {number} fontSize
  * @returns {number}
  */
@@ -596,10 +621,10 @@ function measureRichSegments(pdf, segments, fontSize) {
 
 /**
  * @param {*} pdf
- * @param {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>} segments
+ * @param {Array<PdfRichSegment>} segments
  * @param {number} maxWidth
  * @param {number} fontSize
- * @returns {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>}
+ * @returns {Array<PdfRichSegment>}
  */
 function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
   const source = normalizeRichSegments(segments);
@@ -632,10 +657,10 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
 
 /**
  * @param {*} pdf
- * @param {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }> }>} columns
+ * @param {Array<PdfRichColumn>} columns
  * @param {number} maxWidth
  * @param {number} fontSize
- * @returns {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }>, width: number, xOffset: number }>}
+ * @returns {Array<PdfRichColumn>}
  */
 function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
   const clean = (Array.isArray(columns) ? columns : [])
@@ -710,7 +735,7 @@ function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
     }
 
     const segments = columns[0]?.segments || [];
-    /** @type {Array<{ text: string, bold: boolean, italic: boolean }>} */
+    /** @type {Array<PdfRichSegment>} */
     let current = [];
     let currentWidth = 0;
 
@@ -741,7 +766,7 @@ function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
 
 /**
  * @param {*} pdf
- * @param {Array<{ text: string, bold?: boolean, italic?: boolean }>} segments
+ * @param {Array<PdfRichSegment>} segments
  * @param {number} x
  * @param {number} y
  * @returns {number}
