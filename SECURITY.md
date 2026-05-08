@@ -58,7 +58,7 @@ From a documentation and support perspective this release substantially expands 
 
 From a maintainability and hardening perspective this release refines generated-PDF sanitization and fallback handling, improves PDF/HTML watermark and header visual consistency, avoids premature cleanup of generated-PDF preview resources, fixes release-script parameter/newline issues, simplifies print UI styling, and addresses follow-up code review comments in the PDF and warm-frame print modules.
 
-OpenDocViewer v1.8.0 is recommended going forward because it keeps the v1.7.0 metadata-aware print model while adding a more transparent PDF print workflow, clearer operator feedback, and more complete built-in documentation.
+OpenDocViewer v1.8.0 keeps the v1.7.0 metadata-aware print model while adding a more transparent PDF print workflow, clearer operator feedback, and more complete built-in documentation. v1.9.0 is preferred for current deployments.
 
 ### OpenDocViewer v1.7.0
 OpenDocViewer v1.7.0 extends the v1.6.0 metadata-aware viewer baseline with a substantially richer and safer print customization model.
