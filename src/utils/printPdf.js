@@ -38,6 +38,26 @@ const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
 const ELLIPSIS = '...';
+const BLOCK_LEVEL_ELEMENTS = Object.freeze([
+  'address',
+  'article',
+  'aside',
+  'blockquote',
+  'div',
+  'footer',
+  'header',
+  'h1',
+  'h2',
+  'h3',
+  'h4',
+  'h5',
+  'h6',
+  'li',
+  'main',
+  'p',
+  'section',
+  'tr',
+]);
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -205,7 +225,7 @@ function getElementStyleHints(element, classStyles) {
  * @returns {boolean}
  */
 function isBlockNode(nodeName) {
-  return ['address', 'article', 'aside', 'blockquote', 'div', 'footer', 'header', 'h1', 'h2', 'h3', 'h4', 'h5', 'h6', 'li', 'main', 'p', 'section', 'tr'].includes(nodeName);
+  return BLOCK_LEVEL_ELEMENTS.includes(nodeName);
 }
 
 /**
@@ -343,7 +363,7 @@ function htmlToRichLines(html, css = '') {
 
       const styleHints = getElementStyleHints(element, classStyles);
       const next = {
-        bold: !!(inherited.bold || styleHints.bold || nodeName === 'b' || nodeName === 'strong' || nodeName === 'bold'),
+        bold: !!(inherited.bold || styleHints.bold || nodeName === 'b' || nodeName === 'strong'),
         italic: !!(inherited.italic || styleHints.italic || nodeName === 'i' || nodeName === 'em'),
         align: styleHints.align || inherited.align || 'left',
       };
