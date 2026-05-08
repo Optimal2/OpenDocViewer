@@ -15,6 +15,7 @@ import logger from '../logging/systemLogger.js';
 import { applyTemplateTokensEscaped, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveLocalizedValue } from './localizedValue.js';
+import { resolveWatermarkAssetSrc } from './printWatermark.js';
 
 /**
  * Print overlay config (runtime) consumed by the print overlay logic.
@@ -149,13 +150,16 @@ function buildPrintCss(extraCss, pageOrientation, printFormatCfg) {
       'font:bold 24px/1.2 Arial,Helvetica,sans-serif;letter-spacing:.18em;color:#000;' +
       'background:rgba(255,255,255,.88);padding:4mm 0;pointer-events:none;z-index:2147483646;}' +
     '.odv-print-watermark{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%) rotate(0deg);' +
-      'font:bold 19vmin/1 Arial,Helvetica,sans-serif;letter-spacing:.16em;color:rgba(255,255,255,.16);' +
-      'paint-order:stroke fill;-webkit-text-stroke:1.2px rgba(0,0,0,.20);' +
-      'text-shadow:0 0 .4px rgba(0,0,0,.26),0 0 2px rgba(0,0,0,.18),0 0 12px rgba(255,255,255,.20);' +
+      'font:bold 19vmin/1 Arial,Helvetica,sans-serif;letter-spacing:.16em;color:rgba(255,255,255,.09);' +
+      'paint-order:stroke fill;-webkit-text-stroke:1px rgba(0,0,0,.12);' +
+      'text-shadow:0 0 .4px rgba(0,0,0,.16),0 0 2px rgba(0,0,0,.10),0 0 12px rgba(255,255,255,.14);' +
       'white-space:nowrap;pointer-events:none;user-select:none;z-index:2147483645;}' +
     '.odv-print-watermark::after{content:attr(data-text);position:absolute;left:0;top:0;' +
-      'color:rgba(0,0,0,.10);text-shadow:0 0 1px rgba(255,255,255,.32),0 0 6px rgba(255,255,255,.22);' +
-      'pointer-events:none;z-index:-1;}';
+      'color:rgba(0,0,0,.055);text-shadow:0 0 1px rgba(255,255,255,.22),0 0 6px rgba(255,255,255,.14);' +
+      'pointer-events:none;z-index:-1;}' +
+    '.odv-print-watermark-image{position:absolute;left:50%;top:50%;transform:translate(-50%,-50%);' +
+      'display:block;width:82vw;max-width:96vw;max-height:42vh;height:auto;object-fit:contain;' +
+      'pointer-events:none;user-select:none;z-index:2147483645;}';
 
   return base + trustedExtraCss + headerMarkerExtraCss + watermarkExtraCss;
 }
@@ -270,10 +274,19 @@ function buildPrintFormatElements(doc, tokenContext, printFormatCfg) {
 
   let watermark = null;
   if (enabled(printFormatCfg?.watermark?.enabled)) {
-    watermark = doc.createElement('div');
-    watermark.className = 'odv-print-watermark';
-    watermark.textContent = text;
-    watermark.setAttribute('data-text', text);
+    const assetSrc = resolveWatermarkAssetSrc(printFormatCfg?.watermark || {}, i18next);
+    if (assetSrc && isSafeImageSrc(assetSrc)) {
+      watermark = doc.createElement('img');
+      watermark.className = 'odv-print-watermark-image';
+      watermark.setAttribute('alt', '');
+      watermark.setAttribute('aria-hidden', 'true');
+      watermark.src = assetSrc;
+    } else {
+      watermark = doc.createElement('div');
+      watermark.className = 'odv-print-watermark';
+      watermark.textContent = text;
+      watermark.setAttribute('data-text', text);
+    }
   }
 
   return { header, watermark };
@@ -405,7 +418,7 @@ async function decodeImagesAsync(list) {
  * @returns {void}
  */
 function clearDynamicPageDecorations(pageWrapper) {
-  pageWrapper.querySelectorAll('.odv-print-header,.odv-print-footer,.odv-print-format-header,.odv-print-watermark')
+  pageWrapper.querySelectorAll('.odv-print-header,.odv-print-footer,.odv-print-format-header,.odv-print-watermark,.odv-print-watermark-image')
     .forEach((node) => {
       try { node.remove(); } catch {}
     });

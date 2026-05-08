@@ -140,9 +140,9 @@
       // are ready. It is only used for order-preserving multi-page jobs; active-page and reordered
       // custom jobs continue to use the regular print path.
       prewarmIframe: {
-        // "auto" follows the existing documentLoading/memory profile; true forces eligibility
-        // unless hard memory pressure is detected; false disables the optimization.
-        enabled: 'auto',
+        // false is the default because this optimization has not shown a consistent benefit in
+        // production-like use. Set to "auto" or true only for deployments that explicitly want it.
+        enabled: false,
         // 0 means reuse the existing documentLoading adaptive thresholds instead of adding a
         // separate print-specific page limit.
         maxPages: 0
@@ -167,6 +167,32 @@
         imageFallbackQuality: 0.9
       },
 
+      // Optional per-action button control for the print dialog footer.
+      // Labels and tooltips may be localized objects, e.g. { en: "...", sv: "..." }.
+      actions: {
+        downloadPdf: {
+          enabled: true,
+          label: { en: 'Save PDF', sv: 'Spara PDF' },
+          tooltip: { en: 'Save the generated PDF.', sv: 'Spara den genererade PDF-filen.' }
+        },
+        printHtml: {
+          enabled: true,
+          label: { en: 'Print via HTML', sv: 'Skriv ut via HTML' },
+          tooltip: {
+            en: 'Use the browser print preview. The browser orientation setting applies to the whole print job.',
+            sv: 'Använd webbläsarens utskriftsförhandsgranskning. Webbläsarens orientering gäller hela utskriften.'
+          }
+        },
+        printPdf: {
+          enabled: true,
+          label: { en: 'Print via PDF', sv: 'Skriv ut via PDF' },
+          tooltip: {
+            en: 'OpenDocViewer generates a PDF before the browser prints it.',
+            sv: 'OpenDocViewer skapar en PDF innan webbläsaren skriver ut den.'
+          }
+        }
+      },
+
       // Optional copy marker. The dialog uses a checkbox, not a format dropdown.
       // When inactive, {{isCopy}}/{{printFormat}} are empty and no watermark/header marker is emitted.
       format: {
@@ -182,6 +208,14 @@
           showOption: true,
           // false -> normal print by default; user must explicitly choose copy watermark
           defaultChecked: false,
+          // "custom" renders the configured marker text as a generated overlay.
+          // "copy" and "kopia" use the bundled transparent PNG assets.
+          // "auto" chooses COPY for English and KOPIA for Swedish.
+          mode: 'auto',
+          assets: {
+            copy: baseHref + 'assets/watermarks/copy.png',
+            kopia: baseHref + 'assets/watermarks/kopia.png'
+          },
           // Optional extra CSS appended inside the isolated print iframe for the watermark element.
           // Use this only for trusted, site-local visual tweaks.
           css: ''

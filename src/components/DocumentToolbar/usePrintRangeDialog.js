@@ -83,6 +83,23 @@ function resolveOptionPrintText(option, i18n, useValueForOutput) {
 }
 
 /**
+ * Resolve a configurable print dialog action.
+ * @param {*} actionsCfg
+ * @param {string} name
+ * @param {*} i18n
+ * @param {Object} fallback
+ * @returns {{ enabled: boolean, label: string, tooltip: string }}
+ */
+function resolvePrintAction(actionsCfg, name, i18n, fallback) {
+  const cfg = actionsCfg?.[name] || {};
+  return {
+    enabled: cfg.enabled !== false,
+    label: resolveLocalizedValue(cfg.label, i18n) || fallback.label,
+    tooltip: resolveLocalizedValue(cfg.tooltip ?? cfg.title, i18n) || fallback.tooltip || fallback.label,
+  };
+}
+
+/**
  * Build token-friendly details for the selected option without forcing templates to use list indexes.
  * @param {*} option
  * @param {*} i18n
@@ -181,10 +198,25 @@ export function usePrintRangeController({
   const reasonCfg = fld?.reason || {};
   const forWhomCfg = fld?.forWhom || {};
   const printFormatCfg = cfg?.print?.format || {};
+  const printActionsCfg = cfg?.print?.actions || {};
   const pdfPrintCfg = cfg?.print?.pdf || {};
   const pdfPrintEnabled = pdfPrintCfg?.enabled === true;
-  const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true;
-  const defaultPrintBackend = pdfPrintEnabled && String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe' ? 'pdf' : 'html';
+  const downloadPdfAction = resolvePrintAction(printActionsCfg, 'downloadPdf', i18n, {
+    label: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
+    tooltip: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
+  });
+  const printHtmlAction = resolvePrintAction(printActionsCfg, 'printHtml', i18n, {
+    label: t('printDialog.footer.printHtml', { defaultValue: 'Print via HTML' }),
+    tooltip: t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' }),
+  });
+  const printPdfAction = resolvePrintAction(printActionsCfg, 'printPdf', i18n, {
+    label: t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' }),
+    tooltip: t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' }),
+  });
+  const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true && downloadPdfAction.enabled;
+  const printHtmlEnabled = printHtmlAction.enabled;
+  const printPdfEnabled = pdfPrintEnabled && printPdfAction.enabled;
+  const defaultPrintBackend = printPdfEnabled && String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe' ? 'pdf' : 'html';
   const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
   const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
   const nonEmptyPrintFormatOptions = printFormatOptions.filter((option) => hasTextValue(option?.value));
@@ -496,7 +528,7 @@ export function usePrintRangeController({
     }
 
     const requestedBackend = backendOverride || printBackend;
-    const backend = action === 'download' ? 'pdf' : (pdfPrintEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
+    const backend = action === 'download' ? 'pdf' : (printPdfEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
     const common = { ...extras(), printBackend: backend, printAction: action };
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
@@ -529,7 +561,7 @@ export function usePrintRangeController({
     extras,
     isComparing,
     makeDescendingSequence,
-    pdfPrintEnabled,
+    printPdfEnabled,
     printBackend,
     printMode,
     restrictToActivePage,
@@ -600,8 +632,12 @@ export function usePrintRangeController({
     setPrintFormatChecked,
     printBackend,
     setPrintBackend,
-    pdfPrintEnabled,
+    pdfPrintEnabled: printPdfEnabled,
+    printHtmlEnabled,
     pdfDownloadEnabled,
+    downloadPdfAction,
+    printHtmlAction,
+    printPdfAction,
     freeReason,
     setFreeReason,
     extraText,

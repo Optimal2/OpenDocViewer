@@ -15,6 +15,7 @@ import logger from '../logging/systemLogger.js';
 import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
+import { resolveWatermarkAssetSrc } from './printWatermark.js';
 
 // A4 page dimensions in PostScript points. jsPDF uses 1 pt = 1/72 inch.
 const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89, unit: 'pt' });
@@ -28,10 +29,12 @@ const MAX_FOOTER_LINES = 2;
 const HEADER_FOOTER_LINE_HEIGHT = 1.18;
 const MIN_WATERMARK_FONT_SIZE = 70;
 const WATERMARK_FONT_SCALE = 0.19;
-const WATERMARK_OPACITY = 0.18;
+const WATERMARK_OPACITY = 0.09;
 // Keep PDF and HTML watermarks visually aligned. 0 degrees means centered horizontal text.
 const WATERMARK_ROTATION_ANGLE = 0;
 const WATERMARK_SHADOW_OFFSET = 1.4;
+const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
+const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -278,6 +281,38 @@ function drawWatermark(pdf, text, pageWidth, pageHeight) {
 }
 
 /**
+ * Draw a prepared transparent PNG watermark, scaled to page width and centered.
+ * @param {*} pdf
+ * @param {HTMLImageElement} img
+ * @param {number} pageWidth
+ * @param {number} pageHeight
+ * @returns {boolean}
+ */
+function drawWatermarkImage(pdf, img, pageWidth, pageHeight) {
+  if (!img) return false;
+  const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
+  const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
+  const aspect = naturalWidth / naturalHeight;
+  let drawWidth = pageWidth * WATERMARK_IMAGE_WIDTH_SCALE;
+  let drawHeight = drawWidth / aspect;
+  const maxHeight = pageHeight * WATERMARK_IMAGE_MAX_HEIGHT_SCALE;
+  if (drawHeight > maxHeight) {
+    drawHeight = maxHeight;
+    drawWidth = drawHeight * aspect;
+  }
+
+  const x = (pageWidth - drawWidth) / 2;
+  const y = (pageHeight - drawHeight) / 2;
+  try {
+    pdf.addImage(img, 'PNG', x, y, drawWidth, drawHeight, undefined, 'FAST');
+    return true;
+  } catch (error) {
+    logger.warn('PDF watermark image rendering failed; falling back to text watermark', { error: String(error?.message || error) });
+    return false;
+  }
+}
+
+/**
  * @param {PdfPrintOptions} options
  * @returns {Object}
  */
@@ -322,6 +357,15 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
+  let watermarkImage = null;
+  const watermarkAssetSrc = resolveWatermarkAssetSrc(options.printFormatCfg?.watermark || {}, i18next);
+  if (watermarkAssetSrc) {
+    try {
+      watermarkImage = await loadImage(watermarkAssetSrc);
+    } catch (error) {
+      logger.warn('PDF watermark image could not be loaded; falling back to text watermark', { error: String(error?.message || error) });
+    }
+  }
 
   reportProgress(options, { phase: 'loading-library', current: 0, total });
   const { jsPDF } = await import('jspdf');
@@ -371,6 +415,10 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     addImageWithFallback(pdf, img, drawX, drawY, drawWidth, drawHeight, imageFallbackQuality);
 
     if (copyText && options.printFormatCfg?.watermark?.enabled !== false) {
+      if (watermarkImage && drawWatermarkImage(pdf, watermarkImage, pageWidth, pageHeight)) {
+        reportProgress(options, { phase: 'generating', current: i + 1, total });
+        continue;
+      }
       drawWatermark(pdf, copyText, pageWidth, pageHeight);
     }
     reportProgress(options, { phase: 'generating', current: i + 1, total });

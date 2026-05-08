@@ -116,9 +116,10 @@ export function disposeWarmPrintFrame(warmFrame) {
  * Decide whether warm print iframe preparation is allowed for the current runtime.
  *
  * `false` or the string `'false'` disables the feature. `true` or the string `'true'` forces it
- * on except for invalid page counts, explicit max-page limits, or hard memory pressure. The default
- * `'auto'` mode follows the existing document-loading profile: it is disabled in memory mode and
- * respects `documentLoading.adaptiveMemory.performanceWindowPageCount` when that threshold is set.
+ * on except for invalid page counts, explicit max-page limits, or hard memory pressure. `'auto'`
+ * follows the existing document-loading profile: it is disabled in memory mode and respects
+ * `documentLoading.adaptiveMemory.performanceWindowPageCount` when that threshold is set. Missing
+ * configuration is treated as disabled.
  *
  * Return value semantics:
  * - `true`: the caller may start or keep a warm print iframe for this session.
@@ -133,7 +134,7 @@ export function disposeWarmPrintFrame(warmFrame) {
  */
 export function shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage = 'none') {
   const prewarmCfg = cfg?.print?.prewarmIframe || {};
-  const enabled = prewarmCfg?.enabled ?? 'auto';
+  const enabled = prewarmCfg?.enabled ?? false;
   if (enabled === false || String(enabled).toLowerCase() === 'false') return false;
   if (!Number.isFinite(pageCount) || pageCount <= 0) return false;
   if (String(memoryPressureStage || '').toLowerCase() === 'hard') return false;
