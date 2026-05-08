@@ -37,6 +37,12 @@ const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
+// Keep the generated download URL alive briefly after the synthetic click; browsers should
+// have taken ownership of the download by then, while the object URL is not leaked long-term.
+const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 30 * 1000;
+// Printing through a hidden PDF iframe can keep the blob URL alive while the browser print
+// preview is open. afterprint is preferred, but this long fallback prevents leaked resources.
+const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * 60 * 1000;
 const ELLIPSIS = '...';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -179,6 +185,14 @@ function parseTextStyleDeclarations(style) {
 }
 
 /**
+ * Parse only the small CSS subset used by trusted print header/footer templates.
+ *
+ * This is intentionally not a full CSS parser. Nested at-rules such as `@media` and
+ * `@keyframes` are ignored by design, because generated-PDF output supports only inline
+ * text hints plus simple class-based header/footer alignment. For descendant selectors,
+ * declarations are assigned to the right-most class, which is the best approximation for
+ * the target element in templates such as `.row .meta`.
+ *
  * @param {string} css
  * @returns {Map<string, PdfTextStyleHints>}
  */
@@ -195,6 +209,8 @@ function parseTemplateCssClassStyles(css) {
     selectorText.split(',').forEach((selector) => {
       const classMatches = String(selector).match(/\.([A-Za-z0-9_-]+)/g) || [];
       if (!classMatches.length) return;
+      // Use the right-most class in selector chains. Applying the same declarations to
+      // every class in `.parent .child` would incorrectly style standalone `.parent` nodes.
       const className = classMatches[classMatches.length - 1].slice(1);
       const current = styles.get(className) || {};
       styles.set(className, { ...current, ...declarations });
@@ -372,7 +388,7 @@ function htmlToRichLines(html, css = '') {
       if (styleHints.displayFlex && styleHints.spaceBetween) {
         if (block) appendRichLineBreak(lines);
         const children = Array.from(element.childNodes || [])
-          .filter((child) => child.nodeType === 1 || String(child.textContent || '').trim());
+          .filter((child) => child.nodeType === 1 || String(child.textContent || '').trim().length > 0);
         const columns = children.map((child, index) => {
           const childLines = [[]];
           const previousLines = lines.splice(0, lines.length, ...childLines);
@@ -1065,7 +1081,7 @@ export function downloadPdfBlob(blob, filename = DEFAULT_PDF_FILENAME) {
   } catch (error) {
     logger.debug('PDF download anchor cleanup failed', { error: String(error?.message || error) });
   }
-  window.setTimeout(() => URL.revokeObjectURL(url), 30000);
+  window.setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS);
 }
 
 /**
@@ -1110,7 +1126,7 @@ export function printPdfBlob(blob) {
     // the preview dialog is open. Do not remove the iframe shortly after print(); it
     // can make the PDF preview disappear. afterprint normally cleans it up; this long
     // fallback avoids leaking the object URL if afterprint is not fired.
-    window.setTimeout(() => cleanup(0), 10 * 60 * 1000);
+    window.setTimeout(() => cleanup(0), PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS);
   };
   const afterPrint = () => cleanup(120000);
   const invokePrint = () => {
