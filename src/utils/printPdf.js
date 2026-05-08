@@ -35,6 +35,9 @@ const WATERMARK_ROTATION_ANGLE = 0;
 const WATERMARK_SHADOW_OFFSET = 1.4;
 const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
+const PDF_COLUMN_GAP_PT = 12;
+const PDF_COLUMN_MIN_WIDTH_PT = 32;
+const ELLIPSIS = '...';
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -112,7 +115,7 @@ function isBoldFontWeight(value) {
  * @param {string} style
  * @returns {{ bold?: boolean, italic?: boolean }}
  */
-function parseInlineTextStyle(style) {
+function parseTextStyleDeclarations(style) {
   const result = {};
   const text = String(style || '');
   if (!text) return result;
@@ -123,7 +126,52 @@ function parseInlineTextStyle(style) {
     const value = part.slice(separator + 1).trim().toLowerCase();
     if (property === 'font-weight' && isBoldFontWeight(value)) result.bold = true;
     if (property === 'font-style' && (value === 'italic' || value === 'oblique')) result.italic = true;
+    if (property === 'text-align' && ['left', 'right', 'center'].includes(value)) result.align = value;
+    if (property === 'display' && value === 'flex') result.displayFlex = true;
+    if (property === 'justify-content' && value === 'space-between') result.spaceBetween = true;
   });
+  return result;
+}
+
+/**
+ * @param {string} css
+ * @returns {Map<string, { bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }>}
+ */
+function parseTemplateCssClassStyles(css) {
+  const styles = new Map();
+  const text = String(css || '');
+  if (!text) return styles;
+
+  const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
+  let match = ruleRe.exec(text);
+  while (match) {
+    const selectorText = match[1] || '';
+    const declarations = parseTextStyleDeclarations(match[2] || '');
+    selectorText.split(',').forEach((selector) => {
+      const classMatches = String(selector).match(/\.([A-Za-z0-9_-]+)/g) || [];
+      if (!classMatches.length) return;
+      const className = classMatches[classMatches.length - 1].slice(1);
+      const current = styles.get(className) || {};
+      styles.set(className, { ...current, ...declarations });
+    });
+    match = ruleRe.exec(text);
+  }
+
+  return styles;
+}
+
+/**
+ * @param {Element} element
+ * @param {Map<string, { bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }>} classStyles
+ * @returns {{ bold?: boolean, italic?: boolean, align?: string, displayFlex?: boolean, spaceBetween?: boolean }}
+ */
+function getElementStyleHints(element, classStyles) {
+  const result = {};
+  Array.from(element.classList || []).forEach((className) => {
+    const classStyle = classStyles.get(className);
+    if (classStyle) Object.assign(result, classStyle);
+  });
+  Object.assign(result, parseTextStyleDeclarations(element.getAttribute('style') || ''));
   return result;
 }
 
@@ -139,8 +187,18 @@ function isBlockNode(nodeName) {
  * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} lines
  * @returns {void}
  */
+function richLineIsEmpty(line) {
+  if (Array.isArray(line)) return line.length === 0;
+  const columns = Array.isArray(line?.columns) ? line.columns : [];
+  return !columns.some((column) => Array.isArray(column?.segments) && richLineHasText(column.segments));
+}
+
+/**
+ * @param {Array<*>} lines
+ * @returns {void}
+ */
 function ensureWritableRichLine(lines) {
-  if (!lines.length) lines.push([]);
+  if (!lines.length || !Array.isArray(lines[lines.length - 1])) lines.push([]);
 }
 
 /**
@@ -148,7 +206,7 @@ function ensureWritableRichLine(lines) {
  * @returns {void}
  */
 function appendRichLineBreak(lines) {
-  if (!lines.length || lines[lines.length - 1].length > 0) lines.push([]);
+  if (!lines.length || !richLineIsEmpty(lines[lines.length - 1])) lines.push([]);
 }
 
 /**
@@ -176,21 +234,64 @@ function appendRichText(lines, text, style) {
       text: collapsed,
       bold: !!style?.bold,
       italic: !!style?.italic,
+      align: style?.align || 'left',
     });
   });
+}
+
+/**
+ * @param {Array<*>} lines
+ * @param {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }> }>} columns
+ * @returns {void}
+ */
+function appendRichColumnLine(lines, columns) {
+  const cleanColumns = columns
+    .map((column) => ({
+      align: column.align || 'left',
+      segments: (Array.isArray(column.segments) ? column.segments : [])
+        .filter((segment) => String(segment?.text || '').trim()),
+    }))
+    .filter((column) => richLineHasText(column.segments));
+  if (!cleanColumns.length) return;
+  if (!lines.length || !richLineIsEmpty(lines[lines.length - 1])) {
+    lines.push({ columns: cleanColumns });
+    return;
+  }
+  lines[lines.length - 1] = { columns: cleanColumns };
+}
+
+/**
+ * @param {Array<*>} richLines
+ * @returns {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>}
+ */
+function flattenRichLines(richLines) {
+  const segments = [];
+  (Array.isArray(richLines) ? richLines : []).forEach((line, index) => {
+    const columns = getRichLineColumns(line);
+    columns.forEach((column, columnIndex) => {
+      if ((index > 0 || columnIndex > 0) && segments.length) {
+        segments[segments.length - 1].text += ' ';
+      }
+      segments.push(...column.segments);
+    });
+  });
+  return segments;
 }
 
 /**
  * Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF.
  * Full browser CSS layout is intentionally not attempted here; this supports the formatting
  * commonly used by ODV print headers/footers: line breaks, block breaks, bold, italic and
- * equivalent inline styles.
+ * equivalent inline styles. It also recognizes simple left/right/center alignment and
+ * two-column space-between rows from trusted print-template CSS.
  * @param {string} html
- * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
+ * @param {string=} css
+ * @returns {Array<*>}
  */
-function htmlToRichLines(html) {
+function htmlToRichLines(html, css = '') {
   const input = String(html || '');
-  /** @type {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} */
+  const classStyles = parseTemplateCssClassStyles(css);
+  /** @type {Array<*>} */
   const lines = [[]];
   try {
     const doc = new DOMParser().parseFromString(`<!doctype html><body>${input}`, 'text/html');
@@ -198,7 +299,7 @@ function htmlToRichLines(html) {
 
     /**
      * @param {Node} node
-     * @param {{ bold?: boolean, italic?: boolean }} inherited
+     * @param {{ bold?: boolean, italic?: boolean, align?: string }} inherited
      * @returns {void}
      */
     const walk = (node, inherited) => {
@@ -215,13 +316,44 @@ function htmlToRichLines(html) {
         return;
       }
 
-      const inlineStyle = parseInlineTextStyle(element.getAttribute('style') || '');
+      const styleHints = getElementStyleHints(element, classStyles);
       const next = {
-        bold: !!(inherited.bold || inlineStyle.bold || nodeName === 'b' || nodeName === 'strong' || nodeName === 'bold'),
-        italic: !!(inherited.italic || inlineStyle.italic || nodeName === 'i' || nodeName === 'em'),
+        bold: !!(inherited.bold || styleHints.bold || nodeName === 'b' || nodeName === 'strong' || nodeName === 'bold'),
+        italic: !!(inherited.italic || styleHints.italic || nodeName === 'i' || nodeName === 'em'),
+        align: styleHints.align || inherited.align || 'left',
       };
 
       const block = isBlockNode(nodeName);
+      if (styleHints.displayFlex && styleHints.spaceBetween) {
+        if (block) appendRichLineBreak(lines);
+        const children = Array.from(element.childNodes || [])
+          .filter((child) => child.nodeType === 1 || String(child.textContent || '').trim());
+        const columns = children.map((child, index) => {
+          const childLines = [[]];
+          const previousLines = lines.splice(0, lines.length, ...childLines);
+          try {
+            walk(child, next);
+          } finally {
+            childLines.splice(0, childLines.length, ...lines);
+            lines.splice(0, lines.length, ...previousLines);
+          }
+
+          let align = index === children.length - 1 ? 'right' : 'left';
+          if (child.nodeType === 1) {
+            const childStyle = getElementStyleHints(/** @type {Element} */ (child), classStyles);
+            align = childStyle.align || align;
+          }
+
+          return {
+            align,
+            segments: flattenRichLines(childLines),
+          };
+        });
+        appendRichColumnLine(lines, columns);
+        if (block) appendRichLineBreak(lines);
+        return;
+      }
+
       if (block) appendRichLineBreak(lines);
       if (nodeName === 'li') appendRichText(lines, '- ', next);
       Array.from(element.childNodes || []).forEach((child) => walk(child, next));
@@ -234,10 +366,8 @@ function htmlToRichLines(html) {
   }
 
   return lines
-    .map((line) => line
-      .map((segment) => ({ ...segment, text: segment.text.replace(/\s+/g, ' ') }))
-      .filter((segment) => segment.text))
-    .filter((line) => line.length > 0);
+    .map(normalizeRichLine)
+    .filter((line) => !richLineIsEmpty(line));
 }
 
 /**
@@ -245,7 +375,7 @@ function htmlToRichLines(html) {
  * @param {Object} tokenContext
  * @param {number} page
  * @param {number} total
- * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
+ * @returns {Array<*>}
  */
 function renderOverlayRichLines(cfg, tokenContext, page, total) {
   if (!cfg || cfg.enabled === false) return [];
@@ -255,7 +385,7 @@ function renderOverlayRichLines(cfg, tokenContext, page, total) {
   const tpl = resolveLocalizedValue(cfg.template || '', i18next);
   if (!tpl) return [];
   const html = applyTemplateTokensEscaped(tpl, { ...tokenContext, page, totalPages: total });
-  return htmlToRichLines(html);
+  return htmlToRichLines(html, cfg.css || '');
 }
 
 /**
@@ -370,12 +500,64 @@ function pageFormatForImage(width, height) {
 }
 
 /**
- * @param {*} pdf
- * @param {Array<{ text: string, bold: boolean, italic: boolean }>} line
+ * @param {Array<{ text: string, bold?: boolean, italic?: boolean, align?: string }>} segments
  * @returns {boolean}
  */
-function richLineHasText(line) {
-  return Array.isArray(line) && line.some((segment) => String(segment?.text || '').trim());
+function richLineHasText(segments) {
+  return Array.isArray(segments) && segments.some((segment) => String(segment?.text || '').trim());
+}
+
+/**
+ * @param {Array<{ text: string, bold?: boolean, italic?: boolean, align?: string }>} segments
+ * @returns {Array<{ text: string, bold: boolean, italic: boolean, align: string }>}
+ */
+function normalizeRichSegments(segments) {
+  return (Array.isArray(segments) ? segments : [])
+    .map((segment) => ({
+      text: String(segment?.text || '').replace(/\s+/g, ' '),
+      bold: !!segment?.bold,
+      italic: !!segment?.italic,
+      align: ['left', 'right', 'center'].includes(String(segment?.align || '').toLowerCase())
+        ? String(segment.align).toLowerCase()
+        : 'left',
+    }))
+    .filter((segment) => segment.text);
+}
+
+/**
+ * @param {*} line
+ * @returns {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align: string }>, width?: number, xOffset?: number }>}
+ */
+function getRichLineColumns(line) {
+  if (Array.isArray(line?.columns)) {
+    return line.columns
+      .map((column) => ({
+        align: ['left', 'right', 'center'].includes(String(column?.align || '').toLowerCase())
+          ? String(column.align).toLowerCase()
+          : 'left',
+        segments: normalizeRichSegments(column?.segments),
+        width: Number.isFinite(column?.width) ? Number(column.width) : undefined,
+        xOffset: Number.isFinite(column?.xOffset) ? Number(column.xOffset) : undefined,
+      }))
+      .filter((column) => richLineHasText(column.segments));
+  }
+
+  if (!Array.isArray(line)) return [];
+  const segments = normalizeRichSegments(line);
+  const align = segments.find((segment) => segment.align && segment.align !== 'left')?.align || 'left';
+  return richLineHasText(segments) ? [{ align, segments }] : [];
+}
+
+/**
+ * @param {*} line
+ * @returns {*}
+ */
+function normalizeRichLine(line) {
+  const columns = getRichLineColumns(line);
+  if (columns.length > 1 || (columns.length === 1 && columns[0].align !== 'left')) {
+    return { columns };
+  }
+  return columns.length === 1 ? columns[0].segments : [];
 }
 
 /**
@@ -403,23 +585,136 @@ function measureRichSegment(pdf, segment, fontSize) {
 
 /**
  * @param {*} pdf
- * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} richLines
+ * @param {Array<{ text: string, bold?: boolean, italic?: boolean }>} segments
+ * @param {number} fontSize
+ * @returns {number}
+ */
+function measureRichSegments(pdf, segments, fontSize) {
+  return (Array.isArray(segments) ? segments : [])
+    .reduce((sum, segment) => sum + measureRichSegment(pdf, segment, fontSize), 0);
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>} segments
+ * @param {number} maxWidth
+ * @param {number} fontSize
+ * @returns {Array<{ text: string, bold: boolean, italic: boolean, align?: string }>}
+ */
+function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
+  const source = normalizeRichSegments(segments);
+  if (measureRichSegments(pdf, source, fontSize) <= maxWidth) return source;
+  const ellipsisSegment = { text: ELLIPSIS, bold: false, italic: false, align: 'left' };
+  const ellipsisWidth = measureRichSegment(pdf, ellipsisSegment, fontSize);
+  const fitted = [];
+  let width = 0;
+  for (const segment of source) {
+    const text = String(segment.text || '');
+    let nextText = '';
+    for (const char of text) {
+      const nextSegment = { ...segment, text: nextText + char };
+      const nextWidth = measureRichSegment(pdf, nextSegment, fontSize);
+      if (width + nextWidth + ellipsisWidth > maxWidth) {
+        if (nextText) fitted.push({ ...segment, text: nextText });
+        fitted.push(ellipsisSegment);
+        return fitted;
+      }
+      nextText += char;
+    }
+    if (nextText) {
+      fitted.push({ ...segment, text: nextText });
+      width += measureRichSegment(pdf, { ...segment, text: nextText }, fontSize);
+    }
+  }
+  fitted.push(ellipsisSegment);
+  return fitted;
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }> }>} columns
+ * @param {number} maxWidth
+ * @param {number} fontSize
+ * @returns {Array<{ align: string, segments: Array<{ text: string, bold: boolean, italic: boolean, align?: string }>, width: number, xOffset: number }>}
+ */
+function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
+  const clean = (Array.isArray(columns) ? columns : [])
+    .map((column) => ({
+      align: column.align || 'left',
+      segments: normalizeRichSegments(column.segments),
+      naturalWidth: measureRichSegments(pdf, column.segments, fontSize),
+    }))
+    .filter((column) => richLineHasText(column.segments));
+  if (clean.length <= 1) {
+    return clean.map((column) => ({
+      align: column.align,
+      segments: fitRichSegmentsToWidth(pdf, column.segments, maxWidth, fontSize),
+      width: maxWidth,
+      xOffset: 0,
+    }));
+  }
+
+  const gap = PDF_COLUMN_GAP_PT;
+  const totalGap = gap * (clean.length - 1);
+  const available = Math.max(PDF_COLUMN_MIN_WIDTH_PT * clean.length, maxWidth - totalGap);
+  const naturalTotal = clean.reduce((sum, column) => sum + column.naturalWidth, 0);
+  let widths;
+
+  if (naturalTotal <= available) {
+    widths = clean.map((column) => column.naturalWidth);
+  } else if (clean.length === 2) {
+    const leftNatural = clean[0].naturalWidth;
+    const leftWidth = Math.min(leftNatural, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available * 0.42));
+    widths = [leftWidth, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available - leftWidth)];
+  } else {
+    const equalWidth = Math.max(PDF_COLUMN_MIN_WIDTH_PT, available / clean.length);
+    widths = clean.map(() => equalWidth);
+  }
+
+  let cursor = 0;
+  return clean.map((column, index) => {
+    const width = Math.max(PDF_COLUMN_MIN_WIDTH_PT, widths[index] || PDF_COLUMN_MIN_WIDTH_PT);
+    const result = {
+      align: column.align,
+      segments: fitRichSegmentsToWidth(pdf, column.segments, width, fontSize),
+      width,
+      xOffset: cursor,
+    };
+    cursor += width + gap;
+    if (index === clean.length - 1 && (column.align === 'right' || clean.length === 2)) {
+      result.xOffset = Math.max(0, maxWidth - width);
+    }
+    return result;
+  });
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<*>} richLines
  * @param {number} maxWidth
  * @param {number} fontSize
  * @param {number} maxLines
- * @returns {Array<Array<{ text: string, bold: boolean, italic: boolean }>>}
+ * @returns {Array<*>}
  */
 function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
-  /** @type {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} */
+  /** @type {Array<*>} */
   const out = [];
-  const sourceLines = (Array.isArray(richLines) ? richLines : []).filter(richLineHasText);
+  const sourceLines = (Array.isArray(richLines) ? richLines : []).filter((line) => !richLineIsEmpty(line));
 
   for (const sourceLine of sourceLines) {
+    const columns = getRichLineColumns(sourceLine);
+    if (columns.length > 1 || (columns.length === 1 && columns[0].align !== 'left')) {
+      out.push({ columns: layoutRichColumns(pdf, columns, maxWidth, fontSize) });
+      if (out.length >= maxLines) return out;
+      continue;
+    }
+
+    const segments = columns[0]?.segments || [];
     /** @type {Array<{ text: string, bold: boolean, italic: boolean }>} */
     let current = [];
     let currentWidth = 0;
 
-    for (const segment of sourceLine) {
+    for (const segment of segments) {
       const tokens = String(segment.text || '').match(/\S+\s*/g) || [];
       for (const token of tokens) {
         const nextSegment = { ...segment, text: token };
@@ -446,7 +741,26 @@ function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
 
 /**
  * @param {*} pdf
- * @param {Array<Array<{ text: string, bold: boolean, italic: boolean }>>} richLines
+ * @param {Array<{ text: string, bold?: boolean, italic?: boolean }>} segments
+ * @param {number} x
+ * @param {number} y
+ * @returns {number}
+ */
+function drawRichSegments(pdf, segments, x, y) {
+  let offset = 0;
+  (Array.isArray(segments) ? segments : []).forEach((segment) => {
+    const text = String(segment.text || '');
+    if (!text) return;
+    pdf.setFont('helvetica', segmentFontStyle(segment));
+    pdf.text(text, x + offset, y);
+    offset += pdf.getTextWidth(text);
+  });
+  return offset;
+}
+
+/**
+ * @param {*} pdf
+ * @param {Array<*>} richLines
  * @param {number} x
  * @param {number} y
  * @param {number} maxWidth
@@ -464,13 +778,17 @@ function drawRichTextBlock(pdf, richLines, x, y, maxWidth, fontSize, color, maxL
 
   lines.forEach((line, index) => {
     const yPos = y + (index * lineHeight);
-    let offset = 0;
-    line.forEach((segment) => {
-      const text = String(segment.text || '');
-      if (!text) return;
-      pdf.setFont('helvetica', segmentFontStyle(segment));
-      pdf.text(text, x + offset, yPos);
-      offset += pdf.getTextWidth(text);
+    const columns = getRichLineColumns(line);
+    columns.forEach((column) => {
+      const width = Number.isFinite(column.width) ? Number(column.width) : maxWidth;
+      const xOffset = Number.isFinite(column.xOffset) ? Number(column.xOffset) : 0;
+      const textWidth = measureRichSegments(pdf, column.segments, fontSize);
+      const alignOffset = column.align === 'right'
+        ? Math.max(0, width - textWidth)
+        : column.align === 'center'
+          ? Math.max(0, (width - textWidth) / 2)
+          : 0;
+      drawRichSegments(pdf, column.segments, x + xOffset + alignOffset, yPos);
     });
   });
   return lines.length * lineHeight;

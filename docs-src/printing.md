@@ -162,8 +162,10 @@ Both use the same template engine and both are evaluated per printed page. By de
 The HTML/browser print path renders the configured header/footer as real HTML inside the print
 iframe and can therefore use normal print CSS. The generated-PDF backend uses jsPDF and does not
 attempt full browser layout, but it supports the small rich-text subset expected in headers and
-footers: line breaks, block breaks, `<b>`, `<strong>`, `<bold>`, `<i>`, `<em>`, and equivalent inline
-`font-weight`/`font-style` declarations. More advanced CSS should stay in the HTML print path.
+footers: line breaks, block breaks, `<b>`, `<strong>`, `<bold>`, `<i>`, `<em>`, equivalent inline
+`font-weight`/`font-style` declarations, `text-align: left|right|center`, and simple two-column
+header/footer rows using `display:flex` with `justify-content:space-between`. More advanced CSS
+layout should stay in the HTML print path.
 
 Supported token forms:
 
