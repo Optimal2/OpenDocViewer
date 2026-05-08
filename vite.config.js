@@ -27,7 +27,19 @@ import svgr from 'vite-plugin-svgr';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
-const BUILD_STAMP = new Date().toISOString().replace(/[-:.TZ]/g, '');
+const BUILD_STAMP = (() => {
+  // UTC format: YYYYMMDDHHmmss
+  const d = new Date();
+  const pad = (n) => String(n).padStart(2, '0');
+  return (
+    String(d.getUTCFullYear()) +
+    pad(d.getUTCMonth() + 1) +
+    pad(d.getUTCDate()) +
+    pad(d.getUTCHours()) +
+    pad(d.getUTCMinutes()) +
+    pad(d.getUTCSeconds())
+  );
+})();
 const ODV_BUILD_ID = `${APP_VERSION}-${BUILD_STAMP}`;
 
 /**

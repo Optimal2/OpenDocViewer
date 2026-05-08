@@ -209,8 +209,8 @@ function isBlockNode(nodeName) {
 }
 
 /**
- * @param {Array<*>} lines
- * @returns {void}
+ * @param {*} line Rich-text line candidate.
+ * @returns {boolean}
  */
 function richLineIsEmpty(line) {
   if (Array.isArray(line)) return line.length === 0;
@@ -227,7 +227,7 @@ function ensureWritableRichLine(lines) {
 }
 
 /**
- * @param {Array<*>} lines
+ * @param {Array<*>} lines Rich-text line buffer; appends a new empty line when a line break is needed.
  * @returns {void}
  */
 function appendRichLineBreak(lines) {
