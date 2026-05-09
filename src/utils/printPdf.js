@@ -581,7 +581,7 @@ function loadImage(src, signal) {
 /**
  * @param {Array<string>} urls
  * @param {AbortSignal=} signal
- * @param {function(number): void=} onLoaded
+ * @param {function(number): void} onLoaded
  * @returns {Promise<Array<HTMLImageElement>>}
  */
 async function loadImagesConcurrently(urls, signal, onLoaded) {
@@ -602,7 +602,7 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
         throw new Error(`Failed to load image ${index + 1} for PDF generation: ${String(error?.message || error)}`);
       }
       completed += 1;
-      if (typeof onLoaded === 'function') onLoaded(completed);
+      onLoaded(completed);
     }
   }
 
@@ -1333,7 +1333,9 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   throwIfAborted(signal);
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
-  if (typeof getUrls !== 'function') throw new Error('Document handle does not expose printable page URLs.');
+  if (typeof getUrls !== 'function') {
+    throw new Error("Document handle must implement either 'getAllPrintableDataUrls' or 'exportAllPagesAsDataUrls' to provide printable page URLs.");
+  }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
@@ -1431,7 +1433,9 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   throwIfAborted(options.signal);
   const node = documentRenderRef?.current?.getActiveCanvas?.();
   const src = printableSourceFromElement(node);
-  if (!src) throw new Error('No active printable surface was available for generated PDF output.');
+  if (!src) {
+    throw new Error('Unable to generate PDF from the active surface: no active canvas/image element was found, or the element could not be converted to a safe printable source.');
+  }
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 1) : [] });
   throwIfAborted(options.signal);
   if (options.action === 'download') {
@@ -1455,7 +1459,12 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   const primary = printableSourceFromElement(primaryRenderRef?.current?.getActiveCanvas?.());
   const compare = printableSourceFromElement(compareRenderRef?.current?.getActiveCanvas?.());
   const urls = [primary, compare].filter(Boolean);
-  if (urls.length !== 2) throw new Error('Both comparison surfaces are required for generated PDF output.');
+  if (urls.length !== 2) {
+    const missing = [];
+    if (!primary) missing.push('primary');
+    if (!compare) missing.push('compare');
+    throw new Error(`Both comparison surfaces are required for generated PDF output. Missing surface(s): ${missing.join(', ')}.`);
+  }
   const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 2) : [] });
   throwIfAborted(options.signal);
   if (options.action === 'download') {
