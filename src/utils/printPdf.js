@@ -43,6 +43,7 @@ const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 const JPEG_FALLBACK_DEFAULT_QUALITY = 0.9;
 const JPEG_FALLBACK_MIN_QUALITY = 0.6;
+const JPEG_FALLBACK_MAX_CANVAS_DIMENSION = 4096;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // Two-column flow rows reserve a little less than half the width for the left
@@ -71,7 +72,7 @@ const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or 
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
 const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
 const JSPDF_LOAD_ERROR_HINT = 'Verify that the jsPDF package is installed, the installed version exposes the jsPDF constructor, and the build configuration allows dynamic imports. Check the jsPDF package documentation for API or packaging changes.';
-let exportAllPagesAsDataUrlsAliasWarned = false;
+const DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES = new WeakSet();
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
   'article',
@@ -94,7 +95,8 @@ const BLOCK_LEVEL_ELEMENTS = Object.freeze([
 ]);
 // Header/footer template CSS is intentionally a small subset with simple ASCII class
 // selectors. Full CSS identifier parsing (Unicode escapes, nested at-rules, etc.) is
-// outside the generated-PDF fallback scope.
+// outside the generated-PDF fallback scope. Declaration values that contain braces,
+// including quoted values such as `content:"{"`, are not supported by this regex parser.
 const CSS_RULE_RE = /([^{}]+)\{([^{}]*)\}/g;
 const CSS_CLASS_SELECTOR_RE = /\.([A-Za-z0-9_-]+)/g;
 const CSS_SELECTOR_LIST_SEPARATOR_RE = /,/;
@@ -267,7 +269,8 @@ function parseTextStyleDeclarations(style) {
  * `@keyframes` are ignored by design, because generated-PDF output supports only inline
  * text hints plus simple class-based header/footer alignment. For descendant selectors,
  * declarations are assigned to the right-most class, which is the best approximation for
- * the target element in templates such as `.row .meta`.
+ * the target element in templates such as `.row .meta`. CSS declaration values with
+ * nested braces, including quoted `content: "{"`, are outside this subset.
  *
  * @param {string} css
  * @returns {Map<string, PdfTextStyleHints>}
@@ -331,20 +334,23 @@ function stripDisallowedTemplateElements(html) {
   let cursor = 0;
 
   for (const match of input.matchAll(DISALLOWED_TEMPLATE_TAG_RE)) {
-    if (match.index >= cursor) {
-      output += input.slice(cursor, match.index);
-      cursor = match.index + match[0].length;
+    if (match.index < cursor) {
+      // This tag is inside a block already removed with its closing tag.
+      continue;
+    }
 
-      const isClosingTag = !!match[1];
-      const elementName = String(match[2] || '').toLowerCase();
-      const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
-      if (!isClosingTag && closingPattern) {
-        const remaining = input.slice(cursor);
-        const closingMatch = closingPattern.exec(remaining);
-        if (closingMatch && Number.isInteger(closingMatch.index) && closingMatch.index >= 0) {
-          // The closing search runs on the remaining slice, so its index is relative to cursor.
-          cursor += closingMatch.index + closingMatch[0].length;
-        }
+    output += input.slice(cursor, match.index);
+    cursor = match.index + match[0].length;
+
+    const isClosingTag = !!match[1];
+    const elementName = String(match[2] || '').toLowerCase();
+    const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
+    if (!isClosingTag && closingPattern) {
+      const remaining = input.slice(cursor);
+      const closingMatch = closingPattern.exec(remaining);
+      if (closingMatch && Number.isInteger(closingMatch.index) && closingMatch.index >= 0) {
+        // The closing search runs on the remaining slice, so its index is relative to cursor.
+        cursor += closingMatch.index + closingMatch[0].length;
       }
     }
   }
@@ -698,14 +704,12 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   const results = new Array(urls.length);
   const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
   let completed = 0;
-  const indexes = imageIndexIterator(urls.length);
+  const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
 
-  // The synchronous generator helpers below intentionally contain no await points.
-  // JavaScript's event loop cannot interleave inside a single indexes.next() call,
-  // so each worker claims one index before loadNext awaits the actual image load.
+  // Index claiming is intentionally a synchronous pop from a private array. Keep it
+  // await-free so each worker claims exactly one index before loading the image.
   const takeNextIndex = () => {
-    const next = indexes.next();
-    return next.done ? null : next.value;
+    return pendingIndexes.length ? pendingIndexes.pop() : null;
   };
 
   const reportImageLoaded = () => {
@@ -728,16 +732,6 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
 
   await Promise.all(Array.from({ length: workerCount }, loadNext));
   return results;
-}
-
-/**
- * @param {number} count
- * @returns {Generator<number>}
- */
-function* imageIndexIterator(count) {
-  for (let index = 0; index < count; index += 1) {
-    yield index;
-  }
 }
 
 /**
@@ -783,13 +777,16 @@ function imageExtensionFromUrl(src) {
 function imageToJpegDataUrl(img, quality) {
   try {
     const canvas = document.createElement('canvas');
-    canvas.width = getImageDimension(img, 'width');
-    canvas.height = getImageDimension(img, 'height');
+    const sourceWidth = getImageDimension(img, 'width');
+    const sourceHeight = getImageDimension(img, 'height');
+    const scale = Math.min(1, JPEG_FALLBACK_MAX_CANVAS_DIMENSION / Math.max(sourceWidth, sourceHeight));
+    canvas.width = Math.max(1, Math.round(sourceWidth * scale));
+    canvas.height = Math.max(1, Math.round(sourceHeight * scale));
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
-    ctx.drawImage(img, 0, 0);
+    ctx.drawImage(img, 0, 0, canvas.width, canvas.height);
     const jpegQuality = normalizeQuality(quality, JPEG_FALLBACK_DEFAULT_QUALITY, JPEG_FALLBACK_MIN_QUALITY);
     return canvas.toDataURL('image/jpeg', jpegQuality);
   } catch (error) {
@@ -1569,6 +1566,20 @@ function executeOutputAction(blob, options, count) {
 }
 
 /**
+ * @param {*} handle
+ * @returns {void}
+ */
+function warnDeprecatedPrintableUrlExportAlias(handle) {
+  if (!handle || (typeof handle !== 'object' && typeof handle !== 'function')) {
+    logger.warn('Document renderer uses deprecated exportAllPagesAsDataUrls(); migrate to getAllPrintableDataUrls().');
+    return;
+  }
+  if (DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES.has(handle)) return;
+  DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES.add(handle);
+  logger.warn('Document renderer uses deprecated exportAllPagesAsDataUrls(); migrate to getAllPrintableDataUrls().');
+}
+
+/**
  * Read printable page image URLs from the document renderer. getAllPrintableDataUrls()
  * is the preferred API; exportAllPagesAsDataUrls() remains a backward-compatible alias
  * for older integrations, with no removal date currently scheduled.
@@ -1586,9 +1597,8 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   if (typeof getUrls !== 'function') {
     throw new Error(`Document handle object must implement getAllPrintableDataUrls() to provide printable page URLs. exportAllPagesAsDataUrls() is still supported as a backward-compatible alias. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
   }
-  if (typeof preferredGetUrls !== 'function' && typeof aliasGetUrls === 'function' && !exportAllPagesAsDataUrlsAliasWarned) {
-    exportAllPagesAsDataUrlsAliasWarned = true;
-    logger.warn('Document renderer uses deprecated exportAllPagesAsDataUrls(); migrate to getAllPrintableDataUrls().');
+  if (typeof preferredGetUrls !== 'function' && typeof aliasGetUrls === 'function') {
+    warnDeprecatedPrintableUrlExportAlias(handle);
   }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
