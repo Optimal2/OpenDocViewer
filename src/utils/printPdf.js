@@ -41,6 +41,9 @@ const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
+// Two-column flow rows reserve a little less than half the width for the left
+// label/title side so the right metadata side can hold longer patient/context text.
+const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 // Keep the generated download URL alive briefly after the synthetic click; browsers should
 // have taken ownership of the download by then, while the object URL is not leaked long-term.
 const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 30 * 1000;
@@ -51,6 +54,9 @@ const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * 60 * 1000;
 // the preview UI opens or while it still depends on the blob. Short cleanup can blank pages
 // if the user waits before continuing from the browser print dialog.
 const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 120 * 1000;
+// The iframe load event is normally enough to invoke printing, but blob iframe load
+// events can be missed in some browsers. This fallback retries once after a short delay.
+const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
 const ELLIPSIS = '...';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -741,19 +747,21 @@ function fitRichSegmentTextToWidth(pdf, segment, maxWidth, fontSize) {
   const chars = Array.from(String(segment?.text || ''));
   if (!chars.length || maxWidth <= 0) return '';
 
-  let low = 0;
+  let low = 1;
   let high = chars.length;
-  while (low < high) {
-    const mid = Math.ceil((low + high) / 2);
+  let best = 0;
+  while (low <= high) {
+    const mid = Math.floor((low + high) / 2);
     const candidate = chars.slice(0, mid).join('');
     if (measureRichSegment(pdf, { ...segment, text: candidate }, fontSize) <= maxWidth) {
-      low = mid;
+      best = mid;
+      low = mid + 1;
     } else {
       high = mid - 1;
     }
   }
 
-  return chars.slice(0, low).join('');
+  return chars.slice(0, best).join('');
 }
 
 /**
@@ -828,7 +836,7 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
     widths = clean.map((column) => column.naturalWidth);
   } else if (clean.length === 2) {
     const leftNatural = clean[0].naturalWidth;
-    const leftWidth = Math.min(leftNatural, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available * 0.42));
+    const leftWidth = Math.min(leftNatural, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available * TWO_COLUMN_LEFT_WIDTH_RATIO));
     widths = [leftWidth, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available - leftWidth)];
   } else {
     const equalWidth = Math.max(PDF_COLUMN_MIN_WIDTH_PT, available / clean.length);
@@ -1259,7 +1267,7 @@ export function printPdfBlob(blob) {
   frame.addEventListener('load', invokePrint, { once: true });
   frame.src = url;
   document.body.appendChild(frame);
-  window.setTimeout(invokePrint, 1800);
+  window.setTimeout(invokePrint, PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS);
 }
 
 /**
