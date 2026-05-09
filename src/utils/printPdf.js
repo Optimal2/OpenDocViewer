@@ -71,6 +71,7 @@ const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or 
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
 const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
 const JSPDF_LOAD_ERROR_HINT = 'Verify that the jsPDF package is installed, the installed version exposes the jsPDF constructor, and the build configuration allows dynamic imports. Check the jsPDF package documentation for API or packaging changes.';
+let exportAllPagesAsDataUrlsAliasWarned = false;
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
   'article',
@@ -188,9 +189,9 @@ function asNumber(value) {
 function normalizeQuality(value, rawDefaultValue, minValue = 0) {
   const n = Number(value);
   const min = clamp01(minValue);
-  const fallback = Number.isFinite(rawDefaultValue) ? clamp01(rawDefaultValue) : JPEG_FALLBACK_DEFAULT_QUALITY;
-  if (!Number.isFinite(n)) return Math.max(min, fallback);
-  return Math.max(min, clamp01(n));
+  const candidate = Number.isFinite(n) ? n : rawDefaultValue;
+  const result = Number.isFinite(candidate) ? clamp01(candidate) : clamp01(JPEG_FALLBACK_DEFAULT_QUALITY);
+  return Math.max(min, result);
 }
 
 /**
@@ -696,17 +697,15 @@ function describeValueType(value) {
 async function loadImagesConcurrently(urls, signal, onLoaded) {
   const results = new Array(urls.length);
   const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
-  let nextIndex = 0;
   let completed = 0;
+  const indexes = imageIndexIterator(urls.length);
 
-  // The synchronous helper functions below intentionally contain no await points.
-  // JavaScript's event loop cannot interleave inside them, so each worker claims
-  // one index before loadNext awaits the actual image load.
+  // The synchronous generator helpers below intentionally contain no await points.
+  // JavaScript's event loop cannot interleave inside a single indexes.next() call,
+  // so each worker claims one index before loadNext awaits the actual image load.
   const takeNextIndex = () => {
-    if (nextIndex >= urls.length) return null;
-    const index = nextIndex;
-    nextIndex += 1;
-    return index;
+    const next = indexes.next();
+    return next.done ? null : next.value;
   };
 
   const reportImageLoaded = () => {
@@ -729,6 +728,16 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
 
   await Promise.all(Array.from({ length: workerCount }, loadNext));
   return results;
+}
+
+/**
+ * @param {number} count
+ * @returns {Generator<number>}
+ */
+function* imageIndexIterator(count) {
+  for (let index = 0; index < count; index += 1) {
+    yield index;
+  }
 }
 
 /**
@@ -1330,9 +1339,10 @@ async function loadJsPdf() {
  */
 export async function createPrintPdfBlob(dataUrls, options = {}) {
   throwIfAborted(options.signal);
-  const urls = (Array.isArray(dataUrls) ? dataUrls : []).filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
+  const providedUrls = Array.isArray(dataUrls) ? dataUrls : [];
+  const urls = providedUrls.filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
   if (!urls.length) {
-    throw new Error(`No printable image URLs were available for PDF generation. Provided values were empty, invalid, or rejected by image source safety checks. ${SAFE_IMAGE_SOURCE_HINT}`);
+    throw new Error(`No printable image URLs were available for PDF generation. Received ${providedUrls.length} URL value(s); 0 passed safety checks. Provided values were empty, invalid, or rejected by image source safety checks. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
 
   const pdfCfg = options.pdfCfg || {};
@@ -1570,9 +1580,15 @@ function executeOutputAction(blob, options, count) {
 async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal) {
   throwIfAborted(signal);
   const handle = documentRenderRef?.current;
-  const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
+  const preferredGetUrls = handle?.getAllPrintableDataUrls;
+  const aliasGetUrls = handle?.exportAllPagesAsDataUrls;
+  const getUrls = preferredGetUrls || aliasGetUrls;
   if (typeof getUrls !== 'function') {
     throw new Error(`Document handle object must implement getAllPrintableDataUrls() to provide printable page URLs. exportAllPagesAsDataUrls() is still supported as a backward-compatible alias. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
+  }
+  if (typeof preferredGetUrls !== 'function' && typeof aliasGetUrls === 'function' && !exportAllPagesAsDataUrlsAliasWarned) {
+    exportAllPagesAsDataUrlsAliasWarned = true;
+    logger.warn('Document renderer uses deprecated exportAllPagesAsDataUrls(); migrate to getAllPrintableDataUrls().');
   }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
@@ -1642,7 +1658,7 @@ function printableSourceFromElement(el) {
   if (tag === 'canvas') {
     try {
       const url = el.toDataURL('image/png');
-      return typeof url === 'string' && url.startsWith('data:image') ? url : null;
+      return typeof url === 'string' && url.startsWith('data:image/png') ? url : null;
     } catch (error) {
       logger.warn(
         'Unable to export active canvas to PDF image; the canvas may be tainted by cross-origin content or blocked by browser security restrictions. Ensure embedded images are served from the same origin or from CORS-enabled sources before rendering them to canvas.',
