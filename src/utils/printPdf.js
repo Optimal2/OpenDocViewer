@@ -140,7 +140,7 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  * @property {Object=} printFooterCfg
  * @property {Object=} printFormatCfg
  * @property {Object=} pdfCfg
- * @property {AbortSignal=} signal
+ * @property {AbortSignal=} signal Optional AbortSignal to cancel PDF generation.
  * @property {function(Object): void=} onProgress
  */
 
@@ -868,6 +868,24 @@ function pageFormatForImage(width, height) {
 }
 
 /**
+ * @param {number} pageWidth
+ * @param {number} pageHeight
+ * @param {'portrait'|'landscape'} orientation
+ * @returns {Object}
+ */
+function createJsPdfOptions(pageWidth, pageHeight, orientation) {
+  if (!Number.isFinite(pageWidth) || !Number.isFinite(pageHeight) || pageWidth <= 0 || pageHeight <= 0) {
+    throw new Error(`Invalid PDF page dimensions: ${pageWidth} x ${pageHeight}.`);
+  }
+  return {
+    orientation,
+    unit: 'pt',
+    format: [pageWidth, pageHeight],
+    compress: true,
+  };
+}
+
+/**
  * @param {Array<PdfRichSegment>} segments
  * @returns {Array<PdfRichSegment>}
  */
@@ -1421,7 +1439,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
       // ODV tests this object constructor shape, custom page format, point units,
       // and compression with the jsPDF package version locked by package-lock.
       try {
-        pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
+        pdf = new jsPDF(createJsPdfOptions(pdfPageWidth, pdfPageHeight, orientation));
       } catch (error) {
         throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`);
       }
@@ -1638,7 +1656,15 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   if (typeof preferredGetUrls !== 'function' && typeof aliasGetUrls === 'function') {
     warnDeprecatedPrintableUrlExportAlias(handle);
   }
-  const allUrls = await getUrls.call(handle);
+  let allUrls;
+  try {
+    allUrls = await getUrls.call(handle);
+  } catch (error) {
+    const methodName = typeof preferredGetUrls === 'function'
+      ? 'getAllPrintableDataUrls'
+      : 'exportAllPagesAsDataUrls';
+    throw new Error(`Document handle method ${methodName}() failed while collecting printable page URLs. Details: ${String(error?.message || error)}`);
+  }
   throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
   if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
