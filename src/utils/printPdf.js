@@ -44,6 +44,7 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // Two-column flow rows reserve a little less than half the width for the left
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
+const PDF_IMAGE_LOAD_CONCURRENCY = 4;
 // Keep the generated download URL alive briefly after the synthetic click; browsers should
 // have taken ownership of the download by then, while the object URL is not leaked long-term.
 const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 30 * 1000;
@@ -578,6 +579,38 @@ function loadImage(src, signal) {
 }
 
 /**
+ * @param {Array<string>} urls
+ * @param {AbortSignal=} signal
+ * @param {function(number): void=} onLoaded
+ * @returns {Promise<Array<HTMLImageElement>>}
+ */
+async function loadImagesConcurrently(urls, signal, onLoaded) {
+  const results = new Array(urls.length);
+  const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
+  let nextIndex = 0;
+  let completed = 0;
+
+  async function loadNext() {
+    while (nextIndex < urls.length) {
+      throwIfAborted(signal);
+      const index = nextIndex;
+      nextIndex += 1;
+      try {
+        results[index] = await loadImage(urls[index], signal);
+      } catch (error) {
+        throwIfAborted(signal);
+        throw new Error(`Failed to load image ${index + 1} for PDF generation: ${String(error?.message || error)}`);
+      }
+      completed += 1;
+      if (typeof onLoaded === 'function') onLoaded(completed);
+    }
+  }
+
+  await Promise.all(Array.from({ length: workerCount }, loadNext));
+  return results;
+}
+
+/**
  * @param {HTMLImageElement} img
  * @returns {'PNG'|'JPEG'|'WEBP'}
  */
@@ -773,16 +806,22 @@ function fitRichSegmentTextToWidth(pdf, segment, maxWidth, fontSize) {
  */
 function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
   const source = normalizeRichSegments(segments);
-  if (measureRichSegments(pdf, source, fontSize) <= maxWidth) return source;
+  const measured = source.map((segment) => ({
+    segment,
+    width: measureRichSegment(pdf, segment, fontSize),
+  }));
+  const totalWidth = measured.reduce((sum, item) => sum + item.width, 0);
+  if (totalWidth <= maxWidth) return source;
   const ellipsisSegment = { text: ELLIPSIS, bold: false, italic: false, align: 'left' };
   const ellipsisWidth = measureRichSegment(pdf, ellipsisSegment, fontSize);
   const fitted = [];
   let width = 0;
-  for (const segment of source) {
+  for (const item of measured) {
+    const { segment } = item;
     const text = String(segment.text || '');
     if (!text) continue;
 
-    const segmentWidth = measureRichSegment(pdf, segment, fontSize);
+    const segmentWidth = item.width;
     if (width + segmentWidth + ellipsisWidth > maxWidth) {
       const fittedText = fitRichSegmentTextToWidth(
         pdf,
@@ -811,11 +850,14 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
  */
 function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
   const clean = (Array.isArray(columns) ? columns : [])
-    .map((column) => ({
-      align: column.align || 'left',
-      segments: normalizeRichSegments(column.segments),
-      naturalWidth: measureRichSegments(pdf, column.segments, fontSize),
-    }))
+    .map((column) => {
+      const segments = normalizeRichSegments(column.segments);
+      return {
+        align: column.align || 'left',
+        segments,
+        naturalWidth: measureRichSegments(pdf, segments, fontSize),
+      };
+    })
     .filter((column) => richLineHasText(column.segments));
   if (clean.length <= 1) {
     return clean.map((column) => ({
@@ -826,9 +868,11 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
     }));
   }
 
-  const gap = PDF_COLUMN_GAP_PT;
+  const constrainedWidth = Math.max(0, maxWidth);
+  const gap = Math.min(PDF_COLUMN_GAP_PT, clean.length > 1 ? constrainedWidth / (clean.length - 1) : 0);
   const totalGap = gap * (clean.length - 1);
-  const available = Math.max(PDF_COLUMN_MIN_WIDTH_PT * clean.length, maxWidth - totalGap);
+  const available = Math.max(0, constrainedWidth - totalGap);
+  const minColumnWidth = Math.min(PDF_COLUMN_MIN_WIDTH_PT, available / clean.length);
   const naturalTotal = clean.reduce((sum, column) => sum + column.naturalWidth, 0);
   let widths;
 
@@ -836,16 +880,16 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
     widths = clean.map((column) => column.naturalWidth);
   } else if (clean.length === 2) {
     const leftNatural = clean[0].naturalWidth;
-    const leftWidth = Math.min(leftNatural, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available * TWO_COLUMN_LEFT_WIDTH_RATIO));
-    widths = [leftWidth, Math.max(PDF_COLUMN_MIN_WIDTH_PT, available - leftWidth)];
+    const leftWidth = Math.min(leftNatural, Math.max(minColumnWidth, available * TWO_COLUMN_LEFT_WIDTH_RATIO));
+    widths = [leftWidth, Math.max(minColumnWidth, available - leftWidth)];
   } else {
-    const equalWidth = Math.max(PDF_COLUMN_MIN_WIDTH_PT, available / clean.length);
+    const equalWidth = Math.max(minColumnWidth, available / clean.length);
     widths = clean.map(() => equalWidth);
   }
 
   let cursor = 0;
   return clean.map((column, index) => {
-    const width = Math.max(PDF_COLUMN_MIN_WIDTH_PT, widths[index] || PDF_COLUMN_MIN_WIDTH_PT);
+    const width = Math.max(minColumnWidth, widths[index] || minColumnWidth);
     const result = {
       align: column.align,
       segments: fitRichSegmentsToWidth(pdf, column.segments, width, fontSize),
@@ -853,8 +897,12 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
       xOffset: cursor,
     };
     cursor += width + gap;
-    if (index === clean.length - 1 && (column.align === 'right' || clean.length === 2)) {
-      result.xOffset = Math.max(0, maxWidth - width);
+    // The generated rich-line model uses two columns for CSS space-between rows:
+    // left title/label content and right metadata. Anchor the trailing column to
+    // the right edge even when the template did not explicitly set text-align:right.
+    const isTrailingSpaceBetweenColumn = clean.length === 2 && index === clean.length - 1;
+    if (index === clean.length - 1 && (column.align === 'right' || isTrailingSpaceBetweenColumn)) {
+      result.xOffset = Math.max(0, constrainedWidth - width);
     }
     return result;
   });
@@ -1103,14 +1151,19 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   throwIfAborted(options.signal);
   const { jsPDF } = await import('jspdf');
   throwIfAborted(options.signal);
+  reportProgress(options, { phase: 'loading-images', current: 0, total });
+  const images = await loadImagesConcurrently(urls, options.signal, (current) => {
+    reportProgress(options, { phase: 'loading-images', current, total });
+  });
+  throwIfAborted(options.signal);
   reportProgress(options, { phase: 'generating', current: 0, total });
   /** @type {*|null} */
   let pdf = null;
 
-  for (let i = 0; i < urls.length; i += 1) {
+  for (let i = 0; i < images.length; i += 1) {
     throwIfAborted(options.signal);
     reportProgress(options, { phase: 'generating', current: i, total });
-    const img = await loadImage(urls[i], options.signal);
+    const img = images[i];
     throwIfAborted(options.signal);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
@@ -1284,9 +1337,32 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
-  return Array.isArray(pageNumbers) && pageNumbers.length
-    ? pageNumbers.map((pageNumber) => allUrls[Math.floor(Number(pageNumber)) - 1]).filter(Boolean)
-    : allUrls;
+  if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
+
+  const selected = [];
+  for (const pageNumber of pageNumbers) {
+    const index = pageNumberToIndex(pageNumber, allUrls.length);
+    if (index === null) {
+      logger.warn('Ignored invalid PDF page selection', { pageNumber });
+      continue;
+    }
+    selected.push(allUrls[index]);
+  }
+
+  if (!selected.length) throw new Error('No valid printable page numbers were selected.');
+  return selected;
+}
+
+/**
+ * @param {*} pageNumber 1-based page number.
+ * @param {number} pageCount
+ * @returns {number|null}
+ */
+function pageNumberToIndex(pageNumber, pageCount) {
+  const numeric = Number(pageNumber);
+  if (!Number.isFinite(numeric)) return null;
+  const index = Math.floor(numeric) - 1;
+  return index >= 0 && index < pageCount ? index : null;
 }
 
 /**
