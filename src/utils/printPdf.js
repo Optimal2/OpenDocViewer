@@ -72,6 +72,7 @@ const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or 
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
 const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
 const JSPDF_LOAD_ERROR_HINT = 'Verify that the jsPDF package is installed, the installed version exposes the jsPDF constructor, and the build configuration allows dynamic imports. Check the jsPDF package documentation for API or packaging changes.';
+const JSPDF_MINIMUM_SUPPORTED_VERSION = '4.2.1';
 const DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES = new WeakSet();
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -833,18 +834,26 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
   const attempts = Array.from(new Set([preferred, 'PNG', 'JPEG']));
   for (const format of attempts) {
     try {
+      // The final 'FAST' argument is jsPDF's image compression hint. ODV is tested
+      // with jsPDF >= 4.2.1, where unsupported hints are handled by the library.
       pdf.addImage(img, format, x, y, width, height, undefined, 'FAST');
       return;
     } catch (error) {
       // jsPDF accepts different image inputs depending on browser and source format.
       // Try the next supported format before falling back to canvas conversion.
-      logger.debug('PDF addImage attempt failed', { format, error: String(error?.message || error) });
+      logger.debug('PDF addImage attempt failed', {
+        format,
+        jsPdfMinimumVersion: JSPDF_MINIMUM_SUPPORTED_VERSION,
+        compressionHint: 'FAST',
+        error: String(error?.message || error),
+      });
     }
   }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) {
     throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed. ${SUPPORTED_PDF_IMAGE_FORMAT_HINT} Check that the image is readable.`);
   }
+  // Use the same tested jsPDF compression hint for the JPEG fallback path.
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');
 }
 
@@ -1222,6 +1231,8 @@ function drawWatermark(pdf, text, pageWidth, pageHeight) {
   let restoreGState = false;
   try {
     if (typeof pdf.GState === 'function' && typeof pdf.setGState === 'function') {
+      // GState opacity is part of the jsPDF API covered by the minimum version below.
+      // Keep the guarded fallback because custom builds can still omit advanced APIs.
       pdf.setGState(new pdf.GState({ opacity: WATERMARK_OPACITY }));
       restoreGState = true;
     }
@@ -1271,10 +1282,17 @@ function drawWatermarkImage(pdf, img, pageWidth, pageHeight) {
   const x = (pageWidth - drawWidth) / 2;
   const y = (pageHeight - drawHeight) / 2;
   try {
+    // Prepared watermark assets are generated PNGs. The compression hint follows
+    // the same jsPDF >= 4.2.1 path as page images; failures fall back to text.
     pdf.addImage(img, 'PNG', x, y, drawWidth, drawHeight, undefined, 'FAST');
     return true;
   } catch (error) {
-    logger.warn('PDF watermark image rendering failed; falling back to text watermark', { error: String(error?.message || error) });
+    logger.warn('PDF watermark image rendering failed; falling back to text watermark', {
+      format: 'PNG',
+      jsPdfMinimumVersion: JSPDF_MINIMUM_SUPPORTED_VERSION,
+      compressionHint: 'FAST',
+      error: String(error?.message || error),
+    });
     return false;
   }
 }
@@ -1325,6 +1343,8 @@ function calculateOverlayReserve(hasOverlay, reservePt, lineCount, fontSize) {
  * Dynamically load the jsPDF constructor used by generated PDF output.
  * @returns {Promise<Function>} Resolves to the jsPDF constructor function.
  * @throws {Error} Throws when the module cannot be imported or does not expose the expected jsPDF export.
+ * Generated PDF output is tested with jsPDF >= 4.2.1 for constructor options,
+ * GState opacity, addImage format handling, and image compression hints.
  */
 async function loadJsPdf() {
   try {
@@ -1397,6 +1417,8 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     const orientation = pdfPageWidth > pdfPageHeight ? 'landscape' : 'portrait';
 
     if (!pdf) {
+      // jsPDF >= 4.2.1 supports this object constructor shape, custom page format,
+      // point units, and compression. Earlier/custom builds should fail during tests.
       pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
     } else {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
