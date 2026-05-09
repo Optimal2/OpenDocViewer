@@ -93,6 +93,8 @@ const RICH_TEXT_LINE_BREAK_RE = /\r\n|\r|\n/;
 const RICH_TEXT_COLLAPSIBLE_WHITESPACE_RE = /[ \t\f\v]+/g;
 const RICH_SEGMENT_WHITESPACE_RE = /\s+/g;
 const RICH_SEGMENT_WORD_TOKEN_RE = /\S+\s*/g;
+const IMAGE_SOURCE_DESCRIPTION_MAX_CHARS = 160;
+const IMAGE_SOURCE_DESCRIPTION_PREFIX_CHARS = 120;
 const DISALLOWED_TEMPLATE_ELEMENT_NAMES = Object.freeze([
   'script',
   'style',
@@ -587,12 +589,25 @@ function loadImage(src, signal) {
  * @returns {string}
  */
 function describeImageSource(src) {
-  const value = String(src || '');
+  const value = sanitizeDiagnosticText(String(src || ''));
   if (!value) return '(empty source)';
   const dataMatch = /^data:([^;,]+)/i.exec(value);
   if (dataMatch) return `${dataMatch[1]} data URL (${value.length} chars)`;
-  if (value.length <= 240) return value;
-  return `${value.slice(0, 180)}... (${value.length} chars)`;
+  if (value.length <= IMAGE_SOURCE_DESCRIPTION_MAX_CHARS) return value;
+  return `${value.slice(0, IMAGE_SOURCE_DESCRIPTION_PREFIX_CHARS)}... (${value.length} chars)`;
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function sanitizeDiagnosticText(value) {
+  let result = '';
+  for (const character of value) {
+    const code = character.charCodeAt(0);
+    result += code < 32 || code === 127 ? ' ' : character;
+  }
+  return result;
 }
 
 /**
@@ -1179,7 +1194,7 @@ async function loadJsPdf() {
   try {
     const module = await import('jspdf');
     if (typeof module?.jsPDF !== 'function') {
-      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jsPDF package is installed and compatible with the expected API.");
+      throw new Error(`Expected the jsPDF module to export a 'jsPDF' function. Received ${describeValueType(module?.jsPDF)}. Ensure the jsPDF package is installed and compatible with the expected API.`);
     }
     return module.jsPDF;
   } catch (error) {
