@@ -33,7 +33,11 @@ const WATERMARK_OPACITY = 0.09;
 // Keep PDF and HTML watermarks visually aligned. 0 degrees means centered horizontal text.
 const WATERMARK_ROTATION_ANGLE = 0;
 const WATERMARK_SHADOW_OFFSET = 1.4;
+// Prepared transparent watermark PNGs are intentionally wide and centered. Use most of
+// the printable width while leaving margins so COPY/KOPIA reads as a page watermark.
 const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
+// Cap image watermark height so very narrow/tall pages do not let the PNG cover the
+// document body. Text watermarks use their own font-scale path above.
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
@@ -43,6 +47,10 @@ const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 30 * 1000;
 // Printing through a hidden PDF iframe can keep the blob URL alive while the browser print
 // preview is open. afterprint is preferred, but this long fallback prevents leaked resources.
 const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * 60 * 1000;
+// Keep the PDF iframe/blob alive after afterprint because some browsers fire afterprint when
+// the preview UI opens or while it still depends on the blob. Short cleanup can blank pages
+// if the user waits before continuing from the browser print dialog.
+const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 120 * 1000;
 const ELLIPSIS = '...';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -1128,7 +1136,7 @@ export function printPdfBlob(blob) {
     // fallback avoids leaking the object URL if afterprint is not fired.
     window.setTimeout(() => cleanup(0), PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS);
   };
-  const afterPrint = () => cleanup(120000);
+  const afterPrint = () => cleanup(PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS);
   const invokePrint = () => {
     if (printed) return;
     printed = true;
@@ -1162,20 +1170,30 @@ export function printPdfBlob(blob) {
 /**
  * @param {{ current: * }} documentRenderRef
  * @param {Array<number>=} pageNumbers 1-based page numbers in desired PDF order.
- * @param {PdfPrintOptions=} options
- * @returns {Promise<Blob>}
+ * @param {AbortSignal=} signal
+ * @returns {Promise<Array<string>>}
  */
-export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options = {}) {
-  throwIfAborted(options.signal);
+async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal) {
+  throwIfAborted(signal);
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') throw new Error('Document handle does not expose printable page URLs.');
   const allUrls = await getUrls.call(handle);
-  throwIfAborted(options.signal);
+  throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
-  const selected = Array.isArray(pageNumbers) && pageNumbers.length
+  return Array.isArray(pageNumbers) && pageNumbers.length
     ? pageNumbers.map((pageNumber) => allUrls[Math.floor(Number(pageNumber)) - 1]).filter(Boolean)
     : allUrls;
+}
+
+/**
+ * @param {{ current: * }} documentRenderRef
+ * @param {Array<number>=} pageNumbers 1-based page numbers in desired PDF order.
+ * @param {PdfPrintOptions=} options
+ * @returns {Promise<Blob>}
+ */
+export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options = {}) {
+  const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
   return createPrintPdfBlob(selected, options);
 }
 
@@ -1187,8 +1205,9 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
   throwIfAborted(options.signal);
-  const selectedCount = Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : 1;
-  const blob = await createPdfFromDocumentHandle(documentRenderRef, pageNumbers, options);
+  const selected = await getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, options.signal);
+  const selectedCount = selected.length;
+  const blob = await createPrintPdfBlob(selected, options);
   throwIfAborted(options.signal);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: selectedCount, total: selectedCount });
