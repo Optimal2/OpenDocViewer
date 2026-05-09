@@ -185,8 +185,8 @@ function asNumber(value) {
 function normalizeQuality(value, rawDefaultValue, minValue = 0) {
   const n = Number(value);
   const min = clamp01(minValue);
-  const fallback = Number.isFinite(rawDefaultValue) ? rawDefaultValue : JPEG_FALLBACK_DEFAULT_QUALITY;
-  if (!Number.isFinite(n)) return Math.max(min, clamp01(fallback));
+  const fallback = Number.isFinite(rawDefaultValue) ? clamp01(rawDefaultValue) : JPEG_FALLBACK_DEFAULT_QUALITY;
+  if (!Number.isFinite(n)) return Math.max(min, fallback);
   return Math.max(min, clamp01(n));
 }
 
@@ -231,7 +231,7 @@ function isBoldFontWeight(value) {
   if (!text) return false;
   if (text === 'bold' || text === 'bolder') return true;
   const numeric = parseInt(text, 10);
-  return Number.isFinite(numeric) && numeric >= 600;
+  return Number.isInteger(numeric) && numeric >= 600;
 }
 
 /**
@@ -530,7 +530,8 @@ function htmlToRichLines(html, css = '') {
       if (styleHints.displayFlex && styleHints.spaceBetween) {
         if (block) appendRichLineBreak(lines);
         const children = Array.from(element.childNodes || [])
-          .filter((child) => child.nodeType === 1 || String(child.textContent || '').trim().length > 0);
+          .filter((child) => child.nodeType === 1 ||
+            (child.nodeType === 3 && String(child.textContent || '').trim().length > 0));
         const columns = children.map((child, index) => {
           /** @type {Array<PdfRichLine>} */
           const childLines = [[]];
