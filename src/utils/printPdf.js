@@ -83,6 +83,24 @@ const RICH_TEXT_LINE_BREAK_RE = /\r\n|\r|\n/;
 const RICH_TEXT_COLLAPSIBLE_WHITESPACE_RE = /[ \t\f\v]+/g;
 const RICH_SEGMENT_WHITESPACE_RE = /\s+/g;
 const RICH_SEGMENT_WORD_TOKEN_RE = /\S+\s*/g;
+const DISALLOWED_TEMPLATE_ELEMENT_NAMES = Object.freeze([
+  'script',
+  'style',
+  'template',
+  'noscript',
+  'iframe',
+  'object',
+  'embed',
+]);
+const DISALLOWED_TEMPLATE_TAG_RE = /<\s*(\/?)\s*(script|style|template|noscript|iframe|object|embed)\b[^>]*>/gi;
+const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
+  Object.fromEntries(
+    DISALLOWED_TEMPLATE_ELEMENT_NAMES.map((name) => [
+      name,
+      new RegExp(`<\\s*\\/\\s*${name}\\b[^>]*>`, 'gi'),
+    ])
+  )
+);
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -264,6 +282,44 @@ function isBlockNode(nodeName) {
 }
 
 /**
+ * Remove elements that are never meaningful in generated PDF header/footer text.
+ * DOMParser's text/html mode creates an inert detached document, but stripping
+ * these blocks first keeps dangerous markup out of the parsed tree as well.
+ * @param {string} html
+ * @returns {string}
+ */
+function stripDisallowedTemplateElements(html) {
+  const input = String(html || '');
+  let output = '';
+  let cursor = 0;
+
+  DISALLOWED_TEMPLATE_TAG_RE.lastIndex = 0;
+  let match = DISALLOWED_TEMPLATE_TAG_RE.exec(input);
+  while (match) {
+    if (match.index >= cursor) {
+      output += input.slice(cursor, match.index);
+      cursor = DISALLOWED_TEMPLATE_TAG_RE.lastIndex;
+
+      const isClosingTag = !!match[1];
+      const elementName = String(match[2] || '').toLowerCase();
+      const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
+      if (!isClosingTag && closingPattern) {
+        closingPattern.lastIndex = cursor;
+        const closingMatch = closingPattern.exec(input);
+        if (closingMatch) {
+          cursor = closingPattern.lastIndex;
+          DISALLOWED_TEMPLATE_TAG_RE.lastIndex = cursor;
+        }
+      }
+    }
+
+    match = DISALLOWED_TEMPLATE_TAG_RE.exec(input);
+  }
+
+  return output + input.slice(cursor);
+}
+
+/**
  * @param {Array<PdfRichSegment>} segments
  * @returns {boolean}
  */
@@ -377,7 +433,7 @@ function flattenRichLines(richLines) {
  * @returns {Array<*>}
  */
 function htmlToRichLines(html, css = '') {
-  const input = String(html || '');
+  const input = stripDisallowedTemplateElements(html);
   const classStyles = parseTemplateCssClassStyles(css);
   /** @type {Array<*>} */
   const lines = [[]];
@@ -676,6 +732,32 @@ function measureRichSegments(pdf, segments, fontSize) {
 
 /**
  * @param {*} pdf
+ * @param {PdfRichSegment} segment
+ * @param {number} maxWidth
+ * @param {number} fontSize
+ * @returns {string}
+ */
+function fitRichSegmentTextToWidth(pdf, segment, maxWidth, fontSize) {
+  const chars = Array.from(String(segment?.text || ''));
+  if (!chars.length || maxWidth <= 0) return '';
+
+  let low = 0;
+  let high = chars.length;
+  while (low < high) {
+    const mid = Math.ceil((low + high) / 2);
+    const candidate = chars.slice(0, mid).join('');
+    if (measureRichSegment(pdf, { ...segment, text: candidate }, fontSize) <= maxWidth) {
+      low = mid;
+    } else {
+      high = mid - 1;
+    }
+  }
+
+  return chars.slice(0, low).join('');
+}
+
+/**
+ * @param {*} pdf
  * @param {Array<PdfRichSegment>} segments
  * @param {number} maxWidth
  * @param {number} fontSize
@@ -690,21 +772,23 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
   let width = 0;
   for (const segment of source) {
     const text = String(segment.text || '');
-    let nextText = '';
-    for (const char of text) {
-      const nextSegment = { ...segment, text: nextText + char };
-      const nextWidth = measureRichSegment(pdf, nextSegment, fontSize);
-      if (width + nextWidth + ellipsisWidth > maxWidth) {
-        if (nextText) fitted.push({ ...segment, text: nextText });
-        fitted.push(ellipsisSegment);
-        return fitted;
-      }
-      nextText += char;
+    if (!text) continue;
+
+    const segmentWidth = measureRichSegment(pdf, segment, fontSize);
+    if (width + segmentWidth + ellipsisWidth > maxWidth) {
+      const fittedText = fitRichSegmentTextToWidth(
+        pdf,
+        segment,
+        maxWidth - width - ellipsisWidth,
+        fontSize
+      );
+      if (fittedText) fitted.push({ ...segment, text: fittedText });
+      fitted.push(ellipsisSegment);
+      return fitted;
     }
-    if (nextText) {
-      fitted.push({ ...segment, text: nextText });
-      width += measureRichSegment(pdf, { ...segment, text: nextText }, fontSize);
-    }
+
+    fitted.push(segment);
+    width += segmentWidth;
   }
   fitted.push(ellipsisSegment);
   return fitted;
