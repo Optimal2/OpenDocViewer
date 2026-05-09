@@ -191,26 +191,35 @@ For a normal release candidate, validate locally first:
 
 ```bash
 npm ci
+npm audit --audit-level=low
 npm run lint
 npm run build
 npm run doc
 ```
 
-Then run the PowerShell helper from the repo root on Windows:
+The final pre-release commit is the same shape for patch, minor, and major releases:
+
+- Include all intended application changes, dependency/lockfile changes, source documentation, and `SECURITY.md` updates.
+- Make sure `SECURITY.md` already names the version that is about to be released in both `Supported Versions` and `Recent release context`.
+- Keep generated output such as `dist/` and `docs/` out of the commit unless a specific release process explicitly asks for it.
+- Leave `package.json` and `package-lock.json` at the current version until the release helper runs; `release.ps1` owns the npm version commit and Git tag.
+- Commit and push the pre-release commit before running the release helper, then verify the working tree is clean and the branch matches `origin/<branch>`.
+
+Then run the PowerShell helper from the repo root on Windows. Use `-ReleaseType` and `-Yes` for a non-interactive release:
 
 ```powershell
-.\release.ps1
+.\release.ps1 -ReleaseType patch -Yes
 ```
 
-The release helper now runs the same local validation steps (`lint`, `build`, `doc`) before it creates a release commit. It does **not** edit `SECURITY.md`, so update that file manually before invoking a release when the supported-version matrix or release-context section needs to change. After validation passes, it will:
+The release helper runs the same local validation steps (`lint`, `build`, `doc`) before it creates the release commit. It does **not** edit `SECURITY.md`, and it does **not** stage, commit, or stash normal application changes. After validation passes, it will:
 
-1. stage and commit the current working changes
+1. verify that the working tree is clean and that the local branch matches `origin/<branch>`
 2. run `npm version <patch|minor|major>` to create the version-bump commit and Git tag
-3. push the branch and tag to `origin`
+3. push the release commit and tag to `origin`
 
 The pushed tag triggers `.github/workflows/release.yml`, which builds the production bundle and generated docs, packages them as zip files, and publishes the GitHub release assets.
 
-Use GitHub Desktop for review if you want, but you do not need to create or push the release commits manually unless you explicitly prefer that workflow.
+Use GitHub Desktop for review if you want, but do not rely on the release helper to include pending source changes. The helper is release-only; the pre-release source commit must already be on the branch.
 
 ---
 
