@@ -82,6 +82,7 @@ const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or 
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
 const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
 const JSPDF_LOAD_ERROR_HINT = "Verify that the jsPDF package is installed and exposes the jsPDF constructor. This module uses the bare npm specifier import('jspdf'), so the build configuration must resolve and bundle npm package imports and dynamic imports. Check the jsPDF package documentation for API or packaging changes.";
+const BOLD_FONT_WEIGHT_THRESHOLD = 600;
 const DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES = new WeakSet();
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -254,14 +255,14 @@ function throwIfAborted(signal) {
 /**
  * Check whether a CSS font-weight value should be treated as bold text.
  * @param {*} value CSS font-weight keyword or numeric weight.
- * @returns {boolean} True for bold/bolder or numeric weights >= 600.
+ * @returns {boolean} True for bold/bolder or numeric weights >= BOLD_FONT_WEIGHT_THRESHOLD.
  */
 function isBoldFontWeight(value) {
   const text = String(value || '').trim().toLowerCase();
   if (!text) return false;
   if (text === 'bold' || text === 'bolder') return true;
   const numeric = parseInt(text, 10);
-  return Number.isInteger(numeric) && numeric >= 600;
+  return Number.isInteger(numeric) && numeric >= BOLD_FONT_WEIGHT_THRESHOLD;
 }
 
 /**
@@ -747,6 +748,7 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   let completed = 0;
   // Build the array in reverse order so pop() claims indexes in natural 0..n order
   // while keeping each claim as a simple synchronous stack operation.
+  // Example: length 3 becomes [2, 1, 0], then pop() returns 0, 1, 2.
   const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
 
   // Index claiming is intentionally a synchronous pop from a private array. Keep it
@@ -1012,6 +1014,14 @@ function measureRichSegments(pdf, segments, fontSize) {
 }
 
 /**
+ * @param {string} text
+ * @returns {PdfRichSegment}
+ */
+function createDefaultSegment(text) {
+  return { text, bold: false, italic: false, align: 'left' };
+}
+
+/**
  * @param {*} pdf
  * @param {PdfRichSegment} segment
  * @param {number} maxWidth
@@ -1057,7 +1067,7 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
   }));
   const totalWidth = measured.reduce((sum, item) => sum + item.width, 0);
   if (totalWidth <= widthLimit) return source;
-  const ellipsisSegment = { text: ELLIPSIS, bold: false, italic: false, align: 'left' };
+  const ellipsisSegment = createDefaultSegment(ELLIPSIS);
   const ellipsisWidth = measureRichSegment(pdf, ellipsisSegment, fontSize);
   const fitted = [];
   let width = 0;
@@ -1433,7 +1443,7 @@ async function loadJsPdf() {
     const module = await import('jspdf');
     const jsPDF = resolveJsPdfConstructor(module);
     if (typeof jsPDF !== 'function') {
-      throw new Error(`Expected the jsPDF module to export a constructor as named jsPDF, default.jsPDF, or default. Received ${describeModuleExports(module)}. Ensure the jsPDF package is installed and compatible with the expected API.`);
+      throw new Error(`Expected the jsPDF module to export a constructor as named jsPDF, default.jsPDF, or default. Received ${describeModuleExports(module)}. Verify package.json includes jspdf, package-lock.json has a compatible resolved version, and the build can resolve dynamic npm imports.`);
     }
     return jsPDF;
   } catch (error) {
