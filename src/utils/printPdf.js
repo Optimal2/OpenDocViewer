@@ -192,8 +192,10 @@ function createAbortError() {
 }
 
 /**
- * @param {AbortSignal|undefined} signal
+ * Stop PDF generation as soon as the caller cancels the operation.
+ * @param {AbortSignal|undefined} signal Optional cancellation signal.
  * @returns {void}
+ * @throws {DOMException|Error} Throws an AbortError when the signal is already aborted.
  */
 function throwIfAborted(signal) {
   if (signal?.aborted) throw createAbortError();
@@ -333,6 +335,22 @@ function stripDisallowedTemplateElements(html) {
 }
 
 /**
+ * Keep only the attributes used by the generated-PDF rich text subset.
+ * @param {Element|undefined|null} root
+ * @returns {void}
+ */
+function sanitizeParsedTemplateDocument(root) {
+  root?.querySelectorAll?.('*')?.forEach((element) => {
+    for (const attribute of Array.from(element.attributes || [])) {
+      const name = String(attribute.name || '').toLowerCase();
+      if (name !== 'class' && name !== 'style') {
+        element.removeAttribute(attribute.name);
+      }
+    }
+  });
+}
+
+/**
  * @param {Array<PdfRichSegment>} segments
  * @returns {boolean}
  */
@@ -451,8 +469,9 @@ function htmlToRichLines(html, css = '') {
   /** @type {Array<*>} */
   const lines = [[]];
   try {
-    const doc = new DOMParser().parseFromString(`<!doctype html><body>${input}`, 'text/html');
+    const doc = new DOMParser().parseFromString(input, 'text/html');
     doc.body?.querySelectorAll?.('script,style,template,noscript,iframe,object,embed')?.forEach((node) => node.remove());
+    sanitizeParsedTemplateDocument(doc.body);
 
     /**
      * @param {Node} node
@@ -1188,7 +1207,9 @@ function reportProgress(options, event) {
 }
 
 /**
- * @returns {Promise<*>}
+ * Dynamically load the jsPDF constructor used by generated PDF output.
+ * @returns {Promise<Function>} Resolves to the jsPDF constructor function.
+ * @throws {Error} Throws when the module cannot be imported or does not expose the expected jsPDF export.
  */
 async function loadJsPdf() {
   try {
@@ -1490,8 +1511,9 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
 
 
 /**
- * @param {*} el
- * @returns {string|null}
+ * Extract a safe printable image source from an already-rendered canvas or image element.
+ * @param {*} el Candidate canvas/img element from the document renderer.
+ * @returns {string|null} A safe data/blob/http(s) image URL, or null when no printable source is available.
  */
 function printableSourceFromElement(el) {
   const tag = String(el?.tagName || '').toLowerCase();
