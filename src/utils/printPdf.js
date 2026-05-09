@@ -269,9 +269,7 @@ function parseTemplateCssClassStyles(css) {
   const text = String(css || '');
   if (!text) return styles;
 
-  CSS_RULE_RE.lastIndex = 0;
-  let match = CSS_RULE_RE.exec(text);
-  while (match) {
+  for (const match of text.matchAll(CSS_RULE_RE)) {
     const selectorText = match[1] || '';
     const declarations = parseTextStyleDeclarations(match[2] || '');
     selectorText.split(CSS_SELECTOR_LIST_SEPARATOR_RE).forEach((selector) => {
@@ -283,7 +281,6 @@ function parseTemplateCssClassStyles(css) {
       const current = styles.get(className) || {};
       styles.set(className, { ...current, ...declarations });
     });
-    match = CSS_RULE_RE.exec(text);
   }
 
   return styles;
@@ -325,27 +322,21 @@ function stripDisallowedTemplateElements(html) {
   let output = '';
   let cursor = 0;
 
-  DISALLOWED_TEMPLATE_TAG_RE.lastIndex = 0;
-  let match = DISALLOWED_TEMPLATE_TAG_RE.exec(input);
-  while (match) {
+  for (const match of input.matchAll(DISALLOWED_TEMPLATE_TAG_RE)) {
     if (match.index >= cursor) {
       output += input.slice(cursor, match.index);
-      cursor = DISALLOWED_TEMPLATE_TAG_RE.lastIndex;
+      cursor = match.index + match[0].length;
 
       const isClosingTag = !!match[1];
       const elementName = String(match[2] || '').toLowerCase();
       const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
       if (!isClosingTag && closingPattern) {
-        closingPattern.lastIndex = cursor;
-        const closingMatch = closingPattern.exec(input);
+        const closingMatch = input.slice(cursor).matchAll(closingPattern).next().value;
         if (closingMatch) {
-          cursor = closingPattern.lastIndex;
-          DISALLOWED_TEMPLATE_TAG_RE.lastIndex = cursor;
+          cursor += closingMatch.index + closingMatch[0].length;
         }
       }
     }
-
-    match = DISALLOWED_TEMPLATE_TAG_RE.exec(input);
   }
 
   return output + input.slice(cursor);
@@ -988,6 +979,7 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
  * @returns {Array<PdfRichColumn>}
  */
 function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
+  const constrainedWidth = Math.max(0, maxWidth);
   const clean = (Array.isArray(columns) ? columns : [])
     .map((column) => {
       const segments = normalizeRichSegments(column.segments);
@@ -998,16 +990,24 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
       };
     })
     .filter((column) => richLineHasText(column.segments));
-  if (clean.length <= 1) {
+  if (!clean.length) return [];
+  if (clean.length === 1) {
     return clean.map((column) => ({
       align: column.align,
-      segments: fitRichSegmentsToWidth(pdf, column.segments, maxWidth, fontSize),
-      width: maxWidth,
+      segments: fitRichSegmentsToWidth(pdf, column.segments, constrainedWidth, fontSize),
+      width: constrainedWidth,
+      xOffset: 0,
+    }));
+  }
+  if (constrainedWidth <= 0) {
+    return clean.map((column) => ({
+      align: column.align,
+      segments: [],
+      width: 0,
       xOffset: 0,
     }));
   }
 
-  const constrainedWidth = Math.max(0, maxWidth);
   const gap = Math.min(PDF_COLUMN_GAP_PT, clean.length > 1 ? constrainedWidth / (clean.length - 1) : 0);
   const totalGap = gap * (clean.length - 1);
   const available = Math.max(0, constrainedWidth - totalGap);
@@ -1328,22 +1328,22 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     throwIfAborted(options.signal);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
-    const [pageWidth, pageHeight] = pageFormatForImage(naturalWidth, naturalHeight);
-    const orientation = pageWidth > pageHeight ? 'landscape' : 'portrait';
+    const [pdfPageWidth, pdfPageHeight] = pageFormatForImage(naturalWidth, naturalHeight);
+    const orientation = pdfPageWidth > pdfPageHeight ? 'landscape' : 'portrait';
 
     if (!pdf) {
-      pdf = new jsPDF({ orientation, unit: 'pt', format: [pageWidth, pageHeight], compress: true });
+      pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
     } else {
-      pdf.addPage([pageWidth, pageHeight], orientation);
+      pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
     }
 
     const pageInfo = Array.isArray(options.pageContexts) ? options.pageContexts[i] : null;
     const pageContext = makePageTokenContext(baseContext, pageInfo, bundle);
     const headerLines = renderOverlayRichLines(options.printHeaderCfg || {}, pageContext, i + 1, total);
     const footerLines = renderOverlayRichLines(options.printFooterCfg || {}, pageContext, i + 1, total);
-    const headerDrawLines = wrapRichLines(pdf, headerLines, pageWidth - (marginPt * 2), textFontSize, MAX_HEADER_FOOTER_LINES);
+    const headerDrawLines = wrapRichLines(pdf, headerLines, pdfPageWidth - (marginPt * 2), textFontSize, MAX_HEADER_FOOTER_LINES);
     const footerFontSize = Math.max(5, textFontSize - FOOTER_FONT_SIZE_REDUCTION);
-    const footerDrawLines = wrapRichLines(pdf, footerLines, pageWidth - (marginPt * 2), footerFontSize, MAX_FOOTER_LINES);
+    const footerDrawLines = wrapRichLines(pdf, footerLines, pdfPageWidth - (marginPt * 2), footerFontSize, MAX_FOOTER_LINES);
     const hasHeader = headerDrawLines.length > 0;
     const hasFooter = footerDrawLines.length > 0;
     const copyText = resolveCopyMarkerText(pageContext);
@@ -1355,18 +1355,18 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
       : 0;
 
     if (hasHeader) {
-      drawRichTextBlock(pdf, headerDrawLines, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize, HEADER_FOOTER_COLOR, MAX_HEADER_FOOTER_LINES);
+      drawRichTextBlock(pdf, headerDrawLines, marginPt, marginPt + textFontSize, pdfPageWidth - (marginPt * 2), textFontSize, HEADER_FOOTER_COLOR, MAX_HEADER_FOOTER_LINES);
     }
     if (hasFooter) {
       const lineHeight = Math.max(5, footerFontSize * HEADER_FOOTER_LINE_HEIGHT);
-      const firstY = pageHeight - marginPt - footerFontSize - ((footerDrawLines.length - 1) * lineHeight);
-      drawRichTextBlock(pdf, footerDrawLines, marginPt, firstY, pageWidth - (marginPt * 2), footerFontSize, FOOTER_COLOR, MAX_FOOTER_LINES);
+      const firstY = pdfPageHeight - marginPt - footerFontSize - ((footerDrawLines.length - 1) * lineHeight);
+      drawRichTextBlock(pdf, footerDrawLines, marginPt, firstY, pdfPageWidth - (marginPt * 2), footerFontSize, FOOTER_COLOR, MAX_FOOTER_LINES);
     }
 
     const imageBoxX = marginPt;
     const imageBoxY = marginPt + headerReserve;
-    const imageBoxWidth = pageWidth - (marginPt * 2);
-    const imageBoxHeight = Math.max(1, pageHeight - (marginPt * 2) - headerReserve - footerReserve);
+    const imageBoxWidth = pdfPageWidth - (marginPt * 2);
+    const imageBoxHeight = Math.max(1, pdfPageHeight - (marginPt * 2) - headerReserve - footerReserve);
     const scale = Math.min(imageBoxWidth / naturalWidth, imageBoxHeight / naturalHeight);
     const drawWidth = naturalWidth * scale;
     const drawHeight = naturalHeight * scale;
@@ -1375,11 +1375,11 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     addImageWithFallback(pdf, img, drawX, drawY, drawWidth, drawHeight, imageFallbackQuality);
 
     if (copyText && options.printFormatCfg?.watermark?.enabled !== false) {
-      if (watermarkImage && drawWatermarkImage(pdf, watermarkImage, pageWidth, pageHeight)) {
+      if (watermarkImage && drawWatermarkImage(pdf, watermarkImage, pdfPageWidth, pdfPageHeight)) {
         reportProgress(options, { phase: 'generating', current: i + 1, total });
         continue;
       }
-      drawWatermark(pdf, copyText, pageWidth, pageHeight);
+      drawWatermark(pdf, copyText, pdfPageWidth, pdfPageHeight);
     }
     reportProgress(options, { phase: 'generating', current: i + 1, total });
   }
