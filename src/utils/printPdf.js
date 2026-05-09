@@ -72,7 +72,6 @@ const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or 
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
 const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
 const JSPDF_LOAD_ERROR_HINT = "Verify that the jsPDF package is installed and exposes the jsPDF constructor. This module uses the bare npm specifier import('jspdf'), so the build configuration must resolve and bundle npm package imports and dynamic imports. Check the jsPDF package documentation for API or packaging changes.";
-const JSPDF_TESTED_PACKAGE_VERSION = '4.2.1';
 const DEPRECATED_PRINTABLE_URL_EXPORT_HANDLES = new WeakSet();
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
@@ -846,7 +845,6 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
       // Try the next supported format before falling back to canvas conversion.
       logger.debug('PDF addImage attempt failed', {
         format,
-        jsPdfTestedVersion: JSPDF_TESTED_PACKAGE_VERSION,
         compressionHint: 'FAST',
         error: String(error?.message || error),
       });
@@ -1293,7 +1291,6 @@ function drawWatermarkImage(pdf, img, pageWidth, pageHeight) {
   } catch (error) {
     logger.warn('PDF watermark image rendering failed; falling back to text watermark', {
       format: 'PNG',
-      jsPdfTestedVersion: JSPDF_TESTED_PACKAGE_VERSION,
       compressionHint: 'FAST',
       error: String(error?.message || error),
     });
@@ -1426,7 +1423,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
       try {
         pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
       } catch (error) {
-        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Expected package version from package-lock: ${JSPDF_TESTED_PACKAGE_VERSION}. Verify the installed jsPDF package and build output. Details: ${String(error?.message || error)}`);
+        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`);
       }
     } else {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
