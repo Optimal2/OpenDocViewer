@@ -27,6 +27,8 @@ const FOOTER_COLOR = Object.freeze([70, 70, 70]);
 const MAX_HEADER_FOOTER_LINES = 3;
 const MAX_FOOTER_LINES = 2;
 const HEADER_FOOTER_LINE_HEIGHT = 1.18;
+const HEADER_FOOTER_RESERVE_PADDING_PT = 2;
+const FOOTER_FONT_SIZE_REDUCTION = 0.5;
 const MIN_WATERMARK_FONT_SIZE = 70;
 const WATERMARK_FONT_SCALE = 0.19;
 const WATERMARK_OPACITY = 0.09;
@@ -1232,6 +1234,8 @@ function drawWatermarkImage(pdf, img, pageWidth, pageHeight) {
  * @returns {Object}
  */
 function makeTokenContext(options) {
+  // Generated PDF output builds a base job context here. The first argument is
+  // the optional document context, supplied later per page by makePageTokenContext().
   return makeBaseTokenContext(null, options.reason || '', options.forWhom || '', options.printFormat || '', {
     bundle: options.bundle || null,
     reasonSelection: options.reasonSelection || null,
@@ -1338,13 +1342,17 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     const headerLines = renderOverlayRichLines(options.printHeaderCfg || {}, pageContext, i + 1, total);
     const footerLines = renderOverlayRichLines(options.printFooterCfg || {}, pageContext, i + 1, total);
     const headerDrawLines = wrapRichLines(pdf, headerLines, pageWidth - (marginPt * 2), textFontSize, MAX_HEADER_FOOTER_LINES);
-    const footerFontSize = Math.max(5, textFontSize - 0.5);
+    const footerFontSize = Math.max(5, textFontSize - FOOTER_FONT_SIZE_REDUCTION);
     const footerDrawLines = wrapRichLines(pdf, footerLines, pageWidth - (marginPt * 2), footerFontSize, MAX_FOOTER_LINES);
     const hasHeader = headerDrawLines.length > 0;
     const hasFooter = footerDrawLines.length > 0;
     const copyText = resolveCopyMarkerText(pageContext);
-    const headerReserve = hasHeader ? Math.max(headerReservePt, (headerDrawLines.length * textFontSize * HEADER_FOOTER_LINE_HEIGHT) + 2) : 0;
-    const footerReserve = hasFooter ? Math.max(footerReservePt, (footerDrawLines.length * footerFontSize * HEADER_FOOTER_LINE_HEIGHT) + 2) : 0;
+    const headerReserve = hasHeader
+      ? Math.max(headerReservePt, (headerDrawLines.length * textFontSize * HEADER_FOOTER_LINE_HEIGHT) + HEADER_FOOTER_RESERVE_PADDING_PT)
+      : 0;
+    const footerReserve = hasFooter
+      ? Math.max(footerReservePt, (footerDrawLines.length * footerFontSize * HEADER_FOOTER_LINE_HEIGHT) + HEADER_FOOTER_RESERVE_PADDING_PT)
+      : 0;
 
     if (hasHeader) {
       drawRichTextBlock(pdf, headerDrawLines, marginPt, marginPt + textFontSize, pageWidth - (marginPt * 2), textFontSize, HEADER_FOOTER_COLOR, MAX_HEADER_FOOTER_LINES);
@@ -1481,6 +1489,9 @@ export function printPdfBlob(blob) {
 }
 
 /**
+ * Read printable page image URLs from the document renderer. getAllPrintableDataUrls()
+ * is the preferred API; exportAllPagesAsDataUrls() remains a backward-compatible alias
+ * for older integrations, with no removal date currently scheduled.
  * @param {{ current: * }} documentRenderRef
  * @param {Array<number>=} pageNumbers 1-based page numbers in desired PDF order.
  * @param {AbortSignal=} signal
@@ -1489,10 +1500,6 @@ export function printPdfBlob(blob) {
 async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal) {
   throwIfAborted(signal);
   const handle = documentRenderRef?.current;
-  // getAllPrintableDataUrls() is the canonical renderer API. exportAllPagesAsDataUrls()
-  // remains supported as a backward-compatible alias for older integrations. New
-  // integrations should migrate to getAllPrintableDataUrls(); no removal date is
-  // currently scheduled for the alias.
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
     throw new Error(`Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
