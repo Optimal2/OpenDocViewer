@@ -220,8 +220,8 @@ function clamp01(value) {
 function createAbortError() {
   try {
     return new DOMException('PDF generation was cancelled.', 'AbortError');
-  } catch (domError) {
-    logger.debug('DOMException constructor unavailable; using Error fallback for PDF cancellation', { error: String(domError?.message || domError) });
+  } catch (constructorError) {
+    logger.debug('DOMException constructor unavailable; using Error fallback for PDF cancellation', { error: String(constructorError?.message || constructorError) });
     const fallbackError = new Error('PDF generation was cancelled.');
     fallbackError.name = 'AbortError';
     return fallbackError;
@@ -707,7 +707,7 @@ function describeValueType(value) {
 /**
  * @param {Array<string>} urls
  * @param {AbortSignal=} signal
- * @param {function(number): void} onLoaded
+ * @param {function(number): void} onLoaded Called with the number of images loaded so far.
  * @returns {Promise<Array<HTMLImageElement>>}
  */
 async function loadImagesConcurrently(urls, signal, onLoaded) {
@@ -716,7 +716,10 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   let completed = 0;
   // Build the array in reverse order so pop() claims indexes in natural 0..n order
   // while keeping each claim as a simple synchronous stack operation.
-  const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
+  const pendingIndexes = Array.from({ length: urls.length }, (_, index) => {
+    const reverseIndex = urls.length - 1 - index;
+    return reverseIndex;
+  });
 
   // Index claiming is intentionally a synchronous pop from a private array. Keep it
   // await-free so each worker claims exactly one index before loading the image.
@@ -1098,8 +1101,9 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
     // The generated rich-line model uses two columns for CSS space-between rows:
     // left title/label content and right metadata. Anchor the trailing column to
     // the right edge even when the template did not explicitly set text-align:right.
-    const isTrailingSpaceBetweenColumn = clean.length === 2 && index === clean.length - 1;
-    if (index === clean.length - 1 && (column.align === 'right' || isTrailingSpaceBetweenColumn)) {
+    const isLastColumn = index === clean.length - 1;
+    const isTrailingSpaceBetweenColumn = clean.length === 2 && isLastColumn;
+    if (isLastColumn && (column.align === 'right' || isTrailingSpaceBetweenColumn)) {
       result.xOffset = Math.max(0, constrainedWidth - width);
     }
     return result;
@@ -1419,7 +1423,11 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     if (!pdf) {
       // jsPDF >= 4.2.1 supports this object constructor shape, custom page format,
       // point units, and compression. Earlier/custom builds should fail during tests.
-      pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
+      try {
+        pdf = new jsPDF({ orientation, unit: 'pt', format: [pdfPageWidth, pdfPageHeight], compress: true });
+      } catch (error) {
+        throw new Error(`PDF initialization failed with jsPDF >= ${JSPDF_MINIMUM_SUPPORTED_VERSION} options. Verify the installed jsPDF package and build output. Details: ${String(error?.message || error)}`);
+      }
     } else {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
     }
