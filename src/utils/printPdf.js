@@ -72,6 +72,17 @@ const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'section',
   'tr',
 ]);
+// Header/footer template CSS is intentionally a small subset with simple ASCII class
+// selectors. Full CSS identifier parsing (Unicode escapes, nested at-rules, etc.) is
+// outside the generated-PDF fallback scope.
+const CSS_RULE_RE = /([^{}]+)\{([^{}]*)\}/g;
+const CSS_CLASS_SELECTOR_RE = /\.([A-Za-z0-9_-]+)/g;
+const CSS_SELECTOR_LIST_SEPARATOR_RE = /,/;
+const CSS_DECLARATION_SEPARATOR_RE = /;/;
+const RICH_TEXT_LINE_BREAK_RE = /\r\n|\r|\n/;
+const RICH_TEXT_COLLAPSIBLE_WHITESPACE_RE = /[ \t\f\v]+/g;
+const RICH_SEGMENT_WHITESPACE_RE = /\s+/g;
+const RICH_SEGMENT_WORD_TOKEN_RE = /\S+\s*/g;
 
 /**
  * @typedef {Object} PdfPrintOptions
@@ -166,7 +177,7 @@ function isBoldFontWeight(value) {
   const text = String(value || '').trim().toLowerCase();
   if (!text) return false;
   if (text === 'bold' || text === 'bolder') return true;
-  const numeric = Number.parseInt(text, 10);
+  const numeric = parseInt(text, 10);
   return Number.isFinite(numeric) && numeric >= 600;
 }
 
@@ -178,7 +189,7 @@ function parseTextStyleDeclarations(style) {
   const result = {};
   const text = String(style || '');
   if (!text) return result;
-  text.split(';').forEach((part) => {
+  text.split(CSS_DECLARATION_SEPARATOR_RE).forEach((part) => {
     const separator = part.indexOf(':');
     if (separator === -1) return;
     const property = part.slice(0, separator).trim().toLowerCase();
@@ -209,21 +220,21 @@ function parseTemplateCssClassStyles(css) {
   const text = String(css || '');
   if (!text) return styles;
 
-  const ruleRe = /([^{}]+)\{([^{}]*)\}/g;
-  let match = ruleRe.exec(text);
+  CSS_RULE_RE.lastIndex = 0;
+  let match = CSS_RULE_RE.exec(text);
   while (match) {
     const selectorText = match[1] || '';
     const declarations = parseTextStyleDeclarations(match[2] || '');
-    selectorText.split(',').forEach((selector) => {
-      const classMatches = String(selector).match(/\.([A-Za-z0-9_-]+)/g) || [];
+    selectorText.split(CSS_SELECTOR_LIST_SEPARATOR_RE).forEach((selector) => {
+      const classMatches = Array.from(String(selector).matchAll(CSS_CLASS_SELECTOR_RE), (classMatch) => classMatch[1]);
       if (!classMatches.length) return;
       // Use the right-most class in selector chains. Applying the same declarations to
       // every class in `.parent .child` would incorrectly style standalone `.parent` nodes.
-      const className = classMatches[classMatches.length - 1].slice(1);
+      const className = classMatches[classMatches.length - 1];
       const current = styles.get(className) || {};
       styles.set(className, { ...current, ...declarations });
     });
-    match = ruleRe.exec(text);
+    match = CSS_RULE_RE.exec(text);
   }
 
   return styles;
@@ -295,10 +306,10 @@ function appendRichLineBreak(lines) {
 function appendRichText(lines, text, style) {
   const normalized = String(text || '').replace(/\u00a0/g, ' ');
   if (!normalized) return;
-  const parts = normalized.split(/\r\n|\r|\n/);
+  const parts = normalized.split(RICH_TEXT_LINE_BREAK_RE);
   parts.forEach((part, index) => {
     if (index > 0) appendRichLineBreak(lines);
-    const collapsed = part.replace(/[ \t\f\v]+/g, ' ');
+    const collapsed = part.replace(RICH_TEXT_COLLAPSIBLE_WHITESPACE_RE, ' ');
     if (!collapsed.trim()) {
       if (lines.length && lines[lines.length - 1].length > 0) {
         const line = lines[lines.length - 1];
@@ -583,7 +594,7 @@ function pageFormatForImage(width, height) {
 function normalizeRichSegments(segments) {
   return (Array.isArray(segments) ? segments : [])
     .map((segment) => ({
-      text: String(segment?.text || '').replace(/\s+/g, ' '),
+      text: String(segment?.text || '').replace(RICH_SEGMENT_WHITESPACE_RE, ' '),
       bold: !!segment?.bold,
       italic: !!segment?.italic,
       align: ['left', 'right', 'center'].includes(String(segment?.align || '').toLowerCase())
@@ -784,7 +795,7 @@ function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
     let currentWidth = 0;
 
     for (const segment of segments) {
-      const tokens = String(segment.text || '').match(/\S+\s*/g) || [];
+      const tokens = String(segment.text || '').match(RICH_SEGMENT_WORD_TOKEN_RE) || [];
       for (const token of tokens) {
         const nextSegment = { ...segment, text: token };
         const tokenWidth = measureRichSegment(pdf, nextSegment, fontSize);
