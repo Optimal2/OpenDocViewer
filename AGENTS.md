@@ -15,6 +15,7 @@ Before making changes:
 - Keep OpenDocViewer generic. Do not bake IbsPackager-specific behavior into viewer code unless the integration contract explicitly supports it as optional metadata.
 - Keep code, comments, scripts, and development documentation in English. Swedish belongs only in application localization/help resources.
 - If a change must be visible in a local hosted runtime, run the matching build/publish/deployment step after the code change.
+- When a task produces repository changes, validate them, commit with a focused message, and push unless the user asks not to or the worktree contains unrelated user changes.
 
 ## Security / Antivirus Compatibility
 
