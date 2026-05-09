@@ -1160,7 +1160,7 @@ async function loadJsPdf() {
   try {
     const module = await import('jspdf');
     if (typeof module?.jsPDF !== 'function') {
-      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jspdf package is installed and up to date.");
+      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jspdf package is installed and compatible with the expected API.");
     }
     return module.jsPDF;
   } catch (error) {
