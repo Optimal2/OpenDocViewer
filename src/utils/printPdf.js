@@ -68,6 +68,9 @@ const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
 const PRINT_IFRAME_FOCUS_DELAY_MS = 250;
 const ELLIPSIS = '...';
 const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or http(s) image URLs that the browser can load.';
+const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
+const SUPPORTED_PDF_IMAGE_FORMAT_HINT = `Supported generated-PDF image formats are ${SUPPORTED_PDF_IMAGE_FORMATS}.`;
+const JSPDF_LOAD_ERROR_HINT = 'Verify that the jsPDF package is installed, the installed version exposes the jsPDF constructor, and the build configuration allows dynamic imports. Check the jsPDF package documentation for API or packaging changes.';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
   'article',
@@ -635,7 +638,7 @@ function loadImage(src, signal) {
     };
     img.onerror = () => {
       cleanup();
-      reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}. Check that the image format is supported and that the source is accessible to the browser.`));
+      reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}. ${SUPPORTED_PDF_IMAGE_FORMAT_HINT} Check that the source is accessible to the browser.`));
     };
     try {
       signal?.addEventListener?.('abort', onAbort, { once: true });
@@ -823,7 +826,7 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
   }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) {
-    throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed; check that the image is readable and uses a supported format.`);
+    throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed. ${SUPPORTED_PDF_IMAGE_FORMAT_HINT} Check that the image is readable.`);
   }
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');
 }
@@ -1315,7 +1318,7 @@ async function loadJsPdf() {
     return module.jsPDF;
   } catch (error) {
     logger.warn('PDF generation library failed to load', { error: String(error?.message || error) });
-    throw new Error(`Failed to load PDF generation library. Verify that the jsPDF package is installed and that the build configuration includes dynamic imports. Details: ${String(error?.message || error)}`);
+    throw new Error(`Failed to load PDF generation library. ${JSPDF_LOAD_ERROR_HINT} Details: ${String(error?.message || error)}`);
   }
 }
 
