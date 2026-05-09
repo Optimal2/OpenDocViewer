@@ -18,6 +18,15 @@ import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
 
+/**
+ * Escape regular-expression metacharacters in literal text.
+ * @param {string} value Literal text that will be embedded in a RegExp pattern.
+ * @returns {string} Text escaped for safe RegExp construction.
+ */
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
+}
+
 // A4 page dimensions in PostScript points. jsPDF uses 1 pt = 1/72 inch.
 const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89 });
 const A4_PORTRAIT = [A4_PAGE_PT.width, A4_PAGE_PT.height];
@@ -191,15 +200,6 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
 function asNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
-}
-
-/**
- * Escape regular-expression metacharacters in literal text.
- * @param {string} value Literal text that will be embedded in a RegExp pattern.
- * @returns {string} Text escaped for safe RegExp construction.
- */
-function escapeRegExp(value) {
-  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -581,7 +581,7 @@ function htmlToRichLines(html, css = '') {
         if (block) appendRichLineBreak(lines);
         const children = Array.from(element.childNodes || [])
           .filter((child) => child.nodeType === 1 ||
-            (child.nodeType === 3 && String(child.textContent || '').trim().length > 0));
+            (child.nodeType === 3 && String(child.textContent || '').trim()));
         const columns = children.map((child, index) => {
           /** @type {Array<PdfRichLine>} */
           const childLines = [[]];
@@ -1041,13 +1041,14 @@ function fitRichSegmentTextToWidth(pdf, segment, maxWidth, fontSize) {
  * @returns {Array<PdfRichSegment>}
  */
 function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
+  const widthLimit = Math.max(0, Number(maxWidth) || 0);
   const source = normalizeRichSegments(segments);
   const measured = source.map((segment) => ({
     segment,
     width: measureRichSegment(pdf, segment, fontSize),
   }));
   const totalWidth = measured.reduce((sum, item) => sum + item.width, 0);
-  if (totalWidth <= maxWidth) return source;
+  if (totalWidth <= widthLimit) return source;
   const ellipsisSegment = { text: ELLIPSIS, bold: false, italic: false, align: 'left' };
   const ellipsisWidth = measureRichSegment(pdf, ellipsisSegment, fontSize);
   const fitted = [];
@@ -1058,11 +1059,11 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
     if (!text) continue;
 
     const segmentWidth = item.width;
-    if (width + segmentWidth + ellipsisWidth > maxWidth) {
+    if (width + segmentWidth + ellipsisWidth > widthLimit) {
       const fittedText = fitRichSegmentTextToWidth(
         pdf,
         segment,
-        maxWidth - width - ellipsisWidth,
+        widthLimit - width - ellipsisWidth,
         fontSize
       );
       if (fittedText) fitted.push({ ...segment, text: fittedText });
@@ -1073,7 +1074,6 @@ function fitRichSegmentsToWidth(pdf, segments, maxWidth, fontSize) {
     fitted.push(segment);
     width += segmentWidth;
   }
-  fitted.push(ellipsisSegment);
   return fitted;
 }
 
