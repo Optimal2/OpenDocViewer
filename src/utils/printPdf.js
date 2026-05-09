@@ -353,7 +353,7 @@ function stripDisallowedTemplateElements(html) {
   let cursor = 0;
 
   for (const match of input.matchAll(DISALLOWED_TEMPLATE_TAG_RE)) {
-    if (match.index < cursor) {
+    if (match.index == null || match.index < cursor) {
       // This tag is inside a block already removed with its closing tag.
       continue;
     }
@@ -367,7 +367,7 @@ function stripDisallowedTemplateElements(html) {
     if (!isClosingTag && closingPattern) {
       const remaining = input.slice(cursor);
       const closingMatch = closingPattern.exec(remaining);
-      if (closingMatch && Number.isInteger(closingMatch.index) && closingMatch.index >= 0) {
+      if (closingMatch?.index >= 0) {
         // The closing search runs on the remaining slice, so its index is relative to cursor.
         cursor += closingMatch.index + closingMatch[0].length;
       }
@@ -749,7 +749,7 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   // Index claiming is intentionally a synchronous pop from a private array. Keep it
   // await-free so each worker claims exactly one index before loading the image.
   const takeNextIndex = () => {
-    return pendingIndexes.length ? pendingIndexes.pop() : null;
+    return pendingIndexes.pop() ?? null;
   };
 
   const reportImageLoaded = () => {
