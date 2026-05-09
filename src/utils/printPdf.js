@@ -39,6 +39,7 @@ const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 // Cap image watermark height so very narrow/tall pages do not let the PNG cover the
 // document body. Text watermarks use their own font-scale path above.
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
+const JPEG_FALLBACK_MIN_QUALITY = 0.6;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // Two-column flow rows reserve a little less than half the width for the left
@@ -617,8 +618,28 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
 function inferImageFormat(img) {
   const src = String(img.currentSrc || img.src || '').toLowerCase();
   if (src.startsWith('data:image/jpeg') || src.startsWith('data:image/jpg')) return 'JPEG';
+  if (src.startsWith('data:image/png')) return 'PNG';
   if (src.startsWith('data:image/webp')) return 'WEBP';
+  const extension = imageExtensionFromUrl(src);
+  if (extension === 'jpg' || extension === 'jpeg') return 'JPEG';
+  if (extension === 'webp') return 'WEBP';
   return 'PNG';
+}
+
+/**
+ * @param {string} src
+ * @returns {string}
+ */
+function imageExtensionFromUrl(src) {
+  try {
+    const url = new URL(src, window.location.href);
+    const match = /\.([a-z0-9]+)$/i.exec(url.pathname);
+    return match ? match[1].toLowerCase() : '';
+  } catch {
+    const clean = src.split(/[?#]/, 1)[0] || '';
+    const match = /\.([a-z0-9]+)$/i.exec(clean);
+    return match ? match[1].toLowerCase() : '';
+  }
 }
 
 /**
@@ -638,7 +659,7 @@ function imageToJpegDataUrl(img, quality) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
-    return canvas.toDataURL('image/jpeg', Math.min(1, Math.max(0.1, quality || 0.92)));
+    return canvas.toDataURL('image/jpeg', Math.min(1, Math.max(JPEG_FALLBACK_MIN_QUALITY, quality || 0.92)));
   } catch (error) {
     logger.warn('PDF image fallback conversion failed', { error: String(error?.message || error) });
     return null;
@@ -1117,6 +1138,22 @@ function reportProgress(options, event) {
 }
 
 /**
+ * @returns {Promise<*>}
+ */
+async function loadJsPdf() {
+  try {
+    const module = await import('jspdf');
+    if (typeof module?.jsPDF !== 'function') {
+      throw new Error('jsPDF export was not available.');
+    }
+    return module.jsPDF;
+  } catch (error) {
+    logger.warn('PDF generation library failed to load', { error: String(error?.message || error) });
+    throw new Error(`Failed to load PDF generation library: ${String(error?.message || error)}`);
+  }
+}
+
+/**
  * Build a PDF blob from page image URLs and print metadata.
  * @param {Array<string>} dataUrls
  * @param {PdfPrintOptions=} options
@@ -1149,7 +1186,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
   reportProgress(options, { phase: 'loading-library', current: 0, total });
   throwIfAborted(options.signal);
-  const { jsPDF } = await import('jspdf');
+  const jsPDF = await loadJsPdf();
   throwIfAborted(options.signal);
   reportProgress(options, { phase: 'loading-images', current: 0, total });
   const images = await loadImagesConcurrently(urls, options.signal, (current) => {
@@ -1194,7 +1231,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     }
     if (hasFooter) {
       const lineHeight = Math.max(5, footerFontSize * HEADER_FOOTER_LINE_HEIGHT);
-      const firstY = pageHeight - marginPt - ((footerDrawLines.length - 1) * lineHeight);
+      const firstY = pageHeight - marginPt - footerFontSize - ((footerDrawLines.length - 1) * lineHeight);
       drawRichTextBlock(pdf, footerDrawLines, marginPt, firstY, pageWidth - (marginPt * 2), footerFontSize, FOOTER_COLOR, MAX_FOOTER_LINES);
     }
 
