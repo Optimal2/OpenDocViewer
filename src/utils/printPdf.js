@@ -253,6 +253,14 @@ function isBlockNode(nodeName) {
 }
 
 /**
+ * @param {Array<PdfRichSegment>} segments
+ * @returns {boolean}
+ */
+function richLineHasText(segments) {
+  return Array.isArray(segments) && segments.some((segment) => String(segment?.text || '').trim());
+}
+
+/**
  * @param {*} line Rich-text line candidate.
  * @returns {boolean}
  */
@@ -566,14 +574,6 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
  */
 function pageFormatForImage(width, height) {
   return width > height ? A4_LANDSCAPE : A4_PORTRAIT;
-}
-
-/**
- * @param {Array<PdfRichSegment>} segments
- * @returns {boolean}
- */
-function richLineHasText(segments) {
-  return Array.isArray(segments) && segments.some((segment) => String(segment?.text || '').trim());
 }
 
 /**
