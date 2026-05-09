@@ -695,8 +695,9 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   let nextIndex = 0;
   let completed = 0;
 
-  // These helpers intentionally contain no await points. JavaScript's event loop
-  // cannot interleave inside them, so each worker claims one index before loading.
+  // The synchronous helper functions below intentionally contain no await points.
+  // JavaScript's event loop cannot interleave inside them, so each worker claims
+  // one index before loadNext awaits the actual image load.
   const takeNextIndex = () => {
     if (nextIndex >= urls.length) return null;
     const index = nextIndex;
@@ -1286,6 +1287,20 @@ function reportProgress(options, event) {
 }
 
 /**
+ * @param {boolean} hasOverlay
+ * @param {number} reservePt
+ * @param {number} lineCount
+ * @param {number} fontSize
+ * @returns {number}
+ */
+function calculateOverlayReserve(hasOverlay, reservePt, lineCount, fontSize) {
+  if (!hasOverlay) return 0;
+  const contentReserve = (Math.max(0, lineCount) * Math.max(0, fontSize) * HEADER_FOOTER_LINE_HEIGHT)
+    + HEADER_FOOTER_RESERVE_PADDING_PT;
+  return Math.max(Math.max(0, reservePt), contentReserve);
+}
+
+/**
  * Dynamically load the jsPDF constructor used by generated PDF output.
  * @returns {Promise<Function>} Resolves to the jsPDF constructor function.
  * @throws {Error} Throws when the module cannot be imported or does not expose the expected jsPDF export.
@@ -1375,12 +1390,8 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     const hasHeader = headerDrawLines.length > 0;
     const hasFooter = footerDrawLines.length > 0;
     const copyText = resolveCopyMarkerText(pageContext);
-    const headerReserve = hasHeader
-      ? Math.max(headerReservePt, (headerDrawLines.length * textFontSize * HEADER_FOOTER_LINE_HEIGHT) + HEADER_FOOTER_RESERVE_PADDING_PT)
-      : 0;
-    const footerReserve = hasFooter
-      ? Math.max(footerReservePt, (footerDrawLines.length * footerFontSize * HEADER_FOOTER_LINE_HEIGHT) + HEADER_FOOTER_RESERVE_PADDING_PT)
-      : 0;
+    const headerReserve = calculateOverlayReserve(hasHeader, headerReservePt, headerDrawLines.length, textFontSize);
+    const footerReserve = calculateOverlayReserve(hasFooter, footerReservePt, footerDrawLines.length, footerFontSize);
 
     if (hasHeader) {
       drawRichTextBlock(pdf, headerDrawLines, marginPt, marginPt + textFontSize, pdfPageWidth - (marginPt * 2), textFontSize, HEADER_FOOTER_COLOR, MAX_HEADER_FOOTER_LINES);
@@ -1517,6 +1528,33 @@ export function printPdfBlob(blob) {
 }
 
 /**
+ * @param {Array<*>=} pageContexts
+ * @param {number} count
+ * @returns {Array<*>}
+ */
+function selectPageContexts(pageContexts, count) {
+  return Array.isArray(pageContexts) ? pageContexts.slice(0, Math.max(0, count)) : [];
+}
+
+/**
+ * @param {Blob} blob
+ * @param {PdfPrintOptions} options
+ * @param {number} count
+ * @returns {void}
+ */
+function executeOutputAction(blob, options, count) {
+  const total = Math.max(0, count);
+  if (options.action === 'download') {
+    reportProgress(options, { phase: 'downloading', current: total, total });
+    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
+    return;
+  }
+
+  reportProgress(options, { phase: 'opening-preview', current: total, total });
+  printPdfBlob(blob);
+}
+
+/**
  * Read printable page image URLs from the document renderer. getAllPrintableDataUrls()
  * is the preferred API; exportAllPagesAsDataUrls() remains a backward-compatible alias
  * for older integrations, with no removal date currently scheduled.
@@ -1586,13 +1624,7 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
   const selectedCount = selected.length;
   const blob = await createPrintPdfBlob(selected, options);
   throwIfAborted(options.signal);
-  if (options.action === 'download') {
-    reportProgress(options, { phase: 'downloading', current: selectedCount, total: selectedCount });
-    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  } else {
-    reportProgress(options, { phase: 'opening-preview', current: selectedCount, total: selectedCount });
-    printPdfBlob(blob);
-  }
+  executeOutputAction(blob, options, selectedCount);
 }
 
 
@@ -1639,15 +1671,9 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   if (!src) {
     throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
-  const blob = await createPrintPdfBlob([src], { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 1) : [] });
+  const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
   throwIfAborted(options.signal);
-  if (options.action === 'download') {
-    reportProgress(options, { phase: 'downloading', current: 1, total: 1 });
-    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  } else {
-    reportProgress(options, { phase: 'opening-preview', current: 1, total: 1 });
-    printPdfBlob(blob);
-  }
+  executeOutputAction(blob, options, 1);
 }
 
 /**
@@ -1668,13 +1694,7 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
     if (!compare) missing.push('compare');
     throw new Error(`Both comparison surfaces are required for generated PDF output. Missing surface(s): ${missing.join(', ')}.`);
   }
-  const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 2) : [] });
+  const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
   throwIfAborted(options.signal);
-  if (options.action === 'download') {
-    reportProgress(options, { phase: 'downloading', current: urls.length, total: urls.length });
-    downloadPdfBlob(blob, options.filename || DEFAULT_PDF_FILENAME);
-  } else {
-    reportProgress(options, { phase: 'opening-preview', current: urls.length, total: urls.length });
-    printPdfBlob(blob);
-  }
+  executeOutputAction(blob, options, urls.length);
 }
