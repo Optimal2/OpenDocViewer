@@ -596,6 +596,18 @@ function describeImageSource(src) {
 }
 
 /**
+ * @param {*} value
+ * @returns {string}
+ */
+function describeValueType(value) {
+  if (value === null) return 'null';
+  if (value === undefined) return 'undefined';
+  const type = typeof value;
+  const constructorName = value?.constructor?.name;
+  return constructorName ? `${type} (${constructorName})` : type;
+}
+
+/**
  * @param {Array<string>} urls
  * @param {AbortSignal=} signal
  * @param {function(number): void} onLoaded
@@ -1167,7 +1179,7 @@ async function loadJsPdf() {
   try {
     const module = await import('jspdf');
     if (typeof module?.jsPDF !== 'function') {
-      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jspdf package is installed and compatible with the expected API.");
+      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jsPDF package is installed and compatible with the expected API.");
     }
     return module.jsPDF;
   } catch (error) {
@@ -1396,7 +1408,7 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
-    throw new Error("Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs.");
+    throw new Error(`Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
   }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
@@ -1494,9 +1506,12 @@ function printableSourceFromElement(el) {
 export async function handlePdfCurrent(documentRenderRef, options = {}) {
   throwIfAborted(options.signal);
   const node = documentRenderRef?.current?.getActiveCanvas?.();
+  if (!node) {
+    throw new Error('Unable to generate PDF from the active surface: the document handle did not return an active canvas/image element.');
+  }
   const src = printableSourceFromElement(node);
   if (!src) {
-    throw new Error('Unable to generate PDF from the active surface: no active canvas/image element was found, or the element could not be converted to a safe printable source.');
+    throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: Array.isArray(options.pageContexts) ? options.pageContexts.slice(0, 1) : [] });
   throwIfAborted(options.signal);
