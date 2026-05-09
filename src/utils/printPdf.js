@@ -177,14 +177,14 @@ function asNumber(value) {
 /**
  * Normalize canvas/PDF image quality to the browser-supported 0..1 range.
  * @param {*} value
- * @param {number} defaultValue
+ * @param {number} rawDefaultValue Default value, normalized with the same quality policy.
  * @param {number=} minValue Optional quality floor for readability-sensitive fallbacks.
  * @returns {number}
  */
-function normalizeQuality(value, defaultValue, minValue = 0) {
+function normalizeQuality(value, rawDefaultValue, minValue = 0) {
   const n = Number(value);
   const min = clamp01(minValue);
-  const fallback = Number.isFinite(defaultValue) ? defaultValue : JPEG_FALLBACK_DEFAULT_QUALITY;
+  const fallback = Number.isFinite(rawDefaultValue) ? rawDefaultValue : JPEG_FALLBACK_DEFAULT_QUALITY;
   if (!Number.isFinite(n)) return Math.max(min, clamp01(fallback));
   return Math.max(min, clamp01(n));
 }
@@ -203,10 +203,11 @@ function clamp01(value) {
 function createAbortError() {
   try {
     return new DOMException('PDF generation was cancelled.', 'AbortError');
-  } catch {
-    const error = new Error('PDF generation was cancelled.');
-    error.name = 'AbortError';
-    return error;
+  } catch (domError) {
+    logger.debug('DOMException constructor unavailable; using Error fallback for PDF cancellation', { error: String(domError?.message || domError) });
+    const fallbackError = new Error('PDF generation was cancelled.');
+    fallbackError.name = 'AbortError';
+    return fallbackError;
   }
 }
 
@@ -333,8 +334,10 @@ function stripDisallowedTemplateElements(html) {
       const elementName = String(match[2] || '').toLowerCase();
       const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
       if (!isClosingTag && closingPattern) {
-        const closingMatch = input.slice(cursor).matchAll(closingPattern).next().value;
-        if (closingMatch) {
+        const remaining = input.slice(cursor);
+        const closingMatch = remaining.matchAll(closingPattern).next().value;
+        if (closingMatch && Number.isInteger(closingMatch.index) && closingMatch.index >= 0) {
+          // matchAll() is run on the remaining slice, so its index is relative to cursor.
           cursor += closingMatch.index + closingMatch[0].length;
         }
       }
@@ -562,7 +565,8 @@ function htmlToRichLines(html, css = '') {
     };
 
     Array.from(doc.body?.childNodes || []).forEach((node) => walk(node, {}));
-  } catch {
+  } catch (error) {
+    logger.debug('PDF rich-text HTML parsing failed; falling back to plain text', { error: String(error?.message || error) });
     appendRichText(lines, input.replace(/\u00a0/g, ' '), {});
   }
 
@@ -608,11 +612,19 @@ function loadImage(src, signal) {
     const cleanup = () => {
       img.onload = null;
       img.onerror = null;
-      try { signal?.removeEventListener?.('abort', onAbort); } catch {}
+      try {
+        signal?.removeEventListener?.('abort', onAbort);
+      } catch (error) {
+        logger.debug('PDF image abort listener cleanup failed', { error: String(error?.message || error) });
+      }
     };
     const onAbort = () => {
       cleanup();
-      try { img.src = ''; } catch {}
+      try {
+        img.src = '';
+      } catch (error) {
+        logger.debug('PDF image source reset after abort failed', { error: String(error?.message || error) });
+      }
       reject(createAbortError());
     };
     img.onload = () => {
@@ -623,7 +635,11 @@ function loadImage(src, signal) {
       cleanup();
       reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}. Check that the image format is supported and that the source is accessible to the browser.`));
     };
-    try { signal?.addEventListener?.('abort', onAbort, { once: true }); } catch {}
+    try {
+      signal?.addEventListener?.('abort', onAbort, { once: true });
+    } catch (error) {
+      logger.debug('PDF image abort listener registration failed', { error: String(error?.message || error) });
+    }
     img.src = src;
   });
 }
@@ -675,23 +691,35 @@ function describeValueType(value) {
 async function loadImagesConcurrently(urls, signal, onLoaded) {
   const results = new Array(urls.length);
   const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
-  // Main-thread JavaScript cannot interleave between these synchronous reads and
-  // increments; each worker captures its index before the awaited image load.
   let nextIndex = 0;
   let completed = 0;
 
+  // These helpers intentionally contain no await points. JavaScript's event loop
+  // cannot interleave inside them, so each worker claims one index before loading.
+  const takeNextIndex = () => {
+    if (nextIndex >= urls.length) return null;
+    const index = nextIndex;
+    nextIndex += 1;
+    return index;
+  };
+
+  const reportImageLoaded = () => {
+    completed += 1;
+    onLoaded(completed);
+  };
+
   async function loadNext() {
-    while (nextIndex < urls.length) {
+    while (true) {
       throwIfAborted(signal);
-      const index = nextIndex++;
+      const index = takeNextIndex();
+      if (index === null) return;
       try {
         results[index] = await loadImage(urls[index], signal);
       } catch (error) {
         throwIfAborted(signal);
         throw new Error(`Failed to load image ${index + 1} for PDF generation: ${String(error?.message || error)}`);
       }
-      completed += 1;
-      onLoaded(completed);
+      reportImageLoaded();
     }
   }
 
