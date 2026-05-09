@@ -116,7 +116,8 @@ const DISALLOWED_TEMPLATE_ELEMENT_NAMES = Object.freeze([
   'object',
   'embed',
 ]);
-const DISALLOWED_TEMPLATE_TAG_RE = /<\s*(\/?)\s*(script|style|template|noscript|iframe|object|embed)\b[^>]*>/gi;
+const DISALLOWED_TEMPLATE_ELEMENT_PATTERN = DISALLOWED_TEMPLATE_ELEMENT_NAMES.map(escapeRegExp).join('|');
+const DISALLOWED_TEMPLATE_TAG_RE = new RegExp(`<\\s*(\\/?)\\s*(${DISALLOWED_TEMPLATE_ELEMENT_PATTERN})\\b[^>]*>`, 'gi');
 const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
   Object.fromEntries(
     DISALLOWED_TEMPLATE_ELEMENT_NAMES.map((name) => [
@@ -179,6 +180,14 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
 function asNumber(value) {
   const n = Number(value);
   return Number.isFinite(n) ? n : 0;
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function escapeRegExp(value) {
+  return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
 }
 
 /**
@@ -704,6 +713,8 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   const results = new Array(urls.length);
   const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
   let completed = 0;
+  // Build the array in reverse order so pop() claims indexes in natural 0..n order
+  // while keeping each claim as a simple synchronous stack operation.
   const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
 
   // Index claiming is intentionally a synchronous pop from a private array. Keep it
