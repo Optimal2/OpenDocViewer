@@ -46,9 +46,10 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 const PDF_IMAGE_LOAD_CONCURRENCY = 4;
-// Keep the generated download URL alive briefly after the synthetic click; browsers should
-// have taken ownership of the download by then, while the object URL is not leaked long-term.
-const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 30 * 1000;
+// Browsers do not expose a reliable completion event for synthetic blob downloads.
+// Keep the generated URL alive long enough for slow "save as" flows, then revoke it
+// as a leak-prevention fallback.
+const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 2 * 60 * 1000;
 // Printing through a hidden PDF iframe can keep the blob URL alive while the browser print
 // preview is open. afterprint is preferred, but this long fallback prevents leaked resources.
 const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * 60 * 1000;
@@ -292,8 +293,9 @@ function isBlockNode(nodeName) {
 
 /**
  * Remove elements that are never meaningful in generated PDF header/footer text.
- * DOMParser's text/html mode creates an inert detached document, but stripping
- * these blocks first keeps dangerous markup out of the parsed tree as well.
+ * DOMParser's text/html mode creates an inert detached document: scripts do not
+ * execute while parsing. We still strip risky blocks first and later consume only
+ * the small rich-text subset supported by this PDF renderer, not arbitrary HTML.
  * @param {string} html
  * @returns {string}
  */
@@ -602,14 +604,15 @@ function describeImageSource(src) {
 async function loadImagesConcurrently(urls, signal, onLoaded) {
   const results = new Array(urls.length);
   const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
+  // Main-thread JavaScript cannot interleave between these synchronous reads and
+  // increments; each worker captures its index before the awaited image load.
   let nextIndex = 0;
   let completed = 0;
 
   async function loadNext() {
     while (nextIndex < urls.length) {
       throwIfAborted(signal);
-      const index = nextIndex;
-      nextIndex += 1;
+      const index = nextIndex++;
       try {
         results[index] = await loadImage(urls[index], signal);
       } catch (error) {
@@ -659,6 +662,8 @@ function imageExtensionFromUrl(src) {
 /**
  * Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the
  * original image element/format directly.
+ * The image must already have passed loadImage/isSafeImageSrc. If the browser still taints the
+ * canvas or rejects the source, conversion fails closed and the caller reports a controlled error.
  * @param {HTMLImageElement} img
  * @param {number} quality
  * @returns {string|null}
@@ -817,6 +822,8 @@ function fitRichSegmentTextToWidth(pdf, segment, maxWidth, fontSize) {
   const chars = Array.from(String(segment?.text || ''));
   if (!chars.length || maxWidth <= 0) return '';
 
+  // Binary search keeps very long header/footer segments from requiring one
+  // measureText call per character.
   let low = 1;
   let high = chars.length;
   let best = 0;
