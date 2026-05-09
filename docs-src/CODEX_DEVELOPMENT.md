@@ -82,8 +82,13 @@ npm run dev
 For release validation, prefer the existing release helper when the task is explicitly about preparing a release:
 
 ```powershell
-.\release.ps1
+.\release.ps1 -ReleaseType patch -Yes
 ```
+
+The release helper is release-only. Commit and push application changes, dependency updates,
+source documentation, and `SECURITY.md` release-context updates first. The working tree must be
+clean and the local branch must match `origin/<branch>` before the helper creates the npm version
+commit and Git tag.
 
 ## Integration Notes
 
