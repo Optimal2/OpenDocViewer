@@ -1490,7 +1490,9 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   throwIfAborted(signal);
   const handle = documentRenderRef?.current;
   // getAllPrintableDataUrls() is the canonical renderer API. exportAllPagesAsDataUrls()
-  // remains supported as a backward-compatible alias for older integrations.
+  // remains supported as a backward-compatible alias for older integrations. New
+  // integrations should migrate to getAllPrintableDataUrls(); no removal date is
+  // currently scheduled for the alias.
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
     throw new Error(`Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
@@ -1571,7 +1573,10 @@ function printableSourceFromElement(el) {
       const url = el.toDataURL('image/png');
       return typeof url === 'string' && url.startsWith('data:image') ? url : null;
     } catch (error) {
-      logger.warn('Unable to export active canvas to PDF image', { error: String(error?.message || error) });
+      logger.warn(
+        'Unable to export active canvas to PDF image; the canvas may be tainted by cross-origin content or blocked by browser security restrictions.',
+        { error: String(error?.message || error) }
+      );
       return null;
     }
   }
