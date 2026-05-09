@@ -108,6 +108,7 @@ const PDF_TEMPLATE_ALLOWED_TAGS = Object.freeze([
   'b',
   'br',
   'em',
+  'i',
   'span',
   'strong',
 ]);
@@ -746,10 +747,7 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   let completed = 0;
   // Build the array in reverse order so pop() claims indexes in natural 0..n order
   // while keeping each claim as a simple synchronous stack operation.
-  const pendingIndexes = Array.from({ length: urls.length }, (_, index) => {
-    const reverseIndex = urls.length - 1 - index;
-    return reverseIndex;
-  });
+  const pendingIndexes = Array.from({ length: urls.length }, (_, index) => urls.length - 1 - index);
 
   // Index claiming is intentionally a synchronous pop from a private array. Keep it
   // await-free so each worker claims exactly one index before loading the image.
@@ -853,6 +851,16 @@ function getImageDimension(img, dimension) {
 }
 
 /**
+ * @param {'PNG'|'JPEG'|'WEBP'} preferred
+ * @returns {Array<'PNG'|'JPEG'|'WEBP'>}
+ */
+function imageFormatAttempts(preferred) {
+  if (preferred === 'PNG') return ['PNG', 'JPEG'];
+  if (preferred === 'JPEG') return ['JPEG', 'PNG'];
+  return ['WEBP', 'PNG', 'JPEG'];
+}
+
+/**
  * @param {*} pdf
  * @param {HTMLImageElement} img
  * @param {number} x
@@ -864,11 +872,11 @@ function getImageDimension(img, dimension) {
  */
 function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
   const preferred = inferImageFormat(img);
-  const attempts = Array.from(new Set([preferred, 'PNG', 'JPEG']));
+  const attempts = imageFormatAttempts(preferred);
   for (const format of attempts) {
     try {
       // The final 'FAST' argument is jsPDF's image compression hint. ODV keeps it
-      // best-effort and tests this path with the package version locked by package-lock.
+      // best-effort and tests this path with the package version locked by package-lock.json.
       pdf.addImage(img, format, x, y, width, height, undefined, 'FAST');
       return;
     } catch (error) {
@@ -1417,7 +1425,7 @@ function describeModuleExports(module) {
  * Dynamically load the jsPDF constructor used by generated PDF output.
  * @returns {Promise<Function>} Resolves to the jsPDF constructor function.
  * @throws {Error} Throws when the module cannot be imported or does not expose the expected jsPDF export.
- * Generated PDF output is tested with the jsPDF package version locked by package-lock
+ * Generated PDF output is tested with the jsPDF package version locked by package-lock.json
  * for constructor options, GState opacity, addImage handling, and compression hints.
  */
 async function loadJsPdf() {
@@ -1493,11 +1501,11 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
     if (!pdf) {
       // ODV tests this object constructor shape, custom page format, point units,
-      // and compression with the jsPDF package version locked by package-lock.
+      // and compression with the jsPDF package version locked by package-lock.json.
       try {
         pdf = new jsPDF(createJsPdfOptions(pdfPageWidth, pdfPageHeight, orientation));
       } catch (error) {
-        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`);
+        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock.json and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`);
       }
     } else {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
@@ -1790,7 +1798,7 @@ async function printableSourceFromElement(el) {
   if (tag === 'canvas') {
     try {
       const url = await canvasToPngDataUrl(el);
-      return typeof url === 'string' && url.startsWith('data:image/png') ? url : null;
+      return url;
     } catch (error) {
       logger.warn(
         'Unable to export active canvas to PDF image; the canvas may be tainted by cross-origin content or blocked by browser security restrictions. Ensure embedded images are served from the same origin or from CORS-enabled sources before rendering them to canvas.',
