@@ -353,7 +353,7 @@ function stripDisallowedTemplateElements(html) {
   let cursor = 0;
 
   for (const match of input.matchAll(DISALLOWED_TEMPLATE_TAG_RE)) {
-    if (match.index == null || match.index < cursor) {
+    if (match.index === null || match.index === undefined || match.index < cursor) {
       // This tag is inside a block already removed with its closing tag.
       continue;
     }
@@ -367,7 +367,7 @@ function stripDisallowedTemplateElements(html) {
     if (!isClosingTag && closingPattern) {
       const remaining = input.slice(cursor);
       const closingMatch = closingPattern.exec(remaining);
-      if (closingMatch?.index >= 0) {
+      if (closingMatch && closingMatch.index >= 0) {
         // The closing search runs on the remaining slice, so its index is relative to cursor.
         cursor += closingMatch.index + closingMatch[0].length;
       }
@@ -1735,9 +1735,11 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
 }
 
 /**
+ * Convert a 1-based printable page number into the matching 0-based data URL index.
+ * Invalid, fractional, zero, negative, and out-of-range values return null.
  * @param {*} pageNumber 1-based page number.
- * @param {number} pageCount
- * @returns {number|null}
+ * @param {number} pageCount Total number of printable page URLs available.
+ * @returns {number|null} 0-based page index, or null when pageNumber is invalid.
  */
 function pageNumberToIndex(pageNumber, pageCount) {
   const numeric = Number(pageNumber);
