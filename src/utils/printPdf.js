@@ -49,17 +49,18 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 const PDF_IMAGE_LOAD_CONCURRENCY = 4;
+const ONE_MINUTE_MS = 60 * 1000;
 // Browsers do not expose a reliable completion event for synthetic blob downloads.
 // Keep the generated URL alive long enough for slow "save as" flows, then revoke it
 // as a leak-prevention fallback.
-const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 2 * 60 * 1000;
+const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 2 * ONE_MINUTE_MS;
 // Printing through a hidden PDF iframe can keep the blob URL alive while the browser print
 // preview is open. afterprint is preferred, but this long fallback prevents leaked resources.
-const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * 60 * 1000;
+const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * ONE_MINUTE_MS;
 // Keep the PDF iframe/blob alive after afterprint because some browsers fire afterprint when
 // the preview UI opens or while it still depends on the blob. Short cleanup can blank pages
 // if the user waits before continuing from the browser print dialog.
-const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 120 * 1000;
+const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 2 * ONE_MINUTE_MS;
 // The iframe load event is normally enough to invoke printing, but blob iframe load
 // events can be missed in some browsers. This fallback retries once after a short delay.
 const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
@@ -1298,7 +1299,7 @@ async function loadJsPdf() {
     return module.jsPDF;
   } catch (error) {
     logger.warn('PDF generation library failed to load', { error: String(error?.message || error) });
-    throw new Error(`Failed to load PDF generation library: ${String(error?.message || error)}`);
+    throw new Error(`Failed to load PDF generation library. Verify that the jsPDF package is installed and that the build configuration includes dynamic imports. Details: ${String(error?.message || error)}`);
   }
 }
 
@@ -1529,7 +1530,7 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
-    throw new Error(`Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
+    throw new Error(`Document handle object must implement getAllPrintableDataUrls() to provide printable page URLs. exportAllPagesAsDataUrls() is still supported as a backward-compatible alias. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
   }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
