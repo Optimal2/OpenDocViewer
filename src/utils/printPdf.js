@@ -178,8 +178,16 @@ function asNumber(value) {
 function normalizeQuality(value, defaultValue) {
   const n = Number(value);
   const fallback = Number.isFinite(defaultValue) ? defaultValue : 0.9;
-  if (!Number.isFinite(n)) return Math.min(1, Math.max(0, fallback));
-  return Math.min(1, Math.max(0, n));
+  if (!Number.isFinite(n)) return clamp01(fallback);
+  return clamp01(n);
+}
+
+/**
+ * @param {number} value
+ * @returns {number}
+ */
+function clamp01(value) {
+  return Math.min(1, Math.max(0, value));
 }
 
 /**
@@ -528,6 +536,8 @@ function htmlToRichLines(html, css = '') {
           try {
             walk(child, next);
           } finally {
+            // Capture the child's generated lines, then restore the parent buffer for
+            // subsequent siblings. The child result is consumed below via flattenRichLines.
             swapRichLineBufferContents(childLines, lines);
             swapRichLineBufferContents(lines, previousLines);
           }
@@ -735,8 +745,8 @@ function imageExtensionFromUrl(src) {
 function imageToJpegDataUrl(img, quality) {
   try {
     const canvas = document.createElement('canvas');
-    canvas.width = Math.max(1, img.naturalWidth || img.width || 1);
-    canvas.height = Math.max(1, img.naturalHeight || img.height || 1);
+    canvas.width = getImageDimension(img, 'width');
+    canvas.height = getImageDimension(img, 'height');
     const ctx = canvas.getContext('2d');
     if (!ctx) return null;
     ctx.fillStyle = '#fff';
@@ -747,6 +757,18 @@ function imageToJpegDataUrl(img, quality) {
     logger.warn('PDF image fallback conversion failed', { error: String(error?.message || error) });
     return null;
   }
+}
+
+/**
+ * @param {HTMLImageElement} img
+ * @param {'width'|'height'} dimension
+ * @returns {number}
+ */
+function getImageDimension(img, dimension) {
+  if (dimension === 'width') {
+    return Math.max(1, img.naturalWidth || img.width || 1);
+  }
+  return Math.max(1, img.naturalHeight || img.height || 1);
 }
 
 /**
