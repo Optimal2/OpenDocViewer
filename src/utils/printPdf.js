@@ -18,7 +18,7 @@ import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
 
 // A4 page dimensions in PostScript points. jsPDF uses 1 pt = 1/72 inch.
-const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89, unit: 'pt' });
+const A4_PAGE_PT = Object.freeze({ width: 595.28, height: 841.89 });
 const A4_PORTRAIT = [A4_PAGE_PT.width, A4_PAGE_PT.height];
 const A4_LANDSCAPE = [A4_PAGE_PT.height, A4_PAGE_PT.width];
 const DEFAULT_PDF_FILENAME = 'opendocviewer-print.pdf';
@@ -39,6 +39,7 @@ const WATERMARK_IMAGE_WIDTH_SCALE = 0.82;
 // Cap image watermark height so very narrow/tall pages do not let the PNG cover the
 // document body. Text watermarks use their own font-scale path above.
 const WATERMARK_IMAGE_MAX_HEIGHT_SCALE = 0.42;
+const JPEG_FALLBACK_DEFAULT_QUALITY = 0.9;
 const JPEG_FALLBACK_MIN_QUALITY = 0.6;
 const PDF_COLUMN_GAP_PT = 12;
 const PDF_COLUMN_MIN_WIDTH_PT = 32;
@@ -60,6 +61,8 @@ const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 120 * 1000;
 // The iframe load event is normally enough to invoke printing, but blob iframe load
 // events can be missed in some browsers. This fallback retries once after a short delay.
 const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
+// Give the hidden PDF iframe a brief moment to finish navigation before focus/print.
+const PRINT_IFRAME_FOCUS_DELAY_MS = 250;
 const ELLIPSIS = '...';
 const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or http(s) image URLs that the browser can load.';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
@@ -177,7 +180,7 @@ function asNumber(value) {
  */
 function normalizeQuality(value, defaultValue) {
   const n = Number(value);
-  const fallback = Number.isFinite(defaultValue) ? defaultValue : 0.9;
+  const fallback = Number.isFinite(defaultValue) ? defaultValue : JPEG_FALLBACK_DEFAULT_QUALITY;
   if (!Number.isFinite(n)) return clamp01(fallback);
   return clamp01(n);
 }
@@ -752,7 +755,11 @@ function imageToJpegDataUrl(img, quality) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
-    return canvas.toDataURL('image/jpeg', Math.min(1, Math.max(JPEG_FALLBACK_MIN_QUALITY, quality || 0.92)));
+    const jpegQuality = Math.max(
+      JPEG_FALLBACK_MIN_QUALITY,
+      normalizeQuality(quality, JPEG_FALLBACK_DEFAULT_QUALITY)
+    );
+    return canvas.toDataURL('image/jpeg', jpegQuality);
   } catch (error) {
     logger.warn('PDF image fallback conversion failed', { error: String(error?.message || error) });
     return null;
@@ -1282,7 +1289,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const headerReservePt = Math.max(0, asNumber(pdfCfg.headerReservePt) || 18);
   const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
   const textFontSize = Math.max(5, asNumber(pdfCfg.textFontSize) || 7);
-  const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, 0.9);
+  const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, JPEG_FALLBACK_DEFAULT_QUALITY);
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
@@ -1465,7 +1472,7 @@ export function printPdfBlob(blob) {
         window.open(url, '_blank', 'noopener,noreferrer');
       }
       scheduleFallbackCleanup();
-    }, 250);
+    }, PRINT_IFRAME_FOCUS_DELAY_MS);
   };
   frame.addEventListener('load', invokePrint, { once: true });
   frame.src = url;
