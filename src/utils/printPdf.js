@@ -11,6 +11,7 @@
  */
 
 import i18next from 'i18next';
+import DOMPurify from 'dompurify';
 import logger from '../logging/systemLogger.js';
 import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { resolveLocalizedValue } from './localizedValue.js';
@@ -93,6 +94,15 @@ const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'section',
   'tr',
 ]);
+const PDF_TEMPLATE_ALLOWED_TAGS = Object.freeze([
+  ...BLOCK_LEVEL_ELEMENTS,
+  'b',
+  'br',
+  'em',
+  'span',
+  'strong',
+]);
+const PDF_TEMPLATE_ALLOWED_ATTRIBUTES = Object.freeze(['class', 'style']);
 // Header/footer template CSS is intentionally a small subset with simple ASCII class
 // selectors. Full CSS identifier parsing (Unicode escapes, nested at-rules, etc.) is
 // outside the generated-PDF fallback scope. Declaration values that contain braces,
@@ -368,6 +378,22 @@ function stripDisallowedTemplateElements(html) {
 }
 
 /**
+ * Keep generated-PDF print templates inside the small rich-text subset consumed below.
+ * DOMPurify is used before DOMParser so malformed or encoded HTML is normalized by a
+ * dedicated sanitizer rather than relying only on regex pre-stripping.
+ * @param {string} html
+ * @returns {string}
+ */
+function sanitizeTemplateHtmlForPdf(html) {
+  return DOMPurify.sanitize(String(html || ''), {
+    ALLOWED_TAGS: PDF_TEMPLATE_ALLOWED_TAGS,
+    ALLOWED_ATTR: PDF_TEMPLATE_ALLOWED_ATTRIBUTES,
+    ALLOW_DATA_ATTR: false,
+    FORBID_TAGS: DISALLOWED_TEMPLATE_ELEMENT_NAMES,
+  });
+}
+
+/**
  * Keep only the attributes used by the generated-PDF rich text subset.
  * @param {Element|undefined|null} root
  * @returns {void}
@@ -510,7 +536,7 @@ function flattenRichLines(richLines) {
  * @returns {Array<PdfRichLine>}
  */
 function htmlToRichLines(html, css = '') {
-  const input = stripDisallowedTemplateElements(html);
+  const input = sanitizeTemplateHtmlForPdf(stripDisallowedTemplateElements(html));
   const classStyles = parseTemplateCssClassStyles(css);
   /** @type {Array<PdfRichLine>} */
   const lines = [[]];
@@ -1359,6 +1385,30 @@ function calculateOverlayReserve(hasOverlay, reservePt, lineCount, fontSize) {
 }
 
 /**
+ * Resolve jsPDF from common ESM/CJS export shapes used by bundlers.
+ * @param {*} module
+ * @returns {Function|null}
+ */
+function resolveJsPdfConstructor(module) {
+  const candidates = [
+    module?.jsPDF,
+    module?.default?.jsPDF,
+    module?.default,
+  ];
+  return candidates.find((candidate) => typeof candidate === 'function') || null;
+}
+
+/**
+ * @param {*} module
+ * @returns {string}
+ */
+function describeModuleExports(module) {
+  if (!module || typeof module !== 'object') return describeValueType(module);
+  const keys = Object.keys(module).slice(0, 8);
+  return keys.length ? `object exports: ${keys.join(', ')}` : 'object with no enumerable exports';
+}
+
+/**
  * Dynamically load the jsPDF constructor used by generated PDF output.
  * @returns {Promise<Function>} Resolves to the jsPDF constructor function.
  * @throws {Error} Throws when the module cannot be imported or does not expose the expected jsPDF export.
@@ -1368,10 +1418,11 @@ function calculateOverlayReserve(hasOverlay, reservePt, lineCount, fontSize) {
 async function loadJsPdf() {
   try {
     const module = await import('jspdf');
-    if (typeof module?.jsPDF !== 'function') {
-      throw new Error(`Expected the jsPDF module to export a 'jsPDF' function. Received ${describeValueType(module?.jsPDF)}. Ensure the jsPDF package is installed and compatible with the expected API.`);
+    const jsPDF = resolveJsPdfConstructor(module);
+    if (typeof jsPDF !== 'function') {
+      throw new Error(`Expected the jsPDF module to export a constructor as named jsPDF, default.jsPDF, or default. Received ${describeModuleExports(module)}. Ensure the jsPDF package is installed and compatible with the expected API.`);
     }
-    return module.jsPDF;
+    return jsPDF;
   } catch (error) {
     logger.warn('PDF generation library failed to load', { error: String(error?.message || error) });
     throw new Error(`Failed to load PDF generation library. ${JSPDF_LOAD_ERROR_HINT} Details: ${String(error?.message || error)}`);
@@ -1725,13 +1776,13 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
 /**
  * Extract a safe printable image source from an already-rendered canvas or image element.
  * @param {*} el Candidate canvas/img element from the document renderer.
- * @returns {string|null} A safe data/blob/http(s) image URL, or null when no printable source is available.
+ * @returns {Promise<string|null>} A safe data/blob/http(s) image URL, or null when no printable source is available.
  */
-function printableSourceFromElement(el) {
+async function printableSourceFromElement(el) {
   const tag = String(el?.tagName || '').toLowerCase();
   if (tag === 'canvas') {
     try {
-      const url = el.toDataURL('image/png');
+      const url = await canvasToPngDataUrl(el);
       return typeof url === 'string' && url.startsWith('data:image/png') ? url : null;
     } catch (error) {
       logger.warn(
@@ -1749,6 +1800,55 @@ function printableSourceFromElement(el) {
 }
 
 /**
+ * Convert a canvas to a PNG data URL without using synchronous toDataURL when
+ * browser support for async toBlob is available.
+ * @param {*} canvas
+ * @returns {Promise<string|null>}
+ */
+async function canvasToPngDataUrl(canvas) {
+  if (typeof canvas?.toBlob === 'function') {
+    const blob = await canvasToBlob(canvas, 'image/png');
+    return blob ? blobToDataUrl(blob) : null;
+  }
+  const url = canvas?.toDataURL?.('image/png');
+  return typeof url === 'string' ? url : null;
+}
+
+/**
+ * @param {*} canvas
+ * @param {string} type
+ * @returns {Promise<Blob|null>}
+ */
+function canvasToBlob(canvas, type) {
+  return new Promise((resolve) => {
+    try {
+      canvas.toBlob((blob) => resolve(blob || null), type);
+    } catch (error) {
+      logger.warn('Canvas toBlob failed during PDF source extraction', { error: String(error?.message || error) });
+      resolve(null);
+    }
+  });
+}
+
+/**
+ * @param {Blob} blob
+ * @returns {Promise<string|null>}
+ */
+function blobToDataUrl(blob) {
+  return new Promise((resolve) => {
+    const reader = new FileReader();
+    reader.onload = () => resolve(typeof reader.result === 'string' ? reader.result : null);
+    reader.onerror = () => {
+      logger.warn('Canvas Blob to data URL conversion failed during PDF source extraction', {
+        error: String(reader.error?.message || reader.error || 'unknown FileReader error'),
+      });
+      resolve(null);
+    };
+    reader.readAsDataURL(blob);
+  });
+}
+
+/**
  * Generate/print/download a PDF from the currently rendered active page surface. This path preserves
  * active-page visual edits because it uses the visible canvas/img rather than the original page blob.
  * @param {{ current: * }} documentRenderRef
@@ -1761,7 +1861,7 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   if (!node) {
     throw new Error('Unable to generate PDF from the active surface: the document handle did not return an active canvas/image element.');
   }
-  const src = printableSourceFromElement(node);
+  const src = await printableSourceFromElement(node);
   if (!src) {
     throw new Error(`Unable to generate PDF from the active surface: active ${String(node?.tagName || 'element').toLowerCase()} could not be converted to a safe printable source. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
@@ -1779,8 +1879,10 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
  */
 export async function handlePdfCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   throwIfAborted(options.signal);
-  const primary = printableSourceFromElement(primaryRenderRef?.current?.getActiveCanvas?.());
-  const compare = printableSourceFromElement(compareRenderRef?.current?.getActiveCanvas?.());
+  const [primary, compare] = await Promise.all([
+    printableSourceFromElement(primaryRenderRef?.current?.getActiveCanvas?.()),
+    printableSourceFromElement(compareRenderRef?.current?.getActiveCanvas?.()),
+  ]);
   const urls = [primary, compare].filter(Boolean);
   if (urls.length !== 2) {
     const missing = [];
