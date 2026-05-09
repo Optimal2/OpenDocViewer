@@ -60,6 +60,7 @@ const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 120 * 1000;
 // events can be missed in some browsers. This fallback retries once after a short delay.
 const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
 const ELLIPSIS = '...';
+const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or http(s) image URLs that the browser can load.';
 const BLOCK_LEVEL_ELEMENTS = Object.freeze([
   'address',
   'article',
@@ -548,7 +549,7 @@ function renderOverlayRichLines(cfg, tokenContext, page, total) {
 function loadImage(src, signal) {
   return new Promise((resolve, reject) => {
     if (!isSafeImageSrc(src)) {
-      reject(new Error(`Unsafe image source rejected for PDF generation: ${describeImageSource(src)}. Expected a safe data, blob, or allowed URL image source.`));
+      reject(new Error(`Unsafe image source rejected for PDF generation: ${describeImageSource(src)}. ${SAFE_IMAGE_SOURCE_HINT}`));
       return;
     }
     if (signal?.aborted) {
@@ -572,7 +573,7 @@ function loadImage(src, signal) {
     };
     img.onerror = () => {
       cleanup();
-      reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}.`));
+      reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}. Check that the image format is supported and that the source is accessible to the browser.`));
     };
     try { signal?.addEventListener?.('abort', onAbort, { once: true }); } catch {}
     img.src = src;
@@ -704,7 +705,7 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
   }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
   if (!jpeg) {
-    throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. All jsPDF image format attempts and JPEG fallback conversion failed.`);
+    throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. Native jsPDF image insertion and JPEG fallback conversion both failed; check that the image is readable and uses a supported format.`);
   }
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');
 }
@@ -1159,7 +1160,7 @@ async function loadJsPdf() {
   try {
     const module = await import('jspdf');
     if (typeof module?.jsPDF !== 'function') {
-      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Verify the installed jspdf package version.");
+      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Ensure the jspdf package is installed and up to date.");
     }
     return module.jsPDF;
   } catch (error) {
@@ -1178,7 +1179,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   throwIfAborted(options.signal);
   const urls = (Array.isArray(dataUrls) ? dataUrls : []).filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
   if (!urls.length) {
-    throw new Error('No printable image URLs were available for PDF generation. Provided values were empty, invalid, or rejected by image source safety checks.');
+    throw new Error(`No printable image URLs were available for PDF generation. Provided values were empty, invalid, or rejected by image source safety checks. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
 
   const pdfCfg = options.pdfCfg || {};
@@ -1388,7 +1389,7 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   const handle = documentRenderRef?.current;
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
-    throw new Error("Document handle must implement either 'getAllPrintableDataUrls' or 'exportAllPagesAsDataUrls' to provide printable page URLs.");
+    throw new Error("Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs.");
   }
   const allUrls = await getUrls.call(handle);
   throwIfAborted(signal);
