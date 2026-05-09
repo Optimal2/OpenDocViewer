@@ -548,7 +548,7 @@ function renderOverlayRichLines(cfg, tokenContext, page, total) {
 function loadImage(src, signal) {
   return new Promise((resolve, reject) => {
     if (!isSafeImageSrc(src)) {
-      reject(new Error('Unsafe image source rejected for PDF generation.'));
+      reject(new Error(`Unsafe image source rejected for PDF generation: ${describeImageSource(src)}. Expected a safe data, blob, or allowed URL image source.`));
       return;
     }
     if (signal?.aborted) {
@@ -572,11 +572,24 @@ function loadImage(src, signal) {
     };
     img.onerror = () => {
       cleanup();
-      reject(new Error('Failed to load image for PDF generation.'));
+      reject(new Error(`Failed to load image for PDF generation from ${describeImageSource(src)}.`));
     };
     try { signal?.addEventListener?.('abort', onAbort, { once: true }); } catch {}
     img.src = src;
   });
+}
+
+/**
+ * @param {*} src
+ * @returns {string}
+ */
+function describeImageSource(src) {
+  const value = String(src || '');
+  if (!value) return '(empty source)';
+  const dataMatch = /^data:([^;,]+)/i.exec(value);
+  if (dataMatch) return `${dataMatch[1]} data URL (${value.length} chars)`;
+  if (value.length <= 240) return value;
+  return `${value.slice(0, 180)}... (${value.length} chars)`;
 }
 
 /**
@@ -690,7 +703,9 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
     }
   }
   const jpeg = imageToJpegDataUrl(img, fallbackQuality);
-  if (!jpeg) throw new Error('Unable to add image to generated PDF.');
+  if (!jpeg) {
+    throw new Error(`Unable to add image to generated PDF from ${describeImageSource(img.currentSrc || img.src)}. All jsPDF image format attempts and JPEG fallback conversion failed.`);
+  }
   pdf.addImage(jpeg, 'JPEG', x, y, width, height, undefined, 'FAST');
 }
 
@@ -1144,7 +1159,7 @@ async function loadJsPdf() {
   try {
     const module = await import('jspdf');
     if (typeof module?.jsPDF !== 'function') {
-      throw new Error('jsPDF export was not available.');
+      throw new Error("Expected the 'jspdf' module to export a 'jsPDF' function. Verify the installed jspdf package version.");
     }
     return module.jsPDF;
   } catch (error) {
@@ -1162,7 +1177,9 @@ async function loadJsPdf() {
 export async function createPrintPdfBlob(dataUrls, options = {}) {
   throwIfAborted(options.signal);
   const urls = (Array.isArray(dataUrls) ? dataUrls : []).filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
-  if (!urls.length) throw new Error('No printable image URLs were available for PDF generation.');
+  if (!urls.length) {
+    throw new Error('No printable image URLs were available for PDF generation. Provided values were empty, invalid, or rejected by image source safety checks.');
+  }
 
   const pdfCfg = options.pdfCfg || {};
   const marginPt = Math.max(0, asNumber(pdfCfg.marginPt) || 8);
