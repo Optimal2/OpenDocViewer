@@ -178,13 +178,15 @@ function asNumber(value) {
  * Normalize canvas/PDF image quality to the browser-supported 0..1 range.
  * @param {*} value
  * @param {number} defaultValue
+ * @param {number=} minValue Optional quality floor for readability-sensitive fallbacks.
  * @returns {number}
  */
-function normalizeQuality(value, defaultValue) {
+function normalizeQuality(value, defaultValue, minValue = 0) {
   const n = Number(value);
+  const min = clamp01(minValue);
   const fallback = Number.isFinite(defaultValue) ? defaultValue : JPEG_FALLBACK_DEFAULT_QUALITY;
-  if (!Number.isFinite(n)) return clamp01(fallback);
-  return clamp01(n);
+  if (!Number.isFinite(n)) return Math.max(min, clamp01(fallback));
+  return Math.max(min, clamp01(n));
 }
 
 /**
@@ -538,11 +540,10 @@ function htmlToRichLines(html, css = '') {
             swapRichLineBufferContents(lines, previousLines);
           }
 
-          let align = index === children.length - 1 ? 'right' : 'left';
-          if (child.nodeType === 1) {
-            const childStyle = getElementStyleHints(/** @type {Element} */ (child), classStyles);
-            align = childStyle.align || align;
-          }
+          const childStyle = child.nodeType === 1
+            ? getElementStyleHints(/** @type {Element} */ (child), classStyles)
+            : {};
+          const align = childStyle.align || (index === children.length - 1 ? 'right' : 'left');
 
           return {
             align,
@@ -748,10 +749,7 @@ function imageToJpegDataUrl(img, quality) {
     ctx.fillStyle = '#fff';
     ctx.fillRect(0, 0, canvas.width, canvas.height);
     ctx.drawImage(img, 0, 0);
-    const jpegQuality = Math.max(
-      JPEG_FALLBACK_MIN_QUALITY,
-      normalizeQuality(quality, JPEG_FALLBACK_DEFAULT_QUALITY)
-    );
+    const jpegQuality = normalizeQuality(quality, JPEG_FALLBACK_DEFAULT_QUALITY, JPEG_FALLBACK_MIN_QUALITY);
     return canvas.toDataURL('image/jpeg', jpegQuality);
   } catch (error) {
     logger.warn('PDF image fallback conversion failed', { error: String(error?.message || error) });
@@ -1008,7 +1006,10 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
     }));
   }
 
-  const gap = Math.min(PDF_COLUMN_GAP_PT, clean.length > 1 ? constrainedWidth / (clean.length - 1) : 0);
+  // PDF_COLUMN_GAP_PT is an upper bound; cap again by available width so gaps
+  // cannot consume more space than the row has.
+  const maxGapForWidth = constrainedWidth / (clean.length - 1);
+  const gap = Math.min(PDF_COLUMN_GAP_PT, maxGapForWidth);
   const totalGap = gap * (clean.length - 1);
   const available = Math.max(0, constrainedWidth - totalGap);
   const minColumnWidth = Math.min(PDF_COLUMN_MIN_WIDTH_PT, available / clean.length);
