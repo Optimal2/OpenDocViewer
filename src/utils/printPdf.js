@@ -114,7 +114,7 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
   Object.fromEntries(
     DISALLOWED_TEMPLATE_ELEMENT_NAMES.map((name) => [
       name,
-      new RegExp(`<\\s*\\/\\s*${name}\\b[^>]*>`, 'gi'),
+      new RegExp(`<\\s*\\/\\s*${name}\\b[^>]*>`, 'i'),
     ])
   )
 );
@@ -335,9 +335,9 @@ function stripDisallowedTemplateElements(html) {
       const closingPattern = DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS[elementName];
       if (!isClosingTag && closingPattern) {
         const remaining = input.slice(cursor);
-        const closingMatch = remaining.matchAll(closingPattern).next().value;
+        const closingMatch = closingPattern.exec(remaining);
         if (closingMatch && Number.isInteger(closingMatch.index) && closingMatch.index >= 0) {
-          // matchAll() is run on the remaining slice, so its index is relative to cursor.
+          // The closing search runs on the remaining slice, so its index is relative to cursor.
           cursor += closingMatch.index + closingMatch[0].length;
         }
       }
@@ -662,12 +662,12 @@ function describeImageSource(src) {
  * @returns {string}
  */
 function sanitizeDiagnosticText(value) {
-  let result = '';
+  const result = [];
   for (const character of value) {
     const code = character.charCodeAt(0);
-    result += code < 32 || code === 127 ? ' ' : character;
+    result.push(code < 32 || code === 127 ? ' ' : character);
   }
-  return result;
+  return result.join('');
 }
 
 /**
@@ -709,10 +709,8 @@ async function loadImagesConcurrently(urls, signal, onLoaded) {
   };
 
   async function loadNext() {
-    while (true) {
+    for (let index = takeNextIndex(); index !== null; index = takeNextIndex()) {
       throwIfAborted(signal);
-      const index = takeNextIndex();
-      if (index === null) return;
       try {
         results[index] = await loadImage(urls[index], signal);
       } catch (error) {
@@ -1610,7 +1608,7 @@ function printableSourceFromElement(el) {
       return typeof url === 'string' && url.startsWith('data:image') ? url : null;
     } catch (error) {
       logger.warn(
-        'Unable to export active canvas to PDF image; the canvas may be tainted by cross-origin content or blocked by browser security restrictions.',
+        'Unable to export active canvas to PDF image; the canvas may be tainted by cross-origin content or blocked by browser security restrictions. Ensure embedded images are served from the same origin or from CORS-enabled sources before rendering them to canvas.',
         { error: String(error?.message || error) }
       );
       return null;
