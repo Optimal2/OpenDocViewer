@@ -184,8 +184,9 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  */
 
 /**
- * @param {*} value
- * @returns {number}
+ * Convert a value to a finite number for PDF layout calculations.
+ * @param {*} value Value to convert with Number().
+ * @returns {number} Converted finite number, or 0 when the value is not numeric.
  */
 function asNumber(value) {
   const n = Number(value);
@@ -193,8 +194,9 @@ function asNumber(value) {
 }
 
 /**
- * @param {string} value
- * @returns {string}
+ * Escape regular-expression metacharacters in literal text.
+ * @param {string} value Literal text that will be embedded in a RegExp pattern.
+ * @returns {string} Text escaped for safe RegExp construction.
  */
 function escapeRegExp(value) {
   return String(value).replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
@@ -216,8 +218,9 @@ function normalizeQuality(value, rawDefaultValue, minValue = 0) {
 }
 
 /**
- * @param {number} value
- * @returns {number}
+ * Clamp a numeric value to the inclusive 0..1 range.
+ * @param {number} value Value to clamp.
+ * @returns {number} Value limited to the range 0 through 1.
  */
 function clamp01(value) {
   return Math.min(1, Math.max(0, value));
@@ -248,8 +251,9 @@ function throwIfAborted(signal) {
 }
 
 /**
- * @param {*} value
- * @returns {boolean}
+ * Check whether a CSS font-weight value should be treated as bold text.
+ * @param {*} value CSS font-weight keyword or numeric weight.
+ * @returns {boolean} True for bold/bolder or numeric weights >= 600.
  */
 function isBoldFontWeight(value) {
   const text = String(value || '').trim().toLowerCase();
@@ -332,8 +336,9 @@ function getElementStyleHints(element, classStyles) {
 }
 
 /**
- * @param {string} nodeName
- * @returns {boolean}
+ * Check whether an HTML node name should be treated as block-level in PDF text flow.
+ * @param {string} nodeName Lowercase node name to test.
+ * @returns {boolean} True when the node is in the supported block-level element list.
  */
 function isBlockNode(nodeName) {
   return BLOCK_LEVEL_ELEMENTS.includes(nodeName);
