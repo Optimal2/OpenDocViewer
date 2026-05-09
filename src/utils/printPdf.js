@@ -157,6 +157,10 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  */
 
 /**
+ * @typedef {Array<PdfRichSegment>|{columns: Array<PdfRichColumn>}} PdfRichLine
+ */
+
+/**
  * @param {*} value
  * @returns {number}
  */
@@ -369,7 +373,20 @@ function richLineIsEmpty(line) {
 }
 
 /**
- * @param {Array<*>} lines
+ * Replace one line buffer with another while preserving the original array object.
+ * @param {Array<PdfRichLine>} target
+ * @param {Array<PdfRichLine>} source
+ * @returns {Array<PdfRichLine>} Previous target contents.
+ */
+function swapRichLineBufferContents(target, source) {
+  const previous = target.slice();
+  target.length = 0;
+  target.push(...source);
+  return previous;
+}
+
+/**
+ * @param {Array<PdfRichLine>} lines
  * @returns {void}
  */
 function ensureWritableRichLine(lines) {
@@ -377,7 +394,7 @@ function ensureWritableRichLine(lines) {
 }
 
 /**
- * @param {Array<*>} lines Rich-text line buffer; appends a new empty line when a line break is needed.
+ * @param {Array<PdfRichLine>} lines Rich-text line buffer; appends a new empty line when a line break is needed.
  * @returns {void}
  */
 function appendRichLineBreak(lines) {
@@ -385,7 +402,7 @@ function appendRichLineBreak(lines) {
 }
 
 /**
- * @param {Array<*>} lines
+ * @param {Array<PdfRichLine>} lines
  * @param {string} text
  * @param {PdfTextStyleHints} style
  * @returns {void}
@@ -415,7 +432,7 @@ function appendRichText(lines, text, style) {
 }
 
 /**
- * @param {Array<*>} lines
+ * @param {Array<PdfRichLine>} lines
  * @param {Array<PdfRichColumn>} columns
  * @returns {void}
  */
@@ -436,7 +453,7 @@ function appendRichColumnLine(lines, columns) {
 }
 
 /**
- * @param {Array<*>} richLines
+ * @param {Array<PdfRichLine>} richLines
  * @returns {Array<PdfRichSegment>}
  */
 function flattenRichLines(richLines) {
@@ -461,12 +478,12 @@ function flattenRichLines(richLines) {
  * two-column space-between rows from trusted print-template CSS.
  * @param {string} html
  * @param {string=} css
- * @returns {Array<*>}
+ * @returns {Array<PdfRichLine>}
  */
 function htmlToRichLines(html, css = '') {
   const input = stripDisallowedTemplateElements(html);
   const classStyles = parseTemplateCssClassStyles(css);
-  /** @type {Array<*>} */
+  /** @type {Array<PdfRichLine>} */
   const lines = [[]];
   try {
     const doc = new DOMParser().parseFromString(input, 'text/html');
@@ -505,13 +522,14 @@ function htmlToRichLines(html, css = '') {
         const children = Array.from(element.childNodes || [])
           .filter((child) => child.nodeType === 1 || String(child.textContent || '').trim().length > 0);
         const columns = children.map((child, index) => {
+          /** @type {Array<PdfRichLine>} */
           const childLines = [[]];
-          const previousLines = lines.splice(0, lines.length, ...childLines);
+          const previousLines = swapRichLineBufferContents(lines, childLines);
           try {
             walk(child, next);
           } finally {
-            childLines.splice(0, childLines.length, ...lines);
-            lines.splice(0, lines.length, ...previousLines);
+            swapRichLineBufferContents(childLines, lines);
+            swapRichLineBufferContents(lines, previousLines);
           }
 
           let align = index === children.length - 1 ? 'right' : 'left';
@@ -1004,10 +1022,10 @@ function layoutRichColumns(pdf, columns, maxWidth, fontSize) {
  * @param {number} maxWidth
  * @param {number} fontSize
  * @param {number} maxLines
- * @returns {Array<*>}
+ * @returns {Array<PdfRichLine>}
  */
 function wrapRichLines(pdf, richLines, maxWidth, fontSize, maxLines) {
-  /** @type {Array<*>} */
+  /** @type {Array<PdfRichLine>} */
   const out = [];
   const sourceLines = (Array.isArray(richLines) ? richLines : []).filter((line) => !richLineIsEmpty(line));
 
@@ -1442,6 +1460,8 @@ export function printPdfBlob(blob) {
 async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal) {
   throwIfAborted(signal);
   const handle = documentRenderRef?.current;
+  // getAllPrintableDataUrls() is the canonical renderer API. exportAllPagesAsDataUrls()
+  // remains supported as a backward-compatible alias for older integrations.
   const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
   if (typeof getUrls !== 'function') {
     throw new Error(`Document handle object must implement either getAllPrintableDataUrls() or exportAllPagesAsDataUrls() method to provide printable page URLs. Received ${describeValueType(handle)}; verify documentRenderRef.current is initialized before PDF export.`);
