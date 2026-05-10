@@ -310,6 +310,7 @@
     "modeIndicator": {
       "performance": "Performance mode active",
       "memory": "Memory-efficient mode active",
+      "hardMemory": "Hard memory protection active",
       "error": "Loading error detected"
     },
     "resizer": {

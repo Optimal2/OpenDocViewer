@@ -619,6 +619,12 @@
   bottom: 4px;
   pointer-events: none;
 }
+.odv-toolbar-runtime-led {
+  position: absolute;
+  right: 4px;
+  bottom: 4px;
+  pointer-events: none;
+}
 @keyframes odv-led-pulse {
   0%, 100% { opacity: .68; box-shadow: inset 0 0 0 1px var(--odv-led-edge), 0 0 0 1px rgba(255,255,255,.18), 0 0 3px var(--odv-led-glow); }
   50% { opacity: 1; box-shadow: inset 0 0 0 1px var(--odv-led-edge), 0 0 0 1px rgba(255,255,255,.22), 0 0 7px var(--odv-led-glow); }

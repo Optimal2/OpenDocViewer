@@ -280,9 +280,11 @@ print: {
 
 If `allowDownload` is `true`, the dialog also shows a **Save PDF** action unless `print.actions.downloadPdf.enabled` is `false`. The HTML and PDF print buttons can likewise be hidden with `print.actions.printHtml.enabled` and `print.actions.printPdf.enabled`, and each action can use localized `label` and `tooltip` values. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.
 
-### Planned all-pages PDF prebuild
+Generated PDF blobs are kept in a session-scoped in-memory cache so repeated prints or downloads with the same content-affecting settings do not need to regenerate the PDF. Active-page output is intentionally not keyed for reuse because the same page number can produce different bytes after transient visual edits such as rotation, brightness, or contrast. If the runtime enters hard memory protection, OpenDocViewer drops the generated-PDF cache while keeping the latest dialog settings available for restore.
 
-`print.pdf.prebuildAllPages` is an opt-in planning surface for a future background cache of common **all pages** PDF outputs. The first implementation only normalizes configuration and exposes the planned variants in diagnostics; it does not yet generate PDFs in the background.
+### All-pages PDF prebuild
+
+`print.pdf.prebuildAllPages` is an opt-in background cache for common **all pages** PDF outputs. When enabled, OpenDocViewer prepares matching PDFs after the document has loaded so the later print action can often open the browser PDF preview immediately.
 
 ```js
 print: {

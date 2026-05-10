@@ -294,7 +294,7 @@ Workers are active again for raster images and TIFF whenever the configured back
 
 The same runtime system also fixes a serious page-consistency issue: the thumbnail selection is now tied to the actually displayed page until the viewer switches to an explicit loading overlay. This prevents the UI from showing “page X selected” while the large viewer still shows page Y.
 
-A thin status bar above the toolbar shows which runtime profile is currently active: green for the fast eager path, yellow for the memory-efficient path, and red if the viewer has entered an error state.
+The help-menu button includes a small runtime LED for support calls: green for the fast eager path, yellow for the memory-efficient path, and red if the viewer has entered an error or hard memory-protection state.
 
 ## Printing
 

@@ -20,25 +20,6 @@
   width: 100vw;
 }
 
-.document-viewer-mode-indicator {
-  flex: 0 0 auto;
-  width: 100%;
-  height: 4px;
-  background: #3aa655;
-}
-
-.document-viewer-mode-indicator.is-performance {
-  background: #3aa655;
-}
-
-.document-viewer-mode-indicator.is-memory {
-  background: #d8a106;
-}
-
-.document-viewer-mode-indicator.is-error {
-  background: #c83d3d;
-}
-
 .document-viewer-wrapper {
   display: flex;
   flex-grow: 1;

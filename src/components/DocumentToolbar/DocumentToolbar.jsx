@@ -259,6 +259,9 @@ function normalizeToolbarPageNumber(value, totalPages, fallbackPage = 1) {
  * @returns {*}
  */
 const DocumentToolbar = ({
+  runtimeStatusLedState = 'off',
+  runtimeStatusLedTitle = '',
+  memoryPressureStage = 'normal',
   pageNumber,
   pageNumberDisplay = pageNumber,
   totalPages,
@@ -934,6 +937,12 @@ const DocumentToolbar = ({
     setLastPdfPrintInfo(null);
   }, [pdfPrintSessionKey]);
 
+  useEffect(() => {
+    if (String(memoryPressureStage || 'normal').toLowerCase() === 'hard') {
+      pdfPrintCacheRef.current = new Map();
+    }
+  }, [memoryPressureStage]);
+
   const rememberLastPdfPrint = useCallback((detail, blob, total, filename, pageNumbers = null) => {
     if (!(blob instanceof Blob) || detail?.printBackend !== 'pdf') return;
     const pageTotal = Math.max(1, Math.floor(Number(total) || resolvePrintPageCount(detail) || 1));
@@ -1585,6 +1594,8 @@ const DocumentToolbar = ({
         <HelpMenuButton
           onOpenManual={() => setIsManualDialogOpen(true)}
           onOpenAbout={() => setIsAboutDialogOpen(true)}
+          statusLedState={runtimeStatusLedState}
+          statusLedTitle={runtimeStatusLedTitle}
         />
       </div>
 
@@ -1763,6 +1774,9 @@ const DocumentToolbar = ({
 };
 
 DocumentToolbar.propTypes = {
+  runtimeStatusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']),
+  runtimeStatusLedTitle: PropTypes.string,
+  memoryPressureStage: PropTypes.oneOf(['normal', 'soft', 'hard']),
   pageNumber: PropTypes.number.isRequired,
   pageNumberDisplay: PropTypes.number,
   totalPages: PropTypes.number.isRequired,

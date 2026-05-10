@@ -36,6 +36,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
 /**
  * Props consumed by DocumentViewerToolbar.
  * @typedef {Object} DocumentViewerToolbarProps
+ * @property {'off'|'pending'|'ready'|'active'|'warning'|'error'} runtimeStatusLedState
+ * @property {string} runtimeStatusLedTitle
+ * @property {'normal'|'soft'|'hard'} memoryPressureStage
  * @property {number} pageNumber - Current visible page ordinal.
  * @property {number} pageNumberDisplay - Current original session page number.
  * @property {number} totalPages - Total visible pages.
@@ -103,6 +106,9 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @returns {JSX.Element}
  */
 const DocumentViewerToolbar = ({
+  runtimeStatusLedState,
+  runtimeStatusLedTitle,
+  memoryPressureStage,
   pageNumber,
   pageNumberDisplay,
   totalPages,
@@ -165,6 +171,9 @@ const DocumentViewerToolbar = ({
 }) => {
   return (
     <DocumentToolbar
+      runtimeStatusLedState={runtimeStatusLedState}
+      runtimeStatusLedTitle={runtimeStatusLedTitle}
+      memoryPressureStage={memoryPressureStage}
       pageNumber={pageNumber}
       pageNumberDisplay={pageNumberDisplay}
       totalPages={totalPages}
@@ -229,6 +238,9 @@ const DocumentViewerToolbar = ({
 };
 
 DocumentViewerToolbar.propTypes = {
+  runtimeStatusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']).isRequired,
+  runtimeStatusLedTitle: PropTypes.string.isRequired,
+  memoryPressureStage: PropTypes.oneOf(['normal', 'soft', 'hard']).isRequired,
   pageNumber: PropTypes.number.isRequired,
   pageNumberDisplay: PropTypes.number.isRequired,
   totalPages: PropTypes.number.isRequired,
