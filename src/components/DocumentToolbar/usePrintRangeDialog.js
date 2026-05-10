@@ -23,6 +23,7 @@ import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localized
  * @property {string|null} [forWhom]
  * @property {string|null} [printFormat]
  * @property {string|null} [printFormatValue]
+ * @property {'auto'|'portrait'|'landscape'} [pdfOrientation]
  * @property {'html'|'pdf'} [printBackend]
  * @property {'print'|'download'} [printAction]
  */
@@ -97,6 +98,17 @@ function resolvePrintAction(actionsCfg, name, i18n, fallback) {
     label: resolveLocalizedValue(cfg.label, i18n) || fallback.label,
     tooltip: resolveLocalizedValue(cfg.tooltip ?? cfg.title, i18n) || fallback.tooltip || fallback.label,
   };
+}
+
+/**
+ * @param {*} value
+ * @param {'auto'|'portrait'|'landscape'} fallback
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function normalizePdfOrientationMode(value, fallback = 'auto') {
+  const mode = String(value || '').trim().toLowerCase();
+  if (mode === 'auto' || mode === 'portrait' || mode === 'landscape') return mode;
+  return fallback;
 }
 
 /**
@@ -201,6 +213,24 @@ export function usePrintRangeController({
   const printActionsCfg = cfg?.print?.actions || {};
   const pdfPrintCfg = cfg?.print?.pdf || {};
   const pdfPrintEnabled = pdfPrintCfg?.enabled === true;
+  const pdfOrientationCfg = pdfPrintCfg?.orientation || {};
+  const pdfOrientationFixedMode = normalizePdfOrientationMode(pdfOrientationCfg?.fixedMode || pdfOrientationCfg?.fixed || 'portrait', 'portrait');
+  const pdfOrientationDefaultMode = normalizePdfOrientationMode(
+    pdfOrientationCfg?.mode || pdfPrintCfg?.orientationMode || (pdfOrientationCfg?.defaultAuto === false ? pdfOrientationFixedMode : 'auto'),
+    'auto'
+  );
+  const pdfOrientationDefaultAuto = pdfOrientationDefaultMode === 'auto';
+  const showPdfOrientation = pdfPrintEnabled
+    && pdfOrientationCfg?.enabled === true
+    && pdfOrientationCfg?.showOption !== false;
+  const pdfOrientationLabel = resolveLocalizedValue(
+    pdfOrientationCfg?.checkboxLabel ?? pdfOrientationCfg?.label,
+    i18n
+  ) || t('printDialog.pdfOrientation.checkboxLabel', { defaultValue: 'Automatic page orientation' });
+  const pdfOrientationHint = resolveLocalizedValue(
+    pdfOrientationCfg?.tooltip ?? pdfOrientationCfg?.hint,
+    i18n
+  ) || t('printDialog.pdfOrientation.hint', { defaultValue: 'When selected, each generated page uses portrait or landscape based on the page image.' });
   const downloadPdfAction = resolvePrintAction(printActionsCfg, 'downloadPdf', i18n, {
     label: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
     tooltip: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
@@ -213,10 +243,14 @@ export function usePrintRangeController({
     label: t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' }),
     tooltip: t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' }),
   });
+  const repeatLastPrintAction = resolvePrintAction(printActionsCfg, 'repeatLastPrint', i18n, {
+    label: t('printDialog.repeatLastPrint.button', { defaultValue: 'Print again' }),
+    tooltip: t('printDialog.repeatLastPrint.tooltip', { defaultValue: 'Print the latest prepared print job again without preparing it again.' }),
+  });
   const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true && downloadPdfAction.enabled;
   const printHtmlEnabled = printHtmlAction.enabled;
   const printPdfEnabled = pdfPrintEnabled && printPdfAction.enabled;
-  const defaultPrintBackend = printPdfEnabled && String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe' ? 'pdf' : 'html';
+  const defaultPrintBackend = printPdfEnabled && (!printHtmlEnabled || String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe') ? 'pdf' : 'html';
   const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
   const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
   const nonEmptyPrintFormatOptions = printFormatOptions.filter((option) => hasTextValue(option?.value));
@@ -228,7 +262,7 @@ export function usePrintRangeController({
   const defaultPrintFormatChecked = !!checkboxPrintFormatOption && watermarkEnabled && (forcePrintFormatActive || watermarkCfg?.defaultChecked === true);
   const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox);
+  const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox || showPdfOrientation);
   const restrictToActivePage = !!isDocumentLoading;
   const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
   const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
@@ -260,6 +294,7 @@ export function usePrintRangeController({
   const [extraText, setExtraText] = useState('');
   const [forWhomText, setForWhomText] = useState('');
   const [printFormatChecked, setPrintFormatChecked] = useState(defaultPrintFormatChecked);
+  const [pdfAutoOrientationChecked, setPdfAutoOrientationChecked] = useState(pdfOrientationDefaultAuto);
   const [printBackend, setPrintBackend] = useState(/** @type {'html'|'pdf'} */ (defaultPrintBackend));
 
   const [error, setError] = useState('');
@@ -275,6 +310,7 @@ export function usePrintRangeController({
 
   const previousDefaultReasonRef = useRef(defaultReason);
   const previousDefaultPrintFormatCheckedRef = useRef(defaultPrintFormatChecked);
+  const previousPdfOrientationDefaultAutoRef = useRef(pdfOrientationDefaultAuto);
   const wasOpenRef = useRef(false);
 
   useEffect(() => {
@@ -282,17 +318,20 @@ export function usePrintRangeController({
       wasOpenRef.current = false;
       previousDefaultReasonRef.current = defaultReason;
       previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
+      previousPdfOrientationDefaultAutoRef.current = pdfOrientationDefaultAuto;
       return;
     }
 
     const openedNow = !wasOpenRef.current;
     const defaultReasonChanged = previousDefaultReasonRef.current !== defaultReason;
     const defaultPrintFormatChanged = previousDefaultPrintFormatCheckedRef.current !== defaultPrintFormatChecked;
+    const defaultPdfOrientationChanged = previousPdfOrientationDefaultAutoRef.current !== pdfOrientationDefaultAuto;
     wasOpenRef.current = true;
     previousDefaultReasonRef.current = defaultReason;
     previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
+    previousPdfOrientationDefaultAutoRef.current = pdfOrientationDefaultAuto;
 
-    if (!openedNow && !defaultReasonChanged && !defaultPrintFormatChanged) return;
+    if (!openedNow && !defaultReasonChanged && !defaultPrintFormatChanged && !defaultPdfOrientationChanged) return;
 
     setPrintMode('active');
     setActiveScope('primary');
@@ -305,9 +344,10 @@ export function usePrintRangeController({
     setExtraText('');
     setForWhomText('');
     setPrintFormatChecked(defaultPrintFormatChecked);
+    setPdfAutoOrientationChecked(pdfOrientationDefaultAuto);
     setPrintBackend(defaultPrintBackend);
     setError('');
-  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultReason, isOpen, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultReason, isOpen, pdfOrientationDefaultAuto, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -515,6 +555,10 @@ export function usePrintRangeController({
     };
   }, [composePrintFormat, composeReason, forWhomText, showForWhom]);
 
+  const currentPdfOrientation = showPdfOrientation
+    ? (pdfAutoOrientationChecked ? 'auto' : pdfOrientationFixedMode)
+    : pdfOrientationDefaultMode;
+
   /**
    * Compose and validate the print payload for the current dialog state.
    * @param {'print'|'download'} action
@@ -529,7 +573,7 @@ export function usePrintRangeController({
 
     const requestedBackend = backendOverride || printBackend;
     const backend = action === 'download' ? 'pdf' : (printPdfEnabled && requestedBackend === 'pdf' ? 'pdf' : 'html');
-    const common = { ...extras(), printBackend: backend, printAction: action };
+    const common = { ...extras(), pdfOrientation: currentPdfOrientation, printBackend: backend, printAction: action };
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
     if (printMode === 'active') return { mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...common };
@@ -559,6 +603,7 @@ export function usePrintRangeController({
     allScope,
     customText,
     extras,
+    currentPdfOrientation,
     isComparing,
     makeDescendingSequence,
     printPdfEnabled,
@@ -630,6 +675,8 @@ export function usePrintRangeController({
     setSelectedReason,
     printFormatChecked,
     setPrintFormatChecked,
+    pdfAutoOrientationChecked,
+    setPdfAutoOrientationChecked,
     printBackend,
     setPrintBackend,
     pdfPrintEnabled: printPdfEnabled,
@@ -638,6 +685,7 @@ export function usePrintRangeController({
     downloadPdfAction,
     printHtmlAction,
     printPdfAction,
+    repeatLastPrintAction,
     freeReason,
     setFreeReason,
     extraText,
@@ -656,6 +704,9 @@ export function usePrintRangeController({
     showUserSection,
     showReason,
     showPrintFormat: showPrintFormatCheckbox,
+    showPdfOrientation,
+    pdfOrientationLabel,
+    pdfOrientationHint,
     printFormatCfg,
     printFormatOptions,
     checkboxPrintFormatOption,

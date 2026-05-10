@@ -25,6 +25,7 @@ import { usePrintRangeController } from './usePrintRangeDialog.js';
  * @property {string|null} [printFormatValue]
  * @property {Object} [reasonSelection]
  * @property {Object} [printFormatSelection]
+ * @property {'auto'|'portrait'|'landscape'} [pdfOrientation]
  * @property {'html'|'pdf'} [printBackend]
  * @property {'print'|'download'} [printAction]
  */
@@ -180,7 +181,7 @@ export default function PrintRangeDialog({
         <div className="odv-prd-content">
           <section className="odv-prd-card odv-prd-card-first" aria-labelledby="odv-prd-method-header">
             <h4 id="odv-prd-method-header" className="odv-prd-sectionHeader">{t('printDialog.methodHeader', { defaultValue: 'Print method' })}</h4>
-            <div className={`odv-prd-methodRow${lastPdfPrintAvailable ? ' odv-prd-methodRow--withRepeat' : ''}`}>
+            <div className="odv-prd-methodRow">
               <select
                 className="odv-prd-select odv-prd-methodSelect"
                 value={ctrl.printMode}
@@ -192,20 +193,6 @@ export default function PrintRangeDialog({
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
-
-              {lastPdfPrintAvailable && typeof onRepeatLastPdfPrint === 'function' ? (
-                <button
-                  type="button"
-                  className="odv-prd-action secondary odv-prd-repeatPdfButton"
-                  onClick={onRepeatLastPdfPrint}
-                  title={t('printDialog.repeatLastPdf.tooltip', {
-                    count: lastPdfPrintPageCount,
-                    defaultValue: 'Print the latest generated PDF again without regenerating it.',
-                  })}
-                >
-                  {t('printDialog.repeatLastPdf.button', { defaultValue: 'Print again' })}
-                </button>
-              ) : null}
 
               <div className="odv-prd-summary odv-prd-methodSummary" role="status" aria-live="polite">
                 {summaryText}
@@ -371,6 +358,23 @@ export default function PrintRangeDialog({
                     </label>
                   ) : null}
 
+                  {ctrl.showPdfOrientation ? (
+                    <label className="odv-prd-checkRow odv-prd-checkRow-inline">
+                      <input
+                        type="checkbox"
+                        checked={!!ctrl.pdfAutoOrientationChecked}
+                        onChange={(event) => ctrl.setPdfAutoOrientationChecked(event.target.checked)}
+                        aria-label={ctrl.pdfOrientationLabel}
+                      />
+                      <span
+                        className="odv-prd-tooltipText"
+                        title={ctrl.pdfOrientationHint}
+                      >
+                        {ctrl.pdfOrientationLabel}
+                      </span>
+                    </label>
+                  ) : null}
+
                   {ctrl.showReason ? (
                     <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
                       <span>{t('printDialog.reason.label')} {ctrl.reasonCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
@@ -467,6 +471,18 @@ export default function PrintRangeDialog({
               onClick={ctrl.submitPdfDownload}
             >
               {ctrl.downloadPdfAction.label}
+            </button>
+          ) : null}
+          {lastPdfPrintAvailable && ctrl.repeatLastPrintAction?.enabled && typeof onRepeatLastPdfPrint === 'function' ? (
+            <button
+              type="button"
+              className="odv-prd-action secondary"
+              onClick={onRepeatLastPdfPrint}
+              title={ctrl.repeatLastPrintAction.tooltip}
+              aria-label={ctrl.repeatLastPrintAction.tooltip}
+              data-page-count={lastPdfPrintPageCount || undefined}
+            >
+              {ctrl.repeatLastPrintAction.label}
             </button>
           ) : null}
           {ctrl.printHtmlEnabled ? (

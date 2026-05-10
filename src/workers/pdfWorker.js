@@ -147,7 +147,15 @@ async function loadImagesConcurrently(urls, concurrency) {
   return results;
 }
 
-function pageFormatForImage(width, height) {
+function normalizePdfOrientationMode(value, fallback = 'auto') {
+  const mode = String(value || '').trim().toLowerCase();
+  if (mode === 'auto' || mode === 'portrait' || mode === 'landscape') return mode;
+  return fallback;
+}
+
+function pageFormatForImage(width, height, orientationMode = 'auto') {
+  if (orientationMode === 'portrait') return A4_PORTRAIT;
+  if (orientationMode === 'landscape') return A4_LANDSCAPE;
   return width > height ? A4_LANDSCAPE : A4_PORTRAIT;
 }
 
@@ -532,6 +540,7 @@ async function createPdf(job) {
   const footerReservePt = Math.max(0, Number(pdfCfg.footerReservePt) || 14);
   const textFontSize = Math.max(5, Number(pdfCfg.textFontSize) || 7);
   const imageFallbackQuality = normalizeQuality(pdfCfg.imageFallbackQuality, JPEG_FALLBACK_DEFAULT_QUALITY);
+  const orientationMode = normalizePdfOrientationMode(pdfCfg.orientationMode || pdfCfg.orientation?.mode || 'auto', 'auto');
 
   postProgress({ phase: 'loading-library', current: 0, total });
   const jsPDF = await loadJsPdf();
@@ -554,7 +563,7 @@ async function createPdf(job) {
     });
 
     const image = images[i];
-    const [pdfPageWidth, pdfPageHeight] = pageFormatForImage(image.width, image.height);
+    const [pdfPageWidth, pdfPageHeight] = pageFormatForImage(image.width, image.height, orientationMode);
     const orientation = pdfPageWidth > pdfPageHeight ? 'landscape' : 'portrait';
     if (!pdf) pdf = new jsPDF(createJsPdfOptions(pdfPageWidth, pdfPageHeight, orientation));
     else pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);

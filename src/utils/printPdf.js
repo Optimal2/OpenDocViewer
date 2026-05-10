@@ -168,6 +168,7 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  * @property {Object=} printFooterCfg
  * @property {Object=} printFormatCfg
  * @property {Object=} pdfCfg
+ * @property {'auto'|'portrait'|'landscape'=} pdfOrientation
  * @property {AbortSignal=} signal Optional AbortSignal to cancel PDF generation.
  * @property {function(Object): void=} onProgress
  * @property {boolean=} deferOutput When true, generate and return the PDF Blob without printing/downloading it.
@@ -993,11 +994,42 @@ function addImageWithFallback(pdf, img, x, y, width, height, fallbackQuality) {
 }
 
 /**
+ * @param {*} value
+ * @param {'auto'|'portrait'|'landscape'} fallback
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function normalizePdfOrientationMode(value, fallback = 'auto') {
+  const mode = String(value || '').trim().toLowerCase();
+  if (mode === 'auto' || mode === 'portrait' || mode === 'landscape') return mode;
+  return fallback;
+}
+
+/**
+ * @param {PdfPrintOptions} options
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function resolvePdfOrientationMode(options = {}) {
+  const pdfCfg = options.pdfCfg || {};
+  const orientationCfg = pdfCfg.orientation || {};
+  const fixedMode = normalizePdfOrientationMode(orientationCfg.fixedMode || orientationCfg.fixed || 'portrait', 'portrait');
+  return normalizePdfOrientationMode(
+    options.pdfOrientation
+      || orientationCfg.mode
+      || pdfCfg.orientationMode
+      || (orientationCfg.defaultAuto === false ? fixedMode : 'auto'),
+    'auto'
+  );
+}
+
+/**
  * @param {number} width
  * @param {number} height
+ * @param {'auto'|'portrait'|'landscape'} orientationMode
  * @returns {Array.<number>}
  */
-function pageFormatForImage(width, height) {
+function pageFormatForImage(width, height, orientationMode = 'auto') {
+  if (orientationMode === 'portrait') return A4_PORTRAIT;
+  if (orientationMode === 'landscape') return A4_LANDSCAPE;
   return width > height ? A4_LANDSCAPE : A4_PORTRAIT;
 }
 
@@ -1548,10 +1580,14 @@ function buildPdfPagePlans(options, total) {
  * @returns {Promise<Blob>}
  */
 function createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc) {
+  const pdfCfg = {
+    ...(options.pdfCfg || {}),
+    orientationMode: resolvePdfOrientationMode(options),
+  };
   return createPdfWithWorkerDispatcher({
     urls,
     pagePlans: buildPdfPagePlans(options, urls.length),
-    pdfCfg: options.pdfCfg || {},
+    pdfCfg,
     watermarkEnabled: options.printFormatCfg?.watermark?.enabled !== false,
     watermarkAssetSrc: watermarkAssetSrc || '',
     workerPlan,
@@ -1634,6 +1670,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   }
 
   const pdfCfg = options.pdfCfg || {};
+  const pdfOrientationMode = resolvePdfOrientationMode(options);
   const marginPt = Math.max(0, asNumber(pdfCfg.marginPt) || 8);
   const headerReservePt = Math.max(0, asNumber(pdfCfg.headerReservePt) || 18);
   const footerReservePt = Math.max(0, asNumber(pdfCfg.footerReservePt) || 14);
@@ -1694,7 +1731,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
     throwIfAborted(options.signal);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
     const naturalHeight = Math.max(1, img.naturalHeight || img.height || 1);
-    const [pdfPageWidth, pdfPageHeight] = pageFormatForImage(naturalWidth, naturalHeight);
+    const [pdfPageWidth, pdfPageHeight] = pageFormatForImage(naturalWidth, naturalHeight, pdfOrientationMode);
     const orientation = pdfPageWidth > pdfPageHeight ? 'landscape' : 'portrait';
 
     if (!pdf) {
