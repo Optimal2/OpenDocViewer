@@ -34,6 +34,7 @@ import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame } from '../../utils/printWarmFrame.js';
+import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '' });
 
@@ -878,6 +879,8 @@ const DocumentToolbar = ({
     return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache inactive' });
   }, [printEnabled, printWarmFrameStatus, t]);
 
+  const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
+
   const getWarmCompatibleIndexes = useCallback((detail) => {
     if (!detail || detail.mode === 'active') return null;
     const pageNumbers = resolvePrintPageNumbers(detail);
@@ -1120,6 +1123,23 @@ const DocumentToolbar = ({
       dispatchPrintRequest(detail);
     }, 30);
   }, [closePrintDialog, dispatchPrintRequest, submitUserPrintLog]);
+
+  const handleRunPdfBenchmark = useCallback(async ({ onProgress } = {}) => {
+    const detail = {
+      mode: 'all',
+      allScope: 'session',
+      printBackend: 'pdf',
+      printAction: 'benchmark',
+    };
+    const pageNumbers = resolvePrintPageNumbers(detail);
+    return runPdfGenerationBenchmark({
+      documentRenderRef,
+      pageNumbers,
+      baseOptions: makePrintOptions(detail),
+      config: getRuntimeConfig(),
+      onProgress,
+    });
+  }, [documentRenderRef, makePrintOptions, resolvePrintPageNumbers]);
 
   const printActionTitle = printEnabled
     ? t('toolbar.print')
@@ -1427,6 +1447,8 @@ const DocumentToolbar = ({
       <AboutOverlayDialog
         isOpen={isAboutDialogOpen}
         onClose={() => setIsAboutDialogOpen(false)}
+        benchmarkEnabled={pdfBenchmarkEnabled}
+        onRunPdfBenchmark={handleRunPdfBenchmark}
       />
 
       {pdfProgress.open ? (

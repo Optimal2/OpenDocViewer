@@ -551,7 +551,20 @@
     "version": "Version",
     "buildId": "Build id",
     "project": "Project",
-    "contact": "Contact"
+    "contact": "Contact",
+    "diagnostics": {
+      "summary": "Diagnostics",
+      "download": "Download diagnostics JSON",
+      "runBenchmark": "Run PDF benchmark",
+      "benchmarkRunningShort": "Running…",
+      "downloadBenchmark": "Download benchmark JSON",
+      "benchmarkRunning": "Running PDF benchmark…",
+      "benchmarkProgress": "Running benchmark {current} of {total}…",
+      "benchmarkDone": "Benchmark completed.",
+      "benchmarkError": "Benchmark failed: {error}",
+      "benchmarkSummary": "Best run: {ms} ms, {pages} pages, batch {batch}.",
+      "noBenchmark": "No PDF benchmark result has been recorded."
+    }
   },
   "metadataMatrix": {
     "title": "Document metadata overview",

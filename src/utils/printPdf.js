@@ -1888,6 +1888,19 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
 }
 
 /**
+ * Collect printable page image URLs without creating or opening a PDF. This is
+ * used by diagnostics/benchmark tooling so it exercises the same source path as
+ * generated PDF print while keeping output handling separate.
+ * @param {{ current: * }} documentRenderRef
+ * @param {Array<number>=} pageNumbers 1-based page numbers in desired PDF order.
+ * @param {AbortSignal=} signal
+ * @returns {Promise<Array<string>>}
+ */
+export async function collectPrintablePdfSources(documentRenderRef, pageNumbers, signal) {
+  return getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, signal);
+}
+
+/**
  * Convert a 1-based printable page number into the matching 0-based data URL index.
  * Invalid, fractional, zero, negative, and out-of-range values return null.
  * @param {*} pageNumber 1-based page number.

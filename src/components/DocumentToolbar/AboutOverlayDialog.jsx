@@ -3,10 +3,11 @@
  * Small About dialog for version/build/support information.
  */
 
-import React, { useEffect, useMemo, useRef } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { collectSupportDiagnostics, downloadJsonFile, loadLatestPdfBenchmarkResult } from '../../utils/supportDiagnostics.js';
 
 /**
  * @returns {{ version:string, buildId:string, githubUrl:string, contactEmail:string }}
@@ -34,15 +35,29 @@ function resolveAboutInfo() {
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
+ * @param {boolean=} props.benchmarkEnabled
+ * @param {function(Object=): Promise<Object>=} props.onRunPdfBenchmark
  * @returns {(React.ReactElement|null)}
  */
-export default function AboutOverlayDialog({ isOpen, onClose }) {
+export default function AboutOverlayDialog({
+  isOpen,
+  onClose,
+  benchmarkEnabled = false,
+  onRunPdfBenchmark,
+}) {
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const aboutInfo = useMemo(() => resolveAboutInfo(), []);
+  const diagnosticsEnabled = useMemo(() => {
+    const cfg = getRuntimeConfig();
+    return cfg?.help?.about?.diagnostics?.enabled === true || benchmarkEnabled;
+  }, [benchmarkEnabled]);
+  const [latestBenchmark, setLatestBenchmark] = useState(() => loadLatestPdfBenchmarkResult());
+  const [benchmarkState, setBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
 
   useEffect(() => {
     if (!isOpen) return undefined;
+    setLatestBenchmark(loadLatestPdfBenchmarkResult());
     dialogRef.current?.focus?.();
 
     /** @param {KeyboardEvent} event */
@@ -60,6 +75,67 @@ export default function AboutOverlayDialog({ isOpen, onClose }) {
       window.removeEventListener('keydown', handleEscape, true);
     };
   }, [isOpen, onClose]);
+
+  const diagnostics = useMemo(() => collectSupportDiagnostics({ latestPdfBenchmark: latestBenchmark }), [latestBenchmark]);
+
+  const downloadDiagnostics = useCallback(() => {
+    downloadJsonFile('opendocviewer-diagnostics.json', collectSupportDiagnostics({
+      latestPdfBenchmark: latestBenchmark,
+    }));
+  }, [latestBenchmark]);
+
+  const downloadBenchmark = useCallback(() => {
+    if (!latestBenchmark) return;
+    downloadJsonFile('opendocviewer-pdf-benchmark.json', latestBenchmark);
+  }, [latestBenchmark]);
+
+  const runBenchmark = useCallback(async () => {
+    if (!benchmarkEnabled || typeof onRunPdfBenchmark !== 'function') return;
+    setBenchmarkState({
+      status: 'running',
+      message: t('about.diagnostics.benchmarkRunning', { defaultValue: 'Running PDF benchmark…' }),
+    });
+    try {
+      const result = await onRunPdfBenchmark({
+        onProgress: (event) => {
+          const completed = Math.max(0, Number(event?.completedRuns || 0));
+          const total = Math.max(1, Number(event?.totalRuns || 1));
+          if (event?.phase === 'running') {
+            setBenchmarkState({
+              status: 'running',
+              message: t('about.diagnostics.benchmarkProgress', {
+                current: completed + 1,
+                total,
+                defaultValue: `Running benchmark ${completed + 1} of ${total}…`,
+              }),
+            });
+          }
+        },
+      });
+      setLatestBenchmark(result);
+      setBenchmarkState({
+        status: 'done',
+        message: t('about.diagnostics.benchmarkDone', { defaultValue: 'Benchmark completed.' }),
+      });
+    } catch (error) {
+      setBenchmarkState({
+        status: 'error',
+        message: t('about.diagnostics.benchmarkError', {
+          error: String(error?.message || error),
+          defaultValue: `Benchmark failed: ${String(error?.message || error)}`,
+        }),
+      });
+    }
+  }, [benchmarkEnabled, onRunPdfBenchmark, t]);
+
+  const benchmarkSummary = latestBenchmark?.best
+    ? t('about.diagnostics.benchmarkSummary', {
+        ms: latestBenchmark.best.durationMs,
+        pages: latestBenchmark.pageCount,
+        batch: latestBenchmark.best.batchSizeLabel,
+        defaultValue: `Best run: ${latestBenchmark.best.durationMs} ms, ${latestBenchmark.pageCount} pages, batch ${latestBenchmark.best.batchSizeLabel}.`,
+      })
+    : t('about.diagnostics.noBenchmark', { defaultValue: 'No PDF benchmark result has been recorded.' });
 
   if (!isOpen) return null;
 
@@ -133,6 +209,48 @@ export default function AboutOverlayDialog({ isOpen, onClose }) {
               </div>
             </div>
           </div>
+          {diagnosticsEnabled ? (
+            <details className="odv-about-diagnostics">
+              <summary>{t('about.diagnostics.summary', { defaultValue: 'Diagnostics' })}</summary>
+              <div className="odv-about-diagnostics-actions">
+                <button type="button" className="odv-help-close-button" onClick={downloadDiagnostics}>
+                  {t('about.diagnostics.download', { defaultValue: 'Download diagnostics JSON' })}
+                </button>
+                {benchmarkEnabled ? (
+                  <button
+                    type="button"
+                    className="odv-help-close-button"
+                    onClick={runBenchmark}
+                    disabled={benchmarkState.status === 'running'}
+                  >
+                    {benchmarkState.status === 'running'
+                      ? t('about.diagnostics.benchmarkRunningShort', { defaultValue: 'Running…' })
+                      : t('about.diagnostics.runBenchmark', { defaultValue: 'Run PDF benchmark' })}
+                  </button>
+                ) : null}
+                {latestBenchmark ? (
+                  <button type="button" className="odv-help-close-button" onClick={downloadBenchmark}>
+                    {t('about.diagnostics.downloadBenchmark', { defaultValue: 'Download benchmark JSON' })}
+                  </button>
+                ) : null}
+              </div>
+              <p className={`odv-about-diagnostics-status is-${benchmarkState.status}`}>
+                {benchmarkState.message || benchmarkSummary}
+              </p>
+              <pre className="odv-about-diagnostics-json">
+                {JSON.stringify({
+                  app: diagnostics.app,
+                  navigator: diagnostics.navigator,
+                  config: diagnostics.config,
+                  latestPdfBenchmark: latestBenchmark ? {
+                    createdUtc: latestBenchmark.createdUtc,
+                    pageCount: latestBenchmark.pageCount,
+                    best: latestBenchmark.best,
+                  } : null,
+                }, null, 2)}
+              </pre>
+            </details>
+          ) : null}
         </div>
 
         <div className="odv-help-footer">
@@ -148,4 +266,6 @@ export default function AboutOverlayDialog({ isOpen, onClose }) {
 AboutOverlayDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  benchmarkEnabled: PropTypes.bool,
+  onRunPdfBenchmark: PropTypes.func,
 };
