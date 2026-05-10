@@ -6,8 +6,9 @@
 import React, { useEffect, useId, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import StatusLed from '../common/StatusLed.jsx';
 
-const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '' }) => {
+const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedState = 'off', statusLedTitle = '' }) => {
   const { t } = useTranslation('common');
   const buttonRef = useRef(null);
   const menuRef = useRef(null);
@@ -56,7 +57,7 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '' }) => {
       <button
         ref={buttonRef}
         type="button"
-        className={`odv-btn help-button${className ? ` ${className}` : ''}`}
+        className={`odv-btn help-button odv-btn--with-status-led${className ? ` ${className}` : ''}`}
         aria-label={t('help.open', { defaultValue: 'Open help menu' })}
         title={t('help.open', { defaultValue: 'Open help menu' })}
         aria-haspopup="menu"
@@ -65,6 +66,7 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '' }) => {
         onClick={() => setOpen((current) => !current)}
       >
         <span className="material-icons" aria-hidden="true">help_outline</span>
+        <StatusLed state={statusLedState} size="xs" title={statusLedTitle} className="odv-toolbar-runtime-led" />
       </button>
 
       {open ? (
@@ -99,6 +101,8 @@ HelpMenuButton.propTypes = {
   onOpenManual: PropTypes.func,
   onOpenAbout: PropTypes.func,
   className: PropTypes.string,
+  statusLedState: PropTypes.oneOf(['off', 'pending', 'ready', 'active', 'warning', 'error']),
+  statusLedTitle: PropTypes.string,
 };
 
 export default React.memo(HelpMenuButton);

@@ -310,6 +310,7 @@
     "modeIndicator": {
       "performance": "Prestandaläge aktivt",
       "memory": "Minneseffektivt läge aktivt",
+      "hardMemory": "Kritiskt minnesskydd aktivt",
       "error": "Fel upptäckt under laddning"
     },
     "resizer": {

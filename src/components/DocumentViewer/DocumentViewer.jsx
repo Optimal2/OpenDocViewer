@@ -218,26 +218,33 @@ const DocumentViewer = () => {
     return () => window.removeEventListener('keydown', onKeyDown, true);
   }, [canOpenMetadataMatrix, openMetadataMatrix]);
 
-  const viewerModeIndicator = useMemo(() => {
+  const viewerRuntimeStatus = useMemo(() => {
     if (error) {
       return {
-        className: 'is-error',
+        ledState: 'error',
         title: t('viewer.modeIndicator.error', { defaultValue: 'Viewer loading error' }),
       };
     }
 
     const currentStage = String(memoryPressureStage || 'normal').toLowerCase();
+    if (currentStage === 'hard') {
+      return {
+        ledState: 'error',
+        title: t('viewer.modeIndicator.hardMemory', { defaultValue: 'Hard memory protection active' }),
+      };
+    }
+
     const renderStrategy = String(documentLoadingConfig?.render?.strategy || 'eager-nearby').toLowerCase();
     const mode = String(documentLoadingConfig?.mode || 'auto').toLowerCase();
     if (currentStage !== 'normal' || mode === 'memory' || renderStrategy === 'lazy-viewport') {
       return {
-        className: 'is-memory',
+        ledState: 'warning',
         title: t('viewer.modeIndicator.memory', { defaultValue: 'Memory-efficient mode active' }),
       };
     }
 
     return {
-      className: 'is-performance',
+      ledState: 'ready',
       title: t('viewer.modeIndicator.performance', { defaultValue: 'Performance mode active' }),
     };
   }, [documentLoadingConfig?.mode, documentLoadingConfig?.render?.strategy, error, memoryPressureStage, t]);
@@ -291,13 +298,10 @@ const DocumentViewer = () => {
       role="region"
       aria-label={t('viewer.aria.containerRegion')}
     >
-      <div
-        className={`document-viewer-mode-indicator ${viewerModeIndicator.className}`}
-        title={viewerModeIndicator.title}
-        aria-hidden="true"
-      />
-
       <DocumentViewerToolbar
+        runtimeStatusLedState={viewerRuntimeStatus.ledState}
+        runtimeStatusLedTitle={viewerRuntimeStatus.title}
+        memoryPressureStage={memoryPressureStage}
         pageNumber={pageNumber}
         pageNumberDisplay={pageNumberDisplay}
         setPageNumber={setPageNumber}

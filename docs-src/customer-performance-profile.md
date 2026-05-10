@@ -89,8 +89,8 @@ For the same reason, the selection tab also stays unavailable until every page h
 
 ## Runtime status hint
 
-OpenDocViewer now shows a thin status bar above the toolbar so operators can immediately see which profile is active:
+OpenDocViewer now shows a small LED on the help-menu button so support can ask the operator for a simple visible status:
 
 - green = fast eager/performance path
-- yellow = memory-efficient path
-- red = viewer error state
+- yellow = memory-efficient path or soft memory pressure
+- red = viewer error state or hard memory protection
