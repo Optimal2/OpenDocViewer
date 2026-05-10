@@ -239,6 +239,7 @@
     "pdfProgress": {
       "downloadTitle": "Creating PDF",
       "printTitle": "Preparing PDF print",
+      "percent": "{percent}%",
       "body": "Generated {current} of {total} pages.",
       "loadingLibrary": "Preparing PDF engine…",
       "loadingImages": "Preparing pages: {current} of {total}.",

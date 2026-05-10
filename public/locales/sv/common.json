@@ -239,6 +239,7 @@
     "pdfProgress": {
       "downloadTitle": "Skapar PDF",
       "printTitle": "Förbereder PDF-utskrift",
+      "percent": "{percent}%",
       "body": "Genererat {current} av {total} sidor.",
       "loadingLibrary": "Förbereder PDF-motor…",
       "loadingImages": "Förbereder sidor: {current} av {total}.",
