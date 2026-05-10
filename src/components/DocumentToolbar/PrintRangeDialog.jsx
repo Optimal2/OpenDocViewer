@@ -33,6 +33,9 @@ export default function PrintRangeDialog({
   isOpen,
   onClose,
   onSubmit,
+  onRepeatLastPdfPrint,
+  lastPdfPrintAvailable = false,
+  lastPdfPrintPageCount = 0,
   totalPages,
   isDocumentLoading = false,
   activePageNumber = 1,
@@ -177,7 +180,7 @@ export default function PrintRangeDialog({
         <div className="odv-prd-content">
           <section className="odv-prd-card odv-prd-card-first" aria-labelledby="odv-prd-method-header">
             <h4 id="odv-prd-method-header" className="odv-prd-sectionHeader">{t('printDialog.methodHeader', { defaultValue: 'Print method' })}</h4>
-            <div className="odv-prd-methodRow">
+            <div className={`odv-prd-methodRow${lastPdfPrintAvailable ? ' odv-prd-methodRow--withRepeat' : ''}`}>
               <select
                 className="odv-prd-select odv-prd-methodSelect"
                 value={ctrl.printMode}
@@ -189,6 +192,20 @@ export default function PrintRangeDialog({
                   <option key={option.value} value={option.value}>{option.label}</option>
                 ))}
               </select>
+
+              {lastPdfPrintAvailable && typeof onRepeatLastPdfPrint === 'function' ? (
+                <button
+                  type="button"
+                  className="odv-prd-action secondary odv-prd-repeatPdfButton"
+                  onClick={onRepeatLastPdfPrint}
+                  title={t('printDialog.repeatLastPdf.tooltip', {
+                    count: lastPdfPrintPageCount,
+                    defaultValue: 'Print the latest generated PDF again without regenerating it.',
+                  })}
+                >
+                  {t('printDialog.repeatLastPdf.button', { defaultValue: 'Print again' })}
+                </button>
+              ) : null}
 
               <div className="odv-prd-summary odv-prd-methodSummary" role="status" aria-live="polite">
                 {summaryText}
@@ -482,6 +499,9 @@ PrintRangeDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
+  onRepeatLastPdfPrint: PropTypes.func,
+  lastPdfPrintAvailable: PropTypes.bool,
+  lastPdfPrintPageCount: PropTypes.number,
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool,
   activePageNumber: PropTypes.number,

@@ -198,6 +198,10 @@
     "subtitleUnified": "Välj vad som ska skrivas ut och fyll i eventuella utskriftsuppgifter.",
     "methodHeader": "Utskriftsmetod",
     "methodLabel": "Metod",
+    "repeatLastPdf": {
+      "button": "Skriv ut igen",
+      "tooltip": "Skriv ut senaste PDF-utskriften igen utan att skapa om PDF-filen."
+    },
     "modes": {
       "active": "Aktiv sida",
       "all": "Alla sidor",

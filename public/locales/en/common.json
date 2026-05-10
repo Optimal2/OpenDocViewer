@@ -198,6 +198,10 @@
     "subtitleUnified": "Choose what to print and fill in any print details.",
     "methodHeader": "Print method",
     "methodLabel": "Method",
+    "repeatLastPdf": {
+      "button": "Print again",
+      "tooltip": "Print the latest generated PDF again without regenerating it."
+    },
     "modes": {
       "active": "Active page",
       "all": "All pages",
