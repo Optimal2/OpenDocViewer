@@ -18,7 +18,7 @@ import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
 import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
-import PdfWorker from '../workers/pdfWorker.js?worker';
+import { createPdfWithWorkerDispatcher, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -62,7 +62,6 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 const PDF_WORKER_PAGE_THRESHOLD = 10;
-const PDF_WORKER_BATCH_SIZE = 5;
 const PDF_WORKER_MAX_COUNT_CURRENT = 1;
 // Move the progress bar slightly as a page enters expensive synchronous jsPDF work.
 // The completed page count still stays integer-based in the user-facing text.
@@ -1435,19 +1434,23 @@ function resolvePdfImageLoadConcurrency(pdfCfg = {}) {
  * so a later version can split long jobs into page batches and merge them.
  * @param {Object=} pdfCfg
  * @param {number=} pageCount
- * @returns {{enabled:boolean, workerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number}}
+ * @returns {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean}}
  */
 function resolvePdfWorkerPlan(pdfCfg = {}, pageCount = 0) {
   const pageThreshold = Math.max(1, Number(pdfCfg.workerPageThreshold) || PDF_WORKER_PAGE_THRESHOLD);
   const desiredWorkers = resolveRecommendedWorkerCount(Math.max(0, Number(pdfCfg.workerCount) || 0), 'auto');
+  const configuredBatchSize = Math.max(0, Number(pdfCfg.workerBatchSize) || 0);
+  const workerCount = Math.max(1, Math.min(PDF_WORKER_MAX_COUNT_CURRENT, desiredWorkers));
   return {
     enabled: pdfCfg.workerEnabled !== false && pageCount >= pageThreshold,
     // Keep the first worker-backed PDF path deliberately single-worker. Multiple workers
     // need partial PDF merge semantics, so workerCount is currently a forward-compatible plan field.
-    workerCount: Math.max(1, Math.min(PDF_WORKER_MAX_COUNT_CURRENT, desiredWorkers)),
-    batchSize: Math.max(1, Number(pdfCfg.workerBatchSize) || PDF_WORKER_BATCH_SIZE),
+    workerCount,
+    desiredWorkerCount: desiredWorkers,
+    batchSize: configuredBatchSize || resolveAutoPdfWorkerBatchSize(pageCount, desiredWorkers),
     pageThreshold,
     imageLoadConcurrency: resolvePdfImageLoadConcurrency(pdfCfg),
+    partialMergeEnabled: false,
   };
 }
 
@@ -1473,66 +1476,20 @@ function buildPdfPagePlans(options, total) {
 /**
  * @param {Array<string>} urls
  * @param {PdfPrintOptions} options
- * @param {{enabled:boolean, workerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number}} workerPlan
+ * @param {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean}} workerPlan
  * @param {string|null} watermarkAssetSrc
  * @returns {Promise<Blob>}
  */
 function createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc) {
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    /** @type {Worker|null} */
-    let worker = null;
-    const cleanup = () => {
-      try { options.signal?.removeEventListener?.('abort', onAbort); } catch {}
-      try { worker?.terminate?.(); } catch {}
-      worker = null;
-    };
-    const settle = (fn, value) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      fn(value);
-    };
-    const onAbort = () => settle(reject, createAbortError());
-
-    try {
-      worker = new PdfWorker({ type: 'module', name: 'odv-pdf-worker-1' });
-      options.signal?.addEventListener?.('abort', onAbort, { once: true });
-      worker.onmessage = (event) => {
-        const data = event?.data || {};
-        if (data.type === 'progress') {
-          reportProgress(options, data.event || {});
-          return;
-        }
-        if (data.type === 'result') {
-          if (data.blob instanceof Blob) {
-            settle(resolve, data.blob);
-            return;
-          }
-          settle(reject, new Error('PDF worker completed without returning a PDF blob.'));
-          return;
-        }
-        if (data.type === 'error') {
-          settle(reject, new Error(String(data.error || 'PDF worker failed.')));
-        }
-      };
-      worker.onerror = (event) => {
-        settle(reject, new Error(String(event?.message || event?.error?.message || 'PDF worker crashed.')));
-      };
-      worker.postMessage({
-        type: 'createPdf',
-        job: {
-          urls,
-          pagePlans: buildPdfPagePlans(options, urls.length),
-          pdfCfg: options.pdfCfg || {},
-          watermarkEnabled: options.printFormatCfg?.watermark?.enabled !== false,
-          watermarkAssetSrc: watermarkAssetSrc || '',
-          workerPlan,
-        },
-      });
-    } catch (error) {
-      settle(reject, error);
-    }
+  return createPdfWithWorkerDispatcher({
+    urls,
+    pagePlans: buildPdfPagePlans(options, urls.length),
+    pdfCfg: options.pdfCfg || {},
+    watermarkEnabled: options.printFormatCfg?.watermark?.enabled !== false,
+    watermarkAssetSrc: watermarkAssetSrc || '',
+    workerPlan,
+    signal: options.signal,
+    onProgress: (event) => reportProgress(options, event),
   });
 }
 
