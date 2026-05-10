@@ -62,7 +62,7 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 const PDF_WORKER_PAGE_THRESHOLD = 10;
-const PDF_WORKER_MAX_COUNT_CURRENT = 1;
+const PDF_WORKER_MAX_COUNT = 32;
 // Move the progress bar slightly as a page enters expensive synchronous jsPDF work.
 // The completed page count still stays integer-based in the user-facing text.
 const PDF_PROGRESS_PAGE_START_FRACTION = 0.35;
@@ -1429,9 +1429,8 @@ function resolvePdfImageLoadConcurrency(pdfCfg = {}) {
 }
 
 /**
- * Resolve the generated-PDF worker plan. v1 intentionally runs one dedicated
- * worker for the whole PDF, but the shape already carries workerCount/batchSize
- * so a later version can split long jobs into page batches and merge them.
+ * Resolve the generated-PDF worker plan. Worker merge support lets larger jobs
+ * split into page batches while small jobs can stay on a single PDF worker.
  * @param {Object=} pdfCfg
  * @param {number=} pageCount
  * @returns {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean}}
@@ -1440,17 +1439,16 @@ function resolvePdfWorkerPlan(pdfCfg = {}, pageCount = 0) {
   const pageThreshold = Math.max(1, Number(pdfCfg.workerPageThreshold) || PDF_WORKER_PAGE_THRESHOLD);
   const desiredWorkers = resolveRecommendedWorkerCount(Math.max(0, Number(pdfCfg.workerCount) || 0), 'auto');
   const configuredBatchSize = Math.max(0, Number(pdfCfg.workerBatchSize) || 0);
-  const workerCount = Math.max(1, Math.min(PDF_WORKER_MAX_COUNT_CURRENT, desiredWorkers));
+  const partialMergeEnabled = pdfCfg.partialMergeEnabled !== false;
+  const workerCount = Math.max(1, Math.min(partialMergeEnabled ? PDF_WORKER_MAX_COUNT : 1, desiredWorkers));
   return {
     enabled: pdfCfg.workerEnabled !== false && pageCount >= pageThreshold,
-    // Keep the first worker-backed PDF path deliberately single-worker. Multiple workers
-    // need partial PDF merge semantics, so workerCount is currently a forward-compatible plan field.
     workerCount,
     desiredWorkerCount: desiredWorkers,
-    batchSize: configuredBatchSize || resolveAutoPdfWorkerBatchSize(pageCount, desiredWorkers),
+    batchSize: configuredBatchSize || resolveAutoPdfWorkerBatchSize(pageCount, workerCount),
     pageThreshold,
     imageLoadConcurrency: resolvePdfImageLoadConcurrency(pdfCfg),
-    partialMergeEnabled: false,
+    partialMergeEnabled,
   };
 }
 

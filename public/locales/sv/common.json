@@ -244,6 +244,7 @@
       "loadingImages": "Förbereder sidor: {current} av {total}.",
       "generatingPage": "Genererat {current} av {total} sidor. Bearbetar sida {page}.",
       "finalizing": "Slutför PDF-filen…",
+      "merging": "Slår ihop PDF-delar: {current} av {total}.",
       "openingPreview": "Öppnar PDF-förhandsgranskning…",
       "downloading": "Förbereder PDF-nedladdning…",
       "error": "PDF-generering misslyckades: {error}",

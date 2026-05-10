@@ -244,6 +244,7 @@
       "loadingImages": "Preparing pages: {current} of {total}.",
       "generatingPage": "Generated {current} of {total} pages. Processing page {page}.",
       "finalizing": "Finalizing PDF file…",
+      "merging": "Merging PDF parts: {current} of {total}.",
       "openingPreview": "Opening PDF preview…",
       "downloading": "Preparing PDF download…",
       "error": "PDF generation failed: {error}",

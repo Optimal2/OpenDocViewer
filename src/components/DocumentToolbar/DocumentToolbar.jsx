@@ -76,6 +76,13 @@ function formatPdfProgressBody(t, progress) {
       defaultValue: 'Finalizing PDF file…',
     });
   }
+  if (progress.phase === 'merging') {
+    return t('printDialog.pdfProgress.merging', {
+      current: progress.mergeCurrent || 0,
+      total: progress.mergeTotal || 0,
+      defaultValue: `Merging PDF parts: ${progress.mergeCurrent || 0} of ${progress.mergeTotal || 0}.`,
+    });
+  }
   if (progress.phase === 'opening-preview') {
     return t('printDialog.pdfProgress.openingPreview', {
       defaultValue: 'Opening PDF preview…',

@@ -132,14 +132,14 @@
         footerReservePt: 14,
         textFontSize: 7,
         imageFallbackQuality: 0.9,
-        // Offload generated-PDF assembly to a dedicated web worker for larger jobs.
-        // The first implementation intentionally uses one worker for the whole PDF;
-        // workerCount/workerBatchSize are forward-compatible settings for future
-        // page-batch parallelization and PDF merge support.
+        // Offload generated-PDF assembly to web workers for larger jobs.
+        // partialMergeEnabled lets ODV create page-batch PDFs in parallel and then
+        // merge them pairwise in workers until one final PDF remains.
         workerEnabled: true,
         workerPageThreshold: 10,
+        partialMergeEnabled: true,
         workerCount: 0,
-        // 0 = auto; ODV targets roughly two future merge batches per worker,
+        // 0 = auto; ODV targets roughly two merge batches per worker,
         // bounded to avoid tiny batches that would create too many PDFs to merge.
         workerBatchSize: 0,
         // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime

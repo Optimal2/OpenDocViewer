@@ -2,9 +2,8 @@
 /**
  * OpenDocViewer - generated PDF worker.
  *
- * v1 uses one dedicated worker to keep expensive jsPDF assembly off the UI thread.
- * The job shape includes workerPlan.workerCount/workerBatchSize so a later version can
- * split very large print jobs into partial PDFs and merge them after parallel workers finish.
+ * Generates one full PDF or one page-batch partial PDF. `pdfWorkerDispatcher`
+ * can run several instances in parallel and merge the partial PDFs afterward.
  */
 
 const workerScope = self;
