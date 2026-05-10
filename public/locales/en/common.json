@@ -82,14 +82,8 @@
     "resetContrast": "Reset contrast",
     "printDisabledLoading": "Printing becomes available when all pages are fully loaded.",
     "printBusy": "A PDF is already being prepared.",
-    "printPrewarm": {
-      "off": "Print cache inactive",
-      "pending": "Preparing print cache…",
-      "ready": "Print cache ready",
-      "warning": "Print cache fallback active",
-      "error": "Print cache failed"
-    },
     "printPrebuild": {
+      "off": "PDF cache inactive",
       "pending": "Preparing PDF cache… ({count}/{total})",
       "ready": "PDF cache ready ({count})",
       "warning": "PDF cache partially ready ({count}/{total})",

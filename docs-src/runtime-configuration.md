@@ -183,10 +183,6 @@ Configuration surface:
 ```js
 print: {
   preparationNoticeThresholdPages: 0, // deprecated/no-op compatibility key
-  prewarmIframe: {
-    enabled: false,  // false by default; can be 'auto' or true
-    maxPages: 0     // 0 = reuse existing documentLoading thresholds
-  },
   actions: {
     downloadPdf: {
       enabled: true,
@@ -224,7 +220,8 @@ print: {
 }
 ```
 
-`print.prewarmIframe.enabled` controls the optional hidden print iframe used to speed up compatible multi-page print jobs. The default is `false`. `auto` follows the existing `documentLoading` and memory-pressure profile, `true` forces eligibility unless hard memory pressure is detected, and `false` disables the optimization. `maxPages: 0` means that OpenDocViewer reuses existing document-loading thresholds instead of adding a separate print-specific page limit.
+The older `print.prewarmIframe` optimization has been removed. HTML/browser print jobs now build
+their print iframe on demand, while generated-PDF prebuild is handled by `print.pdf.prebuildAllPages`.
 
 `print.pdf.enabled` controls whether the print dialog offers a separate **Print via PDF** action next to the normal **Print via HTML** action. `allowDownload: true` adds a separate **Save PDF** action to the print dialog. `print.actions.*.enabled` can hide individual footer buttons, while localized `label` and `tooltip` values override the button text without code changes.
 
