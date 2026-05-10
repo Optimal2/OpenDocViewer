@@ -25,7 +25,7 @@ import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeMenuButton from './ThemeMenuButton.jsx';
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, downloadPdfBlob, printPdfBlob } from '../../utils/printUtils.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, downloadPdfBlob, printPdfBlob } from '../../utils/printUtils.js';
 import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
@@ -34,7 +34,6 @@ import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
-import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame } from '../../utils/printWarmFrame.js';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
 
@@ -274,9 +273,6 @@ const DocumentToolbar = ({
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
   const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, progressValue:number, page:number, total:number, error:string, minimized:boolean }} */ (EMPTY_PDF_PROGRESS));
-  const [printWarmFrameStatus, setPrintWarmFrameStatus] = useState(/** @type {'off'|'pending'|'ready'|'warning'|'error'} */ ('off'));
-  const warmPrintFrameRef = useRef(/** @type {*} */ (null));
-  const warmPrintBuildSeqRef = useRef(0);
   const pdfAbortControllerRef = useRef(/** @type {AbortController|null} */ (null));
   const pdfStartTimeoutRef = useRef(/** @type {number|null} */ (null));
   const pdfRunSeqRef = useRef(0);
@@ -873,12 +869,6 @@ const DocumentToolbar = ({
   }, [resolvePrintPageCount, toPagesString]);
 
 
-  const allSessionPageContexts = useMemo(() => {
-    const count = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
-    if (count <= 0) return [];
-    return resolvePrintPageContexts(Array.from({ length: count }, (_value, index) => index + 1));
-  }, [resolvePrintPageContexts, sessionTotalPages]);
-
   const {
     status: pdfPrebuildStatus,
     getCachedBlob: getCachedPrebuiltPdfBlob,
@@ -898,11 +888,13 @@ const DocumentToolbar = ({
   const printLedState = useMemo(() => {
     if (!toolbarPrintEnabled) return 'off';
     if (pdfPrebuildStatus.state && pdfPrebuildStatus.state !== 'off') return pdfPrebuildStatus.state;
-    return printWarmFrameStatus;
-  }, [pdfPrebuildStatus.state, printWarmFrameStatus, toolbarPrintEnabled]);
+    return 'off';
+  }, [pdfPrebuildStatus.state, toolbarPrintEnabled]);
 
   const printLedTitle = useMemo(() => {
-    if (!toolbarPrintEnabled) return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache unavailable' });
+    if (!toolbarPrintEnabled) return t('toolbar.printDisabledLoading', {
+      defaultValue: 'Printing becomes available when all pages are fully loaded.',
+    });
     if (pdfPrebuildStatus.state === 'ready') {
       return t('toolbar.printPrebuild.ready', {
         count: pdfPrebuildStatus.completed,
@@ -926,105 +918,11 @@ const DocumentToolbar = ({
     if (pdfPrebuildStatus.state === 'error') {
       return t('toolbar.printPrebuild.error', { defaultValue: 'PDF cache failed' });
     }
-    if (printWarmFrameStatus === 'ready') return t('toolbar.printPrewarm.ready', { defaultValue: 'Print cache ready' });
-    if (printWarmFrameStatus === 'pending') return t('toolbar.printPrewarm.pending', { defaultValue: 'Preparing print cache…' });
-    if (printWarmFrameStatus === 'warning') return t('toolbar.printPrewarm.warning', { defaultValue: 'Print cache fallback active' });
-    if (printWarmFrameStatus === 'error') return t('toolbar.printPrewarm.error', { defaultValue: 'Print cache failed' });
-    return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache inactive' });
-  }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.state, pdfPrebuildStatus.total, printWarmFrameStatus, t, toolbarPrintEnabled]);
+    return t('toolbar.printPrebuild.off', { defaultValue: 'PDF cache inactive' });
+  }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.state, pdfPrebuildStatus.total, t, toolbarPrintEnabled]);
 
   const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
   const renderBenchmarkEnabled = useMemo(() => isRenderDecodeBenchmarkEnabled(getRuntimeConfig()), []);
-
-  const getWarmCompatibleIndexes = useCallback((detail) => {
-    if (!detail || detail.mode === 'active') return null;
-    const pageNumbers = resolvePrintPageNumbers(detail);
-    if (!Array.isArray(pageNumbers) || pageNumbers.length === 0) return null;
-    const indexes = [];
-    let previous = -1;
-    const seen = new Set();
-    const total = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
-    for (const rawPageNumber of pageNumbers) {
-      const pageNumberValue = Math.floor(Number(rawPageNumber));
-      if (!Number.isFinite(pageNumberValue) || pageNumberValue < 1 || pageNumberValue > total) return null;
-      const index = pageNumberValue - 1;
-      if (seen.has(index) || index <= previous) return null;
-      seen.add(index);
-      indexes.push(index);
-      previous = index;
-    }
-    return indexes;
-  }, [resolvePrintPageNumbers, sessionTotalPages]);
-
-  useEffect(() => {
-    const cfg = getRuntimeConfig();
-    const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
-    const memoryPressureStage = String(viewerContext?.memoryPressureStage || 'none');
-    const enabled = toolbarPrintEnabled && shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage);
-    const currentSeq = warmPrintBuildSeqRef.current + 1;
-    warmPrintBuildSeqRef.current = currentSeq;
-
-    disposeWarmPrintFrame(warmPrintFrameRef.current);
-    warmPrintFrameRef.current = null;
-
-    if (!enabled || !documentRenderRef?.current || pageCount <= 0) {
-      setPrintWarmFrameStatus('off');
-      return undefined;
-    }
-
-    let cancelled = false;
-    setPrintWarmFrameStatus('pending');
-
-    const timeoutId = window.setTimeout(() => {
-      (async () => {
-        try {
-          const handle = documentRenderRef.current;
-          const getUrls = handle?.getAllPrintableDataUrls || handle?.exportAllPagesAsDataUrls;
-          if (typeof getUrls !== 'function') {
-            if (!cancelled && warmPrintBuildSeqRef.current === currentSeq) setPrintWarmFrameStatus('off');
-            return;
-          }
-
-          const dataUrls = await getUrls.call(handle);
-          if (cancelled || warmPrintBuildSeqRef.current !== currentSeq) return;
-          if (!Array.isArray(dataUrls) || dataUrls.length !== pageCount) {
-            setPrintWarmFrameStatus('warning');
-            return;
-          }
-
-          const warmFrame = await createWarmPrintFrame({
-            dataUrls,
-            pageContexts: allSessionPageContexts,
-            printHeaderCfg: cfg.printHeader || {},
-            printFooterCfg: cfg.printFooter || {},
-            printFormatCfg: cfg.print?.format || {},
-            key: `${pageCount}:${i18n?.language || ''}`,
-          });
-          if (cancelled || warmPrintBuildSeqRef.current !== currentSeq) {
-            disposeWarmPrintFrame(warmFrame);
-            return;
-          }
-          warmPrintFrameRef.current = warmFrame;
-          setPrintWarmFrameStatus('ready');
-        } catch (error) {
-          if (!cancelled && warmPrintBuildSeqRef.current === currentSeq) {
-            logger.warn('Warm print preloading failed', { error: String(error?.message || error) });
-            setPrintWarmFrameStatus('error');
-          }
-        }
-      })();
-    }, 250);
-
-    return () => {
-      cancelled = true;
-      window.clearTimeout(timeoutId);
-    };
-  }, [allSessionPageContexts, documentRenderRef, i18n?.language, sessionTotalPages, toolbarPrintEnabled, viewerContext?.memoryPressureStage]);
-
-  useEffect(() => () => {
-    disposeWarmPrintFrame(warmPrintFrameRef.current);
-    warmPrintFrameRef.current = null;
-  }, []);
 
   const resetPdfProgress = useCallback(() => {
     pendingPdfOutputRef.current = null;
@@ -1220,13 +1118,6 @@ const DocumentToolbar = ({
       return;
     }
 
-    const warmIndexes = getWarmCompatibleIndexes(detail);
-    const warmFrame = warmPrintFrameRef.current;
-    if (warmIndexes && warmFrame?.status === 'ready') {
-      const usedWarmFrame = handlePrintWarmFrame(warmFrame, warmIndexes, commonOpts);
-      if (usedWarmFrame) return;
-    }
-
     if (!detail || detail.mode === 'active') {
       if (detail?.activeScope === 'compare-both' && isComparing) {
         handlePrintCurrentComparison(documentRenderRef, compareRef, commonOpts);
@@ -1250,7 +1141,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getWarmCompatibleIndexes, isComparing, makePrintOptions, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, isComparing, makePrintOptions, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.

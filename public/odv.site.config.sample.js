@@ -103,19 +103,6 @@
       // Kept as a harmless compatibility key for older site-local configs.
       preparationNoticeThresholdPages: 0,
 
-      // Warm print iframe preloads original page image blobs in a hidden iframe after all pages
-      // are ready. It is only used for order-preserving multi-page jobs; active-page and reordered
-      // custom jobs continue to use the regular print path.
-      prewarmIframe: {
-        // false is the default because this optimization has not shown a consistent benefit in
-        // production-like use. Set to "auto" or true only for deployments that explicitly want it.
-        enabled: false,
-        // 0 means reuse the existing documentLoading adaptive thresholds instead of adding a
-        // separate print-specific page limit.
-        maxPages: 0
-      },
-
-
       // Optional generated-PDF backend for print output. Direct print remains the default.
       // PDF print generates a PDF inside OpenDocViewer and lets the browser print that PDF.
       pdf: {

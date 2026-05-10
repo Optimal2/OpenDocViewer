@@ -14,11 +14,11 @@
  *   structure changes later.
  */
 
-import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame } from './printCore.js';
+import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence } from './printCore.js';
 import { parsePrintSequence } from './printParse.js';
 import { handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob } from './printPdf.js';
 
-export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePrintWarmFrame, parsePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob };
+export { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, parsePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob };
 
 export default {
   handlePrint,
@@ -26,7 +26,6 @@ export default {
   handlePrintCurrentComparison,
   handlePrintRange,
   handlePrintSequence,
-  handlePrintWarmFrame,
   parsePrintSequence,
   handlePdfOutput,
   handlePdfCurrent,
