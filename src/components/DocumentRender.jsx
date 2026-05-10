@@ -783,11 +783,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
         setImageRevision((prev) => prev + 1);
       }
     },
-    async getAllPrintableDataUrls() {
-      return getPrintablePageUrls();
+    async getAllPrintableDataUrls(pageIndexes) {
+      return getPrintablePageUrls(pageIndexes);
     },
-    async exportAllPagesAsDataUrls() {
-      return getPrintablePageUrls();
+    async exportAllPagesAsDataUrls(pageIndexes) {
+      return getPrintablePageUrls(pageIndexes);
     },
   }), [
     drawImageOnCanvas,
