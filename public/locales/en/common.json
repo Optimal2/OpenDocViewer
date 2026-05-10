@@ -84,6 +84,7 @@
     "printBusy": "A PDF is already being prepared.",
     "printPrebuild": {
       "off": "PDF cache inactive",
+      "paused": "PDF cache paused ({count}/{total})",
       "pending": "Preparing PDF cache… ({count}/{total})",
       "ready": "PDF cache ready ({count})",
       "warning": "PDF cache partially ready ({count}/{total})",

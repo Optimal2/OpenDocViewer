@@ -84,6 +84,7 @@
     "printBusy": "En PDF förbereds redan.",
     "printPrebuild": {
       "off": "PDF-cache är inaktiv",
+      "paused": "PDF-cache pausad ({count}/{total})",
       "pending": "Förbereder PDF-cache… ({count}/{total})",
       "ready": "PDF-cache klar ({count})",
       "warning": "PDF-cache delvis klar ({count}/{total})",
