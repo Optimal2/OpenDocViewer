@@ -88,6 +88,12 @@
       "ready": "Utskriftscache klar",
       "warning": "Utskriftscache använder fallback",
       "error": "Utskriftscache misslyckades"
+    },
+    "printPrebuild": {
+      "pending": "Förbereder PDF-cache… ({count}/{total})",
+      "ready": "PDF-cache klar ({count})",
+      "warning": "PDF-cache delvis klar ({count}/{total})",
+      "error": "PDF-cache misslyckades"
     }
   },
   "printDialog": {

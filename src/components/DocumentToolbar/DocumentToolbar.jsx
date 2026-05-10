@@ -30,6 +30,7 @@ import PrintRangeDialog from './PrintRangeDialog.jsx';
 import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
+import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
@@ -878,14 +879,59 @@ const DocumentToolbar = ({
     return resolvePrintPageContexts(Array.from({ length: count }, (_value, index) => index + 1));
   }, [resolvePrintPageContexts, sessionTotalPages]);
 
-  const warmPrintFrameTitle = useMemo(() => {
-    if (!printEnabled) return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache unavailable' });
+  const {
+    status: pdfPrebuildStatus,
+    getCachedBlob: getCachedPrebuiltPdfBlob,
+    cancel: cancelPdfPrebuild,
+  } = usePdfPrebuildAllPages({
+    printEnabled,
+    isDocumentLoading,
+    sessionTotalPages,
+    documentRenderRef,
+    makePrintOptions,
+    language: i18n?.language || '',
+    i18n,
+  });
+
+  const toolbarPrintEnabled = printEnabled && !isDocumentLoading;
+
+  const printLedState = useMemo(() => {
+    if (!toolbarPrintEnabled) return 'off';
+    if (pdfPrebuildStatus.state && pdfPrebuildStatus.state !== 'off') return pdfPrebuildStatus.state;
+    return printWarmFrameStatus;
+  }, [pdfPrebuildStatus.state, printWarmFrameStatus, toolbarPrintEnabled]);
+
+  const printLedTitle = useMemo(() => {
+    if (!toolbarPrintEnabled) return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache unavailable' });
+    if (pdfPrebuildStatus.state === 'ready') {
+      return t('toolbar.printPrebuild.ready', {
+        count: pdfPrebuildStatus.completed,
+        defaultValue: 'Prepared PDF cache ready',
+      });
+    }
+    if (pdfPrebuildStatus.state === 'pending') {
+      return t('toolbar.printPrebuild.pending', {
+        count: pdfPrebuildStatus.completed,
+        total: pdfPrebuildStatus.total,
+        defaultValue: 'Preparing PDF cache…',
+      });
+    }
+    if (pdfPrebuildStatus.state === 'warning') {
+      return t('toolbar.printPrebuild.warning', {
+        count: pdfPrebuildStatus.completed,
+        total: pdfPrebuildStatus.total,
+        defaultValue: 'PDF cache partially ready',
+      });
+    }
+    if (pdfPrebuildStatus.state === 'error') {
+      return t('toolbar.printPrebuild.error', { defaultValue: 'PDF cache failed' });
+    }
     if (printWarmFrameStatus === 'ready') return t('toolbar.printPrewarm.ready', { defaultValue: 'Print cache ready' });
     if (printWarmFrameStatus === 'pending') return t('toolbar.printPrewarm.pending', { defaultValue: 'Preparing print cache…' });
     if (printWarmFrameStatus === 'warning') return t('toolbar.printPrewarm.warning', { defaultValue: 'Print cache fallback active' });
     if (printWarmFrameStatus === 'error') return t('toolbar.printPrewarm.error', { defaultValue: 'Print cache failed' });
     return t('toolbar.printPrewarm.off', { defaultValue: 'Print cache inactive' });
-  }, [printEnabled, printWarmFrameStatus, t]);
+  }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.state, pdfPrebuildStatus.total, printWarmFrameStatus, t, toolbarPrintEnabled]);
 
   const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
   const renderBenchmarkEnabled = useMemo(() => isRenderDecodeBenchmarkEnabled(getRuntimeConfig()), []);
@@ -914,7 +960,7 @@ const DocumentToolbar = ({
     const cfg = getRuntimeConfig();
     const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
     const memoryPressureStage = String(viewerContext?.memoryPressureStage || 'none');
-    const enabled = printEnabled && shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage);
+    const enabled = toolbarPrintEnabled && shouldEnableWarmPrintFrame(cfg, pageCount, memoryPressureStage);
     const currentSeq = warmPrintBuildSeqRef.current + 1;
     warmPrintBuildSeqRef.current = currentSeq;
 
@@ -973,7 +1019,7 @@ const DocumentToolbar = ({
       cancelled = true;
       window.clearTimeout(timeoutId);
     };
-  }, [allSessionPageContexts, documentRenderRef, i18n?.language, printEnabled, sessionTotalPages, viewerContext?.memoryPressureStage]);
+  }, [allSessionPageContexts, documentRenderRef, i18n?.language, sessionTotalPages, toolbarPrintEnabled, viewerContext?.memoryPressureStage]);
 
   useEffect(() => () => {
     disposeWarmPrintFrame(warmPrintFrameRef.current);
@@ -1070,6 +1116,16 @@ const DocumentToolbar = ({
     if (detail?.printBackend === 'pdf') {
       const total = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : resolvePrintPageCount(detail));
       const action = detail?.printAction === 'download' ? 'download' : 'print';
+      const cachedBlob = getCachedPrebuiltPdfBlob(detail);
+      if (cachedBlob instanceof Blob) {
+        if (action === 'download') {
+          downloadPdfBlob(cachedBlob, commonOpts.filename || 'opendocviewer-print.pdf');
+        } else {
+          printPdfBlob(cachedBlob);
+        }
+        return;
+      }
+      cancelPdfPrebuild();
       const runSeq = pdfRunSeqRef.current + 1;
       pdfRunSeqRef.current = runSeq;
       pendingPdfOutputRef.current = null;
@@ -1194,7 +1250,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, getWarmCompatibleIndexes, isComparing, makePrintOptions, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getWarmCompatibleIndexes, isComparing, makePrintOptions, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -1246,7 +1302,7 @@ const DocumentToolbar = ({
   const isPdfOutputLocked = pdfProgress.open && !isPdfProgressTerminal;
   const printActionTitle = isPdfOutputLocked
     ? t('toolbar.printBusy', { defaultValue: 'A PDF is already being prepared.' })
-    : printEnabled
+    : toolbarPrintEnabled
       ? t('toolbar.print')
       : t('toolbar.printDisabledLoading', {
           defaultValue: 'Printing becomes available when all pages are fully loaded.',
@@ -1282,14 +1338,14 @@ const DocumentToolbar = ({
       {/* Print button → opens dialog */}
       <button
         type="button"
-        onClick={() => { if (printEnabled && !isPdfOutputLocked) openPrintDialog?.(); }}
+        onClick={() => { if (toolbarPrintEnabled && !isPdfOutputLocked) openPrintDialog?.(); }}
         aria-label={printActionTitle}
         title={printActionTitle}
         className="odv-btn odv-btn--with-status-led"
-        disabled={!printEnabled || isPdfOutputLocked}
+        disabled={!toolbarPrintEnabled || isPdfOutputLocked}
       >
         <span className="material-icons" aria-hidden="true">print</span>
-        <StatusLed state={printEnabled ? printWarmFrameStatus : 'off'} size="xs" title={warmPrintFrameTitle} className="odv-toolbar-print-led" />
+        <StatusLed state={printLedState} size="xs" title={printLedTitle} className="odv-toolbar-print-led" />
       </button>
 
       <div className="separator" />
