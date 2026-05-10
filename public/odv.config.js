@@ -206,6 +206,27 @@
           mergeModes: ['auto'],
           maxRuns: 40,
           delayBetweenRunsMs: 150
+        },
+        // Optional future optimization for common "all pages" PDF prints.
+        // Step 1 only plans cacheable variants; later wiring can generate them
+        // in a background queue after the document has loaded.
+        prebuildAllPages: {
+          enabled: false,
+          // Use explicit languages for deployments that print in a fixed language,
+          // e.g. ['sv']. Use ['current'] to follow the active UI language.
+          languages: ['current'],
+          // "default" follows watermark.defaultChecked, "on"/"off" force one state,
+          // and "both" prebuilds both copy-marker states.
+          copyMarker: 'default',
+          includeFixedReasons: true,
+          includeEmptyReason: false,
+          includeFreeTextReasons: false,
+          // Date/time tokens represent PDF creation time and are allowed by default.
+          allowDateTimeTokens: true,
+          maxPages: 500,
+          maxVariants: 12,
+          startDelayMs: 1500,
+          concurrency: 1
         }
       },
 

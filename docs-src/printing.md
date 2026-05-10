@@ -305,3 +305,29 @@ print: {
 ```
 
 If `allowDownload` is `true`, the dialog also shows a **Save PDF** action unless `print.actions.downloadPdf.enabled` is `false`. The HTML and PDF print buttons can likewise be hidden with `print.actions.printHtml.enabled` and `print.actions.printPdf.enabled`, and each action can use localized `label` and `tooltip` values. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.
+
+### Planned all-pages PDF prebuild
+
+`print.pdf.prebuildAllPages` is an opt-in planning surface for a future background cache of common **all pages** PDF outputs. The first implementation only normalizes configuration and exposes the planned variants in diagnostics; it does not yet generate PDFs in the background.
+
+```js
+print: {
+  pdf: {
+    prebuildAllPages: {
+      enabled: false,
+      languages: ['current'], // or e.g. ['sv'] for fixed-language print output
+      copyMarker: 'default',  // 'default', 'on', 'off', or 'both'
+      includeFixedReasons: true,
+      includeEmptyReason: false,
+      includeFreeTextReasons: false,
+      allowDateTimeTokens: true,
+      maxPages: 500,
+      maxVariants: 12,
+      startDelayMs: 1500,
+      concurrency: 1
+    }
+  }
+}
+```
+
+Only fixed reason options are planned by default. Options that require free text, such as "Other reason", are excluded unless `includeFreeTextReasons` is explicitly enabled. `copyMarker: 'both'` plans both the normal and copy-watermark state. Date/time tokens are treated as PDF creation time, so prebuilt PDFs may show the time they were prepared rather than the time the browser print dialog was opened.

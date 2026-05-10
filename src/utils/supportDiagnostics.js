@@ -4,6 +4,7 @@
  */
 
 import { getRuntimeConfig } from './runtimeConfig.js';
+import { createPdfPrebuildAllPagesVariants } from './pdfPrebuildPlan.js';
 
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
@@ -64,6 +65,7 @@ function collectConfigDiagnostics() {
   const cfg = getRuntimeConfig();
   const pdf = cfg?.print?.pdf || {};
   const benchmark = pdf?.benchmark || {};
+  const prebuildPlan = createPdfPrebuildAllPagesVariants(cfg, 'current');
   const loading = cfg?.documentLoading || {};
   const render = loading?.render || {};
   const renderBenchmark = loading?.renderBenchmark || {};
@@ -86,6 +88,16 @@ function collectConfigDiagnostics() {
       benchmarkBatchCounts: Array.isArray(benchmark.batchCounts) ? benchmark.batchCounts.slice(0, 16) : [],
       benchmarkMergeModes: Array.isArray(benchmark.mergeModes) ? benchmark.mergeModes.slice(0, 12) : [],
       benchmarkMaxRuns: Number(benchmark.maxRuns || 0) || 0,
+      prebuildAllPages: {
+        enabled: prebuildPlan.enabled === true,
+        languages: prebuildPlan.config.languages,
+        copyMarkerStates: prebuildPlan.config.copyMarkerStates,
+        maxPages: prebuildPlan.config.maxPages,
+        maxVariants: prebuildPlan.config.maxVariants,
+        concurrency: prebuildPlan.config.concurrency,
+        plannedVariantCount: prebuildPlan.variants.length,
+        plannedVariantKeys: prebuildPlan.variants.map((variant) => variant.key).slice(0, 32),
+      },
     },
     documentLoading: {
       mode: String(loading.mode || ''),
