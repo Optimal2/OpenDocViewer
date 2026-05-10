@@ -185,17 +185,28 @@
           enabled: false,
           pageLimit: 80,
           iterations: 1,
+          // "focused" tests the combinations that answer the tuning questions quickly.
+          // "matrix" performs a full cross-product and is much slower.
+          profile: 'focused',
           // Strategies:
           // - "partial-merge": page-batch PDFs in workers, then merge partial PDFs.
           // - "single-worker": one full-document PDF in one worker, no merge.
           // - "main-thread": full-document PDF on the UI thread; useful only for diagnostics.
-          strategies: ['partial-merge'],
+          strategies: ['partial-merge', 'single-worker'],
           // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
           workerCounts: [0],
           // 0 means auto. Add explicit counts to benchmark image loading inside PDF workers.
-          imageLoadConcurrencies: [0],
-          batchSizes: [0, 40, 80, 100, 150, 180],
-          maxRuns: 80,
+          imageLoadConcurrencies: [0, 2, 3, 4],
+          // Focused profile uses these to test balanced 2/3/4-way PDF splitting.
+          batchCounts: [2, 3, 4],
+          // Explicit batch sizes are extra probes; keep this short for support runs.
+          batchSizes: [0, 100, 150, 180],
+          // Merge modes:
+          // - "auto": single merge for small partial counts, pairwise for larger sets.
+          // - "single": one merge worker receives all partial PDFs.
+          // - "pairwise": reduction rounds that merge two PDFs at a time.
+          mergeModes: ['auto', 'single', 'pairwise'],
+          maxRuns: 40,
           delayBetweenRunsMs: 150
         }
       },
@@ -572,8 +583,10 @@
         pageLimit: 120,
         iterations: 1,
         variants: ['full', 'thumbnail'],
+        // "evenly-spaced" avoids benchmarking only the first pages when a session is large.
+        sampleMode: 'evenly-spaced',
         // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
-        workerCounts: [0],
+        workerCounts: [0, 1, 2, 3, 4, 6, 8],
         maxRuns: 40,
         delayBetweenRunsMs: 150
       },

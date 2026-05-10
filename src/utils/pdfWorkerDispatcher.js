@@ -3,7 +3,7 @@
  * OpenDocViewer - generated PDF worker dispatcher.
  *
  * The dispatcher splits larger generated-PDF jobs into page batches, renders the
- * batches in PDF workers, and then reduces the partial PDFs in merge-worker rounds.
+ * batches in PDF workers, and then merges the partial PDFs in worker-backed mode.
  */
 
 import PdfWorker from '../workers/pdfWorker.js?worker';
@@ -32,6 +32,7 @@ const BATCH_FINALIZE_JOB_UNITS = 1;
  * @property {number} pageThreshold Minimum total page count before worker PDF generation is used.
  * @property {number} imageLoadConcurrency Image fetch/decode concurrency inside each PDF worker task.
  * @property {boolean=} partialMergeEnabled Enables multi-worker partial PDF generation and merge reduction.
+ * @property {'auto'|'single'|'pairwise'=} mergeMode How partial PDFs should be merged.
  */
 
 /**
@@ -43,6 +44,31 @@ const BATCH_FINALIZE_JOB_UNITS = 1;
 function clampInteger(value, min, max) {
   const numeric = Math.floor(Number(value) || 0);
   return Math.max(min, Math.min(max, numeric));
+}
+
+/**
+ * @param {*} value
+ * @returns {'auto'|'single'|'pairwise'}
+ */
+function normalizeMergeMode(value) {
+  const text = String(value || '').trim().toLowerCase();
+  if (text === 'single' || text === 'single-worker' || text === 'single-merge') return 'single';
+  if (text === 'pairwise' || text === 'pairwise-merge') return 'pairwise';
+  return 'auto';
+}
+
+/**
+ * @param {'auto'|'single'|'pairwise'} mergeMode
+ * @param {number} partCount
+ * @returns {'single'|'pairwise'}
+ */
+function resolveMergeExecutionMode(mergeMode, partCount) {
+  const safePartCount = Math.max(0, Math.floor(Number(partCount) || 0));
+  const normalized = normalizeMergeMode(mergeMode);
+  if (normalized === 'single' || normalized === 'pairwise') return normalized;
+  // For a small number of large partial PDFs, one merge job usually avoids
+  // unnecessary intermediate PDFs. Pairwise remains available for larger sets.
+  return safePartCount <= 4 ? 'single' : 'pairwise';
 }
 
 /**
@@ -375,15 +401,65 @@ function sumProgress(progressByBatch) {
 }
 
 /**
- * @param {Array<Blob>} initialParts
+ * @param {Array<Blob>} parts
+ * @param {{batchUnits:number,totalUnits:number,mergeUnits:number}} progressPlan
+ * @param {AbortSignal|undefined} signal
+ * @param {function(Object):void} onProgress
+ * @returns {Promise<Blob>}
+ */
+async function mergePdfBlobsSingleWorker(parts, progressPlan, signal, onProgress) {
+  const mergeTotal = Math.max(1, progressPlan.mergeUnits);
+  const reportMergeProgress = (mergeProgress, extra = {}) => {
+    const completed = progressPlan.batchUnits + Math.max(0, Math.min(mergeTotal, mergeProgress));
+    onProgress({
+      ...extra,
+      phase: 'merging',
+      current: Math.floor(completed),
+      progressValue: completed,
+      total: progressPlan.totalUnits,
+      mergeCurrent: Math.floor(mergeProgress),
+      mergeTotal,
+      mergeRound: 1,
+      partialCount: parts.length,
+    });
+  };
+
+  reportMergeProgress(0, { roundIndex: 0, pairIndex: 0, globalMergeTaskIndex: 0 });
+  const blob = await runPdfMergeWorkerTask(
+    PdfMergeWorker,
+    parts,
+    signal,
+    (event) => {
+      const localTotal = Math.max(1, Number(event?.total) || parts.length || 1);
+      const localCurrent = clampNumber(event?.current, 0, localTotal);
+      reportMergeProgress((localCurrent / localTotal) * mergeTotal, {
+        roundIndex: 0,
+        pairIndex: 0,
+        globalMergeTaskIndex: 0,
+      });
+    },
+    0,
+    {
+      roundIndex: 0,
+      pairIndex: 0,
+      globalMergeTaskIndex: 0,
+      mergeCurrent: 0,
+      mergeTotal,
+    }
+  );
+  reportMergeProgress(mergeTotal, { roundIndex: 0, pairIndex: 0, globalMergeTaskIndex: 0 });
+  return blob;
+}
+
+/**
+ * @param {Array<Blob>} parts
  * @param {PdfWorkerPlan} workerPlan
  * @param {{batchUnits:number,totalUnits:number,mergeUnits:number}} progressPlan
  * @param {AbortSignal|undefined} signal
  * @param {function(Object):void} onProgress
  * @returns {Promise<Blob>}
  */
-async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, signal, onProgress) {
-  let parts = Array.isArray(initialParts) ? initialParts.filter((blob) => blob instanceof Blob) : [];
+async function mergePdfBlobsPairwise(parts, workerPlan, progressPlan, signal, onProgress) {
   if (!parts.length) throw new Error('No partial PDFs were available for merge.');
   if (parts.length === 1) return parts[0];
 
@@ -484,8 +560,27 @@ async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, 
 }
 
 /**
+ * @param {Array<Blob>} initialParts
+ * @param {PdfWorkerPlan} workerPlan
+ * @param {{batchUnits:number,totalUnits:number,mergeUnits:number}} progressPlan
+ * @param {AbortSignal|undefined} signal
+ * @param {function(Object):void} onProgress
+ * @returns {Promise<Blob>}
+ */
+async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, signal, onProgress) {
+  const parts = Array.isArray(initialParts) ? initialParts.filter((blob) => blob instanceof Blob) : [];
+  if (!parts.length) throw new Error('No partial PDFs were available for merge.');
+  if (parts.length === 1) return parts[0];
+  const mergeExecutionMode = resolveMergeExecutionMode(workerPlan?.mergeMode, parts.length);
+  if (mergeExecutionMode === 'single') {
+    return mergePdfBlobsSingleWorker(parts, progressPlan, signal, onProgress);
+  }
+  return mergePdfBlobsPairwise(parts, workerPlan, progressPlan, signal, onProgress);
+}
+
+/**
  * Dispatch generated-PDF work to the worker layer. With partial merge enabled,
- * page batches are rendered in parallel and then merged pairwise in worker rounds.
+ * page batches are rendered in parallel and then merged according to mergeMode.
  * @param {Object} args
  * @param {Array<string>} args.urls
  * @param {Array<Object>} args.pagePlans
@@ -504,6 +599,7 @@ export async function createPdfWithWorkerDispatcher(args) {
     ...(args?.workerPlan || {}),
     overallPageCount: urls.length,
   };
+  workerPlan.mergeMode = normalizeMergeMode(workerPlan.mergeMode);
   const batches = planPdfWorkerBatches(
     urls.length,
     workerPlan.workerCount,
