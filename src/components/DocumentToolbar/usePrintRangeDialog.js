@@ -243,9 +243,11 @@ export function usePrintRangeController({
     label: t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' }),
     tooltip: t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' }),
   });
-  const repeatLastPrintAction = resolvePrintAction(printActionsCfg, 'repeatLastPrint', i18n, {
-    label: t('printDialog.repeatLastPrint.button', { defaultValue: 'Print again' }),
-    tooltip: t('printDialog.repeatLastPrint.tooltip', { defaultValue: 'Print the latest prepared print job again without preparing it again.' }),
+  const reuseLastPrintSettingsAction = resolvePrintAction({
+    reuseLastPrintSettings: printActionsCfg?.reuseLastPrintSettings ?? printActionsCfg?.repeatLastPrint,
+  }, 'reuseLastPrintSettings', i18n, {
+    label: t('printDialog.reuseLastPrint.label', { defaultValue: 'Reuse latest print settings' }),
+    tooltip: t('printDialog.reuseLastPrint.tooltip', { defaultValue: 'Fill in the dialog with the same choices as the latest print.' }),
   });
   const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true && downloadPdfAction.enabled;
   const printHtmlEnabled = printHtmlAction.enabled;
@@ -645,6 +647,71 @@ export function usePrintRangeController({
     submitWithBackend('pdf', 'download');
   }, [submitWithBackend]);
 
+  /**
+   * Restore the dialog state from the latest successfully prepared print.
+   * This does not start printing; it lets the user review the restored values and
+   * then use the normal print action.
+   * @param {*} detail
+   * @returns {void}
+   */
+  const restoreFromDetail = useCallback((detail) => {
+    if (!detail || typeof detail !== 'object') return;
+    setError('');
+
+    const mode = String(detail.mode || 'active');
+    const restoredPages = Array.isArray(detail.restoredPageNumbers)
+      ? detail.restoredPageNumbers.map((value) => Math.floor(Number(value) || 0)).filter((value) => value > 0)
+      : [];
+    const restoreExplicitPages = restoredPages.length > 0
+      && ((mode === 'active' && detail.activeScope !== 'compare-both') || (mode === 'all' && detail.allScope === 'selection'));
+
+    if (restoreExplicitPages) {
+      setPrintMode('custom');
+      setCustomText(restoredPages.join(','));
+    } else if (mode === 'all') {
+      setPrintMode('all');
+      setAllScope(detail.allScope === 'selection' && canPrintSelectionScope ? 'selection' : 'session');
+    } else if (mode === 'range') {
+      setPrintMode('range');
+      setFromValue(String(Math.max(1, Math.floor(Number(detail.from) || 1))));
+      setToValue(String(Math.max(1, Math.floor(Number(detail.to) || 1))));
+    } else if (mode === 'advanced' && Array.isArray(detail.sequence)) {
+      setPrintMode('custom');
+      setCustomText(detail.sequence.map((value) => Math.floor(Number(value) || 0)).filter((value) => value > 0).join(','));
+    } else {
+      setPrintMode('active');
+      setActiveScope(detail.activeScope === 'compare-both' && isComparing ? 'compare-both' : 'primary');
+    }
+
+    if (hasOptions) {
+      const restoredReason = String(detail.reasonSelection?.value ?? detail.reason ?? defaultReason ?? '');
+      const hasRestoredOption = reasonOptions?.some((option) => String(option?.value ?? '') === restoredReason);
+      setSelectedReason(hasRestoredOption ? restoredReason : defaultReason);
+      setExtraText(String(detail.reasonSelection?.freeText ?? ''));
+      setFreeReason('');
+    } else {
+      setFreeReason(String(detail.reason || ''));
+      setSelectedReason(defaultReason);
+      setExtraText('');
+    }
+
+    setForWhomText(String(detail.forWhom || ''));
+    const restoredFormatValue = String(detail.printFormatValue ?? detail.printFormatSelection?.value ?? detail.printFormat ?? '');
+    setPrintFormatChecked(!!restoredFormatValue && !!checkboxPrintFormatOption);
+    setPdfAutoOrientationChecked(normalizePdfOrientationMode(detail.pdfOrientation, pdfOrientationDefaultMode) === 'auto');
+    setPrintBackend(detail.printBackend === 'pdf' && printPdfEnabled ? 'pdf' : defaultPrintBackend);
+  }, [
+    canPrintSelectionScope,
+    checkboxPrintFormatOption,
+    defaultPrintBackend,
+    defaultReason,
+    hasOptions,
+    isComparing,
+    pdfOrientationDefaultMode,
+    printPdfEnabled,
+    reasonOptions,
+  ]);
+
   const onBackdropMouseDown = useCallback((event) => {
     if (event.target === event.currentTarget) {
       event.stopPropagation();
@@ -685,7 +752,7 @@ export function usePrintRangeController({
     downloadPdfAction,
     printHtmlAction,
     printPdfAction,
-    repeatLastPrintAction,
+    reuseLastPrintSettingsAction,
     freeReason,
     setFreeReason,
     extraText,
@@ -730,6 +797,7 @@ export function usePrintRangeController({
     submitPrintDirect,
     submitPrintPdf,
     submitPdfDownload,
+    restoreFromDetail,
     onBackdropMouseDown,
     onDialogKeyDown,
   };

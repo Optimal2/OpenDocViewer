@@ -34,8 +34,8 @@ export default function PrintRangeDialog({
   isOpen,
   onClose,
   onSubmit,
-  onRepeatLastPdfPrint,
   lastPdfPrintAvailable = false,
+  lastPdfPrintDetail = null,
   lastPdfPrintPageCount = 0,
   totalPages,
   isDocumentLoading = false,
@@ -167,15 +167,29 @@ export default function PrintRangeDialog({
               })}
             </p>
           </div>
-          <button
-            type="button"
-            className="odv-prd-closeIcon"
-            onClick={() => { ctrl.setError(''); onClose(); }}
-            aria-label={t('printDialog.close', { defaultValue: 'Close' })}
-            title={t('printDialog.close', { defaultValue: 'Close' })}
-          >
-            <span className="material-icons" aria-hidden="true">close</span>
-          </button>
+          <div className="odv-prd-headerActions">
+            {lastPdfPrintAvailable && ctrl.reuseLastPrintSettingsAction?.enabled ? (
+              <button
+                type="button"
+                className="odv-prd-restoreIcon"
+                onClick={() => ctrl.restoreFromDetail(lastPdfPrintDetail)}
+                aria-label={ctrl.reuseLastPrintSettingsAction.label}
+                title={ctrl.reuseLastPrintSettingsAction.tooltip}
+                data-page-count={lastPdfPrintPageCount || undefined}
+              >
+                <span className="material-icons" aria-hidden="true">restore</span>
+              </button>
+            ) : null}
+            <button
+              type="button"
+              className="odv-prd-closeIcon"
+              onClick={() => { ctrl.setError(''); onClose(); }}
+              aria-label={t('printDialog.close', { defaultValue: 'Close' })}
+              title={t('printDialog.close', { defaultValue: 'Close' })}
+            >
+              <span className="material-icons" aria-hidden="true">close</span>
+            </button>
+          </div>
         </div>
 
         <div className="odv-prd-content">
@@ -337,42 +351,46 @@ export default function PrintRangeDialog({
               <h4 id="odv-prd-log-header" className="odv-prd-sectionHeader">{t('printDialog.userSection.header')}</h4>
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.userLogGroup')}>
                 <div className="odv-prd-fieldCol">
-                  {ctrl.showPrintFormat ? (
-                    <label className="odv-prd-checkRow odv-prd-checkRow-inline">
-                      <input
-                        type="checkbox"
-                        checked={!!ctrl.printFormatChecked}
-                        onChange={(event) => ctrl.setPrintFormatChecked(event.target.checked)}
-                        aria-label={t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
-                      />
-                      <span
-                        className="odv-prd-tooltipText"
-                        title={t('printDialog.printFormat.hint', {
-                          defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
-                        })}
-                      >
-                        {ctrl.checkboxPrintFormatOption?.checkboxLabel
-                          ? ctrl.optionLabel({ value: ctrl.checkboxPrintFormatOption.value, label: ctrl.checkboxPrintFormatOption.checkboxLabel })
-                          : t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
-                      </span>
-                    </label>
-                  ) : null}
+                  {ctrl.showPrintFormat || ctrl.showPdfOrientation ? (
+                    <div className="odv-prd-inlineOptionsRow">
+                      {ctrl.showPrintFormat ? (
+                        <label className="odv-prd-checkRow odv-prd-checkRow-inline">
+                          <input
+                            type="checkbox"
+                            checked={!!ctrl.printFormatChecked}
+                            onChange={(event) => ctrl.setPrintFormatChecked(event.target.checked)}
+                            aria-label={t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
+                          />
+                          <span
+                            className="odv-prd-tooltipText"
+                            title={t('printDialog.printFormat.hint', {
+                              defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
+                            })}
+                          >
+                            {ctrl.checkboxPrintFormatOption?.checkboxLabel
+                              ? ctrl.optionLabel({ value: ctrl.checkboxPrintFormatOption.value, label: ctrl.checkboxPrintFormatOption.checkboxLabel })
+                              : t('printDialog.printFormat.checkboxLabel', { defaultValue: 'Add copy watermark' })}
+                          </span>
+                        </label>
+                      ) : null}
 
-                  {ctrl.showPdfOrientation ? (
-                    <label className="odv-prd-checkRow odv-prd-checkRow-inline">
-                      <input
-                        type="checkbox"
-                        checked={!!ctrl.pdfAutoOrientationChecked}
-                        onChange={(event) => ctrl.setPdfAutoOrientationChecked(event.target.checked)}
-                        aria-label={ctrl.pdfOrientationLabel}
-                      />
-                      <span
-                        className="odv-prd-tooltipText"
-                        title={ctrl.pdfOrientationHint}
-                      >
-                        {ctrl.pdfOrientationLabel}
-                      </span>
-                    </label>
+                      {ctrl.showPdfOrientation ? (
+                        <label className="odv-prd-checkRow odv-prd-checkRow-inline">
+                          <input
+                            type="checkbox"
+                            checked={!!ctrl.pdfAutoOrientationChecked}
+                            onChange={(event) => ctrl.setPdfAutoOrientationChecked(event.target.checked)}
+                            aria-label={ctrl.pdfOrientationLabel}
+                          />
+                          <span
+                            className="odv-prd-tooltipText"
+                            title={ctrl.pdfOrientationHint}
+                          >
+                            {ctrl.pdfOrientationLabel}
+                          </span>
+                        </label>
+                      ) : null}
+                    </div>
                   ) : null}
 
                   {ctrl.showReason ? (
@@ -473,18 +491,6 @@ export default function PrintRangeDialog({
               {ctrl.downloadPdfAction.label}
             </button>
           ) : null}
-          {lastPdfPrintAvailable && ctrl.repeatLastPrintAction?.enabled && typeof onRepeatLastPdfPrint === 'function' ? (
-            <button
-              type="button"
-              className="odv-prd-action secondary"
-              onClick={onRepeatLastPdfPrint}
-              title={ctrl.repeatLastPrintAction.tooltip}
-              aria-label={ctrl.repeatLastPrintAction.tooltip}
-              data-page-count={lastPdfPrintPageCount || undefined}
-            >
-              {ctrl.repeatLastPrintAction.label}
-            </button>
-          ) : null}
           {ctrl.printHtmlEnabled ? (
             <button
               type="button"
@@ -515,8 +521,8 @@ PrintRangeDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
   onSubmit: PropTypes.func.isRequired,
-  onRepeatLastPdfPrint: PropTypes.func,
   lastPdfPrintAvailable: PropTypes.bool,
+  lastPdfPrintDetail: PropTypes.object,
   lastPdfPrintPageCount: PropTypes.number,
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool,

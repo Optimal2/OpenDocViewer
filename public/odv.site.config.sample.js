@@ -220,12 +220,12 @@
             sv: 'OpenDocViewer skapar en PDF innan webbläsaren skriver ut den.'
           }
         },
-        repeatLastPrint: {
+        reuseLastPrintSettings: {
           enabled: true,
-          label: { en: 'Print again', sv: 'Skriv ut igen' },
+          label: { en: 'Reuse latest print settings', sv: 'Återanvänd senaste utskriftsval' },
           tooltip: {
-            en: 'Print the latest prepared print job again without preparing it again.',
-            sv: 'Skriv ut senaste utskriften igen utan att förbereda om den.'
+            en: 'Fill in the dialog with the same choices as the latest print.',
+            sv: 'Fyll i dialogen med samma val som senaste utskriften.'
           }
         }
       },
