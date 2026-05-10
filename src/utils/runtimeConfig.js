@@ -37,3 +37,15 @@ export function getKeyboardPrintShortcutBehavior(cfg = getRuntimeConfig()) {
   if (raw === 'disable' || raw === 'dialog') return raw;
   return 'browser';
 }
+
+/**
+ * Resolve whether document metadata UI affordances should be available.
+ * The host payload may still contain metadata for sorting, printing, logging, or diagnostics; this
+ * flag only controls user-facing metadata overlays and metadata context-menu actions.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.metadata?.enabled !== false;
+}

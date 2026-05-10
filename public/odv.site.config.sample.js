@@ -64,6 +64,11 @@
     // =========================================================================
     exposeStackTraces: false,
     showPerfOverlay: false,
+    metadata: {
+      // Controls user-facing document metadata overlays and metadata context-menu actions.
+      // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
+      enabled: true
+    },
 
     // =========================================================================
     // Base paths and runtime i18n

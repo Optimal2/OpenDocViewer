@@ -55,8 +55,8 @@ function isPdfAbortError(error) {
 function formatPdfProgressBody(t, progress) {
   if (progress.phase === 'ready') {
     return progress.action === 'download'
-      ? t('printDialog.pdfProgress.readyDownloadBody', { defaultValue: 'PDF file is ready. Save it when you are ready.' })
-      : t('printDialog.pdfProgress.readyPrintBody', { defaultValue: 'PDF file is ready. Open print preview when you are ready.' });
+      ? t('printDialog.pdfProgress.readyDownloadBody', { defaultValue: 'The export file is ready. Save it when you are ready.' })
+      : t('printDialog.pdfProgress.readyPrintBody', { defaultValue: 'The print file is ready. Open print preview when you are ready.' });
   }
   const percent = getPdfProgressPercent(progress);
   return t('printDialog.pdfProgress.percent', {
@@ -1004,33 +1004,33 @@ const DocumentToolbar = ({
       return t('toolbar.printPrebuild.paused', {
         count: pdfPrebuildStatus.completed,
         total: pdfPrebuildStatus.total,
-        defaultValue: `PDF cache paused (${pdfPrebuildStatus.completed}/${pdfPrebuildStatus.total}).`,
+        defaultValue: `Print cache paused (${pdfPrebuildStatus.completed}/${pdfPrebuildStatus.total}).`,
       });
     }
     if (pdfPrebuildStatus.state === 'ready') {
       return t('toolbar.printPrebuild.ready', {
         count: pdfPrebuildStatus.completed,
-        defaultValue: 'Prepared PDF cache ready',
+        defaultValue: 'Prepared print cache ready',
       });
     }
     if (pdfPrebuildStatus.state === 'pending') {
       return t('toolbar.printPrebuild.pending', {
         count: pdfPrebuildStatus.completed,
         total: pdfPrebuildStatus.total,
-        defaultValue: 'Preparing PDF cache…',
+        defaultValue: 'Preparing print cache…',
       });
     }
     if (pdfPrebuildStatus.state === 'warning') {
       return t('toolbar.printPrebuild.warning', {
         count: pdfPrebuildStatus.completed,
         total: pdfPrebuildStatus.total,
-        defaultValue: 'PDF cache partially ready',
+        defaultValue: 'Print cache partially ready',
       });
     }
     if (pdfPrebuildStatus.state === 'error') {
-      return t('toolbar.printPrebuild.error', { defaultValue: 'PDF cache failed' });
+      return t('toolbar.printPrebuild.error', { defaultValue: 'Print cache failed' });
     }
-    return t('toolbar.printPrebuild.off', { defaultValue: 'PDF cache inactive' });
+    return t('toolbar.printPrebuild.off', { defaultValue: 'Print cache inactive' });
   }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.paused, pdfPrebuildStatus.state, pdfPrebuildStatus.total, t, toolbarPrintEnabled]);
 
   const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
@@ -1079,7 +1079,7 @@ const DocumentToolbar = ({
       return;
     }
     const confirmed = window.confirm(t('printDialog.pdfProgress.cancelConfirm', {
-      defaultValue: 'Cancel PDF generation?',
+      defaultValue: 'Cancel generation?',
     }));
     if (!confirmed) return;
 
@@ -1652,14 +1652,14 @@ const DocumentToolbar = ({
           </div>
           <div className="odv-pdf-progress-dock-copy">
             <strong>{pdfProgress.action === 'download'
-              ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Creating PDF' })
-              : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing PDF print' })}</strong>
+              ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Preparing export' })
+              : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing print' })}</strong>
             <span>{pdfProgress.error
-              ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `PDF generation failed: ${pdfProgress.error}` })
+              ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `Output generation failed: ${pdfProgress.error}` })
               : isPdfProgressCancelled
-                ? t('printDialog.pdfProgress.cancelled', { defaultValue: 'PDF generation was cancelled.' })
+                ? t('printDialog.pdfProgress.cancelled', { defaultValue: 'Generation was cancelled.' })
                 : isPdfProgressCancelling
-                  ? t('printDialog.pdfProgress.cancelling', { defaultValue: 'Cancelling PDF generation…' })
+                  ? t('printDialog.pdfProgress.cancelling', { defaultValue: 'Cancelling generation…' })
                   : formatPdfProgressBody(t, pdfProgress)}</span>
             {!pdfProgress.error && !isPdfProgressCancelled ? (
               <div className="odv-pdf-progress-track" aria-hidden="true">
@@ -1678,7 +1678,7 @@ const DocumentToolbar = ({
                 onClick={finishPendingPdfOutput}
               >
                 {pdfProgress.action === 'download'
-                  ? t('printDialog.pdfProgress.readyDownloadAction', { defaultValue: 'Save PDF' })
+                  ? t('printDialog.pdfProgress.readyDownloadAction', { defaultValue: 'Save' })
                   : t('printDialog.pdfProgress.readyPrintAction', { defaultValue: 'Open print' })}
               </button>
             ) : null}
@@ -1720,14 +1720,14 @@ const DocumentToolbar = ({
             </div>
             <div className="odv-print-preparing-copy">
               <h3 id="odv-pdf-progress-title">{pdfProgress.action === 'download'
-                ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Creating PDF' })
-                : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing PDF print' })}</h3>
+                ? t('printDialog.pdfProgress.downloadTitle', { defaultValue: 'Preparing export' })
+                : t('printDialog.pdfProgress.printTitle', { defaultValue: 'Preparing print' })}</h3>
               <p>{pdfProgress.error
-                ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `PDF generation failed: ${pdfProgress.error}` })
+                ? t('printDialog.pdfProgress.error', { error: pdfProgress.error, defaultValue: `Output generation failed: ${pdfProgress.error}` })
                 : isPdfProgressCancelled
-                  ? t('printDialog.pdfProgress.cancelled', { defaultValue: 'PDF generation was cancelled.' })
+                  ? t('printDialog.pdfProgress.cancelled', { defaultValue: 'Generation was cancelled.' })
                   : isPdfProgressCancelling
-                    ? t('printDialog.pdfProgress.cancelling', { defaultValue: 'Cancelling PDF generation…' })
+                    ? t('printDialog.pdfProgress.cancelling', { defaultValue: 'Cancelling generation…' })
                     : formatPdfProgressBody(t, pdfProgress)}</p>
               {!pdfProgress.error && !isPdfProgressCancelled ? (
                 <div className="odv-pdf-progress-track" aria-hidden="true">

@@ -98,6 +98,11 @@
     // UI & diagnostics
     exposeStackTraces: toBool(existing.exposeStackTraces, false),
     showPerfOverlay:   toBool(existing.showPerfOverlay,   false),
+    metadata: {
+      // Controls user-facing document metadata overlays and metadata context-menu actions.
+      // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
+      enabled: true
+    },
 
     // Where the app is mounted (derived above).
     basePath: basePath,

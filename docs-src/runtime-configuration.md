@@ -41,6 +41,7 @@ Good runtime-config candidates:
 - i18n defaults and translation versioning / build-based cache busting
 - print-dialog thresholds and print-header settings
 - diagnostics toggles
+- user-facing document metadata visibility
 - keyboard shortcut policy for browser-print interception
 - deployment base path / base href
 - optional integration-adapter mappings for host payload metadata
@@ -50,6 +51,22 @@ Poor runtime-config candidates:
 - logic that should be compile-time code
 - secrets that should not be visible to the browser
 - values that need strong server-side enforcement
+
+## Document Metadata UI
+
+Document metadata can be preserved in the normalized bundle even when the site does not want users
+to inspect it directly inside OpenDocViewer. The user-facing metadata overlays and context-menu
+metadata actions are controlled by:
+
+```js
+metadata: {
+  enabled: true
+}
+```
+
+Set `metadata.enabled` to `false` for deployments where metadata may still be used internally for
+print templates, sorting, or diagnostics, but should not be exposed as a document metadata dialog or
+overview table.
 
 ## Integration adapter mappings
 
