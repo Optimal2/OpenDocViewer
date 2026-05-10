@@ -144,7 +144,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
                 defaultValue: 'Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.',
               })}</li>
               <li>{t('help.sections.selection.shortcut', {
-                defaultValue: 'Press Delete to hide the current left/main page from the saved selection. Hold Shift in compare mode to hide the right page instead.',
+                defaultValue: 'Press Delete to hide the current left/main page from the saved selection. Hold Shift in compare mode to hide the right page instead. Hold Ctrl to hide the whole current document; hold Ctrl + Shift in compare mode to hide the right-side document.',
               })}</li>
             </ul>
             <p>{t('help.sections.selection.empty', {

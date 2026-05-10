@@ -713,10 +713,21 @@ export function useDocumentViewer() {
 
   const hideCurrentPageFromSelection = useCallback((target = 'primary') => {
     const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    if (updateTarget === 'compare' && (!isComparing || compareOriginalPageNumber == null)) return false;
     const originalPageNumber = updateTarget === 'compare' ? compareOriginalPageNumber : currentOriginalPageNumber;
+    if (!Number.isFinite(Number(originalPageNumber)) || Number(originalPageNumber) < 1) return false;
     const originalIndex = Math.max(0, Math.floor(Number(originalPageNumber) || 0) - 1);
     return hidePageFromSelection(originalIndex);
-  }, [compareOriginalPageNumber, currentOriginalPageNumber, hidePageFromSelection]);
+  }, [compareOriginalPageNumber, currentOriginalPageNumber, hidePageFromSelection, isComparing]);
+
+  const hideCurrentDocumentFromSelection = useCallback((target = 'primary') => {
+    const updateTarget = target === 'compare' ? 'compare' : 'primary';
+    if (updateTarget === 'compare' && (!isComparing || compareOriginalPageNumber == null)) return false;
+    const originalPageNumber = updateTarget === 'compare' ? compareOriginalPageNumber : currentOriginalPageNumber;
+    if (!Number.isFinite(Number(originalPageNumber)) || Number(originalPageNumber) < 1) return false;
+    const originalIndex = Math.max(0, Math.floor(Number(originalPageNumber) || 0) - 1);
+    return hideDocumentFromSelection(originalIndex);
+  }, [compareOriginalPageNumber, currentOriginalPageNumber, hideDocumentFromSelection, isComparing]);
 
   // --- Page navigation -----------------------------------------------------------
   /**
@@ -1209,6 +1220,7 @@ export function useDocumentViewer() {
     documentNavigationEnabled,
     compareNavigationEnabled: true,
     hideCurrentPageFromSelection,
+    hideCurrentDocumentFromSelection,
     zoomIn,
     zoomOut,
     actualSize,
