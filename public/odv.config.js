@@ -164,7 +164,18 @@
         headerReservePt: 18,
         footerReservePt: 14,
         textFontSize: 7,
-        imageFallbackQuality: 0.9
+        imageFallbackQuality: 0.9,
+        // Offload generated-PDF assembly to a dedicated web worker for larger jobs.
+        // The first implementation intentionally uses one worker for the whole PDF;
+        // workerCount/workerBatchSize are forward-compatible settings for future
+        // page-batch parallelization and PDF merge support.
+        workerEnabled: true,
+        workerPageThreshold: 10,
+        workerCount: 0,
+        workerBatchSize: 5,
+        // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
+        // recommendation helper as documentLoading.render.workerCount.
+        imageLoadConcurrency: 0
       },
 
       // Optional per-action button control for the print dialog footer.
