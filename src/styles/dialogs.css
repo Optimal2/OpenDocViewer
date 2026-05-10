@@ -1243,6 +1243,74 @@
   min-width: min(430px, 88vw);
   align-items: flex-start;
 }
+.odv-pdf-progress-modal-actions,
+.odv-pdf-progress-dock-actions {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+.odv-pdf-progress-background {
+  background: var(--odv-surface-elevated, #ffffff);
+  color: var(--text-color, #111827);
+  border-color: var(--odv-border, #cbd5e1);
+}
+.odv-pdf-progress-primary {
+  background: var(--primary-color, #2563eb);
+  border-color: var(--primary-color, #2563eb);
+  color: #ffffff;
+}
+.odv-pdf-progress-dock {
+  position: fixed;
+  left: 50%;
+  bottom: max(14px, env(safe-area-inset-bottom));
+  transform: translateX(-50%);
+  z-index: 2147482500;
+  display: grid;
+  grid-template-columns: auto minmax(220px, 1fr) auto;
+  align-items: center;
+  gap: 12px;
+  width: min(720px, calc(100vw - 28px));
+  padding: 12px 14px;
+  border-radius: 14px;
+  border: 1px solid var(--odv-border, #cbd5e1);
+  background: color-mix(in srgb, var(--odv-surface-elevated, #ffffff) 94%, transparent 6%);
+  color: var(--text-color, #111827);
+  box-shadow: 0 18px 46px rgba(15, 23, 42, .22);
+  backdrop-filter: blur(10px);
+}
+.odv-pdf-progress-dock-icon {
+  display: grid;
+  place-items: center;
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 12%, var(--odv-surface, #ffffff) 88%);
+  color: var(--primary-color, #2563eb);
+}
+.odv-pdf-progress-dock-icon .material-icons { font-size: 22px; }
+.odv-pdf-progress-dock-copy {
+  min-width: 0;
+  display: grid;
+  gap: 4px;
+}
+.odv-pdf-progress-dock-copy strong {
+  font-size: 14px;
+  line-height: 1.2;
+}
+.odv-pdf-progress-dock-copy span {
+  color: var(--text-muted-color, #475569);
+  font-size: 13px;
+  line-height: 1.25;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.odv-pdf-progress-dock .odv-pdf-progress-track {
+  height: 6px;
+  margin-top: 2px;
+}
 .odv-pdf-progress-track {
   width: 100%;
   height: 8px;
@@ -1260,6 +1328,19 @@
   transition: width .16s ease;
 }
 .odv-pdf-progress-dialog .odv-print-preparing-copy p { color: var(--text-muted-color, #475569); }
+
+@media (max-width: 640px) {
+  .odv-pdf-progress-dock {
+    grid-template-columns: auto minmax(0, 1fr);
+  }
+  .odv-pdf-progress-dock-actions {
+    grid-column: 1 / -1;
+    justify-content: stretch;
+  }
+  .odv-pdf-progress-dock-actions .odv-print-preparing-close {
+    flex: 1 1 auto;
+  }
+}
 
 [data-theme='dark'] .odv-prd-splitMenu {
   background: var(--odv-surface-elevated, #111827);
