@@ -14,6 +14,7 @@ const EMPTY_PREBUILD_STATUS = Object.freeze({
   completed: 0,
   total: 0,
   error: '',
+  paused: false,
 });
 
 /**
@@ -162,7 +163,8 @@ async function runLimited(items, concurrency, runItem, signal) {
  * @param {{current:*}} args.documentRenderRef
  * @param {function(Object): Object} args.makePrintOptions
  * @param {string=} args.language
- * @returns {{status:{state:string,completed:number,total:number,error:string}, getCachedBlob:function(Object): (Blob|null), cancel:function(): void}}
+ * @param {boolean=} args.paused
+ * @returns {{status:{state:string,completed:number,total:number,error:string,paused:boolean}, getCachedBlob:function(Object): (Blob|null), cancel:function(): void}}
  */
 export default function usePdfPrebuildAllPages({
   printEnabled,
@@ -171,6 +173,7 @@ export default function usePdfPrebuildAllPages({
   documentRenderRef,
   makePrintOptions,
   language = '',
+  paused = false,
 }) {
   const [status, setStatus] = useState(EMPTY_PREBUILD_STATUS);
   const cacheRef = useRef(new Map());
@@ -179,6 +182,7 @@ export default function usePdfPrebuildAllPages({
   const abortRef = useRef(/** @type {AbortController|null} */ (null));
   const timeoutRef = useRef(/** @type {number|null} */ (null));
   const runSeqRef = useRef(0);
+  const planKeyRef = useRef('');
 
   useEffect(() => {
     makePrintOptionsRef.current = makePrintOptions;
@@ -217,8 +221,6 @@ export default function usePdfPrebuildAllPages({
 
     runSeqRef.current += 1;
     const runSeq = runSeqRef.current;
-    variantsRef.current = canPrebuild ? plan.variants.slice() : [];
-    cacheRef.current = new Map();
 
     if (timeoutRef.current !== null) {
       window.clearTimeout(timeoutRef.current);
@@ -228,22 +230,47 @@ export default function usePdfPrebuildAllPages({
     abortRef.current = null;
 
     if (!canPrebuild) {
+      variantsRef.current = [];
+      cacheRef.current = new Map();
+      planKeyRef.current = '';
       setStatus(EMPTY_PREBUILD_STATUS);
+      return undefined;
+    }
+
+    const planKey = JSON.stringify({
+      pageCount,
+      language: language || 'current',
+      variants: plan.variants.map((variant) => variant?.key || ''),
+    });
+    if (planKeyRef.current !== planKey) {
+      cacheRef.current = new Map();
+      planKeyRef.current = planKey;
+    }
+    variantsRef.current = plan.variants.slice();
+
+    if (paused) {
+      const completed = plan.variants.filter((variant) => cacheRef.current.get(variant?.key)?.blob instanceof Blob).length;
+      setStatus(completed >= plan.variants.length
+        ? { state: 'ready', completed, total: plan.variants.length, error: '', paused: false }
+        : { state: 'pending', completed, total: plan.variants.length, error: '', paused: true });
       return undefined;
     }
 
     const abortController = new AbortController();
     abortRef.current = abortController;
-    setStatus(EMPTY_PREBUILD_STATUS);
 
     timeoutRef.current = window.setTimeout(() => {
       timeoutRef.current = null;
       (async () => {
         const signal = abortController.signal;
-        let completed = 0;
+        let completed = plan.variants.filter((variant) => cacheRef.current.get(variant?.key)?.blob instanceof Blob).length;
         const errors = [];
         try {
-          setStatus({ state: 'pending', completed: 0, total: plan.variants.length, error: '' });
+          if (completed >= plan.variants.length) {
+            setStatus({ state: 'ready', completed, total: plan.variants.length, error: '', paused: false });
+            return;
+          }
+          setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
           const pageNumbers = Array.from({ length: pageCount }, (_value, index) => index + 1);
           const urls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
           throwIfAborted(signal);
@@ -251,7 +278,8 @@ export default function usePdfPrebuildAllPages({
             throw new Error(`Expected ${pageCount} printable page URLs for PDF prebuild, got ${Array.isArray(urls) ? urls.length : 0}.`);
           }
 
-          await runLimited(plan.variants, plan.config.concurrency, async (variant) => {
+          const pendingVariants = plan.variants.filter((variant) => !(cacheRef.current.get(variant?.key)?.blob instanceof Blob));
+          await runLimited(pendingVariants, plan.config.concurrency, async (variant) => {
             try {
               const detail = createVariantDetail(variant);
               const options = {
@@ -265,7 +293,7 @@ export default function usePdfPrebuildAllPages({
               cacheRef.current.set(variant.key, { blob, variant, createdAt: Date.now() });
               completed += 1;
               if (runSeqRef.current === runSeq) {
-                setStatus({ state: 'pending', completed, total: plan.variants.length, error: '' });
+                setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
               }
             } catch (error) {
               throwIfAborted(signal);
@@ -285,10 +313,11 @@ export default function usePdfPrebuildAllPages({
               completed,
               total: plan.variants.length,
               error: String(errors[0]?.message || errors[0] || 'PDF prebuild failed.'),
+              paused: false,
             });
             return;
           }
-          setStatus({ state: 'ready', completed, total: plan.variants.length, error: '' });
+          setStatus({ state: 'ready', completed, total: plan.variants.length, error: '', paused: false });
         } catch (error) {
           if (isAbortError(error) || runSeqRef.current !== runSeq) return;
           logger.warn('PDF prebuild failed', { error: String(error?.message || error) });
@@ -297,6 +326,7 @@ export default function usePdfPrebuildAllPages({
             completed,
             total: plan.variants.length,
             error: String(error?.message || error),
+            paused: false,
           });
         }
       })();
@@ -309,7 +339,7 @@ export default function usePdfPrebuildAllPages({
       }
       try { abortController.abort(); } catch {}
     };
-  }, [documentRenderRef, isDocumentLoading, language, printEnabled, sessionTotalPages]);
+  }, [documentRenderRef, isDocumentLoading, language, paused, printEnabled, sessionTotalPages]);
 
   useEffect(() => () => {
     if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);

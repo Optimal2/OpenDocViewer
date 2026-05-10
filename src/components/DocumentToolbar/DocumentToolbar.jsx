@@ -978,7 +978,6 @@ const DocumentToolbar = ({
   const {
     status: pdfPrebuildStatus,
     getCachedBlob: getCachedPrebuiltPdfBlob,
-    cancel: cancelPdfPrebuild,
   } = usePdfPrebuildAllPages({
     printEnabled,
     isDocumentLoading,
@@ -986,6 +985,7 @@ const DocumentToolbar = ({
     documentRenderRef,
     makePrintOptions,
     language: i18n?.language || '',
+    paused: pdfProgress.open && !pdfProgress.error && pdfProgress.phase !== 'cancelled',
   });
 
   const toolbarPrintEnabled = printEnabled && !isDocumentLoading;
@@ -1000,6 +1000,13 @@ const DocumentToolbar = ({
     if (!toolbarPrintEnabled) return t('toolbar.printDisabledLoading', {
       defaultValue: 'Printing becomes available when all pages are fully loaded.',
     });
+    if (pdfPrebuildStatus.paused === true) {
+      return t('toolbar.printPrebuild.paused', {
+        count: pdfPrebuildStatus.completed,
+        total: pdfPrebuildStatus.total,
+        defaultValue: `PDF cache paused (${pdfPrebuildStatus.completed}/${pdfPrebuildStatus.total}).`,
+      });
+    }
     if (pdfPrebuildStatus.state === 'ready') {
       return t('toolbar.printPrebuild.ready', {
         count: pdfPrebuildStatus.completed,
@@ -1024,7 +1031,7 @@ const DocumentToolbar = ({
       return t('toolbar.printPrebuild.error', { defaultValue: 'PDF cache failed' });
     }
     return t('toolbar.printPrebuild.off', { defaultValue: 'PDF cache inactive' });
-  }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.state, pdfPrebuildStatus.total, t, toolbarPrintEnabled]);
+  }, [pdfPrebuildStatus.completed, pdfPrebuildStatus.paused, pdfPrebuildStatus.state, pdfPrebuildStatus.total, t, toolbarPrintEnabled]);
 
   const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
   const renderBenchmarkEnabled = useMemo(() => isRenderDecodeBenchmarkEnabled(getRuntimeConfig()), []);
@@ -1143,7 +1150,6 @@ const DocumentToolbar = ({
         }
         return;
       }
-      cancelPdfPrebuild();
       const runSeq = pdfRunSeqRef.current + 1;
       pdfRunSeqRef.current = runSeq;
       pendingPdfOutputRef.current = null;
@@ -1265,7 +1271,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getLastPdfPrintBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getLastPdfPrintBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
