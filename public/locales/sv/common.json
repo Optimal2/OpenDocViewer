@@ -81,14 +81,14 @@
     "resetBrightness": "Återställ ljusstyrka",
     "resetContrast": "Återställ kontrast",
     "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa.",
-    "printBusy": "En PDF förbereds redan.",
+    "printBusy": "Utskrift/export förbereds redan.",
     "printPrebuild": {
-      "off": "PDF-cache är inaktiv",
-      "paused": "PDF-cache pausad ({count}/{total})",
-      "pending": "Förbereder PDF-cache… ({count}/{total})",
-      "ready": "PDF-cache klar ({count})",
-      "warning": "PDF-cache delvis klar ({count}/{total})",
-      "error": "PDF-cache misslyckades"
+      "off": "Utskriftscache är inaktiv",
+      "paused": "Utskriftscache pausad ({count}/{total})",
+      "pending": "Förbereder utskriftscache… ({count}/{total})",
+      "ready": "Utskriftscache klar ({count})",
+      "warning": "Utskriftscache delvis klar ({count}/{total})",
+      "error": "Utskriftscache misslyckades"
     }
   },
   "printDialog": {
@@ -228,7 +228,7 @@
     },
     "printFormat": {
       "label": "Lägg till KOPIA-vattenstämpel",
-      "hint": "Om rutan är ibockad används den konfigurerade kopiemarkeringen i sidhuvud/sidfot och som vattenstämpel.",
+      "hint": "Lägger till vald vattenstämpel.",
       "checkboxLabel": "Lägg till KOPIA-vattenstämpel"
     },
     "output": {
@@ -247,28 +247,28 @@
       "menuLabel": "Välj utskriftsläge"
     },
     "pdfProgress": {
-      "downloadTitle": "Skapar PDF",
-      "printTitle": "Förbereder PDF-utskrift",
+      "downloadTitle": "Förbereder export",
+      "printTitle": "Förbereder utskrift",
       "percent": "{percent}%",
       "body": "Genererat {current} av {total} sidor.",
-      "loadingLibrary": "Förbereder PDF-motor…",
+      "loadingLibrary": "Förbereder utskriftsmotor…",
       "loadingImages": "Förbereder sidor: {current} av {total}.",
       "generatingPage": "Genererat {current} av {total} sidor. Bearbetar sida {page}.",
-      "finalizing": "Slutför PDF-filen…",
-      "merging": "Slår ihop PDF-delar: {current} av {total}.",
-      "openingPreview": "Öppnar PDF-förhandsgranskning…",
-      "downloading": "Förbereder PDF-nedladdning…",
+      "finalizing": "Slutför filen…",
+      "merging": "Slår ihop delar: {current} av {total}.",
+      "openingPreview": "Öppnar utskriftsförhandsgranskning…",
+      "downloading": "Förbereder nedladdning…",
       "backgroundAction": "Fortsätt jobba",
-      "readyPrintBody": "PDF-filen är klar. Öppna utskriften när du är redo.",
-      "readyDownloadBody": "PDF-filen är klar. Spara den när du är redo.",
+      "readyPrintBody": "Utskriftsfilen är klar. Öppna utskriften när du är redo.",
+      "readyDownloadBody": "Exportfilen är klar. Spara den när du är redo.",
       "readyPrintAction": "Öppna utskrift",
-      "readyDownloadAction": "Spara PDF",
-      "error": "PDF-generering misslyckades: {error}",
+      "readyDownloadAction": "Spara",
+      "error": "Generering misslyckades: {error}",
       "cancel": "Avbryt",
-      "cancelConfirm": "Vill du avbryta PDF-genereringen?",
-      "cancelling": "Avbryter PDF-generering…",
+      "cancelConfirm": "Vill du avbryta genereringen?",
+      "cancelling": "Avbryter generering…",
       "cancellingButton": "Avbryter…",
-      "cancelled": "PDF-genereringen avbröts."
+      "cancelled": "Genereringen avbröts."
     }
   },
   "print": {

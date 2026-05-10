@@ -364,7 +364,7 @@ export default function PrintRangeDialog({
                           <span
                             className="odv-prd-tooltipText"
                             title={t('printDialog.printFormat.hint', {
-                              defaultValue: 'When selected, the configured copy text is available to the header/footer templates and can be printed as a watermark.',
+                              defaultValue: 'Adds the configured watermark.',
                             })}
                           >
                             {ctrl.checkboxPrintFormatOption?.checkboxLabel

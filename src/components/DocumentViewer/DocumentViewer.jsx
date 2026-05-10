@@ -32,6 +32,7 @@ import useNavigationModifierState from '../../hooks/useNavigationModifierState.j
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
+import { getRuntimeConfig, isDocumentMetadataUiEnabled } from '../../utils/runtimeConfig.js';
 
 const DocumentViewer = () => {
   const {
@@ -147,11 +148,19 @@ const DocumentViewer = () => {
 
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
+  const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
 
-  const metadataMatrixView = useMemo(() => buildDocumentMetadataMatrixView(bundle), [bundle]);
-  const canOpenMetadataMatrix = !!metadataMatrixView && Array.isArray(metadataMatrixView.columns) && metadataMatrixView.columns.length > 0;
+  const metadataMatrixView = useMemo(
+    () => (metadataUiEnabled ? buildDocumentMetadataMatrixView(bundle) : null),
+    [bundle, metadataUiEnabled]
+  );
+  const canOpenMetadataMatrix = metadataUiEnabled
+    && !!metadataMatrixView
+    && Array.isArray(metadataMatrixView.columns)
+    && metadataMatrixView.columns.length > 0;
 
   const openDocumentMetadataForOriginalIndex = useCallback((originalIndex) => {
+    if (!metadataUiEnabled) return false;
     const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
     const sourcePage = Array.isArray(allPages) ? (allPages[safeOriginalIndex] || null) : null;
     const documentId = String(sourcePage?.documentId || '').trim();
@@ -166,7 +175,7 @@ const DocumentViewer = () => {
       totalDocuments: Math.max(0, Number(sourcePage?.totalDocuments) || 0),
     });
     return true;
-  }, [allPages, bundle]);
+  }, [allPages, bundle, metadataUiEnabled]);
 
   const closeMetadataOverlay = useCallback(() => {
     setMetadataOverlayState(null);
@@ -406,7 +415,7 @@ const DocumentViewer = () => {
                 clearSelectionFilter={clearSelectionFilter}
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
-                onOpenDocumentMetadata={openDocumentMetadataForOriginalIndex}
+                onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
           canOpenMetadataMatrix={canOpenMetadataMatrix}
           onOpenMetadataMatrix={openMetadataMatrix}
                 minWidth={thumbnailWidthMin}
@@ -482,14 +491,14 @@ const DocumentViewer = () => {
             selectionPanelEnabled={selectionPanelEnabled}
             onHidePageFromSelection={hidePageFromSelection}
             onHideDocumentFromSelection={hideDocumentFromSelection}
-            onOpenDocumentMetadata={openDocumentMetadataForOriginalIndex}
+            onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
             closeCompare={closeCompare}
           />
         )}
       </div>
 
       <DocumentMetadataOverlayDialog
-        isOpen={!!metadataOverlayState}
+        isOpen={metadataUiEnabled && !!metadataOverlayState}
         onClose={closeMetadataOverlay}
         metadataView={metadataOverlayState?.metadataView || null}
         documentNumber={metadataOverlayState?.documentNumber ?? null}
@@ -499,7 +508,7 @@ const DocumentViewer = () => {
       />
 
       <DocumentMetadataMatrixOverlayDialog
-        isOpen={isMetadataMatrixOpen}
+        isOpen={metadataUiEnabled && isMetadataMatrixOpen}
         onClose={closeMetadataMatrix}
         matrixView={metadataMatrixView}
       />

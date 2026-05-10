@@ -81,14 +81,14 @@
     "resetBrightness": "Reset brightness",
     "resetContrast": "Reset contrast",
     "printDisabledLoading": "Printing becomes available when all pages are fully loaded.",
-    "printBusy": "A PDF is already being prepared.",
+    "printBusy": "Print/export output is already being prepared.",
     "printPrebuild": {
-      "off": "PDF cache inactive",
-      "paused": "PDF cache paused ({count}/{total})",
-      "pending": "Preparing PDF cache… ({count}/{total})",
-      "ready": "PDF cache ready ({count})",
-      "warning": "PDF cache partially ready ({count}/{total})",
-      "error": "PDF cache failed"
+      "off": "Print cache inactive",
+      "paused": "Print cache paused ({count}/{total})",
+      "pending": "Preparing print cache… ({count}/{total})",
+      "ready": "Print cache ready ({count})",
+      "warning": "Print cache partially ready ({count}/{total})",
+      "error": "Print cache failed"
     }
   },
   "printDialog": {
@@ -228,7 +228,7 @@
     },
     "printFormat": {
       "label": "Add copy watermark",
-      "hint": "When selected, the configured copy marker is available to header/footer templates and is printed as a watermark.",
+      "hint": "Adds the configured watermark.",
       "checkboxLabel": "Add copy watermark"
     },
     "output": {
@@ -247,28 +247,28 @@
       "menuLabel": "Choose print output mode"
     },
     "pdfProgress": {
-      "downloadTitle": "Creating PDF",
-      "printTitle": "Preparing PDF print",
+      "downloadTitle": "Preparing export",
+      "printTitle": "Preparing print",
       "percent": "{percent}%",
       "body": "Generated {current} of {total} pages.",
-      "loadingLibrary": "Preparing PDF engine…",
+      "loadingLibrary": "Preparing output engine…",
       "loadingImages": "Preparing pages: {current} of {total}.",
       "generatingPage": "Generated {current} of {total} pages. Processing page {page}.",
-      "finalizing": "Finalizing PDF file…",
-      "merging": "Merging PDF parts: {current} of {total}.",
-      "openingPreview": "Opening PDF preview…",
-      "downloading": "Preparing PDF download…",
+      "finalizing": "Finalizing file…",
+      "merging": "Merging parts: {current} of {total}.",
+      "openingPreview": "Opening print preview…",
+      "downloading": "Preparing download…",
       "backgroundAction": "Continue working",
-      "readyPrintBody": "PDF file is ready. Open print preview when you are ready.",
-      "readyDownloadBody": "PDF file is ready. Save it when you are ready.",
+      "readyPrintBody": "The print file is ready. Open print preview when you are ready.",
+      "readyDownloadBody": "The export file is ready. Save it when you are ready.",
       "readyPrintAction": "Open print",
-      "readyDownloadAction": "Save PDF",
-      "error": "PDF generation failed: {error}",
+      "readyDownloadAction": "Save",
+      "error": "Output generation failed: {error}",
       "cancel": "Cancel",
-      "cancelConfirm": "Cancel PDF generation?",
-      "cancelling": "Cancelling PDF generation…",
+      "cancelConfirm": "Cancel generation?",
+      "cancelling": "Cancelling generation…",
       "cancellingButton": "Cancelling…",
-      "cancelled": "PDF generation was cancelled."
+      "cancelled": "Generation was cancelled."
     }
   },
   "print": {
