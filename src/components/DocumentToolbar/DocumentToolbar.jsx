@@ -110,6 +110,18 @@ function getPdfPrintCacheKey(detail, pageNumbers = []) {
   });
 }
 
+/**
+ * Active-page PDF output is based on the current rendered surface, including transient
+ * client-side edits such as rotation, brightness and contrast. It must not be reused
+ * as a later print cache entry because the same page number can represent different
+ * output bytes after those view edits change.
+ * @param {PrintSubmitDetail} detail
+ * @returns {boolean}
+ */
+function canReuseGeneratedPdfPrint(detail) {
+  return detail?.printBackend === 'pdf' && detail?.mode !== 'active';
+}
+
 
 /**
  * Detail payload emitted by the print dialog.
@@ -920,8 +932,17 @@ const DocumentToolbar = ({
     setLastPdfPrintInfo(null);
   }, [pdfPrintSessionKey]);
 
+  const clearLastPdfPrint = useCallback(() => {
+    lastPdfPrintRef.current = null;
+    setLastPdfPrintInfo(null);
+  }, []);
+
   const rememberLastPdfPrint = useCallback((detail, blob, total, filename, pageNumbers = null) => {
     if (!(blob instanceof Blob) || detail?.printBackend !== 'pdf' || detail?.printAction === 'download') return;
+    if (!canReuseGeneratedPdfPrint(detail)) {
+      clearLastPdfPrint();
+      return;
+    }
     const cachePageNumbers = Array.isArray(pageNumbers) ? pageNumbers : resolvePrintPageNumbers(detail);
     const pageTotal = Math.max(1, Math.floor(Number(total) || resolvePrintPageCount(detail) || 1));
     lastPdfPrintRef.current = {
@@ -937,11 +958,11 @@ const DocumentToolbar = ({
       createdAt: lastPdfPrintRef.current.createdAt,
       detail: { ...(detail || {}), restoredPageNumbers: cachePageNumbers.slice() },
     });
-  }, [resolvePrintPageCount, resolvePrintPageNumbers]);
+  }, [clearLastPdfPrint, resolvePrintPageCount, resolvePrintPageNumbers]);
 
   const getLastPdfPrintBlob = useCallback((detail, pageNumbers) => {
     const entry = lastPdfPrintRef.current;
-    if (!(entry?.blob instanceof Blob) || detail?.printBackend !== 'pdf') return null;
+    if (!(entry?.blob instanceof Blob) || !canReuseGeneratedPdfPrint(detail)) return null;
     return entry.cacheKey === getPdfPrintCacheKey(detail, pageNumbers) ? entry.blob : null;
   }, []);
 
