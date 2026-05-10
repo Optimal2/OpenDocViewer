@@ -170,6 +170,7 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  * @property {Object=} pdfCfg
  * @property {AbortSignal=} signal Optional AbortSignal to cancel PDF generation.
  * @property {function(Object): void=} onProgress
+ * @property {boolean=} deferOutput When true, generate and return the PDF Blob without printing/downloading it.
  */
 
 /**
@@ -1996,7 +1997,7 @@ export async function createPdfFromDocumentHandle(documentRenderRef, pageNumbers
  * @param {{ current: * }} documentRenderRef
  * @param {Array<number>=} pageNumbers
  * @param {Object=} options
- * @returns {Promise<void>}
+ * @returns {Promise<Blob|void>}
  */
 export async function handlePdfOutput(documentRenderRef, pageNumbers, options = {}) {
   throwIfAborted(options.signal);
@@ -2004,6 +2005,7 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
   const selectedCount = selected.length;
   const blob = await createPrintPdfBlob(selected, options);
   throwIfAborted(options.signal);
+  if (options.deferOutput === true) return blob;
   executeOutputAction(blob, options, selectedCount);
 }
 
@@ -2088,7 +2090,7 @@ function blobToDataUrl(blob) {
  * active-page visual edits because it uses the visible canvas/img rather than the original page blob.
  * @param {{ current: * }} documentRenderRef
  * @param {Object=} options
- * @returns {Promise<void>}
+ * @returns {Promise<Blob|void>}
  */
 export async function handlePdfCurrent(documentRenderRef, options = {}) {
   throwIfAborted(options.signal);
@@ -2102,6 +2104,7 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   }
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
   throwIfAborted(options.signal);
+  if (options.deferOutput === true) return blob;
   executeOutputAction(blob, options, 1);
 }
 
@@ -2110,7 +2113,7 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
  * @param {{ current: * }} primaryRenderRef
  * @param {{ current: * }} compareRenderRef
  * @param {Object=} options
- * @returns {Promise<void>}
+ * @returns {Promise<Blob|void>}
  */
 export async function handlePdfCurrentComparison(primaryRenderRef, compareRenderRef, options = {}) {
   throwIfAborted(options.signal);
@@ -2127,5 +2130,6 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   }
   const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
   throwIfAborted(options.signal);
+  if (options.deferOutput === true) return blob;
   executeOutputAction(blob, options, urls.length);
 }
