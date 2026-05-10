@@ -3,16 +3,17 @@
  * OpenDocViewer - generated PDF worker dispatcher.
  *
  * The dispatcher splits larger generated-PDF jobs into page batches, renders the
- * batches in PDF workers, and then merges the partial PDFs in worker-backed mode.
+ * batches in PDF workers, then merges the completed partial PDFs in one pass.
  */
 
 import PdfWorker from '../workers/pdfWorker.js?worker';
-import PdfMergeWorker from '../workers/pdfMergeWorker.js?worker';
 
-const MIN_AUTO_BATCH_SIZE = 40;
-const MAX_AUTO_BATCH_SIZE = 180;
-const TARGET_AUTO_BATCH_PAGE_COUNT = 180;
-const MAX_AUTO_BATCH_COUNT = 4;
+const SINGLE_BATCH_MAX_PAGE_COUNT = 180;
+const DEFAULT_TARGET_PAGES_PER_PDF_WORKER = 150;
+const HIGH_CORE_TARGET_PAGES_PER_PDF_WORKER = 75;
+const HIGH_CORE_PAGE_COUNT_THRESHOLD = 240;
+const HIGH_CORE_WORKER_COUNT_THRESHOLD = 16;
+const MAX_AUTO_BATCH_COUNT = 10;
 const BATCH_LIBRARY_JOB_UNITS = 1;
 const BATCH_FINALIZE_JOB_UNITS = 1;
 
@@ -31,8 +32,8 @@ const BATCH_FINALIZE_JOB_UNITS = 1;
  * @property {number} batchSize Preferred page count per future partial-PDF task.
  * @property {number} pageThreshold Minimum total page count before worker PDF generation is used.
  * @property {number} imageLoadConcurrency Image fetch/decode concurrency inside each PDF worker task.
- * @property {boolean=} partialMergeEnabled Enables multi-worker partial PDF generation and merge reduction.
- * @property {'auto'|'single'|'pairwise'=} mergeMode How partial PDFs should be merged.
+ * @property {boolean=} partialMergeEnabled Enables multi-worker partial PDF generation and final merge.
+ * @property {'auto'|'single'|'pairwise'=} mergeMode Legacy benchmark/config field; runtime merge is single-pass.
  */
 
 /**
@@ -47,37 +48,13 @@ function clampInteger(value, min, max) {
 }
 
 /**
- * @param {*} value
- * @returns {'auto'|'single'|'pairwise'}
- */
-function normalizeMergeMode(value) {
-  const text = String(value || '').trim().toLowerCase();
-  if (text === 'single' || text === 'single-worker' || text === 'single-merge') return 'single';
-  if (text === 'pairwise' || text === 'pairwise-merge') return 'pairwise';
-  return 'auto';
-}
-
-/**
- * @param {'auto'|'single'|'pairwise'} mergeMode
- * @param {number} partCount
- * @returns {'single'|'pairwise'}
- */
-function resolveMergeExecutionMode(mergeMode, partCount) {
-  const safePartCount = Math.max(0, Math.floor(Number(partCount) || 0));
-  const normalized = normalizeMergeMode(mergeMode);
-  if (normalized === 'single' || normalized === 'pairwise') return normalized;
-  // For a small number of large partial PDFs, one merge job usually avoids
-  // unnecessary intermediate PDFs. Pairwise remains available for larger sets.
-  return safePartCount <= 4 ? 'single' : 'pairwise';
-}
-
-/**
- * Pick a conservative future batch size. Browser-side PDF generation has a large
- * fixed cost per partial PDF: every batch loads jsPDF, creates a PDF object, and
- * later participates in merge-worker rounds. Benchmarks on 300-page jobs showed
- * that many small batches can be much slower than one to four large batches, even
- * on high-core clients. Auto therefore aims for a small number of large partials
- * instead of trying to keep every logical core busy.
+ * Pick a conservative future batch size from a pages-per-worker target.
+ * Browser-side PDF generation has a large fixed cost per partial PDF: every
+ * batch loads jsPDF, creates a PDF object, and later participates in one final
+ * merge. Benchmarks showed that 100-page jobs should stay in one worker, 300
+ * pages prefer about two large jobs on 6-core clients, and high-core clients can
+ * benefit from four smaller-but-still-substantial jobs. Auto therefore targets
+ * useful page chunks instead of trying to keep every logical core busy.
  * @param {number} pageCount
  * @param {number} workerCount
  * @returns {number}
@@ -85,14 +62,18 @@ function resolveMergeExecutionMode(mergeMode, partCount) {
 export function resolveAutoPdfWorkerBatchSize(pageCount, workerCount) {
   const safePageCount = Math.max(1, Math.floor(Number(pageCount) || 1));
   const safeWorkerCount = Math.max(1, Math.floor(Number(workerCount) || 1));
-  if (safeWorkerCount <= 1 || safePageCount <= MAX_AUTO_BATCH_SIZE) return safePageCount;
+  if (safeWorkerCount <= 1 || safePageCount <= SINGLE_BATCH_MAX_PAGE_COUNT) return safePageCount;
 
-  const targetBatchCount = Math.max(1, Math.min(
-    safeWorkerCount,
-    MAX_AUTO_BATCH_COUNT,
-    Math.ceil(safePageCount / TARGET_AUTO_BATCH_PAGE_COUNT)
-  ));
-  return clampInteger(Math.ceil(safePageCount / targetBatchCount), MIN_AUTO_BATCH_SIZE, MAX_AUTO_BATCH_SIZE);
+  const targetPagesPerWorker = safeWorkerCount >= HIGH_CORE_WORKER_COUNT_THRESHOLD
+    && safePageCount >= HIGH_CORE_PAGE_COUNT_THRESHOLD
+    ? HIGH_CORE_TARGET_PAGES_PER_PDF_WORKER
+    : DEFAULT_TARGET_PAGES_PER_PDF_WORKER;
+  const targetBatchCount = clampInteger(
+    Math.ceil(safePageCount / targetPagesPerWorker),
+    1,
+    Math.min(safeWorkerCount, MAX_AUTO_BATCH_COUNT)
+  );
+  return Math.max(1, Math.ceil(safePageCount / targetBatchCount));
 }
 
 /**
@@ -164,7 +145,7 @@ function countBatchJobUnits(batch) {
 function createPdfProgressPlan(batches) {
   const list = Array.isArray(batches) ? batches : [];
   const batchUnits = list.reduce((sum, batch) => sum + countBatchJobUnits(batch), 0);
-  const mergeUnits = Math.max(0, list.length - 1);
+  const mergeUnits = list.length > 1 ? list.length : 0;
   return {
     batchUnits,
     mergeUnits,
@@ -297,68 +278,6 @@ function runPdfWorkerTask(PdfWorkerCtor, job, signal, onProgress, workerIndex) {
 }
 
 /**
- * @param {Function} PdfMergeWorkerCtor
- * @param {Array<Blob>} blobs
- * @param {AbortSignal|undefined} signal
- * @param {function(Object):void} onProgress
- * @param {number} workerIndex
- * @param {Object} context
- * @returns {Promise<Blob>}
- */
-function runPdfMergeWorkerTask(PdfMergeWorkerCtor, blobs, signal, onProgress, workerIndex, context) {
-  return new Promise((resolve, reject) => {
-    let settled = false;
-    /** @type {Worker|null} */
-    let worker = null;
-    const cleanup = () => {
-      try { signal?.removeEventListener?.('abort', onAbort); } catch {}
-      try { worker?.terminate?.(); } catch {}
-      worker = null;
-    };
-    const settle = (fn, value) => {
-      if (settled) return;
-      settled = true;
-      cleanup();
-      fn(value);
-    };
-    const onAbort = () => {
-      const error = new Error('PDF generation was cancelled.');
-      error.name = 'AbortError';
-      settle(reject, error);
-    };
-
-    try {
-      worker = new PdfMergeWorkerCtor({ type: 'module', name: `odv-pdf-merge-worker-${workerIndex + 1}` });
-      signal?.addEventListener?.('abort', onAbort, { once: true });
-      worker.onmessage = (event) => {
-        const data = event?.data || {};
-        if (data.type === 'progress') {
-          onProgress({ ...context, ...(data.event || {}), phase: 'merging' });
-          return;
-        }
-        if (data.type === 'result') {
-          if (data.blob instanceof Blob) {
-            settle(resolve, data.blob);
-            return;
-          }
-          settle(reject, new Error('PDF merge worker completed without returning a PDF blob.'));
-          return;
-        }
-        if (data.type === 'error') {
-          settle(reject, new Error(String(data.error || 'PDF merge worker failed.')));
-        }
-      };
-      worker.onerror = (event) => {
-        settle(reject, new Error(String(event?.message || event?.error?.message || 'PDF merge worker crashed.')));
-      };
-      worker.postMessage({ type: 'mergePdfs', job: { blobs, ...context } });
-    } catch (error) {
-      settle(reject, error);
-    }
-  });
-}
-
-/**
  * @param {PdfWorkerBatch} batch
  * @param {Object} args
  * @param {PdfWorkerPlan} workerPlan
@@ -407,12 +326,11 @@ function sumProgress(progressByBatch) {
  * @param {function(Object):void} onProgress
  * @returns {Promise<Blob>}
  */
-async function mergePdfBlobsSingleWorker(parts, progressPlan, signal, onProgress) {
+async function mergePdfBlobsSinglePass(parts, progressPlan, signal, onProgress) {
   const mergeTotal = Math.max(1, progressPlan.mergeUnits);
-  const reportMergeProgress = (mergeProgress, extra = {}) => {
+  const reportMergeProgress = (mergeProgress) => {
     const completed = progressPlan.batchUnits + Math.max(0, Math.min(mergeTotal, mergeProgress));
     onProgress({
-      ...extra,
       phase: 'merging',
       current: Math.floor(completed),
       progressValue: completed,
@@ -424,163 +342,42 @@ async function mergePdfBlobsSingleWorker(parts, progressPlan, signal, onProgress
     });
   };
 
-  reportMergeProgress(0, { roundIndex: 0, pairIndex: 0, globalMergeTaskIndex: 0 });
-  const blob = await runPdfMergeWorkerTask(
-    PdfMergeWorker,
-    parts,
-    signal,
-    (event) => {
-      const localTotal = Math.max(1, Number(event?.total) || parts.length || 1);
-      const localCurrent = clampNumber(event?.current, 0, localTotal);
-      reportMergeProgress((localCurrent / localTotal) * mergeTotal, {
-        roundIndex: 0,
-        pairIndex: 0,
-        globalMergeTaskIndex: 0,
-      });
-    },
-    0,
-    {
-      roundIndex: 0,
-      pairIndex: 0,
-      globalMergeTaskIndex: 0,
-      mergeCurrent: 0,
-      mergeTotal,
-    }
-  );
-  reportMergeProgress(mergeTotal, { roundIndex: 0, pairIndex: 0, globalMergeTaskIndex: 0 });
-  return blob;
-}
-
-/**
- * @param {Array<Blob>} parts
- * @param {PdfWorkerPlan} workerPlan
- * @param {{batchUnits:number,totalUnits:number,mergeUnits:number}} progressPlan
- * @param {AbortSignal|undefined} signal
- * @param {function(Object):void} onProgress
- * @returns {Promise<Blob>}
- */
-async function mergePdfBlobsPairwise(parts, workerPlan, progressPlan, signal, onProgress) {
-  if (!parts.length) throw new Error('No partial PDFs were available for merge.');
-  if (parts.length === 1) return parts[0];
-
-  const mergeTotal = Math.max(1, progressPlan.mergeUnits);
-  const mergeProgressByTask = new Array(mergeTotal).fill(0);
-  let nextMergeTaskIndex = 0;
-  let roundIndex = 0;
-
-  const reportMergeProgress = (extra = {}) => {
-    const mergeProgress = sumProgress(mergeProgressByTask);
-    const completed = progressPlan.batchUnits + Math.max(0, Math.min(mergeTotal, mergeProgress));
-    onProgress({
-      ...extra,
-      phase: 'merging',
-      current: Math.floor(completed),
-      progressValue: completed,
-      total: progressPlan.totalUnits,
-      mergeCurrent: Math.floor(mergeProgress),
-      mergeTotal,
-      mergeRound: roundIndex + 1,
-      partialCount: parts.length,
-    });
-  };
-
-  reportMergeProgress();
-
-  while (parts.length > 1) {
+  reportMergeProgress(0);
+  const { PDFDocument } = await import('pdf-lib');
+  const target = await PDFDocument.create();
+  for (let index = 0; index < parts.length; index += 1) {
     throwIfAborted(signal);
-    const nextParts = new Array(Math.ceil(parts.length / 2));
-    const mergeTasks = [];
-
-    for (let index = 0; index < parts.length; index += 2) {
-      const nextIndex = index / 2;
-      const first = parts[index];
-      const second = parts[index + 1];
-      if (second instanceof Blob) {
-        mergeTasks.push({
-          nextIndex,
-          blobs: [first, second],
-          roundIndex,
-          pairIndex: mergeTasks.length,
-          globalMergeTaskIndex: nextMergeTaskIndex,
-        });
-        nextMergeTaskIndex += 1;
-      } else {
-        nextParts[nextIndex] = first;
-      }
-    }
-
-    await runLimitedTasks(
-      mergeTasks,
-      workerPlan.workerCount,
-      async (task, _taskIndex, workerSlot) => {
-        const blob = await runPdfMergeWorkerTask(
-          PdfMergeWorker,
-          task.blobs,
-          signal,
-          (event) => {
-            const localTotal = Math.max(1, Number(event?.total) || task.blobs.length || 1);
-            const localCurrent = clampNumber(event?.current, 0, localTotal);
-            mergeProgressByTask[task.globalMergeTaskIndex] = Math.max(
-              mergeProgressByTask[task.globalMergeTaskIndex],
-              localCurrent / localTotal
-            );
-            reportMergeProgress({
-              roundIndex: event?.roundIndex,
-              pairIndex: event?.pairIndex,
-              globalMergeTaskIndex: task.globalMergeTaskIndex,
-            });
-          },
-          workerSlot,
-          {
-            roundIndex: task.roundIndex,
-            pairIndex: task.pairIndex,
-            globalMergeTaskIndex: task.globalMergeTaskIndex,
-            mergeCurrent: Math.floor(sumProgress(mergeProgressByTask)),
-            mergeTotal,
-          }
-        );
-        nextParts[task.nextIndex] = blob;
-        mergeProgressByTask[task.globalMergeTaskIndex] = 1;
-        reportMergeProgress({
-          roundIndex: task.roundIndex,
-          pairIndex: task.pairIndex,
-          globalMergeTaskIndex: task.globalMergeTaskIndex,
-        });
-        return blob;
-      },
-      signal
-    );
-
-    parts = nextParts;
-    roundIndex += 1;
+    const blob = parts[index];
+    if (!(blob instanceof Blob)) throw new Error(`PDF merge input ${index + 1} was not a Blob.`);
+    const bytes = new Uint8Array(await blob.arrayBuffer());
+    const source = await PDFDocument.load(bytes);
+    const pages = await target.copyPages(source, source.getPageIndices());
+    pages.forEach((page) => target.addPage(page));
+    reportMergeProgress(index + 1);
   }
-
-  reportMergeProgress();
-  return parts[0];
+  throwIfAborted(signal);
+  const mergedBytes = await target.save({ useObjectStreams: true });
+  reportMergeProgress(mergeTotal);
+  return new Blob([mergedBytes], { type: 'application/pdf' });
 }
 
 /**
  * @param {Array<Blob>} initialParts
- * @param {PdfWorkerPlan} workerPlan
  * @param {{batchUnits:number,totalUnits:number,mergeUnits:number}} progressPlan
  * @param {AbortSignal|undefined} signal
  * @param {function(Object):void} onProgress
  * @returns {Promise<Blob>}
  */
-async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, signal, onProgress) {
+async function mergePdfBlobs(initialParts, progressPlan, signal, onProgress) {
   const parts = Array.isArray(initialParts) ? initialParts.filter((blob) => blob instanceof Blob) : [];
   if (!parts.length) throw new Error('No partial PDFs were available for merge.');
   if (parts.length === 1) return parts[0];
-  const mergeExecutionMode = resolveMergeExecutionMode(workerPlan?.mergeMode, parts.length);
-  if (mergeExecutionMode === 'single') {
-    return mergePdfBlobsSingleWorker(parts, progressPlan, signal, onProgress);
-  }
-  return mergePdfBlobsPairwise(parts, workerPlan, progressPlan, signal, onProgress);
+  return mergePdfBlobsSinglePass(parts, progressPlan, signal, onProgress);
 }
 
 /**
  * Dispatch generated-PDF work to the worker layer. With partial merge enabled,
- * page batches are rendered in parallel and then merged according to mergeMode.
+ * page batches are rendered in parallel and then merged in one final pass.
  * @param {Object} args
  * @param {Array<string>} args.urls
  * @param {Array<Object>} args.pagePlans
@@ -599,7 +396,6 @@ export async function createPdfWithWorkerDispatcher(args) {
     ...(args?.workerPlan || {}),
     overallPageCount: urls.length,
   };
-  workerPlan.mergeMode = normalizeMergeMode(workerPlan.mergeMode);
   const batches = planPdfWorkerBatches(
     urls.length,
     workerPlan.workerCount,
@@ -608,6 +404,10 @@ export async function createPdfWithWorkerDispatcher(args) {
   );
 
   if (batches.length <= 0) throw new Error('No pages were available for generated PDF output.');
+  workerPlan.workerCount = Math.max(1, Math.min(
+    Math.floor(Number(workerPlan.workerCount) || 1),
+    batches.length
+  ));
 
   const onProgress = args?.onProgress || (() => {});
   const progressPlan = createPdfProgressPlan(batches);
@@ -656,5 +456,5 @@ export async function createPdfWithWorkerDispatcher(args) {
     args?.signal
   );
 
-  return mergePdfBlobsWithWorkers(partialBlobs, workerPlan, progressPlan, args?.signal, onProgress);
+  return mergePdfBlobs(partialBlobs, progressPlan, args?.signal, onProgress);
 }
