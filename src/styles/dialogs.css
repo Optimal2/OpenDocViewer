@@ -1050,9 +1050,17 @@
   gap: 12px;
   align-items: stretch;
 }
+.odv-prd-methodRow--withRepeat {
+  grid-template-columns: minmax(190px, 240px) auto minmax(0, 1fr);
+}
 .odv-prd-methodSelect {
   width: 100%;
   min-width: 0;
+}
+.odv-prd-repeatPdfButton {
+  min-height: 38px;
+  padding: 0 12px;
+  white-space: nowrap;
 }
 .odv-prd-methodSummary {
   min-height: 38px;
@@ -1062,6 +1070,8 @@
 }
 @media (max-width: 680px) {
   .odv-prd-methodRow { grid-template-columns: 1fr; }
+  .odv-prd-methodRow--withRepeat { grid-template-columns: 1fr; }
+  .odv-prd-repeatPdfButton { justify-self: start; }
 }
 
 /* Plain print action menu. Keep it visually consistent with secondary dialog buttons. */

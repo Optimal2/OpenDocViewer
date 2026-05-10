@@ -150,7 +150,6 @@ async function runLimited(items, concurrency, runItem, signal) {
  * @param {{current:*}} args.documentRenderRef
  * @param {function(Object): Object} args.makePrintOptions
  * @param {string=} args.language
- * @param {*} args.i18n
  * @returns {{status:{state:string,completed:number,total:number,error:string}, getCachedBlob:function(Object): (Blob|null), cancel:function(): void}}
  */
 export default function usePdfPrebuildAllPages({
@@ -160,14 +159,18 @@ export default function usePdfPrebuildAllPages({
   documentRenderRef,
   makePrintOptions,
   language = '',
-  i18n,
 }) {
   const [status, setStatus] = useState(EMPTY_PREBUILD_STATUS);
   const cacheRef = useRef(new Map());
   const variantsRef = useRef([]);
+  const makePrintOptionsRef = useRef(makePrintOptions);
   const abortRef = useRef(/** @type {AbortController|null} */ (null));
   const timeoutRef = useRef(/** @type {number|null} */ (null));
   const runSeqRef = useRef(0);
+
+  useEffect(() => {
+    makePrintOptionsRef.current = makePrintOptions;
+  }, [makePrintOptions]);
 
   const cancel = useCallback(() => {
     if (timeoutRef.current !== null) {
@@ -191,7 +194,7 @@ export default function usePdfPrebuildAllPages({
   useEffect(() => {
     const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
     const cfg = getRuntimeConfig();
-    const plan = createPdfPrebuildAllPagesVariants(cfg, i18n || language || 'current');
+    const plan = createPdfPrebuildAllPagesVariants(cfg, language || 'current');
     const canPrebuild = !!printEnabled
       && !isDocumentLoading
       && !!documentRenderRef?.current
@@ -240,7 +243,7 @@ export default function usePdfPrebuildAllPages({
             try {
               const detail = createVariantDetail(variant);
               const options = {
-                ...makePrintOptions(detail),
+                ...makePrintOptionsRef.current(detail),
                 deferOutput: true,
                 signal,
               };
@@ -294,7 +297,7 @@ export default function usePdfPrebuildAllPages({
       }
       try { abortController.abort(); } catch {}
     };
-  }, [documentRenderRef, i18n, isDocumentLoading, language, makePrintOptions, printEnabled, sessionTotalPages]);
+  }, [documentRenderRef, isDocumentLoading, language, printEnabled, sessionTotalPages]);
 
   useEffect(() => () => {
     if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);
