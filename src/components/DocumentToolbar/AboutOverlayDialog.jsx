@@ -101,12 +101,16 @@ export default function AboutOverlayDialog({
           const completed = Math.max(0, Number(event?.completedRuns || 0));
           const total = Math.max(1, Number(event?.totalRuns || 1));
           if (event?.phase === 'running') {
+            const scenario = String(event?.scenarioLabel || '').trim();
             setBenchmarkState({
               status: 'running',
               message: t('about.diagnostics.benchmarkProgress', {
                 current: completed + 1,
                 total,
-                defaultValue: `Running benchmark ${completed + 1} of ${total}…`,
+                scenario,
+                defaultValue: scenario
+                  ? `Running benchmark ${completed + 1} of ${total}: ${scenario}…`
+                  : `Running benchmark ${completed + 1} of ${total}…`,
               }),
             });
           }
@@ -132,8 +136,8 @@ export default function AboutOverlayDialog({
     ? t('about.diagnostics.benchmarkSummary', {
         ms: latestBenchmark.best.durationMs,
         pages: latestBenchmark.pageCount,
-        batch: latestBenchmark.best.batchSizeLabel,
-        defaultValue: `Best run: ${latestBenchmark.best.durationMs} ms, ${latestBenchmark.pageCount} pages, batch ${latestBenchmark.best.batchSizeLabel}.`,
+        batch: latestBenchmark.best.scenarioLabel || latestBenchmark.best.batchSizeLabel,
+        defaultValue: `Best run: ${latestBenchmark.best.durationMs} ms, ${latestBenchmark.pageCount} pages, ${latestBenchmark.best.scenarioLabel || `batch ${latestBenchmark.best.batchSizeLabel}`}.`,
       })
     : t('about.diagnostics.noBenchmark', { defaultValue: 'No PDF benchmark result has been recorded.' });
 
@@ -245,7 +249,11 @@ export default function AboutOverlayDialog({
                   latestPdfBenchmark: latestBenchmark ? {
                     createdUtc: latestBenchmark.createdUtc,
                     pageCount: latestBenchmark.pageCount,
+                    testedStrategies: latestBenchmark.testedStrategies,
+                    testedWorkerCounts: latestBenchmark.testedWorkerCounts,
                     testedBatchSizes: latestBenchmark.testedBatchSizes,
+                    testedImageLoadConcurrencies: latestBenchmark.testedImageLoadConcurrencies,
+                    scenarioCount: latestBenchmark.scenarioCount,
                     best: latestBenchmark.best,
                     bestTimings: latestBenchmark.best?.timings || null,
                   } : null,

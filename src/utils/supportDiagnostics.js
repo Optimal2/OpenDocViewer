@@ -75,6 +75,12 @@ function collectConfigDiagnostics() {
       workerBatchSize: Number(pdf.workerBatchSize || 0) || 0,
       imageLoadConcurrency: Number(pdf.imageLoadConcurrency || 0) || 0,
       benchmarkEnabled: benchmark.enabled === true,
+      benchmarkStrategies: Array.isArray(benchmark.strategies) ? benchmark.strategies.slice(0, 12) : [],
+      benchmarkWorkerCounts: Array.isArray(benchmark.workerCounts) ? benchmark.workerCounts.slice(0, 32) : [],
+      benchmarkImageLoadConcurrencies: Array.isArray(benchmark.imageLoadConcurrencies)
+        ? benchmark.imageLoadConcurrencies.slice(0, 32)
+        : [],
+      benchmarkMaxRuns: Number(benchmark.maxRuns || 0) || 0,
     },
     documentLoading: {
       mode: String(loading.mode || ''),
