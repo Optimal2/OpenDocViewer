@@ -7,7 +7,7 @@
  *  - Sticky Fit recomputation on relevant changes
  *  - ResizeObserver to re-fit on container resize
  *  - Global Ctrl/Cmd + wheel zoom
- *  - Global keyboard navigation/zoom shortcuts with context guards
+ *  - Global keyboard navigation/zoom/selection shortcuts with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
  * The keyboard layer now understands compare-targeted navigation with Shift and document-level
@@ -53,6 +53,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {boolean} documentNavigationEnabled
  * @property {boolean} compareNavigationEnabled
  * @property {Function=} hideCurrentPageFromSelection
+ * @property {Function=} hideCurrentDocumentFromSelection
  * @property {Function} zoomIn
  * @property {Function} zoomOut
  * @property {Function} rotateLeft
@@ -192,6 +193,7 @@ export function useViewerEffects(args) {
     documentNavigationEnabled,
     compareNavigationEnabled,
     hideCurrentPageFromSelection,
+    hideCurrentDocumentFromSelection,
     zoomIn,
     zoomOut,
     rotateLeft,
@@ -214,7 +216,9 @@ export function useViewerEffects(args) {
   const goToLastDocumentRef = useRef(goToLastDocument);
   const documentNavigationEnabledRef = useRef(documentNavigationEnabled);
   const compareNavigationEnabledRef = useRef(compareNavigationEnabled);
+  const isComparingRef = useRef(isComparing);
   const hideCurrentPageFromSelectionRef = useRef(hideCurrentPageFromSelection);
+  const hideCurrentDocumentFromSelectionRef = useRef(hideCurrentDocumentFromSelection);
   const zoomInRef = useRef(zoomIn);
   const zoomOutRef = useRef(zoomOut);
   const rotateLeftRef = useRef(rotateLeft);
@@ -230,7 +234,9 @@ export function useViewerEffects(args) {
   goToLastDocumentRef.current = goToLastDocument;
   documentNavigationEnabledRef.current = documentNavigationEnabled;
   compareNavigationEnabledRef.current = compareNavigationEnabled;
+  isComparingRef.current = isComparing;
   hideCurrentPageFromSelectionRef.current = hideCurrentPageFromSelection;
+  hideCurrentDocumentFromSelectionRef.current = hideCurrentDocumentFromSelection;
   zoomInRef.current = zoomIn;
   zoomOutRef.current = zoomOut;
   rotateLeftRef.current = rotateLeft;
@@ -492,10 +498,16 @@ export function useViewerEffects(args) {
           break;
 
         case 'Delete':
-          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          if (!e.metaKey && !e.altKey) {
             e.preventDefault();
             stopKeyboardRepeat();
-            hideCurrentPageFromSelectionRef.current?.(target);
+            if (e.ctrlKey) {
+              const deleteTarget = e.shiftKey ? 'compare' : 'primary';
+              if (deleteTarget === 'compare' && !isComparingRef.current) break;
+              hideCurrentDocumentFromSelectionRef.current?.(deleteTarget);
+            } else {
+              hideCurrentPageFromSelectionRef.current?.(target);
+            }
           }
           break;
 

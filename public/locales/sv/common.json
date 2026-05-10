@@ -518,7 +518,7 @@
         "body": "Fliken Urval låter dig inkludera eller exkludera hela dokument eller enskilda sidor. Spara verkställer urvalet. Avbryt återgår till senast sparade urval.",
         "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen.",
         "collapse": "Varje dokument kan expanderas eller fällas ihop i fliken Urval så att stora sessioner blir lättare att hantera.",
-        "shortcut": "Tryck Delete för att dölja aktuell vänster-/huvudsida från det sparade urvalet. Håll ned Shift i jämförelseläge för att dölja den högra sidan i stället."
+        "shortcut": "Tryck Delete för att dölja aktuell vänster-/huvudsida från det sparade urvalet. Håll ned Shift i jämförelseläge för att dölja den högra sidan i stället. Håll ned Ctrl för att dölja hela aktuella dokumentet; håll ned Ctrl + Shift i jämförelseläge för att dölja dokumentet på höger sida."
       },
       "adjustments": {
         "title": "Bildjusteringar",
