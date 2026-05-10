@@ -569,7 +569,16 @@
       "benchmarkDone": "Benchmark completed.",
       "benchmarkError": "Benchmark failed: {error}",
       "benchmarkSummary": "Best run: {ms} ms, {pages} pages, batch {batch}.",
-      "noBenchmark": "No PDF benchmark result has been recorded."
+      "noBenchmark": "No PDF benchmark result has been recorded.",
+      "runRenderBenchmark": "Run render/decode benchmark",
+      "renderBenchmarkRunningShort": "Running…",
+      "downloadRenderBenchmark": "Download render/decode JSON",
+      "renderBenchmarkRunning": "Running render/decode benchmark…",
+      "renderBenchmarkProgress": "Running render/decode {current} of {total}…",
+      "renderBenchmarkDone": "Render/decode benchmark completed.",
+      "renderBenchmarkError": "Render/decode benchmark failed: {error}",
+      "renderBenchmarkSummary": "Best render/decode run: {ms} ms, {pages} pages, {scenario}.",
+      "noRenderBenchmark": "No render/decode benchmark result has been recorded."
     }
   },
   "metadataMatrix": {

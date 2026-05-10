@@ -7,7 +7,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
-import { collectSupportDiagnostics, downloadJsonFile, loadLatestPdfBenchmarkResult } from '../../utils/supportDiagnostics.js';
+import { collectSupportDiagnostics, downloadJsonFile, loadLatestPdfBenchmarkResult, loadLatestRenderDecodeBenchmarkResult } from '../../utils/supportDiagnostics.js';
 
 /**
  * @returns {{ version:string, buildId:string, githubUrl:string, contactEmail:string }}
@@ -37,6 +37,8 @@ function resolveAboutInfo() {
  * @param {function(): void} props.onClose
  * @param {boolean=} props.benchmarkEnabled
  * @param {function(Object=): Promise<Object>=} props.onRunPdfBenchmark
+ * @param {boolean=} props.renderBenchmarkEnabled
+ * @param {function(Object=): Promise<Object>=} props.onRunRenderBenchmark
  * @returns {(React.ReactElement|null)}
  */
 export default function AboutOverlayDialog({
@@ -44,20 +46,25 @@ export default function AboutOverlayDialog({
   onClose,
   benchmarkEnabled = false,
   onRunPdfBenchmark,
+  renderBenchmarkEnabled = false,
+  onRunRenderBenchmark,
 }) {
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const aboutInfo = useMemo(() => resolveAboutInfo(), []);
   const diagnosticsEnabled = useMemo(() => {
     const cfg = getRuntimeConfig();
-    return cfg?.help?.about?.diagnostics?.enabled === true || benchmarkEnabled;
-  }, [benchmarkEnabled]);
+    return cfg?.help?.about?.diagnostics?.enabled === true || benchmarkEnabled || renderBenchmarkEnabled;
+  }, [benchmarkEnabled, renderBenchmarkEnabled]);
   const [latestBenchmark, setLatestBenchmark] = useState(() => loadLatestPdfBenchmarkResult());
+  const [latestRenderBenchmark, setLatestRenderBenchmark] = useState(() => loadLatestRenderDecodeBenchmarkResult());
   const [benchmarkState, setBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
+  const [renderBenchmarkState, setRenderBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
 
   useEffect(() => {
     if (!isOpen) return undefined;
     setLatestBenchmark(loadLatestPdfBenchmarkResult());
+    setLatestRenderBenchmark(loadLatestRenderDecodeBenchmarkResult());
     dialogRef.current?.focus?.();
 
     /** @param {KeyboardEvent} event */
@@ -76,18 +83,27 @@ export default function AboutOverlayDialog({
     };
   }, [isOpen, onClose]);
 
-  const diagnostics = useMemo(() => collectSupportDiagnostics({ latestPdfBenchmark: latestBenchmark }), [latestBenchmark]);
+  const diagnostics = useMemo(() => collectSupportDiagnostics({
+    latestPdfBenchmark: latestBenchmark,
+    latestRenderDecodeBenchmark: latestRenderBenchmark,
+  }), [latestBenchmark, latestRenderBenchmark]);
 
   const downloadDiagnostics = useCallback(() => {
     downloadJsonFile('opendocviewer-diagnostics.json', collectSupportDiagnostics({
       latestPdfBenchmark: latestBenchmark,
+      latestRenderDecodeBenchmark: latestRenderBenchmark,
     }));
-  }, [latestBenchmark]);
+  }, [latestBenchmark, latestRenderBenchmark]);
 
   const downloadBenchmark = useCallback(() => {
     if (!latestBenchmark) return;
     downloadJsonFile('opendocviewer-pdf-benchmark.json', latestBenchmark);
   }, [latestBenchmark]);
+
+  const downloadRenderBenchmark = useCallback(() => {
+    if (!latestRenderBenchmark) return;
+    downloadJsonFile('opendocviewer-render-decode-benchmark.json', latestRenderBenchmark);
+  }, [latestRenderBenchmark]);
 
   const runBenchmark = useCallback(async () => {
     if (!benchmarkEnabled || typeof onRunPdfBenchmark !== 'function') return;
@@ -132,6 +148,49 @@ export default function AboutOverlayDialog({
     }
   }, [benchmarkEnabled, onRunPdfBenchmark, t]);
 
+  const runRenderBenchmark = useCallback(async () => {
+    if (!renderBenchmarkEnabled || typeof onRunRenderBenchmark !== 'function') return;
+    setRenderBenchmarkState({
+      status: 'running',
+      message: t('about.diagnostics.renderBenchmarkRunning', { defaultValue: 'Running render/decode benchmark…' }),
+    });
+    try {
+      const result = await onRunRenderBenchmark({
+        onProgress: (event) => {
+          const completed = Math.max(0, Number(event?.completedRuns || 0));
+          const total = Math.max(1, Number(event?.totalRuns || 1));
+          if (event?.phase === 'running') {
+            const scenario = String(event?.scenarioLabel || '').trim();
+            setRenderBenchmarkState({
+              status: 'running',
+              message: t('about.diagnostics.renderBenchmarkProgress', {
+                current: completed + 1,
+                total,
+                scenario,
+                defaultValue: scenario
+                  ? `Running render/decode benchmark ${completed + 1} of ${total}: ${scenario}…`
+                  : `Running render/decode benchmark ${completed + 1} of ${total}…`,
+              }),
+            });
+          }
+        },
+      });
+      setLatestRenderBenchmark(result);
+      setRenderBenchmarkState({
+        status: 'done',
+        message: t('about.diagnostics.renderBenchmarkDone', { defaultValue: 'Render/decode benchmark completed.' }),
+      });
+    } catch (error) {
+      setRenderBenchmarkState({
+        status: 'error',
+        message: t('about.diagnostics.renderBenchmarkError', {
+          error: String(error?.message || error),
+          defaultValue: `Render/decode benchmark failed: ${String(error?.message || error)}`,
+        }),
+      });
+    }
+  }, [onRunRenderBenchmark, renderBenchmarkEnabled, t]);
+
   const benchmarkSummary = latestBenchmark?.best
     ? t('about.diagnostics.benchmarkSummary', {
         ms: latestBenchmark.best.durationMs,
@@ -140,6 +199,15 @@ export default function AboutOverlayDialog({
         defaultValue: `Best run: ${latestBenchmark.best.durationMs} ms, ${latestBenchmark.pageCount} pages, ${latestBenchmark.best.scenarioLabel || `batch ${latestBenchmark.best.batchSizeLabel}`}.`,
       })
     : t('about.diagnostics.noBenchmark', { defaultValue: 'No PDF benchmark result has been recorded.' });
+
+  const renderBenchmarkSummary = latestRenderBenchmark?.best
+    ? t('about.diagnostics.renderBenchmarkSummary', {
+        ms: latestRenderBenchmark.best.durationMs,
+        pages: latestRenderBenchmark.pageCount,
+        scenario: latestRenderBenchmark.best.scenarioLabel,
+        defaultValue: `Best render/decode run: ${latestRenderBenchmark.best.durationMs} ms, ${latestRenderBenchmark.pageCount} pages, ${latestRenderBenchmark.best.scenarioLabel}.`,
+      })
+    : t('about.diagnostics.noRenderBenchmark', { defaultValue: 'No render/decode benchmark result has been recorded.' });
 
   if (!isOpen) return null;
 
@@ -225,7 +293,7 @@ export default function AboutOverlayDialog({
                     type="button"
                     className="odv-help-close-button"
                     onClick={runBenchmark}
-                    disabled={benchmarkState.status === 'running'}
+                    disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
                   >
                     {benchmarkState.status === 'running'
                       ? t('about.diagnostics.benchmarkRunningShort', { defaultValue: 'Running…' })
@@ -237,9 +305,29 @@ export default function AboutOverlayDialog({
                     {t('about.diagnostics.downloadBenchmark', { defaultValue: 'Download benchmark JSON' })}
                   </button>
                 ) : null}
+                {renderBenchmarkEnabled ? (
+                  <button
+                    type="button"
+                    className="odv-help-close-button"
+                    onClick={runRenderBenchmark}
+                    disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
+                  >
+                    {renderBenchmarkState.status === 'running'
+                      ? t('about.diagnostics.renderBenchmarkRunningShort', { defaultValue: 'Running…' })
+                      : t('about.diagnostics.runRenderBenchmark', { defaultValue: 'Run render/decode benchmark' })}
+                  </button>
+                ) : null}
+                {latestRenderBenchmark ? (
+                  <button type="button" className="odv-help-close-button" onClick={downloadRenderBenchmark}>
+                    {t('about.diagnostics.downloadRenderBenchmark', { defaultValue: 'Download render/decode JSON' })}
+                  </button>
+                ) : null}
               </div>
               <p className={`odv-about-diagnostics-status is-${benchmarkState.status}`}>
                 {benchmarkState.message || benchmarkSummary}
+              </p>
+              <p className={`odv-about-diagnostics-status is-${renderBenchmarkState.status}`}>
+                {renderBenchmarkState.message || renderBenchmarkSummary}
               </p>
               <pre className="odv-about-diagnostics-json">
                 {JSON.stringify({
@@ -256,6 +344,14 @@ export default function AboutOverlayDialog({
                     scenarioCount: latestBenchmark.scenarioCount,
                     best: latestBenchmark.best,
                     bestTimings: latestBenchmark.best?.timings || null,
+                  } : null,
+                  latestRenderDecodeBenchmark: latestRenderBenchmark ? {
+                    createdUtc: latestRenderBenchmark.createdUtc,
+                    pageCount: latestRenderBenchmark.pageCount,
+                    testedVariants: latestRenderBenchmark.testedVariants,
+                    testedWorkerCounts: latestRenderBenchmark.testedWorkerCounts,
+                    scenarioCount: latestRenderBenchmark.scenarioCount,
+                    best: latestRenderBenchmark.best,
                   } : null,
                 }, null, 2)}
               </pre>
@@ -278,4 +374,6 @@ AboutOverlayDialog.propTypes = {
   onClose: PropTypes.func.isRequired,
   benchmarkEnabled: PropTypes.bool,
   onRunPdfBenchmark: PropTypes.func,
+  renderBenchmarkEnabled: PropTypes.bool,
+  onRunRenderBenchmark: PropTypes.func,
 };

@@ -6,6 +6,7 @@
 import { getRuntimeConfig } from './runtimeConfig.js';
 
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
+const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
 
 /**
  * @returns {string}
@@ -65,6 +66,7 @@ function collectConfigDiagnostics() {
   const benchmark = pdf?.benchmark || {};
   const loading = cfg?.documentLoading || {};
   const render = loading?.render || {};
+  const renderBenchmark = loading?.renderBenchmark || {};
   return {
     printPdf: {
       enabled: pdf.enabled === true,
@@ -89,6 +91,12 @@ function collectConfigDiagnostics() {
       workerCount: Number(render.workerCount || 0) || 0,
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
+      renderBenchmarkEnabled: renderBenchmark.enabled === true,
+      renderBenchmarkVariants: Array.isArray(renderBenchmark.variants) ? renderBenchmark.variants.slice(0, 12) : [],
+      renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
+        ? renderBenchmark.workerCounts.slice(0, 32)
+        : [],
+      renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns || 0) || 0,
     },
   };
 }
@@ -123,10 +131,41 @@ export function saveLatestPdfBenchmarkResult(result) {
 }
 
 /**
+ * @returns {Object|null}
+ */
+export function loadLatestRenderDecodeBenchmarkResult() {
+  try {
+    const raw = typeof localStorage !== 'undefined'
+      ? localStorage.getItem(LATEST_RENDER_DECODE_BENCHMARK_KEY)
+      : null;
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    return parsed && typeof parsed === 'object' ? parsed : null;
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * @param {Object} result
+ * @returns {void}
+ */
+export function saveLatestRenderDecodeBenchmarkResult(result) {
+  try {
+    if (typeof localStorage === 'undefined') return;
+    localStorage.setItem(LATEST_RENDER_DECODE_BENCHMARK_KEY, JSON.stringify(result));
+  } catch {
+    // Diagnostics persistence is best-effort only.
+  }
+}
+
+/**
  * @param {Object=} extra
  * @returns {Object}
  */
 export function collectSupportDiagnostics(extra = {}) {
+  const hasLatestPdfBenchmark = Object.prototype.hasOwnProperty.call(extra, 'latestPdfBenchmark');
+  const hasLatestRenderDecodeBenchmark = Object.prototype.hasOwnProperty.call(extra, 'latestRenderDecodeBenchmark');
   return {
     schema: 'opendocviewer.support-diagnostics.v1',
     createdUtc: new Date().toISOString(),
@@ -137,7 +176,12 @@ export function collectSupportDiagnostics(extra = {}) {
     navigator: collectNavigatorDiagnostics(),
     location: collectLocationDiagnostics(),
     config: collectConfigDiagnostics(),
-    latestPdfBenchmark: extra.latestPdfBenchmark || loadLatestPdfBenchmarkResult(),
+    latestPdfBenchmark: hasLatestPdfBenchmark
+      ? extra.latestPdfBenchmark
+      : loadLatestPdfBenchmarkResult(),
+    latestRenderDecodeBenchmark: hasLatestRenderDecodeBenchmark
+      ? extra.latestRenderDecodeBenchmark
+      : loadLatestRenderDecodeBenchmarkResult(),
     extra: extra.extra || undefined,
   };
 }

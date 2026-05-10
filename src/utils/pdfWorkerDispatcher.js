@@ -9,9 +9,10 @@
 import PdfWorker from '../workers/pdfWorker.js?worker';
 import PdfMergeWorker from '../workers/pdfMergeWorker.js?worker';
 
-const MIN_AUTO_BATCH_SIZE = 5;
-const MAX_AUTO_BATCH_SIZE = 40;
-const TARGET_BATCHES_PER_WORKER = 2;
+const MIN_AUTO_BATCH_SIZE = 40;
+const MAX_AUTO_BATCH_SIZE = 180;
+const TARGET_AUTO_BATCH_PAGE_COUNT = 180;
+const MAX_AUTO_BATCH_COUNT = 4;
 const BATCH_LIBRARY_JOB_UNITS = 1;
 const BATCH_FINALIZE_JOB_UNITS = 1;
 
@@ -45,9 +46,12 @@ function clampInteger(value, min, max) {
 }
 
 /**
- * Pick a conservative future batch size. Too-small batches create too many PDFs to
- * merge; too-large batches underuse available cores. This aims for roughly two
- * batches per worker while keeping ordinary large jobs in a 5..40 page range.
+ * Pick a conservative future batch size. Browser-side PDF generation has a large
+ * fixed cost per partial PDF: every batch loads jsPDF, creates a PDF object, and
+ * later participates in merge-worker rounds. Benchmarks on 300-page jobs showed
+ * that many small batches can be much slower than one to four large batches, even
+ * on high-core clients. Auto therefore aims for a small number of large partials
+ * instead of trying to keep every logical core busy.
  * @param {number} pageCount
  * @param {number} workerCount
  * @returns {number}
@@ -55,7 +59,13 @@ function clampInteger(value, min, max) {
 export function resolveAutoPdfWorkerBatchSize(pageCount, workerCount) {
   const safePageCount = Math.max(1, Math.floor(Number(pageCount) || 1));
   const safeWorkerCount = Math.max(1, Math.floor(Number(workerCount) || 1));
-  const targetBatchCount = Math.max(1, safeWorkerCount * TARGET_BATCHES_PER_WORKER);
+  if (safeWorkerCount <= 1 || safePageCount <= MAX_AUTO_BATCH_SIZE) return safePageCount;
+
+  const targetBatchCount = Math.max(1, Math.min(
+    safeWorkerCount,
+    MAX_AUTO_BATCH_COUNT,
+    Math.ceil(safePageCount / TARGET_AUTO_BATCH_PAGE_COUNT)
+  ));
   return clampInteger(Math.ceil(safePageCount / targetBatchCount), MIN_AUTO_BATCH_SIZE, MAX_AUTO_BATCH_SIZE);
 }
 
