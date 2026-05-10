@@ -150,6 +150,7 @@ Behavior:
 - the manual dialog first tries the site-local HTML fragment under `help/site/`
 - if no site-local file exists for the current language, it falls back to the bundled default under `help/default/`
 - site-local manuals can therefore be upgraded independently of the app bundle as long as the deployment keeps `help/site/manual.<lng>.html` outside the tracked repo
+- the manual dialog has a reload button that bypasses browser/server caches with a unique cache-busting URL when a site-local manual has been replaced during an active support session
 - relative links inside the loaded HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
 - the About dialog always exposes the support diagnostics JSON download; benchmark execution controls are separate opt-in runtime flags and default to disabled
 

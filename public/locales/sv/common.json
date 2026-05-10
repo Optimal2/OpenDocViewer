@@ -540,6 +540,7 @@
     },
     "loadedFrom": "Laddad från {path}",
     "loading": "Laddar manual…",
+    "refreshManual": "Ladda om manual från servern",
     "manualNotAvailable": "Ingen manualfil kunde laddas för detta språk.",
     "manualPathsHint": "Lägg en lokal HTML-fil under help/site/ eller använd den inbyggda fallback-filen under help/default/.",
     "menu": {

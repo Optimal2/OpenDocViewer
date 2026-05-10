@@ -5,10 +5,12 @@
  * This keeps customer-specific manual text and linked assets out of the compiled React bundle.
  */
 
-import React, { useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+
+const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
 
 /**
  * @param {*} value
@@ -86,6 +88,39 @@ function rewriteManualHtml(html, resolvedUrl) {
 }
 
 /**
+ * @param {string} url
+ * @param {number} refreshToken
+ * @returns {string}
+ */
+function appendManualRefreshToken(url, refreshToken) {
+  if (!refreshToken) return url;
+  try {
+    const parsed = new URL(String(url || ''), window.location.href);
+    parsed.searchParams.set(MANUAL_REFRESH_QUERY_KEY, String(refreshToken));
+    return parsed.toString();
+  } catch {
+    const separator = String(url || '').includes('?') ? '&' : '?';
+    return `${url}${separator}${MANUAL_REFRESH_QUERY_KEY}=${encodeURIComponent(String(refreshToken))}`;
+  }
+}
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function removeManualRefreshToken(url) {
+  const raw = String(url || '');
+  if (!raw) return raw;
+  try {
+    const parsed = new URL(raw, window.location.href);
+    parsed.searchParams.delete(MANUAL_REFRESH_QUERY_KEY);
+    return parsed.toString();
+  } catch {
+    return raw.replace(new RegExp(`([?&])${MANUAL_REFRESH_QUERY_KEY}=[^&]*&?`), '$1').replace(/[?&]$/, '');
+  }
+}
+
+/**
  * @param {string} language
  * @returns {Array<string>}
  */
@@ -123,11 +158,16 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const [manualState, setManualState] = useState({ loading: false, error: '', html: '', resolvedUrl: '' });
+  const [refreshToken, setRefreshToken] = useState(0);
 
   const language = useMemo(() => {
     const raw = String(i18n?.resolvedLanguage || i18n?.language || 'en').toLowerCase();
     return raw.split('-')[0] || 'en';
   }, [i18n?.language, i18n?.resolvedLanguage]);
+
+  const handleRefresh = useCallback(() => {
+    setRefreshToken(Date.now());
+  }, []);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -159,7 +199,9 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       const candidates = buildManualCandidates(language);
       for (const candidate of candidates) {
         try {
-          const response = await fetch(candidate, {
+          const requestUrl = appendManualRefreshToken(candidate, refreshToken);
+          const response = await fetch(requestUrl, {
+            cache: refreshToken ? 'reload' : 'no-store',
             credentials: 'same-origin',
             signal: controller?.signal,
             headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
@@ -167,11 +209,12 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
           if (!response.ok) continue;
           const html = await response.text();
           if (cancelled) return;
+          const resolvedUrl = removeManualRefreshToken(response.url || requestUrl);
           setManualState({
             loading: false,
             error: '',
-            html: rewriteManualHtml(html, response.url || candidate),
-            resolvedUrl: response.url || candidate,
+            html: rewriteManualHtml(html, resolvedUrl || candidate),
+            resolvedUrl: resolvedUrl || candidate,
           });
           return;
         } catch (error) {
@@ -196,7 +239,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       cancelled = true;
       controller?.abort?.();
     };
-  }, [isOpen, language, t]);
+  }, [isOpen, language, refreshToken, t]);
 
   if (!isOpen) return null;
 
@@ -241,15 +284,27 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
                   })}
             </p>
           </div>
-          <button
-            type="button"
-            className="odv-help-close-icon"
-            onClick={onClose}
-            aria-label={t('help.close', { defaultValue: 'Close' })}
-            title={t('help.close', { defaultValue: 'Close' })}
-          >
-            <span className="material-icons" aria-hidden="true">close</span>
-          </button>
+          <div className="odv-help-header-actions">
+            <button
+              type="button"
+              className="odv-help-close-icon"
+              onClick={handleRefresh}
+              disabled={manualState.loading}
+              aria-label={t('help.refreshManual', { defaultValue: 'Reload manual from server' })}
+              title={t('help.refreshManual', { defaultValue: 'Reload manual from server' })}
+            >
+              <span className="material-icons" aria-hidden="true">refresh</span>
+            </button>
+            <button
+              type="button"
+              className="odv-help-close-icon"
+              onClick={onClose}
+              aria-label={t('help.close', { defaultValue: 'Close' })}
+              title={t('help.close', { defaultValue: 'Close' })}
+            >
+              <span className="material-icons" aria-hidden="true">close</span>
+            </button>
+          </div>
         </div>
 
         <div className="odv-help-body odv-help-body-manual">
