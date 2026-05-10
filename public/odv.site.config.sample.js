@@ -139,8 +139,9 @@
         workerPageThreshold: 10,
         partialMergeEnabled: true,
         workerCount: 0,
-        // 0 = auto; ODV targets roughly two merge batches per worker,
-        // bounded to avoid tiny batches that would create too many PDFs to merge.
+        // 0 = auto; ODV targets a few large partial PDFs. Benchmarks on high-core clients
+        // show that many tiny partial PDFs lose more time in setup/merge overhead than
+        // they gain from keeping every core busy.
         workerBatchSize: 0,
         // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
         // recommendation helper as documentLoading.render.workerCount.
@@ -160,7 +161,7 @@
           workerCounts: [0],
           // 0 means auto. Add explicit counts to benchmark image loading inside PDF workers.
           imageLoadConcurrencies: [0],
-          batchSizes: [0, 5, 10, 20, 30, 40, 60, 80],
+          batchSizes: [0, 40, 80, 100, 150, 180],
           maxRuns: 80,
           delayBetweenRunsMs: 150
         }
@@ -663,6 +664,19 @@
         // Limits for open decoded multi-page source objects kept by the lazy renderer.
         maxOpenPdfDocuments: 16,
         maxOpenTiffDocuments: 16
+      },
+
+      // Opt-in support tooling for benchmarking the page render/decode pipeline against the
+      // current loaded source blobs. Results are available under About -> Diagnostics.
+      renderBenchmark: {
+        enabled: false,
+        pageLimit: 120,
+        iterations: 1,
+        variants: ['full', 'thumbnail'],
+        // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
+        workerCounts: [0],
+        maxRuns: 40,
+        delayBetweenRunsMs: 150
       },
 
       memoryPressure: {

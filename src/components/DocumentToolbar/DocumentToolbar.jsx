@@ -35,6 +35,7 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { createWarmPrintFrame, disposeWarmPrintFrame, shouldEnableWarmPrintFrame } from '../../utils/printWarmFrame.js';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
+import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '', minimized: false });
 
@@ -887,6 +888,7 @@ const DocumentToolbar = ({
   }, [printEnabled, printWarmFrameStatus, t]);
 
   const pdfBenchmarkEnabled = useMemo(() => isPdfBenchmarkEnabled(getRuntimeConfig()), []);
+  const renderBenchmarkEnabled = useMemo(() => isRenderDecodeBenchmarkEnabled(getRuntimeConfig()), []);
 
   const getWarmCompatibleIndexes = useCallback((detail) => {
     if (!detail || detail.mode === 'active') return null;
@@ -1226,6 +1228,14 @@ const DocumentToolbar = ({
     });
   }, [documentRenderRef, makePrintOptions, resolvePrintPageNumbers]);
 
+  const handleRunRenderBenchmark = useCallback(async ({ onProgress, signal } = {}) => runRenderDecodeBenchmark({
+    allPages,
+    viewerContext,
+    config: getRuntimeConfig(),
+    onProgress,
+    signal,
+  }), [allPages, viewerContext]);
+
   const isPdfProgressCancelling = pdfProgress.phase === 'cancelling';
   const isPdfProgressCancelled = pdfProgress.phase === 'cancelled';
   const isPdfProgressReady = pdfProgress.phase === 'ready';
@@ -1542,6 +1552,8 @@ const DocumentToolbar = ({
         onClose={() => setIsAboutDialogOpen(false)}
         benchmarkEnabled={pdfBenchmarkEnabled}
         onRunPdfBenchmark={handleRunPdfBenchmark}
+        renderBenchmarkEnabled={renderBenchmarkEnabled}
+        onRunRenderBenchmark={handleRunRenderBenchmark}
       />
 
       {pdfProgress.open && pdfProgress.minimized ? (

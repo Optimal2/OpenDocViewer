@@ -569,7 +569,16 @@
       "benchmarkDone": "Benchmark slutförd.",
       "benchmarkError": "Benchmark misslyckades: {error}",
       "benchmarkSummary": "Bästa körning: {ms} ms, {pages} sidor, batch {batch}.",
-      "noBenchmark": "Ingen PDF-benchmark har körts."
+      "noBenchmark": "Ingen PDF-benchmark har körts.",
+      "runRenderBenchmark": "Kör render/decode-benchmark",
+      "renderBenchmarkRunningShort": "Kör…",
+      "downloadRenderBenchmark": "Ladda ned render/decode-JSON",
+      "renderBenchmarkRunning": "Kör render/decode-benchmark…",
+      "renderBenchmarkProgress": "Kör render/decode {current} av {total}…",
+      "renderBenchmarkDone": "Render/decode-benchmark slutförd.",
+      "renderBenchmarkError": "Render/decode-benchmark misslyckades: {error}",
+      "renderBenchmarkSummary": "Bästa render/decode: {ms} ms, {pages} sidor, {scenario}.",
+      "noRenderBenchmark": "Ingen render/decode-benchmark har körts."
     }
   },
   "metadataMatrix": {
