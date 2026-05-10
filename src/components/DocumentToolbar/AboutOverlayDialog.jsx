@@ -52,10 +52,6 @@ export default function AboutOverlayDialog({
   const { t } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const aboutInfo = useMemo(() => resolveAboutInfo(), []);
-  const diagnosticsEnabled = useMemo(() => {
-    const cfg = getRuntimeConfig();
-    return cfg?.help?.about?.diagnostics?.enabled === true || benchmarkEnabled || renderBenchmarkEnabled;
-  }, [benchmarkEnabled, renderBenchmarkEnabled]);
   const [latestBenchmark, setLatestBenchmark] = useState(() => loadLatestPdfBenchmarkResult());
   const [latestRenderBenchmark, setLatestRenderBenchmark] = useState(() => loadLatestRenderDecodeBenchmarkResult());
   const [benchmarkState, setBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
@@ -281,82 +277,84 @@ export default function AboutOverlayDialog({
               </div>
             </div>
           </div>
-          {diagnosticsEnabled ? (
-            <details className="odv-about-diagnostics">
-              <summary>{t('about.diagnostics.summary', { defaultValue: 'Diagnostics' })}</summary>
-              <div className="odv-about-diagnostics-actions">
-                <button type="button" className="odv-help-close-button" onClick={downloadDiagnostics}>
-                  {t('about.diagnostics.download', { defaultValue: 'Download diagnostics JSON' })}
+          <details className="odv-about-diagnostics">
+            <summary>{t('about.diagnostics.summary', { defaultValue: 'Diagnostics' })}</summary>
+            <div className="odv-about-diagnostics-actions">
+              <button type="button" className="odv-help-close-button" onClick={downloadDiagnostics}>
+                {t('about.diagnostics.download', { defaultValue: 'Download diagnostics JSON' })}
+              </button>
+              {benchmarkEnabled ? (
+                <button
+                  type="button"
+                  className="odv-help-close-button"
+                  onClick={runBenchmark}
+                  disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
+                >
+                  {benchmarkState.status === 'running'
+                    ? t('about.diagnostics.benchmarkRunningShort', { defaultValue: 'Running…' })
+                    : t('about.diagnostics.runBenchmark', { defaultValue: 'Run PDF benchmark' })}
                 </button>
-                {benchmarkEnabled ? (
-                  <button
-                    type="button"
-                    className="odv-help-close-button"
-                    onClick={runBenchmark}
-                    disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
-                  >
-                    {benchmarkState.status === 'running'
-                      ? t('about.diagnostics.benchmarkRunningShort', { defaultValue: 'Running…' })
-                      : t('about.diagnostics.runBenchmark', { defaultValue: 'Run PDF benchmark' })}
-                  </button>
-                ) : null}
-                {latestBenchmark ? (
-                  <button type="button" className="odv-help-close-button" onClick={downloadBenchmark}>
-                    {t('about.diagnostics.downloadBenchmark', { defaultValue: 'Download benchmark JSON' })}
-                  </button>
-                ) : null}
-                {renderBenchmarkEnabled ? (
-                  <button
-                    type="button"
-                    className="odv-help-close-button"
-                    onClick={runRenderBenchmark}
-                    disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
-                  >
-                    {renderBenchmarkState.status === 'running'
-                      ? t('about.diagnostics.renderBenchmarkRunningShort', { defaultValue: 'Running…' })
-                      : t('about.diagnostics.runRenderBenchmark', { defaultValue: 'Run render/decode benchmark' })}
-                  </button>
-                ) : null}
-                {latestRenderBenchmark ? (
-                  <button type="button" className="odv-help-close-button" onClick={downloadRenderBenchmark}>
-                    {t('about.diagnostics.downloadRenderBenchmark', { defaultValue: 'Download render/decode JSON' })}
-                  </button>
-                ) : null}
-              </div>
+              ) : null}
+              {latestBenchmark ? (
+                <button type="button" className="odv-help-close-button" onClick={downloadBenchmark}>
+                  {t('about.diagnostics.downloadBenchmark', { defaultValue: 'Download benchmark JSON' })}
+                </button>
+              ) : null}
+              {renderBenchmarkEnabled ? (
+                <button
+                  type="button"
+                  className="odv-help-close-button"
+                  onClick={runRenderBenchmark}
+                  disabled={benchmarkState.status === 'running' || renderBenchmarkState.status === 'running'}
+                >
+                  {renderBenchmarkState.status === 'running'
+                    ? t('about.diagnostics.renderBenchmarkRunningShort', { defaultValue: 'Running…' })
+                    : t('about.diagnostics.runRenderBenchmark', { defaultValue: 'Run render/decode benchmark' })}
+                </button>
+              ) : null}
+              {latestRenderBenchmark ? (
+                <button type="button" className="odv-help-close-button" onClick={downloadRenderBenchmark}>
+                  {t('about.diagnostics.downloadRenderBenchmark', { defaultValue: 'Download render/decode JSON' })}
+                </button>
+              ) : null}
+            </div>
+            {benchmarkEnabled || latestBenchmark ? (
               <p className={`odv-about-diagnostics-status is-${benchmarkState.status}`}>
                 {benchmarkState.message || benchmarkSummary}
               </p>
+            ) : null}
+            {renderBenchmarkEnabled || latestRenderBenchmark ? (
               <p className={`odv-about-diagnostics-status is-${renderBenchmarkState.status}`}>
                 {renderBenchmarkState.message || renderBenchmarkSummary}
               </p>
-              <pre className="odv-about-diagnostics-json">
-                {JSON.stringify({
-                  app: diagnostics.app,
-                  navigator: diagnostics.navigator,
-                  config: diagnostics.config,
-                  latestPdfBenchmark: latestBenchmark ? {
-                    createdUtc: latestBenchmark.createdUtc,
-                    pageCount: latestBenchmark.pageCount,
-                    testedStrategies: latestBenchmark.testedStrategies,
-                    testedWorkerCounts: latestBenchmark.testedWorkerCounts,
-                    testedBatchSizes: latestBenchmark.testedBatchSizes,
-                    testedImageLoadConcurrencies: latestBenchmark.testedImageLoadConcurrencies,
-                    scenarioCount: latestBenchmark.scenarioCount,
-                    best: latestBenchmark.best,
-                    bestTimings: latestBenchmark.best?.timings || null,
-                  } : null,
-                  latestRenderDecodeBenchmark: latestRenderBenchmark ? {
-                    createdUtc: latestRenderBenchmark.createdUtc,
-                    pageCount: latestRenderBenchmark.pageCount,
-                    testedVariants: latestRenderBenchmark.testedVariants,
-                    testedWorkerCounts: latestRenderBenchmark.testedWorkerCounts,
-                    scenarioCount: latestRenderBenchmark.scenarioCount,
-                    best: latestRenderBenchmark.best,
-                  } : null,
-                }, null, 2)}
-              </pre>
-            </details>
-          ) : null}
+            ) : null}
+            <pre className="odv-about-diagnostics-json">
+              {JSON.stringify({
+                app: diagnostics.app,
+                navigator: diagnostics.navigator,
+                config: diagnostics.config,
+                latestPdfBenchmark: latestBenchmark ? {
+                  createdUtc: latestBenchmark.createdUtc,
+                  pageCount: latestBenchmark.pageCount,
+                  testedStrategies: latestBenchmark.testedStrategies,
+                  testedWorkerCounts: latestBenchmark.testedWorkerCounts,
+                  testedBatchSizes: latestBenchmark.testedBatchSizes,
+                  testedImageLoadConcurrencies: latestBenchmark.testedImageLoadConcurrencies,
+                  scenarioCount: latestBenchmark.scenarioCount,
+                  best: latestBenchmark.best,
+                  bestTimings: latestBenchmark.best?.timings || null,
+                } : null,
+                latestRenderDecodeBenchmark: latestRenderBenchmark ? {
+                  createdUtc: latestRenderBenchmark.createdUtc,
+                  pageCount: latestRenderBenchmark.pageCount,
+                  testedVariants: latestRenderBenchmark.testedVariants,
+                  testedWorkerCounts: latestRenderBenchmark.testedWorkerCounts,
+                  scenarioCount: latestRenderBenchmark.scenarioCount,
+                  best: latestRenderBenchmark.best,
+                } : null,
+              }, null, 2)}
+            </pre>
+          </details>
         </div>
 
         <div className="odv-help-footer">
