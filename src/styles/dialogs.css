@@ -963,6 +963,51 @@
   color: var(--thumbnail-primary-color);
 }
 
+.odv-about-diagnostics {
+  margin-top: 14px;
+  padding: 12px 14px;
+  border-radius: 12px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: color-mix(in srgb, var(--odv-surface-elevated) 94%, transparent 6%);
+}
+
+.odv-about-diagnostics summary {
+  cursor: pointer;
+  font-weight: 700;
+  color: var(--text-color-strong);
+}
+
+.odv-about-diagnostics-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+  margin-top: 12px;
+}
+
+.odv-about-diagnostics-status {
+  margin: 12px 0 0;
+  color: var(--text-muted-color);
+  line-height: 1.45;
+}
+
+.odv-about-diagnostics-status.is-error {
+  color: var(--warning-color);
+}
+
+.odv-about-diagnostics-json {
+  max-height: 260px;
+  overflow: auto;
+  margin: 12px 0 0;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: var(--odv-surface-muted);
+  font-size: 11px;
+  line-height: 1.45;
+  white-space: pre-wrap;
+  user-select: text;
+}
+
 @media (max-width: 720px) {
   .thumbnail-selection-status-row {
     flex-direction: column;

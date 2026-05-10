@@ -177,7 +177,16 @@
         workerBatchSize: 0,
         // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
         // recommendation helper as documentLoading.render.workerCount.
-        imageLoadConcurrency: 0
+        imageLoadConcurrency: 0,
+        // Opt-in support tooling. When enabled, About -> Diagnostics can benchmark
+        // generated-PDF assembly with several batch sizes without opening print preview.
+        benchmark: {
+          enabled: false,
+          pageLimit: 80,
+          iterations: 1,
+          batchSizes: [0, 5, 10, 20, 40],
+          delayBetweenRunsMs: 150
+        }
       },
 
       // Optional per-action button control for the print dialog footer.
@@ -279,7 +288,10 @@
       },
       about: {
         githubUrl: 'https://github.com/Optimal2/OpenDocViewer',
-        contactEmail: 'dev@optimal2.se'
+        contactEmail: 'dev@optimal2.se',
+        diagnostics: {
+          enabled: false
+        }
       }
     },
 

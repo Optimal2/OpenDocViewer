@@ -551,7 +551,20 @@
     "version": "Version",
     "buildId": "Build-id",
     "project": "Projekt",
-    "contact": "Kontakt"
+    "contact": "Kontakt",
+    "diagnostics": {
+      "summary": "Diagnostik",
+      "download": "Ladda ned diagnostik som JSON",
+      "runBenchmark": "Kör PDF-benchmark",
+      "benchmarkRunningShort": "Kör…",
+      "downloadBenchmark": "Ladda ned benchmark-JSON",
+      "benchmarkRunning": "Kör PDF-benchmark…",
+      "benchmarkProgress": "Kör benchmark {current} av {total}…",
+      "benchmarkDone": "Benchmark slutförd.",
+      "benchmarkError": "Benchmark misslyckades: {error}",
+      "benchmarkSummary": "Bästa körning: {ms} ms, {pages} sidor, batch {batch}.",
+      "noBenchmark": "Ingen PDF-benchmark har körts."
+    }
   },
   "metadataMatrix": {
     "title": "Metadataöversikt",
