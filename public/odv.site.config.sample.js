@@ -139,7 +139,9 @@
         workerEnabled: true,
         workerPageThreshold: 10,
         workerCount: 0,
-        workerBatchSize: 5,
+        // 0 = auto; ODV targets roughly two future merge batches per worker,
+        // bounded to avoid tiny batches that would create too many PDFs to merge.
+        workerBatchSize: 0,
         // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
         // recommendation helper as documentLoading.render.workerCount.
         imageLoadConcurrency: 0
