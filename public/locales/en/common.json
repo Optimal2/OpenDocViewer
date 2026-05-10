@@ -540,6 +540,7 @@
     },
     "loadedFrom": "Loaded from {path}",
     "loading": "Loading manual…",
+    "refreshManual": "Reload manual from server",
     "manualNotAvailable": "No manual file could be loaded for this language.",
     "manualPathsHint": "Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.",
     "menu": {

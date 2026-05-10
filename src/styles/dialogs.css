@@ -463,6 +463,13 @@
   background: linear-gradient(180deg, rgba(255,255,255,0.98), rgba(247,249,252,0.98));
 }
 
+.odv-help-header-actions {
+  display: inline-flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
 .odv-help-title {
   margin: 0;
   font-size: 22px;
@@ -522,6 +529,7 @@
   width: 34px;
   min-width: 34px;
   height: 34px;
+  padding: 0;
 }
 
 .odv-help-close-button {
@@ -537,6 +545,11 @@
 .odv-help-close-button:focus-visible {
   background: var(--odv-hover-overlay);
   outline: none;
+}
+
+.odv-help-close-icon:disabled {
+  cursor: not-allowed;
+  opacity: 0.55;
 }
 
 .odv-help-footer {
