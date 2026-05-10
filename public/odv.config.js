@@ -167,14 +167,14 @@
         imageFallbackQuality: 0.9,
         // Offload generated-PDF assembly to web workers for larger jobs.
         // partialMergeEnabled lets ODV create page-batch PDFs in parallel and then
-        // merge them pairwise in workers until one final PDF remains.
+        // merge all completed partial PDFs in one final pass.
         workerEnabled: true,
         workerPageThreshold: 10,
         partialMergeEnabled: true,
         workerCount: 0,
-        // 0 = auto; ODV targets a few large partial PDFs. Benchmarks on high-core clients
-        // show that many tiny partial PDFs lose more time in setup/merge overhead than
-        // they gain from keeping every core busy.
+        // 0 = auto; ODV targets a few large partial PDFs based on pages per worker.
+        // Benchmarks show that many tiny partial PDFs lose more time in setup/merge
+        // overhead than they gain from keeping every core busy.
         workerBatchSize: 0,
         // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
         // recommendation helper as documentLoading.render.workerCount.
@@ -201,11 +201,9 @@
           batchCounts: [2, 3, 4],
           // Explicit batch sizes are extra probes; keep this short for support runs.
           batchSizes: [0, 100, 150, 180],
-          // Merge modes:
-          // - "auto": single merge for small partial counts, pairwise for larger sets.
-          // - "single": one merge worker receives all partial PDFs.
-          // - "pairwise": reduction rounds that merge two PDFs at a time.
-          mergeModes: ['auto', 'single', 'pairwise'],
+          // Merge mode is kept as a benchmark field for diagnostics compatibility.
+          // Runtime merge now waits for all partial PDFs and merges them in one pass.
+          mergeModes: ['auto'],
           maxRuns: 40,
           delayBetweenRunsMs: 150
         }

@@ -14,7 +14,7 @@ const DEFAULT_BATCH_SIZES = Object.freeze([0]);
 const DEFAULT_BATCH_COUNTS = Object.freeze([2, 3, 4]);
 const DEFAULT_WORKER_COUNTS = Object.freeze([0]);
 const DEFAULT_IMAGE_LOAD_CONCURRENCIES = Object.freeze([0, 2, 3, 4]);
-const DEFAULT_MERGE_MODES = Object.freeze(['auto', 'single', 'pairwise']);
+const DEFAULT_MERGE_MODES = Object.freeze(['auto']);
 const DEFAULT_STRATEGIES = Object.freeze(['partial-merge', 'single-worker']);
 const DEFAULT_PROFILE = 'focused';
 const DEFAULT_PAGE_LIMIT = 80;
@@ -28,7 +28,7 @@ const MAX_BENCHMARK_IMAGE_LOAD_CONCURRENCY = 32;
 const AUTO_NEIGHBOR_BATCH_FACTORS = Object.freeze([0.75, 1.25, 1.5]);
 const BENCHMARK_STRATEGIES = Object.freeze(['partial-merge', 'single-worker', 'main-thread']);
 const BENCHMARK_PROFILES = Object.freeze(['focused', 'matrix']);
-const BENCHMARK_MERGE_MODES = Object.freeze(['auto', 'single', 'pairwise']);
+const BENCHMARK_MERGE_MODES = Object.freeze(['auto']);
 const TIMED_PROGRESS_PHASES = Object.freeze([
   'loading-library',
   'loading-images',
@@ -194,6 +194,7 @@ function describeBenchmarkBatchPlan(pageCount, pdfCfg = {}, requestedBatchSize =
   );
   return {
     ...workerPolicy,
+    workerCount: Math.max(1, Math.min(workerPolicy.workerCount, Math.max(1, batches.length))),
     requestedBatchSize: requested,
     resolvedBatchSize,
     batchCount: batches.length,
@@ -317,7 +318,7 @@ function createMatrixBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}
  * spending most of the run on combinations that are already known to be poor:
  * - single worker vs balanced 2/3/4 partial PDFs
  * - image load/decode concurrency around the likely sweet spot
- * - merge mode with image-load left on auto, so merge overhead can be isolated
+ * - fixed batch sizes around the current auto plan
  * @param {Object} benchmarkCfg
  * @param {number} pageCount
  * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
@@ -375,15 +376,12 @@ function createFocusedBenchmarkScenarios(benchmarkCfg, pageCount) {
         });
       });
 
-      // Compare merge strategies with image-load/decode concurrency held at auto.
-      benchmarkCfg.mergeModes.forEach((mergeMode) => {
-        addScenario(scenarios, seen, {
-          strategy: 'partial-merge',
-          workerCount,
-          batchSize,
-          imageLoadConcurrency: 0,
-          mergeMode,
-        });
+      addScenario(scenarios, seen, {
+        strategy: 'partial-merge',
+        workerCount,
+        batchSize,
+        imageLoadConcurrency: 0,
+        mergeMode: 'auto',
       });
     });
 
