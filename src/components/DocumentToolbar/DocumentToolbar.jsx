@@ -47,57 +47,14 @@ function isPdfAbortError(error) {
 
 /**
  * @param {function(string,Object=): string} t
- * @param {{ phase:string, current:number, page:number, total:number }} progress
+ * @param {{ phase:string, current:number, progressValue:number, page:number, total:number }} progress
  * @returns {string}
  */
 function formatPdfProgressBody(t, progress) {
-  if (progress.phase === 'loading-library') {
-    return t('printDialog.pdfProgress.loadingLibrary', {
-      defaultValue: 'Preparing PDF engine…',
-    });
-  }
-  if (progress.phase === 'loading-images') {
-    return t('printDialog.pdfProgress.loadingImages', {
-      current: progress.current,
-      total: progress.total,
-      defaultValue: `Preparing pages: ${progress.current} of ${progress.total}.`,
-    });
-  }
-  if (progress.phase === 'generating-page' && progress.page > 0) {
-    return t('printDialog.pdfProgress.generatingPage', {
-      current: progress.current,
-      page: progress.page,
-      total: progress.total,
-      defaultValue: `Generated ${progress.current} of ${progress.total} pages. Processing page ${progress.page}.`,
-    });
-  }
-  if (progress.phase === 'finalizing') {
-    return t('printDialog.pdfProgress.finalizing', {
-      defaultValue: 'Finalizing PDF file…',
-    });
-  }
-  if (progress.phase === 'merging') {
-    return t('printDialog.pdfProgress.merging', {
-      current: progress.mergeCurrent || 0,
-      total: progress.mergeTotal || 0,
-      defaultValue: `Merging PDF parts: ${progress.mergeCurrent || 0} of ${progress.mergeTotal || 0}.`,
-    });
-  }
-  if (progress.phase === 'opening-preview') {
-    return t('printDialog.pdfProgress.openingPreview', {
-      defaultValue: 'Opening PDF preview…',
-    });
-  }
-  if (progress.phase === 'downloading') {
-    return t('printDialog.pdfProgress.downloading', {
-      defaultValue: 'Preparing PDF download…',
-    });
-  }
-  return t('printDialog.pdfProgress.body', {
-    current: progress.current,
-    total: progress.total,
-    phase: progress.phase,
-    defaultValue: `Generated ${progress.current} of ${progress.total} pages.`,
+  const percent = getPdfProgressPercent(progress);
+  return t('printDialog.pdfProgress.percent', {
+    percent,
+    defaultValue: `${percent}%`,
   });
 }
 
