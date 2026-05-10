@@ -198,9 +198,9 @@
     "subtitleUnified": "Choose what to print and fill in any print details.",
     "methodHeader": "Print method",
     "methodLabel": "Method",
-    "repeatLastPrint": {
-      "button": "Print again",
-      "tooltip": "Print the latest prepared print job again without preparing it again."
+    "reuseLastPrint": {
+      "label": "Reuse latest print settings",
+      "tooltip": "Fill in the dialog with the same choices as the latest print."
     },
     "pdfOrientation": {
       "checkboxLabel": "Automatic page orientation",

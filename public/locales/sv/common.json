@@ -198,9 +198,9 @@
     "subtitleUnified": "Välj vad som ska skrivas ut och fyll i eventuella utskriftsuppgifter.",
     "methodHeader": "Utskriftsmetod",
     "methodLabel": "Metod",
-    "repeatLastPrint": {
-      "button": "Skriv ut igen",
-      "tooltip": "Skriv ut senaste utskriften igen utan att förbereda om den."
+    "reuseLastPrint": {
+      "label": "Återanvänd senaste utskriftsval",
+      "tooltip": "Fyll i dialogen med samma val som senaste utskriften."
     },
     "pdfOrientation": {
       "checkboxLabel": "Automatisk sidorientering",

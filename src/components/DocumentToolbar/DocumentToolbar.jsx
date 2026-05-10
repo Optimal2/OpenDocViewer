@@ -76,6 +76,40 @@ function getPdfProgressPercent(progress) {
   return Math.max(4, Math.min(100, Math.round((Math.max(0, Math.min(total, value)) / total) * 100)));
 }
 
+/**
+ * @param {*} value
+ * @returns {string}
+ */
+function stablePrintText(value) {
+  return value == null ? '' : String(value);
+}
+
+/**
+ * Compare the content-affecting print settings that determine whether an existing
+ * generated PDF can be reused. `printAction` is intentionally excluded because
+ * printing and saving the same prepared PDF use identical PDF bytes.
+ * @param {PrintSubmitDetail} detail
+ * @param {Array<number>=} pageNumbers
+ * @returns {string}
+ */
+function getPdfPrintCacheKey(detail, pageNumbers = []) {
+  const pages = (Array.isArray(pageNumbers) ? pageNumbers : [])
+    .map((value) => Math.floor(Number(value) || 0))
+    .filter((value) => value > 0);
+  return JSON.stringify({
+    pageScope: detail?.activeScope === 'compare-both' ? 'compare-both' : 'pages',
+    pages,
+    reason: stablePrintText(detail?.reason),
+    reasonValue: stablePrintText(detail?.reasonSelection?.value),
+    reasonFreeText: stablePrintText(detail?.reasonSelection?.freeText),
+    forWhom: stablePrintText(detail?.forWhom),
+    printFormat: stablePrintText(detail?.printFormat),
+    printFormatValue: stablePrintText(detail?.printFormatValue),
+    printFormatSelectionValue: stablePrintText(detail?.printFormatSelection?.value),
+    pdfOrientation: stablePrintText(detail?.pdfOrientation || 'auto'),
+  });
+}
+
 
 /**
  * Detail payload emitted by the print dialog.
@@ -278,9 +312,9 @@ const DocumentToolbar = ({
   const pdfStartTimeoutRef = useRef(/** @type {number|null} */ (null));
   const pdfRunSeqRef = useRef(0);
   const pdfBackgroundModeRef = useRef(false);
-  const pendingPdfOutputRef = useRef(/** @type {{ blob:Blob, action:string, filename:string, total:number, detail:Object }|null} */ (null));
-  const lastPdfPrintRef = useRef(/** @type {{ blob:Blob, detail:Object, filename:string, total:number, createdAt:number }|null} */ (null));
-  const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number }|null} */ (null));
+  const pendingPdfOutputRef = useRef(/** @type {{ blob:Blob, action:string, filename:string, total:number, detail:Object, pageNumbers:Array<number> }|null} */ (null));
+  const lastPdfPrintRef = useRef(/** @type {{ blob:Blob, detail:Object, cacheKey:string, filename:string, total:number, createdAt:number }|null} */ (null));
+  const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number, detail:Object }|null} */ (null));
   const documentRepeatTargetRef = useRef('primary');
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
@@ -886,41 +920,30 @@ const DocumentToolbar = ({
     setLastPdfPrintInfo(null);
   }, [pdfPrintSessionKey]);
 
-  const rememberLastPdfPrint = useCallback((detail, blob, total, filename) => {
+  const rememberLastPdfPrint = useCallback((detail, blob, total, filename, pageNumbers = null) => {
     if (!(blob instanceof Blob) || detail?.printBackend !== 'pdf' || detail?.printAction === 'download') return;
+    const cachePageNumbers = Array.isArray(pageNumbers) ? pageNumbers : resolvePrintPageNumbers(detail);
     const pageTotal = Math.max(1, Math.floor(Number(total) || resolvePrintPageCount(detail) || 1));
     lastPdfPrintRef.current = {
       blob,
       detail: { ...(detail || {}) },
+      cacheKey: getPdfPrintCacheKey(detail, cachePageNumbers),
       filename: filename || 'opendocviewer-print.pdf',
       total: pageTotal,
       createdAt: Date.now(),
     };
-    setLastPdfPrintInfo({ total: pageTotal, createdAt: lastPdfPrintRef.current.createdAt });
-  }, [resolvePrintPageCount]);
+    setLastPdfPrintInfo({
+      total: pageTotal,
+      createdAt: lastPdfPrintRef.current.createdAt,
+      detail: { ...(detail || {}), restoredPageNumbers: cachePageNumbers.slice() },
+    });
+  }, [resolvePrintPageCount, resolvePrintPageNumbers]);
 
-  const repeatLastPdfPrint = useCallback(() => {
+  const getLastPdfPrintBlob = useCallback((detail, pageNumbers) => {
     const entry = lastPdfPrintRef.current;
-    if (!entry?.blob) return;
-    closePrintDialog?.();
-    submitUserPrintLog(entry.detail);
-    try {
-      printPdfBlob(entry.blob);
-    } catch (error) {
-      logger.warn('Repeated PDF print failed', { error: String(error?.message || error) });
-      setPdfProgress({
-        open: true,
-        action: 'print',
-        phase: 'error',
-        current: 0,
-        progressValue: 0,
-        page: 0,
-        total: entry.total || 1,
-        error: String(error?.message || error),
-        minimized: false,
-      });
-    }
-  }, [closePrintDialog, submitUserPrintLog]);
+    if (!(entry?.blob instanceof Blob) || detail?.printBackend !== 'pdf') return null;
+    return entry.cacheKey === getPdfPrintCacheKey(detail, pageNumbers) ? entry.blob : null;
+  }, []);
 
 
   const {
@@ -995,14 +1018,14 @@ const DocumentToolbar = ({
     if (!pending) return;
     pendingPdfOutputRef.current = null;
     pdfBackgroundModeRef.current = false;
-    const { action, blob, detail, filename, total } = pending;
+    const { action, blob, detail, filename, pageNumbers, total } = pending;
     try {
       if (action === 'download') {
         setPdfProgress({ open: true, action, phase: 'downloading', current: total, progressValue: total, page: 0, total, error: '', minimized: true });
         downloadPdfBlob(blob, filename);
       } else {
         setPdfProgress({ open: true, action, phase: 'opening-preview', current: total, progressValue: total, page: 0, total, error: '', minimized: true });
-        rememberLastPdfPrint(detail, blob, total, filename);
+        rememberLastPdfPrint(detail, blob, total, filename, pageNumbers);
         printPdfBlob(blob);
       }
       window.setTimeout(resetPdfProgress, 1800);
@@ -1073,8 +1096,18 @@ const DocumentToolbar = ({
         if (action === 'download') {
           downloadPdfBlob(cachedBlob, commonOpts.filename || 'opendocviewer-print.pdf');
         } else {
-          rememberLastPdfPrint(detail, cachedBlob, total, commonOpts.filename || 'opendocviewer-print.pdf');
+          rememberLastPdfPrint(detail, cachedBlob, total, commonOpts.filename || 'opendocviewer-print.pdf', pageNumbers);
           printPdfBlob(cachedBlob);
+        }
+        return;
+      }
+      const lastPdfBlob = getLastPdfPrintBlob(detail, pageNumbers);
+      if (lastPdfBlob instanceof Blob) {
+        if (action === 'download') {
+          downloadPdfBlob(lastPdfBlob, commonOpts.filename || 'opendocviewer-print.pdf');
+        } else {
+          rememberLastPdfPrint(detail, lastPdfBlob, total, commonOpts.filename || 'opendocviewer-print.pdf', pageNumbers);
+          printPdfBlob(lastPdfBlob);
         }
         return;
       }
@@ -1135,6 +1168,7 @@ const DocumentToolbar = ({
                 action,
                 detail: { ...(detail || {}) },
                 filename: commonOpts.filename || 'opendocviewer-print.pdf',
+                pageNumbers,
                 total,
               };
               setPdfProgress({
@@ -1155,7 +1189,7 @@ const DocumentToolbar = ({
               downloadPdfBlob(blob, commonOpts.filename || 'opendocviewer-print.pdf');
             } else {
               setPdfProgress({ open: true, action, phase: 'opening-preview', current: total, progressValue: total, page: 0, total, error: '', minimized: false });
-              rememberLastPdfPrint(detail, blob, total, commonOpts.filename || 'opendocviewer-print.pdf');
+              rememberLastPdfPrint(detail, blob, total, commonOpts.filename || 'opendocviewer-print.pdf', pageNumbers);
               printPdfBlob(blob);
             }
             window.setTimeout(resetPdfProgress, 1800);
@@ -1198,7 +1232,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [cancelPdfPrebuild, compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getLastPdfPrintBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
@@ -1535,8 +1569,8 @@ const DocumentToolbar = ({
         isOpen={isPrintDialogOpen}
         onClose={() => closePrintDialog?.()}
         onSubmit={handlePrintSubmit}
-        onRepeatLastPdfPrint={repeatLastPdfPrint}
         lastPdfPrintAvailable={!!lastPdfPrintInfo}
+        lastPdfPrintDetail={lastPdfPrintInfo?.detail || null}
         lastPdfPrintPageCount={lastPdfPrintInfo?.total || 0}
         totalPages={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
