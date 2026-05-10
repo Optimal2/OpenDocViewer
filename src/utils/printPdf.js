@@ -60,6 +60,9 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
 const PDF_IMAGE_LOAD_CONCURRENCY = 4;
+// Move the progress bar slightly as a page enters expensive synchronous jsPDF work.
+// The completed page count still stays integer-based in the user-facing text.
+const PDF_PROGRESS_PAGE_START_FRACTION = 0.35;
 const ONE_MINUTE_MS = 60 * 1000;
 // Browsers do not expose a reliable completion event for synthetic blob downloads.
 // Keep the generated URL alive long enough for slow "save as" flows, then revoke it
@@ -250,6 +253,24 @@ function createAbortError() {
  */
 function throwIfAborted(signal) {
   if (signal?.aborted) throw createAbortError();
+}
+
+/**
+ * Yield one browser paint opportunity so progress updates become visible before
+ * expensive synchronous jsPDF operations run on the main thread.
+ * @param {AbortSignal|undefined} signal Optional cancellation signal.
+ * @returns {Promise<void>}
+ */
+async function yieldToBrowser(signal) {
+  throwIfAborted(signal);
+  await new Promise((resolve) => {
+    if (typeof window !== 'undefined' && typeof window.requestAnimationFrame === 'function') {
+      window.requestAnimationFrame(() => resolve());
+      return;
+    }
+    globalThis.setTimeout(resolve, 0);
+  });
+  throwIfAborted(signal);
 }
 
 /**
@@ -1496,12 +1517,20 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   });
   throwIfAborted(options.signal);
   reportProgress(options, { phase: 'generating', current: 0, total });
+  await yieldToBrowser(options.signal);
   /** @type {*|null} */
   let pdf = null;
 
   for (let i = 0; i < images.length; i += 1) {
     throwIfAborted(options.signal);
-    reportProgress(options, { phase: 'generating', current: i, total });
+    reportProgress(options, {
+      phase: 'generating-page',
+      current: i,
+      progressValue: Math.min(total, i + PDF_PROGRESS_PAGE_START_FRACTION),
+      page: i + 1,
+      total,
+    });
+    await yieldToBrowser(options.signal);
     const img = images[i];
     throwIfAborted(options.signal);
     const naturalWidth = Math.max(1, img.naturalWidth || img.width || 1);
@@ -1566,6 +1595,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
 
   if (!pdf) throw new Error('PDF generation produced no document.');
   reportProgress(options, { phase: 'finalizing', current: total, total });
+  await yieldToBrowser(options.signal);
   throwIfAborted(options.signal);
   const blob = pdf.output('blob');
   throwIfAborted(options.signal);
@@ -1731,8 +1761,17 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
     warnDeprecatedPrintableUrlExportAlias(handle);
   }
   let allUrls;
+  const requestedIndexes = Array.isArray(pageNumbers) && pageNumbers.length
+    ? pageNumbers
+        .map((pageNumber) => {
+          const numeric = Number(pageNumber);
+          return Number.isFinite(numeric) ? Math.floor(numeric) - 1 : null;
+        })
+        .filter((index) => index !== null && index >= 0)
+    : null;
+  const shouldRequestSelectedUrls = !!requestedIndexes && getUrls.length >= 1;
   try {
-    allUrls = await getUrls.call(handle);
+    allUrls = await getUrls.call(handle, shouldRequestSelectedUrls ? requestedIndexes : undefined);
   } catch (error) {
     const methodName = typeof preferredGetUrls === 'function'
       ? 'getAllPrintableDataUrls'
@@ -1742,6 +1781,7 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
   throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');
   if (!Array.isArray(pageNumbers) || !pageNumbers.length) return allUrls;
+  if (shouldRequestSelectedUrls) return allUrls;
 
   const selected = [];
   for (const pageNumber of pageNumbers) {
