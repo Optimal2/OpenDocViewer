@@ -88,6 +88,12 @@
       "ready": "Print cache ready",
       "warning": "Print cache fallback active",
       "error": "Print cache failed"
+    },
+    "printPrebuild": {
+      "pending": "Preparing PDF cache… ({count}/{total})",
+      "ready": "PDF cache ready ({count})",
+      "warning": "PDF cache partially ready ({count}/{total})",
+      "error": "PDF cache failed"
     }
   },
   "printDialog": {
