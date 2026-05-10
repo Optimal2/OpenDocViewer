@@ -11,12 +11,18 @@ import { getRuntimeConfig } from './runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestPdfBenchmarkResult } from './supportDiagnostics.js';
 
 const DEFAULT_BATCH_SIZES = Object.freeze([0, 5, 10, 20, 30, 40, 60, 80]);
+const DEFAULT_WORKER_COUNTS = Object.freeze([0]);
+const DEFAULT_IMAGE_LOAD_CONCURRENCIES = Object.freeze([0]);
+const DEFAULT_STRATEGIES = Object.freeze(['partial-merge']);
 const DEFAULT_PAGE_LIMIT = 80;
 const DEFAULT_ITERATIONS = 1;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
+const DEFAULT_MAX_RUNS = 80;
 const MAX_BENCHMARK_WORKER_COUNT = 32;
 const MAX_BENCHMARK_BATCH_SIZE = 200;
+const MAX_BENCHMARK_IMAGE_LOAD_CONCURRENCY = 32;
 const AUTO_NEIGHBOR_BATCH_FACTORS = Object.freeze([0.75, 1.25, 1.5]);
+const BENCHMARK_STRATEGIES = Object.freeze(['partial-merge', 'single-worker', 'main-thread']);
 const TIMED_PROGRESS_PHASES = Object.freeze([
   'loading-library',
   'loading-images',
@@ -56,6 +62,42 @@ function normalizeBatchSizes(value) {
 }
 
 /**
+ * @param {*} value
+ * @param {Array<number>} fallback
+ * @param {number} max
+ * @returns {Array<number>}
+ */
+function normalizeIntegerList(value, fallback, max) {
+  const raw = Array.isArray(value) ? value : fallback;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const next = Math.max(0, Math.min(max, Math.floor(Number(item) || 0)));
+    if (seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out.length ? out : fallback.slice();
+}
+
+/**
+ * @param {*} value
+ * @returns {Array<string>}
+ */
+function normalizeStrategies(value) {
+  const raw = Array.isArray(value) ? value : DEFAULT_STRATEGIES;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const strategy = String(item || '').trim().toLowerCase();
+    if (!BENCHMARK_STRATEGIES.includes(strategy) || seen.has(strategy)) continue;
+    seen.add(strategy);
+    out.push(strategy);
+  }
+  return out.length ? out : DEFAULT_STRATEGIES.slice();
+}
+
+/**
  * Keep a batch-size list ordered and unique.
  * @param {Array<number>} target
  * @param {Set<number>} seen
@@ -92,7 +134,9 @@ function describeBenchmarkBatchPlan(pageCount, pdfCfg = {}, requestedBatchSize =
   const safePageCount = Math.max(0, Math.floor(Number(pageCount) || 0));
   const workerPolicy = resolveBenchmarkWorkerPolicy(pdfCfg);
   const requested = Math.max(0, Math.floor(Number(requestedBatchSize) || 0));
-  const resolvedBatchSize = requested || resolveAutoPdfWorkerBatchSize(safePageCount, workerPolicy.workerCount);
+  const resolvedBatchSize = workerPolicy.partialMergeEnabled
+    ? requested || resolveAutoPdfWorkerBatchSize(safePageCount, workerPolicy.workerCount)
+    : safePageCount;
   const batches = planPdfWorkerBatches(
     safePageCount,
     workerPolicy.workerCount,
@@ -104,6 +148,178 @@ function describeBenchmarkBatchPlan(pageCount, pdfCfg = {}, requestedBatchSize =
     requestedBatchSize: requested,
     resolvedBatchSize,
     batchCount: batches.length,
+  };
+}
+
+/**
+ * @param {Object} scenario
+ * @returns {string}
+ */
+function createScenarioLabel(scenario) {
+  const workerText = scenario.workerCount === 0 ? 'auto' : String(scenario.workerCount);
+  const batchText = scenario.batchSize === 0 ? 'auto' : String(scenario.batchSize);
+  const imageText = scenario.imageLoadConcurrency === 0 ? 'auto' : String(scenario.imageLoadConcurrency);
+  if (scenario.strategy === 'main-thread') return `main/i${imageText}`;
+  if (scenario.strategy === 'single-worker') return `single-worker/i${imageText}`;
+  return `partial/w${workerText}/b${batchText}/i${imageText}`;
+}
+
+/**
+ * @param {Object} scenario
+ * @returns {string}
+ */
+function createScenarioKey(scenario) {
+  return [
+    scenario.strategy,
+    scenario.workerCount,
+    scenario.batchSize,
+    scenario.imageLoadConcurrency,
+  ].join('|');
+}
+
+/**
+ * @param {Array<Object>} target
+ * @param {Set<string>} seen
+ * @param {Object} scenario
+ * @returns {void}
+ */
+function addScenario(target, seen, scenario) {
+  const normalized = {
+    strategy: String(scenario.strategy || 'partial-merge'),
+    workerCount: Math.max(0, Math.floor(Number(scenario.workerCount) || 0)),
+    batchSize: Math.max(0, Math.floor(Number(scenario.batchSize) || 0)),
+    imageLoadConcurrency: Math.max(0, Math.floor(Number(scenario.imageLoadConcurrency) || 0)),
+  };
+  const key = createScenarioKey(normalized);
+  if (seen.has(key)) return;
+  seen.add(key);
+  target.push({ ...normalized, scenarioLabel: createScenarioLabel(normalized) });
+}
+
+/**
+ * @param {Object} benchmarkCfg
+ * @param {number} pageCount
+ * @param {Object=} basePdfCfg
+ * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
+ */
+function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
+  const scenarios = [];
+  const seen = new Set();
+
+  for (const strategy of benchmarkCfg.strategies) {
+    if (strategy === 'main-thread') {
+      benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+        addScenario(scenarios, seen, {
+          strategy,
+          workerCount: 0,
+          batchSize: 0,
+          imageLoadConcurrency,
+        });
+      });
+      continue;
+    }
+
+    if (strategy === 'single-worker') {
+      benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+        addScenario(scenarios, seen, {
+          strategy,
+          workerCount: 1,
+          batchSize: 0,
+          imageLoadConcurrency,
+        });
+      });
+      continue;
+    }
+
+    for (const workerCount of benchmarkCfg.workerCounts) {
+      const batchSizes = expandBenchmarkBatchSizes(
+        benchmarkCfg.batchSizes,
+        pageCount,
+        { ...basePdfCfg, workerCount, partialMergeEnabled: true }
+      );
+      for (const batchSize of batchSizes) {
+        benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+          addScenario(scenarios, seen, {
+            strategy,
+            workerCount,
+            batchSize,
+            imageLoadConcurrency,
+          });
+        });
+      }
+    }
+  }
+
+  return {
+    scenarios: scenarios.slice(0, benchmarkCfg.maxRuns),
+    totalScenarioCount: scenarios.length,
+  };
+}
+
+/**
+ * @param {Object=} basePdfCfg
+ * @param {Object} scenario
+ * @returns {Object}
+ */
+function createScenarioPdfConfig(basePdfCfg = {}, scenario) {
+  if (scenario.strategy === 'main-thread') {
+    return {
+      ...basePdfCfg,
+      workerEnabled: false,
+      workerPageThreshold: 1,
+      imageLoadConcurrency: scenario.imageLoadConcurrency,
+    };
+  }
+
+  if (scenario.strategy === 'single-worker') {
+    return {
+      ...basePdfCfg,
+      workerEnabled: true,
+      workerPageThreshold: 1,
+      partialMergeEnabled: false,
+      workerCount: 1,
+      workerBatchSize: 0,
+      imageLoadConcurrency: scenario.imageLoadConcurrency,
+    };
+  }
+
+  return {
+    ...basePdfCfg,
+    workerEnabled: true,
+    workerPageThreshold: 1,
+    partialMergeEnabled: true,
+    workerCount: scenario.workerCount,
+    workerBatchSize: scenario.batchSize,
+    imageLoadConcurrency: scenario.imageLoadConcurrency,
+  };
+}
+
+/**
+ * @param {number} pageCount
+ * @param {Object} pdfCfg
+ * @param {Object} scenario
+ * @returns {Object}
+ */
+function describeScenarioPlan(pageCount, pdfCfg, scenario) {
+  if (scenario.strategy === 'main-thread') {
+    return {
+      strategy: scenario.strategy,
+      workerEnabled: false,
+      workerCount: 0,
+      desiredWorkerCount: 0,
+      partialMergeEnabled: false,
+      requestedBatchSize: 0,
+      resolvedBatchSize: Math.max(0, Math.floor(Number(pageCount) || 0)),
+      batchCount: 1,
+      imageLoadConcurrency: scenario.imageLoadConcurrency,
+    };
+  }
+
+  return {
+    strategy: scenario.strategy,
+    workerEnabled: true,
+    imageLoadConcurrency: scenario.imageLoadConcurrency,
+    ...describeBenchmarkBatchPlan(pageCount, pdfCfg, scenario.batchSize),
   };
 }
 
@@ -350,7 +566,7 @@ function summarizeBenchmarkTiming(events, durationMs) {
 
 /**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,batchSizes:Array<number>,delayBetweenRunsMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,batchSizes:Array<number>,workerCounts:Array<number>,imageLoadConcurrencies:Array<number>,strategies:Array<string>,maxRuns:number,delayBetweenRunsMs:number}}
  */
 function normalizeBenchmarkConfig(config = getRuntimeConfig()) {
   const cfg = config?.print?.pdf?.benchmark || {};
@@ -359,6 +575,14 @@ function normalizeBenchmarkConfig(config = getRuntimeConfig()) {
     pageLimit: normalizeInteger(cfg.pageLimit, DEFAULT_PAGE_LIMIT, 1, 10000),
     iterations: normalizeInteger(cfg.iterations, DEFAULT_ITERATIONS, 1, 10),
     batchSizes: normalizeBatchSizes(cfg.batchSizes),
+    workerCounts: normalizeIntegerList(cfg.workerCounts, DEFAULT_WORKER_COUNTS, MAX_BENCHMARK_WORKER_COUNT),
+    imageLoadConcurrencies: normalizeIntegerList(
+      cfg.imageLoadConcurrencies,
+      DEFAULT_IMAGE_LOAD_CONCURRENCIES,
+      MAX_BENCHMARK_IMAGE_LOAD_CONCURRENCY
+    ),
+    strategies: normalizeStrategies(cfg.strategies),
+    maxRuns: normalizeInteger(cfg.maxRuns, DEFAULT_MAX_RUNS, 1, 500),
     delayBetweenRunsMs: normalizeInteger(cfg.delayBetweenRunsMs, DEFAULT_DELAY_BETWEEN_RUNS_MS, 0, 10000),
   };
 }
@@ -435,12 +659,13 @@ export async function runPdfGenerationBenchmark({
   const sourceUrls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
   const selected = selectBenchmarkPages(sourceUrls, baseOptions, benchmarkCfg);
   const basePdfCfg = baseOptions.pdfCfg || config?.print?.pdf || {};
-  const batchSizes = expandBenchmarkBatchSizes(benchmarkCfg.batchSizes, selected.urls.length, basePdfCfg);
+  const scenarioPlan = createBenchmarkScenarios(benchmarkCfg, selected.urls.length, basePdfCfg);
+  const scenarios = scenarioPlan.scenarios;
   const runs = [];
-  const totalRuns = batchSizes.length * benchmarkCfg.iterations;
+  const totalRuns = scenarios.length * benchmarkCfg.iterations;
   let completedRuns = 0;
 
-  for (const batchSize of batchSizes) {
+  for (const scenario of scenarios) {
     for (let iteration = 1; iteration <= benchmarkCfg.iterations; iteration += 1) {
       if (signal?.aborted) {
         const error = new Error('PDF benchmark was cancelled.');
@@ -450,20 +675,18 @@ export async function runPdfGenerationBenchmark({
 
       onProgress?.({
         phase: 'running',
-        batchSize,
+        batchSize: scenario.batchSize,
+        scenarioLabel: scenario.scenarioLabel,
+        strategy: scenario.strategy,
+        workerCount: scenario.workerCount,
+        imageLoadConcurrency: scenario.imageLoadConcurrency,
         iteration,
         completedRuns,
         totalRuns,
       });
 
-      const pdfCfg = {
-        ...basePdfCfg,
-        workerEnabled: true,
-        workerPageThreshold: 1,
-        partialMergeEnabled: true,
-        workerBatchSize: batchSize,
-      };
-      const plan = describeBenchmarkBatchPlan(selected.urls.length, pdfCfg, batchSize);
+      const pdfCfg = createScenarioPdfConfig(basePdfCfg, scenario);
+      const plan = describeScenarioPlan(selected.urls.length, pdfCfg, scenario);
       const started = performance.now();
       const progressEvents = [];
       const blob = await createPrintPdfBlob(selected.urls, {
@@ -495,8 +718,12 @@ export async function runPdfGenerationBenchmark({
       const durationMs = performance.now() - started;
       const timings = summarizeBenchmarkTiming(progressEvents, durationMs);
       runs.push({
-        batchSize,
-        batchSizeLabel: batchSize === 0 ? 'auto' : String(batchSize),
+        strategy: scenario.strategy,
+        scenarioLabel: scenario.scenarioLabel,
+        batchSize: scenario.batchSize,
+        batchSizeLabel: scenario.batchSize === 0 ? 'auto' : String(scenario.batchSize),
+        workerCountSetting: scenario.workerCount,
+        imageLoadConcurrencySetting: scenario.imageLoadConcurrency,
         iteration,
         durationMs: Math.round(durationMs),
         outputBytes: Math.max(0, Number(blob?.size) || 0),
@@ -510,7 +737,11 @@ export async function runPdfGenerationBenchmark({
       completedRuns += 1;
       onProgress?.({
         phase: 'completed-run',
-        batchSize,
+        batchSize: scenario.batchSize,
+        scenarioLabel: scenario.scenarioLabel,
+        strategy: scenario.strategy,
+        workerCount: scenario.workerCount,
+        imageLoadConcurrency: scenario.imageLoadConcurrency,
         iteration,
         completedRuns,
         totalRuns,
@@ -528,7 +759,18 @@ export async function runPdfGenerationBenchmark({
     pageLimit: benchmarkCfg.pageLimit,
     iterations: benchmarkCfg.iterations,
     batchSizes: benchmarkCfg.batchSizes,
-    testedBatchSizes: batchSizes,
+    workerCounts: benchmarkCfg.workerCounts,
+    imageLoadConcurrencies: benchmarkCfg.imageLoadConcurrencies,
+    strategies: benchmarkCfg.strategies,
+    maxRuns: benchmarkCfg.maxRuns,
+    testedBatchSizes: Array.from(new Set(scenarios.map((scenario) => scenario.batchSize))),
+    testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
+    testedImageLoadConcurrencies: Array.from(new Set(scenarios.map((scenario) => scenario.imageLoadConcurrency))),
+    testedStrategies: Array.from(new Set(scenarios.map((scenario) => scenario.strategy))),
+    testedScenarios: scenarios,
+    scenarioCount: scenarios.length,
+    totalScenarioCount: scenarioPlan.totalScenarioCount,
+    scenarioLimitApplied: scenarioPlan.totalScenarioCount > scenarios.length,
     runs,
     best,
     diagnostics: collectSupportDiagnostics({ latestPdfBenchmark: null }),

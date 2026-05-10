@@ -184,7 +184,17 @@
           enabled: false,
           pageLimit: 80,
           iterations: 1,
-          batchSizes: [0, 5, 10, 20, 40],
+          // Strategies:
+          // - "partial-merge": page-batch PDFs in workers, then merge partial PDFs.
+          // - "single-worker": one full-document PDF in one worker, no merge.
+          // - "main-thread": full-document PDF on the UI thread; useful only for diagnostics.
+          strategies: ['partial-merge'],
+          // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
+          workerCounts: [0],
+          // 0 means auto. Add explicit counts to benchmark image loading inside PDF workers.
+          imageLoadConcurrencies: [0],
+          batchSizes: [0, 5, 10, 20, 30, 40, 60, 80],
+          maxRuns: 80,
           delayBetweenRunsMs: 150
         }
       },
