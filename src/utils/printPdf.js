@@ -17,6 +17,8 @@ import { applyTemplateTokensEscaped, makeBaseTokenContext, makePageTokenContext,
 import { resolveLocalizedValue } from './localizedValue.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
+import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
+import PdfWorker from '../workers/pdfWorker.js?worker';
 
 /**
  * Escape regular-expression metacharacters in literal text.
@@ -59,7 +61,9 @@ const PDF_COLUMN_MIN_WIDTH_PT = 32;
 // Two-column flow rows reserve a little less than half the width for the left
 // label/title side so the right metadata side can hold longer patient/context text.
 const TWO_COLUMN_LEFT_WIDTH_RATIO = 0.42;
-const PDF_IMAGE_LOAD_CONCURRENCY = 4;
+const PDF_WORKER_PAGE_THRESHOLD = 10;
+const PDF_WORKER_BATCH_SIZE = 5;
+const PDF_WORKER_MAX_COUNT_CURRENT = 1;
 // Move the progress bar slightly as a page enters expensive synchronous jsPDF work.
 // The completed page count still stays integer-based in the user-facing text.
 const PDF_PROGRESS_PAGE_START_FRACTION = 0.35;
@@ -761,11 +765,12 @@ function describeValueType(value) {
  * @param {Array<string>} urls
  * @param {AbortSignal=} signal
  * @param {function(number): void} onLoaded Called with the number of images loaded so far.
+ * @param {number=} concurrency
  * @returns {Promise<Array<HTMLImageElement>>}
  */
-async function loadImagesConcurrently(urls, signal, onLoaded) {
+async function loadImagesConcurrently(urls, signal, onLoaded, concurrency = 1) {
   const results = new Array(urls.length);
-  const workerCount = Math.min(PDF_IMAGE_LOAD_CONCURRENCY, urls.length);
+  const workerCount = Math.min(Math.max(1, Number(concurrency) || 1), urls.length);
   let completed = 0;
   // Build the array in reverse order so pop() claims indexes in natural 0..n order
   // while keeping each claim as a simple synchronous stack operation.
@@ -1415,6 +1420,123 @@ function reportProgress(options, event) {
 }
 
 /**
+ * @param {Object=} pdfCfg
+ * @returns {number}
+ */
+function resolvePdfImageLoadConcurrency(pdfCfg = {}) {
+  const configured = Math.max(0, Number(pdfCfg.imageLoadConcurrency) || 0);
+  const recommended = resolveRecommendedWorkerCount(configured, 'auto');
+  return Math.max(1, Math.min(32, recommended));
+}
+
+/**
+ * Resolve the generated-PDF worker plan. v1 intentionally runs one dedicated
+ * worker for the whole PDF, but the shape already carries workerCount/batchSize
+ * so a later version can split long jobs into page batches and merge them.
+ * @param {Object=} pdfCfg
+ * @param {number=} pageCount
+ * @returns {{enabled:boolean, workerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number}}
+ */
+function resolvePdfWorkerPlan(pdfCfg = {}, pageCount = 0) {
+  const pageThreshold = Math.max(1, Number(pdfCfg.workerPageThreshold) || PDF_WORKER_PAGE_THRESHOLD);
+  const desiredWorkers = resolveRecommendedWorkerCount(Math.max(0, Number(pdfCfg.workerCount) || 0), 'auto');
+  return {
+    enabled: pdfCfg.workerEnabled !== false && pageCount >= pageThreshold,
+    // Keep the first worker-backed PDF path deliberately single-worker. Multiple workers
+    // need partial PDF merge semantics, so workerCount is currently a forward-compatible plan field.
+    workerCount: Math.max(1, Math.min(PDF_WORKER_MAX_COUNT_CURRENT, desiredWorkers)),
+    batchSize: Math.max(1, Number(pdfCfg.workerBatchSize) || PDF_WORKER_BATCH_SIZE),
+    pageThreshold,
+    imageLoadConcurrency: resolvePdfImageLoadConcurrency(pdfCfg),
+  };
+}
+
+/**
+ * @param {PdfPrintOptions} options
+ * @param {number} total
+ * @returns {Array<Object>}
+ */
+function buildPdfPagePlans(options, total) {
+  const bundle = options.bundle || null;
+  const baseContext = makeTokenContext(options);
+  return Array.from({ length: total }, (_, index) => {
+    const pageInfo = Array.isArray(options.pageContexts) ? options.pageContexts[index] : null;
+    const pageContext = makePageTokenContext(baseContext, pageInfo, bundle);
+    return {
+      headerLines: renderOverlayRichLines(options.printHeaderCfg || {}, pageContext, index + 1, total),
+      footerLines: renderOverlayRichLines(options.printFooterCfg || {}, pageContext, index + 1, total),
+      copyText: resolveCopyMarkerText(pageContext),
+    };
+  });
+}
+
+/**
+ * @param {Array<string>} urls
+ * @param {PdfPrintOptions} options
+ * @param {{enabled:boolean, workerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number}} workerPlan
+ * @param {string|null} watermarkAssetSrc
+ * @returns {Promise<Blob>}
+ */
+function createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc) {
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    /** @type {Worker|null} */
+    let worker = null;
+    const cleanup = () => {
+      try { options.signal?.removeEventListener?.('abort', onAbort); } catch {}
+      try { worker?.terminate?.(); } catch {}
+      worker = null;
+    };
+    const settle = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      fn(value);
+    };
+    const onAbort = () => settle(reject, createAbortError());
+
+    try {
+      worker = new PdfWorker({ type: 'module', name: 'odv-pdf-worker-1' });
+      options.signal?.addEventListener?.('abort', onAbort, { once: true });
+      worker.onmessage = (event) => {
+        const data = event?.data || {};
+        if (data.type === 'progress') {
+          reportProgress(options, data.event || {});
+          return;
+        }
+        if (data.type === 'result') {
+          if (data.blob instanceof Blob) {
+            settle(resolve, data.blob);
+            return;
+          }
+          settle(reject, new Error('PDF worker completed without returning a PDF blob.'));
+          return;
+        }
+        if (data.type === 'error') {
+          settle(reject, new Error(String(data.error || 'PDF worker failed.')));
+        }
+      };
+      worker.onerror = (event) => {
+        settle(reject, new Error(String(event?.message || event?.error?.message || 'PDF worker crashed.')));
+      };
+      worker.postMessage({
+        type: 'createPdf',
+        job: {
+          urls,
+          pagePlans: buildPdfPagePlans(options, urls.length),
+          pdfCfg: options.pdfCfg || {},
+          watermarkEnabled: options.printFormatCfg?.watermark?.enabled !== false,
+          watermarkAssetSrc: watermarkAssetSrc || '',
+          workerPlan,
+        },
+      });
+    } catch (error) {
+      settle(reject, error);
+    }
+  });
+}
+
+/**
  * @param {boolean} hasOverlay
  * @param {number} reservePt
  * @param {number} lineCount
@@ -1496,8 +1618,21 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const bundle = options.bundle || null;
   const baseContext = makeTokenContext(options);
   const total = urls.length;
-  let watermarkImage = null;
+  const workerPlan = resolvePdfWorkerPlan(pdfCfg, total);
   const watermarkAssetSrc = resolveWatermarkAssetSrc(options.printFormatCfg?.watermark || {}, i18next);
+  if (workerPlan.enabled && typeof Worker !== 'undefined') {
+    try {
+      return await createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc);
+    } catch (error) {
+      throwIfAborted(options.signal);
+      logger.warn('PDF worker generation failed; falling back to main-thread PDF generation', {
+        error: String(error?.message || error),
+        workerPlan,
+      });
+    }
+  }
+
+  let watermarkImage = null;
   if (watermarkAssetSrc) {
     try {
       watermarkImage = await loadImage(watermarkAssetSrc, options.signal);
@@ -1514,7 +1649,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   reportProgress(options, { phase: 'loading-images', current: 0, total });
   const images = await loadImagesConcurrently(urls, options.signal, (current) => {
     reportProgress(options, { phase: 'loading-images', current, total });
-  });
+  }, workerPlan.imageLoadConcurrency);
   throwIfAborted(options.signal);
   reportProgress(options, { phase: 'generating', current: 0, total });
   await yieldToBrowser(options.signal);
