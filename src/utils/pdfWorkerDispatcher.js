@@ -382,10 +382,11 @@ async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, 
   let nextMergeTaskIndex = 0;
   let roundIndex = 0;
 
-  const reportMergeProgress = () => {
+  const reportMergeProgress = (extra = {}) => {
     const mergeProgress = sumProgress(mergeProgressByTask);
     const completed = progressPlan.batchUnits + Math.max(0, Math.min(mergeTotal, mergeProgress));
     onProgress({
+      ...extra,
       phase: 'merging',
       current: Math.floor(completed),
       progressValue: completed,
@@ -437,19 +438,28 @@ async function mergePdfBlobsWithWorkers(initialParts, workerPlan, progressPlan, 
               mergeProgressByTask[task.globalMergeTaskIndex],
               localCurrent / localTotal
             );
-            reportMergeProgress();
+            reportMergeProgress({
+              roundIndex: event?.roundIndex,
+              pairIndex: event?.pairIndex,
+              globalMergeTaskIndex: task.globalMergeTaskIndex,
+            });
           },
           workerSlot,
           {
             roundIndex: task.roundIndex,
             pairIndex: task.pairIndex,
+            globalMergeTaskIndex: task.globalMergeTaskIndex,
             mergeCurrent: Math.floor(sumProgress(mergeProgressByTask)),
             mergeTotal,
           }
         );
         nextParts[task.nextIndex] = blob;
         mergeProgressByTask[task.globalMergeTaskIndex] = 1;
-        reportMergeProgress();
+        reportMergeProgress({
+          roundIndex: task.roundIndex,
+          pairIndex: task.pairIndex,
+          globalMergeTaskIndex: task.globalMergeTaskIndex,
+        });
         return blob;
       },
       signal
@@ -501,11 +511,16 @@ export async function createPdfWithWorkerDispatcher(args) {
     progressByBatch[batch.batchIndex] = Math.max(progressByBatch[batch.batchIndex], localProgress);
     const aggregateProgress = sumProgress(progressByBatch);
     const page = Math.max(0, Number(event?.page) || 0);
+    const localTotal = Math.max(1, Number(event?.total) || batch.pageCount || 1);
     onProgress({
       ...event,
       current: Math.max(0, Math.min(progressPlan.totalUnits, Math.floor(aggregateProgress))),
       progressValue: Math.max(0, Math.min(progressPlan.totalUnits, aggregateProgress)),
       page: page > 0 ? batch.startPageIndex + page : 0,
+      localCurrent: clampNumber(event?.current, 0, localTotal),
+      localTotal,
+      batchStartPageIndex: batch.startPageIndex,
+      batchPageCount: batch.pageCount,
       total: progressPlan.totalUnits,
       batchIndex: batch.batchIndex,
       batchCount: batches.length,

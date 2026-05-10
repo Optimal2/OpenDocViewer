@@ -10,13 +10,20 @@ import { planPdfWorkerBatches, resolveAutoPdfWorkerBatchSize } from './pdfWorker
 import { getRuntimeConfig } from './runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestPdfBenchmarkResult } from './supportDiagnostics.js';
 
-const DEFAULT_BATCH_SIZES = Object.freeze([0, 5, 10, 20, 40]);
+const DEFAULT_BATCH_SIZES = Object.freeze([0, 5, 10, 20, 30, 40, 60, 80]);
 const DEFAULT_PAGE_LIMIT = 80;
 const DEFAULT_ITERATIONS = 1;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
 const MAX_BENCHMARK_WORKER_COUNT = 32;
-const MAX_BENCHMARK_BATCH_SIZE = 120;
+const MAX_BENCHMARK_BATCH_SIZE = 200;
 const AUTO_NEIGHBOR_BATCH_FACTORS = Object.freeze([0.75, 1.25, 1.5]);
+const TIMED_PROGRESS_PHASES = Object.freeze([
+  'loading-library',
+  'loading-images',
+  'generating',
+  'finalizing',
+  'merging',
+]);
 
 /**
  * @param {*} value
@@ -124,6 +131,221 @@ function expandBenchmarkBatchSizes(configured, pageCount, pdfCfg = {}) {
     addBatchSizeCandidate(out, seen, Math.round(autoPlan.resolvedBatchSize * factor));
   });
   return out;
+}
+
+/**
+ * @param {number} value
+ * @returns {number}
+ */
+function roundMilliseconds(value) {
+  return Math.round(Math.max(0, Number(value) || 0));
+}
+
+/**
+ * @param {*} value
+ * @returns {number|null}
+ */
+function finiteNumberOrNull(value) {
+  const numeric = Number(value);
+  return Number.isFinite(numeric) ? numeric : null;
+}
+
+/**
+ * @param {string} phase
+ * @returns {string}
+ */
+function normalizeTimingPhase(phase) {
+  const text = String(phase || 'unknown');
+  return text === 'generating-page' ? 'generating' : text;
+}
+
+/**
+ * @returns {Object<string, number>}
+ */
+function createEmptyPhaseDurations() {
+  return Object.fromEntries(TIMED_PROGRESS_PHASES.map((phase) => [phase, 0]));
+}
+
+/**
+ * @param {Object<string, {firstMs:number,lastMs:number,eventCount:number}>} spans
+ * @param {string} phase
+ * @param {number} atMs
+ * @returns {void}
+ */
+function recordPhaseSpan(spans, phase, atMs) {
+  const key = normalizeTimingPhase(phase);
+  if (!spans[key]) spans[key] = { firstMs: atMs, lastMs: atMs, eventCount: 0 };
+  spans[key].firstMs = Math.min(spans[key].firstMs, atMs);
+  spans[key].lastMs = Math.max(spans[key].lastMs, atMs);
+  spans[key].eventCount += 1;
+}
+
+/**
+ * @param {Object<string, number>} target
+ * @param {string} phase
+ * @param {number} durationMs
+ * @returns {void}
+ */
+function addPhaseDuration(target, phase, durationMs) {
+  const key = normalizeTimingPhase(phase);
+  if (!TIMED_PROGRESS_PHASES.includes(key)) return;
+  target[key] = (target[key] || 0) + Math.max(0, Number(durationMs) || 0);
+}
+
+/**
+ * Convert progress markers into phase durations by measuring time between phase
+ * transitions. This is an approximation, but it is stable enough to reveal whether
+ * a run spends most time loading images, generating pages, finalizing PDFs, or merging.
+ * @param {Array<Object>} events
+ * @param {number} endMs
+ * @returns {Object<string, number>}
+ */
+function calculateTransitionPhaseDurations(events, endMs) {
+  const sorted = (Array.isArray(events) ? events : [])
+    .filter((event) => Number.isFinite(event?.atMs))
+    .slice()
+    .sort((a, b) => a.atMs - b.atMs);
+  const durations = createEmptyPhaseDurations();
+  if (!sorted.length) return durations;
+
+  let currentPhase = normalizeTimingPhase(sorted[0].phase);
+  let phaseStartMs = sorted[0].atMs;
+  for (let index = 1; index < sorted.length; index += 1) {
+    const event = sorted[index];
+    const nextPhase = normalizeTimingPhase(event.phase);
+    if (nextPhase === currentPhase) continue;
+    addPhaseDuration(durations, currentPhase, event.atMs - phaseStartMs);
+    currentPhase = nextPhase;
+    phaseStartMs = event.atMs;
+  }
+
+  addPhaseDuration(durations, currentPhase, Math.max(0, Number(endMs) || 0) - phaseStartMs);
+  return Object.fromEntries(Object.entries(durations).map(([phase, value]) => [phase, roundMilliseconds(value)]));
+}
+
+/**
+ * @param {Array<Object>} events
+ * @param {string} keyName
+ * @returns {Map<string, Array<Object>>}
+ */
+function groupEventsByNumericKey(events, keyName) {
+  const groups = new Map();
+  (Array.isArray(events) ? events : []).forEach((event) => {
+    const value = finiteNumberOrNull(event?.[keyName]);
+    if (value === null) return;
+    const key = String(Math.floor(value));
+    if (!groups.has(key)) groups.set(key, []);
+    groups.get(key).push(event);
+  });
+  return groups;
+}
+
+/**
+ * @param {Array<Object>} batches
+ * @returns {{count:number,minMs:number,maxMs:number,avgMs:number}}
+ */
+function summarizeTaskDurations(batches) {
+  if (!batches.length) return { count: 0, minMs: 0, maxMs: 0, avgMs: 0 };
+  const durations = batches.map((batch) => Math.max(0, Number(batch.durationMs) || 0));
+  const total = durations.reduce((sum, value) => sum + value, 0);
+  return {
+    count: batches.length,
+    minMs: roundMilliseconds(Math.min(...durations)),
+    maxMs: roundMilliseconds(Math.max(...durations)),
+    avgMs: roundMilliseconds(total / batches.length),
+  };
+}
+
+/**
+ * @param {Object<string, {firstMs:number,lastMs:number,eventCount:number}>} spans
+ * @returns {Object<string, {firstMs:number,lastMs:number,spanMs:number,eventCount:number}>}
+ */
+function finalizePhaseSpans(spans) {
+  return Object.fromEntries(Object.entries(spans).map(([phase, span]) => [
+    phase,
+    {
+      firstMs: roundMilliseconds(span.firstMs),
+      lastMs: roundMilliseconds(span.lastMs),
+      spanMs: roundMilliseconds(span.lastMs - span.firstMs),
+      eventCount: span.eventCount,
+    },
+  ]));
+}
+
+/**
+ * @param {Object<string, number>} target
+ * @param {Object<string, number>} source
+ * @returns {void}
+ */
+function addPhaseDurations(target, source) {
+  Object.entries(source || {}).forEach(([phase, value]) => {
+    target[phase] = (target[phase] || 0) + Math.max(0, Number(value) || 0);
+  });
+}
+
+/**
+ * @param {Array<Object>} events
+ * @param {number} durationMs
+ * @returns {Object}
+ */
+function summarizeBenchmarkTiming(events, durationMs) {
+  const records = Array.isArray(events) ? events : [];
+  const phaseSpans = {};
+  records.forEach((event) => recordPhaseSpan(phaseSpans, event.phase, event.atMs));
+
+  const batchSummaries = [];
+  const batchPhaseTaskMs = createEmptyPhaseDurations();
+  for (const [batchIndex, batchEvents] of groupEventsByNumericKey(records, 'batchIndex')) {
+    const sorted = batchEvents.slice().sort((a, b) => a.atMs - b.atMs);
+    const first = sorted[0] || {};
+    const last = sorted[sorted.length - 1] || first;
+    const phaseDurations = calculateTransitionPhaseDurations(sorted, last.atMs);
+    addPhaseDurations(batchPhaseTaskMs, phaseDurations);
+    batchSummaries.push({
+      batchIndex: Number(batchIndex),
+      startPage: Number.isFinite(first.batchStartPageIndex) ? first.batchStartPageIndex + 1 : null,
+      pageCount: finiteNumberOrNull(first.batchPageCount),
+      durationMs: roundMilliseconds((last.atMs || 0) - (first.atMs || 0)),
+      phaseDurationsMs: phaseDurations,
+      eventCount: sorted.length,
+    });
+  }
+
+  const mergeSummaries = [];
+  const mergePhaseTaskMs = createEmptyPhaseDurations();
+  const mergeEvents = records.filter((event) => normalizeTimingPhase(event.phase) === 'merging');
+  for (const [taskIndex, taskEvents] of groupEventsByNumericKey(mergeEvents, 'globalMergeTaskIndex')) {
+    const sorted = taskEvents.slice().sort((a, b) => a.atMs - b.atMs);
+    const first = sorted[0] || {};
+    const last = sorted[sorted.length - 1] || first;
+    const duration = roundMilliseconds((last.atMs || 0) - (first.atMs || 0));
+    addPhaseDuration(mergePhaseTaskMs, 'merging', duration);
+    mergeSummaries.push({
+      taskIndex: Number(taskIndex),
+      roundIndex: finiteNumberOrNull(first.roundIndex),
+      pairIndex: finiteNumberOrNull(first.pairIndex),
+      durationMs: duration,
+      eventCount: sorted.length,
+    });
+  }
+
+  return {
+    totalMs: roundMilliseconds(durationMs),
+    eventCount: records.length,
+    phaseSpans: finalizePhaseSpans(phaseSpans),
+    batchPhaseTaskMs: Object.fromEntries(Object.entries(batchPhaseTaskMs).map(([phase, value]) => [phase, roundMilliseconds(value)])),
+    mergePhaseTaskMs: Object.fromEntries(Object.entries(mergePhaseTaskMs).map(([phase, value]) => [phase, roundMilliseconds(value)])),
+    batchSummary: summarizeTaskDurations(batchSummaries),
+    mergeSummary: summarizeTaskDurations(mergeSummaries),
+    slowestBatches: batchSummaries
+      .slice()
+      .sort((a, b) => b.durationMs - a.durationMs)
+      .slice(0, 8),
+    slowestMergeTasks: mergeSummaries
+      .slice()
+      .sort((a, b) => b.durationMs - a.durationMs)
+      .slice(0, 8),
+  };
 }
 
 /**
@@ -243,14 +465,35 @@ export async function runPdfGenerationBenchmark({
       };
       const plan = describeBenchmarkBatchPlan(selected.urls.length, pdfCfg, batchSize);
       const started = performance.now();
+      const progressEvents = [];
       const blob = await createPrintPdfBlob(selected.urls, {
         ...baseOptions,
         pageContexts: selected.pageContexts,
         pdfCfg,
         signal,
-        onProgress: undefined,
+        onProgress: (event) => {
+          progressEvents.push({
+            atMs: performance.now() - started,
+            phase: String(event?.phase || 'unknown'),
+            current: finiteNumberOrNull(event?.current),
+            total: finiteNumberOrNull(event?.total),
+            page: finiteNumberOrNull(event?.page),
+            localCurrent: finiteNumberOrNull(event?.localCurrent),
+            localTotal: finiteNumberOrNull(event?.localTotal),
+            batchIndex: finiteNumberOrNull(event?.batchIndex),
+            batchCount: finiteNumberOrNull(event?.batchCount),
+            batchStartPageIndex: finiteNumberOrNull(event?.batchStartPageIndex),
+            batchPageCount: finiteNumberOrNull(event?.batchPageCount),
+            mergeCurrent: finiteNumberOrNull(event?.mergeCurrent),
+            mergeTotal: finiteNumberOrNull(event?.mergeTotal),
+            roundIndex: finiteNumberOrNull(event?.roundIndex),
+            pairIndex: finiteNumberOrNull(event?.pairIndex),
+            globalMergeTaskIndex: finiteNumberOrNull(event?.globalMergeTaskIndex),
+          });
+        },
       });
       const durationMs = performance.now() - started;
+      const timings = summarizeBenchmarkTiming(progressEvents, durationMs);
       runs.push({
         batchSize,
         batchSizeLabel: batchSize === 0 ? 'auto' : String(batchSize),
@@ -261,6 +504,8 @@ export async function runPdfGenerationBenchmark({
         desiredWorkerCount: plan.desiredWorkerCount,
         resolvedBatchSize: plan.resolvedBatchSize,
         batchCount: plan.batchCount,
+        plan,
+        timings,
       });
       completedRuns += 1;
       onProgress?.({

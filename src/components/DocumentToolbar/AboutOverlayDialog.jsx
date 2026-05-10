@@ -245,7 +245,9 @@ export default function AboutOverlayDialog({
                   latestPdfBenchmark: latestBenchmark ? {
                     createdUtc: latestBenchmark.createdUtc,
                     pageCount: latestBenchmark.pageCount,
+                    testedBatchSizes: latestBenchmark.testedBatchSizes,
                     best: latestBenchmark.best,
+                    bestTimings: latestBenchmark.best?.timings || null,
                   } : null,
                 }, null, 2)}
               </pre>
