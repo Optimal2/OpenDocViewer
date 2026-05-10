@@ -10,19 +10,25 @@ import { planPdfWorkerBatches, resolveAutoPdfWorkerBatchSize } from './pdfWorker
 import { getRuntimeConfig } from './runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestPdfBenchmarkResult } from './supportDiagnostics.js';
 
-const DEFAULT_BATCH_SIZES = Object.freeze([0, 5, 10, 20, 30, 40, 60, 80]);
+const DEFAULT_BATCH_SIZES = Object.freeze([0]);
+const DEFAULT_BATCH_COUNTS = Object.freeze([2, 3, 4]);
 const DEFAULT_WORKER_COUNTS = Object.freeze([0]);
-const DEFAULT_IMAGE_LOAD_CONCURRENCIES = Object.freeze([0]);
-const DEFAULT_STRATEGIES = Object.freeze(['partial-merge']);
+const DEFAULT_IMAGE_LOAD_CONCURRENCIES = Object.freeze([0, 2, 3, 4]);
+const DEFAULT_MERGE_MODES = Object.freeze(['auto', 'single', 'pairwise']);
+const DEFAULT_STRATEGIES = Object.freeze(['partial-merge', 'single-worker']);
+const DEFAULT_PROFILE = 'focused';
 const DEFAULT_PAGE_LIMIT = 80;
 const DEFAULT_ITERATIONS = 1;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
-const DEFAULT_MAX_RUNS = 80;
+const DEFAULT_MAX_RUNS = 40;
 const MAX_BENCHMARK_WORKER_COUNT = 32;
 const MAX_BENCHMARK_BATCH_SIZE = 200;
+const MAX_BENCHMARK_BATCH_COUNT = 8;
 const MAX_BENCHMARK_IMAGE_LOAD_CONCURRENCY = 32;
 const AUTO_NEIGHBOR_BATCH_FACTORS = Object.freeze([0.75, 1.25, 1.5]);
 const BENCHMARK_STRATEGIES = Object.freeze(['partial-merge', 'single-worker', 'main-thread']);
+const BENCHMARK_PROFILES = Object.freeze(['focused', 'matrix']);
+const BENCHMARK_MERGE_MODES = Object.freeze(['auto', 'single', 'pairwise']);
 const TIMED_PROGRESS_PHASES = Object.freeze([
   'loading-library',
   'loading-images',
@@ -63,6 +69,23 @@ function normalizeBatchSizes(value) {
 
 /**
  * @param {*} value
+ * @returns {Array<number>}
+ */
+function normalizeBatchCounts(value) {
+  const raw = Array.isArray(value) ? value : DEFAULT_BATCH_COUNTS;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const next = Math.max(2, Math.min(MAX_BENCHMARK_BATCH_COUNT, Math.floor(Number(item) || 0)));
+    if (seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out.length ? out : DEFAULT_BATCH_COUNTS.slice();
+}
+
+/**
+ * @param {*} value
  * @param {Array<number>} fallback
  * @param {number} max
  * @returns {Array<number>}
@@ -95,6 +118,32 @@ function normalizeStrategies(value) {
     out.push(strategy);
   }
   return out.length ? out : DEFAULT_STRATEGIES.slice();
+}
+
+/**
+ * @param {*} value
+ * @returns {Array<string>}
+ */
+function normalizeMergeModes(value) {
+  const raw = Array.isArray(value) ? value : DEFAULT_MERGE_MODES;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const mode = String(item || '').trim().toLowerCase();
+    if (!BENCHMARK_MERGE_MODES.includes(mode) || seen.has(mode)) continue;
+    seen.add(mode);
+    out.push(mode);
+  }
+  return out.length ? out : DEFAULT_MERGE_MODES.slice();
+}
+
+/**
+ * @param {*} value
+ * @returns {'focused'|'matrix'}
+ */
+function normalizeProfile(value) {
+  const profile = String(value || DEFAULT_PROFILE).trim().toLowerCase();
+  return BENCHMARK_PROFILES.includes(profile) ? profile : DEFAULT_PROFILE;
 }
 
 /**
@@ -161,7 +210,7 @@ function createScenarioLabel(scenario) {
   const imageText = scenario.imageLoadConcurrency === 0 ? 'auto' : String(scenario.imageLoadConcurrency);
   if (scenario.strategy === 'main-thread') return `main/i${imageText}`;
   if (scenario.strategy === 'single-worker') return `single-worker/i${imageText}`;
-  return `partial/w${workerText}/b${batchText}/i${imageText}`;
+  return `partial/w${workerText}/b${batchText}/i${imageText}/m${scenario.mergeMode || 'auto'}`;
 }
 
 /**
@@ -174,6 +223,7 @@ function createScenarioKey(scenario) {
     scenario.workerCount,
     scenario.batchSize,
     scenario.imageLoadConcurrency,
+    scenario.mergeMode || 'auto',
   ].join('|');
 }
 
@@ -189,6 +239,9 @@ function addScenario(target, seen, scenario) {
     workerCount: Math.max(0, Math.floor(Number(scenario.workerCount) || 0)),
     batchSize: Math.max(0, Math.floor(Number(scenario.batchSize) || 0)),
     imageLoadConcurrency: Math.max(0, Math.floor(Number(scenario.imageLoadConcurrency) || 0)),
+    mergeMode: BENCHMARK_MERGE_MODES.includes(String(scenario.mergeMode || '').toLowerCase())
+      ? String(scenario.mergeMode).toLowerCase()
+      : 'auto',
   };
   const key = createScenarioKey(normalized);
   if (seen.has(key)) return;
@@ -202,7 +255,7 @@ function addScenario(target, seen, scenario) {
  * @param {Object=} basePdfCfg
  * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
  */
-function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
+function createMatrixBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
   const scenarios = [];
   const seen = new Set();
 
@@ -238,12 +291,15 @@ function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
         { ...basePdfCfg, workerCount, partialMergeEnabled: true }
       );
       for (const batchSize of batchSizes) {
-        benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
-          addScenario(scenarios, seen, {
-            strategy,
-            workerCount,
-            batchSize,
-            imageLoadConcurrency,
+        benchmarkCfg.mergeModes.forEach((mergeMode) => {
+          benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+            addScenario(scenarios, seen, {
+              strategy,
+              workerCount,
+              batchSize,
+              imageLoadConcurrency,
+              mergeMode,
+            });
           });
         });
       }
@@ -254,6 +310,113 @@ function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
     scenarios: scenarios.slice(0, benchmarkCfg.maxRuns),
     totalScenarioCount: scenarios.length,
   };
+}
+
+/**
+ * Create a compact benchmark matrix that answers the important tuning questions without
+ * spending most of the run on combinations that are already known to be poor:
+ * - single worker vs balanced 2/3/4 partial PDFs
+ * - image load/decode concurrency around the likely sweet spot
+ * - merge mode with image-load left on auto, so merge overhead can be isolated
+ * @param {Object} benchmarkCfg
+ * @param {number} pageCount
+ * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
+ */
+function createFocusedBenchmarkScenarios(benchmarkCfg, pageCount) {
+  const scenarios = [];
+  const seen = new Set();
+  const safePageCount = Math.max(1, Math.floor(Number(pageCount) || 1));
+  const includeStrategy = (name) => benchmarkCfg.strategies.includes(name);
+
+  if (includeStrategy('main-thread')) {
+    addScenario(scenarios, seen, {
+      strategy: 'main-thread',
+      workerCount: 0,
+      batchSize: 0,
+      imageLoadConcurrency: 0,
+    });
+  }
+
+  if (includeStrategy('single-worker')) {
+    benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+      addScenario(scenarios, seen, {
+        strategy: 'single-worker',
+        workerCount: 1,
+        batchSize: 0,
+        imageLoadConcurrency,
+      });
+    });
+  }
+
+  if (includeStrategy('partial-merge')) {
+    // Current runtime auto, tested across image-load concurrency values.
+    benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+      addScenario(scenarios, seen, {
+        strategy: 'partial-merge',
+        workerCount: 0,
+        batchSize: 0,
+        imageLoadConcurrency,
+        mergeMode: 'auto',
+      });
+    });
+
+    benchmarkCfg.batchCounts.forEach((batchCount) => {
+      const workerCount = Math.max(1, Math.min(MAX_BENCHMARK_WORKER_COUNT, batchCount));
+      const batchSize = Math.max(1, Math.ceil(safePageCount / batchCount));
+
+      // Compare image-load/decode concurrency while leaving merge behavior on auto.
+      benchmarkCfg.imageLoadConcurrencies.forEach((imageLoadConcurrency) => {
+        addScenario(scenarios, seen, {
+          strategy: 'partial-merge',
+          workerCount,
+          batchSize,
+          imageLoadConcurrency,
+          mergeMode: 'auto',
+        });
+      });
+
+      // Compare merge strategies with image-load/decode concurrency held at auto.
+      benchmarkCfg.mergeModes.forEach((mergeMode) => {
+        addScenario(scenarios, seen, {
+          strategy: 'partial-merge',
+          workerCount,
+          batchSize,
+          imageLoadConcurrency: 0,
+          mergeMode,
+        });
+      });
+    });
+
+    benchmarkCfg.batchSizes
+      .filter((batchSize) => batchSize > 0)
+      .forEach((batchSize) => {
+        addScenario(scenarios, seen, {
+          strategy: 'partial-merge',
+          workerCount: 0,
+          batchSize,
+          imageLoadConcurrency: 0,
+          mergeMode: 'auto',
+        });
+      });
+  }
+
+  return {
+    scenarios: scenarios.slice(0, benchmarkCfg.maxRuns),
+    totalScenarioCount: scenarios.length,
+  };
+}
+
+/**
+ * @param {Object} benchmarkCfg
+ * @param {number} pageCount
+ * @param {Object=} basePdfCfg
+ * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
+ */
+function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
+  if (benchmarkCfg.profile === 'matrix') {
+    return createMatrixBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg);
+  }
+  return createFocusedBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg);
 }
 
 /**
@@ -280,6 +443,7 @@ function createScenarioPdfConfig(basePdfCfg = {}, scenario) {
       workerCount: 1,
       workerBatchSize: 0,
       imageLoadConcurrency: scenario.imageLoadConcurrency,
+      mergeMode: 'auto',
     };
   }
 
@@ -291,6 +455,7 @@ function createScenarioPdfConfig(basePdfCfg = {}, scenario) {
     workerCount: scenario.workerCount,
     workerBatchSize: scenario.batchSize,
     imageLoadConcurrency: scenario.imageLoadConcurrency,
+    mergeMode: scenario.mergeMode || 'auto',
   };
 }
 
@@ -312,6 +477,7 @@ function describeScenarioPlan(pageCount, pdfCfg, scenario) {
       resolvedBatchSize: Math.max(0, Math.floor(Number(pageCount) || 0)),
       batchCount: 1,
       imageLoadConcurrency: scenario.imageLoadConcurrency,
+      mergeMode: 'auto',
     };
   }
 
@@ -319,6 +485,7 @@ function describeScenarioPlan(pageCount, pdfCfg, scenario) {
     strategy: scenario.strategy,
     workerEnabled: true,
     imageLoadConcurrency: scenario.imageLoadConcurrency,
+    mergeMode: scenario.mergeMode || 'auto',
     ...describeBenchmarkBatchPlan(pageCount, pdfCfg, scenario.batchSize),
   };
 }
@@ -566,21 +733,24 @@ function summarizeBenchmarkTiming(events, durationMs) {
 
 /**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,batchSizes:Array<number>,workerCounts:Array<number>,imageLoadConcurrencies:Array<number>,strategies:Array<string>,maxRuns:number,delayBetweenRunsMs:number}}
+ * @returns {{enabled:boolean,profile:string,pageLimit:number,iterations:number,batchSizes:Array<number>,batchCounts:Array<number>,workerCounts:Array<number>,imageLoadConcurrencies:Array<number>,mergeModes:Array<string>,strategies:Array<string>,maxRuns:number,delayBetweenRunsMs:number}}
  */
 function normalizeBenchmarkConfig(config = getRuntimeConfig()) {
   const cfg = config?.print?.pdf?.benchmark || {};
   return {
     enabled: cfg.enabled === true,
+    profile: normalizeProfile(cfg.profile),
     pageLimit: normalizeInteger(cfg.pageLimit, DEFAULT_PAGE_LIMIT, 1, 10000),
     iterations: normalizeInteger(cfg.iterations, DEFAULT_ITERATIONS, 1, 10),
     batchSizes: normalizeBatchSizes(cfg.batchSizes),
+    batchCounts: normalizeBatchCounts(cfg.batchCounts),
     workerCounts: normalizeIntegerList(cfg.workerCounts, DEFAULT_WORKER_COUNTS, MAX_BENCHMARK_WORKER_COUNT),
     imageLoadConcurrencies: normalizeIntegerList(
       cfg.imageLoadConcurrencies,
       DEFAULT_IMAGE_LOAD_CONCURRENCIES,
       MAX_BENCHMARK_IMAGE_LOAD_CONCURRENCY
     ),
+    mergeModes: normalizeMergeModes(cfg.mergeModes),
     strategies: normalizeStrategies(cfg.strategies),
     maxRuns: normalizeInteger(cfg.maxRuns, DEFAULT_MAX_RUNS, 1, 500),
     delayBetweenRunsMs: normalizeInteger(cfg.delayBetweenRunsMs, DEFAULT_DELAY_BETWEEN_RUNS_MS, 0, 10000),
@@ -680,6 +850,7 @@ export async function runPdfGenerationBenchmark({
         strategy: scenario.strategy,
         workerCount: scenario.workerCount,
         imageLoadConcurrency: scenario.imageLoadConcurrency,
+        mergeMode: scenario.mergeMode,
         iteration,
         completedRuns,
         totalRuns,
@@ -724,6 +895,7 @@ export async function runPdfGenerationBenchmark({
         batchSizeLabel: scenario.batchSize === 0 ? 'auto' : String(scenario.batchSize),
         workerCountSetting: scenario.workerCount,
         imageLoadConcurrencySetting: scenario.imageLoadConcurrency,
+        mergeModeSetting: scenario.mergeMode,
         iteration,
         durationMs: Math.round(durationMs),
         outputBytes: Math.max(0, Number(blob?.size) || 0),
@@ -731,6 +903,7 @@ export async function runPdfGenerationBenchmark({
         desiredWorkerCount: plan.desiredWorkerCount,
         resolvedBatchSize: plan.resolvedBatchSize,
         batchCount: plan.batchCount,
+        mergeMode: plan.mergeMode || scenario.mergeMode || 'auto',
         plan,
         timings,
       });
@@ -742,6 +915,7 @@ export async function runPdfGenerationBenchmark({
         strategy: scenario.strategy,
         workerCount: scenario.workerCount,
         imageLoadConcurrency: scenario.imageLoadConcurrency,
+        mergeMode: scenario.mergeMode,
         iteration,
         completedRuns,
         totalRuns,
@@ -758,14 +932,18 @@ export async function runPdfGenerationBenchmark({
     sourcePageCount: sourceUrls.length,
     pageLimit: benchmarkCfg.pageLimit,
     iterations: benchmarkCfg.iterations,
+    profile: benchmarkCfg.profile,
     batchSizes: benchmarkCfg.batchSizes,
+    batchCounts: benchmarkCfg.batchCounts,
     workerCounts: benchmarkCfg.workerCounts,
     imageLoadConcurrencies: benchmarkCfg.imageLoadConcurrencies,
+    mergeModes: benchmarkCfg.mergeModes,
     strategies: benchmarkCfg.strategies,
     maxRuns: benchmarkCfg.maxRuns,
     testedBatchSizes: Array.from(new Set(scenarios.map((scenario) => scenario.batchSize))),
     testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
     testedImageLoadConcurrencies: Array.from(new Set(scenarios.map((scenario) => scenario.imageLoadConcurrency))),
+    testedMergeModes: Array.from(new Set(scenarios.map((scenario) => scenario.mergeMode || 'auto'))),
     testedStrategies: Array.from(new Set(scenarios.map((scenario) => scenario.strategy))),
     testedScenarios: scenarios,
     scenarioCount: scenarios.length,

@@ -14,13 +14,15 @@ import { collectSupportDiagnostics, saveLatestRenderDecodeBenchmarkResult } from
 
 const DEFAULT_PAGE_LIMIT = 120;
 const DEFAULT_ITERATIONS = 1;
-const DEFAULT_WORKER_COUNTS = Object.freeze([0]);
+const DEFAULT_WORKER_COUNTS = Object.freeze([0, 1, 2, 3, 4, 6, 8]);
 const DEFAULT_VARIANTS = Object.freeze(['full']);
 const DEFAULT_MAX_RUNS = 40;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
+const DEFAULT_SAMPLE_MODE = 'evenly-spaced';
 const MAX_RENDER_BENCHMARK_WORKER_COUNT = 32;
 const MAX_RENDER_BENCHMARK_PAGE_LIMIT = 1000;
 const RENDER_VARIANTS = Object.freeze(['full', 'thumbnail']);
+const SAMPLE_MODES = Object.freeze(['first', 'evenly-spaced']);
 
 /**
  * @param {*} value
@@ -71,8 +73,17 @@ function normalizeVariants(value) {
 }
 
 /**
+ * @param {*} value
+ * @returns {'first'|'evenly-spaced'}
+ */
+function normalizeSampleMode(value) {
+  const text = String(value || DEFAULT_SAMPLE_MODE).trim().toLowerCase();
+  return SAMPLE_MODES.includes(text) ? text : DEFAULT_SAMPLE_MODE;
+}
+
+/**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,maxRuns:number,delayBetweenRunsMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number}}
  */
 function normalizeRenderBenchmarkConfig(config = {}) {
   const cfg = config?.documentLoading?.renderBenchmark || {};
@@ -82,6 +93,7 @@ function normalizeRenderBenchmarkConfig(config = {}) {
     iterations: normalizeInteger(cfg.iterations, DEFAULT_ITERATIONS, 1, 10),
     workerCounts: normalizeWorkerCounts(cfg.workerCounts),
     variants: normalizeVariants(cfg.variants),
+    sampleMode: normalizeSampleMode(cfg.sampleMode),
     maxRuns: normalizeInteger(cfg.maxRuns, DEFAULT_MAX_RUNS, 1, 200),
     delayBetweenRunsMs: normalizeInteger(cfg.delayBetweenRunsMs, DEFAULT_DELAY_BETWEEN_RUNS_MS, 0, 10000),
   };
@@ -137,18 +149,19 @@ function throwIfAborted(signal) {
 /**
  * @param {Array<*>} pages
  * @param {number} limit
+ * @param {'first'|'evenly-spaced'} sampleMode
  * @returns {Array<Object>}
  */
-function selectBenchmarkPages(pages, limit) {
-  const selected = [];
+function selectBenchmarkPages(pages, limit, sampleMode) {
   const max = Math.max(1, Number(limit) || DEFAULT_PAGE_LIMIT);
   const source = Array.isArray(pages) ? pages : [];
-  for (let index = 0; index < source.length && selected.length < max; index += 1) {
+  const candidates = [];
+  for (let index = 0; index < source.length; index += 1) {
     const page = source[index] || null;
     const sourceKey = String(page?.sourceKey || '').trim();
     const fileExtension = String(page?.fileExtension || '').trim().toLowerCase();
     if (!page || page.status === -1 || !sourceKey || !fileExtension) continue;
-    selected.push({
+    candidates.push({
       originalPageIndex: index,
       sourceKey,
       fileExtension,
@@ -156,6 +169,22 @@ function selectBenchmarkPages(pages, limit) {
       pageIndex: Math.max(0, Number(page.pageIndex) || 0),
       sourceSizeBytes: Math.max(0, Number(page.sourceSizeBytes) || 0),
     });
+  }
+  if (candidates.length <= max || sampleMode === 'first') return candidates.slice(0, max);
+
+  const selected = [];
+  const used = new Set();
+  const denominator = Math.max(1, max - 1);
+  for (let slot = 0; slot < max; slot += 1) {
+    const index = Math.round((slot * (candidates.length - 1)) / denominator);
+    if (used.has(index)) continue;
+    used.add(index);
+    selected.push(candidates[index]);
+  }
+  for (let index = 0; selected.length < max && index < candidates.length; index += 1) {
+    if (used.has(index)) continue;
+    used.add(index);
+    selected.push(candidates[index]);
   }
   return selected;
 }
@@ -405,7 +434,7 @@ export async function runRenderDecodeBenchmark(args) {
     throw new Error('Render/decode benchmark requires access to the current source blob store.');
   }
 
-  const selectedPages = selectBenchmarkPages(args?.allPages || [], benchmarkCfg.pageLimit);
+  const selectedPages = selectBenchmarkPages(args?.allPages || [], benchmarkCfg.pageLimit, benchmarkCfg.sampleMode);
   if (!selectedPages.length) throw new Error('No loaded source pages were available for render/decode benchmark.');
 
   const scenarioPlan = createScenarios(benchmarkCfg);
@@ -455,6 +484,7 @@ export async function runRenderDecodeBenchmark(args) {
     sourcePageCount: Array.isArray(args?.allPages) ? args.allPages.length : 0,
     pageLimit: benchmarkCfg.pageLimit,
     iterations: benchmarkCfg.iterations,
+    sampleMode: benchmarkCfg.sampleMode,
     variants: benchmarkCfg.variants,
     workerCounts: benchmarkCfg.workerCounts,
     maxRuns: benchmarkCfg.maxRuns,

@@ -1501,7 +1501,7 @@ function resolvePdfImageLoadConcurrency(pdfCfg = {}) {
  * split into page batches while small jobs can stay on a single PDF worker.
  * @param {Object=} pdfCfg
  * @param {number=} pageCount
- * @returns {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean}}
+ * @returns {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean, mergeMode:string}}
  */
 function resolvePdfWorkerPlan(pdfCfg = {}, pageCount = 0) {
   const pageThreshold = Math.max(1, Number(pdfCfg.workerPageThreshold) || PDF_WORKER_PAGE_THRESHOLD);
@@ -1517,6 +1517,7 @@ function resolvePdfWorkerPlan(pdfCfg = {}, pageCount = 0) {
     pageThreshold,
     imageLoadConcurrency: resolvePdfImageLoadConcurrency(pdfCfg),
     partialMergeEnabled,
+    mergeMode: String(pdfCfg.mergeMode || 'auto').trim().toLowerCase() || 'auto',
   };
 }
 
@@ -1542,7 +1543,7 @@ function buildPdfPagePlans(options, total) {
 /**
  * @param {Array<string>} urls
  * @param {PdfPrintOptions} options
- * @param {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean}} workerPlan
+ * @param {{enabled:boolean, workerCount:number, desiredWorkerCount:number, batchSize:number, pageThreshold:number, imageLoadConcurrency:number, partialMergeEnabled:boolean, mergeMode:string}} workerPlan
  * @param {string|null} watermarkAssetSrc
  * @returns {Promise<Blob>}
  */

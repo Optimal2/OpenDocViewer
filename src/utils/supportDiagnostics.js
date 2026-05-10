@@ -77,11 +77,14 @@ function collectConfigDiagnostics() {
       workerBatchSize: Number(pdf.workerBatchSize || 0) || 0,
       imageLoadConcurrency: Number(pdf.imageLoadConcurrency || 0) || 0,
       benchmarkEnabled: benchmark.enabled === true,
+      benchmarkProfile: String(benchmark.profile || ''),
       benchmarkStrategies: Array.isArray(benchmark.strategies) ? benchmark.strategies.slice(0, 12) : [],
       benchmarkWorkerCounts: Array.isArray(benchmark.workerCounts) ? benchmark.workerCounts.slice(0, 32) : [],
       benchmarkImageLoadConcurrencies: Array.isArray(benchmark.imageLoadConcurrencies)
         ? benchmark.imageLoadConcurrencies.slice(0, 32)
         : [],
+      benchmarkBatchCounts: Array.isArray(benchmark.batchCounts) ? benchmark.batchCounts.slice(0, 16) : [],
+      benchmarkMergeModes: Array.isArray(benchmark.mergeModes) ? benchmark.mergeModes.slice(0, 12) : [],
       benchmarkMaxRuns: Number(benchmark.maxRuns || 0) || 0,
     },
     documentLoading: {
@@ -93,6 +96,7 @@ function collectConfigDiagnostics() {
       useWorkersForTiff: render.useWorkersForTiff !== false,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
       renderBenchmarkVariants: Array.isArray(renderBenchmark.variants) ? renderBenchmark.variants.slice(0, 12) : [],
+      renderBenchmarkSampleMode: String(renderBenchmark.sampleMode || ''),
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
         ? renderBenchmark.workerCounts.slice(0, 32)
         : [],
