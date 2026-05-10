@@ -127,6 +127,7 @@ const PDF_TEMPLATE_ALLOWED_ATTRIBUTES = Object.freeze(['class', 'style']);
 const CSS_RULE_RE = /([^{}]+)\{([^{}]*)\}/g;
 const CSS_CLASS_SELECTOR_RE = /\.([A-Za-z0-9_-]+)/g;
 const CSS_SELECTOR_LIST_SEPARATOR_RE = /,/;
+const CSS_DESCENDANT_SELECTOR_SEPARATOR_RE = /\s+/;
 const CSS_DECLARATION_SEPARATOR_RE = /;/;
 const RICH_TEXT_LINE_BREAK_RE = /\r\n|\r|\n/;
 const RICH_TEXT_COLLAPSIBLE_WHITESPACE_RE = /[ \t\f\v]+/g;
@@ -178,6 +179,13 @@ const DISALLOWED_TEMPLATE_CLOSING_TAG_PATTERNS = Object.freeze(
  * @property {string=} align
  * @property {boolean=} displayFlex
  * @property {boolean=} spaceBetween
+ * @property {boolean=} hidden
+ */
+
+/**
+ * @typedef {Object} PdfTemplateCssStyleRule
+ * @property {Array<Array<string>>} selectorParts
+ * @property {PdfTextStyleHints} declarations
  */
 
 /**
@@ -305,10 +313,71 @@ function parseTextStyleDeclarations(style) {
     if (property === 'font-weight' && isBoldFontWeight(value)) result.bold = true;
     if (property === 'font-style' && (value === 'italic' || value === 'oblique')) result.italic = true;
     if (property === 'text-align' && ['left', 'right', 'center'].includes(value)) result.align = value;
-    if (property === 'display' && value === 'flex') result.displayFlex = true;
+    if (property === 'display') {
+      result.hidden = value === 'none';
+      if (value === 'flex') result.displayFlex = true;
+    }
     if (property === 'justify-content' && value === 'space-between') result.spaceBetween = true;
   });
   return result;
+}
+
+/**
+ * Parse a supported class-only selector into descendant selector parts.
+ *
+ * Supported examples: `.row`, `.row .meta`, `.reason.has-text .reason-output`.
+ * Element-qualified selectors such as `span.meta` are accepted, but combinators,
+ * IDs, attributes and pseudo selectors are intentionally outside the PDF CSS subset.
+ * @param {string} selector
+ * @returns {Array<Array<string>>|null}
+ */
+function parseTemplateCssClassSelector(selector) {
+  const parts = String(selector || '')
+    .trim()
+    .split(CSS_DESCENDANT_SELECTOR_SEPARATOR_RE)
+    .filter(Boolean);
+  if (!parts.length) return null;
+
+  const selectorParts = [];
+  for (const part of parts) {
+    const classNames = Array.from(part.matchAll(CSS_CLASS_SELECTOR_RE), (match) => match[1]).filter(Boolean);
+    const leftover = part.replace(CSS_CLASS_SELECTOR_RE, '');
+    const hasSupportedElementPrefix = !leftover || /^[A-Za-z][A-Za-z0-9-]*$/.test(leftover);
+    if (!classNames.length || !hasSupportedElementPrefix) return null;
+    selectorParts.push(classNames);
+  }
+
+  return selectorParts;
+}
+
+/**
+ * @param {Element} element
+ * @param {Array<string>} classNames
+ * @returns {boolean}
+ */
+function elementMatchesClassSelectorPart(element, classNames) {
+  return classNames.every((className) => element.classList?.contains(className));
+}
+
+/**
+ * @param {Element} element
+ * @param {Array<Array<string>>} selectorParts
+ * @returns {boolean}
+ */
+function templateCssRuleMatchesElement(element, selectorParts) {
+  if (!selectorParts.length) return false;
+  if (!elementMatchesClassSelectorPart(element, selectorParts[selectorParts.length - 1])) return false;
+
+  let ancestor = element.parentElement;
+  for (let index = selectorParts.length - 2; index >= 0; index -= 1) {
+    while (ancestor && !elementMatchesClassSelectorPart(ancestor, selectorParts[index])) {
+      ancestor = ancestor.parentElement;
+    }
+    if (!ancestor) return false;
+    ancestor = ancestor.parentElement;
+  }
+
+  return true;
 }
 
 /**
@@ -316,46 +385,43 @@ function parseTextStyleDeclarations(style) {
  *
  * This is intentionally not a full CSS parser. Nested at-rules such as `@media` and
  * `@keyframes` are ignored by design, because generated-PDF output supports only inline
- * text hints plus simple class-based header/footer alignment. For descendant selectors,
- * declarations are assigned to the right-most class, which is the best approximation for
- * the target element in templates such as `.row .meta`. CSS declaration values with
- * nested braces, including quoted `content: "{"`, are outside this subset.
+ * text hints plus simple class-based header/footer alignment. Descendant class selectors
+ * are matched against the actual element ancestry so template rules such as
+ * `.reason-has-text .reason-output { display:none }` behave like the HTML print path.
+ * CSS declaration values with nested braces, including quoted `content: "{"`, are outside
+ * this subset.
  *
  * @param {string} css
- * @returns {Map<string, PdfTextStyleHints>}
+ * @returns {Array<PdfTemplateCssStyleRule>}
  */
-function parseTemplateCssClassStyles(css) {
-  const styles = new Map();
+function parseTemplateCssStyleRules(css) {
+  const rules = [];
   const text = String(css || '');
-  if (!text) return styles;
+  if (!text) return rules;
 
   for (const match of text.matchAll(CSS_RULE_RE)) {
     const selectorText = match[1] || '';
     const declarations = parseTextStyleDeclarations(match[2] || '');
     selectorText.split(CSS_SELECTOR_LIST_SEPARATOR_RE).forEach((selector) => {
-      const classMatches = Array.from(String(selector).matchAll(CSS_CLASS_SELECTOR_RE), (classMatch) => classMatch[1]);
-      if (!classMatches.length) return;
-      // Use the right-most class in selector chains. Applying the same declarations to
-      // every class in `.parent .child` would incorrectly style standalone `.parent` nodes.
-      const className = classMatches[classMatches.length - 1];
-      const current = styles.get(className) || {};
-      styles.set(className, { ...current, ...declarations });
+      const selectorParts = parseTemplateCssClassSelector(selector);
+      if (selectorParts) rules.push({ selectorParts, declarations });
     });
   }
 
-  return styles;
+  return rules;
 }
 
 /**
  * @param {Element} element
- * @param {Map<string, PdfTextStyleHints>} classStyles
+ * @param {Array<PdfTemplateCssStyleRule>} styleRules
  * @returns {PdfTextStyleHints}
  */
-function getElementStyleHints(element, classStyles) {
+function getElementStyleHints(element, styleRules) {
   const result = {};
-  Array.from(element.classList || []).forEach((className) => {
-    const classStyle = classStyles.get(className);
-    if (classStyle) Object.assign(result, classStyle);
+  styleRules.forEach((rule) => {
+    if (templateCssRuleMatchesElement(element, rule.selectorParts)) {
+      Object.assign(result, rule.declarations);
+    }
   });
   Object.assign(result, parseTextStyleDeclarations(element.getAttribute('style') || ''));
   return result;
@@ -568,7 +634,7 @@ function flattenRichLines(richLines) {
  */
 function htmlToRichLines(html, css = '') {
   const input = sanitizeTemplateHtmlForPdf(stripDisallowedTemplateElements(html));
-  const classStyles = parseTemplateCssClassStyles(css);
+  const styleRules = parseTemplateCssStyleRules(css);
   /** @type {Array<PdfRichLine>} */
   const lines = [[]];
   try {
@@ -595,7 +661,8 @@ function htmlToRichLines(html, css = '') {
         return;
       }
 
-      const styleHints = getElementStyleHints(element, classStyles);
+      const styleHints = getElementStyleHints(element, styleRules);
+      if (styleHints.hidden) return;
       const next = {
         bold: !!(inherited.bold || styleHints.bold || nodeName === 'b' || nodeName === 'strong'),
         italic: !!(inherited.italic || styleHints.italic || nodeName === 'i' || nodeName === 'em'),
@@ -622,7 +689,7 @@ function htmlToRichLines(html, css = '') {
           }
 
           const childStyle = child.nodeType === 1
-            ? getElementStyleHints(/** @type {Element} */ (child), classStyles)
+            ? getElementStyleHints(/** @type {Element} */ (child), styleRules)
             : {};
           const align = childStyle.align || (index === children.length - 1 ? 'right' : 'left');
 
