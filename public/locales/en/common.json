@@ -198,9 +198,13 @@
     "subtitleUnified": "Choose what to print and fill in any print details.",
     "methodHeader": "Print method",
     "methodLabel": "Method",
-    "repeatLastPdf": {
+    "repeatLastPrint": {
       "button": "Print again",
-      "tooltip": "Print the latest generated PDF again without regenerating it."
+      "tooltip": "Print the latest prepared print job again without preparing it again."
+    },
+    "pdfOrientation": {
+      "checkboxLabel": "Automatic page orientation",
+      "hint": "When selected, each page uses portrait or landscape based on the page image."
     },
     "modes": {
       "active": "Active page",

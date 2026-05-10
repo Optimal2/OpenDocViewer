@@ -92,6 +92,7 @@ function getPdfProgressPercent(progress) {
  * @property {string=} printFormatValue
  * @property {Object=} reasonSelection
  * @property {Object=} printFormatSelection
+ * @property {'auto'|'portrait'|'landscape'=} pdfOrientation
  * @property {'html'|'pdf'=} printBackend
  * @property {'print'|'download'=} printAction
  */
@@ -843,6 +844,7 @@ const DocumentToolbar = ({
       printFooterCfg: getRuntimeConfig().printFooter || {},
       printFormatCfg: getRuntimeConfig().print?.format || {},
       pdfCfg: getRuntimeConfig().print?.pdf || {},
+      pdfOrientation: detail?.pdfOrientation || '',
       action: detail?.printAction === 'download' ? 'download' : 'print',
       filename: getRuntimeConfig().print?.pdf?.filename || 'opendocviewer-print.pdf',
     };

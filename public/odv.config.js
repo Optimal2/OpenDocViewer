@@ -152,6 +152,18 @@
         footerReservePt: 14,
         textFontSize: 7,
         imageFallbackQuality: 0.9,
+        // Optional PDF orientation checkbox. When unchecked, fixedMode is used.
+        orientation: {
+          enabled: false,
+          showOption: true,
+          defaultAuto: true,
+          fixedMode: 'portrait',
+          checkboxLabel: { en: 'Automatic page orientation', sv: 'Automatisk sidorientering' },
+          tooltip: {
+            en: 'Let the generated print job choose portrait or landscape per page.',
+            sv: 'Låt den skapade utskriften välja stående eller liggande format per sida.'
+          }
+        },
         // Offload generated-PDF assembly to web workers for larger jobs.
         // partialMergeEnabled lets ODV create page-batch PDFs in parallel and then
         // merge all completed partial PDFs in one final pass.
@@ -239,6 +251,14 @@
           tooltip: {
             en: 'OpenDocViewer generates a PDF before the browser prints it.',
             sv: 'OpenDocViewer skapar en PDF innan webbläsaren skriver ut den.'
+          }
+        },
+        repeatLastPrint: {
+          enabled: true,
+          label: { en: 'Print again', sv: 'Skriv ut igen' },
+          tooltip: {
+            en: 'Print the latest prepared print job again without preparing it again.',
+            sv: 'Skriv ut senaste utskriften igen utan att förbereda om den.'
           }
         }
       },

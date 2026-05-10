@@ -198,9 +198,13 @@
     "subtitleUnified": "Välj vad som ska skrivas ut och fyll i eventuella utskriftsuppgifter.",
     "methodHeader": "Utskriftsmetod",
     "methodLabel": "Metod",
-    "repeatLastPdf": {
+    "repeatLastPrint": {
       "button": "Skriv ut igen",
-      "tooltip": "Skriv ut senaste PDF-utskriften igen utan att skapa om PDF-filen."
+      "tooltip": "Skriv ut senaste utskriften igen utan att förbereda om den."
+    },
+    "pdfOrientation": {
+      "checkboxLabel": "Automatisk sidorientering",
+      "hint": "Om rutan är ibockad får varje sida stående eller liggande format baserat på sidbilden."
     },
     "modes": {
       "active": "Aktiv sida",

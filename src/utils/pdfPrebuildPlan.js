@@ -15,6 +15,7 @@ const DEFAULT_PREBUILD_START_DELAY_MS = 1500;
 const DEFAULT_PREBUILD_CONCURRENCY = 1;
 const VALID_COPY_MARKER_STATES = Object.freeze(['default', 'on', 'off']);
 const VALID_PREBUILD_COPY_MARKER_MODES = Object.freeze(['default', 'on', 'off', 'both']);
+const VALID_PDF_ORIENTATION_MODES = Object.freeze(['auto', 'portrait', 'landscape']);
 
 /**
  * @param {*} value
@@ -76,6 +77,32 @@ function normalizeCopyMarkerStates(value) {
   if (mode === 'both') return ['off', 'on'];
   if (VALID_PREBUILD_COPY_MARKER_MODES.includes(mode)) return [/** @type {'default'|'on'|'off'} */ (mode)];
   return ['default'];
+}
+
+/**
+ * @param {*} value
+ * @param {'auto'|'portrait'|'landscape'} fallback
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function normalizePdfOrientationMode(value, fallback = 'auto') {
+  const mode = String(value || '').trim().toLowerCase();
+  if (VALID_PDF_ORIENTATION_MODES.includes(mode)) return /** @type {'auto'|'portrait'|'landscape'} */ (mode);
+  return fallback;
+}
+
+/**
+ * @param {*} pdfCfg
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function resolvePrebuildPdfOrientation(pdfCfg = {}) {
+  const orientationCfg = pdfCfg?.orientation || {};
+  const fixedMode = normalizePdfOrientationMode(orientationCfg.fixedMode || orientationCfg.fixed || 'portrait', 'portrait');
+  return normalizePdfOrientationMode(
+    orientationCfg.mode
+      || pdfCfg?.orientationMode
+      || (orientationCfg.defaultAuto === false ? fixedMode : 'auto'),
+    'auto'
+  );
 }
 
 /**
@@ -233,6 +260,7 @@ export function createPdfPrebuildAllPagesVariants(runtimeConfig, i18nOrLanguage 
 
   const reasonCfg = cfg?.userLog?.ui?.fields?.reason || {};
   const printFormatCfg = cfg?.print?.format || {};
+  const pdfOrientation = resolvePrebuildPdfOrientation(pdfCfg);
   const variants = [];
   for (const language of prebuildCfg.languages) {
     const languageContext = resolveVariantLanguageContext(language, i18nOrLanguage);
@@ -245,9 +273,11 @@ export function createPdfPrebuildAllPagesVariants(runtimeConfig, i18nOrLanguage 
             language,
             reasonValue: reason.reasonSelection?.value || '',
             copyMarkerState,
+            pdfOrientation,
           }),
           mode: 'all',
           language,
+          pdfOrientation,
           reason: reason.reason,
           reasonSelection: reason.reasonSelection,
           forWhom: null,
@@ -271,6 +301,7 @@ export function createPdfPrebuildVariantKey(parts = {}) {
   return [
     'all',
     String(parts.language || 'current').toLowerCase(),
+    String(parts.pdfOrientation || 'auto').toLowerCase(),
     String(parts.reasonValue || ''),
     String(parts.copyMarkerState || 'default'),
   ].join('|');

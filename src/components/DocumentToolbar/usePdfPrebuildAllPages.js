@@ -74,6 +74,16 @@ function hasPrintFormat(detail) {
 }
 
 /**
+ * @param {*} value
+ * @returns {'auto'|'portrait'|'landscape'}
+ */
+function normalizePdfOrientation(value) {
+  const mode = String(value || '').trim().toLowerCase();
+  if (mode === 'portrait' || mode === 'landscape') return mode;
+  return 'auto';
+}
+
+/**
  * @param {*} detail
  * @returns {boolean}
  */
@@ -100,6 +110,7 @@ function createVariantDetail(variant) {
     printFormat: variant?.printFormat || null,
     printFormatValue: variant?.printFormatValue || null,
     printFormatSelection: variant?.printFormatSelection || null,
+    pdfOrientation: normalizePdfOrientation(variant?.pdfOrientation),
   };
 }
 
@@ -111,6 +122,7 @@ function createVariantDetail(variant) {
  */
 function matchesVariant(variant, detail, activeLanguage) {
   if (!matchesActiveLanguage(variant?.language, activeLanguage)) return false;
+  if (normalizePdfOrientation(variant?.pdfOrientation) !== normalizePdfOrientation(detail?.pdfOrientation)) return false;
   return getReasonValue(variant) === getReasonValue(detail)
     && hasPrintFormat(variant) === hasPrintFormat(detail);
 }
