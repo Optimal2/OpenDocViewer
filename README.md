@@ -48,7 +48,8 @@ The codebase now has four documentation layers:
   - Basic visual image adjustments for raster pages (rotation, brightness, contrast)
 - **Printing**
   - Current page, all pages, range, and explicit sequence printing
-  - Optional print-header overlay with template tokens
+  - Browser HTML print and generated-PDF print/download paths
+  - Optional print headers, footers, watermarks, action labels, and generated-PDF prebuild/cache behavior through runtime configuration
 - **Runtime flexibility**
   - Runtime config through `public/odv.config.js`
   - Configurable large-document loading thresholds, adaptive memory heuristics, prefetch concurrency, and cache limits
@@ -302,17 +303,22 @@ The print pipeline lives mainly under:
 
 - `src/utils/printCore.js`
 - `src/utils/printDom.js`
+- `src/utils/printPdf.js`
+- `src/utils/pdfWorkerDispatcher.js`
 - `src/utils/printTemplate.js`
 - `src/utils/printParse.js`
+- `src/workers/pdfWorker.js`
 - `src/components/DocumentToolbar/PrintRangeDialog.jsx`
 
 Key design points:
 
-- printing uses a hidden iframe instead of popups
+- browser HTML printing uses a hidden iframe instead of popups
+- generated-PDF printing can use a dedicated worker pipeline, partial PDF batches, merge, and a session-scoped cache
 - current page printing prefers the renderer’s active canvas/image
 - multi-page printing can use ordered full-size URLs and page metadata
+- common all-pages generated-PDF variants can be prebuilt in the background when enabled by runtime configuration
 - while the document is still loading, the print dialog intentionally stays in an active-page-only mode to avoid unstable page-range UI
-- optional header overlays are injected into the print iframe DOM
+- optional headers, footers, watermarks, orientation controls, and print/export button labels are controlled by runtime configuration
 
 ---
 
