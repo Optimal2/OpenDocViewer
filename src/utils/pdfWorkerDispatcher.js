@@ -9,11 +9,7 @@
 import PdfWorker from '../workers/pdfWorker.js?worker';
 
 const SINGLE_BATCH_MAX_PAGE_COUNT = 180;
-const DEFAULT_TARGET_PAGES_PER_PDF_WORKER = 150;
-const HIGH_CORE_TARGET_PAGES_PER_PDF_WORKER = 75;
-const HIGH_CORE_PAGE_COUNT_THRESHOLD = 240;
-const HIGH_CORE_WORKER_COUNT_THRESHOLD = 16;
-const MAX_AUTO_BATCH_COUNT = 10;
+const TARGET_PAGES_PER_PDF_WORKER = 100;
 const BATCH_LIBRARY_JOB_UNITS = 1;
 const BATCH_FINALIZE_JOB_UNITS = 1;
 
@@ -51,10 +47,8 @@ function clampInteger(value, min, max) {
  * Pick a conservative future batch size from a pages-per-worker target.
  * Browser-side PDF generation has a large fixed cost per partial PDF: every
  * batch loads jsPDF, creates a PDF object, and later participates in one final
- * merge. Benchmarks showed that 100-page jobs should stay in one worker, 300
- * pages prefer about two large jobs on 6-core clients, and high-core clients can
- * benefit from four smaller-but-still-substantial jobs. Auto therefore targets
- * useful page chunks instead of trying to keep every logical core busy.
+ * merge. Auto therefore targets useful page chunks and treats the available
+ * worker count as a ceiling only, not as a signal that more chunks are faster.
  * @param {number} pageCount
  * @param {number} workerCount
  * @returns {number}
@@ -64,14 +58,10 @@ export function resolveAutoPdfWorkerBatchSize(pageCount, workerCount) {
   const safeWorkerCount = Math.max(1, Math.floor(Number(workerCount) || 1));
   if (safeWorkerCount <= 1 || safePageCount <= SINGLE_BATCH_MAX_PAGE_COUNT) return safePageCount;
 
-  const targetPagesPerWorker = safeWorkerCount >= HIGH_CORE_WORKER_COUNT_THRESHOLD
-    && safePageCount >= HIGH_CORE_PAGE_COUNT_THRESHOLD
-    ? HIGH_CORE_TARGET_PAGES_PER_PDF_WORKER
-    : DEFAULT_TARGET_PAGES_PER_PDF_WORKER;
   const targetBatchCount = clampInteger(
-    Math.ceil(safePageCount / targetPagesPerWorker),
+    Math.ceil(safePageCount / TARGET_PAGES_PER_PDF_WORKER),
     1,
-    Math.min(safeWorkerCount, MAX_AUTO_BATCH_COUNT)
+    safeWorkerCount
   );
   return Math.max(1, Math.ceil(safePageCount / targetBatchCount));
 }
