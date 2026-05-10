@@ -4,7 +4,9 @@
  */
 
 import logger from '../logging/systemLogger.js';
+import { resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { collectPrintablePdfSources, createPrintPdfBlob } from './printPdf.js';
+import { planPdfWorkerBatches, resolveAutoPdfWorkerBatchSize } from './pdfWorkerDispatcher.js';
 import { getRuntimeConfig } from './runtimeConfig.js';
 import { collectSupportDiagnostics, saveLatestPdfBenchmarkResult } from './supportDiagnostics.js';
 
@@ -12,6 +14,9 @@ const DEFAULT_BATCH_SIZES = Object.freeze([0, 5, 10, 20, 40]);
 const DEFAULT_PAGE_LIMIT = 80;
 const DEFAULT_ITERATIONS = 1;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
+const MAX_BENCHMARK_WORKER_COUNT = 32;
+const MAX_BENCHMARK_BATCH_SIZE = 120;
+const AUTO_NEIGHBOR_BATCH_FACTORS = Object.freeze([0.75, 1.25, 1.5]);
 
 /**
  * @param {*} value
@@ -41,6 +46,84 @@ function normalizeBatchSizes(value) {
     out.push(next);
   }
   return out.length ? out : DEFAULT_BATCH_SIZES.slice();
+}
+
+/**
+ * Keep a batch-size list ordered and unique.
+ * @param {Array<number>} target
+ * @param {Set<number>} seen
+ * @param {number} value
+ * @returns {void}
+ */
+function addBatchSizeCandidate(target, seen, value) {
+  const next = Math.max(0, Math.min(MAX_BENCHMARK_BATCH_SIZE, Math.floor(Number(value) || 0)));
+  if (seen.has(next)) return;
+  seen.add(next);
+  target.push(next);
+}
+
+/**
+ * Resolve the PDF worker count with the same policy as generated-PDF output.
+ * @param {Object=} pdfCfg
+ * @returns {{workerCount:number, desiredWorkerCount:number, partialMergeEnabled:boolean}}
+ */
+function resolveBenchmarkWorkerPolicy(pdfCfg = {}) {
+  const partialMergeEnabled = pdfCfg.partialMergeEnabled !== false;
+  const desiredWorkerCount = resolveRecommendedWorkerCount(Math.max(0, Number(pdfCfg.workerCount) || 0), 'auto');
+  const workerCount = Math.max(1, Math.min(partialMergeEnabled ? MAX_BENCHMARK_WORKER_COUNT : 1, desiredWorkerCount));
+  return { workerCount, desiredWorkerCount, partialMergeEnabled };
+}
+
+/**
+ * Describe the actual batch plan for one benchmark run.
+ * @param {number} pageCount
+ * @param {Object=} pdfCfg
+ * @param {number=} requestedBatchSize
+ * @returns {{workerCount:number, desiredWorkerCount:number, partialMergeEnabled:boolean, requestedBatchSize:number, resolvedBatchSize:number, batchCount:number}}
+ */
+function describeBenchmarkBatchPlan(pageCount, pdfCfg = {}, requestedBatchSize = 0) {
+  const safePageCount = Math.max(0, Math.floor(Number(pageCount) || 0));
+  const workerPolicy = resolveBenchmarkWorkerPolicy(pdfCfg);
+  const requested = Math.max(0, Math.floor(Number(requestedBatchSize) || 0));
+  const resolvedBatchSize = requested || resolveAutoPdfWorkerBatchSize(safePageCount, workerPolicy.workerCount);
+  const batches = planPdfWorkerBatches(
+    safePageCount,
+    workerPolicy.workerCount,
+    resolvedBatchSize,
+    workerPolicy.partialMergeEnabled
+  );
+  return {
+    ...workerPolicy,
+    requestedBatchSize: requested,
+    resolvedBatchSize,
+    batchCount: batches.length,
+  };
+}
+
+/**
+ * Expand configured benchmark sizes with values near the current auto plan.
+ *
+ * When `0` is present, it means "test runtime auto". The benchmark also tests a
+ * few neighboring concrete batch sizes so the JSON can show whether auto is near
+ * the local client sweet spot instead of only saying "auto was fastest".
+ * @param {Array<number>} configured
+ * @param {number} pageCount
+ * @param {Object=} pdfCfg
+ * @returns {Array<number>}
+ */
+function expandBenchmarkBatchSizes(configured, pageCount, pdfCfg = {}) {
+  const out = [];
+  const seen = new Set();
+  const source = Array.isArray(configured) && configured.length ? configured : DEFAULT_BATCH_SIZES;
+  source.forEach((value) => addBatchSizeCandidate(out, seen, value));
+
+  if (!seen.has(0)) return out;
+
+  const autoPlan = describeBenchmarkBatchPlan(pageCount, pdfCfg, 0);
+  AUTO_NEIGHBOR_BATCH_FACTORS.forEach((factor) => {
+    addBatchSizeCandidate(out, seen, Math.round(autoPlan.resolvedBatchSize * factor));
+  });
+  return out;
 }
 
 /**
@@ -130,11 +213,12 @@ export async function runPdfGenerationBenchmark({
   const sourceUrls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
   const selected = selectBenchmarkPages(sourceUrls, baseOptions, benchmarkCfg);
   const basePdfCfg = baseOptions.pdfCfg || config?.print?.pdf || {};
+  const batchSizes = expandBenchmarkBatchSizes(benchmarkCfg.batchSizes, selected.urls.length, basePdfCfg);
   const runs = [];
-  const totalRuns = benchmarkCfg.batchSizes.length * benchmarkCfg.iterations;
+  const totalRuns = batchSizes.length * benchmarkCfg.iterations;
   let completedRuns = 0;
 
-  for (const batchSize of benchmarkCfg.batchSizes) {
+  for (const batchSize of batchSizes) {
     for (let iteration = 1; iteration <= benchmarkCfg.iterations; iteration += 1) {
       if (signal?.aborted) {
         const error = new Error('PDF benchmark was cancelled.');
@@ -157,6 +241,7 @@ export async function runPdfGenerationBenchmark({
         partialMergeEnabled: true,
         workerBatchSize: batchSize,
       };
+      const plan = describeBenchmarkBatchPlan(selected.urls.length, pdfCfg, batchSize);
       const started = performance.now();
       const blob = await createPrintPdfBlob(selected.urls, {
         ...baseOptions,
@@ -172,6 +257,10 @@ export async function runPdfGenerationBenchmark({
         iteration,
         durationMs: Math.round(durationMs),
         outputBytes: Math.max(0, Number(blob?.size) || 0),
+        workerCount: plan.workerCount,
+        desiredWorkerCount: plan.desiredWorkerCount,
+        resolvedBatchSize: plan.resolvedBatchSize,
+        batchCount: plan.batchCount,
       });
       completedRuns += 1;
       onProgress?.({
@@ -194,6 +283,7 @@ export async function runPdfGenerationBenchmark({
     pageLimit: benchmarkCfg.pageLimit,
     iterations: benchmarkCfg.iterations,
     batchSizes: benchmarkCfg.batchSizes,
+    testedBatchSizes: batchSizes,
     runs,
     best,
     diagnostics: collectSupportDiagnostics({ latestPdfBenchmark: null }),
