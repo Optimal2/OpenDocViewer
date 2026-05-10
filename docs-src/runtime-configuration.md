@@ -134,6 +134,7 @@ Behavior:
 - if no site-local file exists for the current language, it falls back to the bundled default under `help/default/`
 - site-local manuals can therefore be upgraded independently of the app bundle as long as the deployment keeps `help/site/manual.<lng>.html` outside the tracked repo
 - relative links inside the loaded HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
+- the About dialog always exposes the support diagnostics JSON download; benchmark execution controls are separate opt-in runtime flags and default to disabled
 
 Shipped public files:
 

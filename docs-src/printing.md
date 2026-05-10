@@ -282,6 +282,8 @@ If `allowDownload` is `true`, the dialog also shows a **Save PDF** action unless
 
 Generated PDF blobs are kept in a session-scoped in-memory cache so repeated prints or downloads with the same content-affecting settings do not need to regenerate the PDF. Active-page output is intentionally not keyed for reuse because the same page number can produce different bytes after transient visual edits such as rotation, brightness, or contrast. If the runtime enters hard memory protection, OpenDocViewer drops the generated-PDF cache while keeping the latest dialog settings available for restore.
 
+PDF benchmark execution is controlled separately by `print.pdf.benchmark.enabled` and defaults to `false`. Keep it disabled in normal production use; enable it temporarily only when support needs to measure PDF generation on a specific client. The normal support diagnostics JSON download remains available even when benchmark execution is disabled.
+
 ### All-pages PDF prebuild
 
 `print.pdf.prebuildAllPages` is an opt-in background cache for common **all pages** PDF outputs. When enabled, OpenDocViewer prepares matching PDFs after the document has loaded so the later print action can often open the browser PDF preview immediately.
