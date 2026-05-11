@@ -28,8 +28,8 @@ import {
 import LoadPressureDialog from './LoadPressureDialog.jsx';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 import {
-  createDocumentSourceKey,
   createReloadCacheSessionId,
+  describeDocumentSourceKey,
 } from '../../utils/reloadCacheIdentity.js';
 
 /**
@@ -130,6 +130,7 @@ import {
  * @property {number=} sizeBytes
  * @property {number} fileIndex
  * @property {string} url
+ * @property {('document-version'|'document-url-fallback'|'url')=} cacheKeyMode
  * @property {*=} stats
  * @property {(Blob|undefined)} analysisBlob
  * @property {(number|undefined)} pageCountHint
@@ -964,7 +965,8 @@ const DocumentLoader = ({
       const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
-      const sourceKey = createDocumentSourceKey(entry, orderIndex);
+      const sourceIdentity = describeDocumentSourceKey(entry, orderIndex);
+      const sourceKey = sourceIdentity.sourceKey;
 
       if (reloadCacheSessionId && typeof readSourceBlob === 'function') {
         try {
@@ -1010,6 +1012,7 @@ const DocumentLoader = ({
               sizeBytes: Number(cachedBlob.size || 0),
               fileIndex: entry.fileIndex,
               url: entry.url,
+              cacheKeyMode: sourceIdentity.mode,
               stats: { mode: 'indexeddb' },
               analysisBlob: cachedBlob,
               pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
@@ -1093,6 +1096,7 @@ const DocumentLoader = ({
             sizeBytes: Number(blob.size || 0),
             fileIndex: entry.fileIndex,
             url: entry.url,
+            cacheKeyMode: sourceIdentity.mode,
             stats: stored?.stats || null,
             analysisBlob: blob,
             pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
@@ -1166,6 +1170,14 @@ const DocumentLoader = ({
         return;
       }
 
+      const cacheIdentityStats = entries.reduce((stats, entry, orderIndex) => {
+        const mode = describeDocumentSourceKey(entry, orderIndex).mode;
+        if (mode === 'document-version') stats.documentVersion += 1;
+        else if (mode === 'document-url-fallback') stats.documentUrlFallback += 1;
+        else stats.url += 1;
+        return stats;
+      }, { documentVersion: 0, documentUrlFallback: 0, url: 0 });
+
       const sourceWarningThreshold = Math.max(0, Number(config.warning.sourceCountThreshold) || 0);
       if (sourceWarningThreshold > 0 && entries.length >= sourceWarningThreshold) {
         const accepted = await maybePrompt({
@@ -1195,6 +1207,7 @@ const DocumentLoader = ({
         expectedSourceCount: entries.length,
         config,
         cacheSessionId: reloadCacheSessionId,
+        cacheIdentityStats,
       });
 
       if (shouldStopRun()) return;
@@ -1344,6 +1357,7 @@ const DocumentLoader = ({
           mimeType: result.mimeType,
           sourceUrl: result.url,
           sizeBytes: result.sizeBytes,
+          cacheKeyMode: result.cacheKeyMode,
         });
 
         const placeholders = createPagePlaceholders({

@@ -48,9 +48,9 @@ export function createReloadCacheSessionId(seed = '') {
 /**
  * @param {*} entry
  * @param {number} orderIndex
- * @returns {string}
+ * @returns {{ sourceKey:string, mode:('document-version'|'document-url-fallback'|'url'), hasDocumentId:boolean, hasDocumentVersion:boolean }}
  */
-export function createDocumentSourceKey(entry, orderIndex = 0) {
+export function describeDocumentSourceKey(entry, orderIndex = 0) {
   const documentId = part(entry?.documentId);
   const documentVersion = part(entry?.documentVersion);
   const fileToken = part(entry?.fileId)
@@ -61,35 +61,59 @@ export function createDocumentSourceKey(entry, orderIndex = 0) {
   const extension = part(entry?.ext).toLowerCase();
 
   if (documentId && documentVersion) {
-    return `docsrc_${stableHash([
-      'document-source-v2',
-      documentId,
-      documentVersion,
-      fileToken,
-      fileCount,
-      extension,
-    ].join('|'))}`;
+    return {
+      sourceKey: `docsrc_${stableHash([
+        'document-source-v2',
+        documentId,
+        documentVersion,
+        fileToken,
+        fileCount,
+        extension,
+      ].join('|'))}`,
+      mode: 'document-version',
+      hasDocumentId: true,
+      hasDocumentVersion: true,
+    };
   }
 
   if (documentId) {
-    return `docsrc_${stableHash([
-      'document-source-url-fallback-v2',
-      documentId,
-      fileToken,
-      fileCount,
-      extension,
-      part(entry?.url),
-      part(orderIndex),
-    ].join('|'))}`;
+    return {
+      sourceKey: `docsrc_${stableHash([
+        'document-source-url-fallback-v2',
+        documentId,
+        fileToken,
+        fileCount,
+        extension,
+        part(entry?.url),
+        part(orderIndex),
+      ].join('|'))}`,
+      mode: 'document-url-fallback',
+      hasDocumentId: true,
+      hasDocumentVersion: false,
+    };
   }
 
-  return `src_${stableHash([
-    'url-source-v2',
-    part(entry?.url),
-    part(entry?.fileIndex),
-    part(orderIndex),
-    extension,
-  ].join('|'))}`;
+  return {
+    sourceKey: `src_${stableHash([
+      'url-source-v2',
+      part(entry?.url),
+      part(entry?.fileIndex),
+      part(orderIndex),
+      extension,
+    ].join('|'))}`,
+    mode: 'url',
+    hasDocumentId: false,
+    hasDocumentVersion: false,
+  };
+}
+
+/**
+ * @param {*} entry
+ * @param {number} orderIndex
+ * @returns {string}
+ */
+export function createDocumentSourceKey(entry, orderIndex = 0) {
+  return describeDocumentSourceKey(entry, orderIndex).sourceKey;
 }
 
 /**
