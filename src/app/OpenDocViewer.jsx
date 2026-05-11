@@ -167,7 +167,10 @@ OpenDocViewer.propTypes = {
     PropTypes.shape({
       url: PropTypes.string.isRequired,
       ext: PropTypes.string,
-      fileIndex: PropTypes.number
+      fileIndex: PropTypes.number,
+      documentId: PropTypes.string,
+      documentVersion: PropTypes.string,
+      fileId: PropTypes.string
     })
   ),
   bundle: PropTypes.object,

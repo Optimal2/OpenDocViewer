@@ -119,6 +119,27 @@ successfully, OpenDocViewer treats the whole source session as expired or invali
 hundreds of identical failed requests and lets the viewer-level notice show the site-specific
 recovery instruction.
 
+## Document-Version Reload Cache
+
+`documentLoading.sourceStore.reloadCacheTtlMs` and
+`documentLoading.assetStore.reloadCacheTtlMs` enable an opt-in IndexedDB cache for original source
+blobs and rendered page blobs. `0` disables this cache. A positive value keeps encrypted records for
+that many milliseconds, up to 24 hours.
+
+When a host provides stable document metadata, OpenDocViewer keys the cache by document identity
+rather than by short-lived source URLs. For object-document payloads, the strongest built-in version
+signal is:
+
+- document id
+- `modifiedTimestamp` metadata alias, or raw metadata field `502`
+- optional page count metadata alias, or raw metadata field `504`
+- file id / file order inside the document
+- render settings for rendered page assets
+
+This allows a document opened alone to be reused later when the same document is opened again or
+included in a larger multi-document bundle. If no document version can be resolved, OpenDocViewer
+falls back to URL-based cache keys to avoid serving stale content for a reused document id.
+
 ## Integration adapter mappings
 
 Some embedding hosts send an object-document payload where document-level metadata records need to

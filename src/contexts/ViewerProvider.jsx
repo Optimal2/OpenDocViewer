@@ -25,6 +25,10 @@ import { createSourceTempStore } from '../utils/sourceTempStore.js';
 import { createPageAssetStore } from '../utils/pageAssetStore.js';
 import { createPageAssetRenderer } from '../utils/pageAssetRenderer.js';
 import {
+  createPersistedPageAssetKey,
+  createRenderAssetSignature,
+} from '../utils/reloadCacheIdentity.js';
+import {
   createTrackedObjectUrl,
   isTrackedObjectUrl,
   revokeTrackedObjectUrl,
@@ -73,12 +77,19 @@ function makeAssetKey(variant, pageIndex) {
 /**
  * @param {*} page
  * @param {('full'|'thumbnail')} variant
+ * @param {*} renderConfig
  * @returns {string}
  */
-function makePersistedAssetKey(page, variant) {
+function makePersistedAssetKey(page, variant, renderConfig) {
   const sourceKey = String(page?.sourceKey || '');
   const pageIndex = Math.max(0, Number(page?.pageIndex) || 0);
-  return `${sourceKey}:${pageIndex}:${variant}`;
+  const renderSignature = createRenderAssetSignature(renderConfig);
+  return createPersistedPageAssetKey({
+    sourceKey,
+    pageIndex,
+    variant,
+    renderSignature,
+  });
 }
 
 /**
@@ -875,7 +886,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     if (tempStoreMode !== 'memory' || assetStoreMode !== 'indexeddb') return;
 
     try {
-      const persisted = await assetStore.getAsset(makePersistedAssetKey(page, 'full'));
+      const persisted = await assetStore.getAsset(
+        makePersistedAssetKey(page, 'full', sessionConfigRef.current.render)
+      );
       if (!persisted?.blob || Number(persisted.blob.size || 0) <= 0) return;
 
       await tempStore.deleteSource(page.sourceKey);
@@ -909,7 +922,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     if (!page || !page.sourceKey) return;
 
     await store.putAsset({
-      assetKey: makePersistedAssetKey(page, variant),
+      assetKey: makePersistedAssetKey(page, variant, sessionConfigRef.current.render),
       sourceKey: page.sourceKey,
       pageIndex: Math.max(0, Number(page.pageIndex) || 0),
       variant,
@@ -1117,7 +1130,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const page = getPageAt(allPagesRef.current, pageIndex);
     if (!page || !page.sourceKey) return null;
 
-    const stored = await store.getAsset(makePersistedAssetKey(page, variant));
+    const stored = await store.getAsset(
+      makePersistedAssetKey(page, variant, sessionConfigRef.current.render)
+    );
     if (!stored?.blob || !stored?.meta) return null;
 
     const cache = getVariantCache(variant);
@@ -1468,7 +1483,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
       try {
         let blob = null;
-        const stored = await pageAssetStoreRef.current?.getAsset?.(makePersistedAssetKey(page, 'full'));
+        const stored = await pageAssetStoreRef.current?.getAsset?.(
+          makePersistedAssetKey(page, 'full', sessionConfigRef.current.render)
+        );
         if (stored?.blob) {
           blob = stored.blob;
         } else {

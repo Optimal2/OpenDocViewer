@@ -153,6 +153,9 @@ DocumentConsumerWrapper.propTypes = {
       url: PropTypes.string.isRequired,
       ext: PropTypes.string,
       fileIndex: PropTypes.number,
+      documentId: PropTypes.string,
+      documentVersion: PropTypes.string,
+      fileId: PropTypes.string,
     })
   ),
   reloadCacheSeed: PropTypes.string,

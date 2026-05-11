@@ -633,8 +633,9 @@
 
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
 
-        // Optional short reload cache. 0 disables it. When enabled, source blobs survive a same-tab
-        // reload/F5 for this many milliseconds and are encrypted with a key kept in sessionStorage.
+        // Optional document-version reload cache. 0 disables it. When enabled, source blobs survive
+        // same-tab reloads/reopens for this many milliseconds and are encrypted with a key kept in
+        // sessionStorage. Host ticket URLs are not part of document-version cache keys.
         reloadCacheTtlMs: 0,
 
         // Small in-memory read cache for recently reused source blobs.
@@ -654,7 +655,7 @@
 
         protection: 'aes-gcm-session',
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
-        // Optional short reload cache for rendered page blobs. 0 disables it.
+        // Optional document-version reload cache for rendered page blobs. 0 disables it.
         reloadCacheTtlMs: 0,
         blobCacheEntries: 16,
 

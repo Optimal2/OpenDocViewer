@@ -87,8 +87,10 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
 const DEMO_MAX = 300;
 
 /**
- * Build a stable reload-cache seed from host bundle identity without including short-lived
- * source URLs/tickets. The loader adds the ordered source identity and hashes the final value.
+ * Build a stable reload-cache scope from host/user identity without including short-lived
+ * source URLs/tickets, session ids, or the current document selection. Individual source entries
+ * carry their own document-version identity, so the same document can be reused whether it is
+ * opened alone or as part of a larger comparison bundle.
  *
  * @param {(PortableDocumentBundle|null|undefined)} bundle
  * @returns {string}
@@ -96,23 +98,11 @@ const DEMO_MAX = 300;
 function makeReloadCacheSeedFromBundle(bundle) {
   if (!bundle) return '';
   const session = bundle.session || {};
-  const docs = Array.isArray(bundle.documents) ? bundle.documents : [];
-  const documentSignature = docs.map((doc, index) => {
-    const files = Array.isArray(doc?.files) ? doc.files : [];
-    const extensions = files.map((file) => String(file?.ext || '').toLowerCase()).join(',');
-    return [
-      index + 1,
-      String(doc?.documentId || ''),
-      files.length,
-      extensions,
-    ].join(':');
-  }).join('|');
 
   return [
-    String(session.id || session.sessionId || session.SessionId || ''),
+    'odv-cache-scope-v2',
     String(session.userId || session.UserId || ''),
-    docs.length,
-    documentSignature,
+    String(bundle.integration?.kind || ''),
   ].join('||');
 }
 

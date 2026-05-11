@@ -23,6 +23,8 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 /** @typedef {'worker-preferred'|'main-only'|'hybrid-by-format'} DocumentLoadingRenderBackend */
 /** @typedef {'normal'|'soft'|'hard'} DocumentLoadingMemoryPressureStage */
 
+const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+
 /**
  * @typedef {Object} DocumentLoadingAdaptiveMemoryConfig
  * @property {boolean} enabled
@@ -588,7 +590,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       switchToIndexedDbAboveTotalMiB: normalizeMiBThreshold(raw?.sourceStore?.switchToIndexedDbAboveTotalMiB, adaptiveDefaults.sourceStore.switchToIndexedDbAboveTotalMiB, 1048576),
       protection: normalizeProtection(raw?.sourceStore?.protection, adaptiveDefaults.sourceStore.protection),
       staleSessionTtlMs: normalizeNumber(raw?.sourceStore?.staleSessionTtlMs, adaptiveDefaults.sourceStore.staleSessionTtlMs, 1000, 365 * 24 * 60 * 60 * 1000),
-      reloadCacheTtlMs: normalizeNumber(raw?.sourceStore?.reloadCacheTtlMs, adaptiveDefaults.sourceStore.reloadCacheTtlMs, 0, 60 * 60 * 1000),
+      reloadCacheTtlMs: normalizeNumber(raw?.sourceStore?.reloadCacheTtlMs, adaptiveDefaults.sourceStore.reloadCacheTtlMs, 0, MAX_RELOAD_CACHE_TTL_MS),
       blobCacheEntries: normalizeNumber(raw?.sourceStore?.blobCacheEntries, adaptiveDefaults.sourceStore.blobCacheEntries, 1, 64),
     },
     assetStore: {
@@ -598,7 +600,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       switchToIndexedDbAboveTotalMiB: normalizeMiBThreshold(raw?.assetStore?.switchToIndexedDbAboveTotalMiB, adaptiveDefaults.assetStore.switchToIndexedDbAboveTotalMiB, 1048576),
       protection: normalizeProtection(raw?.assetStore?.protection, adaptiveDefaults.assetStore.protection),
       staleSessionTtlMs: normalizeNumber(raw?.assetStore?.staleSessionTtlMs, adaptiveDefaults.assetStore.staleSessionTtlMs, 1000, 365 * 24 * 60 * 60 * 1000),
-      reloadCacheTtlMs: normalizeNumber(raw?.assetStore?.reloadCacheTtlMs, adaptiveDefaults.assetStore.reloadCacheTtlMs, 0, 60 * 60 * 1000),
+      reloadCacheTtlMs: normalizeNumber(raw?.assetStore?.reloadCacheTtlMs, adaptiveDefaults.assetStore.reloadCacheTtlMs, 0, MAX_RELOAD_CACHE_TTL_MS),
       blobCacheEntries: normalizeNumber(raw?.assetStore?.blobCacheEntries, adaptiveDefaults.assetStore.blobCacheEntries, 1, 256),
       persistThumbnails: normalizeBoolean(raw?.assetStore?.persistThumbnails, adaptiveDefaults.assetStore.persistThumbnails),
       releaseSinglePageRasterSourceAfterFullPersist: normalizeBoolean(raw?.assetStore?.releaseSinglePageRasterSourceAfterFullPersist, adaptiveDefaults.assetStore.releaseSinglePageRasterSourceAfterFullPersist),
