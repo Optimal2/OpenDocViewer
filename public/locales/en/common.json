@@ -308,6 +308,14 @@
         "error": "Document load error"
       }
     },
+    "problemNotice": {
+      "title": "The documents could not be shown correctly",
+      "message": "The document session may have expired. Close this viewer and open the document again from the source system.",
+      "reload": "Reload viewer",
+      "close": "Dismiss",
+      "details": "Technical details",
+      "failedSummary": "{failed} of {total} pages failed to load."
+    },
     "modeIndicator": {
       "performance": "Performance mode active",
       "memory": "Memory-efficient mode active",

@@ -69,6 +69,32 @@
       // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
       enabled: true
     },
+    viewer: {
+      problemNotice: {
+        // Site-configurable support notice for serious viewer-level load problems. This is useful
+        // when source URLs are session-bound and users need host-specific recovery instructions.
+        enabled: true,
+        showForLoaderError: true,
+        showForFailedPages: true,
+        minFailedPages: 1,
+        failedPageRatio: 0.5,
+        requireLoadComplete: false,
+        dismissible: true,
+        showReloadButton: true,
+        showTechnicalDetails: false,
+        title: {
+          en: 'The documents could not be shown correctly',
+          sv: 'Dokumenten kunde inte visas korrekt'
+        },
+        message: {
+          en: 'The document session may have expired. Close this viewer and open the document again from the source system.',
+          sv: 'Dokumentsessionen kan ha gått ut. Stäng visaren och öppna dokumentet på nytt från källsystemet.'
+        },
+        reloadLabel: { en: 'Reload viewer', sv: 'Ladda om visaren' },
+        closeLabel: { en: 'Dismiss', sv: 'Stäng' },
+        detailsLabel: { en: 'Technical details', sv: 'Tekniska detaljer' }
+      }
+    },
 
     // =========================================================================
     // Base paths and runtime i18n

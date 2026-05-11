@@ -846,6 +846,102 @@ canvas {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 16%, transparent 84%);
 }
 
+.viewer-problem-notice {
+  position: fixed;
+  top: 72px;
+  left: 50%;
+  z-index: 80;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  width: min(760px, calc(100vw - 28px));
+  padding: 14px 16px;
+  border: 1px solid color-mix(in srgb, #f59e0b 55%, #7c2d12 45%);
+  border-radius: 10px;
+  background: color-mix(in srgb, #fff7ed 92%, white 8%);
+  color: #1f2937;
+  box-shadow: 0 18px 46px rgba(15, 23, 42, 0.22);
+  transform: translateX(-50%);
+}
+
+.viewer-problem-notice-icon {
+  flex: 0 0 auto;
+  margin-top: 1px;
+  color: #b45309;
+  font-size: 24px;
+}
+
+.viewer-problem-notice-body {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.viewer-problem-notice-body h2 {
+  margin: 0 0 4px;
+  font-size: 0.98rem;
+  line-height: 1.25;
+}
+
+.viewer-problem-notice-body p {
+  margin: 0;
+  font-size: 0.86rem;
+  line-height: 1.42;
+}
+
+.viewer-problem-notice-details {
+  margin-top: 8px;
+  font-size: 0.78rem;
+}
+
+.viewer-problem-notice-details summary {
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.viewer-problem-notice-actions {
+  display: flex;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 8px;
+}
+
+.viewer-problem-notice-button {
+  min-height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  border: 1px solid rgba(120, 53, 15, 0.28);
+  background: rgba(255, 255, 255, 0.78);
+  color: #1f2937;
+  font-size: 0.78rem;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.viewer-problem-notice-button.primary {
+  background: #b45309;
+  color: white;
+  border-color: #92400e;
+}
+
+.viewer-problem-notice-button:hover,
+.viewer-problem-notice-button:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.22);
+}
+
+@media (max-width: 720px) {
+  .viewer-problem-notice {
+    top: 64px;
+    flex-direction: column;
+  }
+
+  .viewer-problem-notice-actions {
+    width: 100%;
+    justify-content: flex-end;
+    flex-wrap: wrap;
+  }
+}
+
 .thumbnail-selection-panel {
   display: flex;
   flex-direction: column;

@@ -31,6 +31,7 @@ import { useDocumentViewer } from './useDocumentViewer.js';
 import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
+import ViewerProblemNotice from '../ViewerProblemNotice.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
 import { getRuntimeConfig, isDocumentMetadataUiEnabled } from '../../utils/runtimeConfig.js';
 
@@ -375,6 +376,12 @@ const DocumentViewer = () => {
         primaryDocumentNavigation={primaryDocumentNavigation}
         compareDocumentNavigation={compareDocumentNavigation}
         navigationModifierState={navigationModifierState}
+      />
+
+      <ViewerProblemNotice
+        error={error}
+        pageLoadState={pageLoadState}
+        loadingRunActive={loadingRunActive}
       />
 
       <div
