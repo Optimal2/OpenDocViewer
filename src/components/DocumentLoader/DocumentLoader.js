@@ -180,6 +180,140 @@ function normalizeExtension(value) {
   return ext;
 }
 
+const SUPPORTED_SOURCE_EXTENSIONS = Object.freeze(new Set([
+  'bmp',
+  'gif',
+  'jpg',
+  'pdf',
+  'png',
+  'tiff',
+  'webp',
+]));
+
+const TEXT_LIKE_SOURCE_MIME_RE = /^(?:text\/|application\/(?:html|json|javascript|xhtml\+xml|xml|[\w.-]+\+(?:json|xml))|image\/svg\+xml)(?:[;\s]|$)/i;
+
+/**
+ * @param {string} value
+ * @returns {boolean}
+ */
+function isSupportedSourceExtension(value) {
+  return SUPPORTED_SOURCE_EXTENSIONS.has(normalizeExtension(value));
+}
+
+/**
+ * @param {string} mimeType
+ * @returns {boolean}
+ */
+function isTextLikeSourceMime(mimeType) {
+  return TEXT_LIKE_SOURCE_MIME_RE.test(String(mimeType || '').trim());
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {string}
+ */
+function asciiHead(bytes) {
+  const view = bytes instanceof Uint8Array ? bytes : new Uint8Array();
+  const chars = [];
+  const limit = Math.min(view.length, 96);
+  for (let index = 0; index < limit; index += 1) {
+    const code = view[index];
+    chars.push(code >= 32 && code <= 126 ? String.fromCharCode(code) : ' ');
+  }
+  return chars.join('').trimStart();
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @returns {boolean}
+ */
+function looksLikeTextPayload(bytes) {
+  const head = asciiHead(bytes).toLowerCase();
+  return head.startsWith('<!doctype')
+    || head.startsWith('<html')
+    || head.startsWith('<script')
+    || head.startsWith('<?xml')
+    || head.startsWith('{')
+    || head.startsWith('[');
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {string} signature
+ * @returns {boolean}
+ */
+function startsWithAscii(bytes, signature) {
+  const text = String(signature || '');
+  if (!bytes || bytes.length < text.length) return false;
+  for (let index = 0; index < text.length; index += 1) {
+    if (bytes[index] !== text.charCodeAt(index)) return false;
+  }
+  return true;
+}
+
+/**
+ * @param {Uint8Array} bytes
+ * @param {string} ext
+ * @returns {boolean}
+ */
+function matchesKnownSourceSignature(bytes, ext) {
+  const normalized = normalizeExtension(ext);
+  if (!bytes || bytes.length < 4) return false;
+
+  switch (normalized) {
+    case 'pdf':
+      return startsWithAscii(bytes, '%PDF-');
+    case 'png':
+      return bytes.length >= 8
+        && bytes[0] === 0x89
+        && bytes[1] === 0x50
+        && bytes[2] === 0x4e
+        && bytes[3] === 0x47
+        && bytes[4] === 0x0d
+        && bytes[5] === 0x0a
+        && bytes[6] === 0x1a
+        && bytes[7] === 0x0a;
+    case 'jpg':
+      return bytes[0] === 0xff && bytes[1] === 0xd8 && bytes[2] === 0xff;
+    case 'gif':
+      return startsWithAscii(bytes, 'GIF87a') || startsWithAscii(bytes, 'GIF89a');
+    case 'bmp':
+      return startsWithAscii(bytes, 'BM');
+    case 'webp':
+      return bytes.length >= 12 && startsWithAscii(bytes, 'RIFF') && startsWithAscii(bytes.slice(8), 'WEBP');
+    case 'tiff':
+      return (bytes[0] === 0x49 && bytes[1] === 0x49 && bytes[2] === 0x2a && bytes[3] === 0x00)
+        || (bytes[0] === 0x4d && bytes[1] === 0x4d && bytes[2] === 0x00 && bytes[3] === 0x2a);
+    default:
+      return false;
+  }
+}
+
+/**
+ * @param {Blob} blob
+ * @returns {Promise<Uint8Array>}
+ */
+async function readBlobHeadBytes(blob) {
+  if (!(blob instanceof Blob) || blob.size <= 0) return new Uint8Array();
+  const buffer = await blob.slice(0, 512).arrayBuffer();
+  return new Uint8Array(buffer);
+}
+
+/**
+ * @param {string} url
+ * @returns {string}
+ */
+function redactUrlForLog(url) {
+  try {
+    const parsed = new URL(String(url || ''), globalThis.location?.href || 'http://localhost/');
+    parsed.search = parsed.search ? '?...' : '';
+    parsed.hash = '';
+    return parsed.toString();
+  } catch {
+    return String(url || '').split('?')[0];
+  }
+}
+
 /**
  * @param {string} mimeType
  * @returns {string}
@@ -314,6 +448,84 @@ function createPrefetchTimeoutError(url, timeoutMs) {
 }
 
 /**
+ * Build a source-validation error. A common operational failure mode behind WebClient/iframe
+ * integrations is an HTTP 200 response that contains an HTML login/error page instead of document
+ * bytes. Such payloads must not be stored in ODV's temp caches as images/PDF files.
+ *
+ * @param {string} message
+ * @param {Object=} details
+ * @returns {Error}
+ */
+function createInvalidSourcePayloadError(message, details = {}) {
+  const error = new Error(message);
+  error.isInvalidSourcePayload = true;
+  error.isTransientSourcePayload = !!details.retryable;
+  error.details = details;
+  return error;
+}
+
+/**
+ * Validate that a fetched source looks like a renderable document before it is saved to ODV's
+ * session temp store. This intentionally rejects text-like payloads even when the URL or host
+ * metadata claims an image/PDF extension, because expired upstream sessions often return HTML.
+ *
+ * @param {Object} input
+ * @param {ResolvedEntry} input.entry
+ * @param {Blob} input.blob
+ * @param {(Object|null)} input.detectedType
+ * @param {string} input.mimeType
+ * @param {string} input.fileExtension
+ * @returns {Promise<void>}
+ */
+async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, fileExtension }) {
+  const normalizedExt = normalizeExtension(fileExtension);
+  const detectedExt = normalizeExtension(detectedType?.ext || '');
+  const mimeExt = normalizeExtension(mimeToExtension(mimeType));
+  const expectedExt = normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
+  const headBytes = await readBlobHeadBytes(blob);
+  const signatureExt = [detectedExt, normalizedExt, expectedExt]
+    .filter(Boolean)
+    .find((ext) => matchesKnownSourceSignature(headBytes, ext)) || '';
+
+  const details = {
+    url: redactUrlForLog(entry?.url || ''),
+    fileIndex: Number(entry?.fileIndex || 0),
+    expectedExt,
+    detectedExt,
+    mimeExt,
+    resolvedExt: normalizedExt,
+    mimeType: String(mimeType || ''),
+    sizeBytes: Number(blob?.size || 0),
+  };
+
+  if (!isSupportedSourceExtension(normalizedExt)) {
+    throw createInvalidSourcePayloadError(
+      `Fetched source is not a supported ODV document type (${normalizedExt || 'unknown'}).`,
+      details
+    );
+  }
+
+  if (looksLikeTextPayload(headBytes) || (isTextLikeSourceMime(mimeType) && !signatureExt)) {
+    throw createInvalidSourcePayloadError(
+      'Fetched source looked like text/HTML/JSON instead of document bytes. The upstream session or document endpoint may have expired or returned an error page.',
+      { ...details, retryable: true }
+    );
+  }
+
+  if (detectedExt && isSupportedSourceExtension(detectedExt)) return;
+  if (signatureExt) return;
+
+  const mimeLooksRenderable = mimeExt && isSupportedSourceExtension(mimeExt);
+  const imageMime = /^image\/(?!svg\+xml)/i.test(String(mimeType || ''));
+  if (mimeLooksRenderable || imageMime) return;
+
+  throw createInvalidSourcePayloadError(
+    'Fetched source could not be verified as a supported PDF/image payload.',
+    details
+  );
+}
+
+/**
  * Retry only errors that are likely to be transient in real deployments: browser/network fetch
  * failures and gateway-style HTTP responses. Permanent input problems such as 404 are not retried.
  *
@@ -322,6 +534,7 @@ function createPrefetchTimeoutError(url, timeoutMs) {
  */
 function isTransientPrefetchError(error) {
   if (!error) return false;
+  if (error?.isTransientSourcePayload === true) return true;
   const status = Number(error?.status);
   if (Number.isFinite(status)) {
     return status === 408 || status === 425 || status === 429 || status >= 500;
@@ -699,7 +912,11 @@ const DocumentLoader = ({
             }, requestTimeoutMs);
           }
 
-          const response = await fetch(entry.url, { signal: controller.signal });
+          const response = await fetch(entry.url, {
+            signal: controller.signal,
+            cache: 'no-store',
+            credentials: 'same-origin',
+          });
           if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
 
           const blob = await response.blob();
@@ -724,6 +941,14 @@ const DocumentLoader = ({
             || inferUrlExtension(entry.url)
             || 'png'
           );
+
+          await validateFetchedSourceBlob({
+            entry,
+            blob,
+            detectedType,
+            mimeType,
+            fileExtension,
+          });
 
           const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
           const stored = await storeSourceBlob({
@@ -769,6 +994,7 @@ const DocumentLoader = ({
               attempt,
               maxAttempts,
               requestTimeoutMs,
+              details: normalizedError?.details || undefined,
               error: String(normalizedError?.message || normalizedError),
             });
             return {
@@ -787,6 +1013,7 @@ const DocumentLoader = ({
             maxAttempts,
             requestTimeoutMs,
             retryDelayMs,
+            details: normalizedError?.details || undefined,
             error: String(normalizedError?.message || normalizedError),
           });
           if (retryDelayMs > 0) await sleep(retryDelayMs);
