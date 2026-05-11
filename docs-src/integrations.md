@@ -124,9 +124,18 @@ preparation request must succeed before the iframe is redirected to OpenDocViewe
 
 Operational rules for that flow:
 
-- Build the preparation URL with a real path separator. If the viewer base URL is
-  `/OpenDocViewer`, then the preparation endpoint should be `/OpenDocViewer/prep`, not
-  `/OpenDocViewerprep`.
+- OpenDocViewer itself does not implement a `/prep` API. It is a static SPA; on IIS, unknown paths
+  such as `/OpenDocViewer/prep` normally fall back to `index.html` unless the host has added a
+  separate handler. A successful `POST /OpenDocViewer/prep` is therefore not proof that ODV has
+  received or stored the preparation payload.
+- If the host uses a preparation endpoint, make it an explicit host/WebClient-owned endpoint and
+  point the viewer startup to the prepared bundle with `?sessionurl=...`, the same-origin parent
+  bridge, or another documented bootstrap mode.
+- In the legacy same-origin iframe flow, OpenDocViewer may read the full WebClient model from the
+  parent page. When the iframe URL also contains `sessiondata.caseIds`, those ids are treated as an
+  allowlist so stale `PortableDocuments` retained by the host page/session are not traversed.
+- Build any host preparation URL with a real path separator. If the endpoint is deployed under the
+  viewer application path, it would be `/OpenDocViewer/prep`, not `/OpenDocViewerprep`.
 - Prefer a normal same-origin `fetch` and check `response.ok`. Avoid `mode: 'no-cors'` for
   same-origin integrations because it hides response details and makes a failed preparation call look
   like an opaque success path.

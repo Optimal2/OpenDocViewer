@@ -65,6 +65,7 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
  * @property {string} mode
  * @property {(string|undefined)} [hostPayloadSource]
  * @property {*=} [hostPayload]
+ * @property {Object=} [filterInfo]
  */
 
 /**
