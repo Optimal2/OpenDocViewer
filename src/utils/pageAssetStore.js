@@ -222,6 +222,8 @@ export class PageAssetStore {
 
     this.assetCount = 0;
     this.totalBytes = 0;
+    this.cacheHits = 0;
+    this.cacheMisses = 0;
 
     /** @type {'memory'|'indexeddb'} */
     this.mode = 'memory';
@@ -269,6 +271,9 @@ export class PageAssetStore {
       totalBytes: this.totalBytes,
       encrypted: this.mode === 'indexeddb' && this.encryptionAvailable,
       indexedDbAvailable: this.indexedDbAvailable,
+      reloadCacheTtlMs: this.reloadCacheTtlMs,
+      cacheHits: this.cacheHits,
+      cacheMisses: this.cacheMisses,
     };
   }
 
@@ -385,17 +390,22 @@ export class PageAssetStore {
     }
 
     const record = await this.getIndexedDbRecord(key);
-    if (!record) return null;
+    if (!record) {
+      if (this.reloadCacheTtlMs > 0) this.cacheMisses += 1;
+      return null;
+    }
     let blob = null;
     try {
       blob = await this.recordToBlob(record);
     } catch (error) {
+      if (this.reloadCacheTtlMs > 0) this.cacheMisses += 1;
       logger.warn('Failed to read cached page asset; rerendering from source', {
         assetKey: key,
         error: String(error?.message || error),
       });
       return null;
     }
+    if (blob && this.reloadCacheTtlMs > 0) this.cacheHits += 1;
     if (blob && this.reloadCacheTtlMs > 0) {
       void this.touchIndexedDbRecord(key).catch(() => {});
     }
@@ -420,6 +430,8 @@ export class PageAssetStore {
       this.meta.clear();
       this.assetCount = 0;
       this.totalBytes = 0;
+      this.cacheHits = 0;
+      this.cacheMisses = 0;
 
       if (this.mode !== 'indexeddb' || !this.indexedDbAvailable || this.reloadCacheTtlMs > 0) return;
 

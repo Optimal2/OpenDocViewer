@@ -253,6 +253,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetCount: 0,
     sourceStoreEncrypted: false,
     assetStoreEncrypted: false,
+    sourceCacheHits: 0,
+    sourceCacheMisses: 0,
+    assetCacheHits: 0,
+    assetCacheMisses: 0,
+    sourceReloadCacheTtlMs: 0,
+    assetReloadCacheTtlMs: 0,
   });
 
   const allPagesRef = useRef([]);
@@ -387,6 +393,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         pendingAssetCount: pendingAssetPromisesRef.current.size,
         sourceStoreEncrypted: !!tempStats.encrypted,
         assetStoreEncrypted: !!assetStats.encrypted,
+        sourceCacheHits: Math.max(0, Number(tempStats.cacheHits || 0)),
+        sourceCacheMisses: Math.max(0, Number(tempStats.cacheMisses || 0)),
+        assetCacheHits: Math.max(0, Number(assetStats.cacheHits || 0)),
+        assetCacheMisses: Math.max(0, Number(assetStats.cacheMisses || 0)),
+        sourceReloadCacheTtlMs: Math.max(0, Number(tempStats.reloadCacheTtlMs || 0)),
+        assetReloadCacheTtlMs: Math.max(0, Number(assetStats.reloadCacheTtlMs || 0)),
       };
 
       const same = Object.keys(next).every((key) => next[key] === current[key]);
@@ -505,6 +517,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       pendingAssetCount: 0,
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
+      sourceCacheHits: 0,
+      sourceCacheMisses: 0,
+      assetCacheHits: 0,
+      assetCacheMisses: 0,
+      sourceReloadCacheTtlMs: 0,
+      assetReloadCacheTtlMs: 0,
     });
   }, [revokeSessionUrls, updateAllPages]);
 
@@ -753,6 +771,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       pendingAssetCount: 0,
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
+      sourceCacheHits: 0,
+      sourceCacheMisses: 0,
+      assetCacheHits: 0,
+      assetCacheMisses: 0,
+      sourceReloadCacheTtlMs: 0,
+      assetReloadCacheTtlMs: 0,
     });
   }, [revokeSessionUrls, updateAllPages]);
 
