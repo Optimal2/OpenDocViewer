@@ -58,6 +58,18 @@ function formatDuration(ms) {
 }
 
 /**
+ * @param {number} ttlMs
+ * @returns {string}
+ */
+function formatTtl(ttlMs) {
+  const safeMs = Math.max(0, Number(ttlMs) || 0);
+  if (!safeMs) return 'off';
+  const seconds = Math.round(safeMs / 1000);
+  if (seconds < 60) return `${seconds}s`;
+  return `${Math.round(seconds / 60)}m`;
+}
+
+/**
  * @param {number} startedAtMs
  * @param {number} completedAtMs
  * @param {number} nowMs
@@ -626,6 +638,25 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             <span style={{ marginLeft: 8, opacity: 0.75 }}>{t('perf.encryptedLabel')}</span>
           ) : null}
         </div>
+        {(Number(runtimeDiagnostics?.sourceReloadCacheTtlMs || 0) > 0 || Number(runtimeDiagnostics?.assetReloadCacheTtlMs || 0) > 0) ? (
+          <div>
+            <span style={labelStyle}>{t('perf.reloadCacheLabel', { defaultValue: 'Reload-cache' })}</span>{' '}
+            <span style={{ opacity: 0.85 }}>
+              {t('perf.sourceStoreShortLabel', { defaultValue: 'source' })}{' '}
+              <strong>{Number(runtimeDiagnostics?.sourceCacheHits || 0)}</strong>
+              /{Number(runtimeDiagnostics?.sourceCacheMisses || 0)}{' '}
+              {t('perf.cacheHitsMissesLabel', { defaultValue: 'hits/misses' })}
+              {' '}({formatTtl(Number(runtimeDiagnostics?.sourceReloadCacheTtlMs || 0))})
+            </span>
+            <span style={{ marginLeft: 10, opacity: 0.85 }}>
+              {t('perf.assetStoreShortLabel', { defaultValue: 'assets' })}{' '}
+              <strong>{Number(runtimeDiagnostics?.assetCacheHits || 0)}</strong>
+              /{Number(runtimeDiagnostics?.assetCacheMisses || 0)}{' '}
+              {t('perf.cacheHitsMissesLabel', { defaultValue: 'hits/misses' })}
+              {' '}({formatTtl(Number(runtimeDiagnostics?.assetReloadCacheTtlMs || 0))})
+            </span>
+          </div>
+        ) : null}
       </div>
 
       <div style={sectionStyle}>

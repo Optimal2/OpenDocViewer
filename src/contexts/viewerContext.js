@@ -93,6 +93,12 @@ import { createContext } from 'react';
  * @property {number} pendingAssetCount
  * @property {boolean} sourceStoreEncrypted
  * @property {boolean} assetStoreEncrypted
+ * @property {number} sourceCacheHits
+ * @property {number} sourceCacheMisses
+ * @property {number} assetCacheHits
+ * @property {number} assetCacheMisses
+ * @property {number} sourceReloadCacheTtlMs
+ * @property {number} assetReloadCacheTtlMs
  */
 
 /**
