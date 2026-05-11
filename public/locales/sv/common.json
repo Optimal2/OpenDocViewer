@@ -308,6 +308,14 @@
         "error": "Fel vid inläsning av dokument"
       }
     },
+    "problemNotice": {
+      "title": "Dokumenten kunde inte visas korrekt",
+      "message": "Dokumentsessionen kan ha gått ut. Stäng visaren och öppna dokumentet på nytt från källsystemet.",
+      "reload": "Ladda om visaren",
+      "close": "Stäng",
+      "details": "Tekniska detaljer",
+      "failedSummary": "{failed} av {total} sidor kunde inte läsas in."
+    },
     "modeIndicator": {
       "performance": "Prestandaläge aktivt",
       "memory": "Minneseffektivt läge aktivt",

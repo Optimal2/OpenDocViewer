@@ -68,6 +68,41 @@ Set `metadata.enabled` to `false` for deployments where metadata may still be us
 print templates, sorting, or diagnostics, but should not be exposed as a document metadata dialog or
 overview table.
 
+## Viewer Problem Notice
+
+Deployments can configure a viewer-level support notice for serious load failures, for example when
+host-provided document links expire and many pages fail at once.
+
+Configuration surface:
+
+```js
+viewer: {
+  problemNotice: {
+    enabled: true,
+    showForLoaderError: true,
+    showForFailedPages: true,
+    minFailedPages: 1,
+    failedPageRatio: 0.5,
+    requireLoadComplete: false,
+    dismissible: true,
+    showReloadButton: true,
+    showTechnicalDetails: false,
+    title: {
+      en: 'The documents could not be shown correctly',
+      sv: 'Dokumenten kunde inte visas korrekt'
+    },
+    message: {
+      en: 'The document session may have expired. Close this viewer and open the document again from the source system.',
+      sv: 'Dokumentsessionen kan ha gått ut. Stäng visaren och öppna dokumentet på nytt från källsystemet.'
+    }
+  }
+}
+```
+
+The notice is not tied to a single failed page. It is shown when the loader reports a fatal error, or
+when the configured number and ratio of failed pages is reached. Site-specific text should explain
+the local recovery path, such as reopening the document from the embedding application.
+
 ## Integration adapter mappings
 
 Some embedding hosts send an object-document payload where document-level metadata records need to
