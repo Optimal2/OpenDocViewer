@@ -59,6 +59,13 @@ If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL insp
 
 If an environment still shows intermittent `GetStream`-style timeouts, lower concurrency first. Only re-enable retries if you have measured that the backend usually recovers quickly and users prefer waiting over surfacing a failed page faster.
 
+OpenDocViewer bypasses the browser HTTP cache for source-file fetches and validates that fetched
+bytes look like a supported PDF/image before writing them to its temporary source store. If users see
+many failed-page placeholders after a session has been open for a while, inspect the browser console
+or system log for `Fetched source looked like text/HTML/JSON` or `could not be verified as a
+supported PDF/image payload`. Those messages usually mean the upstream host session or preparation
+endpoint is returning an error/login payload with HTTP 200 instead of the original document bytes.
+
 ## IIS proxy app
 
 The dedicated proxy app under `IIS-ODVProxyApp/` exists only to forward logging traffic.

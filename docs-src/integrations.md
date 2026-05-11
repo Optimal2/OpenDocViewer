@@ -116,6 +116,29 @@ File reference rules:
 
 `path` is preserved by normalization, but the explicit-list loader currently needs `url` for actual browser loading. Treat `path` as diagnostic or host-context data unless a deployment explicitly maps it to a URL before startup.
 
+## WebClient / iframe preparation flow
+
+Some legacy host applications open OpenDocViewer in an iframe and pass only compact session data in
+`?sessiondata=...`. If a separate host-side preparation endpoint is used before navigation, that
+preparation request must succeed before the iframe is redirected to OpenDocViewer.
+
+Operational rules for that flow:
+
+- Build the preparation URL with a real path separator. If the viewer base URL is
+  `/OpenDocViewer`, then the preparation endpoint should be `/OpenDocViewer/prep`, not
+  `/OpenDocViewerprep`.
+- Prefer a normal same-origin `fetch` and check `response.ok`. Avoid `mode: 'no-cors'` for
+  same-origin integrations because it hides response details and makes a failed preparation call look
+  like an opaque success path.
+- Only navigate the iframe after preparation has succeeded, or explicitly handle the failure with a
+  support-visible message.
+- Source endpoints must not return an HTML login page, JSON error payload, or other text response
+  with HTTP 200 when the viewer expects document bytes. OpenDocViewer validates fetched source bytes
+  before storing them in its temporary cache and will reject text-like payloads so a bad upstream
+  session response is not persisted as a corrupt PDF/image.
+- OpenDocViewer fetches source URLs with `cache: 'no-store'` so a previously bad HTTP-cache entry is
+  not reused for a later reload of the same WebClient session.
+
 ## Database-Backed Host Files
 
 Some host applications intentionally keep the web tier away from worker-only file shares. In that topology, the worker can copy reviewable source bytes into a database table and the web application can expose a short, authenticated file endpoint.
