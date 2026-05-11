@@ -52,6 +52,8 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
  * @param {Object} [props.bundle]    Optional normalized bundle with document metadata and integration hints
  * @param {BootstrapDebugInfo} [props.bootstrapDebugInfo]
  *        Diagnostics-only transport details from startup detection
+ * @param {string} [props.reloadCacheSeed]
+ *        Stable non-URL identity used for the optional short reload cache.
  * @param {(boolean|undefined)} [props.demoMode]
  *        Demo passthrough: when true, the loader may directly insert simple images.
  * @param {"repeat"|"mix"} [props.demoStrategy]
@@ -69,6 +71,7 @@ const OpenDocViewer = ({
   sourceList,
   bundle,
   bootstrapDebugInfo,
+  reloadCacheSeed,
   // NEW: demo passthrough props
   demoMode,
   demoStrategy,
@@ -138,6 +141,7 @@ const OpenDocViewer = ({
         endNumber={endNumber}
         sourceList={sourceList || null}  // explicit list passthrough
         bundle={bundle || null}          // optional metadata
+        reloadCacheSeed={reloadCacheSeed || ''}
         isMobileView={isMobileView}
         initialized={initialized}
         /* NEW: forward demo-mode props so the loader can engage demo fast-paths */
@@ -173,6 +177,7 @@ OpenDocViewer.propTypes = {
     hostPayload: PropTypes.any,
     filterInfo: PropTypes.object,
   }),
+  reloadCacheSeed: PropTypes.string,
 
   // Demo-mode passthrough (optional)
   demoMode: PropTypes.bool,

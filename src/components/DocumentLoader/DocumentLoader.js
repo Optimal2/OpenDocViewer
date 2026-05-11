@@ -26,7 +26,6 @@ import {
   shouldRecommendStopping,
 } from '../../utils/documentLoadingConfig.js';
 import LoadPressureDialog from './LoadPressureDialog.jsx';
-import { createOpaqueIdFragment } from '../../utils/idUtils.js';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 
 /**
@@ -47,6 +46,7 @@ import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
  * @property {string=} extension
  * @property {number=} endNumber
  * @property {Array.<DocumentSourceItem>=} sourceList
+ * @property {string=} reloadCacheSeed
  * @property {boolean=} demoMode
  * @property {'repeat'|'mix'=} demoStrategy
  * @property {number=} demoCount
@@ -336,7 +336,92 @@ function mimeToExtension(mimeType) {
  * @returns {string}
  */
 function createSourceKey(fileIndex, orderIndex) {
-  return ['src', String(fileIndex), String(orderIndex), createOpaqueIdFragment(4)].join('_');
+  return ['src', String(fileIndex), String(orderIndex)].join('_');
+}
+
+/**
+ * @param {string} value
+ * @returns {string}
+ */
+function stableHash(value) {
+  const text = String(value || '');
+  let h1 = 0x811c9dc5;
+  let h2 = 0x45d9f3b;
+  for (let index = 0; index < text.length; index += 1) {
+    const code = text.charCodeAt(index);
+    h1 ^= code;
+    h1 = Math.imul(h1, 0x01000193);
+    h2 ^= code;
+    h2 = Math.imul(h2, 0x1000193);
+    h2 ^= h2 >>> 13;
+  }
+  return `${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}`;
+}
+
+/**
+ * @param {*} config
+ * @returns {boolean}
+ */
+function isReloadCacheEnabled(config) {
+  return Math.max(0, Number(config?.sourceStore?.reloadCacheTtlMs) || 0) > 0
+    || Math.max(0, Number(config?.assetStore?.reloadCacheTtlMs) || 0) > 0;
+}
+
+/**
+ * @param {*} config
+ * @returns {'memory'|'indexeddb'}
+ */
+function getInitialTempStoreMode(config) {
+  if (isReloadCacheEnabled(config)) return 'indexeddb';
+  return String(config?.sourceStore?.mode || '').toLowerCase() === 'indexeddb' ? 'indexeddb' : 'memory';
+}
+
+/**
+ * @param {ResolvedEntry[]} entries
+ * @param {string=} reloadCacheSeed
+ * @returns {string}
+ */
+function buildReloadCacheNamespace(entries, reloadCacheSeed = '') {
+  const list = Array.isArray(entries) ? entries : [];
+  const useDocumentIdentity = list.length > 0 && list.every((entry) => !!entry.documentId);
+  const parts = [
+    'odv-reload-cache-v1',
+    useDocumentIdentity ? 'document' : 'url',
+    String(reloadCacheSeed || ''),
+    String(list.length),
+  ];
+
+  list.forEach((entry, orderIndex) => {
+    if (useDocumentIdentity) {
+      parts.push([
+        orderIndex,
+        entry.fileIndex,
+        entry.documentId || '',
+        entry.documentFileNumber || '',
+        entry.documentFileCount || '',
+        entry.ext || '',
+      ].join(':'));
+      return;
+    }
+
+    parts.push([
+      orderIndex,
+      entry.fileIndex,
+      entry.url,
+      entry.ext || '',
+    ].join(':'));
+  });
+
+  return parts.join('|');
+}
+
+/**
+ * @param {ResolvedEntry[]} entries
+ * @param {string=} reloadCacheSeed
+ * @returns {string}
+ */
+function createReloadCacheSessionId(entries, reloadCacheSeed = '') {
+  return `odv_reload_${stableHash(buildReloadCacheNamespace(entries, reloadCacheSeed))}`;
 }
 
 /**
@@ -801,6 +886,7 @@ const DocumentLoader = ({
   children,
   endNumber,
   sourceList,
+  reloadCacheSeed = '',
   demoMode,
   demoStrategy = 'repeat',
   demoCount,
@@ -818,6 +904,7 @@ const DocumentLoader = ({
     patchPageAtIndex,
     initializeDocumentSession,
     storeSourceBlob,
+    readSourceBlob,
     registerSourceDescriptor,
     addMessage,
     scheduleSourceWarmup,
@@ -881,6 +968,10 @@ const DocumentLoader = ({
       mode: Array.isArray(sourceList) && sourceList.length > 0 ? 'explicit-list' : (demoMode ? 'demo' : 'pattern'),
     });
 
+    const reloadCacheSessionId = isReloadCacheEnabled(config)
+      ? createReloadCacheSessionId(entries, reloadCacheSeed)
+      : undefined;
+
     const abortAllFetches = () => {
       const controllers = Array.from(activeControllersRef.current.values());
       activeControllersRef.current.clear();
@@ -935,6 +1026,65 @@ const DocumentLoader = ({
       const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
+      const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
+
+      if (reloadCacheSessionId && typeof readSourceBlob === 'function') {
+        try {
+          const cachedBlob = await readSourceBlob(sourceKey);
+          if (cachedBlob instanceof Blob && cachedBlob.size > 0) {
+            let detectedType = null;
+            try { detectedType = await fileTypeFromBlob(cachedBlob); } catch {}
+
+            const mimeType = String(
+              detectedType?.mime
+              || cachedBlob.type
+              || 'application/octet-stream'
+            );
+
+            const fileExtension = normalizeExtension(
+              detectedType?.ext
+              || mimeToExtension(mimeType)
+              || entry.ext
+              || inferUrlExtension(entry.url)
+              || 'png'
+            );
+
+            await validateFetchedSourceBlob({
+              entry,
+              blob: cachedBlob,
+              detectedType,
+              mimeType,
+              fileExtension,
+            });
+
+            logger.info('Prefetch source restored from reload cache', {
+              sourceKey,
+              fileIndex: entry.fileIndex,
+              fileExtension,
+              sizeBytes: Number(cachedBlob.size || 0),
+            });
+
+            return {
+              ok: true,
+              sourceKey,
+              fileExtension,
+              mimeType,
+              sizeBytes: Number(cachedBlob.size || 0),
+              fileIndex: entry.fileIndex,
+              url: entry.url,
+              stats: { mode: 'indexeddb' },
+              analysisBlob: cachedBlob,
+              pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+            };
+          }
+        } catch (error) {
+          logger.warn('Reload cache source could not be reused; fetching source normally', {
+            sourceKey,
+            fileIndex: entry.fileIndex,
+            error: String(error?.message || error),
+          });
+        }
+      }
 
       for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         const controller = new AbortController();
@@ -988,7 +1138,6 @@ const DocumentLoader = ({
             fileExtension,
           });
 
-          const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
           const stored = await storeSourceBlob({
             sourceKey,
             blob,
@@ -1087,7 +1236,7 @@ const DocumentLoader = ({
           discoveredPageCount: 0,
           estimatedPageCount: 0,
           prefetchedBytes: 0,
-          tempStoreMode: config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory',
+          tempStoreMode: getInitialTempStoreMode(config),
           tempStoreProtected: config.sourceStore.protection === 'aes-gcm-session',
           recommendStop: shouldRecommendStopping({
             sourceCount: entries.length,
@@ -1107,6 +1256,7 @@ const DocumentLoader = ({
       await initializeDocumentSession({
         expectedSourceCount: entries.length,
         config,
+        cacheSessionId: reloadCacheSessionId,
       });
 
       if (shouldStopRun()) return;
@@ -1122,7 +1272,7 @@ const DocumentLoader = ({
       let initialUnavailableFailures = 0;
       let initialSourceUnavailableCheckActive = true;
       const pageEstimateStats = new Map();
-      let activeTempStoreMode = config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory';
+      let activeTempStoreMode = getInitialTempStoreMode(config);
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
       const isSequentialFetch = String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential';
       const abortOnSourceUnavailableCount = Math.max(0, Number(config.fetch.abortOnSourceUnavailableCount) || 0);
@@ -1381,6 +1531,7 @@ const DocumentLoader = ({
     insertPagesAtIndex,
     patchPageAtIndex,
     promptForPressure,
+    readSourceBlob,
     registerSourceDescriptor,
     scheduleSourceWarmup,
     setError,
@@ -1388,6 +1539,7 @@ const DocumentLoader = ({
     setPlannedPageCount,
     setWorkerCount,
     sourceList,
+    reloadCacheSeed,
     storeSourceBlob,
   ]);
 

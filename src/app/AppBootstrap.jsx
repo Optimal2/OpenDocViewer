@@ -87,6 +87,36 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
 const DEMO_MAX = 300;
 
 /**
+ * Build a stable reload-cache seed from host bundle identity without including short-lived
+ * source URLs/tickets. The loader adds the ordered source identity and hashes the final value.
+ *
+ * @param {(PortableDocumentBundle|null|undefined)} bundle
+ * @returns {string}
+ */
+function makeReloadCacheSeedFromBundle(bundle) {
+  if (!bundle) return '';
+  const session = bundle.session || {};
+  const docs = Array.isArray(bundle.documents) ? bundle.documents : [];
+  const documentSignature = docs.map((doc, index) => {
+    const files = Array.isArray(doc?.files) ? doc.files : [];
+    const extensions = files.map((file) => String(file?.ext || '').toLowerCase()).join(',');
+    return [
+      index + 1,
+      String(doc?.documentId || ''),
+      files.length,
+      extensions,
+    ].join(':');
+  }).join('|');
+
+  return [
+    String(session.id || session.sessionId || session.SessionId || ''),
+    String(session.userId || session.UserId || ''),
+    docs.length,
+    documentSignature,
+  ].join('||');
+}
+
+/**
  * Build a demo source list from the /public sample files.
  * Use Vite's BASE_URL so paths work under any mount point.
  *
@@ -212,7 +242,12 @@ export default function AppBootstrap() {
       Array.isArray(sourceListFromBundle) &&
       sourceListFromBundle.length > 0
     ) {
-      return { sourceList: sourceListFromBundle, bundle, bootstrapDebugInfo };
+      return {
+        sourceList: sourceListFromBundle,
+        bundle,
+        bootstrapDebugInfo,
+        reloadCacheSeed: makeReloadCacheSeedFromBundle(bundle),
+      };
     }
 
     // 3) Demo launcher pressed → explicit-list mode from /public samples

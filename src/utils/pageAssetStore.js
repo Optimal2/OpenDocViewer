@@ -9,6 +9,7 @@
 
 import logger from '../logging/systemLogger.js';
 import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { getReloadCacheAesKey } from './reloadCacheCrypto.js';
 
 const DB_NAME = 'OpenDocViewerPageAssetStore';
 const DB_VERSION = 1;
@@ -211,7 +212,8 @@ export class PageAssetStore {
       ...opts,
     };
 
-    this.sessionId = createSessionId();
+    this.reloadCacheTtlMs = Math.max(0, Number(this.config.reloadCacheTtlMs) || 0);
+    this.sessionId = String(opts.sessionId || '').trim() || createSessionId();
     /** @type {Map<string, { blob: Blob, meta: StoredPageAssetMeta }>} */
     this.memoryEntries = new Map();
     /** @type {Map<string, StoredPageAssetMeta>} */
@@ -235,6 +237,7 @@ export class PageAssetStore {
     const expectedAssetCount = Math.max(0, Number(this.config.expectedAssetCount) || 0);
     const countThreshold = Math.max(0, Number(this.config.switchToIndexedDbAboveAssetCount) || 0);
     if (
+      (this.reloadCacheTtlMs > 0 && this.indexedDbAvailable) ||
       this.requestedMode === 'indexeddb'
       || (this.requestedMode === 'adaptive' && countThreshold > 0 && expectedAssetCount >= countThreshold)
     ) {
@@ -383,9 +386,26 @@ export class PageAssetStore {
 
     const record = await this.getIndexedDbRecord(key);
     if (!record) return null;
-    const blob = await this.recordToBlob(record);
+    let blob = null;
+    try {
+      blob = await this.recordToBlob(record);
+    } catch (error) {
+      logger.warn('Failed to read cached page asset; rerendering from source', {
+        assetKey: key,
+        error: String(error?.message || error),
+      });
+      return null;
+    }
+    if (blob && this.reloadCacheTtlMs > 0) {
+      void this.touchIndexedDbRecord(key).catch(() => {});
+    }
     const nextMeta = this.recordToMeta(record);
+    const wasKnown = this.meta.has(key);
     this.meta.set(key, nextMeta);
+    if (!wasKnown) {
+      this.assetCount += 1;
+      this.totalBytes += Number(nextMeta.sizeBytes || 0);
+    }
     if (blob) this.blobCache.set(key, blob);
     return blob ? { meta: nextMeta, blob } : null;
   }
@@ -401,7 +421,7 @@ export class PageAssetStore {
       this.assetCount = 0;
       this.totalBytes = 0;
 
-      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable) return;
+      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable || this.reloadCacheTtlMs > 0) return;
 
       try {
         const db = await this.ensureDb();
@@ -439,7 +459,8 @@ export class PageAssetStore {
     this.cleanupPromise = (async () => {
       try {
         const db = await this.ensureDb();
-        const cutoff = Date.now() - Math.max(1000, Number(this.config.staleSessionTtlMs) || 0);
+        const ttlMs = this.reloadCacheTtlMs > 0 ? this.reloadCacheTtlMs : Number(this.config.staleSessionTtlMs);
+        const cutoff = Date.now() - Math.max(1000, ttlMs || 0);
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const index = tx.objectStore(STORE_NAME).index('createdAt');
         await new Promise((resolve, reject) => {
@@ -452,8 +473,7 @@ export class PageAssetStore {
               resolve(undefined);
               return;
             }
-            const record = cursor.value;
-            if (!record || record.sessionId !== this.sessionId) cursor.delete();
+            cursor.delete();
             cursor.continue();
           };
         });
@@ -485,11 +505,20 @@ export class PageAssetStore {
   async ensureKey() {
     if (!this.encryptionAvailable) return null;
     if (!this.keyPromise) {
-      this.keyPromise = globalThis.crypto.subtle.generateKey(
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
+      if (this.reloadCacheTtlMs > 0) {
+        this.keyPromise = getReloadCacheAesKey(this.sessionId, this.reloadCacheTtlMs, 'asset')
+          .then((key) => key || globalThis.crypto.subtle.generateKey(
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+          ));
+      } else {
+        this.keyPromise = globalThis.crypto.subtle.generateKey(
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      }
     }
     return this.keyPromise;
   }
@@ -628,6 +657,24 @@ export class PageAssetStore {
     const record = await requestToPromise(store.get(makeStorageKey(assetKey, this.sessionId)));
     await txDone;
     return record || null;
+  }
+
+  /**
+   * @param {string} assetKey
+   * @returns {Promise<void>}
+   */
+  async touchIndexedDbRecord(assetKey) {
+    const db = await this.ensureDb();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const txDone = transactionDone(tx);
+    const store = tx.objectStore(STORE_NAME);
+    const storageKey = makeStorageKey(assetKey, this.sessionId);
+    const record = await requestToPromise(store.get(storageKey));
+    if (record) {
+      record.createdAt = Date.now();
+      await requestToPromise(store.put(record));
+    }
+    await txDone;
   }
 
   /**

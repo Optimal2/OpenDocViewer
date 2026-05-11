@@ -562,6 +562,10 @@
         // Best-effort cleanup of stale temp sessions left behind in IndexedDB.
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
 
+        // Optional short reload cache. 0 disables it. When enabled, source blobs survive a same-tab
+        // reload/F5 for this many milliseconds and are encrypted with a key kept in sessionStorage.
+        reloadCacheTtlMs: 0,
+
         // Small in-memory read cache for recently used temp-store blobs.
         blobCacheEntries: 12
       },
@@ -574,6 +578,8 @@
         switchToIndexedDbAboveTotalMiB: 4096,
         protection: 'aes-gcm-session',
         staleSessionTtlMs: 24 * 60 * 60 * 1000,
+        // Optional short reload cache for rendered page blobs. 0 disables it.
+        reloadCacheTtlMs: 0,
         blobCacheEntries: 16,
         // Dedicated thumbnails are skipped by default because the preferred runtime profile reuses
         // the rendered full-size page for both the main view and the thumbnail pane until memory

@@ -33,6 +33,7 @@ import { createContext } from 'react';
  * @typedef {Object} DocumentSessionInitOptions
  * @property {number=} expectedSourceCount
  * @property {Object=} config
+ * @property {string=} cacheSessionId
  */
 
 /**

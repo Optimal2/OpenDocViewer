@@ -636,6 +636,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const tempStore = createSourceTempStore({
       ...sessionConfigRef.current.sourceStore,
       expectedSourceCount: Math.max(0, Number(options?.expectedSourceCount) || 0),
+      sessionId: options?.cacheSessionId,
     });
     await tempStore.ready();
     tempStoreRef.current = tempStore;
@@ -643,6 +644,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     if (sessionConfigRef.current.assetStore.enabled !== false) {
       const pageAssetStore = createPageAssetStore({
         ...sessionConfigRef.current.assetStore,
+        sessionId: options?.cacheSessionId,
       });
       await pageAssetStore.ready();
       pageAssetStoreRef.current = pageAssetStore;
@@ -666,6 +668,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetMode: pageAssetStoreRef.current?.getStats?.().mode || 'disabled',
       requestedMode: sessionConfigRef.current.mode,
       expectedSourceCount: options?.expectedSourceCount || 0,
+      cacheSessionId: options?.cacheSessionId || undefined,
     });
   }, [collectRuntimeDiagnostics, resetViewerState]);
 
