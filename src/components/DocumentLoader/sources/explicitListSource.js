@@ -14,8 +14,10 @@
  *   @property {(string|undefined)} ext
  *   @property {number} fileIndex
  *   @property {(string|undefined)} documentId
+ *   @property {(string|undefined)} documentVersion
  *   @property {(number|undefined)} documentNumber
  *   @property {(number|undefined)} totalDocuments
+ *   @property {(string|undefined)} fileId
  *   @property {(number|undefined)} documentFileNumber
  *   @property {(number|undefined)} documentFileCount
  *
@@ -27,6 +29,7 @@
 /**
  * A single file reference in a portable document.
  * @typedef {Object} PortableFile
+ * @property {(string|undefined)} id
  * @property {string} url
  * @property {(string|undefined)} ext
  */
@@ -35,6 +38,11 @@
  * Portable document containing a list of files.
  * @typedef {Object} PortableDoc
  * @property {(string|undefined)} documentId
+ * @property {(string|undefined)} documentVersion
+ * @property {(Object|undefined)} metadata
+ * @property {(Object|undefined)} metadataDetails
+ * @property {(Object|undefined)} metaById
+ * @property {(Array|undefined)} meta
  * @property {(Array.<PortableFile>|undefined)} files
  */
 
@@ -61,6 +69,90 @@ function inferExtFromUrl(url) {
 }
 
 /**
+ * @param {*} value
+ * @returns {(string|undefined)}
+ */
+function optionalText(value) {
+  if (value == null) return undefined;
+  const text = String(value).trim();
+  return text || undefined;
+}
+
+/**
+ * @param {*} doc
+ * @param {Array<string>} keys
+ * @returns {(string|undefined)}
+ */
+function firstDocumentField(doc, keys) {
+  for (const key of keys) {
+    const value = optionalText(doc?.[key]);
+    if (value) return value;
+  }
+  return undefined;
+}
+
+/**
+ * @param {*} doc
+ * @param {string} alias
+ * @returns {(string|undefined)}
+ */
+function metadataAliasValue(doc, alias) {
+  const fromTextMap = optionalText(doc?.metadata?.[alias]);
+  if (fromTextMap) return fromTextMap;
+
+  const details = doc?.metadataDetails?.[alias];
+  return optionalText(details?.selectedValue)
+    || optionalText(details?.value)
+    || optionalText(details?.lookupValue);
+}
+
+/**
+ * @param {*} doc
+ * @param {Array<string>} fieldIds
+ * @returns {(string|undefined)}
+ */
+function metadataFieldValue(doc, fieldIds) {
+  const byId = doc?.metaById || {};
+  for (const fieldId of fieldIds) {
+    const record = byId?.[fieldId];
+    const value = optionalText(record?.value) || optionalText(record?.Value);
+    if (value) return value;
+  }
+
+  const list = Array.isArray(doc?.meta) ? doc.meta : [];
+  for (const fieldId of fieldIds) {
+    const record = list.find((entry) => String(entry?.id ?? entry?.DataId ?? entry?.dataId ?? '') === fieldId);
+    const value = optionalText(record?.value) || optionalText(record?.Value);
+    if (value) return value;
+  }
+
+  return undefined;
+}
+
+/**
+ * @param {*} doc
+ * @returns {(string|undefined)}
+ */
+function resolveDocumentVersion(doc) {
+  const explicitVersion = firstDocumentField(doc, [
+    'documentVersion',
+    'version',
+    'modifiedTimestamp',
+    'modifiedAt',
+    'lastModified',
+    'updatedAt',
+  ]);
+  const modifiedTimestamp = explicitVersion
+    || metadataAliasValue(doc, 'modifiedTimestamp')
+    || metadataFieldValue(doc, ['502']);
+  if (!modifiedTimestamp) return undefined;
+
+  const pageCount = metadataAliasValue(doc, 'numberOfPages')
+    || metadataFieldValue(doc, ['504']);
+  return pageCount ? `${modifiedTimestamp}|pages:${pageCount}` : modifiedTimestamp;
+}
+
+/**
  * Convert a PortableDocumentBundle into a flat, ordered list of file URLs.
  * We preserve the document order and file order given, and assign a stable,
  * continuous `fileIndex` across the entire bundle.
@@ -84,6 +176,7 @@ export function makeExplicitSource(bundle) {
     const doc = docs[docIndex];
     const files = Array.isArray(doc?.files) ? doc.files : [];
     const documentNumber = docIndex + 1;
+    const documentVersion = resolveDocumentVersion(doc);
 
     for (let fileIndex = 0; fileIndex < files.length; fileIndex += 1) {
       const file = files[fileIndex];
@@ -96,8 +189,10 @@ export function makeExplicitSource(bundle) {
         ext,
         fileIndex: idx++,
         documentId: typeof doc?.documentId === 'string' && doc.documentId ? doc.documentId : undefined,
+        documentVersion,
         documentNumber,
         totalDocuments,
+        fileId: optionalText(file?.id),
         documentFileNumber: fileIndex + 1,
         documentFileCount: files.length,
       });

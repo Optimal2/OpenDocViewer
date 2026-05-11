@@ -27,6 +27,10 @@ import {
 } from '../../utils/documentLoadingConfig.js';
 import LoadPressureDialog from './LoadPressureDialog.jsx';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
+import {
+  createDocumentSourceKey,
+  createReloadCacheSessionId,
+} from '../../utils/reloadCacheIdentity.js';
 
 /**
  * @typedef {Object} DocumentSourceItem
@@ -34,6 +38,8 @@ import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
  * @property {string=} ext
  * @property {number=} fileIndex
  * @property {string=} documentId
+ * @property {string=} documentVersion
+ * @property {string=} fileId
  * @property {number=} documentNumber
  * @property {number=} totalDocuments
  * @property {number=} documentFileNumber
@@ -65,6 +71,8 @@ import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
  * @property {number} sizeBytes
  * @property {number} startIndex
  * @property {string=} documentId
+ * @property {string=} documentVersion
+ * @property {string=} fileId
  * @property {number=} documentNumber
  * @property {number=} totalDocuments
  * @property {number=} documentPageStart
@@ -331,34 +339,6 @@ function mimeToExtension(mimeType) {
 }
 
 /**
- * @param {number} fileIndex
- * @param {number} orderIndex
- * @returns {string}
- */
-function createSourceKey(fileIndex, orderIndex) {
-  return ['src', String(fileIndex), String(orderIndex)].join('_');
-}
-
-/**
- * @param {string} value
- * @returns {string}
- */
-function stableHash(value) {
-  const text = String(value || '');
-  let h1 = 0x811c9dc5;
-  let h2 = 0x45d9f3b;
-  for (let index = 0; index < text.length; index += 1) {
-    const code = text.charCodeAt(index);
-    h1 ^= code;
-    h1 = Math.imul(h1, 0x01000193);
-    h2 ^= code;
-    h2 = Math.imul(h2, 0x1000193);
-    h2 ^= h2 >>> 13;
-  }
-  return `${(h1 >>> 0).toString(36)}${(h2 >>> 0).toString(36)}`;
-}
-
-/**
  * @param {*} config
  * @returns {boolean}
  */
@@ -374,54 +354,6 @@ function isReloadCacheEnabled(config) {
 function getInitialTempStoreMode(config) {
   if (isReloadCacheEnabled(config)) return 'indexeddb';
   return String(config?.sourceStore?.mode || '').toLowerCase() === 'indexeddb' ? 'indexeddb' : 'memory';
-}
-
-/**
- * @param {ResolvedEntry[]} entries
- * @param {string=} reloadCacheSeed
- * @returns {string}
- */
-function buildReloadCacheNamespace(entries, reloadCacheSeed = '') {
-  const list = Array.isArray(entries) ? entries : [];
-  const useDocumentIdentity = list.length > 0 && list.every((entry) => !!entry.documentId);
-  const parts = [
-    'odv-reload-cache-v1',
-    useDocumentIdentity ? 'document' : 'url',
-    String(reloadCacheSeed || ''),
-    String(list.length),
-  ];
-
-  list.forEach((entry, orderIndex) => {
-    if (useDocumentIdentity) {
-      parts.push([
-        orderIndex,
-        entry.fileIndex,
-        entry.documentId || '',
-        entry.documentFileNumber || '',
-        entry.documentFileCount || '',
-        entry.ext || '',
-      ].join(':'));
-      return;
-    }
-
-    parts.push([
-      orderIndex,
-      entry.fileIndex,
-      entry.url,
-      entry.ext || '',
-    ].join(':'));
-  });
-
-  return parts.join('|');
-}
-
-/**
- * @param {ResolvedEntry[]} entries
- * @param {string=} reloadCacheSeed
- * @returns {string}
- */
-function createReloadCacheSessionId(entries, reloadCacheSeed = '') {
-  return `odv_reload_${stableHash(buildReloadCacheNamespace(entries, reloadCacheSeed))}`;
 }
 
 /**
@@ -839,6 +771,12 @@ function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoForma
         documentId: item?.documentId != null && String(item.documentId).trim()
           ? String(item.documentId)
           : undefined,
+        documentVersion: item?.documentVersion != null && String(item.documentVersion).trim()
+          ? String(item.documentVersion)
+          : undefined,
+        fileId: item?.fileId != null && String(item.fileId).trim()
+          ? String(item.fileId)
+          : undefined,
         documentNumber: toPositiveIntOrUndefined(item?.documentNumber),
         totalDocuments: toPositiveIntOrUndefined(item?.totalDocuments),
         documentFileNumber: toPositiveIntOrUndefined(item?.documentFileNumber),
@@ -969,7 +907,7 @@ const DocumentLoader = ({
     });
 
     const reloadCacheSessionId = isReloadCacheEnabled(config)
-      ? createReloadCacheSessionId(entries, reloadCacheSeed)
+      ? createReloadCacheSessionId(reloadCacheSeed)
       : undefined;
 
     const abortAllFetches = () => {
@@ -1026,7 +964,7 @@ const DocumentLoader = ({
       const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
-      const sourceKey = createSourceKey(entry.fileIndex, orderIndex);
+      const sourceKey = createDocumentSourceKey(entry, orderIndex);
 
       if (reloadCacheSessionId && typeof readSourceBlob === 'function') {
         try {
