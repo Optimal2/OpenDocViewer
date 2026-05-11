@@ -38,6 +38,7 @@ export const ODV_BOOTSTRAP_MODES = Object.freeze({
  * @property {string} mode
  * @property {(string|undefined)} hostPayloadSource
  * @property {*=} hostPayload
+ * @property {Object=} filterInfo
  */
 
 /**
@@ -110,12 +111,123 @@ function tryNormalizeBundle(candidate) {
  * @param {(string|undefined)} hostPayloadSource
  * @param {*} hostPayload
  * @param {boolean} diagnosticsEnabled
+ * @param {Object=} extra
  * @returns {BootstrapDebugInfo}
  */
-function makeDebugInfo(mode, hostPayloadSource, hostPayload, diagnosticsEnabled) {
-  return diagnosticsEnabled
+function makeDebugInfo(mode, hostPayloadSource, hostPayload, diagnosticsEnabled, extra = undefined) {
+  const base = diagnosticsEnabled
     ? { mode, hostPayloadSource, hostPayload }
     : { mode, hostPayloadSource };
+  return extra && typeof extra === 'object'
+    ? { ...base, ...extra }
+    : base;
+}
+
+function isPlainObject(value) {
+  return !!value && typeof value === 'object' && !Array.isArray(value);
+}
+
+function normalizeCaseId(value) {
+  const out = String(value ?? '').trim();
+  return out || undefined;
+}
+
+function getSessionCaseIds(sessionData) {
+  const raw = sessionData?.caseIds ?? sessionData?.CaseIds ?? sessionData?.caseIDs;
+  if (!Array.isArray(raw)) return [];
+  return raw
+    .map((entry) => normalizeCaseId(entry))
+    .filter(Boolean);
+}
+
+function documentMatchesCaseIds(documentKey, documentValue, caseIdSet) {
+  const candidates = [
+    documentKey,
+    documentValue?.DocumentId,
+    documentValue?.documentId,
+    documentValue?.Id,
+    documentValue?.id,
+  ];
+
+  return candidates.some((entry) => {
+    const normalized = normalizeCaseId(entry);
+    return normalized ? caseIdSet.has(normalized) : false;
+  });
+}
+
+function filterObjectDocumentModelByCaseIds(payload, caseIds) {
+  if (!isPlainObject(payload?.PortableDocuments)) return null;
+
+  const caseIdSet = new Set(caseIds);
+  const nextPortableDocuments = {};
+  if (Object.prototype.hasOwnProperty.call(payload.PortableDocuments, '$id')) {
+    nextPortableDocuments.$id = payload.PortableDocuments.$id;
+  }
+
+  let originalCount = 0;
+  let retainedCount = 0;
+  for (const [docKey, docValue] of Object.entries(payload.PortableDocuments)) {
+    if (docKey === '$id') continue;
+    originalCount += 1;
+    if (!documentMatchesCaseIds(docKey, isPlainObject(docValue) ? docValue : {}, caseIdSet)) continue;
+    nextPortableDocuments[docKey] = docValue;
+    retainedCount += 1;
+  }
+
+  return {
+    payload: {
+      ...payload,
+      PortableDocuments: nextPortableDocuments,
+    },
+    originalCount,
+    retainedCount,
+  };
+}
+
+function filterNeutralBundleByCaseIds(payload, caseIds) {
+  const hasNestedBundle = isPlainObject(payload?.bundle);
+  const bundle = hasNestedBundle ? payload.bundle : payload;
+  if (!Array.isArray(bundle?.documents)) return null;
+
+  const caseIdSet = new Set(caseIds);
+  const originalCount = bundle.documents.length;
+  const documents = bundle.documents.filter((documentValue) => (
+    documentMatchesCaseIds(undefined, isPlainObject(documentValue) ? documentValue : {}, caseIdSet)
+  ));
+
+  const nextBundle = {
+    ...bundle,
+    documents,
+  };
+
+  return {
+    payload: hasNestedBundle ? { ...payload, bundle: nextBundle } : nextBundle,
+    originalCount,
+    retainedCount: documents.length,
+  };
+}
+
+function filterParentPayloadBySessionCaseIds(parentPayload, sessionData) {
+  const caseIds = getSessionCaseIds(sessionData);
+  if (caseIds.length <= 0) return { payload: parentPayload, filterInfo: undefined };
+
+  const filtered =
+    filterObjectDocumentModelByCaseIds(parentPayload, caseIds) ||
+    filterNeutralBundleByCaseIds(parentPayload, caseIds);
+
+  if (!filtered) return { payload: parentPayload, filterInfo: undefined };
+
+  return {
+    payload: filtered.payload,
+    filterInfo: {
+      filterInfo: {
+        source: 'sessiondata.caseIds',
+        caseIdCount: caseIds.length,
+        originalDocumentCount: filtered.originalCount,
+        retainedDocumentCount: filtered.retainedCount,
+      },
+    },
+  };
 }
 
 /**
@@ -194,7 +306,12 @@ export async function bootstrapDetect(options = {}) {
   try {
     const parentCandidate = probeParent();
     if (parentCandidate?.data) {
-      const bundle = tryNormalizeBundle(parentCandidate.data);
+      const sessionCandidate = probeSessionToken();
+      const parentPayload = filterParentPayloadBySessionCaseIds(
+        parentCandidate.data,
+        sessionCandidate?.data
+      );
+      const bundle = tryNormalizeBundle(parentPayload.payload);
       if (bundle) {
         return {
           mode: ODV_BOOTSTRAP_MODES.PARENT_PAGE,
@@ -202,8 +319,9 @@ export async function bootstrapDetect(options = {}) {
           debugInfo: makeDebugInfo(
             ODV_BOOTSTRAP_MODES.PARENT_PAGE,
             String(parentCandidate.source || 'parent'),
-            parentCandidate.data,
-            diagnosticsEnabled
+            parentPayload.payload,
+            diagnosticsEnabled,
+            parentPayload.filterInfo
           ),
         };
       }

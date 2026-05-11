@@ -364,6 +364,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
   const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
+  const filterInfo = bootstrapDebugInfo?.filterInfo;
   const bundleDocumentCount = Array.isArray(bundle?.documents) ? bundle.documents.length : 0;
   const bundleMetaFieldCount = countBundleMetaFields(bundle);
   const caseIdCount = getCaseIdCount(hostPayload);
@@ -495,6 +496,13 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             {caseIdCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.caseIdsLabel', { defaultValue: 'caseIds:' })} <strong>{caseIdCount}</strong></span> : null}
             {bundleDocumentCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleDocumentsLabel', { defaultValue: 'Documents:' })} <strong>{bundleDocumentCount}</strong></span> : null}
             {bundleMetaFieldCount > 0 ? <span style={{ marginLeft: 10 }}>{t('perf.bundleMetaFieldsLabel', { defaultValue: 'Meta fields:' })} <strong>{bundleMetaFieldCount}</strong></span> : null}
+            {filterInfo ? (
+              <span style={{ marginLeft: 10 }}>
+                {t('perf.caseIdFilterLabel', { defaultValue: 'Filter:' })}{' '}
+                <strong>{Number(filterInfo.retainedDocumentCount || 0)}</strong>
+                /{Number(filterInfo.originalDocumentCount || 0)}
+              </span>
+            ) : null}
           </div>
           {showHostMetadata ? (
             <pre
@@ -675,6 +683,12 @@ PerformanceMonitor.propTypes = {
     mode: PropTypes.string,
     hostPayloadSource: PropTypes.string,
     hostPayload: PropTypes.any,
+    filterInfo: PropTypes.shape({
+      source: PropTypes.string,
+      caseIdCount: PropTypes.number,
+      originalDocumentCount: PropTypes.number,
+      retainedDocumentCount: PropTypes.number,
+    }),
   }),
 };
 

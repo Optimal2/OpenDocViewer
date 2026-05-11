@@ -37,6 +37,7 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
  * @property {string} mode
  * @property {(string|undefined)} [hostPayloadSource]
  * @property {*=} [hostPayload]
+ * @property {Object=} [filterInfo]
  */
 
 /**
@@ -170,6 +171,7 @@ OpenDocViewer.propTypes = {
     mode: PropTypes.string,
     hostPayloadSource: PropTypes.string,
     hostPayload: PropTypes.any,
+    filterInfo: PropTypes.object,
   }),
 
   // Demo-mode passthrough (optional)
