@@ -103,6 +103,22 @@ The notice is not tied to a single failed page. It is shown when the loader repo
 when the configured number and ratio of failed pages is reached. Site-specific text should explain
 the local recovery path, such as reopening the document from the embedding application.
 
+The loader can also stop early when an embedding host has issued unusable source tickets. Configure
+the threshold under `documentLoading.fetch`:
+
+```js
+documentLoading: {
+  fetch: {
+    abortOnSourceUnavailableCount: 8
+  }
+}
+```
+
+When the first configured number of source URLs all fail as unavailable and no source has loaded
+successfully, OpenDocViewer treats the whole source session as expired or invalid. This avoids
+hundreds of identical failed requests and lets the viewer-level notice show the site-specific
+recovery instruction.
+
 ## Integration adapter mappings
 
 Some embedding hosts send an object-document payload where document-level metadata records need to

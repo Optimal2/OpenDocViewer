@@ -66,6 +66,12 @@ or system log for `Fetched source looked like text/HTML/JSON` or `could not be v
 supported PDF/image payload`. Those messages usually mean the upstream host session or preparation
 endpoint is returning an error/login payload with HTTP 200 instead of the original document bytes.
 
+If the console instead shows repeated `GetStream` failures with `status 404` and the IIS error page
+says `FileTicket could not be resolved`, the upstream file tickets have expired or were generated
+for a host session that can no longer resolve them. ODV cannot renew those tickets by itself. It will
+stop early after `documentLoading.fetch.abortOnSourceUnavailableCount` initial unavailable sources
+and show the configured problem notice so the user can start a fresh host/WebClient session.
+
 ## IIS proxy app
 
 The dedicated proxy app under `IIS-ODVProxyApp/` exists only to forward logging traffic.

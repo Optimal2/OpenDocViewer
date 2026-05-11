@@ -138,6 +138,9 @@ Operational rules for that flow:
   session response is not persisted as a corrupt PDF/image.
 - OpenDocViewer fetches source URLs with `cache: 'no-store'` so a previously bad HTTP-cache entry is
   not reused for a later reload of the same WebClient session.
+- If many source URLs return `404 FileTicket could not be resolved`, the host has issued tickets
+  that its `GetStream` endpoint can no longer resolve. OpenDocViewer can detect this and stop early,
+  but it cannot renew the tickets; the embedding host must provide a fresh WebClient/session handoff.
 
 ## Database-Backed Host Files
 
