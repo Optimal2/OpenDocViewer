@@ -123,11 +123,11 @@ const DocumentViewerRender = ({
   );
 
   const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
-    || Number(primaryImageProperties?.brightness || 100) !== 100
-    || Number(primaryImageProperties?.contrast || 100) !== 100;
+    || Number(primaryImageProperties?.brightness ?? 100) !== 100
+    || Number(primaryImageProperties?.contrast ?? 100) !== 100;
   const compareCanvasEnabled = Number(compareImageProperties?.rotation || 0) !== 0
-    || Number(compareImageProperties?.brightness || 100) !== 100
-    || Number(compareImageProperties?.contrast || 100) !== 100;
+    || Number(compareImageProperties?.brightness ?? 100) !== 100
+    || Number(compareImageProperties?.contrast ?? 100) !== 100;
 
   const handlePrimaryRendered = useCallback(() => {
     if (zoomMode === 'FIT_PAGE') {

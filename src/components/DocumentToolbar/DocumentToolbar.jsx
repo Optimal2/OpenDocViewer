@@ -778,8 +778,8 @@ const DocumentToolbar = ({
     handleContrastChange({ target: { value: 100 } }, resolveEditingTarget(event));
   }, [handleContrastChange, resolveEditingTarget]);
 
-  const isBrightnessAdjusted = Number(editingProperties?.brightness || 100) !== 100;
-  const isContrastAdjusted = Number(editingProperties?.contrast || 100) !== 100;
+  const isBrightnessAdjusted = Number(editingProperties?.brightness ?? 100) !== 100;
+  const isContrastAdjusted = Number(editingProperties?.contrast ?? 100) !== 100;
 
   /**
    * Build a compact "pages" descriptor for logging.
