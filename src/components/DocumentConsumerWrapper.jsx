@@ -53,6 +53,8 @@ const DocumentThumbnailList = lazy(() => import('./DocumentThumbnailList'));
  * @param {number} [props.endNumber]             Pattern mode: last page/file number (1..N)
  * @param {Array.<SourceItem>} [props.sourceList]
  *        Explicit-list mode: ordered list of source items
+ * @param {string=} [props.reloadCacheSeed]
+ *        Stable non-URL identity used for the optional short reload cache.
  * @param {boolean} props.isMobileView           Whether to render the thumbnail-only view
  * @param {boolean} props.initialized            Delay mounting until basic app init completes
  * @param {(boolean|undefined)} [props.demoMode]         Demo mode: use public '/sample.*' files
@@ -66,6 +68,7 @@ const DocumentConsumerWrapper = ({
   extension,
   endNumber,
   sourceList,
+  reloadCacheSeed,
   isMobileView,
   initialized,
   // NEW demo props (optional):
@@ -108,6 +111,7 @@ const DocumentConsumerWrapper = ({
             extension={extension}
             endNumber={endNumber}
             sourceList={sourceList || null}
+            reloadCacheSeed={reloadCacheSeed || ''}
             // Forward NEW demo props (undefined values are harmless):
             demoMode={demoMode}
             demoStrategy={demoStrategy}
@@ -151,6 +155,7 @@ DocumentConsumerWrapper.propTypes = {
       fileIndex: PropTypes.number,
     })
   ),
+  reloadCacheSeed: PropTypes.string,
   isMobileView: PropTypes.bool.isRequired,
   initialized: PropTypes.bool.isRequired,
   // NEW demo props

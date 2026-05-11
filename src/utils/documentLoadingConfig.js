@@ -60,6 +60,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  * @property {number} switchToIndexedDbAboveTotalMiB
  * @property {SourceStoreProtection} protection
  * @property {number} staleSessionTtlMs
+ * @property {number} reloadCacheTtlMs
  * @property {number} blobCacheEntries
  */
 
@@ -71,6 +72,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  * @property {number} switchToIndexedDbAboveTotalMiB
  * @property {SourceStoreProtection} protection
  * @property {number} staleSessionTtlMs
+ * @property {number} reloadCacheTtlMs
  * @property {number} blobCacheEntries
  * @property {boolean} persistThumbnails
  * @property {boolean} releaseSinglePageRasterSourceAfterFullPersist
@@ -194,6 +196,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       switchToIndexedDbAboveTotalMiB: 1536,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
+      reloadCacheTtlMs: 0,
       blobCacheEntries: 16,
     },
     assetStore: {
@@ -203,6 +206,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       switchToIndexedDbAboveTotalMiB: 4096,
       protection: 'aes-gcm-session',
       staleSessionTtlMs: 24 * 60 * 60 * 1000,
+      reloadCacheTtlMs: 0,
       blobCacheEntries: 24,
       persistThumbnails: false,
       releaseSinglePageRasterSourceAfterFullPersist: false,
@@ -584,6 +588,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       switchToIndexedDbAboveTotalMiB: normalizeMiBThreshold(raw?.sourceStore?.switchToIndexedDbAboveTotalMiB, adaptiveDefaults.sourceStore.switchToIndexedDbAboveTotalMiB, 1048576),
       protection: normalizeProtection(raw?.sourceStore?.protection, adaptiveDefaults.sourceStore.protection),
       staleSessionTtlMs: normalizeNumber(raw?.sourceStore?.staleSessionTtlMs, adaptiveDefaults.sourceStore.staleSessionTtlMs, 1000, 365 * 24 * 60 * 60 * 1000),
+      reloadCacheTtlMs: normalizeNumber(raw?.sourceStore?.reloadCacheTtlMs, adaptiveDefaults.sourceStore.reloadCacheTtlMs, 0, 60 * 60 * 1000),
       blobCacheEntries: normalizeNumber(raw?.sourceStore?.blobCacheEntries, adaptiveDefaults.sourceStore.blobCacheEntries, 1, 64),
     },
     assetStore: {
@@ -593,6 +598,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       switchToIndexedDbAboveTotalMiB: normalizeMiBThreshold(raw?.assetStore?.switchToIndexedDbAboveTotalMiB, adaptiveDefaults.assetStore.switchToIndexedDbAboveTotalMiB, 1048576),
       protection: normalizeProtection(raw?.assetStore?.protection, adaptiveDefaults.assetStore.protection),
       staleSessionTtlMs: normalizeNumber(raw?.assetStore?.staleSessionTtlMs, adaptiveDefaults.assetStore.staleSessionTtlMs, 1000, 365 * 24 * 60 * 60 * 1000),
+      reloadCacheTtlMs: normalizeNumber(raw?.assetStore?.reloadCacheTtlMs, adaptiveDefaults.assetStore.reloadCacheTtlMs, 0, 60 * 60 * 1000),
       blobCacheEntries: normalizeNumber(raw?.assetStore?.blobCacheEntries, adaptiveDefaults.assetStore.blobCacheEntries, 1, 256),
       persistThumbnails: normalizeBoolean(raw?.assetStore?.persistThumbnails, adaptiveDefaults.assetStore.persistThumbnails),
       releaseSinglePageRasterSourceAfterFullPersist: normalizeBoolean(raw?.assetStore?.releaseSinglePageRasterSourceAfterFullPersist, adaptiveDefaults.assetStore.releaseSinglePageRasterSourceAfterFullPersist),

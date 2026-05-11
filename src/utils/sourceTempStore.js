@@ -20,6 +20,7 @@
 
 import logger from '../logging/systemLogger.js';
 import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { getReloadCacheAesKey } from './reloadCacheCrypto.js';
 
 const DB_NAME = 'OpenDocViewerTempStore';
 const DB_VERSION = 1;
@@ -218,7 +219,8 @@ export class SourceTempStore {
       ...opts,
     };
 
-    this.sessionId = createSessionId();
+    this.reloadCacheTtlMs = Math.max(0, Number(this.config.reloadCacheTtlMs) || 0);
+    this.sessionId = String(opts.sessionId || '').trim() || createSessionId();
     /** @type {Map<string, { blob: Blob, meta: SourceMeta }>} */
     this.memoryEntries = new Map();
     /** @type {Map<string, SourceMeta>} */
@@ -242,6 +244,7 @@ export class SourceTempStore {
     const expectedSourceCount = Math.max(0, Number(this.config.expectedSourceCount) || 0);
     const countThreshold = Math.max(0, Number(this.config.switchToIndexedDbAboveSourceCount) || 0);
     if (
+      (this.reloadCacheTtlMs > 0 && this.indexedDbAvailable) ||
       this.requestedMode === 'indexeddb'
       || (this.requestedMode === 'adaptive' && countThreshold > 0 && expectedSourceCount >= countThreshold)
     ) {
@@ -402,7 +405,25 @@ export class SourceTempStore {
 
     const record = await this.getIndexedDbRecord(key);
     if (!record) return null;
-    const blob = await this.recordToBlob(record);
+    let blob = null;
+    try {
+      blob = await this.recordToBlob(record);
+    } catch (error) {
+      logger.warn('Failed to read cached source blob; falling back to network source', {
+        sourceKey: key,
+        error: String(error?.message || error),
+      });
+      return null;
+    }
+    if (blob && this.reloadCacheTtlMs > 0) {
+      void this.touchIndexedDbRecord(key).catch(() => {});
+    }
+    if (blob && !this.meta.has(key)) {
+      const restoredMeta = this.recordToMeta(record);
+      this.meta.set(key, restoredMeta);
+      this.sourceCount += 1;
+      this.totalBytes += Number(restoredMeta.sizeBytes || 0);
+    }
     if (blob) this.blobCache.set(key, blob);
     return blob;
   }
@@ -467,7 +488,7 @@ export class SourceTempStore {
       this.sourceCount = 0;
       this.totalBytes = 0;
 
-      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable) return;
+      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable || this.reloadCacheTtlMs > 0) return;
 
       try {
         const db = await this.ensureDb();
@@ -506,7 +527,8 @@ export class SourceTempStore {
     this.cleanupPromise = (async () => {
       try {
         const db = await this.ensureDb();
-        const cutoff = Date.now() - Math.max(1000, Number(this.config.staleSessionTtlMs) || 0);
+        const ttlMs = this.reloadCacheTtlMs > 0 ? this.reloadCacheTtlMs : Number(this.config.staleSessionTtlMs);
+        const cutoff = Date.now() - Math.max(1000, ttlMs || 0);
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const index = tx.objectStore(STORE_NAME).index('createdAt');
         await new Promise((resolve, reject) => {
@@ -519,8 +541,7 @@ export class SourceTempStore {
               resolve(undefined);
               return;
             }
-            const record = cursor.value;
-            if (!record || record.sessionId !== this.sessionId) cursor.delete();
+            cursor.delete();
             cursor.continue();
           };
         });
@@ -552,11 +573,20 @@ export class SourceTempStore {
   async ensureKey() {
     if (!this.encryptionAvailable) return null;
     if (!this.keyPromise) {
-      this.keyPromise = globalThis.crypto.subtle.generateKey(
-        { name: 'AES-GCM', length: 256 },
-        false,
-        ['encrypt', 'decrypt']
-      );
+      if (this.reloadCacheTtlMs > 0) {
+        this.keyPromise = getReloadCacheAesKey(this.sessionId, this.reloadCacheTtlMs, 'source')
+          .then((key) => key || globalThis.crypto.subtle.generateKey(
+            { name: 'AES-GCM', length: 256 },
+            false,
+            ['encrypt', 'decrypt']
+          ));
+      } else {
+        this.keyPromise = globalThis.crypto.subtle.generateKey(
+          { name: 'AES-GCM', length: 256 },
+          false,
+          ['encrypt', 'decrypt']
+        );
+      }
     }
     return this.keyPromise;
   }
@@ -683,6 +713,43 @@ export class SourceTempStore {
     const record = await requestToPromise(store.get(makeStorageKey(sourceKey, this.sessionId)));
     await txDone;
     return record || null;
+  }
+
+  /**
+   * @param {string} sourceKey
+   * @returns {Promise<void>}
+   */
+  async touchIndexedDbRecord(sourceKey) {
+    const db = await this.ensureDb();
+    const tx = db.transaction(STORE_NAME, 'readwrite');
+    const txDone = transactionDone(tx);
+    const store = tx.objectStore(STORE_NAME);
+    const storageKey = makeStorageKey(sourceKey, this.sessionId);
+    const record = await requestToPromise(store.get(storageKey));
+    if (record) {
+      record.createdAt = Date.now();
+      await requestToPromise(store.put(record));
+    }
+    await txDone;
+  }
+
+  /**
+   * @param {*} record
+   * @returns {SourceMeta}
+   */
+  recordToMeta(record) {
+    return {
+      sourceKey: String(record?.sourceKey || ''),
+      sessionId: String(record?.sessionId || ''),
+      storageKey: String(record?.id || ''),
+      fileExtension: String(record?.fileExtension || '').toLowerCase(),
+      mimeType: String(record?.mimeType || 'application/octet-stream'),
+      originalUrl: String(record?.originalUrl || ''),
+      fileIndex: Number.isFinite(record?.fileIndex) ? Number(record.fileIndex) : 0,
+      sizeBytes: Number(record?.sizeBytes || 0),
+      createdAt: Number(record?.createdAt || 0),
+      encrypted: !!record?.encrypted,
+    };
   }
 
   /**
