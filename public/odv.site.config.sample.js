@@ -606,7 +606,12 @@
         prefetchRetryBaseDelayMs: 750,
         // Abort a single prefetch attempt after this many milliseconds so one slow source does not
         // keep the viewer waiting on that spot in the sequence for too long.
-        prefetchRequestTimeoutMs: 10000
+        prefetchRequestTimeoutMs: 10000,
+
+        // If this many initial source URLs all fail as unavailable and no source has loaded yet,
+        // stop early and show the viewer-level problem notice. This catches expired host tickets
+        // without logging hundreds of identical failed fetches.
+        abortOnSourceUnavailableCount: 8
       },
 
       sourceStore: {

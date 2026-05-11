@@ -433,6 +433,35 @@ function createPrefetchHttpError(url, status) {
 }
 
 /**
+ * Host integrations often expose short-lived file tickets. When those expire, every source URL in
+ * the new ODV run can fail with 404/410 or an auth-style response. Those are not transient ODV
+ * failures; they mean the host must issue a fresh document session.
+ *
+ * @param {*} error
+ * @returns {boolean}
+ */
+function isSourceUnavailableError(error) {
+  const status = Number(error?.status);
+  if (status === 401 || status === 403 || status === 404 || status === 410) return true;
+  if (error?.isInvalidSourcePayload && error?.isTransientSourcePayload) return true;
+  return false;
+}
+
+/**
+ * @param {Object} input
+ * @param {number} input.failureCount
+ * @param {number} input.sourceCount
+ * @returns {Error}
+ */
+function createSourceUnavailableSessionError({ failureCount, sourceCount }) {
+  const error = new Error(
+    `Document source tickets could not be resolved (${failureCount} of ${sourceCount} initial sources failed). The host/WebClient session may have expired and must issue fresh document links.`
+  );
+  error.isSourceUnavailableSession = true;
+  return error;
+}
+
+/**
  * Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the
  * browser/network stack to decide when a stuck request should finally die.
  *
@@ -894,6 +923,15 @@ const DocumentLoader = ({
      * @returns {Promise<PrefetchResult>}
      */
     const prefetchSource = (entry, orderIndex) => prefetchLimiter(async () => {
+      if (cancelled || !isMountedRef.current) {
+        return {
+          ok: false,
+          aborted: true,
+          fileIndex: entry.fileIndex,
+          url: entry.url,
+        };
+      }
+
       const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
@@ -1080,10 +1118,14 @@ const DocumentLoader = ({
       let processedSourceCount = 0;
       let prefetchedBytes = 0;
       let pageWarningShown = false;
+      let successfulPrefetches = 0;
+      let initialUnavailableFailures = 0;
+      let initialSourceUnavailableCheckActive = true;
       const pageEstimateStats = new Map();
       let activeTempStoreMode = config.sourceStore.mode === 'indexeddb' ? 'indexeddb' : 'memory';
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
       const isSequentialFetch = String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential';
+      const abortOnSourceUnavailableCount = Math.max(0, Number(config.fetch.abortOnSourceUnavailableCount) || 0);
       const prefetchTasks = isSequentialFetch
         ? null
         : entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
@@ -1097,6 +1139,16 @@ const DocumentLoader = ({
           ? await prefetchSource(entry, i)
           : await prefetchTasks[i];
         if (shouldStopRun() || result.aborted) break;
+
+        if (result.ok) {
+          successfulPrefetches += 1;
+          initialSourceUnavailableCheckActive = false;
+          initialUnavailableFailures = 0;
+        } else if (initialSourceUnavailableCheckActive && successfulPrefetches <= 0 && isSourceUnavailableError(result.error)) {
+          initialUnavailableFailures += 1;
+        } else {
+          initialSourceUnavailableCheckActive = false;
+        }
 
         const documentContext = resolveDocumentSourceContext(entry);
         const documentKey = getDocumentProgressKey(entry);
@@ -1143,6 +1195,30 @@ const DocumentLoader = ({
           nextPageIndex += failedPages.length;
           processedSourceCount += 1;
           setPlannedPageCount(nextPageIndex);
+
+          if (
+            abortOnSourceUnavailableCount > 0
+            && initialSourceUnavailableCheckActive
+            && successfulPrefetches <= 0
+            && initialUnavailableFailures >= Math.min(abortOnSourceUnavailableCount, entries.length)
+          ) {
+            const sessionError = createSourceUnavailableSessionError({
+              failureCount: initialUnavailableFailures,
+              sourceCount: entries.length,
+            });
+            logger.error('Stopping document load because host source tickets appear unavailable', {
+              failureCount: initialUnavailableFailures,
+              sourceCount: entries.length,
+              error: sessionError.message,
+            });
+            cancelled = true;
+            abortAllFetches();
+            setError(sessionError.message);
+            setLoadingRunActive(false);
+            setPlannedPageCount(nextPageIndex);
+            return;
+          }
+
           continue;
         }
 

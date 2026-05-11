@@ -50,6 +50,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
  * @property {number} prefetchRetryCount
  * @property {number} prefetchRetryBaseDelayMs
  * @property {number} prefetchRequestTimeoutMs
+ * @property {number} abortOnSourceUnavailableCount
  */
 
 /**
@@ -185,6 +186,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       prefetchRetryCount: 0,
       prefetchRetryBaseDelayMs: 750,
       prefetchRequestTimeoutMs: 10000,
+      abortOnSourceUnavailableCount: 8,
     },
     sourceStore: {
       mode: 'adaptive',
@@ -574,6 +576,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       prefetchRetryCount: normalizeNumber(raw?.fetch?.prefetchRetryCount, adaptiveDefaults.fetch.prefetchRetryCount, 0, 5),
       prefetchRetryBaseDelayMs: normalizeNumber(raw?.fetch?.prefetchRetryBaseDelayMs, adaptiveDefaults.fetch.prefetchRetryBaseDelayMs, 100, 60000),
       prefetchRequestTimeoutMs: normalizeNumber(raw?.fetch?.prefetchRequestTimeoutMs, adaptiveDefaults.fetch.prefetchRequestTimeoutMs, 1000, 120000),
+      abortOnSourceUnavailableCount: normalizeThreshold(raw?.fetch?.abortOnSourceUnavailableCount, adaptiveDefaults.fetch.abortOnSourceUnavailableCount, 1000000),
     },
     sourceStore: {
       mode: normalizeStoreMode(raw?.sourceStore?.mode, adaptiveDefaults.sourceStore.mode),
