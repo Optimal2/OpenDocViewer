@@ -70,6 +70,17 @@ function formatTtl(ttlMs) {
 }
 
 /**
+ * @param {*} value
+ * @returns {string}
+ */
+function formatCacheScope(value) {
+  const text = String(value || '').trim();
+  if (!text) return '-';
+  if (text.length <= 20) return text;
+  return `...${text.slice(-14)}`;
+}
+
+/**
  * @param {number} startedAtMs
  * @param {number} completedAtMs
  * @param {number} nowMs
@@ -654,6 +665,71 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
               /{Number(runtimeDiagnostics?.assetCacheMisses || 0)}{' '}
               {t('perf.cacheHitsMissesLabel', { defaultValue: 'hits/misses' })}
               {' '}({formatTtl(Number(runtimeDiagnostics?.assetReloadCacheTtlMs || 0))})
+            </span>
+          </div>
+        ) : null}
+        {(runtimeDiagnostics?.sourceCacheSessionId || runtimeDiagnostics?.assetCacheSessionId) ? (
+          <div
+            style={{ opacity: 0.78 }}
+            title={[
+              String(runtimeDiagnostics?.sourceCacheLastReadFailure || ''),
+              String(runtimeDiagnostics?.assetCacheLastReadFailure || ''),
+            ].filter(Boolean).join(' | ')}
+          >
+            <span style={labelStyle}>{t('perf.reloadCacheScopeLabel', { defaultValue: 'Cache scope' })}</span>{' '}
+            {t('perf.sourceStoreShortLabel', { defaultValue: 'source' })}{' '}
+            <strong title={String(runtimeDiagnostics?.sourceCacheSessionId || '')}>
+              {formatCacheScope(runtimeDiagnostics?.sourceCacheSessionId)}
+            </strong>
+            <span style={{ marginLeft: 8 }}>
+              {t('perf.keyStorageLabel', { defaultValue: 'key' })}{' '}
+              <strong>{String(runtimeDiagnostics?.sourceCacheKeyStorage || '-')}</strong>
+            </span>
+            <span style={{ marginLeft: 10 }}>
+              {t('perf.assetStoreShortLabel', { defaultValue: 'assets' })}{' '}
+              <strong title={String(runtimeDiagnostics?.assetCacheSessionId || '')}>
+                {formatCacheScope(runtimeDiagnostics?.assetCacheSessionId)}
+              </strong>
+              <span style={{ marginLeft: 8 }}>
+                {t('perf.keyStorageLabel', { defaultValue: 'key' })}{' '}
+                <strong>{String(runtimeDiagnostics?.assetCacheKeyStorage || '-')}</strong>
+              </span>
+            </span>
+          </div>
+        ) : null}
+        {(Number(runtimeDiagnostics?.sourceCacheKeyModeDocumentVersion || 0) > 0
+          || Number(runtimeDiagnostics?.sourceCacheKeyModeUrlFallback || 0) > 0
+          || Number(runtimeDiagnostics?.sourceCacheKeyModeUrl || 0) > 0) ? (
+          <div style={{ opacity: 0.78 }}>
+            <span style={labelStyle}>{t('perf.sourceKeyModeLabel', { defaultValue: 'Source key' })}</span>{' '}
+            doc-ver <strong>{Number(runtimeDiagnostics?.sourceCacheKeyModeDocumentVersion || 0)}</strong>
+            <span style={{ marginLeft: 8 }}>
+              fallback <strong>{Number(runtimeDiagnostics?.sourceCacheKeyModeUrlFallback || 0)}</strong>
+            </span>
+            <span style={{ marginLeft: 8 }}>
+              url <strong>{Number(runtimeDiagnostics?.sourceCacheKeyModeUrl || 0)}</strong>
+            </span>
+          </div>
+        ) : null}
+        {(Number(runtimeDiagnostics?.sourceCacheReadFailures || 0) > 0
+          || Number(runtimeDiagnostics?.assetCacheReadFailures || 0) > 0
+          || runtimeDiagnostics?.sourceCacheLastMissReason
+          || runtimeDiagnostics?.assetCacheLastMissReason) ? (
+          <div style={{ opacity: 0.78 }}>
+            <span style={labelStyle}>{t('perf.reloadCacheMissReasonLabel', { defaultValue: 'Cache miss' })}</span>{' '}
+            {t('perf.sourceStoreShortLabel', { defaultValue: 'source' })}{' '}
+            <strong>{String(runtimeDiagnostics?.sourceCacheLastMissReason || '-')}</strong>
+            <span style={{ marginLeft: 6 }}>
+              {t('perf.errorsShortLabel', { defaultValue: 'errors' })}{' '}
+              <strong>{Number(runtimeDiagnostics?.sourceCacheReadFailures || 0)}</strong>
+            </span>
+            <span style={{ marginLeft: 10 }}>
+              {t('perf.assetStoreShortLabel', { defaultValue: 'assets' })}{' '}
+              <strong>{String(runtimeDiagnostics?.assetCacheLastMissReason || '-')}</strong>
+              <span style={{ marginLeft: 6 }}>
+                {t('perf.errorsShortLabel', { defaultValue: 'errors' })}{' '}
+                <strong>{Number(runtimeDiagnostics?.assetCacheReadFailures || 0)}</strong>
+              </span>
             </span>
           </div>
         ) : null}

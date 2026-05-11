@@ -34,6 +34,7 @@ import { createContext } from 'react';
  * @property {number=} expectedSourceCount
  * @property {Object=} config
  * @property {string=} cacheSessionId
+ * @property {{ documentVersion:number, documentUrlFallback:number, url:number }=} cacheIdentityStats
  */
 
 /**
@@ -68,6 +69,7 @@ import { createContext } from 'react';
  * @property {string=} mimeType
  * @property {string=} sourceUrl
  * @property {number=} sizeBytes
+ * @property {('document-version'|'document-url-fallback'|'url')=} cacheKeyMode
  */
 
 
@@ -99,6 +101,19 @@ import { createContext } from 'react';
  * @property {number} assetCacheMisses
  * @property {number} sourceReloadCacheTtlMs
  * @property {number} assetReloadCacheTtlMs
+ * @property {number} sourceCacheReadFailures
+ * @property {number} assetCacheReadFailures
+ * @property {string} sourceCacheLastMissReason
+ * @property {string} assetCacheLastMissReason
+ * @property {string} sourceCacheLastReadFailure
+ * @property {string} assetCacheLastReadFailure
+ * @property {string} sourceCacheSessionId
+ * @property {string} assetCacheSessionId
+ * @property {string} sourceCacheKeyStorage
+ * @property {string} assetCacheKeyStorage
+ * @property {number} sourceCacheKeyModeDocumentVersion
+ * @property {number} sourceCacheKeyModeUrlFallback
+ * @property {number} sourceCacheKeyModeUrl
  */
 
 /**

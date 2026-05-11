@@ -13,14 +13,17 @@
  *   - adaptive: start in memory, promote to IndexedDB above configured thresholds
  *
  * SECURITY MODEL
- *   Optional AES-GCM wraps IndexedDB payloads with a per-session key that stays in memory only.
- *   The intent is pragmatic protection against casual inspection of temp data, not resistance against
- *   a fully privileged local attacker.
+ *   Optional AES-GCM wraps IndexedDB payloads with a per-session key. Normal temp sessions keep that
+ *   key in memory; opt-in reload cache sessions persist the key for the configured short TTL so the
+ *   same-origin viewer can decrypt cached blobs after a reload or a new WebClient handoff.
  */
 
 import logger from '../logging/systemLogger.js';
 import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
-import { getReloadCacheAesKey } from './reloadCacheCrypto.js';
+import {
+  getReloadCacheAesKey,
+  getReloadCacheAesKeyStorageState,
+} from './reloadCacheCrypto.js';
 
 const DB_NAME = 'OpenDocViewerTempStore';
 const DB_VERSION = 1;
@@ -133,6 +136,14 @@ function openTempStoreDb() {
  * @property {number} totalBytes
  * @property {boolean} encrypted
  * @property {boolean} indexedDbAvailable
+ * @property {number} reloadCacheTtlMs
+ * @property {number} cacheHits
+ * @property {number} cacheMisses
+ * @property {number} cacheReadFailures
+ * @property {string} lastCacheMissReason
+ * @property {string} lastCacheReadFailure
+ * @property {string} sessionId
+ * @property {string} keyStorage
  */
 
 /**
@@ -231,6 +242,9 @@ export class SourceTempStore {
     this.totalBytes = 0;
     this.cacheHits = 0;
     this.cacheMisses = 0;
+    this.cacheReadFailures = 0;
+    this.lastCacheMissReason = '';
+    this.lastCacheReadFailure = '';
 
     /** @type {'memory'|'indexeddb'} */
     this.mode = 'memory';
@@ -288,6 +302,13 @@ export class SourceTempStore {
       reloadCacheTtlMs: this.reloadCacheTtlMs,
       cacheHits: this.cacheHits,
       cacheMisses: this.cacheMisses,
+      cacheReadFailures: this.cacheReadFailures,
+      lastCacheMissReason: this.lastCacheMissReason,
+      lastCacheReadFailure: this.lastCacheReadFailure,
+      sessionId: this.sessionId,
+      keyStorage: this.encryptionAvailable && this.reloadCacheTtlMs > 0
+        ? getReloadCacheAesKeyStorageState(this.sessionId, 'source')
+        : '',
     };
   }
 
@@ -410,14 +431,22 @@ export class SourceTempStore {
 
     const record = await this.getIndexedDbRecord(key);
     if (!record) {
-      if (this.reloadCacheTtlMs > 0) this.cacheMisses += 1;
+      if (this.reloadCacheTtlMs > 0) {
+        this.cacheMisses += 1;
+        this.lastCacheMissReason = 'not-found';
+      }
       return null;
     }
     let blob = null;
     try {
       blob = await this.recordToBlob(record);
     } catch (error) {
-      if (this.reloadCacheTtlMs > 0) this.cacheMisses += 1;
+      if (this.reloadCacheTtlMs > 0) {
+        this.cacheMisses += 1;
+        this.cacheReadFailures += 1;
+        this.lastCacheMissReason = 'read-error';
+        this.lastCacheReadFailure = String(error?.message || error).slice(0, 160);
+      }
       logger.warn('Failed to read cached source blob; falling back to network source', {
         sourceKey: key,
         error: String(error?.message || error),
@@ -499,6 +528,9 @@ export class SourceTempStore {
       this.totalBytes = 0;
       this.cacheHits = 0;
       this.cacheMisses = 0;
+      this.cacheReadFailures = 0;
+      this.lastCacheMissReason = '';
+      this.lastCacheReadFailure = '';
 
       if (this.mode !== 'indexeddb' || !this.indexedDbAvailable || this.reloadCacheTtlMs > 0) return;
 

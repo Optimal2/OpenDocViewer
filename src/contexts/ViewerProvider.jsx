@@ -270,10 +270,24 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     assetCacheMisses: 0,
     sourceReloadCacheTtlMs: 0,
     assetReloadCacheTtlMs: 0,
+    sourceCacheReadFailures: 0,
+    assetCacheReadFailures: 0,
+    sourceCacheLastMissReason: '',
+    assetCacheLastMissReason: '',
+    sourceCacheLastReadFailure: '',
+    assetCacheLastReadFailure: '',
+    sourceCacheSessionId: '',
+    assetCacheSessionId: '',
+    sourceCacheKeyStorage: '',
+    assetCacheKeyStorage: '',
+    sourceCacheKeyModeDocumentVersion: 0,
+    sourceCacheKeyModeUrlFallback: 0,
+    sourceCacheKeyModeUrl: 0,
   });
 
   const allPagesRef = useRef([]);
   const sourceDescriptorsRef = useRef(new Map());
+  const cacheIdentityStatsRef = useRef({ documentVersion: 0, documentUrlFallback: 0, url: 0 });
   const tempStoreRef = useRef(null);
   const pageAssetStoreRef = useRef(null);
   const pageRendererRef = useRef(null);
@@ -383,6 +397,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
 
     setRuntimeDiagnostics((current) => {
+      const cacheIdentityStats = cacheIdentityStatsRef.current || {};
       const next = {
         sessionStartedAtMs: Number(sessionStartedAtMsRef.current || 0),
         loadRunStartedAtMs: Number(loadRunStartedAtMsRef.current || 0),
@@ -410,6 +425,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         assetCacheMisses: Math.max(0, Number(assetStats.cacheMisses || 0)),
         sourceReloadCacheTtlMs: Math.max(0, Number(tempStats.reloadCacheTtlMs || 0)),
         assetReloadCacheTtlMs: Math.max(0, Number(assetStats.reloadCacheTtlMs || 0)),
+        sourceCacheReadFailures: Math.max(0, Number(tempStats.cacheReadFailures || 0)),
+        assetCacheReadFailures: Math.max(0, Number(assetStats.cacheReadFailures || 0)),
+        sourceCacheLastMissReason: String(tempStats.lastCacheMissReason || ''),
+        assetCacheLastMissReason: String(assetStats.lastCacheMissReason || ''),
+        sourceCacheLastReadFailure: String(tempStats.lastCacheReadFailure || ''),
+        assetCacheLastReadFailure: String(assetStats.lastCacheReadFailure || ''),
+        sourceCacheSessionId: String(tempStats.sessionId || ''),
+        assetCacheSessionId: String(assetStats.sessionId || ''),
+        sourceCacheKeyStorage: String(tempStats.keyStorage || ''),
+        assetCacheKeyStorage: String(assetStats.keyStorage || ''),
+        sourceCacheKeyModeDocumentVersion: Math.max(0, Number(cacheIdentityStats.documentVersion || 0)),
+        sourceCacheKeyModeUrlFallback: Math.max(0, Number(cacheIdentityStats.documentUrlFallback || 0)),
+        sourceCacheKeyModeUrl: Math.max(0, Number(cacheIdentityStats.url || 0)),
       };
 
       const same = Object.keys(next).every((key) => next[key] === current[key]);
@@ -446,6 +474,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     sessionEpochRef.current += 1;
     pendingAssetPromisesRef.current.clear();
     sourceDescriptorsRef.current.clear();
+    cacheIdentityStatsRef.current = { documentVersion: 0, documentUrlFallback: 0, url: 0 };
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
@@ -534,6 +563,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetCacheMisses: 0,
       sourceReloadCacheTtlMs: 0,
       assetReloadCacheTtlMs: 0,
+      sourceCacheReadFailures: 0,
+      assetCacheReadFailures: 0,
+      sourceCacheLastMissReason: '',
+      assetCacheLastMissReason: '',
+      sourceCacheLastReadFailure: '',
+      assetCacheLastReadFailure: '',
+      sourceCacheSessionId: '',
+      assetCacheSessionId: '',
+      sourceCacheKeyStorage: '',
+      assetCacheKeyStorage: '',
+      sourceCacheKeyModeDocumentVersion: 0,
+      sourceCacheKeyModeUrlFallback: 0,
+      sourceCacheKeyModeUrl: 0,
     });
   }, [revokeSessionUrls, updateAllPages]);
 
@@ -657,6 +699,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     await resetViewerState();
 
     const baseConfig = cloneDocumentLoadingConfig(options?.config || getDocumentLoadingConfig());
+    cacheIdentityStatsRef.current = {
+      documentVersion: Math.max(0, Number(options?.cacheIdentityStats?.documentVersion || 0)),
+      documentUrlFallback: Math.max(0, Number(options?.cacheIdentityStats?.documentUrlFallback || 0)),
+      url: Math.max(0, Number(options?.cacheIdentityStats?.url || 0)),
+    };
     sessionBaseConfigRef.current = baseConfig;
     sessionConfigRef.current = cloneDocumentLoadingConfig(baseConfig);
     setDocumentLoadingConfig(sessionConfigRef.current);
@@ -698,6 +745,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       requestedMode: sessionConfigRef.current.mode,
       expectedSourceCount: options?.expectedSourceCount || 0,
       cacheSessionId: options?.cacheSessionId || undefined,
+      cacheIdentityStats: cacheIdentityStatsRef.current,
     });
   }, [collectRuntimeDiagnostics, resetViewerState]);
 
@@ -710,6 +758,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     sessionEpochRef.current += 1;
     pendingAssetPromisesRef.current.clear();
     sourceDescriptorsRef.current.clear();
+    cacheIdentityStatsRef.current = { documentVersion: 0, documentUrlFallback: 0, url: 0 };
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
@@ -788,6 +837,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetCacheMisses: 0,
       sourceReloadCacheTtlMs: 0,
       assetReloadCacheTtlMs: 0,
+      sourceCacheReadFailures: 0,
+      assetCacheReadFailures: 0,
+      sourceCacheLastMissReason: '',
+      assetCacheLastMissReason: '',
+      sourceCacheLastReadFailure: '',
+      assetCacheLastReadFailure: '',
+      sourceCacheSessionId: '',
+      assetCacheSessionId: '',
+      sourceCacheKeyStorage: '',
+      assetCacheKeyStorage: '',
+      sourceCacheKeyModeDocumentVersion: 0,
+      sourceCacheKeyModeUrlFallback: 0,
+      sourceCacheKeyModeUrl: 0,
     });
   }, [revokeSessionUrls, updateAllPages]);
 
@@ -806,6 +868,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       mimeType: String(descriptor?.mimeType || ''),
       sourceUrl: String(descriptor?.sourceUrl || ''),
       sizeBytes: Number(descriptor?.sizeBytes || 0),
+      cacheKeyMode: String(descriptor?.cacheKeyMode || ''),
     });
   }, []);
 
