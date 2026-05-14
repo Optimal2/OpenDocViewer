@@ -23,7 +23,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 /** @typedef {'worker-preferred'|'main-only'|'hybrid-by-format'} DocumentLoadingRenderBackend */
 /** @typedef {'normal'|'soft'|'hard'} DocumentLoadingMemoryPressureStage */
 
-const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
+export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
 
 /**
  * @typedef {Object} DocumentLoadingAdaptiveMemoryConfig
