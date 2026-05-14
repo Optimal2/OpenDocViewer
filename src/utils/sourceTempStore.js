@@ -19,7 +19,7 @@
  */
 
 import logger from '../logging/systemLogger.js';
-import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { getDocumentLoadingConfig, MAX_RELOAD_CACHE_TTL_MS } from './documentLoadingConfig.js';
 import {
   getReloadCacheAesKey,
   getReloadCacheAesKeyStorageState,
@@ -28,6 +28,7 @@ import {
 const DB_NAME = 'OpenDocViewerTempStore';
 const DB_VERSION = 1;
 const STORE_NAME = 'sources';
+const MAX_STALE_SESSION_TTL_MS = 365 * 24 * 60 * 60 * 1000;
 
 /**
  * @param {string} sourceKey
@@ -81,6 +82,19 @@ function createSessionId() {
   fallbackSessionCounter += 1;
   const perfNow = typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : 0;
   return `odv_${Date.now().toString(36)}_${Math.floor(perfNow * 1000).toString(36)}_${fallbackSessionCounter.toString(36)}`;
+}
+
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @param {number} max
+ * @returns {number}
+ */
+function normalizeTtlMs(value, fallback = 0, max = MAX_RELOAD_CACHE_TTL_MS) {
+  const fallbackValue = Math.max(0, Number(fallback) || 0);
+  const numericValue = Number(value);
+  if (!Number.isFinite(numericValue)) return Math.min(max, fallbackValue);
+  return Math.min(max, Math.max(0, Math.floor(numericValue)));
 }
 
 /**
@@ -206,6 +220,14 @@ class BlobLruCache {
     }
   }
 
+  /**
+   * @param {string} key
+   * @returns {void}
+   */
+  delete(key) {
+    this.map.delete(key);
+  }
+
   clear() {
     this.map.clear();
   }
@@ -230,7 +252,16 @@ export class SourceTempStore {
       ...opts,
     };
 
-    this.reloadCacheTtlMs = Math.max(0, Number(this.config.reloadCacheTtlMs) || 0);
+    this.reloadCacheTtlMs = normalizeTtlMs(
+      this.config.reloadCacheTtlMs,
+      cfg.sourceStore.reloadCacheTtlMs,
+      MAX_RELOAD_CACHE_TTL_MS,
+    );
+    this.staleSessionTtlMs = Math.max(1000, normalizeTtlMs(
+      this.config.staleSessionTtlMs,
+      cfg.sourceStore.staleSessionTtlMs,
+      MAX_STALE_SESSION_TTL_MS,
+    ));
     this.sessionId = String(opts.sessionId || '').trim() || createSessionId();
     /** @type {Map<string, { blob: Blob, meta: SourceMeta }>} */
     this.memoryEntries = new Map();
@@ -324,8 +355,18 @@ export class SourceTempStore {
       ...this.config,
       ...(nextConfig || {}),
     };
+    this.reloadCacheTtlMs = normalizeTtlMs(
+      this.config.reloadCacheTtlMs,
+      this.reloadCacheTtlMs,
+      MAX_RELOAD_CACHE_TTL_MS,
+    );
+    this.staleSessionTtlMs = Math.max(1000, normalizeTtlMs(
+      this.config.staleSessionTtlMs,
+      this.staleSessionTtlMs,
+      MAX_STALE_SESSION_TTL_MS,
+    ));
     this.requestedMode = String(this.config.mode || this.requestedMode || 'adaptive').toLowerCase();
-    if (this.blobCache) this.blobCache.limit = Math.max(1, Number(this.config.blobCacheEntries) || this.blobCache.limit || 1);
+    this.blobCache.limit = Math.max(1, Number(this.config.blobCacheEntries) || this.blobCache.limit || 1);
   }
 
   /**
@@ -486,7 +527,7 @@ export class SourceTempStore {
 
     await this.enqueueWrite(async () => {
       const previousMeta = this.meta.get(key) || null;
-      if (this.blobCache?.map) this.blobCache.map.delete(key);
+      this.blobCache.delete(key);
 
       if (this.mode === 'memory') {
         this.memoryEntries.delete(key);
@@ -532,7 +573,12 @@ export class SourceTempStore {
       this.lastCacheMissReason = '';
       this.lastCacheReadFailure = '';
 
-      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable || this.reloadCacheTtlMs > 0) return;
+      if (this.mode !== 'indexeddb' || !this.indexedDbAvailable) return;
+      if (this.reloadCacheTtlMs > 0) {
+        // Reload-cache sessions intentionally survive explicit viewer cleanup
+        // so a short follow-up launch can reuse fetched source blobs.
+        return;
+      }
 
       try {
         const db = await this.ensureDb();
@@ -571,8 +617,8 @@ export class SourceTempStore {
     this.cleanupPromise = (async () => {
       try {
         const db = await this.ensureDb();
-        const ttlMs = this.reloadCacheTtlMs > 0 ? this.reloadCacheTtlMs : Number(this.config.staleSessionTtlMs);
-        const cutoff = Date.now() - Math.max(1000, ttlMs || 0);
+        const ttlMs = this.reloadCacheTtlMs > 0 ? this.reloadCacheTtlMs : this.staleSessionTtlMs;
+        const cutoff = Date.now() - ttlMs;
         const tx = db.transaction(STORE_NAME, 'readwrite');
         const index = tx.objectStore(STORE_NAME).index('createdAt');
         await new Promise((resolve, reject) => {
