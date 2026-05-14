@@ -28,7 +28,11 @@ import {
 const DB_NAME = 'OpenDocViewerTempStore';
 const DB_VERSION = 1;
 const STORE_NAME = 'sources';
-const MAX_STALE_SESSION_TTL_MS = 365 * 24 * 60 * 60 * 1000;
+const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+const MAX_STALE_SESSION_TTL_MS = ONE_YEAR_MS;
+const MAX_CACHE_ERROR_MESSAGE_LENGTH = 160;
+const AES_GCM_256_KEY_ALGORITHM = { name: 'AES-GCM', length: 256 };
+const AES_GCM_KEY_USAGES = ['encrypt', 'decrypt'];
 
 /**
  * @param {string} sourceKey
@@ -502,7 +506,7 @@ export class SourceTempStore {
         this.cacheMisses += 1;
         this.cacheReadFailures += 1;
         this.lastCacheMissReason = 'read-error';
-        this.lastCacheReadFailure = String(error?.message || error).slice(0, 160);
+        this.lastCacheReadFailure = String(error?.message || error).slice(0, MAX_CACHE_ERROR_MESSAGE_LENGTH);
       }
       logger.warn('Failed to read cached source blob; falling back to network source', {
         sourceKey: key,
@@ -681,15 +685,15 @@ export class SourceTempStore {
       if (this.reloadCacheTtlMs > 0) {
         this.keyPromise = getReloadCacheAesKey(this.sessionId, this.reloadCacheTtlMs, 'source')
           .then((key) => key || globalThis.crypto.subtle.generateKey(
-            { name: 'AES-GCM', length: 256 },
+            AES_GCM_256_KEY_ALGORITHM,
             false,
-            ['encrypt', 'decrypt']
+            AES_GCM_KEY_USAGES
           ));
       } else {
         this.keyPromise = globalThis.crypto.subtle.generateKey(
-          { name: 'AES-GCM', length: 256 },
+          AES_GCM_256_KEY_ALGORITHM,
           false,
-          ['encrypt', 'decrypt']
+          AES_GCM_KEY_USAGES
         );
       }
     }
