@@ -29,6 +29,7 @@ const DB_NAME = 'OpenDocViewerTempStore';
 const DB_VERSION = 1;
 const STORE_NAME = 'sources';
 const ONE_YEAR_MS = 365 * 24 * 60 * 60 * 1000;
+// Upper bound only. Normal defaults are 24h and reload caches are short lived.
 const MAX_STALE_SESSION_TTL_MS = ONE_YEAR_MS;
 const MAX_CACHE_ERROR_MESSAGE_LENGTH = 160;
 const AES_GCM_256_KEY_ALGORITHM = { name: 'AES-GCM', length: 256 };
@@ -220,7 +221,8 @@ class BlobLruCache {
     if (!this.map.has(key)) return null;
     const value = this.map.get(key) || null;
     this.map.delete(key);
-    if (value) this.map.set(key, value);
+    if (!value) return null;
+    this.map.set(key, value);
     return value;
   }
 
@@ -406,6 +408,8 @@ export class SourceTempStore {
    * @returns {Promise<T>}
    */
   enqueueWrite(fn) {
+    // Keep the queue alive after a failed write. The returned promise still
+    // rejects for the caller, while the next write can continue from the tail.
     const next = this.writeQueue.then(fn, fn);
     this.writeQueue = next.then(() => undefined, () => undefined);
     return next;
@@ -729,6 +733,8 @@ export class SourceTempStore {
         };
         await this.putIndexedDbEntry(promotedMeta, entry.blob);
         this.meta.set(sourceKey, promotedMeta);
+        // Keep memory metadata coherent until the whole promotion succeeds; if
+        // a later IndexedDB write fails, the store falls back to memory mode.
         this.memoryEntries.set(sourceKey, { blob: entry.blob, meta: promotedMeta });
       }
       this.mode = 'indexeddb';
