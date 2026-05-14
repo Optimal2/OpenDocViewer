@@ -88,13 +88,27 @@ function createSessionId() {
  * @param {unknown} value
  * @param {number} fallback
  * @param {number} max
+ * @param {number} min
  * @returns {number}
  */
-function normalizeTtlMs(value, fallback = 0, max = MAX_RELOAD_CACHE_TTL_MS) {
-  const fallbackValue = Math.max(0, Number(fallback) || 0);
+function normalizeTtlMs(value, fallback = 0, max = MAX_RELOAD_CACHE_TTL_MS, min = 0) {
+  const lowerBound = Math.max(0, Number(min) || 0);
+  const upperBound = Math.max(lowerBound, Number(max) || lowerBound);
+  const fallbackValue = Math.min(upperBound, Math.max(lowerBound, Number(fallback) || 0));
   const numericValue = Number(value);
-  if (!Number.isFinite(numericValue)) return Math.min(max, fallbackValue);
-  return Math.min(max, Math.max(0, Math.floor(numericValue)));
+  if (!Number.isFinite(numericValue)) return fallbackValue;
+  return Math.min(upperBound, Math.max(lowerBound, Math.floor(numericValue)));
+}
+
+/**
+ * @param {unknown} value
+ * @param {number} fallback
+ * @returns {number}
+ */
+function normalizePositiveInteger(value, fallback = 1) {
+  const numericValue = Number(value);
+  if (Number.isFinite(numericValue) && numericValue >= 1) return Math.floor(numericValue);
+  return Math.max(1, Math.floor(Number(fallback) || 1));
 }
 
 /**
@@ -257,17 +271,18 @@ export class SourceTempStore {
       cfg.sourceStore.reloadCacheTtlMs,
       MAX_RELOAD_CACHE_TTL_MS,
     );
-    this.staleSessionTtlMs = Math.max(1000, normalizeTtlMs(
+    this.staleSessionTtlMs = normalizeTtlMs(
       this.config.staleSessionTtlMs,
       cfg.sourceStore.staleSessionTtlMs,
       MAX_STALE_SESSION_TTL_MS,
-    ));
+      1000,
+    );
     this.sessionId = String(opts.sessionId || '').trim() || createSessionId();
     /** @type {Map<string, { blob: Blob, meta: SourceMeta }>} */
     this.memoryEntries = new Map();
     /** @type {Map<string, SourceMeta>} */
     this.meta = new Map();
-    this.blobCache = new BlobLruCache(this.config.blobCacheEntries);
+    this.blobCache = new BlobLruCache(normalizePositiveInteger(this.config.blobCacheEntries, 1));
 
     this.sourceCount = 0;
     this.totalBytes = 0;
@@ -291,8 +306,8 @@ export class SourceTempStore {
     const expectedSourceCount = Math.max(0, Number(this.config.expectedSourceCount) || 0);
     const countThreshold = Math.max(0, Number(this.config.switchToIndexedDbAboveSourceCount) || 0);
     if (
-      (this.reloadCacheTtlMs > 0 && this.indexedDbAvailable) ||
-      this.requestedMode === 'indexeddb'
+      (this.reloadCacheTtlMs > 0 && this.indexedDbAvailable)
+      || this.requestedMode === 'indexeddb'
       || (this.requestedMode === 'adaptive' && countThreshold > 0 && expectedSourceCount >= countThreshold)
     ) {
       this.mode = this.indexedDbAvailable ? 'indexeddb' : 'memory';
@@ -360,13 +375,14 @@ export class SourceTempStore {
       this.reloadCacheTtlMs,
       MAX_RELOAD_CACHE_TTL_MS,
     );
-    this.staleSessionTtlMs = Math.max(1000, normalizeTtlMs(
+    this.staleSessionTtlMs = normalizeTtlMs(
       this.config.staleSessionTtlMs,
       this.staleSessionTtlMs,
       MAX_STALE_SESSION_TTL_MS,
-    ));
+      1000,
+    );
     this.requestedMode = String(this.config.mode || this.requestedMode || 'adaptive').toLowerCase();
-    this.blobCache.limit = Math.max(1, Number(this.config.blobCacheEntries) || this.blobCache.limit || 1);
+    this.blobCache.limit = normalizePositiveInteger(this.config.blobCacheEntries, this.blobCache.limit);
   }
 
   /**
@@ -527,9 +543,9 @@ export class SourceTempStore {
 
     await this.enqueueWrite(async () => {
       const previousMeta = this.meta.get(key) || null;
-      this.blobCache.delete(key);
 
       if (this.mode === 'memory') {
+        this.blobCache.delete(key);
         this.memoryEntries.delete(key);
         this.meta.delete(key);
         if (previousMeta) {
@@ -539,19 +555,18 @@ export class SourceTempStore {
         return;
       }
 
-      try {
-        const db = await this.ensureDb();
-        const tx = db.transaction(STORE_NAME, 'readwrite');
-        const txDone = transactionDone(tx);
-        const request = tx.objectStore(STORE_NAME).delete(makeStorageKey(key, this.sessionId));
-        await requestToPromise(request);
-        await txDone;
-      } finally {
-        this.meta.delete(key);
-        if (previousMeta) {
-          this.sourceCount = Math.max(0, this.sourceCount - 1);
-          this.totalBytes = Math.max(0, this.totalBytes - Number(previousMeta.sizeBytes || 0));
-        }
+      const db = await this.ensureDb();
+      const tx = db.transaction(STORE_NAME, 'readwrite');
+      const txDone = transactionDone(tx);
+      const request = tx.objectStore(STORE_NAME).delete(makeStorageKey(key, this.sessionId));
+      await requestToPromise(request);
+      await txDone;
+
+      this.blobCache.delete(key);
+      this.meta.delete(key);
+      if (previousMeta) {
+        this.sourceCount = Math.max(0, this.sourceCount - 1);
+        this.totalBytes = Math.max(0, this.totalBytes - Number(previousMeta.sizeBytes || 0));
       }
     });
   }
