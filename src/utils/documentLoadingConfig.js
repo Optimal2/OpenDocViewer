@@ -219,6 +219,9 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       workerCount: resolveRecommendedWorkerCount(0, 'auto'),
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
+      // These are the actual normalized render defaults for the current loading path.
+      // Viewer providers can override them through runtime config, but there is no
+      // separate provider-only concurrency default layered on top of this module.
       maxConcurrentMainThreadRenders: 3,
       maxConcurrentAssetRenders: 3,
       warmupBatchSize: 48,

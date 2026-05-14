@@ -453,8 +453,8 @@ export class SourceTempStore {
       });
       return null;
     }
-    if (blob && this.reloadCacheTtlMs > 0) this.cacheHits += 1;
     if (blob && this.reloadCacheTtlMs > 0) {
+      this.cacheHits += 1;
       void this.touchIndexedDbRecord(key).catch(() => {});
     }
     if (blob && !this.meta.has(key)) {

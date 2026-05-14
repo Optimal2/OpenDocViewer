@@ -133,7 +133,7 @@ function matchesVariant(variant, detail, activeLanguage) {
  * @template T
  * @param {Array<T>} items
  * @param {number} concurrency
- * @param {function(T, number): Promise<void>} runItem
+ * @param {function(T): Promise<void>} runItem
  * @param {AbortSignal|undefined} signal
  * @returns {Promise<void>}
  */
@@ -148,7 +148,7 @@ async function runLimited(items, concurrency, runItem, signal) {
       const itemIndex = nextIndex;
       nextIndex += 1;
       if (itemIndex >= list.length) return;
-      await runItem(list[itemIndex], itemIndex);
+      await runItem(list[itemIndex]);
     }
   };
 

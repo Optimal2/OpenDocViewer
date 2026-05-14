@@ -414,7 +414,7 @@ function createBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg = {}) {
   if (benchmarkCfg.profile === 'matrix') {
     return createMatrixBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg);
   }
-  return createFocusedBenchmarkScenarios(benchmarkCfg, pageCount, basePdfCfg);
+  return createFocusedBenchmarkScenarios(benchmarkCfg, pageCount);
 }
 
 /**

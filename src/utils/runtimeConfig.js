@@ -36,7 +36,10 @@ export function getRuntimeConfig() {
       if (typeof window.__ODV_GET_CONFIG__ === 'function') return window.__ODV_GET_CONFIG__() || {};
       if (window.__ODV_CONFIG__) return window.__ODV_CONFIG__ || {};
     }
-  } catch {}
+  } catch {
+    // Runtime config globals are host-owned and can be unavailable during early bootstrap,
+    // tests, or restricted embedding. Falling back to defaults keeps the viewer usable.
+  }
   return {};
 }
 
@@ -72,16 +75,21 @@ function normalizeBoolean(value, fallback) {
   return typeof value === 'boolean' ? value : fallback;
 }
 
+function clampNumber(value, min, max) {
+  const lowerBounded = Math.max(min, value);
+  return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
+}
+
 function normalizeInteger(value, fallback, min, max) {
   const next = Math.floor(Number(value));
   if (!Number.isFinite(next)) return fallback;
-  return Math.max(min, typeof max === 'number' ? Math.min(max, next) : next);
+  return clampNumber(next, min, max);
 }
 
 function normalizeFloat(value, fallback, min, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return fallback;
-  return Math.max(min, typeof max === 'number' ? Math.min(max, next) : next);
+  return clampNumber(next, min, max);
 }
 
 /**

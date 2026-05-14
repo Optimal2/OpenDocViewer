@@ -659,7 +659,6 @@
 .odv-print-preparing-close:hover,
 .odv-print-preparing-close:focus-visible {
   outline: none;
-  background: rgba(0, 0, 0, 0.04);
 }
 
 .odv-print-preparing-close:disabled {
@@ -1112,18 +1111,15 @@
 .odv-prd-menuButton {
   display: inline-flex;
   align-items: center;
-  gap: 8px;
+  gap: 4px;
 }
 .odv-prd-menuButton .material-icons {
-  font-size: 20px;
+  font-size: 19px;
   line-height: 1;
 }
 /* Print output menu: intentionally use a neutral light popover in all themes.
    The print dialog is a light/elevated surface even when host themes differ, and using
    explicit high-contrast colors here avoids inherited dark toolbar/menu styles. */
-.odv-prd-printActionMenu { position: relative; display: inline-flex; }
-.odv-prd-menuButton { display: inline-flex; align-items: center; gap: 4px; }
-.odv-prd-menuButton .material-icons { font-size: 19px; line-height: 1; }
 .odv-prd-printMenu {
   position: absolute;
   right: 0;
