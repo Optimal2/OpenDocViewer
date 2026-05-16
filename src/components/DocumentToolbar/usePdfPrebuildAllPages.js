@@ -3,11 +3,14 @@
  * Background prebuild/cache for configured "all pages" generated-PDF variants.
  */
 
-import { useCallback, useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import logger from '../../logging/systemLogger.js';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import { collectPrintablePdfSources, createPrintPdfBlob } from '../../utils/printPdf.js';
-import { createPdfPrebuildAllPagesVariants } from '../../utils/pdfPrebuildPlan.js';
+import {
+  createPdfPrebuildAllPagesVariants,
+  getPdfPrebuildAllPagesLanguageDependency,
+} from '../../utils/pdfPrebuildPlan.js';
 import { getPdfPrintCacheKey, isFullSessionPageSequence } from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PREBUILD_STATUS = Object.freeze({
@@ -35,28 +38,6 @@ function throwIfAborted(signal) {
  */
 function isAbortError(error) {
   return String(error?.name || '') === 'AbortError';
-}
-
-/**
- * @param {string} language
- * @returns {{full:string,base:string}}
- */
-function normalizeLanguage(language) {
-  const full = String(language || '').trim().toLowerCase();
-  return { full, base: full.split('-')[0] || full };
-}
-
-/**
- * @param {string} variantLanguage
- * @param {string} activeLanguage
- * @returns {boolean}
- */
-function matchesActiveLanguage(variantLanguage, activeLanguage) {
-  const raw = String(variantLanguage || 'current').trim().toLowerCase();
-  if (!raw || raw === 'current') return true;
-  const variant = normalizeLanguage(raw);
-  const active = normalizeLanguage(activeLanguage || 'current');
-  return variant.full === active.full || (!!variant.base && variant.base === active.base);
 }
 
 /**
@@ -169,6 +150,15 @@ export default function usePdfPrebuildAllPages({
   const timeoutRef = useRef(/** @type {number|null} */ (null));
   const runSeqRef = useRef(0);
   const planKeyRef = useRef('');
+  // Explicit prebuild languages describe fixed print output. Only "current"
+  // variants should be invalidated when the user changes the UI language.
+  const prebuildLanguageDependency = useMemo(
+    () => getPdfPrebuildAllPagesLanguageDependency(getRuntimeConfig(), language || 'current'),
+    [language]
+  );
+  const prebuildLanguageContext = prebuildLanguageDependency === 'fixed'
+    ? 'current'
+    : (language || 'current');
 
   useEffect(() => {
     makePrintOptionsRef.current = makePrintOptions;
@@ -194,16 +184,16 @@ export default function usePdfPrebuildAllPages({
     const cacheKey = getPdfPrintCacheKey(detail, resolvedPageNumbers);
     for (const entry of cacheRef.current.values()) {
       if (entry?.printCacheKey !== cacheKey) continue;
-      if (!matchesActiveLanguage(entry?.variant?.language, language)) continue;
+      if (entry?.languageDependency !== prebuildLanguageDependency) continue;
       return entry?.blob instanceof Blob ? entry.blob : null;
     }
     return null;
-  }, [language, sessionTotalPages]);
+  }, [prebuildLanguageDependency, sessionTotalPages]);
 
   useEffect(() => {
     const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
     const cfg = getRuntimeConfig();
-    const plan = createPdfPrebuildAllPagesVariants(cfg, language || 'current');
+    const plan = createPdfPrebuildAllPagesVariants(cfg, prebuildLanguageContext);
     const canPrebuild = !!printEnabled
       && !isDocumentLoading
       && !!documentRenderRef?.current
@@ -232,7 +222,7 @@ export default function usePdfPrebuildAllPages({
 
     const planKey = JSON.stringify({
       pageCount,
-      language: language || 'current',
+      language: prebuildLanguageDependency,
       variants: plan.variants.map((variant) => variant?.key || ''),
     });
     if (planKeyRef.current !== planKey) {
@@ -286,6 +276,7 @@ export default function usePdfPrebuildAllPages({
               cacheRef.current.set(variant.key, {
                 blob,
                 variant,
+                languageDependency: prebuildLanguageDependency,
                 printCacheKey: getPdfPrintCacheKey(detail, pageNumbers),
                 createdAt: Date.now(),
               });
@@ -337,7 +328,15 @@ export default function usePdfPrebuildAllPages({
       }
       try { abortController.abort(); } catch {}
     };
-  }, [documentRenderRef, isDocumentLoading, language, paused, printEnabled, sessionTotalPages]);
+  }, [
+    documentRenderRef,
+    isDocumentLoading,
+    paused,
+    prebuildLanguageContext,
+    prebuildLanguageDependency,
+    printEnabled,
+    sessionTotalPages,
+  ]);
 
   useEffect(() => () => {
     if (timeoutRef.current !== null) window.clearTimeout(timeoutRef.current);

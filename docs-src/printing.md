@@ -309,3 +309,5 @@ print: {
 ```
 
 Only fixed reason options are planned by default. Options that require free text, such as "Other reason", are excluded unless `includeFreeTextReasons` is explicitly enabled. `copyMarker: 'both'` plans both the normal and copy-watermark state. Date/time tokens are treated as PDF creation time, so prebuilt PDFs may show the time they were prepared rather than the time the browser print dialog was opened. If the user starts a PDF print or PDF download while this background work is still running, the prebuild run pauses, keeps already cached variants, and resumes the remaining variants after the active PDF job leaves the progress dialog.
+
+`languages: ['current']` makes the planned PDF output follow the active UI language, so changing language intentionally invalidates the prebuild run. Explicit languages such as `['sv']` describe fixed print output and are independent of the active UI language. This is useful for deployments where generated PDF headers, footers and print reason output stay the same even when the OpenDocViewer interface is switched between languages.
