@@ -2,22 +2,25 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.0.0** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.0.1** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.0 feature release has not yet been rolled out, but the recommendation is to move to v2.0.0 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, and deployment-configuration controls.
+**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.1 patch has not yet been rolled out, but the recommendation is to move to v2.0.1 to get the latest WebClient/session reload-cache fixes, host-ticket diagnostics, problem-notice handling, and selection-panel behavior.
 
-**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.0.0 upgrade has not yet been completed, but the recommendation is to move to v2.0.0 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, and release-script documentation.
+**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.x feature release has not yet been rolled out, but the recommendation is to move to v2.0.1 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, and deployment-configuration controls.
 
-**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.0.0 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, and operational support tooling.
+**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.0.x upgrade has not yet been completed, but the recommendation is to move to v2.0.1 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, and release-script documentation.
+
+**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.0.1 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, and operational support tooling.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.0.0   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.0.0 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.0.0 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.0.0 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.0.1 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.0.1 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.0.1 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.0.1 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -36,6 +39,17 @@ Earlier releases are retained for historical reference only and are **not recomm
 
 The eight most recent releases are listed below for operational context.
 
+### OpenDocViewer v2.0.1
+OpenDocViewer v2.0.1 is a targeted patch release on top of v2.0.0. It keeps the v2.0.0 integration and runtime configuration model intact while improving WebClient/session resilience, operator diagnostics, and a few user-facing edge cases.
+
+From a document-loading perspective this release adds an optional short-lived reload cache for original source blobs and rendered page assets. The cache is keyed from stable document identity and document-version metadata instead of short-lived host ticket URLs, so opening the same document from a fresh WebClient session can reuse browser-local data when the deployment explicitly enables the cache. The cache remains disabled by default, has bounded TTL validation, and reports hit/miss details through the performance overlay.
+
+From a host-integration and support perspective this release rejects invalid document payloads before caching, handles expired host ticket links more clearly, filters legacy parent payloads by session case ids, and adds a configurable viewer-level problem notice for serious host/session failures. ODV still cannot renew expired host tickets by itself; the notice and diagnostics are intended to guide the user or operator back to a fresh host handoff.
+
+From a viewer workflow perspective this release preserves zero brightness and contrast values correctly and updates the Selection tab cancel action so it is always available, discards unsaved selection edits, and returns to the thumbnail view. Help text in Swedish and English has been aligned with that behavior.
+
+From a maintainability perspective this release includes review-driven cleanup around source temporary storage, reload-cache TTL normalization, queued writes, cache constants, and benchmark helper signatures. These changes are intentionally internal and do not change the public Portable Document Bundle contract.
+
 ### OpenDocViewer v2.0.0
 OpenDocViewer v2.0.0 is the new recommended production baseline. Although the version number moves to 2.0.0, the release is intentionally focused on the generated-PDF print workflow, operator diagnostics, deployment-time configurability, and supportability rather than a broad application rewrite.
 
@@ -49,7 +63,7 @@ From a support and diagnostics perspective this release moves the runtime status
 
 From a deployment and documentation perspective this release removes the old HTML print prewarm path, documents generated-PDF prebuild and benchmark configuration, allows deployments to hide user-facing metadata dialogs while still preserving metadata internally, and adds a manual reload control that bypasses browser/server caches when site-local manual HTML has been replaced. Site-local manual content can therefore be updated and verified without rebuilding the React bundle.
 
-OpenDocViewer v2.0.0 is recommended going forward because it combines the v1.9.1 generated-PDF hardening with the latest print-performance, session-cache, diagnostics, and deployment-configuration work.
+OpenDocViewer v2.0.0 combines the v1.9.1 generated-PDF hardening with the latest print-performance, session-cache, diagnostics, and deployment-configuration work. v2.0.1 is preferred for current deployments.
 
 ### OpenDocViewer v1.9.1
 OpenDocViewer v1.9.1 is a targeted patch release on top of v1.9.0 focused on generated-PDF hardening, diagnostics, and maintainability. Existing v1.9.0 print configuration should continue to work; this patch does not introduce a new runtime configuration model.
@@ -62,7 +76,7 @@ From a generated-PDF output perspective this release improves rich text handling
 
 From a maintainability perspective this release extracts constants and small helper functions around PDF timing, quality, image handling, text fitting, and jsPDF compatibility assumptions. The goal is to keep the generated-PDF backend easier to review and safer to adjust without changing the public integration contract.
 
-OpenDocViewer v1.9.1 keeps the v1.9.0 print configuration model while adding generated-PDF hardening and review-driven cleanup. v2.0.0 is preferred for current deployments.
+OpenDocViewer v1.9.1 keeps the v1.9.0 print configuration model while adding generated-PDF hardening and review-driven cleanup. v2.0.1 is preferred for current deployments.
 
 ### OpenDocViewer v1.9.0
 OpenDocViewer v1.9.0 builds on the v1.8.0 generated-PDF print baseline with a safer dependency set, clearer print configuration, and closer visual parity between HTML print and generated-PDF print.
@@ -77,7 +91,7 @@ From an operator workflow perspective this release makes generated-PDF output ca
 
 From an integration and release-readiness perspective this release adds a session-URL integration helper, improves related error handling, updates the runtime configuration documentation for the expanded print options, keeps customer-specific packaging out of the public repository through ignored local files, and documents non-interactive release-script usage through `.\release.ps1 -ReleaseType minor -Yes`.
 
-OpenDocViewer v1.9.0 combines the v1.8.0 generated-PDF print workflow with a cleaner print configuration model, improved PDF/HTML print consistency, and a refreshed security/dependency baseline. v2.0.0 is preferred for current deployments.
+OpenDocViewer v1.9.0 combines the v1.8.0 generated-PDF print workflow with a cleaner print configuration model, improved PDF/HTML print consistency, and a refreshed security/dependency baseline. v2.0.1 is preferred for current deployments.
 
 ### OpenDocViewer v1.8.0
 OpenDocViewer v1.8.0 builds on the v1.7.0 print customization baseline with a more practical, operator-friendly print workflow and a generated-PDF print backend.
@@ -92,7 +106,7 @@ From a documentation and support perspective this release substantially expands 
 
 From a maintainability and hardening perspective this release refines generated-PDF sanitization and fallback handling, improves PDF/HTML watermark and header visual consistency, avoids premature cleanup of generated-PDF preview resources, fixes release-script parameter/newline issues, simplifies print UI styling, and addresses follow-up code review comments in the PDF and warm-frame print modules.
 
-OpenDocViewer v1.8.0 keeps the v1.7.0 metadata-aware print model while adding a more transparent PDF print workflow, clearer operator feedback, and more complete built-in documentation. v2.0.0 is preferred for current deployments.
+OpenDocViewer v1.8.0 keeps the v1.7.0 metadata-aware print model while adding a more transparent PDF print workflow, clearer operator feedback, and more complete built-in documentation. v2.0.1 is preferred for current deployments.
 
 ### OpenDocViewer v1.7.0
 OpenDocViewer v1.7.0 extends the v1.6.0 metadata-aware viewer baseline with a substantially richer and safer print customization model.
@@ -122,11 +136,6 @@ OpenDocViewer v1.5.0 is the consolidated production baseline that combines the l
 From a security perspective this release is the first one in the current line that combines the recommended dependency set (`axios` 1.15.0 and the corresponding resolved `follow-redirects` / `dompurify` updates in the lockfile) with the current runtime hardening around gated diagnostics, safer context-menu behavior inside the viewer, and version-aware language-resource loading.
 
 From a functional/support perspective it also introduces the document-aware viewer model: portable-document grouping, selection-aware filtering, compare-aware modifier targeting, unified print-dialog flow, configurable large-print preparation notices, persisted language preferences, and synchronized runtime/sample configuration coverage.
-
-### OpenDocViewer v1.4.1
-OpenDocViewer v1.4.1 is a targeted patch release focused on maintenance and release hygiene.
-
-This release updates the development/build toolchain to remediate current Vite security advisories, keeps the existing runtime behavior intact, improves release-script clarity around manual SECURITY.md updates and post-push verification, and adds small maintainability clarifications in worker-side rendering code where GitHub AI previously raised low-confidence suggestions.
 
 ## Reporting a Vulnerability
 
