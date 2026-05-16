@@ -177,6 +177,10 @@
         // When true, the print dialog also shows a separate "Save PDF" action.
         allowDownload: false,
         filename: 'opendocviewer-print.pdf',
+        // 'strict' treats localized print text as part of the generated-PDF cache key.
+        // 'ignore' reuses PDFs across UI languages when the deployment guarantees
+        // language-independent print output for the same stable option values.
+        cacheLanguageMode: 'strict',
         // PDF layout tuning in points. Keep these small so document content keeps maximum space.
         marginPt: 8,
         headerReservePt: 18,

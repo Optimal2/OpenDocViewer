@@ -15,6 +15,45 @@ function stablePrintText(value) {
 }
 
 /**
+ * @param {*} value
+ * @returns {'strict'|'ignore'}
+ */
+export function normalizePdfPrintCacheLanguageMode(value) {
+  const mode = String(value || '').trim().toLowerCase();
+  if (mode === 'ignore' || mode === 'none' || mode === 'language-agnostic') return 'ignore';
+  return 'strict';
+}
+
+/**
+ * @param {*} runtimeConfigOrOptions
+ * @returns {{languageMode:string}}
+ */
+export function getPdfPrintCacheKeyOptions(runtimeConfigOrOptions = {}) {
+  const directMode = runtimeConfigOrOptions?.languageMode ?? runtimeConfigOrOptions?.cacheLanguageMode;
+  if (directMode !== undefined) {
+    return { languageMode: normalizePdfPrintCacheLanguageMode(directMode) };
+  }
+
+  const pdfCfg = runtimeConfigOrOptions?.print?.pdf || runtimeConfigOrOptions?.pdf || {};
+  return {
+    languageMode: normalizePdfPrintCacheLanguageMode(
+      pdfCfg?.cacheLanguageMode
+        ?? pdfCfg?.cache?.languageMode
+        ?? pdfCfg?.cache?.language
+        ?? 'strict'
+    ),
+  };
+}
+
+/**
+ * @param {*} runtimeConfigOrOptions
+ * @returns {boolean}
+ */
+export function isPdfPrintCacheLanguageIgnored(runtimeConfigOrOptions = {}) {
+  return getPdfPrintCacheKeyOptions(runtimeConfigOrOptions).languageMode === 'ignore';
+}
+
+/**
  * @param {Array<number>=} pageNumbers
  * @returns {Array<number>}
  */
@@ -30,17 +69,21 @@ export function normalizePdfPrintCachePageNumbers(pageNumbers = []) {
  * printing and saving the same prepared PDF use identical PDF bytes.
  * @param {*} detail
  * @param {Array<number>=} pageNumbers
+ * @param {*=} options
  * @returns {string}
  */
-export function getPdfPrintCacheKey(detail, pageNumbers = []) {
+export function getPdfPrintCacheKey(detail, pageNumbers = [], options = {}) {
+  const cacheOptions = getPdfPrintCacheKeyOptions(options);
+  const ignoreLanguage = cacheOptions.languageMode === 'ignore';
   return JSON.stringify({
+    languageMode: cacheOptions.languageMode,
     pageScope: detail?.activeScope === 'compare-both' ? 'compare-both' : 'pages',
     pages: normalizePdfPrintCachePageNumbers(pageNumbers),
-    reason: stablePrintText(detail?.reason),
+    reason: ignoreLanguage ? '' : stablePrintText(detail?.reason),
     reasonValue: stablePrintText(detail?.reasonSelection?.value),
     reasonFreeText: stablePrintText(detail?.reasonSelection?.freeText),
     forWhom: stablePrintText(detail?.forWhom),
-    printFormat: stablePrintText(detail?.printFormat),
+    printFormat: ignoreLanguage ? '' : stablePrintText(detail?.printFormat),
     printFormatValue: stablePrintText(detail?.printFormatValue),
     printFormatSelectionValue: stablePrintText(detail?.printFormatSelection?.value),
     pdfOrientation: stablePrintText(detail?.pdfOrientation || 'auto'),

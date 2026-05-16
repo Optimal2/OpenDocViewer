@@ -302,6 +302,7 @@ print: {
     defaultMode: 'direct',
     allowDownload: false,
     filename: 'opendocviewer-print.pdf',
+    cacheLanguageMode: 'strict',
     marginPt: 8,
     headerReservePt: 18,
     footerReservePt: 14,
@@ -316,4 +317,4 @@ their print iframe on demand, while generated-PDF prebuild is handled by `print.
 
 `print.pdf.enabled` controls whether the print dialog offers a separate **Print via PDF** action next to the normal **Print via HTML** action. `allowDownload: true` adds a separate **Save PDF** action to the print dialog. `print.actions.*.enabled` can hide individual footer buttons, while localized `label` and `tooltip` values override the button text without code changes.
 
-The generated-PDF backend is intended for deployments where the browser is slow to build print preview from large HTML/IMG print documents. It reuses already rendered page image blobs for multi-page jobs. Active-page PDF output uses the current rendered surface to preserve transient image edits.
+The generated-PDF backend is intended for deployments where the browser is slow to build print preview from large HTML/IMG print documents. It reuses already rendered page image blobs for multi-page jobs. Active-page PDF output uses the current rendered surface to preserve transient image edits. `print.pdf.cacheLanguageMode` defaults to `strict`; set it to `ignore` only for deployments where generated PDF output is intentionally the same across UI languages for the same stable print option values.

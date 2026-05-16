@@ -269,6 +269,7 @@ print: {
     defaultMode: 'direct', // 'direct' or 'safe'
     allowDownload: false,
     filename: 'opendocviewer-print.pdf',
+    cacheLanguageMode: 'strict', // 'strict' or 'ignore'
     marginPt: 8,
     headerReservePt: 18,
     footerReservePt: 14,
@@ -281,6 +282,8 @@ print: {
 If `allowDownload` is `true`, the dialog also shows a **Save PDF** action unless `print.actions.downloadPdf.enabled` is `false`. The HTML and PDF print buttons can likewise be hidden with `print.actions.printHtml.enabled` and `print.actions.printPdf.enabled`, and each action can use localized `label` and `tooltip` values. Active-page PDF output uses the currently rendered active surface so transient image edits are preserved. Multi-page PDF output uses the original page image blobs in the requested print order.
 
 Generated PDF blobs are kept in a session-scoped in-memory cache so repeated prints or downloads with the same content-affecting settings do not need to regenerate the PDF. Active-page output is intentionally not keyed for reuse because the same page number can produce different bytes after transient visual edits such as rotation, brightness, or contrast. If the runtime enters hard memory protection, OpenDocViewer drops the generated-PDF cache while keeping the latest dialog settings available for restore.
+
+`print.pdf.cacheLanguageMode` controls whether localized print text participates in this generated-PDF cache key. The default, `strict`, treats resolved reason and copy-marker text as content-affecting. Set it to `ignore` only when the deployment guarantees that generated PDF headers, footers and fixed option output are language-independent for the same stable option values. In `ignore` mode, the cache key still includes page numbers, recipient text, selected option values, free-text reason content and PDF orientation, but it does not reject a cached PDF only because the active UI language changed.
 
 PDF benchmark execution is controlled separately by `print.pdf.benchmark.enabled` and defaults to `false`. Keep it disabled in normal production use; enable it temporarily only when support needs to measure PDF generation on a specific client. The normal support diagnostics JSON download remains available even when benchmark execution is disabled.
 

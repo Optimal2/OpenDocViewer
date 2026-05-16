@@ -11,7 +11,11 @@ import {
   createPdfPrebuildAllPagesVariants,
   getPdfPrebuildAllPagesLanguageDependency,
 } from '../../utils/pdfPrebuildPlan.js';
-import { getPdfPrintCacheKey, isFullSessionPageSequence } from '../../utils/pdfPrintCacheKey.js';
+import {
+  getPdfPrintCacheKey,
+  getPdfPrintCacheKeyOptions,
+  isFullSessionPageSequence,
+} from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PREBUILD_STATUS = Object.freeze({
   state: 'off',
@@ -150,6 +154,7 @@ export default function usePdfPrebuildAllPages({
   const timeoutRef = useRef(/** @type {number|null} */ (null));
   const runSeqRef = useRef(0);
   const planKeyRef = useRef('');
+  const initialLanguageRef = useRef(language || 'current');
   // Explicit prebuild languages describe fixed print output. Only "current"
   // variants should be invalidated when the user changes the UI language.
   const prebuildLanguageDependency = useMemo(
@@ -158,7 +163,13 @@ export default function usePdfPrebuildAllPages({
   );
   const prebuildLanguageContext = prebuildLanguageDependency === 'fixed'
     ? 'current'
-    : (language || 'current');
+    : (prebuildLanguageDependency === 'ignore'
+        ? initialLanguageRef.current
+        : (language || 'current'));
+  const pdfPrintCacheKeyOptions = useMemo(
+    () => getPdfPrintCacheKeyOptions(getRuntimeConfig()),
+    []
+  );
 
   useEffect(() => {
     makePrintOptionsRef.current = makePrintOptions;
@@ -181,14 +192,14 @@ export default function usePdfPrebuildAllPages({
       : createSessionPageNumbers(pageCount);
     if (!isCacheableAllPagesRequest(detail, resolvedPageNumbers, pageCount)) return null;
 
-    const cacheKey = getPdfPrintCacheKey(detail, resolvedPageNumbers);
+    const cacheKey = getPdfPrintCacheKey(detail, resolvedPageNumbers, pdfPrintCacheKeyOptions);
     for (const entry of cacheRef.current.values()) {
       if (entry?.printCacheKey !== cacheKey) continue;
       if (entry?.languageDependency !== prebuildLanguageDependency) continue;
       return entry?.blob instanceof Blob ? entry.blob : null;
     }
     return null;
-  }, [prebuildLanguageDependency, sessionTotalPages]);
+  }, [pdfPrintCacheKeyOptions, prebuildLanguageDependency, sessionTotalPages]);
 
   useEffect(() => {
     const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
@@ -277,7 +288,7 @@ export default function usePdfPrebuildAllPages({
                 blob,
                 variant,
                 languageDependency: prebuildLanguageDependency,
-                printCacheKey: getPdfPrintCacheKey(detail, pageNumbers),
+                printCacheKey: getPdfPrintCacheKey(detail, pageNumbers, pdfPrintCacheKeyOptions),
                 createdAt: Date.now(),
               });
               completed += 1;
@@ -332,6 +343,7 @@ export default function usePdfPrebuildAllPages({
     documentRenderRef,
     isDocumentLoading,
     paused,
+    pdfPrintCacheKeyOptions,
     prebuildLanguageContext,
     prebuildLanguageDependency,
     printEnabled,
