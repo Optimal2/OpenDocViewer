@@ -50,6 +50,10 @@ function normalizeRotationDegrees(value) {
 /** Neutral per-page image adjustment state. */
 const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, contrast: 100 });
 
+// Primary and compare rotations are packed into one dependency value for useViewerEffects.
+// Rotation is normalized to 0..359 degrees, so 1000 keeps the two pane values from overlapping.
+const COMPARE_ROTATION_DEPENDENCY_MULTIPLIER = 1000;
+
 /**
  * @param {(Array<boolean>|null|undefined)} mask
  * @param {number} total
@@ -970,21 +974,30 @@ export function useDocumentViewer() {
   }, [printEnabled]);
 
   // --- Zoom helpers --------------------------------------------------------------
+  const tryCallDocumentRender = useCallback((methodName, warningMessage) => {
+    try {
+      const target = documentRenderRef.current;
+      const method = target?.[methodName];
+      if (typeof method !== 'function') return false;
+      method.call(target);
+      return true;
+    } catch (error) {
+      logger.warn(warningMessage, { error: String(error?.message || error) });
+      return false;
+    }
+  }, []);
+
   const zoomIn = useCallback(() => {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
-    try { if (documentRenderRef.current?.zoomIn) { documentRenderRef.current.zoomIn(); return; } } catch (error) {
-      logger.warn('DocumentRender zoomIn failed; using state fallback', { error: String(error?.message || error) });
-    }
+    if (tryCallDocumentRender('zoomIn', 'DocumentRender zoomIn failed; using state fallback')) return;
     setZoom((z) => Math.min(8, Math.round((z * 1.1) * 100) / 100));
-  }, []);
+  }, [tryCallDocumentRender]);
 
   const zoomOut = useCallback(() => {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
-    try { if (documentRenderRef.current?.zoomOut) { documentRenderRef.current.zoomOut(); return; } } catch (error) {
-      logger.warn('DocumentRender zoomOut failed; using state fallback', { error: String(error?.message || error) });
-    }
+    if (tryCallDocumentRender('zoomOut', 'DocumentRender zoomOut failed; using state fallback')) return;
     setZoom((z) => Math.max(0.1, Math.round((z / 1.1) * 100) / 100));
-  }, []);
+  }, [tryCallDocumentRender]);
 
   const actualSize = useCallback(() => {
     resetPostZoom();
@@ -995,18 +1008,14 @@ export function useDocumentViewer() {
   const fitToScreen = useCallback(() => {
     resetPostZoom();
     setZoomState({ mode: 'FIT_PAGE', scale: zoom });
-    try { documentRenderRef.current?.fitToScreen?.(); } catch (error) {
-      logger.warn('DocumentRender fitToScreen failed', { error: String(error?.message || error) });
-    }
-  }, [resetPostZoom, zoom]);
+    tryCallDocumentRender('fitToScreen', 'DocumentRender fitToScreen failed');
+  }, [resetPostZoom, tryCallDocumentRender, zoom]);
 
   const fitToWidth = useCallback(() => {
     resetPostZoom();
     setZoomState({ mode: 'FIT_WIDTH', scale: zoom });
-    try { documentRenderRef.current?.fitToWidth?.(); } catch (error) {
-      logger.warn('DocumentRender fitToWidth failed', { error: String(error?.message || error) });
-    }
-  }, [resetPostZoom, zoom]);
+    tryCallDocumentRender('fitToWidth', 'DocumentRender fitToWidth failed');
+  }, [resetPostZoom, tryCallDocumentRender, zoom]);
 
   /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'). */
   const setZoomMode = useCallback((mode) => {
@@ -1205,7 +1214,8 @@ export function useDocumentViewer() {
     setZoomState,
     documentRenderRef,
     viewerContainerRef,
-    imageRotation: (Number(primaryImageProperties.rotation) || 0) + ((Number(compareImageProperties.rotation) || 0) * 1000),
+    imageRotation: (Number(primaryImageProperties.rotation) || 0)
+      + ((Number(compareImageProperties.rotation) || 0) * COMPARE_ROTATION_DEPENDENCY_MULTIPLIER),
     isComparing,
     thumbnailWidth,
     pageNumber: currentOriginalPageNumber,
