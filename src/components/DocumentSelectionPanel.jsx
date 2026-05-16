@@ -5,7 +5,7 @@
  * The panel is intentionally draft-based:
  * - users can tick/untick freely without immediately affecting the viewer
  * - Save applies the filtered page set
- * - Cancel restores the last applied selection
+ * - Cancel discards draft changes and returns to the thumbnail list
  *
  * Documents are collapsible so very large sessions remain manageable. Documents with a mixed
  * selection state (some pages included, some excluded) expand by default until the user chooses
@@ -110,7 +110,6 @@ export default function DocumentSelectionPanel({
   const masterChecked = safeTotalSessionPages > 0 && draftIncludedCount >= safeTotalSessionPages;
   const masterIndeterminate = draftIncludedCount > 0 && draftIncludedCount < safeTotalSessionPages;
   const saveDisabled = !enabled || !draftSelectionDirty;
-  const cancelDisabled = !draftSelectionDirty;
 
   const documentSummaries = useMemo(() => {
     return documents.map((document) => {
@@ -283,7 +282,6 @@ export default function DocumentSelectionPanel({
         <button
           type="button"
           className="thumbnail-selection-button secondary"
-          disabled={cancelDisabled}
           onClick={onCancel}
         >
           {t('thumbnails.selection.cancel', { defaultValue: 'Cancel' })}

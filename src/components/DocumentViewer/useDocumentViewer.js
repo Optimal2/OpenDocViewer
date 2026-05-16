@@ -638,6 +638,7 @@ export function useDocumentViewer() {
 
   const cancelDraftSelection = useCallback(() => {
     setDraftSelectionMask(normalizedAppliedSelectionMask.slice());
+    setThumbnailPaneMode('thumbnails');
   }, [normalizedAppliedSelectionMask]);
 
   const clearSelectionFilter = useCallback(() => {
