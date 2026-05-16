@@ -6,7 +6,7 @@
 
 **OpenDocViewer v2.0.1** remains supported and may still be used in production where the v2.0.2 patch has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest generated-PDF cache language-mode fixes and fixed-language prebuild reuse.
 
-**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.x patch line has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest WebClient/session reload-cache fixes, generated-PDF cache fixes, host-ticket diagnostics, problem-notice handling, and selection-panel behavior.
+**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.x patch line has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, and selection-panel behavior.
 
 **OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.x feature release has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, and deployment-configuration controls.
 
@@ -43,104 +43,135 @@ Earlier releases are retained for historical reference only and are **not recomm
 The eight most recent releases are listed below for operational context.
 
 ### OpenDocViewer v2.0.2
-OpenDocViewer v2.0.2 is a targeted patch release on top of v2.0.1. It keeps the v2.0.x integration and runtime configuration model intact while fixing generated-PDF cache reuse for deployments with language-independent print output.
+Changes since v2.0.1:
 
-From a generated-PDF cache perspective this release adds `print.pdf.cacheLanguageMode`. The default `strict` mode keeps localized print text as part of the cache key. The opt-in `ignore` mode lets deployments reuse generated PDFs across UI languages when headers, footers, fixed print reasons, and copy-marker output are intentionally identical for the same stable option values.
-
-From a prebuild perspective this release fixes fixed-language all-pages PDF variants so they can be reused even when the active UI language is different from the configured prebuild language. UI language changes no longer invalidate fixed-language prebuild runs, and user-generated session PDFs use the same language-mode cache policy as background-prebuilt PDFs.
-
-From a support and deployment perspective this release documents the new cache language mode, exposes it in diagnostics, and updates the VGR packaging configuration to use language-agnostic PDF caching where print templates are fixed in Swedish regardless of UI language.
+- Added `print.pdf.cacheLanguageMode`.
+- Kept the default `strict` mode, where localized print text remains part of the generated-PDF cache key.
+- Added opt-in `ignore` mode for installations where generated print output is intentionally identical across UI languages.
+- Fixed reuse of fixed-language all-pages PDF prebuild variants when the active UI language differs from the configured prebuild language.
+- Stopped UI language changes from invalidating fixed-language prebuild runs.
+- Applied the same language-mode cache policy to user-generated session PDFs and background-prebuilt PDFs.
+- Documented the cache language mode and exposed it in diagnostics.
 
 ### OpenDocViewer v2.0.1
-OpenDocViewer v2.0.1 is a targeted patch release on top of v2.0.0. It keeps the v2.0.0 integration and runtime configuration model intact while improving WebClient/session resilience, operator diagnostics, and a few user-facing edge cases.
+Changes since v2.0.0:
 
-From a document-loading perspective this release adds an optional short-lived reload cache for original source blobs and rendered page assets. The cache is keyed from stable document identity and document-version metadata instead of short-lived host ticket URLs, so opening the same document from a fresh WebClient session can reuse browser-local data when the deployment explicitly enables the cache. The cache remains disabled by default, has bounded TTL validation, and reports hit/miss details through the performance overlay.
-
-From a host-integration and support perspective this release rejects invalid document payloads before caching, handles expired host ticket links more clearly, filters legacy parent payloads by session case ids, and adds a configurable viewer-level problem notice for serious host/session failures. ODV still cannot renew expired host tickets by itself; the notice and diagnostics are intended to guide the user or operator back to a fresh host handoff.
-
-From a viewer workflow perspective this release preserves zero brightness and contrast values correctly and updates the Selection tab cancel action so it is always available, discards unsaved selection edits, and returns to the thumbnail view. Help text in Swedish and English has been aligned with that behavior.
-
-From a maintainability perspective this release includes review-driven cleanup around source temporary storage, reload-cache TTL normalization, queued writes, cache constants, and benchmark helper signatures. These changes are intentionally internal and do not change the public Portable Document Bundle contract.
+- Added an optional short-lived reload cache for original source blobs and rendered page assets.
+- Keyed reload-cache entries from stable document identity and version metadata instead of temporary source URLs.
+- Kept the reload cache disabled by default, with bounded TTL validation and performance-overlay hit/miss diagnostics.
+- Rejected invalid document payloads before caching.
+- Improved handling and diagnostics for expired source links and serious source/session failures.
+- Added a configurable viewer-level problem notice for serious loading failures.
+- Preserved zero brightness and contrast values correctly.
+- Changed the Selection tab cancel action so it is always available, discards unsaved selection edits, and returns to the thumbnail view.
+- Aligned Swedish and English help text with the Selection tab behavior.
+- Cleaned up source temporary storage, reload-cache TTL normalization, queued writes, cache constants, and benchmark helper signatures.
 
 ### OpenDocViewer v2.0.0
-OpenDocViewer v2.0.0 is the new recommended production baseline. Although the version number moves to 2.0.0, the release is intentionally focused on the generated-PDF print workflow, operator diagnostics, deployment-time configurability, and supportability rather than a broad application rewrite.
+Changes since v1.9.1:
 
-From a generated-PDF performance perspective this release adds a dedicated PDF worker pipeline, worker-batch dispatch planning, partial PDF generation, and final PDF merge support. The automatic plan is tuned from benchmark data so normal jobs avoid unnecessary worker/merge overhead, while larger jobs can still be split when the page count makes that worthwhile. Progress reporting is now based on deterministic work units rather than page-number-only updates, so users get steadier feedback during long print preparation.
-
-From an operator workflow perspective this release adds optional background PDF preparation for common all-pages print variants. Sites can prebuild fixed-language, fixed-reason, and copy/no-copy combinations after document load so common print jobs can open the browser preview much faster. The prebuild run pauses while a user-initiated print/download job is active, keeps completed variants in the session cache, and resumes remaining variants afterwards.
-
-From a print-dialog perspective this release keeps generated PDFs in a session-scoped cache and adds a safe "reuse latest print settings" workflow. Active-page PDF output is intentionally excluded from cache-key reuse because transient page edits such as rotation, brightness, and contrast can change the bytes even when the page number is the same. The dialog also supports a configurable automatic-orientation checkbox for generated-PDF output and configurable print/export action labels and tooltips.
-
-From a support and diagnostics perspective this release moves the runtime status indicator from the page-wide top line to the help-menu LED, keeps diagnostics JSON download available independently of benchmark execution, and adds opt-in PDF and render/decode benchmark tooling for support sessions. Benchmark execution remains disabled by default in production runtime configuration.
-
-From a deployment and documentation perspective this release removes the old HTML print prewarm path, documents generated-PDF prebuild and benchmark configuration, allows deployments to hide user-facing metadata dialogs while still preserving metadata internally, and adds a manual reload control that bypasses browser/server caches when site-local manual HTML has been replaced. Site-local manual content can therefore be updated and verified without rebuilding the React bundle.
-
-OpenDocViewer v2.0.0 combines the v1.9.1 generated-PDF hardening with the latest print-performance, session-cache, diagnostics, and deployment-configuration work. v2.0.2 is preferred for current deployments.
+- Added a dedicated generated-PDF worker pipeline.
+- Added worker-batch dispatch planning, partial PDF generation, and final PDF merge support.
+- Changed generated-PDF progress reporting to deterministic work units.
+- Added optional background preparation for common all-pages print variants.
+- Paused background PDF preparation while a user-initiated print or download job is active.
+- Kept completed prebuilt variants in the session cache.
+- Added session-scoped generated-PDF cache reuse for compatible print settings.
+- Excluded active-page PDF output from cache-key reuse because transient page edits can change the output.
+- Added a configurable automatic-orientation checkbox for generated-PDF output.
+- Added configurable print/export action labels and tooltips.
+- Moved the runtime status indicator to the help-menu status LED.
+- Kept diagnostics JSON download available independently of benchmark execution.
+- Added opt-in PDF and render/decode benchmark tooling.
+- Removed the old HTML print prewarm path.
+- Documented generated-PDF prebuild and benchmark configuration.
+- Added configuration for hiding user-facing metadata dialogs while preserving metadata internally.
+- Added a manual reload control for site-local manual HTML updates.
 
 ### OpenDocViewer v1.9.1
-OpenDocViewer v1.9.1 is a targeted patch release on top of v1.9.0 focused on generated-PDF hardening, diagnostics, and maintainability. Existing v1.9.0 print configuration should continue to work; this patch does not introduce a new runtime configuration model.
+Changes since v1.9.0:
 
-Compared with v1.9.0, the main functional area touched is the generated-PDF backend in `src/utils/printPdf.js`. The release promotes `dompurify` to a direct dependency and uses it as an explicit defense-in-depth layer for trusted administrator-authored header/footer template HTML before the generated-PDF renderer consumes the limited rich-text subset it supports.
-
-From a security and robustness perspective this release tightens generated-PDF template parsing, image-source diagnostics, safe printable surface extraction, cancellation handling, and jsPDF initialization errors. Diagnostic messages are more actionable while still avoiding uncontrolled or overly large source strings in error output.
-
-From a generated-PDF output perspective this release improves rich text handling for header/footer templates, including bold/italic detection, block/inline flow handling, simple alignment, two-column `display:flex; justify-content:space-between` rows, text fitting, ellipsis behavior, and image format fallbacks. It also keeps generated-PDF cleanup delays intentionally conservative so browser print previews do not lose their backing PDF blob while the user is still interacting with the print dialog.
-
-From a maintainability perspective this release extracts constants and small helper functions around PDF timing, quality, image handling, text fitting, and jsPDF compatibility assumptions. The goal is to keep the generated-PDF backend easier to review and safer to adjust without changing the public integration contract.
-
-OpenDocViewer v1.9.1 keeps the v1.9.0 print configuration model while adding generated-PDF hardening and review-driven cleanup. v2.0.2 is preferred for current deployments.
+- Promoted `dompurify` to a direct dependency.
+- Added defense-in-depth sanitization for trusted header/footer template HTML before generated-PDF rendering.
+- Tightened generated-PDF template parsing.
+- Improved image-source diagnostics, printable surface extraction, cancellation handling, and jsPDF initialization errors.
+- Improved generated-PDF rich text handling for header/footer templates.
+- Added support for bold/italic detection, block/inline flow handling, simple alignment, two-column flex rows, text fitting, ellipsis behavior, and image format fallbacks.
+- Kept generated-PDF cleanup delays conservative so browser print previews do not lose their backing PDF blob too early.
+- Extracted constants and helper functions around PDF timing, quality, image handling, text fitting, and jsPDF compatibility.
 
 ### OpenDocViewer v1.9.0
-OpenDocViewer v1.9.0 builds on the v1.8.0 generated-PDF print baseline with a safer dependency set, clearer print configuration, and closer visual parity between HTML print and generated-PDF print.
+Changes since v1.8.0:
 
-From a security and maintenance perspective this release refreshes the npm dependency baseline, including `axios` 1.16.0, `express-rate-limit` 8.5.1, resolved `ip-address` 10.2.0, React 19.2.6, pdf.js 5.7.284, Vite 8.0.11, and the matching lint/build tooling updates. The release validation baseline is `npm audit --audit-level=low`, `npm run lint`, `npm run build`, and `npm run doc`.
-
-From a print-configuration perspective this release adds prepared transparent COPY and KOPIA watermark image assets, introduces explicit watermark modes (`auto`, `copy`, `kopia`, and `custom`), keeps custom text watermarking available, and makes generated-PDF watermarks more subtle so they do not obscure the underlying document content. Print actions can also be configured and localized for HTML print, generated-PDF print, and generated-PDF download labels and tooltips.
-
-From a generated-PDF output perspective this release improves header and footer rendering for the trusted print-template subset used by OpenDocViewer deployments. The generated-PDF backend now preserves common inline styling such as bold and italic, supports simple left/right/center text alignment, handles the common two-column `display:flex; justify-content:space-between` header/footer pattern, and documents the intentionally limited CSS parsing model instead of attempting to behave like a full browser layout engine.
-
-From an operator workflow perspective this release makes generated-PDF output cancellable while pages are being prepared, supports Escape as a cancel shortcut with confirmation, uses neutral terminology instead of "secure print" in the progress UI, and keeps print pre-warming configurable with the default disabled because it has not shown a reliable performance benefit.
-
-From an integration and release-readiness perspective this release adds a session-URL integration helper, improves related error handling, updates the runtime configuration documentation for the expanded print options, keeps customer-specific packaging out of the public repository through ignored local files, and documents non-interactive release-script usage through `.\release.ps1 -ReleaseType minor -Yes`.
-
-OpenDocViewer v1.9.0 combines the v1.8.0 generated-PDF print workflow with a cleaner print configuration model, improved PDF/HTML print consistency, and a refreshed security/dependency baseline. v2.0.2 is preferred for current deployments.
+- Refreshed runtime and development dependencies, including `axios` 1.16.0, `express-rate-limit` 8.5.1, resolved `ip-address` 10.2.0, React 19.2.6, pdf.js 5.7.284, and Vite 8.0.11.
+- Updated lint/build tooling and release validation guidance.
+- Added prepared transparent COPY and KOPIA watermark image assets.
+- Added watermark modes: `auto`, `copy`, `kopia`, and `custom`.
+- Kept custom text watermarking available.
+- Made generated-PDF watermarks more subtle.
+- Added configurable and localizable print action labels and tooltips.
+- Improved generated-PDF header and footer rendering for the supported print-template subset.
+- Preserved common inline styling such as bold and italic in generated-PDF output.
+- Added simple left/right/center alignment and two-column flex-row handling for generated-PDF headers and footers.
+- Documented the limited CSS parsing model for generated-PDF templates.
+- Added cancellation for generated-PDF output while pages are being prepared.
+- Added Escape as a cancel shortcut with confirmation.
+- Replaced "secure print" terminology in progress UI with neutral wording.
+- Kept print pre-warming configurable and disabled by default.
+- Added a session-URL integration helper and related error handling.
+- Updated runtime configuration documentation for expanded print options.
+- Documented non-interactive release-script usage.
 
 ### OpenDocViewer v1.8.0
-OpenDocViewer v1.8.0 builds on the v1.7.0 print customization baseline with a more practical, operator-friendly print workflow and a generated-PDF print backend.
+Changes since v1.7.0:
 
-From a print-output perspective this release adds a PDF-based print path alongside the existing browser HTML print path. Users can print through the browser's HTML preview, print via a generated PDF, or download the generated PDF when enabled by configuration. The PDF path reuses already rendered page images where possible, shows OpenDocViewer-side generation progress, supports configured headers, footers, metadata tokens, copy-marker output, and page-specific portrait/landscape handling. The existing HTML print path remains available for direct browser printing and for compatibility with existing deployments.
-
-From a print-dialog perspective this release simplifies the UI after the broader v1.7.0 print feature expansion. The dialog now uses plain, explicit actions for HTML print, PDF print, and PDF download rather than a split-button/dropdown model. The visible explanatory text is kept short, while detailed behavioral differences between HTML print and PDF print are documented in the manual. The copy-watermark tooltip remains available on the relevant label without expanding the dialog.
-
-From a user-feedback perspective this release adds visible progress while OpenDocViewer generates PDF print/download output. This makes larger print jobs feel less opaque: users can see how many pages have been processed before the browser's own print preview appears. A reusable StatusLed component also provides a compact status pattern that can be reused elsewhere in the application.
-
-From a documentation and support perspective this release substantially expands the bundled Swedish and English default manuals. The manuals now cover navigation, zoom, thumbnails, metadata, selection, comparison, image adjustments, print modes, PDF download, copy watermark, headers/footers, large-document behavior, troubleshooting, and site-local manual overrides. The Swedish and English default manuals contain the same operational content in their respective languages.
-
-From a maintainability and hardening perspective this release refines generated-PDF sanitization and fallback handling, improves PDF/HTML watermark and header visual consistency, avoids premature cleanup of generated-PDF preview resources, fixes release-script parameter/newline issues, simplifies print UI styling, and addresses follow-up code review comments in the PDF and warm-frame print modules.
-
-OpenDocViewer v1.8.0 keeps the v1.7.0 metadata-aware print model while adding a more transparent PDF print workflow, clearer operator feedback, and more complete built-in documentation. v2.0.2 is preferred for current deployments.
+- Added a PDF-based print path alongside the existing browser HTML print path.
+- Added optional PDF download from the print dialog.
+- Added progress feedback while PDF output is generated.
+- Simplified the print dialog to explicit actions for HTML print, PDF print, and PDF download.
+- Added a reusable `StatusLed` component and initial print-readiness integration.
+- Improved visual alignment between HTML print and generated-PDF output.
+- Improved copy-marker handling in headers and watermark rendering.
+- Expanded the bundled Swedish and English manuals.
+- Hardened generated-PDF fallback handling, sanitization, quality normalization, and resource cleanup.
+- Updated release documentation and release-script handling.
 
 ### OpenDocViewer v1.7.0
-OpenDocViewer v1.7.0 extends the v1.6.0 metadata-aware viewer baseline with a substantially richer and safer print customization model.
+Changes since v1.6.0:
 
-From a print-control perspective this release adds a configurable copy-marker workflow for physical print output. Deployments can expose a user-controlled copy watermark checkbox, default it on or off, hide it while forcing the configured marker, localize display labels separately from physical print output, and use `printValue` for clean print text while keeping longer UI instructions in the print dialog. Normal printing remains unmarked by default unless the deployment explicitly configures otherwise.
-
-From a print-template perspective this release adds metadata-aware header and footer templates with `{{...}}` tokens, conditional blocks that suppress empty labels, page-specific document metadata, session-level tokens, structured reason/format selection tokens, metadata alias tokens, newline support, and a dedicated print footer. Token values are escaped before insertion while trusted administrator-authored template markup remains supported.
-
-From a print-layout perspective the default header/footer model now reserves page space instead of drawing over the original page image. This avoids obscuring document content while still allowing explicit legacy overlay behavior through configuration. The copy watermark has also been adjusted to be larger, more transparent, and more visible across both light and dark source pages by combining low-opacity text with contrast stroke/glow styling.
-
-From a maintainability and hardening perspective this release fixes JSDoc parser issues in the print modules, documents the print token and layout model, tightens i18n path/default handling, improves robustness around `import.meta`/window access, adds safer i18n path segment handling, updates print-related logging payloads, and refreshes selected dependencies including `i18next-http-backend` and `postcss`.
+- Added a configurable copy-marker workflow for physical print output.
+- Added configuration for exposing, defaulting, hiding, or forcing the copy watermark control.
+- Added separate display labels and physical print values for print dialog options.
+- Added metadata-aware header and footer templates with `{{...}}` tokens.
+- Added conditional print-template blocks, page-specific document metadata, session-level tokens, structured reason/format tokens, metadata alias tokens, newline support, and a dedicated print footer.
+- Escaped token values before insertion while preserving trusted administrator-authored template markup.
+- Changed the default header/footer layout to reserve page space instead of drawing over the original page image.
+- Adjusted copy watermark size, opacity, and visibility.
+- Fixed JSDoc parser issues in print modules.
+- Documented the print token and layout model.
+- Tightened i18n path/default handling.
+- Improved robustness around `import.meta` and `window` access.
+- Added safer i18n path segment handling.
+- Updated print-related logging payloads.
+- Refreshed selected dependencies, including `i18next-http-backend` and `postcss`.
 
 v1.7.0 is superseded by later releases and is not recommended for current deployments.
 
 ### OpenDocViewer v1.6.0
-OpenDocViewer v1.6.0 extends the document-aware viewer baseline from v1.5.0 with richer metadata handling, improved operator-facing overlays, configurable HTML-based help content, and broader runtime/UI refinement.
+Changes since v1.5.0:
 
-From a support and maintainability perspective this release preserves full raw document metadata in the normalized integration layer, adds optional semantic alias mapping for host metadata, and surfaces that metadata through new in-viewer tools rather than leaving it trapped inside the incoming payload. This makes later UI, print, support, and integration work less dependent on deployment-specific parsing logic.
-
-From a viewer workflow perspective it adds document metadata overlays from page and thumbnail context menus, a metadata matrix view across all documents in the current session, improved metadata fallback behavior, and Escape-based closing consistency for the new overlays. It also expands the toolbar/help area with an About dialog, version visibility in the UI, and an HTML-based manual model that can be overridden site-locally without rebuilding the application.
-
-This release also reintroduces theme support in a more controlled form with explicit Normal / Light / Dark modes, persisted user preference handling, and broader theme-token cleanup across dialogs and interactive surfaces so the viewer remains usable in all supported themes.
+- Preserved full raw document metadata in the normalized integration model.
+- Added optional semantic alias mapping for metadata.
+- Exposed document metadata through viewer tools.
+- Added document metadata overlays from page and thumbnail context menus.
+- Added a metadata matrix view for all documents in the current session.
+- Improved metadata labeling and fallback behavior.
+- Added consistent Escape-to-close behavior for the new overlays.
+- Expanded the toolbar/help area with separate manual and about views.
+- Added visible application version information in the UI.
+- Added site-local HTML manual support.
+- Reintroduced theme support with explicit Normal, Light, and Dark modes.
+- Persisted the selected theme and broadened theme-token coverage across dialogs and controls.
 
 ## Reporting a Vulnerability
 
