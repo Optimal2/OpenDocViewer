@@ -8,6 +8,7 @@ import logger from '../../logging/systemLogger.js';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import { collectPrintablePdfSources, createPrintPdfBlob } from '../../utils/printPdf.js';
 import { createPdfPrebuildAllPagesVariants } from '../../utils/pdfPrebuildPlan.js';
+import { getPdfPrintCacheKey, isFullSessionPageSequence } from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PREBUILD_STATUS = Object.freeze({
   state: 'off',
@@ -59,22 +60,6 @@ function matchesActiveLanguage(variantLanguage, activeLanguage) {
 }
 
 /**
- * @param {*} detail
- * @returns {string}
- */
-function getReasonValue(detail) {
-  return String(detail?.reasonSelection?.value ?? detail?.reason ?? '').trim();
-}
-
-/**
- * @param {*} detail
- * @returns {boolean}
- */
-function hasPrintFormat(detail) {
-  return !!String(detail?.printFormatValue ?? detail?.printFormat ?? '').trim();
-}
-
-/**
  * @param {*} value
  * @returns {'auto'|'portrait'|'landscape'}
  */
@@ -86,13 +71,19 @@ function normalizePdfOrientation(value) {
 
 /**
  * @param {*} detail
+ * @param {Array<number>} pageNumbers
+ * @param {number} sessionTotalPages
  * @returns {boolean}
  */
-function isCacheableAllPagesRequest(detail) {
-  return detail?.printBackend === 'pdf'
-    && detail?.mode === 'all'
-    && detail?.allScope !== 'selection'
-    && !String(detail?.forWhom || '').trim();
+function isCacheableAllPagesRequest(detail, pageNumbers, sessionTotalPages) {
+  if (detail?.printBackend !== 'pdf' || detail?.mode !== 'all') return false;
+  if (String(detail?.forWhom || '').trim()) return false;
+  if (detail?.allScope === 'selection') {
+    // A saved selection can still resolve to the complete original page sequence.
+    // In that case the prebuilt session PDF bytes are identical and may be reused.
+    return isFullSessionPageSequence(pageNumbers, sessionTotalPages);
+  }
+  return true;
 }
 
 /**
@@ -113,19 +104,6 @@ function createVariantDetail(variant) {
     printFormatSelection: variant?.printFormatSelection || null,
     pdfOrientation: normalizePdfOrientation(variant?.pdfOrientation),
   };
-}
-
-/**
- * @param {*} variant
- * @param {*} detail
- * @param {string} activeLanguage
- * @returns {boolean}
- */
-function matchesVariant(variant, detail, activeLanguage) {
-  if (!matchesActiveLanguage(variant?.language, activeLanguage)) return false;
-  if (normalizePdfOrientation(variant?.pdfOrientation) !== normalizePdfOrientation(detail?.pdfOrientation)) return false;
-  return getReasonValue(variant) === getReasonValue(detail)
-    && hasPrintFormat(variant) === hasPrintFormat(detail);
 }
 
 /**
@@ -156,6 +134,14 @@ async function runLimited(items, concurrency, runItem, signal) {
 }
 
 /**
+ * @param {number} pageCount
+ * @returns {Array<number>}
+ */
+function createSessionPageNumbers(pageCount) {
+  return Array.from({ length: Math.max(0, Math.floor(Number(pageCount) || 0)) }, (_value, index) => index + 1);
+}
+
+/**
  * @param {Object} args
  * @param {boolean} args.printEnabled
  * @param {boolean} args.isDocumentLoading
@@ -164,7 +150,7 @@ async function runLimited(items, concurrency, runItem, signal) {
  * @param {function(Object): Object} args.makePrintOptions
  * @param {string=} args.language
  * @param {boolean=} args.paused
- * @returns {{status:{state:string,completed:number,total:number,error:string,paused:boolean}, getCachedBlob:function(Object): (Blob|null), cancel:function(): void}}
+ * @returns {{status:{state:string,completed:number,total:number,error:string,paused:boolean}, getCachedBlob:function(Object, Array<number>=, number=): (Blob|null), cancel:function(): void}}
  */
 export default function usePdfPrebuildAllPages({
   printEnabled,
@@ -198,14 +184,21 @@ export default function usePdfPrebuildAllPages({
     setStatus((current) => (current.state === 'ready' ? current : EMPTY_PREBUILD_STATUS));
   }, []);
 
-  const getCachedBlob = useCallback((detail) => {
-    if (!isCacheableAllPagesRequest(detail)) return null;
-    const variants = variantsRef.current || [];
-    const variant = variants.find((item) => matchesVariant(item, detail, language));
-    if (!variant) return null;
-    const entry = cacheRef.current.get(variant.key);
-    return entry?.blob instanceof Blob ? entry.blob : null;
-  }, [language]);
+  const getCachedBlob = useCallback((detail, pageNumbers = [], sessionPageCount = sessionTotalPages) => {
+    const pageCount = Math.max(0, Math.floor(Number(sessionPageCount) || 0));
+    const resolvedPageNumbers = Array.isArray(pageNumbers) && pageNumbers.length
+      ? pageNumbers
+      : createSessionPageNumbers(pageCount);
+    if (!isCacheableAllPagesRequest(detail, resolvedPageNumbers, pageCount)) return null;
+
+    const cacheKey = getPdfPrintCacheKey(detail, resolvedPageNumbers);
+    for (const entry of cacheRef.current.values()) {
+      if (entry?.printCacheKey !== cacheKey) continue;
+      if (!matchesActiveLanguage(entry?.variant?.language, language)) continue;
+      return entry?.blob instanceof Blob ? entry.blob : null;
+    }
+    return null;
+  }, [language, sessionTotalPages]);
 
   useEffect(() => {
     const pageCount = Math.max(0, Math.floor(Number(sessionTotalPages) || 0));
@@ -271,7 +264,7 @@ export default function usePdfPrebuildAllPages({
             return;
           }
           setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });
-          const pageNumbers = Array.from({ length: pageCount }, (_value, index) => index + 1);
+          const pageNumbers = createSessionPageNumbers(pageCount);
           const urls = await collectPrintablePdfSources(documentRenderRef, pageNumbers, signal);
           throwIfAborted(signal);
           if (!Array.isArray(urls) || urls.length !== pageCount) {
@@ -290,7 +283,12 @@ export default function usePdfPrebuildAllPages({
               const blob = await createPrintPdfBlob(urls, options);
               throwIfAborted(signal);
               if (!(blob instanceof Blob)) throw new Error('Prebuilt PDF generation did not return a Blob.');
-              cacheRef.current.set(variant.key, { blob, variant, createdAt: Date.now() });
+              cacheRef.current.set(variant.key, {
+                blob,
+                variant,
+                printCacheKey: getPdfPrintCacheKey(detail, pageNumbers),
+                createdAt: Date.now(),
+              });
               completed += 1;
               if (runSeqRef.current === runSeq) {
                 setStatus({ state: 'pending', completed, total: plan.variants.length, error: '', paused: false });

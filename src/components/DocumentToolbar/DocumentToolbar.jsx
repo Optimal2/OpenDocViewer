@@ -36,6 +36,7 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
+import { canReuseGeneratedPdfPrint, getPdfPrintCacheKey } from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '', minimized: false });
 
@@ -75,53 +76,6 @@ function getPdfProgressPercent(progress) {
   const value = Number.isFinite(rawValue) ? rawValue : progress.current;
   return Math.max(4, Math.min(100, Math.round((Math.max(0, Math.min(total, value)) / total) * 100)));
 }
-
-/**
- * @param {*} value
- * @returns {string}
- */
-function stablePrintText(value) {
-  return value == null ? '' : String(value);
-}
-
-/**
- * Compare the content-affecting print settings that determine whether an existing
- * generated PDF can be reused. `printAction` is intentionally excluded because
- * printing and saving the same prepared PDF use identical PDF bytes.
- * @param {PrintSubmitDetail} detail
- * @param {Array<number>=} pageNumbers
- * @returns {string}
- */
-function getPdfPrintCacheKey(detail, pageNumbers = []) {
-  const pages = (Array.isArray(pageNumbers) ? pageNumbers : [])
-    .map((value) => Math.floor(Number(value) || 0))
-    .filter((value) => value > 0);
-  return JSON.stringify({
-    pageScope: detail?.activeScope === 'compare-both' ? 'compare-both' : 'pages',
-    pages,
-    reason: stablePrintText(detail?.reason),
-    reasonValue: stablePrintText(detail?.reasonSelection?.value),
-    reasonFreeText: stablePrintText(detail?.reasonSelection?.freeText),
-    forWhom: stablePrintText(detail?.forWhom),
-    printFormat: stablePrintText(detail?.printFormat),
-    printFormatValue: stablePrintText(detail?.printFormatValue),
-    printFormatSelectionValue: stablePrintText(detail?.printFormatSelection?.value),
-    pdfOrientation: stablePrintText(detail?.pdfOrientation || 'auto'),
-  });
-}
-
-/**
- * Active-page PDF output is based on the current rendered surface, including transient
- * client-side edits such as rotation, brightness and contrast. It must not be reused
- * as a later print cache entry because the same page number can represent different
- * output bytes after those view edits change.
- * @param {PrintSubmitDetail} detail
- * @returns {boolean}
- */
-function canReuseGeneratedPdfPrint(detail) {
-  return detail?.printBackend === 'pdf' && detail?.mode !== 'active';
-}
-
 
 /**
  * Detail payload emitted by the print dialog.
@@ -1128,7 +1082,7 @@ const DocumentToolbar = ({
     if (detail?.printBackend === 'pdf') {
       const total = Math.max(1, Array.isArray(pageNumbers) && pageNumbers.length ? pageNumbers.length : resolvePrintPageCount(detail));
       const action = detail?.printAction === 'download' ? 'download' : 'print';
-      const cachedBlob = getCachedPrebuiltPdfBlob(detail);
+      const cachedBlob = getCachedPrebuiltPdfBlob(detail, pageNumbers, sessionTotalPages);
       if (cachedBlob instanceof Blob) {
         if (action === 'download') {
           rememberLastPdfPrint(detail, cachedBlob, total, commonOpts.filename || 'opendocviewer-print.pdf', pageNumbers);
@@ -1271,7 +1225,7 @@ const DocumentToolbar = ({
     if (detail.mode === 'advanced' && Array.isArray(detail.sequence) && detail.sequence.length) {
       handlePrintSequence(documentRenderRef, detail.sequence, commonOpts);
     }
-  }, [compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getLastPdfPrintBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, visibleOriginalPageNumbers]);
+  }, [compareRef, documentRenderRef, getCachedPrebuiltPdfBlob, getLastPdfPrintBlob, isComparing, makePrintOptions, rememberLastPdfPrint, resetPdfProgress, resolvePrintPageCount, resolvePrintPageNumbers, sessionTotalPages, visibleOriginalPageNumbers]);
 
   /**
    * Handle the dialog submit event and dispatch the correct print action.
