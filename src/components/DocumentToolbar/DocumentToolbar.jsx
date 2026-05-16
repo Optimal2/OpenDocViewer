@@ -36,7 +36,11 @@ import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
-import { canReuseGeneratedPdfPrint, getPdfPrintCacheKey } from '../../utils/pdfPrintCacheKey.js';
+import {
+  canReuseGeneratedPdfPrint,
+  getPdfPrintCacheKey,
+  getPdfPrintCacheKeyOptions,
+} from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '', minimized: false });
 
@@ -897,6 +901,11 @@ const DocumentToolbar = ({
     }
   }, [memoryPressureStage]);
 
+  const pdfPrintCacheKeyOptions = useMemo(
+    () => getPdfPrintCacheKeyOptions(getRuntimeConfig()),
+    []
+  );
+
   const rememberLastPdfPrint = useCallback((detail, blob, total, filename, pageNumbers = null) => {
     if (!(blob instanceof Blob) || detail?.printBackend !== 'pdf') return;
     const pageTotal = Math.max(1, Math.floor(Number(total) || resolvePrintPageCount(detail) || 1));
@@ -904,7 +913,7 @@ const DocumentToolbar = ({
     const settingsDetail = { ...(detail || {}) };
     if (canReuseGeneratedPdfPrint(detail)) {
       const cachePageNumbers = Array.isArray(pageNumbers) ? pageNumbers : resolvePrintPageNumbers(detail);
-      const cacheKey = getPdfPrintCacheKey(detail, cachePageNumbers);
+      const cacheKey = getPdfPrintCacheKey(detail, cachePageNumbers, pdfPrintCacheKeyOptions);
       pdfPrintCacheRef.current.set(cacheKey, {
         blob,
         detail: settingsDetail,
@@ -919,14 +928,14 @@ const DocumentToolbar = ({
       createdAt,
       detail: settingsDetail,
     });
-  }, [resolvePrintPageCount, resolvePrintPageNumbers]);
+  }, [pdfPrintCacheKeyOptions, resolvePrintPageCount, resolvePrintPageNumbers]);
 
   const getLastPdfPrintBlob = useCallback((detail, pageNumbers) => {
     if (!canReuseGeneratedPdfPrint(detail)) return null;
-    const cacheKey = getPdfPrintCacheKey(detail, pageNumbers);
+    const cacheKey = getPdfPrintCacheKey(detail, pageNumbers, pdfPrintCacheKeyOptions);
     const entry = pdfPrintCacheRef.current.get(cacheKey);
     return entry?.blob instanceof Blob ? entry.blob : null;
-  }, []);
+  }, [pdfPrintCacheKeyOptions]);
 
 
   const {

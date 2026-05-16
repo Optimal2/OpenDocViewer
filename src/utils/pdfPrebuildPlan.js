@@ -8,6 +8,7 @@
  */
 
 import { resolveLocalizedValue, resolveOptionLabel } from './localizedValue.js';
+import { isPdfPrintCacheLanguageIgnored } from './pdfPrintCacheKey.js';
 
 const DEFAULT_PREBUILD_MAX_PAGES = 500;
 const DEFAULT_PREBUILD_MAX_VARIANTS = 12;
@@ -266,6 +267,8 @@ function getActiveLanguageKey(i18nOrLanguage) {
  * @returns {string}
  */
 export function getPdfPrebuildAllPagesLanguageDependency(runtimeConfig, i18nOrLanguage = null) {
+  if (isPdfPrintCacheLanguageIgnored(runtimeConfig)) return 'ignore';
+
   const cfg = runtimeConfig || {};
   const pdfCfg = cfg?.print?.pdf || {};
   const prebuildCfg = normalizePdfPrebuildAllPagesConfig(pdfCfg?.prebuildAllPages || {});
