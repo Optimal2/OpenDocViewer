@@ -247,6 +247,37 @@ function resolveVariantLanguageContext(language, i18nOrLanguage) {
 }
 
 /**
+ * @param {(string|Object|null)} i18nOrLanguage
+ * @returns {string}
+ */
+function getActiveLanguageKey(i18nOrLanguage) {
+  const raw = typeof i18nOrLanguage === 'string'
+    ? i18nOrLanguage
+    : (i18nOrLanguage?.resolvedLanguage || i18nOrLanguage?.language || 'current');
+  return String(raw || 'current').trim().toLowerCase() || 'current';
+}
+
+/**
+ * Return the language dependency that should invalidate an all-pages prebuild run.
+ * Explicit languages such as "sv" produce fixed print output and must survive UI
+ * language changes; "current" intentionally follows the active UI language.
+ * @param {*} runtimeConfig
+ * @param {(string|Object|null)=} i18nOrLanguage
+ * @returns {string}
+ */
+export function getPdfPrebuildAllPagesLanguageDependency(runtimeConfig, i18nOrLanguage = null) {
+  const cfg = runtimeConfig || {};
+  const pdfCfg = cfg?.print?.pdf || {};
+  const prebuildCfg = normalizePdfPrebuildAllPagesConfig(pdfCfg?.prebuildAllPages || {});
+  const usesCurrentLanguage = prebuildCfg.languages.some((language) => {
+    const value = String(language || '').trim().toLowerCase();
+    return !value || value === 'current';
+  });
+  if (!usesCurrentLanguage) return 'fixed';
+  return getActiveLanguageKey(i18nOrLanguage);
+}
+
+/**
  * Create all cacheable all-pages PDF variant descriptors for a runtime config.
  * @param {*} runtimeConfig
  * @param {(string|Object|null)=} i18nOrLanguage

@@ -243,7 +243,8 @@
         prebuildAllPages: {
           enabled: false,
           // Use explicit languages for deployments that print in a fixed language,
-          // e.g. ['sv']. Use ['current'] to follow the active UI language.
+          // e.g. ['sv']. Explicit languages survive UI language changes.
+          // Use ['current'] to follow the active UI language.
           languages: ['current'],
           // "default" follows watermark.defaultChecked, "on"/"off" force one state,
           // and "both" prebuilds both copy-marker states.
