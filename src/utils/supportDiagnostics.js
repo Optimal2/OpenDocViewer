@@ -13,6 +13,12 @@ import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
 const DOWNLOAD_URL_REVOKE_DELAY_MS = 30 * 1000;
+// Diagnostics payloads cap arrays so downloaded files stay readable while still
+// including enough configured values to troubleshoot support cases.
+const NAVIGATOR_LANGUAGE_DIAGNOSTIC_LIMIT = 8;
+const DIAGNOSTIC_OPTION_LIST_LIMIT = 12;
+const DIAGNOSTIC_BATCH_LIST_LIMIT = 16;
+const DIAGNOSTIC_DETAIL_LIST_LIMIT = 32;
 
 /**
  * @returns {string}
@@ -59,7 +65,7 @@ function collectNavigatorDiagnostics() {
   return {
     userAgent: String(nav?.userAgent || ''),
     language: String(nav?.language || ''),
-    languages: Array.isArray(nav?.languages) ? nav.languages.slice(0, 8) : [],
+    languages: Array.isArray(nav?.languages) ? nav.languages.slice(0, NAVIGATOR_LANGUAGE_DIAGNOSTIC_LIMIT) : [],
     hardwareConcurrency: Number(nav?.hardwareConcurrency || 0) || 0,
     deviceMemoryGb: Number(nav?.deviceMemory || 0) || 0,
     platform: String(nav?.platform || ''),
@@ -102,13 +108,21 @@ function collectConfigDiagnostics() {
       imageLoadConcurrency: Number(pdf.imageLoadConcurrency || 0) || 0,
       benchmarkEnabled: benchmark.enabled === true,
       benchmarkProfile: String(benchmark.profile || ''),
-      benchmarkStrategies: Array.isArray(benchmark.strategies) ? benchmark.strategies.slice(0, 12) : [],
-      benchmarkWorkerCounts: Array.isArray(benchmark.workerCounts) ? benchmark.workerCounts.slice(0, 32) : [],
-      benchmarkImageLoadConcurrencies: Array.isArray(benchmark.imageLoadConcurrencies)
-        ? benchmark.imageLoadConcurrencies.slice(0, 32)
+      benchmarkStrategies: Array.isArray(benchmark.strategies)
+        ? benchmark.strategies.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
         : [],
-      benchmarkBatchCounts: Array.isArray(benchmark.batchCounts) ? benchmark.batchCounts.slice(0, 16) : [],
-      benchmarkMergeModes: Array.isArray(benchmark.mergeModes) ? benchmark.mergeModes.slice(0, 12) : [],
+      benchmarkWorkerCounts: Array.isArray(benchmark.workerCounts)
+        ? benchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
+      benchmarkImageLoadConcurrencies: Array.isArray(benchmark.imageLoadConcurrencies)
+        ? benchmark.imageLoadConcurrencies.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
+      benchmarkBatchCounts: Array.isArray(benchmark.batchCounts)
+        ? benchmark.batchCounts.slice(0, DIAGNOSTIC_BATCH_LIST_LIMIT)
+        : [],
+      benchmarkMergeModes: Array.isArray(benchmark.mergeModes)
+        ? benchmark.mergeModes.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
+        : [],
       benchmarkMaxRuns: Number(benchmark.maxRuns || 0) || 0,
       cacheLanguageMode: pdfCacheOptions.languageMode,
       prebuildAllPages: {
@@ -119,7 +133,7 @@ function collectConfigDiagnostics() {
         maxVariants: prebuildPlan.config.maxVariants,
         concurrency: prebuildPlan.config.concurrency,
         plannedVariantCount: prebuildPlan.variants.length,
-        plannedVariantKeys: prebuildPlan.variants.map((variant) => variant.key).slice(0, 32),
+        plannedVariantKeys: prebuildPlan.variants.map((variant) => variant.key).slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT),
       },
     },
     documentLoading: {
@@ -130,10 +144,12 @@ function collectConfigDiagnostics() {
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
-      renderBenchmarkVariants: Array.isArray(renderBenchmark.variants) ? renderBenchmark.variants.slice(0, 12) : [],
+      renderBenchmarkVariants: Array.isArray(renderBenchmark.variants)
+        ? renderBenchmark.variants.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
+        : [],
       renderBenchmarkSampleMode: String(renderBenchmark.sampleMode || ''),
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
-        ? renderBenchmark.workerCounts.slice(0, 32)
+        ? renderBenchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
         : [],
       renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns || 0) || 0,
     },
@@ -202,8 +218,8 @@ export function saveLatestRenderDecodeBenchmarkResult(result) {
  * @returns {Object}
  */
 export function collectSupportDiagnostics(extra = {}) {
-  const hasLatestPdfBenchmark = Object.prototype.hasOwnProperty.call(extra, 'latestPdfBenchmark');
-  const hasLatestRenderDecodeBenchmark = Object.prototype.hasOwnProperty.call(extra, 'latestRenderDecodeBenchmark');
+  const hasLatestPdfBenchmark = Object.hasOwn(extra, 'latestPdfBenchmark');
+  const hasLatestRenderDecodeBenchmark = Object.hasOwn(extra, 'latestRenderDecodeBenchmark');
   return {
     schema: 'opendocviewer.support-diagnostics.v1',
     createdUtc: new Date().toISOString(),
