@@ -12,26 +12,43 @@ import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 // best-effort support data and do not require migration.
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
+const DOWNLOAD_URL_REVOKE_DELAY_MS = 30 * 1000;
+
+/**
+ * @returns {string}
+ */
+function resolveWindowAppVersion() {
+  if (typeof window === 'undefined') return '';
+  return String(window.__ODV_APP_VERSION__ || window.__APP_VERSION__ || '').trim();
+}
+
+/**
+ * @param {...string} names
+ * @returns {string}
+ */
+function resolveImportMetaEnvValue(...names) {
+  if (typeof import.meta === 'undefined' || !import.meta.env) return '';
+  for (const name of names) {
+    const value = String(import.meta.env[name] || '').trim();
+    if (value) return value;
+  }
+  return '';
+}
 
 /**
  * @returns {string}
  */
 function resolveAppVersion() {
-  return String(
-    (typeof window !== 'undefined' && (window.__ODV_APP_VERSION__ || window.__APP_VERSION__))
-      || (typeof import.meta !== 'undefined' && import.meta.env && (import.meta.env.VITE_APP_VERSION || import.meta.env.APP_VERSION))
-      || 'unknown'
-  );
+  return resolveWindowAppVersion()
+    || resolveImportMetaEnvValue('VITE_APP_VERSION', 'APP_VERSION')
+    || 'unknown';
 }
 
 /**
  * @returns {string}
  */
 function resolveBuildId() {
-  return String(
-    (typeof import.meta !== 'undefined' && import.meta.env && import.meta.env.ODV_BUILD_ID)
-      || ''
-  ).trim();
+  return resolveImportMetaEnvValue('ODV_BUILD_ID');
 }
 
 /**
@@ -234,14 +251,8 @@ export function downloadJsonFile(filename, payload) {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    const revokeUrl = () => URL.revokeObjectURL(url);
-    if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
-      window.setTimeout(revokeUrl, 30 * 1000);
-    } else if (typeof setTimeout === 'function') {
-      setTimeout(revokeUrl, 30 * 1000);
-    } else {
-      revokeUrl();
-    }
+    const scheduleTimeout = typeof window !== 'undefined' ? window.setTimeout : setTimeout;
+    scheduleTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
     return true;
   } catch {
     if (url && typeof URL.revokeObjectURL === 'function') {
