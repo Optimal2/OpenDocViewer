@@ -25,6 +25,8 @@ const DIAGNOSTIC_DETAIL_LIST_LIMIT = 32;
  */
 function resolveWindowAppVersion() {
   if (typeof window === 'undefined') return '';
+  // Optional host/bootstrap globals. When present they are expected to be
+  // version strings or values that can be stringified for support diagnostics.
   return String(window.__ODV_APP_VERSION__ || window.__APP_VERSION__ || '').trim();
 }
 
@@ -33,9 +35,10 @@ function resolveWindowAppVersion() {
  * @returns {string}
  */
 function resolveImportMetaEnvValue(...names) {
-  if (typeof import.meta === 'undefined' || !import.meta.env) return '';
+  const env = import.meta?.env;
+  if (!env) return '';
   for (const name of names) {
-    const value = String(import.meta.env[name] || '').trim();
+    const value = String(env[name] || '').trim();
     if (value) return value;
   }
   return '';
@@ -85,10 +88,10 @@ function collectNavigatorDiagnostics() {
     userAgent: String(nav?.userAgent || ''),
     language: String(nav?.language || ''),
     languages: Array.isArray(nav?.languages) ? nav.languages.slice(0, NAVIGATOR_LANGUAGE_DIAGNOSTIC_LIMIT) : [],
-    hardwareConcurrency: Number(nav?.hardwareConcurrency || 0) || 0,
+    hardwareConcurrency: Number(nav?.hardwareConcurrency) || 0,
     // navigator.deviceMemory is already reported in gigabytes; keep the suffix
     // so downloaded diagnostics make the unit explicit.
-    deviceMemoryGb: Number(nav?.deviceMemory || 0) || 0,
+    deviceMemoryGb: Number(nav?.deviceMemory) || 0,
     platform: String(nav?.platform || ''),
   };
 }
@@ -122,11 +125,11 @@ function collectConfigDiagnostics() {
     printPdf: {
       enabled: pdf.enabled === true,
       workerEnabled: pdf.workerEnabled !== false,
-      workerPageThreshold: Number(pdf.workerPageThreshold || 0) || 0,
+      workerPageThreshold: Number(pdf.workerPageThreshold) || 0,
       partialMergeEnabled: pdf.partialMergeEnabled !== false,
-      workerCount: Number(pdf.workerCount || 0) || 0,
-      workerBatchSize: Number(pdf.workerBatchSize || 0) || 0,
-      imageLoadConcurrency: Number(pdf.imageLoadConcurrency || 0) || 0,
+      workerCount: Number(pdf.workerCount) || 0,
+      workerBatchSize: Number(pdf.workerBatchSize) || 0,
+      imageLoadConcurrency: Number(pdf.imageLoadConcurrency) || 0,
       benchmarkEnabled: benchmark.enabled === true,
       benchmarkProfile: String(benchmark.profile || ''),
       benchmarkStrategies: Array.isArray(benchmark.strategies)
@@ -144,7 +147,7 @@ function collectConfigDiagnostics() {
       benchmarkMergeModes: Array.isArray(benchmark.mergeModes)
         ? benchmark.mergeModes.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
         : [],
-      benchmarkMaxRuns: Number(benchmark.maxRuns || 0) || 0,
+      benchmarkMaxRuns: Number(benchmark.maxRuns) || 0,
       cacheLanguageMode: pdfCacheOptions.languageMode,
       prebuildAllPages: {
         enabled: prebuildPlan.enabled === true,
@@ -161,7 +164,7 @@ function collectConfigDiagnostics() {
       mode: String(loading.mode || ''),
       renderStrategy: String(render.strategy || ''),
       renderBackend: String(render.backend || ''),
-      workerCount: Number(render.workerCount || 0) || 0,
+      workerCount: Number(render.workerCount) || 0,
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
@@ -172,7 +175,7 @@ function collectConfigDiagnostics() {
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
         ? renderBenchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
         : [],
-      renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns || 0) || 0,
+      renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns) || 0,
     },
   };
 }
