@@ -76,7 +76,7 @@ function resolveAppVersion() {
  * @returns {string}
  */
 function resolveBuildId() {
-  return resolveImportMetaEnvValue('ODV_BUILD_ID');
+  return resolveImportMetaEnvValue('ODV_BUILD_ID', 'BUILD_ID');
 }
 
 /**
@@ -265,7 +265,7 @@ export function collectSupportDiagnostics(extra = {}) {
 }
 
 /**
- * @param {string} filename
+ * @param {string=} filename
  * @param {*} payload
  * @returns {boolean}
  */
