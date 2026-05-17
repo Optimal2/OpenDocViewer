@@ -37,7 +37,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} setZoomState
  * @property {Object} documentRenderRef         - Ref-like { current: any }
  * @property {Object} viewerContainerRef        - Ref-like { current: HTMLElement|null }
- * @property {number} imageRotation
+ * @property {string} imageRotationKey          - Primary/compare rotation dependency key.
  * @property {boolean} isComparing
  * @property {number} thumbnailWidth
  * @property {number} pageNumber
@@ -178,7 +178,7 @@ export function useViewerEffects(args) {
     setZoomState,
     documentRenderRef,
     viewerContainerRef,
-    imageRotation,
+    imageRotationKey,
     isComparing,
     thumbnailWidth,
     pageNumber,
@@ -311,7 +311,7 @@ export function useViewerEffects(args) {
     return () => {
       window.cancelAnimationFrame(rafId);
     };
-  }, [pageNumber, imageRotation, isComparing, thumbnailWidth, zoomState.mode, documentRenderRef]);
+  }, [pageNumber, imageRotationKey, isComparing, thumbnailWidth, zoomState.mode, documentRenderRef]);
 
   // Re-fit on container resize (only in Fit modes)
   useEffect(() => {

@@ -7,6 +7,9 @@ import { getRuntimeConfig } from './runtimeConfig.js';
 import { createPdfPrebuildAllPagesVariants } from './pdfPrebuildPlan.js';
 import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 
+// The .v1 suffix is part of the local diagnostics storage contract. Future
+// incompatible payloads should use a new key; old entries are tiny,
+// best-effort support data and do not require migration.
 const LATEST_PDF_BENCHMARK_KEY = 'odv.pdfBenchmark.latest.v1';
 const LATEST_RENDER_DECODE_BENCHMARK_KEY = 'odv.renderDecodeBenchmark.latest.v1';
 
@@ -121,12 +124,13 @@ function collectConfigDiagnostics() {
 }
 
 /**
+ * @param {string} storageKey
  * @returns {Object|null}
  */
-export function loadLatestPdfBenchmarkResult() {
+function loadLatestBenchmarkResult(storageKey) {
   try {
     const raw = typeof localStorage !== 'undefined'
-      ? localStorage.getItem(LATEST_PDF_BENCHMARK_KEY)
+      ? localStorage.getItem(storageKey)
       : null;
     if (!raw) return null;
     const parsed = JSON.parse(raw);
@@ -134,6 +138,13 @@ export function loadLatestPdfBenchmarkResult() {
   } catch {
     return null;
   }
+}
+
+/**
+ * @returns {Object|null}
+ */
+export function loadLatestPdfBenchmarkResult() {
+  return loadLatestBenchmarkResult(LATEST_PDF_BENCHMARK_KEY);
 }
 
 /**
@@ -153,16 +164,7 @@ export function saveLatestPdfBenchmarkResult(result) {
  * @returns {Object|null}
  */
 export function loadLatestRenderDecodeBenchmarkResult() {
-  try {
-    const raw = typeof localStorage !== 'undefined'
-      ? localStorage.getItem(LATEST_RENDER_DECODE_BENCHMARK_KEY)
-      : null;
-    if (!raw) return null;
-    const parsed = JSON.parse(raw);
-    return parsed && typeof parsed === 'object' ? parsed : null;
-  } catch {
-    return null;
-  }
+  return loadLatestBenchmarkResult(LATEST_RENDER_DECODE_BENCHMARK_KEY);
 }
 
 /**
@@ -211,19 +213,40 @@ export function collectSupportDiagnostics(extra = {}) {
  * @returns {boolean}
  */
 export function downloadJsonFile(filename, payload) {
+  if (
+    typeof document === 'undefined'
+    || !document.body
+    || typeof Blob === 'undefined'
+    || typeof URL === 'undefined'
+    || typeof URL.createObjectURL !== 'function'
+  ) {
+    return false;
+  }
+
+  let url = '';
   try {
     const json = JSON.stringify(payload, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
-    const url = URL.createObjectURL(blob);
+    url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
     link.download = filename || 'opendocviewer-diagnostics.json';
     document.body.appendChild(link);
     link.click();
     link.remove();
-    window.setTimeout(() => URL.revokeObjectURL(url), 30 * 1000);
+    const revokeUrl = () => URL.revokeObjectURL(url);
+    if (typeof window !== 'undefined' && typeof window.setTimeout === 'function') {
+      window.setTimeout(revokeUrl, 30 * 1000);
+    } else if (typeof setTimeout === 'function') {
+      setTimeout(revokeUrl, 30 * 1000);
+    } else {
+      revokeUrl();
+    }
     return true;
   } catch {
+    if (url && typeof URL.revokeObjectURL === 'function') {
+      URL.revokeObjectURL(url);
+    }
     return false;
   }
 }
