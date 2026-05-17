@@ -284,11 +284,19 @@ export function downloadJsonFile(filename, payload) {
     || typeof Blob === 'undefined'
     || typeof URL === 'undefined'
     || typeof URL.createObjectURL !== 'function'
+    || typeof URL.revokeObjectURL !== 'function'
   ) {
     return false;
   }
 
-  let url = null;
+  let url;
+  let revokeTimerId;
+  const revokeUrl = () => {
+    if (!url) return;
+    URL.revokeObjectURL(url);
+    url = undefined;
+  };
+
   try {
     const json = JSON.stringify(payload, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
@@ -299,12 +307,13 @@ export function downloadJsonFile(filename, payload) {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
+    revokeTimerId = setTimeout(revokeUrl, DOWNLOAD_URL_REVOKE_DELAY_MS);
     return true;
   } catch {
-    if (url && typeof URL.revokeObjectURL === 'function') {
-      URL.revokeObjectURL(url);
+    if (revokeTimerId !== undefined) {
+      clearTimeout(revokeTimerId);
     }
+    revokeUrl();
     return false;
   }
 }
