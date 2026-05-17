@@ -251,8 +251,7 @@ export function downloadJsonFile(filename, payload) {
     document.body.appendChild(link);
     link.click();
     link.remove();
-    const scheduleTimeout = typeof window !== 'undefined' ? window.setTimeout : setTimeout;
-    scheduleTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
+    setTimeout(() => URL.revokeObjectURL(url), DOWNLOAD_URL_REVOKE_DELAY_MS);
     return true;
   } catch {
     if (url && typeof URL.revokeObjectURL === 'function') {
