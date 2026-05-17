@@ -50,9 +50,19 @@ function normalizeRotationDegrees(value) {
 /** Neutral per-page image adjustment state. */
 const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, contrast: 100 });
 
-// Primary and compare rotations are packed into one dependency value for useViewerEffects.
-// Rotation is normalized to 0..359 degrees, so 1000 keeps the two pane values from overlapping.
-const COMPARE_ROTATION_DEPENDENCY_MULTIPLIER = 1000;
+// The viewer API still exposes a container-click hook for shell components, but
+// this hook currently has no behavior. Keep the no-op at module scope so it is
+// stable without allocating an empty callback for every hook instance.
+const HANDLE_CONTAINER_CLICK_NOOP = () => {};
+
+/**
+ * @param {*} primaryRotation
+ * @param {*} compareRotation
+ * @returns {string}
+ */
+function buildImageRotationDependencyKey(primaryRotation, compareRotation) {
+  return `${normalizeRotationDegrees(primaryRotation)}|${normalizeRotationDegrees(compareRotation)}`;
+}
 
 /**
  * @param {(Array<boolean>|null|undefined)} mask
@@ -562,8 +572,7 @@ export function useDocumentViewer() {
     ...DEFAULT_IMAGE_PROPERTIES,
   }));
 
-  const [isExpandedRaw, setIsExpandedRaw] = useState(false); // editing-controls visibility
-  const isExpanded = isExpandedRaw;
+  const [isExpanded, setIsExpandedState] = useState(false); // editing-controls visibility
 
   const [thumbnailWidth, setThumbnailWidth] = useState(THUMBNAIL_WIDTH_DEFAULT);
 
@@ -1043,7 +1052,7 @@ export function useDocumentViewer() {
    */
   const setIsExpanded = useCallback((next) => {
     const resolve = (curr) => (typeof next === 'function' ? next(curr) : next);
-    setIsExpandedRaw((curr) => !!resolve(curr));
+    setIsExpandedState((curr) => !!resolve(curr));
   }, []);
 
   /** Toggle compare mode. */
@@ -1200,12 +1209,11 @@ export function useDocumentViewer() {
     window.addEventListener('mouseup', onUp);
   }, [thumbnailWidth]);
 
-  /**
-   * Intentionally a no-op. The outer viewer shell keeps an explicit click handler slot so the
-   * container API shape stays stable while focus/selection behavior is evaluated separately from
-   * page activation, compare toggling, and edit-mode interactions.
-   */
-  const handleContainerClick = useCallback(function handleContainerClick() {}, []);
+  const handleContainerClick = HANDLE_CONTAINER_CLICK_NOOP;
+  const imageRotationKey = buildImageRotationDependencyKey(
+    primaryImageProperties.rotation,
+    compareImageProperties.rotation
+  );
 
   // --- Effects: sticky fit, global wheel, hotkeys --------------------------------
   useViewerEffects({
@@ -1214,8 +1222,7 @@ export function useDocumentViewer() {
     setZoomState,
     documentRenderRef,
     viewerContainerRef,
-    imageRotation: (Number(primaryImageProperties.rotation) || 0)
-      + ((Number(compareImageProperties.rotation) || 0) * COMPARE_ROTATION_DEPENDENCY_MULTIPLIER),
+    imageRotationKey,
     isComparing,
     thumbnailWidth,
     pageNumber: currentOriginalPageNumber,
