@@ -2,28 +2,31 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.0.2** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.0.3** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v2.0.1** remains supported and may still be used in production where the v2.0.2 patch has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest generated-PDF cache language-mode fixes and fixed-language prebuild reuse.
+**OpenDocViewer v2.0.2** remains supported and may still be used in production where the v2.0.3 patch has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest diagnostics and OMP artifact manifest improvements.
 
-**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.x patch line has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, and selection-panel behavior.
+**OpenDocViewer v2.0.1** remains supported and may still be used in production where the v2.0.2 or v2.0.3 patches have not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest generated-PDF cache language-mode fixes, fixed-language prebuild reuse, diagnostics cleanup, and OMP artifact manifest support.
 
-**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.x feature release has not yet been rolled out, but the recommendation is to move to v2.0.2 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, and deployment-configuration controls.
+**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.x patch line has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, selection-panel behavior, diagnostics cleanup, and OMP artifact manifest support.
 
-**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.0.x upgrade has not yet been completed, but the recommendation is to move to v2.0.2 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, and release-script documentation.
+**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.x feature release has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, deployment-configuration controls, and OMP artifact manifest support.
 
-**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.0.2 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, and operational support tooling.
+**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.0.x upgrade has not yet been completed, but the recommendation is to move to v2.0.3 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, and release-script documentation.
+
+**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.0.3 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, and operational support tooling.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.0.2   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.0.2 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.0.2 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.0.2 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.0.2 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.0.2 and not the preferred target for new deployments |
+| 2.0.3   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -41,6 +44,20 @@ Earlier releases are retained for historical reference only and are **not recomm
 ## Recent release context
 
 The eight most recent releases are listed below for operational context.
+
+### OpenDocViewer v2.0.3
+Changes since v2.0.2:
+
+- Improved diagnostics JSON downloads with timestamped default filenames.
+- Added console diagnostics when a diagnostics download cannot be created.
+- Hardened temporary download URL cleanup after successful and failed diagnostics downloads.
+- Added build-id fallback support for diagnostics.
+- Made diagnostics fields clearer by naming render-worker counts separately and documenting device-memory units.
+- Kept diagnostics own-property checks compatible with older browser shells.
+- Replaced several diagnostics list-size literals with named limits.
+- Reduced duplicate benchmark-result loading logic.
+- Replaced packed compare-rotation dependency math with an explicit primary/compare rotation key.
+- Added an OMP component manifest and version-bump helper for artifact-based deployment tooling.
 
 ### OpenDocViewer v2.0.2
 Changes since v2.0.1:
@@ -156,22 +173,6 @@ Changes since v1.6.0:
 - Refreshed selected dependencies, including `i18next-http-backend` and `postcss`.
 
 v1.7.0 is superseded by later releases and is not recommended for current deployments.
-
-### OpenDocViewer v1.6.0
-Changes since v1.5.0:
-
-- Preserved full raw document metadata in the normalized integration model.
-- Added optional semantic alias mapping for metadata.
-- Exposed document metadata through viewer tools.
-- Added document metadata overlays from page and thumbnail context menus.
-- Added a metadata matrix view for all documents in the current session.
-- Improved metadata labeling and fallback behavior.
-- Added consistent Escape-to-close behavior for the new overlays.
-- Expanded the toolbar/help area with separate manual and about views.
-- Added visible application version information in the UI.
-- Added site-local HTML manual support.
-- Reintroduced theme support with explicit Normal, Light, and Dark modes.
-- Persisted the selected theme and broadened theme-token coverage across dialogs and controls.
 
 ## Reporting a Vulnerability
 
