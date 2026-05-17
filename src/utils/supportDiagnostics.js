@@ -53,6 +53,16 @@ function hasOwn(value, propertyName) {
 /**
  * @returns {string}
  */
+function createDefaultDiagnosticsFilename() {
+  const timestamp = new Date()
+    .toISOString()
+    .replace(/[:.]/g, '-');
+  return `opendocviewer-diagnostics-${timestamp}.json`;
+}
+
+/**
+ * @returns {string}
+ */
 function resolveAppVersion() {
   return resolveWindowAppVersion()
     || resolveImportMetaEnvValue('VITE_APP_VERSION', 'APP_VERSION')
@@ -76,6 +86,8 @@ function collectNavigatorDiagnostics() {
     language: String(nav?.language || ''),
     languages: Array.isArray(nav?.languages) ? nav.languages.slice(0, NAVIGATOR_LANGUAGE_DIAGNOSTIC_LIMIT) : [],
     hardwareConcurrency: Number(nav?.hardwareConcurrency || 0) || 0,
+    // navigator.deviceMemory is already reported in gigabytes; keep the suffix
+    // so downloaded diagnostics make the unit explicit.
     deviceMemoryGb: Number(nav?.deviceMemory || 0) || 0,
     platform: String(nav?.platform || ''),
   };
@@ -272,7 +284,7 @@ export function downloadJsonFile(filename, payload) {
     url = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = url;
-    link.download = filename || 'opendocviewer-diagnostics.json';
+    link.download = filename || createDefaultDiagnosticsFilename();
     document.body.appendChild(link);
     link.click();
     link.remove();
