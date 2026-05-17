@@ -289,31 +289,23 @@ export function downloadJsonFile(filename, payload) {
     return false;
   }
 
-  let url;
-  let revokeTimerId;
-  const revokeUrl = () => {
-    if (!url) return;
-    URL.revokeObjectURL(url);
-    url = undefined;
-  };
-
+  let createdUrl;
   try {
     const json = JSON.stringify(payload, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
-    url = URL.createObjectURL(blob);
+    createdUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
-    link.href = url;
+    link.href = createdUrl;
     link.download = filename || createDefaultDiagnosticsFilename();
     document.body.appendChild(link);
     link.click();
     link.remove();
-    revokeTimerId = setTimeout(revokeUrl, DOWNLOAD_URL_REVOKE_DELAY_MS);
+    setTimeout(() => URL.revokeObjectURL(createdUrl), DOWNLOAD_URL_REVOKE_DELAY_MS);
     return true;
   } catch {
-    if (revokeTimerId !== undefined) {
-      clearTimeout(revokeTimerId);
+    if (createdUrl) {
+      URL.revokeObjectURL(createdUrl);
     }
-    revokeUrl();
     return false;
   }
 }
