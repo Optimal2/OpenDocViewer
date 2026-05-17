@@ -23,7 +23,7 @@ const DIAGNOSTIC_DETAIL_LIST_LIMIT = 32;
 /**
  * @returns {string}
  */
-function resolveWindowAppVersion() {
+function getAppVersionFromWindowGlobals() {
   if (typeof window === 'undefined') return '';
   // Optional host/bootstrap globals. When present they are expected to be
   // version strings or values that can be stringified for support diagnostics.
@@ -50,6 +50,8 @@ function resolveImportMetaEnvValue(...names) {
  * @returns {boolean}
  */
 function hasOwn(value, propertyName) {
+  // Object.hasOwn is cleaner, but this compatibility helper keeps diagnostics
+  // usable in older embedded browser shells that do not fully implement ES2022.
   return Object.prototype.hasOwnProperty.call(value, propertyName);
 }
 
@@ -67,7 +69,7 @@ function createDefaultDiagnosticsFilename() {
  * @returns {string}
  */
 function resolveAppVersion() {
-  return resolveWindowAppVersion()
+  return getAppVersionFromWindowGlobals()
     || resolveImportMetaEnvValue('VITE_APP_VERSION', 'APP_VERSION')
     || 'unknown';
 }
@@ -286,7 +288,7 @@ export function downloadJsonFile(filename, payload) {
     return false;
   }
 
-  let url = '';
+  let url = null;
   try {
     const json = JSON.stringify(payload, null, 2);
     const blob = new Blob([json], { type: 'application/json' });
