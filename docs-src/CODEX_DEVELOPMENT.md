@@ -18,6 +18,7 @@ Use these files as the main map:
 - `docs-src/runtime-configuration.md` - runtime config loading order, override rules, and deployment notes.
 - `docs-src/deploy-ops.md` - IIS hosting, proxy deployment, cache rules, and operational checklists.
 - `docs-src/log-servers.md` - optional logging endpoint contracts and security assumptions.
+- `docs-src/omp-component-manifest.md` - OMP artifact component manifest and version-bump helper usage.
 - `docs-src/printing.md` - print pipeline design and module boundaries.
 
 ## Language and Documentation Policy
