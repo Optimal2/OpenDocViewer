@@ -265,9 +265,15 @@ export function collectSupportDiagnostics(extra = {}) {
 }
 
 /**
- * @param {string=} filename
- * @param {*} payload
- * @returns {boolean}
+ * Download a JSON diagnostics payload in browser environments.
+ *
+ * The filename parameter intentionally stays first because this helper is an
+ * existing exported API and toolbar call sites pass `(filename, payload)`.
+ * Pass an empty string to use a timestamped default diagnostics filename.
+ *
+ * @param {string} filename - Preferred download filename, or empty for the default.
+ * @param {*} payload - JSON-serializable diagnostics payload.
+ * @returns {boolean} True when the browser download was started; false when required browser APIs are unavailable or serialization fails.
  */
 export function downloadJsonFile(filename, payload) {
   if (
