@@ -42,6 +42,15 @@ function resolveImportMetaEnvValue(...names) {
 }
 
 /**
+ * @param {Object} value
+ * @param {string} propertyName
+ * @returns {boolean}
+ */
+function hasOwn(value, propertyName) {
+  return Object.prototype.hasOwnProperty.call(value, propertyName);
+}
+
+/**
  * @returns {string}
  */
 function resolveAppVersion() {
@@ -218,8 +227,8 @@ export function saveLatestRenderDecodeBenchmarkResult(result) {
  * @returns {Object}
  */
 export function collectSupportDiagnostics(extra = {}) {
-  const hasLatestPdfBenchmark = Object.hasOwn(extra, 'latestPdfBenchmark');
-  const hasLatestRenderDecodeBenchmark = Object.hasOwn(extra, 'latestRenderDecodeBenchmark');
+  const hasLatestPdfBenchmark = hasOwn(extra, 'latestPdfBenchmark');
+  const hasLatestRenderDecodeBenchmark = hasOwn(extra, 'latestRenderDecodeBenchmark');
   return {
     schema: 'opendocviewer.support-diagnostics.v1',
     createdUtc: new Date().toISOString(),
