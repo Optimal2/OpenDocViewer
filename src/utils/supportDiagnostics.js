@@ -66,6 +66,24 @@ function createDefaultDiagnosticsFilename() {
 }
 
 /**
+ * @param {*} filename
+ * @returns {string}
+ */
+function normalizeDownloadFilename(filename) {
+  const text = typeof filename === 'string' ? filename.trim() : '';
+  return text || createDefaultDiagnosticsFilename();
+}
+
+/**
+ * @param {unknown} error
+ * @returns {void}
+ */
+function logDiagnosticsDownloadFailure(error) {
+  if (typeof console === 'undefined' || typeof console.warn !== 'function') return;
+  console.warn('[OpenDocViewer] Diagnostics download failed.', error);
+}
+
+/**
  * @returns {string}
  */
 function resolveAppVersion() {
@@ -166,7 +184,7 @@ function collectConfigDiagnostics() {
       mode: String(loading.mode || ''),
       renderStrategy: String(render.strategy || ''),
       renderBackend: String(render.backend || ''),
-      workerCount: Number(render.workerCount) || 0,
+      renderWorkerCount: Number(render.workerCount) || 0,
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
@@ -273,7 +291,7 @@ export function collectSupportDiagnostics(extra = {}) {
  * existing exported API and toolbar call sites pass `(filename, payload)`.
  * Pass an empty string to use a timestamped default diagnostics filename.
  *
- * @param {string} filename - Preferred download filename, or empty for the default.
+ * @param {*} filename - Preferred download filename string, or an empty/non-string value for the default.
  * @param {*} payload - JSON-serializable diagnostics payload.
  * @returns {boolean} True when the browser download was started; false when required browser APIs are unavailable or serialization fails.
  */
@@ -296,16 +314,17 @@ export function downloadJsonFile(filename, payload) {
     createdUrl = URL.createObjectURL(blob);
     const link = document.createElement('a');
     link.href = createdUrl;
-    link.download = filename || createDefaultDiagnosticsFilename();
+    link.download = normalizeDownloadFilename(filename);
     document.body.appendChild(link);
     link.click();
     link.remove();
     setTimeout(() => URL.revokeObjectURL(createdUrl), DOWNLOAD_URL_REVOKE_DELAY_MS);
     return true;
-  } catch {
+  } catch (error) {
     if (createdUrl) {
       URL.revokeObjectURL(createdUrl);
     }
+    logDiagnosticsDownloadFailure(error);
     return false;
   }
 }
