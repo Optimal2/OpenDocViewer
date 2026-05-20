@@ -13,6 +13,9 @@ HostAgent tooling can treat it consistently.
 - `repositoryKey` identifies the source repository.
 - `repositoryVersion` is an optional coordinated release version for the whole
   repository.
+- `moduleDefinitions` lists the OMP module-definition document owned by the
+  repository. The JSON file lives at the repository root because OpenDocViewer
+  is a single-module repository.
 - `componentKey` is the stable key used by scripts and release tooling.
 - `moduleKey`, `appKey`, `packageType`, and `targetName` identify the OMP
   artifact target.
