@@ -5,7 +5,7 @@
   "moduleDefinitions": [
     {
       "moduleKey": "opendocviewer",
-      "definitionVersion": "2.0.3",
+      "definitionVersion": "2.0.3.1",
       "path": "opendocviewer.module-definition.json"
     }
   ],
