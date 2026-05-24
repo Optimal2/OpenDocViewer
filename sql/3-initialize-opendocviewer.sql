@@ -12,7 +12,7 @@ BEGIN
 END
 GO
 
-DECLARE @ArtifactVersion nvarchar(50) = N'2.0.3';
+DECLARE @ArtifactVersion nvarchar(50) = N'2.0.4';
 DECLARE @OpenDocViewerDisplayName nvarchar(150) = N'OpenDocViewer';
 DECLARE @OpenDocViewerRoutePath nvarchar(256) = N'opendocviewer';
 DECLARE @OpenDocViewerPublicUrl nvarchar(500) = NULL;
