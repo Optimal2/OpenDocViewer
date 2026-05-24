@@ -7,6 +7,7 @@
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
+import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 
@@ -49,11 +50,24 @@ function isRewritableRelativeUrl(value) {
 
 /**
  * @param {string} html
+ * @returns {string}
+ */
+function sanitizeManualHtml(html) {
+  return DOMPurify.sanitize(String(html || ''), {
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    ADD_ATTR: ['target'],
+    FORBID_ATTR: ['srcdoc'],
+    FORBID_TAGS: ['script', 'iframe', 'object', 'embed', 'form', 'input', 'button'],
+  });
+}
+
+/**
+ * @param {string} html
  * @param {string} resolvedUrl
  * @returns {string}
  */
 function rewriteManualHtml(html, resolvedUrl) {
-  if (typeof DOMParser === 'undefined') return html;
+  if (typeof DOMParser === 'undefined') return sanitizeManualHtml(html);
   const parser = new DOMParser();
   const doc = parser.parseFromString(String(html || ''), 'text/html');
   doc.querySelectorAll('script').forEach((node) => node.remove());
@@ -83,8 +97,10 @@ function rewriteManualHtml(html, resolvedUrl) {
       .map((node) => node.outerHTML)
       .join('')
     : '';
-  if (doc.body && doc.body.innerHTML.trim()) return `${headMarkup}${doc.body.innerHTML}`;
-  return `${headMarkup}${doc.documentElement?.innerHTML || String(html || '')}`;
+  const rewrittenHtml = doc.body && doc.body.innerHTML.trim()
+    ? `${headMarkup}${doc.body.innerHTML}`
+    : `${headMarkup}${doc.documentElement?.innerHTML || String(html || '')}`;
+  return sanitizeManualHtml(rewrittenHtml);
 }
 
 /**
