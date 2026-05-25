@@ -15,3 +15,7 @@ explicit `-ArtifactConfigurationFile`, `-HostConfigurationFile`,
 `-ConfigOverlayFile`, and `-WidgetFile` arguments. This repository is
 responsible for producing correct objects from the host information it receives;
 repositories that have no host-specific needs can ignore those inputs.
+
+A shared host profile can contain a `modules.opendocviewer` segment. The
+canonical exporter applies only module segments that match modules owned by this
+repository.
