@@ -14,13 +14,19 @@ param(
     [switch]$AllComponents,
     [switch]$BuildArtifacts,
     [string]$Configuration = 'Release',
-    [string[]]$ArtifactConfigurationFile = @()
+    [string[]]$ArtifactConfigurationFile = @(),
+    [string[]]$HostConfigurationFile = @(),
+    [string[]]$ConfigOverlayFile = @(),
+    [string[]]$WidgetFile = @()
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $repositoryRoot = $PSScriptRoot
+if ([string]::IsNullOrWhiteSpace($OmpRepositoryRoot)) {
+    $OmpRepositoryRoot = $env:OMP_REPOSITORY_ROOT
+}
 if ([string]::IsNullOrWhiteSpace($OmpRepositoryRoot)) {
     $OmpRepositoryRoot = Join-Path (Split-Path -Parent $repositoryRoot) 'OpenModulePlatform'
 }
@@ -38,4 +44,7 @@ if (-not (Test-Path -LiteralPath $scriptPath -PathType Leaf)) {
     -AllComponents:$AllComponents `
     -BuildArtifacts:$BuildArtifacts `
     -Configuration $Configuration `
-    -ArtifactConfigurationFile $ArtifactConfigurationFile
+    -ArtifactConfigurationFile $ArtifactConfigurationFile `
+    -HostConfigurationFile $HostConfigurationFile `
+    -ConfigOverlayFile $ConfigOverlayFile `
+    -WidgetFile $WidgetFile
