@@ -2,34 +2,37 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.1.0** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.1.1** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v2.0.3** remains supported and may still be used in production where the v2.1.0 release has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest OMP universal-package tooling, portable module-definition support, manual HTML sanitization, and expired-session reset recovery.
+**OpenDocViewer v2.1.0** remains supported and may still be used in production where the v2.1.1 patch has not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest runtime-configuration documentation, OMP artifact manifest update, component-version helper fixes, and reset-event cleanup.
 
-**OpenDocViewer v2.0.2** remains supported and may still be used in production where the v2.0.3 or v2.1.0 updates have not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest diagnostics, OMP artifact manifest improvements, universal-package tooling, and session reset recovery.
+**OpenDocViewer v2.0.3** remains supported and may still be used in production where the v2.1.x release line has not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest OMP universal-package tooling, portable module-definition support, manual HTML sanitization, expired-session reset recovery, and component-version helper fixes.
 
-**OpenDocViewer v2.0.1** remains supported and may still be used in production where later v2.x updates have not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest generated-PDF cache language-mode fixes, fixed-language prebuild reuse, diagnostics cleanup, OMP packaging support, and session reset recovery.
+**OpenDocViewer v2.0.2** remains supported and may still be used in production where the v2.0.3 or v2.1.x updates have not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest diagnostics, OMP artifact manifest improvements, universal-package tooling, and session reset recovery.
 
-**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.x line has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, selection-panel behavior, OMP packaging support, and session reset recovery.
+**OpenDocViewer v2.0.1** remains supported and may still be used in production where later v2.x updates have not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest generated-PDF cache language-mode fixes, fixed-language prebuild reuse, diagnostics cleanup, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.x feature line has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, deployment-configuration controls, OMP packaging support, and session reset recovery.
+**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.x line has not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, selection-panel behavior, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.x upgrade has not yet been completed, but the recommendation is to move to v2.1.0 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, release-script documentation, and OMP packaging support.
+**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.x feature line has not yet been rolled out, but the recommendation is to move to v2.1.1 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, deployment-configuration controls, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.1.0 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, operational support tooling, and OMP packaging support.
+**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.x upgrade has not yet been completed, but the recommendation is to move to v2.1.1 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, release-script documentation, and OMP packaging support.
+
+**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.1.1 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, operational support tooling, and OMP packaging support.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.1.0   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 2.1.1   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.1.1 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -47,6 +50,14 @@ Earlier releases are retained for historical reference only and are **not recomm
 ## Recent release context
 
 The most recent releases are listed below for operational context.
+
+### OpenDocViewer v2.1.1
+Changes since v2.1.0:
+
+- Clarified runtime-configuration documentation: `odv.site.config.js` is fetched before the default config, but its values are applied as overrides on top of the defaults defined in `odv.config.js`.
+- Updated the OMP component manifest to advertise the current OpenDocViewer artifact package version for artifact-only delivery workflows.
+- Updated the OMP component-version helper to write JSON as UTF-8 without BOM, serialize deeper manifest structures, and make dry-run output explicit.
+- Simplified reset-session event dispatch to use the standard browser `CustomEvent` constructor directly.
 
 ### OpenDocViewer v2.1.0
 Changes since v2.0.3:
