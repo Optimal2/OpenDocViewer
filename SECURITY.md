@@ -56,7 +56,7 @@ Changes since v2.0.3:
 - Made the OpenDocViewer module definition portable by embedding its SQL initialization and repair scripts.
 - Added a host-profile segment convention for repository-owned package generation.
 - Added defense-in-depth sanitization for site-local manual HTML before displaying it in the manual overlay.
-- Added a viewer-level reset-session recovery action for expired host/WebClient document tickets.
+- Added a viewer-level reset-session recovery action for expired host document tickets.
 - The reset action emits `odv:session-reset-requested`, can notify an embedding host, reloads a same-origin parent page by default, and falls back to a cache-busted viewer reload.
 - Documented `showResetSessionButton` and `resetSessionTarget` for deployments where reloading only the viewer iframe can reuse stale host payloads.
 
