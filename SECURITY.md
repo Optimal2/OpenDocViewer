@@ -2,31 +2,34 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.0.3** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.1.0** is the current recommended release line and the preferred production target going forward.
 
-**OpenDocViewer v2.0.2** remains supported and may still be used in production where the v2.0.3 patch has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest diagnostics and OMP artifact manifest improvements.
+**OpenDocViewer v2.0.3** remains supported and may still be used in production where the v2.1.0 release has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest OMP universal-package tooling, portable module-definition support, manual HTML sanitization, and expired-session reset recovery.
 
-**OpenDocViewer v2.0.1** remains supported and may still be used in production where the v2.0.2 or v2.0.3 patches have not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest generated-PDF cache language-mode fixes, fixed-language prebuild reuse, diagnostics cleanup, and OMP artifact manifest support.
+**OpenDocViewer v2.0.2** remains supported and may still be used in production where the v2.0.3 or v2.1.0 updates have not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest diagnostics, OMP artifact manifest improvements, universal-package tooling, and session reset recovery.
 
-**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.0.x patch line has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, selection-panel behavior, diagnostics cleanup, and OMP artifact manifest support.
+**OpenDocViewer v2.0.1** remains supported and may still be used in production where later v2.x updates have not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest generated-PDF cache language-mode fixes, fixed-language prebuild reuse, diagnostics cleanup, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.0.x feature release has not yet been rolled out, but the recommendation is to move to v2.0.3 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, deployment-configuration controls, and OMP artifact manifest support.
+**OpenDocViewer v2.0.0** remains supported and may still be used in production where the v2.x line has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest reload-cache fixes, generated-PDF cache fixes, source-link diagnostics, problem-notice handling, selection-panel behavior, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.0.x upgrade has not yet been completed, but the recommendation is to move to v2.0.3 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, and release-script documentation.
+**OpenDocViewer v1.9.1** remains supported and may still be used in production where the v2.x feature line has not yet been rolled out, but the recommendation is to move to v2.1.0 to get the latest generated-PDF worker pipeline, session PDF caching, diagnostics, manual refresh, reload-cache, deployment-configuration controls, OMP packaging support, and session reset recovery.
 
-**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.0.3 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, and operational support tooling.
+**OpenDocViewer v1.9.0** remains supported and may still be used in production where a v2.x upgrade has not yet been completed, but the recommendation is to move to v2.1.0 to get the latest supported print configuration model, generated-PDF performance work, prepared COPY/KOPIA watermark assets, diagnostics, release-script documentation, and OMP packaging support.
+
+**OpenDocViewer v1.8.0** remains supported and may still be used in production where an upgrade has not yet been completed, but the recommendation is to move to v2.1.0 to get the latest supported print configuration model, generated-PDF worker pipeline, dependency/security baseline, operational support tooling, and OMP packaging support.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.0.3   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.0.3 and not the preferred target for new deployments |
+| 2.1.0   | :white_check_mark: | Current recommended release and latest supported baseline |
+| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.1.0 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -43,7 +46,19 @@ Earlier releases are retained for historical reference only and are **not recomm
 
 ## Recent release context
 
-The eight most recent releases are listed below for operational context.
+The most recent releases are listed below for operational context.
+
+### OpenDocViewer v2.1.0
+Changes since v2.0.3:
+
+- Added OMP-compatible repository object wrappers for building module definitions and artifact packages from `omp-components.json`.
+- Added a universal-package exporter so OpenDocViewer can be transported through the same package format as other OMP-compatible modules.
+- Made the OpenDocViewer module definition portable by embedding its SQL initialization and repair scripts.
+- Added a host-profile segment convention for repository-owned package generation.
+- Added defense-in-depth sanitization for site-local manual HTML before displaying it in the manual overlay.
+- Added a viewer-level reset-session recovery action for expired host/WebClient document tickets.
+- The reset action emits `odv:session-reset-requested`, can notify an embedding host, reloads a same-origin parent page by default, and falls back to a cache-busted viewer reload.
+- Documented `showResetSessionButton` and `resetSessionTarget` for deployments where reloading only the viewer iframe can reuse stale host payloads.
 
 ### OpenDocViewer v2.0.3
 Changes since v2.0.2:
