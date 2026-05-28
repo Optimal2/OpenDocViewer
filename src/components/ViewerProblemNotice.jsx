@@ -85,6 +85,91 @@ function resolveProblemTrigger({ error, pageLoadState, loadingRunActive, config 
   };
 }
 
+function getSameOriginParentWindow() {
+  try {
+    if (typeof window === 'undefined') return null;
+    if (!window.parent || window.parent === window) return null;
+    void window.parent.location.href;
+    return window.parent;
+  } catch {
+    return null;
+  }
+}
+
+function buildCacheBustedCurrentUrl() {
+  try {
+    const url = new URL(window.location.href);
+    url.searchParams.set('odvSessionReset', String(Date.now()));
+    return url.toString();
+  } catch {
+    return window.location.href;
+  }
+}
+
+function dispatchResetEvent(target, detail) {
+  try {
+    const EventCtor = target?.CustomEvent || CustomEvent;
+    const event = new EventCtor('odv:session-reset-requested', {
+      detail,
+      cancelable: true,
+    });
+    return target.dispatchEvent(event);
+  } catch {
+    return true;
+  }
+}
+
+function postResetMessageToParent(detail) {
+  try {
+    if (typeof window === 'undefined' || !window.parent || window.parent === window) return;
+    window.parent.postMessage({ type: 'odv:session-reset-requested', detail }, '*');
+  } catch {
+    // Best-effort support signal only.
+  }
+}
+
+function reloadCurrentViewer() {
+  try {
+    window.location.replace(buildCacheBustedCurrentUrl());
+  } catch {
+    try { window.location.reload(); } catch {}
+  }
+}
+
+function resetViewerSession(trigger, targetMode) {
+  if (typeof window === 'undefined') return;
+
+  const detail = {
+    reason: trigger?.reason || 'viewer-problem-notice',
+    failedPages: trigger?.failedPages || 0,
+    expectedPages: trigger?.expectedPages || 0,
+    error: trigger?.error || '',
+  };
+
+  if (dispatchResetEvent(window, detail) === false) return;
+
+  const mode = String(targetMode || 'parent-or-current').toLowerCase();
+  if (mode === 'none') return;
+
+  const parent = getSameOriginParentWindow();
+  if (parent) {
+    if (dispatchResetEvent(parent, detail) === false) return;
+  } else {
+    postResetMessageToParent(detail);
+  }
+
+  if ((mode === 'parent' || mode === 'parent-or-current') && parent) {
+    try {
+      parent.location.reload();
+      return;
+    } catch {
+      // Fall back to the current viewer below when allowed.
+    }
+  }
+
+  if (mode !== 'parent') reloadCurrentViewer();
+}
+
 /**
  * @param {Object} props
  * @param {(string|null|undefined)} props.error
@@ -116,6 +201,8 @@ export default function ViewerProblemNotice({ error, pageLoadState, loadingRunAc
     || t('viewer.problemNotice.message', { defaultValue: 'The document session may have expired. Close this viewer and open the document again from the source system.' });
   const reloadLabel = resolveLocalizedValue(config.reloadLabel, i18n)
     || t('viewer.problemNotice.reload', { defaultValue: 'Reload viewer' });
+  const resetSessionLabel = resolveLocalizedValue(config.resetSessionLabel, i18n)
+    || t('viewer.problemNotice.resetSession', { defaultValue: 'Reset session' });
   const closeLabel = resolveLocalizedValue(config.closeLabel, i18n)
     || t('viewer.problemNotice.close', { defaultValue: 'Dismiss' });
   const detailsLabel = resolveLocalizedValue(config.detailsLabel, i18n)
@@ -141,11 +228,20 @@ export default function ViewerProblemNotice({ error, pageLoadState, loadingRunAc
         ) : null}
       </div>
       <div className="viewer-problem-notice-actions">
-        {config.showReloadButton ? (
+        {config.showResetSessionButton ? (
           <button
             type="button"
             className="viewer-problem-notice-button primary"
-            onClick={() => { try { window.location.reload(); } catch {} }}
+            onClick={() => resetViewerSession(trigger, config.resetSessionTarget)}
+          >
+            {resetSessionLabel}
+          </button>
+        ) : null}
+        {config.showReloadButton ? (
+          <button
+            type="button"
+            className="viewer-problem-notice-button"
+            onClick={reloadCurrentViewer}
           >
             {reloadLabel}
           </button>

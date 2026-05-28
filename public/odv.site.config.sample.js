@@ -81,6 +81,11 @@
         requireLoadComplete: false,
         dismissible: true,
         showReloadButton: true,
+        showResetSessionButton: true,
+        // 'parent-or-current' reloads the embedding host page when ODV runs in a same-origin iframe.
+        // Use 'current' for standalone deployments, 'parent' to avoid fallback reloads, or 'none'
+        // when a host listens for the odv:session-reset-requested event and performs recovery itself.
+        resetSessionTarget: 'parent-or-current',
         showTechnicalDetails: false,
         title: {
           en: 'The documents could not be shown correctly',
@@ -90,6 +95,7 @@
           en: 'The document session may have expired. Close this viewer and open the document again from the source system.',
           sv: 'Dokumentsessionen kan ha gått ut. Stäng visaren och öppna dokumentet på nytt från källsystemet.'
         },
+        resetSessionLabel: { en: 'Reset session', sv: 'Starta om sessionen' },
         reloadLabel: { en: 'Reload viewer', sv: 'Ladda om visaren' },
         closeLabel: { en: 'Dismiss', sv: 'Stäng' },
         detailsLabel: { en: 'Technical details', sv: 'Tekniska detaljer' }

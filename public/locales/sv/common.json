@@ -311,6 +311,7 @@
     "problemNotice": {
       "title": "Dokumenten kunde inte visas korrekt",
       "message": "Dokumentsessionen kan ha gått ut. Stäng visaren och öppna dokumentet på nytt från källsystemet.",
+      "resetSession": "Starta om sessionen",
       "reload": "Ladda om visaren",
       "close": "Stäng",
       "details": "Tekniska detaljer",
