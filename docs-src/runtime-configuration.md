@@ -86,6 +86,8 @@ viewer: {
     requireLoadComplete: false,
     dismissible: true,
     showReloadButton: true,
+    showResetSessionButton: true,
+    resetSessionTarget: 'parent-or-current',
     showTechnicalDetails: false,
     title: {
       en: 'The documents could not be shown correctly',
@@ -118,6 +120,19 @@ When the first configured number of source URLs all fail as unavailable and no s
 successfully, OpenDocViewer treats the whole source session as expired or invalid. This avoids
 hundreds of identical failed requests and lets the viewer-level notice show the site-specific
 recovery instruction.
+
+`showResetSessionButton` adds a stronger recovery action than a plain viewer reload. The reset
+button dispatches `odv:session-reset-requested`, posts the same message to the parent window, and
+then follows `resetSessionTarget`:
+
+- `parent-or-current` (default) reloads the same-origin embedding page when ODV is iframed, or falls
+  back to a cache-busted viewer reload.
+- `parent` only reloads the same-origin parent page.
+- `current` reloads the viewer URL with an `odvSessionReset` cache-busting parameter.
+- `none` only emits the event/message so the embedding host can handle recovery itself.
+
+Use the reset action for host/WebClient integrations where reloading only the iframe can reuse the
+same stale parent payload and therefore the same expired document tickets.
 
 ## Document-Version Reload Cache
 

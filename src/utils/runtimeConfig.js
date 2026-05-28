@@ -18,12 +18,15 @@
  * @property {boolean} requireLoadComplete
  * @property {boolean} dismissible
  * @property {boolean} showReloadButton
+ * @property {boolean} showResetSessionButton
  * @property {boolean} showTechnicalDetails
  * @property {*} title
  * @property {*} message
  * @property {*} reloadLabel
+ * @property {*} resetSessionLabel
  * @property {*} closeLabel
  * @property {*} detailsLabel
+ * @property {string} resetSessionTarget
  */
 
 /**
@@ -92,6 +95,12 @@ function normalizeFloat(value, fallback, min, max) {
   return clampNumber(next, min, max);
 }
 
+function normalizeResetSessionTarget(value, fallback) {
+  const raw = String(value || fallback || '').trim().toLowerCase();
+  if (raw === 'current' || raw === 'parent' || raw === 'none') return raw;
+  return 'parent-or-current';
+}
+
 /**
  * Resolve the configurable viewer-level problem notice. The notice is intended for serious support
  * situations, for example when host-provided source URLs expire and many pages fail at once.
@@ -110,11 +119,14 @@ export function getViewerProblemNoticeConfig(cfg = getRuntimeConfig()) {
     requireLoadComplete: normalizeBoolean(raw.requireLoadComplete, false),
     dismissible: normalizeBoolean(raw.dismissible, true),
     showReloadButton: normalizeBoolean(raw.showReloadButton, true),
+    showResetSessionButton: normalizeBoolean(raw.showResetSessionButton, true),
     showTechnicalDetails: normalizeBoolean(raw.showTechnicalDetails, false),
     title: raw.title,
     message: raw.message,
     reloadLabel: raw.reloadLabel,
+    resetSessionLabel: raw.resetSessionLabel,
     closeLabel: raw.closeLabel,
     detailsLabel: raw.detailsLabel,
+    resetSessionTarget: normalizeResetSessionTarget(raw.resetSessionTarget, 'parent-or-current'),
   };
 }

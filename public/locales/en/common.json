@@ -311,6 +311,7 @@
     "problemNotice": {
       "title": "The documents could not be shown correctly",
       "message": "The document session may have expired. Close this viewer and open the document again from the source system.",
+      "resetSession": "Reset session",
       "reload": "Reload viewer",
       "close": "Dismiss",
       "details": "Technical details",
