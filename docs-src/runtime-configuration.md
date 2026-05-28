@@ -9,7 +9,7 @@ OpenDocViewer is designed so operational configuration can change without rebuil
 - `public/odv.site.config.sample.js`
   - sample site override file
 - optional deployment-specific `odv.site.config.js`
-  - loaded before the required default config
+  - fetched before the required default config and then merged on top of those defaults
 
 ## Load order
 
@@ -22,6 +22,8 @@ OpenDocViewer is designed so operational configuration can change without rebuil
 5. import `src/index.jsx`
 
 This keeps the viewer startup deterministic and avoids partial initialization with missing config.
+Although the optional site file is fetched first, `odv.config.js` owns the default object and applies
+`odv.site.config.js` as overrides with `deepMerge(ACTIVE_CONFIG, siteOverrides)`.
 
 ## Why scripts are probed before injection
 

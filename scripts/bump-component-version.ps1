@@ -76,6 +76,16 @@ function Set-JsonProperty {
     $property.Value = $Value
 }
 
+function Write-Utf8NoBomFile {
+    param(
+        [string]$Path,
+        [string]$Value
+    )
+
+    $encoding = [System.Text.UTF8Encoding]::new($false)
+    [System.IO.File]::WriteAllText($Path, $Value, $encoding)
+}
+
 $resolvedManifestPath = Resolve-FullPath -Path $ManifestPath
 if (-not (Test-Path -LiteralPath $resolvedManifestPath -PathType Leaf)) {
     throw "Component manifest not found: $resolvedManifestPath"
@@ -139,8 +149,10 @@ if ($selectedComponents.Count -eq $components.Count) {
 }
 
 if ($PSCmdlet.ShouldProcess($resolvedManifestPath, "Update $($selectedComponents.Count) component version(s)")) {
-    $json = $manifest | ConvertTo-Json -Depth 20
-    Set-Content -LiteralPath $resolvedManifestPath -Value $json -Encoding UTF8
+    $json = $manifest | ConvertTo-Json -Depth 100
+    Write-Utf8NoBomFile -Path $resolvedManifestPath -Value ($json + [Environment]::NewLine)
+    $updates | Format-Table -AutoSize
+} else {
+    Write-Host 'WhatIf: component versions were calculated but the manifest was not updated.'
+    $updates | Format-Table -AutoSize
 }
-
-$updates | Format-Table -AutoSize
