@@ -108,8 +108,7 @@ function buildCacheBustedCurrentUrl() {
 
 function dispatchResetEvent(target, detail) {
   try {
-    const EventCtor = target?.CustomEvent || CustomEvent;
-    const event = new EventCtor('odv:session-reset-requested', {
+    const event = new CustomEvent('odv:session-reset-requested', {
       detail,
       cancelable: true,
     });
