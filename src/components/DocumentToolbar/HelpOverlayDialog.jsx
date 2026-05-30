@@ -94,7 +94,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.navigation.title', { defaultValue: 'Navigation' })}</h3>
             <p>{t('help.sections.navigation.intro', {
-              defaultValue: 'Use the toolbar, Arrow Up/Arrow Down, Home, and End to move through the material.',
+              defaultValue: 'Use the toolbar, Arrow Up/Arrow Down, Page Up/Page Down, Home, and End to move through the material.',
             })}</p>
             <ul>
               <li>{t('help.sections.navigation.pageMode', {

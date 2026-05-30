@@ -513,7 +513,7 @@
     "sections": {
       "navigation": {
         "title": "Navigering",
-        "intro": "Använd verktygsfältet, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
+        "intro": "Använd verktygsfältet, pil upp/pil ned, Page Up/Page Down, Home och End för att förflytta dig i materialet.",
         "pageMode": "Vanlig navigering flyttar en sida i taget.",
         "shiftMode": "Använd pil höger för att öppna eller välja höger jämförelsevy. Använd pil vänster för att välja huvudvy / vänster vy; tryck pil vänster igen när huvudvyn är aktiv för att stänga jämförelsevyn. Håll nere Shift i jämförelsevy för att tillfälligt styra motsatt vy.",
         "ctrlMode": "Håll nere Ctrl när fler än ett dokument är öppnat för att flytta dokument för dokument i stället för sida för sida.",
