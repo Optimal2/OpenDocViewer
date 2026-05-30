@@ -139,6 +139,11 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
     const buffer = await sourceBlob.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
       data: buffer,
+      // A dedicated worker rendering into OffscreenCanvas cannot rely on the browser FontFace
+      // path in the same way the main thread can. Let pdf.js draw embedded glyphs directly so
+      // text keeps its real shape instead of degrading to missing-font boxes.
+      disableFontFace: true,
+      useSystemFonts: false,
     });
     const entry = {
       loadingTask,
