@@ -155,16 +155,22 @@ export default function AboutOverlayDialog({
         onProgress: (event) => {
           const completed = Math.max(0, Number(event?.completedRuns || 0));
           const total = Math.max(1, Number(event?.totalRuns || 1));
+          const renderedPages = Math.max(0, Number(event?.renderedPages || 0));
+          const pageCount = Math.max(0, Number(event?.pageCount || 0));
           if (event?.phase === 'running') {
             const scenario = String(event?.scenarioLabel || '').trim();
+            const pageProgress = pageCount > 0 ? `${renderedPages}/${pageCount}` : '';
             setRenderBenchmarkState({
               status: 'running',
               message: t('about.diagnostics.renderBenchmarkProgress', {
                 current: completed + 1,
                 total,
                 scenario,
+                renderedPages,
+                pageCount,
+                pageProgress,
                 defaultValue: scenario
-                  ? `Running render/decode benchmark ${completed + 1} of ${total}: ${scenario}…`
+                  ? `Running render/decode benchmark ${completed + 1} of ${total}: ${scenario}${pageProgress ? ` (${pageProgress} pages)` : ''}…`
                   : `Running render/decode benchmark ${completed + 1} of ${total}…`,
               }),
             });
@@ -348,9 +354,11 @@ export default function AboutOverlayDialog({
                   createdUtc: latestRenderBenchmark.createdUtc,
                   pageCount: latestRenderBenchmark.pageCount,
                   testedVariants: latestRenderBenchmark.testedVariants,
+                  testedPdfToImageModes: latestRenderBenchmark.testedPdfToImageModes,
                   testedWorkerCounts: latestRenderBenchmark.testedWorkerCounts,
                   scenarioCount: latestRenderBenchmark.scenarioCount,
                   best: latestRenderBenchmark.best,
+                  bestRendererStats: latestRenderBenchmark.best?.rendererStats || null,
                 } : null,
               }, null, 2)}
             </pre>

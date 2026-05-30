@@ -13,6 +13,7 @@ import PdfPageWorker from '../workers/pdfPageWorker.js?worker';
  * @typedef {Object} PdfPageWorkerPoolOptions
  * @property {boolean=} enabled
  * @property {number=} workerCount
+ * @property {number=} taskTimeoutMs
  */
 
 /**
@@ -34,10 +35,11 @@ export class PdfPageWorkerPool {
   constructor(opts = {}) {
     this.enabled = opts?.enabled !== false;
     this.workerCount = this.enabled ? Math.max(0, Number(opts?.workerCount) || 0) : 0;
+    this.taskTimeoutMs = Math.max(5000, Math.min(10 * 60 * 1000, Number(opts?.taskTimeoutMs) || 2 * 60 * 1000));
 
     /** @type {Array<PdfPageWorkerEntry>} */
     this.workers = [];
-    /** @type {Map<number, { resolve:function(any):void, reject:function(*):void, slot:number }>} */
+    /** @type {Map<number, { resolve:function(any):void, reject:function(*):void, slot:number, timeoutId:any }>} */
     this.pending = new Map();
     /** @type {Array<{ taskId:number, payload:Object, resolve:function(any):void, reject:function(*):void }>} */
     this.queue = [];
@@ -83,16 +85,27 @@ export class PdfPageWorkerPool {
 
   pump() {
     if (this.disposed) return;
+    if (this.queue.length > 0 && this.getWorkerCount() <= 0) {
+      this.rejectQueuedWithFallback('No compatible PDF page worker is available');
+      return;
+    }
+
     while (this.queue.length > 0) {
       const slot = this.workers.findIndex((entry) => entry && !entry.dead && !entry.busy);
-      if (slot < 0) return;
+      if (slot < 0) {
+        if (this.getWorkerCount() <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
+        return;
+      }
 
       const next = this.queue.shift();
       if (!next) return;
       const entry = this.workers[slot];
       entry.busy = true;
       entry.activeTaskId = next.taskId;
-      this.pending.set(next.taskId, { resolve: next.resolve, reject: next.reject, slot });
+      const timeoutId = globalThis.setTimeout?.(() => {
+        this.handleTimeout(next.taskId, slot);
+      }, this.taskTimeoutMs);
+      this.pending.set(next.taskId, { resolve: next.resolve, reject: next.reject, slot, timeoutId });
 
       try {
         entry.worker.postMessage({
@@ -101,14 +114,58 @@ export class PdfPageWorkerPool {
           payload: next.payload,
         });
       } catch (error) {
+        this.clearPendingTimeout(next.taskId);
         this.pending.delete(next.taskId);
         entry.busy = false;
         entry.activeTaskId = null;
+        entry.dead = true;
+        try { entry.worker.terminate(); } catch {}
+        this.workerCount = this.getWorkerCount();
         const nextError = new Error(String(error?.message || error || 'Failed to post PDF worker message'));
         nextError.fallbackMainThread = true;
         next.reject(nextError);
+        if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
       }
     }
+  }
+
+  clearPendingTimeout(taskId) {
+    const pending = this.pending.get(taskId);
+    if (pending?.timeoutId) {
+      try { globalThis.clearTimeout?.(pending.timeoutId); } catch {}
+      pending.timeoutId = null;
+    }
+  }
+
+  rejectQueuedWithFallback(message) {
+    while (this.queue.length > 0) {
+      const next = this.queue.shift();
+      if (!next) continue;
+      const error = new Error(message || 'PDF page worker is unavailable');
+      error.fallbackMainThread = true;
+      next.reject(error);
+    }
+  }
+
+  handleTimeout(taskId, slot) {
+    const pending = this.pending.get(taskId);
+    if (!pending) return;
+
+    this.pending.delete(taskId);
+    const entry = this.workers[slot];
+    if (entry) {
+      entry.busy = false;
+      entry.activeTaskId = null;
+      entry.dead = true;
+      try { entry.worker.terminate(); } catch {}
+    }
+
+    this.workerCount = this.getWorkerCount();
+    const error = new Error('PDF page worker timed out');
+    error.fallbackMainThread = true;
+    pending.reject(error);
+    if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
+    this.pump();
   }
 
   handleMessage(slot, event) {
@@ -119,6 +176,7 @@ export class PdfPageWorkerPool {
     const pending = this.pending.get(taskId);
     if (!pending) return;
 
+    this.clearPendingTimeout(taskId);
     this.pending.delete(taskId);
     const entry = this.workers[slot];
     if (entry) {
@@ -148,6 +206,7 @@ export class PdfPageWorkerPool {
     if (taskId) {
       const pending = this.pending.get(taskId);
       if (pending) {
+        this.clearPendingTimeout(taskId);
         this.pending.delete(taskId);
         const error = new Error(String(errorLike?.message || errorLike || 'PDF page worker failed'));
         error.fallbackMainThread = true;
@@ -163,6 +222,7 @@ export class PdfPageWorkerPool {
     }
 
     this.workerCount = this.getWorkerCount();
+    if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
     logger.warn('PDF page worker terminated after an error', {
       remainingWorkers: this.workerCount,
       error: String(errorLike?.message || errorLike || 'unknown'),
@@ -173,12 +233,15 @@ export class PdfPageWorkerPool {
   async dispose() {
     this.disposed = true;
     for (const pending of this.pending.values()) {
+      if (pending?.timeoutId) {
+        try { globalThis.clearTimeout?.(pending.timeoutId); } catch {}
+      }
       const error = new Error('PDF page worker pool disposed');
       error.fallbackMainThread = true;
       pending.reject(error);
     }
     this.pending.clear();
-    this.queue.length = 0;
+    this.rejectQueuedWithFallback('PDF page worker pool disposed');
 
     for (const entry of this.workers) {
       if (!entry?.worker) continue;

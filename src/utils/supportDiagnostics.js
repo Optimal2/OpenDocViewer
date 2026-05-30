@@ -192,6 +192,9 @@ function collectConfigDiagnostics() {
       renderBenchmarkVariants: Array.isArray(renderBenchmark.variants)
         ? renderBenchmark.variants.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
         : [],
+      renderBenchmarkPdfToImageModes: Array.isArray(renderBenchmark.pdfToImageModes)
+        ? renderBenchmark.pdfToImageModes.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
+        : [],
       renderBenchmarkSampleMode: String(renderBenchmark.sampleMode || ''),
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
         ? renderBenchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
