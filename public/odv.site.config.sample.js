@@ -708,6 +708,10 @@
         workerCount: 0,
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,
+        // PDF-to-image rendering mode:
+        //   'main-thread' -> proven pdf.js path used by earlier OpenDocViewer versions
+        //   'worker'      -> experimental OffscreenCanvas/pdf.js worker path with main-thread fallback
+        pdfToImageMode: 'main-thread',
 
         // Maximum number of main-thread renders allowed when the worker path is unavailable.
         maxConcurrentMainThreadRenders: 3,

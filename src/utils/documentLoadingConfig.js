@@ -21,6 +21,7 @@ import { getRuntimeMemoryProfile } from './memoryProfile.js';
 /** @typedef {'sequential'|'parallel-limited'} DocumentLoadingFetchStrategy */
 /** @typedef {'eager-all'|'eager-nearby'|'lazy-viewport'} DocumentLoadingRenderStrategy */
 /** @typedef {'worker-preferred'|'main-only'|'hybrid-by-format'} DocumentLoadingRenderBackend */
+/** @typedef {'main-thread'|'worker'} PdfToImageMode */
 /** @typedef {'normal'|'soft'|'hard'} DocumentLoadingMemoryPressureStage */
 
 export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
@@ -87,6 +88,7 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {number} workerCount
  * @property {boolean} useWorkersForRasterImages
  * @property {boolean} useWorkersForTiff
+ * @property {PdfToImageMode} pdfToImageMode
  * @property {number} maxConcurrentMainThreadRenders
  * @property {number} maxConcurrentAssetRenders
  * @property {number} warmupBatchSize
@@ -219,6 +221,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       workerCount: resolveRecommendedWorkerCount(0, 'auto'),
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
+      pdfToImageMode: 'main-thread',
       // These are the actual normalized render defaults for the current loading path.
       // Viewer providers can override them through runtime config, but there is no
       // separate provider-only concurrency default layered on top of this module.
@@ -329,6 +332,14 @@ function normalizeRenderBackend(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
   if (raw === 'main-only' || raw === 'worker-preferred') return raw;
   return 'hybrid-by-format';
+}
+
+function normalizePdfToImageMode(value, fallback) {
+  if (value === true) return 'worker';
+  if (value === false) return 'main-thread';
+  const raw = String(value || fallback || '').trim().toLowerCase().replace(/_/g, '-');
+  if (raw === 'worker' || raw === 'workers' || raw === 'offscreen-worker') return 'worker';
+  return 'main-thread';
 }
 
 function normalizeBoolean(value, fallback) {
@@ -506,6 +517,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
   next.render.backend = next.render.backend || 'hybrid-by-format';
   next.render.useWorkersForRasterImages = normalizeBoolean(next.render.useWorkersForRasterImages, true);
   next.render.useWorkersForTiff = normalizeBoolean(next.render.useWorkersForTiff, true);
+  next.render.pdfToImageMode = normalizePdfToImageMode(next.render.pdfToImageMode, DOCUMENT_LOADING_DEFAULTS.render.pdfToImageMode);
   next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'auto');
   next.render.maxConcurrentMainThreadRenders = Math.max(1, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
   next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
@@ -614,6 +626,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       workerCount: normalizeNumber(raw?.render?.workerCount, adaptiveDefaults.render.workerCount, 0, 32),
       useWorkersForRasterImages: normalizeBoolean(raw?.render?.useWorkersForRasterImages, adaptiveDefaults.render.useWorkersForRasterImages),
       useWorkersForTiff: normalizeBoolean(raw?.render?.useWorkersForTiff, adaptiveDefaults.render.useWorkersForTiff),
+      pdfToImageMode: normalizePdfToImageMode(raw?.render?.pdfToImageMode ?? raw?.render?.['pdf-to-image-mode'], adaptiveDefaults.render.pdfToImageMode),
       maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 8),
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),
       warmupBatchSize: normalizeNumber(raw?.render?.warmupBatchSize, adaptiveDefaults.render.warmupBatchSize, 1, 512),

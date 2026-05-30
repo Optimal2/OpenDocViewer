@@ -618,14 +618,18 @@
         // 'lazy-viewport' -> render only what the viewport needs
         strategy: 'eager-nearby',
 
-        // 'hybrid-by-format' keeps PDF on the main/pdf.js path while raster + TIFF use workers
-        // whenever possible.
+        // 'hybrid-by-format' keeps the stable PDF path on the main thread by default while raster
+        // + TIFF use workers whenever possible.
         backend: 'hybrid-by-format',
 
         // 0 = choose from hardwareConcurrency/deviceMemory at runtime.
         workerCount: 0,
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,
+        // PDF-to-image rendering mode:
+        //   'main-thread' -> proven pdf.js path used by earlier OpenDocViewer versions
+        //   'worker'      -> experimental OffscreenCanvas/pdf.js worker path with main-thread fallback
+        pdfToImageMode: 'main-thread',
         maxConcurrentMainThreadRenders: 3,
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6

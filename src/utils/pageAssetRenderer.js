@@ -4,7 +4,7 @@
  *
  * The renderer keeps the modern temp-store / placeholder architecture from `main`, but routes raster
  * and TIFF work through dedicated workers when that is beneficial and supported. PDF rendering stays
- * on the pdf.js path.
+ * on the stable main-thread pdf.js path by default, with an opt-in page-image worker mode.
  */
 
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
@@ -12,6 +12,7 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
 import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
+import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
 
 try {
   if (pdfjsLib?.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
@@ -204,13 +205,17 @@ export class PageAssetRenderer {
     this.pdfCache = new Map();
     this.tiffCache = new Map();
     this.workerPool = null;
+    this.pdfWorkerPool = null;
     this.rebuildWorkerPool();
   }
 
   rebuildWorkerPool() {
     const current = this.workerPool;
+    const currentPdf = this.pdfWorkerPool;
     this.workerPool = null;
+    this.pdfWorkerPool = null;
     if (current) void current.dispose?.();
+    if (currentPdf) void currentPdf.dispose?.();
 
     const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
     if (backend === 'main-only') return;
@@ -218,19 +223,31 @@ export class PageAssetRenderer {
     const workerCount = Math.max(0, Number(this.config.workerCount) || 0);
     if (workerCount <= 0) return;
 
-    this.workerPool = createPageAssetWorkerPool({
-      enabled: true,
-      workerCount,
-      useForTiff: this.config.useWorkersForTiff !== false,
-      useForRasterImages: this.config.useWorkersForRasterImages !== false,
-    });
+    const useForTiff = this.config.useWorkersForTiff !== false;
+    const useForRasterImages = this.config.useWorkersForRasterImages !== false;
+    if (useForTiff || useForRasterImages) {
+      this.workerPool = createPageAssetWorkerPool({
+        enabled: true,
+        workerCount,
+        useForTiff,
+        useForRasterImages,
+      });
+    }
+
+    if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() === 'worker') {
+      this.pdfWorkerPool = createPdfPageWorkerPool({
+        enabled: true,
+        workerCount,
+      });
+    }
   }
 
   updateConfig(nextConfig = {}) {
     const previousBackend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
-    const previousWorkerCount = this.getWorkerCount();
+    const previousWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
     const previousUseForTiff = this.config.useWorkersForTiff !== false;
     const previousUseForRasterImages = this.config.useWorkersForRasterImages !== false;
+    const previousPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
     this.config = {
       ...this.config,
       ...(nextConfig || {}),
@@ -239,15 +256,21 @@ export class PageAssetRenderer {
     const nextWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
     const nextUseForTiff = this.config.useWorkersForTiff !== false;
     const nextUseForRasterImages = this.config.useWorkersForRasterImages !== false;
+    const nextPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
     const shouldRebuild = previousBackend !== nextBackend
       || previousWorkerCount !== nextWorkerCount
       || previousUseForTiff !== nextUseForTiff
-      || previousUseForRasterImages !== nextUseForRasterImages;
+      || previousUseForRasterImages !== nextUseForRasterImages
+      || previousPdfToImageMode !== nextPdfToImageMode;
     if (shouldRebuild) this.rebuildWorkerPool();
   }
 
   getWorkerCount() {
-    return Math.max(0, Number(this.workerPool?.getWorkerCount?.() || 0));
+    return Math.max(
+      0,
+      Number(this.workerPool?.getWorkerCount?.() || 0),
+      Number(this.pdfWorkerPool?.getWorkerCount?.() || 0)
+    );
   }
 
   canRenderInWorker(fileExtension, variant) {
@@ -264,6 +287,10 @@ export class PageAssetRenderer {
     if (this.workerPool) {
       try { await this.workerPool.dispose?.(); } catch {}
       this.workerPool = null;
+    }
+    if (this.pdfWorkerPool) {
+      try { await this.pdfWorkerPool.dispose?.(); } catch {}
+      this.pdfWorkerPool = null;
     }
 
     for (const entry of this.pdfCache.values()) {
@@ -334,6 +361,13 @@ export class PageAssetRenderer {
     return this.canRenderInWorker(ext, variant);
   }
 
+  shouldTryPdfWorker() {
+    const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
+    if (backend === 'main-only') return false;
+    if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() !== 'worker') return false;
+    return !!this.pdfWorkerPool?.canRender?.();
+  }
+
   /**
    * Render one requested page asset. Worker routing is decided per page/source file.
    * A PDF or fallback TIFF does not force unrelated raster files onto the main thread;
@@ -366,6 +400,26 @@ export class PageAssetRenderer {
     }
 
     if (ext === 'pdf') {
+      if (this.shouldTryPdfWorker()) {
+        try {
+          const sourceBlob = await this.tempStore.getBlob(descriptor.sourceKey);
+          if (sourceBlob) {
+            return await this.pdfWorkerPool.renderAsset({
+              sourceBlob,
+              sourceKey: String(descriptor?.sourceKey || ''),
+              pageIndex: Math.max(0, Number(descriptor?.pageIndex) || 0),
+              variant,
+              thumbnailMaxWidth: options?.thumbnailMaxWidth,
+              thumbnailMaxHeight: options?.thumbnailMaxHeight,
+              fullPageScale: Number(this.config.fullPageScale) || 2.0,
+              maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
+            });
+          }
+        } catch {
+          // Experimental PDF worker rendering must never make PDF display less reliable than the
+          // proven main-thread path. Any worker-side failure is retried below with the existing path.
+        }
+      }
       return this.renderPdfPage(descriptor, {
         variant,
         thumbnailMaxWidth: options?.thumbnailMaxWidth,

@@ -584,6 +584,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           TIFF <strong>{documentLoadingConfig?.render?.useWorkersForTiff === false ? 'off' : 'on'}</strong>
         </span>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          PDF <strong>{String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')}</strong>
+        </span>
       </div>
 
       <div style={sectionStyle}>

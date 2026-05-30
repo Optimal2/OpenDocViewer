@@ -126,6 +126,7 @@ export function createRenderAssetSignature(renderConfig = {}) {
     Number(renderConfig?.fullPageScale || 0) || '',
     Number(renderConfig?.thumbnailMaxWidth || 0) || '',
     Number(renderConfig?.thumbnailMaxHeight || 0) || '',
+    part(renderConfig?.pdfToImageMode),
   ].join('|'))}`;
 }
 
