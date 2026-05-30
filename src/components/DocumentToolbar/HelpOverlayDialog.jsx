@@ -101,13 +101,13 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
                 defaultValue: 'Normal navigation moves page by page.',
               })}</li>
               <li>{t('help.sections.navigation.shiftMode', {
-                defaultValue: 'Hold Shift in compare mode to steer the right pane instead of the left/main pane.',
+                defaultValue: 'Use Arrow Right to open or select the right compare pane. Use Arrow Left to select the primary / left pane; press Arrow Left again while the primary pane is active to close compare mode. Hold Shift in compare mode to temporarily target the opposite pane.',
               })}</li>
               <li>{t('help.sections.navigation.ctrlMode', {
                 defaultValue: 'Hold Ctrl when multiple documents are loaded to move whole documents instead of single pages.',
               })}</li>
               <li>{t('help.sections.navigation.ctrlShiftMode', {
-                defaultValue: 'Hold Ctrl + Shift in compare mode to navigate whole documents in the right pane.',
+                defaultValue: 'Hold Ctrl + Shift in compare mode to navigate whole documents in the temporary opposite pane.',
               })}</li>
             </ul>
           </section>
@@ -144,7 +144,7 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
                 defaultValue: 'Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.',
               })}</li>
               <li>{t('help.sections.selection.shortcut', {
-                defaultValue: 'Press Delete to hide the current left/main page from the saved selection. Hold Shift in compare mode to hide the right page instead. Hold Ctrl to hide the whole current document; hold Ctrl + Shift in compare mode to hide the right-side document.',
+                defaultValue: 'Press Delete to hide the current active page from the saved selection. Hold Shift in compare mode to hide the temporary opposite page instead. Hold Ctrl to hide the whole current document for the targeted pane.',
               })}</li>
             </ul>
             <p>{t('help.sections.selection.empty', {
@@ -159,16 +159,16 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             })}</p>
             <ul>
               <li>{t('help.sections.adjustments.primary', {
-                defaultValue: 'Without Shift, adjustments target the left/main page.',
+                defaultValue: 'Adjustments target the active pane.',
               })}</li>
               <li>{t('help.sections.adjustments.compare', {
-                defaultValue: 'With Shift in compare mode, adjustments target the right compare page.',
+                defaultValue: 'Hold Shift in compare mode to temporarily target the opposite pane.',
               })}</li>
               <li>{t('help.sections.adjustments.reset', {
                 defaultValue: 'Adjustments reset when you move to another page.',
               })}</li>
               <li>{t('help.sections.adjustments.shortcut', {
-                defaultValue: 'Use Arrow Left and Arrow Right to rotate the active pane. Hold Shift in compare mode to rotate the right pane instead.',
+                defaultValue: 'Use Ctrl + Arrow Left and Ctrl + Arrow Right to rotate the targeted pane.',
               })}</li>
             </ul>
           </section>

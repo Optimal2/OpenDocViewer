@@ -518,6 +518,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {function(number): void} [props.selectForCompare]
  * @param {boolean=} props.isComparing
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
+ * @param {'primary'|'compare'=} props.activePane
  * @param {{ shift:boolean, ctrl:boolean }} props.navigationModifierState
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
@@ -534,6 +535,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
+  activePane = 'primary',
   navigationModifierState,
   selectionPanelEnabled = false,
   onHidePageFromSelection,
@@ -542,6 +544,9 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 }) {
   const { t } = useTranslation('common');
   const isShiftPressed = !!navigationModifierState.shift;
+  const comparePaneVisible = !!isComparing
+    && Number.isFinite(Number(comparePageNumber))
+    && typeof selectForCompare === 'function';
   const {
     bundle,
     ensurePageAsset,
@@ -600,8 +605,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     return allPages.findIndex((page, visibleIndex) => (getSessionPageIndex(page, visibleIndex) + 1) === Number(comparePageNumber));
   }, [allPages, comparePageNumber, isComparing, totalCount]);
   // Follow actual page/document changes only. Holding Shift by itself must not yank the strip to
-  // the compare thumbnail; the right pane should only take over after an explicit compare page
-  // change coming from keyboard navigation, toolbar navigation, or compare selection.
+  // the opposite thumbnail; a pane takes over only after an explicit page change in that pane.
   const [autoScrollPageNumber, setAutoScrollPageNumber] = useState(Math.max(1, Number(pageNumber) || 1));
   const previousPrimaryPageNumberRef = useRef(Number(pageNumber) || 0);
   const previousComparePageNumberRef = useRef(Number.isFinite(comparePageNumber) ? Number(comparePageNumber) : 0);
@@ -914,6 +918,14 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     setContextMenuState(null);
   }, []);
 
+  const resolveActivationTarget = useCallback((event) => {
+    if (!comparePaneVisible) return 'primary';
+    const shift = typeof event?.shiftKey === 'boolean' ? !!event.shiftKey : isShiftPressed;
+    const basePane = activePane === 'compare' ? 'compare' : 'primary';
+    if (!shift) return basePane;
+    return basePane === 'compare' ? 'primary' : 'compare';
+  }, [activePane, comparePaneVisible, isShiftPressed]);
+
   useEffect(() => {
     if (!contextMenuState) return undefined;
 
@@ -1038,12 +1050,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleActivate = useCallback((nextPageNumber, event) => {
     closeContextMenu();
     try {
-      const wantsCompareTarget = !!(event?.shiftKey || isShiftPressed) && typeof selectForCompare === 'function';
-      if (wantsCompareTarget) {
+      const activationTarget = resolveActivationTarget(event);
+      if (activationTarget === 'compare' && typeof selectForCompare === 'function') {
         event.preventDefault?.();
         event.stopPropagation?.();
         selectForCompare(nextPageNumber);
-        logger.info('Thumbnail SHIFT-activated for compare', { pageNumber: nextPageNumber });
+        logger.info('Thumbnail activated for compare pane', { pageNumber: nextPageNumber });
         return;
       }
       setPageNumber(nextPageNumber);
@@ -1053,7 +1065,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         error: String(error?.message || error),
       });
     }
-  }, [closeContextMenu, isShiftPressed, selectForCompare, setPageNumber]);
+  }, [closeContextMenu, resolveActivationTarget, selectForCompare, setPageNumber]);
 
   /**
    * @param {*} event
@@ -1341,6 +1353,7 @@ DocumentThumbnailList.propTypes = {
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  activePane: PropTypes.oneOf(['primary', 'compare']),
   navigationModifierState: PropTypes.shape({
     shift: PropTypes.bool.isRequired,
     ctrl: PropTypes.bool.isRequired,

@@ -2,7 +2,7 @@
 /**
  * Shared modifier-key state for navigation and compare-aware viewer actions.
  *
- * The viewer uses Shift as a temporary target switch for the right compare pane and Ctrl as a
+ * The viewer uses Shift as a temporary target switch for the opposite compare pane and Ctrl as a
  * temporary scope switch for whole-document navigation. This hook centralizes that state so the
  * toolbar and the thumbnail pane stay in sync.
  *

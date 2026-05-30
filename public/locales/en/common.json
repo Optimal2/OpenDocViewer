@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Enable compare mode",
       "disable": "Disable compare mode",
-      "shiftHint": "Shift targets the right compare pane."
+      "shiftHint": "Shift temporarily targets the opposite compare pane."
     },
     "editing": {
       "enable": "Enable canvas tools",
@@ -54,7 +54,7 @@
       "targetPrimary": "primary / left pane",
       "targetCompare": "right compare pane",
       "modeTitle": "{scope} · {target}",
-      "shiftHint": "Shift = right compare pane",
+      "shiftHint": "Shift = opposite pane",
       "ctrlHint": "Ctrl = document mode",
       "groupDescription": "{scope} for {target}.",
       "loadingAnnounce": "Page navigation is still loading pages.",
@@ -76,7 +76,7 @@
       }
     },
     "editingTargetPrimary": "Editing the primary / left page",
-    "editingTargetCompare": "Editing the right compare page (Shift)",
+    "editingTargetCompare": "Editing the right compare page",
     "resetAdjustments": "Reset adjustments",
     "resetBrightness": "Reset brightness",
     "resetContrast": "Reset contrast",
@@ -352,6 +352,13 @@
       "description": "The active selection currently hides every page. Reset the selection filter to show the full session again, or open the selection tab to choose a new subset.",
       "showAll": "Show all pages",
       "openSelection": "Open selection"
+    },
+    "paneSelector": {
+      "primary": "Use primary / left pane",
+      "compare": "Use right compare pane",
+      "primaryActive": "Primary / left pane is the default target",
+      "compareActive": "Right compare pane is the default target",
+      "temporaryTarget": "Shift is temporarily targeting this pane"
     }
   },
   "thumbnails": {
@@ -508,9 +515,9 @@
         "title": "Navigation",
         "intro": "Use the toolbar, Arrow Up/Arrow Down, Home, and End to move through the material.",
         "pageMode": "Normal navigation moves one page at a time.",
-        "shiftMode": "Hold Shift to target the right compare pane. If compare mode is not open yet, Shift + navigation opens it on the right.",
+        "shiftMode": "Use Arrow Right to open or select the right compare pane. Use Arrow Left to select the primary / left pane; press Arrow Left again while the primary pane is active to close compare mode. Hold Shift in compare mode to temporarily target the opposite pane.",
         "ctrlMode": "Hold Ctrl when more than one document is loaded to move document by document instead of page by page.",
-        "ctrlShiftMode": "Hold Ctrl + Shift in compare mode to navigate whole documents in the right pane."
+        "ctrlShiftMode": "Hold Ctrl + Shift in compare mode to navigate whole documents in the temporary opposite pane."
       },
       "compare": {
         "title": "Compare mode",
@@ -527,15 +534,15 @@
         "body": "The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel ignores unsaved changes and returns to the thumbnail view.",
         "empty": "If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.",
         "collapse": "Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.",
-        "shortcut": "Press Delete to hide the current left/main page from the saved selection. Hold Shift in compare mode to hide the right page instead. Hold Ctrl to hide the whole current document; hold Ctrl + Shift in compare mode to hide the right-side document."
+        "shortcut": "Press Delete to hide the current active page from the saved selection. Hold Shift in compare mode to hide the temporary opposite page instead. Hold Ctrl to hide the whole current document for the targeted pane."
       },
       "adjustments": {
         "title": "Image adjustments",
         "body": "Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.",
-        "primary": "Without Shift, adjustments target the left/primary page.",
-        "compare": "With Shift in compare mode, adjustments target the right page.",
+        "primary": "Adjustments target the active pane.",
+        "compare": "Hold Shift in compare mode to temporarily target the opposite pane.",
         "reset": "Adjustments reset when you move to another page.",
-        "shortcut": "Use Arrow Left and Arrow Right to rotate the active pane. Hold Shift in compare mode to rotate the right pane instead."
+        "shortcut": "Use Ctrl + Arrow Left and Ctrl + Arrow Right to rotate the targeted pane."
       },
       "printing": {
         "title": "Printing",

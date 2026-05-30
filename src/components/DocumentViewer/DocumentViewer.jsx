@@ -63,6 +63,8 @@ const DocumentViewer = () => {
     zoom,
     setZoom,
     isComparing,
+    activePane,
+    setActivePane,
     comparePageNumber,
     renderComparePageNumber,
     setComparePageNumber,
@@ -269,6 +271,12 @@ const DocumentViewer = () => {
   const hasVisiblePages = totalPages > 0;
   const hasPrintableSelection = selectionActive && visibleOriginalPageNumbers.length > 0;
   const showEmptySelectionState = selectionActive && !hasVisiblePages;
+  const effectivePane = useMemo(() => {
+    if (!isComparing) return 'primary';
+    const basePane = activePane === 'compare' ? 'compare' : 'primary';
+    if (!navigationModifierState.shift) return basePane;
+    return basePane === 'compare' ? 'primary' : 'compare';
+  }, [activePane, isComparing, navigationModifierState.shift]);
 
   const prevPageDisabled = pageNumber <= 1;
   const nextPageDisabled = pageNumber >= totalPages;
@@ -350,6 +358,7 @@ const DocumentViewer = () => {
         allPages={allPages || []}
 
         isComparing={isComparing}
+        activePane={activePane}
         handleCompare={handleCompare}
         comparePageNumber={comparePageNumber}
         comparePageNumberDisplay={renderComparePageNumber}
@@ -410,7 +419,8 @@ const DocumentViewer = () => {
                 selectForCompare={selectForCompare}
                 isComparing={isComparing}
                 comparePageNumber={compareThumbnailPageNumber}
-          navigationModifierState={navigationModifierState}
+                activePane={activePane}
+                navigationModifierState={navigationModifierState}
                 paneMode={thumbnailPaneMode}
                 setPaneMode={setThumbnailPaneMode}
                 selectionPanelEnabled={selectionPanelEnabled}
@@ -429,8 +439,8 @@ const DocumentViewer = () => {
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
                 onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
-          canOpenMetadataMatrix={canOpenMetadataMatrix}
-          onOpenMetadataMatrix={openMetadataMatrix}
+                canOpenMetadataMatrix={canOpenMetadataMatrix}
+                onOpenMetadataMatrix={openMetadataMatrix}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -489,6 +499,9 @@ const DocumentViewer = () => {
             zoom={zoom}
             setZoom={setZoom}
             isComparing={isComparing}
+            activePane={activePane}
+            effectivePane={effectivePane}
+            onSetActivePane={setActivePane}
             primaryImageProperties={primaryImageProperties}
             compareImageProperties={compareImageProperties}
             documentRenderRef={documentRenderRef}

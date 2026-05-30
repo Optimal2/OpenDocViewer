@@ -90,6 +90,67 @@
   border-color: color-mix(in srgb, var(--thumbnail-compare-color) 72%, transparent 28%);
 }
 
+.odv-pane-selector {
+  --odv-pane-selector-accent: var(--thumbnail-primary-color);
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 12;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  padding: 0;
+  border: 2px solid color-mix(in srgb, var(--odv-pane-selector-accent) 72%, transparent 28%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--canvas-background-color) 88%, transparent 12%);
+  color: var(--odv-pane-selector-accent);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
+  cursor: pointer;
+  opacity: 0.72;
+  transition: opacity 0.16s ease, transform 0.16s ease, box-shadow 0.16s ease, background-color 0.16s ease;
+}
+
+.odv-pane-selector.is-compare {
+  --odv-pane-selector-accent: var(--thumbnail-compare-color);
+}
+
+.odv-pane-selector:hover,
+.odv-pane-selector:focus-visible,
+.odv-pane-selector.is-active,
+.odv-pane-selector.is-effective {
+  opacity: 1;
+}
+
+.odv-pane-selector:hover,
+.odv-pane-selector:focus-visible {
+  transform: translateY(-1px);
+  background: color-mix(in srgb, var(--canvas-background-color) 96%, var(--odv-pane-selector-accent) 4%);
+}
+
+.odv-pane-selector:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--odv-pane-selector-accent) 78%, #ffffff 22%);
+  outline-offset: 2px;
+}
+
+.odv-pane-selector.is-active {
+  box-shadow:
+    0 0 0 4px color-mix(in srgb, var(--odv-pane-selector-accent) 24%, transparent 76%),
+    0 8px 20px rgba(15, 23, 42, 0.18);
+}
+
+.odv-pane-selector.is-effective:not(.is-active) {
+  border-style: dashed;
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--odv-pane-selector-accent) 18%, transparent 82%),
+    0 8px 20px rgba(15, 23, 42, 0.18);
+}
+
+.odv-pane-selector .material-icons {
+  font-size: 21px;
+  line-height: 1;
+}
 
 .document-render-viewport,
 .canvas-wrapper {

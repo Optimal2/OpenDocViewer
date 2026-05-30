@@ -10,10 +10,9 @@
  *  - Global keyboard navigation/zoom/selection shortcuts with context guards
  *  - Config-driven Ctrl/Cmd + P behavior
  *
- * The keyboard layer now understands compare-targeted navigation with Shift and document-level
- * navigation with Ctrl. When compare mode is available, Shift + navigation keys steer the right
- * pane. When multiple visible documents exist, Ctrl + navigation keys step whole documents instead
- * of pages.
+ * The keyboard layer understands compare-targeted navigation and document-level navigation.
+ * Compare mode has an explicit active pane; Shift temporarily targets the opposite pane, while
+ * Ctrl switches Up/Down/Home/End to whole-document stepping and Ctrl+Left/Right rotates.
  *
  * @module useViewerEffects
  */
@@ -52,6 +51,10 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} goToLastDocument
  * @property {boolean} documentNavigationEnabled
  * @property {boolean} compareNavigationEnabled
+ * @property {'primary'|'compare'=} activePane
+ * @property {Function=} activatePrimaryPane
+ * @property {Function=} activateComparePane
+ * @property {Function=} closeCompare
  * @property {Function=} hideCurrentPageFromSelection
  * @property {Function=} hideCurrentDocumentFromSelection
  * @property {Function} zoomIn
@@ -192,6 +195,10 @@ export function useViewerEffects(args) {
     goToLastDocument,
     documentNavigationEnabled,
     compareNavigationEnabled,
+    activePane = 'primary',
+    activatePrimaryPane,
+    activateComparePane,
+    closeCompare,
     hideCurrentPageFromSelection,
     hideCurrentDocumentFromSelection,
     zoomIn,
@@ -217,6 +224,10 @@ export function useViewerEffects(args) {
   const documentNavigationEnabledRef = useRef(documentNavigationEnabled);
   const compareNavigationEnabledRef = useRef(compareNavigationEnabled);
   const isComparingRef = useRef(isComparing);
+  const activePaneRef = useRef(activePane === 'compare' ? 'compare' : 'primary');
+  const activatePrimaryPaneRef = useRef(activatePrimaryPane);
+  const activateComparePaneRef = useRef(activateComparePane);
+  const closeCompareRef = useRef(closeCompare);
   const hideCurrentPageFromSelectionRef = useRef(hideCurrentPageFromSelection);
   const hideCurrentDocumentFromSelectionRef = useRef(hideCurrentDocumentFromSelection);
   const zoomInRef = useRef(zoomIn);
@@ -235,6 +246,10 @@ export function useViewerEffects(args) {
   documentNavigationEnabledRef.current = documentNavigationEnabled;
   compareNavigationEnabledRef.current = compareNavigationEnabled;
   isComparingRef.current = isComparing;
+  activePaneRef.current = activePane === 'compare' ? 'compare' : 'primary';
+  activatePrimaryPaneRef.current = activatePrimaryPane;
+  activateComparePaneRef.current = activateComparePane;
+  closeCompareRef.current = closeCompare;
   hideCurrentPageFromSelectionRef.current = hideCurrentPageFromSelection;
   hideCurrentDocumentFromSelectionRef.current = hideCurrentDocumentFromSelection;
   zoomInRef.current = zoomIn;
@@ -392,9 +407,12 @@ export function useViewerEffects(args) {
      * @param {KeyboardEvent} e
      * @returns {'primary'|'compare'}
      */
-    const getTarget = (e) => (
-      e.shiftKey && compareNavigationEnabledRef.current ? 'compare' : 'primary'
-    );
+    const getTarget = (e) => {
+      if (!compareNavigationEnabledRef.current || !isComparingRef.current) return 'primary';
+      const currentActivePane = activePaneRef.current === 'compare' ? 'compare' : 'primary';
+      if (!e.shiftKey) return currentActivePane;
+      return currentActivePane === 'compare' ? 'primary' : 'compare';
+    };
 
     /**
      * @param {KeyboardEvent} e
@@ -483,17 +501,29 @@ export function useViewerEffects(args) {
           break;
 
         case 'ArrowLeft':
-          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          if (e.ctrlKey && !e.metaKey && !e.altKey) {
             e.preventDefault();
             stopKeyboardRepeat();
             rotateLeftRef.current?.(target);
+          } else if (!e.metaKey && !e.altKey) {
+            e.preventDefault();
+            stopKeyboardRepeat();
+            if (isComparingRef.current && activePaneRef.current === 'primary') {
+              closeCompareRef.current?.();
+            } else {
+              activatePrimaryPaneRef.current?.();
+            }
           }
           break;
         case 'ArrowRight':
-          if (!e.ctrlKey && !e.metaKey && !e.altKey) {
+          if (e.ctrlKey && !e.metaKey && !e.altKey) {
             e.preventDefault();
             stopKeyboardRepeat();
             rotateRightRef.current?.(target);
+          } else if (!e.metaKey && !e.altKey) {
+            e.preventDefault();
+            stopKeyboardRepeat();
+            activateComparePaneRef.current?.();
           }
           break;
 
@@ -502,9 +532,8 @@ export function useViewerEffects(args) {
             e.preventDefault();
             stopKeyboardRepeat();
             if (e.ctrlKey) {
-              const deleteTarget = e.shiftKey ? 'compare' : 'primary';
-              if (deleteTarget === 'compare' && !isComparingRef.current) break;
-              hideCurrentDocumentFromSelectionRef.current?.(deleteTarget);
+              if (target === 'compare' && !isComparingRef.current) break;
+              hideCurrentDocumentFromSelectionRef.current?.(target);
             } else {
               hideCurrentPageFromSelectionRef.current?.(target);
             }

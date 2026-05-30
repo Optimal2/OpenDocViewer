@@ -15,7 +15,7 @@
     "compare": {
       "enable": "Aktivera jämför-läge",
       "disable": "Inaktivera jämför-läge",
-      "shiftHint": "Shift styr höger jämförelsevy."
+      "shiftHint": "Shift styr tillfälligt motsatt jämförelsevy."
     },
     "editing": {
       "enable": "Aktivera redigeringsverktyg",
@@ -54,7 +54,7 @@
       "targetPrimary": "huvudvy / vänster vy",
       "targetCompare": "höger jämförelsevy",
       "modeTitle": "{scope} · {target}",
-      "shiftHint": "Shift = höger jämförelsevy",
+      "shiftHint": "Shift = motsatt vy",
       "ctrlHint": "Ctrl = dokumentläge",
       "groupDescription": "{scope} för {target}.",
       "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
@@ -76,7 +76,7 @@
       }
     },
     "editingTargetPrimary": "Redigerar vänster/huvudsida",
-    "editingTargetCompare": "Redigerar höger jämförelsesida (Shift)",
+    "editingTargetCompare": "Redigerar höger jämförelsesida",
     "resetAdjustments": "Återställ justeringar",
     "resetBrightness": "Återställ ljusstyrka",
     "resetContrast": "Återställ kontrast",
@@ -352,6 +352,13 @@
       "description": "Det aktiva urvalet döljer just nu alla sidor. Återställ urvalsfiltreringen för att visa hela sessionen igen, eller öppna urvalsfliken och välj ett nytt delmängdsurval.",
       "showAll": "Visa alla sidor",
       "openSelection": "Öppna urval"
+    },
+    "paneSelector": {
+      "primary": "Använd huvudvy / vänster vy",
+      "compare": "Använd höger jämförelsevy",
+      "primaryActive": "Huvudvy / vänster vy är standardmål",
+      "compareActive": "Höger jämförelsevy är standardmål",
+      "temporaryTarget": "Shift styr tillfälligt denna vy"
     }
   },
   "thumbnails": {
@@ -508,9 +515,9 @@
         "title": "Navigering",
         "intro": "Använd verktygsfältet, pil upp/pil ned, Home och End för att förflytta dig i materialet.",
         "pageMode": "Vanlig navigering flyttar en sida i taget.",
-        "shiftMode": "Håll nere Shift för att styra den högra jämförelsepanelen. Om jämförelsevyn inte redan är öppen startar Shift + navigering den till höger.",
+        "shiftMode": "Använd pil höger för att öppna eller välja höger jämförelsevy. Använd pil vänster för att välja huvudvy / vänster vy; tryck pil vänster igen när huvudvyn är aktiv för att stänga jämförelsevyn. Håll nere Shift i jämförelsevy för att tillfälligt styra motsatt vy.",
         "ctrlMode": "Håll nere Ctrl när fler än ett dokument är öppnat för att flytta dokument för dokument i stället för sida för sida.",
-        "ctrlShiftMode": "Håll nere Ctrl + Shift i jämförelsevy för att navigera hela dokument i den högra sidan."
+        "ctrlShiftMode": "Håll nere Ctrl + Shift i jämförelsevy för att navigera hela dokument i den tillfälligt motsatta vyn."
       },
       "compare": {
         "title": "Jämförelsevy",
@@ -527,15 +534,15 @@
         "body": "Fliken Urval låter dig inkludera eller exkludera hela dokument eller enskilda sidor. Spara verkställer urvalet. Avbryt ignorerar osparade ändringar och återgår till miniatyrvyn.",
         "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen.",
         "collapse": "Varje dokument kan expanderas eller fällas ihop i fliken Urval så att stora sessioner blir lättare att hantera.",
-        "shortcut": "Tryck Delete för att dölja aktuell vänster-/huvudsida från det sparade urvalet. Håll ned Shift i jämförelseläge för att dölja den högra sidan i stället. Håll ned Ctrl för att dölja hela aktuella dokumentet; håll ned Ctrl + Shift i jämförelseläge för att dölja dokumentet på höger sida."
+        "shortcut": "Tryck Delete för att dölja aktuell aktiv sida från det sparade urvalet. Håll ned Shift i jämförelsevy för att dölja den tillfälligt motsatta sidan i stället. Håll ned Ctrl för att dölja hela aktuella dokumentet för den riktade vyn."
       },
       "adjustments": {
         "title": "Bildjusteringar",
         "body": "Rotation, ljus, kontrast och återställning finns alltid tillgängliga i verktygsfältet. Ljus och kontrast öppnas från sina ikoner. Viewern använder snabb bildrendering tills du gör en faktisk justering. Först då växlar den aktuella panelen över till canvas-rendering.",
-        "primary": "Utan Shift avser justeringarna vänster/huvudsidan.",
-        "compare": "Med Shift i jämförelsevy avser justeringarna högersidan.",
+        "primary": "Justeringar avser den aktiva vyn.",
+        "compare": "Håll nere Shift i jämförelsevy för att tillfälligt rikta justeringar mot motsatt vy.",
         "reset": "Justeringar återställs när du byter till en annan sida.",
-        "shortcut": "Använd pil vänster och pil höger för att rotera aktiv sida. Håll nere Shift i jämförelsevy för att rotera den högra sidan i stället."
+        "shortcut": "Använd Ctrl + pil vänster och Ctrl + pil höger för att rotera den riktade vyn."
       },
       "printing": {
         "title": "Utskrift",
