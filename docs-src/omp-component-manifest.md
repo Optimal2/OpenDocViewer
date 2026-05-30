@@ -25,6 +25,8 @@ HostAgent tooling can treat it consistently.
 - `relativePathTemplate` describes the artifact-store path. Replace
   `{version}` with the component version.
 - `packageFileTemplate` describes the expected release package path.
+- `minModuleDefinitionVersion` records the minimum module-definition version
+  required by an artifact package.
 
 ## Bumping Versions
 
