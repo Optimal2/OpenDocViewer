@@ -81,7 +81,6 @@ const PageNavigationButtons = ({
   const SUPPRESS_CLICK_WINDOW_MS = 400;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
   const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
-  const activePointerIdRef = useRef(/** @type {(number|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const hasPages = Math.max(0, Number(totalPagesDisplay) || 0) > 0;
@@ -115,7 +114,6 @@ const PageNavigationButtons = ({
       markSuppressedClick(activeKey);
     }
     activeRepeatButtonRef.current = null;
-    activePointerIdRef.current = null;
   }, [markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
@@ -166,8 +164,6 @@ const PageNavigationButtons = ({
     if (prevPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
-    event?.currentTarget?.setPointerCapture?.(event.pointerId);
-    activePointerIdRef.current = Number.isFinite(event?.pointerId) ? event.pointerId : null;
     activeRepeatButtonRef.current = 'prev';
     markSuppressedClick('prev');
     startPrevPageTimer('prev', event);
@@ -181,8 +177,6 @@ const PageNavigationButtons = ({
     if (nextPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
-    event?.currentTarget?.setPointerCapture?.(event.pointerId);
-    activePointerIdRef.current = Number.isFinite(event?.pointerId) ? event.pointerId : null;
     activeRepeatButtonRef.current = 'next';
     markSuppressedClick('next');
     startNextPageTimer('next', event);
@@ -275,7 +269,6 @@ const PageNavigationButtons = ({
         onPointerDown={beginPrevRepeat}
         onPointerUp={stopAllRepeatNavigation}
         onPointerCancel={stopAllRepeatNavigation}
-        onLostPointerCapture={stopAllRepeatNavigation}
         aria-label={resolvedPreviousButtonTitle}
         title={resolvedPreviousButtonTitle}
         className="odv-btn"
@@ -329,7 +322,6 @@ const PageNavigationButtons = ({
         onPointerDown={beginNextRepeat}
         onPointerUp={stopAllRepeatNavigation}
         onPointerCancel={stopAllRepeatNavigation}
-        onLostPointerCapture={stopAllRepeatNavigation}
         aria-label={resolvedNextButtonTitle}
         title={resolvedNextButtonTitle}
         className="odv-btn"
