@@ -1046,6 +1046,19 @@ export function useDocumentViewer() {
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
   }, [actualSize, fitToScreen, fitToWidth]);
 
+  /**
+   * Toggle between the two fit modes from the page surface. Any non-fit-width mode moves to
+   * fit-width first because that is the most useful quick-read target.
+   */
+  const toggleFitZoomMode = useCallback(() => {
+    if (zoomState?.mode === 'FIT_WIDTH') {
+      fitToScreen();
+      return;
+    }
+
+    fitToWidth();
+  }, [fitToScreen, fitToWidth, zoomState?.mode]);
+
   // --- Compare + editing controls -------------------------------------------------
   /**
    * Setter for the editing controls visibility. The controls may now stay open while compare mode
@@ -1313,6 +1326,7 @@ export function useDocumentViewer() {
     actualSize,
     fitToScreen,
     fitToWidth,
+    toggleFitZoomMode,
     handleContainerClick,
     handleCompare,
     closeCompare,
