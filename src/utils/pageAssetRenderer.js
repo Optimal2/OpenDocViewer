@@ -351,7 +351,7 @@ export class PageAssetRenderer {
           variant,
           thumbnailMaxWidth: options?.thumbnailMaxWidth,
           thumbnailMaxHeight: options?.thumbnailMaxHeight,
-          rasterFullPageScale: Number(this.config.fullPageScale) || 1.5,
+          rasterFullPageScale: Number(this.config.fullPageScale) || 2.0,
         });
       } catch (error) {
         if (!error?.fallbackMainThread) throw error;
@@ -425,7 +425,7 @@ export class PageAssetRenderer {
             Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
             Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
           )
-        : Math.max(0.5, Number(this.config.fullPageScale) || 1.5);
+        : Math.max(0.5, Number(this.config.fullPageScale) || 2.0);
       const viewport = page.getViewport({ scale: targetScale });
 
       const canvas = document.createElement('canvas');

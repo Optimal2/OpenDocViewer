@@ -105,12 +105,12 @@
     },
     viewer: {
       // Initial zoom mode when the first page opens.
-      // Supported values: "fit-page" (default), "fit-width", "actual-size".
-      defaultZoomMode: 'fit-page',
+      // Supported values: "fit-page", "fit-width" (default), "actual-size".
+      defaultZoomMode: 'fit-width',
       // Optional page turn gesture at the top/bottom scroll edge. When enabled, continued wheel
       // scrolling at the edge fills a small progress indicator before changing page.
       edgeScrollPageTurn: {
-        enabled: false,
+        enabled: true,
         thresholdPx: 720,
         quietMs: 140,
         decayMs: 650
@@ -633,7 +633,7 @@
         maxConcurrentAssetRenders: 3,
         warmupBatchSize: 48,
         loadingOverlayDelayMs: 90,
-        fullPageScale: 1.5,
+        fullPageScale: 2.0,
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
         // Real thumbnail raster size. The pane can still scale the image to fit the available width.

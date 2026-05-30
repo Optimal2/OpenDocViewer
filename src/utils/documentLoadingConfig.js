@@ -226,7 +226,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       maxConcurrentAssetRenders: 3,
       warmupBatchSize: 48,
       loadingOverlayDelayMs: 90,
-      fullPageScale: 1.5,
+      fullPageScale: 2.0,
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
       thumbnailLoadingStrategy: 'adaptive',
