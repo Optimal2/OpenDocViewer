@@ -10,6 +10,14 @@
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 
 /**
+ * @typedef {Object} ViewerEdgeScrollPageTurnConfig
+ * @property {boolean} enabled
+ * @property {number} thresholdPx
+ * @property {number} decayMs
+ * @property {number} quietMs
+ */
+
+/**
  * @typedef {Object} ViewerProblemNoticeConfig
  * @property {boolean} enabled
  * @property {boolean} showForLoaderError
@@ -125,6 +133,27 @@ function normalizeDefaultZoomMode(value, fallback = 'fit-page') {
  */
 export function getViewerDefaultZoomMode(cfg = getRuntimeConfig()) {
   return normalizeDefaultZoomMode(cfg?.viewer?.defaultZoomMode, 'fit-page');
+}
+
+/**
+ * Resolve the optional scroll-at-edge page turn gesture.
+ *
+ * Runtime config value: `viewer.edgeScrollPageTurn`
+ * Supported shape:
+ * `{ enabled: true, thresholdPx: 720, quietMs: 140, decayMs: 650 }`
+ *
+ * @param {Object=} cfg
+ * @returns {ViewerEdgeScrollPageTurnConfig}
+ */
+export function getViewerEdgeScrollPageTurnConfig(cfg = getRuntimeConfig()) {
+  const rawValue = cfg?.viewer?.edgeScrollPageTurn ?? cfg?.edgeScrollPageTurn ?? {};
+  const raw = typeof rawValue === 'boolean' ? { enabled: rawValue } : (rawValue || {});
+  return {
+    enabled: normalizeBoolean(raw.enabled, false),
+    thresholdPx: normalizeInteger(raw.thresholdPx, 720, 120, 5000),
+    quietMs: normalizeInteger(raw.quietMs, 140, 0, 2000),
+    decayMs: normalizeInteger(raw.decayMs, 650, 100, 5000),
+  };
 }
 
 /**

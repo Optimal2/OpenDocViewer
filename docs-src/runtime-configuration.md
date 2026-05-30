@@ -85,6 +85,26 @@ The default is `fit-page`, which preserves the historical behavior where the ful
 the viewer pane. Use `fit-width` when users should start with the page width filling the pane and
 scroll vertically through taller pages. Use `actual-size` for a 100% initial zoom.
 
+## Edge Scroll Page Turn
+
+Deployments can opt in to wheel-based page changes at the vertical scroll edges:
+
+```js
+viewer: {
+  edgeScrollPageTurn: {
+    enabled: true,
+    thresholdPx: 720,
+    quietMs: 140,
+    decayMs: 650
+  }
+}
+```
+
+When enabled, normal wheel scrolling works inside the current page. If the user keeps scrolling down
+at the bottom edge, or up at the top edge, OpenDocViewer fills a small progress indicator. Reaching
+the threshold changes to the next or previous page and resets the indicator. If the user stops before
+the threshold, the indicator decays and disappears.
+
 ## Viewer Problem Notice
 
 Deployments can configure a viewer-level support notice for serious load failures, for example when

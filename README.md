@@ -43,6 +43,7 @@ The codebase now has four documentation layers:
   - Fit-to-page and fit-to-width sticky zoom modes
   - Runtime-configurable default zoom mode
   - Double-click the main page surface to toggle between fit-to-width and fit-to-page
+  - Optional edge-scroll page turn gesture with a visual progress indicator
   - Explicit zoom controls, typed zoom percentage, and 1:1 mode
   - Optional comparison view with independent per-pane post-zoom
   - Deterministic thumbnail pane with keyboard-friendly selection, compare badges, and width controls
