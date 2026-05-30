@@ -8,6 +8,7 @@
  */
 
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
+import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 
 const workerScope = self;
 const MIN_THUMBNAIL_DIMENSION = 24;
@@ -16,6 +17,12 @@ const DEFAULT_THUMBNAIL_HEIGHT = 310;
 
 /** @type {Map<string, { loadingTask:any, promise:Promise<any>, dispose:function():Promise<void> }>} */
 const pdfCache = new Map();
+
+try {
+  if (pdfjsLib?.GlobalWorkerOptions) {
+    pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
+  }
+} catch {}
 
 function createFallbackMainThreadError(message, code = 'pdf-worker-fallback', phase = 'unknown') {
   const error = new Error(message);
@@ -28,6 +35,7 @@ function createFallbackMainThreadError(message, code = 'pdf-worker-fallback', ph
 function getWorkerEnvironmentDiagnostics() {
   let offscreenCanvasContext2d = false;
   let offscreenCanvasConvertToBlob = false;
+  let workerSrcConfigured = false;
   try {
     if (typeof OffscreenCanvas === 'function') {
       const canvas = new OffscreenCanvas(1, 1);
@@ -35,15 +43,20 @@ function getWorkerEnvironmentDiagnostics() {
       offscreenCanvasConvertToBlob = typeof canvas.convertToBlob === 'function';
     }
   } catch {}
+  try {
+    workerSrcConfigured = !!pdfjsLib?.GlobalWorkerOptions?.workerSrc;
+  } catch {}
 
   return {
     hasBlob: typeof Blob === 'function',
+    hasWorker: typeof Worker === 'function',
     hasOffscreenCanvas: typeof OffscreenCanvas === 'function',
     offscreenCanvasContext2d,
     offscreenCanvasConvertToBlob,
     hasDOMMatrix: typeof DOMMatrix === 'function',
     hasImageData: typeof ImageData === 'function',
     hasPath2D: typeof Path2D === 'function',
+    workerSrcConfigured,
     pdfjsVersion: String(pdfjsLib?.version || ''),
     userAgent: String(workerScope.navigator?.userAgent || ''),
   };
@@ -126,7 +139,6 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
     const buffer = await sourceBlob.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
       data: buffer,
-      disableWorker: true,
     });
     const entry = {
       loadingTask,
