@@ -520,9 +520,8 @@ const DocumentViewerRender = ({
       startScrollLeft: Number(viewport.scrollLeft) || 0,
       startScrollTop: Number(viewport.scrollTop) || 0,
       moved: false,
+      captured: false,
     };
-    setActivePanPane(pane);
-    try { paneElement.setPointerCapture?.(event.pointerId); } catch {}
   }, [closeContextMenu, getPaneElement, getPaneViewport, isComparing, onSetActivePane, setPanePannable]);
 
   const handlePanePointerMove = useCallback((event, pane) => {
@@ -534,6 +533,11 @@ const DocumentViewerRender = ({
     if (!state.moved && Math.hypot(dx, dy) < PAN_POINTER_MOVE_THRESHOLD_PX) return;
 
     state.moved = true;
+    if (!state.captured) {
+      state.captured = true;
+      setActivePanPane(pane);
+      try { state.captureElement?.setPointerCapture?.(state.pointerId); } catch {}
+    }
     state.viewport.scrollLeft = state.startScrollLeft - dx;
     state.viewport.scrollTop = state.startScrollTop - dy;
     event?.preventDefault?.();
