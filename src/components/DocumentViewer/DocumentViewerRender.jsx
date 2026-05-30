@@ -490,6 +490,10 @@ const DocumentViewerRender = ({
     return () => window.removeEventListener('resize', handleResize);
   }, [isComparing, updatePanePannability]);
 
+  const closeContextMenu = useCallback(() => {
+    setContextMenuState(null);
+  }, []);
+
   const handlePanePointerDown = useCallback((event, pane) => {
     if (event?.button !== 0) return;
     if (event?.pointerType === 'touch') return;
@@ -571,10 +575,6 @@ const DocumentViewerRender = ({
     const timeoutId = window.setTimeout(() => applyPaneScrollPosition('compare', pending), 0);
     return () => window.clearTimeout(timeoutId);
   }, [applyPaneScrollPosition, comparePageNumber]);
-
-  const closeContextMenu = useCallback(() => {
-    setContextMenuState(null);
-  }, []);
 
   useEffect(() => {
     closeContextMenu();
