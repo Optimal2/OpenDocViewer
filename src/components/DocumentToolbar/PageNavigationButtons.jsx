@@ -77,8 +77,10 @@ const PageNavigationButtons = ({
   const SUPPRESS_CLICK_WINDOW_MS = 400;
   const REPEAT_INITIAL_DELAY_MS = 500;
   const REPEAT_INTERVAL_MS = 50;
+  const DUPLICATE_REPEAT_START_WINDOW_MS = 120;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
   const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
+  const repeatStartStateRef = useRef({ key: null, until: 0 });
   const repeatDelayTimerRef = useRef(null);
   const repeatIntervalRef = useRef(null);
   const inputRef = useRef(null);
@@ -129,6 +131,7 @@ const PageNavigationButtons = ({
       markSuppressedClick(activeKey);
     }
     activeRepeatButtonRef.current = null;
+    repeatStartStateRef.current = { key: null, until: 0 };
   }, [clearLocalRepeatTimers, markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
@@ -136,12 +139,14 @@ const PageNavigationButtons = ({
       stopAllRepeatNavigation();
     };
 
+    window.addEventListener('pointerup', handleRelease, { passive: true });
     window.addEventListener('mouseup', handleRelease, { passive: true });
     window.addEventListener('touchend', handleRelease, { passive: true });
     window.addEventListener('touchcancel', handleRelease, { passive: true });
     window.addEventListener('blur', handleRelease, { passive: true });
 
     return () => {
+      window.removeEventListener('pointerup', handleRelease);
       window.removeEventListener('mouseup', handleRelease);
       window.removeEventListener('touchend', handleRelease);
       window.removeEventListener('touchcancel', handleRelease);
@@ -188,6 +193,19 @@ const PageNavigationButtons = ({
    * @returns {void}
    */
   const startLocalRepeatNavigation = useCallback((key, event, handler) => {
+    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
+      ? performance.now()
+      : Date.now();
+    const repeatStartState = repeatStartStateRef.current || {};
+    if (repeatStartState.key === key && Number(repeatStartState.until || 0) > now) {
+      event?.preventDefault?.();
+      return;
+    }
+    repeatStartStateRef.current = {
+      key,
+      until: now + DUPLICATE_REPEAT_START_WINDOW_MS,
+    };
+
     clearLocalRepeatTimers();
     event?.preventDefault?.();
     activeRepeatButtonRef.current = key;
@@ -309,6 +327,7 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'prev', handlePrevPage)}
+        onPointerDown={beginPrevRepeat}
         onMouseDown={beginPrevRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onTouchStart={beginPrevRepeat}
@@ -363,6 +382,7 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'next', handleNextPage)}
+        onPointerDown={beginNextRepeat}
         onMouseDown={beginNextRepeat}
         onMouseUp={stopAllRepeatNavigation}
         onTouchStart={beginNextRepeat}
