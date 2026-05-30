@@ -80,6 +80,7 @@ function getPageSelectionContext(allPages, originalPageNumber) {
  * @param {RefLike} props.compareRef
  * @param {Array} props.allPages
  * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
+ * @param {function(): void=} props.onToggleFitZoomMode
  * @param {number} props.postZoomLeft
  * @param {number} props.postZoomRight
  * @param {function(number): void} props.bumpPostZoomLeft
@@ -104,6 +105,7 @@ const DocumentViewerRender = ({
   compareRef,
   allPages,
   zoomMode = 'CUSTOM',
+  onToggleFitZoomMode,
   postZoomLeft = 1.0,
   postZoomRight = 1.0,
   bumpPostZoomLeft,
@@ -291,6 +293,7 @@ const DocumentViewerRender = ({
               isCanvasEnabled={primaryCanvasEnabled}
               allPages={allPages}
               zoomMode={zoomMode}
+              onToggleFitZoomMode={onToggleFitZoomMode}
               onDisplayStateChange={onPrimaryDisplayStateChange}
             />
           </div>
@@ -322,6 +325,7 @@ const DocumentViewerRender = ({
                 isCanvasEnabled={compareCanvasEnabled}
                 allPages={allPages}
                 zoomMode={zoomMode}
+                onToggleFitZoomMode={onToggleFitZoomMode}
               />
             </div>
           </div>
@@ -435,6 +439,7 @@ DocumentViewerRender.propTypes = {
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
   zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+  onToggleFitZoomMode: PropTypes.func,
   postZoomLeft: PropTypes.number.isRequired,
   postZoomRight: PropTypes.number.isRequired,
   bumpPostZoomLeft: PropTypes.func.isRequired,

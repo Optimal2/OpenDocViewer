@@ -98,6 +98,7 @@ const DocumentViewer = () => {
     actualSize,
     fitToScreen,
     fitToWidth,
+    toggleFitZoomMode,
     handleContainerClick,
     handleCompare,
     closeCompare,
@@ -490,6 +491,7 @@ const DocumentViewer = () => {
             compareRef={compareRef}
             allPages={allPages}
             zoomMode={zoomState?.mode}
+            onToggleFitZoomMode={toggleFitZoomMode}
             postZoomLeft={postZoomLeft}
             postZoomRight={postZoomRight}
             bumpPostZoomLeft={bumpPostZoomLeft}

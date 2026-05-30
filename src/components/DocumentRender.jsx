@@ -83,6 +83,7 @@ function isBlobAssetUrl(url) {
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
  * @param {('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
+ * @param {function(): void=} props.onToggleFitZoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
  * @returns {React.ReactElement}
  */
@@ -98,6 +99,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     forceRender,
     allPages,
     zoomMode = 'FIT_PAGE',
+    onToggleFitZoomMode,
     onDisplayStateChange = () => {},
   },
   ref
@@ -356,6 +358,17 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
     fitToScreen();
   }, [fitToScreen, fitToWidth, setZoom, zoomMode]);
+
+  /**
+   * @param {React.MouseEvent<HTMLDivElement>} event
+   * @returns {void}
+   */
+  const handleViewportDoubleClick = useCallback((event) => {
+    if (typeof onToggleFitZoomMode !== 'function') return;
+    event.preventDefault();
+    event.stopPropagation();
+    onToggleFitZoomMode();
+  }, [onToggleFitZoomMode]);
 
   useEffect(() => {
     let cancelled = false;
@@ -855,7 +868,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [clearLoadingOverlayTimer]);
 
   return (
-    <div ref={renderViewportRef} className="document-render-viewport">
+    <div
+      ref={renderViewportRef}
+      className="document-render-viewport"
+      onDoubleClick={handleViewportDoubleClick}
+    >
       <div className="document-render-container" style={stageStyle}>
         {displayedUrl && !hideDisplayedSurface && (
           <ImageRenderer
