@@ -17,10 +17,48 @@ const DEFAULT_THUMBNAIL_HEIGHT = 310;
 /** @type {Map<string, { loadingTask:any, promise:Promise<any>, dispose:function():Promise<void> }>} */
 const pdfCache = new Map();
 
-function createFallbackMainThreadError(message) {
+function createFallbackMainThreadError(message, code = 'pdf-worker-fallback', phase = 'unknown') {
   const error = new Error(message);
   error.fallbackMainThread = true;
+  error.code = code;
+  error.phase = phase;
   return error;
+}
+
+function getWorkerEnvironmentDiagnostics() {
+  let offscreenCanvasContext2d = false;
+  let offscreenCanvasConvertToBlob = false;
+  try {
+    if (typeof OffscreenCanvas === 'function') {
+      const canvas = new OffscreenCanvas(1, 1);
+      offscreenCanvasContext2d = !!canvas.getContext?.('2d');
+      offscreenCanvasConvertToBlob = typeof canvas.convertToBlob === 'function';
+    }
+  } catch {}
+
+  return {
+    hasBlob: typeof Blob === 'function',
+    hasOffscreenCanvas: typeof OffscreenCanvas === 'function',
+    offscreenCanvasContext2d,
+    offscreenCanvasConvertToBlob,
+    hasDOMMatrix: typeof DOMMatrix === 'function',
+    hasImageData: typeof ImageData === 'function',
+    hasPath2D: typeof Path2D === 'function',
+    pdfjsVersion: String(pdfjsLib?.version || ''),
+    userAgent: String(workerScope.navigator?.userAgent || ''),
+  };
+}
+
+function serializeError(error, fallbackPhase = 'unknown') {
+  return {
+    name: String(error?.name || 'Error'),
+    message: String(error?.message || error || 'Unknown PDF worker error'),
+    code: String(error?.code || ''),
+    phase: String(error?.phase || fallbackPhase || 'unknown'),
+    stack: String(error?.stack || ''),
+    fallbackMainThread: !!error?.fallbackMainThread,
+    environment: getWorkerEnvironmentDiagnostics(),
+  };
 }
 
 function fitScale(width, height, maxWidth, maxHeight) {
@@ -65,14 +103,24 @@ function createLocalCanvas(width, height) {
 
 async function canvasToBlob(canvas) {
   if (!canvas || typeof canvas.convertToBlob !== 'function') {
-    throw createFallbackMainThreadError('OffscreenCanvas.convertToBlob is unavailable for PDF worker rendering');
+    throw createFallbackMainThreadError(
+      'OffscreenCanvas.convertToBlob is unavailable for PDF worker rendering',
+      'offscreen-canvas-convert-to-blob-unavailable',
+      'canvas-to-blob'
+    );
   }
   return canvas.convertToBlob({ type: 'image/png' });
 }
 
 async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
   const key = String(sourceKey || '').trim();
-  if (!key) throw createFallbackMainThreadError('PDF worker payload is missing a sourceKey');
+  if (!key) {
+    throw createFallbackMainThreadError(
+      'PDF worker payload is missing a sourceKey',
+      'missing-source-key',
+      'load-document'
+    );
+  }
 
   if (!pdfCache.has(key)) {
     const buffer = await sourceBlob.arrayBuffer();
@@ -100,7 +148,11 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
 
 async function renderPdfPageAsset(payload) {
   if (!(payload?.sourceBlob instanceof Blob)) {
-    throw createFallbackMainThreadError('PDF worker payload is missing sourceBlob');
+    throw createFallbackMainThreadError(
+      'PDF worker payload is missing sourceBlob',
+      'missing-source-blob',
+      'validate-payload'
+    );
   }
   const variant = String(payload?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full';
   const maxOpenPdfDocuments = Math.max(1, Number(payload?.maxOpenPdfDocuments) || 1);
@@ -123,11 +175,19 @@ async function renderPdfPageAsset(payload) {
     const height = Math.max(1, Math.ceil(viewport.height));
     const canvas = createLocalCanvas(width, height);
     if (!canvas) {
-      throw createFallbackMainThreadError('OffscreenCanvas is unavailable for PDF worker rendering');
+      throw createFallbackMainThreadError(
+        'OffscreenCanvas is unavailable for PDF worker rendering',
+        'offscreen-canvas-unavailable',
+        'create-canvas'
+      );
     }
     const ctx = canvas.getContext('2d', { alpha: false });
     if (!ctx) {
-      throw createFallbackMainThreadError('Failed to acquire OffscreenCanvas context for PDF worker rendering');
+      throw createFallbackMainThreadError(
+        'Failed to acquire OffscreenCanvas context for PDF worker rendering',
+        'offscreen-canvas-context-unavailable',
+        'create-canvas-context'
+      );
     }
 
     await page.render({ canvasContext: ctx, viewport }).promise;
@@ -165,6 +225,13 @@ workerScope.onmessage = async (event) => {
       taskId,
       ok: false,
       error: String(error?.message || error),
+      errorDetails: serializeError(error, 'render'),
+      payloadSummary: {
+        variant: String(data?.payload?.variant || ''),
+        pageIndex: Math.max(0, Number(data?.payload?.pageIndex) || 0),
+        sourceKeyPresent: !!data?.payload?.sourceKey,
+        sourceBlobSize: Math.max(0, Number(data?.payload?.sourceBlob?.size) || 0),
+      },
       fallbackMainThread: true,
     });
   }

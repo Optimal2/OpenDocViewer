@@ -14,6 +14,8 @@ import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
 import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
 import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
 
+const MAX_FALLBACK_REASON_SAMPLES = 12;
+
 try {
   if (pdfjsLib?.GlobalWorkerOptions && !pdfjsLib.GlobalWorkerOptions.workerSrc) {
     pdfjsLib.GlobalWorkerOptions.workerSrc = pdfWorkerUrl;
@@ -75,6 +77,28 @@ function canvasToBlob(canvas, mimeType = 'image/png', quality) {
       else reject(new Error('Canvas serialization failed'));
     }, mimeType, quality);
   });
+}
+
+function normalizeFallbackDetails(error) {
+  const details = error?.pdfWorkerDetails && typeof error.pdfWorkerDetails === 'object'
+    ? error.pdfWorkerDetails
+    : null;
+  return {
+    name: String(details?.name || error?.name || 'Error'),
+    message: String(details?.message || error?.message || error || 'Unknown PDF worker fallback'),
+    code: String(details?.code || error?.code || ''),
+    phase: String(details?.phase || error?.phase || ''),
+    stack: String(details?.stack || error?.stack || ''),
+    filename: String(details?.filename || ''),
+    lineno: Number(details?.lineno || 0),
+    colno: Number(details?.colno || 0),
+    environment: details?.environment || null,
+    payloadSummary: details?.payloadSummary || null,
+    lastWorkerError: details?.lastWorkerError || null,
+    workerCreationErrors: Array.isArray(details?.workerCreationErrors)
+      ? details.workerCreationErrors.slice()
+      : [],
+  };
 }
 
 async function loadBlobForDrawing(blob) {
@@ -211,6 +235,8 @@ export class PageAssetRenderer {
       workerFallbackCount: 0,
       pdfWorkerCount: 0,
       pdfWorkerFallbackCount: 0,
+      pdfWorkerFallbackReasons: {},
+      pdfWorkerFallbackSamples: [],
       mainPdfCount: 0,
       mainTiffCount: 0,
       mainImageCount: 0,
@@ -286,6 +312,8 @@ export class PageAssetRenderer {
   getStats() {
     return {
       ...this.renderStats,
+      pdfWorkerFallbackReasons: { ...this.renderStats.pdfWorkerFallbackReasons },
+      pdfWorkerFallbackSamples: this.renderStats.pdfWorkerFallbackSamples.slice(),
       activeWorkerCount: this.getWorkerCount(),
       activePdfWorkerCount: Number(this.pdfWorkerPool?.getWorkerCount?.() || 0),
       activePageAssetWorkerCount: Number(this.workerPool?.getWorkerCount?.() || 0),
@@ -387,6 +415,26 @@ export class PageAssetRenderer {
     return !!this.pdfWorkerPool?.canRender?.();
   }
 
+  recordPdfWorkerFallback(error, descriptor, variant) {
+    const details = normalizeFallbackDetails(error);
+    const reasonKey = details.code || details.message || 'unknown-pdf-worker-fallback';
+    this.renderStats.pdfWorkerFallbackReasons[reasonKey] = (
+      Number(this.renderStats.pdfWorkerFallbackReasons[reasonKey]) || 0
+    ) + 1;
+
+    if (this.renderStats.pdfWorkerFallbackSamples.length >= MAX_FALLBACK_REASON_SAMPLES) return;
+    this.renderStats.pdfWorkerFallbackSamples.push({
+      reasonKey,
+      ...details,
+      pageIndex: Math.max(0, Number(descriptor?.pageIndex) || 0),
+      originalPageIndex: Number.isFinite(descriptor?.originalPageIndex)
+        ? Math.max(0, Number(descriptor.originalPageIndex))
+        : undefined,
+      sourceKeyPresent: !!descriptor?.sourceKey,
+      variant,
+    });
+  }
+
   /**
    * Render one requested page asset. Worker routing is decided per page/source file.
    * A PDF or fallback TIFF does not force unrelated raster files onto the main thread;
@@ -441,8 +489,9 @@ export class PageAssetRenderer {
               return result;
             });
           }
-        } catch {
+        } catch (error) {
           this.renderStats.pdfWorkerFallbackCount += 1;
+          this.recordPdfWorkerFallback(error, descriptor, variant);
           // Experimental PDF worker rendering must never make PDF display less reliable than the
           // proven main-thread path. Any worker-side failure is retried below with the existing path.
         }
