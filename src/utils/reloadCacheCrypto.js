@@ -5,8 +5,8 @@
  * The source and rendered-page IndexedDB stores normally use an in-memory AES key. That is safest,
  * but it also means an accidental F5 cannot read the temp blobs it just wrote. For explicitly
  * enabled short reload caches, keep the AES key in browser storage for the same TTL as the cache
- * records. localStorage lets the same-origin WebClient/ODV flow reuse data after a new WebClient
- * session, while sessionStorage remains a fallback and migration source for already-open tabs.
+ * records. localStorage lets the same-origin host/viewer flow reuse data after a new host session,
+ * while sessionStorage remains a fallback and migration source for already-open tabs.
  */
 
 const STORAGE_PREFIX = 'OpenDocViewer.reloadCacheKey.v1';

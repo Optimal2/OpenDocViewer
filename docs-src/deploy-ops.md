@@ -70,7 +70,7 @@ If the console instead shows repeated `GetStream` failures with `status 404` and
 says `FileTicket could not be resolved`, the upstream file tickets have expired or were generated
 for a host session that can no longer resolve them. ODV cannot renew those tickets by itself. It will
 stop early after `documentLoading.fetch.abortOnSourceUnavailableCount` initial unavailable sources
-and show the configured problem notice so the user can start a fresh host/WebClient session.
+and show the configured problem notice so the user can start a fresh host session.
 
 ## IIS proxy app
 

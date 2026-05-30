@@ -82,6 +82,7 @@ function isBlobAssetUrl(url) {
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
+ * @param {('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
  * @returns {React.ReactElement}
  */
@@ -96,6 +97,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     isCanvasEnabled,
     forceRender,
     allPages,
+    zoomMode = 'FIT_PAGE',
     onDisplayStateChange = () => {},
   },
   ref
@@ -338,6 +340,23 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     calculateFitToWidthZoom(surface, renderViewportRef, setZoom);
   }, [getActiveRenderSurface, setZoom]);
 
+  /**
+   * @returns {void}
+   */
+  const applyInitialZoomMode = useCallback(() => {
+    if (zoomMode === 'FIT_WIDTH') {
+      fitToWidth();
+      return;
+    }
+
+    if (zoomMode === 'ACTUAL_SIZE') {
+      setZoom(1);
+      return;
+    }
+
+    fitToScreen();
+  }, [fitToScreen, fitToWidth, setZoom, zoomMode]);
+
   useEffect(() => {
     let cancelled = false;
     const requestId = requestSeqRef.current + 1;
@@ -517,9 +536,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
     if (initialFitPendingRef.current) {
       initialFitPendingRef.current = false;
-      fitToScreen();
+      applyInitialZoomMode();
     }
-  }, [drawImageOnCanvas, fitToScreen, imageLoaded, imageProperties, initialRenderDone, isCanvasEnabled, onRender, displayedAsset.url]);
+  }, [applyInitialZoomMode, drawImageOnCanvas, imageLoaded, imageProperties, initialRenderDone, isCanvasEnabled, onRender, displayedAsset.url]);
 
   /**
    * @param {HTMLImageElement} image
@@ -557,14 +576,14 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
       if (initialFitPendingRef.current) {
         initialFitPendingRef.current = false;
-        fitToScreen();
+        applyInitialZoomMode();
       }
     }
   }, [
+    applyInitialZoomMode,
     clearLoadingOverlayTimer,
     currentPage?.realHeight,
     currentPage?.realWidth,
-    fitToScreen,
     initialRenderDone,
     isCanvasEnabled,
     onRender,
@@ -608,15 +627,15 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
       if (initialFitPendingRef.current) {
         initialFitPendingRef.current = false;
-        fitToScreen();
+        applyInitialZoomMode();
       }
     }
   }, [
+    applyInitialZoomMode,
     clearLoadingOverlayTimer,
     currentIndex,
     currentPage?.realHeight,
     currentPage?.realWidth,
-    fitToScreen,
     initialRenderDone,
     isCanvasEnabled,
     onRender,

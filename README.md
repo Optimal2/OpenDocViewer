@@ -41,6 +41,7 @@ The codebase now has four documentation layers:
   - Common image formats such as JPG and PNG
 - **Viewer behavior**
   - Fit-to-page and fit-to-width sticky zoom modes
+  - Runtime-configurable default zoom mode
   - Explicit zoom controls, typed zoom percentage, and 1:1 mode
   - Optional comparison view with independent per-pane post-zoom
   - Deterministic thumbnail pane with keyboard-friendly selection, compare badges, and width controls

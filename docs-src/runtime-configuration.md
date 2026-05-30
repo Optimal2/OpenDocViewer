@@ -70,6 +70,21 @@ Set `metadata.enabled` to `false` for deployments where metadata may still be us
 print templates, sorting, or diagnostics, but should not be exposed as a document metadata dialog or
 overview table.
 
+## Viewer Default Zoom Mode
+
+Deployments can choose the initial zoom mode used when the first page opens:
+
+```js
+viewer: {
+  // Supported values: "fit-page", "fit-width", "actual-size".
+  defaultZoomMode: 'fit-page'
+}
+```
+
+The default is `fit-page`, which preserves the historical behavior where the full page fits inside
+the viewer pane. Use `fit-width` when users should start with the page width filling the pane and
+scroll vertically through taller pages. Use `actual-size` for a 100% initial zoom.
+
 ## Viewer Problem Notice
 
 Deployments can configure a viewer-level support notice for serious load failures, for example when
@@ -133,8 +148,8 @@ then follows `resetSessionTarget`:
 - `current` reloads the viewer URL with an `odvSessionReset` cache-busting parameter.
 - `none` only emits the event/message so the embedding host can handle recovery itself.
 
-Use the reset action for host/WebClient integrations where reloading only the iframe can reuse the
-same stale parent payload and therefore the same expired document tickets.
+Use the reset action for host integrations where reloading only the iframe can reuse the same stale
+parent payload and therefore the same expired document tickets.
 
 ## Document-Version Reload Cache
 
