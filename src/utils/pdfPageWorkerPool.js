@@ -9,6 +9,37 @@
 import logger from '../logging/systemLogger.js';
 import PdfPageWorker from '../workers/pdfPageWorker.js?worker';
 
+function normalizeErrorDetails(errorLike, phase = 'pool') {
+  const error = errorLike?.error || errorLike;
+  return {
+    name: String(error?.name || errorLike?.type || 'Error'),
+    message: String(error?.message || errorLike?.message || errorLike || 'Unknown PDF page worker error'),
+    code: String(error?.code || errorLike?.code || ''),
+    phase: String(error?.phase || errorLike?.phase || phase || 'pool'),
+    stack: String(error?.stack || errorLike?.stack || ''),
+    filename: String(errorLike?.filename || ''),
+    lineno: Number(errorLike?.lineno || 0),
+    colno: Number(errorLike?.colno || 0),
+    fallbackMainThread: true,
+  };
+}
+
+function attachErrorDetails(error, details) {
+  error.fallbackMainThread = true;
+  error.pdfWorkerDetails = details || normalizeErrorDetails(error);
+  if (details?.code) error.code = details.code;
+  if (details?.phase) error.phase = details.phase;
+  return error;
+}
+
+function withWorkerHistory(details, lastWorkerError, workerCreationErrors) {
+  return {
+    ...details,
+    lastWorkerError: lastWorkerError || null,
+    workerCreationErrors: Array.isArray(workerCreationErrors) ? workerCreationErrors.slice(0, 4) : [],
+  };
+}
+
 /**
  * @typedef {Object} PdfPageWorkerPoolOptions
  * @property {boolean=} enabled
@@ -45,6 +76,8 @@ export class PdfPageWorkerPool {
     this.queue = [];
     this.taskId = 1;
     this.disposed = false;
+    this.lastWorkerError = null;
+    this.workerCreationErrors = [];
 
     for (let i = 0; i < this.workerCount; i += 1) {
       try {
@@ -55,7 +88,14 @@ export class PdfPageWorkerPool {
         worker.onerror = (event) => this.handleError(slot, event?.error || event);
         worker.onmessageerror = (event) => this.handleError(slot, event);
       } catch (error) {
-        logger.warn('Failed to create PDF page worker', { error: String(error?.message || error) });
+        const details = {
+          ...normalizeErrorDetails(error, 'create-worker'),
+          code: String(error?.code || 'pdf-worker-create-failed'),
+          phase: 'create-worker',
+        };
+        this.lastWorkerError = details;
+        this.workerCreationErrors.push(details);
+        logger.warn('Failed to create PDF page worker', { error: details.message, details });
       }
     }
 
@@ -70,11 +110,19 @@ export class PdfPageWorkerPool {
     return !this.disposed && this.workerCount > 0;
   }
 
+  createUnavailableError(message, code = 'no-compatible-pdf-worker') {
+    return attachErrorDetails(new Error(message || 'No compatible PDF page worker is available'), withWorkerHistory({
+      name: 'Error',
+      message: message || 'No compatible PDF page worker is available',
+      code,
+      phase: 'queue',
+      fallbackMainThread: true,
+    }, this.lastWorkerError, this.workerCreationErrors));
+  }
+
   renderAsset(payload) {
     if (!this.canRender()) {
-      const error = new Error('No compatible PDF page worker is available');
-      error.fallbackMainThread = true;
-      return Promise.reject(error);
+      return Promise.reject(this.createUnavailableError('No compatible PDF page worker is available'));
     }
 
     return new Promise((resolve, reject) => {
@@ -121,8 +169,16 @@ export class PdfPageWorkerPool {
         entry.dead = true;
         try { entry.worker.terminate(); } catch {}
         this.workerCount = this.getWorkerCount();
-        const nextError = new Error(String(error?.message || error || 'Failed to post PDF worker message'));
-        nextError.fallbackMainThread = true;
+        const details = {
+          ...normalizeErrorDetails(error, 'post-message'),
+          code: String(error?.code || 'pdf-worker-post-message-failed'),
+          phase: 'post-message',
+        };
+        this.lastWorkerError = details;
+        const nextError = attachErrorDetails(
+          new Error(String(error?.message || error || 'Failed to post PDF worker message')),
+          details
+        );
         next.reject(nextError);
         if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
       }
@@ -141,9 +197,7 @@ export class PdfPageWorkerPool {
     while (this.queue.length > 0) {
       const next = this.queue.shift();
       if (!next) continue;
-      const error = new Error(message || 'PDF page worker is unavailable');
-      error.fallbackMainThread = true;
-      next.reject(error);
+      next.reject(this.createUnavailableError(message || 'PDF page worker is unavailable', 'queued-pdf-worker-unavailable'));
     }
   }
 
@@ -161,8 +215,15 @@ export class PdfPageWorkerPool {
     }
 
     this.workerCount = this.getWorkerCount();
-    const error = new Error('PDF page worker timed out');
-    error.fallbackMainThread = true;
+    const details = {
+      name: 'TimeoutError',
+      message: 'PDF page worker timed out',
+      code: 'pdf-worker-timeout',
+      phase: 'render',
+      fallbackMainThread: true,
+    };
+    this.lastWorkerError = details;
+    const error = attachErrorDetails(new Error('PDF page worker timed out'), details);
     pending.reject(error);
     if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
     this.pump();
@@ -192,7 +253,21 @@ export class PdfPageWorkerPool {
         mimeType: String(data.mimeType || data.blob?.type || 'image/png'),
       });
     } else {
-      const error = new Error(String(data?.error || 'PDF worker render failed'));
+      const details = data?.errorDetails && typeof data.errorDetails === 'object'
+        ? {
+            ...data.errorDetails,
+            payloadSummary: data?.payloadSummary || null,
+            fallbackMainThread: !!data?.fallbackMainThread,
+          }
+        : {
+            name: 'Error',
+            message: String(data?.error || 'PDF worker render failed'),
+            code: '',
+            phase: 'render',
+            fallbackMainThread: !!data?.fallbackMainThread,
+          };
+      this.lastWorkerError = details;
+      const error = attachErrorDetails(new Error(String(data?.error || details.message || 'PDF worker render failed')), details);
       error.fallbackMainThread = !!data?.fallbackMainThread;
       pending.reject(error);
     }
@@ -208,8 +283,16 @@ export class PdfPageWorkerPool {
       if (pending) {
         this.clearPendingTimeout(taskId);
         this.pending.delete(taskId);
-        const error = new Error(String(errorLike?.message || errorLike || 'PDF page worker failed'));
-        error.fallbackMainThread = true;
+        const details = {
+          ...normalizeErrorDetails(errorLike, 'worker-error'),
+          code: String(errorLike?.code || 'pdf-worker-runtime-error'),
+          phase: 'worker-error',
+        };
+        this.lastWorkerError = details;
+        const error = attachErrorDetails(
+          new Error(String(errorLike?.message || errorLike || 'PDF page worker failed')),
+          details
+        );
         pending.reject(error);
       }
     }
@@ -236,8 +319,13 @@ export class PdfPageWorkerPool {
       if (pending?.timeoutId) {
         try { globalThis.clearTimeout?.(pending.timeoutId); } catch {}
       }
-      const error = new Error('PDF page worker pool disposed');
-      error.fallbackMainThread = true;
+      const error = attachErrorDetails(new Error('PDF page worker pool disposed'), {
+        name: 'Error',
+        message: 'PDF page worker pool disposed',
+        code: 'pdf-worker-pool-disposed',
+        phase: 'dispose',
+        fallbackMainThread: true,
+      });
       pending.reject(error);
     }
     this.pending.clear();
