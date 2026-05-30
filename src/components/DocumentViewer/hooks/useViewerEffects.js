@@ -12,8 +12,9 @@
  *
  * The keyboard layer understands compare-targeted navigation and document-level navigation.
  * Compare mode has an explicit active pane; Shift temporarily targets the opposite pane, while
- * Ctrl switches Up/Down/PageUp/PageDown/Home/End to whole-document stepping and Ctrl+Left/Right
- * rotates.
+ * Ctrl switches Up/Down/Home/End to whole-document stepping and Ctrl+Left/Right rotates.
+ * Ctrl+PageUp/PageDown is intentionally left to the browser because Chromium uses it for tab
+ * navigation before normal page code can handle it reliably.
  *
  * @module useViewerEffects
  */
@@ -369,13 +370,15 @@ export function useViewerEffects(args) {
      * @param {KeyboardEvent} e
      * @returns {boolean}
      */
-    const isNextRepeatKey = (e) => e.key === 'ArrowDown' || e.key === 'PageDown';
+    const isNextRepeatKey = (e) => e.key === 'ArrowDown'
+      || (e.key === 'PageDown' && !e.ctrlKey && !e.metaKey && !e.altKey);
 
     /**
      * @param {KeyboardEvent} e
      * @returns {boolean}
      */
-    const isPreviousRepeatKey = (e) => e.key === 'ArrowUp' || e.key === 'PageUp';
+    const isPreviousRepeatKey = (e) => e.key === 'ArrowUp'
+      || (e.key === 'PageUp' && !e.ctrlKey && !e.metaKey && !e.altKey);
 
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {

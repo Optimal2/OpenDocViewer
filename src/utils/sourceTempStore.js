@@ -410,7 +410,7 @@ export class SourceTempStore {
   enqueueWrite(fn) {
     // Keep the queue alive after a failed write. The returned promise still
     // rejects for the caller, while the next write can continue from the tail.
-    const next = this.writeQueue.then(fn, fn);
+    const next = this.writeQueue.then(() => fn(), () => fn());
     this.writeQueue = next.then(() => undefined, () => undefined);
     return next;
   }
@@ -640,13 +640,12 @@ export class SourceTempStore {
     this.cleanupPromise = (async () => {
       try {
         const db = await this.ensureDb();
-        const ttlMs = this.reloadCacheTtlMs > 0 ? this.reloadCacheTtlMs : this.staleSessionTtlMs;
-        const cutoff = Date.now() - ttlMs;
+        const staleCutoff = Date.now() - this.staleSessionTtlMs;
         const tx = db.transaction(STORE_NAME, 'readwrite');
-        const index = tx.objectStore(STORE_NAME).index('createdAt');
+        const createdAtIndex = tx.objectStore(STORE_NAME).index('createdAt');
         await new Promise((resolve, reject) => {
-          const range = IDBKeyRange.upperBound(cutoff);
-          const req = index.openCursor(range);
+          const range = IDBKeyRange.upperBound(staleCutoff);
+          const req = createdAtIndex.openCursor(range);
           req.onerror = () => reject(req.error || new Error('Failed to iterate stale temp-store records'));
           req.onsuccess = () => {
             const cursor = req.result;
@@ -659,6 +658,28 @@ export class SourceTempStore {
           };
         });
         await transactionDone(tx);
+
+        if (this.reloadCacheTtlMs > 0) {
+          const reloadCutoff = Date.now() - this.reloadCacheTtlMs;
+          const sessionTx = db.transaction(STORE_NAME, 'readwrite');
+          const sessionIndex = sessionTx.objectStore(STORE_NAME).index('sessionId');
+          await new Promise((resolve, reject) => {
+            const req = sessionIndex.openCursor(IDBKeyRange.only(this.sessionId));
+            req.onerror = () => reject(req.error || new Error('Failed to iterate reload-cache session records'));
+            req.onsuccess = () => {
+              const cursor = req.result;
+              if (!cursor) {
+                resolve(undefined);
+                return;
+              }
+              if (Number(cursor.value?.createdAt || 0) < reloadCutoff) {
+                cursor.delete();
+              }
+              cursor.continue();
+            };
+          });
+          await transactionDone(sessionTx);
+        }
       } catch (error) {
         logger.warn('Failed to clean stale temp-store sessions', {
           error: String(error?.message || error),
