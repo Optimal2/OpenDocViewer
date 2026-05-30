@@ -7,6 +7,7 @@
  */
 
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
+/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 
 /**
  * @typedef {Object} ViewerProblemNoticeConfig
@@ -99,6 +100,31 @@ function normalizeResetSessionTarget(value, fallback) {
   const raw = String(value || fallback || '').trim().toLowerCase();
   if (raw === 'current' || raw === 'parent' || raw === 'none') return raw;
   return 'parent-or-current';
+}
+
+function normalizeDefaultZoomMode(value, fallback = 'fit-page') {
+  const raw = String(value || fallback || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+  if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
+  if (raw === 'actual-size' || raw === 'actualsize' || raw === 'actual' || raw === '100%' || raw === '1:1') {
+    return 'ACTUAL_SIZE';
+  }
+  return 'FIT_PAGE';
+}
+
+/**
+ * Resolve the initial page zoom mode.
+ *
+ * Runtime config value: `viewer.defaultZoomMode`
+ * Supported values:
+ * - `fit-page`: fit the full page inside the viewport
+ * - `fit-width`: fit the page width to the viewport
+ * - `actual-size`: start at 100%
+ *
+ * @param {Object=} cfg
+ * @returns {ViewerDefaultZoomMode}
+ */
+export function getViewerDefaultZoomMode(cfg = getRuntimeConfig()) {
+  return normalizeDefaultZoomMode(cfg?.viewer?.defaultZoomMode, 'fit-page');
 }
 
 /**

@@ -473,7 +473,7 @@ function isSourceUnavailableError(error) {
  */
 function createSourceUnavailableSessionError({ failureCount, sourceCount }) {
   const error = new Error(
-    `Document source tickets could not be resolved (${failureCount} of ${sourceCount} initial sources failed). The host/WebClient session may have expired and must issue fresh document links.`
+    `Document source tickets could not be resolved (${failureCount} of ${sourceCount} initial sources failed). The host session may have expired and must issue fresh document links.`
   );
   error.isSourceUnavailableSession = true;
   return error;
@@ -495,7 +495,7 @@ function createPrefetchTimeoutError(url, timeoutMs) {
 }
 
 /**
- * Build a source-validation error. A common operational failure mode behind WebClient/iframe
+ * Build a source-validation error. A common operational failure mode behind host iframe
  * integrations is an HTTP 200 response that contains an HTML login/error page instead of document
  * bytes. Such payloads must not be stored in ODV's temp caches as images/PDF files.
  *

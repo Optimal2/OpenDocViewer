@@ -104,6 +104,9 @@
       enabled: true
     },
     viewer: {
+      // Initial zoom mode when the first page opens.
+      // Supported values: "fit-page" (default), "fit-width", "actual-size".
+      defaultZoomMode: 'fit-page',
       problemNotice: {
         // Viewer-level support notice for serious load failures, for example when host-provided
         // document URLs expire and many pages start showing the failed-page placeholder.

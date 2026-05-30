@@ -70,6 +70,9 @@
       enabled: true
     },
     viewer: {
+      // Initial zoom mode when the first page opens.
+      // Supported values: "fit-page" (default), "fit-width", "actual-size".
+      defaultZoomMode: 'fit-page',
       problemNotice: {
         // Site-configurable support notice for serious viewer-level load problems. This is useful
         // when source URLs are session-bound and users need host-specific recovery instructions.

@@ -290,6 +290,7 @@ const DocumentViewerRender = ({
               imageProperties={primaryImageProperties}
               isCanvasEnabled={primaryCanvasEnabled}
               allPages={allPages}
+              zoomMode={zoomMode}
               onDisplayStateChange={onPrimaryDisplayStateChange}
             />
           </div>
@@ -320,6 +321,7 @@ const DocumentViewerRender = ({
                 imageProperties={compareImageProperties}
                 isCanvasEnabled={compareCanvasEnabled}
                 allPages={allPages}
+                zoomMode={zoomMode}
               />
             </div>
           </div>

@@ -16,7 +16,7 @@
 import { useState, useRef, useMemo, useEffect, useCallback, useContext } from 'react';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
-import { getKeyboardPrintShortcutBehavior } from '../../utils/runtimeConfig.js';
+import { getKeyboardPrintShortcutBehavior, getViewerDefaultZoomMode } from '../../utils/runtimeConfig.js';
 import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
@@ -419,7 +419,10 @@ export function useDocumentViewer() {
     hasError: false,
   });
   const [zoom, setZoom] = useState(1);
-  const [zoomState, setZoomState] = useState(/** @type {ZoomState} */({ mode: 'FIT_PAGE', scale: 1 }));
+  const [zoomState, setZoomState] = useState(
+    /** @returns {ZoomState} */
+    () => ({ mode: getViewerDefaultZoomMode(), scale: 1 })
+  );
 
   const [isComparing, setIsComparing] = useState(false);
   const [comparePageNumberRaw, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null)); // original 1-based

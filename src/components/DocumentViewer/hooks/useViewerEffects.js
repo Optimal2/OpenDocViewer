@@ -566,11 +566,15 @@ export function useViewerEffects(args) {
     viewerContainerRef,
   ]);
 
-  // Optional: auto-fit after first mount if renderer supports it.
+  // Optional: apply the configured initial zoom mode after first mount if the renderer supports it.
   useEffect(() => {
+    const mode = zoomState.mode;
     const t = setTimeout(() => {
-      try { if (documentRenderRef.current?.fitToScreen) documentRenderRef.current.fitToScreen(); } catch {}
+      try {
+        if (mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
+        else if (mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
+      } catch {}
     }, 0);
     return () => { clearTimeout(t); };
-  }, [documentRenderRef]);
+  }, [documentRenderRef, zoomState.mode]);
 }

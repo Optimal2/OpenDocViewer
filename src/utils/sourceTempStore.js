@@ -15,7 +15,7 @@
  * SECURITY MODEL
  *   Optional AES-GCM wraps IndexedDB payloads with a per-session key. Normal temp sessions keep that
  *   key in memory; opt-in reload cache sessions persist the key for the configured short TTL so the
- *   same-origin viewer can decrypt cached blobs after a reload or a new WebClient handoff.
+ *   same-origin viewer can decrypt cached blobs after a reload or a new host handoff.
  */
 
 import logger from '../logging/systemLogger.js';

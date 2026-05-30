@@ -116,7 +116,7 @@ File reference rules:
 
 `path` is preserved by normalization, but the explicit-list loader currently needs `url` for actual browser loading. Treat `path` as diagnostic or host-context data unless a deployment explicitly maps it to a URL before startup.
 
-## WebClient / iframe preparation flow
+## Host iframe preparation flow
 
 Some legacy host applications open OpenDocViewer in an iframe and pass only compact session data in
 `?sessiondata=...`. If a separate host-side preparation endpoint is used before navigation, that
@@ -128,10 +128,10 @@ Operational rules for that flow:
   such as `/OpenDocViewer/prep` normally fall back to `index.html` unless the host has added a
   separate handler. A successful `POST /OpenDocViewer/prep` is therefore not proof that ODV has
   received or stored the preparation payload.
-- If the host uses a preparation endpoint, make it an explicit host/WebClient-owned endpoint and
+- If the host uses a preparation endpoint, make it an explicit host-owned endpoint and
   point the viewer startup to the prepared bundle with `?sessionurl=...`, the same-origin parent
   bridge, or another documented bootstrap mode.
-- In the legacy same-origin iframe flow, OpenDocViewer may read the full WebClient model from the
+- In the legacy same-origin iframe flow, OpenDocViewer may read the full host model from the
   parent page. When the iframe URL also contains `sessiondata.caseIds`, those ids are treated as an
   allowlist so stale `PortableDocuments` retained by the host page/session are not traversed.
 - Build any host preparation URL with a real path separator. If the endpoint is deployed under the
@@ -146,10 +146,10 @@ Operational rules for that flow:
   before storing them in its temporary cache and will reject text-like payloads so a bad upstream
   session response is not persisted as a corrupt PDF/image.
 - OpenDocViewer fetches source URLs with `cache: 'no-store'` so a previously bad HTTP-cache entry is
-  not reused for a later reload of the same WebClient session.
+  not reused for a later reload of the same host session.
 - If many source URLs return `404 FileTicket could not be resolved`, the host has issued tickets
   that its `GetStream` endpoint can no longer resolve. OpenDocViewer can detect this and stop early,
-  but it cannot renew the tickets; the embedding host must provide a fresh WebClient/session handoff.
+  but it cannot renew the tickets; the embedding host must provide a fresh session handoff.
 
 ## Database-Backed Host Files
 
