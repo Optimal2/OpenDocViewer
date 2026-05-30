@@ -66,6 +66,55 @@ function getPageSelectionContext(allPages, originalPageNumber) {
 
 const EDGE_SCROLL_DIRECTION_PREVIOUS = 'previous';
 const EDGE_SCROLL_DIRECTION_NEXT = 'next';
+const PAN_POINTER_MOVE_THRESHOLD_PX = 3;
+
+/**
+ * @param {*} target
+ * @returns {boolean}
+ */
+function isPaneInteractiveTarget(target) {
+  if (!(target instanceof Element)) return false;
+  return !!target.closest(
+    '.compare-zoom-overlay, .odv-pane-selector, button, input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"], [data-odv-allow-native-contextmenu="true"]'
+  );
+}
+
+/**
+ * @param {(HTMLElement|null)} viewport
+ * @returns {boolean}
+ */
+function isPannableViewport(viewport) {
+  if (!(viewport instanceof HTMLElement)) return false;
+  return viewport.scrollWidth > viewport.clientWidth + 1
+    || viewport.scrollHeight > viewport.clientHeight + 1;
+}
+
+/**
+ * @param {*} event
+ * @param {(HTMLElement|null)} viewport
+ * @returns {boolean}
+ */
+function isPointerOnViewportScrollbar(event, viewport) {
+  if (!(viewport instanceof HTMLElement)) return false;
+  const rect = viewport.getBoundingClientRect();
+  const verticalScrollbarWidth = Math.max(0, viewport.offsetWidth - viewport.clientWidth);
+  const horizontalScrollbarHeight = Math.max(0, viewport.offsetHeight - viewport.clientHeight);
+  const clientX = Number(event?.clientX) || 0;
+  const clientY = Number(event?.clientY) || 0;
+
+  const onVerticalScrollbar = verticalScrollbarWidth > 0
+    && clientX >= rect.right - verticalScrollbarWidth
+    && clientX <= rect.right
+    && clientY >= rect.top
+    && clientY <= rect.bottom - horizontalScrollbarHeight;
+  const onHorizontalScrollbar = horizontalScrollbarHeight > 0
+    && clientY >= rect.bottom - horizontalScrollbarHeight
+    && clientY <= rect.bottom
+    && clientX >= rect.left
+    && clientX <= rect.right - verticalScrollbarWidth;
+
+  return onVerticalScrollbar || onHorizontalScrollbar;
+}
 
 /**
  * @param {WheelEvent|React.WheelEvent} event
@@ -179,6 +228,17 @@ const DocumentViewerRender = ({
   const edgeScrollDecayRafRef = useRef(0);
   const edgeScrollProgressRef = useRef(0);
   const edgeScrollPendingResetRef = useRef(/** @type {Partial<Record<ViewerPaneKey, 'top'|'bottom'>>} */ ({}));
+  const panStateRef = useRef(/** @type {(null|{
+    pane: ViewerPaneKey,
+    pointerId: number,
+    viewport: HTMLElement,
+    captureElement: HTMLElement,
+    startX: number,
+    startY: number,
+    startScrollLeft: number,
+    startScrollTop: number,
+    moved: boolean
+  })} */ (null));
   const [contextMenuState, setContextMenuState] = useState(
     /** @type {(ViewerContextMenuState|null)} */ (null)
   );
@@ -189,6 +249,10 @@ const DocumentViewerRender = ({
       progress: 0,
     })
   );
+  const [pannablePanes, setPannablePanes] = useState(
+    /** @type {Record<ViewerPaneKey, boolean>} */ ({ primary: false, compare: false })
+  );
+  const [activePanPane, setActivePanPane] = useState(/** @type {(ViewerPaneKey|null)} */ (null));
 
   const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
     || Number(primaryImageProperties?.brightness ?? 100) !== 100
@@ -235,6 +299,19 @@ const DocumentViewerRender = ({
     const viewport = paneElement?.querySelector?.('.document-render-viewport');
     return viewport instanceof HTMLElement ? viewport : null;
   }, [getPaneElement]);
+
+  const setPanePannable = useCallback((pane, nextValue) => {
+    const next = !!nextValue;
+    setPannablePanes((current) => (
+      current[pane] === next ? current : { ...current, [pane]: next }
+    ));
+  }, []);
+
+  const updatePanePannability = useCallback((pane) => {
+    const next = isPannableViewport(getPaneViewport(pane));
+    setPanePannable(pane, next);
+    return next;
+  }, [getPaneViewport, setPanePannable]);
 
   const applyPaneScrollPosition = useCallback((pane, position) => {
     const viewport = getPaneViewport(pane);
@@ -381,6 +458,103 @@ const DocumentViewerRender = ({
     schedulePaneScrollPosition,
     startEdgeScrollDecay,
   ]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const frameId = window.requestAnimationFrame(() => {
+      updatePanePannability('primary');
+      if (isComparing) updatePanePannability('compare');
+      else setPanePannable('compare', false);
+    });
+    return () => window.cancelAnimationFrame(frameId);
+  }, [
+    compareImageProperties?.rotation,
+    comparePageNumber,
+    isComparing,
+    pageNumber,
+    postZoomLeft,
+    postZoomRight,
+    primaryImageProperties?.rotation,
+    setPanePannable,
+    updatePanePannability,
+    zoom,
+  ]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+    const handleResize = () => {
+      updatePanePannability('primary');
+      if (isComparing) updatePanePannability('compare');
+    };
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, [isComparing, updatePanePannability]);
+
+  const handlePanePointerDown = useCallback((event, pane) => {
+    if (event?.button !== 0) return;
+    if (event?.pointerType === 'touch') return;
+    if (event?.isPrimary === false) return;
+    if (isPaneInteractiveTarget(event?.target)) return;
+
+    closeContextMenu();
+    if (isComparing) onSetActivePane?.(pane);
+
+    const paneElement = getPaneElement(pane);
+    const viewport = getPaneViewport(pane);
+    const canPan = isPannableViewport(viewport);
+    setPanePannable(pane, canPan);
+    if (!paneElement || !viewport || !canPan) return;
+    if (isPointerOnViewportScrollbar(event, viewport)) return;
+
+    panStateRef.current = {
+      pane,
+      pointerId: Number(event.pointerId),
+      viewport,
+      captureElement: paneElement,
+      startX: Number(event.clientX) || 0,
+      startY: Number(event.clientY) || 0,
+      startScrollLeft: Number(viewport.scrollLeft) || 0,
+      startScrollTop: Number(viewport.scrollTop) || 0,
+      moved: false,
+    };
+    setActivePanPane(pane);
+    try { paneElement.setPointerCapture?.(event.pointerId); } catch {}
+  }, [closeContextMenu, getPaneElement, getPaneViewport, isComparing, onSetActivePane, setPanePannable]);
+
+  const handlePanePointerMove = useCallback((event, pane) => {
+    const state = panStateRef.current;
+    if (!state || state.pane !== pane || state.pointerId !== Number(event?.pointerId)) return;
+
+    const dx = (Number(event.clientX) || 0) - state.startX;
+    const dy = (Number(event.clientY) || 0) - state.startY;
+    if (!state.moved && Math.hypot(dx, dy) < PAN_POINTER_MOVE_THRESHOLD_PX) return;
+
+    state.moved = true;
+    state.viewport.scrollLeft = state.startScrollLeft - dx;
+    state.viewport.scrollTop = state.startScrollTop - dy;
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
+  }, []);
+
+  const finishPanePan = useCallback((event, pane) => {
+    const state = panStateRef.current;
+    if (!state || state.pane !== pane || state.pointerId !== Number(event?.pointerId)) return;
+
+    panStateRef.current = null;
+    setActivePanPane(null);
+    updatePanePannability(pane);
+
+    try {
+      if (state.captureElement?.hasPointerCapture?.(state.pointerId)) {
+        state.captureElement.releasePointerCapture(state.pointerId);
+      }
+    } catch {}
+
+    if (state.moved) {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+    }
+  }, [updatePanePannability]);
 
   useEffect(() => {
     const pending = edgeScrollPendingResetRef.current.primary;
@@ -590,9 +764,20 @@ const DocumentViewerRender = ({
         >
           <div
             ref={primaryPaneRef}
-            className={`document-pane-frame ${isComparing ? 'is-primary-pane' : 'is-single-pane'}`}
+            className={[
+              'document-pane-frame',
+              isComparing ? 'is-primary-pane' : 'is-single-pane',
+              pannablePanes.primary ? 'is-pannable' : '',
+              activePanPane === 'primary' ? 'is-panning' : '',
+            ].filter(Boolean).join(' ')}
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
             onWheelCapture={(event) => handlePaneWheelCapture(event, 'primary')}
+            onPointerEnter={() => updatePanePannability('primary')}
+            onPointerDownCapture={(event) => handlePanePointerDown(event, 'primary')}
+            onPointerMoveCapture={(event) => handlePanePointerMove(event, 'primary')}
+            onPointerUpCapture={(event) => finishPanePan(event, 'primary')}
+            onPointerCancelCapture={(event) => finishPanePan(event, 'primary')}
+            onLostPointerCapture={(event) => finishPanePan(event, 'primary')}
           >
             {isComparing ? renderPaneSelector('primary') : null}
             {renderEdgeScrollIndicator('primary')}
@@ -628,9 +813,20 @@ const DocumentViewerRender = ({
           <div className="document-render-container-comparison" style={{ position: 'relative' }}>
             <div
               ref={comparePaneRef}
-              className="document-pane-frame is-compare-pane"
+              className={[
+                'document-pane-frame',
+                'is-compare-pane',
+                pannablePanes.compare ? 'is-pannable' : '',
+                activePanPane === 'compare' ? 'is-panning' : '',
+              ].filter(Boolean).join(' ')}
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
               onWheelCapture={(event) => handlePaneWheelCapture(event, 'compare')}
+              onPointerEnter={() => updatePanePannability('compare')}
+              onPointerDownCapture={(event) => handlePanePointerDown(event, 'compare')}
+              onPointerMoveCapture={(event) => handlePanePointerMove(event, 'compare')}
+              onPointerUpCapture={(event) => finishPanePan(event, 'compare')}
+              onPointerCancelCapture={(event) => finishPanePan(event, 'compare')}
+              onLostPointerCapture={(event) => finishPanePan(event, 'compare')}
             >
               {renderPaneSelector('compare')}
               {renderEdgeScrollIndicator('compare')}

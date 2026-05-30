@@ -90,6 +90,20 @@
   border-color: color-mix(in srgb, var(--thumbnail-compare-color) 72%, transparent 28%);
 }
 
+.document-pane-frame.is-pannable .document-render-viewport {
+  cursor: grab;
+}
+
+.document-pane-frame.is-panning,
+.document-pane-frame.is-panning .document-render-viewport,
+.document-pane-frame.is-panning .document-render-container,
+.document-pane-frame.is-panning .document-render-container img,
+.document-pane-frame.is-panning canvas {
+  cursor: grabbing;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
 .odv-pane-selector {
   --odv-pane-selector-accent: var(--thumbnail-primary-color);
   position: absolute;
