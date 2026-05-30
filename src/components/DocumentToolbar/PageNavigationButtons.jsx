@@ -13,9 +13,7 @@
  * @param {boolean} props.nextPageDisabled
  * @param {boolean} props.firstPageDisabled
  * @param {boolean} props.lastPageDisabled
- * @param {function(string, *=):void} props.startPrevPageTimer
  * @param {function():void} props.stopPrevPageTimer
- * @param {function(string, *=):void} props.startNextPageTimer
  * @param {function():void} props.stopNextPageTimer
  * @param {function(*=):void} props.handleFirstPage
  * @param {function(*=):void} props.handleLastPage
@@ -53,9 +51,7 @@ const PageNavigationButtons = ({
   nextPageDisabled,
   firstPageDisabled,
   lastPageDisabled,
-  startPrevPageTimer,
   stopPrevPageTimer,
-  startNextPageTimer,
   stopNextPageTimer,
   handleFirstPage,
   handleLastPage,
@@ -79,8 +75,12 @@ const PageNavigationButtons = ({
   const groupId = useId();
 
   const SUPPRESS_CLICK_WINDOW_MS = 400;
+  const REPEAT_INITIAL_DELAY_MS = 500;
+  const REPEAT_INTERVAL_MS = 50;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
   const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
+  const repeatDelayTimerRef = useRef(null);
+  const repeatIntervalRef = useRef(null);
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const hasPages = Math.max(0, Number(totalPagesDisplay) || 0) > 0;
@@ -106,7 +106,22 @@ const PageNavigationButtons = ({
   /**
    * @returns {void}
    */
+  const clearLocalRepeatTimers = useCallback(() => {
+    if (repeatDelayTimerRef.current != null) {
+      window.clearTimeout(repeatDelayTimerRef.current);
+      repeatDelayTimerRef.current = null;
+    }
+    if (repeatIntervalRef.current != null) {
+      window.clearInterval(repeatIntervalRef.current);
+      repeatIntervalRef.current = null;
+    }
+  }, []);
+
+  /**
+   * @returns {void}
+   */
   const stopAllRepeatNavigation = useCallback(() => {
+    clearLocalRepeatTimers();
     stopPrevPageTimer();
     stopNextPageTimer();
     const activeKey = activeRepeatButtonRef.current;
@@ -114,29 +129,26 @@ const PageNavigationButtons = ({
       markSuppressedClick(activeKey);
     }
     activeRepeatButtonRef.current = null;
-  }, [markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
+  }, [clearLocalRepeatTimers, markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
     const handleRelease = () => {
       stopAllRepeatNavigation();
     };
 
-    window.addEventListener('pointerup', handleRelease, { passive: true });
-    window.addEventListener('pointercancel', handleRelease, { passive: true });
     window.addEventListener('mouseup', handleRelease, { passive: true });
     window.addEventListener('touchend', handleRelease, { passive: true });
     window.addEventListener('touchcancel', handleRelease, { passive: true });
     window.addEventListener('blur', handleRelease, { passive: true });
 
     return () => {
-      window.removeEventListener('pointerup', handleRelease);
-      window.removeEventListener('pointercancel', handleRelease);
       window.removeEventListener('mouseup', handleRelease);
       window.removeEventListener('touchend', handleRelease);
       window.removeEventListener('touchcancel', handleRelease);
       window.removeEventListener('blur', handleRelease);
+      clearLocalRepeatTimers();
     };
-  }, [stopAllRepeatNavigation]);
+  }, [clearLocalRepeatTimers, stopAllRepeatNavigation]);
 
   const applyDraft = useCallback(() => {
     if (!hasPages) {
@@ -158,16 +170,50 @@ const PageNavigationButtons = ({
 
   /**
    * @param {*} event
+   * @returns {{shiftKey:boolean,ctrlKey:boolean,altKey:boolean,metaKey:boolean,preventDefault:function():void,stopPropagation:function():void}}
+   */
+  const createRepeatEventSnapshot = useCallback((event) => ({
+    shiftKey: !!event?.shiftKey,
+    ctrlKey: !!event?.ctrlKey,
+    altKey: !!event?.altKey,
+    metaKey: !!event?.metaKey,
+    preventDefault() {},
+    stopPropagation() {},
+  }), []);
+
+  /**
+   * @param {'prev'|'next'} key
+   * @param {*} event
+   * @param {function(*=):void} handler
+   * @returns {void}
+   */
+  const startLocalRepeatNavigation = useCallback((key, event, handler) => {
+    clearLocalRepeatTimers();
+    event?.preventDefault?.();
+    activeRepeatButtonRef.current = key;
+    markSuppressedClick(key);
+
+    const eventSnapshot = createRepeatEventSnapshot(event);
+    handler?.(eventSnapshot);
+
+    repeatDelayTimerRef.current = window.setTimeout(() => {
+      repeatDelayTimerRef.current = null;
+      repeatIntervalRef.current = window.setInterval(() => {
+        if (activeRepeatButtonRef.current !== key) return;
+        handler?.(eventSnapshot);
+      }, REPEAT_INTERVAL_MS);
+    }, REPEAT_INITIAL_DELAY_MS);
+  }, [clearLocalRepeatTimers, createRepeatEventSnapshot, markSuppressedClick]);
+
+  /**
+   * @param {*} event
    * @returns {void}
    */
   const beginPrevRepeat = useCallback((event) => {
     if (prevPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
-    event?.preventDefault?.();
-    activeRepeatButtonRef.current = 'prev';
-    markSuppressedClick('prev');
-    startPrevPageTimer('prev', event);
-  }, [markSuppressedClick, prevPageDisabled, startPrevPageTimer]);
+    startLocalRepeatNavigation('prev', event, handlePrevPage);
+  }, [handlePrevPage, prevPageDisabled, startLocalRepeatNavigation]);
 
   /**
    * @param {*} event
@@ -176,11 +222,8 @@ const PageNavigationButtons = ({
   const beginNextRepeat = useCallback((event) => {
     if (nextPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
-    event?.preventDefault?.();
-    activeRepeatButtonRef.current = 'next';
-    markSuppressedClick('next');
-    startNextPageTimer('next', event);
-  }, [markSuppressedClick, nextPageDisabled, startNextPageTimer]);
+    startLocalRepeatNavigation('next', event, handleNextPage);
+  }, [handleNextPage, nextPageDisabled, startLocalRepeatNavigation]);
 
   /**
    * @param {*} event
@@ -266,9 +309,10 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'prev', handlePrevPage)}
-        onPointerDown={beginPrevRepeat}
-        onPointerUp={stopAllRepeatNavigation}
-        onPointerCancel={stopAllRepeatNavigation}
+        onMouseDown={beginPrevRepeat}
+        onMouseUp={stopAllRepeatNavigation}
+        onTouchStart={beginPrevRepeat}
+        onTouchEnd={stopAllRepeatNavigation}
         aria-label={resolvedPreviousButtonTitle}
         title={resolvedPreviousButtonTitle}
         className="odv-btn"
@@ -319,9 +363,10 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'next', handleNextPage)}
-        onPointerDown={beginNextRepeat}
-        onPointerUp={stopAllRepeatNavigation}
-        onPointerCancel={stopAllRepeatNavigation}
+        onMouseDown={beginNextRepeat}
+        onMouseUp={stopAllRepeatNavigation}
+        onTouchStart={beginNextRepeat}
+        onTouchEnd={stopAllRepeatNavigation}
         aria-label={resolvedNextButtonTitle}
         title={resolvedNextButtonTitle}
         className="odv-btn"
@@ -350,9 +395,7 @@ PageNavigationButtons.propTypes = {
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
-  startPrevPageTimer: PropTypes.func.isRequired,
   stopPrevPageTimer: PropTypes.func.isRequired,
-  startNextPageTimer: PropTypes.func.isRequired,
   stopNextPageTimer: PropTypes.func.isRequired,
   handleFirstPage: PropTypes.func.isRequired,
   handleLastPage: PropTypes.func.isRequired,
