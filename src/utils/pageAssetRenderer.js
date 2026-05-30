@@ -206,6 +206,15 @@ export class PageAssetRenderer {
     this.tiffCache = new Map();
     this.workerPool = null;
     this.pdfWorkerPool = null;
+    this.renderStats = {
+      workerAssetCount: 0,
+      workerFallbackCount: 0,
+      pdfWorkerCount: 0,
+      pdfWorkerFallbackCount: 0,
+      mainPdfCount: 0,
+      mainTiffCount: 0,
+      mainImageCount: 0,
+    };
     this.rebuildWorkerPool();
   }
 
@@ -238,6 +247,7 @@ export class PageAssetRenderer {
       this.pdfWorkerPool = createPdfPageWorkerPool({
         enabled: true,
         workerCount,
+        taskTimeoutMs: this.config.pdfWorkerTaskTimeoutMs,
       });
     }
   }
@@ -271,6 +281,15 @@ export class PageAssetRenderer {
       Number(this.workerPool?.getWorkerCount?.() || 0),
       Number(this.pdfWorkerPool?.getWorkerCount?.() || 0)
     );
+  }
+
+  getStats() {
+    return {
+      ...this.renderStats,
+      activeWorkerCount: this.getWorkerCount(),
+      activePdfWorkerCount: Number(this.pdfWorkerPool?.getWorkerCount?.() || 0),
+      activePageAssetWorkerCount: Number(this.workerPool?.getWorkerCount?.() || 0),
+    };
   }
 
   canRenderInWorker(fileExtension, variant) {
@@ -393,8 +412,12 @@ export class PageAssetRenderer {
           thumbnailMaxWidth: options?.thumbnailMaxWidth,
           thumbnailMaxHeight: options?.thumbnailMaxHeight,
           rasterFullPageScale: Number(this.config.fullPageScale) || 2.0,
+        }).then((result) => {
+          this.renderStats.workerAssetCount += 1;
+          return result;
         });
       } catch (error) {
+        this.renderStats.workerFallbackCount += 1;
         if (!error?.fallbackMainThread) throw error;
       }
     }
@@ -413,13 +436,18 @@ export class PageAssetRenderer {
               thumbnailMaxHeight: options?.thumbnailMaxHeight,
               fullPageScale: Number(this.config.fullPageScale) || 2.0,
               maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
+            }).then((result) => {
+              this.renderStats.pdfWorkerCount += 1;
+              return result;
             });
           }
         } catch {
+          this.renderStats.pdfWorkerFallbackCount += 1;
           // Experimental PDF worker rendering must never make PDF display less reliable than the
           // proven main-thread path. Any worker-side failure is retried below with the existing path.
         }
       }
+      this.renderStats.mainPdfCount += 1;
       return this.renderPdfPage(descriptor, {
         variant,
         thumbnailMaxWidth: options?.thumbnailMaxWidth,
@@ -427,12 +455,14 @@ export class PageAssetRenderer {
       });
     }
     if (ext === 'tif' || ext === 'tiff') {
+      this.renderStats.mainTiffCount += 1;
       return this.renderTiffPage(descriptor, {
         variant,
         thumbnailMaxWidth: options?.thumbnailMaxWidth,
         thumbnailMaxHeight: options?.thumbnailMaxHeight,
       });
     }
+    this.renderStats.mainImageCount += 1;
     return this.renderImagePage(descriptor, {
       variant,
       thumbnailMaxWidth: options?.thumbnailMaxWidth,

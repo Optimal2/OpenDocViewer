@@ -16,12 +16,14 @@ const DEFAULT_PAGE_LIMIT = 120;
 const DEFAULT_ITERATIONS = 1;
 const DEFAULT_WORKER_COUNTS = Object.freeze([0, 1, 2, 3, 4, 6, 8]);
 const DEFAULT_VARIANTS = Object.freeze(['full']);
+const DEFAULT_PDF_TO_IMAGE_MODES = Object.freeze(['current']);
 const DEFAULT_MAX_RUNS = 40;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
 const DEFAULT_SAMPLE_MODE = 'evenly-spaced';
 const MAX_RENDER_BENCHMARK_WORKER_COUNT = 32;
 const MAX_RENDER_BENCHMARK_PAGE_LIMIT = 1000;
 const RENDER_VARIANTS = Object.freeze(['full', 'thumbnail']);
+const PDF_TO_IMAGE_MODES = Object.freeze(['current', 'main-thread', 'worker']);
 const SAMPLE_MODES = Object.freeze(['first', 'evenly-spaced']);
 
 /**
@@ -74,6 +76,32 @@ function normalizeVariants(value) {
 
 /**
  * @param {*} value
+ * @returns {Array<'current'|'main-thread'|'worker'>}
+ */
+function normalizePdfToImageModes(value) {
+  const raw = Array.isArray(value)
+    ? value
+    : typeof value === 'string'
+      ? (value.trim().toLowerCase() === 'compare' ? ['main-thread', 'worker'] : [value])
+      : DEFAULT_PDF_TO_IMAGE_MODES;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const normalized = String(item || '').trim().toLowerCase().replace(/_/g, '-');
+    const next = normalized === 'main' || normalized === 'mainthread'
+      ? 'main-thread'
+      : normalized === 'workers' || normalized === 'offscreen-worker'
+        ? 'worker'
+        : normalized;
+    if (!PDF_TO_IMAGE_MODES.includes(next) || seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out.length ? out : DEFAULT_PDF_TO_IMAGE_MODES.slice();
+}
+
+/**
+ * @param {*} value
  * @returns {'first'|'evenly-spaced'}
  */
 function normalizeSampleMode(value) {
@@ -83,7 +111,7 @@ function normalizeSampleMode(value) {
 
 /**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number}}
  */
 function normalizeRenderBenchmarkConfig(config = {}) {
   const cfg = config?.documentLoading?.renderBenchmark || {};
@@ -93,6 +121,7 @@ function normalizeRenderBenchmarkConfig(config = {}) {
     iterations: normalizeInteger(cfg.iterations, DEFAULT_ITERATIONS, 1, 10),
     workerCounts: normalizeWorkerCounts(cfg.workerCounts),
     variants: normalizeVariants(cfg.variants),
+    pdfToImageModes: normalizePdfToImageModes(cfg.pdfToImageModes || cfg.pdfToImageMode),
     sampleMode: normalizeSampleMode(cfg.sampleMode),
     maxRuns: normalizeInteger(cfg.maxRuns, DEFAULT_MAX_RUNS, 1, 200),
     delayBetweenRunsMs: normalizeInteger(cfg.delayBetweenRunsMs, DEFAULT_DELAY_BETWEEN_RUNS_MS, 0, 10000),
@@ -201,14 +230,18 @@ function addScenario(scenarios, seen, scenario) {
       ? String(scenario.variant).toLowerCase()
       : 'full',
     workerCount: Math.max(0, Math.min(MAX_RENDER_BENCHMARK_WORKER_COUNT, Math.floor(Number(scenario?.workerCount) || 0))),
+    pdfToImageMode: PDF_TO_IMAGE_MODES.includes(String(scenario?.pdfToImageMode || '').toLowerCase())
+      ? String(scenario.pdfToImageMode).toLowerCase()
+      : 'current',
   };
-  const key = `${normalized.variant}|${normalized.workerCount}`;
+  const key = `${normalized.variant}|${normalized.workerCount}|${normalized.pdfToImageMode}`;
   if (seen.has(key)) return;
   seen.add(key);
   const workerLabel = normalized.workerCount === 0 ? 'auto' : String(normalized.workerCount);
+  const pdfLabel = normalized.pdfToImageMode === 'current' ? 'pdf-current' : `pdf-${normalized.pdfToImageMode}`;
   scenarios.push({
     ...normalized,
-    scenarioLabel: `${normalized.variant}/w${workerLabel}`,
+    scenarioLabel: `${normalized.variant}/${pdfLabel}/w${workerLabel}`,
   });
 }
 
@@ -220,8 +253,10 @@ function createScenarios(benchmarkCfg) {
   const scenarios = [];
   const seen = new Set();
   for (const variant of benchmarkCfg.variants) {
-    for (const workerCount of benchmarkCfg.workerCounts) {
-      addScenario(scenarios, seen, { variant, workerCount });
+    for (const pdfToImageMode of benchmarkCfg.pdfToImageModes) {
+      for (const workerCount of benchmarkCfg.workerCounts) {
+        addScenario(scenarios, seen, { variant, workerCount, pdfToImageMode });
+      }
     }
   }
   return {
@@ -307,9 +342,14 @@ async function runScenario(args) {
   const resolvedWorkerCount = requestedWorkerCount > 0
     ? requestedWorkerCount
     : resolveRecommendedWorkerCount(0, 'auto');
+  const basePdfToImageMode = String(args.baseRenderConfig?.pdfToImageMode || 'main-thread').toLowerCase();
+  const pdfToImageMode = scenario.pdfToImageMode === 'current'
+    ? basePdfToImageMode
+    : String(scenario.pdfToImageMode || 'main-thread').toLowerCase();
   const renderConfig = {
     ...(args.baseRenderConfig || {}),
     workerCount: resolvedWorkerCount,
+    pdfToImageMode,
   };
   const tempStore = {
     getBlob: (sourceKey) => args.viewerContext.readSourceBlob?.(sourceKey),
@@ -321,13 +361,13 @@ async function runScenario(args) {
     },
   };
   const renderer = createPageAssetRenderer({ tempStore, config: renderConfig });
-  const concurrency = Math.max(
-    1,
-    Math.min(
-      args.pages.length,
-      resolvedWorkerCount || Number(renderConfig.maxConcurrentAssetRenders) || 1
-    )
-  );
+  const hasPdfPages = args.pages.some((page) => String(page?.fileExtension || '').toLowerCase() === 'pdf');
+  const backend = String(renderConfig.backend || 'hybrid-by-format').toLowerCase();
+  const mainThreadPdfOnly = hasPdfPages && (backend === 'main-only' || pdfToImageMode !== 'worker');
+  const concurrencyBase = mainThreadPdfOnly
+    ? Number(renderConfig.maxConcurrentMainThreadRenders) || 1
+    : resolvedWorkerCount || Number(renderConfig.maxConcurrentAssetRenders) || 1;
+  const concurrency = Math.max(1, Math.min(args.pages.length, concurrencyBase));
   const startedAt = performance.now();
   let completed = 0;
 
@@ -377,6 +417,7 @@ async function runScenario(args) {
     }, args.signal);
 
     const durationMs = Math.round(performance.now() - startedAt);
+    const rendererStats = typeof renderer.getStats === 'function' ? renderer.getStats() : {};
     const successCount = taskResults.filter((result) => result?.ok).length;
     const errorCount = taskResults.length - successCount;
     const outputBytes = taskResults.reduce((sum, result) => sum + Math.max(0, Number(result?.outputBytes) || 0), 0);
@@ -397,6 +438,8 @@ async function runScenario(args) {
     return {
       scenarioLabel: scenario.scenarioLabel,
       variant: scenario.variant,
+      pdfToImageModeSetting: scenario.pdfToImageMode,
+      pdfToImageMode,
       workerCountSetting: scenario.workerCount,
       workerCount: resolvedWorkerCount,
       concurrency,
@@ -406,6 +449,7 @@ async function runScenario(args) {
       errorCount,
       outputBytes,
       byExtension: summarizeByExtension(taskResults),
+      rendererStats,
       taskSummary,
       slowestTasks: taskResults
         .slice()
@@ -453,6 +497,8 @@ export async function runRenderDecodeBenchmark(args) {
         completedRuns: runs.length,
         totalRuns,
         scenarioLabel: scenario.scenarioLabel,
+        renderedPages: 0,
+        pageCount: selectedPages.length,
       });
       const result = await runScenario({
         pages: selectedPages,
@@ -486,9 +532,11 @@ export async function runRenderDecodeBenchmark(args) {
     iterations: benchmarkCfg.iterations,
     sampleMode: benchmarkCfg.sampleMode,
     variants: benchmarkCfg.variants,
+    pdfToImageModes: benchmarkCfg.pdfToImageModes,
     workerCounts: benchmarkCfg.workerCounts,
     maxRuns: benchmarkCfg.maxRuns,
     testedVariants: Array.from(new Set(scenarios.map((scenario) => scenario.variant))),
+    testedPdfToImageModes: Array.from(new Set(scenarios.map((scenario) => scenario.pdfToImageMode))),
     testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
     testedScenarios: scenarios,
     scenarioCount: scenarios.length,

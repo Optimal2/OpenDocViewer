@@ -675,6 +675,9 @@
         pageLimit: 120,
         iterations: 1,
         variants: ['full', 'thumbnail'],
+        // PDF-only routing scenarios. "current" follows documentLoading.render.pdfToImageMode.
+        // Use ['main-thread', 'worker'] when comparing PDF page rendering modes.
+        pdfToImageModes: ['current'],
         // "evenly-spaced" avoids benchmarking only the first pages when a session is large.
         sampleMode: 'evenly-spaced',
         // 0 means auto. Add explicit counts to benchmark worker-pool scaling.

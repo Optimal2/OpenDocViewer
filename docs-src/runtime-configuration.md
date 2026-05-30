@@ -194,6 +194,20 @@ The worker mode uses the existing `documentLoading.render.workerCount` setting a
 from generated-PDF printing. Raster images and TIFF files continue to use `useWorkersForRasterImages`
 and `useWorkersForTiff`.
 
+The render/decode benchmark can compare PDF page-image routing modes without changing the active
+viewer setting:
+
+```js
+documentLoading: {
+  renderBenchmark: {
+    enabled: true,
+    pdfToImageModes: ['main-thread', 'worker']
+  }
+}
+```
+
+Use `['current']` to benchmark only the active `documentLoading.render.pdfToImageMode` value.
+
 ## Document-Version Reload Cache
 
 `documentLoading.sourceStore.reloadCacheTtlMs` and

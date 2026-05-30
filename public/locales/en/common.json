@@ -601,7 +601,7 @@
       "renderBenchmarkRunningShort": "Running…",
       "downloadRenderBenchmark": "Download render/decode JSON",
       "renderBenchmarkRunning": "Running render/decode benchmark…",
-      "renderBenchmarkProgress": "Running render/decode {current} of {total}…",
+      "renderBenchmarkProgress": "Running render/decode {current} of {total}: {scenario} ({pageProgress} pages)…",
       "renderBenchmarkDone": "Render/decode benchmark completed.",
       "renderBenchmarkError": "Render/decode benchmark failed: {error}",
       "renderBenchmarkSummary": "Best render/decode run: {ms} ms, {pages} pages, {scenario}.",
