@@ -195,6 +195,7 @@ function collectConfigDiagnostics() {
       renderBenchmarkPdfToImageModes: Array.isArray(renderBenchmark.pdfToImageModes)
         ? renderBenchmark.pdfToImageModes.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
         : [],
+      renderBenchmarkTaskTimeoutMs: Number(renderBenchmark.taskTimeoutMs) || 0,
       renderBenchmarkSampleMode: String(renderBenchmark.sampleMode || ''),
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
         ? renderBenchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)

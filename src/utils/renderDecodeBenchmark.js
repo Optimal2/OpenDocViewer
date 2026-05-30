@@ -20,8 +20,10 @@ const DEFAULT_PDF_TO_IMAGE_MODES = Object.freeze(['current']);
 const DEFAULT_MAX_RUNS = 40;
 const DEFAULT_DELAY_BETWEEN_RUNS_MS = 150;
 const DEFAULT_SAMPLE_MODE = 'evenly-spaced';
+const DEFAULT_TASK_TIMEOUT_MS = 90 * 1000;
 const MAX_RENDER_BENCHMARK_WORKER_COUNT = 32;
 const MAX_RENDER_BENCHMARK_PAGE_LIMIT = 1000;
+const MAX_RENDER_BENCHMARK_TASK_TIMEOUT_MS = 10 * 60 * 1000;
 const RENDER_VARIANTS = Object.freeze(['full', 'thumbnail']);
 const PDF_TO_IMAGE_MODES = Object.freeze(['current', 'main-thread', 'worker']);
 const SAMPLE_MODES = Object.freeze(['first', 'evenly-spaced']);
@@ -111,7 +113,7 @@ function normalizeSampleMode(value) {
 
 /**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number,taskTimeoutMs:number}}
  */
 function normalizeRenderBenchmarkConfig(config = {}) {
   const cfg = config?.documentLoading?.renderBenchmark || {};
@@ -125,6 +127,7 @@ function normalizeRenderBenchmarkConfig(config = {}) {
     sampleMode: normalizeSampleMode(cfg.sampleMode),
     maxRuns: normalizeInteger(cfg.maxRuns, DEFAULT_MAX_RUNS, 1, 200),
     delayBetweenRunsMs: normalizeInteger(cfg.delayBetweenRunsMs, DEFAULT_DELAY_BETWEEN_RUNS_MS, 0, 10000),
+    taskTimeoutMs: normalizeInteger(cfg.taskTimeoutMs, DEFAULT_TASK_TIMEOUT_MS, 5000, MAX_RENDER_BENCHMARK_TASK_TIMEOUT_MS),
   };
 }
 
@@ -173,6 +176,59 @@ function throwIfAborted(signal) {
   const error = new Error('Render/decode benchmark was cancelled.');
   error.name = 'AbortError';
   throw error;
+}
+
+/**
+ * @param {string} message
+ * @returns {Error}
+ */
+function createTimeoutError(message) {
+  const error = new Error(message);
+  error.name = 'TimeoutError';
+  return error;
+}
+
+/**
+ * @template T
+ * @param {Promise<T>} operation
+ * @param {number} timeoutMs
+ * @param {AbortSignal=} signal
+ * @param {string=} label
+ * @returns {Promise<T>}
+ */
+function withTimeout(operation, timeoutMs, signal, label = 'operation') {
+  const duration = Math.max(0, Number(timeoutMs) || 0);
+  if (duration <= 0) return operation;
+
+  return new Promise((resolve, reject) => {
+    let settled = false;
+    let timeoutId = 0;
+    const cleanup = () => {
+      if (timeoutId) globalThis.clearTimeout?.(timeoutId);
+      signal?.removeEventListener?.('abort', onAbort);
+    };
+    const settle = (fn, value) => {
+      if (settled) return;
+      settled = true;
+      cleanup();
+      fn(value);
+    };
+    const onAbort = () => {
+      const error = new Error('Render/decode benchmark was cancelled.');
+      error.name = 'AbortError';
+      settle(reject, error);
+    };
+
+    timeoutId = globalThis.setTimeout?.(() => {
+      settle(reject, createTimeoutError(`Render/decode benchmark timed out while rendering ${label}.`));
+    }, duration);
+    signal?.addEventListener?.('abort', onAbort, { once: true });
+
+    operation.then(
+      (value) => settle(resolve, value),
+      (error) => settle(reject, error)
+    );
+  });
 }
 
 /**
@@ -330,6 +386,7 @@ function summarizeByExtension(taskResults) {
  * @param {Object} args.scenario
  * @param {Object} args.viewerContext
  * @param {Object} args.baseRenderConfig
+ * @param {number} args.taskTimeoutMs
  * @param {number} args.completedRuns
  * @param {number} args.totalRuns
  * @param {function(Object): void=} args.onProgress
@@ -351,6 +408,10 @@ async function runScenario(args) {
     workerCount: resolvedWorkerCount,
     pdfToImageMode,
   };
+  renderConfig.pdfWorkerTaskTimeoutMs = Math.min(
+    Math.max(5000, Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS),
+    Math.max(5000, Number(renderConfig.pdfWorkerTaskTimeoutMs) || Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS)
+  );
   const tempStore = {
     getBlob: (sourceKey) => args.viewerContext.readSourceBlob?.(sourceKey),
     getArrayBuffer: async (sourceKey) => {
@@ -370,27 +431,38 @@ async function runScenario(args) {
   const concurrency = Math.max(1, Math.min(args.pages.length, concurrencyBase));
   const startedAt = performance.now();
   let completed = 0;
+  let timeoutCount = 0;
+
+  const reportPageProgress = () => {
+    args.onProgress?.({
+      phase: 'running',
+      completedRuns: args.completedRuns,
+      totalRuns: args.totalRuns,
+      scenarioLabel: scenario.scenarioLabel,
+      renderedPages: completed,
+      pageCount: args.pages.length,
+    });
+  };
 
   try {
     const taskResults = await runLimited(args.pages, concurrency, async (page, taskIndex) => {
       throwIfAborted(args.signal);
       const taskStart = performance.now();
       try {
-        const rendered = await renderer.renderPageAsset(page, {
-          variant: scenario.variant,
-          thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
-          thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
-        });
+        const label = `${scenario.scenarioLabel} page ${page.originalPageIndex + 1}`;
+        const rendered = await withTimeout(
+          renderer.renderPageAsset(page, {
+            variant: scenario.variant,
+            thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
+            thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
+          }),
+          args.taskTimeoutMs,
+          args.signal,
+          label
+        );
         const durationMs = Math.round(performance.now() - taskStart);
         completed += 1;
-        args.onProgress?.({
-          phase: 'running',
-          completedRuns: args.completedRuns,
-          totalRuns: args.totalRuns,
-          scenarioLabel: scenario.scenarioLabel,
-          renderedPages: completed,
-          pageCount: args.pages.length,
-        });
+        reportPageProgress();
         return {
           ok: true,
           taskIndex,
@@ -405,12 +477,15 @@ async function runScenario(args) {
       } catch (error) {
         const durationMs = Math.round(performance.now() - taskStart);
         completed += 1;
+        if (String(error?.name || '') === 'TimeoutError') timeoutCount += 1;
+        reportPageProgress();
         return {
           ok: false,
           taskIndex,
           originalPageIndex: page.originalPageIndex,
           fileExtension: page.fileExtension,
           durationMs,
+          timedOut: String(error?.name || '') === 'TimeoutError',
           error: String(error?.message || error),
         };
       }
@@ -447,6 +522,7 @@ async function runScenario(args) {
       pageCount: args.pages.length,
       successCount,
       errorCount,
+      timeoutCount,
       outputBytes,
       byExtension: summarizeByExtension(taskResults),
       rendererStats,
@@ -505,6 +581,7 @@ export async function runRenderDecodeBenchmark(args) {
         scenario,
         viewerContext,
         baseRenderConfig,
+        taskTimeoutMs: benchmarkCfg.taskTimeoutMs,
         completedRuns: runs.length,
         totalRuns,
         onProgress: args?.onProgress,
@@ -534,6 +611,7 @@ export async function runRenderDecodeBenchmark(args) {
     variants: benchmarkCfg.variants,
     pdfToImageModes: benchmarkCfg.pdfToImageModes,
     workerCounts: benchmarkCfg.workerCounts,
+    taskTimeoutMs: benchmarkCfg.taskTimeoutMs,
     maxRuns: benchmarkCfg.maxRuns,
     testedVariants: Array.from(new Set(scenarios.map((scenario) => scenario.variant))),
     testedPdfToImageModes: Array.from(new Set(scenarios.map((scenario) => scenario.pdfToImageMode))),

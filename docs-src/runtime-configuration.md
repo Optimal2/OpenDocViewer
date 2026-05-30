@@ -201,12 +201,14 @@ viewer setting:
 documentLoading: {
   renderBenchmark: {
     enabled: true,
-    pdfToImageModes: ['main-thread', 'worker']
+    pdfToImageModes: ['main-thread', 'worker'],
+    taskTimeoutMs: 90000
   }
 }
 ```
 
 Use `['current']` to benchmark only the active `documentLoading.render.pdfToImageMode` value.
+`taskTimeoutMs` prevents one stuck page render from blocking the rest of the benchmark run.
 
 ## Document-Version Reload Cache
 
