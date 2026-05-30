@@ -83,6 +83,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }} compareDocumentNavigation
  * @property {function(): void} handleCompare
  * @property {boolean} isComparing
+ * @property {'primary'|'compare'} activePane
  * @property {(number|null)} comparePageNumber - Current visible compare-page ordinal.
  * @property {(number|null)} comparePageNumberDisplay - Current original session compare-page number.
  * @property {{ shift:boolean, ctrl:boolean }} navigationModifierState
@@ -138,6 +139,7 @@ const DocumentViewerToolbar = ({
   viewerContainerRef,
   handleCompare,
   isComparing,
+  activePane,
   comparePageNumber,
   comparePageNumberDisplay,
   navigationModifierState,
@@ -217,6 +219,7 @@ const DocumentViewerToolbar = ({
       compareDocumentNavigation={compareDocumentNavigation}
       handleCompare={handleCompare}
       isComparing={isComparing}
+      activePane={activePane}
       comparePageNumber={comparePageNumber}
       comparePageNumberDisplay={comparePageNumberDisplay}
       navigationModifierState={navigationModifierState}
@@ -273,6 +276,7 @@ DocumentViewerToolbar.propTypes = {
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
+  activePane: PropTypes.oneOf(['primary', 'compare']).isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   comparePageNumberDisplay: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   navigationModifierState: PropTypes.shape({

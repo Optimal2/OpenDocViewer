@@ -22,6 +22,7 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {function(number): void} [props.selectForCompare]
  * @param {boolean} [props.isComparing]
  * @param {(number|null)} [props.comparePageNumber]
+ * @param {'primary'|'compare'} [props.activePane]
  * @param {{ shift:boolean, ctrl:boolean }} props.navigationModifierState
  * @param {'thumbnails'|'selection'} props.paneMode
  * @param {function(string): void} props.setPaneMode
@@ -64,6 +65,7 @@ const DocumentViewerThumbnails = ({
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
+  activePane = 'primary',
   navigationModifierState,
   paneMode,
   setPaneMode,
@@ -262,6 +264,7 @@ const DocumentViewerThumbnails = ({
           selectForCompare={selectForCompare}
           isComparing={isComparing}
           comparePageNumber={comparePageNumber}
+          activePane={activePane}
           navigationModifierState={navigationModifierState}
           selectionPanelEnabled={selectionPanelEnabled}
           onHidePageFromSelection={hidePageFromSelection}
@@ -290,6 +293,7 @@ DocumentViewerThumbnails.propTypes = {
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  activePane: PropTypes.oneOf(['primary', 'compare']),
   navigationModifierState: PropTypes.shape({
     shift: PropTypes.bool.isRequired,
     ctrl: PropTypes.bool.isRequired,

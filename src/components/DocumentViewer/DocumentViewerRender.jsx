@@ -108,6 +108,9 @@ function isAtScrollBottom(viewport) {
  * @param {number} props.zoom
  * @param {SetNumberState} props.setZoom
  * @param {boolean} props.isComparing
+ * @param {ViewerPaneKey=} props.activePane
+ * @param {ViewerPaneKey=} props.effectivePane
+ * @param {function(ViewerPaneKey): void=} props.onSetActivePane
  * @param {{ rotation:number, brightness:number, contrast:number }} props.primaryImageProperties
  * @param {{ rotation:number, brightness:number, contrast:number }} props.compareImageProperties
  * @param {RefLike} props.documentRenderRef
@@ -139,6 +142,9 @@ const DocumentViewerRender = ({
   zoom,
   setZoom,
   isComparing,
+  activePane = 'primary',
+  effectivePane = 'primary',
+  onSetActivePane,
   primaryImageProperties,
   compareImageProperties,
   documentRenderRef,
@@ -492,6 +498,8 @@ const DocumentViewerRender = ({
   // Apply per-pane post-zoom only while comparing; single-pane stays at base zoom
   const effectiveLeftZoom = isComparing ? zoom * postZoomLeft : zoom;
   const effectiveRightZoom = isComparing ? zoom * postZoomRight : zoom;
+  const normalizedActivePane = isComparing && activePane === 'compare' ? 'compare' : 'primary';
+  const normalizedEffectivePane = isComparing && effectivePane === 'compare' ? 'compare' : 'primary';
   const canHidePageFromSelection = !!selectionPanelEnabled && typeof onHidePageFromSelection === 'function';
   const canHideDocumentFromSelection = !!selectionPanelEnabled && typeof onHideDocumentFromSelection === 'function';
   const canOpenMetadataFromContextMenu = !!contextMenuState
@@ -528,6 +536,50 @@ const DocumentViewerRender = ({
     );
   };
 
+  /**
+   * @param {ViewerPaneKey} pane
+   * @returns {React.ReactElement}
+   */
+  const renderPaneSelector = (pane) => {
+    const isComparePane = pane === 'compare';
+    const isActivePane = normalizedActivePane === pane;
+    const isEffectivePane = normalizedEffectivePane === pane;
+    const label = isComparePane
+      ? t('viewer.paneSelector.compare', { defaultValue: 'Use right compare pane' })
+      : t('viewer.paneSelector.primary', { defaultValue: 'Use primary / left pane' });
+    const activeLabel = isComparePane
+      ? t('viewer.paneSelector.compareActive', { defaultValue: 'Right compare pane is the default target' })
+      : t('viewer.paneSelector.primaryActive', { defaultValue: 'Primary / left pane is the default target' });
+    const temporaryLabel = isEffectivePane && !isActivePane
+      ? t('viewer.paneSelector.temporaryTarget', { defaultValue: 'Shift is temporarily targeting this pane' })
+      : '';
+    const title = [isActivePane ? activeLabel : label, temporaryLabel].filter(Boolean).join(' - ');
+
+    return (
+      <button
+        type="button"
+        className={[
+          'odv-pane-selector',
+          isComparePane ? 'is-compare' : 'is-primary',
+          isActivePane ? 'is-active' : '',
+          isEffectivePane ? 'is-effective' : '',
+        ].filter(Boolean).join(' ')}
+        aria-label={title}
+        aria-pressed={isActivePane}
+        title={title}
+        onClick={(event) => {
+          event.preventDefault();
+          event.stopPropagation();
+          onSetActivePane?.(pane);
+        }}
+      >
+        <span className="material-icons" aria-hidden="true">
+          {isActivePane ? 'radio_button_checked' : 'radio_button_unchecked'}
+        </span>
+      </button>
+    );
+  };
+
   return (
     <>
       <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
@@ -542,6 +594,7 @@ const DocumentViewerRender = ({
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
             onWheelCapture={(event) => handlePaneWheelCapture(event, 'primary')}
           >
+            {isComparing ? renderPaneSelector('primary') : null}
             {renderEdgeScrollIndicator('primary')}
             {isComparing && (
               <div className="compare-zoom-sticky">
@@ -579,6 +632,7 @@ const DocumentViewerRender = ({
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
               onWheelCapture={(event) => handlePaneWheelCapture(event, 'compare')}
             >
+              {renderPaneSelector('compare')}
               {renderEdgeScrollIndicator('compare')}
               <div className="compare-zoom-sticky">
                 <CompareZoomOverlay
@@ -698,6 +752,9 @@ DocumentViewerRender.propTypes = {
   zoom: PropTypes.number.isRequired,
   setZoom: PropTypes.func.isRequired,
   isComparing: PropTypes.bool.isRequired,
+  activePane: PropTypes.oneOf(['primary', 'compare']),
+  effectivePane: PropTypes.oneOf(['primary', 'compare']),
+  onSetActivePane: PropTypes.func,
   primaryImageProperties: PropTypes.shape({
     rotation: PropTypes.number.isRequired,
     brightness: PropTypes.number.isRequired,

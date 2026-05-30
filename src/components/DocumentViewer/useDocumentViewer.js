@@ -288,6 +288,16 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
 /** @typedef {'primary'|'compare'} ViewerPageTarget */
 
 /**
+ * Normalize any pane key into the viewer's two supported navigation targets.
+ *
+ * @param {*} pane
+ * @returns {ViewerPageTarget}
+ */
+function normalizeViewerPaneTarget(pane) {
+  return pane === 'compare' ? 'compare' : 'primary';
+}
+
+/**
  * Hook that centralizes viewer UI state and event handlers.
  * Public entry – returns the full API consumed by the viewer.
  *
@@ -425,6 +435,7 @@ export function useDocumentViewer() {
   );
 
   const [isComparing, setIsComparing] = useState(false);
+  const [activePane, setActivePaneRaw] = useState(/** @type {ViewerPageTarget} */ ('primary'));
   const [comparePageNumberRaw, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null)); // original 1-based
   const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
@@ -544,6 +555,7 @@ export function useDocumentViewer() {
       if (pageNumberRaw !== 1) setPageNumberRaw(1);
       if (comparePageNumberRaw !== null) setComparePageNumberRaw(null);
       if (isComparing) setIsComparing(false);
+      if (activePane !== 'primary') setActivePaneRaw('primary');
       return;
     }
 
@@ -558,6 +570,7 @@ export function useDocumentViewer() {
       if (comparePageNumberRaw !== nextComparePage) setComparePageNumberRaw(nextComparePage);
     }
   }, [
+    activePane,
     compareOriginalPageIndex,
     comparePageNumberRaw,
     currentOriginalPageIndex,
@@ -1071,6 +1084,37 @@ export function useDocumentViewer() {
     setIsExpandedState((curr) => !!resolve(curr));
   }, []);
 
+  /**
+   * Set the default pane for compare-aware navigation and editing actions.
+   * The compare pane can only be selected while compare mode is visible.
+   *
+   * @param {ViewerPageTarget} pane
+   * @returns {void}
+   */
+  const setActivePane = useCallback((pane) => {
+    const nextPane = normalizeViewerPaneTarget(pane);
+    if (nextPane === 'compare' && !isComparing) return;
+    setActivePaneRaw(nextPane);
+  }, [isComparing]);
+
+  /** @returns {void} */
+  const activatePrimaryPane = useCallback(() => {
+    setActivePaneRaw('primary');
+  }, []);
+
+  /**
+   * Open compare mode when needed and make the right pane the default target.
+   * @returns {void}
+   */
+  const activateComparePane = useCallback(() => {
+    const fallbackOriginalPage = compareOriginalPageNumber != null
+      ? compareOriginalPageNumber
+      : currentOriginalPageNumber;
+    setComparePageNumberRaw(fallbackOriginalPage);
+    setIsComparing(true);
+    setActivePaneRaw('compare');
+  }, [compareOriginalPageNumber, currentOriginalPageNumber]);
+
   /** Toggle compare mode. */
   const handleCompare = useCallback(() => {
     setIsComparing((prev) => {
@@ -1081,6 +1125,7 @@ export function useDocumentViewer() {
           : currentOriginalPageNumber;
         setComparePageNumberRaw(fallbackOriginalPage);
       }
+      setActivePaneRaw(next ? 'compare' : 'primary');
       return next;
     });
   }, [compareOriginalPageNumber, currentOriginalPageNumber]);
@@ -1091,6 +1136,7 @@ export function useDocumentViewer() {
    */
   const closeCompare = useCallback(() => {
     setIsComparing(false);
+    setActivePaneRaw('primary');
   }, []);
 
   /**
@@ -1103,6 +1149,7 @@ export function useDocumentViewer() {
    */
   const selectForCompare = useCallback((page) => {
     setComparePageNumber(page);
+    setActivePaneRaw('compare');
     logger.info('Compare selection updated', { comparePage: page });
   }, [setComparePageNumber]);
 
@@ -1253,6 +1300,10 @@ export function useDocumentViewer() {
     goToLastDocument,
     documentNavigationEnabled,
     compareNavigationEnabled: true,
+    activePane,
+    activatePrimaryPane,
+    activateComparePane,
+    closeCompare,
     hideCurrentPageFromSelection,
     hideCurrentDocumentFromSelection,
     zoomIn,
@@ -1289,6 +1340,10 @@ export function useDocumentViewer() {
     zoom,
     setZoom,
     isComparing,
+    activePane,
+    setActivePane,
+    activatePrimaryPane,
+    activateComparePane,
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
