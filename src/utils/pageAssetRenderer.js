@@ -227,15 +227,22 @@ export class PageAssetRenderer {
   }
 
   updateConfig(nextConfig = {}) {
+    const previousBackend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
     const previousWorkerCount = this.getWorkerCount();
+    const previousUseForTiff = this.config.useWorkersForTiff !== false;
+    const previousUseForRasterImages = this.config.useWorkersForRasterImages !== false;
     this.config = {
       ...this.config,
       ...(nextConfig || {}),
     };
+    const nextBackend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
     const nextWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
-    const shouldRebuild = previousWorkerCount !== nextWorkerCount
-      || !this.workerPool
-      || String(this.config.backend || '').toLowerCase() === 'main-only';
+    const nextUseForTiff = this.config.useWorkersForTiff !== false;
+    const nextUseForRasterImages = this.config.useWorkersForRasterImages !== false;
+    const shouldRebuild = previousBackend !== nextBackend
+      || previousWorkerCount !== nextWorkerCount
+      || previousUseForTiff !== nextUseForTiff
+      || previousUseForRasterImages !== nextUseForRasterImages;
     if (shouldRebuild) this.rebuildWorkerPool();
   }
 
@@ -245,6 +252,12 @@ export class PageAssetRenderer {
 
   canRenderInWorker(fileExtension, variant) {
     return !!this.workerPool?.canRender?.(fileExtension, variant);
+  }
+
+  getBufferCacheLimit() {
+    const pdfLimit = Math.max(0, Number(this.config.maxOpenPdfDocuments) || 0);
+    const tiffLimit = Math.max(0, Number(this.config.maxOpenTiffDocuments) || 0);
+    return Math.max(1, pdfLimit + tiffLimit + 1);
   }
 
   async dispose() {
@@ -268,19 +281,13 @@ export class PageAssetRenderer {
   async getSourceBuffer(sourceKey) {
     const key = String(sourceKey || '');
     if (this.bufferCache.has(key)) {
-      const buffer = this.bufferCache.get(key);
-      this.bufferCache.delete(key);
-      this.bufferCache.set(key, buffer);
-      return buffer;
+      touchLru(this.bufferCache, key, this.getBufferCacheLimit());
+      return this.bufferCache.get(key);
     }
 
     const buffer = await this.tempStore.getArrayBuffer(key);
     if (!buffer) throw new Error(`Missing temp-store bytes for source ${key}`);
-    this.bufferCache.set(key, buffer);
-    while (this.bufferCache.size > Math.max(this.config.maxOpenPdfDocuments, this.config.maxOpenTiffDocuments) + 1) {
-      const oldestKey = this.bufferCache.keys().next().value;
-      this.bufferCache.delete(oldestKey);
-    }
+    setLru(this.bufferCache, key, buffer, this.getBufferCacheLimit());
     return buffer;
   }
 

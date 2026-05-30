@@ -830,13 +830,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     }
 
     for (let index = visibleRange.start; index <= visibleRange.end; index += 1) {
-      const priority = index === focusIndex
-        ? 'critical'
-        : index === currentIndex
-          ? 'high'
-          : index === compareIndex
-            ? 'high'
-            : 'high';
+      const priority = index === focusIndex ? 'critical' : 'high';
       pushIndex(index, priority);
       touchVisibleIndex(index);
     }
