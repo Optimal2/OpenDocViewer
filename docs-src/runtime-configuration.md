@@ -171,6 +171,29 @@ then follows `resetSessionTarget`:
 Use the reset action for host integrations where reloading only the iframe can reuse the same stale
 parent payload and therefore the same expired document tickets.
 
+## PDF Page Rendering Worker Mode
+
+PDF pages are rendered through the proven main-thread pdf.js path by default. Deployments can opt in
+to the experimental worker path for PDF-to-image rendering:
+
+```js
+documentLoading: {
+  render: {
+    pdfToImageMode: 'worker'
+  }
+}
+```
+
+Supported values are:
+
+- `main-thread` - default, matches the behavior used by earlier OpenDocViewer versions.
+- `worker` - renders PDF page images in dedicated workers when supported, with automatic fallback to
+  the main-thread path if worker-side rendering is unavailable or fails.
+
+The worker mode uses the existing `documentLoading.render.workerCount` setting and remains separate
+from generated-PDF printing. Raster images and TIFF files continue to use `useWorkersForRasterImages`
+and `useWorkersForTiff`.
+
 ## Document-Version Reload Cache
 
 `documentLoading.sourceStore.reloadCacheTtlMs` and
