@@ -408,6 +408,7 @@ async function runScenario(args) {
     workerCount: resolvedWorkerCount,
     pdfToImageMode,
   };
+  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 8);
   renderConfig.pdfWorkerTaskTimeoutMs = Math.min(
     Math.max(5000, Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS),
     Math.max(5000, Number(renderConfig.pdfWorkerTaskTimeoutMs) || Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS)
@@ -427,7 +428,9 @@ async function runScenario(args) {
   const mainThreadPdfOnly = hasPdfPages && (backend === 'main-only' || pdfToImageMode !== 'worker');
   const concurrencyBase = mainThreadPdfOnly
     ? Number(renderConfig.maxConcurrentMainThreadRenders) || 1
-    : resolvedWorkerCount || Number(renderConfig.maxConcurrentAssetRenders) || 1;
+    : (hasPdfPages && pdfToImageMode === 'worker'
+      ? Math.min(resolvedWorkerCount || pdfWorkerMaxCount, pdfWorkerMaxCount)
+      : (resolvedWorkerCount || Number(renderConfig.maxConcurrentAssetRenders) || 1));
   const concurrency = Math.max(1, Math.min(args.pages.length, concurrencyBase));
   const startedAt = performance.now();
   let completed = 0;
@@ -517,6 +520,7 @@ async function runScenario(args) {
       pdfToImageMode,
       workerCountSetting: scenario.workerCount,
       workerCount: resolvedWorkerCount,
+      pdfWorkerMaxCount,
       concurrency,
       durationMs,
       pageCount: args.pages.length,

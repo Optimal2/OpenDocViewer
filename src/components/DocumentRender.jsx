@@ -396,7 +396,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       setBlockingLoading(false);
       setImageLoaded(false);
 
-      if (!displayedAssetRef.current.url) return;
       const delayMs = Math.max(0, Number(activeLoadingConfig?.render?.loadingOverlayDelayMs) || 0);
       if (delayMs <= 0) {
         setBlockingLoading(true);
@@ -844,11 +843,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [blockingLoading, clearLoadingOverlayTimer, isRequestedAssetVisible, transitionPending]);
 
   const hideDisplayedSurface = !!transitionPending && displayedAsset.pageIndex !== currentIndex;
-  const showLoadingOverlay = !showErrorState && !isRequestedAssetVisible && (
-    blockingLoading
-    || (!displayedUrl && transitionPending)
-    || (transitionPending && displayedAsset.pageIndex !== currentIndex)
-  );
+  const showLoadingOverlay = !showErrorState && !isRequestedAssetVisible && !!blockingLoading;
   const hiddenImageStyle = isCanvasEnabled && canvasReady
     ? {
         visibility: 'hidden',

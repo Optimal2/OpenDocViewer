@@ -89,6 +89,7 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {boolean} useWorkersForRasterImages
  * @property {boolean} useWorkersForTiff
  * @property {PdfToImageMode} pdfToImageMode
+ * @property {number} pdfWorkerMaxCount
  * @property {number} maxConcurrentMainThreadRenders
  * @property {number} maxConcurrentAssetRenders
  * @property {number} warmupBatchSize
@@ -222,6 +223,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
       pdfToImageMode: 'main-thread',
+      pdfWorkerMaxCount: 8,
       // These are the actual normalized render defaults for the current loading path.
       // Viewer providers can override them through runtime config, but there is no
       // separate provider-only concurrency default layered on top of this module.
@@ -627,6 +629,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       useWorkersForRasterImages: normalizeBoolean(raw?.render?.useWorkersForRasterImages, adaptiveDefaults.render.useWorkersForRasterImages),
       useWorkersForTiff: normalizeBoolean(raw?.render?.useWorkersForTiff, adaptiveDefaults.render.useWorkersForTiff),
       pdfToImageMode: normalizePdfToImageMode(raw?.render?.pdfToImageMode ?? raw?.render?.['pdf-to-image-mode'], adaptiveDefaults.render.pdfToImageMode),
+      pdfWorkerMaxCount: normalizeNumber(raw?.render?.pdfWorkerMaxCount ?? raw?.render?.maxPdfWorkerCount, adaptiveDefaults.render.pdfWorkerMaxCount, 1, 32),
       maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 8),
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),
       warmupBatchSize: normalizeNumber(raw?.render?.warmupBatchSize, adaptiveDefaults.render.warmupBatchSize, 1, 512),

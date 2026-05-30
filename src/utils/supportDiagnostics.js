@@ -188,6 +188,7 @@ function collectConfigDiagnostics() {
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
       pdfToImageMode: String(render.pdfToImageMode || ''),
+      pdfWorkerMaxCount: Number(render.pdfWorkerMaxCount) || 0,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
       renderBenchmarkVariants: Array.isArray(renderBenchmark.variants)
         ? renderBenchmark.variants.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
