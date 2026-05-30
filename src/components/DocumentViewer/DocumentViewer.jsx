@@ -33,7 +33,11 @@ import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx'
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
 import ViewerProblemNotice from '../ViewerProblemNotice.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
-import { getRuntimeConfig, isDocumentMetadataUiEnabled } from '../../utils/runtimeConfig.js';
+import {
+  getRuntimeConfig,
+  getViewerEdgeScrollPageTurnConfig,
+  isDocumentMetadataUiEnabled,
+} from '../../utils/runtimeConfig.js';
 
 const DocumentViewer = () => {
   const {
@@ -151,6 +155,7 @@ const DocumentViewer = () => {
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
+  const edgeScrollPageTurnConfig = useMemo(() => getViewerEdgeScrollPageTurnConfig(getRuntimeConfig()), []);
 
   const metadataMatrixView = useMemo(
     () => (metadataUiEnabled ? buildDocumentMetadataMatrixView(bundle) : null),
@@ -488,10 +493,16 @@ const DocumentViewer = () => {
             compareImageProperties={compareImageProperties}
             documentRenderRef={documentRenderRef}
             comparePageNumber={renderComparePageNumber}
+            primaryVisiblePageNumber={pageNumber}
+            compareVisiblePageNumber={comparePageNumber}
+            totalVisiblePages={totalPages}
             compareRef={compareRef}
             allPages={allPages}
             zoomMode={zoomState?.mode}
             onToggleFitZoomMode={toggleFitZoomMode}
+            edgeScrollPageTurnConfig={edgeScrollPageTurnConfig}
+            onEdgeScrollPreviousPage={goToPreviousPage}
+            onEdgeScrollNextPage={goToNextPage}
             postZoomLeft={postZoomLeft}
             postZoomRight={postZoomRight}
             bumpPostZoomLeft={bumpPostZoomLeft}

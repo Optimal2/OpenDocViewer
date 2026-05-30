@@ -64,6 +64,41 @@ function getPageSelectionContext(allPages, originalPageNumber) {
   };
 }
 
+const EDGE_SCROLL_DIRECTION_PREVIOUS = 'previous';
+const EDGE_SCROLL_DIRECTION_NEXT = 'next';
+
+/**
+ * @param {WheelEvent|React.WheelEvent} event
+ * @param {HTMLElement} viewport
+ * @returns {number}
+ */
+function getWheelDeltaYPx(event, viewport) {
+  const raw = Number(event?.deltaY || 0);
+  if (!Number.isFinite(raw) || raw === 0) return 0;
+  if (event?.deltaMode === 1) return raw * 48;
+  if (event?.deltaMode === 2) return raw * Math.max(1, Number(viewport?.clientHeight) || 1);
+  return raw;
+}
+
+/**
+ * @param {HTMLElement} viewport
+ * @returns {boolean}
+ */
+function isAtScrollTop(viewport) {
+  return Number(viewport?.scrollTop || 0) <= 1;
+}
+
+/**
+ * @param {HTMLElement} viewport
+ * @returns {boolean}
+ */
+function isAtScrollBottom(viewport) {
+  const scrollTop = Number(viewport?.scrollTop || 0);
+  const clientHeight = Number(viewport?.clientHeight || 0);
+  const scrollHeight = Number(viewport?.scrollHeight || 0);
+  return scrollTop + clientHeight >= scrollHeight - 1;
+}
+
 /**
  * DocumentViewerRender
  * Renders the main document pane and, if enabled, a comparison pane.
@@ -77,10 +112,16 @@ function getPageSelectionContext(allPages, originalPageNumber) {
  * @param {{ rotation:number, brightness:number, contrast:number }} props.compareImageProperties
  * @param {RefLike} props.documentRenderRef
  * @param {(number|null)} props.comparePageNumber
+ * @param {number} props.primaryVisiblePageNumber
+ * @param {(number|null)} props.compareVisiblePageNumber
+ * @param {number} props.totalVisiblePages
  * @param {RefLike} props.compareRef
  * @param {Array} props.allPages
  * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
  * @param {function(): void=} props.onToggleFitZoomMode
+ * @param {{ enabled:boolean, thresholdPx:number, quietMs:number, decayMs:number }=} props.edgeScrollPageTurnConfig
+ * @param {function(ViewerPaneKey): void=} props.onEdgeScrollPreviousPage
+ * @param {function(ViewerPaneKey): void=} props.onEdgeScrollNextPage
  * @param {number} props.postZoomLeft
  * @param {number} props.postZoomRight
  * @param {function(number): void} props.bumpPostZoomLeft
@@ -102,10 +143,16 @@ const DocumentViewerRender = ({
   compareImageProperties,
   documentRenderRef,
   comparePageNumber,
+  primaryVisiblePageNumber,
+  compareVisiblePageNumber,
+  totalVisiblePages,
   compareRef,
   allPages,
   zoomMode = 'CUSTOM',
   onToggleFitZoomMode,
+  edgeScrollPageTurnConfig,
+  onEdgeScrollPreviousPage,
+  onEdgeScrollNextPage,
   postZoomLeft = 1.0,
   postZoomRight = 1.0,
   bumpPostZoomLeft,
@@ -120,8 +167,21 @@ const DocumentViewerRender = ({
   const { t } = useTranslation('common');
   const { bundle } = useContext(ViewerContext);
   const contextMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const primaryPaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const comparePaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const edgeScrollQuietTimerRef = useRef(0);
+  const edgeScrollDecayRafRef = useRef(0);
+  const edgeScrollProgressRef = useRef(0);
+  const edgeScrollPendingResetRef = useRef(/** @type {Partial<Record<ViewerPaneKey, 'top'|'bottom'>>} */ ({}));
   const [contextMenuState, setContextMenuState] = useState(
     /** @type {(ViewerContextMenuState|null)} */ (null)
+  );
+  const [edgeScrollState, setEdgeScrollState] = useState(
+    /** @type {{ pane:(ViewerPaneKey|null), direction:('previous'|'next'|null), progress:number }} */ ({
+      pane: null,
+      direction: null,
+      progress: 0,
+    })
   );
 
   const primaryCanvasEnabled = Number(primaryImageProperties?.rotation || 0) !== 0
@@ -146,6 +206,191 @@ const DocumentViewerRender = ({
       compareRef?.current?.fitToWidth?.();
     }
   }, [compareRef, zoomMode]);
+
+  const resetEdgeScrollProgress = useCallback(() => {
+    if (edgeScrollQuietTimerRef.current) {
+      window.clearTimeout(edgeScrollQuietTimerRef.current);
+      edgeScrollQuietTimerRef.current = 0;
+    }
+    if (edgeScrollDecayRafRef.current) {
+      window.cancelAnimationFrame(edgeScrollDecayRafRef.current);
+      edgeScrollDecayRafRef.current = 0;
+    }
+    edgeScrollProgressRef.current = 0;
+    setEdgeScrollState({ pane: null, direction: null, progress: 0 });
+  }, []);
+
+  const getPaneElement = useCallback((pane) => (
+    pane === 'compare' ? comparePaneRef.current : primaryPaneRef.current
+  ), []);
+
+  const getPaneViewport = useCallback((pane) => {
+    const paneElement = getPaneElement(pane);
+    const viewport = paneElement?.querySelector?.('.document-render-viewport');
+    return viewport instanceof HTMLElement ? viewport : null;
+  }, [getPaneElement]);
+
+  const applyPaneScrollPosition = useCallback((pane, position) => {
+    const viewport = getPaneViewport(pane);
+    if (!viewport) return;
+    viewport.scrollTop = position === 'bottom'
+      ? Math.max(0, Number(viewport.scrollHeight || 0))
+      : 0;
+  }, [getPaneViewport]);
+
+  const schedulePaneScrollPosition = useCallback((pane, position) => {
+    edgeScrollPendingResetRef.current[pane] = position;
+    const apply = () => applyPaneScrollPosition(pane, position);
+    window.requestAnimationFrame(apply);
+    window.setTimeout(apply, 80);
+    window.setTimeout(apply, 220);
+  }, [applyPaneScrollPosition]);
+
+  const startEdgeScrollDecay = useCallback(() => {
+    if (edgeScrollDecayRafRef.current) {
+      window.cancelAnimationFrame(edgeScrollDecayRafRef.current);
+      edgeScrollDecayRafRef.current = 0;
+    }
+
+    const startProgress = edgeScrollProgressRef.current;
+    if (startProgress <= 0) {
+      resetEdgeScrollProgress();
+      return;
+    }
+
+    const startTime = performance.now();
+    const decayMs = Math.max(100, Number(edgeScrollPageTurnConfig?.decayMs) || 650);
+    const tick = (now) => {
+      const ratio = Math.max(0, 1 - ((now - startTime) / decayMs));
+      const nextProgress = startProgress * ratio;
+      edgeScrollProgressRef.current = nextProgress;
+      setEdgeScrollState((current) => ({
+        pane: current.pane,
+        direction: current.direction,
+        progress: nextProgress,
+      }));
+
+      if (nextProgress > 0.01) {
+        edgeScrollDecayRafRef.current = window.requestAnimationFrame(tick);
+      } else {
+        resetEdgeScrollProgress();
+      }
+    };
+
+    edgeScrollDecayRafRef.current = window.requestAnimationFrame(tick);
+  }, [edgeScrollPageTurnConfig?.decayMs, resetEdgeScrollProgress]);
+
+  useEffect(() => () => {
+    if (edgeScrollQuietTimerRef.current) window.clearTimeout(edgeScrollQuietTimerRef.current);
+    if (edgeScrollDecayRafRef.current) window.cancelAnimationFrame(edgeScrollDecayRafRef.current);
+  }, []);
+
+  const canTurnFromPaneEdge = useCallback((pane, direction) => {
+    const total = Math.max(0, Number(totalVisiblePages) || 0);
+    const page = pane === 'compare'
+      ? Math.max(0, Number(compareVisiblePageNumber) || 0)
+      : Math.max(0, Number(primaryVisiblePageNumber) || 0);
+    if (total <= 0 || page <= 0) return false;
+    if (direction === EDGE_SCROLL_DIRECTION_PREVIOUS) return page > 1;
+    return page < total;
+  }, [compareVisiblePageNumber, primaryVisiblePageNumber, totalVisiblePages]);
+
+  /**
+   * @param {*} event
+   * @param {ViewerPaneKey} pane
+   * @returns {void}
+   */
+  const handlePaneWheelCapture = useCallback((event, pane) => {
+    if (edgeScrollPageTurnConfig?.enabled !== true) return;
+    if (event?.ctrlKey || event?.metaKey || event?.altKey) return;
+    if (event?.target?.closest?.('.compare-zoom-overlay, button, input, textarea, select, [contenteditable="true"]')) return;
+
+    const paneElement = getPaneElement(pane);
+    const viewport = getPaneViewport(pane);
+    if (!paneElement || !viewport) return;
+    if (viewport.scrollHeight <= viewport.clientHeight + 1) return;
+
+    const absX = Math.abs(Number(event?.deltaX || 0));
+    const deltaY = getWheelDeltaYPx(event, viewport);
+    const absY = Math.abs(deltaY);
+    if (absY <= 0 || absX > absY) return;
+
+    const direction = deltaY < 0 ? EDGE_SCROLL_DIRECTION_PREVIOUS : EDGE_SCROLL_DIRECTION_NEXT;
+    const atRelevantEdge = direction === EDGE_SCROLL_DIRECTION_PREVIOUS
+      ? isAtScrollTop(viewport)
+      : isAtScrollBottom(viewport);
+
+    if (!atRelevantEdge || !canTurnFromPaneEdge(pane, direction)) {
+      if (!atRelevantEdge) resetEdgeScrollProgress();
+      return;
+    }
+
+    event.preventDefault?.();
+    event.stopPropagation?.();
+
+    if (edgeScrollQuietTimerRef.current) {
+      window.clearTimeout(edgeScrollQuietTimerRef.current);
+      edgeScrollQuietTimerRef.current = 0;
+    }
+    if (edgeScrollDecayRafRef.current) {
+      window.cancelAnimationFrame(edgeScrollDecayRafRef.current);
+      edgeScrollDecayRafRef.current = 0;
+    }
+
+    const thresholdPx = Math.max(120, Number(edgeScrollPageTurnConfig?.thresholdPx) || 720);
+    const sameGesture = edgeScrollState.pane === pane && edgeScrollState.direction === direction;
+    const baseProgress = sameGesture ? edgeScrollProgressRef.current : 0;
+    const nextProgress = Math.min(1, baseProgress + (Math.min(absY, thresholdPx * 0.45) / thresholdPx));
+    edgeScrollProgressRef.current = nextProgress;
+    setEdgeScrollState({ pane, direction, progress: nextProgress });
+
+    if (nextProgress >= 1) {
+      resetEdgeScrollProgress();
+      if (direction === EDGE_SCROLL_DIRECTION_PREVIOUS) {
+        onEdgeScrollPreviousPage?.(pane);
+        schedulePaneScrollPosition(pane, 'bottom');
+      } else {
+        onEdgeScrollNextPage?.(pane);
+        schedulePaneScrollPosition(pane, 'top');
+      }
+      return;
+    }
+
+    edgeScrollQuietTimerRef.current = window.setTimeout(
+      startEdgeScrollDecay,
+      Math.max(0, Number(edgeScrollPageTurnConfig?.quietMs) || 140)
+    );
+  }, [
+    canTurnFromPaneEdge,
+    edgeScrollPageTurnConfig?.enabled,
+    edgeScrollPageTurnConfig?.quietMs,
+    edgeScrollPageTurnConfig?.thresholdPx,
+    edgeScrollState.direction,
+    edgeScrollState.pane,
+    getPaneElement,
+    getPaneViewport,
+    onEdgeScrollNextPage,
+    onEdgeScrollPreviousPage,
+    resetEdgeScrollProgress,
+    schedulePaneScrollPosition,
+    startEdgeScrollDecay,
+  ]);
+
+  useEffect(() => {
+    const pending = edgeScrollPendingResetRef.current.primary;
+    if (!pending) return undefined;
+    edgeScrollPendingResetRef.current.primary = undefined;
+    const timeoutId = window.setTimeout(() => applyPaneScrollPosition('primary', pending), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [applyPaneScrollPosition, pageNumber]);
+
+  useEffect(() => {
+    const pending = edgeScrollPendingResetRef.current.compare;
+    if (!pending) return undefined;
+    edgeScrollPendingResetRef.current.compare = undefined;
+    const timeoutId = window.setTimeout(() => applyPaneScrollPosition('compare', pending), 0);
+    return () => window.clearTimeout(timeoutId);
+  }, [applyPaneScrollPosition, comparePageNumber]);
 
   const closeContextMenu = useCallback(() => {
     setContextMenuState(null);
@@ -260,6 +505,29 @@ const DocumentViewerRender = ({
     ? Math.max(8, Math.min(contextMenuState.y, Math.max(8, (typeof window !== 'undefined' ? window.innerHeight : contextMenuState.y + 256) - 256)))
     : 0;
 
+  /**
+   * @param {ViewerPaneKey} pane
+   * @returns {(React.ReactElement|null)}
+   */
+  const renderEdgeScrollIndicator = (pane) => {
+    if (edgeScrollPageTurnConfig?.enabled !== true) return null;
+    if (edgeScrollState.pane !== pane || !edgeScrollState.direction || edgeScrollState.progress <= 0) return null;
+    const progress = Math.max(0, Math.min(1, Number(edgeScrollState.progress) || 0));
+    return (
+      <div
+        className={`odv-edge-scroll-page-turn ${edgeScrollState.direction === EDGE_SCROLL_DIRECTION_PREVIOUS ? 'is-previous' : 'is-next'}`}
+        aria-hidden="true"
+      >
+        <div
+          className="odv-edge-scroll-page-turn-track"
+          style={{ '--odv-edge-scroll-progress': progress }}
+        >
+          <div className="odv-edge-scroll-page-turn-fill" />
+        </div>
+      </div>
+    );
+  };
+
   return (
     <>
       <div className="viewer-section" style={{ display: 'flex', padding: '15px' }}>
@@ -269,9 +537,12 @@ const DocumentViewerRender = ({
           style={{ position: 'relative' }}
         >
           <div
+            ref={primaryPaneRef}
             className={`document-pane-frame ${isComparing ? 'is-primary-pane' : 'is-single-pane'}`}
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
+            onWheelCapture={(event) => handlePaneWheelCapture(event, 'primary')}
           >
+            {renderEdgeScrollIndicator('primary')}
             {isComparing && (
               <div className="compare-zoom-sticky">
                 <CompareZoomOverlay
@@ -303,9 +574,12 @@ const DocumentViewerRender = ({
         {isComparing && comparePageNumber !== null && (
           <div className="document-render-container-comparison" style={{ position: 'relative' }}>
             <div
+              ref={comparePaneRef}
               className="document-pane-frame is-compare-pane"
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
+              onWheelCapture={(event) => handlePaneWheelCapture(event, 'compare')}
             >
+              {renderEdgeScrollIndicator('compare')}
               <div className="compare-zoom-sticky">
                 <CompareZoomOverlay
                   value={postZoomRight}
@@ -436,10 +710,21 @@ DocumentViewerRender.propTypes = {
   }).isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  primaryVisiblePageNumber: PropTypes.number.isRequired,
+  compareVisiblePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  totalVisiblePages: PropTypes.number.isRequired,
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
   zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
   onToggleFitZoomMode: PropTypes.func,
+  edgeScrollPageTurnConfig: PropTypes.shape({
+    enabled: PropTypes.bool.isRequired,
+    thresholdPx: PropTypes.number.isRequired,
+    quietMs: PropTypes.number.isRequired,
+    decayMs: PropTypes.number.isRequired,
+  }),
+  onEdgeScrollPreviousPage: PropTypes.func,
+  onEdgeScrollNextPage: PropTypes.func,
   postZoomLeft: PropTypes.number.isRequired,
   postZoomRight: PropTypes.number.isRequired,
   bumpPostZoomLeft: PropTypes.func.isRequired,

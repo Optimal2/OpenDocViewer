@@ -107,6 +107,14 @@
       // Initial zoom mode when the first page opens.
       // Supported values: "fit-page" (default), "fit-width", "actual-size".
       defaultZoomMode: 'fit-page',
+      // Optional page turn gesture at the top/bottom scroll edge. When enabled, continued wheel
+      // scrolling at the edge fills a small progress indicator before changing page.
+      edgeScrollPageTurn: {
+        enabled: false,
+        thresholdPx: 720,
+        quietMs: 140,
+        decayMs: 650
+      },
       problemNotice: {
         // Viewer-level support notice for serious load failures, for example when host-provided
         // document URLs expire and many pages start showing the failed-page placeholder.
