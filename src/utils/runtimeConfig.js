@@ -110,7 +110,7 @@ function normalizeResetSessionTarget(value, fallback) {
   return 'parent-or-current';
 }
 
-function normalizeDefaultZoomMode(value, fallback = 'fit-page') {
+function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
   const raw = String(value || fallback || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
   if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
   if (raw === 'actual-size' || raw === 'actualsize' || raw === 'actual' || raw === '100%' || raw === '1:1') {
@@ -132,7 +132,7 @@ function normalizeDefaultZoomMode(value, fallback = 'fit-page') {
  * @returns {ViewerDefaultZoomMode}
  */
 export function getViewerDefaultZoomMode(cfg = getRuntimeConfig()) {
-  return normalizeDefaultZoomMode(cfg?.viewer?.defaultZoomMode, 'fit-page');
+  return normalizeDefaultZoomMode(cfg?.viewer?.defaultZoomMode, 'fit-width');
 }
 
 /**
@@ -149,7 +149,7 @@ export function getViewerEdgeScrollPageTurnConfig(cfg = getRuntimeConfig()) {
   const rawValue = cfg?.viewer?.edgeScrollPageTurn ?? cfg?.edgeScrollPageTurn ?? {};
   const raw = typeof rawValue === 'boolean' ? { enabled: rawValue } : (rawValue || {});
   return {
-    enabled: normalizeBoolean(raw.enabled, false),
+    enabled: normalizeBoolean(raw.enabled, true),
     thresholdPx: normalizeInteger(raw.thresholdPx, 720, 120, 5000),
     quietMs: normalizeInteger(raw.quietMs, 140, 0, 2000),
     decayMs: normalizeInteger(raw.decayMs, 650, 100, 5000),
