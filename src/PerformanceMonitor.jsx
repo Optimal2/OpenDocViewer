@@ -586,6 +586,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         </span>
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           PDF <strong>{String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')}</strong>
+          <span style={{ opacity: 0.75 }}>
+            {' '}max {Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}
+          </span>
         </span>
       </div>
 

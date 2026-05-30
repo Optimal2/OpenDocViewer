@@ -81,6 +81,7 @@ const PageNavigationButtons = ({
   const SUPPRESS_CLICK_WINDOW_MS = 400;
   const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
   const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
+  const activePointerIdRef = useRef(/** @type {(number|null)} */ (null));
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const hasPages = Math.max(0, Number(totalPagesDisplay) || 0) > 0;
@@ -114,6 +115,7 @@ const PageNavigationButtons = ({
       markSuppressedClick(activeKey);
     }
     activeRepeatButtonRef.current = null;
+    activePointerIdRef.current = null;
   }, [markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
 
   useEffect(() => {
@@ -121,12 +123,16 @@ const PageNavigationButtons = ({
       stopAllRepeatNavigation();
     };
 
+    window.addEventListener('pointerup', handleRelease, { passive: true });
+    window.addEventListener('pointercancel', handleRelease, { passive: true });
     window.addEventListener('mouseup', handleRelease, { passive: true });
     window.addEventListener('touchend', handleRelease, { passive: true });
     window.addEventListener('touchcancel', handleRelease, { passive: true });
     window.addEventListener('blur', handleRelease, { passive: true });
 
     return () => {
+      window.removeEventListener('pointerup', handleRelease);
+      window.removeEventListener('pointercancel', handleRelease);
       window.removeEventListener('mouseup', handleRelease);
       window.removeEventListener('touchend', handleRelease);
       window.removeEventListener('touchcancel', handleRelease);
@@ -160,6 +166,8 @@ const PageNavigationButtons = ({
     if (prevPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
+    event?.currentTarget?.setPointerCapture?.(event.pointerId);
+    activePointerIdRef.current = Number.isFinite(event?.pointerId) ? event.pointerId : null;
     activeRepeatButtonRef.current = 'prev';
     markSuppressedClick('prev');
     startPrevPageTimer('prev', event);
@@ -173,6 +181,8 @@ const PageNavigationButtons = ({
     if (nextPageDisabled) return;
     if (typeof event?.button === 'number' && event.button !== 0) return;
     event?.preventDefault?.();
+    event?.currentTarget?.setPointerCapture?.(event.pointerId);
+    activePointerIdRef.current = Number.isFinite(event?.pointerId) ? event.pointerId : null;
     activeRepeatButtonRef.current = 'next';
     markSuppressedClick('next');
     startNextPageTimer('next', event);
@@ -262,11 +272,10 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'prev', handlePrevPage)}
-        onMouseDown={beginPrevRepeat}
-        onMouseUp={stopAllRepeatNavigation}
-        onMouseLeave={stopAllRepeatNavigation}
-        onTouchStart={beginPrevRepeat}
-        onTouchEnd={stopAllRepeatNavigation}
+        onPointerDown={beginPrevRepeat}
+        onPointerUp={stopAllRepeatNavigation}
+        onPointerCancel={stopAllRepeatNavigation}
+        onLostPointerCapture={stopAllRepeatNavigation}
         aria-label={resolvedPreviousButtonTitle}
         title={resolvedPreviousButtonTitle}
         className="odv-btn"
@@ -317,11 +326,10 @@ const PageNavigationButtons = ({
       <button
         type="button"
         onClick={(event) => handleSingleStepClick(event, 'next', handleNextPage)}
-        onMouseDown={beginNextRepeat}
-        onMouseUp={stopAllRepeatNavigation}
-        onMouseLeave={stopAllRepeatNavigation}
-        onTouchStart={beginNextRepeat}
-        onTouchEnd={stopAllRepeatNavigation}
+        onPointerDown={beginNextRepeat}
+        onPointerUp={stopAllRepeatNavigation}
+        onPointerCancel={stopAllRepeatNavigation}
+        onLostPointerCapture={stopAllRepeatNavigation}
         aria-label={resolvedNextButtonTitle}
         title={resolvedNextButtonTitle}
         className="odv-btn"

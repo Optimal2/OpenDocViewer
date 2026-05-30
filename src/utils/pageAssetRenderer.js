@@ -257,6 +257,8 @@ export class PageAssetRenderer {
 
     const workerCount = Math.max(0, Number(this.config.workerCount) || 0);
     if (workerCount <= 0) return;
+    const pdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
+    const pdfWorkerCount = Math.max(1, Math.min(workerCount, pdfWorkerMaxCount));
 
     const useForTiff = this.config.useWorkersForTiff !== false;
     const useForRasterImages = this.config.useWorkersForRasterImages !== false;
@@ -272,7 +274,7 @@ export class PageAssetRenderer {
     if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() === 'worker') {
       this.pdfWorkerPool = createPdfPageWorkerPool({
         enabled: true,
-        workerCount,
+        workerCount: pdfWorkerCount,
         taskTimeoutMs: this.config.pdfWorkerTaskTimeoutMs,
       });
     }
@@ -284,6 +286,7 @@ export class PageAssetRenderer {
     const previousUseForTiff = this.config.useWorkersForTiff !== false;
     const previousUseForRasterImages = this.config.useWorkersForRasterImages !== false;
     const previousPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
+    const previousPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
     this.config = {
       ...this.config,
       ...(nextConfig || {}),
@@ -293,11 +296,13 @@ export class PageAssetRenderer {
     const nextUseForTiff = this.config.useWorkersForTiff !== false;
     const nextUseForRasterImages = this.config.useWorkersForRasterImages !== false;
     const nextPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
+    const nextPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
     const shouldRebuild = previousBackend !== nextBackend
       || previousWorkerCount !== nextWorkerCount
       || previousUseForTiff !== nextUseForTiff
       || previousUseForRasterImages !== nextUseForRasterImages
-      || previousPdfToImageMode !== nextPdfToImageMode;
+      || previousPdfToImageMode !== nextPdfToImageMode
+      || previousPdfWorkerMaxCount !== nextPdfWorkerMaxCount;
     if (shouldRebuild) this.rebuildWorkerPool();
   }
 
