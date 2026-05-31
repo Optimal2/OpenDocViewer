@@ -16,7 +16,16 @@ const DEFAULT_THUMBNAIL_WIDTH = 220;
 const DEFAULT_THUMBNAIL_HEIGHT = 310;
 const PDFJS_PAGE_WORKER_VERBOSITY = pdfjsLib?.VerbosityLevel?.ERRORS ?? 0;
 
-/** @type {Map<string, { loadingTask:any, promise:Promise<any>, dispose:function():Promise<void> }>} */
+/**
+ * @typedef {Object} PdfCacheEntry
+ * @property {*} loadingTask
+ * @property {Promise<*>} promise
+ * @property {number} activeCount
+ * @property {boolean} evicted
+ * @property {(Promise<void>|null)} disposePromise
+ */
+
+/** @type {Map<string, PdfCacheEntry>} */
 const pdfCache = new Map();
 
 try {
@@ -89,21 +98,49 @@ function normalizeThumbnailBound(value, fallback) {
   return Math.max(MIN_THUMBNAIL_DIMENSION, resolvedValue);
 }
 
-function setLru(map, key, value, limit) {
+function requestPdfEntryDisposal(entry) {
+  if (!entry) return Promise.resolve();
+  entry.evicted = true;
+  if (entry.activeCount > 0) return Promise.resolve();
+  if (!entry.disposePromise) {
+    entry.disposePromise = (async () => {
+      try {
+        const doc = await entry.promise;
+        await doc?.destroy?.();
+      } catch {}
+      try { await entry.loadingTask?.destroy?.(); } catch {}
+    })();
+  }
+  return entry.disposePromise;
+}
+
+function releasePdfEntry(entry) {
+  if (!entry) return;
+  entry.activeCount = Math.max(0, Number(entry.activeCount || 0) - 1);
+  if (entry.evicted && entry.activeCount <= 0) {
+    void requestPdfEntryDisposal(entry);
+  }
+}
+
+async function setLru(map, key, value, limit) {
   map.delete(key);
   map.set(key, value);
+  const disposals = [];
   while (map.size > Math.max(1, Number(limit) || 1)) {
     const oldestKey = map.keys().next().value;
     const oldest = map.get(oldestKey);
     map.delete(oldestKey);
-    try { void oldest?.dispose?.(); } catch {}
+    disposals.push(requestPdfEntryDisposal(oldest));
+  }
+  if (disposals.length > 0) {
+    await Promise.allSettled(disposals);
   }
 }
 
-function touchLru(map, key, limit) {
+async function touchLru(map, key, limit) {
   if (!map.has(key)) return;
   const value = map.get(key);
-  setLru(map, key, value, limit);
+  await setLru(map, key, value, limit);
 }
 
 function createLocalCanvas(width, height) {
@@ -126,7 +163,7 @@ async function canvasToBlob(canvas) {
   return canvas.convertToBlob({ type: 'image/png' });
 }
 
-async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
+async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
   const key = String(sourceKey || '').trim();
   if (!key) {
     throw createFallbackMainThreadError(
@@ -140,19 +177,18 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
     const entry = {
       loadingTask: null,
       promise: null,
-      async dispose() {
-        try {
-          const doc = await entry.promise;
-          await doc?.destroy?.();
-        } catch {}
-        try { await entry.loadingTask?.destroy?.(); } catch {}
-      },
+      activeCount: 0,
+      evicted: false,
+      disposePromise: null,
     };
 
     entry.promise = (async () => {
       const buffer = await sourceBlob.arrayBuffer();
+      // Blob.arrayBuffer() gives this worker a fresh buffer. pdf.js may transfer it internally,
+      // so keep the payload worker-owned and do not share caller-owned ArrayBuffer references.
+      const data = new Uint8Array(buffer);
       const loadingTask = pdfjsLib.getDocument({
-        data: buffer,
+        data,
         // pdf.js runs inside ODV's own page-image worker here. If pdf.js cannot start a nested
         // worker it uses its in-thread loopback path, which is expected in this environment.
         verbosity: PDFJS_PAGE_WORKER_VERBOSITY,
@@ -169,11 +205,31 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
       throw error;
     });
 
-    setLru(pdfCache, key, entry, maxOpenPdfDocuments);
+    await setLru(pdfCache, key, entry, maxOpenPdfDocuments);
   }
 
-  touchLru(pdfCache, key, maxOpenPdfDocuments);
-  return pdfCache.get(key).promise;
+  await touchLru(pdfCache, key, maxOpenPdfDocuments);
+  return pdfCache.get(key);
+}
+
+async function acquirePdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
+  const entry = await getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments);
+  entry.activeCount += 1;
+  try {
+    const pdf = await entry.promise;
+    let released = false;
+    return {
+      pdf,
+      release() {
+        if (released) return;
+        released = true;
+        releasePdfEntry(entry);
+      },
+    };
+  } catch (error) {
+    releasePdfEntry(entry);
+    throw error;
+  }
 }
 
 async function renderPdfPageAsset(payload) {
@@ -186,11 +242,13 @@ async function renderPdfPageAsset(payload) {
   }
   const variant = String(payload?.variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full';
   const maxOpenPdfDocuments = Math.max(1, Number(payload?.maxOpenPdfDocuments) || 1);
-  const pdf = await getPdfDocument(payload.sourceBlob, payload.sourceKey, maxOpenPdfDocuments);
+  const pdfLease = await acquirePdfDocument(payload.sourceBlob, payload.sourceKey, maxOpenPdfDocuments);
+  const pdf = pdfLease.pdf;
   const pageNumber = Math.max(1, Math.floor(Number(payload?.pageIndex) || 0) + 1);
-  const page = await pdf.getPage(pageNumber);
+  let page = null;
 
   try {
+    page = await pdf.getPage(pageNumber);
     const baseViewport = page.getViewport({ scale: 1 });
     const targetScale = variant === 'thumbnail'
       ? fitScale(
@@ -229,7 +287,8 @@ async function renderPdfPageAsset(payload) {
       mimeType: blob.type || 'image/png',
     };
   } finally {
-    try { page.cleanup(); } catch {}
+    try { page?.cleanup?.(); } catch {}
+    pdfLease.release();
   }
 }
 
