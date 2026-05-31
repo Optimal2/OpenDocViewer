@@ -78,6 +78,7 @@ export class PdfPageWorkerPool {
     this.disposed = false;
     this.lastWorkerError = null;
     this.workerCreationErrors = [];
+    this.pumpTimer = 0;
 
     for (let i = 0; i < this.workerCount; i += 1) {
       try {
@@ -132,6 +133,7 @@ export class PdfPageWorkerPool {
   }
 
   pump() {
+    this.pumpTimer = 0;
     if (this.disposed) return;
     if (this.queue.length > 0 && this.getWorkerCount() <= 0) {
       this.rejectQueuedWithFallback('No compatible PDF page worker is available');
@@ -185,6 +187,14 @@ export class PdfPageWorkerPool {
     }
   }
 
+  schedulePump() {
+    if (this.disposed || this.pumpTimer) return;
+    this.pumpTimer = globalThis.setTimeout?.(() => {
+      this.pumpTimer = 0;
+      this.pump();
+    }, 0) || 0;
+  }
+
   clearPendingTimeout(taskId) {
     const pending = this.pending.get(taskId);
     if (pending?.timeoutId) {
@@ -226,7 +236,7 @@ export class PdfPageWorkerPool {
     const error = attachErrorDetails(new Error('PDF page worker timed out'), details);
     pending.reject(error);
     if (this.workerCount <= 0) this.rejectQueuedWithFallback('No compatible PDF page worker is available');
-    this.pump();
+    this.schedulePump();
   }
 
   handleMessage(slot, event) {
@@ -272,7 +282,7 @@ export class PdfPageWorkerPool {
       pending.reject(error);
     }
 
-    this.pump();
+    this.schedulePump();
   }
 
   handleError(slot, errorLike) {
@@ -310,7 +320,7 @@ export class PdfPageWorkerPool {
       remainingWorkers: this.workerCount,
       error: String(errorLike?.message || errorLike || 'unknown'),
     });
-    this.pump();
+    this.schedulePump();
   }
 
   async dispose() {
@@ -330,6 +340,10 @@ export class PdfPageWorkerPool {
     }
     this.pending.clear();
     this.rejectQueuedWithFallback('PDF page worker pool disposed');
+    if (this.pumpTimer) {
+      try { globalThis.clearTimeout?.(this.pumpTimer); } catch {}
+      this.pumpTimer = 0;
+    }
 
     for (const entry of this.workers) {
       if (!entry?.worker) continue;

@@ -135,6 +135,7 @@ function getPdfProgressPercent(progress) {
  * @property {number} totalPages
  * @property {number} totalPagesDisplay
  * @property {boolean} isDocumentLoading
+ * @property {Object=} pageLoadState
  * @property {boolean} prevPageDisabled
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
@@ -246,6 +247,7 @@ const DocumentToolbar = ({
   totalPages,
   totalPagesDisplay = totalPages,
   isDocumentLoading = false,
+  pageLoadState = null,
   prevPageDisabled,
   nextPageDisabled,
   firstPageDisabled,
@@ -1312,6 +1314,7 @@ const DocumentToolbar = ({
         lastButtonTitle={navigationButtonTitles.last}
         onGoToPage={handleGoToPageInput}
         isDocumentLoading={isDocumentLoading}
+        pageLoadState={pageLoadState}
       />
 
       <div className="separator" />
@@ -1713,6 +1716,7 @@ DocumentToolbar.propTypes = {
   totalPages: PropTypes.number.isRequired,
   totalPagesDisplay: PropTypes.number,
   isDocumentLoading: PropTypes.bool,
+  pageLoadState: PropTypes.object,
   prevPageDisabled: PropTypes.bool.isRequired,
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,

@@ -63,6 +63,8 @@
       "groupDescription": "{scope} for {target}.",
       "loadingAnnounce": "Page navigation is still loading pages.",
       "readyAnnounce": "Page navigation is ready.",
+      "loadProgressShort": "{completed}/{total} done",
+      "loadProgressTitle": "Loading pages: {ready} ready, {failed} failed, {pending} remaining of {total}.",
       "noPagesTitle": "No visible pages available",
       "noPagesAnnounce": "No visible pages are currently available."
     },

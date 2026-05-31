@@ -44,6 +44,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {number} totalPages - Total visible pages.
  * @property {number} totalPagesDisplay - Total original session pages.
  * @property {boolean} isDocumentLoading
+ * @property {Object=} pageLoadState
  * @property {PageNumberSetter} setPageNumber
  * @property {PageNumberSetter} setVisiblePageNumber
  * @property {PageNumberSetter} setComparePageNumber
@@ -115,6 +116,7 @@ const DocumentViewerToolbar = ({
   totalPages,
   totalPagesDisplay,
   isDocumentLoading,
+  pageLoadState,
   setPageNumber,
   setVisiblePageNumber,
   setComparePageNumber,
@@ -181,6 +183,7 @@ const DocumentViewerToolbar = ({
       totalPages={totalPages}
       totalPagesDisplay={totalPagesDisplay}
       isDocumentLoading={isDocumentLoading}
+      pageLoadState={pageLoadState}
       setPageNumber={setPageNumber}
       setVisiblePageNumber={setVisiblePageNumber}
       setComparePageNumber={setComparePageNumber}
@@ -249,6 +252,7 @@ DocumentViewerToolbar.propTypes = {
   totalPages: PropTypes.number.isRequired,
   totalPagesDisplay: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool.isRequired,
+  pageLoadState: PropTypes.object,
   setPageNumber: PropTypes.func.isRequired,
   setVisiblePageNumber: PropTypes.func.isRequired,
   setComparePageNumber: PropTypes.func.isRequired,
