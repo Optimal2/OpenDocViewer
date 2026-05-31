@@ -13,10 +13,6 @@
  * @param {boolean} props.nextPageDisabled
  * @param {boolean} props.firstPageDisabled
  * @param {boolean} props.lastPageDisabled
- * @param {function(string, *=):void} props.startPrevPageTimer
- * @param {function():void} props.stopPrevPageTimer
- * @param {function(string, *=):void} props.startNextPageTimer
- * @param {function():void} props.stopNextPageTimer
  * @param {function(*=):void} props.handleFirstPage
  * @param {function(*=):void} props.handleLastPage
  * @param {function(*=):void} props.handlePrevPage
@@ -48,15 +44,78 @@ function clampPage(n, total) {
   return Math.max(1, Math.min(safeTotal, value));
 }
 
+const REPEAT_INITIAL_DELAY_MS = 300;
+const REPEAT_INTERVAL_MS = 50;
+
+// Keep the hold-repeat timer outside React component lifetime because page changes can re-render
+// or replace toolbar controls while the pointer is still held down.
+const pageRepeatState = {
+  key: null,
+  delayTimer: null,
+  intervalTimer: null,
+  releaseListenersAttached: false,
+};
+
+function clearToolbarPageRepeatTimers() {
+  if (pageRepeatState.delayTimer != null) {
+    window.clearTimeout(pageRepeatState.delayTimer);
+    pageRepeatState.delayTimer = null;
+  }
+  if (pageRepeatState.intervalTimer != null) {
+    window.clearInterval(pageRepeatState.intervalTimer);
+    pageRepeatState.intervalTimer = null;
+  }
+}
+
+function stopToolbarPageRepeat() {
+  clearToolbarPageRepeatTimers();
+  pageRepeatState.key = null;
+}
+
+function ensureToolbarPageRepeatReleaseListeners() {
+  if (pageRepeatState.releaseListenersAttached || typeof window === 'undefined') return;
+  pageRepeatState.releaseListenersAttached = true;
+  const stop = () => stopToolbarPageRepeat();
+  window.addEventListener('pointerup', stop, { passive: true });
+  window.addEventListener('mouseup', stop, { passive: true });
+  window.addEventListener('touchend', stop, { passive: true });
+  window.addEventListener('touchcancel', stop, { passive: true });
+  window.addEventListener('blur', stop, { passive: true });
+}
+
+function createRepeatEventSnapshot(event) {
+  return {
+    shiftKey: !!event?.shiftKey,
+    ctrlKey: !!event?.ctrlKey,
+    altKey: !!event?.altKey,
+    metaKey: !!event?.metaKey,
+    preventDefault() {},
+    stopPropagation() {},
+  };
+}
+
+function startToolbarPageRepeat(key, event, handler) {
+  ensureToolbarPageRepeatReleaseListeners();
+  stopToolbarPageRepeat();
+
+  const eventSnapshot = createRepeatEventSnapshot(event);
+  pageRepeatState.key = key;
+  handler?.(eventSnapshot);
+
+  pageRepeatState.delayTimer = window.setTimeout(() => {
+    pageRepeatState.delayTimer = null;
+    pageRepeatState.intervalTimer = window.setInterval(() => {
+      if (pageRepeatState.key !== key) return;
+      handler?.(eventSnapshot);
+    }, REPEAT_INTERVAL_MS);
+  }, REPEAT_INITIAL_DELAY_MS);
+}
+
 const PageNavigationButtons = ({
   prevPageDisabled,
   nextPageDisabled,
   firstPageDisabled,
   lastPageDisabled,
-  startPrevPageTimer,
-  stopPrevPageTimer,
-  startNextPageTimer,
-  stopNextPageTimer,
   handleFirstPage,
   handleLastPage,
   handlePrevPage,
@@ -109,35 +168,14 @@ const PageNavigationButtons = ({
    * @returns {void}
    */
   const stopAllRepeatNavigation = useCallback(() => {
-    stopPrevPageTimer();
-    stopNextPageTimer();
+    stopToolbarPageRepeat();
     const activeKey = activeRepeatButtonRef.current;
     if (activeKey === 'prev' || activeKey === 'next') {
       markSuppressedClick(activeKey);
     }
     activeRepeatButtonRef.current = null;
     repeatStartStateRef.current = { key: null, until: 0 };
-  }, [markSuppressedClick, stopNextPageTimer, stopPrevPageTimer]);
-
-  useEffect(() => {
-    const handleRelease = () => {
-      stopAllRepeatNavigation();
-    };
-
-    window.addEventListener('pointerup', handleRelease, { passive: true });
-    window.addEventListener('mouseup', handleRelease, { passive: true });
-    window.addEventListener('touchend', handleRelease, { passive: true });
-    window.addEventListener('touchcancel', handleRelease, { passive: true });
-    window.addEventListener('blur', handleRelease, { passive: true });
-
-    return () => {
-      window.removeEventListener('pointerup', handleRelease);
-      window.removeEventListener('mouseup', handleRelease);
-      window.removeEventListener('touchend', handleRelease);
-      window.removeEventListener('touchcancel', handleRelease);
-      window.removeEventListener('blur', handleRelease);
-    };
-  }, [stopAllRepeatNavigation]);
+  }, [markSuppressedClick]);
 
   const applyDraft = useCallback(() => {
     if (!hasPages) {
@@ -188,8 +226,8 @@ const PageNavigationButtons = ({
     event?.preventDefault?.();
     activeRepeatButtonRef.current = 'prev';
     markSuppressedClick('prev');
-    startPrevPageTimer('prev', event);
-  }, [markSuppressedClick, prevPageDisabled, shouldIgnoreDuplicateRepeatStart, startPrevPageTimer]);
+    startToolbarPageRepeat('prev', event, handlePrevPage);
+  }, [handlePrevPage, markSuppressedClick, prevPageDisabled, shouldIgnoreDuplicateRepeatStart]);
 
   /**
    * @param {*} event
@@ -202,8 +240,8 @@ const PageNavigationButtons = ({
     event?.preventDefault?.();
     activeRepeatButtonRef.current = 'next';
     markSuppressedClick('next');
-    startNextPageTimer('next', event);
-  }, [markSuppressedClick, nextPageDisabled, shouldIgnoreDuplicateRepeatStart, startNextPageTimer]);
+    startToolbarPageRepeat('next', event, handleNextPage);
+  }, [handleNextPage, markSuppressedClick, nextPageDisabled, shouldIgnoreDuplicateRepeatStart]);
 
   /**
    * @param {*} event
@@ -377,10 +415,6 @@ PageNavigationButtons.propTypes = {
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
-  stopPrevPageTimer: PropTypes.func.isRequired,
-  startPrevPageTimer: PropTypes.func.isRequired,
-  stopNextPageTimer: PropTypes.func.isRequired,
-  startNextPageTimer: PropTypes.func.isRequired,
   handleFirstPage: PropTypes.func.isRequired,
   handleLastPage: PropTypes.func.isRequired,
   handlePrevPage: PropTypes.func.isRequired,
