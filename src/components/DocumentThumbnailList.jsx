@@ -515,7 +515,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {function(number): void} props.setPageNumber - Accepts an original 1-based page number.
  * @param {{ current:(HTMLElement|null) }} props.thumbnailsContainerRef
  * @param {number} props.width
- * @param {function(number): void} [props.selectForCompare]
+ * @param {function(number, Object=): void} [props.selectForCompare]
  * @param {boolean=} props.isComparing
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
  * @param {'primary'|'compare'=} props.activePane
@@ -544,9 +544,10 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
 }) {
   const { t } = useTranslation('common');
   const isShiftPressed = !!navigationModifierState.shift;
+  const canSelectForCompare = typeof selectForCompare === 'function';
   const comparePaneVisible = !!isComparing
     && Number.isFinite(Number(comparePageNumber))
-    && typeof selectForCompare === 'function';
+    && canSelectForCompare;
   const {
     bundle,
     ensurePageAsset,
@@ -913,12 +914,12 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   }, []);
 
   const resolveActivationTarget = useCallback((event) => {
-    if (!comparePaneVisible) return 'primary';
     const shift = typeof event?.shiftKey === 'boolean' ? !!event.shiftKey : isShiftPressed;
-    const basePane = activePane === 'compare' ? 'compare' : 'primary';
+    const basePane = comparePaneVisible && activePane === 'compare' ? 'compare' : 'primary';
     if (!shift) return basePane;
+    if (!canSelectForCompare) return 'primary';
     return basePane === 'compare' ? 'primary' : 'compare';
-  }, [activePane, comparePaneVisible, isShiftPressed]);
+  }, [activePane, canSelectForCompare, comparePaneVisible, isShiftPressed]);
 
   useEffect(() => {
     if (!contextMenuState) return undefined;
@@ -1046,9 +1047,10 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     try {
       const activationTarget = resolveActivationTarget(event);
       if (activationTarget === 'compare' && typeof selectForCompare === 'function') {
-        event.preventDefault?.();
-        event.stopPropagation?.();
-        selectForCompare(nextPageNumber);
+        event?.preventDefault?.();
+        event?.stopPropagation?.();
+        // Thumbnail activation is a temporary target choice; it must not move the persistent pane selector.
+        selectForCompare(nextPageNumber, { preserveActivePane: true });
         logger.info('Thumbnail activated for compare pane', { pageNumber: nextPageNumber });
         return;
       }

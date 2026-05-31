@@ -19,7 +19,7 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {Object} props.thumbnailsContainerRef
  * @param {number} props.width
  * @param {number} props.sessionTotalPages
- * @param {function(number): void} [props.selectForCompare]
+ * @param {function(number, Object=): void} [props.selectForCompare]
  * @param {boolean} [props.isComparing]
  * @param {(number|null)} [props.comparePageNumber]
  * @param {'primary'|'compare'} [props.activePane]
