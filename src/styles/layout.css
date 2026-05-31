@@ -314,9 +314,14 @@ canvas {
   color: currentColor;
 }
 .compare-zoom-overlay .odv-btn:hover,
-.compare-zoom-overlay .odv-btn:focus {
+.compare-zoom-overlay .odv-btn:focus-visible {
   background: rgba(255, 255, 255, 0.2);
   outline: none;
+}
+.compare-zoom-overlay .odv-btn:focus-visible {
+  box-shadow:
+    0 0 0 2px color-mix(in srgb, var(--focus-shadow) 70%, transparent 30%),
+    0 1px 2px rgba(0, 0, 0, 0.35);
 }
 .compare-zoom-overlay .odv-btn:disabled { opacity: 0.5; cursor: default; }
 [data-theme='dark'] .compare-zoom-overlay .odv-btn {
@@ -425,9 +430,9 @@ canvas {
 }
 
 .thumbnail-pane-toolbar-button:hover,
-.thumbnail-pane-toolbar-button:focus,
+.thumbnail-pane-toolbar-button:focus-visible,
 .thumbnail-pane-collapsed-toggle:hover,
-.thumbnail-pane-collapsed-toggle:focus {
+.thumbnail-pane-collapsed-toggle:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-primary-color) 60%, transparent 40%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 22%, transparent 78%);
@@ -490,7 +495,7 @@ canvas {
 }
 
 .thumbnail-pane-mode-button:hover,
-.thumbnail-pane-mode-button:focus {
+.thumbnail-pane-mode-button:focus-visible {
   outline: none;
   background: color-mix(in srgb, var(--thumbnail-primary-color) 10%, transparent 90%);
 }
@@ -536,7 +541,7 @@ canvas {
 }
 
 .thumbnail-pane-mode-inline-tool:hover,
-.thumbnail-pane-mode-inline-tool:focus {
+.thumbnail-pane-mode-inline-tool:focus-visible {
   outline: none;
   background: color-mix(in srgb, #b91c1c 12%, transparent 88%);
   box-shadow: 0 0 0 2px color-mix(in srgb, #b91c1c 18%, transparent 82%);
@@ -629,7 +634,7 @@ canvas {
 }
 
 .thumbnail-wrapper:hover,
-.thumbnail-wrapper:focus {
+.thumbnail-wrapper:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-border-color) 42%, var(--primary-color) 58%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--focus-shadow) 55%, transparent 45%);
@@ -953,7 +958,7 @@ canvas {
 }
 
 .viewer-empty-state-button:hover,
-.viewer-empty-state-button:focus {
+.viewer-empty-state-button:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-primary-color) 58%, transparent 42%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 16%, transparent 84%);
@@ -1037,7 +1042,7 @@ canvas {
 }
 
 .viewer-problem-notice-button:hover,
-.viewer-problem-notice-button:focus {
+.viewer-problem-notice-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px rgba(180, 83, 9, 0.22);
 }
@@ -1126,7 +1131,7 @@ canvas {
 }
 
 .thumbnail-selection-toggle:hover,
-.thumbnail-selection-toggle:focus {
+.thumbnail-selection-toggle:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-primary-color) 60%, transparent 40%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 18%, transparent 82%);
@@ -1218,7 +1223,7 @@ canvas {
 }
 
 .odv-context-menu-item:hover,
-.odv-context-menu-item:focus {
+.odv-context-menu-item:focus-visible {
   outline: none;
   background: color-mix(in srgb, var(--thumbnail-primary-color) 10%, transparent 90%);
 }
@@ -1260,7 +1265,7 @@ canvas {
 }
 
 .thumbnail-selection-button:hover,
-.thumbnail-selection-button:focus {
+.thumbnail-selection-button:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-primary-color) 60%, transparent 40%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 18%, transparent 82%);
@@ -1296,7 +1301,7 @@ canvas {
   text-align: center;
   font-size: 1.2rem;
   color: var(--primary-color);
-  background: rgba(255, 255, 255, 0.7);
+  background: color-mix(in srgb, var(--canvas-background-color) 72%, transparent 28%);
   padding: 5px 10px;
   border-radius: 4px;
 }
@@ -1407,7 +1412,7 @@ canvas {
 }
 
 .thumbnail-selection-inline-action:hover,
-.thumbnail-selection-inline-action:focus {
+.thumbnail-selection-inline-action:focus-visible {
   outline: none;
   border-color: color-mix(in srgb, var(--thumbnail-primary-color) 58%, transparent 42%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--thumbnail-primary-color) 16%, transparent 84%);

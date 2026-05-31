@@ -80,7 +80,7 @@ function fitScale(width, height, maxWidth, maxHeight) {
   const safeHeight = Math.max(1, Number(height) || 1);
   const safeMaxWidth = Math.max(1, Number(maxWidth) || safeWidth);
   const safeMaxHeight = Math.max(1, Number(maxHeight) || safeHeight);
-  return Math.min(1, safeMaxWidth / safeWidth, safeMaxHeight / safeHeight);
+  return Math.min(safeMaxWidth / safeWidth, safeMaxHeight / safeHeight);
 }
 
 function normalizeThumbnailBound(value, fallback) {
@@ -137,29 +137,38 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
   }
 
   if (!pdfCache.has(key)) {
-    const buffer = await sourceBlob.arrayBuffer();
-    const loadingTask = pdfjsLib.getDocument({
-      data: buffer,
-      // pdf.js runs inside ODV's own page-image worker here. If pdf.js cannot start a nested
-      // worker it uses its in-thread loopback path, which is expected in this environment.
-      verbosity: PDFJS_PAGE_WORKER_VERBOSITY,
-      // A dedicated worker rendering into OffscreenCanvas cannot rely on the browser FontFace
-      // path in the same way the main thread can. Let pdf.js draw embedded glyphs directly so
-      // text keeps its real shape instead of degrading to missing-font boxes.
-      disableFontFace: true,
-      useSystemFonts: false,
-    });
     const entry = {
-      loadingTask,
-      promise: loadingTask.promise,
+      loadingTask: null,
+      promise: null,
       async dispose() {
         try {
-          const doc = await loadingTask.promise;
+          const doc = await entry.promise;
           await doc?.destroy?.();
         } catch {}
-        try { await loadingTask.destroy?.(); } catch {}
+        try { await entry.loadingTask?.destroy?.(); } catch {}
       },
     };
+
+    entry.promise = (async () => {
+      const buffer = await sourceBlob.arrayBuffer();
+      const loadingTask = pdfjsLib.getDocument({
+        data: buffer,
+        // pdf.js runs inside ODV's own page-image worker here. If pdf.js cannot start a nested
+        // worker it uses its in-thread loopback path, which is expected in this environment.
+        verbosity: PDFJS_PAGE_WORKER_VERBOSITY,
+        // A dedicated worker rendering into OffscreenCanvas cannot rely on the browser FontFace
+        // path in the same way the main thread can. Let pdf.js draw embedded glyphs directly so
+        // text keeps its real shape instead of degrading to missing-font boxes.
+        disableFontFace: true,
+        useSystemFonts: false,
+      });
+      entry.loadingTask = loadingTask;
+      return loadingTask.promise;
+    })().catch((error) => {
+      if (pdfCache.get(key) === entry) pdfCache.delete(key);
+      throw error;
+    });
+
     setLru(pdfCache, key, entry, maxOpenPdfDocuments);
   }
 
