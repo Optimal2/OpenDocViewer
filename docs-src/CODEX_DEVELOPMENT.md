@@ -91,6 +91,25 @@ source documentation, and `SECURITY.md` release-context updates first. The worki
 clean and the local branch must match `origin/<branch>` before the helper creates the npm version
 commit and Git tag.
 
+For AI-operated official releases:
+
+1. Confirm that the user requested an official OpenDocViewer release. If they only ask for a
+   local OMP test artifact, do not run `release.ps1`.
+2. Inspect `package.json`, `SECURITY.md`, `release.ps1`, `.github/workflows/release.yml`, and
+   the current Git status before making release-prep edits.
+3. Update `SECURITY.md` for the version that `release.ps1` is about to create. Do not manually
+   bump `package.json` or `package-lock.json`.
+4. Run `npm run lint`, `npm run build`, `npm run doc`, and `git diff --check`.
+5. Commit and push the release-prep changes.
+6. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes` from a clean branch that matches
+   `origin/<branch>`.
+7. Verify the pushed release commit, the local and remote `vX.Y.Z` tag, and the GitHub Actions
+   release workflow.
+
+Official OpenDocViewer releases and OMP artifact-only component builds are versioned separately.
+Do not force `omp-components.json` to match `package.json` unless the requested release explicitly
+includes a component-manifest update.
+
 ## Integration Notes
 
 The canonical host contract is Portable Document Bundle v1. For future IbsPackager manual-review integration:

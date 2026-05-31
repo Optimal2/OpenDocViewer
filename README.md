@@ -225,6 +225,23 @@ The pushed tag triggers `.github/workflows/release.yml`, which builds the produc
 
 Use GitHub Desktop for review if you want, but do not rely on the release helper to include pending source changes. The helper is release-only; the pre-release source commit must already be on the branch.
 
+### AI-agent release checklist
+
+When an AI agent handles a release end to end, use this order:
+
+1. Confirm that the request is for an official OpenDocViewer release, not only an OMP artifact build for local or customer testing.
+2. Inspect `package.json`, `SECURITY.md`, `release.ps1`, `.github/workflows/release.yml`, and `git status --short` before editing.
+3. Determine the next official version from the current `package.json` version and the requested release type. Do not manually edit `package.json` or `package-lock.json`; `release.ps1` owns that version commit and tag.
+4. Update `SECURITY.md` so `Supported Versions` and `Recent release context` already name the version about to be released.
+5. Update source documentation when the release process itself changed. Keep generated `dist/` and `docs/` out of the pre-release commit.
+6. Run `npm run lint`, `npm run build`, `npm run doc`, and `git diff --check`.
+7. Commit and push the source/documentation release-prep commit.
+8. Verify the working tree is clean and `HEAD` matches `origin/<branch>`.
+9. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes`.
+10. Verify the new `vX.Y.Z` tag exists locally and on `origin`, `git status --short` is clean, and GitHub Actions has a release workflow run for the tag.
+
+Official OpenDocViewer versions and OMP artifact component versions are related but independent. Do not align them automatically. An OMP artifact-only test build may bump `omp-components.json` without changing `package.json`; an official release may bump `package.json` without changing `omp-components.json` unless the release explicitly includes a component-manifest update.
+
 ---
 
 ## Hosting and deployment

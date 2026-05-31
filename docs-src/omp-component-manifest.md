@@ -4,8 +4,12 @@ This repository uses `omp-components.json` to list deployable components that
 can be registered as OMP artifacts.
 
 OpenDocViewer has one deployable component, so the repository release version
-and the component artifact version normally stay aligned. The manifest still
-uses the same component-list shape as multi-app repositories so OMP package and
+and the component artifact version may look similar, but they are intentionally
+independent. The public OpenDocViewer release version is owned by `package.json`
+and Git tags. The OMP artifact component version is owned by
+`omp-components.json` and may move faster when local or customer deployments
+need artifact-only test builds between public releases. The manifest still uses
+the same component-list shape as multi-app repositories so OMP package and
 HostAgent tooling can treat it consistently.
 
 ## Fields
@@ -39,4 +43,7 @@ Use `scripts/bump-component-version.ps1` to update manifest versions:
 
 The script updates `omp-components.json` only. For an actual OpenDocViewer
 release, keep using the normal release process so `package.json`, tags,
-release notes, and `SECURITY.md` stay aligned with the manifest.
+release notes, and `SECURITY.md` describe the official release. Do not bump
+`omp-components.json` during an official release merely to match `package.json`;
+change the component manifest only when the deployable OMP artifact version is
+intended to change.
