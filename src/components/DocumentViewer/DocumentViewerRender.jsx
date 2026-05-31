@@ -149,6 +149,16 @@ function isAtScrollBottom(viewport) {
 }
 
 /**
+ * @param {*} event
+ * @returns {void}
+ */
+function preventDefaultIfCancelable(event) {
+  if (typeof event?.preventDefault !== 'function') return;
+  if (event?.cancelable === false) return;
+  event.preventDefault();
+}
+
+/**
  * DocumentViewerRender
  * Renders the main document pane and, if enabled, a comparison pane.
  *
@@ -228,6 +238,7 @@ const DocumentViewerRender = ({
   const edgeScrollDecayRafRef = useRef(0);
   const edgeScrollProgressRef = useRef(0);
   const edgeScrollPendingResetRef = useRef(/** @type {Partial<Record<ViewerPaneKey, 'top'|'bottom'>>} */ ({}));
+  const handlePaneWheelCaptureRef = useRef(/** @type {(null|function(WheelEvent, ViewerPaneKey): void)} */ (null));
   const panStateRef = useRef(/** @type {(null|{
     pane: ViewerPaneKey,
     pointerId: number,
@@ -408,7 +419,7 @@ const DocumentViewerRender = ({
       return;
     }
 
-    event.preventDefault?.();
+    preventDefaultIfCancelable(event);
     event.stopPropagation?.();
 
     if (edgeScrollQuietTimerRef.current) {
@@ -458,6 +469,38 @@ const DocumentViewerRender = ({
     schedulePaneScrollPosition,
     startEdgeScrollDecay,
   ]);
+
+  useEffect(() => {
+    handlePaneWheelCaptureRef.current = handlePaneWheelCapture;
+  }, [handlePaneWheelCapture]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') return undefined;
+
+    const listenerOptions = { capture: true, passive: false };
+    const removeOptions = { capture: true };
+    const entries = [
+      { pane: 'primary', element: primaryPaneRef.current },
+      ...(isComparing && comparePageNumber !== null
+        ? [{ pane: 'compare', element: comparePaneRef.current }]
+        : []),
+    ];
+    const listeners = entries
+      .filter((entry) => entry.element instanceof HTMLElement)
+      .map((entry) => {
+        const listener = (event) => {
+          handlePaneWheelCaptureRef.current?.(event, entry.pane);
+        };
+        entry.element.addEventListener('wheel', listener, listenerOptions);
+        return { element: entry.element, listener };
+      });
+
+    return () => {
+      for (const { element, listener } of listeners) {
+        element.removeEventListener('wheel', listener, removeOptions);
+      }
+    };
+  }, [comparePageNumber, isComparing]);
 
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
@@ -775,7 +818,6 @@ const DocumentViewerRender = ({
               activePanPane === 'primary' ? 'is-panning' : '',
             ].filter(Boolean).join(' ')}
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
-            onWheelCapture={(event) => handlePaneWheelCapture(event, 'primary')}
             onPointerEnter={() => updatePanePannability('primary')}
             onPointerDownCapture={(event) => handlePanePointerDown(event, 'primary')}
             onPointerMoveCapture={(event) => handlePanePointerMove(event, 'primary')}
@@ -824,7 +866,6 @@ const DocumentViewerRender = ({
                 activePanPane === 'compare' ? 'is-panning' : '',
               ].filter(Boolean).join(' ')}
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
-              onWheelCapture={(event) => handlePaneWheelCapture(event, 'compare')}
               onPointerEnter={() => updatePanePannability('compare')}
               onPointerDownCapture={(event) => handlePanePointerDown(event, 'compare')}
               onPointerMoveCapture={(event) => handlePanePointerMove(event, 'compare')}
