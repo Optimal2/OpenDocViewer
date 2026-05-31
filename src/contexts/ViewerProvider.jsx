@@ -1373,17 +1373,26 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       return fullUrl;
     }
 
+    workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
+    const existingUrl = String(workingPage[urlField] || '').trim();
     const cacheEntry = cache.get(safeIndex);
     if (cacheEntry?.url) {
-      if (isReusableAssetUrl(cacheEntry.url)) {
+      const cachedUrl = String(cacheEntry.url || '').trim();
+      if (isReusableAssetUrl(cachedUrl)) {
+        // Page state may carry a freshly replaced object URL while the cache still points at
+        // the previous asset, for example after a one-shot PDF resolution boost.
+        if (existingUrl && existingUrl !== cachedUrl && isReusableAssetUrl(existingUrl)) {
+          cache.set(safeIndex, { url: existingUrl, lastAccess: Date.now() });
+          touchCacheEntry(cache, safeIndex);
+          return existingUrl;
+        }
+
         touchCacheEntry(cache, safeIndex);
-        return cacheEntry.url;
+        return cachedUrl;
       }
-      clearPageAssetReference(safeIndex, variant, cacheEntry.url);
+      clearPageAssetReference(safeIndex, variant, cachedUrl);
     }
 
-    workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
-    const existingUrl = workingPage[urlField];
     if (existingUrl) {
       if (isReusableAssetUrl(existingUrl)) {
         if (options.trackInCache !== false) {
