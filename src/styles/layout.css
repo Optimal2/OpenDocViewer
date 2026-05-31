@@ -198,7 +198,9 @@ canvas {
   display: block;
   width: auto;
   height: auto;
-  transition: visibility 0.3s ease, transform 0.3s ease;
+  /* Page changes and sticky fit modes must snap to the exact calculated scale. Animating
+     transform makes same-proportion pages appear to slide or grow when their raster sizes differ. */
+  transition: none;
   transform-origin: top left;
 }
 

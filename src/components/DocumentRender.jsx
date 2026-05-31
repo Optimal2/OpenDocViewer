@@ -57,6 +57,14 @@ function normalizeSize(size) {
 }
 
 /**
+ * @param {{ width:number, height:number }} size
+ * @returns {boolean}
+ */
+function hasUsableSize(size) {
+  return Number(size?.width) > 0 && Number(size?.height) > 0;
+}
+
+/**
  * @param {(string|null|undefined)} url
  * @returns {boolean}
  */
@@ -147,7 +155,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const [transitionPending, setTransitionPending] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
-  const [naturalSize, setNaturalSize] = useState({ width: 0, height: 0 });
+  const [naturalSize, setNaturalSize] = useState({
+    width: 0,
+    height: 0,
+    pageIndex: -1,
+    url: '',
+  });
 
   useEffect(() => {
     displayedAssetRef.current = displayedAsset;
@@ -207,13 +220,23 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   const normalizedRotation = ((Number(imageProperties?.rotation || 0) % 360) + 360) % 360;
 
-  const fallbackRenderSize = useMemo(
-    () => normalizeSize({
-      width: naturalSize.width || currentPage?.realWidth || 0,
-      height: naturalSize.height || currentPage?.realHeight || 0,
-    }),
-    [currentPage?.realHeight, currentPage?.realWidth, naturalSize.height, naturalSize.width]
-  );
+  const fallbackRenderSize = useMemo(() => {
+    const naturalSizeMatchesDisplayedAsset = naturalSize.pageIndex === displayedAsset.pageIndex
+      && String(naturalSize.url || '') === String(displayedAsset.url || '');
+    return normalizeSize({
+      width: naturalSizeMatchesDisplayedAsset ? naturalSize.width : currentPage?.realWidth,
+      height: naturalSizeMatchesDisplayedAsset ? naturalSize.height : currentPage?.realHeight,
+    });
+  }, [
+    currentPage?.realHeight,
+    currentPage?.realWidth,
+    displayedAsset.pageIndex,
+    displayedAsset.url,
+    naturalSize.height,
+    naturalSize.pageIndex,
+    naturalSize.url,
+    naturalSize.width,
+  ]);
 
   const effectiveRenderSize = useMemo(() => {
     if (!isCanvasEnabled) return fallbackRenderSize;
@@ -343,6 +366,25 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [getActiveRenderSurface, setZoom]);
 
   /**
+   * Apply sticky fit modes before a newly loaded page becomes visible. That avoids a one-frame jump
+   * when two pages have the same proportions but different raster resolution.
+   *
+   * @param {{ width:number, height:number }} renderSize
+   * @returns {void}
+   */
+  const applyFitZoomForKnownSize = useCallback((renderSize) => {
+    const size = normalizeSize(renderSize);
+    if (!hasUsableSize(size)) return;
+
+    const syntheticSurface = { width: size.width, height: size.height };
+    if (zoomMode === 'FIT_WIDTH') {
+      calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom);
+    } else if (zoomMode === 'FIT_PAGE') {
+      calculateFitToScreenZoom(syntheticSurface, renderViewportRef, setZoom);
+    }
+  }, [setZoom, zoomMode]);
+
+  /**
    * @returns {void}
    */
   const applyInitialZoomMode = useCallback(() => {
@@ -418,7 +460,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       setPendingAsset(null);
       setDisplayedAsset({ url: '', pageIndex: -1, pageNumber: 0 });
       setImageLoaded(false);
-      setNaturalSize({ width: 0, height: 0 });
+      setNaturalSize({ width: 0, height: 0, pageIndex: -1, url: '' });
       return () => {
         cancelled = true;
         clearLoadingOverlayTimer();
@@ -470,8 +512,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           setImageLoaded(true);
           setAssetFailed(false);
         } else {
-          setDisplayedAsset({ url, pageIndex: currentIndex, pageNumber });
-          setPendingAsset(null);
+          setPendingAsset({ url, pageIndex: currentIndex, pageNumber });
           setImageLoaded(false);
           setAssetFailed(false);
         }
@@ -562,8 +603,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       width: Number(image?.naturalWidth || currentPage?.realWidth || 0),
       height: Number(image?.naturalHeight || currentPage?.realHeight || 0),
     });
+    const nextLayoutSize = isCanvasEnabled && (normalizedRotation === 90 || normalizedRotation === 270)
+      ? { width: nextSize.height, height: nextSize.width }
+      : nextSize;
 
     clearLoadingOverlayTimer();
+    applyFitZoomForKnownSize(nextLayoutSize);
     setDisplayedAsset({
       url: String(image?.currentSrc || image?.src || ''),
       pageIndex: target.pageIndex,
@@ -572,7 +617,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     setPendingAsset(null);
     setTransitionPending(false);
     setBlockingLoading(false);
-    setNaturalSize(nextSize);
+    setNaturalSize({
+      ...nextSize,
+      pageIndex: target.pageIndex,
+      url: String(image?.currentSrc || image?.src || ''),
+    });
     setImageLoaded(true);
     setAssetFailed(false);
     resetAssetRetry();
@@ -598,7 +647,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     currentPage?.realWidth,
     initialRenderDone,
     isCanvasEnabled,
+    normalizedRotation,
     onRender,
+    applyFitZoomForKnownSize,
     touchPageAsset,
     resetAssetRetry,
   ]);
@@ -616,7 +667,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       height: Number(image.naturalHeight || currentPage?.realHeight || 0),
     });
 
-    setNaturalSize(nextSize);
+    setNaturalSize({
+      ...nextSize,
+      pageIndex: displayedAssetRef.current.pageIndex,
+      url: String(image.currentSrc || image.src || ''),
+    });
     setImageLoaded(true);
     resetAssetRetry();
     touchPageAsset(displayedAssetRef.current.pageIndex, 'full');
@@ -842,7 +897,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     if (transitionPending) setTransitionPending(false);
   }, [blockingLoading, clearLoadingOverlayTimer, isRequestedAssetVisible, transitionPending]);
 
-  const hideDisplayedSurface = !!transitionPending && displayedAsset.pageIndex !== currentIndex;
+  const hideDisplayedSurface = !!blockingLoading && displayedAsset.pageIndex !== currentIndex;
   const showLoadingOverlay = !showErrorState && !isRequestedAssetVisible && !!blockingLoading;
   const hiddenImageStyle = isCanvasEnabled && canvasReady
     ? {
