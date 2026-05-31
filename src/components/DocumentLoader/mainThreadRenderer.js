@@ -26,6 +26,7 @@ import { generateThumbnail } from './documentLoaderUtils.js';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
+import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
 
 /**
  * Render job passed to the main-thread renderer.
@@ -138,7 +139,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       dataBuffer = await resp.arrayBuffer();
     }
 
-    const pdf = await pdfjsLib.getDocument({ data: dataBuffer.slice(0) }).promise;
+    const pdf = await pdfjsLib.getDocument(withPdfJsDocumentOptions({ data: dataBuffer.slice(0) })).promise;
 
     // pdf.getPage(...) is 1-based; translate (pageStartIndex .. +pagesInvolved-1) → (1..N)
     const first = job.pageStartIndex + 1;

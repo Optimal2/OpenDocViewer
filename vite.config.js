@@ -21,7 +21,7 @@
  */
 
 import { defineConfig } from 'vite';
-import { readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
 import svgr from 'vite-plugin-svgr';
 
@@ -41,6 +41,55 @@ const BUILD_STAMP = (() => {
   );
 })();
 const ODV_BUILD_ID = `${APP_VERSION}-${BUILD_STAMP}`;
+const PDFJS_WASM_PUBLIC_PREFIX = '/pdfjs/wasm/';
+const PDFJS_WASM_OUTPUT_PREFIX = 'pdfjs/wasm/';
+const PDFJS_WASM_DIR = new URL('./node_modules/pdfjs-dist/wasm/', import.meta.url);
+
+function getPdfJsWasmAssetNames() {
+  return readdirSync(PDFJS_WASM_DIR)
+    .filter((name) => /\.(?:wasm|js)$/i.test(name))
+    .sort((a, b) => a.localeCompare(b));
+}
+
+function getStaticContentType(fileName) {
+  const lower = String(fileName || '').toLowerCase();
+  if (lower.endsWith('.wasm')) return 'application/wasm';
+  if (lower.endsWith('.js')) return 'text/javascript; charset=utf-8';
+  return 'application/octet-stream';
+}
+
+function pdfJsWasmAssetsPlugin() {
+  return {
+    name: 'odv-pdfjs-wasm-assets',
+    configureServer(server) {
+      server.middlewares.use(PDFJS_WASM_PUBLIC_PREFIX, (req, res, next) => {
+        const requestedName = decodeURIComponent(String(req.url || '').split('?')[0] || '').replace(/^\/+/, '');
+        if (!/^[A-Za-z0-9_.-]+$/.test(requestedName)) {
+          next();
+          return;
+        }
+
+        const fileUrl = new URL(requestedName, PDFJS_WASM_DIR);
+        if (!existsSync(fileUrl)) {
+          next();
+          return;
+        }
+
+        res.setHeader('Content-Type', getStaticContentType(requestedName));
+        res.end(readFileSync(fileUrl));
+      });
+    },
+    generateBundle() {
+      for (const name of getPdfJsWasmAssetNames()) {
+        this.emitFile({
+          type: 'asset',
+          fileName: `${PDFJS_WASM_OUTPUT_PREFIX}${name}`,
+          source: readFileSync(new URL(name, PDFJS_WASM_DIR)),
+        });
+      }
+    },
+  };
+}
 
 /**
  * @typedef {import('vite').UserConfigExport} UserConfigExport
@@ -71,6 +120,9 @@ export default defineConfig(({ mode }) => {
 
       // Import SVGs as React components: `import { ReactComponent as Icon } from './icon.svg'`
       svgr({ svgrOptions: { icon: true } }),
+
+      // pdf.js loads codec WASM/fallback modules by filename from `wasmUrl`.
+      pdfJsWasmAssetsPlugin(),
     ],
 
     /**

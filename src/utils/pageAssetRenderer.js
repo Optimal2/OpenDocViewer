@@ -13,6 +13,7 @@ import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
 import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
 import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
+import { withPdfJsDocumentOptions } from './pdfjsDocumentOptions.js';
 
 const MAX_FALLBACK_REASON_SAMPLES = 12;
 
@@ -375,7 +376,7 @@ export class PageAssetRenderer {
     const key = String(sourceKey || '');
     if (!this.pdfCache.has(key)) {
       const buffer = await this.getSourceBuffer(key);
-      const loadingTask = pdfjsLib.getDocument({ data: buffer.slice(0) });
+      const loadingTask = pdfjsLib.getDocument(withPdfJsDocumentOptions({ data: buffer.slice(0) }));
       const entry = {
         loadingTask,
         promise: loadingTask.promise,
