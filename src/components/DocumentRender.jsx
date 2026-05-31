@@ -546,7 +546,6 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     return () => {
       cancelled = true;
       clearLoadingOverlayTimer();
-      requestSeqRef.current += 1;
       unpinPageAsset(currentIndex, 'full');
     };
   }, [
@@ -872,6 +871,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     async getAllPrintableDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
     },
+    // Backward-compatible alias for older print callers; prefer getAllPrintableDataUrls().
     async exportAllPagesAsDataUrls(pageIndexes) {
       return getPrintablePageUrls(pageIndexes);
     },

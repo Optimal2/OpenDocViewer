@@ -362,7 +362,7 @@ function summarizeByExtension(taskResults) {
       errorCount: 0,
       totalMs: 0,
       outputBytes: 0,
-      minMs: 0,
+      minMs: null,
       maxMs: 0,
       avgMs: 0,
     };
@@ -372,7 +372,7 @@ function summarizeByExtension(taskResults) {
     current.outputBytes += Math.max(0, Number(result?.outputBytes) || 0);
     if (result?.ok) current.successCount += 1;
     else current.errorCount += 1;
-    current.minMs = current.minMs ? Math.min(current.minMs, duration) : duration;
+    current.minMs = current.minMs === null ? duration : Math.min(current.minMs, duration);
     current.maxMs = Math.max(current.maxMs, duration);
     current.avgMs = current.count ? Math.round(current.totalMs / current.count) : 0;
     byExtension[ext] = current;
