@@ -132,6 +132,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   const canvasRef = useRef(/** @type {(HTMLCanvasElement|null)} */ (null));
   const imgRef = useRef(/** @type {(HTMLImageElement|null)} */ (null));
+  const pendingImgRef = useRef(/** @type {(HTMLImageElement|null)} */ (null));
   const renderViewportRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const requestSeqRef = useRef(0);
   const initialRenderRef = useRef(false);
@@ -711,11 +712,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   /**
    * @param {*} event
+   * @param {(DisplayedAsset|null)=} targetOverride
    * @returns {void}
    */
-  const handlePendingImageLoad = useCallback((event) => {
+  const handlePendingImageLoad = useCallback((event, targetOverride = null) => {
     const image = event?.currentTarget;
-    const target = pendingAssetRef.current;
+    const target = targetOverride || pendingAssetRef.current;
     if (!(image instanceof HTMLImageElement) || !target) return;
 
     const imageUrl = String(image.currentSrc || image.src || '');
@@ -723,6 +725,15 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
     finalizeDisplayedAsset(image, target);
   }, [finalizeDisplayedAsset]);
+
+  useLayoutEffect(() => {
+    const target = pendingAsset;
+    const image = pendingImgRef.current;
+    if (!target || !(image instanceof HTMLImageElement)) return;
+    const imageUrl = String(image.currentSrc || image.src || '');
+    if (!image.complete || Number(image.naturalWidth || 0) <= 0 || imageUrl !== String(target.url || '')) return;
+    finalizeDisplayedAsset(image, target);
+  }, [finalizeDisplayedAsset, pendingAsset]);
 
   /**
    * @param {{ pageIndex:number, pageNumber:number }} target
@@ -768,11 +779,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   /**
    * @param {*} event
+   * @param {(DisplayedAsset|null)=} targetOverride
    * @returns {void}
    */
-  const handlePendingImageError = useCallback((event) => {
+  const handlePendingImageError = useCallback((event, targetOverride = null) => {
     const image = event?.currentTarget;
-    const target = pendingAssetRef.current;
+    const target = targetOverride || pendingAssetRef.current;
     const imageUrl = String(image?.currentSrc || image?.src || '');
     const targetUrl = String(target?.url || '');
 
@@ -940,13 +952,15 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
         {pendingAsset?.url && pendingAsset.url !== displayedUrl && (
           <img
+            key={`${pendingAsset.pageIndex}:${pendingAsset.url}`}
+            ref={pendingImgRef}
             src={pendingAsset.url}
             alt=""
             aria-hidden="true"
             decoding="async"
             style={{ display: 'none' }}
-            onLoad={handlePendingImageLoad}
-            onError={handlePendingImageError}
+            onLoad={(event) => handlePendingImageLoad(event, pendingAsset)}
+            onError={(event) => handlePendingImageError(event, pendingAsset)}
           />
         )}
 

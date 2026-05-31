@@ -160,14 +160,14 @@ function delay(ms, signal) {
   return new Promise((resolve, reject) => {
     let timeoutId = 0;
     const cleanup = () => {
-      if (timeoutId) window.clearTimeout(timeoutId);
+      if (timeoutId) globalThis.clearTimeout(timeoutId);
       signal?.removeEventListener?.('abort', onAbort);
     };
     const onAbort = () => {
       cleanup();
       reject(createAbortError());
     };
-    timeoutId = window.setTimeout(() => {
+    timeoutId = globalThis.setTimeout(() => {
       cleanup();
       resolve();
     }, duration);
@@ -650,7 +650,6 @@ export async function runRenderDecodeBenchmark(args) {
 
   const best = runs
     .filter((run) => run.errorCount === 0)
-    .slice()
     .sort((a, b) => a.durationMs - b.durationMs)[0] || null;
 
   const result = {
