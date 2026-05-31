@@ -386,6 +386,38 @@ function summarizeByExtension(taskResults) {
 
 /**
  * @param {Object} args
+ * @param {number} args.pageCount
+ * @param {boolean} args.hasPdfPages
+ * @param {string} args.backend
+ * @param {string} args.pdfToImageMode
+ * @param {number} args.resolvedWorkerCount
+ * @param {number} args.pdfWorkerMaxCount
+ * @param {Object} args.renderConfig
+ * @returns {number}
+ */
+function resolveScenarioConcurrency(args) {
+  const pageCount = Math.max(1, Number(args.pageCount) || 1);
+  const resolvedWorkerCount = Math.max(0, Number(args.resolvedWorkerCount) || 0);
+
+  if (args.hasPdfPages && (args.backend === 'main-only' || args.pdfToImageMode !== 'worker')) {
+    const mainThreadLimit = Math.max(1, Number(args.renderConfig?.maxConcurrentMainThreadRenders) || 1);
+    return Math.min(pageCount, mainThreadLimit);
+  }
+
+  if (args.hasPdfPages && args.pdfToImageMode === 'worker') {
+    const pdfWorkerLimit = Math.max(1, Number(args.pdfWorkerMaxCount) || 1);
+    const workerLimit = resolvedWorkerCount > 0 ? resolvedWorkerCount : pdfWorkerLimit;
+    return Math.min(pageCount, workerLimit, pdfWorkerLimit);
+  }
+
+  const assetLimit = resolvedWorkerCount > 0
+    ? resolvedWorkerCount
+    : Math.max(1, Number(args.renderConfig?.maxConcurrentAssetRenders) || 1);
+  return Math.min(pageCount, assetLimit);
+}
+
+/**
+ * @param {Object} args
  * @param {Array<Object>} args.pages
  * @param {Object} args.scenario
  * @param {Object} args.viewerContext
@@ -429,13 +461,15 @@ async function runScenario(args) {
   const renderer = createPageAssetRenderer({ tempStore, config: renderConfig });
   const hasPdfPages = args.pages.some((page) => String(page?.fileExtension || '').toLowerCase() === 'pdf');
   const backend = String(renderConfig.backend || 'hybrid-by-format').toLowerCase();
-  const mainThreadPdfOnly = hasPdfPages && (backend === 'main-only' || pdfToImageMode !== 'worker');
-  const concurrencyBase = mainThreadPdfOnly
-    ? Number(renderConfig.maxConcurrentMainThreadRenders) || 1
-    : (hasPdfPages && pdfToImageMode === 'worker'
-      ? Math.min(resolvedWorkerCount || pdfWorkerMaxCount, pdfWorkerMaxCount)
-      : (resolvedWorkerCount || Number(renderConfig.maxConcurrentAssetRenders) || 1));
-  const concurrency = Math.max(1, Math.min(args.pages.length, concurrencyBase));
+  const concurrency = resolveScenarioConcurrency({
+    pageCount: args.pages.length,
+    hasPdfPages,
+    backend,
+    pdfToImageMode,
+    resolvedWorkerCount,
+    pdfWorkerMaxCount,
+    renderConfig,
+  });
   const startedAt = performance.now();
   let completed = 0;
   let timeoutCount = 0;
@@ -547,7 +581,7 @@ async function runScenario(args) {
       rendererStats,
       taskSummary,
       slowestTasks: taskResults
-        .slice()
+        .filter(Boolean)
         .sort((a, b) => (Number(b?.durationMs) || 0) - (Number(a?.durationMs) || 0))
         .slice(0, 10),
     };

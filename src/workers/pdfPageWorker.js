@@ -23,6 +23,7 @@ const PDFJS_PAGE_WORKER_VERBOSITY = pdfjsLib?.VerbosityLevel?.ERRORS ?? 0;
  * @property {number} activeCount
  * @property {boolean} evicted
  * @property {(Promise<void>|null)} disposePromise
+ * @property {?Function} resolveDisposeWhenIdle
  */
 
 /** @type {Map<string, PdfCacheEntry>} */
@@ -101,9 +102,13 @@ function normalizeThumbnailBound(value, fallback) {
 function requestPdfEntryDisposal(entry) {
   if (!entry) return Promise.resolve();
   entry.evicted = true;
-  if (entry.activeCount > 0) return Promise.resolve();
   if (!entry.disposePromise) {
     entry.disposePromise = (async () => {
+      if (entry.activeCount > 0) {
+        await new Promise((resolve) => {
+          entry.resolveDisposeWhenIdle = resolve;
+        });
+      }
       try {
         const doc = await entry.promise;
         await doc?.destroy?.();
@@ -118,7 +123,13 @@ function releasePdfEntry(entry) {
   if (!entry) return;
   entry.activeCount = Math.max(0, Number(entry.activeCount || 0) - 1);
   if (entry.evicted && entry.activeCount <= 0) {
-    void requestPdfEntryDisposal(entry);
+    if (entry.resolveDisposeWhenIdle) {
+      const resolve = entry.resolveDisposeWhenIdle;
+      entry.resolveDisposeWhenIdle = null;
+      resolve();
+    } else {
+      void requestPdfEntryDisposal(entry);
+    }
   }
 }
 
@@ -180,10 +191,10 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
       activeCount: 0,
       evicted: false,
       disposePromise: null,
+      resolveDisposeWhenIdle: null,
     };
 
-    entry.promise = (async () => {
-      const buffer = await sourceBlob.arrayBuffer();
+    entry.promise = sourceBlob.arrayBuffer().then((buffer) => {
       // Blob.arrayBuffer() gives this worker a fresh buffer. pdf.js may transfer it internally,
       // so keep the payload worker-owned and do not share caller-owned ArrayBuffer references.
       const data = new Uint8Array(buffer);
@@ -200,7 +211,7 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
       });
       entry.loadingTask = loadingTask;
       return loadingTask.promise;
-    })().catch((error) => {
+    }).catch((error) => {
       if (pdfCache.get(key) === entry) pdfCache.delete(key);
       throw error;
     });
