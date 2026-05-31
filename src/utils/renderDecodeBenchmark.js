@@ -140,6 +140,16 @@ export function isRenderDecodeBenchmarkEnabled(config = {}) {
 }
 
 /**
+ * @param {string=} message
+ * @returns {Error}
+ */
+function createAbortError(message = 'Render/decode benchmark was cancelled.') {
+  const error = new Error(message);
+  error.name = 'AbortError';
+  return error;
+}
+
+/**
  * @param {number} ms
  * @param {AbortSignal=} signal
  * @returns {Promise<void>}
@@ -155,9 +165,7 @@ function delay(ms, signal) {
     };
     const onAbort = () => {
       cleanup();
-      const error = new Error('Render/decode benchmark was cancelled.');
-      error.name = 'AbortError';
-      reject(error);
+      reject(createAbortError());
     };
     timeoutId = window.setTimeout(() => {
       cleanup();
@@ -173,9 +181,7 @@ function delay(ms, signal) {
  */
 function throwIfAborted(signal) {
   if (!signal?.aborted) return;
-  const error = new Error('Render/decode benchmark was cancelled.');
-  error.name = 'AbortError';
-  throw error;
+  throw createAbortError();
 }
 
 /**
@@ -214,9 +220,7 @@ function withTimeout(operation, timeoutMs, signal, label = 'operation') {
       fn(value);
     };
     const onAbort = () => {
-      const error = new Error('Render/decode benchmark was cancelled.');
-      error.name = 'AbortError';
-      settle(reject, error);
+      settle(reject, createAbortError());
     };
 
     timeoutId = globalThis.setTimeout?.(() => {
@@ -502,14 +506,25 @@ async function runScenario(args) {
     const successfulDurations = taskResults
       .filter((result) => result?.ok)
       .map((result) => Math.max(0, Number(result.durationMs) || 0));
+    const successfulDurationStats = successfulDurations.reduce((stats, duration) => ({
+      count: stats.count + 1,
+      totalMs: stats.totalMs + duration,
+      minMs: stats.minMs === null ? duration : Math.min(stats.minMs, duration),
+      maxMs: Math.max(stats.maxMs, duration),
+    }), {
+      count: 0,
+      totalMs: 0,
+      minMs: null,
+      maxMs: 0,
+    });
     const taskSummary = {
       count: taskResults.length,
       successCount,
       errorCount,
-      minMs: successfulDurations.length ? Math.min(...successfulDurations) : 0,
-      maxMs: successfulDurations.length ? Math.max(...successfulDurations) : 0,
-      avgMs: successfulDurations.length
-        ? Math.round(successfulDurations.reduce((sum, value) => sum + value, 0) / successfulDurations.length)
+      minMs: successfulDurationStats.count ? successfulDurationStats.minMs : 0,
+      maxMs: successfulDurationStats.count ? successfulDurationStats.maxMs : 0,
+      avgMs: successfulDurationStats.count
+        ? Math.round(successfulDurationStats.totalMs / successfulDurationStats.count)
         : 0,
     };
 
