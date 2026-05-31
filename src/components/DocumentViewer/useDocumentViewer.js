@@ -1145,11 +1145,13 @@ export function useDocumentViewer() {
    * If compare is ON, just replaces the right-hand page.
    *
    * @param {number} page
+   * @param {Object=} options
+   * @param {boolean=} options.preserveActivePane
    * @returns {void}
    */
-  const selectForCompare = useCallback((page) => {
+  const selectForCompare = useCallback((page, options = {}) => {
     setComparePageNumber(page);
-    setActivePaneRaw('compare');
+    if (!options?.preserveActivePane) setActivePaneRaw('compare');
     logger.info('Compare selection updated', { comparePage: page });
   }, [setComparePageNumber]);
 

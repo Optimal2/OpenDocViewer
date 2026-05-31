@@ -31,6 +31,7 @@
 import React, { useEffect, useState, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import useAcceleratingHoldRepeat from '../../hooks/useAcceleratingHoldRepeat.js';
 
 function clampPercent(n) {
   const v = Math.round(Number(n));
@@ -128,6 +129,14 @@ const ZoomButtons = ({
   const disableOneToOne = !onActualSize || !!isOneToOneActive;
   const disableFitPage = disableFits || fitPageActive;
   const disableFitWidth = disableFits || fitWidthActive;
+  const zoomOutRepeat = useAcceleratingHoldRepeat({
+    action: zoomOut,
+    disabled: disableZoomOut,
+  });
+  const zoomInRepeat = useAcceleratingHoldRepeat({
+    action: zoomIn,
+    disabled: disableZoomIn,
+  });
 
   // Display value: show "100%" while not focused; show "100" while editing.
   const displayValue = isFocused
@@ -140,7 +149,10 @@ const ZoomButtons = ({
       <div className="zoom-fixed-group" role="group" aria-label={t('toolbar.zoomPercentAria')}>
         <button
           type="button"
-          onClick={zoomOut}
+          onClick={zoomOutRepeat.onClick}
+          onPointerDown={zoomOutRepeat.onPointerDown}
+          onMouseDown={zoomOutRepeat.onMouseDown}
+          onTouchStart={zoomOutRepeat.onTouchStart}
           aria-label={t('toolbar.zoomOut')}
           title={t('toolbar.zoomOut')}
           className="odv-btn"
@@ -196,7 +208,10 @@ const ZoomButtons = ({
 
         <button
           type="button"
-          onClick={zoomIn}
+          onClick={zoomInRepeat.onClick}
+          onPointerDown={zoomInRepeat.onPointerDown}
+          onMouseDown={zoomInRepeat.onMouseDown}
+          onTouchStart={zoomInRepeat.onTouchStart}
           aria-label={t('toolbar.zoomIn')}
           title={t('toolbar.zoomIn')}
           className="odv-btn"
