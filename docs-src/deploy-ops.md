@@ -53,6 +53,14 @@ The IIS config also establishes:
 - MIME types for `.mjs`, `.wasm`, `.svg`, `.json`, `.webmanifest`, `.woff`, `.woff2`
 - static and dynamic compression for JS, CSS, JSON, and SVG
 
+### PDF.js codec resources
+
+OpenDocViewer's Vite build emits the optional PDF.js codec resources under
+`dist/pdfjs/wasm/`. These files include JBIG2 and OpenJPEG WASM/fallback modules
+used by scanned or image-heavy PDFs. Deploy this folder together with the rest
+of `dist/`; otherwise affected PDFs may load as blank pages and the browser
+console may show `JBig2 failed to initialize` or missing `wasmUrl` warnings.
+
 ### Prefetch tuning for proxied source endpoints
 
 If the upstream document endpoint sits behind IIS, ARR, smart-card SSO, SSL inspection, or another proxy/security layer, keep `documentLoading.fetch.prefetchConcurrency` conservative unless you have measured headroom in that exact environment. This customer-focused bundle keeps concurrency moderate at `4`, disables retries, and aborts individual prefetch requests after `10000` ms so one stalled upstream request does not hold the UI for long. The profile assumes the main VPN/proxy timeout issue has been resolved and now optimizes harder for responsiveness.

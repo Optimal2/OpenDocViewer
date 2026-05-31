@@ -19,6 +19,7 @@ import { decode as decodeUTIF } from 'utif2';
 // Use the same pdf.js API and worker that are bundled with the app (legacy build + ESM worker).
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
 
 // Ensure API ↔ worker versions match (dev == build behavior)
 try {
@@ -141,7 +142,7 @@ export const getTotalPages = async (arrayBuffer, fileExtension) => {
 
   if (fileExtLower === 'pdf') {
     const arrayBufferCopy = arrayBuffer.slice(0); // pdf.js will consume the bytes
-    const loadingTask = pdfjsLib.getDocument({ data: arrayBufferCopy });
+    const loadingTask = pdfjsLib.getDocument(withPdfJsDocumentOptions({ data: arrayBufferCopy }));
     const pdf = await loadingTask.promise;
     try {
       logger.debug('PDF document loaded', { numPages: pdf.numPages });

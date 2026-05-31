@@ -9,6 +9,7 @@
 
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
+import { withPdfJsDocumentOptions } from '../utils/pdfjsDocumentOptions.js';
 
 const workerScope = self;
 const MIN_THUMBNAIL_DIMENSION = 24;
@@ -195,7 +196,7 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
       // Blob.arrayBuffer() gives this worker a fresh buffer. pdf.js may transfer it internally,
       // so keep the payload worker-owned and do not share caller-owned ArrayBuffer references.
       const data = new Uint8Array(buffer);
-      const loadingTask = pdfjsLib.getDocument({
+      const loadingTask = pdfjsLib.getDocument(withPdfJsDocumentOptions({
         data,
         // pdf.js runs inside ODV's own page-image worker here. If pdf.js cannot start a nested
         // worker it uses its in-thread loopback path, which is expected in this environment.
@@ -205,7 +206,7 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
         // text keeps its real shape instead of degrading to missing-font boxes.
         disableFontFace: true,
         useSystemFonts: false,
-      });
+      }));
       // Store before waiting for loadingTask.promise so eviction can cancel an in-flight load.
       entry.loadingTask = loadingTask;
       return loadingTask.promise;
