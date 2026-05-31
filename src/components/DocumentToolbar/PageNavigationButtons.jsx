@@ -36,79 +36,13 @@
 import React, { useRef, useState, useEffect, useCallback, useId, useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import useAcceleratingHoldRepeat from '../../hooks/useAcceleratingHoldRepeat.js';
 
 function clampPage(n, total) {
   const safeTotal = Number.isFinite(total) && total > 0 ? Math.floor(total) : 1;
   const value = Math.floor(Number(n));
   if (!Number.isFinite(value)) return null;
   return Math.max(1, Math.min(safeTotal, value));
-}
-
-const REPEAT_INITIAL_DELAY_MS = 300;
-const REPEAT_INTERVAL_MS = 50;
-
-// Keep the hold-repeat timer outside React component lifetime because page changes can re-render
-// or replace toolbar controls while the pointer is still held down.
-const pageRepeatState = {
-  key: null,
-  delayTimer: null,
-  intervalTimer: null,
-  releaseListenersAttached: false,
-};
-
-function clearToolbarPageRepeatTimers() {
-  if (pageRepeatState.delayTimer != null) {
-    window.clearTimeout(pageRepeatState.delayTimer);
-    pageRepeatState.delayTimer = null;
-  }
-  if (pageRepeatState.intervalTimer != null) {
-    window.clearInterval(pageRepeatState.intervalTimer);
-    pageRepeatState.intervalTimer = null;
-  }
-}
-
-function stopToolbarPageRepeat() {
-  clearToolbarPageRepeatTimers();
-  pageRepeatState.key = null;
-}
-
-function ensureToolbarPageRepeatReleaseListeners() {
-  if (pageRepeatState.releaseListenersAttached || typeof window === 'undefined') return;
-  pageRepeatState.releaseListenersAttached = true;
-  const stop = () => stopToolbarPageRepeat();
-  window.addEventListener('pointerup', stop, { passive: true });
-  window.addEventListener('mouseup', stop, { passive: true });
-  window.addEventListener('touchend', stop, { passive: true });
-  window.addEventListener('touchcancel', stop, { passive: true });
-  window.addEventListener('blur', stop, { passive: true });
-}
-
-function createRepeatEventSnapshot(event) {
-  return {
-    shiftKey: !!event?.shiftKey,
-    ctrlKey: !!event?.ctrlKey,
-    altKey: !!event?.altKey,
-    metaKey: !!event?.metaKey,
-    preventDefault() {},
-    stopPropagation() {},
-  };
-}
-
-function startToolbarPageRepeat(key, event, handler) {
-  ensureToolbarPageRepeatReleaseListeners();
-  stopToolbarPageRepeat();
-
-  const eventSnapshot = createRepeatEventSnapshot(event);
-  pageRepeatState.key = key;
-  handler?.(eventSnapshot);
-
-  pageRepeatState.delayTimer = window.setTimeout(() => {
-    pageRepeatState.delayTimer = null;
-    pageRepeatState.intervalTimer = window.setInterval(() => {
-      if (pageRepeatState.key !== key) return;
-      handler?.(eventSnapshot);
-    }, REPEAT_INTERVAL_MS);
-  }, REPEAT_INITIAL_DELAY_MS);
 }
 
 const PageNavigationButtons = ({
@@ -137,45 +71,24 @@ const PageNavigationButtons = ({
   const { t } = useTranslation();
   const groupId = useId();
 
-  const SUPPRESS_CLICK_WINDOW_MS = 400;
-  const DUPLICATE_REPEAT_START_WINDOW_MS = 120;
-  const suppressClickUntilRef = useRef({ prev: 0, next: 0 });
-  const activeRepeatButtonRef = useRef(/** @type {('prev'|'next'|null)} */ (null));
-  const repeatStartStateRef = useRef({ key: null, until: 0 });
   const inputRef = useRef(null);
   const [isFocused, setIsFocused] = useState(false);
   const hasPages = Math.max(0, Number(totalPagesDisplay) || 0) > 0;
   const [draft, setDraft] = useState(hasPages ? String(pageNumberDisplay) : '0');
+  const previousRepeat = useAcceleratingHoldRepeat({
+    action: handlePrevPage,
+    disabled: prevPageDisabled,
+  });
+  const nextRepeat = useAcceleratingHoldRepeat({
+    action: handleNextPage,
+    disabled: nextPageDisabled,
+  });
 
   useEffect(() => {
     const el = inputRef.current;
     const focused = !!(el && document.activeElement === el) || isFocused;
     if (!focused) setDraft(hasPages ? String(pageNumberDisplay) : '0');
   }, [hasPages, pageNumberDisplay, isFocused]);
-
-  /**
-   * @param {'prev'|'next'} key
-   * @returns {void}
-   */
-  const markSuppressedClick = useCallback((key) => {
-    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
-      ? performance.now()
-      : Date.now();
-    suppressClickUntilRef.current[key] = now + SUPPRESS_CLICK_WINDOW_MS;
-  }, []);
-
-  /**
-   * @returns {void}
-   */
-  const stopAllRepeatNavigation = useCallback(() => {
-    stopToolbarPageRepeat();
-    const activeKey = activeRepeatButtonRef.current;
-    if (activeKey === 'prev' || activeKey === 'next') {
-      markSuppressedClick(activeKey);
-    }
-    activeRepeatButtonRef.current = null;
-    repeatStartStateRef.current = { key: null, until: 0 };
-  }, [markSuppressedClick]);
 
   const applyDraft = useCallback(() => {
     if (!hasPages) {
@@ -194,75 +107,6 @@ const PageNavigationButtons = ({
   const cancelDraft = useCallback(() => {
     setDraft(hasPages ? String(pageNumberDisplay) : '0');
   }, [hasPages, pageNumberDisplay]);
-
-  /**
-   * @param {*} event
-   * @returns {boolean}
-   */
-  const shouldIgnoreDuplicateRepeatStart = useCallback((key, event) => {
-    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
-      ? performance.now()
-      : Date.now();
-    const repeatStartState = repeatStartStateRef.current || {};
-    if (repeatStartState.key === key && Number(repeatStartState.until || 0) > now) {
-      event?.preventDefault?.();
-      return true;
-    }
-    repeatStartStateRef.current = {
-      key,
-      until: now + DUPLICATE_REPEAT_START_WINDOW_MS,
-    };
-    return false;
-  }, []);
-
-  /**
-   * @param {*} event
-   * @returns {void}
-   */
-  const beginPrevRepeat = useCallback((event) => {
-    if (prevPageDisabled) return;
-    if (typeof event?.button === 'number' && event.button !== 0) return;
-    if (shouldIgnoreDuplicateRepeatStart('prev', event)) return;
-    event?.preventDefault?.();
-    activeRepeatButtonRef.current = 'prev';
-    markSuppressedClick('prev');
-    startToolbarPageRepeat('prev', event, handlePrevPage);
-  }, [handlePrevPage, markSuppressedClick, prevPageDisabled, shouldIgnoreDuplicateRepeatStart]);
-
-  /**
-   * @param {*} event
-   * @returns {void}
-   */
-  const beginNextRepeat = useCallback((event) => {
-    if (nextPageDisabled) return;
-    if (typeof event?.button === 'number' && event.button !== 0) return;
-    if (shouldIgnoreDuplicateRepeatStart('next', event)) return;
-    event?.preventDefault?.();
-    activeRepeatButtonRef.current = 'next';
-    markSuppressedClick('next');
-    startToolbarPageRepeat('next', event, handleNextPage);
-  }, [handleNextPage, markSuppressedClick, nextPageDisabled, shouldIgnoreDuplicateRepeatStart]);
-
-  /**
-   * @param {*} event
-   * @param {'prev'|'next'} key
-   * @param {function(*=):void} handler
-   * @returns {void}
-   */
-  const handleSingleStepClick = useCallback((event, key, handler) => {
-    const now = typeof performance !== 'undefined' && Number.isFinite(performance.now())
-      ? performance.now()
-      : Date.now();
-    const suppressUntil = Number(suppressClickUntilRef.current[key] || 0);
-    if (suppressUntil > now) {
-      suppressClickUntilRef.current[key] = 0;
-      event?.preventDefault?.();
-      event?.stopPropagation?.();
-      return;
-    }
-    suppressClickUntilRef.current[key] = 0;
-    handler?.(event);
-  }, []);
 
   const groupTitle = navigationGroupTitle || t('toolbar.page');
   const pageTitle = !hasPages
@@ -326,12 +170,10 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={(event) => handleSingleStepClick(event, 'prev', handlePrevPage)}
-        onPointerDown={beginPrevRepeat}
-        onMouseDown={beginPrevRepeat}
-        onMouseUp={stopAllRepeatNavigation}
-        onTouchStart={beginPrevRepeat}
-        onTouchEnd={stopAllRepeatNavigation}
+        onClick={previousRepeat.onClick}
+        onPointerDown={previousRepeat.onPointerDown}
+        onMouseDown={previousRepeat.onMouseDown}
+        onTouchStart={previousRepeat.onTouchStart}
         aria-label={resolvedPreviousButtonTitle}
         title={resolvedPreviousButtonTitle}
         className="odv-btn"
@@ -381,12 +223,10 @@ const PageNavigationButtons = ({
 
       <button
         type="button"
-        onClick={(event) => handleSingleStepClick(event, 'next', handleNextPage)}
-        onPointerDown={beginNextRepeat}
-        onMouseDown={beginNextRepeat}
-        onMouseUp={stopAllRepeatNavigation}
-        onTouchStart={beginNextRepeat}
-        onTouchEnd={stopAllRepeatNavigation}
+        onClick={nextRepeat.onClick}
+        onPointerDown={nextRepeat.onPointerDown}
+        onMouseDown={nextRepeat.onMouseDown}
+        onTouchStart={nextRepeat.onTouchStart}
         aria-label={resolvedNextButtonTitle}
         title={resolvedNextButtonTitle}
         className="odv-btn"

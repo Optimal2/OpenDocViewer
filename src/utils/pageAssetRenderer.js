@@ -43,6 +43,7 @@ try {
  * @property {'full'|'thumbnail'} variant
  * @property {number=} thumbnailMaxWidth
  * @property {number=} thumbnailMaxHeight
+ * @property {number=} fullPageScale
  */
 
 function fitScale(width, height, maxWidth, maxHeight) {
@@ -487,7 +488,7 @@ export class PageAssetRenderer {
               variant,
               thumbnailMaxWidth: options?.thumbnailMaxWidth,
               thumbnailMaxHeight: options?.thumbnailMaxHeight,
-              fullPageScale: Number(this.config.fullPageScale) || 2.0,
+              fullPageScale: Number(options?.fullPageScale) || Number(this.config.fullPageScale) || 2.0,
               maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
             }).then((result) => {
               this.renderStats.pdfWorkerCount += 1;
@@ -570,7 +571,7 @@ export class PageAssetRenderer {
             Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
             Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
           )
-        : Math.max(0.5, Number(this.config.fullPageScale) || 2.0);
+        : Math.max(0.5, Number(options.fullPageScale) || Number(this.config.fullPageScale) || 2.0);
       const viewport = page.getViewport({ scale: targetScale });
 
       const canvas = document.createElement('canvas');
