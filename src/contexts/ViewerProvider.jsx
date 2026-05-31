@@ -204,6 +204,7 @@ function createLimiter(getLimit) {
   let sequence = 0;
   /** @type {Array<{ task:function():Promise<any>, resolve:function(any):void, reject:function(*):void, priority:number, seq:number }>} */
   const queue = [];
+  let pumpTimer = 0;
 
   /**
    * @param {('critical'|'high'|'normal'|'low'|number|undefined)} priority
@@ -236,7 +237,16 @@ function createLimiter(getLimit) {
     return bestIndex;
   };
 
+  const schedulePump = () => {
+    if (pumpTimer) return;
+    pumpTimer = globalThis.setTimeout?.(() => {
+      pumpTimer = 0;
+      pump();
+    }, 0) || 0;
+  };
+
   const pump = () => {
+    pumpTimer = 0;
     while (activeCount < Math.max(1, Number(getLimit()) || 1) && queue.length > 0) {
       const next = queue.splice(nextQueueIndex(), 1)[0];
       if (!next) return;
@@ -246,7 +256,7 @@ function createLimiter(getLimit) {
         .then(next.resolve, next.reject)
         .finally(() => {
           activeCount = Math.max(0, activeCount - 1);
-          pump();
+          schedulePump();
         });
     }
   };

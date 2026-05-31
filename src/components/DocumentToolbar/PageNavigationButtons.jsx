@@ -23,6 +23,7 @@
  * @param {number} [props.totalPagesDisplay]
  * @param {function(number):void} [props.onGoToPage]
  * @param {boolean} [props.isDocumentLoading=false]
+ * @param {Object=} [props.pageLoadState]
  * @param {'primary'|'compare'} [props.navigationTarget='primary']
  * @param {'page'|'document'} [props.navigationScope='page']
  * @param {string} [props.navigationGroupTitle]
@@ -60,6 +61,7 @@ const PageNavigationButtons = ({
   totalPagesDisplay = totalPages,
   onGoToPage,
   isDocumentLoading = false,
+  pageLoadState = null,
   navigationTarget = 'primary',
   navigationScope = 'page',
   navigationGroupTitle = '',
@@ -143,6 +145,44 @@ const PageNavigationButtons = ({
     : (isDocumentLoading
       ? t('toolbar.navigation.loadingAnnounce', { defaultValue: 'Page navigation is still loading.' })
       : t('toolbar.navigation.readyAnnounce', { defaultValue: 'Page navigation is ready.' }));
+  const loadProgress = useMemo(() => {
+    const total = Math.max(0, Number(pageLoadState?.expectedPages) || Number(totalPagesDisplay) || 0);
+    const ready = Math.max(0, Number(pageLoadState?.readyPages) || 0);
+    const failed = Math.max(0, Number(pageLoadState?.failedPages) || 0);
+    const pending = Math.max(0, Number(pageLoadState?.pendingPages) || Math.max(0, total - ready - failed));
+    const completed = Math.max(0, Math.min(total, ready + failed));
+    return {
+      total,
+      ready,
+      failed,
+      pending,
+      completed,
+      visible: isDocumentLoading && total > 0,
+    };
+  }, [
+    isDocumentLoading,
+    pageLoadState?.expectedPages,
+    pageLoadState?.failedPages,
+    pageLoadState?.pendingPages,
+    pageLoadState?.readyPages,
+    totalPagesDisplay,
+  ]);
+  const loadProgressText = loadProgress.visible
+    ? t('toolbar.navigation.loadProgressShort', {
+        completed: loadProgress.completed,
+        total: loadProgress.total,
+        defaultValue: `${loadProgress.completed}/${loadProgress.total}`,
+      })
+    : '';
+  const loadProgressTitle = loadProgress.visible
+    ? t('toolbar.navigation.loadProgressTitle', {
+        ready: loadProgress.ready,
+        failed: loadProgress.failed,
+        pending: loadProgress.pending,
+        total: loadProgress.total,
+        defaultValue: `Loading pages: ${loadProgress.ready} ready, ${loadProgress.failed} failed, ${loadProgress.pending} remaining of ${loadProgress.total}.`,
+      })
+    : '';
 
   return (
     <div
@@ -221,6 +261,17 @@ const PageNavigationButtons = ({
         title={groupTitle}
       />
 
+      {loadProgress.visible ? (
+        <span
+          className="page-load-progress-badge"
+          role="status"
+          aria-live="polite"
+          title={loadProgressTitle}
+        >
+          {loadProgressText}
+        </span>
+      ) : null}
+
       <button
         type="button"
         onClick={nextRepeat.onClick}
@@ -265,6 +316,12 @@ PageNavigationButtons.propTypes = {
   totalPagesDisplay: PropTypes.number,
   onGoToPage: PropTypes.func,
   isDocumentLoading: PropTypes.bool,
+  pageLoadState: PropTypes.shape({
+    readyPages: PropTypes.number,
+    expectedPages: PropTypes.number,
+    failedPages: PropTypes.number,
+    pendingPages: PropTypes.number,
+  }),
   navigationTarget: PropTypes.oneOf(['primary', 'compare']),
   navigationScope: PropTypes.oneOf(['page', 'document']),
   navigationGroupTitle: PropTypes.string,

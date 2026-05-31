@@ -83,6 +83,7 @@ export class PageAssetWorkerPool {
     this.queue = [];
     this.taskId = 1;
     this.disposed = false;
+    this.pumpTimer = 0;
 
     for (let i = 0; i < this.workerCount; i += 1) {
       try {
@@ -141,6 +142,7 @@ export class PageAssetWorkerPool {
    * @returns {void}
    */
   pump() {
+    this.pumpTimer = 0;
     if (this.disposed) return;
     while (this.queue.length > 0) {
       const slot = this.workers.findIndex((entry) => entry && !entry.dead && !entry.busy);
@@ -168,6 +170,14 @@ export class PageAssetWorkerPool {
         next.reject(nextError);
       }
     }
+  }
+
+  schedulePump() {
+    if (this.disposed || this.pumpTimer) return;
+    this.pumpTimer = globalThis.setTimeout?.(() => {
+      this.pumpTimer = 0;
+      this.pump();
+    }, 0) || 0;
   }
 
   /**
@@ -203,7 +213,7 @@ export class PageAssetWorkerPool {
       pending.reject(error);
     }
 
-    this.pump();
+    this.schedulePump();
   }
 
   /**
@@ -236,7 +246,7 @@ export class PageAssetWorkerPool {
       remainingWorkers: this.workerCount,
       error: String(errorLike?.message || errorLike || 'unknown'),
     });
-    this.pump();
+    this.schedulePump();
   }
 
   /**
@@ -251,6 +261,10 @@ export class PageAssetWorkerPool {
     }
     this.pending.clear();
     this.queue.length = 0;
+    if (this.pumpTimer) {
+      try { globalThis.clearTimeout?.(this.pumpTimer); } catch {}
+      this.pumpTimer = 0;
+    }
 
     for (const entry of this.workers) {
       if (!entry?.worker) continue;

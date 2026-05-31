@@ -63,6 +63,8 @@
       "groupDescription": "{scope} för {target}.",
       "loadingAnnounce": "Sidnavigeringen laddar fortfarande sidor.",
       "readyAnnounce": "Sidnavigeringen är redo.",
+      "loadProgressShort": "{completed}/{total} klara",
+      "loadProgressTitle": "Laddar sidor: {ready} klara, {failed} misslyckade, {pending} återstår av {total}.",
       "noPagesTitle": "Inga synliga sidor tillgängliga",
       "noPagesAnnounce": "Det finns för närvarande inga synliga sidor."
     },

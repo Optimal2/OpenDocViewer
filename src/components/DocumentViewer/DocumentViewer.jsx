@@ -335,6 +335,7 @@ const DocumentViewer = () => {
         totalPages={totalPages}
         totalPagesDisplay={totalPagesDisplay}
         isDocumentLoading={isDocumentLoading}
+        pageLoadState={pageLoadState}
 
         zoom={zoom}
         setZoom={setZoom}
