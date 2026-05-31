@@ -63,6 +63,9 @@ import {
  * @property {boolean=} trackInCache
  * @property {('critical'|'high'|'normal'|'low'|number)=} priority
  * @property {boolean=} skipFullReuse
+ * @property {boolean=} forceRefresh
+ * @property {boolean=} persist
+ * @property {number=} fullPageScale
  */
 
 /**
@@ -72,6 +75,37 @@ import {
  */
 function makeAssetKey(variant, pageIndex) {
   return `${variant}:${pageIndex}`;
+}
+
+/**
+ * @param {('full'|'thumbnail')} variant
+ * @param {number} pageIndex
+ * @param {EnsurePageAssetOptions=} options
+ * @returns {string}
+ */
+function makePendingAssetKey(variant, pageIndex, options = {}) {
+  const scale = Number(options?.fullPageScale);
+  return Number.isFinite(scale) && scale > 0
+    ? `${makeAssetKey(variant, pageIndex)}:scale:${scale}`
+    : makeAssetKey(variant, pageIndex);
+}
+
+/**
+ * @param {*} page
+ * @returns {string}
+ */
+function makePdfResolutionPageKey(page) {
+  const sourceKey = String(page?.sourceKey || '');
+  const sourcePageIndex = Math.max(0, Number(page?.pageIndex) || 0);
+  return sourceKey ? `${sourceKey}:${sourcePageIndex}` : '';
+}
+
+/**
+ * @param {*} page
+ * @returns {boolean}
+ */
+function isPdfPageEntry(page) {
+  return String(page?.fileExtension || '').toLowerCase() === 'pdf';
 }
 
 /**
@@ -243,6 +277,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const [messageQueue, setMessageQueue] = useState([]);
   const [documentLoadingConfig, setDocumentLoadingConfig] = useState(getDocumentLoadingConfig());
   const [memoryPressureStage, setMemoryPressureStage] = useState('normal');
+  const [pdfResolutionBoostState, setPdfResolutionBoostState] = useState({ boostedKeys: [], pendingKeys: [] });
   const [runtimeDiagnostics, setRuntimeDiagnostics] = useState({
     sessionStartedAtMs: 0,
     loadRunStartedAtMs: 0,
@@ -312,10 +347,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const loadRunCompletedAtMsRef = useRef(0);
   const knownFullAssetPagesRef = useRef(new Set());
   const knownThumbnailAssetPagesRef = useRef(new Set());
+  const pdfResolutionBoostedKeysRef = useRef(new Set());
+  const pdfResolutionPendingKeysRef = useRef(new Set());
 
   const renderWithLimit = useRef(createLimiter(
     () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
   )).current;
+
+  const publishPdfResolutionBoostState = useCallback(() => {
+    setPdfResolutionBoostState({
+      boostedKeys: Array.from(pdfResolutionBoostedKeysRef.current),
+      pendingKeys: Array.from(pdfResolutionPendingKeysRef.current),
+    });
+  }, []);
 
   /**
    * @param {Array<any>|function(Array<any>): Array<any>} updater
@@ -480,6 +524,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     releasedRasterSourceKeysRef.current.clear();
     knownFullAssetPagesRef.current.clear();
     knownThumbnailAssetPagesRef.current.clear();
+    pdfResolutionBoostedKeysRef.current.clear();
+    pdfResolutionPendingKeysRef.current.clear();
+    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -764,6 +811,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     releasedRasterSourceKeysRef.current.clear();
     knownFullAssetPagesRef.current.clear();
     knownThumbnailAssetPagesRef.current.clear();
+    pdfResolutionBoostedKeysRef.current.clear();
+    pdfResolutionPendingKeysRef.current.clear();
+    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -1242,10 +1292,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   /**
    * @param {number} pageIndex
    * @param {('full'|'thumbnail')} variant
-   * @param {('critical'|'high'|'normal'|'low'|number)=} priority
+   * @param {('critical'|'high'|'normal'|'low'|number|EnsurePageAssetOptions)=} optionsOrPriority
    * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
    */
-  const renderPageBlob = useCallback(async (pageIndex, variant, priority = 'normal') => {
+  const renderPageBlob = useCallback(async (pageIndex, variant, optionsOrPriority = 'normal') => {
+    const renderOptions = optionsOrPriority && typeof optionsOrPriority === 'object'
+      ? optionsOrPriority
+      : { priority: optionsOrPriority };
     const page = getPageAt(allPagesRef.current, pageIndex);
     if (!page || page.status === -1) throw new Error(`Page ${pageIndex} is not available.`);
     if (!page.sourceKey) throw new Error(`Page ${pageIndex} does not have a source key yet.`);
@@ -1262,13 +1315,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       variant,
       thumbnailMaxWidth: sessionConfigRef.current.render.thumbnailMaxWidth,
       thumbnailMaxHeight: sessionConfigRef.current.render.thumbnailMaxHeight,
+      fullPageScale: renderOptions.fullPageScale,
     });
 
     if (pageRendererRef.current?.canRenderInWorker?.(source.fileExtension, variant)) {
       return renderTask();
     }
 
-    return renderWithLimit(renderTask, priority);
+    return renderWithLimit(renderTask, renderOptions.priority || 'normal');
   }, [renderWithLimit]);
 
   /**
@@ -1341,7 +1395,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       clearPageAssetReference(safeIndex, variant, existingUrl);
     }
 
-    const pendingKey = makeAssetKey(variant, safeIndex);
+    const pendingKey = makePendingAssetKey(variant, safeIndex, options);
     if (pendingAssetPromisesRef.current.has(pendingKey)) {
       return pendingAssetPromisesRef.current.get(pendingKey);
     }
@@ -1351,15 +1405,25 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const promise = (async () => {
       try {
-        const restoredUrl = await restorePersistedAsset(safeIndex, variant, options);
-        if (sessionEpochRef.current !== sessionEpoch) return null;
-        if (restoredUrl) return restoredUrl;
+        const skipPersistedRestore = options.forceRefresh === true
+          && Number.isFinite(Number(options.fullPageScale))
+          && Number(options.fullPageScale) > 0;
+        if (!skipPersistedRestore) {
+          const restoredUrl = await restorePersistedAsset(safeIndex, variant, options);
+          if (sessionEpochRef.current !== sessionEpoch) return null;
+          if (restoredUrl) return restoredUrl;
+        }
 
-        const rendered = await renderPageBlob(safeIndex, variant, options.priority || 'normal');
+        const rendered = await renderPageBlob(safeIndex, variant, {
+          priority: options.priority || 'normal',
+          fullPageScale: options.fullPageScale,
+        });
         if (sessionEpochRef.current !== sessionEpoch) return null;
 
-        await persistRenderedAsset(safeIndex, variant, rendered);
-        if (sessionEpochRef.current !== sessionEpoch) return null;
+        if (options.persist !== false) {
+          await persistRenderedAsset(safeIndex, variant, rendered);
+          if (sessionEpochRef.current !== sessionEpoch) return null;
+        }
 
         const url = createTrackedObjectUrl(rendered.blob);
         if (options.trackInCache !== false) {
@@ -1421,6 +1485,58 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
   }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+
+  /**
+   * Render one PDF page again at twice the configured full-page PDF scale.
+   * The boost is intentionally session-local and one-shot per PDF page; it replaces the visible
+   * object URL without changing the persisted normal-resolution cache entry.
+   *
+   * @param {number} pageIndex
+   * @returns {Promise<boolean>}
+   */
+  const enhancePdfPageResolution = useCallback(async (pageIndex) => {
+    const safeIndex = Math.max(0, Number(pageIndex) || 0);
+    const page = getPageAt(allPagesRef.current, safeIndex);
+    if (!page || page.status === -1 || !isPdfPageEntry(page)) return false;
+
+    const pageKey = makePdfResolutionPageKey(page);
+    if (!pageKey) return false;
+    if (pdfResolutionBoostedKeysRef.current.has(pageKey) || pdfResolutionPendingKeysRef.current.has(pageKey)) {
+      return false;
+    }
+
+    pdfResolutionBoostedKeysRef.current.add(pageKey);
+    pdfResolutionPendingKeysRef.current.add(pageKey);
+    publishPdfResolutionBoostState();
+
+    const baseScale = Math.max(0.5, Number(sessionConfigRef.current?.render?.fullPageScale) || 2.0);
+    try {
+      const url = await ensurePageAsset(safeIndex, 'full', {
+        forceRefresh: true,
+        priority: 'critical',
+        fullPageScale: baseScale * 2,
+        persist: false,
+      });
+      if (url) {
+        logger.info('Enhanced PDF page resolution for current session', {
+          pageIndex: safeIndex,
+          sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
+          scale: baseScale * 2,
+        });
+        return true;
+      }
+      return false;
+    } catch (error) {
+      logger.warn('Failed to enhance PDF page resolution', {
+        pageIndex: safeIndex,
+        error: String(error?.message || error),
+      });
+      return false;
+    } finally {
+      pdfResolutionPendingKeysRef.current.delete(pageKey);
+      publishPdfResolutionBoostState();
+    }
+  }, [ensurePageAsset, publishPdfResolutionBoostState]);
 
   /**
    * Drain background eager-render work without blocking the UI thread.
@@ -1784,6 +1900,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceBlob,
     registerSourceDescriptor,
     ensurePageAsset,
+    enhancePdfPageResolution,
+    pdfResolutionBoostState,
     touchPageAsset,
     pinPageAsset,
     unpinPageAsset,
@@ -1817,6 +1935,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceBlob,
     registerSourceDescriptor,
     ensurePageAsset,
+    enhancePdfPageResolution,
+    pdfResolutionBoostState,
     touchPageAsset,
     pinPageAsset,
     unpinPageAsset,

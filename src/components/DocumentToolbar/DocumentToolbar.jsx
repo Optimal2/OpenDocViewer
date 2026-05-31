@@ -19,7 +19,6 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import userLog from '../../logging/userLogger.js';
 import logger from '../../logging/systemLogger.js';
-import usePageNavigation from '../../hooks/usePageNavigation.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
@@ -144,6 +143,10 @@ function getPdfProgressPercent(progress) {
  * @property {PageNumberSetter=} setVisiblePageNumber
  * @property {PageNumberSetter} [setComparePageNumber]
  * @property {PageNumberSetter=} [setVisibleComparePageNumber]
+ * @property {function(string=): void} [goToPreviousPage]
+ * @property {function(string=): void} [goToNextPage]
+ * @property {function(string=): void} [goToFirstPage]
+ * @property {function(string=): void} [goToLastPage]
  * @property {function(string=): void} [goToPreviousDocument]
  * @property {function(string=): void} [goToNextDocument]
  * @property {function(string=): void} [goToFirstDocument]
@@ -208,6 +211,24 @@ function normalizeToolbarPageNumber(value, totalPages, fallbackPage = 1) {
 }
 
 /**
+ * @param {*} page
+ * @returns {string}
+ */
+function makePdfResolutionPageKey(page) {
+  const sourceKey = String(page?.sourceKey || '');
+  const sourcePageIndex = Math.max(0, Number(page?.pageIndex) || 0);
+  return sourceKey ? `${sourceKey}:${sourcePageIndex}` : '';
+}
+
+/**
+ * @param {*} page
+ * @returns {boolean}
+ */
+function isPdfPage(page) {
+  return String(page?.fileExtension || '').toLowerCase() === 'pdf';
+}
+
+/**
  * Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
  *
  * The component owns only local toolbar UI state. Page rendering, zoom math, and print execution
@@ -233,6 +254,10 @@ const DocumentToolbar = ({
   setVisiblePageNumber,
   setComparePageNumber,
   setVisibleComparePageNumber,
+  goToPreviousPage,
+  goToNextPage,
+  goToFirstPage,
+  goToLastPage,
   goToPreviousDocument,
   goToNextDocument,
   goToFirstDocument,
@@ -377,24 +402,6 @@ const DocumentToolbar = ({
     canGoLast: !!compareDocumentNavigation?.canGoLast,
   }), [compareDocumentNavigation]);
 
-  // Navigation helpers (single-step handlers + press-and-hold timers).
-  // Compare mode has an explicit active pane. Shift temporarily inverts that pane, while Ctrl
-  // switches the scope to whole-document stepping when more than one visible document exists.
-  const primaryNavigation = usePageNavigation(setPageNumber, totalPages);
-  const compareNavigation = usePageNavigation(setComparePageNumber, totalPages);
-  const {
-    handlePrevPageWrapper: handlePrimaryPrevPage,
-    handleNextPageWrapper: handlePrimaryNextPage,
-    handleFirstPageWrapper: handlePrimaryFirstPage,
-    handleLastPageWrapper: handlePrimaryLastPage,
-  } = primaryNavigation;
-  const {
-    handlePrevPageWrapper: handleComparePrevPage,
-    handleNextPageWrapper: handleCompareNextPage,
-    handleFirstPageWrapper: handleCompareFirstPage,
-    handleLastPageWrapper: handleCompareLastPage,
-  } = compareNavigation;
-
   const getEffectiveModifierState = useCallback((event) => {
     const base = navigationModifierState || { shift: false, ctrl: false };
     const shift = typeof event?.shiftKey === 'boolean'
@@ -450,32 +457,15 @@ const DocumentToolbar = ({
 
   const invokePageNavigationForTarget = useCallback((target, direction) => {
     const safeTarget = target === 'compare' ? 'compare' : 'primary';
-    if (direction === 'prev') {
-      if (safeTarget === 'compare') handleComparePrevPage?.();
-      else handlePrimaryPrevPage?.();
-      return;
-    }
-    if (direction === 'next') {
-      if (safeTarget === 'compare') handleCompareNextPage?.();
-      else handlePrimaryNextPage?.();
-      return;
-    }
-    if (direction === 'first') {
-      if (safeTarget === 'compare') handleCompareFirstPage?.();
-      else handlePrimaryFirstPage?.();
-      return;
-    }
-    if (safeTarget === 'compare') handleCompareLastPage?.();
-    else handlePrimaryLastPage?.();
+    if (direction === 'prev') { goToPreviousPage?.(safeTarget); return; }
+    if (direction === 'next') { goToNextPage?.(safeTarget); return; }
+    if (direction === 'first') { goToFirstPage?.(safeTarget); return; }
+    goToLastPage?.(safeTarget);
   }, [
-    handleCompareFirstPage,
-    handleCompareLastPage,
-    handleCompareNextPage,
-    handleComparePrevPage,
-    handlePrimaryFirstPage,
-    handlePrimaryLastPage,
-    handlePrimaryNextPage,
-    handlePrimaryPrevPage,
+    goToFirstPage,
+    goToLastPage,
+    goToNextPage,
+    goToPreviousPage,
   ]);
 
   const invokeDocumentNavigationForTarget = useCallback((target, direction) => {
@@ -536,6 +526,19 @@ const DocumentToolbar = ({
     : normalizeToolbarPageNumber(pageNumber, totalPages, 1);
   const editingTargetMode = comparePaneVisible && navigationTargetMode === 'compare' ? 'compare' : 'primary';
   const editingProperties = editingTargetMode === 'compare' ? compareImageProperties : primaryImageProperties;
+  const editingPageNumber = editingTargetMode === 'compare' ? compareNavigationPageDisplay : pageNumberDisplay;
+  const editingPageIndex = Math.max(0, Math.floor(Number(editingPageNumber) || 1) - 1);
+  const editingPage = Array.isArray(allPages) ? (allPages[editingPageIndex] || null) : null;
+  const editingPageResolutionKey = makePdfResolutionPageKey(editingPage);
+  const pdfResolutionBoostedKeys = viewerContext?.pdfResolutionBoostState?.boostedKeys || [];
+  const pdfResolutionPendingKeys = viewerContext?.pdfResolutionBoostState?.pendingKeys || [];
+  const isEditingPdfPage = isPdfPage(editingPage);
+  const isPdfResolutionBoosted = !!editingPageResolutionKey && pdfResolutionBoostedKeys.includes(editingPageResolutionKey);
+  const isPdfResolutionPending = !!editingPageResolutionKey && pdfResolutionPendingKeys.includes(editingPageResolutionKey);
+  const canBoostPdfResolution = isEditingPdfPage
+    && !isPdfResolutionBoosted
+    && !isPdfResolutionPending
+    && typeof viewerContext?.enhancePdfPageResolution === 'function';
   const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page' })
     : t('toolbar.editingTargetPrimary', { defaultValue: 'Editing the primary / left page' });
@@ -647,6 +650,19 @@ const DocumentToolbar = ({
    * @param {*} event
    * @returns {void}
    */
+  const handleEnhancePdfResolutionClick = useCallback((event) => {
+    const target = resolveEditingTarget(event);
+    const targetPageNumber = target === 'compare' ? compareNavigationPageDisplay : pageNumberDisplay;
+    const targetPageIndex = Math.max(0, Math.floor(Number(targetPageNumber) || 1) - 1);
+    const page = Array.isArray(allPages) ? (allPages[targetPageIndex] || null) : null;
+    if (!isPdfPage(page)) return;
+    void viewerContext?.enhancePdfPageResolution?.(targetPageIndex);
+  }, [allPages, compareNavigationPageDisplay, pageNumberDisplay, resolveEditingTarget, viewerContext]);
+
+  /**
+   * @param {*} event
+   * @returns {void}
+   */
   const handleResetAdjustmentsClick = useCallback((event) => {
     resetImageProperties(resolveEditingTarget(event));
     setOpenAdjustmentMenu(null);
@@ -670,6 +686,13 @@ const DocumentToolbar = ({
 
   const isBrightnessAdjusted = Number(editingProperties?.brightness ?? 100) !== 100;
   const isContrastAdjusted = Number(editingProperties?.contrast ?? 100) !== 100;
+  const enhancePdfResolutionTitle = isPdfResolutionPending
+    ? t('toolbar.enhancePdfResolutionPending', { defaultValue: 'Increasing PDF page resolution…' })
+    : isPdfResolutionBoosted
+      ? t('toolbar.enhancePdfResolutionDone', { defaultValue: 'Resolution boost already applied to this PDF page' })
+      : isEditingPdfPage
+        ? t('toolbar.enhancePdfResolution', { defaultValue: 'Increase PDF page resolution' })
+        : t('toolbar.enhancePdfResolutionUnavailable', { defaultValue: 'Resolution boost is available only for PDF pages' });
 
   /**
    * Build a compact "pages" descriptor for logging.
@@ -1346,6 +1369,17 @@ const DocumentToolbar = ({
           <span className="material-icons" aria-hidden="true">rotate_right</span>
         </button>
 
+        <button
+          type="button"
+          onClick={handleEnhancePdfResolutionClick}
+          aria-label={enhancePdfResolutionTitle}
+          title={enhancePdfResolutionTitle}
+          className={`odv-btn${isPdfResolutionBoosted || isPdfResolutionPending ? ' is-active' : ''}`}
+          disabled={!canBoostPdfResolution}
+        >
+          <span className="material-icons" aria-hidden="true">high_quality</span>
+        </button>
+
         <div className="toolbar-menu-shell toolbar-adjustment-shell">
           <button
             ref={brightnessButtonRef}
@@ -1707,6 +1741,10 @@ DocumentToolbar.propTypes = {
     shift: PropTypes.bool.isRequired,
     ctrl: PropTypes.bool.isRequired,
   }),
+  goToPreviousPage: PropTypes.func,
+  goToNextPage: PropTypes.func,
+  goToFirstPage: PropTypes.func,
+  goToLastPage: PropTypes.func,
   goToPreviousDocument: PropTypes.func,
   goToNextDocument: PropTypes.func,
   goToFirstDocument: PropTypes.func,

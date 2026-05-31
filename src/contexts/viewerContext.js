@@ -58,6 +58,8 @@ import { createContext } from 'react';
  * @property {('critical'|'high'|'normal'|'low'|number)=} priority
  * @property {boolean=} skipFullReuse
  * @property {boolean=} forceRefresh
+ * @property {boolean=} persist
+ * @property {number=} fullPageScale
  */
 
 /**
@@ -141,6 +143,8 @@ import { createContext } from 'react';
  * @property {function(string): Promise<(Blob|null)>} readSourceBlob
  * @property {function(ViewerSourceDescriptor): void} registerSourceDescriptor
  * @property {function(number, ('full'|'thumbnail'), (EnsurePageAssetOptions|undefined)=): Promise<(string|null)>} ensurePageAsset
+ * @property {function(number): Promise<boolean>} enhancePdfPageResolution
+ * @property {{ boostedKeys:Array<string>, pendingKeys:Array<string> }} pdfResolutionBoostState
  * @property {function(number, ('full'|'thumbnail')): void} touchPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} pinPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} unpinPageAsset
