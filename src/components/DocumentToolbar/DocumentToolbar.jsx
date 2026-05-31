@@ -20,7 +20,6 @@ import { useTranslation } from 'react-i18next';
 import userLog from '../../logging/userLogger.js';
 import logger from '../../logging/systemLogger.js';
 import usePageNavigation from '../../hooks/usePageNavigation.js';
-import usePageTimer from '../../hooks/usePageTimer.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
@@ -292,7 +291,6 @@ const DocumentToolbar = ({
   // output is intentionally excluded because it includes transient visual edit state.
   const pdfPrintCacheRef = useRef(/** @type {Map<string, { blob:Blob, detail:Object, filename:string, total:number, createdAt:number }>} */ (new Map()));
   const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number, detail:Object }|null} */ (null));
-  const documentRepeatTargetRef = useRef('primary');
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -389,38 +387,13 @@ const DocumentToolbar = ({
     handleNextPageWrapper: handlePrimaryNextPage,
     handleFirstPageWrapper: handlePrimaryFirstPage,
     handleLastPageWrapper: handlePrimaryLastPage,
-    startPrevPageTimer: startPrimaryPrevPageTimer,
-    stopPrevPageTimer: stopPrimaryPrevPageTimer,
-    startNextPageTimer: startPrimaryNextPageTimer,
-    stopNextPageTimer: stopPrimaryNextPageTimer,
   } = primaryNavigation;
   const {
     handlePrevPageWrapper: handleComparePrevPage,
     handleNextPageWrapper: handleCompareNextPage,
     handleFirstPageWrapper: handleCompareFirstPage,
     handleLastPageWrapper: handleCompareLastPage,
-    startPrevPageTimer: startComparePrevPageTimer,
-    stopPrevPageTimer: stopComparePrevPageTimer,
-    startNextPageTimer: startCompareNextPageTimer,
-    stopNextPageTimer: stopCompareNextPageTimer,
   } = compareNavigation;
-
-  const handleDocumentPrevRepeatStep = useCallback(() => {
-    const target = documentRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
-    goToPreviousDocument?.(target);
-  }, [goToPreviousDocument]);
-  const handleDocumentNextRepeatStep = useCallback(() => {
-    const target = documentRepeatTargetRef.current === 'compare' ? 'compare' : 'primary';
-    goToNextDocument?.(target);
-  }, [goToNextDocument]);
-  const {
-    startPageTimer: startDocumentPrevPageTimer,
-    stopPageTimer: stopDocumentPrevPageTimer,
-  } = usePageTimer(500, handleDocumentPrevRepeatStep);
-  const {
-    startPageTimer: startDocumentNextPageTimer,
-    stopPageTimer: stopDocumentNextPageTimer,
-  } = usePageTimer(500, handleDocumentNextRepeatStep);
 
   const getEffectiveModifierState = useCallback((event) => {
     const base = navigationModifierState || { shift: false, ctrl: false };
@@ -545,58 +518,6 @@ const DocumentToolbar = ({
   const handleLastPage = useCallback((event) => {
     invokeNavigation(event, 'last');
   }, [invokeNavigation]);
-
-  const startPrevPageTimer = useCallback((direction, event) => {
-    if (blockUnavailableCompareTarget(event)) return;
-    const target = resolveNavigationTarget(event);
-    const scope = resolveNavigationScope(event);
-    if (scope === 'document') {
-      documentRepeatTargetRef.current = target;
-      startDocumentPrevPageTimer(direction);
-      return;
-    }
-    if (target === 'compare') startComparePrevPageTimer(direction);
-    else startPrimaryPrevPageTimer(direction);
-  }, [
-    blockUnavailableCompareTarget,
-    resolveNavigationScope,
-    resolveNavigationTarget,
-    startComparePrevPageTimer,
-    startDocumentPrevPageTimer,
-    startPrimaryPrevPageTimer,
-  ]);
-
-  const stopPrevPageTimer = useCallback(() => {
-    stopPrimaryPrevPageTimer();
-    stopComparePrevPageTimer();
-    stopDocumentPrevPageTimer();
-  }, [stopComparePrevPageTimer, stopDocumentPrevPageTimer, stopPrimaryPrevPageTimer]);
-
-  const startNextPageTimer = useCallback((direction, event) => {
-    if (blockUnavailableCompareTarget(event)) return;
-    const target = resolveNavigationTarget(event);
-    const scope = resolveNavigationScope(event);
-    if (scope === 'document') {
-      documentRepeatTargetRef.current = target;
-      startDocumentNextPageTimer(direction);
-      return;
-    }
-    if (target === 'compare') startCompareNextPageTimer(direction);
-    else startPrimaryNextPageTimer(direction);
-  }, [
-    blockUnavailableCompareTarget,
-    resolveNavigationScope,
-    resolveNavigationTarget,
-    startCompareNextPageTimer,
-    startDocumentNextPageTimer,
-    startPrimaryNextPageTimer,
-  ]);
-
-  const stopNextPageTimer = useCallback(() => {
-    stopPrimaryNextPageTimer();
-    stopCompareNextPageTimer();
-    stopDocumentNextPageTimer();
-  }, [stopCompareNextPageTimer, stopDocumentNextPageTimer, stopPrimaryNextPageTimer]);
 
   const compareNavigationPage = useMemo(
     () => normalizeToolbarPageNumber(comparePageNumber, totalPages, pageNumber),
@@ -1351,10 +1272,6 @@ const DocumentToolbar = ({
         nextPageDisabled={effectiveNextPageDisabled}
         firstPageDisabled={effectiveFirstPageDisabled}
         lastPageDisabled={effectiveLastPageDisabled}
-        startPrevPageTimer={startPrevPageTimer}
-        stopPrevPageTimer={stopPrevPageTimer}
-        startNextPageTimer={startNextPageTimer}
-        stopNextPageTimer={stopNextPageTimer}
         handleFirstPage={handleFirstPage}
         handleLastPage={handleLastPage}
         handlePrevPage={handlePrevPage}
