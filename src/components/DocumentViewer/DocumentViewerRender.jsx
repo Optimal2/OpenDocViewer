@@ -402,7 +402,6 @@ const DocumentViewerRender = ({
     const paneElement = getPaneElement(pane);
     const viewport = getPaneViewport(pane);
     if (!paneElement || !viewport) return;
-    if (viewport.scrollHeight <= viewport.clientHeight + 1) return;
 
     const absX = Math.abs(Number(event?.deltaX || 0));
     const deltaY = getWheelDeltaYPx(event, viewport);
