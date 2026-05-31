@@ -133,25 +133,22 @@ function releasePdfEntry(entry) {
   }
 }
 
-async function setLru(map, key, value, limit) {
+function setLru(map, key, value, limit) {
   map.delete(key);
   map.set(key, value);
-  const disposals = [];
   while (map.size > Math.max(1, Number(limit) || 1)) {
     const oldestKey = map.keys().next().value;
     const oldest = map.get(oldestKey);
     map.delete(oldestKey);
-    disposals.push(requestPdfEntryDisposal(oldest));
-  }
-  if (disposals.length > 0) {
-    await Promise.allSettled(disposals);
+    // Disposal is lease-aware and may wait for an active render; do not block cache mutation here.
+    void requestPdfEntryDisposal(oldest);
   }
 }
 
-async function touchLru(map, key, limit) {
+function touchLru(map, key, limit) {
   if (!map.has(key)) return;
   const value = map.get(key);
-  await setLru(map, key, value, limit);
+  setLru(map, key, value, limit);
 }
 
 function createLocalCanvas(width, height) {
@@ -209,6 +206,7 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
         disableFontFace: true,
         useSystemFonts: false,
       });
+      // Store before waiting for loadingTask.promise so eviction can cancel an in-flight load.
       entry.loadingTask = loadingTask;
       return loadingTask.promise;
     }).catch((error) => {
@@ -216,10 +214,10 @@ async function getPdfDocumentEntry(sourceBlob, sourceKey, maxOpenPdfDocuments) {
       throw error;
     });
 
-    await setLru(pdfCache, key, entry, maxOpenPdfDocuments);
+    setLru(pdfCache, key, entry, maxOpenPdfDocuments);
   }
 
-  await touchLru(pdfCache, key, maxOpenPdfDocuments);
+  touchLru(pdfCache, key, maxOpenPdfDocuments);
   return pdfCache.get(key);
 }
 
