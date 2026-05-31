@@ -14,6 +14,7 @@ const workerScope = self;
 const MIN_THUMBNAIL_DIMENSION = 24;
 const DEFAULT_THUMBNAIL_WIDTH = 220;
 const DEFAULT_THUMBNAIL_HEIGHT = 310;
+const PDFJS_PAGE_WORKER_VERBOSITY = pdfjsLib?.VerbosityLevel?.ERRORS ?? 0;
 
 /** @type {Map<string, { loadingTask:any, promise:Promise<any>, dispose:function():Promise<void> }>} */
 const pdfCache = new Map();
@@ -139,6 +140,9 @@ async function getPdfDocument(sourceBlob, sourceKey, maxOpenPdfDocuments) {
     const buffer = await sourceBlob.arrayBuffer();
     const loadingTask = pdfjsLib.getDocument({
       data: buffer,
+      // pdf.js runs inside ODV's own page-image worker here. If pdf.js cannot start a nested
+      // worker it uses its in-thread loopback path, which is expected in this environment.
+      verbosity: PDFJS_PAGE_WORKER_VERBOSITY,
       // A dedicated worker rendering into OffscreenCanvas cannot rely on the browser FontFace
       // path in the same way the main thread can. Let pdf.js draw embedded glyphs directly so
       // text keeps its real shape instead of degrading to missing-font boxes.
