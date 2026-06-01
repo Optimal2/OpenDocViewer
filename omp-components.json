@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "repositoryKey": "opendocviewer",
-  "repositoryVersion": "2.3.26",
+  "repositoryVersion": "2.3.27",
   "moduleDefinitions": [
     {
       "moduleKey": "opendocviewer",
@@ -17,7 +17,7 @@
       "appKey": "opendocviewer_webapp",
       "packageType": "web-app",
       "targetName": "opendocviewer",
-      "version": "2.3.26",
+      "version": "2.3.27",
       "projectPath": ".",
       "relativePathTemplate": "opendocviewer/web/{version}",
       "packageFileTemplate": "OpenDocViewer-{version}.zip",
