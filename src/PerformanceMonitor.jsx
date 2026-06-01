@@ -78,6 +78,12 @@ function formatPhaseTiming(label, count, totalMs, maxMs) {
 }
 
 /**
+ * Check the flat viewer page list for ordering mistakes that would be user-visible.
+ *
+ * The check is sequence-based, not globally source-unique: opening the same file twice is valid
+ * and should produce two complete source sequences. A duplicate is reported only when the same
+ * source page appears twice inside one uninterrupted sequence.
+ *
  * @param {Array<*>} pages
  * @returns {{ ok:boolean, checkedPages:number, duplicatePages:number, missingPages:number, orderIssues:number, indexMismatches:number, sourceCount:number, sequenceCount:number }}
  */

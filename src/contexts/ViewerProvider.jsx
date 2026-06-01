@@ -1855,6 +1855,18 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     stats.maxMs = Math.max(Number(stats.maxMs) || 0, safeDurationMs);
   }, []);
 
+  /**
+   * Try to render a full-page PDF warm-up batch through the partitioned worker path.
+   *
+   * This is deliberately opt-in because it trades the simple per-page queue for a larger
+   * worker batch. Each selected page is registered in the normal pending-asset map so foreground
+   * navigation and nearby warm-up cannot render the same page at the same time. If the batch path
+   * fails, returns no item result, or cannot commit a rendered blob, the affected page falls back
+   * to the regular `ensurePageAsset` path.
+   *
+   * @param {Array<*>} tasks
+   * @returns {Promise<boolean>}
+   */
   const tryRenderPdfWarmupBatch = useCallback(async (tasks) => {
     const renderConfig = sessionConfigRef.current?.render || {};
     if (String(renderConfig.pdfWorkerWarmupBatchMode || 'off').toLowerCase() !== 'partitioned') return false;
@@ -1927,42 +1939,51 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       if (!task || completedItems.has(itemId)) return;
       completedItems.add(itemId);
 
-      if (sessionEpochRef.current !== sessionEpoch) {
-        resolveBatchPending(itemId, null);
-        return;
-      }
-      if (!result?.ok || !(result.blob instanceof Blob)) {
+      try {
+        if (sessionEpochRef.current !== sessionEpoch) {
+          resolveBatchPending(itemId, null);
+          return;
+        }
+        if (!result?.ok || !(result.blob instanceof Blob)) {
+          resolveBatchPending(itemId, null);
+          failedTasks.push(task);
+          return;
+        }
+
+        const page = getPageAt(allPagesRef.current, task.pageIndex);
+        const existingUrl = String(page?.fullSizeUrl || '').trim();
+        if (!page || page.status === -1) {
+          resolveBatchPending(itemId, null);
+          return;
+        }
+        if (page.fullSizeStatus === 1 && existingUrl && isReusableAssetUrl(existingUrl)) {
+          resolveBatchPending(itemId, existingUrl);
+          return;
+        }
+
+        const renderDurationMs = Math.max(0, Number(result.durationMs) || 0);
+        stats.renderCompletedCount += 1;
+        stats.renderTotalMs += renderDurationMs;
+        stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, renderDurationMs);
+
+        const rendered = {
+          blob: result.blob,
+          width: Math.max(1, Number(result.width) || 1),
+          height: Math.max(1, Number(result.height) || 1),
+          mimeType: String(result.mimeType || result.blob.type || 'image/png'),
+        };
+        const url = commitRenderedPageAsset(task.pageIndex, 'full', rendered, { priority: task.priority || 'low' });
+        resolveBatchPending(itemId, url);
+        if (persistFullInBackground) {
+          persistRenderedAssetInBackground(task.pageIndex, 'full', rendered, sessionEpoch);
+        }
+      } catch (error) {
         resolveBatchPending(itemId, null);
         failedTasks.push(task);
-        return;
-      }
-
-      const page = getPageAt(allPagesRef.current, task.pageIndex);
-      const existingUrl = String(page?.fullSizeUrl || '').trim();
-      if (!page || page.status === -1) {
-        resolveBatchPending(itemId, null);
-        return;
-      }
-      if (page.fullSizeStatus === 1 && existingUrl && isReusableAssetUrl(existingUrl)) {
-        resolveBatchPending(itemId, existingUrl);
-        return;
-      }
-
-      const renderDurationMs = Math.max(0, Number(result.durationMs) || 0);
-      stats.renderCompletedCount += 1;
-      stats.renderTotalMs += renderDurationMs;
-      stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, renderDurationMs);
-
-      const rendered = {
-        blob: result.blob,
-        width: Math.max(1, Number(result.width) || 1),
-        height: Math.max(1, Number(result.height) || 1),
-        mimeType: String(result.mimeType || result.blob.type || 'image/png'),
-      };
-      const url = commitRenderedPageAsset(task.pageIndex, 'full', rendered, { priority: task.priority || 'low' });
-      resolveBatchPending(itemId, url);
-      if (persistFullInBackground) {
-        persistRenderedAssetInBackground(task.pageIndex, 'full', rendered, sessionEpoch);
+        logger.warn('PDF warm-up batch item could not be committed; falling back to per-page rendering', {
+          pageIndex: task.pageIndex,
+          error: String(error?.message || error),
+        });
       }
     };
 
@@ -1980,12 +2001,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         count: descriptors.length,
         error: String(error?.message || error),
       });
-      failedTasks.push(...taskByItem.filter((_, index) => !completedItems.has(index)));
     }
 
     for (let index = 0; index < taskByItem.length; index += 1) {
       if (!completedItems.has(index)) {
         resolveBatchPending(index, null);
+        failedTasks.push(taskByItem[index]);
       }
     }
 
