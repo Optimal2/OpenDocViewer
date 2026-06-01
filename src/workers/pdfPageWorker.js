@@ -100,6 +100,29 @@ function normalizeThumbnailBound(value, fallback) {
   return Math.max(MIN_THUMBNAIL_DIMENSION, resolvedValue);
 }
 
+function normalizeBatchConcurrency(value) {
+  return Math.max(1, Math.min(8, Math.floor(Number(value) || 1)));
+}
+
+async function runLimited(items, concurrency, runItem) {
+  const list = Array.isArray(items) ? items : [];
+  if (!list.length) return [];
+  const laneCount = Math.max(1, Math.min(list.length, normalizeBatchConcurrency(concurrency)));
+  const results = new Array(list.length);
+  let nextIndex = 0;
+
+  const runLane = async () => {
+    while (nextIndex < list.length) {
+      const itemIndex = nextIndex;
+      nextIndex += 1;
+      results[itemIndex] = await runItem(list[itemIndex], itemIndex);
+    }
+  };
+
+  await Promise.all(Array.from({ length: laneCount }, () => runLane()));
+  return results;
+}
+
 function requestPdfEntryDisposal(entry) {
   if (!entry) return Promise.resolve();
   entry.evicted = true;
@@ -302,12 +325,89 @@ async function renderPdfPageAsset(payload) {
   }
 }
 
+function createPayloadSummary(payload) {
+  return {
+    variant: String(payload?.variant || ''),
+    pageIndex: Math.max(0, Number(payload?.pageIndex) || 0),
+    sourceKeyPresent: !!payload?.sourceKey,
+    sourceBlobSize: Math.max(0, Number(payload?.sourceBlob?.size) || 0),
+  };
+}
+
+async function renderPdfPageAssetBatch(payload, postItemResult) {
+  const items = Array.isArray(payload?.items) ? payload.items : [];
+  const concurrency = normalizeBatchConcurrency(payload?.concurrency);
+  let successCount = 0;
+  let errorCount = 0;
+
+  await runLimited(items, concurrency, async (item, itemIndex) => {
+    const taskStartedAt = performance.now();
+    const itemId = Number.isFinite(Number(item?.itemId)) ? Number(item.itemId) : itemIndex;
+    const itemPayload = item?.payload || item || {};
+
+    try {
+      const rendered = await renderPdfPageAsset(itemPayload);
+      const result = {
+        itemId,
+        itemIndex,
+        ok: true,
+        blob: rendered.blob,
+        width: rendered.width,
+        height: rendered.height,
+        mimeType: rendered.mimeType,
+        durationMs: Math.max(0, Math.round(performance.now() - taskStartedAt)),
+      };
+      successCount += 1;
+      postItemResult(result);
+      return result;
+    } catch (error) {
+      const result = {
+        itemId,
+        itemIndex,
+        ok: false,
+        error: String(error?.message || error),
+        errorDetails: serializeError(error, 'render'),
+        payloadSummary: createPayloadSummary(itemPayload),
+        fallbackMainThread: !!error?.fallbackMainThread,
+        durationMs: Math.max(0, Math.round(performance.now() - taskStartedAt)),
+      };
+      errorCount += 1;
+      postItemResult(result);
+      return result;
+    }
+  });
+
+  return {
+    itemCount: items.length,
+    successCount,
+    errorCount,
+    concurrency,
+  };
+}
+
 workerScope.onmessage = async (event) => {
   const data = event?.data || {};
-  if (data?.type !== 'renderPdfPageAsset') return;
+  if (data?.type !== 'renderPdfPageAsset' && data?.type !== 'renderPdfPageAssetBatch') return;
   const taskId = Number(data?.taskId || 0);
 
   try {
+    if (data?.type === 'renderPdfPageAssetBatch') {
+      const summary = await renderPdfPageAssetBatch(data?.payload || {}, (result) => {
+        workerScope.postMessage({
+          type: 'renderPdfPageAssetBatchItem',
+          taskId,
+          ...result,
+        });
+      });
+      workerScope.postMessage({
+        type: 'renderPdfPageAssetBatchResult',
+        taskId,
+        ok: true,
+        ...summary,
+      });
+      return;
+    }
+
     const rendered = await renderPdfPageAsset(data?.payload || {});
     workerScope.postMessage({
       type: 'renderPdfPageAssetResult',
@@ -325,12 +425,7 @@ workerScope.onmessage = async (event) => {
       ok: false,
       error: String(error?.message || error),
       errorDetails: serializeError(error, 'render'),
-      payloadSummary: {
-        variant: String(data?.payload?.variant || ''),
-        pageIndex: Math.max(0, Number(data?.payload?.pageIndex) || 0),
-        sourceKeyPresent: !!data?.payload?.sourceKey,
-        sourceBlobSize: Math.max(0, Number(data?.payload?.sourceBlob?.size) || 0),
-      },
+      payloadSummary: createPayloadSummary(data?.payload || {}),
       fallbackMainThread: true,
     });
   }

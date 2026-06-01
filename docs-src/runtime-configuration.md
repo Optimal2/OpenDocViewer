@@ -208,8 +208,11 @@ documentLoading: {
     mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
     mainThreadCoreMultipliers: [0.5, 0.75, 1],
     workerCounts: [0, 1, 2, 3, 4, 6, 8],
+    includeAutoWorkerCount: true,
     workerCoreMultipliers: [0.25, 0.5, 1],
     pdfWorkerPageTargets: [50, 100, 200],
+    pdfWorkerBatchMode: 'queue',
+    pdfWorkerRendersPerWorker: [1],
     taskTimeoutMs: 90000
   }
 }
@@ -227,6 +230,12 @@ derives extra main-thread render concurrency values from `navigator.hardwareConc
 `pdfWorkerPageTargets` derives worker counts from the sampled page count, for example `100` means
 "roughly one PDF page worker per 100 sampled pages", capped by the runtime-recommended worker count.
 `taskTimeoutMs` prevents one stuck page render from blocking the rest of the benchmark run.
+
+`pdfWorkerBatchMode: 'partitioned'` is a benchmark-only stress mode for PDF worker experiments. It
+splits the sampled PDF pages into contiguous partitions once, gives one partition to each PDF page
+worker, and tests each value in `pdfWorkerRendersPerWorker` as the number of local render lanes
+inside that worker. This does not change the normal viewer runtime path, which continues to use
+`pdfWorkerBatchMode: 'queue'`.
 
 ## Document-Version Reload Cache
 

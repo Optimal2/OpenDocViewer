@@ -791,6 +791,8 @@
         sampleMode: 'evenly-spaced',
         // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
         workerCounts: [0, 1, 2, 3, 4, 6, 8],
+        // Include the automatic worker-count scenario alongside explicit workerCounts.
+        includeAutoWorkerCount: true,
         // Explicit main-thread render concurrency values tested for pdfToImageMode='main-thread'.
         // Main-thread PDF scenarios use these values instead of workerCounts.
         mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
@@ -803,6 +805,12 @@
         // Add worker-count probes based on pages per PDF page worker, capped by the
         // runtime-recommended worker count. Useful for 300/600-page PDF stress tests.
         pdfWorkerPageTargets: [50, 100, 200],
+        // PDF worker benchmark dispatch:
+        //   "queue"       -> normal runtime path, one page render task is queued at a time.
+        //   "partitioned" -> benchmark-only path that gives each PDF worker one contiguous
+        //                    page partition and lets it run N concurrent render lanes locally.
+        pdfWorkerBatchMode: 'queue',
+        pdfWorkerRendersPerWorker: [1],
         maxRuns: 40,
         delayBetweenRunsMs: 150
       },
