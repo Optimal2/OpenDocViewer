@@ -498,6 +498,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const pdfWorkerPagePolicy = documentLoadingConfig?.render?.pdfWorkerPagePolicy || {};
   const pdfAutoPolicyLabel = [
     Number(pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0,
+    `cpu<${Number(pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency) || 0}`,
     `${Number(pdfWorkerPagePolicy.smallWorkerBelowPageCount) || 100}:${Number(pdfWorkerPagePolicy.smallWorkerCount) || 1}`,
     Number(pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 600,
     Number(pdfWorkerPagePolicy.pagesPerWorker) || 150,

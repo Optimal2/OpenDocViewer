@@ -645,10 +645,11 @@
         //   <100 PDF pages      -> 1 PDF worker
         //   100-599 PDF pages   -> 4 PDF workers
         //   >=600 PDF pages     -> round(pdfPages / 150), capped by client capability
-        pdfWorkerPagePolicy: {
-          enabled: true,
-          mainThreadBelowPageCount: 0,
-          smallWorkerBelowPageCount: 100,
+      pdfWorkerPagePolicy: {
+        enabled: true,
+        mainThreadBelowPageCount: 0,
+        mainThreadBelowHardwareConcurrency: 0,
+        smallWorkerBelowPageCount: 100,
           smallWorkerCount: 1,
           fixedWorkerBelowPageCount: 600,
           fixedWorkerCount: 4,

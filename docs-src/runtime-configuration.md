@@ -181,10 +181,11 @@ documentLoading: {
   render: {
     pdfToImageMode: 'auto',
     pdfWorkerMaxCount: 0,
-    pdfWorkerPagePolicy: {
-      enabled: true,
-      mainThreadBelowPageCount: 0,
-      smallWorkerBelowPageCount: 100,
+      pdfWorkerPagePolicy: {
+        enabled: true,
+        mainThreadBelowPageCount: 0,
+        mainThreadBelowHardwareConcurrency: 0,
+        smallWorkerBelowPageCount: 100,
       smallWorkerCount: 1,
       fixedWorkerBelowPageCount: 600,
       fixedWorkerCount: 4,
@@ -212,6 +213,10 @@ its own worker policy.
 
 Set `pdfWorkerPagePolicy.mainThreadBelowPageCount` above `0` only for deployments that explicitly
 want very small PDFs to stay on the legacy main-thread route.
+Set `pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency` above `0` when a deployment has measured
+that low-core clients are faster or more stable on the main-thread route. For example, `8` means
+clients with fewer than 8 logical cores use main-thread PDF rendering, while 8-core and stronger
+clients still use the automatic PDF worker policy.
 
 The render/decode benchmark can compare PDF page-image routing modes without changing the active
 viewer setting:
