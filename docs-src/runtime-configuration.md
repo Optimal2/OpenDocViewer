@@ -173,8 +173,8 @@ parent payload and therefore the same expired document tickets.
 
 ## PDF Page Rendering Worker Mode
 
-PDF pages use an automatic PDF-to-image routing policy by default. Small PDFs stay on the proven
-main-thread pdf.js path, while larger PDF runs use page-count based workers:
+PDF pages use an automatic PDF-to-image routing policy by default. The viewer starts with a tiny
+worker pool so it can grow smoothly when the total PDF page count increases during loading:
 
 ```js
 documentLoading: {
@@ -183,7 +183,9 @@ documentLoading: {
     pdfWorkerMaxCount: 0,
     pdfWorkerPagePolicy: {
       enabled: true,
-      mainThreadBelowPageCount: 100,
+      mainThreadBelowPageCount: 0,
+      smallWorkerBelowPageCount: 100,
+      smallWorkerCount: 1,
       fixedWorkerBelowPageCount: 600,
       fixedWorkerCount: 4,
       pagesPerWorker: 150,
@@ -195,8 +197,8 @@ documentLoading: {
 
 Supported values are:
 
-- `auto` - default. Uses main thread below 100 PDF pages, 4 PDF workers for 100-599 PDF pages, and
-  `round(pdfPages / 150)` workers from 600 pages upward.
+- `auto` - default. Uses 1 PDF worker below 100 PDF pages, 4 PDF workers for 100-599 PDF pages,
+  and `round(pdfPages / 150)` workers from 600 pages upward.
 - `main-thread` - forces the behavior used by earlier OpenDocViewer versions.
 - `worker` - forces PDF page images through dedicated workers when supported, with automatic fallback
   to the main-thread path if worker-side rendering is unavailable or fails.
@@ -207,6 +209,9 @@ and `pdfWorkerPagePolicy.maxWorkerCount` default to `0`, meaning no static site 
 positive value only when a deployment needs an explicit safety ceiling. Raster images and TIFF files
 continue to use `useWorkersForRasterImages` and `useWorkersForTiff`, and generated-PDF printing uses
 its own worker policy.
+
+Set `pdfWorkerPagePolicy.mainThreadBelowPageCount` above `0` only for deployments that explicitly
+want very small PDFs to stay on the legacy main-thread route.
 
 The render/decode benchmark can compare PDF page-image routing modes without changing the active
 viewer setting:

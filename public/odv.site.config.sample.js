@@ -709,7 +709,7 @@
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,
         // PDF-to-image rendering mode:
-        //   'auto'        -> main thread for small PDFs, then page-count based PDF workers
+        //   'auto'        -> page-count based PDF workers with main-thread fallback
         //   'main-thread' -> proven pdf.js path used by earlier OpenDocViewer versions
         //   'worker'      -> force the OffscreenCanvas/pdf.js worker path with main-thread fallback
         pdfToImageMode: 'auto',
@@ -717,12 +717,14 @@
         // Positive values remain available as a site-specific safety cap.
         pdfWorkerMaxCount: 0,
         // Auto PDF worker policy:
-        //   <100 PDF pages      -> main thread
+        //   <100 PDF pages      -> 1 PDF worker
         //   100-599 PDF pages   -> 4 PDF workers
         //   >=600 PDF pages     -> round(pdfPages / 150), capped by client capability
         pdfWorkerPagePolicy: {
           enabled: true,
-          mainThreadBelowPageCount: 100,
+          mainThreadBelowPageCount: 0,
+          smallWorkerBelowPageCount: 100,
+          smallWorkerCount: 1,
           fixedWorkerBelowPageCount: 600,
           fixedWorkerCount: 4,
           pagesPerWorker: 150,
