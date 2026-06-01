@@ -437,6 +437,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const pdfWorkerRenderedCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerRenderedCount || 0));
   const pdfWorkerFallbackCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerFallbackCount || 0));
   const mainPdfRenderedCount = Math.max(0, Number(runtimeDiagnostics?.mainPdfRenderedCount || 0));
+  const pdfWarmupBatchMode = String(documentLoadingConfig?.render?.pdfWorkerWarmupBatchMode || 'off');
+  const pdfWarmupBatchSize = Math.max(0, Number(documentLoadingConfig?.render?.pdfWorkerWarmupBatchSize || 0));
+  const pdfWarmupRendersPerWorker = Math.max(1, Number(documentLoadingConfig?.render?.pdfWorkerWarmupRendersPerWorker || 1));
+  const pdfWarmupBatchLabel = pdfWarmupBatchMode === 'partitioned'
+    ? ` batch:${pdfWarmupBatchMode}/${pdfWarmupBatchSize || 'auto'}x${pdfWarmupRendersPerWorker}`
+    : '';
   const loadRunElapsedSeconds = loadRunElapsedMs > 0 ? loadRunElapsedMs / 1000 : 0;
   const loadPageRate = loadRunElapsedSeconds > 0 ? fullReadyCount / loadRunElapsedSeconds : 0;
   const renderPageRate = loadRunElapsedSeconds > 0 ? assetRenderCount / loadRunElapsedSeconds : 0;
@@ -474,7 +480,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
     `Mode: ${String(documentLoadingConfig?.mode || 'auto')} Stage: ${String(memoryPressureStage || 'normal')} Workers: ${workerCount} PDF ${activePdfWorkerCount} raster ${activePageAssetWorkerCount}`,
     `Fetch: ${String(documentLoadingConfig?.fetch?.strategy || 'sequential')} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
-    `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
+    `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel}${pdfWarmupBatchLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
@@ -724,6 +730,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             {String(documentLoadingConfig?.render?.pdfToImageMode || '').toLowerCase() === 'auto'
               ? ` policy ${pdfAutoPolicyLabel}`
               : ` max ${Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}`}
+            {pdfWarmupBatchLabel}
           </span>
           {(pdfWorkerRenderedCount > 0 || mainPdfRenderedCount > 0 || pdfWorkerFallbackCount > 0) ? (
             <span style={{ opacity: 0.75 }}>

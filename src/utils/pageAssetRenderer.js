@@ -72,6 +72,21 @@ function touchLru(map, key, limit) {
   setLru(map, key, value, limit);
 }
 
+function partitionContiguous(items, partitionCount) {
+  const list = Array.isArray(items) ? items : [];
+  const count = Math.max(1, Math.min(list.length || 1, Math.floor(Number(partitionCount) || 1)));
+  const partitions = [];
+  let cursor = 0;
+  for (let index = 0; index < count; index += 1) {
+    const remainingItems = list.length - cursor;
+    const remainingPartitions = count - index;
+    const size = Math.ceil(remainingItems / remainingPartitions);
+    partitions.push(list.slice(cursor, cursor + size));
+    cursor += size;
+  }
+  return partitions.filter((partition) => partition.length > 0);
+}
+
 function canvasToBlob(canvas, mimeType = 'image/png', quality) {
   return new Promise((resolve, reject) => {
     canvas.toBlob((blob) => {
@@ -445,6 +460,10 @@ export class PageAssetRenderer {
     return this.shouldTryPdfWorker();
   }
 
+  canRenderPdfBatchInWorker() {
+    return this.shouldTryPdfWorker() && typeof this.pdfWorkerPool?.renderBatch === 'function';
+  }
+
   recordPdfWorkerFallback(error, descriptor, variant) {
     const details = normalizeFallbackDetails(error);
     const reasonKey = details.code || details.message || 'unknown-pdf-worker-fallback';
@@ -463,6 +482,123 @@ export class PageAssetRenderer {
       sourceKeyPresent: !!descriptor?.sourceKey,
       variant,
     });
+  }
+
+  async renderPdfPageAssetBatch(descriptors, options = {}) {
+    const variant = options?.variant === 'thumbnail' ? 'thumbnail' : 'full';
+    if (!this.canRenderPdfBatchInWorker()) {
+      const error = this.pdfWorkerPool?.createUnavailableError?.('No compatible PDF page worker is available')
+        || new Error('No compatible PDF page worker is available');
+      throw error;
+    }
+
+    const safeDescriptors = Array.isArray(descriptors) ? descriptors : [];
+    if (!safeDescriptors.length) {
+      return { results: [], summary: { itemCount: 0, successCount: 0, errorCount: 0 } };
+    }
+
+    const sourceBlobCache = new Map();
+    const batchItems = [];
+    for (let index = 0; index < safeDescriptors.length; index += 1) {
+      const descriptor = safeDescriptors[index] || {};
+      const sourceKey = String(descriptor?.sourceKey || '');
+      if (!sourceBlobCache.has(sourceKey)) {
+        sourceBlobCache.set(sourceKey, await this.tempStore.getBlob(sourceKey));
+      }
+      const sourceBlob = sourceBlobCache.get(sourceKey);
+      if (!sourceBlob) {
+        batchItems.push({
+          itemId: index,
+          missingSource: true,
+          payload: {
+            sourceKey,
+            pageIndex: Math.max(0, Number(descriptor?.pageIndex) || 0),
+          },
+        });
+        continue;
+      }
+
+      batchItems.push({
+        itemId: index,
+        payload: {
+          sourceBlob,
+          sourceKey,
+          pageIndex: Math.max(0, Number(descriptor?.pageIndex) || 0),
+          variant,
+          thumbnailMaxWidth: options?.thumbnailMaxWidth,
+          thumbnailMaxHeight: options?.thumbnailMaxHeight,
+          fullPageScale: Number(options?.fullPageScale) || Number(this.config.fullPageScale) || 2.0,
+          maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
+        },
+      });
+    }
+
+    const results = new Array(safeDescriptors.length);
+    const workerCount = Math.max(1, Number(this.pdfWorkerPool?.getWorkerCount?.() || 0) || 1);
+    const rendersPerWorker = Math.max(1, Math.min(8, Math.floor(Number(options?.rendersPerWorker) || 1)));
+    const onItemResult = (result, slot) => {
+      const itemId = Math.max(0, Number(result?.itemId) || 0);
+      const descriptor = safeDescriptors[itemId] || {};
+      const normalized = result?.ok
+        ? {
+            ok: true,
+            itemId,
+            descriptor,
+            blob: result.blob,
+            width: Math.max(1, Number(result.width) || 1),
+            height: Math.max(1, Number(result.height) || 1),
+            mimeType: String(result.mimeType || result.blob?.type || 'image/png'),
+            durationMs: Math.max(0, Number(result.durationMs) || 0),
+            workerSlot: Number(slot),
+          }
+        : {
+            ok: false,
+            itemId,
+            descriptor,
+            durationMs: Math.max(0, Number(result?.durationMs) || 0),
+            error: String(result?.error || 'PDF worker batch item failed'),
+            errorDetails: result?.errorDetails || null,
+            fallbackMainThread: !!result?.fallbackMainThread,
+            workerSlot: Number(slot),
+          };
+      results[itemId] = normalized;
+      if (normalized.ok) {
+        this.renderStats.pdfWorkerCount += 1;
+      } else {
+        this.renderStats.pdfWorkerFallbackCount += 1;
+        const error = new Error(normalized.error);
+        error.fallbackMainThread = !!normalized.fallbackMainThread;
+        error.pdfWorkerDetails = normalized.errorDetails || null;
+        this.recordPdfWorkerFallback(error, descriptor, variant);
+      }
+      try { options?.onItemResult?.(normalized, slot); } catch {}
+    };
+
+    for (const item of batchItems) {
+      if (!item.missingSource) continue;
+      onItemResult({
+        itemId: item.itemId,
+        ok: false,
+        error: `Missing source blob for PDF batch render ${item.payload.sourceKey}`,
+        durationMs: 0,
+      }, -1);
+    }
+
+    const runnableItems = batchItems.filter((item) => !item.missingSource);
+    const partitions = partitionContiguous(runnableItems, workerCount);
+    const summaries = await Promise.all(partitions.map((partition) => this.pdfWorkerPool.renderBatch(partition, {
+      concurrency: rendersPerWorker,
+      onItemResult,
+    })));
+
+    return {
+      results,
+      summary: summaries.reduce((acc, item) => ({
+        itemCount: acc.itemCount + Math.max(0, Number(item?.summary?.itemCount ?? item?.itemCount) || 0),
+        successCount: acc.successCount + Math.max(0, Number(item?.summary?.successCount ?? item?.successCount) || 0),
+        errorCount: acc.errorCount + Math.max(0, Number(item?.summary?.errorCount ?? item?.errorCount) || 0),
+      }), { itemCount: 0, successCount: 0, errorCount: 0 }),
+    };
   }
 
   /**
