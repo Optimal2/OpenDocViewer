@@ -508,6 +508,7 @@ export class PageAssetRenderer {
         variant,
         thumbnailMaxWidth: options?.thumbnailMaxWidth,
         thumbnailMaxHeight: options?.thumbnailMaxHeight,
+        fullPageScale: options?.fullPageScale,
       });
     }
     if (ext === 'tif' || ext === 'tiff') {
