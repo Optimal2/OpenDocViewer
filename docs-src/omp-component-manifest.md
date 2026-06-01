@@ -8,9 +8,15 @@ and the component artifact version may look similar, but they are intentionally
 independent. The public OpenDocViewer release version is owned by `package.json`
 and Git tags. The OMP artifact component version is owned by
 `omp-components.json` and may move faster when local or customer deployments
-need artifact-only test builds between public releases. The manifest still uses
-the same component-list shape as multi-app repositories so OMP package and
-HostAgent tooling can treat it consistently.
+need artifact-only test builds between public releases. It may also stay on a
+different number than the public release version. The manifest still uses the
+same component-list shape as multi-app repositories so OMP package and HostAgent
+tooling can treat it consistently.
+
+The two version streams must not be mechanically synchronized. The OMP artifact
+version exists so OMP can tell deployable packages apart; the official
+OpenDocViewer version exists so users, support staff, release notes, and the
+Help -> About dialog can identify the application build.
 
 ## Fields
 
@@ -47,3 +53,18 @@ release notes, and `SECURITY.md` describe the official release. Do not bump
 `omp-components.json` during an official release merely to match `package.json`;
 change the component manifest only when the deployable OMP artifact version is
 intended to change.
+
+When an official release is going to be installed through OMP, the order matters:
+
+1. Prepare and commit the release notes and other source changes.
+2. Run `release.ps1`, which updates `package.json` / `package-lock.json`, creates
+   the official version commit, and tags the release.
+3. After that release commit exists, bump the OMP artifact component version.
+4. Export the OMP universal package from the post-release commit.
+
+This post-release artifact bump does not mean the OMP artifact version must equal
+the official OpenDocViewer version. It only guarantees that OMP sees a new
+artifact identity and imports files built after the official application version
+changed. Without this step, a local or customer OMP installation can keep serving
+an older artifact-only package, and Help -> About will correctly show the older
+OpenDocViewer version embedded in that package.

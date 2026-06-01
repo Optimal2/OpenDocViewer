@@ -239,8 +239,21 @@ When an AI agent handles a release end to end, use this order:
 8. Verify the working tree is clean and `HEAD` matches `origin/<branch>`.
 9. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes`.
 10. Verify the new `vX.Y.Z` tag exists locally and on `origin`, `git status --short` is clean, and GitHub Actions has a release workflow run for the tag.
+11. If the released build should be deployed through OMP, bump the OMP artifact
+    component version after the release helper has updated `package.json`, then
+    export a new OMP package from that post-release commit. This keeps the
+    OpenDocViewer About dialog aligned with the official application version
+    inside the OMP deployment.
 
-Official OpenDocViewer versions and OMP artifact component versions are related but independent. Do not align them automatically. An OMP artifact-only test build may bump `omp-components.json` without changing `package.json`; an official release may bump `package.json` without changing `omp-components.json` unless the release explicitly includes a component-manifest update.
+Official OpenDocViewer versions and OMP artifact component versions are related
+but independent. Do not align them automatically and do not treat
+`omp-components.json` as the source of the public OpenDocViewer version. An OMP
+artifact-only test build may bump `omp-components.json` without changing
+`package.json`; an official release may bump `package.json` without immediately
+changing `omp-components.json`. The important ordering rule is that any OMP
+package meant to carry an official release must be built after `release.ps1` has
+created the npm version commit, with a fresh OMP artifact version so OMP imports
+the newly built files instead of an earlier artifact-only package.
 
 ---
 
