@@ -419,6 +419,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const activePageAssetWorkerCount = Math.max(0, Number(runtimeDiagnostics?.activePageAssetWorkerCount || 0));
   const pdfWorkerRenderedCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerRenderedCount || 0));
   const pdfWorkerFallbackCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerFallbackCount || 0));
+  const pdfWorkerFallbackLastReason = String(runtimeDiagnostics?.pdfWorkerFallbackLastReason || '');
   const mainPdfRenderedCount = Math.max(0, Number(runtimeDiagnostics?.mainPdfRenderedCount || 0));
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
@@ -633,7 +634,11 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {(pdfWorkerRenderedCount > 0 || mainPdfRenderedCount > 0 || pdfWorkerFallbackCount > 0) ? (
             <span style={{ opacity: 0.75 }}>
               {' '}done w:<strong>{pdfWorkerRenderedCount}</strong> main:<strong>{mainPdfRenderedCount}</strong>
-              {pdfWorkerFallbackCount > 0 ? <> fb:<strong>{pdfWorkerFallbackCount}</strong></> : null}
+              {pdfWorkerFallbackCount > 0 ? (
+                <>
+                  {' '}fb:<strong title={pdfWorkerFallbackLastReason}>{pdfWorkerFallbackCount}</strong>
+                </>
+              ) : null}
             </span>
           ) : null}
         </span>
