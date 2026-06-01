@@ -738,6 +738,12 @@
           maxWorkerCount: 0
         },
 
+        // Experimental/off by default: use existing PDF worker batch rendering for background
+        // warm-up. This mirrors the partitioned render/decode benchmark path for support testing.
+        pdfWorkerWarmupBatchMode: 'off',
+        pdfWorkerWarmupBatchSize: 0,
+        pdfWorkerWarmupRendersPerWorker: 1,
+
         // Maximum number of main-thread renders allowed when the worker path is unavailable.
         maxConcurrentMainThreadRenders: 3,
 

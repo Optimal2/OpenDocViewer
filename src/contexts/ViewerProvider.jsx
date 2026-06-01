@@ -1597,6 +1597,50 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     return renderWithLimit(renderTask, renderOptions.priority || 'normal');
   }, [pdfWorkerRenderWithLimit, renderWithLimit, syncRendererPdfPageCount]);
 
+  const commitRenderedPageAsset = useCallback((pageIndex, variant, rendered, options = {}) => {
+    const safeIndex = Math.max(0, Number(pageIndex) || 0);
+    const cache = getVariantCache(variant);
+    const url = createTrackedObjectUrl(rendered.blob);
+    if (options.trackInCache !== false) {
+      cache.set(safeIndex, { url, lastAccess: Date.now() });
+      touchCacheEntry(cache, safeIndex);
+    }
+
+    const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(safeIndex);
+    if (variant === 'thumbnail') noteThumbnailAssetReady(safeIndex);
+    else {
+      noteFullAssetReady(safeIndex);
+      if (reuseThumbnail) noteThumbnailAssetReady(safeIndex);
+    }
+    patchPageAtIndex(safeIndex, variant === 'thumbnail'
+      ? {
+          thumbnailUrl: url,
+          thumbnailStatus: 1,
+          thumbnailUsesFullAsset: false,
+          realWidth: rendered.width,
+          realHeight: rendered.height,
+        }
+      : {
+          fullSizeUrl: url,
+          fullSizeStatus: 1,
+          loaded: true,
+          realWidth: rendered.width,
+          realHeight: rendered.height,
+          status: 1,
+          ...(reuseThumbnail
+            ? {
+                thumbnailUsesFullAsset: true,
+                thumbnailUrl: '',
+                thumbnailStatus: 1,
+              }
+            : {}),
+        }
+    );
+
+    if (options.trackInCache !== false) enforceCacheLimit(variant);
+    return url;
+  }, [enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, shouldReuseFullAssetForThumbnail]);
+
   /**
    * @param {number} pageIndex
    * @param {('full'|'thumbnail')} variant
@@ -1715,48 +1759,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           if (sessionEpochRef.current !== sessionEpoch) return null;
         }
 
-        const url = createTrackedObjectUrl(rendered.blob);
-        if (options.trackInCache !== false) {
-          cache.set(safeIndex, { url, lastAccess: Date.now() });
-          touchCacheEntry(cache, safeIndex);
-        }
-
-        const reuseThumbnail = variant === 'full' && shouldReuseFullAssetForThumbnail(safeIndex);
-        if (variant === 'thumbnail') noteThumbnailAssetReady(safeIndex);
-        else {
-          noteFullAssetReady(safeIndex);
-          if (reuseThumbnail) noteThumbnailAssetReady(safeIndex);
-        }
-        patchPageAtIndex(safeIndex, variant === 'thumbnail'
-          ? {
-              thumbnailUrl: url,
-              thumbnailStatus: 1,
-              thumbnailUsesFullAsset: false,
-              realWidth: rendered.width,
-              realHeight: rendered.height,
-            }
-          : {
-              fullSizeUrl: url,
-              fullSizeStatus: 1,
-              loaded: true,
-              realWidth: rendered.width,
-              realHeight: rendered.height,
-              status: 1,
-              ...(reuseThumbnail
-                ? {
-                    thumbnailUsesFullAsset: true,
-                    thumbnailUrl: '',
-                    thumbnailStatus: 1,
-                  }
-                : {}),
-            }
-        );
+        const url = commitRenderedPageAsset(safeIndex, variant, rendered, options);
 
         if (options.persist !== false && persistFullInBackground) {
           persistRenderedAssetInBackground(safeIndex, variant, rendered, sessionEpoch);
         }
 
-        if (options.trackInCache !== false) enforceCacheLimit(variant);
         return url;
       } catch (e) {
         if (sessionEpochRef.current === sessionEpoch) {
@@ -1778,7 +1786,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
-  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
    * Render one PDF page again at twice the configured full-page PDF scale.
@@ -1847,6 +1855,96 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     stats.maxMs = Math.max(Number(stats.maxMs) || 0, safeDurationMs);
   }, []);
 
+  const tryRenderPdfWarmupBatch = useCallback(async (tasks) => {
+    const renderConfig = sessionConfigRef.current?.render || {};
+    if (String(renderConfig.pdfWorkerWarmupBatchMode || 'off').toLowerCase() !== 'partitioned') return false;
+    if (!pageRendererRef.current?.canRenderPdfBatchInWorker?.()) return false;
+    const safeTasks = Array.isArray(tasks) ? tasks : [];
+    if (safeTasks.length < 2) return false;
+
+    const descriptors = [];
+    const taskByItem = [];
+    for (const task of safeTasks) {
+      const safeIndex = Math.max(0, Number(task?.pageIndex) || 0);
+      if (String(task?.variant || 'full') !== 'full') continue;
+      if (pendingAssetPromisesRef.current.has(makePendingAssetKey('full', safeIndex))) continue;
+      const page = getPageAt(allPagesRef.current, safeIndex);
+      if (!page || page.status === -1 || page.fullSizeStatus === 1 || page.fullSizeUrl || !page.sourceKey) continue;
+      const source = sourceDescriptorsRef.current.get(page.sourceKey);
+      if (String(source?.fileExtension || page.fileExtension || '').toLowerCase() !== 'pdf') continue;
+      descriptors.push({
+        sourceKey: source.sourceKey,
+        fileExtension: source.fileExtension,
+        fileIndex: source.fileIndex,
+        pageIndex: page.pageIndex,
+      });
+      taskByItem.push({ ...task, pageIndex: safeIndex });
+    }
+
+    if (descriptors.length < 2) return false;
+
+    const sessionEpoch = sessionEpochRef.current;
+    const completedItems = new Set();
+    const failedTasks = [];
+    const stats = assetPipelineStatsRef.current;
+    const persistFullInBackground = sessionConfigRef.current.assetStore.persistFullPagesInBackground !== false;
+    const rendersPerWorker = Math.max(1, Number(renderConfig.pdfWorkerWarmupRendersPerWorker) || 1);
+
+    const recordBatchItem = (result) => {
+      const itemId = Math.max(0, Number(result?.itemId) || 0);
+      const task = taskByItem[itemId];
+      if (!task || completedItems.has(itemId)) return;
+      completedItems.add(itemId);
+
+      if (sessionEpochRef.current !== sessionEpoch) return;
+      if (!result?.ok || !(result.blob instanceof Blob)) {
+        failedTasks.push(task);
+        return;
+      }
+
+      const renderDurationMs = Math.max(0, Number(result.durationMs) || 0);
+      stats.renderCompletedCount += 1;
+      stats.renderTotalMs += renderDurationMs;
+      stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, renderDurationMs);
+
+      const rendered = {
+        blob: result.blob,
+        width: Math.max(1, Number(result.width) || 1),
+        height: Math.max(1, Number(result.height) || 1),
+        mimeType: String(result.mimeType || result.blob.type || 'image/png'),
+      };
+      commitRenderedPageAsset(task.pageIndex, 'full', rendered, { priority: task.priority || 'low' });
+      if (persistFullInBackground) {
+        persistRenderedAssetInBackground(task.pageIndex, 'full', rendered, sessionEpoch);
+      }
+    };
+
+    try {
+      await pageRendererRef.current.renderPdfPageAssetBatch(descriptors, {
+        variant: 'full',
+        fullPageScale: renderConfig.fullPageScale,
+        thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
+        thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
+        rendersPerWorker,
+        onItemResult: recordBatchItem,
+      });
+    } catch (error) {
+      logger.warn('PDF warm-up batch failed; falling back to per-page rendering', {
+        count: descriptors.length,
+        error: String(error?.message || error),
+      });
+      failedTasks.push(...taskByItem.filter((_, index) => !completedItems.has(index)));
+    }
+
+    if (sessionEpochRef.current === sessionEpoch && failedTasks.length > 0) {
+      await Promise.allSettled(failedTasks.map((task) => ensurePageAsset(task.pageIndex, 'full', {
+        priority: task.priority || 'low',
+      })));
+    }
+
+    return true;
+  }, [commitRenderedPageAsset, ensurePageAsset, persistRenderedAssetInBackground]);
+
   /**
    * Drain background eager-render work without blocking the UI thread.
    * The queue is intentionally best-effort: memory pressure or session resets may clear it at any time.
@@ -1867,6 +1965,43 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
             break;
           }
           warmupQueueRef.current = readinessTasks;
+        }
+
+        const renderConfig = sessionConfigRef.current?.render || {};
+        if (String(renderConfig.pdfWorkerWarmupBatchMode || 'off').toLowerCase() === 'partitioned'
+          && pageRendererRef.current?.canRenderPdfBatchInWorker?.()) {
+          const pdfBatchLimit = Math.max(
+            2,
+            Number(renderConfig.pdfWorkerWarmupBatchSize)
+              || Number(renderConfig.warmupBatchSize)
+              || 2
+          );
+          const selected = [];
+          const remaining = [];
+          for (const task of warmupQueueRef.current) {
+            const safeIndex = Math.max(0, Number(task?.pageIndex) || 0);
+            const page = getPageAt(allPagesRef.current, safeIndex);
+            const source = page?.sourceKey ? sourceDescriptorsRef.current.get(page.sourceKey) : null;
+            const isBatchCandidate = selected.length < pdfBatchLimit
+              && String(task?.variant || 'full') === 'full'
+              && page
+              && page.status !== -1
+              && page.fullSizeStatus !== 1
+              && !page.fullSizeUrl
+              && String(source?.fileExtension || page.fileExtension || '').toLowerCase() === 'pdf';
+            if (isBatchCandidate) selected.push(task);
+            else remaining.push(task);
+          }
+
+          if (selected.length >= 2) {
+            warmupQueueRef.current = remaining;
+            const handled = await tryRenderPdfWarmupBatch(selected);
+            if (handled) {
+              await new Promise((resolve) => window.setTimeout(resolve, 0));
+              continue;
+            }
+            warmupQueueRef.current = selected.concat(warmupQueueRef.current);
+          }
         }
 
         const batchSize = Math.max(1, Number(sessionConfigRef.current?.render?.warmupBatchSize) || 1);
@@ -1897,7 +2032,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         }, 0);
       }
     }
-  }, [ensurePageAsset]);
+  }, [ensurePageAsset, tryRenderPdfWarmupBatch]);
 
   /**
    * Enqueue eager page rendering for a newly discovered source range.

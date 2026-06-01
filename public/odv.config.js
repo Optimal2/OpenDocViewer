@@ -655,6 +655,12 @@
           pagesPerWorker: 150,
           maxWorkerCount: 0
         },
+        // Experimental/off by default: use existing PDF worker batch rendering for background
+        // warm-up. This is useful for support benchmarks because it mirrors the partitioned
+        // render/decode benchmark path, but ordinary interactive renders still use per-page tasks.
+        pdfWorkerWarmupBatchMode: 'off',
+        pdfWorkerWarmupBatchSize: 0,
+        pdfWorkerWarmupRendersPerWorker: 1,
         maxConcurrentMainThreadRenders: 3,
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6
