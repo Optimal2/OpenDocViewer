@@ -180,7 +180,7 @@ to the experimental worker path for PDF-to-image rendering:
 documentLoading: {
   render: {
     pdfToImageMode: 'worker',
-    pdfWorkerMaxCount: 8
+    pdfWorkerMaxCount: 6
   }
 }
 ```
@@ -192,10 +192,10 @@ Supported values are:
   the main-thread path if worker-side rendering is unavailable or fails.
 
 The worker mode uses the existing `documentLoading.render.workerCount` setting, capped by
-`documentLoading.render.pdfWorkerMaxCount` (default `8`), and remains separate from generated-PDF
+`documentLoading.render.pdfWorkerMaxCount` (default `6`), and remains separate from generated-PDF
 printing. Raster images and TIFF files continue to use `useWorkersForRasterImages` and
 `useWorkersForTiff`. The cap avoids spawning very large PDF page-worker pools on high-core
-workstations where benchmarks show little benefit beyond the 4-8 worker range.
+workstations where benchmarks show little benefit beyond the 4-6 worker range.
 
 The render/decode benchmark can compare PDF page-image routing modes without changing the active
 viewer setting:

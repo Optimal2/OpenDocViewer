@@ -703,7 +703,7 @@ async function runPartitionedPdfWorkerScenario(args) {
     workerCount: resolvedWorkerCount,
     pdfToImageMode: 'worker',
   };
-  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 8);
+  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 6);
   const pdfWorkerCount = Math.max(1, Math.min(resolvedWorkerCount || pdfWorkerMaxCount, pdfWorkerMaxCount));
   const rendersPerWorker = Math.max(1, Math.min(8, Math.floor(Number(scenario.pdfWorkerRendersPerWorker) || 1)));
   const pool = createPdfPageWorkerPool({
@@ -910,7 +910,7 @@ async function runScenario(args) {
   if (scenario.mainThreadConcurrency > 0) {
     renderConfig.maxConcurrentMainThreadRenders = scenario.mainThreadConcurrency;
   }
-  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 8);
+  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 6);
   renderConfig.pdfWorkerTaskTimeoutMs = Math.min(
     Math.max(5000, Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS),
     Math.max(5000, Number(renderConfig.pdfWorkerTaskTimeoutMs) || Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS)
