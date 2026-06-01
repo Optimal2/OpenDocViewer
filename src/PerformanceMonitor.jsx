@@ -403,6 +403,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const assetRenderAvgMs = assetRenderCount > 0
     ? Number(runtimeDiagnostics?.assetRenderTotalMs || 0) / assetRenderCount
     : 0;
+  const assetRenderMaxMs = Math.max(0, Number(runtimeDiagnostics?.assetRenderMaxMs || 0));
   const assetRestoreAttempts = Math.max(0, Number(runtimeDiagnostics?.assetRestoreAttemptCount || 0));
   const assetRestoreAvgMs = assetRestoreAttempts > 0
     ? Number(runtimeDiagnostics?.assetRestoreTotalMs || 0) / assetRestoreAttempts
@@ -413,6 +414,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const assetPersistAvgMs = assetPersistFinished > 0
     ? Number(runtimeDiagnostics?.assetPersistTotalMs || 0) / assetPersistFinished
     : 0;
+  const assetPersistMaxMs = Math.max(0, Number(runtimeDiagnostics?.assetPersistMaxMs || 0));
+  const activePdfWorkerCount = Math.max(0, Number(runtimeDiagnostics?.activePdfWorkerCount || 0));
+  const activePageAssetWorkerCount = Math.max(0, Number(runtimeDiagnostics?.activePageAssetWorkerCount || 0));
+  const pdfWorkerRenderedCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerRenderedCount || 0));
+  const pdfWorkerFallbackCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerFallbackCount || 0));
+  const mainPdfRenderedCount = Math.max(0, Number(runtimeDiagnostics?.mainPdfRenderedCount || 0));
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
   const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
@@ -593,6 +600,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         </span>
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           {t('perf.workersLabel')} <strong>{workerCount}</strong>
+          <span style={{ opacity: 0.75 }}>
+            {' '}PDF <strong>{activePdfWorkerCount}</strong> raster <strong>{activePageAssetWorkerCount}</strong>
+          </span>
         </span>
       </div>
 
@@ -620,6 +630,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
               ? ` policy ${pdfAutoPolicyLabel}`
               : ` max ${Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}`}
           </span>
+          {(pdfWorkerRenderedCount > 0 || mainPdfRenderedCount > 0 || pdfWorkerFallbackCount > 0) ? (
+            <span style={{ opacity: 0.75 }}>
+              {' '}done w:<strong>{pdfWorkerRenderedCount}</strong> main:<strong>{mainPdfRenderedCount}</strong>
+              {pdfWorkerFallbackCount > 0 ? <> fb:<strong>{pdfWorkerFallbackCount}</strong></> : null}
+            </span>
+          ) : null}
         </span>
       </div>
 
@@ -647,6 +663,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={labelStyle}>{t('perf.assetPipelineLabel', { defaultValue: 'Asset pipeline:' })}</span>{' '}
         <span style={{ opacity: 0.9 }}>
           render <strong>{assetRenderCount}</strong> avg <strong>{formatMilliseconds(assetRenderAvgMs)}</strong>
+          {' '}max <strong>{formatMilliseconds(assetRenderMaxMs)}</strong>
         </span>
         <span style={{ marginLeft: 8, opacity: 0.9 }}>
           restore <strong>{Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}</strong>
@@ -658,6 +675,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           /<strong>{assetPersistCompleted}</strong>
           /<strong>{assetPersistFailed}</strong>
           {' '}avg <strong>{formatMilliseconds(assetPersistAvgMs)}</strong>
+          {' '}max <strong>{formatMilliseconds(assetPersistMaxMs)}</strong>
         </span>
       </div>
 

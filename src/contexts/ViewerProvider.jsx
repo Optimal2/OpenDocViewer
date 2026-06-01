@@ -334,6 +334,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     trackedObjectUrlCount: 0,
     warmupQueueLength: 0,
     pendingAssetCount: 0,
+    activeWorkerCount: 0,
+    activePdfWorkerCount: 0,
+    activePageAssetWorkerCount: 0,
+    pdfWorkerRenderedCount: 0,
+    pdfWorkerFallbackCount: 0,
+    mainPdfRenderedCount: 0,
     assetRenderCompletedCount: 0,
     assetRenderTotalMs: 0,
     assetRenderMaxMs: 0,
@@ -477,6 +483,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const tempStats = tempStoreRef.current?.getStats?.() || {};
     const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
+    const rendererStats = pageRendererRef.current?.getStats?.() || {};
     const pipelineStats = assetPipelineStatsRef.current || createAssetPipelineStats();
     const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
     const totalPages = pages.length;
@@ -530,6 +537,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         trackedObjectUrlCount: getTrackedObjectUrlCount(),
         warmupQueueLength: warmupQueueRef.current.length,
         pendingAssetCount: pendingAssetPromisesRef.current.size,
+        activeWorkerCount: Math.max(0, Number(rendererStats.activeWorkerCount || 0)),
+        activePdfWorkerCount: Math.max(0, Number(rendererStats.activePdfWorkerCount || 0)),
+        activePageAssetWorkerCount: Math.max(0, Number(rendererStats.activePageAssetWorkerCount || 0)),
+        pdfWorkerRenderedCount: Math.max(0, Number(rendererStats.pdfWorkerCount || 0)),
+        pdfWorkerFallbackCount: Math.max(0, Number(rendererStats.pdfWorkerFallbackCount || 0)),
+        mainPdfRenderedCount: Math.max(0, Number(rendererStats.mainPdfCount || 0)),
         assetRenderCompletedCount: Math.max(0, Number(pipelineStats.renderCompletedCount || 0)),
         assetRenderTotalMs: Math.max(0, Number(pipelineStats.renderTotalMs || 0)),
         assetRenderMaxMs: Math.max(0, Number(pipelineStats.renderMaxMs || 0)),
@@ -686,6 +699,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
+      activeWorkerCount: 0,
+      activePdfWorkerCount: 0,
+      activePageAssetWorkerCount: 0,
+      pdfWorkerRenderedCount: 0,
+      pdfWorkerFallbackCount: 0,
+      mainPdfRenderedCount: 0,
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
       assetRenderMaxMs: 0,
@@ -987,6 +1006,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
+      activeWorkerCount: 0,
+      activePdfWorkerCount: 0,
+      activePageAssetWorkerCount: 0,
+      pdfWorkerRenderedCount: 0,
+      pdfWorkerFallbackCount: 0,
+      mainPdfRenderedCount: 0,
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
       assetRenderMaxMs: 0,
