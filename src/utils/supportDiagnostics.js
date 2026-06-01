@@ -140,6 +140,7 @@ function collectConfigDiagnostics() {
   const pdfCacheOptions = getPdfPrintCacheKeyOptions(cfg);
   const loading = cfg?.documentLoading || {};
   const render = loading?.render || {};
+  const assetStore = loading?.assetStore || {};
   const renderBenchmark = loading?.renderBenchmark || {};
   return {
     printPdf: {
@@ -202,6 +203,12 @@ function collectConfigDiagnostics() {
             maxWorkerCount: Number(render.pdfWorkerPagePolicy.maxWorkerCount) || 0,
           }
         : null,
+      assetStoreEnabled: assetStore.enabled !== false,
+      assetStoreMode: String(assetStore.mode || ''),
+      assetStoreProtection: String(assetStore.protection || ''),
+      assetStoreReloadCacheTtlMs: Number(assetStore.reloadCacheTtlMs) || 0,
+      assetStorePersistFullPagesInBackground: assetStore.persistFullPagesInBackground !== false,
+      assetStoreRestoreBeforeRender: assetStore.restoreBeforeRender !== false,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
       renderBenchmarkVariants: Array.isArray(renderBenchmark.variants)
         ? renderBenchmark.variants.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)

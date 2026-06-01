@@ -78,6 +78,8 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {number} reloadCacheTtlMs
  * @property {number} blobCacheEntries
  * @property {boolean} persistThumbnails
+ * @property {boolean} persistFullPagesInBackground
+ * @property {boolean} restoreBeforeRender
  * @property {boolean} releaseSinglePageRasterSourceAfterFullPersist
  */
 
@@ -228,6 +230,8 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       reloadCacheTtlMs: 0,
       blobCacheEntries: 24,
       persistThumbnails: false,
+      persistFullPagesInBackground: true,
+      restoreBeforeRender: true,
       releaseSinglePageRasterSourceAfterFullPersist: false,
     },
     render: {
@@ -813,6 +817,8 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       reloadCacheTtlMs: normalizeNumber(raw?.assetStore?.reloadCacheTtlMs, adaptiveDefaults.assetStore.reloadCacheTtlMs, 0, MAX_RELOAD_CACHE_TTL_MS),
       blobCacheEntries: normalizeNumber(raw?.assetStore?.blobCacheEntries, adaptiveDefaults.assetStore.blobCacheEntries, 1, 256),
       persistThumbnails: normalizeBoolean(raw?.assetStore?.persistThumbnails, adaptiveDefaults.assetStore.persistThumbnails),
+      persistFullPagesInBackground: normalizeBoolean(raw?.assetStore?.persistFullPagesInBackground, adaptiveDefaults.assetStore.persistFullPagesInBackground),
+      restoreBeforeRender: normalizeBoolean(raw?.assetStore?.restoreBeforeRender, adaptiveDefaults.assetStore.restoreBeforeRender),
       releaseSinglePageRasterSourceAfterFullPersist: normalizeBoolean(raw?.assetStore?.releaseSinglePageRasterSourceAfterFullPersist, adaptiveDefaults.assetStore.releaseSinglePageRasterSourceAfterFullPersist),
     },
     render: {

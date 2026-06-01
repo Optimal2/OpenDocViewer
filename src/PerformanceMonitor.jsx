@@ -57,6 +57,12 @@ function formatDuration(ms) {
   return `${hh}${mm}:${ss}.${tenths}`;
 }
 
+function formatMilliseconds(ms) {
+  const safeMs = Math.max(0, Number(ms) || 0);
+  if (safeMs < 1000) return `${Math.round(safeMs)} ms`;
+  return `${(safeMs / 1000).toFixed(1)} s`;
+}
+
 /**
  * @param {number} ttlMs
  * @returns {string}
@@ -393,6 +399,20 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     Number(pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 600,
     Number(pdfWorkerPagePolicy.pagesPerWorker) || 150,
   ].join('/');
+  const assetRenderCount = Math.max(0, Number(runtimeDiagnostics?.assetRenderCompletedCount || 0));
+  const assetRenderAvgMs = assetRenderCount > 0
+    ? Number(runtimeDiagnostics?.assetRenderTotalMs || 0) / assetRenderCount
+    : 0;
+  const assetRestoreAttempts = Math.max(0, Number(runtimeDiagnostics?.assetRestoreAttemptCount || 0));
+  const assetRestoreAvgMs = assetRestoreAttempts > 0
+    ? Number(runtimeDiagnostics?.assetRestoreTotalMs || 0) / assetRestoreAttempts
+    : 0;
+  const assetPersistCompleted = Math.max(0, Number(runtimeDiagnostics?.assetPersistCompletedCount || 0));
+  const assetPersistFailed = Math.max(0, Number(runtimeDiagnostics?.assetPersistFailedCount || 0));
+  const assetPersistFinished = assetPersistCompleted + assetPersistFailed;
+  const assetPersistAvgMs = assetPersistFinished > 0
+    ? Number(runtimeDiagnostics?.assetPersistTotalMs || 0) / assetPersistFinished
+    : 0;
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
   const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
@@ -621,6 +641,24 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {t('perf.thumbnailAssetsLabel')} <strong>{thumbnailReadyCount}</strong>/{totalPages}
         </span>
         {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> {t('perf.failedSuffix', { count: failedPages })}</span> : null}
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.assetPipelineLabel', { defaultValue: 'Asset pipeline:' })}</span>{' '}
+        <span style={{ opacity: 0.9 }}>
+          render <strong>{assetRenderCount}</strong> avg <strong>{formatMilliseconds(assetRenderAvgMs)}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          restore <strong>{Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}</strong>
+          /<strong>{Number(runtimeDiagnostics?.assetRestoreMissCount || 0)}</strong>
+          {' '}avg <strong>{formatMilliseconds(assetRestoreAvgMs)}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          persist <strong>{Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}</strong>
+          /<strong>{assetPersistCompleted}</strong>
+          /<strong>{assetPersistFailed}</strong>
+          {' '}avg <strong>{formatMilliseconds(assetPersistAvgMs)}</strong>
+        </span>
       </div>
 
       <div style={sectionStyle}>

@@ -605,6 +605,13 @@
         // the rendered full-size page for both the main view and the thumbnail pane until memory
         // pressure forces a downgrade.
         persistThumbnails: false,
+        // Full pages become visible as soon as their rendered Blob is available. Persisting the
+        // rendered Blob to memory/IndexedDB continues in the background so cache writes cannot
+        // throttle first display of large PDF runs.
+        persistFullPagesInBackground: true,
+        // When enabled, ODV checks the rendered-page cache before re-rendering. Disable in support
+        // benchmarks to isolate first-load render throughput from IndexedDB cache-miss overhead.
+        restoreBeforeRender: true,
         // Keep original single-page raster sources by default for stability.
         // Set to true in site config if you explicitly want the original source released after the
         // full-page blob has been persisted.

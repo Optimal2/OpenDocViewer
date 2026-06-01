@@ -268,6 +268,32 @@ function createLimiter(getLimit) {
   });
 }
 
+function createAssetPipelineStats() {
+  return {
+    renderCompletedCount: 0,
+    renderTotalMs: 0,
+    renderMaxMs: 0,
+    restoreAttemptCount: 0,
+    restoreHitCount: 0,
+    restoreMissCount: 0,
+    restoreTotalMs: 0,
+    persistPendingCount: 0,
+    persistCompletedCount: 0,
+    persistFailedCount: 0,
+    persistTotalMs: 0,
+    persistMaxMs: 0,
+    persistLastError: '',
+  };
+}
+
+function nowMs() {
+  try {
+    return typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : Date.now();
+  } catch {
+    return Date.now();
+  }
+}
+
 /**
  * @typedef {Object} ViewerProviderProps
  * @property {React.ReactNode} children
@@ -308,6 +334,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     trackedObjectUrlCount: 0,
     warmupQueueLength: 0,
     pendingAssetCount: 0,
+    assetRenderCompletedCount: 0,
+    assetRenderTotalMs: 0,
+    assetRenderMaxMs: 0,
+    assetRestoreAttemptCount: 0,
+    assetRestoreHitCount: 0,
+    assetRestoreMissCount: 0,
+    assetRestoreTotalMs: 0,
+    assetPersistPendingCount: 0,
+    assetPersistCompletedCount: 0,
+    assetPersistFailedCount: 0,
+    assetPersistTotalMs: 0,
+    assetPersistMaxMs: 0,
+    assetPersistLastError: '',
     sourceStoreEncrypted: false,
     assetStoreEncrypted: false,
     sourceCacheHits: 0,
@@ -361,6 +400,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const pdfResolutionBoostedKeysRef = useRef(new Set());
   const pdfResolutionPendingKeysRef = useRef(new Set());
   const pdfPageCountRef = useRef(0);
+  const assetPipelineStatsRef = useRef(createAssetPipelineStats());
 
   const renderWithLimit = useRef(createLimiter(
     () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
@@ -437,6 +477,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const tempStats = tempStoreRef.current?.getStats?.() || {};
     const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
+    const pipelineStats = assetPipelineStatsRef.current || createAssetPipelineStats();
     const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
     const totalPages = pages.length;
     const renderConfig = sessionConfigRef.current?.render || {};
@@ -489,6 +530,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         trackedObjectUrlCount: getTrackedObjectUrlCount(),
         warmupQueueLength: warmupQueueRef.current.length,
         pendingAssetCount: pendingAssetPromisesRef.current.size,
+        assetRenderCompletedCount: Math.max(0, Number(pipelineStats.renderCompletedCount || 0)),
+        assetRenderTotalMs: Math.max(0, Number(pipelineStats.renderTotalMs || 0)),
+        assetRenderMaxMs: Math.max(0, Number(pipelineStats.renderMaxMs || 0)),
+        assetRestoreAttemptCount: Math.max(0, Number(pipelineStats.restoreAttemptCount || 0)),
+        assetRestoreHitCount: Math.max(0, Number(pipelineStats.restoreHitCount || 0)),
+        assetRestoreMissCount: Math.max(0, Number(pipelineStats.restoreMissCount || 0)),
+        assetRestoreTotalMs: Math.max(0, Number(pipelineStats.restoreTotalMs || 0)),
+        assetPersistPendingCount: Math.max(0, Number(pipelineStats.persistPendingCount || 0)),
+        assetPersistCompletedCount: Math.max(0, Number(pipelineStats.persistCompletedCount || 0)),
+        assetPersistFailedCount: Math.max(0, Number(pipelineStats.persistFailedCount || 0)),
+        assetPersistTotalMs: Math.max(0, Number(pipelineStats.persistTotalMs || 0)),
+        assetPersistMaxMs: Math.max(0, Number(pipelineStats.persistMaxMs || 0)),
+        assetPersistLastError: String(pipelineStats.persistLastError || ''),
         sourceStoreEncrypted: !!tempStats.encrypted,
         assetStoreEncrypted: !!assetStats.encrypted,
         sourceCacheHits: Math.max(0, Number(tempStats.cacheHits || 0)),
@@ -547,6 +601,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetPromisesRef.current.clear();
     sourceDescriptorsRef.current.clear();
     cacheIdentityStatsRef.current = { documentVersion: 0, documentUrlFallback: 0, url: 0 };
+    assetPipelineStatsRef.current = createAssetPipelineStats();
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
@@ -631,6 +686,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
+      assetRenderCompletedCount: 0,
+      assetRenderTotalMs: 0,
+      assetRenderMaxMs: 0,
+      assetRestoreAttemptCount: 0,
+      assetRestoreHitCount: 0,
+      assetRestoreMissCount: 0,
+      assetRestoreTotalMs: 0,
+      assetPersistPendingCount: 0,
+      assetPersistCompletedCount: 0,
+      assetPersistFailedCount: 0,
+      assetPersistTotalMs: 0,
+      assetPersistMaxMs: 0,
+      assetPersistLastError: '',
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
       sourceCacheHits: 0,
@@ -785,6 +853,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       documentUrlFallback: Math.max(0, Number(options?.cacheIdentityStats?.documentUrlFallback || 0)),
       url: Math.max(0, Number(options?.cacheIdentityStats?.url || 0)),
     };
+    assetPipelineStatsRef.current = createAssetPipelineStats();
     sessionBaseConfigRef.current = baseConfig;
     sessionConfigRef.current = cloneDocumentLoadingConfig(baseConfig);
     setDocumentLoadingConfig(sessionConfigRef.current);
@@ -891,6 +960,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     sessionBaseConfigRef.current = defaultConfig;
     sessionConfigRef.current = defaultConfig;
     pdfPageCountRef.current = 0;
+    assetPipelineStatsRef.current = createAssetPipelineStats();
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     setWorkerCount(0);
@@ -917,6 +987,19 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       trackedObjectUrlCount: 0,
       warmupQueueLength: 0,
       pendingAssetCount: 0,
+      assetRenderCompletedCount: 0,
+      assetRenderTotalMs: 0,
+      assetRenderMaxMs: 0,
+      assetRestoreAttemptCount: 0,
+      assetRestoreHitCount: 0,
+      assetRestoreMissCount: 0,
+      assetRestoreTotalMs: 0,
+      assetPersistPendingCount: 0,
+      assetPersistCompletedCount: 0,
+      assetPersistFailedCount: 0,
+      assetPersistTotalMs: 0,
+      assetPersistMaxMs: 0,
+      assetPersistLastError: '',
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
       sourceCacheHits: 0,
@@ -1089,6 +1172,42 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     announceIndexedDbAssetMode();
     if (variant === 'full') await maybeReleaseSinglePageRasterSource(pageIndex);
   }, [announceIndexedDbAssetMode, maybeReleaseSinglePageRasterSource, noteFullAssetReady, noteThumbnailAssetReady]);
+
+  const persistRenderedAssetInBackground = useCallback((pageIndex, variant, rendered, sessionEpoch) => {
+    const stats = assetPipelineStatsRef.current;
+    stats.persistPendingCount += 1;
+    const startedAt = nowMs();
+
+    Promise.resolve()
+      .then(() => {
+        if (sessionEpochRef.current !== sessionEpoch) return null;
+        return persistRenderedAsset(pageIndex, variant, rendered);
+      })
+      .then(() => {
+        const durationMs = Math.max(0, nowMs() - startedAt);
+        stats.persistCompletedCount += 1;
+        stats.persistTotalMs += durationMs;
+        stats.persistMaxMs = Math.max(Number(stats.persistMaxMs) || 0, durationMs);
+      })
+      .catch((error) => {
+        const durationMs = Math.max(0, nowMs() - startedAt);
+        stats.persistFailedCount += 1;
+        stats.persistTotalMs += durationMs;
+        stats.persistMaxMs = Math.max(Number(stats.persistMaxMs) || 0, durationMs);
+        stats.persistLastError = String(error?.message || error).slice(0, 180);
+        logger.warn('Background page-asset persist failed', {
+          pageIndex,
+          variant,
+          error: stats.persistLastError,
+        });
+      })
+      .finally(() => {
+        stats.persistPendingCount = Math.max(0, Number(stats.persistPendingCount || 0) - 1);
+        if (sessionEpochRef.current === sessionEpoch && stats.persistPendingCount <= 0) {
+          collectRuntimeDiagnostics();
+        }
+      });
+  }, [collectRuntimeDiagnostics, persistRenderedAsset]);
 
 
 
@@ -1281,10 +1400,18 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const page = getPageAt(allPagesRef.current, pageIndex);
     if (!page || !page.sourceKey) return null;
 
+    const stats = assetPipelineStatsRef.current;
+    const startedAt = nowMs();
+    stats.restoreAttemptCount += 1;
     const stored = await store.getAsset(
       makePersistedAssetKey(page, variant, sessionConfigRef.current.render)
     );
-    if (!stored?.blob || !stored?.meta) return null;
+    stats.restoreTotalMs += Math.max(0, nowMs() - startedAt);
+    if (!stored?.blob || !stored?.meta) {
+      stats.restoreMissCount += 1;
+      return null;
+    }
+    stats.restoreHitCount += 1;
 
     const cache = getVariantCache(variant);
     const url = createTrackedObjectUrl(stored.blob);
@@ -1461,19 +1588,28 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         const skipPersistedRestore = options.forceRefresh === true
           && Number.isFinite(Number(options.fullPageScale))
           && Number(options.fullPageScale) > 0;
-        if (!skipPersistedRestore) {
+        const restoreBeforeRender = sessionConfigRef.current.assetStore.restoreBeforeRender !== false;
+        if (!skipPersistedRestore && restoreBeforeRender) {
           const restoredUrl = await restorePersistedAsset(safeIndex, variant, options);
           if (sessionEpochRef.current !== sessionEpoch) return null;
           if (restoredUrl) return restoredUrl;
         }
 
+        const renderStartedAt = nowMs();
         const rendered = await renderPageBlob(safeIndex, variant, {
           priority: options.priority || 'normal',
           fullPageScale: options.fullPageScale,
         });
         if (sessionEpochRef.current !== sessionEpoch) return null;
+        const renderDurationMs = Math.max(0, nowMs() - renderStartedAt);
+        const stats = assetPipelineStatsRef.current;
+        stats.renderCompletedCount += 1;
+        stats.renderTotalMs += renderDurationMs;
+        stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, renderDurationMs);
 
-        if (options.persist !== false) {
+        const persistFullInBackground = variant === 'full'
+          && sessionConfigRef.current.assetStore.persistFullPagesInBackground !== false;
+        if (options.persist !== false && !persistFullInBackground) {
           await persistRenderedAsset(safeIndex, variant, rendered);
           if (sessionEpochRef.current !== sessionEpoch) return null;
         }
@@ -1515,6 +1651,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
             }
         );
 
+        if (options.persist !== false && persistFullInBackground) {
+          persistRenderedAssetInBackground(safeIndex, variant, rendered, sessionEpoch);
+        }
+
         if (options.trackInCache !== false) enforceCacheLimit(variant);
         return url;
       } catch (e) {
@@ -1537,7 +1677,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
-  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
    * Render one PDF page again at twice the configured full-page PDF scale.
