@@ -203,10 +203,6 @@ function collectConfigDiagnostics() {
             maxWorkerCount: Number(render.pdfWorkerPagePolicy.maxWorkerCount) || 0,
           }
         : null,
-      pdfWorkerWarmupBatchMode: String(render.pdfWorkerWarmupBatchMode || ''),
-      deferPdfWorkerWarmupUntilLoadComplete: render.deferPdfWorkerWarmupUntilLoadComplete !== false,
-      pdfWorkerWarmupMinPageCount: Number(render.pdfWorkerWarmupMinPageCount) || 0,
-      pdfWorkerWarmupRendersPerWorker: Number(render.pdfWorkerWarmupRendersPerWorker) || 0,
       assetStoreEnabled: assetStore.enabled !== false,
       assetStoreMode: String(assetStore.mode || ''),
       assetStoreProtection: String(assetStore.protection || ''),

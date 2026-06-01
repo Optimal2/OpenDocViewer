@@ -737,14 +737,6 @@
           pagesPerWorker: 150,
           maxWorkerCount: 0
         },
-        // Large eager PDF warmups are batched once the initial source load is complete so the
-        // real viewer uses the same high-throughput worker pattern as the diagnostics benchmark.
-        // "partitioned" gives each PDF worker a large contiguous page range; "queue" keeps the
-        // older one-page-at-a-time worker queue; "off" disables the batch fast path.
-        pdfWorkerWarmupBatchMode: 'partitioned',
-        deferPdfWorkerWarmupUntilLoadComplete: true,
-        pdfWorkerWarmupMinPageCount: 100,
-        pdfWorkerWarmupRendersPerWorker: 1,
 
         // Maximum number of main-thread renders allowed when the worker path is unavailable.
         maxConcurrentMainThreadRenders: 3,
