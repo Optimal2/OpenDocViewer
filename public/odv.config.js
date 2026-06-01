@@ -690,6 +690,15 @@
         // Explicit main-thread render concurrency values tested for pdfToImageMode='main-thread'.
         // Main-thread PDF scenarios use these values instead of workerCounts.
         mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
+        // Add CPU-scaled probes to the explicit main-thread list. On a 24-core workstation,
+        // these defaults add 12/18/24 without hardcoding those values for smaller clients.
+        mainThreadCoreMultipliers: [0.5, 0.75, 1],
+        // Add CPU-scaled worker-count probes to worker scenarios. Values are multiplied by
+        // the runtime-recommended worker count, which normally leaves one core for the UI.
+        workerCoreMultipliers: [0.25, 0.5, 1],
+        // Add worker-count probes based on pages per PDF page worker, capped by the
+        // runtime-recommended worker count. Useful for 300/600-page PDF stress tests.
+        pdfWorkerPageTargets: [50, 100, 200],
         maxRuns: 40,
         delayBetweenRunsMs: 150
       },

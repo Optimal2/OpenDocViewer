@@ -316,6 +316,10 @@ export class PageAssetRenderer {
     );
   }
 
+  getPdfWorkerCount() {
+    return Math.max(0, Number(this.pdfWorkerPool?.getWorkerCount?.() || 0));
+  }
+
   getStats() {
     return {
       ...this.renderStats,
@@ -420,6 +424,10 @@ export class PageAssetRenderer {
     if (backend === 'main-only') return false;
     if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() !== 'worker') return false;
     return !!this.pdfWorkerPool?.canRender?.();
+  }
+
+  canRenderPdfInWorker() {
+    return this.shouldTryPdfWorker();
   }
 
   recordPdfWorkerFallback(error, descriptor, variant) {

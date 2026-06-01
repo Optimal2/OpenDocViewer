@@ -204,6 +204,15 @@ function collectConfigDiagnostics() {
       renderBenchmarkMainThreadConcurrencies: Array.isArray(renderBenchmark.mainThreadConcurrencies)
         ? renderBenchmark.mainThreadConcurrencies.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
         : [],
+      renderBenchmarkMainThreadCoreMultipliers: Array.isArray(renderBenchmark.mainThreadCoreMultipliers)
+        ? renderBenchmark.mainThreadCoreMultipliers.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
+      renderBenchmarkWorkerCoreMultipliers: Array.isArray(renderBenchmark.workerCoreMultipliers)
+        ? renderBenchmark.workerCoreMultipliers.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
+      renderBenchmarkPdfWorkerPageTargets: Array.isArray(renderBenchmark.pdfWorkerPageTargets)
+        ? renderBenchmark.pdfWorkerPageTargets.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
       renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns) || 0,
     },
   };

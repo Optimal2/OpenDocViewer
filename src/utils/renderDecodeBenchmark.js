@@ -29,6 +29,9 @@ const RENDER_VARIANTS = Object.freeze(['full', 'thumbnail']);
 const PDF_TO_IMAGE_MODES = Object.freeze(['current', 'main-thread', 'worker']);
 const SAMPLE_MODES = Object.freeze(['first', 'evenly-spaced']);
 const DEFAULT_MAIN_THREAD_CONCURRENCIES = Object.freeze([1, 2, 3, 4, 5, 6, 8]);
+const DEFAULT_MAIN_THREAD_CORE_MULTIPLIERS = Object.freeze([0.5, 0.75, 1]);
+const DEFAULT_WORKER_CORE_MULTIPLIERS = Object.freeze([0.25, 0.5, 1]);
+const DEFAULT_PDF_WORKER_PAGE_TARGETS = Object.freeze([50, 100, 200]);
 
 /**
  * @param {*} value
@@ -63,19 +66,53 @@ function normalizeWorkerCounts(value, fallback = DEFAULT_WORKER_COUNTS) {
 
 /**
  * @param {*} value
+ * @param {Array<number>} fallback
+ * @param {number} max
  * @returns {Array<number>}
  */
-function normalizeMainThreadConcurrencies(value) {
-  const raw = Array.isArray(value) ? value : DEFAULT_MAIN_THREAD_CONCURRENCIES;
+function normalizePositiveNumberList(value, fallback, max) {
+  const raw = Array.isArray(value) ? value : fallback;
   const out = [];
   const seen = new Set();
   for (const item of raw) {
-    const next = Math.max(1, Math.min(MAX_RENDER_BENCHMARK_MAIN_THREAD_CONCURRENCY, Math.floor(Number(item) || 0)));
+    const next = Math.max(1, Math.min(max, Math.floor(Number(item) || 0)));
     if (seen.has(next)) continue;
     seen.add(next);
     out.push(next);
   }
-  return out.length ? out : DEFAULT_MAIN_THREAD_CONCURRENCIES.slice();
+  return out.length ? out : fallback.slice();
+}
+
+/**
+ * @param {*} value
+ * @param {Array<number>} fallback
+ * @returns {Array<number>}
+ */
+function normalizeMultiplierList(value, fallback) {
+  const raw = Array.isArray(value) ? value : fallback;
+  const out = [];
+  const seen = new Set();
+  for (const item of raw) {
+    const next = Math.max(0, Math.min(4, Number(item) || 0));
+    if (next <= 0) continue;
+    const key = next.toFixed(4);
+    if (seen.has(key)) continue;
+    seen.add(key);
+    out.push(next);
+  }
+  return out.length ? out : fallback.slice();
+}
+
+/**
+ * @param {*} value
+ * @returns {Array<number>}
+ */
+function normalizeMainThreadConcurrencies(value) {
+  return normalizePositiveNumberList(
+    value,
+    DEFAULT_MAIN_THREAD_CONCURRENCIES,
+    MAX_RENDER_BENCHMARK_MAIN_THREAD_CONCURRENCY
+  );
 }
 
 /**
@@ -131,8 +168,63 @@ function normalizeSampleMode(value) {
 }
 
 /**
+ * @returns {number}
+ */
+function getHardwareConcurrency() {
+  try {
+    return Math.max(1, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 2));
+  } catch {
+    return 2;
+  }
+}
+
+/**
+ * @param {Array<number>} values
+ * @param {Array<number>} additions
+ * @param {number} max
+ * @returns {Array<number>}
+ */
+function mergePositiveCounts(values, additions, max) {
+  const out = [];
+  const seen = new Set();
+  for (const item of [...(values || []), ...(additions || [])]) {
+    const next = Math.max(1, Math.min(max, Math.floor(Number(item) || 0)));
+    if (seen.has(next)) continue;
+    seen.add(next);
+    out.push(next);
+  }
+  return out;
+}
+
+/**
+ * @param {number} baseCount
+ * @param {Array<number>} multipliers
+ * @param {number} max
+ * @returns {Array<number>}
+ */
+function deriveCountsFromMultipliers(baseCount, multipliers, max) {
+  const base = Math.max(1, Math.floor(Number(baseCount) || 1));
+  return (Array.isArray(multipliers) ? multipliers : [])
+    .map((multiplier) => Math.max(1, Math.round(base * (Number(multiplier) || 0))))
+    .filter((value) => value > 0 && value <= max);
+}
+
+/**
+ * @param {number} pageCount
+ * @param {Array<number>} targets
+ * @param {number} max
+ * @returns {Array<number>}
+ */
+function deriveWorkerCountsFromPageTargets(pageCount, targets, max) {
+  const pages = Math.max(1, Math.floor(Number(pageCount) || 1));
+  return (Array.isArray(targets) ? targets : [])
+    .map((target) => Math.ceil(pages / Math.max(1, Number(target) || 1)))
+    .filter((value) => value > 0 && value <= max);
+}
+
+/**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,mainThreadConcurrencies:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number,taskTimeoutMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,mainThreadConcurrencies:Array<number>,mainThreadCoreMultipliers:Array<number>,workerCoreMultipliers:Array<number>,pdfWorkerPageTargets:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number,taskTimeoutMs:number}}
  */
 function normalizeRenderBenchmarkConfig(config = {}) {
   const cfg = config?.documentLoading?.renderBenchmark || {};
@@ -143,6 +235,16 @@ function normalizeRenderBenchmarkConfig(config = {}) {
     workerCounts: normalizeWorkerCounts(cfg.workerCounts),
     mainThreadConcurrencies: normalizeMainThreadConcurrencies(
       cfg.mainThreadConcurrencies || cfg.mainThreadConcurrency || cfg.mainThreadCounts
+    ),
+    mainThreadCoreMultipliers: normalizeMultiplierList(
+      cfg.mainThreadCoreMultipliers,
+      DEFAULT_MAIN_THREAD_CORE_MULTIPLIERS
+    ),
+    workerCoreMultipliers: normalizeMultiplierList(cfg.workerCoreMultipliers, DEFAULT_WORKER_CORE_MULTIPLIERS),
+    pdfWorkerPageTargets: normalizePositiveNumberList(
+      cfg.pdfWorkerPageTargets || cfg.pdfWorkerPagesPerWorker,
+      DEFAULT_PDF_WORKER_PAGE_TARGETS,
+      MAX_RENDER_BENCHMARK_PAGE_LIMIT
     ),
     variants: normalizeVariants(cfg.variants),
     pdfToImageModes: normalizePdfToImageModes(cfg.pdfToImageModes || cfg.pdfToImageMode),
@@ -339,25 +441,60 @@ function addScenario(scenarios, seen, scenario) {
 
 /**
  * @param {Object} benchmarkCfg
- * @param {string=} activePdfToImageMode
- * @returns {{scenarios:Array<Object>, totalScenarioCount:number}}
+ * @param {Object=} options
+ * @param {string=} options.activePdfToImageMode
+ * @param {number=} options.pageCount
+ * @param {number=} options.hardwareConcurrency
+ * @param {number=} options.recommendedWorkerCount
+ * @returns {{scenarios:Array<Object>, totalScenarioCount:number, mainThreadConcurrencies:Array<number>, workerCounts:Array<number>}}
  */
-function createScenarios(benchmarkCfg, activePdfToImageMode = 'main-thread') {
+function createScenarios(benchmarkCfg, options = {}) {
   const scenarios = [];
   const seen = new Set();
-  const activePdfMode = String(activePdfToImageMode || 'main-thread').toLowerCase() === 'worker'
+  const activePdfMode = String(options.activePdfToImageMode || 'main-thread').toLowerCase() === 'worker'
     ? 'worker'
     : 'main-thread';
+  const hardwareConcurrency = Math.max(1, Number(options.hardwareConcurrency) || getHardwareConcurrency());
+  const recommendedWorkerCount = Math.max(
+    1,
+    Math.min(MAX_RENDER_BENCHMARK_WORKER_COUNT, Number(options.recommendedWorkerCount) || 1)
+  );
+  const mainThreadConcurrencies = mergePositiveCounts(
+    benchmarkCfg.mainThreadConcurrencies,
+    deriveCountsFromMultipliers(
+      hardwareConcurrency,
+      benchmarkCfg.mainThreadCoreMultipliers,
+      MAX_RENDER_BENCHMARK_MAIN_THREAD_CONCURRENCY
+    ),
+    MAX_RENDER_BENCHMARK_MAIN_THREAD_CONCURRENCY
+  );
+  const workerCounts = [0].concat(mergePositiveCounts(
+    benchmarkCfg.workerCounts.filter((count) => Number(count) > 0),
+    [
+      ...deriveCountsFromMultipliers(
+        recommendedWorkerCount,
+        benchmarkCfg.workerCoreMultipliers,
+        MAX_RENDER_BENCHMARK_WORKER_COUNT
+      ),
+      ...deriveWorkerCountsFromPageTargets(
+        options.pageCount,
+        benchmarkCfg.pdfWorkerPageTargets,
+        recommendedWorkerCount
+      ),
+    ],
+    MAX_RENDER_BENCHMARK_WORKER_COUNT
+  ));
+
   for (const variant of benchmarkCfg.variants) {
     for (const pdfToImageMode of benchmarkCfg.pdfToImageModes) {
       const variesMainThreadConcurrency = pdfToImageMode === 'main-thread'
         || (pdfToImageMode === 'current' && activePdfMode === 'main-thread');
       if (variesMainThreadConcurrency) {
-        for (const mainThreadConcurrency of benchmarkCfg.mainThreadConcurrencies) {
+        for (const mainThreadConcurrency of mainThreadConcurrencies) {
           addScenario(scenarios, seen, { variant, workerCount: 0, mainThreadConcurrency, pdfToImageMode });
         }
       } else {
-        for (const workerCount of benchmarkCfg.workerCounts) {
+        for (const workerCount of workerCounts) {
           addScenario(scenarios, seen, { variant, workerCount, mainThreadConcurrency: 0, pdfToImageMode });
         }
       }
@@ -366,6 +503,8 @@ function createScenarios(benchmarkCfg, activePdfToImageMode = 'main-thread') {
   return {
     scenarios: scenarios.slice(0, benchmarkCfg.maxRuns),
     totalScenarioCount: scenarios.length,
+    mainThreadConcurrencies,
+    workerCounts,
   };
 }
 
@@ -665,7 +804,14 @@ export async function runRenderDecodeBenchmark(args) {
   const basePdfToImageMode = String(baseRenderConfig?.pdfToImageMode || 'main-thread').toLowerCase() === 'worker'
     ? 'worker'
     : 'main-thread';
-  const scenarioPlan = createScenarios(benchmarkCfg, basePdfToImageMode);
+  const hardwareConcurrency = getHardwareConcurrency();
+  const recommendedWorkerCount = resolveRecommendedWorkerCount(0, 'auto');
+  const scenarioPlan = createScenarios(benchmarkCfg, {
+    activePdfToImageMode: basePdfToImageMode,
+    pageCount: selectedPages.length,
+    hardwareConcurrency,
+    recommendedWorkerCount,
+  });
   const scenarios = scenarioPlan.scenarios;
   const totalRuns = scenarios.length * benchmarkCfg.iterations;
   const runs = [];
@@ -713,10 +859,17 @@ export async function runRenderDecodeBenchmark(args) {
     iterations: benchmarkCfg.iterations,
     sampleMode: benchmarkCfg.sampleMode,
     activePdfToImageMode: basePdfToImageMode,
+    hardwareConcurrency,
+    recommendedWorkerCount,
     variants: benchmarkCfg.variants,
     pdfToImageModes: benchmarkCfg.pdfToImageModes,
     workerCounts: benchmarkCfg.workerCounts,
     mainThreadConcurrencies: benchmarkCfg.mainThreadConcurrencies,
+    focusedWorkerCounts: scenarioPlan.workerCounts,
+    focusedMainThreadConcurrencies: scenarioPlan.mainThreadConcurrencies,
+    mainThreadCoreMultipliers: benchmarkCfg.mainThreadCoreMultipliers,
+    workerCoreMultipliers: benchmarkCfg.workerCoreMultipliers,
+    pdfWorkerPageTargets: benchmarkCfg.pdfWorkerPageTargets,
     taskTimeoutMs: benchmarkCfg.taskTimeoutMs,
     maxRuns: benchmarkCfg.maxRuns,
     testedVariants: Array.from(new Set(scenarios.map((scenario) => scenario.variant))),

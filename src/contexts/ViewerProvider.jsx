@@ -363,6 +363,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const renderWithLimit = useRef(createLimiter(
     () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
   )).current;
+  const pdfWorkerRenderWithLimit = useRef(createLimiter(
+    () => Math.max(
+      1,
+      Number(pageRendererRef.current?.getPdfWorkerCount?.() || 0)
+        || Number(sessionConfigRef.current?.render?.workerCount || 0)
+        || 1
+    )
+  )).current;
 
   const publishPdfResolutionBoostState = useCallback(() => {
     setPdfResolutionBoostState({
@@ -1332,8 +1340,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       return renderTask();
     }
 
+    if (String(source.fileExtension || '').toLowerCase() === 'pdf'
+      && pageRendererRef.current?.canRenderPdfInWorker?.()) {
+      return pdfWorkerRenderWithLimit(renderTask, renderOptions.priority || 'normal');
+    }
+
     return renderWithLimit(renderTask, renderOptions.priority || 'normal');
-  }, [renderWithLimit]);
+  }, [pdfWorkerRenderWithLimit, renderWithLimit]);
 
   /**
    * @param {number} pageIndex
