@@ -10,7 +10,7 @@
 import { decode as decodeUTIF, decodeImage as decodeUTIFImage, toRGBA8 } from 'utif2';
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
-import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { getDocumentLoadingConfig, resolvePdfRenderConfigForPageCount } from './documentLoadingConfig.js';
 import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
 import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
 import { withPdfJsDocumentOptions } from './pdfjsDocumentOptions.js';
@@ -246,6 +246,29 @@ export class PageAssetRenderer {
     this.rebuildWorkerPool();
   }
 
+  getEffectiveRenderConfig() {
+    return resolvePdfRenderConfigForPageCount(
+      this.config,
+      Math.max(0, Number(this.config.pdfPageCount || this.config.pdfWorkerResolvedPageCount) || 0)
+    );
+  }
+
+  getWorkerPoolSignature(config = this.config) {
+    const effective = resolvePdfRenderConfigForPageCount(
+      config,
+      Math.max(0, Number(config?.pdfPageCount || config?.pdfWorkerResolvedPageCount) || 0)
+    );
+    return {
+      backend: String(effective.backend || 'hybrid-by-format').toLowerCase(),
+      workerCount: Math.max(0, Number(effective.workerCount) || 0),
+      pdfWorkerCount: Math.max(0, Number(effective.pdfWorkerCount) || 0),
+      useWorkersForTiff: effective.useWorkersForTiff !== false,
+      useWorkersForRasterImages: effective.useWorkersForRasterImages !== false,
+      pdfToImageMode: String(effective.pdfToImageMode || 'main-thread').toLowerCase(),
+      pdfWorkerTaskTimeoutMs: Math.max(0, Number(effective.pdfWorkerTaskTimeoutMs) || 0),
+    };
+  }
+
   rebuildWorkerPool() {
     const current = this.workerPool;
     const currentPdf = this.pdfWorkerPool;
@@ -254,17 +277,17 @@ export class PageAssetRenderer {
     if (current) void current.dispose?.();
     if (currentPdf) void currentPdf.dispose?.();
 
-    const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
+    const effective = this.getEffectiveRenderConfig();
+    const backend = String(effective.backend || 'hybrid-by-format').toLowerCase();
     if (backend === 'main-only') return;
 
-    const workerCount = Math.max(0, Number(this.config.workerCount) || 0);
-    if (workerCount <= 0) return;
-    const pdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
-    const pdfWorkerCount = Math.max(1, Math.min(workerCount, pdfWorkerMaxCount));
+    const workerCount = Math.max(0, Number(effective.workerCount) || 0);
+    const pdfWorkerCount = Math.max(0, Number(effective.pdfWorkerCount) || 0);
+    if (workerCount <= 0 && pdfWorkerCount <= 0) return;
 
-    const useForTiff = this.config.useWorkersForTiff !== false;
-    const useForRasterImages = this.config.useWorkersForRasterImages !== false;
-    if (useForTiff || useForRasterImages) {
+    const useForTiff = effective.useWorkersForTiff !== false;
+    const useForRasterImages = effective.useWorkersForRasterImages !== false;
+    if (workerCount > 0 && (useForTiff || useForRasterImages)) {
       this.workerPool = createPageAssetWorkerPool({
         enabled: true,
         workerCount,
@@ -273,38 +296,29 @@ export class PageAssetRenderer {
       });
     }
 
-    if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() === 'worker') {
+    if (String(effective.pdfToImageMode || 'main-thread').toLowerCase() === 'worker' && pdfWorkerCount > 0) {
       this.pdfWorkerPool = createPdfPageWorkerPool({
         enabled: true,
         workerCount: pdfWorkerCount,
-        taskTimeoutMs: this.config.pdfWorkerTaskTimeoutMs,
+        taskTimeoutMs: effective.pdfWorkerTaskTimeoutMs,
       });
     }
   }
 
   updateConfig(nextConfig = {}) {
-    const previousBackend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
-    const previousWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
-    const previousUseForTiff = this.config.useWorkersForTiff !== false;
-    const previousUseForRasterImages = this.config.useWorkersForRasterImages !== false;
-    const previousPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
-    const previousPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
+    const previousSignature = this.getWorkerPoolSignature();
     this.config = {
       ...this.config,
       ...(nextConfig || {}),
     };
-    const nextBackend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
-    const nextWorkerCount = Math.max(0, Number(this.config.workerCount) || 0);
-    const nextUseForTiff = this.config.useWorkersForTiff !== false;
-    const nextUseForRasterImages = this.config.useWorkersForRasterImages !== false;
-    const nextPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
-    const nextPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
-    const shouldRebuild = previousBackend !== nextBackend
-      || previousWorkerCount !== nextWorkerCount
-      || previousUseForTiff !== nextUseForTiff
-      || previousUseForRasterImages !== nextUseForRasterImages
-      || previousPdfToImageMode !== nextPdfToImageMode
-      || previousPdfWorkerMaxCount !== nextPdfWorkerMaxCount;
+    const nextSignature = this.getWorkerPoolSignature();
+    const shouldRebuild = previousSignature.backend !== nextSignature.backend
+      || previousSignature.workerCount !== nextSignature.workerCount
+      || previousSignature.pdfWorkerCount !== nextSignature.pdfWorkerCount
+      || previousSignature.useWorkersForTiff !== nextSignature.useWorkersForTiff
+      || previousSignature.useWorkersForRasterImages !== nextSignature.useWorkersForRasterImages
+      || previousSignature.pdfToImageMode !== nextSignature.pdfToImageMode
+      || previousSignature.pdfWorkerTaskTimeoutMs !== nextSignature.pdfWorkerTaskTimeoutMs;
     if (shouldRebuild) this.rebuildWorkerPool();
   }
 
@@ -420,9 +434,10 @@ export class PageAssetRenderer {
   }
 
   shouldTryPdfWorker() {
-    const backend = String(this.config.backend || 'hybrid-by-format').toLowerCase();
+    const effective = this.getEffectiveRenderConfig();
+    const backend = String(effective.backend || 'hybrid-by-format').toLowerCase();
     if (backend === 'main-only') return false;
-    if (String(this.config.pdfToImageMode || 'main-thread').toLowerCase() !== 'worker') return false;
+    if (String(effective.pdfToImageMode || 'main-thread').toLowerCase() !== 'worker') return false;
     return !!this.pdfWorkerPool?.canRender?.();
   }
 
