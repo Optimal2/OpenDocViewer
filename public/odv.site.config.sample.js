@@ -711,7 +711,7 @@
         //   "main-only"        -> keep rendering on the main thread only
         backend: 'hybrid-by-format',
 
-        // 0 = choose from navigator.hardwareConcurrency at runtime, falling back to 4 when unknown.
+        // 0 = choose from navigator.hardwareConcurrency at runtime, using 4 as the minimum/fallback.
         workerCount: 0,
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,

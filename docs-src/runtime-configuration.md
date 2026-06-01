@@ -174,9 +174,9 @@ parent payload and therefore the same expired document tickets.
 ## PDF Page Rendering Worker Mode
 
 PDF pages use an automatic PDF-to-image routing policy by default. The default policy now mirrors
-the normal raster/TIFF worker recommendation: use the browser-reported logical core count, fall back
-to 4 workers when the browser does not report a value, and cap the result by the number of PDF pages
-and any explicit site limit.
+the normal raster/TIFF worker recommendation: use the browser-reported logical core count with a
+minimum/fallback of 4 workers, and cap the result by the number of PDF pages and any explicit site
+limit.
 
 ```js
 documentLoading: {
@@ -205,8 +205,9 @@ documentLoading: {
 - `worker` - forces PDF page images through dedicated workers when supported, with automatic fallback
   to the main-thread path if worker-side rendering is unavailable or fails.
 
-The runtime-recommended worker count is `navigator.hardwareConcurrency` when available and `4` when
-unknown. `memory` mode still caps background workers more aggressively. `pdfWorkerMaxCount` and
+The runtime-recommended worker count is `navigator.hardwareConcurrency` when available, but never
+less than 4 in normal auto/performance mode. `memory` mode still caps background workers more
+aggressively. `pdfWorkerMaxCount` and
 `pdfWorkerPagePolicy.maxWorkerCount` default to `0`, meaning no static site cap; set either to a
 positive value only when a deployment needs an explicit safety ceiling. Raster images and TIFF files
 use the same worker recommendation through `documentLoading.render.workerCount`, while generated-PDF

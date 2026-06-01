@@ -174,7 +174,7 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
     cores = Math.max(0, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 0));
   } catch {}
 
-  const suggested = cores > 0 ? cores : 4;
+  const suggested = Math.max(4, cores);
 
   if (mode === 'memory') return Math.max(1, Math.min(2, suggested));
   return Math.max(1, Math.min(32, suggested));
