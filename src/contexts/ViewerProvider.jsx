@@ -1864,14 +1864,17 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const descriptors = [];
     const taskByItem = [];
+    const seenBatchPageIndexes = new Set();
     for (const task of safeTasks) {
       const safeIndex = Math.max(0, Number(task?.pageIndex) || 0);
       if (String(task?.variant || 'full') !== 'full') continue;
+      if (seenBatchPageIndexes.has(safeIndex)) continue;
       if (pendingAssetPromisesRef.current.has(makePendingAssetKey('full', safeIndex))) continue;
       const page = getPageAt(allPagesRef.current, safeIndex);
       if (!page || page.status === -1 || page.fullSizeStatus === 1 || page.fullSizeUrl || !page.sourceKey) continue;
       const source = sourceDescriptorsRef.current.get(page.sourceKey);
       if (String(source?.fileExtension || page.fileExtension || '').toLowerCase() !== 'pdf') continue;
+      seenBatchPageIndexes.add(safeIndex);
       descriptors.push({
         sourceKey: source.sourceKey,
         fileExtension: source.fileExtension,
@@ -1886,9 +1889,37 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const sessionEpoch = sessionEpochRef.current;
     const completedItems = new Set();
     const failedTasks = [];
+    const batchPendingByItem = new Map();
     const stats = assetPipelineStatsRef.current;
     const persistFullInBackground = sessionConfigRef.current.assetStore.persistFullPagesInBackground !== false;
     const rendersPerWorker = Math.max(1, Number(renderConfig.pdfWorkerWarmupRendersPerWorker) || 1);
+    const markBatchPending = (itemId, pageIndex) => {
+      const key = makePendingAssetKey('full', pageIndex);
+      let resolvePending;
+      const promise = new Promise((resolve) => {
+        resolvePending = resolve;
+      });
+      batchPendingByItem.set(itemId, {
+        key,
+        promise,
+        resolve: resolvePending,
+        resolved: false,
+      });
+      pendingAssetPromisesRef.current.set(key, promise);
+    };
+    const resolveBatchPending = (itemId, value = null) => {
+      const entry = batchPendingByItem.get(itemId);
+      if (!entry || entry.resolved) return;
+      entry.resolved = true;
+      entry.resolve(value || null);
+      if (pendingAssetPromisesRef.current.get(entry.key) === entry.promise) {
+        pendingAssetPromisesRef.current.delete(entry.key);
+      }
+    };
+
+    for (let index = 0; index < taskByItem.length; index += 1) {
+      markBatchPending(index, taskByItem[index].pageIndex);
+    }
 
     const recordBatchItem = (result) => {
       const itemId = Math.max(0, Number(result?.itemId) || 0);
@@ -1896,9 +1927,24 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       if (!task || completedItems.has(itemId)) return;
       completedItems.add(itemId);
 
-      if (sessionEpochRef.current !== sessionEpoch) return;
+      if (sessionEpochRef.current !== sessionEpoch) {
+        resolveBatchPending(itemId, null);
+        return;
+      }
       if (!result?.ok || !(result.blob instanceof Blob)) {
+        resolveBatchPending(itemId, null);
         failedTasks.push(task);
+        return;
+      }
+
+      const page = getPageAt(allPagesRef.current, task.pageIndex);
+      const existingUrl = String(page?.fullSizeUrl || '').trim();
+      if (!page || page.status === -1) {
+        resolveBatchPending(itemId, null);
+        return;
+      }
+      if (page.fullSizeStatus === 1 && existingUrl && isReusableAssetUrl(existingUrl)) {
+        resolveBatchPending(itemId, existingUrl);
         return;
       }
 
@@ -1913,7 +1959,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         height: Math.max(1, Number(result.height) || 1),
         mimeType: String(result.mimeType || result.blob.type || 'image/png'),
       };
-      commitRenderedPageAsset(task.pageIndex, 'full', rendered, { priority: task.priority || 'low' });
+      const url = commitRenderedPageAsset(task.pageIndex, 'full', rendered, { priority: task.priority || 'low' });
+      resolveBatchPending(itemId, url);
       if (persistFullInBackground) {
         persistRenderedAssetInBackground(task.pageIndex, 'full', rendered, sessionEpoch);
       }
@@ -1934,6 +1981,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         error: String(error?.message || error),
       });
       failedTasks.push(...taskByItem.filter((_, index) => !completedItems.has(index)));
+    }
+
+    for (let index = 0; index < taskByItem.length; index += 1) {
+      if (!completedItems.has(index)) {
+        resolveBatchPending(index, null);
+      }
     }
 
     if (sessionEpochRef.current === sessionEpoch && failedTasks.length > 0) {
