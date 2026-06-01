@@ -730,6 +730,9 @@
         pdfWorkerPagePolicy: {
           enabled: true,
           mainThreadBelowPageCount: 0,
+          // 0 disables this hardware rule. A value such as 8 keeps low-core clients on the
+          // main-thread PDF route while allowing stronger clients to use PDF workers.
+          mainThreadBelowHardwareConcurrency: 0,
           smallWorkerBelowPageCount: 100,
           smallWorkerCount: 1,
           fixedWorkerBelowPageCount: 600,

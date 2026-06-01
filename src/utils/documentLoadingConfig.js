@@ -120,6 +120,7 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @typedef {Object} DocumentLoadingPdfWorkerPagePolicy
  * @property {boolean} enabled
  * @property {number} mainThreadBelowPageCount
+ * @property {number} mainThreadBelowHardwareConcurrency
  * @property {number} smallWorkerBelowPageCount
  * @property {number} smallWorkerCount
  * @property {number} fixedWorkerBelowPageCount
@@ -250,6 +251,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       pdfWorkerPagePolicy: {
         enabled: true,
         mainThreadBelowPageCount: 0,
+        mainThreadBelowHardwareConcurrency: 0,
         smallWorkerBelowPageCount: 100,
         smallWorkerCount: 1,
         fixedWorkerBelowPageCount: 600,
@@ -392,6 +394,12 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
       0,
       1000000
     ),
+    mainThreadBelowHardwareConcurrency: normalizeNumber(
+      raw.mainThreadBelowHardwareConcurrency ?? raw.mainThreadBelowCores,
+      base.mainThreadBelowHardwareConcurrency ?? 0,
+      0,
+      128
+    ),
     smallWorkerBelowPageCount: normalizeNumber(
       raw.smallWorkerBelowPageCount,
       base.smallWorkerBelowPageCount ?? 100,
@@ -479,6 +487,10 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
     DOCUMENT_LOADING_DEFAULTS.render.pdfWorkerPagePolicy
   );
   const recommendedCap = Math.max(1, Math.min(32, resolveRecommendedWorkerCount(0, 'auto')));
+  let hardwareConcurrency = 2;
+  try {
+    hardwareConcurrency = Math.max(1, Number(globalThis.navigator?.hardwareConcurrency || 2));
+  } catch {}
   const explicitPolicyCap = Math.max(0, Number(policy.maxWorkerCount) || 0);
   const explicitLegacyCap = Math.max(0, Number(renderConfig?.pdfWorkerMaxCount) || 0);
   let hardwareCap = recommendedCap;
@@ -487,9 +499,11 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
   hardwareCap = Math.max(1, Math.floor(hardwareCap));
 
   const mainThreadLimit = Math.max(0, Math.floor(Number(policy.mainThreadBelowPageCount) || 0));
+  const mainThreadHardwareLimit = Math.max(0, Math.floor(Number(policy.mainThreadBelowHardwareConcurrency) || 0));
   const useMainThread = !policy.enabled
     || safePageCount <= 0
-    || (mainThreadLimit > 0 && safePageCount < mainThreadLimit);
+    || (mainThreadLimit > 0 && safePageCount < mainThreadLimit)
+    || (mainThreadHardwareLimit > 0 && hardwareConcurrency < mainThreadHardwareLimit);
   if (useMainThread) {
     return { mode: 'main-thread', workerCount: 0, policy, hardwareCap };
   }

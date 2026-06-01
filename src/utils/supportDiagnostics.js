@@ -195,6 +195,7 @@ function collectConfigDiagnostics() {
         ? {
             enabled: render.pdfWorkerPagePolicy.enabled !== false,
             mainThreadBelowPageCount: Number(render.pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0,
+            mainThreadBelowHardwareConcurrency: Number(render.pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency) || 0,
             smallWorkerBelowPageCount: Number(render.pdfWorkerPagePolicy.smallWorkerBelowPageCount) || 0,
             smallWorkerCount: Number(render.pdfWorkerPagePolicy.smallWorkerCount) || 0,
             fixedWorkerBelowPageCount: Number(render.pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 0,
