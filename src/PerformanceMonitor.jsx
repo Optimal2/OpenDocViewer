@@ -267,7 +267,6 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     error,
     workerCount,
     messageQueue,
-    loadingRunActive,
     plannedPageCount,
     documentLoadingConfig,
     memoryPressureStage,
@@ -376,14 +375,24 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     [allPages]
   );
   const discoveredPages = Math.max(totalPages, Number(plannedPageCount) || 0);
+  const loadRunStartedAtMs = Number(runtimeDiagnostics?.loadRunStartedAtMs || 0);
+  const loadRunCompletedAtMs = Number(runtimeDiagnostics?.loadRunCompletedAtMs || 0);
+  const loadRunTimingActive = loadRunStartedAtMs > 0 && loadRunCompletedAtMs <= 0;
   const loadRunElapsedMs = resolveElapsedMs(
-    runtimeDiagnostics?.loadRunStartedAtMs,
-    runtimeDiagnostics?.loadRunCompletedAtMs,
+    loadRunStartedAtMs,
+    loadRunCompletedAtMs,
     clockNow
   );
   const fullReadyCount = Math.max(0, Number(runtimeDiagnostics?.fullReadyCount || 0));
   const thumbnailReadyCount = Math.max(0, Number(runtimeDiagnostics?.thumbnailReadyCount || 0));
   const messages = Array.isArray(messageQueue) ? messageQueue.slice(-20) : [];
+  const pdfWorkerPagePolicy = documentLoadingConfig?.render?.pdfWorkerPagePolicy || {};
+  const pdfAutoPolicyLabel = [
+    Number(pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0,
+    `${Number(pdfWorkerPagePolicy.smallWorkerBelowPageCount) || 100}:${Number(pdfWorkerPagePolicy.smallWorkerCount) || 1}`,
+    Number(pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 600,
+    Number(pdfWorkerPagePolicy.pagesPerWorker) || 150,
+  ].join('/');
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
   const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
@@ -588,7 +597,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           PDF <strong>{String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')}</strong>
           <span style={{ opacity: 0.75 }}>
             {String(documentLoadingConfig?.render?.pdfToImageMode || '').toLowerCase() === 'auto'
-              ? ` policy ${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.mainThreadBelowPageCount) || 100}/${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.fixedWorkerBelowPageCount) || 600}/${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.pagesPerWorker) || 150}`
+              ? ` policy ${pdfAutoPolicyLabel}`
               : ` max ${Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}`}
           </span>
         </span>
@@ -598,7 +607,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={labelStyle}>{t('perf.loadRunLabel')}</span>{' '}
         <strong>{formatDuration(loadRunElapsedMs)}</strong>
         <span style={{ marginLeft: 8, opacity: 0.75 }}>
-          {loadingRunActive ? t('perf.loadRunActive') : t('perf.loadRunDone')}
+          {loadRunTimingActive ? t('perf.loadRunActive') : t('perf.loadRunDone')}
         </span>
       </div>
 

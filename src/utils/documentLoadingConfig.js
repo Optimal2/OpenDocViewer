@@ -115,6 +115,8 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @typedef {Object} DocumentLoadingPdfWorkerPagePolicy
  * @property {boolean} enabled
  * @property {number} mainThreadBelowPageCount
+ * @property {number} smallWorkerBelowPageCount
+ * @property {number} smallWorkerCount
  * @property {number} fixedWorkerBelowPageCount
  * @property {number} fixedWorkerCount
  * @property {number} pagesPerWorker
@@ -240,7 +242,9 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       pdfWorkerMaxCount: 0,
       pdfWorkerPagePolicy: {
         enabled: true,
-        mainThreadBelowPageCount: 100,
+        mainThreadBelowPageCount: 0,
+        smallWorkerBelowPageCount: 100,
+        smallWorkerCount: 1,
         fixedWorkerBelowPageCount: 600,
         fixedWorkerCount: 4,
         pagesPerWorker: 150,
@@ -374,10 +378,17 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
     enabled: normalizeBoolean(raw.enabled, base.enabled !== false),
     mainThreadBelowPageCount: normalizeNumber(
       raw.mainThreadBelowPageCount,
-      base.mainThreadBelowPageCount ?? 100,
+      base.mainThreadBelowPageCount ?? 0,
       0,
       1000000
     ),
+    smallWorkerBelowPageCount: normalizeNumber(
+      raw.smallWorkerBelowPageCount,
+      base.smallWorkerBelowPageCount ?? 100,
+      0,
+      1000000
+    ),
+    smallWorkerCount: normalizeNumber(raw.smallWorkerCount, base.smallWorkerCount ?? 1, 1, 32),
     fixedWorkerBelowPageCount: normalizeNumber(
       raw.fixedWorkerBelowPageCount,
       base.fixedWorkerBelowPageCount ?? 600,
@@ -434,10 +445,11 @@ export function countPdfPages(pages) {
 /**
  * Resolve the PDF page-worker policy for the current document size.
  *
- * The default policy intentionally uses the main-thread path for small PDFs, a fixed four-worker
- * pool for medium PDFs, and one worker per roughly 150 pages for larger documents. The result is
+ * The default policy starts PDF rendering in a tiny worker pool, grows to a fixed four-worker pool
+ * for medium PDFs, and uses one worker per roughly 150 pages for larger documents. The result is
  * capped by the runtime-recommended worker count and by explicit site caps only when those caps are
- * configured.
+ * configured. Set mainThreadBelowPageCount above 0 to keep very small PDFs on the legacy
+ * main-thread path.
  *
  * @param {number} pageCount
  * @param {DocumentLoadingRenderConfig=} renderConfig
@@ -457,19 +469,31 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
   if (explicitLegacyCap > 0) hardwareCap = Math.min(hardwareCap, explicitLegacyCap);
   hardwareCap = Math.max(1, Math.floor(hardwareCap));
 
-  if (!policy.enabled || safePageCount <= 0 || safePageCount < policy.mainThreadBelowPageCount) {
+  const mainThreadLimit = Math.max(0, Math.floor(Number(policy.mainThreadBelowPageCount) || 0));
+  const useMainThread = !policy.enabled
+    || safePageCount <= 0
+    || (mainThreadLimit > 0 && safePageCount < mainThreadLimit);
+  if (useMainThread) {
     return { mode: 'main-thread', workerCount: 0, policy, hardwareCap };
   }
 
+  const smallWorkerCount = Math.max(1, Math.floor(Number(policy.smallWorkerCount) || 1));
   const fixedWorkerCount = Math.max(1, Math.floor(Number(policy.fixedWorkerCount) || 1));
   const pagesPerWorker = Math.max(1, Math.floor(Number(policy.pagesPerWorker) || 1));
+  const smallLimit = Math.max(
+    mainThreadLimit,
+    Math.floor(Number(policy.smallWorkerBelowPageCount) || 0)
+  );
   const fixedLimit = Math.max(
-    policy.mainThreadBelowPageCount,
+    smallLimit,
     Math.floor(Number(policy.fixedWorkerBelowPageCount) || 0)
   );
-  const desiredWorkerCount = safePageCount < fixedLimit
-    ? fixedWorkerCount
-    : Math.max(fixedWorkerCount, Math.round(safePageCount / pagesPerWorker));
+  let desiredWorkerCount = fixedWorkerCount;
+  if (smallLimit > mainThreadLimit && safePageCount < smallLimit) {
+    desiredWorkerCount = smallWorkerCount;
+  } else if (safePageCount >= fixedLimit) {
+    desiredWorkerCount = Math.max(fixedWorkerCount, Math.round(safePageCount / pagesPerWorker));
+  }
   return {
     mode: 'worker',
     workerCount: Math.max(1, Math.min(hardwareCap, desiredWorkerCount)),

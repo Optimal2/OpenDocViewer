@@ -1861,8 +1861,6 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     if (loadingRunActive && !wasActive) {
       loadRunStartedAtMsRef.current = Date.now();
       loadRunCompletedAtMsRef.current = 0;
-    } else if (!loadingRunActive && wasActive && loadRunStartedAtMsRef.current > 0) {
-      loadRunCompletedAtMsRef.current = Date.now();
     }
     previousLoadingRunActiveRef.current = loadingRunActive;
     collectRuntimeDiagnostics();
@@ -1909,6 +1907,16 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       allPagesReady,
     };
   }, [allPages, loadingRunActive, plannedPageCount]);
+
+  useEffect(() => {
+    if (!diagnosticsEnabled) return undefined;
+    if (!pageLoadState.allPagesReady) return undefined;
+    if (loadRunStartedAtMsRef.current <= 0 || loadRunCompletedAtMsRef.current > 0) return undefined;
+
+    loadRunCompletedAtMsRef.current = Date.now();
+    collectRuntimeDiagnostics();
+    return undefined;
+  }, [collectRuntimeDiagnostics, diagnosticsEnabled, pageLoadState.allPagesReady]);
 
   useEffect(() => {
     if (loadingRunActive) return undefined;
