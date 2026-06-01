@@ -246,11 +246,37 @@ derives extra main-thread render concurrency values from `navigator.hardwareConc
 "roughly one PDF page worker per 100 sampled pages", capped by the runtime-recommended worker count.
 `taskTimeoutMs` prevents one stuck page render from blocking the rest of the benchmark run.
 
-`pdfWorkerBatchMode: 'partitioned'` is a benchmark-only stress mode for PDF worker experiments. It
-splits the sampled PDF pages into contiguous partitions once, gives one partition to each PDF page
-worker, and tests each value in `pdfWorkerRendersPerWorker` as the number of local render lanes
-inside that worker. This does not change the normal viewer runtime path, which continues to use
-`pdfWorkerBatchMode: 'queue'`.
+`renderBenchmark.pdfWorkerBatchMode: 'partitioned'` is a benchmark stress mode for PDF worker
+experiments. It splits the sampled PDF pages into contiguous partitions once, gives one partition to
+each PDF page worker, and tests each value in `pdfWorkerRendersPerWorker` as the number of local
+render lanes inside that worker.
+
+The normal viewer runtime keeps `documentLoading.render.pdfWorkerWarmupBatchMode: 'off'` by default.
+Support or high-throughput sites can opt in to the same partitioned batch concept for background
+full-page PDF warm-up:
+
+```js
+documentLoading: {
+  render: {
+    pdfWorkerWarmupBatchMode: 'partitioned',
+    pdfWorkerWarmupBatchSize: 1200,
+    pdfWorkerWarmupRendersPerWorker: 1
+  }
+}
+```
+
+This runtime warm-up path is conservative about correctness:
+
+- only full-size PDF page assets are selected
+- pages already rendered or pending through another route are skipped
+- selected pages are registered in the normal pending-asset map so foreground navigation does not
+  render them again
+- each worker result is checked against the current page state before commit
+- missing, failed, stale, or uncommitted items fall back to the regular per-page render path
+
+Keep this setting disabled until the target client hardware and upstream document source behavior
+have been measured. It is most useful for very large PDF sessions where the PDF worker benchmark
+shows that contiguous partitioning is materially faster than the per-page queue.
 
 ## Page Asset Persistence Diagnostics
 

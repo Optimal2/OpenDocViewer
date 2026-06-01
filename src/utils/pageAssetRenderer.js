@@ -484,6 +484,18 @@ export class PageAssetRenderer {
     });
   }
 
+  /**
+   * Render a PDF page set through the PDF worker pool as one partitioned batch.
+   *
+   * The caller owns page-state commits. This method only turns descriptors into worker payloads,
+   * reports each item as soon as its worker finishes, and returns an aggregate summary. Missing
+   * source blobs and worker-side failures are surfaced as item failures so the caller can fall back
+   * to the normal per-page path without losing page order.
+   *
+   * @param {Array<*>} descriptors
+   * @param {Object=} options
+   * @returns {Promise<{ results:Array<*>, summary:{ itemCount:number, successCount:number, errorCount:number } }>}
+   */
   async renderPdfPageAssetBatch(descriptors, options = {}) {
     const variant = options?.variant === 'thumbnail' ? 'thumbnail' : 'full';
     if (!this.canRenderPdfBatchInWorker()) {
