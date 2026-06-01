@@ -201,6 +201,9 @@ function collectConfigDiagnostics() {
       renderBenchmarkWorkerCounts: Array.isArray(renderBenchmark.workerCounts)
         ? renderBenchmark.workerCounts.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
         : [],
+      renderBenchmarkMainThreadConcurrencies: Array.isArray(renderBenchmark.mainThreadConcurrencies)
+        ? renderBenchmark.mainThreadConcurrencies.slice(0, DIAGNOSTIC_DETAIL_LIST_LIMIT)
+        : [],
       renderBenchmarkMaxRuns: Number(renderBenchmark.maxRuns) || 0,
     },
   };

@@ -630,7 +630,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       useWorkersForTiff: normalizeBoolean(raw?.render?.useWorkersForTiff, adaptiveDefaults.render.useWorkersForTiff),
       pdfToImageMode: normalizePdfToImageMode(raw?.render?.pdfToImageMode ?? raw?.render?.['pdf-to-image-mode'], adaptiveDefaults.render.pdfToImageMode),
       pdfWorkerMaxCount: normalizeNumber(raw?.render?.pdfWorkerMaxCount ?? raw?.render?.maxPdfWorkerCount, adaptiveDefaults.render.pdfWorkerMaxCount, 1, 32),
-      maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 8),
+      maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 32),
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),
       warmupBatchSize: normalizeNumber(raw?.render?.warmupBatchSize, adaptiveDefaults.render.warmupBatchSize, 1, 512),
       loadingOverlayDelayMs: normalizeNumber(raw?.render?.loadingOverlayDelayMs, adaptiveDefaults.render.loadingOverlayDelayMs, 0, 5000),

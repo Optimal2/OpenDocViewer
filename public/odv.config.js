@@ -687,6 +687,9 @@
         sampleMode: 'evenly-spaced',
         // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
         workerCounts: [0, 1, 2, 3, 4, 6, 8],
+        // Explicit main-thread render concurrency values tested for pdfToImageMode='main-thread'.
+        // Main-thread PDF scenarios use these values instead of workerCounts.
+        mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
         maxRuns: 40,
         delayBetweenRunsMs: 150
       },

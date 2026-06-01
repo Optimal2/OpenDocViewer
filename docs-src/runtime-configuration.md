@@ -205,12 +205,18 @@ documentLoading: {
   renderBenchmark: {
     enabled: true,
     pdfToImageModes: ['main-thread', 'worker'],
+    mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
+    workerCounts: [0, 1, 2, 3, 4, 6, 8],
     taskTimeoutMs: 90000
   }
 }
 ```
 
-Use `['current']` to benchmark only the active `documentLoading.render.pdfToImageMode` value.
+Use `['current']` to benchmark only the active `documentLoading.render.pdfToImageMode` value. When
+the active mode is `main-thread`, `current` varies `mainThreadConcurrencies`; when the active mode
+is `worker`, `current` varies `workerCounts`. Explicit `main-thread` PDF scenarios also vary
+`mainThreadConcurrencies`, while explicit `worker` PDF scenarios vary `workerCounts`, where `0`
+means the runtime-recommended worker count.
 `taskTimeoutMs` prevents one stuck page render from blocking the rest of the benchmark run.
 
 ## Document-Version Reload Cache
