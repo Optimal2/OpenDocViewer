@@ -78,6 +78,84 @@ function formatPhaseTiming(label, count, totalMs, maxMs) {
 }
 
 /**
+ * @param {Array<*>} pages
+ * @returns {{ ok:boolean, uniquePages:number, duplicatePages:number, missingPages:number, orderIssues:number, indexMismatches:number, sourceCount:number }}
+ */
+function analyzePageIntegrity(pages) {
+  const list = Array.isArray(pages) ? pages : [];
+  const seenPages = new Set();
+  const sourceGroups = new Map();
+  let duplicatePages = 0;
+  let missingIdentityPages = 0;
+  let indexMismatches = 0;
+  let orderIssues = 0;
+
+  for (let index = 0; index < list.length; index += 1) {
+    const page = list[index];
+    if (!page) {
+      missingIdentityPages += 1;
+      continue;
+    }
+
+    const allPagesIndex = Number(page.allPagesIndex);
+    if (Number.isFinite(allPagesIndex) && allPagesIndex !== index) {
+      indexMismatches += 1;
+    }
+
+    const sourceKey = String(page.sourceKey || '').trim();
+    const pageIndex = Math.floor(Number(page.pageIndex));
+    if (!sourceKey || !Number.isFinite(pageIndex) || pageIndex < 0) {
+      missingIdentityPages += 1;
+      continue;
+    }
+
+    const pageKey = `${sourceKey}:${pageIndex}`;
+    if (seenPages.has(pageKey)) duplicatePages += 1;
+    else seenPages.add(pageKey);
+
+    let group = sourceGroups.get(sourceKey);
+    if (!group) {
+      group = {
+        pageIndexes: new Set(),
+        minPageIndex: pageIndex,
+        maxPageIndex: pageIndex,
+        lastListIndex: index,
+        lastPageIndex: pageIndex,
+        reentered: false,
+      };
+      sourceGroups.set(sourceKey, group);
+    } else {
+      if (index !== group.lastListIndex + 1) group.reentered = true;
+      if (pageIndex !== group.lastPageIndex + 1) orderIssues += 1;
+      group.minPageIndex = Math.min(group.minPageIndex, pageIndex);
+      group.maxPageIndex = Math.max(group.maxPageIndex, pageIndex);
+      group.lastListIndex = index;
+      group.lastPageIndex = pageIndex;
+    }
+
+    group.pageIndexes.add(pageIndex);
+  }
+
+  let missingPages = missingIdentityPages;
+  for (const group of sourceGroups.values()) {
+    if (group.reentered) orderIssues += 1;
+    if (group.minPageIndex > 0) missingPages += group.minPageIndex;
+    const expectedWithinSource = group.maxPageIndex - group.minPageIndex + 1;
+    missingPages += Math.max(0, expectedWithinSource - group.pageIndexes.size);
+  }
+
+  return {
+    ok: duplicatePages === 0 && missingPages === 0 && orderIssues === 0 && indexMismatches === 0,
+    uniquePages: seenPages.size,
+    duplicatePages,
+    missingPages,
+    orderIssues,
+    indexMismatches,
+    sourceCount: sourceGroups.size,
+  };
+}
+
+/**
  * @param {number} ttlMs
  * @returns {string}
  */
@@ -397,6 +475,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     () => allPages.filter((page) => page && (page.status === -1 || page.fullSizeStatus === -1 || page.thumbnailStatus === -1)).length,
     [allPages]
   );
+  const pageIntegrity = useMemo(() => analyzePageIntegrity(allPages), [allPages]);
   const discoveredPages = Math.max(totalPages, Number(plannedPageCount) || 0);
   const loadRunStartedAtMs = Number(runtimeDiagnostics?.loadRunStartedAtMs || 0);
   const loadRunCompletedAtMs = Number(runtimeDiagnostics?.loadRunCompletedAtMs || 0);
@@ -485,6 +564,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
+    `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} unique ${pageIntegrity.uniquePages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
     hasHeapMetrics
       ? `Heap: ${memory.usedJSHeapSize.toFixed(1)} MB / ${memory.totalJSHeapSize.toFixed(1)} MB limit ${memory.jsHeapSizeLimit.toFixed(0)} MB`
@@ -766,6 +846,28 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {t('perf.thumbnailAssetsLabel')} <strong>{thumbnailReadyCount}</strong>/{totalPages}
         </span>
         {failedPages > 0 ? <span style={{ color: '#ff9c9c' }}> {t('perf.failedSuffix', { count: failedPages })}</span> : null}
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.integrityLabel', { defaultValue: 'Integrity:' })}</span>{' '}
+        <strong style={{ color: pageIntegrity.ok ? '#b9f6ca' : '#ffcc80' }}>
+          {pageIntegrity.ok ? 'ok' : 'check'}
+        </strong>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          unique <strong>{pageIntegrity.uniquePages}</strong>/{totalPages}
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          dup <strong>{pageIntegrity.duplicatePages}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          missing <strong>{pageIntegrity.missingPages}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          order <strong>{pageIntegrity.orderIssues}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          index <strong>{pageIntegrity.indexMismatches}</strong>
+        </span>
       </div>
 
       <div style={sectionStyle}>
