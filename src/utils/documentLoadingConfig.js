@@ -169,23 +169,15 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   const explicit = Math.max(0, Number(preferred) || 0);
   if (explicit > 0) return explicit;
 
-  let cores = 2;
-  let deviceMemoryGb = 0;
+  let cores = 0;
   try {
-    cores = Math.max(1, Number(globalThis.navigator?.hardwareConcurrency || 2));
-    deviceMemoryGb = Math.max(0, Number(globalThis.navigator?.deviceMemory || 0));
+    cores = Math.max(0, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 0));
   } catch {}
 
-  const leaveForUi = cores > 1 ? 1 : 0;
-  let suggested = Math.max(1, cores - leaveForUi);
-
-  if (deviceMemoryGb > 0) {
-    if (deviceMemoryGb <= 2) suggested = Math.min(suggested, 1);
-    else if (deviceMemoryGb <= 4) suggested = Math.min(suggested, 2);
-  }
+  const suggested = cores > 0 ? cores : 4;
 
   if (mode === 'memory') return Math.max(1, Math.min(2, suggested));
-  return Math.max(1, suggested);
+  return Math.max(1, Math.min(32, suggested));
 }
 
 export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
@@ -252,11 +244,11 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
         enabled: true,
         mainThreadBelowPageCount: 0,
         mainThreadBelowHardwareConcurrency: 0,
-        smallWorkerBelowPageCount: 100,
+        smallWorkerBelowPageCount: 0,
         smallWorkerCount: 1,
-        fixedWorkerBelowPageCount: 600,
-        fixedWorkerCount: 4,
-        pagesPerWorker: 150,
+        fixedWorkerBelowPageCount: 0,
+        fixedWorkerCount: 1,
+        pagesPerWorker: 1,
         maxWorkerCount: 0,
       },
       pdfWorkerWarmupBatchMode: 'off',
@@ -402,19 +394,19 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
     ),
     smallWorkerBelowPageCount: normalizeNumber(
       raw.smallWorkerBelowPageCount,
-      base.smallWorkerBelowPageCount ?? 100,
+      base.smallWorkerBelowPageCount ?? 0,
       0,
       1000000
     ),
     smallWorkerCount: normalizeNumber(raw.smallWorkerCount, base.smallWorkerCount ?? 1, 1, 32),
     fixedWorkerBelowPageCount: normalizeNumber(
       raw.fixedWorkerBelowPageCount,
-      base.fixedWorkerBelowPageCount ?? 600,
-      1,
+      base.fixedWorkerBelowPageCount ?? 0,
+      0,
       1000000
     ),
-    fixedWorkerCount: normalizeNumber(raw.fixedWorkerCount, base.fixedWorkerCount ?? 4, 1, 32),
-    pagesPerWorker: normalizeNumber(raw.pagesPerWorker, base.pagesPerWorker ?? 150, 1, 1000000),
+    fixedWorkerCount: normalizeNumber(raw.fixedWorkerCount, base.fixedWorkerCount ?? 1, 1, 32),
+    pagesPerWorker: normalizeNumber(raw.pagesPerWorker, base.pagesPerWorker ?? 1, 1, 1000000),
     maxWorkerCount: normalizeNumber(raw.maxWorkerCount, base.maxWorkerCount ?? 0, 0, 32),
   };
 }
@@ -470,11 +462,9 @@ export function countPdfPages(pages) {
 /**
  * Resolve the PDF page-worker policy for the current document size.
  *
- * The default policy starts PDF rendering in a tiny worker pool, grows to a fixed four-worker pool
- * for medium PDFs, and uses one worker per roughly 150 pages for larger documents. The result is
- * capped by the runtime-recommended worker count and by explicit site caps only when those caps are
- * configured. Set mainThreadBelowPageCount above 0 to keep very small PDFs on the legacy
- * main-thread path.
+ * The default policy uses the same runtime-recommended worker count as raster/TIFF rendering,
+ * capped by PDF page count and explicit site caps only when those caps are configured. Set
+ * mainThreadBelowPageCount above 0 to keep very small PDFs on the legacy main-thread path.
  *
  * @param {number} pageCount
  * @param {DocumentLoadingRenderConfig=} renderConfig
@@ -487,9 +477,9 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
     DOCUMENT_LOADING_DEFAULTS.render.pdfWorkerPagePolicy
   );
   const recommendedCap = Math.max(1, Math.min(32, resolveRecommendedWorkerCount(0, 'auto')));
-  let hardwareConcurrency = 2;
+  let hardwareConcurrency = 4;
   try {
-    hardwareConcurrency = Math.max(1, Number(globalThis.navigator?.hardwareConcurrency || 2));
+    hardwareConcurrency = Math.max(1, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 4));
   } catch {}
   const explicitPolicyCap = Math.max(0, Number(policy.maxWorkerCount) || 0);
   const explicitLegacyCap = Math.max(0, Number(renderConfig?.pdfWorkerMaxCount) || 0);
@@ -536,7 +526,7 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
 /**
  * Return a render config with `pdfToImageMode` and `pdfWorkerCount` resolved for a known PDF page
  * count. Explicit `main-thread` and `worker` modes still behave as overrides; `auto` uses the
- * page-count policy.
+ * automatic worker policy.
  *
  * @param {DocumentLoadingRenderConfig=} renderConfig
  * @param {number=} pdfPageCount
