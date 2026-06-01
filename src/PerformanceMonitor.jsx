@@ -290,6 +290,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const [clockNow, setClockNow] = useState(() => Date.now());
   const [showHostMetadata, setShowHostMetadata] = useState(false);
   const [copyState, setCopyState] = useState('idle');
+  const [copyPerfState, setCopyPerfState] = useState('idle');
   const [downloadState, setDownloadState] = useState('idle');
 
   const hardwareConcurrency = useMemo(() => {
@@ -313,6 +314,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const lastFrameTime = useRef(undefined);
   const smaWindow = useRef([]);
   const copyResetTimerRef = useRef(undefined);
+  const copyPerfResetTimerRef = useRef(undefined);
   const downloadResetTimerRef = useRef(undefined);
   const SMA_SIZE = 30;
 
@@ -369,6 +371,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     return () => {
       try { if (rafRef.current) cancelAnimationFrame(rafRef.current); } catch {}
       try { if (copyResetTimerRef.current) clearTimeout(copyResetTimerRef.current); } catch {}
+      try { if (copyPerfResetTimerRef.current) clearTimeout(copyPerfResetTimerRef.current); } catch {}
       try { if (downloadResetTimerRef.current) clearTimeout(downloadResetTimerRef.current); } catch {}
       clearInterval(memoryTimerId);
       clearInterval(clockTimerId);
@@ -420,6 +423,25 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const pdfWorkerRenderedCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerRenderedCount || 0));
   const pdfWorkerFallbackCount = Math.max(0, Number(runtimeDiagnostics?.pdfWorkerFallbackCount || 0));
   const mainPdfRenderedCount = Math.max(0, Number(runtimeDiagnostics?.mainPdfRenderedCount || 0));
+  const overlaySnapshotText = [
+    `OpenDocViewer performance ${new Date().toISOString()}`,
+    `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
+    `Mode: ${String(documentLoadingConfig?.mode || 'auto')} Stage: ${String(memoryPressureStage || 'normal')} Workers: ${workerCount} PDF ${activePdfWorkerCount} raster ${activePageAssetWorkerCount}`,
+    `Fetch: ${String(documentLoadingConfig?.fetch?.strategy || 'sequential')} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
+    `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
+    `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
+    `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
+    `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
+    hasHeapMetrics
+      ? `Heap: ${memory.usedJSHeapSize.toFixed(1)} MB / ${memory.totalJSHeapSize.toFixed(1)} MB limit ${memory.jsHeapSizeLimit.toFixed(0)} MB`
+      : 'Heap: unavailable',
+    `Source store: ${String(runtimeDiagnostics?.sourceStoreMode || 'memory')} ${formatBytes(Number(runtimeDiagnostics?.sourceBytes || 0))} items ${Number(runtimeDiagnostics?.sourceCount || 0)}`,
+    `Asset store: ${String(runtimeDiagnostics?.assetStoreMode || 'disabled')} ${formatBytes(Number(runtimeDiagnostics?.assetBytes || 0))} items ${Number(runtimeDiagnostics?.assetCount || 0)}`,
+    `Cache scope source ${formatCacheScope(runtimeDiagnostics?.sourceCacheSessionId)} key ${String(runtimeDiagnostics?.sourceCacheKeyStorage || '-')} assets ${formatCacheScope(runtimeDiagnostics?.assetCacheSessionId)} key ${String(runtimeDiagnostics?.assetCacheKeyStorage || '-')}`,
+    `Source key doc-ver ${Number(runtimeDiagnostics?.sourceCacheKeyModeDocumentVersion || 0)} fallback ${Number(runtimeDiagnostics?.sourceCacheKeyModeUrlFallback || 0)} url ${Number(runtimeDiagnostics?.sourceCacheKeyModeUrl || 0)}`,
+    `Object URLs: ${Number(runtimeDiagnostics?.trackedObjectUrlCount || 0)} pending ${Number(runtimeDiagnostics?.pendingAssetCount || 0)} warm-up ${Number(runtimeDiagnostics?.warmupQueueLength || 0)}`,
+    `Full cache: ${Number(runtimeDiagnostics?.fullCacheCount || 0)} / ${Math.max(0, Number(runtimeDiagnostics?.fullCacheLimit || 0))} Thumb cache: ${Number(runtimeDiagnostics?.thumbnailCacheCount || 0)} / ${Math.max(0, Number(runtimeDiagnostics?.thumbnailCacheLimit || 0))}`,
+  ].join('\n');
 
   const hostPayload = bootstrapDebugInfo?.hostPayload;
   const hostPayloadSource = String(bootstrapDebugInfo?.hostPayloadSource || '');
@@ -473,6 +495,17 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     downloadResetTimerRef.current = setTimeout(() => setDownloadState('idle'), 1800);
   }, [hostPayloadPretty, metadataDownloadName]);
 
+  const onCopyPerfSnapshot = useCallback(async () => {
+    const ok = await copyText(overlaySnapshotText);
+    setCopyPerfState(ok ? 'copied' : 'failed');
+    try {
+      if (copyPerfResetTimerRef.current) clearTimeout(copyPerfResetTimerRef.current);
+    } catch {
+      // ignore
+    }
+    copyPerfResetTimerRef.current = setTimeout(() => setCopyPerfState('idle'), 1800);
+  }, [overlaySnapshotText]);
+
   const wrapStyle = {
     position: 'fixed',
     bottom: 0,
@@ -491,7 +524,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     boxShadow: '0 0 0 1px rgba(255,255,255,0.08), 0 6px 24px rgba(0,0,0,0.35)',
     backdropFilter: 'blur(2px)',
   };
-  const h3Style = { margin: '0 0 6px 0', fontSize: '12px', letterSpacing: '0.02em', opacity: 0.9 };
+  const h3Style = { margin: 0, fontSize: '12px', letterSpacing: '0.02em', opacity: 0.9 };
   const sectionStyle = { margin: '6px 0' };
   const labelStyle = { opacity: 0.8 };
   const valueStyle = { fontWeight: 700 };
@@ -507,7 +540,21 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
 
   return (
     <div style={wrapStyle} role="status" aria-live="polite" aria-atomic="true">
-      <h3 style={h3Style}>{t('perf.title')}</h3>
+      <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', gap: 8, marginBottom: 6 }}>
+        <h3 style={h3Style}>{t('perf.title')}</h3>
+        <button
+          type="button"
+          onClick={onCopyPerfSnapshot}
+          style={smallButtonStyle}
+          title={t('perf.copySnapshotTitle', { defaultValue: 'Copy the diagnostics overlay as text' })}
+        >
+          {copyPerfState === 'copied'
+            ? t('perf.copiedLabel', { defaultValue: 'Copied' })
+            : copyPerfState === 'failed'
+              ? t('perf.copyFailedLabel', { defaultValue: 'Copy failed' })
+              : t('perf.copySnapshot', { defaultValue: 'Copy' })}
+        </button>
+      </div>
 
       {hasHostMetadata ? (
         <div style={{ ...sectionStyle, marginTop: 2, marginBottom: 10, padding: '8px', border: '1px solid rgba(255,255,255,0.14)', borderRadius: '6px', background: 'rgba(255,255,255,0.05)' }}>
