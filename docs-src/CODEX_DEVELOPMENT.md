@@ -105,10 +105,17 @@ For AI-operated official releases:
    `origin/<branch>`.
 7. Verify the pushed release commit, the local and remote `vX.Y.Z` tag, and the GitHub Actions
    release workflow.
+8. If the official release will be delivered through OMP, bump the OMP artifact component version
+   after the release helper has updated `package.json`, then export/import the OMP package from
+   that post-release commit. This ensures OMP deploys files whose Help -> About version matches
+   the official release.
 
 Official OpenDocViewer releases and OMP artifact-only component builds are versioned separately.
-Do not force `omp-components.json` to match `package.json` unless the requested release explicitly
-includes a component-manifest update.
+Do not force `omp-components.json` to match `package.json`. The OMP artifact version only needs
+to change when a new deployable artifact should be registered or imported. However, an official
+release that is followed by an OMP deployment must not reuse a pre-release OMP artifact package,
+because that package was built before `release.ps1` updated the application version embedded in
+the runtime.
 
 ## Integration Notes
 
