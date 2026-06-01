@@ -70,6 +70,13 @@ function formatRate(value, unit = 'p/s') {
   return `${Math.round(safeValue)} ${unit}`;
 }
 
+function formatPhaseTiming(label, count, totalMs, maxMs) {
+  const safeCount = Math.max(0, Number(count) || 0);
+  if (safeCount <= 0) return `${label} 0`;
+  const avgMs = Math.max(0, Number(totalMs) || 0) / safeCount;
+  return `${label} ${safeCount} avg ${formatMilliseconds(avgMs)} max ${formatMilliseconds(maxMs)}`;
+}
+
 /**
  * @param {number} ttlMs
  * @returns {string}
@@ -436,6 +443,32 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourceRate = loadRunElapsedSeconds > 0
     ? Number(runtimeDiagnostics?.sourceCount || 0) / loadRunElapsedSeconds
     : 0;
+  const loaderPhaseSummary = [
+    formatPhaseTiming(
+      'fetch',
+      runtimeDiagnostics?.loaderFetchCount,
+      runtimeDiagnostics?.loaderFetchTotalMs,
+      runtimeDiagnostics?.loaderFetchMaxMs
+    ),
+    formatPhaseTiming(
+      'type',
+      runtimeDiagnostics?.loaderTypeCount,
+      runtimeDiagnostics?.loaderTypeTotalMs,
+      runtimeDiagnostics?.loaderTypeMaxMs
+    ),
+    formatPhaseTiming(
+      'store',
+      runtimeDiagnostics?.loaderStoreCount,
+      runtimeDiagnostics?.loaderStoreTotalMs,
+      runtimeDiagnostics?.loaderStoreMaxMs
+    ),
+    formatPhaseTiming(
+      'analysis',
+      runtimeDiagnostics?.loaderAnalysisCount,
+      runtimeDiagnostics?.loaderAnalysisTotalMs,
+      runtimeDiagnostics?.loaderAnalysisMaxMs
+    ),
+  ].join(' | ');
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
     `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
@@ -444,6 +477,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
+    `Loader phases: ${loaderPhaseSummary}`,
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
     hasHeapMetrics
@@ -745,6 +779,11 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {' '}avg <strong>{formatMilliseconds(assetPersistAvgMs)}</strong>
           {' '}max <strong>{formatMilliseconds(assetPersistMaxMs)}</strong>
         </span>
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.loaderPhasesLabel', { defaultValue: 'Loader phases:' })}</span>{' '}
+        <span style={{ opacity: 0.9 }}>{loaderPhaseSummary}</span>
       </div>
 
       <div style={sectionStyle}>

@@ -114,6 +114,21 @@ import { createContext } from 'react';
  * @property {number} assetPersistTotalMs
  * @property {number} assetPersistMaxMs
  * @property {string} assetPersistLastError
+ * @property {number} loaderPrefetchCount
+ * @property {number} loaderPrefetchTotalMs
+ * @property {number} loaderPrefetchMaxMs
+ * @property {number} loaderFetchCount
+ * @property {number} loaderFetchTotalMs
+ * @property {number} loaderFetchMaxMs
+ * @property {number} loaderTypeCount
+ * @property {number} loaderTypeTotalMs
+ * @property {number} loaderTypeMaxMs
+ * @property {number} loaderStoreCount
+ * @property {number} loaderStoreTotalMs
+ * @property {number} loaderStoreMaxMs
+ * @property {number} loaderAnalysisCount
+ * @property {number} loaderAnalysisTotalMs
+ * @property {number} loaderAnalysisMaxMs
  * @property {boolean} sourceStoreEncrypted
  * @property {boolean} assetStoreEncrypted
  * @property {number} sourceCacheHits
@@ -161,6 +176,7 @@ import { createContext } from 'react';
  * @property {function(string): Promise<(ArrayBuffer|null)>} readSourceArrayBuffer
  * @property {function(string): Promise<(Blob|null)>} readSourceBlob
  * @property {function(ViewerSourceDescriptor): void} registerSourceDescriptor
+ * @property {function(string, number): void} recordLoaderPhaseTiming
  * @property {function(number, ('full'|'thumbnail'), (EnsurePageAssetOptions|undefined)=): Promise<(string|null)>} ensurePageAsset
  * @property {function(number): Promise<boolean>} enhancePdfPageResolution
  * @property {{ boostedKeys:Array<string>, pendingKeys:Array<string> }} pdfResolutionBoostState
