@@ -496,13 +496,28 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const thumbnailReadyCount = Math.max(0, Number(runtimeDiagnostics?.thumbnailReadyCount || 0));
   const messages = Array.isArray(messageQueue) ? messageQueue.slice(-20) : [];
   const pdfWorkerPagePolicy = documentLoadingConfig?.render?.pdfWorkerPagePolicy || {};
-  const pdfAutoPolicyLabel = [
-    Number(pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0,
-    `cpu<${Number(pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency) || 0}`,
-    `${Number(pdfWorkerPagePolicy.smallWorkerBelowPageCount) || 100}:${Number(pdfWorkerPagePolicy.smallWorkerCount) || 1}`,
-    Number(pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 600,
-    Number(pdfWorkerPagePolicy.pagesPerWorker) || 150,
-  ].join('/');
+  const pdfAutoMainThreadBelowPages = Number(pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0;
+  const pdfAutoMainThreadBelowCores = Number(pdfWorkerPagePolicy.mainThreadBelowHardwareConcurrency) || 0;
+  const pdfAutoSmallBelowPages = Number(pdfWorkerPagePolicy.smallWorkerBelowPageCount) || 0;
+  const pdfAutoSmallWorkers = Number(pdfWorkerPagePolicy.smallWorkerCount) || 1;
+  const pdfAutoFixedBelowPages = Number(pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 0;
+  const pdfAutoPagesPerWorker = Number(pdfWorkerPagePolicy.pagesPerWorker) || 1;
+  const pdfAutoUsesRecommendedWorkers = pdfAutoSmallBelowPages <= 0
+    && pdfAutoFixedBelowPages <= 0
+    && pdfAutoPagesPerWorker <= 1;
+  const pdfAutoPolicyLabel = pdfAutoUsesRecommendedWorkers
+    ? [
+        'cores',
+        pdfAutoMainThreadBelowPages > 0 ? `pages<${pdfAutoMainThreadBelowPages}` : '',
+        pdfAutoMainThreadBelowCores > 0 ? `cpu<${pdfAutoMainThreadBelowCores}` : '',
+      ].filter(Boolean).join('/')
+    : [
+        pdfAutoMainThreadBelowPages,
+        `cpu<${pdfAutoMainThreadBelowCores}`,
+        `${pdfAutoSmallBelowPages || 100}:${pdfAutoSmallWorkers}`,
+        pdfAutoFixedBelowPages || 600,
+        pdfAutoPagesPerWorker || 150,
+      ].join('/');
   const assetRenderCount = Math.max(0, Number(runtimeDiagnostics?.assetRenderCompletedCount || 0));
   const assetRenderAvgMs = assetRenderCount > 0
     ? Number(runtimeDiagnostics?.assetRenderTotalMs || 0) / assetRenderCount

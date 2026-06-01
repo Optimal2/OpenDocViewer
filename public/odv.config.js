@@ -224,7 +224,7 @@
         // Benchmarks show that many tiny partial PDFs lose more time in setup/merge
         // overhead than they gain from keeping every core busy.
         workerBatchSize: 0,
-        // 0 = choose from hardwareConcurrency/deviceMemory using the same runtime
+        // 0 = choose from navigator.hardwareConcurrency using the same runtime
         // recommendation helper as documentLoading.render.workerCount.
         imageLoadConcurrency: 0,
         // Opt-in support tooling. When enabled, About -> Diagnostics can benchmark
@@ -629,31 +629,29 @@
         // + TIFF use workers whenever possible.
         backend: 'hybrid-by-format',
 
-        // 0 = choose from hardwareConcurrency/deviceMemory at runtime.
+        // 0 = choose from navigator.hardwareConcurrency at runtime, falling back to 4 when unknown.
         workerCount: 0,
         useWorkersForRasterImages: true,
         useWorkersForTiff: true,
         // PDF-to-image rendering mode:
-        //   'auto'        -> page-count based PDF workers with main-thread fallback
+        //   'auto'        -> client-capacity based PDF workers with main-thread fallback
         //   'main-thread' -> proven pdf.js path used by earlier OpenDocViewer versions
         //   'worker'      -> force the OffscreenCanvas/pdf.js worker path with main-thread fallback
         pdfToImageMode: 'auto',
         // 0 = no static PDF-worker cap; ODV caps the automatic policy by the current client.
         // Positive values remain available as a site-specific safety cap.
         pdfWorkerMaxCount: 0,
-        // Auto PDF worker policy:
-        //   <100 PDF pages      -> 1 PDF worker
-        //   100-599 PDF pages   -> 4 PDF workers
-        //   >=600 PDF pages     -> round(pdfPages / 150), capped by client capability
-      pdfWorkerPagePolicy: {
-        enabled: true,
-        mainThreadBelowPageCount: 0,
-        mainThreadBelowHardwareConcurrency: 0,
-        smallWorkerBelowPageCount: 100,
+        // Auto PDF worker policy. The default uses the same client worker recommendation as
+        // raster/TIFF rendering, capped by the PDF page count and any explicit site max.
+        pdfWorkerPagePolicy: {
+          enabled: true,
+          mainThreadBelowPageCount: 0,
+          mainThreadBelowHardwareConcurrency: 0,
+          smallWorkerBelowPageCount: 0,
           smallWorkerCount: 1,
-          fixedWorkerBelowPageCount: 600,
-          fixedWorkerCount: 4,
-          pagesPerWorker: 150,
+          fixedWorkerBelowPageCount: 0,
+          fixedWorkerCount: 1,
+          pagesPerWorker: 1,
           maxWorkerCount: 0
         },
         // Experimental/off by default: use existing PDF worker batch rendering for background
@@ -715,7 +713,7 @@
         // "evenly-spaced" avoids benchmarking only the first pages when a session is large.
         sampleMode: 'evenly-spaced',
         // 0 means auto. Add explicit counts to benchmark worker-pool scaling.
-        workerCounts: [0, 1, 2, 3, 4, 6, 8],
+        workerCounts: [0, 8, 16, 24],
         // Include the automatic worker-count scenario alongside explicit workerCounts.
         includeAutoWorkerCount: true,
         // Explicit main-thread render concurrency values tested for pdfToImageMode='main-thread'.
