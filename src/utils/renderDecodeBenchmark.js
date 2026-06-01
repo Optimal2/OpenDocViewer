@@ -9,6 +9,7 @@
 
 import logger from '../logging/systemLogger.js';
 import { createPageAssetRenderer } from './pageAssetRenderer.js';
+import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
 import { getDocumentLoadingConfig, resolveRecommendedWorkerCount } from './documentLoadingConfig.js';
 import { collectSupportDiagnostics, saveLatestRenderDecodeBenchmarkResult } from './supportDiagnostics.js';
 
@@ -32,6 +33,8 @@ const DEFAULT_MAIN_THREAD_CONCURRENCIES = Object.freeze([1, 2, 3, 4, 5, 6, 8]);
 const DEFAULT_MAIN_THREAD_CORE_MULTIPLIERS = Object.freeze([0.5, 0.75, 1]);
 const DEFAULT_WORKER_CORE_MULTIPLIERS = Object.freeze([0.25, 0.5, 1]);
 const DEFAULT_PDF_WORKER_PAGE_TARGETS = Object.freeze([50, 100, 200]);
+const DEFAULT_PDF_WORKER_RENDERS_PER_WORKER = Object.freeze([1]);
+const PDF_WORKER_BATCH_MODES = Object.freeze(['queue', 'partitioned']);
 
 /**
  * @param {*} value
@@ -160,6 +163,15 @@ function normalizePdfToImageModes(value) {
 
 /**
  * @param {*} value
+ * @returns {'queue'|'partitioned'}
+ */
+function normalizePdfWorkerBatchMode(value) {
+  const text = String(value || 'queue').trim().toLowerCase();
+  return PDF_WORKER_BATCH_MODES.includes(text) ? text : 'queue';
+}
+
+/**
+ * @param {*} value
  * @returns {'first'|'evenly-spaced'}
  */
 function normalizeSampleMode(value) {
@@ -224,7 +236,7 @@ function deriveWorkerCountsFromPageTargets(pageCount, targets, max) {
 
 /**
  * @param {Object=} config
- * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,mainThreadConcurrencies:Array<number>,mainThreadCoreMultipliers:Array<number>,workerCoreMultipliers:Array<number>,pdfWorkerPageTargets:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number,taskTimeoutMs:number}}
+ * @returns {{enabled:boolean,pageLimit:number,iterations:number,workerCounts:Array<number>,includeAutoWorkerCount:boolean,mainThreadConcurrencies:Array<number>,mainThreadCoreMultipliers:Array<number>,workerCoreMultipliers:Array<number>,pdfWorkerPageTargets:Array<number>,pdfWorkerBatchMode:string,pdfWorkerRendersPerWorker:Array<number>,variants:Array<string>,pdfToImageModes:Array<string>,sampleMode:string,maxRuns:number,delayBetweenRunsMs:number,taskTimeoutMs:number}}
  */
 function normalizeRenderBenchmarkConfig(config = {}) {
   const cfg = config?.documentLoading?.renderBenchmark || {};
@@ -233,6 +245,7 @@ function normalizeRenderBenchmarkConfig(config = {}) {
     pageLimit: normalizeInteger(cfg.pageLimit, DEFAULT_PAGE_LIMIT, 1, MAX_RENDER_BENCHMARK_PAGE_LIMIT),
     iterations: normalizeInteger(cfg.iterations, DEFAULT_ITERATIONS, 1, 10),
     workerCounts: normalizeWorkerCounts(cfg.workerCounts),
+    includeAutoWorkerCount: cfg.includeAutoWorkerCount !== false,
     mainThreadConcurrencies: normalizeMainThreadConcurrencies(
       cfg.mainThreadConcurrencies || cfg.mainThreadConcurrency || cfg.mainThreadCounts
     ),
@@ -245,6 +258,12 @@ function normalizeRenderBenchmarkConfig(config = {}) {
       cfg.pdfWorkerPageTargets || cfg.pdfWorkerPagesPerWorker,
       DEFAULT_PDF_WORKER_PAGE_TARGETS,
       MAX_RENDER_BENCHMARK_PAGE_LIMIT
+    ),
+    pdfWorkerBatchMode: normalizePdfWorkerBatchMode(cfg.pdfWorkerBatchMode || cfg.pdfWorkerBenchmarkMode),
+    pdfWorkerRendersPerWorker: normalizePositiveNumberList(
+      cfg.pdfWorkerRendersPerWorker || cfg.pdfWorkerConcurrentRendersPerWorker,
+      DEFAULT_PDF_WORKER_RENDERS_PER_WORKER,
+      8
     ),
     variants: normalizeVariants(cfg.variants),
     pdfToImageModes: normalizePdfToImageModes(cfg.pdfToImageModes || cfg.pdfToImageMode),
@@ -421,8 +440,10 @@ function addScenario(scenarios, seen, scenario) {
     pdfToImageMode: PDF_TO_IMAGE_MODES.includes(String(scenario?.pdfToImageMode || '').toLowerCase())
       ? String(scenario.pdfToImageMode).toLowerCase()
       : 'current',
+    pdfWorkerBatchMode: normalizePdfWorkerBatchMode(scenario?.pdfWorkerBatchMode),
+    pdfWorkerRendersPerWorker: Math.max(1, Math.min(8, Math.floor(Number(scenario?.pdfWorkerRendersPerWorker) || 1))),
   };
-  const key = `${normalized.variant}|${normalized.workerCount}|${normalized.mainThreadConcurrency}|${normalized.pdfToImageMode}`;
+  const key = `${normalized.variant}|${normalized.workerCount}|${normalized.mainThreadConcurrency}|${normalized.pdfToImageMode}|${normalized.pdfWorkerBatchMode}|${normalized.pdfWorkerRendersPerWorker}`;
   if (seen.has(key)) return;
   seen.add(key);
   const workerLabel = normalized.workerCount === 0 ? 'auto' : String(normalized.workerCount);
@@ -432,7 +453,10 @@ function addScenario(scenarios, seen, scenario) {
   const pdfLabel = normalized.pdfToImageMode === 'current' ? 'pdf-current' : `pdf-${normalized.pdfToImageMode}`;
   const isMainThreadConcurrencyScenario = normalized.pdfToImageMode === 'main-thread'
     || (normalized.pdfToImageMode === 'current' && normalized.mainThreadConcurrency > 0);
-  const concurrencyLabel = isMainThreadConcurrencyScenario ? mainThreadLabel : `w${workerLabel}`;
+  const workerBatchLabel = normalized.pdfWorkerBatchMode === 'partitioned'
+    ? `w${workerLabel}-rpw${normalized.pdfWorkerRendersPerWorker}`
+    : `w${workerLabel}`;
+  const concurrencyLabel = isMainThreadConcurrencyScenario ? mainThreadLabel : workerBatchLabel;
   scenarios.push({
     ...normalized,
     scenarioLabel: `${normalized.variant}/${pdfLabel}/${concurrencyLabel}`,
@@ -468,7 +492,7 @@ function createScenarios(benchmarkCfg, options = {}) {
     ),
     MAX_RENDER_BENCHMARK_MAIN_THREAD_CONCURRENCY
   );
-  const workerCounts = [0].concat(mergePositiveCounts(
+  const workerCounts = (benchmarkCfg.includeAutoWorkerCount ? [0] : []).concat(mergePositiveCounts(
     benchmarkCfg.workerCounts.filter((count) => Number(count) > 0),
     [
       ...deriveCountsFromMultipliers(
@@ -484,6 +508,9 @@ function createScenarios(benchmarkCfg, options = {}) {
     ],
     MAX_RENDER_BENCHMARK_WORKER_COUNT
   ));
+  const pdfWorkerRendersPerWorker = benchmarkCfg.pdfWorkerBatchMode === 'partitioned'
+    ? benchmarkCfg.pdfWorkerRendersPerWorker
+    : [1];
 
   for (const variant of benchmarkCfg.variants) {
     for (const pdfToImageMode of benchmarkCfg.pdfToImageModes) {
@@ -495,7 +522,16 @@ function createScenarios(benchmarkCfg, options = {}) {
         }
       } else {
         for (const workerCount of workerCounts) {
-          addScenario(scenarios, seen, { variant, workerCount, mainThreadConcurrency: 0, pdfToImageMode });
+          for (const rendersPerWorker of pdfWorkerRendersPerWorker) {
+            addScenario(scenarios, seen, {
+              variant,
+              workerCount,
+              mainThreadConcurrency: 0,
+              pdfToImageMode,
+              pdfWorkerBatchMode: benchmarkCfg.pdfWorkerBatchMode,
+              pdfWorkerRendersPerWorker: rendersPerWorker,
+            });
+          }
         }
       }
     }
@@ -505,6 +541,7 @@ function createScenarios(benchmarkCfg, options = {}) {
     totalScenarioCount: scenarios.length,
     mainThreadConcurrencies,
     workerCounts,
+    pdfWorkerRendersPerWorker,
   };
 }
 
@@ -567,6 +604,62 @@ function summarizeByExtension(taskResults) {
   return byExtension;
 }
 
+function summarizeTaskResults(taskResults) {
+  const list = Array.isArray(taskResults) ? taskResults : [];
+  const successCount = list.filter((result) => result?.ok).length;
+  const errorCount = list.length - successCount;
+  const timeoutCount = list.filter((result) => result?.timedOut).length;
+  const outputBytes = list.reduce((sum, result) => sum + Math.max(0, Number(result?.outputBytes) || 0), 0);
+  const successfulDurations = list
+    .filter((result) => result?.ok)
+    .map((result) => Math.max(0, Number(result.durationMs) || 0));
+  const successfulDurationStats = successfulDurations.reduce((stats, duration) => ({
+    count: stats.count + 1,
+    totalMs: stats.totalMs + duration,
+    minMs: stats.minMs === null ? duration : Math.min(stats.minMs, duration),
+    maxMs: Math.max(stats.maxMs, duration),
+  }), {
+    count: 0,
+    totalMs: 0,
+    minMs: null,
+    maxMs: 0,
+  });
+
+  return {
+    successCount,
+    errorCount,
+    timeoutCount,
+    outputBytes,
+    byExtension: summarizeByExtension(list),
+    taskSummary: {
+      count: list.length,
+      successCount,
+      errorCount,
+      minMs: successfulDurationStats.count ? successfulDurationStats.minMs : 0,
+      maxMs: successfulDurationStats.count ? successfulDurationStats.maxMs : 0,
+      avgMs: successfulDurationStats.count
+        ? Math.round(successfulDurationStats.totalMs / successfulDurationStats.count)
+        : 0,
+    },
+    slowestTasks: list
+      .filter(Boolean)
+      .sort((a, b) => (Number(b?.durationMs) || 0) - (Number(a?.durationMs) || 0))
+      .slice(0, 10),
+  };
+}
+
+function partitionContiguous(items, partitionCount) {
+  const list = Array.isArray(items) ? items : [];
+  const count = Math.max(1, Math.min(list.length || 1, Math.floor(Number(partitionCount) || 1)));
+  const partitions = [];
+  for (let partitionIndex = 0; partitionIndex < count; partitionIndex += 1) {
+    const start = Math.floor((partitionIndex * list.length) / count);
+    const end = Math.floor(((partitionIndex + 1) * list.length) / count);
+    partitions.push(list.slice(start, end));
+  }
+  return partitions.filter((partition) => partition.length > 0);
+}
+
 /**
  * @param {Object} args
  * @param {number} args.pageCount
@@ -597,6 +690,193 @@ function resolveScenarioConcurrency(args) {
     ? resolvedWorkerCount
     : Math.max(1, Number(args.renderConfig?.maxConcurrentAssetRenders) || 1);
   return Math.min(pageCount, assetLimit);
+}
+
+async function runPartitionedPdfWorkerScenario(args) {
+  const scenario = args.scenario;
+  const requestedWorkerCount = Math.max(0, Number(scenario.workerCount) || 0);
+  const resolvedWorkerCount = requestedWorkerCount > 0
+    ? requestedWorkerCount
+    : resolveRecommendedWorkerCount(0, 'auto');
+  const renderConfig = {
+    ...(args.baseRenderConfig || {}),
+    workerCount: resolvedWorkerCount,
+    pdfToImageMode: 'worker',
+  };
+  const pdfWorkerMaxCount = Math.max(1, Number(renderConfig.pdfWorkerMaxCount) || 8);
+  const pdfWorkerCount = Math.max(1, Math.min(resolvedWorkerCount || pdfWorkerMaxCount, pdfWorkerMaxCount));
+  const rendersPerWorker = Math.max(1, Math.min(8, Math.floor(Number(scenario.pdfWorkerRendersPerWorker) || 1)));
+  const pool = createPdfPageWorkerPool({
+    enabled: true,
+    workerCount: pdfWorkerCount,
+    taskTimeoutMs: Math.min(
+      MAX_RENDER_BENCHMARK_TASK_TIMEOUT_MS,
+      Math.max(5000, Number(args.taskTimeoutMs) || DEFAULT_TASK_TIMEOUT_MS)
+    ),
+  });
+  const startedAt = performance.now();
+  const taskResults = new Array(args.pages.length);
+  const sourceBlobCache = new Map();
+  let completed = 0;
+
+  const reportPageProgress = () => {
+    args.onProgress?.({
+      phase: 'running',
+      completedRuns: args.completedRuns,
+      totalRuns: args.totalRuns,
+      scenarioLabel: scenario.scenarioLabel,
+      renderedPages: completed,
+      pageCount: args.pages.length,
+    });
+  };
+
+  const getSourceBlob = async (sourceKey) => {
+    const key = String(sourceKey || '');
+    if (!sourceBlobCache.has(key)) {
+      const blob = await args.viewerContext.readSourceBlob?.(key);
+      sourceBlobCache.set(key, blob || null);
+    }
+    return sourceBlobCache.get(key);
+  };
+
+  try {
+    if (!pool.canRender()) {
+      throw pool.createUnavailableError?.('No compatible PDF page worker is available')
+        || new Error('No compatible PDF page worker is available');
+    }
+
+    const batchItems = [];
+    for (let index = 0; index < args.pages.length; index += 1) {
+      throwIfAborted(args.signal);
+      const page = args.pages[index];
+      const sourceBlob = await getSourceBlob(page.sourceKey);
+      batchItems.push({
+        itemId: index,
+        payload: {
+          sourceBlob,
+          sourceKey: String(page?.sourceKey || ''),
+          pageIndex: Math.max(0, Number(page?.pageIndex) || 0),
+          variant: scenario.variant,
+          thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
+          thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
+          fullPageScale: Number(renderConfig.fullPageScale) || 2.0,
+          maxOpenPdfDocuments: Number(renderConfig.maxOpenPdfDocuments) || 16,
+        },
+      });
+    }
+
+    const recordItemResult = (result) => {
+      const itemId = Math.max(0, Number(result?.itemId) || 0);
+      const page = args.pages[itemId] || {};
+      if (result?.ok) {
+        taskResults[itemId] = {
+          ok: true,
+          taskIndex: itemId,
+          originalPageIndex: page.originalPageIndex,
+          fileExtension: page.fileExtension,
+          durationMs: Math.max(0, Math.round(Number(result.durationMs) || 0)),
+          outputBytes: Math.max(0, Number(result?.blob?.size) || 0),
+          width: Math.max(0, Number(result?.width) || 0),
+          height: Math.max(0, Number(result?.height) || 0),
+          mimeType: String(result?.mimeType || result?.blob?.type || ''),
+        };
+      } else {
+        taskResults[itemId] = {
+          ok: false,
+          taskIndex: itemId,
+          originalPageIndex: page.originalPageIndex,
+          fileExtension: page.fileExtension,
+          durationMs: Math.max(0, Math.round(Number(result.durationMs) || 0)),
+          error: String(result?.error || 'PDF worker batch item failed'),
+          timedOut: false,
+        };
+      }
+      completed += 1;
+      reportPageProgress();
+    };
+
+    const partitions = partitionContiguous(batchItems, pdfWorkerCount);
+    await Promise.all(partitions.map(async (partition) => {
+      try {
+        await pool.renderBatch(partition, {
+          concurrency: rendersPerWorker,
+          onItemResult: recordItemResult,
+        });
+      } catch (error) {
+        for (const item of partition) {
+          const itemId = Math.max(0, Number(item?.itemId) || 0);
+          if (taskResults[itemId]) continue;
+          const page = args.pages[itemId] || {};
+          taskResults[itemId] = {
+            ok: false,
+            taskIndex: itemId,
+            originalPageIndex: page.originalPageIndex,
+            fileExtension: page.fileExtension,
+            durationMs: 0,
+            error: String(error?.message || error || 'PDF worker batch failed'),
+            timedOut: String(error?.name || '') === 'TimeoutError',
+          };
+          completed += 1;
+          reportPageProgress();
+        }
+      }
+    }));
+
+    for (let index = 0; index < taskResults.length; index += 1) {
+      if (taskResults[index]) continue;
+      const page = args.pages[index] || {};
+      taskResults[index] = {
+        ok: false,
+        taskIndex: index,
+        originalPageIndex: page.originalPageIndex,
+        fileExtension: page.fileExtension,
+        durationMs: 0,
+        error: 'PDF worker batch did not return a result for this page.',
+      };
+    }
+
+    const durationMs = Math.round(performance.now() - startedAt);
+    const summary = summarizeTaskResults(taskResults);
+    return {
+      scenarioLabel: scenario.scenarioLabel,
+      variant: scenario.variant,
+      pdfToImageModeSetting: scenario.pdfToImageMode,
+      pdfToImageMode: 'worker',
+      workerCountSetting: scenario.workerCount,
+      mainThreadConcurrencySetting: scenario.mainThreadConcurrency,
+      pdfWorkerBatchMode: scenario.pdfWorkerBatchMode,
+      pdfWorkerRendersPerWorker: rendersPerWorker,
+      workerCount: resolvedWorkerCount,
+      mainThreadConcurrency: Math.max(1, Number(renderConfig.maxConcurrentMainThreadRenders) || 1),
+      pdfWorkerMaxCount,
+      concurrency: pdfWorkerCount * rendersPerWorker,
+      durationMs,
+      pageCount: args.pages.length,
+      successCount: summary.successCount,
+      errorCount: summary.errorCount,
+      timeoutCount: summary.timeoutCount,
+      outputBytes: summary.outputBytes,
+      byExtension: summary.byExtension,
+      rendererStats: {
+        workerAssetCount: 0,
+        workerFallbackCount: 0,
+        pdfWorkerCount: summary.successCount,
+        pdfWorkerFallbackCount: summary.errorCount,
+        pdfWorkerFallbackReasons: {},
+        pdfWorkerFallbackSamples: [],
+        mainPdfCount: 0,
+        mainTiffCount: 0,
+        mainImageCount: 0,
+        activeWorkerCount: pool.getWorkerCount(),
+        activePdfWorkerCount: pool.getWorkerCount(),
+        activePageAssetWorkerCount: 0,
+      },
+      taskSummary: summary.taskSummary,
+      slowestTasks: summary.slowestTasks,
+    };
+  } finally {
+    await pool.dispose?.();
+  }
 }
 
 /**
@@ -644,9 +924,23 @@ async function runScenario(args) {
       return blob ? blob.arrayBuffer() : null;
     },
   };
-  const renderer = createPageAssetRenderer({ tempStore, config: renderConfig });
   const hasPdfPages = args.pages.some((page) => String(page?.fileExtension || '').toLowerCase() === 'pdf');
+  const allPagesArePdf = args.pages.every((page) => String(page?.fileExtension || '').toLowerCase() === 'pdf');
   const backend = String(renderConfig.backend || 'hybrid-by-format').toLowerCase();
+  if (
+    scenario.pdfWorkerBatchMode === 'partitioned'
+    && pdfToImageMode === 'worker'
+    && backend !== 'main-only'
+    && hasPdfPages
+    && allPagesArePdf
+  ) {
+    return runPartitionedPdfWorkerScenario({
+      ...args,
+      baseRenderConfig: renderConfig,
+    });
+  }
+
+  const renderer = createPageAssetRenderer({ tempStore, config: renderConfig });
   const concurrency = resolveScenarioConcurrency({
     pageCount: args.pages.length,
     hasPdfPages,
@@ -720,33 +1014,7 @@ async function runScenario(args) {
 
     const durationMs = Math.round(performance.now() - startedAt);
     const rendererStats = typeof renderer.getStats === 'function' ? renderer.getStats() : {};
-    const successCount = taskResults.filter((result) => result?.ok).length;
-    const errorCount = taskResults.length - successCount;
-    const outputBytes = taskResults.reduce((sum, result) => sum + Math.max(0, Number(result?.outputBytes) || 0), 0);
-    const successfulDurations = taskResults
-      .filter((result) => result?.ok)
-      .map((result) => Math.max(0, Number(result.durationMs) || 0));
-    const successfulDurationStats = successfulDurations.reduce((stats, duration) => ({
-      count: stats.count + 1,
-      totalMs: stats.totalMs + duration,
-      minMs: stats.minMs === null ? duration : Math.min(stats.minMs, duration),
-      maxMs: Math.max(stats.maxMs, duration),
-    }), {
-      count: 0,
-      totalMs: 0,
-      minMs: null,
-      maxMs: 0,
-    });
-    const taskSummary = {
-      count: taskResults.length,
-      successCount,
-      errorCount,
-      minMs: successfulDurationStats.count ? successfulDurationStats.minMs : 0,
-      maxMs: successfulDurationStats.count ? successfulDurationStats.maxMs : 0,
-      avgMs: successfulDurationStats.count
-        ? Math.round(successfulDurationStats.totalMs / successfulDurationStats.count)
-        : 0,
-    };
+    const summary = summarizeTaskResults(taskResults);
 
     return {
       scenarioLabel: scenario.scenarioLabel,
@@ -761,17 +1029,14 @@ async function runScenario(args) {
       concurrency,
       durationMs,
       pageCount: args.pages.length,
-      successCount,
-      errorCount,
+      successCount: summary.successCount,
+      errorCount: summary.errorCount,
       timeoutCount,
-      outputBytes,
-      byExtension: summarizeByExtension(taskResults),
+      outputBytes: summary.outputBytes,
+      byExtension: summary.byExtension,
       rendererStats,
-      taskSummary,
-      slowestTasks: taskResults
-        .filter(Boolean)
-        .sort((a, b) => (Number(b?.durationMs) || 0) - (Number(a?.durationMs) || 0))
-        .slice(0, 10),
+      taskSummary: summary.taskSummary,
+      slowestTasks: summary.slowestTasks,
     };
   } finally {
     await renderer.dispose?.();
@@ -864,12 +1129,16 @@ export async function runRenderDecodeBenchmark(args) {
     variants: benchmarkCfg.variants,
     pdfToImageModes: benchmarkCfg.pdfToImageModes,
     workerCounts: benchmarkCfg.workerCounts,
+    includeAutoWorkerCount: benchmarkCfg.includeAutoWorkerCount,
     mainThreadConcurrencies: benchmarkCfg.mainThreadConcurrencies,
     focusedWorkerCounts: scenarioPlan.workerCounts,
     focusedMainThreadConcurrencies: scenarioPlan.mainThreadConcurrencies,
     mainThreadCoreMultipliers: benchmarkCfg.mainThreadCoreMultipliers,
     workerCoreMultipliers: benchmarkCfg.workerCoreMultipliers,
     pdfWorkerPageTargets: benchmarkCfg.pdfWorkerPageTargets,
+    pdfWorkerBatchMode: benchmarkCfg.pdfWorkerBatchMode,
+    pdfWorkerRendersPerWorker: benchmarkCfg.pdfWorkerRendersPerWorker,
+    focusedPdfWorkerRendersPerWorker: scenarioPlan.pdfWorkerRendersPerWorker,
     taskTimeoutMs: benchmarkCfg.taskTimeoutMs,
     maxRuns: benchmarkCfg.maxRuns,
     testedVariants: Array.from(new Set(scenarios.map((scenario) => scenario.variant))),
@@ -877,6 +1146,10 @@ export async function runRenderDecodeBenchmark(args) {
     testedWorkerCounts: Array.from(new Set(scenarios.map((scenario) => scenario.workerCount))),
     testedMainThreadConcurrencies: Array.from(
       new Set(scenarios.map((scenario) => scenario.mainThreadConcurrency).filter((value) => value > 0))
+    ),
+    testedPdfWorkerBatchModes: Array.from(new Set(scenarios.map((scenario) => scenario.pdfWorkerBatchMode))),
+    testedPdfWorkerRendersPerWorker: Array.from(
+      new Set(scenarios.map((scenario) => scenario.pdfWorkerRendersPerWorker).filter((value) => value > 0))
     ),
     testedScenarios: scenarios,
     scenarioCount: scenarios.length,

@@ -132,6 +132,30 @@ export class PdfPageWorkerPool {
     });
   }
 
+  renderBatch(items, options = {}) {
+    if (!this.canRender()) {
+      return Promise.reject(this.createUnavailableError('No compatible PDF page worker is available'));
+    }
+    const safeItems = Array.isArray(items) ? items : [];
+    if (!safeItems.length) return Promise.resolve({ results: [], summary: { itemCount: 0, successCount: 0, errorCount: 0 } });
+
+    return new Promise((resolve, reject) => {
+      this.queue.push({
+        type: 'batch',
+        taskId: this.taskId++,
+        payload: {
+          items: safeItems,
+          concurrency: Math.max(1, Math.min(8, Math.floor(Number(options?.concurrency) || 1))),
+        },
+        expectedItems: safeItems.length,
+        onItemResult: typeof options?.onItemResult === 'function' ? options.onItemResult : null,
+        resolve,
+        reject,
+      });
+      this.pump();
+    });
+  }
+
   pump() {
     this.pumpTimer = 0;
     if (this.disposed) return;
@@ -155,11 +179,21 @@ export class PdfPageWorkerPool {
       const timeoutId = globalThis.setTimeout?.(() => {
         this.handleTimeout(next.taskId, slot);
       }, this.taskTimeoutMs);
-      this.pending.set(next.taskId, { resolve: next.resolve, reject: next.reject, slot, timeoutId });
+      this.pending.set(next.taskId, {
+        type: next.type === 'batch' ? 'batch' : 'single',
+        resolve: next.resolve,
+        reject: next.reject,
+        slot,
+        timeoutId,
+        expectedItems: Math.max(0, Number(next.expectedItems) || 0),
+        results: next.type === 'batch' ? new Array(Math.max(0, Number(next.expectedItems) || 0)) : null,
+        receivedItems: 0,
+        onItemResult: next.onItemResult || null,
+      });
 
       try {
         entry.worker.postMessage({
-          type: 'renderPdfPageAsset',
+          type: next.type === 'batch' ? 'renderPdfPageAssetBatch' : 'renderPdfPageAsset',
           taskId: next.taskId,
           payload: next.payload,
         });
@@ -241,11 +275,20 @@ export class PdfPageWorkerPool {
 
   handleMessage(slot, event) {
     const data = event?.data || {};
-    if (data?.type !== 'renderPdfPageAssetResult') return;
+    if (data?.type === 'renderPdfPageAssetBatchItem') {
+      this.handleBatchItem(slot, data);
+      return;
+    }
+    if (data?.type !== 'renderPdfPageAssetResult' && data?.type !== 'renderPdfPageAssetBatchResult') return;
 
     const taskId = Number(data?.taskId || 0);
     const pending = this.pending.get(taskId);
     if (!pending) return;
+
+    if (data?.type === 'renderPdfPageAssetBatchResult') {
+      this.handleBatchResult(slot, data, pending);
+      return;
+    }
 
     this.clearPendingTimeout(taskId);
     this.pending.delete(taskId);
@@ -278,6 +321,84 @@ export class PdfPageWorkerPool {
           };
       this.lastWorkerError = details;
       const error = attachErrorDetails(new Error(String(data?.error || details.message || 'PDF worker render failed')), details);
+      error.fallbackMainThread = !!data?.fallbackMainThread;
+      pending.reject(error);
+    }
+
+    this.schedulePump();
+  }
+
+  handleBatchItem(slot, data) {
+    const taskId = Number(data?.taskId || 0);
+    const pending = this.pending.get(taskId);
+    if (!pending || pending.type !== 'batch') return;
+
+    const itemId = Math.max(0, Number(data?.itemId) || 0);
+    const itemIndex = Math.max(0, Number(data?.itemIndex) || 0);
+    const result = data?.ok
+      ? {
+          ok: true,
+          itemId,
+          itemIndex,
+          blob: data.blob,
+          width: Math.max(1, Number(data.width) || 1),
+          height: Math.max(1, Number(data.height) || 1),
+          mimeType: String(data.mimeType || data.blob?.type || 'image/png'),
+          durationMs: Math.max(0, Number(data.durationMs) || 0),
+        }
+      : {
+          ok: false,
+          itemId,
+          itemIndex,
+          durationMs: Math.max(0, Number(data.durationMs) || 0),
+          error: String(data?.error || 'PDF worker batch item failed'),
+          errorDetails: data?.errorDetails || null,
+          payloadSummary: data?.payloadSummary || null,
+          fallbackMainThread: !!data?.fallbackMainThread,
+        };
+
+    if (pending.results && itemIndex < pending.results.length) pending.results[itemIndex] = result;
+    pending.receivedItems = Math.max(0, Number(pending.receivedItems) || 0) + 1;
+    try { pending.onItemResult?.(result, slot); } catch {}
+  }
+
+  handleBatchResult(slot, data, pending) {
+    const taskId = Number(data?.taskId || 0);
+    this.clearPendingTimeout(taskId);
+    this.pending.delete(taskId);
+    const entry = this.workers[slot];
+    if (entry) {
+      entry.busy = false;
+      entry.activeTaskId = null;
+    }
+
+    if (data?.ok) {
+      pending.resolve({
+        results: Array.isArray(pending.results) ? pending.results : [],
+        summary: {
+          itemCount: Math.max(0, Number(data.itemCount) || 0),
+          successCount: Math.max(0, Number(data.successCount) || 0),
+          errorCount: Math.max(0, Number(data.errorCount) || 0),
+          concurrency: Math.max(1, Number(data.concurrency) || 1),
+          receivedItems: Math.max(0, Number(pending.receivedItems) || 0),
+        },
+      });
+    } else {
+      const details = data?.errorDetails && typeof data.errorDetails === 'object'
+        ? {
+            ...data.errorDetails,
+            payloadSummary: data?.payloadSummary || null,
+            fallbackMainThread: !!data?.fallbackMainThread,
+          }
+        : {
+            name: 'Error',
+            message: String(data?.error || 'PDF worker batch failed'),
+            code: '',
+            phase: 'render',
+            fallbackMainThread: !!data?.fallbackMainThread,
+          };
+      this.lastWorkerError = details;
+      const error = attachErrorDetails(new Error(String(data?.error || details.message || 'PDF worker batch failed')), details);
       error.fallbackMainThread = !!data?.fallbackMainThread;
       pending.reject(error);
     }
