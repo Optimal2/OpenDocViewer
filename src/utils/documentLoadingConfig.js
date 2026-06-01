@@ -441,7 +441,7 @@ export function countPdfPages(pages) {
  *
  * @param {number} pageCount
  * @param {DocumentLoadingRenderConfig=} renderConfig
- * @returns {{mode:'main-thread'|'worker', workerCount:number, policy:DocumentLoadingPdfWorkerPagePolicy, hardwareCap:number}}
+ * @returns {{mode:string, workerCount:number, policy:DocumentLoadingPdfWorkerPagePolicy, hardwareCap:number}}
  */
 export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUMENT_LOADING_DEFAULTS.render) {
   const safePageCount = Math.max(0, Math.floor(Number(pageCount) || 0));
