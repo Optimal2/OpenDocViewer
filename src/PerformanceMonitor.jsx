@@ -587,7 +587,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           PDF <strong>{String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')}</strong>
           <span style={{ opacity: 0.75 }}>
-            {' '}max {Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}
+            {String(documentLoadingConfig?.render?.pdfToImageMode || '').toLowerCase() === 'auto'
+              ? ` policy ${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.mainThreadBelowPageCount) || 100}/${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.fixedWorkerBelowPageCount) || 600}/${Number(documentLoadingConfig?.render?.pdfWorkerPagePolicy?.pagesPerWorker) || 150}`
+              : ` max ${Number(documentLoadingConfig?.render?.pdfWorkerMaxCount) || 0}`}
           </span>
         </span>
       </div>

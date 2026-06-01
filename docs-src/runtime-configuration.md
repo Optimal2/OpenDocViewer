@@ -173,29 +173,40 @@ parent payload and therefore the same expired document tickets.
 
 ## PDF Page Rendering Worker Mode
 
-PDF pages are rendered through the proven main-thread pdf.js path by default. Deployments can opt in
-to the experimental worker path for PDF-to-image rendering:
+PDF pages use an automatic PDF-to-image routing policy by default. Small PDFs stay on the proven
+main-thread pdf.js path, while larger PDF runs use page-count based workers:
 
 ```js
 documentLoading: {
   render: {
-    pdfToImageMode: 'worker',
-    pdfWorkerMaxCount: 6
+    pdfToImageMode: 'auto',
+    pdfWorkerMaxCount: 0,
+    pdfWorkerPagePolicy: {
+      enabled: true,
+      mainThreadBelowPageCount: 100,
+      fixedWorkerBelowPageCount: 600,
+      fixedWorkerCount: 4,
+      pagesPerWorker: 150,
+      maxWorkerCount: 0
+    }
   }
 }
 ```
 
 Supported values are:
 
-- `main-thread` - default, matches the behavior used by earlier OpenDocViewer versions.
-- `worker` - renders PDF page images in dedicated workers when supported, with automatic fallback to
-  the main-thread path if worker-side rendering is unavailable or fails.
+- `auto` - default. Uses main thread below 100 PDF pages, 4 PDF workers for 100-599 PDF pages, and
+  `round(pdfPages / 150)` workers from 600 pages upward.
+- `main-thread` - forces the behavior used by earlier OpenDocViewer versions.
+- `worker` - forces PDF page images through dedicated workers when supported, with automatic fallback
+  to the main-thread path if worker-side rendering is unavailable or fails.
 
-The worker mode uses the existing `documentLoading.render.workerCount` setting, capped by
-`documentLoading.render.pdfWorkerMaxCount` (default `6`), and remains separate from generated-PDF
-printing. Raster images and TIFF files continue to use `useWorkersForRasterImages` and
-`useWorkersForTiff`. The cap avoids spawning very large PDF page-worker pools on high-core
-workstations where benchmarks show little benefit beyond the 4-6 worker range.
+The automatic worker count is capped by the runtime-recommended worker count for the current client
+hardware, usually `navigator.hardwareConcurrency - 1` with memory safeguards. `pdfWorkerMaxCount`
+and `pdfWorkerPagePolicy.maxWorkerCount` default to `0`, meaning no static site cap; set either to a
+positive value only when a deployment needs an explicit safety ceiling. Raster images and TIFF files
+continue to use `useWorkersForRasterImages` and `useWorkersForTiff`, and generated-PDF printing uses
+its own worker policy.
 
 The render/decode benchmark can compare PDF page-image routing modes without changing the active
 viewer setting:
@@ -219,10 +230,9 @@ documentLoading: {
 ```
 
 Use `['current']` to benchmark only the active `documentLoading.render.pdfToImageMode` value. When
-the active mode is `main-thread`, `current` varies `mainThreadConcurrencies`; when the active mode
-is `worker`, `current` varies `workerCounts`. Explicit `main-thread` PDF scenarios also vary
-`mainThreadConcurrencies`, while explicit `worker` PDF scenarios vary `workerCounts`, where `0`
-means the runtime-recommended worker count.
+the active mode is `auto`, `current` runs the page-count policy once. Explicit `main-thread` PDF
+scenarios vary `mainThreadConcurrencies`, while explicit `worker` PDF scenarios vary `workerCounts`,
+where `0` means the runtime-recommended worker count.
 
 The benchmark also adds a small set of focused CPU-budget probes. `mainThreadCoreMultipliers`
 derives extra main-thread render concurrency values from `navigator.hardwareConcurrency`.

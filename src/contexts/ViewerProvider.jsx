@@ -15,6 +15,7 @@ import ViewerContext from './viewerContext.js';
 import {
   applyMemoryPressureStage,
   cloneDocumentLoadingConfig,
+  countPdfPages,
   getDocumentLoadingConfig,
   getPerformanceWindowPageCount,
   isRasterImageExtension,
@@ -359,6 +360,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const knownThumbnailAssetPagesRef = useRef(new Set());
   const pdfResolutionBoostedKeysRef = useRef(new Set());
   const pdfResolutionPendingKeysRef = useRef(new Set());
+  const pdfPageCountRef = useRef(0);
 
   const renderWithLimit = useRef(createLimiter(
     () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
@@ -389,6 +391,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       allPagesRef.current = Array.isArray(next) ? next : [];
       return allPagesRef.current;
     });
+  }, []);
+
+  const syncRendererPdfPageCount = useCallback(() => {
+    const nextPdfPageCount = countPdfPages(allPagesRef.current);
+    if (pdfPageCountRef.current === nextPdfPageCount) return;
+    pdfPageCountRef.current = nextPdfPageCount;
+    pageRendererRef.current?.updateConfig?.({ pdfPageCount: nextPdfPageCount });
+    setWorkerCount(Math.max(0, Number(pageRendererRef.current?.getWorkerCount?.() || 0)));
   }, []);
 
   /**
@@ -595,6 +605,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const defaultConfig = getDocumentLoadingConfig();
     sessionBaseConfigRef.current = defaultConfig;
     sessionConfigRef.current = defaultConfig;
+    pdfPageCountRef.current = 0;
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     previousLoadingRunActiveRef.current = false;
@@ -737,7 +748,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     if (tempStoreRef.current?.updateConfig) tempStoreRef.current.updateConfig(normalized.sourceStore);
     if (pageAssetStoreRef.current?.updateConfig) pageAssetStoreRef.current.updateConfig(normalized.assetStore);
-    if (pageRendererRef.current?.updateConfig) pageRendererRef.current.updateConfig(normalized.render);
+    if (pageRendererRef.current?.updateConfig) {
+      pageRendererRef.current.updateConfig({
+        ...normalized.render,
+        pdfPageCount: pdfPageCountRef.current,
+      });
+    }
 
     if (forceIndexedDbPromotion) {
       try { await tempStoreRef.current?.promoteToIndexedDb?.(); } catch {}
@@ -793,7 +809,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     pageRendererRef.current = createPageAssetRenderer({
       tempStore,
-      config: sessionConfigRef.current.render,
+      config: {
+        ...sessionConfigRef.current.render,
+        pdfPageCount: pdfPageCountRef.current,
+      },
     });
 
     sessionEpochRef.current += 1;
@@ -871,6 +890,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const defaultConfig = getDocumentLoadingConfig();
     sessionBaseConfigRef.current = defaultConfig;
     sessionConfigRef.current = defaultConfig;
+    pdfPageCountRef.current = 0;
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     setWorkerCount(0);
@@ -1323,6 +1343,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const source = sourceDescriptorsRef.current.get(page.sourceKey);
     if (!source) throw new Error(`Missing source descriptor for ${page.sourceKey}.`);
     if (!pageRendererRef.current) throw new Error('No active page renderer.');
+    syncRendererPdfPageCount();
 
     const renderTask = () => pageRendererRef.current.renderPageAsset({
       sourceKey: source.sourceKey,
@@ -1346,7 +1367,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
 
     return renderWithLimit(renderTask, renderOptions.priority || 'normal');
-  }, [pdfWorkerRenderWithLimit, renderWithLimit]);
+  }, [pdfWorkerRenderWithLimit, renderWithLimit, syncRendererPdfPageCount]);
 
   /**
    * @param {number} pageIndex
@@ -1720,6 +1741,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     return urls;
   }, [persistRenderedAsset, renderPageBlob, touchPageAsset]);
+
+  useEffect(() => {
+    syncRendererPdfPageCount();
+  }, [allPages, syncRendererPdfPageCount]);
 
   useEffect(() => {
     enforceCacheLimit('full');

@@ -188,7 +188,18 @@ function collectConfigDiagnostics() {
       useWorkersForRasterImages: render.useWorkersForRasterImages !== false,
       useWorkersForTiff: render.useWorkersForTiff !== false,
       pdfToImageMode: String(render.pdfToImageMode || ''),
+      pdfWorkerCount: Number(render.pdfWorkerCount) || 0,
       pdfWorkerMaxCount: Number(render.pdfWorkerMaxCount) || 0,
+      pdfWorkerPagePolicy: render.pdfWorkerPagePolicy && typeof render.pdfWorkerPagePolicy === 'object'
+        ? {
+            enabled: render.pdfWorkerPagePolicy.enabled !== false,
+            mainThreadBelowPageCount: Number(render.pdfWorkerPagePolicy.mainThreadBelowPageCount) || 0,
+            fixedWorkerBelowPageCount: Number(render.pdfWorkerPagePolicy.fixedWorkerBelowPageCount) || 0,
+            fixedWorkerCount: Number(render.pdfWorkerPagePolicy.fixedWorkerCount) || 0,
+            pagesPerWorker: Number(render.pdfWorkerPagePolicy.pagesPerWorker) || 0,
+            maxWorkerCount: Number(render.pdfWorkerPagePolicy.maxWorkerCount) || 0,
+          }
+        : null,
       renderBenchmarkEnabled: renderBenchmark.enabled === true,
       renderBenchmarkVariants: Array.isArray(renderBenchmark.variants)
         ? renderBenchmark.variants.slice(0, DIAGNOSTIC_OPTION_LIST_LIMIT)
