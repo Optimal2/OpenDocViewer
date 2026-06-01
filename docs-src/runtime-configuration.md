@@ -206,7 +206,10 @@ documentLoading: {
     enabled: true,
     pdfToImageModes: ['main-thread', 'worker'],
     mainThreadConcurrencies: [1, 2, 3, 4, 5, 6, 8],
+    mainThreadCoreMultipliers: [0.5, 0.75, 1],
     workerCounts: [0, 1, 2, 3, 4, 6, 8],
+    workerCoreMultipliers: [0.25, 0.5, 1],
+    pdfWorkerPageTargets: [50, 100, 200],
     taskTimeoutMs: 90000
   }
 }
@@ -217,6 +220,12 @@ the active mode is `main-thread`, `current` varies `mainThreadConcurrencies`; wh
 is `worker`, `current` varies `workerCounts`. Explicit `main-thread` PDF scenarios also vary
 `mainThreadConcurrencies`, while explicit `worker` PDF scenarios vary `workerCounts`, where `0`
 means the runtime-recommended worker count.
+
+The benchmark also adds a small set of focused CPU-budget probes. `mainThreadCoreMultipliers`
+derives extra main-thread render concurrency values from `navigator.hardwareConcurrency`.
+`workerCoreMultipliers` derives extra worker counts from the runtime-recommended worker count.
+`pdfWorkerPageTargets` derives worker counts from the sampled page count, for example `100` means
+"roughly one PDF page worker per 100 sampled pages", capped by the runtime-recommended worker count.
 `taskTimeoutMs` prevents one stuck page render from blocking the rest of the benchmark run.
 
 ## Document-Version Reload Cache
