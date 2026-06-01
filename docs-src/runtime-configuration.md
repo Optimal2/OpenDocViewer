@@ -252,6 +252,17 @@ worker, and tests each value in `pdfWorkerRendersPerWorker` as the number of loc
 inside that worker. This does not change the normal viewer runtime path, which continues to use
 `pdfWorkerBatchMode: 'queue'`.
 
+## Page Asset Persistence Diagnostics
+
+Full-size page images are shown as soon as their rendered `Blob` is available. By default,
+`documentLoading.assetStore.persistFullPagesInBackground` keeps first display from waiting for
+memory or IndexedDB cache writes. Set it to `false` only when support needs to reproduce the older
+synchronous path.
+
+`documentLoading.assetStore.restoreBeforeRender` controls whether the viewer probes the rendered-page
+cache before rendering a page. Keep it enabled for normal reload-cache behavior. Disable it during
+first-load performance investigations to isolate render throughput from IndexedDB cache-miss reads.
+
 ## Document-Version Reload Cache
 
 `documentLoading.sourceStore.reloadCacheTtlMs` and

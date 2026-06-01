@@ -95,6 +95,19 @@ import { createContext } from 'react';
  * @property {number} trackedObjectUrlCount
  * @property {number} warmupQueueLength
  * @property {number} pendingAssetCount
+ * @property {number} assetRenderCompletedCount
+ * @property {number} assetRenderTotalMs
+ * @property {number} assetRenderMaxMs
+ * @property {number} assetRestoreAttemptCount
+ * @property {number} assetRestoreHitCount
+ * @property {number} assetRestoreMissCount
+ * @property {number} assetRestoreTotalMs
+ * @property {number} assetPersistPendingCount
+ * @property {number} assetPersistCompletedCount
+ * @property {number} assetPersistFailedCount
+ * @property {number} assetPersistTotalMs
+ * @property {number} assetPersistMaxMs
+ * @property {string} assetPersistLastError
  * @property {boolean} sourceStoreEncrypted
  * @property {boolean} assetStoreEncrypted
  * @property {number} sourceCacheHits
