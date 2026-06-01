@@ -383,6 +383,23 @@ function needsPageCountAnalysis(fileExtension) {
 }
 
 /**
+ * Large multi-page PDFs should not start their background render warm-up while the loader is still
+ * discovering more sources. The automatic PDF worker policy depends on the final PDF page count; if
+ * warm-up starts too early the worker pool can be rebuilt mid-run as the count grows.
+ *
+ * @param {Object} input
+ * @param {string} input.fileExtension
+ * @param {number} input.pageCount
+ * @param {number} input.sourceCount
+ * @returns {boolean}
+ */
+function shouldDeferSourceWarmup({ fileExtension, pageCount, sourceCount }) {
+  return normalizeExtension(fileExtension) === 'pdf'
+    && Math.max(1, Number(pageCount) || 1) >= 100
+    && Math.max(0, Number(sourceCount) || 0) > 1;
+}
+
+/**
  * Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF
  * files do not create a second sequential analysis phase after all sources have been fetched.
  *
@@ -1495,7 +1512,13 @@ const DocumentLoader = ({
         });
 
         insertPagesAtIndex(placeholders, nextPageIndex);
-        scheduleSourceWarmup(nextPageIndex, placeholders.length);
+        if (!shouldDeferSourceWarmup({
+          fileExtension: result.fileExtension,
+          pageCount,
+          sourceCount: entries.length,
+        })) {
+          scheduleSourceWarmup(nextPageIndex, placeholders.length);
+        }
 
         if (documentState) {
           documentState.pageCount += placeholders.length;
