@@ -169,6 +169,14 @@ function createLimiter(concurrency) {
   });
 }
 
+function nowMs() {
+  try {
+    return typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : Date.now();
+  } catch {
+    return Date.now();
+  }
+}
+
 /**
  * @param {string} url
  * @returns {string}
@@ -901,6 +909,7 @@ const DocumentLoader = ({
     initializeDocumentSession,
     storeSourceBlob,
     readSourceBlob,
+    recordLoaderPhaseTiming,
     registerSourceDescriptor,
     addMessage,
     scheduleSourceWarmup,
@@ -1029,6 +1038,7 @@ const DocumentLoader = ({
         try {
           const cachedBlob = await readSourceBlob(sourceKey);
           if (cachedBlob instanceof Blob && cachedBlob.size > 0) {
+            const typeStartedAt = nowMs();
             const resolvedPayload = await resolveFetchedSourcePayload({
               entry,
               blob: cachedBlob,
@@ -1043,6 +1053,7 @@ const DocumentLoader = ({
               fileExtension: resolvedPayload.fileExtension,
               headBytes: resolvedPayload.headBytes,
             });
+            recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
 
             logger.info('Prefetch source restored from reload cache', {
               sourceKey,
@@ -1090,6 +1101,7 @@ const DocumentLoader = ({
             }, requestTimeoutMs);
           }
 
+          const fetchStartedAt = nowMs();
           const response = await fetch(entry.url, {
             signal: controller.signal,
             cache: 'no-store',
@@ -1098,10 +1110,12 @@ const DocumentLoader = ({
           if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
 
           const blob = await response.blob();
+          recordLoaderPhaseTiming?.('fetch', nowMs() - fetchStartedAt);
           if (!(blob instanceof Blob) || blob.size <= 0) {
             throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
           }
 
+          const typeStartedAt = nowMs();
           const resolvedPayload = await resolveFetchedSourcePayload({
             entry,
             blob,
@@ -1116,7 +1130,9 @@ const DocumentLoader = ({
             fileExtension: resolvedPayload.fileExtension,
             headBytes: resolvedPayload.headBytes,
           });
+          recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
 
+          const storeStartedAt = nowMs();
           const stored = await storeSourceBlob({
             sourceKey,
             blob,
@@ -1125,6 +1141,7 @@ const DocumentLoader = ({
             originalUrl: entry.url,
             fileIndex: entry.fileIndex,
           });
+          recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
 
           return {
             ok: true,
@@ -1374,7 +1391,9 @@ const DocumentLoader = ({
               ? await analysisBlob.arrayBuffer()
               : null;
             if (!arrayBuffer) throw new Error(`Prefetched source is missing analysis bytes for ${result.sourceKey}`);
+            const analysisStartedAt = nowMs();
             pageCount = Math.max(1, Number(await getTotalPages(arrayBuffer, result.fileExtension)) || 1);
+            recordLoaderPhaseTiming?.('analysis', nowMs() - analysisStartedAt);
           } catch (error) {
             logger.warn('Failed to determine page count; falling back to 1 page', {
               sourceKey: result.sourceKey,
@@ -1524,6 +1543,7 @@ const DocumentLoader = ({
     patchPageAtIndex,
     promptForPressure,
     readSourceBlob,
+    recordLoaderPhaseTiming,
     registerSourceDescriptor,
     scheduleSourceWarmup,
     setError,

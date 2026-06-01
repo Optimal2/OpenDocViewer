@@ -286,6 +286,16 @@ function createAssetPipelineStats() {
   };
 }
 
+function createLoaderPhaseStats() {
+  return {
+    prefetch: { count: 0, totalMs: 0, maxMs: 0 },
+    fetch: { count: 0, totalMs: 0, maxMs: 0 },
+    type: { count: 0, totalMs: 0, maxMs: 0 },
+    store: { count: 0, totalMs: 0, maxMs: 0 },
+    analysis: { count: 0, totalMs: 0, maxMs: 0 },
+  };
+}
+
 function nowMs() {
   try {
     return typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : Date.now();
@@ -353,6 +363,21 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     assetPersistTotalMs: 0,
     assetPersistMaxMs: 0,
     assetPersistLastError: '',
+    loaderPrefetchCount: 0,
+    loaderPrefetchTotalMs: 0,
+    loaderPrefetchMaxMs: 0,
+    loaderFetchCount: 0,
+    loaderFetchTotalMs: 0,
+    loaderFetchMaxMs: 0,
+    loaderTypeCount: 0,
+    loaderTypeTotalMs: 0,
+    loaderTypeMaxMs: 0,
+    loaderStoreCount: 0,
+    loaderStoreTotalMs: 0,
+    loaderStoreMaxMs: 0,
+    loaderAnalysisCount: 0,
+    loaderAnalysisTotalMs: 0,
+    loaderAnalysisMaxMs: 0,
     sourceStoreEncrypted: false,
     assetStoreEncrypted: false,
     sourceCacheHits: 0,
@@ -407,6 +432,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const pdfResolutionPendingKeysRef = useRef(new Set());
   const pdfPageCountRef = useRef(0);
   const assetPipelineStatsRef = useRef(createAssetPipelineStats());
+  const loaderPhaseStatsRef = useRef(createLoaderPhaseStats());
 
   const renderWithLimit = useRef(createLimiter(
     () => Math.max(1, Number(sessionConfigRef.current?.render?.maxConcurrentMainThreadRenders) || 2)
@@ -485,6 +511,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
     const rendererStats = pageRendererRef.current?.getStats?.() || {};
     const pipelineStats = assetPipelineStatsRef.current || createAssetPipelineStats();
+    const loaderStats = loaderPhaseStatsRef.current || createLoaderPhaseStats();
     const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
     const totalPages = pages.length;
     const renderConfig = sessionConfigRef.current?.render || {};
@@ -556,6 +583,21 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         assetPersistTotalMs: Math.max(0, Number(pipelineStats.persistTotalMs || 0)),
         assetPersistMaxMs: Math.max(0, Number(pipelineStats.persistMaxMs || 0)),
         assetPersistLastError: String(pipelineStats.persistLastError || ''),
+        loaderPrefetchCount: Math.max(0, Number(loaderStats.prefetch?.count || 0)),
+        loaderPrefetchTotalMs: Math.max(0, Number(loaderStats.prefetch?.totalMs || 0)),
+        loaderPrefetchMaxMs: Math.max(0, Number(loaderStats.prefetch?.maxMs || 0)),
+        loaderFetchCount: Math.max(0, Number(loaderStats.fetch?.count || 0)),
+        loaderFetchTotalMs: Math.max(0, Number(loaderStats.fetch?.totalMs || 0)),
+        loaderFetchMaxMs: Math.max(0, Number(loaderStats.fetch?.maxMs || 0)),
+        loaderTypeCount: Math.max(0, Number(loaderStats.type?.count || 0)),
+        loaderTypeTotalMs: Math.max(0, Number(loaderStats.type?.totalMs || 0)),
+        loaderTypeMaxMs: Math.max(0, Number(loaderStats.type?.maxMs || 0)),
+        loaderStoreCount: Math.max(0, Number(loaderStats.store?.count || 0)),
+        loaderStoreTotalMs: Math.max(0, Number(loaderStats.store?.totalMs || 0)),
+        loaderStoreMaxMs: Math.max(0, Number(loaderStats.store?.maxMs || 0)),
+        loaderAnalysisCount: Math.max(0, Number(loaderStats.analysis?.count || 0)),
+        loaderAnalysisTotalMs: Math.max(0, Number(loaderStats.analysis?.totalMs || 0)),
+        loaderAnalysisMaxMs: Math.max(0, Number(loaderStats.analysis?.maxMs || 0)),
         sourceStoreEncrypted: !!tempStats.encrypted,
         assetStoreEncrypted: !!assetStats.encrypted,
         sourceCacheHits: Math.max(0, Number(tempStats.cacheHits || 0)),
@@ -622,6 +664,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     knownThumbnailAssetPagesRef.current.clear();
     pdfResolutionBoostedKeysRef.current.clear();
     pdfResolutionPendingKeysRef.current.clear();
+    loaderPhaseStatsRef.current = createLoaderPhaseStats();
     setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
@@ -718,6 +761,21 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetPersistTotalMs: 0,
       assetPersistMaxMs: 0,
       assetPersistLastError: '',
+      loaderPrefetchCount: 0,
+      loaderPrefetchTotalMs: 0,
+      loaderPrefetchMaxMs: 0,
+      loaderFetchCount: 0,
+      loaderFetchTotalMs: 0,
+      loaderFetchMaxMs: 0,
+      loaderTypeCount: 0,
+      loaderTypeTotalMs: 0,
+      loaderTypeMaxMs: 0,
+      loaderStoreCount: 0,
+      loaderStoreTotalMs: 0,
+      loaderStoreMaxMs: 0,
+      loaderAnalysisCount: 0,
+      loaderAnalysisTotalMs: 0,
+      loaderAnalysisMaxMs: 0,
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
       sourceCacheHits: 0,
@@ -873,6 +931,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       url: Math.max(0, Number(options?.cacheIdentityStats?.url || 0)),
     };
     assetPipelineStatsRef.current = createAssetPipelineStats();
+    loaderPhaseStatsRef.current = createLoaderPhaseStats();
     sessionBaseConfigRef.current = baseConfig;
     sessionConfigRef.current = cloneDocumentLoadingConfig(baseConfig);
     setDocumentLoadingConfig(sessionConfigRef.current);
@@ -938,6 +997,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     knownThumbnailAssetPagesRef.current.clear();
     pdfResolutionBoostedKeysRef.current.clear();
     pdfResolutionPendingKeysRef.current.clear();
+    loaderPhaseStatsRef.current = createLoaderPhaseStats();
     setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
@@ -980,6 +1040,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     sessionConfigRef.current = defaultConfig;
     pdfPageCountRef.current = 0;
     assetPipelineStatsRef.current = createAssetPipelineStats();
+    loaderPhaseStatsRef.current = createLoaderPhaseStats();
     setDocumentLoadingConfig(defaultConfig);
     setMemoryPressureStage('normal');
     setWorkerCount(0);
@@ -1025,6 +1086,21 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetPersistTotalMs: 0,
       assetPersistMaxMs: 0,
       assetPersistLastError: '',
+      loaderPrefetchCount: 0,
+      loaderPrefetchTotalMs: 0,
+      loaderPrefetchMaxMs: 0,
+      loaderFetchCount: 0,
+      loaderFetchTotalMs: 0,
+      loaderFetchMaxMs: 0,
+      loaderTypeCount: 0,
+      loaderTypeTotalMs: 0,
+      loaderTypeMaxMs: 0,
+      loaderStoreCount: 0,
+      loaderStoreTotalMs: 0,
+      loaderStoreMaxMs: 0,
+      loaderAnalysisCount: 0,
+      loaderAnalysisTotalMs: 0,
+      loaderAnalysisMaxMs: 0,
       sourceStoreEncrypted: false,
       assetStoreEncrypted: false,
       sourceCacheHits: 0,
@@ -1757,6 +1833,21 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [ensurePageAsset, publishPdfResolutionBoostState]);
 
   /**
+   * @param {string} phase
+   * @param {number} durationMs
+   * @returns {void}
+   */
+  const recordLoaderPhaseTiming = useCallback((phase, durationMs) => {
+    const phaseKey = String(phase || '').toLowerCase();
+    const stats = loaderPhaseStatsRef.current?.[phaseKey];
+    if (!stats) return;
+    const safeDurationMs = Math.max(0, Number(durationMs) || 0);
+    stats.count += 1;
+    stats.totalMs += safeDurationMs;
+    stats.maxMs = Math.max(Number(stats.maxMs) || 0, safeDurationMs);
+  }, []);
+
+  /**
    * Drain background eager-render work without blocking the UI thread.
    * The queue is intentionally best-effort: memory pressure or session resets may clear it at any time.
    *
@@ -2129,6 +2220,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceArrayBuffer,
     readSourceBlob,
     registerSourceDescriptor,
+    recordLoaderPhaseTiming,
     ensurePageAsset,
     enhancePdfPageResolution,
     pdfResolutionBoostState,
@@ -2164,6 +2256,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     readSourceArrayBuffer,
     readSourceBlob,
     registerSourceDescriptor,
+    recordLoaderPhaseTiming,
     ensurePageAsset,
     enhancePdfPageResolution,
     pdfResolutionBoostState,
