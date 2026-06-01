@@ -79,12 +79,14 @@ function formatPhaseTiming(label, count, totalMs, maxMs) {
 
 /**
  * @param {Array<*>} pages
- * @returns {{ ok:boolean, uniquePages:number, duplicatePages:number, missingPages:number, orderIssues:number, indexMismatches:number, sourceCount:number }}
+ * @returns {{ ok:boolean, checkedPages:number, duplicatePages:number, missingPages:number, orderIssues:number, indexMismatches:number, sourceCount:number, sequenceCount:number }}
  */
 function analyzePageIntegrity(pages) {
   const list = Array.isArray(pages) ? pages : [];
-  const seenPages = new Set();
-  const sourceGroups = new Map();
+  const sourceKeys = new Set();
+  const sourceSequences = [];
+  let currentSequence = null;
+  let checkedPages = 0;
   let duplicatePages = 0;
   let missingIdentityPages = 0;
   let indexMismatches = 0;
@@ -109,49 +111,48 @@ function analyzePageIntegrity(pages) {
       continue;
     }
 
-    const pageKey = `${sourceKey}:${pageIndex}`;
-    if (seenPages.has(pageKey)) duplicatePages += 1;
-    else seenPages.add(pageKey);
+    checkedPages += 1;
+    sourceKeys.add(sourceKey);
 
-    let group = sourceGroups.get(sourceKey);
-    if (!group) {
-      group = {
+    if (!currentSequence || currentSequence.sourceKey !== sourceKey) {
+      currentSequence = {
+        sourceKey,
         pageIndexes: new Set(),
         minPageIndex: pageIndex,
         maxPageIndex: pageIndex,
-        lastListIndex: index,
-        lastPageIndex: pageIndex,
-        reentered: false,
+        lastPageIndex: undefined,
       };
-      sourceGroups.set(sourceKey, group);
-    } else {
-      if (index !== group.lastListIndex + 1) group.reentered = true;
-      if (pageIndex !== group.lastPageIndex + 1) orderIssues += 1;
-      group.minPageIndex = Math.min(group.minPageIndex, pageIndex);
-      group.maxPageIndex = Math.max(group.maxPageIndex, pageIndex);
-      group.lastListIndex = index;
-      group.lastPageIndex = pageIndex;
+      sourceSequences.push(currentSequence);
     }
 
-    group.pageIndexes.add(pageIndex);
+    if (currentSequence.pageIndexes.has(pageIndex)) duplicatePages += 1;
+    else currentSequence.pageIndexes.add(pageIndex);
+
+    if (currentSequence.lastPageIndex != null && pageIndex !== currentSequence.lastPageIndex + 1) {
+      orderIssues += 1;
+    }
+
+    currentSequence.minPageIndex = Math.min(currentSequence.minPageIndex, pageIndex);
+    currentSequence.maxPageIndex = Math.max(currentSequence.maxPageIndex, pageIndex);
+    currentSequence.lastPageIndex = pageIndex;
   }
 
   let missingPages = missingIdentityPages;
-  for (const group of sourceGroups.values()) {
-    if (group.reentered) orderIssues += 1;
-    if (group.minPageIndex > 0) missingPages += group.minPageIndex;
-    const expectedWithinSource = group.maxPageIndex - group.minPageIndex + 1;
-    missingPages += Math.max(0, expectedWithinSource - group.pageIndexes.size);
+  for (const sequence of sourceSequences) {
+    if (sequence.minPageIndex > 0) missingPages += sequence.minPageIndex;
+    const expectedWithinSource = sequence.maxPageIndex - sequence.minPageIndex + 1;
+    missingPages += Math.max(0, expectedWithinSource - sequence.pageIndexes.size);
   }
 
   return {
     ok: duplicatePages === 0 && missingPages === 0 && orderIssues === 0 && indexMismatches === 0,
-    uniquePages: seenPages.size,
+    checkedPages,
     duplicatePages,
     missingPages,
     orderIssues,
     indexMismatches,
-    sourceCount: sourceGroups.size,
+    sourceCount: sourceKeys.size,
+    sequenceCount: sourceSequences.length,
   };
 }
 
@@ -564,7 +565,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
-    `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} unique ${pageIntegrity.uniquePages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount}`,
+    `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} checked ${pageIntegrity.checkedPages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount} seq ${pageIntegrity.sequenceCount}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
     hasHeapMetrics
       ? `Heap: ${memory.usedJSHeapSize.toFixed(1)} MB / ${memory.totalJSHeapSize.toFixed(1)} MB limit ${memory.jsHeapSizeLimit.toFixed(0)} MB`
@@ -854,7 +855,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {pageIntegrity.ok ? 'ok' : 'check'}
         </strong>
         <span style={{ marginLeft: 8, opacity: 0.9 }}>
-          unique <strong>{pageIntegrity.uniquePages}</strong>/{totalPages}
+          checked <strong>{pageIntegrity.checkedPages}</strong>/{totalPages}
         </span>
         <span style={{ marginLeft: 8, opacity: 0.9 }}>
           dup <strong>{pageIntegrity.duplicatePages}</strong>
@@ -867,6 +868,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         </span>
         <span style={{ marginLeft: 8, opacity: 0.9 }}>
           index <strong>{pageIntegrity.indexMismatches}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          seq <strong>{pageIntegrity.sequenceCount}</strong>
         </span>
       </div>
 
