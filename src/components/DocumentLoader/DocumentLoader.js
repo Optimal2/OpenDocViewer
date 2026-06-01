@@ -309,6 +309,63 @@ async function readBlobHeadBytes(blob) {
 }
 
 /**
+ * Resolve source type information with a cheap signature-first path. Most ODV integrations already
+ * send a reliable extension, so we can avoid the heavier `file-type` probe when the first bytes
+ * confirm that extension. If the signature does not match, fall back to the full detector so
+ * mislabeled or extensionless sources still load correctly.
+ *
+ * @param {Object} input
+ * @param {*} input.entry
+ * @param {Blob} input.blob
+ * @param {string=} input.responseMimeType
+ * @returns {Promise<{detectedType:(Object|null), mimeType:string, fileExtension:string, headBytes:Uint8Array}>}
+ */
+async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' }) {
+  const initialMimeType = String(
+    responseMimeType
+    || blob?.type
+    || 'application/octet-stream'
+  );
+  const expectedExt = normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
+  const mimeExt = normalizeExtension(mimeToExtension(initialMimeType));
+  const headBytes = await readBlobHeadBytes(blob);
+  const signatureExt = [expectedExt, mimeExt]
+    .filter(Boolean)
+    .find((ext) => isSupportedSourceExtension(ext) && matchesKnownSourceSignature(headBytes, ext)) || '';
+
+  if (signatureExt) {
+    return {
+      detectedType: null,
+      mimeType: initialMimeType,
+      fileExtension: signatureExt,
+      headBytes,
+    };
+  }
+
+  let detectedType = null;
+  try { detectedType = await fileTypeFromBlob(blob); } catch {}
+
+  const mimeType = String(
+    detectedType?.mime
+    || initialMimeType
+    || 'application/octet-stream'
+  );
+  const fileExtension = normalizeExtension(
+    detectedType?.ext
+    || mimeToExtension(mimeType)
+    || expectedExt
+    || 'png'
+  );
+
+  return {
+    detectedType,
+    mimeType,
+    fileExtension,
+    headBytes,
+  };
+}
+
+/**
  * @param {string} url
  * @returns {string}
  */
@@ -524,15 +581,15 @@ function createInvalidSourcePayloadError(message, details = {}) {
  * @param {string} input.fileExtension
  * @returns {Promise<void>}
  */
-async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, fileExtension }) {
+async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, fileExtension, headBytes }) {
   const normalizedExt = normalizeExtension(fileExtension);
   const detectedExt = normalizeExtension(detectedType?.ext || '');
   const mimeExt = normalizeExtension(mimeToExtension(mimeType));
   const expectedExt = normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
-  const headBytes = await readBlobHeadBytes(blob);
+  const resolvedHeadBytes = headBytes instanceof Uint8Array ? headBytes : await readBlobHeadBytes(blob);
   const signatureExt = [detectedExt, normalizedExt, expectedExt]
     .filter(Boolean)
-    .find((ext) => matchesKnownSourceSignature(headBytes, ext)) || '';
+    .find((ext) => matchesKnownSourceSignature(resolvedHeadBytes, ext)) || '';
 
   const details = {
     url: redactUrlForLog(entry?.url || ''),
@@ -552,7 +609,7 @@ async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, 
     );
   }
 
-  if (looksLikeTextPayload(headBytes) || (isTextLikeSourceMime(mimeType) && !signatureExt)) {
+  if (looksLikeTextPayload(resolvedHeadBytes) || (isTextLikeSourceMime(mimeType) && !signatureExt)) {
     throw createInvalidSourcePayloadError(
       'Fetched source looked like text/HTML/JSON instead of document bytes. The upstream session or document endpoint may have expired or returned an error page.',
       { ...details, retryable: true }
@@ -972,50 +1029,42 @@ const DocumentLoader = ({
         try {
           const cachedBlob = await readSourceBlob(sourceKey);
           if (cachedBlob instanceof Blob && cachedBlob.size > 0) {
-            let detectedType = null;
-            try { detectedType = await fileTypeFromBlob(cachedBlob); } catch {}
-
-            const mimeType = String(
-              detectedType?.mime
-              || cachedBlob.type
-              || 'application/octet-stream'
-            );
-
-            const fileExtension = normalizeExtension(
-              detectedType?.ext
-              || mimeToExtension(mimeType)
-              || entry.ext
-              || inferUrlExtension(entry.url)
-              || 'png'
-            );
+            const resolvedPayload = await resolveFetchedSourcePayload({
+              entry,
+              blob: cachedBlob,
+              responseMimeType: cachedBlob.type,
+            });
 
             await validateFetchedSourceBlob({
               entry,
               blob: cachedBlob,
-              detectedType,
-              mimeType,
-              fileExtension,
+              detectedType: resolvedPayload.detectedType,
+              mimeType: resolvedPayload.mimeType,
+              fileExtension: resolvedPayload.fileExtension,
+              headBytes: resolvedPayload.headBytes,
             });
 
             logger.info('Prefetch source restored from reload cache', {
               sourceKey,
               fileIndex: entry.fileIndex,
-              fileExtension,
+              fileExtension: resolvedPayload.fileExtension,
               sizeBytes: Number(cachedBlob.size || 0),
             });
 
             return {
               ok: true,
               sourceKey,
-              fileExtension,
-              mimeType,
+              fileExtension: resolvedPayload.fileExtension,
+              mimeType: resolvedPayload.mimeType,
               sizeBytes: Number(cachedBlob.size || 0),
               fileIndex: entry.fileIndex,
               url: entry.url,
               cacheKeyMode: sourceIdentity.mode,
               stats: { mode: 'indexeddb' },
               analysisBlob: cachedBlob,
-              pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+              pageCountHint: resolvedPayload.fileExtension === 'pdf' || resolvedPayload.fileExtension === 'tiff'
+                ? undefined
+                : 1,
             };
           }
         } catch (error) {
@@ -1053,37 +1102,26 @@ const DocumentLoader = ({
             throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
           }
 
-          let detectedType = null;
-          try { detectedType = await fileTypeFromBlob(blob); } catch {}
-
-          const mimeType = String(
-            detectedType?.mime
-            || response.headers.get('content-type')
-            || blob.type
-            || 'application/octet-stream'
-          );
-
-          const fileExtension = normalizeExtension(
-            detectedType?.ext
-            || mimeToExtension(mimeType)
-            || entry.ext
-            || inferUrlExtension(entry.url)
-            || 'png'
-          );
+          const resolvedPayload = await resolveFetchedSourcePayload({
+            entry,
+            blob,
+            responseMimeType: response.headers.get('content-type') || blob.type,
+          });
 
           await validateFetchedSourceBlob({
             entry,
             blob,
-            detectedType,
-            mimeType,
-            fileExtension,
+            detectedType: resolvedPayload.detectedType,
+            mimeType: resolvedPayload.mimeType,
+            fileExtension: resolvedPayload.fileExtension,
+            headBytes: resolvedPayload.headBytes,
           });
 
           const stored = await storeSourceBlob({
             sourceKey,
             blob,
-            fileExtension,
-            mimeType,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
             originalUrl: entry.url,
             fileIndex: entry.fileIndex,
           });
@@ -1091,15 +1129,17 @@ const DocumentLoader = ({
           return {
             ok: true,
             sourceKey,
-            fileExtension,
-            mimeType,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
             sizeBytes: Number(blob.size || 0),
             fileIndex: entry.fileIndex,
             url: entry.url,
             cacheKeyMode: sourceIdentity.mode,
             stats: stored?.stats || null,
             analysisBlob: blob,
-            pageCountHint: fileExtension === 'pdf' || fileExtension === 'tiff' ? undefined : 1,
+            pageCountHint: resolvedPayload.fileExtension === 'pdf' || resolvedPayload.fileExtension === 'tiff'
+              ? undefined
+              : 1,
           };
         } catch (error) {
           const normalizedError = didTimeout
