@@ -94,6 +94,10 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {number=} pdfWorkerCount
  * @property {number} pdfWorkerMaxCount
  * @property {DocumentLoadingPdfWorkerPagePolicy} pdfWorkerPagePolicy
+ * @property {string} pdfWorkerWarmupBatchMode
+ * @property {boolean} deferPdfWorkerWarmupUntilLoadComplete
+ * @property {number} pdfWorkerWarmupMinPageCount
+ * @property {number} pdfWorkerWarmupRendersPerWorker
  * @property {number} maxConcurrentMainThreadRenders
  * @property {number} maxConcurrentAssetRenders
  * @property {number} warmupBatchSize
@@ -254,6 +258,10 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
         pagesPerWorker: 150,
         maxWorkerCount: 0,
       },
+      pdfWorkerWarmupBatchMode: 'partitioned',
+      deferPdfWorkerWarmupUntilLoadComplete: true,
+      pdfWorkerWarmupMinPageCount: 100,
+      pdfWorkerWarmupRendersPerWorker: 1,
       // These are the actual normalized render defaults for the current loading path.
       // Viewer providers can override them through runtime config, but there is no
       // separate provider-only concurrency default layered on top of this module.
@@ -373,6 +381,13 @@ function normalizePdfToImageMode(value, fallback) {
   if (raw === 'auto' || raw === 'adaptive') return 'auto';
   if (raw === 'worker' || raw === 'workers' || raw === 'offscreen-worker') return 'worker';
   return 'main-thread';
+}
+
+function normalizePdfWorkerWarmupBatchMode(value, fallback) {
+  const raw = String(value || fallback || '').trim().toLowerCase().replace(/_/g, '-');
+  if (raw === 'off' || raw === 'disabled' || raw === 'none') return 'off';
+  if (raw === 'queue') return 'queue';
+  return 'partitioned';
 }
 
 function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULTS.render.pdfWorkerPagePolicy) {
@@ -833,6 +848,26 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       pdfWorkerPagePolicy: normalizePdfWorkerPagePolicy(
         raw?.render?.pdfWorkerPagePolicy ?? raw?.render?.pdfWorkerAutoPolicy,
         adaptiveDefaults.render.pdfWorkerPagePolicy
+      ),
+      pdfWorkerWarmupBatchMode: normalizePdfWorkerWarmupBatchMode(
+        raw?.render?.pdfWorkerWarmupBatchMode,
+        adaptiveDefaults.render.pdfWorkerWarmupBatchMode
+      ),
+      deferPdfWorkerWarmupUntilLoadComplete: normalizeBoolean(
+        raw?.render?.deferPdfWorkerWarmupUntilLoadComplete,
+        adaptiveDefaults.render.deferPdfWorkerWarmupUntilLoadComplete
+      ),
+      pdfWorkerWarmupMinPageCount: normalizeNumber(
+        raw?.render?.pdfWorkerWarmupMinPageCount,
+        adaptiveDefaults.render.pdfWorkerWarmupMinPageCount,
+        1,
+        100000
+      ),
+      pdfWorkerWarmupRendersPerWorker: normalizeNumber(
+        raw?.render?.pdfWorkerWarmupRendersPerWorker,
+        adaptiveDefaults.render.pdfWorkerWarmupRendersPerWorker,
+        1,
+        8
       ),
       maxConcurrentMainThreadRenders: normalizeNumber(raw?.render?.maxConcurrentMainThreadRenders, adaptiveDefaults.render.maxConcurrentMainThreadRenders, 1, 32),
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),

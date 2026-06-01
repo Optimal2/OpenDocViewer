@@ -1731,6 +1731,202 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
   }, [ensurePageAsset, publishPdfResolutionBoostState]);
 
+  const tryPumpPdfWorkerBatchWarmup = useCallback(async () => {
+    const renderConfig = sessionConfigRef.current?.render || {};
+    const batchMode = String(renderConfig.pdfWorkerWarmupBatchMode || 'partitioned').toLowerCase();
+    if (batchMode === 'off') return false;
+    if (!pageRendererRef.current?.canRenderPdfInWorker?.()) return false;
+    if (loadingRunActive && renderConfig.deferPdfWorkerWarmupUntilLoadComplete !== false) return false;
+
+    const minPageCount = Math.max(1, Number(renderConfig.pdfWorkerWarmupMinPageCount) || 1);
+    const queue = Array.isArray(warmupQueueRef.current) ? warmupQueueRef.current : [];
+    if (queue.length < minPageCount) return false;
+
+    const candidates = [];
+    const remainder = [];
+    const seen = new Set();
+
+    for (const task of queue) {
+      const pageIndex = Math.max(0, Number(task?.pageIndex) || 0);
+      const page = getPageAt(allPagesRef.current, pageIndex);
+      const pendingKey = makePendingAssetKey('full', pageIndex, {});
+      const canBatch = String(task?.variant || 'full') === 'full'
+        && !seen.has(pageIndex)
+        && isPdfPageEntry(page)
+        && page?.status !== -1
+        && page?.fullSizeStatus !== 1
+        && !page?.fullSizeUrl
+        && !pendingAssetPromisesRef.current.has(pendingKey);
+
+      if (!canBatch) {
+        remainder.push(task);
+        continue;
+      }
+
+      seen.add(pageIndex);
+      candidates.push({ pageIndex, page });
+    }
+
+    if (candidates.length < minPageCount) return false;
+    warmupQueueRef.current = remainder;
+
+    const sessionEpoch = sessionEpochRef.current;
+    const fullCache = getVariantCache('full');
+    const descriptors = candidates
+      .sort((a, b) => a.pageIndex - b.pageIndex)
+      .map(({ pageIndex, page }) => ({
+        sessionPageIndex: pageIndex,
+        sourceKey: String(page?.sourceKey || ''),
+        fileExtension: 'pdf',
+        fileIndex: Math.max(0, Number(page?.fileIndex) || 0),
+        pageIndex: Math.max(0, Number(page?.pageIndex) || 0),
+      }));
+
+    updateAllPages((prev) => {
+      const next = prev.slice();
+      let changed = false;
+      for (const { sessionPageIndex } of descriptors) {
+        const current = getPageAt(next, sessionPageIndex);
+        if (!current || current.status === -1 || current.fullSizeStatus === 1) continue;
+        if (current.fullSizeStatus !== 0) {
+          next[sessionPageIndex] = { ...current, fullSizeStatus: 0 };
+          changed = true;
+        }
+      }
+      return changed ? next : prev;
+    });
+
+    const pendingPatches = [];
+    const failedPageIndexes = [];
+    let flushTimer = 0;
+
+    const flushPatches = () => {
+      flushTimer = 0;
+      if (!pendingPatches.length || sessionEpochRef.current !== sessionEpoch) return;
+      const patchBatch = pendingPatches.splice(0);
+      updateAllPages((prev) => {
+        const next = prev.slice();
+        let changed = false;
+        for (const { pageIndex, patch } of patchBatch) {
+          const current = getPageAt(next, pageIndex);
+          if (!current || current.status === -1) continue;
+          next[pageIndex] = { ...current, ...patch };
+          changed = true;
+        }
+        return changed ? next : prev;
+      });
+      collectRuntimeDiagnostics();
+    };
+
+    const schedulePatchFlush = () => {
+      if (flushTimer) return;
+      flushTimer = globalThis.setTimeout?.(flushPatches, 0) || 0;
+    };
+
+    try {
+      await pageRendererRef.current.renderPdfPageAssetBatch(descriptors, {
+        variant: 'full',
+        batchMode,
+        rendersPerWorker: Math.max(1, Number(renderConfig.pdfWorkerWarmupRendersPerWorker) || 1),
+        thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
+        thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
+        fullPageScale: renderConfig.fullPageScale,
+        onItemResult: (result) => {
+          if (sessionEpochRef.current !== sessionEpoch) return;
+          const pageIndex = Math.max(0, Number(result?.descriptor?.sessionPageIndex) || 0);
+          if (!result?.ok || !result?.blob) {
+            failedPageIndexes.push(pageIndex);
+            return;
+          }
+
+          const durationMs = Math.max(0, Number(result.durationMs) || 0);
+          const stats = assetPipelineStatsRef.current;
+          stats.renderCompletedCount += 1;
+          stats.renderTotalMs += durationMs;
+          stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, durationMs);
+
+          const rendered = {
+            blob: result.blob,
+            width: Math.max(1, Number(result.width) || 1),
+            height: Math.max(1, Number(result.height) || 1),
+            mimeType: String(result.mimeType || result.blob?.type || 'image/png'),
+          };
+          const url = createTrackedObjectUrl(rendered.blob);
+          fullCache.set(pageIndex, { url, lastAccess: Date.now() });
+          touchCacheEntry(fullCache, pageIndex);
+
+          const reuseThumbnail = shouldReuseFullAssetForThumbnail(pageIndex);
+          noteFullAssetReady(pageIndex);
+          if (reuseThumbnail) noteThumbnailAssetReady(pageIndex);
+
+          pendingPatches.push({
+            pageIndex,
+            patch: {
+              fullSizeUrl: url,
+              fullSizeStatus: 1,
+              loaded: true,
+              realWidth: rendered.width,
+              realHeight: rendered.height,
+              status: 1,
+              ...(reuseThumbnail
+                ? {
+                    thumbnailUsesFullAsset: true,
+                    thumbnailUrl: '',
+                    thumbnailStatus: 1,
+                  }
+                : {}),
+            },
+          });
+
+          if (sessionConfigRef.current.assetStore.persistFullPagesInBackground !== false) {
+            persistRenderedAssetInBackground(pageIndex, 'full', rendered, sessionEpoch);
+          }
+          schedulePatchFlush();
+        },
+      });
+    } catch (error) {
+      logger.warn('PDF worker batch warm-up failed; falling back to per-page warm-up', {
+        error: String(error?.message || error),
+        pageCount: descriptors.length,
+      });
+      warmupQueueRef.current = descriptors.map((descriptor) => ({
+        pageIndex: descriptor.sessionPageIndex,
+        variant: 'full',
+        priority: 'low',
+        reason: 'readiness',
+      })).concat(warmupQueueRef.current);
+      return false;
+    } finally {
+      if (flushTimer) {
+        try { globalThis.clearTimeout?.(flushTimer); } catch {}
+        flushTimer = 0;
+      }
+      flushPatches();
+    }
+
+    enforceCacheLimit('full');
+
+    if (failedPageIndexes.length > 0 && sessionEpochRef.current === sessionEpoch) {
+      await Promise.allSettled(failedPageIndexes.map((pageIndex) => ensurePageAsset(pageIndex, 'full', {
+        priority: 'low',
+      })));
+    }
+
+    collectRuntimeDiagnostics();
+    return true;
+  }, [
+    collectRuntimeDiagnostics,
+    enforceCacheLimit,
+    ensurePageAsset,
+    getVariantCache,
+    loadingRunActive,
+    noteFullAssetReady,
+    noteThumbnailAssetReady,
+    persistRenderedAssetInBackground,
+    shouldReuseFullAssetForThumbnail,
+    updateAllPages,
+  ]);
+
   /**
    * Drain background eager-render work without blocking the UI thread.
    * The queue is intentionally best-effort: memory pressure or session resets may clear it at any time.
@@ -1743,6 +1939,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     try {
       while (warmupQueueRef.current.length > 0) {
+        if (await tryPumpPdfWorkerBatchWarmup()) {
+          await new Promise((resolve) => window.setTimeout(resolve, 0));
+          continue;
+        }
+
         const renderStrategy = String(sessionConfigRef.current?.render?.strategy || 'lazy-viewport').toLowerCase();
         if (renderStrategy === 'lazy-viewport') {
           const readinessTasks = warmupQueueRef.current.filter((task) => String(task?.reason || '') === 'readiness');
@@ -1781,7 +1982,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         }, 0);
       }
     }
-  }, [ensurePageAsset]);
+  }, [ensurePageAsset, tryPumpPdfWorkerBatchWarmup]);
 
   /**
    * Enqueue eager page rendering for a newly discovered source range.
@@ -1819,7 +2020,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     for (let offset = 0; offset < warmPageCount; offset += 1) {
       const pageIndex = safeStartIndex + offset;
-      addTask(pageIndex, 'full', offset === 0 ? 'high' : 'low');
+      const page = getPageAt(allPagesRef.current, pageIndex);
+      const deferPdfFullWarmup = loadingRunActive
+        && renderConfig.deferPdfWorkerWarmupUntilLoadComplete !== false
+        && isPdfPageEntry(page);
+      if (!deferPdfFullWarmup) addTask(pageIndex, 'full', offset === 0 ? 'high' : 'low');
       if (shouldReuseFullAssetForThumbnail(pageIndex)) continue;
       if (renderConfig.thumbnailLoadingStrategy !== 'viewport' || strategy === 'eager-all') {
         addTask(pageIndex, 'thumbnail', offset === 0 ? 'normal' : 'low');
@@ -1828,7 +2033,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     warmupQueueRef.current = queue;
     void pumpWarmupQueue();
-  }, [memoryPressureStage, pumpWarmupQueue, shouldReuseFullAssetForThumbnail]);
+  }, [loadingRunActive, memoryPressureStage, pumpWarmupQueue, shouldReuseFullAssetForThumbnail]);
 
   /**
    * @param {Array<number>=} pageIndexes
