@@ -631,8 +631,8 @@
         //   'worker'      -> experimental OffscreenCanvas/pdf.js worker path with main-thread fallback
         pdfToImageMode: 'main-thread',
         // Caps page-image workers used by pdfToImageMode='worker'. Recent full-page benchmarks
-        // were fastest around 4-8 workers; the default favors full-size page viewing.
-        pdfWorkerMaxCount: 8,
+        // were fastest around 4-6 workers; the default favors stable full-size page viewing.
+        pdfWorkerMaxCount: 6,
         maxConcurrentMainThreadRenders: 3,
         // Keep this aligned with the normalized runtime defaults from
         // `src/utils/documentLoadingConfig.js`. There is no hidden ViewerProvider-only default of 6

@@ -259,7 +259,7 @@ export class PageAssetRenderer {
 
     const workerCount = Math.max(0, Number(this.config.workerCount) || 0);
     if (workerCount <= 0) return;
-    const pdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
+    const pdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
     const pdfWorkerCount = Math.max(1, Math.min(workerCount, pdfWorkerMaxCount));
 
     const useForTiff = this.config.useWorkersForTiff !== false;
@@ -288,7 +288,7 @@ export class PageAssetRenderer {
     const previousUseForTiff = this.config.useWorkersForTiff !== false;
     const previousUseForRasterImages = this.config.useWorkersForRasterImages !== false;
     const previousPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
-    const previousPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
+    const previousPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
     this.config = {
       ...this.config,
       ...(nextConfig || {}),
@@ -298,7 +298,7 @@ export class PageAssetRenderer {
     const nextUseForTiff = this.config.useWorkersForTiff !== false;
     const nextUseForRasterImages = this.config.useWorkersForRasterImages !== false;
     const nextPdfToImageMode = String(this.config.pdfToImageMode || 'main-thread').toLowerCase();
-    const nextPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 8);
+    const nextPdfWorkerMaxCount = Math.max(1, Number(this.config.pdfWorkerMaxCount) || 6);
     const shouldRebuild = previousBackend !== nextBackend
       || previousWorkerCount !== nextWorkerCount
       || previousUseForTiff !== nextUseForTiff

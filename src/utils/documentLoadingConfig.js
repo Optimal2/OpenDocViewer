@@ -223,7 +223,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
       pdfToImageMode: 'main-thread',
-      pdfWorkerMaxCount: 8,
+      pdfWorkerMaxCount: 6,
       // These are the actual normalized render defaults for the current loading path.
       // Viewer providers can override them through runtime config, but there is no
       // separate provider-only concurrency default layered on top of this module.
