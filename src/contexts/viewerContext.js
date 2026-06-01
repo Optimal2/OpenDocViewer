@@ -100,6 +100,7 @@ import { createContext } from 'react';
  * @property {number} activePageAssetWorkerCount
  * @property {number} pdfWorkerRenderedCount
  * @property {number} pdfWorkerFallbackCount
+ * @property {string} pdfWorkerFallbackLastReason
  * @property {number} mainPdfRenderedCount
  * @property {number} assetRenderCompletedCount
  * @property {number} assetRenderTotalMs

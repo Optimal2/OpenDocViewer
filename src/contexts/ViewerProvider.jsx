@@ -339,6 +339,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     activePageAssetWorkerCount: 0,
     pdfWorkerRenderedCount: 0,
     pdfWorkerFallbackCount: 0,
+    pdfWorkerFallbackLastReason: '',
     mainPdfRenderedCount: 0,
     assetRenderCompletedCount: 0,
     assetRenderTotalMs: 0,
@@ -388,6 +389,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const memoryMonitorTimerRef = useRef(null);
   const warmupQueueRef = useRef(/** @type {Array<{ pageIndex:number, variant:('full'|'thumbnail'), priority:('critical'|'high'|'normal'|'low'|number), reason:(('warmup'|'readiness')|undefined) }>} */ ([]));
   const warmupRunningRef = useRef(false);
+  const pendingPagePatchesRef = useRef(new Map());
+  const pagePatchFlushTimerRef = useRef(0);
   const pendingAssetPromisesRef = useRef(new Map());
   const fullPageCacheRef = useRef(new Map());
   const thumbnailCacheRef = useRef(new Map());
@@ -484,6 +487,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const tempStats = tempStoreRef.current?.getStats?.() || {};
     const assetStats = pageAssetStoreRef.current?.getStats?.() || {};
     const rendererStats = pageRendererRef.current?.getStats?.() || {};
+    const pdfFallbackSamples = Array.isArray(rendererStats.pdfWorkerFallbackSamples)
+      ? rendererStats.pdfWorkerFallbackSamples
+      : [];
+    const lastPdfFallbackSample = pdfFallbackSamples[pdfFallbackSamples.length - 1] || null;
     const pipelineStats = assetPipelineStatsRef.current || createAssetPipelineStats();
     const pages = Array.isArray(allPagesRef.current) ? allPagesRef.current : [];
     const totalPages = pages.length;
@@ -542,6 +549,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         activePageAssetWorkerCount: Math.max(0, Number(rendererStats.activePageAssetWorkerCount || 0)),
         pdfWorkerRenderedCount: Math.max(0, Number(rendererStats.pdfWorkerCount || 0)),
         pdfWorkerFallbackCount: Math.max(0, Number(rendererStats.pdfWorkerFallbackCount || 0)),
+        pdfWorkerFallbackLastReason: lastPdfFallbackSample
+          ? [
+              String(lastPdfFallbackSample.code || '').trim(),
+              String(lastPdfFallbackSample.phase || '').trim(),
+              String(lastPdfFallbackSample.message || '').trim(),
+            ].filter(Boolean).join(' | ').slice(0, 220)
+          : '',
         mainPdfRenderedCount: Math.max(0, Number(rendererStats.mainPdfCount || 0)),
         assetRenderCompletedCount: Math.max(0, Number(pipelineStats.renderCompletedCount || 0)),
         assetRenderTotalMs: Math.max(0, Number(pipelineStats.renderTotalMs || 0)),
@@ -614,6 +628,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetPromisesRef.current.clear();
     sourceDescriptorsRef.current.clear();
     cacheIdentityStatsRef.current = { documentVersion: 0, documentUrlFallback: 0, url: 0 };
+    pendingPagePatchesRef.current.clear();
+    if (pagePatchFlushTimerRef.current) {
+      try { window.clearTimeout(pagePatchFlushTimerRef.current); } catch {}
+      pagePatchFlushTimerRef.current = 0;
+    }
     assetPipelineStatsRef.current = createAssetPipelineStats();
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
@@ -704,6 +723,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       activePageAssetWorkerCount: 0,
       pdfWorkerRenderedCount: 0,
       pdfWorkerFallbackCount: 0,
+      pdfWorkerFallbackLastReason: '',
       mainPdfRenderedCount: 0,
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
@@ -787,6 +807,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
    */
   const patchPageAtIndex = useCallback((index, patch) => {
     const safeIndex = Math.max(0, Number(index) || 0);
+    pendingPagePatchesRef.current.delete(safeIndex);
     updateAllPages((prev) => {
       const current = getPageAt(prev, safeIndex);
       if (!current) return prev;
@@ -807,6 +828,63 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       return next;
     });
   }, [updateAllPages]);
+
+  /**
+   * Flush many background page updates through one React state update.
+   *
+   * Eager PDF loading can finish hundreds of pages in quick succession. Applying every completion
+   * as its own full `allPages` array copy is pure UI overhead, so non-critical warmup completions
+   * are coalesced for the next frame while direct user-visible updates still use patchPageAtIndex.
+   *
+   * @returns {void}
+   */
+  const flushQueuedPagePatches = useCallback(() => {
+    pagePatchFlushTimerRef.current = 0;
+    const entries = Array.from(pendingPagePatchesRef.current.entries());
+    pendingPagePatchesRef.current.clear();
+    if (entries.length === 0) return;
+
+    updateAllPages((prev) => {
+      let next = prev;
+      for (const [pageIndex, queuedPatch] of entries) {
+        const safeIndex = Math.max(0, Number(pageIndex) || 0);
+        const current = getPageAt(next, safeIndex);
+        if (!current) continue;
+        const nextPatch = resolvePatch(queuedPatch, current);
+        if (!nextPatch || Object.keys(nextPatch).length === 0) continue;
+
+        let changed = false;
+        for (const [key, value] of Object.entries(nextPatch)) {
+          if (!Object.is(current[key], value)) {
+            changed = true;
+            break;
+          }
+        }
+        if (!changed) continue;
+
+        if (next === prev) next = prev.slice();
+        next[safeIndex] = { ...current, ...nextPatch };
+      }
+      return next;
+    });
+  }, [updateAllPages]);
+
+  /**
+   * @param {number} index
+   * @param {Object} patch
+   * @returns {void}
+   */
+  const queuePagePatchAtIndex = useCallback((index, patch) => {
+    const safeIndex = Math.max(0, Number(index) || 0);
+    const nextPatch = patch && typeof patch === 'object' ? patch : {};
+    if (Object.keys(nextPatch).length === 0) return;
+
+    const existing = pendingPagePatchesRef.current.get(safeIndex);
+    pendingPagePatchesRef.current.set(safeIndex, existing ? { ...existing, ...nextPatch } : nextPatch);
+
+    if (pagePatchFlushTimerRef.current) return;
+    pagePatchFlushTimerRef.current = window.setTimeout(flushQueuedPagePatches, 16);
+  }, [flushQueuedPagePatches]);
 
   /**
    * @param {string} message
@@ -931,6 +1009,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pendingAssetPromisesRef.current.clear();
     sourceDescriptorsRef.current.clear();
     cacheIdentityStatsRef.current = { documentVersion: 0, documentUrlFallback: 0, url: 0 };
+    pendingPagePatchesRef.current.clear();
+    if (pagePatchFlushTimerRef.current) {
+      try { window.clearTimeout(pagePatchFlushTimerRef.current); } catch {}
+      pagePatchFlushTimerRef.current = 0;
+    }
     indexedDbModeAnnouncedRef.current = false;
     assetIndexedDbModeAnnouncedRef.current = false;
     releasedRasterSourceKeysRef.current.clear();
@@ -1011,6 +1094,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       activePageAssetWorkerCount: 0,
       pdfWorkerRenderedCount: 0,
       pdfWorkerFallbackCount: 0,
+      pdfWorkerFallbackLastReason: '',
       mainPdfRenderedCount: 0,
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
@@ -1651,7 +1735,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           noteFullAssetReady(safeIndex);
           if (reuseThumbnail) noteThumbnailAssetReady(safeIndex);
         }
-        patchPageAtIndex(safeIndex, variant === 'thumbnail'
+        const completionPatch = variant === 'thumbnail'
           ? {
               thumbnailUrl: url,
               thumbnailStatus: 1,
@@ -1673,8 +1757,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
                     thumbnailStatus: 1,
                   }
                 : {}),
-            }
-        );
+            };
+        const priorityText = String(options.priority || 'normal').toLowerCase();
+        const shouldBatchCompletion = options.forceRefresh !== true
+          && priorityText !== 'critical'
+          && priorityText !== 'high';
+        if (shouldBatchCompletion) queuePagePatchAtIndex(safeIndex, completionPatch);
+        else patchPageAtIndex(safeIndex, completionPatch);
 
         if (options.persist !== false && persistFullInBackground) {
           persistRenderedAssetInBackground(safeIndex, variant, rendered, sessionEpoch);
@@ -1702,7 +1791,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
     return promise;
-  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
+  }, [clearPageAssetReference, enforceCacheLimit, getVariantCache, noteFullAssetReady, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, queuePagePatchAtIndex, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
    * Render one PDF page again at twice the configured full-page PDF scale.
