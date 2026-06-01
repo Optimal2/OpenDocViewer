@@ -95,6 +95,12 @@ import { createContext } from 'react';
  * @property {number} trackedObjectUrlCount
  * @property {number} warmupQueueLength
  * @property {number} pendingAssetCount
+ * @property {number} activeWorkerCount
+ * @property {number} activePdfWorkerCount
+ * @property {number} activePageAssetWorkerCount
+ * @property {number} pdfWorkerRenderedCount
+ * @property {number} pdfWorkerFallbackCount
+ * @property {number} mainPdfRenderedCount
  * @property {number} assetRenderCompletedCount
  * @property {number} assetRenderTotalMs
  * @property {number} assetRenderMaxMs
