@@ -10,7 +10,7 @@
  *     1. resolves the ordered list of source URLs,
  *     2. optionally warns when the run looks too large,
  *     3. prefetches original source files into a temp store (memory or IndexedDB),
- *     4. analyzes page counts from the temp store in stable source order,
+ *     4. analyzes page counts while prefetch work is still running,
  *     5. inserts lightweight page placeholders, and
  *     6. lets the viewer lazily render full pages / thumbnails on demand.
  */
@@ -371,6 +371,54 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
     fileExtension,
     headBytes,
   };
+}
+
+/**
+ * @param {string} fileExtension
+ * @returns {boolean}
+ */
+function needsPageCountAnalysis(fileExtension) {
+  const normalized = normalizeExtension(fileExtension);
+  return normalized === 'pdf' || normalized === 'tiff';
+}
+
+/**
+ * Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF
+ * files do not create a second sequential analysis phase after all sources have been fetched.
+ *
+ * @param {Object} input
+ * @param {string} input.sourceKey
+ * @param {string} input.url
+ * @param {Blob} input.blob
+ * @param {string} input.fileExtension
+ * @param {(function(string, number):void)=} input.recordLoaderPhaseTiming
+ * @returns {Promise<number>}
+ */
+async function resolvePrefetchedPageCountHint({
+  sourceKey,
+  url,
+  blob,
+  fileExtension,
+  recordLoaderPhaseTiming,
+}) {
+  if (!needsPageCountAnalysis(fileExtension)) return 1;
+
+  try {
+    const arrayBuffer = blob instanceof Blob ? await blob.arrayBuffer() : null;
+    if (!arrayBuffer) throw new Error(`Prefetched source is missing analysis bytes for ${sourceKey}`);
+
+    const analysisStartedAt = nowMs();
+    const pageCount = Math.max(1, Number(await getTotalPages(arrayBuffer, fileExtension)) || 1);
+    recordLoaderPhaseTiming?.('analysis', nowMs() - analysisStartedAt);
+    return pageCount;
+  } catch (error) {
+    logger.warn('Failed to determine page count during prefetch; falling back to 1 page', {
+      sourceKey,
+      url,
+      error: String(error?.message || error),
+    });
+    return 1;
+  }
 }
 
 /**
@@ -1062,6 +1110,14 @@ const DocumentLoader = ({
               sizeBytes: Number(cachedBlob.size || 0),
             });
 
+            const pageCountHint = await resolvePrefetchedPageCountHint({
+              sourceKey,
+              url: entry.url,
+              blob: cachedBlob,
+              fileExtension: resolvedPayload.fileExtension,
+              recordLoaderPhaseTiming,
+            });
+
             return {
               ok: true,
               sourceKey,
@@ -1073,9 +1129,7 @@ const DocumentLoader = ({
               cacheKeyMode: sourceIdentity.mode,
               stats: { mode: 'indexeddb' },
               analysisBlob: cachedBlob,
-              pageCountHint: resolvedPayload.fileExtension === 'pdf' || resolvedPayload.fileExtension === 'tiff'
-                ? undefined
-                : 1,
+              pageCountHint,
             };
           }
         } catch (error) {
@@ -1143,6 +1197,14 @@ const DocumentLoader = ({
           });
           recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
 
+          const pageCountHint = await resolvePrefetchedPageCountHint({
+            sourceKey,
+            url: entry.url,
+            blob,
+            fileExtension: resolvedPayload.fileExtension,
+            recordLoaderPhaseTiming,
+          });
+
           return {
             ok: true,
             sourceKey,
@@ -1154,9 +1216,7 @@ const DocumentLoader = ({
             cacheKeyMode: sourceIdentity.mode,
             stats: stored?.stats || null,
             analysisBlob: blob,
-            pageCountHint: resolvedPayload.fileExtension === 'pdf' || resolvedPayload.fileExtension === 'tiff'
-              ? undefined
-              : 1,
+            pageCountHint,
           };
         } catch (error) {
           const normalizedError = didTimeout
