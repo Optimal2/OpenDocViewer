@@ -102,7 +102,7 @@ export class PageAssetWorkerPool {
         this.workers.push({ worker, busy: false, activeTaskId: null, dead: false });
         worker.onmessage = (event) => this.handleMessage(slot, event);
         worker.onerror = (event) => this.handleError(slot, event?.error || event);
-        worker.onmessageerror = (event) => this.handleError(slot, event);
+        worker.onmessageerror = (event) => this.handleError(slot, event?.data || event);
       } catch (error) {
         logger.warn('Failed to create page asset worker', { error: String(error?.message || error) });
       }
@@ -133,7 +133,7 @@ export class PageAssetWorkerPool {
 
   /**
    * @param {WorkerTaskInput} payload
-   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string }>}
+   * @returns {Promise<{ blob:Blob, width:number, height:number, mimeType:string, workerQueueMs:number, workerRunMs:number }>}
    */
   renderAsset(payload) {
     if (!this.canRender(payload?.fileExtension, payload?.variant === 'thumbnail' ? 'thumbnail' : 'full')) {

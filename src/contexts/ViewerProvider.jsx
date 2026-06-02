@@ -687,7 +687,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
-      try { window.clearInterval(memoryMonitorTimerRef.current); } catch {}
+      try { globalThis.clearInterval(memoryMonitorTimerRef.current); } catch {}
       memoryMonitorTimerRef.current = null;
     }
     revokeSessionUrls();
@@ -1026,7 +1026,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
-      try { window.clearInterval(memoryMonitorTimerRef.current); } catch {}
+      try { globalThis.clearInterval(memoryMonitorTimerRef.current); } catch {}
       memoryMonitorTimerRef.current = null;
     }
     revokeSessionUrls();
@@ -2113,7 +2113,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
             warmupQueueRef.current = remaining;
             const handled = await tryRenderPdfWarmupBatch(selected);
             if (handled) {
-              await new Promise((resolve) => window.setTimeout(resolve, 0));
+              await new Promise((resolve) => globalThis.setTimeout(resolve, 0));
               continue;
             }
             warmupQueueRef.current = selected.concat(warmupQueueRef.current);
@@ -2138,12 +2138,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           }
         }));
 
-        await new Promise((resolve) => window.setTimeout(resolve, 0));
+        await new Promise((resolve) => globalThis.setTimeout(resolve, 0));
       }
     } finally {
       warmupRunningRef.current = false;
       if (warmupQueueRef.current.length > 0) {
-        window.setTimeout(() => {
+        globalThis.setTimeout(() => {
           void pumpWarmupQueue();
         }, 0);
       }
@@ -2341,7 +2341,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     };
 
     void evaluate();
-    const timerId = window.setInterval(() => {
+    const timerId = globalThis.setInterval(() => {
       void evaluate();
     }, Math.max(250, Number(documentLoadingConfig.memoryPressure.sampleIntervalMs) || 2000));
     memoryMonitorTimerRef.current = timerId;
@@ -2349,7 +2349,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     return () => {
       disposed = true;
       if (memoryMonitorTimerRef.current === timerId) memoryMonitorTimerRef.current = null;
-      try { window.clearInterval(timerId); } catch {}
+      try { globalThis.clearInterval(timerId); } catch {}
     };
   }, [
     addMessage,
@@ -2376,11 +2376,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   useEffect(() => {
     if (!diagnosticsEnabled) return undefined;
     collectRuntimeDiagnostics();
-    const timerId = window.setInterval(collectRuntimeDiagnostics, 500);
+    const timerId = globalThis.setInterval(collectRuntimeDiagnostics, 500);
     diagnosticsTimerRef.current = timerId;
     return () => {
       if (diagnosticsTimerRef.current === timerId) diagnosticsTimerRef.current = null;
-      try { window.clearInterval(timerId); } catch {}
+      try { globalThis.clearInterval(timerId); } catch {}
     };
   }, [collectRuntimeDiagnostics, diagnosticsEnabled]);
 

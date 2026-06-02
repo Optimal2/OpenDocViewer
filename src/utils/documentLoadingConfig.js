@@ -174,6 +174,9 @@ function detectBrowserFamily() {
   return 'unknown';
 }
 
+/**
+ * @returns {number}
+ */
 function getReportedCoreCount() {
   try {
     return Math.max(0, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 0));
@@ -192,6 +195,9 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   if (explicit > 0) return explicit;
 
   const cores = getReportedCoreCount();
+  // ODV's VGR profile intentionally treats missing or very low hardwareConcurrency as a
+  // four-worker-capable client. Real VGR tests showed this is still stable on weak clients,
+  // while a one-worker fallback makes large documents feel broken rather than merely slower.
   const suggested = Math.max(4, cores);
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
@@ -212,6 +218,8 @@ function resolveRecommendedRasterWorkerCount(preferred = 0, mode = 'auto') {
   const cores = getReportedCoreCount();
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
+  // See resolveRecommendedWorkerCount: min 4 is deliberate for ODV throughput. Chromium gets
+  // a slightly higher raster floor on 6+ core clients because observed queue time dominated at 6.
   let suggested = Math.max(4, cores);
   if (browserFamily !== 'firefox' && cores >= 6) {
     suggested = Math.max(8, suggested);
@@ -554,6 +562,8 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
   if (smallLimit > mainThreadLimit && safePageCount < smallLimit) {
     desiredWorkerCount = smallWorkerCount;
   } else if (safePageCount >= fixedLimit) {
+    // With the default fixedLimit=0 policy, large PDFs scale from pagesPerWorker immediately.
+    // fixedWorkerCount remains the floor; pagesPerWorker controls how aggressively workers scale.
     desiredWorkerCount = Math.max(fixedWorkerCount, Math.round(safePageCount / pagesPerWorker));
   }
   return {
@@ -830,6 +840,30 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
   const adaptiveDefaults = buildAdaptiveDefaults(raw?.adaptiveMemory);
   const requestedMode = normalizeMode(raw?.mode, adaptiveDefaults.mode);
 
+  const configuredSoftHeapUsageRatio = normalizeFloat(
+    raw?.memoryPressure?.softHeapUsageRatio,
+    adaptiveDefaults.memoryPressure.softHeapUsageRatio,
+    0.1,
+    0.99
+  );
+  const normalizedHardHeapUsageRatio = Math.min(
+    0.99,
+    Math.max(
+      0.11,
+      normalizeFloat(
+        raw?.memoryPressure?.hardHeapUsageRatio,
+        adaptiveDefaults.memoryPressure.hardHeapUsageRatio,
+        0.1,
+        0.99
+      )
+    )
+  );
+  const normalizedSoftHeapUsageRatio = Math.min(
+    configuredSoftHeapUsageRatio,
+    normalizedHardHeapUsageRatio - 0.01
+  );
+  // Keep the pressure thresholds ordered even when a site override accidentally swaps them.
+
   const normalized = {
     mode: requestedMode,
     adaptiveMemory: {
@@ -919,8 +953,8 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
     memoryPressure: {
       enabled: normalizeBoolean(raw?.memoryPressure?.enabled, adaptiveDefaults.memoryPressure.enabled),
       sampleIntervalMs: normalizeNumber(raw?.memoryPressure?.sampleIntervalMs, adaptiveDefaults.memoryPressure.sampleIntervalMs, 250, 60000),
-      softHeapUsageRatio: normalizeFloat(raw?.memoryPressure?.softHeapUsageRatio, adaptiveDefaults.memoryPressure.softHeapUsageRatio, 0.1, 0.99),
-      hardHeapUsageRatio: normalizeFloat(raw?.memoryPressure?.hardHeapUsageRatio, adaptiveDefaults.memoryPressure.hardHeapUsageRatio, 0.1, 0.99),
+      softHeapUsageRatio: normalizedSoftHeapUsageRatio,
+      hardHeapUsageRatio: normalizedHardHeapUsageRatio,
       softResidentMiB: normalizeMiBThreshold(raw?.memoryPressure?.softResidentMiB, adaptiveDefaults.memoryPressure.softResidentMiB, 1048576),
       hardResidentMiB: normalizeMiBThreshold(raw?.memoryPressure?.hardResidentMiB, adaptiveDefaults.memoryPressure.hardResidentMiB, 1048576),
       forceMemoryModeAbovePageCount: normalizeThreshold(raw?.memoryPressure?.forceMemoryModeAbovePageCount, adaptiveDefaults.memoryPressure.forceMemoryModeAbovePageCount, 10000000),
@@ -963,6 +997,10 @@ export function shouldKeepAllFullImageAssets(config, pages) {
   return list.every((page) => shouldUseFullImagesForThumbnails(config, page, totalPages));
 }
 
+/**
+ * @param {number} bytes
+ * @returns {string}
+ */
 export function formatBytes(bytes) {
   const value = Math.max(0, Number(bytes) || 0);
   if (value < 1024) return `${value} B`;
@@ -977,17 +1015,26 @@ export function formatBytes(bytes) {
   return `${size.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} ${unit}`;
 }
 
+/**
+ * @param {number} count
+ * @returns {string}
+ */
 export function formatCount(count) {
   return new Intl.NumberFormat().format(Math.max(0, Number(count) || 0));
 }
 
+/**
+ * @param {StopRecommendationInput} input
+ * @returns {boolean}
+ */
 export function shouldRecommendStopping({
   sourceCount = 0,
   pageCount = 0,
-  config = getDocumentLoadingConfig(),
+  config = null,
 }) {
-  const sourceThreshold = Math.max(0, Number(config.warning.minStopRecommendationSources) || 0);
-  const pageThreshold = Math.max(0, Number(config.warning.minStopRecommendationPages) || 0);
+  const resolvedConfig = config || getDocumentLoadingConfig();
+  const sourceThreshold = Math.max(0, Number(resolvedConfig.warning.minStopRecommendationSources) || 0);
+  const pageThreshold = Math.max(0, Number(resolvedConfig.warning.minStopRecommendationPages) || 0);
   return (
     (sourceThreshold > 0 && Math.max(0, Number(sourceCount) || 0) >= sourceThreshold)
     || (pageThreshold > 0 && Math.max(0, Number(pageCount) || 0) >= pageThreshold)
