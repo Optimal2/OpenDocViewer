@@ -126,7 +126,9 @@ image files should continue to use normal URLs.
 When a gateway supplies inline bytes, prefer `?bundleUrl=...`/`?sessionurl=...` over embedding the
 full JSON bundle in the HTML document. This keeps the initial viewer HTML small, lets the browser
 fetch the prepared bundle as one explicit JSON request, and still preserves the same Portable
-Document Bundle contract once OpenDocViewer starts.
+Document Bundle contract once OpenDocViewer starts. An explicit `bundleUrl`/`sessionurl` startup
+parameter takes precedence over the same-origin parent bridge so embedded gateways are not bypassed
+by legacy parent-page bootstrap data.
 
 ## Host iframe preparation flow
 
