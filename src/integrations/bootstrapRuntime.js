@@ -318,7 +318,8 @@ export async function bootstrapDetect(options = {}) {
             ODV_BOOTSTRAP_MODES.SESSION_URL,
             String(sessionUrlCandidate.source || 'sessionurl'),
             sessionUrlCandidate.data,
-            diagnosticsEnabled
+            diagnosticsEnabled,
+            sessionUrlCandidate.timing ? { timing: sessionUrlCandidate.timing } : undefined
           ),
         };
       }
