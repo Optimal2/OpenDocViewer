@@ -145,9 +145,29 @@ export class PageAssetWorkerPool {
     }
 
     return new Promise((resolve, reject) => {
-      this.queue.push({ taskId: this.taskId++, payload, queuedAt: nowMs(), resolve, reject });
+      this.queue.push({ taskId: this.allocateTaskId(), payload, queuedAt: nowMs(), resolve, reject });
       this.pump();
     });
+  }
+
+  /**
+   * @returns {number}
+   */
+  allocateTaskId() {
+    const maxTaskId = Number.MAX_SAFE_INTEGER;
+    let candidate = Math.max(1, Math.floor(Number(this.taskId) || 1));
+
+    for (let attempt = 0; attempt < 1024; attempt += 1) {
+      this.taskId = candidate >= maxTaskId ? 1 : candidate + 1;
+      if (!this.pending.has(candidate) && !this.queue.some((entry) => entry?.taskId === candidate)) {
+        return candidate;
+      }
+
+      candidate = this.taskId;
+    }
+
+    this.taskId = this.taskId >= maxTaskId ? 1 : this.taskId + 1;
+    return Math.max(1, Math.floor(Number(this.taskId) || 1));
   }
 
   /**
