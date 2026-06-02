@@ -195,9 +195,9 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   if (explicit > 0) return explicit;
 
   const cores = getReportedCoreCount();
-  // ODV's VGR profile intentionally treats missing or very low hardwareConcurrency as a
-  // four-worker-capable client. Real VGR tests showed this is still stable on weak clients,
-  // while a one-worker fallback makes large documents feel broken rather than merely slower.
+  // Treat missing or very low hardwareConcurrency as at least four workers. Real host-driven
+  // large-document sessions showed this remains stable on weak clients, while a one-worker
+  // fallback makes large documents feel broken rather than merely slower.
   const suggested = Math.max(4, cores);
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
@@ -218,7 +218,7 @@ function resolveRecommendedRasterWorkerCount(preferred = 0, mode = 'auto') {
   const cores = getReportedCoreCount();
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
-  // See resolveRecommendedWorkerCount: min 4 is deliberate for ODV throughput. Chromium/Edge
+  // See resolveRecommendedWorkerCount: min 4 is deliberate for large-document throughput. Chromium/Edge
   // raster decoding can profit from slight oversubscription on low-core clients because source
   // transfer, image decode, and canvas serialization do not all keep the same core busy at once.
   let suggested = Math.max(4, cores);

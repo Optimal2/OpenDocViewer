@@ -304,8 +304,8 @@ export async function bootstrapDetect(options = {}) {
 
   // 1) Session URL (?sessionurl=… / ?bundleUrl=…)
   // Explicit URL payloads must win over the same-origin parent bridge. Gateway integrations can run
-  // inside a WebClient page that still exposes its original parent bootstrap data; choosing parent
-  // first would silently bypass the prepared gateway bundle.
+  // inside a host page that still exposes its original parent bootstrap data; choosing parent first
+  // would silently bypass the prepared gateway bundle.
   const explicitSessionUrlRequested = hasSessionUrlParameter();
   try {
     const sessionUrlCandidate = await probeSessionUrl();
