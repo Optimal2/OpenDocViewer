@@ -390,6 +390,49 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
 }
 
 /**
+ * Gateway source packs already carry trusted file metadata from the prepared server-side session.
+ * Keep validation cheap for that path: confirm that the payload does not look like an HTML/error
+ * response, then use the gateway extension/content type instead of running a full magic detector for
+ * every frame. That keeps large source packs from serializing transport behind per-file type probes.
+ *
+ * @param {Object} input
+ * @param {*} input.entry
+ * @param {Blob} input.blob
+ * @param {*=} input.header
+ * @param {Uint8Array=} input.headBytes
+ * @returns {Promise<{detectedType:(Object|null), mimeType:string, fileExtension:string, headBytes:Uint8Array}>}
+ */
+async function resolveTrustedSourcePackPayload({ entry, blob, header = null, headBytes = undefined }) {
+  const expectedExt = normalizeExtension(
+    header?.ext
+    || entry?.ext
+    || inferUrlExtension(header?.displayName || entry?.url || '')
+  );
+  const headerMimeType = String(
+    header?.contentType
+    || blob?.type
+    || mimeForExtension(expectedExt)
+    || 'application/octet-stream'
+  );
+  const resolvedHeadBytes = headBytes instanceof Uint8Array ? headBytes : await readBlobHeadBytes(blob);
+
+  if (isSupportedSourceExtension(expectedExt)) {
+    return {
+      detectedType: null,
+      mimeType: headerMimeType,
+      fileExtension: expectedExt,
+      headBytes: resolvedHeadBytes,
+    };
+  }
+
+  return resolveFetchedSourcePayload({
+    entry,
+    blob,
+    responseMimeType: headerMimeType,
+  });
+}
+
+/**
  * @param {string} fileExtension
  * @returns {boolean}
  */
@@ -1594,15 +1637,17 @@ const DocumentLoader = ({
             const blob = new Blob([payload], {
               type: String(header?.contentType || entry.inlineMimeType || mimeForExtension(entry.ext) || 'application/octet-stream'),
             });
+            const payloadHeadBytes = payload.subarray(0, Math.min(payload.length, 512));
             const sourceIdentity = describeDocumentSourceKey(entry, fileIndex);
             const sourceKey = sourceIdentity.sourceKey;
 
             try {
               const typeStartedAt = nowMs();
-              const resolvedPayload = await resolveFetchedSourcePayload({
+              const resolvedPayload = await resolveTrustedSourcePackPayload({
                 entry,
                 blob,
-                responseMimeType: header?.contentType || blob.type,
+                header,
+                headBytes: payloadHeadBytes,
               });
 
               await validateFetchedSourceBlob({
