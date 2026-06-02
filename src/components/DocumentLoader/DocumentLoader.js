@@ -1578,6 +1578,115 @@ const DocumentLoader = ({
         });
       };
 
+      const sourcePackProcessConcurrency = Math.max(1, Math.min(8, Number(config.fetch.prefetchConcurrency) || 4));
+      const sourcePackProcessLimiter = createLimiter(sourcePackProcessConcurrency);
+      const sourcePackProcessingTasks = new Set();
+
+      const processSourcePackFrame = async ({ fileIndex, entry, header, payload }) => {
+        if (shouldStopRun()) {
+          settle(fileIndex, {
+            ok: false,
+            aborted: true,
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+          });
+          return;
+        }
+
+        if (header?.ok === false) {
+          settle(fileIndex, {
+            ok: false,
+            error: new Error(String(header?.error || 'Source pack frame failed.')),
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+          });
+          return;
+        }
+
+        const blob = new Blob([payload], {
+          type: String(header?.contentType || entry.inlineMimeType || mimeForExtension(entry.ext) || 'application/octet-stream'),
+        });
+        const payloadHeadBytes = payload.subarray(0, Math.min(payload.length, 512));
+        const sourceIdentity = describeDocumentSourceKey(entry, fileIndex);
+        const sourceKey = sourceIdentity.sourceKey;
+
+        try {
+          const typeStartedAt = nowMs();
+          const resolvedPayload = await resolveTrustedSourcePackPayload({
+            entry,
+            blob,
+            header,
+            headBytes: payloadHeadBytes,
+          });
+
+          await validateFetchedSourceBlob({
+            entry,
+            blob,
+            detectedType: resolvedPayload.detectedType,
+            mimeType: resolvedPayload.mimeType,
+            fileExtension: resolvedPayload.fileExtension,
+            headBytes: resolvedPayload.headBytes,
+          });
+          recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
+
+          const storeStartedAt = nowMs();
+          const stored = await storeSourceBlob({
+            sourceKey,
+            blob,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
+            originalUrl: entry.url,
+            fileIndex: entry.fileIndex,
+          });
+          recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
+
+          const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
+            || await resolvePrefetchedPageCountHint({
+              sourceKey,
+              url: entry.url,
+              blob,
+              fileExtension: resolvedPayload.fileExtension,
+              recordLoaderPhaseTiming,
+            });
+
+          settle(fileIndex, {
+            ok: true,
+            sourceKey,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
+            sizeBytes: Number(blob.size || 0),
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+            cacheKeyMode: sourceIdentity.mode,
+            stats: stored?.stats || null,
+            analysisBlob: blob,
+            pageCountHint,
+          });
+        } catch (error) {
+          settle(fileIndex, {
+            ok: false,
+            error,
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+          });
+        }
+      };
+
+      const queueSourcePackFrame = (frame) => {
+        const task = sourcePackProcessLimiter(() => processSourcePackFrame(frame));
+        sourcePackProcessingTasks.add(task);
+        task.finally(() => {
+          sourcePackProcessingTasks.delete(task);
+        });
+        return task;
+      };
+
+      const waitForSourcePackProcessing = async () => {
+        while (sourcePackProcessingTasks.size > 0) {
+          await Promise.allSettled(Array.from(sourcePackProcessingTasks));
+        }
+      };
+
       const runSourcePack = async () => {
         const controller = new AbortController();
         activeControllersRef.current.add(controller);
@@ -1624,84 +1733,10 @@ const DocumentLoader = ({
             const entry = entries[fileIndex];
             if (!entry) continue;
 
-            if (header?.ok === false) {
-              settle(fileIndex, {
-                ok: false,
-                error: new Error(String(header?.error || 'Source pack frame failed.')),
-                fileIndex: entry.fileIndex,
-                url: entry.url,
-              });
-              continue;
-            }
-
-            const blob = new Blob([payload], {
-              type: String(header?.contentType || entry.inlineMimeType || mimeForExtension(entry.ext) || 'application/octet-stream'),
-            });
-            const payloadHeadBytes = payload.subarray(0, Math.min(payload.length, 512));
-            const sourceIdentity = describeDocumentSourceKey(entry, fileIndex);
-            const sourceKey = sourceIdentity.sourceKey;
-
-            try {
-              const typeStartedAt = nowMs();
-              const resolvedPayload = await resolveTrustedSourcePackPayload({
-                entry,
-                blob,
-                header,
-                headBytes: payloadHeadBytes,
-              });
-
-              await validateFetchedSourceBlob({
-                entry,
-                blob,
-                detectedType: resolvedPayload.detectedType,
-                mimeType: resolvedPayload.mimeType,
-                fileExtension: resolvedPayload.fileExtension,
-                headBytes: resolvedPayload.headBytes,
-              });
-              recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
-
-              const storeStartedAt = nowMs();
-              const stored = await storeSourceBlob({
-                sourceKey,
-                blob,
-                fileExtension: resolvedPayload.fileExtension,
-                mimeType: resolvedPayload.mimeType,
-                originalUrl: entry.url,
-                fileIndex: entry.fileIndex,
-              });
-              recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
-
-              const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
-                || await resolvePrefetchedPageCountHint({
-                  sourceKey,
-                  url: entry.url,
-                  blob,
-                  fileExtension: resolvedPayload.fileExtension,
-                  recordLoaderPhaseTiming,
-                });
-
-              settle(fileIndex, {
-                ok: true,
-                sourceKey,
-                fileExtension: resolvedPayload.fileExtension,
-                mimeType: resolvedPayload.mimeType,
-                sizeBytes: Number(blob.size || 0),
-                fileIndex: entry.fileIndex,
-                url: entry.url,
-                cacheKeyMode: sourceIdentity.mode,
-                stats: stored?.stats || null,
-                analysisBlob: blob,
-                pageCountHint,
-              });
-            } catch (error) {
-              settle(fileIndex, {
-                ok: false,
-                error,
-                fileIndex: entry.fileIndex,
-                url: entry.url,
-              });
-            }
+            queueSourcePackFrame({ fileIndex, entry, header, payload });
           }
+
+          await waitForSourcePackProcessing();
 
           entries.forEach((entry, index) => {
             settle(index, {
