@@ -85,6 +85,117 @@ import { isPerformanceOverlayEnabled } from '../utils/performanceOverlayFlag.js'
  */
 
 const DEMO_MAX = 300;
+const BOOTSTRAP_LOADING_PHASES = [
+  'preparing',
+  'checking',
+  'pages',
+  'viewer'
+];
+
+function readPositiveIntegerQueryParam(params, key) {
+  const parsed = Math.floor(Number(params.get(key)));
+  return Number.isFinite(parsed) && parsed > 0 ? parsed : 0;
+}
+
+function readBootstrapSummaryFromUrl() {
+  if (typeof window === 'undefined' || typeof URLSearchParams === 'undefined') {
+    return { documents: 0, files: 0 };
+  }
+
+  try {
+    const params = new URLSearchParams(window.location.search);
+    return {
+      documents: readPositiveIntegerQueryParam(params, 'odvDocs'),
+      files: readPositiveIntegerQueryParam(params, 'odvFiles')
+    };
+  } catch {
+    return { documents: 0, files: 0 };
+  }
+}
+
+function BootstrapLoading({ ready, t }) {
+  const [tick, setTick] = useState(0);
+  const summary = useMemo(() => readBootstrapSummaryFromUrl(), []);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      setTick((value) => value + 1);
+    }, 180);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const progress = Math.min(96, Math.round(12 + (1 - Math.exp(-tick / 24)) * 84));
+  const phaseIndex = Math.min(
+    BOOTSTRAP_LOADING_PHASES.length - 1,
+    Math.floor(progress / 25)
+  );
+  const phaseKey = BOOTSTRAP_LOADING_PHASES[phaseIndex];
+  const translate = ready && typeof t === 'function'
+    ? (key, options) => t(key, options)
+    : (_key, options) => options?.defaultValue || '';
+
+  const title = translate('bootstrapLoading.title', { defaultValue: 'Preparing documents' });
+  const summaryText = summary.documents > 0 || summary.files > 0
+    ? translate('bootstrapLoading.summary', {
+      documents: summary.documents,
+      files: summary.files,
+      defaultValue: `Documents: ${summary.documents || '-'} Files: ${summary.files || '-'}`
+    })
+    : translate('bootstrapLoading.summaryUnknown', { defaultValue: 'Preparing document session' });
+  const phaseText = translate(`bootstrapLoading.phases.${phaseKey}`, {
+    defaultValue: 'Preparing viewer'
+  });
+  const stepText = translate('bootstrapLoading.step', {
+    step: phaseIndex + 1,
+    total: BOOTSTRAP_LOADING_PHASES.length,
+    defaultValue: `Step ${phaseIndex + 1} of ${BOOTSTRAP_LOADING_PHASES.length}`
+  });
+
+  return (
+    <div
+      role="region"
+      aria-busy="true"
+      aria-live="polite"
+      style={{
+        minHeight: '100vh',
+        display: 'flex',
+        alignItems: 'center',
+        justifyContent: 'center',
+        background: '#f7f8fb',
+        color: '#1e293b',
+        fontFamily: 'Arial, Helvetica, sans-serif'
+      }}
+    >
+      <div style={{ width: 'min(420px, calc(100vw - 48px))' }}>
+        <div style={{ fontSize: 18, fontWeight: 700, marginBottom: 6 }}>{title}</div>
+        <div style={{ fontSize: 13, color: '#475569', marginBottom: 12 }}>{summaryText}</div>
+        <div
+          aria-label={phaseText}
+          style={{
+            height: 8,
+            background: '#dbe3ee',
+            borderRadius: 999,
+            overflow: 'hidden'
+          }}
+        >
+          <div
+            style={{
+              width: `${progress}%`,
+              height: '100%',
+              background: '#b85c00',
+              borderRadius: 999,
+              transition: 'width 180ms ease-out'
+            }}
+          />
+        </div>
+        <div style={{ display: 'flex', justifyContent: 'space-between', gap: 12, marginTop: 8, fontSize: 12, color: '#64748b' }}>
+          <span>{phaseText}</span>
+          <span>{stepText}</span>
+        </div>
+      </div>
+    </div>
+  );
+}
 
 /**
  * Build a stable reload-cache scope from host/user identity without including short-lived
@@ -258,11 +369,7 @@ export default function AppBootstrap() {
   // Until a startup payload exists, show the demo launcher instead of the viewer shell.
   if (!viewerProps) {
     if (bootstrapPending) {
-      return (
-        <div className="button-container" role="region" aria-busy="true" aria-live="polite">
-          Loading...
-        </div>
-      );
+      return <BootstrapLoading ready={ready} t={t} />;
     }
 
     // Avoid calling t(...) before i18n is initialized (prevents noisy dev warnings).

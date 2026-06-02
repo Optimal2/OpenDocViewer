@@ -297,6 +297,18 @@
       "region": "OpenDocViewer demo-start"
     }
   },
+  "bootstrapLoading": {
+    "title": "Förbereder dokument",
+    "summary": "Dokument: {documents}  Filer: {files}",
+    "summaryUnknown": "Förbereder dokumentsession",
+    "step": "Steg {step} av {total}",
+    "phases": {
+      "preparing": "Förbereder dokumentlista",
+      "checking": "Kontrollerar filer",
+      "pages": "Förbereder sidor",
+      "viewer": "Startar visaren"
+    }
+  },
   "viewer": {
     "aria": {
       "containerRegion": "Dokumentvisarens område",
