@@ -83,6 +83,8 @@ export class PageAssetWorkerPool {
     this.enabled = opts?.enabled !== false;
     this.useForTiff = opts?.useForTiff !== false;
     this.useForRasterImages = opts?.useForRasterImages !== false;
+    // Zero is intentionally preserved here as "no worker pool"; PageAssetRenderer only creates
+    // this pool after documentLoadingConfig has resolved auto worker counts to a positive value.
     this.workerCount = this.enabled ? Math.max(0, Number(opts?.workerCount) || 0) : 0;
 
     /** @type {Array<PageAssetWorkerEntry>} */
@@ -218,13 +220,15 @@ export class PageAssetWorkerPool {
 
     if (data?.ok) {
       const completedAt = nowMs();
+      const queuedAt = pending.queuedAt != null ? pending.queuedAt : completedAt;
+      const startedAt = pending.startedAt != null ? pending.startedAt : completedAt;
       pending.resolve({
         blob: data.blob,
         width: Math.max(1, Number(data.width) || 1),
         height: Math.max(1, Number(data.height) || 1),
         mimeType: String(data.mimeType || data.blob?.type || 'application/octet-stream'),
-        workerQueueMs: Math.max(0, Number(pending.startedAt || completedAt) - Number(pending.queuedAt || completedAt)),
-        workerRunMs: Math.max(0, completedAt - Number(pending.startedAt || completedAt)),
+        workerQueueMs: Math.max(0, Number(startedAt) - Number(queuedAt)),
+        workerRunMs: Math.max(0, completedAt - Number(startedAt)),
       });
     } else {
       const error = new Error(String(data?.error || 'Worker render failed'));
