@@ -898,6 +898,8 @@ export function isRasterImageExtension(value) {
     || ext === 'gif'
     || ext === 'webp'
     || ext === 'bmp'
+    || ext === 'tif'
+    || ext === 'tiff'
     || ext === 'avif';
 }
 
