@@ -143,6 +143,7 @@ export default function AppBootstrap() {
   const [bundle, setBundle] = useState(/** @type {(PortableDocumentBundle|null)} */ (null));
   const [urlConfig, setUrlConfig] = useState(/** @type {(UrlConfig|null)} */ (null));
   const [bootstrapDebugInfo, setBootstrapDebugInfo] = useState(/** @type {(BootstrapDebugInfo|null)} */ (null));
+  const [bootstrapPending, setBootstrapPending] = useState(true);
 
   const perfOverlayEnabled = useMemo(() => isPerformanceOverlayEnabled(), []);
 
@@ -175,6 +176,8 @@ export default function AppBootstrap() {
         });
       } catch (error) {
         logger.error('Bootstrap detection failed', { error: String(error?.message || error) });
+      } finally {
+        if (mounted) setBootstrapPending(false);
       }
     })();
     return () => { mounted = false; };
@@ -254,11 +257,19 @@ export default function AppBootstrap() {
 
   // Until a startup payload exists, show the demo launcher instead of the viewer shell.
   if (!viewerProps) {
+    if (bootstrapPending) {
+      return (
+        <div className="button-container" role="region" aria-busy="true" aria-live="polite">
+          Loading...
+        </div>
+      );
+    }
+
     // Avoid calling t(...) before i18n is initialized (prevents noisy dev warnings).
     if (!ready) {
       return (
         <div className="button-container" role="region" aria-busy="true" aria-live="polite">
-          Loading…
+          Loading...
         </div>
       );
     }
