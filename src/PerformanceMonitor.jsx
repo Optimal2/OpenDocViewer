@@ -299,6 +299,35 @@ function countBundleMetaFields(bundle) {
 }
 
 /**
+ * @param {*} bundle
+ * @returns {{ documentCount:number, fileCount:number, inlineFileCount:number, inlineBytes:number }}
+ */
+function summarizeBundleSources(bundle) {
+  const docs = Array.isArray(bundle?.documents) ? bundle.documents : [];
+  let fileCount = 0;
+  let inlineFileCount = 0;
+  let inlineBytes = 0;
+
+  for (const doc of docs) {
+    const files = Array.isArray(doc?.files) ? doc.files : [];
+    fileCount += files.length;
+    for (const file of files) {
+      if (typeof file?.inlineBase64 === 'string' && file.inlineBase64.length > 0) {
+        inlineFileCount += 1;
+        inlineBytes += Math.max(0, Number(file?.inlineSizeBytes || 0));
+      }
+    }
+  }
+
+  return {
+    documentCount: docs.length,
+    fileCount,
+    inlineFileCount,
+    inlineBytes,
+  };
+}
+
+/**
  * Copy best-effort text to clipboard without throwing.
  *
  * @param {string} text
@@ -584,6 +613,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     ),
   ].join(' | ');
   const bundleIntegration = isPlainObject(bundle?.integration) ? bundle.integration : {};
+  const bundleSourceSummary = useMemo(() => summarizeBundleSources(bundle), [bundle]);
+  const bootstrapMode = String(bootstrapDebugInfo?.mode || '').trim();
+  const bootstrapSource = String(bootstrapDebugInfo?.hostPayloadSource || '').trim();
   const integrationSource = String(bundleIntegration?.source || '').trim();
   const integrationMode = String(bundleIntegration?.mode || '').trim();
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
@@ -598,6 +630,8 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Mode: ${String(documentLoadingConfig?.mode || 'auto')} Stage: ${String(memoryPressureStage || 'normal')} Workers: ${workerCount} PDF ${activePdfWorkerCount} raster ${activePageAssetWorkerCount}`,
     `Fetch: ${String(documentLoadingConfig?.fetch?.strategy || 'sequential')} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
     `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel}${pdfWarmupBatchLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
+    `Bootstrap: ${bootstrapMode || '-'} source ${bootstrapSource || '-'}`,
+    `Bundle: docs ${bundleSourceSummary.documentCount} files ${bundleSourceSummary.fileCount} inline ${bundleSourceSummary.inlineFileCount} ${formatBytes(bundleSourceSummary.inlineBytes)}`,
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
@@ -834,6 +868,20 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         </span>
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           {t('perf.backendLabel', { defaultValue: 'Backend:' })} <strong>{String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}</strong>
+        </span>
+      </div>
+
+      <div style={sectionStyle}>
+        <span style={labelStyle}>{t('perf.bootstrapLabel', { defaultValue: 'Bootstrap:' })}</span>{' '}
+        <strong>{bootstrapMode || '-'}</strong>
+        <span style={{ marginLeft: 8, opacity: 0.75 }}>
+          source <strong>{bootstrapSource || '-'}</strong>
+        </span>
+        <span style={{ marginLeft: 10, opacity: 0.9 }}>
+          bundle docs <strong>{bundleSourceSummary.documentCount}</strong>
+          {' '}files <strong>{bundleSourceSummary.fileCount}</strong>
+          {' '}inline <strong>{bundleSourceSummary.inlineFileCount}</strong>
+          {' '}{formatBytes(bundleSourceSummary.inlineBytes)}
         </span>
       </div>
 

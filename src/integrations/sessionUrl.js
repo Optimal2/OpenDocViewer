@@ -11,7 +11,7 @@ const SESSION_URL_TIMEOUT_MS = 15_000;
 
 /**
  * @typedef {Object} SessionUrlResult
- * @property {'sessionurl'} source
+ * @property {('sessionurl'|'sessionUrl'|'bundleurl'|'bundleUrl')} source
  * @property {*} data
  */
 
@@ -21,10 +21,12 @@ function readSessionUrlParameter() {
   }
 
   const q = new URLSearchParams(window.location.search);
-  return q.get('sessionurl')
-    || q.get('sessionUrl')
-    || q.get('bundleurl')
-    || q.get('bundleUrl');
+  for (const source of ['sessionurl', 'sessionUrl', 'bundleurl', 'bundleUrl']) {
+    const value = q.get(source);
+    if (value) return { source, value };
+  }
+
+  return null;
 }
 
 function resolveHttpUrl(rawUrl) {
@@ -68,8 +70,8 @@ function warnSessionUrl(message, detail) {
  * @returns {Promise.<(SessionUrlResult|null)>}
  */
 export async function readFromSessionUrl() {
-  const rawUrl = readSessionUrlParameter();
-  const url = resolveHttpUrl(rawUrl);
+  const parameter = readSessionUrlParameter();
+  const url = resolveHttpUrl(parameter?.value);
   if (!url) return null;
 
   const controller = typeof AbortController !== 'undefined'
@@ -114,7 +116,7 @@ export async function readFromSessionUrl() {
   }
 
   try {
-    return { source: 'sessionurl', data: JSON.parse(text) };
+    return { source: parameter?.source || 'sessionurl', data: JSON.parse(text) };
   } catch (error) {
     warnSessionUrl('Session URL response was not valid JSON.', error);
     return null;
