@@ -584,10 +584,13 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     ),
   ].join(' | ');
   const bundleIntegration = isPlainObject(bundle?.integration) ? bundle.integration : {};
+  const integrationSource = String(bundleIntegration?.source || '').trim();
+  const integrationMode = String(bundleIntegration?.mode || '').trim();
+  const integrationTransport = String(bundleIntegration?.transport || '').trim();
   const gatewayInlineSourceCount = Math.max(0, Number(bundleIntegration?.inlineSourceCount || 0));
   const gatewayInlineSourceBytes = Math.max(0, Number(bundleIntegration?.inlineSourceBytes || 0));
-  const gatewayInlineSnapshotLine = gatewayInlineSourceCount > 0
-    ? `Gateway inline: ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)}`
+  const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)}`
     : '';
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
@@ -598,7 +601,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
-    ...(gatewayInlineSnapshotLine ? [gatewayInlineSnapshotLine] : []),
+    ...(integrationSnapshotLine ? [integrationSnapshotLine] : []),
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
     `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} checked ${pageIntegrity.checkedPages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount} seq ${pageIntegrity.sequenceCount}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
@@ -934,12 +937,18 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={{ opacity: 0.9 }}>{loaderPhaseSummary}</span>
       </div>
 
-      {gatewayInlineSourceCount > 0 ? (
+      {integrationSnapshotLine ? (
         <div style={sectionStyle}>
-          <span style={labelStyle}>{t('perf.gatewayInlineLabel', { defaultValue: 'Gateway inline:' })}</span>{' '}
-          <strong>{gatewayInlineSourceCount}</strong>
+          <span style={labelStyle}>{t('perf.integrationLabel', { defaultValue: 'Integration:' })}</span>{' '}
+          <strong>{integrationSource || '-'}</strong>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
-            {formatBytes(gatewayInlineSourceBytes)}
+            {integrationMode || '-'}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            transport <strong>{integrationTransport || '-'}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            inline <strong>{gatewayInlineSourceCount}</strong> {formatBytes(gatewayInlineSourceBytes)}
           </span>
         </div>
       ) : null}
