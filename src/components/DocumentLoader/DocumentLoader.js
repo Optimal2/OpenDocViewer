@@ -44,6 +44,9 @@ import {
  * @property {number=} totalDocuments
  * @property {number=} documentFileNumber
  * @property {number=} documentFileCount
+ * @property {string=} inlineBase64
+ * @property {string=} inlineMimeType
+ * @property {number=} inlineSizeBytes
  */
 
 /**
@@ -100,6 +103,9 @@ import {
  * @property {number=} totalDocuments
  * @property {number=} documentFileNumber
  * @property {number=} documentFileCount
+ * @property {string=} inlineBase64
+ * @property {string=} inlineMimeType
+ * @property {number=} inlineSizeBytes
  */
 
 /**
@@ -730,6 +736,58 @@ function isTransientPrefetchError(error) {
 }
 
 /**
+ * Decode host-provided Base64 source bytes without routing through `fetch(data:...)`.
+ * Gateway integrations use this for small raster batches where hundreds of per-file source
+ * requests would otherwise dominate the initial load.
+ *
+ * @param {ResolvedEntry} entry
+ * @returns {(Blob|null)}
+ */
+function buildInlineSourceBlob(entry) {
+  const encoded = typeof entry?.inlineBase64 === 'string' ? entry.inlineBase64 : '';
+  if (!encoded) return null;
+
+  try {
+    let normalized = encoded.trim().replace(/\s+/g, '').replace(/-/g, '+').replace(/_/g, '/');
+    const padding = normalized.length % 4;
+    if (padding === 2) normalized += '==';
+    if (padding === 3) normalized += '=';
+    const binary = atob(normalized);
+    const bytes = new Uint8Array(binary.length);
+    for (let index = 0; index < binary.length; index += 1) {
+      bytes[index] = binary.charCodeAt(index);
+    }
+
+    const mimeType = String(entry.inlineMimeType || mimeForExtension(entry.ext) || 'application/octet-stream');
+    return new Blob([bytes], { type: mimeType });
+  } catch (error) {
+    logger.warn('Inline source bytes could not be decoded; falling back to source URL', {
+      fileIndex: entry?.fileIndex,
+      url: redactUrlForLog(entry?.url || ''),
+      error: String(error?.message || error),
+    });
+    return null;
+  }
+}
+
+/**
+ * @param {string} ext
+ * @returns {string}
+ */
+function mimeForExtension(ext) {
+  switch (normalizeExtension(ext)) {
+    case 'pdf': return 'application/pdf';
+    case 'tiff': return 'image/tiff';
+    case 'png': return 'image/png';
+    case 'jpg': return 'image/jpeg';
+    case 'gif': return 'image/gif';
+    case 'bmp': return 'image/bmp';
+    case 'webp': return 'image/webp';
+    default: return '';
+  }
+}
+
+/**
  * @param {*} value
  * @returns {(number|undefined)}
  */
@@ -912,6 +970,9 @@ function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoForma
         totalDocuments: toPositiveIntOrUndefined(item?.totalDocuments),
         documentFileNumber: toPositiveIntOrUndefined(item?.documentFileNumber),
         documentFileCount: toPositiveIntOrUndefined(item?.documentFileCount),
+        inlineBase64: typeof item?.inlineBase64 === 'string' && item.inlineBase64 ? item.inlineBase64 : undefined,
+        inlineMimeType: typeof item?.inlineMimeType === 'string' && item.inlineMimeType ? item.inlineMimeType : undefined,
+        inlineSizeBytes: toPositiveIntOrUndefined(item?.inlineSizeBytes),
       }))
       .filter((item) => !!item.url);
   }
@@ -1151,6 +1212,67 @@ const DocumentLoader = ({
           }
         } catch (error) {
           logger.warn('Reload cache source could not be reused; fetching source normally', {
+            sourceKey,
+            fileIndex: entry.fileIndex,
+            error: String(error?.message || error),
+          });
+        }
+      }
+
+      const inlineBlob = buildInlineSourceBlob(entry);
+      if (inlineBlob instanceof Blob && inlineBlob.size > 0) {
+        try {
+          const typeStartedAt = nowMs();
+          const resolvedPayload = await resolveFetchedSourcePayload({
+            entry,
+            blob: inlineBlob,
+            responseMimeType: entry.inlineMimeType || inlineBlob.type,
+          });
+
+          await validateFetchedSourceBlob({
+            entry,
+            blob: inlineBlob,
+            detectedType: resolvedPayload.detectedType,
+            mimeType: resolvedPayload.mimeType,
+            fileExtension: resolvedPayload.fileExtension,
+            headBytes: resolvedPayload.headBytes,
+          });
+          recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
+
+          const storeStartedAt = nowMs();
+          const stored = await storeSourceBlob({
+            sourceKey,
+            blob: inlineBlob,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
+            originalUrl: entry.url,
+            fileIndex: entry.fileIndex,
+          });
+          recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
+
+          const pageCountHint = await resolvePrefetchedPageCountHint({
+            sourceKey,
+            url: entry.url,
+            blob: inlineBlob,
+            fileExtension: resolvedPayload.fileExtension,
+            recordLoaderPhaseTiming,
+          });
+
+          return {
+            ok: true,
+            sourceKey,
+            fileExtension: resolvedPayload.fileExtension,
+            mimeType: resolvedPayload.mimeType,
+            sizeBytes: Number(inlineBlob.size || 0),
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+            cacheKeyMode: sourceIdentity.mode,
+            stats: stored?.stats || null,
+            analysisBlob: inlineBlob,
+            pageCountHint,
+          };
+        } catch (error) {
+          logger.warn('Inline source bytes could not be used; fetching source URL instead', {
             sourceKey,
             fileIndex: entry.fileIndex,
             error: String(error?.message || error),
