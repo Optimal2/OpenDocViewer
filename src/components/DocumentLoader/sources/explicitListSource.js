@@ -23,6 +23,8 @@
  *   @property {(string|undefined)} inlineBase64
  *   @property {(string|undefined)} inlineMimeType
  *   @property {(number|undefined)} inlineSizeBytes
+ *   @property {(string|undefined)} sourcePackUrl
+ *   @property {(string|undefined)} sourcePackFormat
  *   @property {(number|undefined)} pageCountHint
  *   @property {(string|undefined)} pageCountHintSource
  *   @property {(string|undefined)} sourceKind
@@ -185,6 +187,8 @@ export function makeExplicitSource(bundle) {
   const items = [];
   let idx = 0;
   const totalDocuments = docs.length;
+  const sourcePackUrl = optionalText(bundle?.integration?.sourcePackUrl);
+  const sourcePackFormat = optionalText(bundle?.integration?.sourcePackFormat);
 
   for (let docIndex = 0; docIndex < docs.length; docIndex += 1) {
     const doc = docs[docIndex];
@@ -212,6 +216,8 @@ export function makeExplicitSource(bundle) {
         inlineBase64: optionalText(file?.inlineBase64),
         inlineMimeType: optionalText(file?.inlineMimeType || file?.contentType),
         inlineSizeBytes: Number.isFinite(file?.inlineSizeBytes) ? Number(file.inlineSizeBytes) : undefined,
+        sourcePackUrl,
+        sourcePackFormat,
         pageCountHint: Number.isFinite(file?.pageCountHint) ? Number(file.pageCountHint) : undefined,
         pageCountHintSource: optionalText(file?.pageCountHintSource),
         sourceKind: optionalText(file?.sourceKind),
