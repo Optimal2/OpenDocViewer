@@ -273,6 +273,12 @@ function createAssetPipelineStats() {
     renderCompletedCount: 0,
     renderTotalMs: 0,
     renderMaxMs: 0,
+    workerQueueCount: 0,
+    workerQueueTotalMs: 0,
+    workerQueueMaxMs: 0,
+    workerRunCount: 0,
+    workerRunTotalMs: 0,
+    workerRunMaxMs: 0,
     restoreAttemptCount: 0,
     restoreHitCount: 0,
     restoreMissCount: 0,
@@ -353,6 +359,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     assetRenderCompletedCount: 0,
     assetRenderTotalMs: 0,
     assetRenderMaxMs: 0,
+    assetWorkerQueueCount: 0,
+    assetWorkerQueueTotalMs: 0,
+    assetWorkerQueueMaxMs: 0,
+    assetWorkerRunCount: 0,
+    assetWorkerRunTotalMs: 0,
+    assetWorkerRunMaxMs: 0,
     assetRestoreAttemptCount: 0,
     assetRestoreHitCount: 0,
     assetRestoreMissCount: 0,
@@ -573,6 +585,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         assetRenderCompletedCount: Math.max(0, Number(pipelineStats.renderCompletedCount || 0)),
         assetRenderTotalMs: Math.max(0, Number(pipelineStats.renderTotalMs || 0)),
         assetRenderMaxMs: Math.max(0, Number(pipelineStats.renderMaxMs || 0)),
+        assetWorkerQueueCount: Math.max(0, Number(pipelineStats.workerQueueCount || 0)),
+        assetWorkerQueueTotalMs: Math.max(0, Number(pipelineStats.workerQueueTotalMs || 0)),
+        assetWorkerQueueMaxMs: Math.max(0, Number(pipelineStats.workerQueueMaxMs || 0)),
+        assetWorkerRunCount: Math.max(0, Number(pipelineStats.workerRunCount || 0)),
+        assetWorkerRunTotalMs: Math.max(0, Number(pipelineStats.workerRunTotalMs || 0)),
+        assetWorkerRunMaxMs: Math.max(0, Number(pipelineStats.workerRunMaxMs || 0)),
         assetRestoreAttemptCount: Math.max(0, Number(pipelineStats.restoreAttemptCount || 0)),
         assetRestoreHitCount: Math.max(0, Number(pipelineStats.restoreHitCount || 0)),
         assetRestoreMissCount: Math.max(0, Number(pipelineStats.restoreMissCount || 0)),
@@ -751,6 +769,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
       assetRenderMaxMs: 0,
+      assetWorkerQueueCount: 0,
+      assetWorkerQueueTotalMs: 0,
+      assetWorkerQueueMaxMs: 0,
+      assetWorkerRunCount: 0,
+      assetWorkerRunTotalMs: 0,
+      assetWorkerRunMaxMs: 0,
       assetRestoreAttemptCount: 0,
       assetRestoreHitCount: 0,
       assetRestoreMissCount: 0,
@@ -1076,6 +1100,12 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       assetRenderCompletedCount: 0,
       assetRenderTotalMs: 0,
       assetRenderMaxMs: 0,
+      assetWorkerQueueCount: 0,
+      assetWorkerQueueTotalMs: 0,
+      assetWorkerQueueMaxMs: 0,
+      assetWorkerRunCount: 0,
+      assetWorkerRunTotalMs: 0,
+      assetWorkerRunMaxMs: 0,
       assetRestoreAttemptCount: 0,
       assetRestoreHitCount: 0,
       assetRestoreMissCount: 0,
@@ -1751,6 +1781,18 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         stats.renderCompletedCount += 1;
         stats.renderTotalMs += renderDurationMs;
         stats.renderMaxMs = Math.max(Number(stats.renderMaxMs) || 0, renderDurationMs);
+        const workerQueueMs = Number(rendered?.workerQueueMs);
+        if (Number.isFinite(workerQueueMs) && workerQueueMs >= 0) {
+          stats.workerQueueCount += 1;
+          stats.workerQueueTotalMs += workerQueueMs;
+          stats.workerQueueMaxMs = Math.max(Number(stats.workerQueueMaxMs) || 0, workerQueueMs);
+        }
+        const workerRunMs = Number(rendered?.workerRunMs);
+        if (Number.isFinite(workerRunMs) && workerRunMs >= 0) {
+          stats.workerRunCount += 1;
+          stats.workerRunTotalMs += workerRunMs;
+          stats.workerRunMaxMs = Math.max(Number(stats.workerRunMaxMs) || 0, workerRunMs);
+        }
 
         const persistFullInBackground = variant === 'full'
           && sessionConfigRef.current.assetStore.persistFullPagesInBackground !== false;
