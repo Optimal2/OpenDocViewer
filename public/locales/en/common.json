@@ -297,6 +297,18 @@
       "region": "OpenDocViewer demo launcher"
     }
   },
+  "bootstrapLoading": {
+    "title": "Preparing documents",
+    "summary": "Documents: {documents}  Files: {files}",
+    "summaryUnknown": "Preparing document session",
+    "step": "Step {step} of {total}",
+    "phases": {
+      "preparing": "Preparing document list",
+      "checking": "Checking files",
+      "pages": "Preparing pages",
+      "viewer": "Starting viewer"
+    }
+  },
   "viewer": {
     "aria": {
       "containerRegion": "Document viewer container",
