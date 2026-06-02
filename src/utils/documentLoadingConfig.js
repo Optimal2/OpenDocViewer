@@ -218,11 +218,13 @@ function resolveRecommendedRasterWorkerCount(preferred = 0, mode = 'auto') {
   const cores = getReportedCoreCount();
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
-  // See resolveRecommendedWorkerCount: min 4 is deliberate for ODV throughput. Chromium gets
-  // a slightly higher raster floor on 6+ core clients because observed queue time dominated at 6.
+  // See resolveRecommendedWorkerCount: min 4 is deliberate for ODV throughput. Chromium/Edge
+  // raster decoding can profit from slight oversubscription on low-core clients because source
+  // transfer, image decode, and canvas serialization do not all keep the same core busy at once.
   let suggested = Math.max(4, cores);
-  if (browserFamily !== 'firefox' && cores >= 6) {
-    suggested = Math.max(8, suggested);
+  if (browserFamily !== 'firefox') {
+    if (cores > 0 && cores <= 4) suggested = Math.max(suggested, cores + 2);
+    if (cores >= 6) suggested = Math.max(8, suggested);
   }
 
   if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
