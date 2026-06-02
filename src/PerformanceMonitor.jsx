@@ -621,8 +621,13 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
   const gatewayInlineSourceCount = Math.max(0, Number(bundleIntegration?.inlineSourceCount || 0));
   const gatewayInlineSourceBytes = Math.max(0, Number(bundleIntegration?.inlineSourceBytes || 0));
+  const directReadableSourceCount = Math.max(0, Number(bundleIntegration?.directReadableSourceCount || 0));
+  const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
+  const gatewaySourceUrlCount = Math.max(0, Number(bundleIntegration?.gatewaySourceUrlCount || 0));
+  const webClientFallbackSourceCount = Math.max(0, Number(bundleIntegration?.webClientFallbackSourceCount || 0));
+  const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
-    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)}`
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} ${gatewayRouteSummary}`
     : '';
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
@@ -997,6 +1002,15 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             inline <strong>{gatewayInlineSourceCount}</strong> {formatBytes(gatewayInlineSourceBytes)}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            direct <strong>{directReadableSourceCount}</strong>/<strong>{directMissingSourceCount}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            gateway <strong>{gatewaySourceUrlCount}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            webclient <strong>{webClientFallbackSourceCount}</strong>
           </span>
         </div>
       ) : null}
