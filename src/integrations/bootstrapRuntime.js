@@ -302,7 +302,30 @@ export async function bootstrapDetect(options = {}) {
     probeSessionToken();
   }
 
-  // 1) Parent page (same-origin bridge)
+  // 1) Session URL (?sessionurl=… / ?bundleUrl=…)
+  // Explicit URL payloads must win over the same-origin parent bridge. Gateway integrations can run
+  // inside a WebClient page that still exposes its original parent bootstrap data; choosing parent
+  // first would silently bypass the prepared gateway bundle.
+  try {
+    const sessionUrlCandidate = await probeSessionUrl();
+    if (sessionUrlCandidate?.data) {
+      const bundle = tryNormalizeBundle(sessionUrlCandidate.data);
+      if (bundle) {
+        return {
+          mode: ODV_BOOTSTRAP_MODES.SESSION_URL,
+          bundle,
+          debugInfo: makeDebugInfo(
+            ODV_BOOTSTRAP_MODES.SESSION_URL,
+            String(sessionUrlCandidate.source || 'sessionurl'),
+            sessionUrlCandidate.data,
+            diagnosticsEnabled
+          ),
+        };
+      }
+    }
+  } catch {}
+
+  // 2) Parent page (same-origin bridge)
   try {
     const parentCandidate = probeParent();
     if (parentCandidate?.data) {
@@ -322,26 +345,6 @@ export async function bootstrapDetect(options = {}) {
             parentPayload.payload,
             diagnosticsEnabled,
             parentPayload.filterInfo
-          ),
-        };
-      }
-    }
-  } catch {}
-
-  // 2) Session URL (?sessionurl=…)
-  try {
-    const sessionUrlCandidate = await probeSessionUrl();
-    if (sessionUrlCandidate?.data) {
-      const bundle = tryNormalizeBundle(sessionUrlCandidate.data);
-      if (bundle) {
-        return {
-          mode: ODV_BOOTSTRAP_MODES.SESSION_URL,
-          bundle,
-          debugInfo: makeDebugInfo(
-            ODV_BOOTSTRAP_MODES.SESSION_URL,
-            String(sessionUrlCandidate.source || 'sessionurl'),
-            sessionUrlCandidate.data,
-            diagnosticsEnabled
           ),
         };
       }
