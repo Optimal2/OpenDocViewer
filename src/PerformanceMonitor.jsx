@@ -77,6 +77,19 @@ function formatPhaseTiming(label, count, totalMs, maxMs) {
   return `${label} ${safeCount} avg ${formatMilliseconds(avgMs)} max ${formatMilliseconds(maxMs)}`;
 }
 
+function getBrowserLabel() {
+  try {
+    const ua = String(globalThis.navigator?.userAgent || '');
+    if (/firefox\//i.test(ua)) return 'Firefox';
+    if (/edg\//i.test(ua)) return 'Edge';
+    if (/chrome\//i.test(ua) || /chromium\//i.test(ua)) return 'Chrome';
+    if (/safari\//i.test(ua)) return 'Safari';
+    return 'unknown';
+  } catch {
+    return 'unknown';
+  }
+}
+
 /**
  * Check the flat viewer page list for ordering mistakes that would be user-visible.
  *
@@ -435,6 +448,8 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     }
   }, []);
 
+  const browserLabel = useMemo(() => getBrowserLabel(), []);
+
   const deviceMemory = useMemo(() => {
     try {
       return typeof navigator !== 'undefined' ? (Number(navigator.deviceMemory) || 0) : 0;
@@ -558,6 +573,16 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     ? Number(runtimeDiagnostics?.assetRenderTotalMs || 0) / assetRenderCount
     : 0;
   const assetRenderMaxMs = Math.max(0, Number(runtimeDiagnostics?.assetRenderMaxMs || 0));
+  const assetWorkerQueueCount = Math.max(0, Number(runtimeDiagnostics?.assetWorkerQueueCount || 0));
+  const assetWorkerQueueAvgMs = assetWorkerQueueCount > 0
+    ? Number(runtimeDiagnostics?.assetWorkerQueueTotalMs || 0) / assetWorkerQueueCount
+    : 0;
+  const assetWorkerQueueMaxMs = Math.max(0, Number(runtimeDiagnostics?.assetWorkerQueueMaxMs || 0));
+  const assetWorkerRunCount = Math.max(0, Number(runtimeDiagnostics?.assetWorkerRunCount || 0));
+  const assetWorkerRunAvgMs = assetWorkerRunCount > 0
+    ? Number(runtimeDiagnostics?.assetWorkerRunTotalMs || 0) / assetWorkerRunCount
+    : 0;
+  const assetWorkerRunMaxMs = Math.max(0, Number(runtimeDiagnostics?.assetWorkerRunMaxMs || 0));
   const assetRestoreAttempts = Math.max(0, Number(runtimeDiagnostics?.assetRestoreAttemptCount || 0));
   const assetRestoreAvgMs = assetRestoreAttempts > 0
     ? Number(runtimeDiagnostics?.assetRestoreTotalMs || 0) / assetRestoreAttempts
@@ -670,7 +695,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     : '';
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
-    `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
+    `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB Browser: ${browserLabel}`,
     `Mode: ${String(documentLoadingConfig?.mode || 'auto')} Stage: ${String(memoryPressureStage || 'normal')} Workers: ${workerCount} PDF ${activePdfWorkerCount} raster ${activePageAssetWorkerCount}`,
     `Fetch: ${fetchSummary} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
     `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel}${pdfWarmupBatchLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
@@ -684,7 +709,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     ...(sourceHintsSnapshotLine ? [sourceHintsSnapshotLine] : []),
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
     `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} checked ${pageIntegrity.checkedPages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount} seq ${pageIntegrity.sequenceCount}`,
-    `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
+    `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} worker q ${assetWorkerQueueCount} avg ${formatMilliseconds(assetWorkerQueueAvgMs)} max ${formatMilliseconds(assetWorkerQueueMaxMs)} run ${assetWorkerRunCount} avg ${formatMilliseconds(assetWorkerRunAvgMs)} max ${formatMilliseconds(assetWorkerRunMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
     hasHeapMetrics
       ? `Heap: ${memory.usedJSHeapSize.toFixed(1)} MB / ${memory.totalJSHeapSize.toFixed(1)} MB limit ${memory.jsHeapSizeLimit.toFixed(0)} MB`
       : 'Heap: unavailable',
@@ -890,6 +915,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           {t('perf.cpuCores', { count: hardwareConcurrency })}
           {deviceMemory ? ` ${t('perf.ramApprox', { gb: deviceMemory })}` : ''}
         </span>
+        <span style={{ marginLeft: 8, opacity: 0.7 }}>
+          Browser <strong>{browserLabel}</strong>
+        </span>
       </div>
 
       <div style={sectionStyle}>
@@ -1011,6 +1039,14 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={{ opacity: 0.9 }}>
           render <strong>{assetRenderCount}</strong> avg <strong>{formatMilliseconds(assetRenderAvgMs)}</strong>
           {' '}max <strong>{formatMilliseconds(assetRenderMaxMs)}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          worker q <strong>{assetWorkerQueueCount}</strong> avg <strong>{formatMilliseconds(assetWorkerQueueAvgMs)}</strong>
+          {' '}max <strong>{formatMilliseconds(assetWorkerQueueMaxMs)}</strong>
+        </span>
+        <span style={{ marginLeft: 8, opacity: 0.9 }}>
+          run <strong>{assetWorkerRunCount}</strong> avg <strong>{formatMilliseconds(assetWorkerRunAvgMs)}</strong>
+          {' '}max <strong>{formatMilliseconds(assetWorkerRunMaxMs)}</strong>
         </span>
         <span style={{ marginLeft: 8, opacity: 0.9 }}>
           restore <strong>{Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}</strong>

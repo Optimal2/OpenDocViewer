@@ -152,13 +152,14 @@ const PageNavigationButtons = ({
     const pending = Math.max(0, Number(pageLoadState?.pendingPages) || Math.max(0, total - ready - failed));
     const completed = Math.max(0, Math.min(total, ready + failed));
     const ratio = total > 0 ? Math.max(0, Math.min(1, completed / total)) : 0;
+    const percent = `${Math.round(ratio * 10000) / 100}%`;
     return {
       total,
       ready,
       failed,
       pending,
       completed,
-      ratio,
+      percent,
       visible: isDocumentLoading && total > 0,
     };
   }, [
@@ -260,26 +261,10 @@ const PageNavigationButtons = ({
           : t('toolbar.navigation.noPagesTitle', { defaultValue: 'No visible pages available' })}
         aria-busy={isDocumentLoading}
         aria-describedby={`${descriptionId} ${statusId}`}
-        title={groupTitle}
+        title={loadProgress.visible ? loadProgressTitle : groupTitle}
+        style={loadProgress.visible ? { '--odv-page-load-progress': loadProgress.percent } : undefined}
       />
-
-      {loadProgress.visible ? (
-        <span
-          className="page-load-progress-badge"
-          role="progressbar"
-          aria-valuemin={0}
-          aria-valuemax={loadProgress.total}
-          aria-valuenow={loadProgress.completed}
-          aria-valuetext={loadProgressText}
-          title={loadProgressTitle}
-          style={{ '--odv-page-load-progress-ratio': String(loadProgress.ratio) }}
-        >
-          <span className="page-load-progress-track" aria-hidden="true">
-            <span className="page-load-progress-fill" />
-          </span>
-          <span className="sr-only">{loadProgressText}</span>
-        </span>
-      ) : null}
+      {loadProgress.visible ? <span className="sr-only">{loadProgressText}</span> : null}
 
       <button
         type="button"

@@ -29,6 +29,8 @@ import ImageWorker from '../workers/imageWorker.js?worker';
  * @property {function(any):void} resolve
  * @property {function(*):void} reject
  * @property {number} slot
+ * @property {number=} queuedAt
+ * @property {number=} startedAt
  */
 
 /**
@@ -65,6 +67,14 @@ function isRasterExt(fileExtension) {
     || ext === 'avif';
 }
 
+function nowMs() {
+  try {
+    return typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : Date.now();
+  } catch {
+    return Date.now();
+  }
+}
+
 export class PageAssetWorkerPool {
   /**
    * @param {PageAssetWorkerPoolOptions=} opts
@@ -79,7 +89,7 @@ export class PageAssetWorkerPool {
     this.workers = [];
     /** @type {Map<number, PendingWorkerTask>} */
     this.pending = new Map();
-    /** @type {Array<{ taskId:number, payload:WorkerTaskInput, resolve:function(any):void, reject:function(*):void }>} */
+    /** @type {Array<{ taskId:number, payload:WorkerTaskInput, queuedAt:number, resolve:function(any):void, reject:function(*):void }>} */
     this.queue = [];
     this.taskId = 1;
     this.disposed = false;
@@ -133,7 +143,7 @@ export class PageAssetWorkerPool {
     }
 
     return new Promise((resolve, reject) => {
-      this.queue.push({ taskId: this.taskId++, payload, resolve, reject });
+      this.queue.push({ taskId: this.taskId++, payload, queuedAt: nowMs(), resolve, reject });
       this.pump();
     });
   }
@@ -153,7 +163,13 @@ export class PageAssetWorkerPool {
       const entry = this.workers[slot];
       entry.busy = true;
       entry.activeTaskId = next.taskId;
-      this.pending.set(next.taskId, { resolve: next.resolve, reject: next.reject, slot });
+      this.pending.set(next.taskId, {
+        resolve: next.resolve,
+        reject: next.reject,
+        slot,
+        queuedAt: next.queuedAt,
+        startedAt: nowMs(),
+      });
 
       try {
         entry.worker.postMessage({
@@ -201,11 +217,14 @@ export class PageAssetWorkerPool {
     }
 
     if (data?.ok) {
+      const completedAt = nowMs();
       pending.resolve({
         blob: data.blob,
         width: Math.max(1, Number(data.width) || 1),
         height: Math.max(1, Number(data.height) || 1),
         mimeType: String(data.mimeType || data.blob?.type || 'application/octet-stream'),
+        workerQueueMs: Math.max(0, Number(pending.startedAt || completedAt) - Number(pending.queuedAt || completedAt)),
+        workerRunMs: Math.max(0, completedAt - Number(pending.startedAt || completedAt)),
       });
     } else {
       const error = new Error(String(data?.error || 'Worker render failed'));
