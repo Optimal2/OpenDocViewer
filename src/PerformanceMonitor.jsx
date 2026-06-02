@@ -634,6 +634,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const remoteInlineMaxConcurrency = Math.max(0, Number(bundleIntegration?.remoteInlineMaxConcurrency || 0));
   const remoteInlineMaxCount = Math.max(0, Number(bundleIntegration?.remoteInlineMaxCount || 0));
   const remoteInlineMaxCountLabel = remoteInlineMaxCount > 0 ? String(remoteInlineMaxCount) : 'all';
+  const remoteInlineMaxTotalBytes = Math.max(0, Number(bundleIntegration?.remoteInlineMaxTotalBytes || 0));
   const gatewayBundleBuildMs = Math.max(0, Number(bundleIntegration?.gatewayBundleBuildMs || 0));
   const directReadableSourceCount = Math.max(0, Number(bundleIntegration?.directReadableSourceCount || 0));
   const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
@@ -646,7 +647,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
   const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
-    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} cap ${remoteInlineMaxCountLabel} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} cap ${remoteInlineMaxCountLabel} budget ${remoteInlineMaxTotalBytes > 0 ? formatBytes(remoteInlineMaxTotalBytes) : '-'} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
     : '';
   const bootstrapTimingSnapshotLine = bootstrapTotalMs > 0
     ? `Bootstrap timing: bundle ${formatMilliseconds(bootstrapTotalMs)} fetch ${formatMilliseconds(bootstrapFetchMs)} text ${formatMilliseconds(bootstrapTextMs)} parse ${formatMilliseconds(bootstrapParseMs)} size ${formatBytes(bootstrapResponseTextBytes)}`
@@ -1035,6 +1036,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             {' '}fail <strong>{remoteInlineFailureCount}</strong>
             {' '}c<strong>{remoteInlineMaxConcurrency || '-'}</strong>
             {' '}cap <strong>{remoteInlineMaxCountLabel}</strong>
+            {' '}budget <strong>{remoteInlineMaxTotalBytes > 0 ? formatBytes(remoteInlineMaxTotalBytes) : '-'}</strong>
             {' '}{formatBytes(remoteInlineSourceBytes)}
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
