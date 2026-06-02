@@ -621,6 +621,10 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
   const gatewayInlineSourceCount = Math.max(0, Number(bundleIntegration?.inlineSourceCount || 0));
   const gatewayInlineSourceBytes = Math.max(0, Number(bundleIntegration?.inlineSourceBytes || 0));
+  const remoteInlineSourceCount = Math.max(0, Number(bundleIntegration?.remoteInlineSourceCount || 0));
+  const remoteInlineSourceBytes = Math.max(0, Number(bundleIntegration?.remoteInlineSourceBytes || 0));
+  const remoteInlineAttemptCount = Math.max(0, Number(bundleIntegration?.remoteInlineAttemptCount || 0));
+  const remoteInlineFailureCount = Math.max(0, Number(bundleIntegration?.remoteInlineFailureCount || 0));
   const directReadableSourceCount = Math.max(0, Number(bundleIntegration?.directReadableSourceCount || 0));
   const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
   const gatewaySourceUrlCount = Math.max(0, Number(bundleIntegration?.gatewaySourceUrlCount || 0));
@@ -632,7 +636,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
   const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
-    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} ${gatewayRouteSummary}`
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} ${formatBytes(remoteInlineSourceBytes)} ${gatewayRouteSummary}`
     : '';
   const sourceHintsSnapshotLine = (sourcePageCountHintCount > 0 || sourcePageCountHintMissingCount > 0)
     ? `Hints: pages ${sourcePageCountHintCount}/${sourcePageCountHintCount + sourcePageCountHintMissingCount} total ${sourcePageCountHintTotal}`
@@ -1011,6 +1015,10 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             inline <strong>{gatewayInlineSourceCount}</strong> {formatBytes(gatewayInlineSourceBytes)}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            remote <strong>{remoteInlineSourceCount}</strong>/<strong>{remoteInlineAttemptCount}</strong>
+            {' '}fail <strong>{remoteInlineFailureCount}</strong> {formatBytes(remoteInlineSourceBytes)}
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             direct <strong>{directReadableSourceCount}</strong>/<strong>{directMissingSourceCount}</strong>
