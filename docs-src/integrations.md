@@ -123,6 +123,11 @@ viewer can recover if inline bytes are missing, malformed, too large for the hos
 rejected during validation. Inline bytes are intended for small source files; large PDFs and large
 image files should continue to use normal URLs.
 
+When a gateway supplies inline bytes, prefer `?bundleUrl=...`/`?sessionurl=...` over embedding the
+full JSON bundle in the HTML document. This keeps the initial viewer HTML small, lets the browser
+fetch the prepared bundle as one explicit JSON request, and still preserves the same Portable
+Document Bundle contract once OpenDocViewer starts.
+
 ## Host iframe preparation flow
 
 Some legacy host applications open OpenDocViewer in an iframe and pass only compact session data in

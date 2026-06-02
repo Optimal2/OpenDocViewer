@@ -6,7 +6,7 @@
  * embedding base64 JSON directly in the viewer URL.
  */
 
-const MAX_RESPONSE_TEXT_LEN = 2_000_000;
+const MAX_RESPONSE_TEXT_LEN = 64_000_000;
 const SESSION_URL_TIMEOUT_MS = 15_000;
 
 /**
