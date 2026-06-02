@@ -625,7 +625,9 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
   const gatewaySourceUrlCount = Math.max(0, Number(bundleIntegration?.gatewaySourceUrlCount || 0));
   const webClientFallbackSourceCount = Math.max(0, Number(bundleIntegration?.webClientFallbackSourceCount || 0));
-  const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount}`;
+  const webClientFilePathUrlSourceCount = Math.max(0, Number(bundleIntegration?.webClientFilePathUrlSourceCount || 0));
+  const webClientTemplateUrlSourceCount = Math.max(0, Number(bundleIntegration?.webClientTemplateUrlSourceCount || 0));
+  const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
     ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} ${gatewayRouteSummary}`
     : '';
@@ -1011,6 +1013,8 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             webclient <strong>{webClientFallbackSourceCount}</strong>
+            {' '}path <strong>{webClientFilePathUrlSourceCount}</strong>
+            {' '}template <strong>{webClientTemplateUrlSourceCount}</strong>
           </span>
         </div>
       ) : null}
