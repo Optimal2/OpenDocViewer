@@ -6,8 +6,8 @@
  * embedding base64 JSON directly in the viewer URL.
  */
 
-const MAX_RESPONSE_TEXT_LEN = 64_000_000;
-const SESSION_URL_TIMEOUT_MS = 15_000;
+const MAX_RESPONSE_TEXT_LEN = 256_000_000;
+const SESSION_URL_TIMEOUT_MS = 180_000;
 
 /**
  * @typedef {Object} SessionUrlResult
@@ -27,6 +27,10 @@ function readSessionUrlParameter() {
   }
 
   return null;
+}
+
+export function hasSessionUrlParameter() {
+  return !!readSessionUrlParameter();
 }
 
 function nowMs() {

@@ -13,7 +13,7 @@
 
 import { readFromParent } from './parentBridge.js';
 import { readFromSessionToken } from './sessionToken.js';
-import { readFromSessionUrl } from './sessionUrl.js';
+import { hasSessionUrlParameter, readFromSessionUrl } from './sessionUrl.js';
 import { readFromUrlParams } from './urlParams.js';
 import { normalizeToPortableBundle } from './normalizePortableBundle.js';
 
@@ -306,6 +306,7 @@ export async function bootstrapDetect(options = {}) {
   // Explicit URL payloads must win over the same-origin parent bridge. Gateway integrations can run
   // inside a WebClient page that still exposes its original parent bootstrap data; choosing parent
   // first would silently bypass the prepared gateway bundle.
+  const explicitSessionUrlRequested = hasSessionUrlParameter();
   try {
     const sessionUrlCandidate = await probeSessionUrl();
     if (sessionUrlCandidate?.data) {
@@ -325,6 +326,17 @@ export async function bootstrapDetect(options = {}) {
       }
     }
   } catch {}
+  if (explicitSessionUrlRequested) {
+    return {
+      mode: ODV_BOOTSTRAP_MODES.DEMO,
+      debugInfo: makeDebugInfo(
+        ODV_BOOTSTRAP_MODES.DEMO,
+        'session-url-unavailable',
+        undefined,
+        diagnosticsEnabled
+      ),
+    };
+  }
 
   // 2) Parent page (same-origin bridge)
   try {
