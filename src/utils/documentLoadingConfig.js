@@ -174,6 +174,14 @@ function detectBrowserFamily() {
   return 'unknown';
 }
 
+function getReportedCoreCount() {
+  try {
+    return Math.max(0, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 0));
+  } catch {
+    return 0;
+  }
+}
+
 /**
  * @param {number} preferred
  * @param {DocumentLoadingMode=} mode
@@ -183,14 +191,31 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   const explicit = Math.max(0, Number(preferred) || 0);
   if (explicit > 0) return explicit;
 
-  let cores = 0;
-  try {
-    cores = Math.max(0, Math.floor(Number(globalThis.navigator?.hardwareConcurrency) || 0));
-  } catch {}
-
+  const cores = getReportedCoreCount();
   const suggested = Math.max(4, cores);
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
+
+  if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
+  return Math.max(1, Math.min(browserCap, suggested));
+}
+
+/**
+ * @param {number} preferred
+ * @param {DocumentLoadingMode=} mode
+ * @returns {number}
+ */
+function resolveRecommendedRasterWorkerCount(preferred = 0, mode = 'auto') {
+  const explicit = Math.max(0, Number(preferred) || 0);
+  if (explicit > 0) return explicit;
+
+  const cores = getReportedCoreCount();
+  const browserFamily = detectBrowserFamily();
+  const browserCap = browserFamily === 'firefox' ? 8 : 32;
+  let suggested = Math.max(4, cores);
+  if (browserFamily !== 'firefox' && cores >= 6) {
+    suggested = Math.max(8, suggested);
+  }
 
   if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
   return Math.max(1, Math.min(browserCap, suggested));
@@ -249,7 +274,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
     render: {
       strategy: 'eager-nearby',
       backend: 'hybrid-by-format',
-      workerCount: resolveRecommendedWorkerCount(0, 'auto'),
+      workerCount: resolveRecommendedRasterWorkerCount(0, 'auto'),
       useWorkersForRasterImages: true,
       useWorkersForTiff: true,
       pdfToImageMode: 'auto',
@@ -649,7 +674,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.fetch.prefetchConcurrency = 6;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 2048;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 4096;
-      base.render.workerCount = resolveRecommendedWorkerCount(0, 'performance');
+      base.render.workerCount = resolveRecommendedRasterWorkerCount(0, 'performance');
       base.render.maxConcurrentMainThreadRenders = 3;
       base.render.maxConcurrentAssetRenders = 3;
       break;
@@ -657,7 +682,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.fetch.prefetchConcurrency = 4;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1536;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 3072;
-      base.render.workerCount = resolveRecommendedWorkerCount(0, 'auto');
+      base.render.workerCount = resolveRecommendedRasterWorkerCount(0, 'auto');
       base.render.maxConcurrentMainThreadRenders = 2;
       base.render.maxConcurrentAssetRenders = 2;
       break;
@@ -665,7 +690,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.fetch.prefetchConcurrency = 3;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 1024;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 2048;
-      base.render.workerCount = resolveRecommendedWorkerCount(0, 'auto');
+      base.render.workerCount = resolveRecommendedRasterWorkerCount(0, 'auto');
       base.render.maxConcurrentMainThreadRenders = 2;
       base.render.maxConcurrentAssetRenders = 2;
       break;
@@ -673,7 +698,7 @@ function buildAdaptiveDefaults(adaptiveRaw = {}) {
       base.fetch.prefetchConcurrency = 1;
       base.sourceStore.switchToIndexedDbAboveTotalMiB = 256;
       base.assetStore.switchToIndexedDbAboveTotalMiB = 512;
-      base.render.workerCount = resolveRecommendedWorkerCount(1, 'memory');
+      base.render.workerCount = resolveRecommendedRasterWorkerCount(1, 'memory');
       base.render.maxConcurrentMainThreadRenders = 1;
       base.render.maxConcurrentAssetRenders = 1;
       base.render.fullPageCacheLimit = 16;
@@ -703,7 +728,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
     next.render.backend = 'hybrid-by-format';
     next.render.useWorkersForRasterImages = true;
     next.render.useWorkersForTiff = true;
-    next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'performance');
+    next.render.workerCount = resolveRecommendedRasterWorkerCount(next.render.workerCount, 'performance');
     next.render.maxConcurrentMainThreadRenders = Math.max(3, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
     next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
     next.render.warmupBatchSize = Math.max(48, next.render.warmupBatchSize || 0);
@@ -727,7 +752,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
     next.render.backend = next.render.backend === 'main-only' ? 'main-only' : 'hybrid-by-format';
     next.render.useWorkersForRasterImages = true;
     next.render.useWorkersForTiff = true;
-    next.render.workerCount = Math.min(2, resolveRecommendedWorkerCount(next.render.workerCount, 'memory'));
+    next.render.workerCount = Math.min(2, resolveRecommendedRasterWorkerCount(next.render.workerCount, 'memory'));
     next.render.maxConcurrentMainThreadRenders = 1;
     next.render.maxConcurrentAssetRenders = 1;
     next.render.warmupBatchSize = Math.min(8, Math.max(1, next.render.warmupBatchSize || 8));
@@ -750,7 +775,7 @@ export function applyDocumentLoadingMode(baseConfig, mode) {
   next.render.pdfToImageMode = normalizePdfToImageMode(next.render.pdfToImageMode, DOCUMENT_LOADING_DEFAULTS.render.pdfToImageMode);
   next.render.pdfWorkerCount = Math.max(0, Number(next.render.pdfWorkerCount) || 0);
   next.render.pdfWorkerPagePolicy = normalizePdfWorkerPagePolicy(next.render.pdfWorkerPagePolicy);
-  next.render.workerCount = resolveRecommendedWorkerCount(next.render.workerCount, 'auto');
+  next.render.workerCount = resolveRecommendedRasterWorkerCount(next.render.workerCount, 'auto');
   next.render.maxConcurrentMainThreadRenders = Math.max(1, next.render.maxConcurrentMainThreadRenders || next.render.maxConcurrentAssetRenders || 1);
   next.render.maxConcurrentAssetRenders = next.render.maxConcurrentMainThreadRenders;
   next.render.warmupBatchSize = Math.max(24, next.render.warmupBatchSize || 24);
@@ -773,7 +798,7 @@ export function applyMemoryPressureStage(baseConfig, stage) {
   next.fetch.prefetchConcurrency = 1;
   next.assetStore.persistThumbnails = true;
   next.render.strategy = next.render.strategy === 'eager-all' ? 'eager-nearby' : next.render.strategy;
-  next.render.workerCount = Math.max(1, Math.min(3, resolveRecommendedWorkerCount(next.render.workerCount, 'memory')));
+  next.render.workerCount = Math.max(1, Math.min(3, resolveRecommendedRasterWorkerCount(next.render.workerCount, 'memory')));
   next.render.maxConcurrentMainThreadRenders = 2;
   next.render.maxConcurrentAssetRenders = 2;
   next.render.warmupBatchSize = Math.max(1, Math.min(12, next.render.warmupBatchSize || 12));
