@@ -622,14 +622,19 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const bootstrapParseMs = Math.max(0, Number(bootstrapTiming?.parseMs || 0));
   const bootstrapTotalMs = Math.max(0, Number(bootstrapTiming?.totalMs || 0));
   const bootstrapResponseTextBytes = Math.max(0, Number(bootstrapTiming?.responseTextBytes || 0));
-  const fetchStrategy = String(documentLoadingConfig?.fetch?.strategy || 'sequential');
-  const fetchConcurrency = Math.max(1, Number(documentLoadingConfig?.fetch?.prefetchConcurrency || 1));
-  const fetchSummary = fetchStrategy === 'parallel-limited'
-    ? `${fetchStrategy} c${fetchConcurrency}`
-    : fetchStrategy;
   const integrationSource = String(bundleIntegration?.source || '').trim();
   const integrationMode = String(bundleIntegration?.mode || '').trim();
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
+  const integrationSourceTransport = String(bundleIntegration?.sourceTransport || '').trim();
+  const sourcePackFormat = String(bundleIntegration?.sourcePackFormat || '').trim();
+  const sourcePackSourceCount = Math.max(0, Number(bundleIntegration?.sourcePackSourceCount || 0));
+  const fetchStrategy = String(documentLoadingConfig?.fetch?.strategy || 'sequential');
+  const fetchConcurrency = Math.max(1, Number(documentLoadingConfig?.fetch?.prefetchConcurrency || 1));
+  const fetchSummary = integrationSourceTransport === 'source-pack-stream'
+    ? `source-pack ${sourcePackFormat || '-'}`
+    : fetchStrategy === 'parallel-limited'
+    ? `${fetchStrategy} c${fetchConcurrency}`
+    : fetchStrategy;
   const gatewayInlineSourceCount = Math.max(0, Number(bundleIntegration?.inlineSourceCount || 0));
   const gatewayInlineSourceBytes = Math.max(0, Number(bundleIntegration?.inlineSourceBytes || 0));
   const remoteInlineSourceCount = Math.max(0, Number(bundleIntegration?.remoteInlineSourceCount || 0));
@@ -655,7 +660,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
   const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} proxy ${webClientGatewayProxySourceCount}${webClientGatewayProxyThreshold > 0 ? `>${webClientGatewayProxyThreshold}` : ''}${webClientGatewayProxyMaxConcurrency > 0 ? ` c${webClientGatewayProxyMaxConcurrency}` : ''} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
-    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} cap ${remoteInlineMaxCountLabel} budget ${remoteInlineMaxTotalBytes > 0 ? formatBytes(remoteInlineMaxTotalBytes) : '-'} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} source ${integrationSourceTransport || '-'} ${sourcePackFormat || '-'} ${sourcePackSourceCount || 0} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} cap ${remoteInlineMaxCountLabel} budget ${remoteInlineMaxTotalBytes > 0 ? formatBytes(remoteInlineMaxTotalBytes) : '-'} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
     : '';
   const bootstrapTimingSnapshotLine = bootstrapTotalMs > 0
     ? `Bootstrap timing: bundle ${formatMilliseconds(bootstrapTotalMs)} fetch ${formatMilliseconds(bootstrapFetchMs)} text ${formatMilliseconds(bootstrapTextMs)} parse ${formatMilliseconds(bootstrapParseMs)} size ${formatBytes(bootstrapResponseTextBytes)}`
@@ -1035,6 +1040,11 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             transport <strong>{integrationTransport || '-'}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            source <strong>{integrationSourceTransport || '-'}</strong>
+            {' '}{sourcePackFormat || '-'}
+            {' '}<strong>{sourcePackSourceCount || 0}</strong>
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             inline <strong>{gatewayInlineSourceCount}</strong> {formatBytes(gatewayInlineSourceBytes)}

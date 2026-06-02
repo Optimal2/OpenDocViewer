@@ -47,6 +47,8 @@ import {
  * @property {string=} inlineBase64
  * @property {string=} inlineMimeType
  * @property {number=} inlineSizeBytes
+ * @property {string=} sourcePackUrl
+ * @property {string=} sourcePackFormat
  * @property {number=} pageCountHint
  * @property {string=} pageCountHintSource
  * @property {string=} sourceKind
@@ -809,6 +811,46 @@ function buildInlineSourceBlob(entry) {
   }
 }
 
+const SOURCE_PACK_MAGIC = 'ODVSP1\n';
+const SOURCE_PACK_HEADER_LIMIT_BYTES = 64 * 1024;
+
+function getSourcePackUrl(entries) {
+  if (!Array.isArray(entries) || entries.length <= 0) return '';
+  const first = entries.find((entry) => typeof entry?.sourcePackUrl === 'string' && entry.sourcePackUrl.trim());
+  return first ? String(first.sourcePackUrl).trim() : '';
+}
+
+function readUint32LittleEndian(bytes) {
+  if (!(bytes instanceof Uint8Array) || bytes.length < 4) return 0;
+  return (bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24)) >>> 0;
+}
+
+async function readExactStreamBytes(reader, state, length) {
+  const expectedLength = Math.max(0, Number(length) || 0);
+  if (expectedLength <= 0) return new Uint8Array(0);
+
+  const output = new Uint8Array(expectedLength);
+  let written = 0;
+
+  while (written < expectedLength) {
+    if (!state.chunk || state.offset >= state.chunk.length) {
+      const next = await reader.read();
+      if (next.done) return null;
+      state.chunk = next.value instanceof Uint8Array ? next.value : new Uint8Array(next.value || []);
+      state.offset = 0;
+      if (state.chunk.length <= 0) continue;
+    }
+
+    const available = state.chunk.length - state.offset;
+    const take = Math.min(available, expectedLength - written);
+    output.set(state.chunk.subarray(state.offset, state.offset + take), written);
+    state.offset += take;
+    written += take;
+  }
+
+  return output;
+}
+
 /**
  * @param {string} ext
  * @returns {string}
@@ -1012,6 +1054,8 @@ function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoForma
         inlineBase64: typeof item?.inlineBase64 === 'string' && item.inlineBase64 ? item.inlineBase64 : undefined,
         inlineMimeType: typeof item?.inlineMimeType === 'string' && item.inlineMimeType ? item.inlineMimeType : undefined,
         inlineSizeBytes: toPositiveIntOrUndefined(item?.inlineSizeBytes),
+        sourcePackUrl: typeof item?.sourcePackUrl === 'string' && item.sourcePackUrl ? item.sourcePackUrl : undefined,
+        sourcePackFormat: typeof item?.sourcePackFormat === 'string' && item.sourcePackFormat ? item.sourcePackFormat : undefined,
         pageCountHint: toPositiveIntOrUndefined(item?.pageCountHint),
         pageCountHintSource: typeof item?.pageCountHintSource === 'string' && item.pageCountHintSource
           ? item.pageCountHintSource
@@ -1465,6 +1509,189 @@ const DocumentLoader = ({
       };
     });
 
+    const createSourcePackPrefetchTasks = (sourcePackUrl) => {
+      const deferreds = entries.map(() => {
+        /** @type {(value: PrefetchResult) => void} */
+        let resolve = () => {};
+        const promise = new Promise((nextResolve) => { resolve = nextResolve; });
+        return { promise, resolve, settled: false };
+      });
+
+      const settle = (index, result) => {
+        const target = deferreds[index];
+        if (!target || target.settled) return;
+        target.settled = true;
+        target.resolve(result);
+      };
+
+      const settleMissing = (error) => {
+        entries.forEach((entry, index) => {
+          settle(index, {
+            ok: false,
+            error,
+            fileIndex: entry.fileIndex,
+            url: entry.url,
+          });
+        });
+      };
+
+      const runSourcePack = async () => {
+        const controller = new AbortController();
+        activeControllersRef.current.add(controller);
+        const decoder = new TextDecoder();
+
+        try {
+          const response = await fetch(sourcePackUrl, {
+            signal: controller.signal,
+            cache: 'no-store',
+            credentials: 'same-origin',
+          });
+          if (!response.ok) throw createPrefetchHttpError(sourcePackUrl, response.status);
+          if (!response.body || typeof response.body.getReader !== 'function') {
+            throw new Error('Source pack stream is not available in this browser.');
+          }
+
+          const reader = response.body.getReader();
+          const state = { chunk: null, offset: 0 };
+          const magicBytes = await readExactStreamBytes(reader, state, SOURCE_PACK_MAGIC.length);
+          if (!magicBytes || decoder.decode(magicBytes) !== SOURCE_PACK_MAGIC) {
+            throw new Error('Source pack stream has an invalid signature.');
+          }
+
+          while (!shouldStopRun()) {
+            const frameStartedAt = nowMs();
+            const headerLengthBytes = await readExactStreamBytes(reader, state, 4);
+            if (!headerLengthBytes) break;
+
+            const headerLength = readUint32LittleEndian(headerLengthBytes);
+            if (headerLength === 0) break;
+            if (headerLength > SOURCE_PACK_HEADER_LIMIT_BYTES) {
+              throw new Error(`Source pack frame header is too large (${headerLength} bytes).`);
+            }
+
+            const headerBytes = await readExactStreamBytes(reader, state, headerLength);
+            if (!headerBytes) throw new Error('Source pack stream ended inside a frame header.');
+            const header = JSON.parse(decoder.decode(headerBytes));
+            const payloadBytes = Math.max(0, Number(header?.payloadBytes || 0));
+            const payload = await readExactStreamBytes(reader, state, payloadBytes);
+            if (!payload) throw new Error('Source pack stream ended inside a frame payload.');
+            recordLoaderPhaseTiming?.('fetch', nowMs() - frameStartedAt);
+
+            const fileIndex = Math.max(0, Number(header?.fileIndex || 0));
+            const entry = entries[fileIndex];
+            if (!entry) continue;
+
+            if (header?.ok === false) {
+              settle(fileIndex, {
+                ok: false,
+                error: new Error(String(header?.error || 'Source pack frame failed.')),
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+              });
+              continue;
+            }
+
+            const blob = new Blob([payload], {
+              type: String(header?.contentType || entry.inlineMimeType || mimeForExtension(entry.ext) || 'application/octet-stream'),
+            });
+            const sourceIdentity = describeDocumentSourceKey(entry, fileIndex);
+            const sourceKey = sourceIdentity.sourceKey;
+
+            try {
+              const typeStartedAt = nowMs();
+              const resolvedPayload = await resolveFetchedSourcePayload({
+                entry,
+                blob,
+                responseMimeType: header?.contentType || blob.type,
+              });
+
+              await validateFetchedSourceBlob({
+                entry,
+                blob,
+                detectedType: resolvedPayload.detectedType,
+                mimeType: resolvedPayload.mimeType,
+                fileExtension: resolvedPayload.fileExtension,
+                headBytes: resolvedPayload.headBytes,
+              });
+              recordLoaderPhaseTiming?.('type', nowMs() - typeStartedAt);
+
+              const storeStartedAt = nowMs();
+              const stored = await storeSourceBlob({
+                sourceKey,
+                blob,
+                fileExtension: resolvedPayload.fileExtension,
+                mimeType: resolvedPayload.mimeType,
+                originalUrl: entry.url,
+                fileIndex: entry.fileIndex,
+              });
+              recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
+
+              const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
+                || await resolvePrefetchedPageCountHint({
+                  sourceKey,
+                  url: entry.url,
+                  blob,
+                  fileExtension: resolvedPayload.fileExtension,
+                  recordLoaderPhaseTiming,
+                });
+
+              settle(fileIndex, {
+                ok: true,
+                sourceKey,
+                fileExtension: resolvedPayload.fileExtension,
+                mimeType: resolvedPayload.mimeType,
+                sizeBytes: Number(blob.size || 0),
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+                cacheKeyMode: sourceIdentity.mode,
+                stats: stored?.stats || null,
+                analysisBlob: blob,
+                pageCountHint,
+              });
+            } catch (error) {
+              settle(fileIndex, {
+                ok: false,
+                error,
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+              });
+            }
+          }
+
+          entries.forEach((entry, index) => {
+            settle(index, {
+              ok: false,
+              error: new Error('Source pack stream ended before this source was received.'),
+              fileIndex: entry.fileIndex,
+              url: entry.url,
+            });
+          });
+        } catch (error) {
+          if (controller.signal.aborted || cancelled) {
+            entries.forEach((entry, index) => {
+              settle(index, {
+                ok: false,
+                aborted: true,
+                fileIndex: entry.fileIndex,
+                url: entry.url,
+              });
+            });
+          } else {
+            logger.error('Source pack prefetch failed', {
+              url: sourcePackUrl,
+              error: String(error?.message || error),
+            });
+            settleMissing(error);
+          }
+        } finally {
+          activeControllersRef.current.delete(controller);
+        }
+      };
+
+      void runSourcePack();
+      return deferreds.map((item) => item.promise);
+    };
+
     const run = async () => {
       setError(null);
       setWorkerCount(0);
@@ -1532,7 +1759,11 @@ const DocumentLoader = ({
       const tempStoreProtected = config.sourceStore.protection === 'aes-gcm-session';
       const isSequentialFetch = String(config.fetch.strategy || 'parallel-limited').toLowerCase() === 'sequential';
       const abortOnSourceUnavailableCount = Math.max(0, Number(config.fetch.abortOnSourceUnavailableCount) || 0);
-      const prefetchTasks = isSequentialFetch
+      const sourcePackUrl = getSourcePackUrl(entries);
+      const sourcePackTasks = sourcePackUrl
+        ? createSourcePackPrefetchTasks(sourcePackUrl)
+        : null;
+      const prefetchTasks = isSequentialFetch || sourcePackTasks
         ? null
         : entries.map((entry, orderIndex) => prefetchSource(entry, orderIndex));
       const documentProgress = new Map();
@@ -1541,7 +1772,9 @@ const DocumentLoader = ({
         if (cancelled) break;
 
         const entry = entries[i];
-        const result = isSequentialFetch
+        const result = sourcePackTasks
+          ? await sourcePackTasks[i]
+          : isSequentialFetch
           ? await prefetchSource(entry, i)
           : await prefetchTasks[i];
         if (shouldStopRun() || result.aborted) break;
