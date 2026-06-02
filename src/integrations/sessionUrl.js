@@ -29,6 +29,15 @@ function readSessionUrlParameter() {
   return null;
 }
 
+function nowMs() {
+  try {
+    if (typeof performance !== 'undefined' && typeof performance.now === 'function') {
+      return performance.now();
+    }
+  } catch {}
+  return Date.now();
+}
+
 function resolveHttpUrl(rawUrl) {
   if (!rawUrl || typeof window === 'undefined') return null;
 
@@ -73,6 +82,7 @@ export async function readFromSessionUrl() {
   const parameter = readSessionUrlParameter();
   const url = resolveHttpUrl(parameter?.value);
   if (!url) return null;
+  const startedMs = nowMs();
 
   const controller = typeof AbortController !== 'undefined'
     ? new AbortController()
@@ -98,13 +108,16 @@ export async function readFromSessionUrl() {
   } finally {
     if (timeoutId) clearTimeout(timeoutId);
   }
+  const fetchMs = nowMs() - startedMs;
 
   if (!response.ok) {
     warnSessionUrl(`Session URL returned HTTP ${response.status} ${response.statusText}.`);
     return null;
   }
 
+  const textStartedMs = nowMs();
   const text = await response.text();
+  const textMs = nowMs() - textStartedMs;
   if (!text) {
     warnSessionUrl('Session URL returned an empty response.');
     return null;
@@ -116,7 +129,20 @@ export async function readFromSessionUrl() {
   }
 
   try {
-    return { source: parameter?.source || 'sessionurl', data: JSON.parse(text) };
+    const parseStartedMs = nowMs();
+    const data = JSON.parse(text);
+    const parseMs = nowMs() - parseStartedMs;
+    return {
+      source: parameter?.source || 'sessionurl',
+      data,
+      timing: {
+        fetchMs,
+        textMs,
+        parseMs,
+        totalMs: nowMs() - startedMs,
+        responseTextBytes: text.length
+      }
+    };
   } catch (error) {
     warnSessionUrl('Session URL response was not valid JSON.', error);
     return null;

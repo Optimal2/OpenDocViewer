@@ -616,6 +616,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const bundleSourceSummary = useMemo(() => summarizeBundleSources(bundle), [bundle]);
   const bootstrapMode = String(bootstrapDebugInfo?.mode || '').trim();
   const bootstrapSource = String(bootstrapDebugInfo?.hostPayloadSource || '').trim();
+  const bootstrapTiming = isPlainObject(bootstrapDebugInfo?.timing) ? bootstrapDebugInfo.timing : {};
+  const bootstrapFetchMs = Math.max(0, Number(bootstrapTiming?.fetchMs || 0));
+  const bootstrapTextMs = Math.max(0, Number(bootstrapTiming?.textMs || 0));
+  const bootstrapParseMs = Math.max(0, Number(bootstrapTiming?.parseMs || 0));
+  const bootstrapTotalMs = Math.max(0, Number(bootstrapTiming?.totalMs || 0));
+  const bootstrapResponseTextBytes = Math.max(0, Number(bootstrapTiming?.responseTextBytes || 0));
   const integrationSource = String(bundleIntegration?.source || '').trim();
   const integrationMode = String(bundleIntegration?.mode || '').trim();
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
@@ -625,6 +631,8 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const remoteInlineSourceBytes = Math.max(0, Number(bundleIntegration?.remoteInlineSourceBytes || 0));
   const remoteInlineAttemptCount = Math.max(0, Number(bundleIntegration?.remoteInlineAttemptCount || 0));
   const remoteInlineFailureCount = Math.max(0, Number(bundleIntegration?.remoteInlineFailureCount || 0));
+  const remoteInlineMaxConcurrency = Math.max(0, Number(bundleIntegration?.remoteInlineMaxConcurrency || 0));
+  const gatewayBundleBuildMs = Math.max(0, Number(bundleIntegration?.gatewayBundleBuildMs || 0));
   const directReadableSourceCount = Math.max(0, Number(bundleIntegration?.directReadableSourceCount || 0));
   const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
   const gatewaySourceUrlCount = Math.max(0, Number(bundleIntegration?.gatewaySourceUrlCount || 0));
@@ -636,7 +644,10 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
   const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
-    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} ${formatBytes(remoteInlineSourceBytes)} ${gatewayRouteSummary}`
+    ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
+    : '';
+  const bootstrapTimingSnapshotLine = bootstrapTotalMs > 0
+    ? `Bootstrap timing: bundle ${formatMilliseconds(bootstrapTotalMs)} fetch ${formatMilliseconds(bootstrapFetchMs)} text ${formatMilliseconds(bootstrapTextMs)} parse ${formatMilliseconds(bootstrapParseMs)} size ${formatBytes(bootstrapResponseTextBytes)}`
     : '';
   const sourceHintsSnapshotLine = (sourcePageCountHintCount > 0 || sourcePageCountHintMissingCount > 0)
     ? `Hints: pages ${sourcePageCountHintCount}/${sourcePageCountHintCount + sourcePageCountHintMissingCount} total ${sourcePageCountHintTotal}`
@@ -648,6 +659,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Fetch: ${String(documentLoadingConfig?.fetch?.strategy || 'sequential')} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
     `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel}${pdfWarmupBatchLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
     `Bootstrap: ${bootstrapMode || '-'} source ${bootstrapSource || '-'}`,
+    ...(bootstrapTimingSnapshotLine ? [bootstrapTimingSnapshotLine] : []),
     `Bundle: docs ${bundleSourceSummary.documentCount} files ${bundleSourceSummary.fileCount} inline ${bundleSourceSummary.inlineFileCount} ${formatBytes(bundleSourceSummary.inlineBytes)}`,
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
@@ -1018,7 +1030,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             remote <strong>{remoteInlineSourceCount}</strong>/<strong>{remoteInlineAttemptCount}</strong>
-            {' '}fail <strong>{remoteInlineFailureCount}</strong> {formatBytes(remoteInlineSourceBytes)}
+            {' '}fail <strong>{remoteInlineFailureCount}</strong>
+            {' '}c<strong>{remoteInlineMaxConcurrency || '-'}</strong>
+            {' '}{formatBytes(remoteInlineSourceBytes)}
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            build <strong>{formatMilliseconds(gatewayBundleBuildMs)}</strong>
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             direct <strong>{directReadableSourceCount}</strong>/<strong>{directMissingSourceCount}</strong>
@@ -1030,6 +1047,25 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             webclient <strong>{webClientFallbackSourceCount}</strong>
             {' '}path <strong>{webClientFilePathUrlSourceCount}</strong>
             {' '}template <strong>{webClientTemplateUrlSourceCount}</strong>
+          </span>
+        </div>
+      ) : null}
+
+      {bootstrapTimingSnapshotLine ? (
+        <div style={sectionStyle}>
+          <span style={labelStyle}>{t('perf.bootstrapTimingLabel', { defaultValue: 'Bootstrap timing:' })}</span>{' '}
+          bundle <strong>{formatMilliseconds(bootstrapTotalMs)}</strong>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            fetch <strong>{formatMilliseconds(bootstrapFetchMs)}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            text <strong>{formatMilliseconds(bootstrapTextMs)}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            parse <strong>{formatMilliseconds(bootstrapParseMs)}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            size <strong>{formatBytes(bootstrapResponseTextBytes)}</strong>
           </span>
         </div>
       ) : null}
