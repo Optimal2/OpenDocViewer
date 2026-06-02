@@ -47,6 +47,10 @@ import {
  * @property {string=} inlineBase64
  * @property {string=} inlineMimeType
  * @property {number=} inlineSizeBytes
+ * @property {number=} pageCountHint
+ * @property {string=} pageCountHintSource
+ * @property {string=} sourceKind
+ * @property {number=} sourceSizeBytes
  */
 
 /**
@@ -106,6 +110,10 @@ import {
  * @property {string=} inlineBase64
  * @property {string=} inlineMimeType
  * @property {number=} inlineSizeBytes
+ * @property {number=} pageCountHint
+ * @property {string=} pageCountHintSource
+ * @property {string=} sourceKind
+ * @property {number=} sourceSizeBytes
  */
 
 /**
@@ -386,6 +394,37 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
 function needsPageCountAnalysis(fileExtension) {
   const normalized = normalizeExtension(fileExtension);
   return normalized === 'pdf' || normalized === 'tiff';
+}
+
+/**
+ * @param {*} entry
+ * @param {string} resolvedFileExtension
+ * @returns {(number|undefined)}
+ */
+function resolveTrustedEntryPageCountHint(entry, resolvedFileExtension) {
+  const hint = toPositiveIntOrUndefined(entry?.pageCountHint);
+  if (!hint) return undefined;
+
+  const entryExt = normalizeExtension(entry?.ext || inferUrlExtension(entry?.url || ''));
+  const resolvedExt = normalizeExtension(resolvedFileExtension);
+  if (entryExt && resolvedExt && entryExt !== resolvedExt) return undefined;
+
+  return hint;
+}
+
+/**
+ * @param {Array<ResolvedEntry>} entries
+ * @returns {number}
+ */
+function resolveExactPlannedPageCount(entries) {
+  if (!Array.isArray(entries) || entries.length <= 0) return 0;
+  let total = 0;
+  for (const entry of entries) {
+    const hint = toPositiveIntOrUndefined(entry?.pageCountHint);
+    if (!hint) return 0;
+    total += hint;
+  }
+  return total;
 }
 
 /**
@@ -973,6 +1012,12 @@ function resolveEntries(sourceList, demoMode, demoStrategy, demoCount, demoForma
         inlineBase64: typeof item?.inlineBase64 === 'string' && item.inlineBase64 ? item.inlineBase64 : undefined,
         inlineMimeType: typeof item?.inlineMimeType === 'string' && item.inlineMimeType ? item.inlineMimeType : undefined,
         inlineSizeBytes: toPositiveIntOrUndefined(item?.inlineSizeBytes),
+        pageCountHint: toPositiveIntOrUndefined(item?.pageCountHint),
+        pageCountHintSource: typeof item?.pageCountHintSource === 'string' && item.pageCountHintSource
+          ? item.pageCountHintSource
+          : undefined,
+        sourceKind: typeof item?.sourceKind === 'string' && item.sourceKind ? item.sourceKind : undefined,
+        sourceSizeBytes: toPositiveIntOrUndefined(item?.sourceSizeBytes),
       }))
       .filter((item) => !!item.url);
   }
@@ -1093,6 +1138,7 @@ const DocumentLoader = ({
       extension,
       endNumber
     );
+    const exactPlannedPageCount = resolveExactPlannedPageCount(entries);
 
     logger.info('DocumentLoader run started', {
       sourceCount: entries.length,
@@ -1188,13 +1234,14 @@ const DocumentLoader = ({
               sizeBytes: Number(cachedBlob.size || 0),
             });
 
-            const pageCountHint = await resolvePrefetchedPageCountHint({
-              sourceKey,
-              url: entry.url,
-              blob: cachedBlob,
-              fileExtension: resolvedPayload.fileExtension,
-              recordLoaderPhaseTiming,
-            });
+            const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
+              || await resolvePrefetchedPageCountHint({
+                sourceKey,
+                url: entry.url,
+                blob: cachedBlob,
+                fileExtension: resolvedPayload.fileExtension,
+                recordLoaderPhaseTiming,
+              });
 
             return {
               ok: true,
@@ -1250,13 +1297,14 @@ const DocumentLoader = ({
           });
           recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
 
-          const pageCountHint = await resolvePrefetchedPageCountHint({
-            sourceKey,
-            url: entry.url,
-            blob: inlineBlob,
-            fileExtension: resolvedPayload.fileExtension,
-            recordLoaderPhaseTiming,
-          });
+          const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
+            || await resolvePrefetchedPageCountHint({
+              sourceKey,
+              url: entry.url,
+              blob: inlineBlob,
+              fileExtension: resolvedPayload.fileExtension,
+              recordLoaderPhaseTiming,
+            });
 
           return {
             ok: true,
@@ -1336,13 +1384,14 @@ const DocumentLoader = ({
           });
           recordLoaderPhaseTiming?.('store', nowMs() - storeStartedAt);
 
-          const pageCountHint = await resolvePrefetchedPageCountHint({
-            sourceKey,
-            url: entry.url,
-            blob,
-            fileExtension: resolvedPayload.fileExtension,
-            recordLoaderPhaseTiming,
-          });
+          const pageCountHint = resolveTrustedEntryPageCountHint(entry, resolvedPayload.fileExtension)
+            || await resolvePrefetchedPageCountHint({
+              sourceKey,
+              url: entry.url,
+              blob,
+              fileExtension: resolvedPayload.fileExtension,
+              recordLoaderPhaseTiming,
+            });
 
           return {
             ok: true,
@@ -1469,7 +1518,7 @@ const DocumentLoader = ({
       if (shouldStopRun()) return;
 
       setLoadingRunActive(true);
-      setPlannedPageCount(0);
+      setPlannedPageCount(exactPlannedPageCount);
 
       let nextPageIndex = 0;
       let processedSourceCount = 0;
@@ -1551,7 +1600,7 @@ const DocumentLoader = ({
 
           nextPageIndex += failedPages.length;
           processedSourceCount += 1;
-          setPlannedPageCount(nextPageIndex);
+          setPlannedPageCount(exactPlannedPageCount || nextPageIndex);
 
           if (
             abortOnSourceUnavailableCount > 0
@@ -1656,7 +1705,7 @@ const DocumentLoader = ({
         }
 
         nextPageIndex += placeholders.length;
-        setPlannedPageCount(nextPageIndex);
+        setPlannedPageCount(exactPlannedPageCount || nextPageIndex);
 
         if (processedSourceCount === 1 && nextPageIndex > 0) {
           try { void ensurePageAsset(0, 'thumbnail', { priority: 'high' }); } catch {}

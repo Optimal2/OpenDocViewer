@@ -627,9 +627,15 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const webClientFallbackSourceCount = Math.max(0, Number(bundleIntegration?.webClientFallbackSourceCount || 0));
   const webClientFilePathUrlSourceCount = Math.max(0, Number(bundleIntegration?.webClientFilePathUrlSourceCount || 0));
   const webClientTemplateUrlSourceCount = Math.max(0, Number(bundleIntegration?.webClientTemplateUrlSourceCount || 0));
+  const sourcePageCountHintCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintCount || 0));
+  const sourcePageCountHintTotal = Math.max(0, Number(bundleIntegration?.sourcePageCountHintTotal || 0));
+  const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
   const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
     ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} ${gatewayRouteSummary}`
+    : '';
+  const sourceHintsSnapshotLine = (sourcePageCountHintCount > 0 || sourcePageCountHintMissingCount > 0)
+    ? `Hints: pages ${sourcePageCountHintCount}/${sourcePageCountHintCount + sourcePageCountHintMissingCount} total ${sourcePageCountHintTotal}`
     : '';
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
@@ -643,6 +649,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
     ...(integrationSnapshotLine ? [integrationSnapshotLine] : []),
+    ...(sourceHintsSnapshotLine ? [sourceHintsSnapshotLine] : []),
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
     `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} checked ${pageIntegrity.checkedPages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount} seq ${pageIntegrity.sequenceCount}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
@@ -1015,6 +1022,17 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
             webclient <strong>{webClientFallbackSourceCount}</strong>
             {' '}path <strong>{webClientFilePathUrlSourceCount}</strong>
             {' '}template <strong>{webClientTemplateUrlSourceCount}</strong>
+          </span>
+        </div>
+      ) : null}
+
+      {sourceHintsSnapshotLine ? (
+        <div style={sectionStyle}>
+          <span style={labelStyle}>{t('perf.sourceHintsLabel', { defaultValue: 'Hints:' })}</span>{' '}
+          pages <strong>{sourcePageCountHintCount}</strong>
+          /<strong>{sourcePageCountHintCount + sourcePageCountHintMissingCount}</strong>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            total <strong>{sourcePageCountHintTotal}</strong>
           </span>
         </div>
       ) : null}

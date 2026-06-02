@@ -23,6 +23,10 @@
  *   @property {(string|undefined)} inlineBase64
  *   @property {(string|undefined)} inlineMimeType
  *   @property {(number|undefined)} inlineSizeBytes
+ *   @property {(number|undefined)} pageCountHint
+ *   @property {(string|undefined)} pageCountHintSource
+ *   @property {(string|undefined)} sourceKind
+ *   @property {(number|undefined)} sourceSizeBytes
  *
  *   @typedef {Object} ExplicitSourceList
  *   @property {number} total
@@ -38,6 +42,10 @@
  * @property {(string|undefined)} inlineBase64
  * @property {(string|undefined)} inlineMimeType
  * @property {(number|undefined)} inlineSizeBytes
+ * @property {(number|undefined)} pageCountHint
+ * @property {(string|undefined)} pageCountHintSource
+ * @property {(string|undefined)} sourceKind
+ * @property {(number|undefined)} sourceSizeBytes
  */
 
 /**
@@ -204,6 +212,10 @@ export function makeExplicitSource(bundle) {
         inlineBase64: optionalText(file?.inlineBase64),
         inlineMimeType: optionalText(file?.inlineMimeType || file?.contentType),
         inlineSizeBytes: Number.isFinite(file?.inlineSizeBytes) ? Number(file.inlineSizeBytes) : undefined,
+        pageCountHint: Number.isFinite(file?.pageCountHint) ? Number(file.pageCountHint) : undefined,
+        pageCountHintSource: optionalText(file?.pageCountHintSource),
+        sourceKind: optionalText(file?.sourceKind),
+        sourceSizeBytes: Number.isFinite(file?.sourceSizeBytes) ? Number(file.sourceSizeBytes) : undefined,
       });
     }
   }
