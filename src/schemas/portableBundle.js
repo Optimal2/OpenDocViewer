@@ -45,6 +45,9 @@ export const PORTABLE_BUNDLE_SCHEMA_VERSION = 1;
  * @property {string} [ext]   - File extension without dot (e.g., "png", "tiff").
  * @property {string} [path]  - Local/relative path (for portable/embedded deployments).
  * @property {string} [url]   - Absolute/relative URL (for hosted deployments).
+ * @property {string} [inlineBase64]    - Optional Base64 source bytes for small files.
+ * @property {string} [inlineMimeType]  - Optional MIME type for inline source bytes.
+ * @property {number} [inlineSizeBytes] - Optional decoded byte count for inline source bytes.
  */
 
 /**

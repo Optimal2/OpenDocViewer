@@ -116,6 +116,13 @@ File reference rules:
 
 `path` is preserved by normalization, but the explicit-list loader currently needs `url` for actual browser loading. Treat `path` as diagnostic or host-context data unless a deployment explicitly maps it to a URL before startup.
 
+For gateway integrations that prepare many small raster files, a file entry may also include
+`inlineBase64`, `inlineMimeType`, and `inlineSizeBytes`. OpenDocViewer uses these source bytes
+directly and skips the network request for that file. Keep `url` populated as a fallback so the
+viewer can recover if inline bytes are missing, malformed, too large for the host to include, or
+rejected during validation. Inline bytes are intended for small source files; large PDFs and large
+image files should continue to use normal URLs.
+
 ## Host iframe preparation flow
 
 Some legacy host applications open OpenDocViewer in an iframe and pass only compact session data in

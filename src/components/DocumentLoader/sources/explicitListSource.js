@@ -20,6 +20,9 @@
  *   @property {(string|undefined)} fileId
  *   @property {(number|undefined)} documentFileNumber
  *   @property {(number|undefined)} documentFileCount
+ *   @property {(string|undefined)} inlineBase64
+ *   @property {(string|undefined)} inlineMimeType
+ *   @property {(number|undefined)} inlineSizeBytes
  *
  *   @typedef {Object} ExplicitSourceList
  *   @property {number} total
@@ -32,6 +35,9 @@
  * @property {(string|undefined)} id
  * @property {string} url
  * @property {(string|undefined)} ext
+ * @property {(string|undefined)} inlineBase64
+ * @property {(string|undefined)} inlineMimeType
+ * @property {(number|undefined)} inlineSizeBytes
  */
 
 /**
@@ -195,6 +201,9 @@ export function makeExplicitSource(bundle) {
         fileId: optionalText(file?.id),
         documentFileNumber: fileIndex + 1,
         documentFileCount: files.length,
+        inlineBase64: optionalText(file?.inlineBase64),
+        inlineMimeType: optionalText(file?.inlineMimeType || file?.contentType),
+        inlineSizeBytes: Number.isFinite(file?.inlineSizeBytes) ? Number(file.inlineSizeBytes) : undefined,
       });
     }
   }

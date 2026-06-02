@@ -217,6 +217,7 @@ function isPlainObject(value) {
 }
 
 const SENSITIVE_KEY_RE = /(auth|token|secret|password|passwd|authorization|cookie|apikey|api_key)/i;
+const LARGE_INLINE_KEY_RE = /^(inlineBase64|inlineData|dataUrl)$/i;
 
 /**
  * Redact auth-like values before showing transport payloads in the diagnostics HUD.
@@ -235,6 +236,11 @@ function sanitizeForOverlay(value, depth = 0) {
   for (const [key, entry] of Object.entries(value)) {
     if (SENSITIVE_KEY_RE.test(String(key || ''))) {
       out[key] = '[Masked]';
+      continue;
+    }
+    if (LARGE_INLINE_KEY_RE.test(String(key || ''))) {
+      const length = typeof entry === 'string' ? entry.length : 0;
+      out[key] = length > 0 ? `[Inline source bytes masked, ${length} chars]` : '[Inline source bytes masked]';
       continue;
     }
     out[key] = sanitizeForOverlay(entry, depth + 1);
@@ -577,6 +583,12 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
       runtimeDiagnostics?.loaderAnalysisMaxMs
     ),
   ].join(' | ');
+  const bundleIntegration = isPlainObject(bundle?.integration) ? bundle.integration : {};
+  const gatewayInlineSourceCount = Math.max(0, Number(bundleIntegration?.inlineSourceCount || 0));
+  const gatewayInlineSourceBytes = Math.max(0, Number(bundleIntegration?.inlineSourceBytes || 0));
+  const gatewayInlineSnapshotLine = gatewayInlineSourceCount > 0
+    ? `Gateway inline: ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)}`
+    : '';
   const overlaySnapshotText = [
     `OpenDocViewer performance ${new Date().toISOString()}`,
     `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
@@ -586,6 +598,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `Load run: ${formatDuration(loadRunElapsedMs)} ${loadRunTimingActive ? 'active' : 'done'}`,
     `Throughput: load ${formatRate(loadPageRate)} render ${formatRate(renderPageRate)} sources ${formatRate(sourceRate, 'src/s')}`,
     `Loader phases: ${loaderPhaseSummary}`,
+    ...(gatewayInlineSnapshotLine ? [gatewayInlineSnapshotLine] : []),
     `Pages: ${discoveredPages} full ${fullReadyCount}/${totalPages} thumbs ${thumbnailReadyCount}/${totalPages} failed ${failedPages}`,
     `Integrity: ${pageIntegrity.ok ? 'ok' : 'check'} checked ${pageIntegrity.checkedPages}/${totalPages} dup ${pageIntegrity.duplicatePages} missing ${pageIntegrity.missingPages} order ${pageIntegrity.orderIssues} index ${pageIntegrity.indexMismatches} sources ${pageIntegrity.sourceCount} seq ${pageIntegrity.sequenceCount}`,
     `Asset pipeline: render ${assetRenderCount} avg ${formatMilliseconds(assetRenderAvgMs)} max ${formatMilliseconds(assetRenderMaxMs)} restore ${Number(runtimeDiagnostics?.assetRestoreHitCount || 0)}/${Number(runtimeDiagnostics?.assetRestoreMissCount || 0)} avg ${formatMilliseconds(assetRestoreAvgMs)} persist ${Number(runtimeDiagnostics?.assetPersistPendingCount || 0)}/${assetPersistCompleted}/${assetPersistFailed} avg ${formatMilliseconds(assetPersistAvgMs)} max ${formatMilliseconds(assetPersistMaxMs)}`,
@@ -920,6 +933,16 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
         <span style={labelStyle}>{t('perf.loaderPhasesLabel', { defaultValue: 'Loader phases:' })}</span>{' '}
         <span style={{ opacity: 0.9 }}>{loaderPhaseSummary}</span>
       </div>
+
+      {gatewayInlineSourceCount > 0 ? (
+        <div style={sectionStyle}>
+          <span style={labelStyle}>{t('perf.gatewayInlineLabel', { defaultValue: 'Gateway inline:' })}</span>{' '}
+          <strong>{gatewayInlineSourceCount}</strong>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            {formatBytes(gatewayInlineSourceBytes)}
+          </span>
+        </div>
+      ) : null}
 
       <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.heapLabel')}</span>{' '}
