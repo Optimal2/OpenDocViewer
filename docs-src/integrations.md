@@ -130,6 +130,15 @@ Document Bundle contract once OpenDocViewer starts. An explicit `bundleUrl`/`ses
 parameter takes precedence over the same-origin parent bridge so embedded gateways are not bypassed
 by legacy parent-page bootstrap data.
 
+For larger prepared sessions, prefer source-pack streaming over per-file inline bytes. A host can
+set `bundle.integration.sourceTransport = 'source-pack-stream'`,
+`bundle.integration.sourcePackFormat = 'odvsp1'`, and `bundle.integration.sourcePackUrl` to a
+same-origin endpoint that returns an `ODVSP1` stream. Each file entry still needs a deterministic
+`url`, extension, id, and optional page-count hints so the viewer can preserve document order,
+diagnostics, and fallback behavior. The source-pack stream is treated as a transport optimization:
+OpenDocViewer validates each frame before storing it in the temporary in-memory source cache, then
+renders from that cache like any other explicit source list.
+
 ## Host iframe preparation flow
 
 Some legacy host applications open OpenDocViewer in an iframe and pass only compact session data in
