@@ -635,6 +635,8 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const remoteInlineMaxCount = Math.max(0, Number(bundleIntegration?.remoteInlineMaxCount || 0));
   const remoteInlineMaxCountLabel = remoteInlineMaxCount > 0 ? String(remoteInlineMaxCount) : 'all';
   const remoteInlineMaxTotalBytes = Math.max(0, Number(bundleIntegration?.remoteInlineMaxTotalBytes || 0));
+  const webClientGatewayProxySourceCount = Math.max(0, Number(bundleIntegration?.webClientGatewayProxySourceCount || 0));
+  const webClientGatewayProxyThreshold = Math.max(0, Number(bundleIntegration?.webClientGatewayProxyThreshold || 0));
   const gatewayBundleBuildMs = Math.max(0, Number(bundleIntegration?.gatewayBundleBuildMs || 0));
   const directReadableSourceCount = Math.max(0, Number(bundleIntegration?.directReadableSourceCount || 0));
   const directMissingSourceCount = Math.max(0, Number(bundleIntegration?.directMissingSourceCount || 0));
@@ -645,7 +647,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const sourcePageCountHintCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintCount || 0));
   const sourcePageCountHintTotal = Math.max(0, Number(bundleIntegration?.sourcePageCountHintTotal || 0));
   const sourcePageCountHintMissingCount = Math.max(0, Number(bundleIntegration?.sourcePageCountHintMissingCount || 0));
-  const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
+  const gatewayRouteSummary = `direct ${directReadableSourceCount}/${directMissingSourceCount} gateway ${gatewaySourceUrlCount} proxy ${webClientGatewayProxySourceCount}${webClientGatewayProxyThreshold > 0 ? `>${webClientGatewayProxyThreshold}` : ''} webclient ${webClientFallbackSourceCount} path ${webClientFilePathUrlSourceCount} template ${webClientTemplateUrlSourceCount}`;
   const integrationSnapshotLine = integrationSource || integrationMode || integrationTransport || gatewayInlineSourceCount > 0
     ? `Integration: ${integrationSource || '-'} mode ${integrationMode || '-'} transport ${integrationTransport || '-'} inline ${gatewayInlineSourceCount} sources ${formatBytes(gatewayInlineSourceBytes)} remote ${remoteInlineSourceCount}/${remoteInlineAttemptCount} fail ${remoteInlineFailureCount} c${remoteInlineMaxConcurrency || '-'} cap ${remoteInlineMaxCountLabel} budget ${remoteInlineMaxTotalBytes > 0 ? formatBytes(remoteInlineMaxTotalBytes) : '-'} ${formatBytes(remoteInlineSourceBytes)} build ${formatMilliseconds(gatewayBundleBuildMs)} ${gatewayRouteSummary}`
     : '';
@@ -1047,6 +1049,14 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             gateway <strong>{gatewaySourceUrlCount}</strong>
+          </span>
+          <span style={{ marginLeft: 8, opacity: 0.75 }}>
+            proxy <strong>{webClientGatewayProxySourceCount}</strong>
+            {webClientGatewayProxyThreshold > 0 ? (
+              <>
+                {' '}&gt;<strong>{webClientGatewayProxyThreshold}</strong>
+              </>
+            ) : null}
           </span>
           <span style={{ marginLeft: 8, opacity: 0.75 }}>
             webclient <strong>{webClientFallbackSourceCount}</strong>
