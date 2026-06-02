@@ -622,6 +622,11 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
   const bootstrapParseMs = Math.max(0, Number(bootstrapTiming?.parseMs || 0));
   const bootstrapTotalMs = Math.max(0, Number(bootstrapTiming?.totalMs || 0));
   const bootstrapResponseTextBytes = Math.max(0, Number(bootstrapTiming?.responseTextBytes || 0));
+  const fetchStrategy = String(documentLoadingConfig?.fetch?.strategy || 'sequential');
+  const fetchConcurrency = Math.max(1, Number(documentLoadingConfig?.fetch?.prefetchConcurrency || 1));
+  const fetchSummary = fetchStrategy === 'parallel-limited'
+    ? `${fetchStrategy} c${fetchConcurrency}`
+    : fetchStrategy;
   const integrationSource = String(bundleIntegration?.source || '').trim();
   const integrationMode = String(bundleIntegration?.mode || '').trim();
   const integrationTransport = String(bundleIntegration?.transport || '').trim();
@@ -662,7 +667,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
     `OpenDocViewer performance ${new Date().toISOString()}`,
     `FPS: ${fps || 0} CPU: ${hardwareConcurrency} cores RAM~${deviceMemory || 'n/a'}GB`,
     `Mode: ${String(documentLoadingConfig?.mode || 'auto')} Stage: ${String(memoryPressureStage || 'normal')} Workers: ${workerCount} PDF ${activePdfWorkerCount} raster ${activePageAssetWorkerCount}`,
-    `Fetch: ${String(documentLoadingConfig?.fetch?.strategy || 'sequential')} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
+    `Fetch: ${fetchSummary} Render: ${String(documentLoadingConfig?.render?.strategy || 'eager-nearby')} Backend: ${String(documentLoadingConfig?.render?.backend || 'hybrid-by-format')}`,
     `PDF route: ${String(documentLoadingConfig?.render?.pdfToImageMode || 'main-thread')} policy ${pdfAutoPolicyLabel}${pdfWarmupBatchLabel} done worker:${pdfWorkerRenderedCount} main:${mainPdfRenderedCount} fallback:${pdfWorkerFallbackCount}`,
     `Bootstrap: ${bootstrapMode || '-'} source ${bootstrapSource || '-'}`,
     ...(bootstrapTimingSnapshotLine ? [bootstrapTimingSnapshotLine] : []),
@@ -898,7 +903,7 @@ const PerformanceMonitor = ({ bundle = null, bootstrapDebugInfo = null }) => {
 
       <div style={sectionStyle}>
         <span style={labelStyle}>{t('perf.fetchLabel', { defaultValue: 'Fetch:' })}</span>{' '}
-        <strong>{String(documentLoadingConfig?.fetch?.strategy || 'sequential')}</strong>
+        <strong>{fetchSummary}</strong>
         <span style={{ marginLeft: 10, opacity: 0.9 }}>
           {t('perf.renderLabel', { defaultValue: 'Render:' })} <strong>{String(documentLoadingConfig?.render?.strategy || 'eager-nearby')}</strong>
         </span>
