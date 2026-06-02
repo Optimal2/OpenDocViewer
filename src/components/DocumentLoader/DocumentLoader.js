@@ -742,6 +742,7 @@ function createInvalidSourcePayloadError(message, details = {}) {
  * @param {(Object|null)} input.detectedType
  * @param {string} input.mimeType
  * @param {string} input.fileExtension
+ * @param {Uint8Array=} input.headBytes
  * @returns {Promise<void>}
  */
 async function validateFetchedSourceBlob({ entry, blob, detectedType, mimeType, fileExtension, headBytes }) {
@@ -1287,7 +1288,7 @@ const DocumentLoader = ({
         };
       }
 
-      const maxAttempts = Math.max(1, Number(config.fetch.prefetchRetryCount) + 1 || 1);
+      const maxAttempts = Math.max(1, (Number(config.fetch.prefetchRetryCount) || 0) + 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
       const sourceIdentity = describeDocumentSourceKey(entry, orderIndex);
@@ -1423,7 +1424,7 @@ const DocumentLoader = ({
 
         try {
           if (requestTimeoutMs > 0) {
-            timeoutId = window.setTimeout(() => {
+            timeoutId = globalThis.setTimeout(() => {
               didTimeout = true;
               try { controller.abort(); } catch {}
             }, requestTimeoutMs);
@@ -1539,7 +1540,7 @@ const DocumentLoader = ({
           });
           if (retryDelayMs > 0) await sleep(retryDelayMs);
         } finally {
-          if (timeoutId) window.clearTimeout(timeoutId);
+          if (timeoutId) globalThis.clearTimeout(timeoutId);
           activeControllersRef.current.delete(controller);
         }
       }
@@ -1554,7 +1555,7 @@ const DocumentLoader = ({
 
     const createSourcePackPrefetchTasks = (sourcePackUrl) => {
       const deferreds = entries.map(() => {
-        /** @type {(value: PrefetchResult) => void} */
+        /** @type {function(PrefetchResult):void} */
         let resolve = () => {};
         const promise = new Promise((nextResolve) => { resolve = nextResolve; });
         return { promise, resolve, settled: false };
