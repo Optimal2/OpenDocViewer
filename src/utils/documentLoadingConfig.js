@@ -161,6 +161,20 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  */
 
 /**
+ * @returns {'firefox'|'edge'|'chrome'|'safari'|'unknown'}
+ */
+function detectBrowserFamily() {
+  try {
+    const ua = String(globalThis.navigator?.userAgent || '').toLowerCase();
+    if (ua.includes('firefox/')) return 'firefox';
+    if (ua.includes('edg/')) return 'edge';
+    if (ua.includes('chrome/') || ua.includes('chromium/')) return 'chrome';
+    if (ua.includes('safari/')) return 'safari';
+  } catch {}
+  return 'unknown';
+}
+
+/**
  * @param {number} preferred
  * @param {DocumentLoadingMode=} mode
  * @returns {number}
@@ -175,9 +189,11 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   } catch {}
 
   const suggested = Math.max(4, cores);
+  const browserFamily = detectBrowserFamily();
+  const browserCap = browserFamily === 'firefox' ? 8 : 32;
 
-  if (mode === 'memory') return Math.max(1, Math.min(2, suggested));
-  return Math.max(1, Math.min(32, suggested));
+  if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
+  return Math.max(1, Math.min(browserCap, suggested));
 }
 
 export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
