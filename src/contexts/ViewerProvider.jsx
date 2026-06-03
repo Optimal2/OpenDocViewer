@@ -1849,11 +1849,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       return false;
     }
 
-    pdfResolutionBoostedKeysRef.current.add(pageKey);
     pdfResolutionPendingKeysRef.current.add(pageKey);
     publishPdfResolutionBoostState();
 
     const baseScale = Math.max(0.5, Number(sessionConfigRef.current?.render?.fullPageScale) || 2.0);
+    const previousUrl = String(page.fullSizeUrl || '').trim();
     try {
       const url = await ensurePageAsset(safeIndex, 'full', {
         forceRefresh: true,
@@ -1862,6 +1862,20 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         persist: false,
       });
       if (url) {
+        const nextUrl = String(url || '').trim();
+        const pageAfterRender = getPageAt(allPagesRef.current, safeIndex);
+        const committedUrl = String(pageAfterRender?.fullSizeUrl || '').trim();
+        const replacedVisibleAsset = !previousUrl || nextUrl !== previousUrl || committedUrl !== previousUrl;
+        if (!replacedVisibleAsset) {
+          logger.warn('PDF page resolution boost rendered without replacing the visible asset URL', {
+            pageIndex: safeIndex,
+            sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
+            scale: baseScale * 2,
+          });
+          return false;
+        }
+
+        pdfResolutionBoostedKeysRef.current.add(pageKey);
         logger.info('Enhanced PDF page resolution for current session', {
           pageIndex: safeIndex,
           sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
