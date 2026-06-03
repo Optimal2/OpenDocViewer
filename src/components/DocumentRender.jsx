@@ -424,9 +424,15 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     setPendingAsset(null);
 
     const beginTransition = () => {
+      const expectedUrl = String(currentPage?.fullSizeUrl || '').trim();
+      const displayedUrl = String(displayedAssetRef.current.url || '').trim();
       const targetAlreadyDisplayed = (
         displayedAssetRef.current.pageIndex === currentIndex
-        && !!String(displayedAssetRef.current.url || '')
+        && !!displayedUrl
+        // A PDF resolution boost replaces the page URL without changing the page index. Treat that
+        // as a real asset transition so the hidden preloader can load the new bitmap and recompute
+        // sticky fit zoom from its larger natural size.
+        && (!expectedUrl || displayedUrl === expectedUrl)
         && imageLoadedRef.current
       );
       if (targetAlreadyDisplayed) {
