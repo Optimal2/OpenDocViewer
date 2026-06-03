@@ -280,7 +280,7 @@
 
 .odv-prd-action.secondary {
   background: var(--odv-surface, #ffffff);
-  color: inherit;
+  color: var(--text-color, #111827);
   border-color: var(--odv-border, #d5dae1);
 }
 
@@ -296,7 +296,7 @@
 .odv-print-preparing-close:hover,
 .odv-print-preparing-close:focus-visible {
   background: color-mix(in srgb, var(--primary-color, #2563eb) 7%, var(--odv-surface, #ffffff) 93%);
-  color: var(--text-color, inherit);
+  color: var(--text-color, #111827);
   border-color: color-mix(in srgb, var(--primary-color, #2563eb) 24%, var(--odv-border, #d5dae1) 76%);
 }
 /* a11y helper */
@@ -652,6 +652,7 @@
   border-radius: 10px;
   border: 1px solid var(--odv-border, #d5dae1);
   background: var(--odv-surface, #ffffff);
+  color: var(--text-color, #111827);
   cursor: pointer;
   font-weight: 600;
 }
@@ -1296,6 +1297,19 @@
   background: var(--primary-color, #2563eb);
   border-color: var(--primary-color, #2563eb);
   color: #ffffff;
+}
+.odv-print-preparing-close.odv-pdf-progress-primary,
+.odv-print-preparing-close.odv-pdf-progress-primary:hover,
+.odv-print-preparing-close.odv-pdf-progress-primary:focus-visible {
+  background: var(--primary-color, #2563eb);
+  border-color: var(--primary-color, #2563eb);
+  color: #ffffff;
+}
+.odv-print-preparing-close.odv-pdf-progress-primary:hover,
+.odv-print-preparing-close.odv-pdf-progress-primary:focus-visible {
+  /* This must outrank the generic close-button hover rule so primary actions keep white text. */
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 88%, #000000 12%);
+  border-color: color-mix(in srgb, var(--primary-color, #2563eb) 88%, #000000 12%);
 }
 .odv-pdf-progress-dock {
   position: fixed;
