@@ -367,6 +367,7 @@ async function copyText(text) {
     document.body.appendChild(ta);
     ta.select();
     ta.setSelectionRange(0, ta.value.length);
+    // Deprecated fallback retained for older embedded browsers that do not expose navigator.clipboard.
     const ok = document.execCommand('copy');
     document.body.removeChild(ta);
     return !!ok;
