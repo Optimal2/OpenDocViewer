@@ -308,7 +308,8 @@
   padding: 0;
   border: 0;
   overflow: hidden;
-  clip: rect(0 0 0 0);
+  clip: rect(0, 0, 0, 0);
+  clip-path: inset(50%);
   white-space: nowrap;
 }
 
@@ -1298,9 +1299,7 @@
   border-color: var(--primary-color, #2563eb);
   color: #ffffff;
 }
-.odv-print-preparing-close.odv-pdf-progress-primary,
-.odv-print-preparing-close.odv-pdf-progress-primary:hover,
-.odv-print-preparing-close.odv-pdf-progress-primary:focus-visible {
+.odv-print-preparing-close.odv-pdf-progress-primary {
   background: var(--primary-color, #2563eb);
   border-color: var(--primary-color, #2563eb);
   color: #ffffff;
@@ -1409,4 +1408,18 @@
 [data-theme='dark'] .odv-prd-splitMenuItem:hover,
 [data-theme='dark'] .odv-prd-splitMenuItem:focus-visible {
   background: color-mix(in srgb, var(--primary-color, #60a5fa) 18%, var(--odv-surface-elevated, #111827) 82%);
+}
+
+.odv-prd-closeIcon:focus-visible,
+.odv-prd-restoreIcon:focus-visible,
+.odv-prd-action:focus-visible,
+.odv-help-close-icon:focus-visible,
+.odv-help-close-button:focus-visible,
+.odv-print-preparing-close:focus-visible,
+.odv-metadata-close-icon:focus-visible,
+.odv-metadata-close-button:focus-visible,
+.odv-prd-printMenuItem:focus-visible,
+.odv-prd-splitMenuItem:focus-visible {
+  outline: 2px solid var(--primary-color, #2563eb);
+  outline-offset: 2px;
 }
