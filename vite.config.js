@@ -27,20 +27,8 @@ import svgr from 'vite-plugin-svgr';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
-const BUILD_STAMP = (() => {
-  // UTC format: YYYYMMDDHHmmss
-  const d = new Date();
-  const pad = (n) => String(n).padStart(2, '0');
-  return (
-    String(d.getUTCFullYear()) +
-    pad(d.getUTCMonth() + 1) +
-    pad(d.getUTCDate()) +
-    pad(d.getUTCHours()) +
-    pad(d.getUTCMinutes()) +
-    pad(d.getUTCSeconds())
-  );
-})();
-const ODV_BUILD_ID = `${APP_VERSION}-${BUILD_STAMP}`;
+const BUILD_STAMP = String(process.env.ODV_BUILD_STAMP || process.env.SOURCE_DATE_EPOCH || 'stable');
+const ODV_BUILD_ID = String(process.env.ODV_BUILD_ID || `${APP_VERSION}-${BUILD_STAMP}`);
 const PDFJS_WASM_PUBLIC_PREFIX = '/pdfjs/wasm/';
 const PDFJS_WASM_OUTPUT_PREFIX = 'pdfjs/wasm/';
 const PDFJS_WASM_DIR = new URL('./node_modules/pdfjs-dist/wasm/', import.meta.url);

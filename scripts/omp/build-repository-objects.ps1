@@ -251,15 +251,47 @@ function Invoke-NativeChecked {
         [Parameter(Mandatory = $true)][string]$WorkingDirectory
     )
 
-    Push-Location $WorkingDirectory
+    $logRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('omp-native-' + [Guid]::NewGuid().ToString('N'))
+    $stdoutPath = Join-Path $logRoot 'stdout.log'
+    $stderrPath = Join-Path $logRoot 'stderr.log'
+
     try {
-        & $FileName @Arguments 2>&1 | ForEach-Object { Write-Host $_ }
-        if ($LASTEXITCODE -ne 0) {
-            throw "$FileName failed with exit code $LASTEXITCODE."
+        New-Item -ItemType Directory -Path $logRoot | Out-Null
+        $resolvedFileName = $FileName
+        if ([string]::IsNullOrWhiteSpace([System.IO.Path]::GetExtension($FileName))) {
+            $cmdCandidate = Get-Command "$FileName.cmd" -CommandType Application -ErrorAction SilentlyContinue |
+                Select-Object -First 1
+            if ($null -ne $cmdCandidate) {
+                $resolvedFileName = $cmdCandidate.Source
+            }
+        }
+
+        $process = Start-Process `
+            -FilePath $resolvedFileName `
+            -ArgumentList $Arguments `
+            -WorkingDirectory $WorkingDirectory `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath `
+            -NoNewWindow `
+            -PassThru `
+            -Wait
+
+        if (Test-Path -LiteralPath $stdoutPath -PathType Leaf) {
+            Get-Content -LiteralPath $stdoutPath | ForEach-Object { Write-Host $_ }
+        }
+
+        if (Test-Path -LiteralPath $stderrPath -PathType Leaf) {
+            Get-Content -LiteralPath $stderrPath | ForEach-Object { Write-Warning $_ }
+        }
+
+        if ($process.ExitCode -ne 0) {
+            throw "$FileName failed with exit code $($process.ExitCode)."
         }
     }
     finally {
-        Pop-Location
+        if (Test-Path -LiteralPath $logRoot -PathType Container) {
+            Remove-Item -LiteralPath $logRoot -Recurse -Force
+        }
     }
 }
 
@@ -292,7 +324,19 @@ function Publish-NodeWebComponent {
     }
 
     if (Test-Path -LiteralPath (Join-Path $projectDirectory 'package-lock.json') -PathType Leaf) {
-        Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
+        try {
+            Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
+        }
+        catch {
+            $nodeModulesPath = Join-Path $projectDirectory 'node_modules'
+            if (-not (Test-Path -LiteralPath $nodeModulesPath -PathType Container)) {
+                throw
+            }
+
+            Write-Warning "npm ci failed. Removing node_modules and retrying once."
+            Remove-Item -LiteralPath $nodeModulesPath -Recurse -Force
+            Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
+        }
     }
 
     Invoke-NativeChecked -FileName 'npm' -Arguments @('run', 'build') -WorkingDirectory $projectDirectory
@@ -618,7 +662,7 @@ try {
         }
 
         & $newArtifactPackageScript @artifactPackageArgs
-        if ($LASTEXITCODE -ne 0) {
+        if (-not $?) {
             throw "Artifact package creation failed for component '$($component.componentKey)'."
         }
     }
