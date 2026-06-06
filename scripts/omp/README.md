@@ -2,6 +2,40 @@
 
 ## Convenience Wrappers
 
+Every OMP-compatible repository exposes the same command files in
+`scripts\omp`:
+
+```text
+bump-version.cmd
+build-universal-package.cmd
+export-universal-package.cmd
+```
+
+The `.cmd` files are intended for Windows double-click usage and normal command
+prompt usage. They call the matching PowerShell scripts with `-NoProfile` and
+without `-ExecutionPolicy Bypass`. `build-universal-package.cmd` and
+`bump-version.cmd` pause at the end by default so a double-clicked console
+window stays open. For scripted validation, pass `--no-pause` as the first
+argument:
+
+```cmd
+scripts\omp\build-universal-package.cmd --no-pause
+```
+
+All `.cmd` wrappers forward additional arguments to the underlying `.ps1`
+script. Examples:
+
+```cmd
+scripts\omp\build-universal-package.cmd --no-pause -OutputDirectory E:\Packages
+scripts\omp\export-universal-package.cmd -AllComponents -BuildArtifacts -OutputPath E:\Packages\my-package.zip
+```
+
+For most manual package builds, use `build-universal-package.cmd`. It defaults
+to all components, builds artifact payloads, and writes one complete universal
+package. `export-universal-package.cmd` is the lower-level exporter; use it when
+you need explicit parameters such as host profiles, selected components, or
+extra object files.
+
 `bump-version.ps1` updates the current repository's `omp-components.json`.
 It can bump repository, component, and module-definition versions. When module
 definitions are selected it also updates the referenced module-definition JSON
@@ -11,6 +45,19 @@ files. Use the `.cmd` launcher for an interactive double-click flow.
 .\scripts\omp\bump-version.ps1 -ComponentKey omp-portal-web
 .\scripts\omp\bump-version.ps1 -AllComponents -Part minor
 .\scripts\omp\bump-version.ps1 -ModuleKey omp_portal -UpdateModuleMinimums
+```
+
+Double-click `bump-version.cmd` for an interactive version bump. The default
+interactive choice is all artifact components and patch version bump; module
+definition versions are bumped only when selected. This command changes files,
+so review `git diff` before building and committing.
+
+When arguments are passed to `bump-version.cmd`, it runs the underlying
+PowerShell script non-interactively. This is useful for scripted version bumps:
+
+```cmd
+scripts\omp\bump-version.cmd --no-pause -ComponentKey omp-portal-web
+scripts\omp\bump-version.cmd --no-pause -AllComponents -Part patch
 ```
 
 `build-universal-package.ps1` is a friendlier wrapper around
@@ -102,3 +149,27 @@ config overlays, widgets, or widget runtime-data zips below `OutputRoot`.
 
 Keep private host profiles in the private installer or DEV repository, not in
 public module repositories.
+
+## Validating Command Wrappers
+
+Use `test-cmd-wrappers.ps1` to verify that repository `.cmd` package builders
+can run without hanging. The validation always calls
+`build-universal-package.cmd --no-pause`, redirects stdout/stderr to per-repo
+log files, and terminates the whole command process tree if one repository
+exceeds the configured timeout.
+
+```powershell
+.\scripts\omp\test-cmd-wrappers.ps1 -RepositoryName OpenModulePlatform -PerRepositoryTimeoutSeconds 1200
+
+.\scripts\omp\test-cmd-wrappers.ps1 `
+  -WorkspaceRoot "E:\Linus Dunkers\Documents\GitHub" `
+  -RepositoryName Dokumentbibliotek,LogSearch,EArkivChecker `
+  -OutputRoot "$env:TEMP\omp-cmd-wrapper-validation\packages" `
+  -LogRoot "$env:TEMP\omp-cmd-wrapper-validation\logs" `
+  -PerRepositoryTimeoutSeconds 1800
+```
+
+With no `-RepositoryName`, the validator scans the workspace for sibling
+repositories that contain both `omp-components.json` and
+`scripts\omp\build-universal-package.cmd`. The default output and log folders
+are below the current user's temp directory.
