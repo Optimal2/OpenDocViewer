@@ -128,14 +128,114 @@ function Set-JsonProperty {
     $property.Value = $Value
 }
 
+function Get-JsonIndent {
+    param(
+        [Parameter(Mandatory = $true)][int]$Level,
+        [Parameter(Mandatory = $true)][int]$IndentSize
+    )
+
+    return ' ' * ($Level * $IndentSize)
+}
+
+function Get-NextJsonNonWhitespaceIndex {
+    param(
+        [Parameter(Mandatory = $true)][string]$Json,
+        [Parameter(Mandatory = $true)][int]$StartIndex
+    )
+
+    for ($index = $StartIndex; $index -lt $Json.Length; $index++) {
+        if (-not [char]::IsWhiteSpace($Json[$index])) {
+            return $index
+        }
+    }
+
+    return -1
+}
+
+function Format-JsonText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Json,
+        [int]$IndentSize = 2
+    )
+
+    $builder = [Text.StringBuilder]::new()
+    $indent = 0
+    $inString = $false
+    $isEscaped = $false
+
+    for ($index = 0; $index -lt $Json.Length; $index++) {
+        $ch = $Json[$index]
+
+        if ($inString) {
+            [void]$builder.Append($ch)
+            if ($isEscaped) {
+                $isEscaped = $false
+            }
+            elseif ($ch -eq '\') {
+                $isEscaped = $true
+            }
+            elseif ($ch -eq '"') {
+                $inString = $false
+            }
+
+            continue
+        }
+
+        switch ($ch) {
+            '"' {
+                $inString = $true
+                [void]$builder.Append($ch)
+            }
+            { $_ -eq '{' -or $_ -eq '[' } {
+                $nextIndex = Get-NextJsonNonWhitespaceIndex -Json $Json -StartIndex ($index + 1)
+                $isEmptyObject = $ch -eq '{' -and $nextIndex -ge 0 -and $Json[$nextIndex] -eq '}'
+                $isEmptyArray = $ch -eq '[' -and $nextIndex -ge 0 -and $Json[$nextIndex] -eq ']'
+                if ($isEmptyObject -or $isEmptyArray) {
+                    [void]$builder.Append($ch)
+                    [void]$builder.Append($Json[$nextIndex])
+                    $index = $nextIndex
+                    continue
+                }
+
+                [void]$builder.Append($ch)
+                $indent++
+                [void]$builder.Append([Environment]::NewLine)
+                [void]$builder.Append((Get-JsonIndent -Level $indent -IndentSize $IndentSize))
+            }
+            { $_ -eq '}' -or $_ -eq ']' } {
+                $indent = [Math]::Max(0, $indent - 1)
+                [void]$builder.Append([Environment]::NewLine)
+                [void]$builder.Append((Get-JsonIndent -Level $indent -IndentSize $IndentSize))
+                [void]$builder.Append($ch)
+            }
+            ':' {
+                [void]$builder.Append(': ')
+            }
+            ',' {
+                [void]$builder.Append($ch)
+                [void]$builder.Append([Environment]::NewLine)
+                [void]$builder.Append((Get-JsonIndent -Level $indent -IndentSize $IndentSize))
+            }
+            default {
+                if (-not [char]::IsWhiteSpace($ch)) {
+                    [void]$builder.Append($ch)
+                }
+            }
+        }
+    }
+
+    return $builder.ToString()
+}
+
 function Save-JsonFile {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][object]$Value
     )
 
-    $json = $Value | ConvertTo-Json -Depth 50
-    [IO.File]::WriteAllText($Path, $json + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+    $json = $Value | ConvertTo-Json -Depth 50 -Compress
+    $formattedJson = Format-JsonText -Json $json
+    [IO.File]::WriteAllText($Path, $formattedJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
 }
 
 function Convert-KeyInput {
