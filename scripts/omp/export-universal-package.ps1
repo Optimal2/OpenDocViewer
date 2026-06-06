@@ -225,7 +225,7 @@ function Add-ProfileObjectArguments {
             continue
         }
 
-        $script:ArtifactConfigurationFile += (Convert-ProfileArtifactConfiguration -Entry $entry -BasePath $basePath)
+        $script:ArtifactConfigurationFile += (Convert-ProfileArtifactConfiguration -Entry $entry -BasePath $BasePath)
     }
 
     foreach ($entry in @((Get-JsonPropertyValue -Object $Profile -Name 'hostConfigurationFiles'))) {
@@ -233,7 +233,7 @@ function Add-ProfileObjectArguments {
             continue
         }
 
-        $script:HostConfigurationFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $basePath -ListName 'hostConfigurationFiles')
+        $script:HostConfigurationFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $BasePath -ListName 'hostConfigurationFiles')
     }
 
     foreach ($entry in @((Get-JsonPropertyValue -Object $Profile -Name 'configOverlayFiles'))) {
@@ -241,7 +241,7 @@ function Add-ProfileObjectArguments {
             continue
         }
 
-        $script:ConfigOverlayFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $basePath -ListName 'configOverlayFiles')
+        $script:ConfigOverlayFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $BasePath -ListName 'configOverlayFiles')
     }
 
     foreach ($entry in @((Get-JsonPropertyValue -Object $Profile -Name 'widgetFiles'))) {
@@ -249,7 +249,7 @@ function Add-ProfileObjectArguments {
             continue
         }
 
-        $script:WidgetFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $basePath -ListName 'widgetFiles')
+        $script:WidgetFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $BasePath -ListName 'widgetFiles')
     }
 
     foreach ($entry in @((Get-JsonPropertyValue -Object $Profile -Name 'widgetDataFiles'))) {
@@ -257,7 +257,7 @@ function Add-ProfileObjectArguments {
             continue
         }
 
-        $script:WidgetDataFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $basePath -ListName 'widgetDataFiles')
+        $script:WidgetDataFile += (Convert-ProfilePortableFile -Entry $entry -BasePath $BasePath -ListName 'widgetDataFiles')
     }
 }
 

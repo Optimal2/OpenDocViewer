@@ -68,6 +68,22 @@ function Get-SafeFileName {
     return $safe
 }
 
+function ConvertTo-CmdArgument {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    if ($Value -notmatch '[\s"&|<>^]') {
+        return $Value
+    }
+
+    return '"' + $Value.Replace('"', '""') + '"'
+}
+
+function Join-CmdCommandLine {
+    param([Parameter(Mandatory = $true)][string[]]$Arguments)
+
+    return ($Arguments | ForEach-Object { ConvertTo-CmdArgument -Value $_ }) -join ' '
+}
+
 $scriptDirectory = Get-ScriptDirectory
 $currentRepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDirectory '..\..'))
 
@@ -113,7 +129,7 @@ if (@($repositories).Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
-$timeoutMilliseconds = [int][Math]::Min([int]::MaxValue, [int64]$PerRepositoryTimeoutSeconds * 1000)
+$timeoutMilliseconds = [int][Math]::Min([int]::MaxValue, ([int64]$PerRepositoryTimeoutSeconds) * 1000L)
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
@@ -149,8 +165,8 @@ foreach ($repository in $repositories) {
 
     Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a $PerRepositoryTimeoutSeconds second timeout..."
 
-    $cmdLine = "`"$cmdPath`" --no-pause -OutputDirectory `"$outputRootPath`""
-    $cmdArguments = "/d /s /c `"$cmdLine`""
+    $cmdInvocation = 'call ' + (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
+    $cmdArguments = @('/d', '/c', $cmdInvocation)
     $process = Start-Process -FilePath $env:ComSpec `
         -ArgumentList $cmdArguments `
         -WorkingDirectory $repository.FullName `
@@ -162,7 +178,10 @@ foreach ($repository in $repositories) {
     $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
     if ($timedOut) {
         Write-Warning "[$repoDisplayName] Timeout reached. Terminating process tree for PID $($process.Id)."
-        & taskkill.exe /PID $process.Id /T /F | Out-Null
+        $taskKillOutput = & taskkill.exe /PID $process.Id /T /F 2>&1
+        if ($LASTEXITCODE -ne 0) {
+            Write-Warning "[$repoDisplayName] taskkill failed with exit code $LASTEXITCODE. $($taskKillOutput -join ' ')"
+        }
     }
     else {
         $process.WaitForExit()
