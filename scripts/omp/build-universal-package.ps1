@@ -9,7 +9,7 @@ package name uses repositoryKey and repositoryVersion from omp-components.json.
 #>
 [CmdletBinding()]
 param(
-    [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path,
+    [string]$RepositoryRoot = '',
     [string]$OutputDirectory = '',
     [string]$OutputPath = '',
     [string]$PackageVersion = '',
@@ -30,6 +30,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+function Get-ScriptDirectory {
+    if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        return $PSScriptRoot
+    }
+
+    $scriptPath = $PSCommandPath
+    if ([string]::IsNullOrWhiteSpace($scriptPath)) {
+        $scriptPath = $MyInvocation.MyCommand.Path
+    }
+
+    if ([string]::IsNullOrWhiteSpace($scriptPath)) {
+        throw 'Could not resolve script directory. Pass -RepositoryRoot explicitly.'
+    }
+
+    return Split-Path -Parent $scriptPath
+}
 
 function Wait-ForUser {
     param([switch]$Enabled)
@@ -53,6 +70,11 @@ function Get-SafeName {
 
 $exitCode = 0
 try {
+    $scriptDirectory = Get-ScriptDirectory
+    if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+        $RepositoryRoot = (Resolve-Path (Join-Path $scriptDirectory '..\..')).Path
+    }
+
     $repositoryRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
     $manifestPath = Join-Path $repositoryRoot 'omp-components.json'
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
@@ -99,7 +121,7 @@ try {
         $OutputPath = Join-Path $OutputDirectory $fileName
     }
 
-    $exportScript = Join-Path $PSScriptRoot 'export-universal-package.ps1'
+    $exportScript = Join-Path $scriptDirectory 'export-universal-package.ps1'
     if (-not (Test-Path -LiteralPath $exportScript -PathType Leaf)) {
         throw "Universal package exporter not found: $exportScript"
     }

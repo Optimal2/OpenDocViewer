@@ -9,7 +9,7 @@ manifest-driven so OMP-compatible repositories can expose the same command.
 #>
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string]$RepositoryRoot = (Resolve-Path (Join-Path $PSScriptRoot '..\..')).Path,
+    [string]$RepositoryRoot = '',
     [string[]]$ComponentKey = @(),
     [switch]$AllComponents,
     [string[]]$ModuleKey = @(),
@@ -25,6 +25,23 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+function Get-ScriptDirectory {
+    if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
+        return $PSScriptRoot
+    }
+
+    $scriptPath = $PSCommandPath
+    if ([string]::IsNullOrWhiteSpace($scriptPath)) {
+        $scriptPath = $MyInvocation.MyCommand.Path
+    }
+
+    if ([string]::IsNullOrWhiteSpace($scriptPath)) {
+        throw 'Could not resolve script directory. Pass -RepositoryRoot explicitly.'
+    }
+
+    return Split-Path -Parent $scriptPath
+}
 
 function Wait-ForUser {
     param([switch]$Enabled)
@@ -133,6 +150,11 @@ function Convert-KeyInput {
 
 $exitCode = 0
 try {
+    $scriptDirectory = Get-ScriptDirectory
+    if ([string]::IsNullOrWhiteSpace($RepositoryRoot)) {
+        $RepositoryRoot = (Resolve-Path (Join-Path $scriptDirectory '..\..')).Path
+    }
+
     $repositoryRoot = Resolve-FullPath -Path $RepositoryRoot
     $manifestPath = Join-Path $repositoryRoot 'omp-components.json'
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
@@ -234,7 +256,8 @@ try {
 
     $updates = [System.Collections.Generic.List[object]]::new()
 
-    if (-not $SkipRepositoryVersion) {
+    $hasSelectedVersionTargets = $selectedComponents.Count -gt 0 -or $selectedModuleDefinitions.Count -gt 0
+    if (-not $SkipRepositoryVersion -and $hasSelectedVersionTargets) {
         $currentRepositoryVersion = [string]$manifest.repositoryVersion
         if ([string]::IsNullOrWhiteSpace($currentRepositoryVersion)) {
             throw 'repositoryVersion is missing. Add it manually or use -SkipRepositoryVersion.'
@@ -305,7 +328,7 @@ try {
         }
     }
 
-    if ($PSCmdlet.ShouldProcess($manifestPath, 'Update OMP component manifest versions')) {
+    if ($updates.Count -gt 0 -and $PSCmdlet.ShouldProcess($manifestPath, 'Update OMP component manifest versions')) {
         Save-JsonFile -Path $manifestPath -Value $manifest
     }
 
