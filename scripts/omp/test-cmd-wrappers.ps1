@@ -71,11 +71,16 @@ function Get-SafeFileName {
 function ConvertTo-CmdArgument {
     param([Parameter(Mandatory = $true)][string]$Value)
 
-    if ($Value -notmatch '[\s"&|<>^]') {
-        return $Value
+    if ($Value.Contains('"')) {
+        throw "CMD wrapper arguments cannot contain double quotes: $Value"
     }
 
-    return '"' + $Value.Replace('"', '""') + '"'
+    $escaped = $Value.Replace('^', '^^').Replace('%', '%%')
+    if ($escaped -notmatch '[\s&|<>^%]') {
+        return $escaped
+    }
+
+    return '"' + $escaped + '"'
 }
 
 function Join-CmdCommandLine {
@@ -129,7 +134,13 @@ if (@($repositories).Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
-$timeoutMilliseconds = [int][Math]::Min([int]::MaxValue, ([int64]$PerRepositoryTimeoutSeconds) * 1000L)
+$timeoutMilliseconds64 = ([int64]$PerRepositoryTimeoutSeconds) * 1000L
+$timeoutMilliseconds = if ($timeoutMilliseconds64 -gt [int]::MaxValue) {
+    [int]::MaxValue
+}
+else {
+    [int]$timeoutMilliseconds64
+}
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
@@ -152,7 +163,7 @@ foreach ($repository in $repositories) {
         throw "Manifest must contain repositoryKey and repositoryVersion: $manifestPath"
     }
 
-    $expectedPackagePath = Join-Path $outputRootPath "$packageKey-global-$packageVersion-universal.zip"
+    $expectedPackagePath = Join-Path $outputRootPath ('{0}__global__{1}.zip' -f $packageKey, $packageVersion)
     if (Test-Path -LiteralPath $expectedPackagePath -PathType Leaf) {
         Remove-Item -LiteralPath $expectedPackagePath -Force
     }
@@ -182,9 +193,6 @@ foreach ($repository in $repositories) {
         if ($LASTEXITCODE -ne 0) {
             Write-Warning "[$repoDisplayName] taskkill failed with exit code $LASTEXITCODE. $($taskKillOutput -join ' ')"
         }
-    }
-    else {
-        $process.WaitForExit()
     }
 
     $exitCode = if ($timedOut) { $null } else { $process.ExitCode }
