@@ -16,7 +16,6 @@ param(
     [switch]$AllModuleDefinitions,
     [switch]$UpdateModuleMinimums,
     [switch]$SkipRepositoryVersion,
-    [ValidateSet('patch', 'minor', 'major')]
     [string]$Part = 'patch',
     [string]$Version = '',
     [switch]$Interactive,
@@ -25,6 +24,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+$ValidVersionParts = @('patch', 'minor', 'major')
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -69,6 +69,17 @@ function Test-VersionText {
     }
 }
 
+function ConvertTo-VersionPart {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $normalized = $Value.Trim().ToLowerInvariant()
+    if ($script:ValidVersionParts -notcontains $normalized) {
+        throw "Unsupported version part: $Value. Valid values are: $($script:ValidVersionParts -join ', ')."
+    }
+
+    return $normalized
+}
+
 function Get-BumpedVersion {
     param(
         [Parameter(Mandatory = $true)][string]$CurrentVersion,
@@ -79,11 +90,13 @@ function Get-BumpedVersion {
         throw "Cannot bump '$CurrentVersion' automatically. Use -Version for prerelease/build versions or non-standard text."
     }
 
+    $normalizedVersionPart = ConvertTo-VersionPart -Value $VersionPart
+
     $major = [int]$Matches[1]
     $minor = [int]$Matches[2]
     $patch = [int]$Matches[3]
 
-    switch ($VersionPart) {
+    switch ($normalizedVersionPart) {
         'major' {
             $major += 1
             $minor = 0
@@ -171,7 +184,7 @@ function Format-JsonText {
             if ($isEscaped) {
                 $isEscaped = $false
             }
-            elseif ($ch -eq '\') {
+            elseif ($ch -eq [char]92) {
                 $isEscaped = $true
             }
             elseif ($ch -eq '"') {
@@ -230,12 +243,15 @@ function Format-JsonText {
 function Save-JsonFile {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
-        [Parameter(Mandatory = $true)][object]$Value
+        [Parameter(Mandatory = $true)][object]$Value,
+        [Parameter(Mandatory = $true)][string]$Action
     )
 
     $json = $Value | ConvertTo-Json -Depth 50 -Compress
     $formattedJson = Format-JsonText -Json $json
-    [IO.File]::WriteAllText($Path, $formattedJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+    if ($PSCmdlet.ShouldProcess($Path, $Action)) {
+        [IO.File]::WriteAllText($Path, $formattedJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+    }
 }
 
 function Convert-KeyInput {
@@ -245,7 +261,11 @@ function Convert-KeyInput {
         return @()
     }
 
-    return @($Value.Split(',', [StringSplitOptions]::RemoveEmptyEntries) | ForEach-Object { $_.Trim() } | Where-Object { $_ })
+    return @(
+        $Value.Split(',', [StringSplitOptions]::RemoveEmptyEntries) |
+            ForEach-Object { $_.Trim() } |
+            Where-Object { -not [string]::IsNullOrEmpty($_) }
+    )
 }
 
 $exitCode = 0
@@ -306,11 +326,7 @@ try {
 
         $partInput = Read-Host 'Version part to bump (patch/minor/major, Enter=patch)'
         if (-not [string]::IsNullOrWhiteSpace($partInput)) {
-            if (@('patch', 'minor', 'major') -notcontains $partInput.Trim().ToLowerInvariant()) {
-                throw "Unsupported version part: $partInput"
-            }
-
-            $Part = $partInput.Trim().ToLowerInvariant()
+            $Part = ConvertTo-VersionPart -Value $partInput
         }
     }
 
@@ -322,7 +338,9 @@ try {
         throw 'Use either -AllModuleDefinitions or -ModuleKey, not both.'
     }
 
-    if (-not $AllComponents -and $ComponentKey.Count -eq 0 -and -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0 -and -not $Interactive) {
+    $hasNoComponentSelection = -not $AllComponents -and $ComponentKey.Count -eq 0
+    $hasNoModuleSelection = -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0
+    if ($hasNoComponentSelection -and $hasNoModuleSelection -and -not $Interactive) {
         $AllComponents = $true
     }
 
@@ -396,9 +414,7 @@ try {
         if (Test-Path -LiteralPath $definitionPath -PathType Leaf) {
             $definitionJson = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8 | ConvertFrom-Json
             Set-JsonProperty -Object $definitionJson -Name 'definitionVersion' -Value $nextVersion
-            if ($PSCmdlet.ShouldProcess($definitionPath, "Set definitionVersion to $nextVersion")) {
-                Save-JsonFile -Path $definitionPath -Value $definitionJson
-            }
+            Save-JsonFile -Path $definitionPath -Value $definitionJson -Action "Set definitionVersion to $nextVersion"
         }
 
         [void]$updates.Add([pscustomobject]@{
@@ -428,8 +444,8 @@ try {
         }
     }
 
-    if ($updates.Count -gt 0 -and $PSCmdlet.ShouldProcess($manifestPath, 'Update OMP component manifest versions')) {
-        Save-JsonFile -Path $manifestPath -Value $manifest
+    if ($updates.Count -gt 0) {
+        Save-JsonFile -Path $manifestPath -Value $manifest -Action 'Update OMP component manifest versions'
     }
 
     Write-Host ''
