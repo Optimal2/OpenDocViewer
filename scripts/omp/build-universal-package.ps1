@@ -117,7 +117,7 @@ try {
         }
 
         New-Item -ItemType Directory -Path $OutputDirectory -Force | Out-Null
-        $fileName = '{0}-{1}-{2}-universal.zip' -f (Get-SafeName -Value $PackageKey), (Get-SafeName -Value $targetPart), (Get-SafeName -Value $PackageVersion)
+        $fileName = '{0}__{1}__{2}.zip' -f (Get-SafeName -Value $PackageKey), (Get-SafeName -Value $targetPart), (Get-SafeName -Value $PackageVersion)
         $OutputPath = Join-Path $OutputDirectory $fileName
     }
 
