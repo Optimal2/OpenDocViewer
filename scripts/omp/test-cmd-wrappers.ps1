@@ -33,11 +33,10 @@ $MillisecondsPerSecond = 1000
 $ManifestRelativePath = 'omp-components.json'
 $CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
-$PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
+$PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
 $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 $HashPrefixLength = 16
-$DecimalPlacesForTimeDisplay = 2
 $PositiveIntegerPattern = '^[1-9][0-9]*$'
 $MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator) plus DEL.
@@ -137,8 +136,7 @@ function Test-IsSubPath {
     $fullPath = ConvertTo-ComparablePath -Name 'path' -Path $Path
     $fullBasePath = ConvertTo-ComparablePath -Name 'base path' -Path $BasePath
     return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
-        $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
-        $fullPath.StartsWith($fullBasePath + [System.IO.Path]::AltDirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+        $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
 }
 
 function ConvertTo-ComparablePath {
@@ -147,7 +145,8 @@ function ConvertTo-ComparablePath {
         [Parameter(Mandatory = $true)][string]$Path
     )
 
-    return (Resolve-FullPathSafely -Name $Name -Path $Path).TrimEnd('\', '/')
+    $fullPath = (Resolve-FullPathSafely -Name $Name -Path $Path).TrimEnd('\', '/')
+    return $fullPath.Replace([System.IO.Path]::AltDirectorySeparatorChar, [System.IO.Path]::DirectorySeparatorChar)
 }
 
 function Assert-RepositoryPathUnderWorkspace {
@@ -329,7 +328,7 @@ function Get-ValidProcessIdOrNull {
 
     # Windows process IDs are positive decimal integers; zero or negative values
     # are treated as invalid before any taskkill command is assembled.
-    if ($id -lt 1) {
+    if ($id -lt $MinimumValidProcessId) {
         return $null
     }
 
@@ -396,10 +395,37 @@ function Invoke-TaskKillTree {
                 Write-Verbose "Could not terminate stuck taskkill.exe process: $($_.Exception.Message)"
             }
 
-            $taskKillProcess.WaitForExit()
+            $output = [System.Collections.Generic.List[string]]::new()
+            $output.Add("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
+
+            if ($taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)) {
+                try {
+                    $stdout = $stdoutTask.GetAwaiter().GetResult()
+                    if (-not [string]::IsNullOrWhiteSpace($stdout)) {
+                        $output.Add($stdout.Trim())
+                    }
+                }
+                catch {
+                    $output.Add("Could not read taskkill stdout after timeout: $($_.Exception.Message)")
+                }
+
+                try {
+                    $stderr = $stderrTask.GetAwaiter().GetResult()
+                    if (-not [string]::IsNullOrWhiteSpace($stderr)) {
+                        $output.Add($stderr.Trim())
+                    }
+                }
+                catch {
+                    $output.Add("Could not read taskkill stderr after timeout: $($_.Exception.Message)")
+                }
+            }
+            else {
+                $output.Add("taskkill.exe did not exit after an additional termination wait; redirected output was not read.")
+            }
+
             return [pscustomobject]@{
                 ExitCode = $TaskKillExecutionExceptionExitCode
-                Output = @("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
+                Output = $output.ToArray()
             }
         }
 
@@ -478,6 +504,10 @@ function Write-TaskKillFailureWarning {
     )
 
     $taskKillOutputText = ($Output | Out-String).Trim()
+    if ([string]::IsNullOrWhiteSpace($taskKillOutputText)) {
+        $taskKillOutputText = '(no output)'
+    }
+
     if ($ExitCode -eq $TaskKillExecutionExceptionExitCode) {
         Write-Warning "[$RepositoryName] taskkill could not be started. This can indicate missing taskkill.exe or insufficient permissions. Output:$([Environment]::NewLine)$taskKillOutputText"
         return
@@ -571,6 +601,10 @@ function Assert-SafePackageIdentityPart {
     if ($Value -notmatch $PackageIdentityPattern) {
         throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, hyphen, plus. Manifest: $ManifestPath"
     }
+
+    if ($Value.Contains('..') -or $Value -eq '.' -or $Value -eq '..') {
+        throw "Manifest field '$Name' must not contain path traversal markers or consecutive dots. Manifest: $ManifestPath"
+    }
 }
 
 function Get-RequiredManifestText {
@@ -595,6 +629,9 @@ $scriptDirectory = Get-ScriptDirectory
 $currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path '..\..' -BasePath $scriptDirectory
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
+    # OMP-compatible repositories are normally cloned as siblings; default to
+    # the parent folder of the current repository so one run can validate all of
+    # those sibling repositories.
     $WorkspaceRoot = Split-Path -Parent $currentRepositoryRoot
 }
 
@@ -620,7 +657,8 @@ Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 New-DirectorySafely -Path $outputRootPath -Description 'output root directory'
 New-DirectorySafely -Path $logRootPath -Description 'log root directory'
 $cmdExePath = Resolve-CmdExePath
-# A GUID alone gives enough uniqueness while keeping log paths shorter.
+# The 'N' GUID format is 32 hexadecimal characters without hyphens, which gives
+# enough uniqueness while keeping log paths shorter.
 $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
@@ -652,8 +690,10 @@ if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath. Each repository must contain $ManifestRelativePath and $CommandWrapperRelativePath."
 }
 
-# WaitForExit expects a 32-bit millisecond value; ValidateRange caps this at
-# 3,600,000 ms, well below [int]::MaxValue.
+# WaitForExit expects a 32-bit millisecond value. This is intentionally computed
+# from the parameter so the unit conversion stays close to the configured
+# timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
+# [int]::MaxValue.
 $timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
@@ -704,8 +744,7 @@ foreach ($repository in $repositories) {
     # the underlying PowerShell script. call ensures the invoked .cmd file
     # returns control to this cmd.exe instance when it is run through /c.
     Assert-SafeCmdArgumentText -Name 'Command wrapper path' -Value $cmdPath
-    Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
-    $cmdInvocation = 'call ' + (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
+    $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
@@ -806,10 +845,7 @@ foreach ($repository in $repositories) {
                     Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
                 }
                 elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                    # This is display text only; the actual wait uses
-                    # PostTerminationWaitMilliseconds above.
-                    $postTerminationWaitSecondsDisplay = [Math]::Round($PostTerminationWaitMilliseconds / $MillisecondsPerSecond, $DecimalPlacesForTimeDisplay)
-                    Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSecondsDisplay seconds after termination attempt; exit code may be unavailable."
+                    Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
                 }
             }
         }
@@ -856,6 +892,8 @@ foreach ($repository in $repositories) {
 
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
+# Select-Object -First 1 keeps this compatible with Windows PowerShell, where
+# Where-Object does not have a portable -First parameter.
 $hasFailures = $null -ne ($results | Where-Object { $_.Status -ne 'OK' } | Select-Object -First 1)
 if ($hasFailures) {
     # Keep one generic failure exit code for compatibility with existing
