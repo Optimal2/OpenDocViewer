@@ -78,8 +78,8 @@ $HashPrefixLength = 16
 # system processes, but this script starts cmd.exe itself and only needs to
 # prevent invalid zero/negative IDs from reaching taskkill.exe.
 $MinimumValidProcessId = 1
-# ASCII control characters: NUL through US (Unit Separator), including TAB,
-# CR, and LF, plus DEL.
+# ASCII control characters: NUL through US (Unit Separator), including all
+# whitespace controls such as TAB, vertical tab, form feed, CR, and LF, plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
@@ -155,13 +155,6 @@ function Convert-SecondsToIntMilliseconds {
     }
 
     $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
-    # This is unreachable while $MaximumWaitForExitSeconds is derived from
-    # [int]::MaxValue, but keep it as defense if the helper is reused with a
-    # different upper bound later.
-    if ($milliseconds -gt [int]::MaxValue) {
-        throw "$Name is too large for WaitForExit after conversion: $milliseconds milliseconds."
-    }
-
     return [int]$milliseconds
 }
 
@@ -229,6 +222,9 @@ function Resolve-FullPathSafely {
     )
 
     try {
+        # This helper only canonicalizes paths. Callers that accept rooted
+        # inputs must still validate the resolved path against the intended
+        # workspace/output base with Assert-* helpers before using it.
         if ([System.IO.Path]::IsPathRooted($Path)) {
             return [System.IO.Path]::GetFullPath($Path)
         }
@@ -453,18 +449,18 @@ function Assert-CmdCommandLineLength {
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
-        $systemCmdPathDescription = Join-Path $systemRoot 'System32\cmd.exe'
-        if (Test-Path -LiteralPath $systemCmdPathDescription -PathType Leaf) {
-            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdPathDescription
+        $systemCmdDiagnosticPath = Join-Path $systemRoot 'System32\cmd.exe'
+        if (Test-Path -LiteralPath $systemCmdDiagnosticPath -PathType Leaf) {
+            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdDiagnosticPath
         }
     }
     else {
-        $systemCmdPathDescription = '$env:SystemRoot\System32\cmd.exe'
+        $systemCmdDiagnosticPath = '$env:SystemRoot\System32\cmd.exe'
     }
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw "Could not locate cmd.exe because '$systemCmdPathDescription' was missing and ComSpec was empty."
+        throw "Could not locate cmd.exe because '$systemCmdDiagnosticPath' was missing and ComSpec was empty."
     }
 
     return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
@@ -604,6 +600,9 @@ function Add-TaskOutputOrDiagnostic {
         # so this path is intentionally synchronous; Windows PowerShell 5.1 has
         # no async/await syntax that would make the call clearer.
         if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
+            # ReadToEndAsync has no cancellation token in the runtimes this
+            # script targets. Leave the task alone after this bounded diagnostic
+            # wait; the owning process is already being observed separately.
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
             return
         }
@@ -649,7 +648,7 @@ function Invoke-TaskKillTree {
         $taskKillCompletedWithinTimeout = $taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)
         if (-not $taskKillCompletedWithinTimeout) {
             try {
-                Write-Verbose "taskkill.exe exceeded $TaskKillWaitSeconds seconds and is being forcefully terminated."
+                Write-Verbose "taskkill.exe exceeded $TaskKillWaitSeconds seconds and is being forcefully terminated; this terminates the helper taskkill.exe process, not the target process tree."
                 $taskKillProcess.Kill()
             }
             catch {
@@ -742,9 +741,9 @@ function Test-ExpectedCmdProcess {
 
         # TotalMilliseconds is a double; keep that precision for the tolerance
         # comparison instead of rounding to whole milliseconds.
-        $startTimeDeltaMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
-        if ($startTimeDeltaMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
-            Write-Verbose "Process start time changed by $startTimeDeltaMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
+        $startTimeDeltaMs = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
+        if ($startTimeDeltaMs -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
+            Write-Verbose "Process start time changed by $startTimeDeltaMs ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
             return $false
         }
 
@@ -783,12 +782,14 @@ function Write-TaskKillFailureWarning {
         $taskKillOutputText = '(no output)'
     }
 
+    $taskKillAvailabilityAdvice = 'Verify that taskkill.exe is available and that the caller has permission to inspect or terminate the process tree.'
     if ($ExitCode -eq $TaskKillExecutionExceptionExitCode) {
-        Write-Warning "[$RepositoryName] taskkill could not be started. This can indicate missing taskkill.exe or insufficient permissions. Output:$([Environment]::NewLine)$taskKillOutputText"
+        Write-Warning "[$RepositoryName] taskkill could not be started. $taskKillAvailabilityAdvice Output:$([Environment]::NewLine)$taskKillOutputText"
         return
     }
 
-    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated, taskkill.exe may be unavailable, or the caller may lack permission. If the process is still running, verify it with Task Manager or run 'taskkill /F /PID <PID> /T' manually. Output:$([Environment]::NewLine)$taskKillOutputText"
+    $manualTaskKillAdvice = "If the process is still running, verify it with Task Manager or run 'taskkill /F /PID <PID> /T' manually."
+    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. $taskKillAvailabilityAdvice $manualTaskKillAdvice Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
 function New-ValidationResult {
@@ -1040,8 +1041,8 @@ if ($repositories.Count -eq 0) {
 # WaitForExit expects a 32-bit millisecond value. This is intentionally computed
 # from the parameter so the unit conversion stays close to the configured
 # timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
-# [int]::MaxValue. The helper still keeps an overflow guard if the parameter cap
-# is widened later.
+# [int]::MaxValue, and Convert-SecondsToIntMilliseconds also rejects values
+# above the WaitForExit-compatible seconds limit.
 try {
     $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
 }
@@ -1089,8 +1090,9 @@ foreach ($repository in $repositories) {
         # Keep -Encoding UTF8 for Windows PowerShell compatibility. The OMP
         # repository tooling writes component manifests as UTF-8 JSON. Avoid
         # utf8NoBOM here because Windows PowerShell 5.1 does not support it.
-        # For reads, this handles both BOM and no-BOM UTF-8 manifests in the
-        # PowerShell versions targeted by these wrapper scripts.
+        # For reads, -Encoding UTF8 handles both BOM and no-BOM UTF-8 manifests
+        # in the PowerShell versions targeted by these wrapper scripts, so avoid
+        # a version-specific branch only to choose utf8NoBOM on newer shells.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1112,7 +1114,7 @@ foreach ($repository in $repositories) {
         $manifest = $manifestJson | ConvertFrom-Json
     }
     catch {
-        throw "Component manifest '$manifestPath' was read but could not be parsed as JSON: $($_.Exception.Message)"
+        throw "Component manifest '$manifestPath' was read but could not be parsed as JSON. Check for common JSON syntax issues such as missing commas, trailing commas, or unescaped quotes: $($_.Exception.Message)"
     }
 
     $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
@@ -1155,7 +1157,9 @@ foreach ($repository in $repositories) {
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
-    $cmdArgumentText = $cmdArguments -join ' '
+    # Display-only diagnostic text. Do not feed this back into cmd.exe; actual
+    # execution uses ArgumentList above so arguments stay separated.
+    $cmdArgumentDisplayText = $cmdArguments -join ' '
     $process = $null
     $processStartTime = $null
     try {
@@ -1190,7 +1194,7 @@ foreach ($repository in $repositories) {
             -Package $expectedPackagePath `
             -StdoutLog $stdoutPath `
             -StderrLog $stderrPath `
-            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
+            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentDisplayText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
         continue
     }
 
@@ -1279,7 +1283,19 @@ foreach ($repository in $repositories) {
                         }
                     }
                     catch {
-                        Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed: $($_.Exception.Message)"
+                        $killError = $_.Exception.Message
+                        try {
+                            $process.Refresh()
+                            if ($process.HasExited) {
+                                Write-Warning "[$repoDisplayName] Direct Process.Kill() raced with natural process exit; no further termination was needed. Original error: $killError"
+                            }
+                            else {
+                                Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed while the process still appeared to be running: $killError"
+                            }
+                        }
+                        catch {
+                            Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed and the final process state could not be inspected: $killError"
+                        }
                     }
                 }
             }
