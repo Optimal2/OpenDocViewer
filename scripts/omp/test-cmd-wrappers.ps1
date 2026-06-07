@@ -20,6 +20,8 @@ param(
     [string[]]$RepositoryName = @(),
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
+    # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
+    # CI/manual validation cannot hang indefinitely.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -36,14 +38,14 @@ $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 $HashPrefixLength = 16
 $DecimalPlacesForTimeDisplay = 2
-# ASCII control characters: NUL through Unit Separator (US) plus DEL.
+# ASCII control characters: NUL through US (Unit Separator) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
 $MaximumCmdCommandLineLength = 8191
 # 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
 # packages must contain a manifest and object payload, so useful output must be
 # larger than this marker.
-$MinimumZipFileLengthBytes = 22
+$MinimumMeaningfulZipFileLengthBytes = 22
 
 # Give taskkill a short grace period to tear down child processes and flush
 # redirected streams without letting a stuck validation run hang indefinitely.
@@ -245,7 +247,7 @@ function Resolve-CmdExePath {
     }
 
     if (-not [StringComparer]::OrdinalIgnoreCase.Equals([System.IO.Path]::GetFileName($candidate), 'cmd.exe')) {
-        throw "ComSpec must point to cmd.exe for wrapper validation; the filename check is intentionally case-insensitive on Windows. Actual value: $candidate"
+        throw "ComSpec must point to cmd.exe for wrapper validation. Actual value: $candidate"
     }
 
     return $candidate
@@ -277,7 +279,7 @@ function Get-ProcessExitCodeOrNull {
         return $Process.ExitCode
     }
     catch [System.InvalidOperationException] {
-        Write-Verbose "Process state was unavailable while reading ExitCode. The process may still be running or may have already been disposed."
+        Write-Verbose "Process state is unavailable while reading ExitCode. The process may be running or may have been disposed."
         return $null
     }
     catch {
@@ -297,7 +299,9 @@ function Get-ValidProcessIdOrNull {
         return $null
     }
 
-    if ($null -eq $id -or $id -lt 1) {
+    # Windows process IDs are positive decimal integers; zero or negative values
+    # are treated as invalid before any taskkill command is assembled.
+    if ($id -lt 1) {
         return $null
     }
 
@@ -321,6 +325,8 @@ function ConvertTo-TaskKillProcessIdArgument {
     param([Parameter(Mandatory = $true)][int]$ProcessId)
 
     $processIdText = [string]$ProcessId
+    # Defense in depth: the parameter is already an int, but taskkill receives a
+    # string argument and should only ever see a positive decimal PID.
     if ($processIdText -notmatch '^[1-9][0-9]*$') {
         throw "Process ID is not a positive integer and cannot be passed to taskkill.exe: $processIdText"
     }
@@ -350,9 +356,13 @@ function Invoke-TaskKillTree {
             throw 'Process.Start returned null.'
         }
 
-        $stdout = $taskKillProcess.StandardOutput.ReadToEnd()
-        $stderr = $taskKillProcess.StandardError.ReadToEnd()
+        # Start both reads before waiting so taskkill cannot block on a full
+        # redirected stream buffer.
+        $stdoutTask = $taskKillProcess.StandardOutput.ReadToEndAsync()
+        $stderrTask = $taskKillProcess.StandardError.ReadToEndAsync()
         $taskKillProcess.WaitForExit()
+        $stdout = $stdoutTask.GetAwaiter().GetResult()
+        $stderr = $stderrTask.GetAwaiter().GetResult()
         $output = [System.Collections.Generic.List[string]]::new()
         if (-not [string]::IsNullOrWhiteSpace($stdout)) {
             $output.Add($stdout.Trim())
@@ -450,7 +460,7 @@ function Test-PackageCreated {
         }
 
         $length = $item.Length
-        $hasMeaningfulPayload = $length -gt $MinimumZipFileLengthBytes
+        $hasMeaningfulPayload = $length -gt $MinimumMeaningfulZipFileLengthBytes
         return [pscustomobject]@{
             Exists = $true
             IsValid = $hasMeaningfulPayload
@@ -459,7 +469,7 @@ function Test-PackageCreated {
                 'Package file exists and has meaningful zip content.'
             }
             else {
-                "Package file is too small to contain a meaningful zip payload. Expected size must be greater than $MinimumZipFileLengthBytes bytes."
+                "Package file is too small to contain a meaningful zip payload. Expected size must be greater than $MinimumMeaningfulZipFileLengthBytes bytes."
             }
         }
     }
@@ -540,7 +550,7 @@ Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 [System.IO.Directory]::CreateDirectory($logRootPath) | Out-Null
 $cmdExePath = Resolve-CmdExePath
-$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N'))
+$runId = '{0}_{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N'))
 $runLogRootPath = Join-Path $logRootPath $runId
 [System.IO.Directory]::CreateDirectory($runLogRootPath) | Out-Null
 
@@ -604,7 +614,7 @@ foreach ($repository in $repositories) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest must be strict JSON with repositoryKey and repositoryVersion fields; strict JSON does not allow trailing commas."
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest must be valid JSON with repositoryKey and repositoryVersion fields."
     }
 
     $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
@@ -629,7 +639,7 @@ foreach ($repository in $repositories) {
     $stdoutPath = Join-Path $runLogRootPath "$safeName.stdout.log"
     $stderrPath = Join-Path $runLogRootPath "$safeName.stderr.log"
 
-    Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a $PerRepositoryTimeoutSeconds second timeout..."
+    Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a timeout of $PerRepositoryTimeoutSeconds seconds..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
@@ -679,9 +689,9 @@ foreach ($repository in $repositories) {
     try {
         $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
         if ($exitedWithinTimeout) {
-            # The timed overload observes process exit; the parameterless overload
-            # then blocks until redirected stdout/stderr finish flushing before
-            # status checks inspect logs and package output.
+            # The timed overload observes process exit. The second, parameterless
+            # call is still required by .NET so redirected stdout/stderr are fully
+            # flushed before status checks inspect logs and package output.
             $process.WaitForExit()
         }
 
@@ -689,7 +699,7 @@ foreach ($repository in $repositories) {
         if ($timedOut) {
             $processId = Get-ValidProcessIdOrNull -Process $process
             $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
-            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds second(s). Terminating process tree for PID $processIdText."
+            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
                 Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
@@ -789,7 +799,8 @@ foreach ($repository in $repositories) {
 
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
-if ($results | Where-Object { $_.Status -ne 'OK' } | Select-Object -First 1) {
+$hasFailures = $null -ne ($results | Where-Object { $_.Status -ne 'OK' } | Select-Object -First 1)
+if ($hasFailures) {
     # Keep one generic failure exit code for compatibility with existing
     # callers; individual failure categories are reported in the table above.
     exit 1
