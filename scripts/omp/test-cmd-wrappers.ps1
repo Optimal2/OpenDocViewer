@@ -34,6 +34,9 @@ $CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 $GlobalPackageFileSegment = '__global__'
+# 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
+# packages must contain a manifest and object payload, so useful output must be
+# larger than this marker.
 $MinimumZipFileLengthBytes = 22
 
 # Give taskkill a short grace period to tear down child processes and flush
@@ -111,18 +114,31 @@ function Get-SafeFileName {
     return $safe
 }
 
+function Assert-SafeCmdArgumentText {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Value
+    )
+
+    if ($Value.Contains('"')) {
+        throw "$Name cannot contain double quotes when it is passed through cmd.exe: $Value"
+    }
+
+    if ($Value.Contains('%')) {
+        throw "$Name cannot contain percent signs; cmd.exe expands environment variables even within quoted strings: $Value"
+    }
+
+    if ($Value -match '[\x00-\x1F\x7F]') {
+        throw "$Name cannot contain control characters when it is passed through cmd.exe: $Value"
+    }
+}
+
 function ConvertTo-CmdArgument {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     # This helper only supports the argument shapes generated below; reject
     # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
-    if ($Value.Contains('"')) {
-        throw "CMD wrapper arguments cannot contain double quotes. Please use an alternative path or parameter value without double quotes: $Value"
-    }
-
-    if ($Value.Contains('%')) {
-        throw "CMD wrapper arguments cannot contain percent signs; cmd.exe expands environment variables even within quoted strings. Please use an alternative path or parameter value without percent signs: $Value"
-    }
+    Assert-SafeCmdArgumentText -Name 'CMD wrapper argument' -Value $Value
 
     # cmd.exe treats ^ as its escape character, so double carets when the
     # generated command line needs a literal caret.
@@ -140,14 +156,44 @@ function Join-CmdCommandLine {
     return ($Arguments | ForEach-Object { ConvertTo-CmdArgument -Value $_ }) -join ' '
 }
 
+function Resolve-CmdExePath {
+    $systemRoot = $env:SystemRoot
+    if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
+        $systemCmd = Join-Path $systemRoot 'System32\cmd.exe'
+        if (Test-Path -LiteralPath $systemCmd -PathType Leaf) {
+            return [System.IO.Path]::GetFullPath($systemCmd)
+        }
+    }
+
+    $candidate = $env:ComSpec
+    if ([string]::IsNullOrWhiteSpace($candidate)) {
+        throw 'Could not locate cmd.exe because SystemRoot/System32/cmd.exe was missing and ComSpec was empty.'
+    }
+
+    $candidate = [System.IO.Path]::GetFullPath($candidate)
+    if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
+        throw "ComSpec points to a missing executable: $candidate"
+    }
+
+    if ([System.IO.Path]::GetFileName($candidate) -ine 'cmd.exe') {
+        throw "ComSpec must point to cmd.exe for wrapper validation. Actual value: $candidate"
+    }
+
+    return $candidate
+}
+
 function Get-ProcessExitCodeOrNull {
     param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
 
     try {
         $Process.Refresh()
-        if ($Process.HasExited) {
-            return $Process.ExitCode
+        if (-not $Process.HasExited) {
+            # This is expected after a timeout if Windows has not finished
+            # terminating the process tree yet; it is not treated as an error.
+            return $null
         }
+
+        return $Process.ExitCode
     }
     catch [System.InvalidOperationException] {
         Write-Verbose "Process state was unavailable while reading ExitCode. The process may still be running or may have already been disposed."
@@ -177,6 +223,19 @@ function Get-ValidProcessIdOrNull {
     return [int]$id
 }
 
+function Test-ExpectedCmdProcess {
+    param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
+
+    try {
+        $Process.Refresh()
+        return $Process.ProcessName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase)
+    }
+    catch {
+        Write-Verbose "Could not verify process name before taskkill: $($_.Exception.Message)"
+        return $false
+    }
+}
+
 function Write-TaskKillFailureWarning {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryName,
@@ -191,6 +250,7 @@ function Write-TaskKillFailureWarning {
     }
 
     Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
+    return $null
 }
 
 function Test-PackageCreated {
@@ -253,6 +313,8 @@ function Assert-SafePackageIdentityPart {
 }
 
 $scriptDirectory = Get-ScriptDirectory
+# This script is intentionally kept in scripts/omp, so ..\.. is the repository
+# root for every OMP-compatible repository that carries the shared wrappers.
 $currentRepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDirectory '..\..'))
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
@@ -262,6 +324,9 @@ if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
 $workspaceRootPath = Resolve-FullDirectory -Path $WorkspaceRoot
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
+    # On normal Windows developer machines and GitHub runners, GetTempPath()
+    # resolves to a user-specific temp folder. Pass -OutputRoot explicitly when
+    # validating packages that should not be written to temp storage.
     $OutputRoot = Join-Path ([System.IO.Path]::GetTempPath()) 'omp-cmd-wrapper-validation\packages'
 }
 
@@ -271,10 +336,14 @@ if ([string]::IsNullOrWhiteSpace($LogRoot)) {
 
 $outputRootPath = [System.IO.Path]::GetFullPath($OutputRoot)
 $logRootPath = [System.IO.Path]::GetFullPath($LogRoot)
+Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
+Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 [System.IO.Directory]::CreateDirectory($logRootPath) | Out-Null
+$cmdExePath = Resolve-CmdExePath
+$runStamp = Get-Date -Format 'yyyyMMdd-HHmmss'
 
-if ($RepositoryName.Count -gt 0) {
+if (@($RepositoryName).Count -gt 0) {
     $repositories = foreach ($name in $RepositoryName) {
         $candidate = Join-Path $workspaceRootPath $name
         if (-not (Test-Path -LiteralPath $candidate -PathType Container)) {
@@ -293,7 +362,7 @@ else {
         Sort-Object Name
 }
 
-if ($null -eq $repositories -or $repositories.Count -eq 0) {
+if ($null -eq $repositories -or @($repositories).Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
@@ -301,14 +370,12 @@ if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTi
     throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
 }
 
-# WaitForExit expects a 32-bit millisecond value. The named timeout bounds above
-# keep this conversion safely below Int32.MaxValue.
-$timeoutMilliseconds64 = ([int64]$PerRepositoryTimeoutSeconds) * $MillisecondsPerSecond
-if ($timeoutMilliseconds64 -gt [int]::MaxValue) {
-    throw "PerRepositoryTimeoutSeconds is too large to convert to WaitForExit milliseconds: $PerRepositoryTimeoutSeconds"
-}
-
-$timeoutMilliseconds = [int]$timeoutMilliseconds64
+# WaitForExit expects a 32-bit millisecond value. The timeout bounds above keep
+# this conversion well below Int32.MaxValue.
+$timeoutMilliseconds = [int](([int64]$PerRepositoryTimeoutSeconds) * $MillisecondsPerSecond)
+# Validation results are assembled as PSCustomObjects in several branches; a
+# generic object list keeps append behavior efficient without defining a custom
+# class for this script-only report.
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
@@ -361,16 +428,15 @@ foreach ($repository in $repositories) {
         Remove-Item -LiteralPath $expectedPackagePath -Force
     }
 
-    $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
+    $safeName = '{0}-{1}-{2}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName), $runStamp
     $stdoutPath = Join-Path $logRootPath "$safeName.stdout.log"
     $stderrPath = Join-Path $logRootPath "$safeName.stderr.log"
-    Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
-    Remove-Item -LiteralPath $stderrPath -Force -ErrorAction SilentlyContinue
 
     Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a $PerRepositoryTimeoutSeconds second timeout..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
-    # the underlying PowerShell script.
+    # the underlying PowerShell script. call ensures the invoked .cmd file
+    # returns control to this cmd.exe instance when it is run through /c.
     $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
@@ -379,7 +445,11 @@ foreach ($repository in $repositories) {
         # -WindowStyle Hidden keeps validation non-interactive. -NoNewWindow is
         # intentionally not used because this script redirects stdout/stderr to
         # files and should not attach child command windows to the caller.
-        $process = Start-Process -FilePath $env:ComSpec `
+        if (-not (Test-IsSubPath -Path $repository.FullName -BasePath $workspaceRootPath)) {
+            throw "Repository path must stay within the workspace root immediately before command execution. Repository: $($repository.FullName). Workspace: $workspaceRootPath"
+        }
+
+        $process = Start-Process -FilePath $cmdExePath `
             -ArgumentList $cmdArguments `
             -WorkingDirectory $repository.FullName `
             -RedirectStandardOutput $stdoutPath `
@@ -402,87 +472,105 @@ foreach ($repository in $repositories) {
         continue
     }
 
-    $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
-    if ($exitedWithinTimeout) {
-        # The timed overload observes process exit; the parameterless overload
-        # then lets redirected stdout/stderr finish flushing before status checks.
-        $process.WaitForExit()
-    }
-
-    $timedOut = -not $exitedWithinTimeout
-    if ($timedOut) {
-        $processId = Get-ValidProcessIdOrNull -Process $process
-        $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
-        Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds second(s). Terminating process tree for PID $processIdText."
-        $process.Refresh()
-        if ($process.HasExited) {
-            Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
+    try {
+        $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
+        if ($exitedWithinTimeout) {
+            # The timed overload observes process exit; the parameterless overload
+            # then blocks until redirected stdout/stderr finish flushing before
+            # status checks inspect logs and package output.
+            $process.WaitForExit()
         }
-        elseif ($null -eq $processId) {
-            Write-Warning "[$repoDisplayName] Process has an invalid or unavailable PID; taskkill was not attempted."
-        }
-        else {
-            try {
-                # The Process object keeps a handle to the child cmd.exe and
-                # HasExited is checked immediately before taskkill, so PID reuse
-                # is not expected in normal Windows process lifetime semantics.
-                $taskKillOutput = & taskkill.exe /PID $processId /T /F 2>&1
-                $taskKillExitCode = $LASTEXITCODE
-            }
-            catch {
-                $taskKillOutput = @($_.Exception.ToString())
-                $taskKillExitCode = $TaskKillExecutionExceptionExitCode
-            }
 
-            if ($taskKillExitCode -ne 0) {
-                Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
-            }
-
+        $timedOut = -not $exitedWithinTimeout
+        if ($timedOut) {
+            $processId = Get-ValidProcessIdOrNull -Process $process
+            $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
+            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds second(s). Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
-                Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
+                Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
             }
-            elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                $postTerminationWaitSeconds = [int]($PostTerminationWaitMilliseconds / $MillisecondsPerSecond)
-                Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+            elseif ($null -eq $processId) {
+                Write-Warning "[$repoDisplayName] Process has an invalid or unavailable PID; taskkill was not attempted."
+            }
+            elseif (-not (Test-ExpectedCmdProcess -Process $process)) {
+                Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted."
+            }
+            else {
+                try {
+                    $process.Refresh()
+                    if ($process.HasExited) {
+                        Write-Warning "[$repoDisplayName] Process exited immediately before taskkill; termination was not needed."
+                        $taskKillOutput = @()
+                        $taskKillExitCode = 0
+                    }
+                    else {
+                        # The Process object keeps a handle to the child cmd.exe
+                        # and HasExited/ProcessName are checked immediately
+                        # before taskkill, so PID reuse is not expected in normal
+                        # Windows process lifetime semantics.
+                        $LASTEXITCODE = 0
+                        $taskKillOutput = & taskkill.exe /PID $processId /T /F 2>&1
+                        $taskKillExitCode = [int]$LASTEXITCODE
+                    }
+                }
+                catch {
+                    $taskKillOutput = @($_.Exception.ToString())
+                    $taskKillExitCode = $TaskKillExecutionExceptionExitCode
+                }
+
+                if ($taskKillExitCode -ne 0) {
+                    Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
+                }
+
+                $process.Refresh()
+                if ($process.HasExited) {
+                    Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
+                }
+                elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
+                    $postTerminationWaitSeconds = [Math]::Round($PostTerminationWaitMilliseconds / $MillisecondsPerSecond, 2)
+                    Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+                }
             }
         }
-    }
 
-    $exitCode = Get-ProcessExitCodeOrNull -Process $process
-    $packageValidation = Test-PackageCreated -Path $expectedPackagePath
-    $status = if ($timedOut) {
-        'Timeout'
-    }
-    elseif ($null -eq $exitCode) {
-        'No exit code'
-    }
-    elseif ($exitCode -ne 0) {
-        'Failed'
-    }
-    elseif (-not $packageValidation.Exists) {
-        'Missing package'
-    }
-    elseif (-not $packageValidation.IsValid) {
-        'Invalid package'
-    }
-    else {
-        'OK'
-    }
+        $exitCode = Get-ProcessExitCodeOrNull -Process $process
+        $packageValidation = Test-PackageCreated -Path $expectedPackagePath
+        $status = if ($timedOut) {
+            'Timeout'
+        }
+        elseif ($null -eq $exitCode) {
+            'No exit code'
+        }
+        elseif ($exitCode -ne 0) {
+            'Failed'
+        }
+        elseif (-not $packageValidation.Exists) {
+            'Missing package'
+        }
+        elseif (-not $packageValidation.IsValid) {
+            'Invalid package'
+        }
+        else {
+            'OK'
+        }
 
-    $results.Add([pscustomobject]@{
-        Repository = $repoDisplayName
-        Status = $status
-        ExitCode = $exitCode
-        Package = $expectedPackagePath
-        StdoutLog = $stdoutPath
-        StderrLog = $stderrPath
-        Detail = $packageValidation.Message
-    })
+        $results.Add([pscustomobject]@{
+            Repository = $repoDisplayName
+            Status = $status
+            ExitCode = $exitCode
+            Package = $expectedPackagePath
+            StdoutLog = $stdoutPath
+            StderrLog = $stderrPath
+            Detail = $packageValidation.Message
+        })
 
-    Write-Host "[$repoDisplayName] $status"
-    if ($null -ne $process) {
-        $process.Dispose()
+        Write-Host "[$repoDisplayName] $status"
+    }
+    finally {
+        if ($null -ne $process) {
+            $process.Dispose()
+        }
     }
 }
 
