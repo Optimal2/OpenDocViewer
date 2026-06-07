@@ -38,6 +38,8 @@ $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 $HashPrefixLength = 16
 $DecimalPlacesForTimeDisplay = 2
+$PositiveIntegerPattern = '^[1-9][0-9]*$'
+$MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
@@ -47,9 +49,12 @@ $MaximumCmdCommandLineLength = 8191
 # larger than this marker.
 $MinimumMeaningfulZipFileLengthBytes = 22
 
-# Give taskkill a short grace period to tear down child processes and flush
-# redirected streams without letting a stuck validation run hang indefinitely.
-$PostTerminationWaitMilliseconds = 10 * $MillisecondsPerSecond
+$PostTerminationWaitSeconds = 10
+$TaskKillWaitSeconds = 10
+# Give taskkill and the target process a short grace period to tear down child
+# processes and flush redirected streams without letting validation hang.
+$PostTerminationWaitMilliseconds = $PostTerminationWaitSeconds * $MillisecondsPerSecond
+$TaskKillWaitMilliseconds = $TaskKillWaitSeconds * $MillisecondsPerSecond
 # taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
 # PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
@@ -109,17 +114,40 @@ function Resolve-FullDirectory {
     return $resolved
 }
 
+function New-DirectorySafely {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+
+    try {
+        [System.IO.Directory]::CreateDirectory($Path) | Out-Null
+    }
+    catch {
+        throw "Could not create $Description '$Path': $($_.Exception.Message)"
+    }
+}
+
 function Test-IsSubPath {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][string]$BasePath
     )
 
-    $fullPath = (Resolve-FullPathSafely -Name 'repository path' -Path $Path).TrimEnd('\', '/')
-    $fullBasePath = (Resolve-FullPathSafely -Name 'workspace root path' -Path $BasePath).TrimEnd('\', '/')
+    $fullPath = ConvertTo-ComparablePath -Name 'path' -Path $Path
+    $fullBasePath = ConvertTo-ComparablePath -Name 'base path' -Path $BasePath
     return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::AltDirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function ConvertTo-ComparablePath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    return (Resolve-FullPathSafely -Name $Name -Path $Path).TrimEnd('\', '/')
 }
 
 function Assert-RepositoryPathUnderWorkspace {
@@ -327,7 +355,7 @@ function ConvertTo-TaskKillProcessIdArgument {
     $processIdText = [string]$ProcessId
     # Defense in depth: the parameter is already an int, but taskkill receives a
     # string argument and should only ever see a positive decimal PID.
-    if ($processIdText -notmatch '^[1-9][0-9]*$') {
+    if ($processIdText -notmatch $PositiveIntegerPattern) {
         throw "Process ID is not a positive integer and cannot be passed to taskkill.exe: $processIdText"
     }
 
@@ -360,7 +388,21 @@ function Invoke-TaskKillTree {
         # redirected stream buffer.
         $stdoutTask = $taskKillProcess.StandardOutput.ReadToEndAsync()
         $stderrTask = $taskKillProcess.StandardError.ReadToEndAsync()
-        $taskKillProcess.WaitForExit()
+        if (-not $taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)) {
+            try {
+                $taskKillProcess.Kill()
+            }
+            catch {
+                Write-Verbose "Could not terminate stuck taskkill.exe process: $($_.Exception.Message)"
+            }
+
+            $taskKillProcess.WaitForExit()
+            return [pscustomobject]@{
+                ExitCode = $TaskKillExecutionExceptionExitCode
+                Output = @("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
+            }
+        }
+
         $stdout = $stdoutTask.GetAwaiter().GetResult()
         $stderr = $stderrTask.GetAwaiter().GetResult()
         $output = [System.Collections.Generic.List[string]]::new()
@@ -491,6 +533,34 @@ function Test-PackageCreated {
     }
 }
 
+function Remove-ExistingFileSafely {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$Description
+    )
+
+    try {
+        $item = Get-Item -LiteralPath $Path -ErrorAction Stop
+    }
+    catch [System.Management.Automation.ItemNotFoundException] {
+        return
+    }
+    catch {
+        throw "Could not inspect existing $Description '$Path': $($_.Exception.Message)"
+    }
+
+    if ($item -isnot [System.IO.FileInfo]) {
+        throw "Existing $Description path is not a file and will not be removed: $Path"
+    }
+
+    try {
+        Remove-Item -LiteralPath $Path -Force -ErrorAction Stop
+    }
+    catch {
+        throw "Could not remove existing $Description '$Path': $($_.Exception.Message)"
+    }
+}
+
 function Assert-SafePackageIdentityPart {
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -547,12 +617,13 @@ $outputRootPath = Resolve-FullPathSafely -Name 'output root path' -Path $OutputR
 $logRootPath = Resolve-FullPathSafely -Name 'log root path' -Path $LogRoot
 Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
 Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
-[System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
-[System.IO.Directory]::CreateDirectory($logRootPath) | Out-Null
+New-DirectorySafely -Path $outputRootPath -Description 'output root directory'
+New-DirectorySafely -Path $logRootPath -Description 'log root directory'
 $cmdExePath = Resolve-CmdExePath
-$runId = '{0}_{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N'))
+# A GUID alone gives enough uniqueness while keeping log paths shorter.
+$runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
-[System.IO.Directory]::CreateDirectory($runLogRootPath) | Out-Null
+New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
 
 if ($repositoryNames.Count -gt 0) {
     $repositories = @(
@@ -581,15 +652,9 @@ if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath. Each repository must contain $ManifestRelativePath and $CommandWrapperRelativePath."
 }
 
-# WaitForExit expects a 32-bit millisecond value. ValidateRange keeps the normal
-# value well below Int32.MaxValue, and this assertion keeps the invariant obvious
-# if the accepted timeout range changes later.
-$timeoutMilliseconds64 = [int64]$PerRepositoryTimeoutSeconds * $MillisecondsPerSecond
-if ($timeoutMilliseconds64 -gt [int]::MaxValue) {
-    throw "PerRepositoryTimeoutSeconds produced $timeoutMilliseconds64 milliseconds, which exceeds Int32.MaxValue for WaitForExit."
-}
-
-$timeoutMilliseconds = [int]$timeoutMilliseconds64
+# WaitForExit expects a 32-bit millisecond value; ValidateRange caps this at
+# 3,600,000 ms, well below [int]::MaxValue.
+$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -625,19 +690,13 @@ foreach ($repository in $repositories) {
     # export-universal-package.ps1.
     $expectedPackagePath = Join-Path $outputRootPath ('{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileSegment, $packageVersion)
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
-    try {
-        Remove-Item -LiteralPath $expectedPackagePath -Force -ErrorAction Stop
-    }
-    catch [System.Management.Automation.ItemNotFoundException] {
-        # Nothing to remove; this is the expected state for a fresh run.
-    }
-    catch {
-        throw "Could not remove previous expected package '$expectedPackagePath': $($_.Exception.Message)"
-    }
+    Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
 
     $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
     $stdoutPath = Join-Path $runLogRootPath "$safeName.stdout.log"
     $stderrPath = Join-Path $runLogRootPath "$safeName.stderr.log"
+    Assert-PathUnderBase -Path $stdoutPath -BasePath $runLogRootPath -PathDescription 'stdout log path' -BaseDescription 'run log root'
+    Assert-PathUnderBase -Path $stderrPath -BasePath $runLogRootPath -PathDescription 'stderr log path' -BaseDescription 'run log root'
 
     Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a timeout of $PerRepositoryTimeoutSeconds seconds..."
 
@@ -711,25 +770,23 @@ foreach ($repository in $repositories) {
                 Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted."
             }
             else {
+                $taskKillAttempted = $false
+                $taskKillOutput = @()
+                $taskKillExitCode = $TaskKillExecutionExceptionExitCode
                 try {
                     $process.Refresh()
                     if ($process.HasExited) {
                         Write-Warning "[$repoDisplayName] Process exited immediately before taskkill; termination was not needed."
-                        # These values describe the skipped termination path,
-                        # not an actual taskkill.exe invocation.
-                        $taskKillOutput = @()
-                        $taskKillExitCode = 0
                     }
                     elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
                         Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted."
-                        $taskKillOutput = @()
-                        $taskKillExitCode = 0
                     }
                     else {
                         # The Process object keeps a handle to the child cmd.exe
                         # and HasExited/ProcessName/StartTime are checked
                         # immediately before taskkill, so PID reuse is not
                         # expected in normal Windows process lifetime semantics.
+                        $taskKillAttempted = $true
                         $taskKillResult = Invoke-TaskKillTree -ProcessId $processId
                         $taskKillOutput = $taskKillResult.Output
                         $taskKillExitCode = $taskKillResult.ExitCode
@@ -740,7 +797,7 @@ foreach ($repository in $repositories) {
                     $taskKillExitCode = $TaskKillExecutionExceptionExitCode
                 }
 
-                if ($taskKillExitCode -ne 0) {
+                if ($taskKillAttempted -and $taskKillExitCode -ne 0) {
                     Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
                 }
 
