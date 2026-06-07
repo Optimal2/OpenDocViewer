@@ -98,7 +98,7 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 $MaximumDiagnosticTextLength = 160
 $MinimumTimeoutSeconds = 60
 $MaximumTimeoutSeconds = 3600
-$MillisecondsPerSecond = 1000L
+$MillisecondsPerSecond = [int64]1000
 $Sha256HexLength = 64
 $RepositoryRootRelativePath = '..\..'
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
@@ -138,6 +138,9 @@ $TaskKillExecutionExceptionExitCode = -1
 # child process because of timestamp precision differences.
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
 
+# ValidateRange rejects normal command-line input before the script body runs.
+# Keep this guard as a self-check for the named constants that document the
+# literal ValidateRange bounds above.
 if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
     throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
 }
@@ -293,6 +296,8 @@ function Trim-TrailingDirectorySeparators {
 
     $trimmedRoot = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
     if ($trimmed.Equals($trimmedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        # Preserve the trailing separator for roots such as C:\ and \\server\share\
+        # because C: has different semantics from C:\ on Windows.
         return $root
     }
 
@@ -530,6 +535,7 @@ function Get-ValidProcessIdOrNull {
     # Windows never assigns process ID 0 or negative values to normal child
     # processes; reject them before any taskkill command is assembled.
     if ($id -lt $MinimumValidProcessId) {
+        Write-Verbose "Rejected invalid process ID before taskkill: $id"
         return $null
     }
 
@@ -708,8 +714,8 @@ function Test-ExpectedCmdProcess {
             return $true
         }
 
-        if ($ExpectedStartTime -isnot [datetime]) {
-            Write-Verbose "Expected process start time should be of type [datetime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
+        if ($ExpectedStartTime -isnot [System.DateTime]) {
+            Write-Verbose "Expected process start time should be of type [System.DateTime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
             return $false
         }
 
@@ -805,7 +811,7 @@ function Test-PackageCreated {
             return [pscustomobject]@{
                 Exists = $true
                 IsValid = $false
-                Length = 0L
+                Length = [int64]0
                 Message = "Package path is not a file: $Path"
             }
         }
@@ -830,7 +836,7 @@ function Test-PackageCreated {
         return [pscustomobject]@{
             Exists = $false
             IsValid = $false
-            Length = 0L
+            Length = [int64]0
             Message = 'Package file was not created.'
         }
     }
@@ -838,7 +844,7 @@ function Test-PackageCreated {
         return [pscustomobject]@{
             Exists = $false
             IsValid = $false
-            Length = 0L
+            Length = [int64]0
             Message = "Could not inspect package file: $($_.Exception.Message)"
         }
     }
@@ -1091,6 +1097,9 @@ foreach ($repository in $repositories) {
     # Global package files are named repositoryKey__global__repositoryVersion.zip.
     $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileDelimiter, $packageVersion
     $expectedPackagePath = Join-Path $outputRootPath $expectedPackageFileName
+    # Manifest fields are allow-listed before the filename is built, and this
+    # final base-path check is kept as defense in depth against traversal if the
+    # naming convention changes later.
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
 
