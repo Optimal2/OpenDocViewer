@@ -57,6 +57,8 @@ param(
     # Larger package builds can opt into any value from 60 to 3600 seconds (1 hour).
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
+    # ValidateRange requires literal values in a script parameter block; keep
+    # these in sync with $MinimumTimeoutSeconds and $MaximumTimeoutSeconds below.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -76,7 +78,8 @@ $HashPrefixLength = 16
 # system processes, but this script starts cmd.exe itself and only needs to
 # prevent invalid zero/negative IDs from reaching taskkill.exe.
 $MinimumValidProcessId = 1
-# ASCII control characters: NUL through US (Unit Separator) plus DEL.
+# ASCII control characters: NUL through US (Unit Separator), including TAB,
+# CR, and LF, plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
@@ -93,26 +96,37 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
+$MinimumTimeoutSeconds = 60
+$MaximumTimeoutSeconds = 3600
+$MillisecondsPerSecond = 1000L
+$Sha256HexLength = 64
+$RepositoryRootRelativePath = '..\..'
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / 1000)
+# PowerShell division returns a floating-point value even for integer inputs, so
+# Floor keeps this as the largest whole number of seconds accepted by
+# WaitForExit's millisecond API.
+$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
 # converted to WaitForExit-compatible millisecond values below.
-$PostTerminationWaitSeconds = [int]10
+# Ten seconds is long enough for typical Windows process tree cleanup without
+# making timeout validation feel stuck when a child process is wedged.
+$PostTerminationWaitSeconds = 10
 # taskkill.exe should be quick; ten seconds accommodates slow process creation
 # on busy runners without letting the wrapper validation hang.
-$TaskKillWaitSeconds = [int]10
+$TaskKillWaitSeconds = 10
 # After killing taskkill.exe itself, wait only briefly for redirected streams.
-$TaskKillPostTerminationWaitSeconds = [int]3
+$TaskKillPostTerminationWaitSeconds = 3
 # ReadToEndAsync tasks should complete after taskkill.exe exits. Keep a small
 # upper bound so diagnostics cannot hang if a redirected stream behaves oddly.
-$TaskKillStreamReadWaitSeconds = [int]3
-# Direct Process.Kill() is the last fallback for a stuck cmd.exe process.
-$DirectProcessKillWaitSeconds = [int]10
+$TaskKillStreamReadWaitSeconds = 3
+# Direct Process.Kill() is the last fallback for a stuck cmd.exe process; reuse
+# the same ten-second grace period as taskkill-driven termination.
+$DirectProcessKillWaitSeconds = 10
 # The command output is redirected to files, so only a short final flush wait is
 # needed once the process has already exited.
-$StreamFlushWaitSeconds = [int]3
+$StreamFlushWaitSeconds = 3
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
 # period after taskkill asks Windows to terminate the process tree.
@@ -123,6 +137,10 @@ $TaskKillExecutionExceptionExitCode = -1
 # handle and a refreshed lookup. A small tolerance avoids rejecting the same
 # child process because of timestamp precision differences.
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
+
+if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
+    throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
+}
 
 function Convert-SecondsToIntMilliseconds {
     param(
@@ -136,7 +154,11 @@ function Convert-SecondsToIntMilliseconds {
         throw "$Name is too large for WaitForExit: $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
     }
 
-    $milliseconds = ([int64]$Seconds) * 1000L
+    $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
+    if ($milliseconds -gt [int]::MaxValue) {
+        throw "$Name is too large for WaitForExit after conversion: $milliseconds milliseconds."
+    }
+
     return [int]$milliseconds
 }
 
@@ -153,6 +175,19 @@ function Get-SafeDiagnosticText {
     }
 
     return $safe
+}
+
+function Get-ControlCharacterDiagnostic {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    foreach ($character in $Value.ToCharArray()) {
+        $codePoint = [int][char]$character
+        if ($codePoint -le 31 -or $codePoint -eq 127) {
+            return ('U+{0:X4}' -f $codePoint)
+        }
+    }
+
+    return 'unknown control character'
 }
 
 try {
@@ -247,13 +282,30 @@ function Test-IsSubPath {
         $fullPath.StartsWith($fullBasePathWithSeparator, [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Trim-TrailingDirectorySeparators {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    $trimmed = $Path.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    $root = [System.IO.Path]::GetPathRoot($Path)
+    if ([string]::IsNullOrEmpty($root)) {
+        return $trimmed
+    }
+
+    $trimmedRoot = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    if ($trimmed.Equals($trimmedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+        return $root
+    }
+
+    return $trimmed
+}
+
 function ConvertTo-ComparablePath {
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$Path
     )
 
-    $fullPath = (Resolve-FullPathSafely -Name $Name -Path $Path).TrimEnd('\', '/')
+    $fullPath = Trim-TrailingDirectorySeparators -Path (Resolve-FullPathSafely -Name $Name -Path $Path)
     return $fullPath.Replace([System.IO.Path]::AltDirectorySeparatorChar, [System.IO.Path]::DirectorySeparatorChar)
 }
 
@@ -302,9 +354,10 @@ function Get-ShortStableHash {
     # intentionally more than enough for the small set of sibling repositories.
     # BitConverter is clear enough here; this script hashes only a small set of
     # repository paths, so avoiding Replace() would be a negligible micro-optimization.
-    $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
-    if ($hash.Length -ne 64) {
-        throw "SHA256 hash output must be exactly 64 hexadecimal characters. Actual length: $($hash.Length)."
+    $hashWithSeparators = [BitConverter]::ToString($hashBytes)
+    $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
+    if ($hash.Length -ne $Sha256HexLength) {
+        throw "SHA256 hash output must be exactly $Sha256HexLength hexadecimal characters. Actual length: $($hash.Length)."
     }
 
     if ($HashPrefixLength -gt $hash.Length) {
@@ -341,12 +394,15 @@ function Assert-SafeCmdArgumentText {
         throw "$Name cannot contain percent signs; cmd.exe expands environment variables even within quoted strings: $Value"
     }
 
+    # Newlines are also covered by $ControlCharacterPattern. Keep this branch
+    # first so users get a clearer error for the most common control characters.
     if ($Value.Contains("`r") -or $Value.Contains("`n")) {
         throw "$Name cannot contain newline characters when it is passed through cmd.exe: $Value"
     }
 
     if ($Value -match $ControlCharacterPattern) {
-        throw "$Name cannot contain control characters when it is passed through cmd.exe: $Value"
+        $controlCharacter = Get-ControlCharacterDiagnostic -Value $Value
+        throw "$Name cannot contain control characters ($controlCharacter) when it is passed through cmd.exe: $(Get-SafeDiagnosticText -Value $Value)"
     }
 }
 
@@ -359,8 +415,9 @@ function ConvertTo-CmdArgument {
     # pre-validation if this helper ever gains new callers.
     Assert-SafeCmdArgumentText -Name 'CMD wrapper argument' -Value $Value
 
-    # cmd.exe treats ^ as its escape character. Escape carets before quoting so
-    # a literal caret cannot alter parsing of the generated command line.
+    # cmd.exe treats ^ as its escape character; ^^ emits one literal caret.
+    # Escape carets before quoting so a literal caret cannot alter parsing of
+    # the generated command line.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
@@ -527,6 +584,8 @@ function Add-TaskOutputOrDiagnostic {
     )
 
     try {
+        # Task.Wait can surface stream read failures as AggregateException; the
+        # catch below converts them into diagnostics instead of hiding them.
         if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
             return
@@ -548,6 +607,7 @@ function Invoke-TaskKillTree {
     $processIdArgument = ConvertTo-TaskKillProcessIdArgument -ProcessId $ProcessId
     $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
     $startInfo.FileName = Resolve-TaskKillExePath
+    # Required for redirected stdout/stderr streams below.
     $startInfo.UseShellExecute = $false
     $startInfo.CreateNoWindow = $true
     $startInfo.RedirectStandardOutput = $true
@@ -567,7 +627,8 @@ function Invoke-TaskKillTree {
         # redirected stream buffer.
         $stdoutTask = $taskKillProcess.StandardOutput.ReadToEndAsync()
         $stderrTask = $taskKillProcess.StandardError.ReadToEndAsync()
-        if (-not $taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)) {
+        $taskKillCompletedWithinTimeout = $taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)
+        if (-not $taskKillCompletedWithinTimeout) {
             try {
                 Write-Verbose "taskkill.exe exceeded $TaskKillWaitSeconds seconds and is being forcefully terminated."
                 $taskKillProcess.Kill()
@@ -615,6 +676,15 @@ function Invoke-TaskKillTree {
     }
 }
 
+function Test-IsCmdProcessName {
+    param([Parameter(Mandatory = $true)][string]$ProcessName)
+
+    return (
+        $ProcessName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase) -or
+        $ProcessName.Equals('cmd.exe', [StringComparison]::OrdinalIgnoreCase)
+    )
+}
+
 function Test-ExpectedCmdProcess {
     param(
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
@@ -628,8 +698,7 @@ function Test-ExpectedCmdProcess {
         $processName = $Process.ProcessName
         # ProcessName normally omits .exe on Windows, but accept both forms to
         # keep the guard clear if the runtime behavior ever changes.
-        $isCmdProcess = $processName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase) -or
-            $processName.Equals('cmd.exe', [StringComparison]::OrdinalIgnoreCase)
+        $isCmdProcess = Test-IsCmdProcessName -ProcessName $processName
 
         if (-not $isCmdProcess) {
             return $false
@@ -729,8 +798,10 @@ function Test-PackageCreated {
 
         if ($item -isnot [System.IO.FileInfo]) {
             # A directory or other filesystem object at the expected package
-            # path is a failed validation result. Do not read Length here; only
-            # FileInfo exposes meaningful package size for the generated ZIP.
+            # path is a failed validation result. The expected package path is
+            # always filesystem-backed, not a registry/provider path. Do not
+            # read Length here; only FileInfo exposes meaningful package size
+            # for the generated ZIP.
             return [pscustomobject]@{
                 Exists = $true
                 IsValid = $false
@@ -866,7 +937,7 @@ function Get-RequiredManifestText {
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
-$currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path '..\..' -BasePath $scriptDirectory
+$currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path $RepositoryRootRelativePath -BasePath $scriptDirectory
 $currentRepositoryMarkerPath = Join-Path $currentRepositoryRoot 'omp-components.json'
 if (-not (Test-Path -LiteralPath $currentRepositoryMarkerPath -PathType Leaf)) {
     throw "Resolved repository root '$currentRepositoryRoot' does not contain omp-components.json. test-cmd-wrappers.ps1 assumes it is stored below scripts/omp."
@@ -1087,7 +1158,8 @@ foreach ($repository in $repositories) {
     }
 
     try {
-        $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
+        $completedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
+        $timedOut = -not $completedWithinTimeout
         if ($timedOut) {
             # The process can exit between timeout detection and the following
             # state reads. Every termination branch refreshes the Process object
@@ -1150,6 +1222,9 @@ foreach ($repository in $repositories) {
                         $process.Refresh()
                         if ($process.HasExited) {
                             Write-Warning "[$repoDisplayName] Process exited immediately before direct Process.Kill(); no further termination was needed."
+                        }
+                        elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
+                            Write-Warning "[$repoDisplayName] Process identity changed immediately before direct Process.Kill(); termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
                         }
                         else {
                             # The process can still exit between HasExited and
