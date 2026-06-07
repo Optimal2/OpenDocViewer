@@ -20,6 +20,8 @@ param(
     [string[]]$RepositoryName = @(),
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
+    # 60 seconds catches accidental tiny values; 3600 seconds prevents a hung
+    # wrapper validation from consuming an entire workday.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -28,6 +30,7 @@ $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
+$MinimumZipFileLengthBytes = 22
 
 # Give taskkill a short grace period to tear down child processes and flush
 # redirected streams without letting a stuck validation run hang indefinitely.
@@ -76,7 +79,7 @@ function Get-SafeFileName {
     $safe = $Value -replace $SafeFileNamePattern, '-'
     $safe = $safe.Trim('-')
     if ([string]::IsNullOrWhiteSpace($safe)) {
-        return 'repository'
+        return 'repository-{0}' -f [Guid]::NewGuid().ToString('N').Substring(0, 8)
     }
 
     return $safe
@@ -95,6 +98,8 @@ function ConvertTo-CmdArgument {
         throw "CMD wrapper arguments cannot contain percent signs because cmd.exe expands environment variables: $Value"
     }
 
+    # cmd.exe treats ^ as its escape character, so double carets when the
+    # generated command line needs a literal caret.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch '[\s&|<>]') {
         return $escaped
@@ -121,8 +126,59 @@ function Get-ProcessExitCodeOrNull {
     catch [System.InvalidOperationException] {
         return $null
     }
+}
 
-    return $null
+function Write-TaskKillFailureWarning {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryName,
+        [Parameter(Mandatory = $true)][int]$ExitCode,
+        [object[]]$Output = @()
+    )
+
+    $taskKillOutputText = ($Output | Out-String).Trim()
+    if ($ExitCode -eq $TaskKillExecutionExceptionExitCode) {
+        Write-Warning "[$RepositoryName] taskkill could not be started. Output:`n$taskKillOutputText"
+        return
+    }
+
+    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
+}
+
+function Test-PackageCreated {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    try {
+        $item = Get-Item -LiteralPath $Path -ErrorAction SilentlyContinue
+        if ($null -eq $item) {
+            return [pscustomobject]@{
+                Exists = $false
+                IsValid = $false
+                Length = 0L
+                Message = 'Package file was not created.'
+            }
+        }
+
+        $length = [int64]$item.Length
+        return [pscustomobject]@{
+            Exists = $true
+            IsValid = $length -gt $MinimumZipFileLengthBytes
+            Length = $length
+            Message = if ($length -gt $MinimumZipFileLengthBytes) {
+                'Package file exists and has meaningful zip content.'
+            }
+            else {
+                "Package file is too small to contain a meaningful zip payload. Minimum expected size is greater than $MinimumZipFileLengthBytes bytes."
+            }
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            Exists = $false
+            IsValid = $false
+            Length = 0L
+            Message = "Could not inspect package file: $($_.Exception.Message)"
+        }
+    }
 }
 
 $scriptDirectory = Get-ScriptDirectory
@@ -192,7 +248,16 @@ foreach ($repository in $repositories) {
     $packageKey = [string]$manifest.repositoryKey
     $packageVersion = [string]$manifest.repositoryVersion
     if ([string]::IsNullOrWhiteSpace($packageKey) -or [string]::IsNullOrWhiteSpace($packageVersion)) {
-        throw "Manifest must contain repositoryKey and repositoryVersion: $manifestPath"
+        $missingFields = [System.Collections.Generic.List[string]]::new()
+        if ([string]::IsNullOrWhiteSpace($packageKey)) {
+            $missingFields.Add('repositoryKey')
+        }
+
+        if ([string]::IsNullOrWhiteSpace($packageVersion)) {
+            $missingFields.Add('repositoryVersion')
+        }
+
+        throw "Manifest must contain non-empty repositoryKey and repositoryVersion. Missing: $($missingFields -join ', '). Manifest: $manifestPath"
     }
 
     # build-universal-package.cmd creates the repository's global package by
@@ -232,6 +297,9 @@ foreach ($repository in $repositories) {
         if ($process.HasExited) {
             Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
         }
+        elseif ($process.Id -le 0) {
+            Write-Warning "[$repoDisplayName] Process has an invalid PID '$($process.Id)'; taskkill was not attempted."
+        }
         else {
             try {
                 $taskKillOutput = & taskkill.exe /PID $process.Id /T /F 2>&1
@@ -243,13 +311,7 @@ foreach ($repository in $repositories) {
             }
 
             if ($taskKillExitCode -ne 0) {
-                $taskKillOutputText = ($taskKillOutput | Out-String).Trim()
-                if ($taskKillExitCode -eq $TaskKillExecutionExceptionExitCode) {
-                    Write-Warning "[$repoDisplayName] taskkill could not be started. Output:`n$taskKillOutputText"
-                }
-                else {
-                    Write-Warning "[$repoDisplayName] taskkill failed with exit code $taskKillExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
-                }
+                Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
             }
 
             if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
@@ -259,17 +321,21 @@ foreach ($repository in $repositories) {
     }
 
     $exitCode = Get-ProcessExitCodeOrNull -Process $process
-    $packageItem = Get-Item -LiteralPath $expectedPackagePath -ErrorAction SilentlyContinue
-    $packageExists = $null -ne $packageItem
-    $packageLength = if ($packageExists) { $packageItem.Length } else { 0L }
+    $packageValidation = Test-PackageCreated -Path $expectedPackagePath
     $status = if ($timedOut) {
         'Timeout'
+    }
+    elseif ($null -eq $exitCode) {
+        'No exit code'
     }
     elseif ($exitCode -ne 0) {
         'Failed'
     }
-    elseif (-not $packageExists -or $packageLength -le 0) {
+    elseif (-not $packageValidation.Exists) {
         'Missing package'
+    }
+    elseif (-not $packageValidation.IsValid) {
+        'Invalid package'
     }
     else {
         'OK'
