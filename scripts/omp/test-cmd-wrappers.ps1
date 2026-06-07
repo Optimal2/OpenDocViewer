@@ -26,6 +26,7 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+$PostTerminationWaitMilliseconds = 10000
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -87,7 +88,7 @@ function ConvertTo-CmdArgument {
     }
 
     $escaped = $Value.Replace('^', '^^')
-    if ($escaped -notmatch '[\s&|<>^%]') {
+    if ($escaped -notmatch '[\s&|<>]') {
         return $escaped
     }
 
@@ -98,6 +99,21 @@ function Join-CmdCommandLine {
     param([Parameter(Mandatory = $true)][string[]]$Arguments)
 
     return ($Arguments | ForEach-Object { ConvertTo-CmdArgument -Value $_ }) -join ' '
+}
+
+function Get-ProcessExitCodeOrNull {
+    param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
+
+    try {
+        if ($Process.HasExited) {
+            return $Process.ExitCode
+        }
+    }
+    catch [System.InvalidOperationException] {
+        return $null
+    }
+
+    return $null
 }
 
 $scriptDirectory = Get-ScriptDirectory
@@ -197,7 +213,8 @@ foreach ($repository in $repositories) {
         -WindowStyle Hidden `
         -PassThru
 
-    $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
+    $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
+    $timedOut = -not $exitedWithinTimeout
     if ($timedOut) {
         Write-Warning "[$repoDisplayName] Timeout reached. Terminating process tree for PID $($process.Id)."
         if ($process.HasExited) {
@@ -215,21 +232,16 @@ foreach ($repository in $repositories) {
 
             if ($taskKillExitCode -ne 0) {
                 $taskKillOutputText = ($taskKillOutput | Out-String).Trim()
-                if ($taskKillExitCode -eq 128) {
-                    Write-Warning "[$repoDisplayName] taskkill could not find the process; it may have already terminated. Output:`n$taskKillOutputText"
-                }
-                else {
-                    Write-Warning "[$repoDisplayName] taskkill failed with exit code $taskKillExitCode. Output:`n$taskKillOutputText"
-                }
+                Write-Warning "[$repoDisplayName] taskkill failed with exit code $taskKillExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
             }
 
-            if (-not $process.WaitForExit(10000)) {
-                Write-Warning "[$repoDisplayName] Process did not report exit within 10 seconds after taskkill."
+            if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
+                Write-Warning "[$repoDisplayName] Process did not report exit within $($PostTerminationWaitMilliseconds / 1000) seconds after taskkill."
             }
         }
     }
 
-    $exitCode = if ($timedOut -or -not $process.HasExited) { $null } else { $process.ExitCode }
+    $exitCode = Get-ProcessExitCodeOrNull -Process $process
     $packageExists = Test-Path -LiteralPath $expectedPackagePath -PathType Leaf
     $packageLength = if ($packageExists) { (Get-Item -LiteralPath $expectedPackagePath).Length } else { 0L }
     $status = if ($timedOut) {
