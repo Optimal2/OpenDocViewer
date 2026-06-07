@@ -1,6 +1,6 @@
 <#
 .SYNOPSIS
-Validates OMP repository command wrappers with configurable per-repository timeouts.
+Validates OpenModulePlatform (OMP) repository command wrappers with configurable per-repository timeouts.
 
 .DESCRIPTION
 Runs the wrapper specified by -CommandWrapperRelativePath in non-interactive mode
@@ -21,7 +21,7 @@ cmd.exe process tree and avoids reading ExitCode until the process has exited.
 
 .PARAMETER WorkspaceRoot
 Workspace that contains the OMP-compatible repository folders. Defaults to the
-parent folder of the repository that contains this script.
+immediate parent folder of the repository that contains this script.
 
 .PARAMETER RepositoryName
 Optional repository folder names to validate. When omitted, sibling folders are
@@ -139,7 +139,8 @@ $TaskKillExecutionExceptionExitCode = -1
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
 
 # ValidateRange rejects normal command-line input before the script body runs.
-# Keep this guard as a self-check for the named constants that document the
+# This is intentionally not the primary validation path; it is a maintainer
+# self-check that keeps the named documentation constants synchronized with the
 # literal ValidateRange bounds above.
 if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
     throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
@@ -158,6 +159,9 @@ function Convert-SecondsToIntMilliseconds {
     }
 
     $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
+    # This is unreachable while $MaximumWaitForExitSeconds is derived from
+    # [int]::MaxValue, but keep it as defense if the helper is reused with a
+    # different upper bound later.
     if ($milliseconds -gt [int]::MaxValue) {
         throw "$Name is too large for WaitForExit after conversion: $milliseconds milliseconds."
     }
@@ -194,6 +198,9 @@ function Get-ControlCharacterDiagnostic {
 }
 
 try {
+    # Keep these conversions explicit instead of looping over variable names:
+    # each output variable is consumed by different process-wait branches, and
+    # spelling them out makes timeout diagnostics easier to trace.
     $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
     $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
     $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
@@ -447,8 +454,10 @@ function Assert-CmdCommandLineLength {
 
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
+    $systemCmdPathDescription = '$env:SystemRoot\System32\cmd.exe'
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $systemCmd = Join-Path $systemRoot 'System32\cmd.exe'
+        $systemCmdPathDescription = $systemCmd
         if (Test-Path -LiteralPath $systemCmd -PathType Leaf) {
             return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmd
         }
@@ -456,7 +465,7 @@ function Resolve-CmdExePath {
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw 'Could not locate cmd.exe because $env:SystemRoot\System32\cmd.exe was missing and ComSpec was empty.'
+        throw "Could not locate cmd.exe because '$systemCmdPathDescription' was missing and ComSpec was empty."
     }
 
     return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
@@ -591,7 +600,9 @@ function Add-TaskOutputOrDiagnostic {
 
     try {
         # Task.Wait can surface stream read failures as AggregateException; the
-        # catch below converts them into diagnostics instead of hiding them.
+        # catch below converts them into diagnostics instead of hiding them. The
+        # ReadToEndAsync tasks come from process streams and the wait is bounded,
+        # so this path is intentionally synchronous for Windows PowerShell 5.1.
         if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
             return
@@ -695,7 +706,9 @@ function Test-ExpectedCmdProcess {
     param(
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
         # Keep this nullable object-shaped parameter because callers pass the
-        # optional value returned by Get-ProcessStartTimeOrNull.
+        # optional value returned by Get-ProcessStartTimeOrNull. Non-null values
+        # are validated below so callers get a clear diagnostic instead of a
+        # parameter-binding failure when process metadata is unavailable.
         [object]$ExpectedStartTime = $null
     )
 
@@ -725,9 +738,9 @@ function Test-ExpectedCmdProcess {
             return $false
         }
 
-        $startTimeDelta = ($actualStartTime - $ExpectedStartTime).Duration()
-        if ($startTimeDelta -gt $ProcessStartTimeTolerance) {
-            Write-Verbose "Process start time changed by $($startTimeDelta.TotalMilliseconds) ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
+        $startTimeDeltaMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
+        if ($startTimeDeltaMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
+            Write-Verbose "Process start time changed by $startTimeDeltaMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
             return $false
         }
 
@@ -891,7 +904,7 @@ function Assert-SafePackageIdentityPart {
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. The entire value must match $PackageIdentityPattern. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Only letters, digits, dots, underscores, plus signs, and hyphens are allowed. Pattern: $PackageIdentityPattern. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
@@ -1025,7 +1038,12 @@ if ($repositories.Count -eq 0) {
 # timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
 # [int]::MaxValue. The helper still keeps an overflow guard if the parameter cap
 # is widened later.
-$timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+try {
+    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+}
+catch {
+    throw "Invalid per-repository validation timeout configuration used by the main repository loop: $($_.Exception.Message)"
+}
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -1064,18 +1082,20 @@ foreach ($repository in $repositories) {
 
     try {
         # Keep -Encoding UTF8 for Windows PowerShell compatibility. The OMP
-        # repository tooling writes component manifests as UTF-8 JSON, and this
-        # reader handles both BOM and no-BOM files.
+        # repository tooling writes component manifests as UTF-8 JSON. Avoid
+        # utf8NoBOM here because Windows PowerShell 5.1 does not support it.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
+        # The file was checked above, but it can still be removed or replaced
+        # between Test-Path and Get-Content.
         throw "Component manifest is missing: $manifestPath"
     }
     catch [System.UnauthorizedAccessException] {
-        throw "Could not read component manifest '$manifestPath' because access was denied: $($_.Exception.Message)"
+        throw "Could not read component manifest '$manifestPath' because access was denied. Check file permissions for the current user: $($_.Exception.Message)"
     }
     catch [System.IO.IOException] {
-        throw "Could not read component manifest '$manifestPath' because of an I/O error. The file may be locked or unavailable: $($_.Exception.Message)"
+        throw "Could not read component manifest '$manifestPath' because of an I/O error. Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
     }
     catch {
         throw "Could not read component manifest '$manifestPath': $($_.Exception.Message)"
@@ -1167,6 +1187,10 @@ foreach ($repository in $repositories) {
     }
 
     try {
+        # Timeout handling stays inline because it updates the per-repository
+        # validation result, log paths, process identity diagnostics, and final
+        # package inspection in one flow. Extracting it would require a wide
+        # parameter object without making the operational logic safer.
         $completedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
         $timedOut = -not $completedWithinTimeout
         if ($timedOut) {
