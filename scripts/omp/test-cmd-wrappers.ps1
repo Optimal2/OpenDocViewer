@@ -34,6 +34,8 @@ $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
+$HashPrefixLength = 16
+$DecimalPlacesForTimeDisplay = 2
 # ASCII control characters: NUL through Unit Separator (US) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
@@ -146,8 +148,18 @@ function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
-    $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-    return $hash.Substring(0, 16)
+    $sha256 = [Security.Cryptography.SHA256]::Create()
+    try {
+        $hashBytes = $sha256.ComputeHash($bytes)
+    }
+    finally {
+        $sha256.Dispose()
+    }
+
+    # 16 hex characters gives 64 bits of stable filename entropy, which is
+    # intentionally more than enough for the small set of sibling repositories.
+    $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
+    return $hash.Substring(0, [Math]::Min($HashPrefixLength, $hash.Length))
 }
 
 function Get-SafeFileName {
@@ -232,8 +244,8 @@ function Resolve-CmdExePath {
         throw "ComSpec points to a missing executable: $candidate"
     }
 
-    if ([System.IO.Path]::GetFileName($candidate) -ine 'cmd.exe') {
-        throw "ComSpec must point to cmd.exe for wrapper validation. Actual value: $candidate"
+    if (-not [StringComparer]::OrdinalIgnoreCase.Equals([System.IO.Path]::GetFileName($candidate), 'cmd.exe')) {
+        throw "ComSpec must point to cmd.exe for wrapper validation; the filename check is intentionally case-insensitive on Windows. Actual value: $candidate"
     }
 
     return $candidate
@@ -387,8 +399,13 @@ function Test-ExpectedCmdProcess {
         }
 
         if ($null -ne $ExpectedStartTime) {
+            if ($ExpectedStartTime -isnot [datetime]) {
+                Write-Verbose "Expected process start time had unexpected type '$($ExpectedStartTime.GetType().FullName)'."
+                return $false
+            }
+
             $actualStartTime = Get-ProcessStartTimeOrNull -Process $Process
-            if ($null -eq $actualStartTime -or $actualStartTime -ne [datetime]$ExpectedStartTime) {
+            if ($null -eq $actualStartTime -or $actualStartTime -ne $ExpectedStartTime) {
                 return $false
             }
         }
@@ -410,11 +427,11 @@ function Write-TaskKillFailureWarning {
 
     $taskKillOutputText = ($Output | Out-String).Trim()
     if ($ExitCode -eq $TaskKillExecutionExceptionExitCode) {
-        Write-Warning "[$RepositoryName] taskkill could not be started. Output:`n$taskKillOutputText"
+        Write-Warning "[$RepositoryName] taskkill could not be started. This can indicate missing taskkill.exe or insufficient permissions. Output:$([Environment]::NewLine)$taskKillOutputText"
         return
     }
 
-    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
+    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated, taskkill.exe may be unavailable, or the caller may lack permission. Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
 function Test-PackageCreated {
@@ -476,6 +493,22 @@ function Assert-SafePackageIdentityPart {
     }
 }
 
+function Get-RequiredManifestText {
+    param(
+        [Parameter(Mandatory = $true)][object]$Manifest,
+        [Parameter(Mandatory = $true)][string]$PropertyName,
+        [Parameter(Mandatory = $true)][string]$ManifestPath
+    )
+
+    $value = [string]$Manifest.$PropertyName
+    if ([string]::IsNullOrWhiteSpace($value)) {
+        throw "Manifest field '$PropertyName' is required and must not be empty. Manifest: $ManifestPath"
+    }
+
+    Assert-SafePackageIdentityPart -Name $PropertyName -Value $value -ManifestPath $ManifestPath
+    return $value
+}
+
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
@@ -513,34 +546,40 @@ $runLogRootPath = Join-Path $logRootPath $runId
 
 if ($repositoryNames.Count -gt 0) {
     $repositories = @(
-    foreach ($name in $repositoryNames) {
-        $candidate = Join-Path $workspaceRootPath $name
-        if (-not (Test-Path -LiteralPath $candidate -PathType Container)) {
-            throw "Repository directory not found: $candidate"
-        }
+        foreach ($name in $repositoryNames) {
+            $candidate = Join-Path $workspaceRootPath $name
+            if (-not (Test-Path -LiteralPath $candidate -PathType Container)) {
+                throw "Repository directory not found: $candidate"
+            }
 
-        Get-Item -LiteralPath $candidate
-    }
+            Get-Item -LiteralPath $candidate
+        }
     )
 }
 else {
     $repositories = @(
-    Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
-        Where-Object {
-            (Test-Path -LiteralPath (Join-Path $_.FullName $ManifestRelativePath) -PathType Leaf) -and
-            (Test-Path -LiteralPath (Join-Path $_.FullName $CommandWrapperRelativePath) -PathType Leaf)
-        } |
-        Sort-Object Name
+        Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
+            Where-Object {
+                (Test-Path -LiteralPath (Join-Path $_.FullName $ManifestRelativePath) -PathType Leaf) -and
+                (Test-Path -LiteralPath (Join-Path $_.FullName $CommandWrapperRelativePath) -PathType Leaf)
+            } |
+            Sort-Object Name
     )
 }
 
 if ($repositories.Count -eq 0) {
-    throw "No OMP-compatible repositories found below $workspaceRootPath."
+    throw "No OMP-compatible repositories found below $workspaceRootPath. Each repository must contain $ManifestRelativePath and $CommandWrapperRelativePath."
 }
 
-# WaitForExit expects a 32-bit millisecond value. The timeout bounds above keep
-# this conversion well below Int32.MaxValue.
-$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
+# WaitForExit expects a 32-bit millisecond value. ValidateRange keeps the normal
+# value well below Int32.MaxValue, and this assertion keeps the invariant obvious
+# if the accepted timeout range changes later.
+$timeoutMilliseconds64 = [int64]$PerRepositoryTimeoutSeconds * $MillisecondsPerSecond
+if ($timeoutMilliseconds64 -gt [int]::MaxValue) {
+    throw "PerRepositoryTimeoutSeconds produced $timeoutMilliseconds64 milliseconds, which exceeds Int32.MaxValue for WaitForExit."
+}
+
+$timeoutMilliseconds = [int]$timeoutMilliseconds64
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -565,26 +604,11 @@ foreach ($repository in $repositories) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). Check for trailing commas, invalid escape sequences, missing required JSON structure, or non-UTF-8 content."
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest must be strict JSON with repositoryKey and repositoryVersion fields; strict JSON does not allow trailing commas."
     }
 
-    $packageKey = [string]$manifest.repositoryKey
-    $packageVersion = [string]$manifest.repositoryVersion
-    if ([string]::IsNullOrWhiteSpace($packageKey) -or [string]::IsNullOrWhiteSpace($packageVersion)) {
-        $missingFields = [System.Collections.Generic.List[string]]::new()
-        if ([string]::IsNullOrWhiteSpace($packageKey)) {
-            $missingFields.Add('repositoryKey')
-        }
-
-        if ([string]::IsNullOrWhiteSpace($packageVersion)) {
-            $missingFields.Add('repositoryVersion')
-        }
-
-        throw "Manifest must contain non-empty repositoryKey and repositoryVersion. Missing fields: $($missingFields -join ', '). Manifest: $manifestPath"
-    }
-
-    Assert-SafePackageIdentityPart -Name 'repositoryKey' -Value $packageKey -ManifestPath $manifestPath
-    Assert-SafePackageIdentityPart -Name 'repositoryVersion' -Value $packageVersion -ManifestPath $manifestPath
+    $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
+    $packageVersion = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryVersion' -ManifestPath $manifestPath
 
     # build-universal-package.cmd creates the repository's global package by
     # default, and global packages use the same __global__ naming convention as
@@ -715,8 +739,10 @@ foreach ($repository in $repositories) {
                     Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
                 }
                 elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                    $postTerminationWaitSeconds = [Math]::Round($PostTerminationWaitMilliseconds / $MillisecondsPerSecond, 2)
-                    Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+                    # This is display text only; the actual wait uses
+                    # PostTerminationWaitMilliseconds above.
+                    $postTerminationWaitSecondsDisplay = [Math]::Round($PostTerminationWaitMilliseconds / $MillisecondsPerSecond, $DecimalPlacesForTimeDisplay)
+                    Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSecondsDisplay seconds after termination attempt; exit code may be unavailable."
                 }
             }
         }
