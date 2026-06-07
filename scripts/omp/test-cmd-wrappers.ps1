@@ -29,6 +29,8 @@ Set-StrictMode -Version Latest
 $MinimumTimeoutSeconds = 60
 $MaximumTimeoutSeconds = 3600
 $MillisecondsPerSecond = 1000
+$ManifestRelativePath = 'omp-components.json'
+$CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 $GlobalPackageFileSegment = '__global__'
@@ -37,7 +39,8 @@ $MinimumZipFileLengthBytes = 22
 # Give taskkill a short grace period to tear down child processes and flush
 # redirected streams without letting a stuck validation run hang indefinitely.
 $PostTerminationWaitMilliseconds = 10 * $MillisecondsPerSecond
-$PostTerminationWaitSeconds = [int]($PostTerminationWaitMilliseconds / 1000)
+# taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
+# PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
 
 function Get-ScriptDirectory {
@@ -92,7 +95,7 @@ function Get-ShortStableHash {
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
     $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-    return $hash.Substring(0, 8)
+    return $hash.Substring(0, [Math]::Min(8, $hash.Length))
 }
 
 function Get-SafeFileName {
@@ -167,7 +170,7 @@ function Get-ValidProcessIdOrNull {
         return $null
     }
 
-    if ($null -eq $id -or $id -isnot [int] -or $id -lt 1) {
+    if ($null -eq $id -or $id -lt 1) {
         return $null
     }
 
@@ -204,12 +207,22 @@ function Test-PackageCreated {
             }
         }
 
+        if ($item -isnot [System.IO.FileInfo]) {
+            return [pscustomobject]@{
+                Exists = $false
+                IsValid = $false
+                Length = 0L
+                Message = "Package path is not a file: $Path"
+            }
+        }
+
         $length = [int64]$item.Length
+        $hasMeaningfulPayload = $length -gt $MinimumZipFileLengthBytes
         return [pscustomobject]@{
             Exists = $true
-            IsValid = $length -gt $MinimumZipFileLengthBytes
+            IsValid = $hasMeaningfulPayload
             Length = $length
-            Message = if ($length -gt $MinimumZipFileLengthBytes) {
+            Message = if ($hasMeaningfulPayload) {
                 'Package file exists and has meaningful zip content.'
             }
             else {
@@ -274,13 +287,13 @@ if ($RepositoryName.Count -gt 0) {
 else {
     $repositories = Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
         Where-Object {
-            (Test-Path -LiteralPath (Join-Path $_.FullName 'omp-components.json') -PathType Leaf) -and
-            (Test-Path -LiteralPath (Join-Path $_.FullName 'scripts\omp\build-universal-package.cmd') -PathType Leaf)
+            (Test-Path -LiteralPath (Join-Path $_.FullName $ManifestRelativePath) -PathType Leaf) -and
+            (Test-Path -LiteralPath (Join-Path $_.FullName $CommandWrapperRelativePath) -PathType Leaf)
         } |
         Sort-Object Name
 }
 
-if (@($repositories).Count -eq 0) {
+if ($null -eq $repositories -or $repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
@@ -290,13 +303,18 @@ if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTi
 
 # WaitForExit expects a 32-bit millisecond value. The named timeout bounds above
 # keep this conversion safely below Int32.MaxValue.
-$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
+$timeoutMilliseconds64 = ([int64]$PerRepositoryTimeoutSeconds) * $MillisecondsPerSecond
+if ($timeoutMilliseconds64 -gt [int]::MaxValue) {
+    throw "PerRepositoryTimeoutSeconds is too large to convert to WaitForExit milliseconds: $PerRepositoryTimeoutSeconds"
+}
+
+$timeoutMilliseconds = [int]$timeoutMilliseconds64
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
     $repoDisplayName = $repository.Name
-    $manifestPath = Join-Path $repository.FullName 'omp-components.json'
-    $cmdPath = Join-Path $repository.FullName 'scripts\omp\build-universal-package.cmd'
+    $manifestPath = Join-Path $repository.FullName $ManifestRelativePath
+    $cmdPath = Join-Path $repository.FullName $CommandWrapperRelativePath
 
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
         throw "Component manifest not found: $manifestPath"
@@ -356,7 +374,11 @@ foreach ($repository in $repositories) {
     $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
+    $process = $null
     try {
+        # -WindowStyle Hidden keeps validation non-interactive. -NoNewWindow is
+        # intentionally not used because this script redirects stdout/stderr to
+        # files and should not attach child command windows to the caller.
         $process = Start-Process -FilePath $env:ComSpec `
             -ArgumentList $cmdArguments `
             -WorkingDirectory $repository.FullName `
@@ -381,6 +403,12 @@ foreach ($repository in $repositories) {
     }
 
     $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
+    if ($exitedWithinTimeout) {
+        # The timed overload observes process exit; the parameterless overload
+        # then lets redirected stdout/stderr finish flushing before status checks.
+        $process.WaitForExit()
+    }
+
     $timedOut = -not $exitedWithinTimeout
     if ($timedOut) {
         $processId = Get-ValidProcessIdOrNull -Process $process
@@ -395,6 +423,9 @@ foreach ($repository in $repositories) {
         }
         else {
             try {
+                # The Process object keeps a handle to the child cmd.exe and
+                # HasExited is checked immediately before taskkill, so PID reuse
+                # is not expected in normal Windows process lifetime semantics.
                 $taskKillOutput = & taskkill.exe /PID $processId /T /F 2>&1
                 $taskKillExitCode = $LASTEXITCODE
             }
@@ -412,7 +443,8 @@ foreach ($repository in $repositories) {
                 Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
             }
             elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+                $postTerminationWaitSeconds = [int]($PostTerminationWaitMilliseconds / $MillisecondsPerSecond)
+                Write-Warning "[$repoDisplayName] Process did not exit within $postTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
             }
         }
     }
@@ -449,11 +481,14 @@ foreach ($repository in $repositories) {
     })
 
     Write-Host "[$repoDisplayName] $status"
+    if ($null -ne $process) {
+        $process.Dispose()
+    }
 }
 
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
-if (@($results | Where-Object { $_.Status -ne 'OK' }).Count -gt 0) {
+if ($results | Where-Object { $_.Status -ne 'OK' } | Select-Object -First 1) {
     # Keep one generic failure exit code for compatibility with existing
     # callers; individual failure categories are reported in the table above.
     exit 1
