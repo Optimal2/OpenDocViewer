@@ -8,6 +8,11 @@ OMP-compatible repositories. Each repository is executed in its own process with
 stdout and stderr redirected to log files. If a repository exceeds the timeout,
 the whole command process tree is terminated with taskkill so validation cannot
 hang indefinitely.
+
+The timeout is measured by WaitForExit after the child process has been started.
+WaitForExit returns true when the process exits within that interval and false
+when the timeout expires. On timeout, the script attempts to terminate the whole
+cmd.exe process tree and avoids reading ExitCode until the process has exited.
 #>
 [CmdletBinding()]
 param(
@@ -71,11 +76,17 @@ function Get-SafeFileName {
 function ConvertTo-CmdArgument {
     param([Parameter(Mandatory = $true)][string]$Value)
 
+    # This helper only supports the argument shapes generated below; reject
+    # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
     if ($Value.Contains('"')) {
         throw "CMD wrapper arguments cannot contain double quotes: $Value"
     }
 
-    $escaped = $Value.Replace('^', '^^').Replace('%', '%%')
+    if ($Value.Contains('%')) {
+        throw "CMD wrapper arguments cannot contain percent signs because cmd.exe expands environment variables: $Value"
+    }
+
+    $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch '[\s&|<>^%]') {
         return $escaped
     }
@@ -189,13 +200,36 @@ foreach ($repository in $repositories) {
     $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
     if ($timedOut) {
         Write-Warning "[$repoDisplayName] Timeout reached. Terminating process tree for PID $($process.Id)."
-        $taskKillOutput = & taskkill.exe /PID $process.Id /T /F 2>&1
-        if ($LASTEXITCODE -ne 0) {
-            Write-Warning "[$repoDisplayName] taskkill failed with exit code $LASTEXITCODE. $($taskKillOutput -join ' ')"
+        if ($process.HasExited) {
+            Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
+        }
+        else {
+            try {
+                $taskKillOutput = & taskkill.exe /PID $process.Id /T /F 2>&1
+                $taskKillExitCode = $LASTEXITCODE
+            }
+            catch {
+                $taskKillOutput = @($_.Exception.Message)
+                $taskKillExitCode = -1
+            }
+
+            if ($taskKillExitCode -ne 0) {
+                $taskKillOutputText = ($taskKillOutput | Out-String).Trim()
+                if ($taskKillExitCode -eq 128) {
+                    Write-Warning "[$repoDisplayName] taskkill could not find the process; it may have already terminated. Output:`n$taskKillOutputText"
+                }
+                else {
+                    Write-Warning "[$repoDisplayName] taskkill failed with exit code $taskKillExitCode. Output:`n$taskKillOutputText"
+                }
+            }
+
+            if (-not $process.WaitForExit(10000)) {
+                Write-Warning "[$repoDisplayName] Process did not report exit within 10 seconds after taskkill."
+            }
         }
     }
 
-    $exitCode = if ($timedOut) { $null } else { $process.ExitCode }
+    $exitCode = if ($timedOut -or -not $process.HasExited) { $null } else { $process.ExitCode }
     $packageExists = Test-Path -LiteralPath $expectedPackagePath -PathType Leaf
     $packageLength = if ($packageExists) { (Get-Item -LiteralPath $expectedPackagePath).Length } else { 0L }
     $status = if ($timedOut) {
