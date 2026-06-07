@@ -23,7 +23,7 @@ param(
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
     # The default gives ordinary repository builds 20 minutes. Larger package
-    # builds can opt in to a longer timeout, up to the hard safety cap below.
+    # builds can opt in to a longer timeout, up to 3600 seconds (1 hour).
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
     [ValidateRange(60, 3600)]
@@ -56,7 +56,9 @@ $MaximumDiagnosticTextLength = 160
 
 $PostTerminationWaitSeconds = 10
 $TaskKillWaitSeconds = 10
-$TaskKillPostKillWaitSeconds = 3
+$TaskKillPostTerminationWaitSeconds = 3
+$DirectProcessKillWaitSeconds = 10
+$StreamFlushWaitSeconds = 3
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
 # period after taskkill asks Windows to terminate the process tree.
@@ -71,6 +73,7 @@ function Convert-SecondsToIntMilliseconds {
     )
 
     $milliseconds = [TimeSpan]::FromSeconds($Seconds).TotalMilliseconds
+    # Round only after the range check so the [int] cast cannot overflow.
     if ($milliseconds -gt [int]::MaxValue) {
         throw "$Name is too large for WaitForExit: $Seconds seconds."
     }
@@ -95,7 +98,9 @@ function Get-SafeDiagnosticText {
 
 $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
 $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
-$TaskKillPostKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostKillWaitSeconds' -Seconds $TaskKillPostKillWaitSeconds
+$TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
+$DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
+$StreamFlushWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'StreamFlushWaitSeconds' -Seconds $StreamFlushWaitSeconds
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -447,7 +452,7 @@ function Invoke-TaskKillTree {
             $output = [System.Collections.Generic.List[string]]::new()
             $output.Add("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
 
-            if ($taskKillProcess.WaitForExit($TaskKillPostKillWaitMilliseconds)) {
+            if ($taskKillProcess.WaitForExit($TaskKillPostTerminationWaitMilliseconds)) {
                 try {
                     $stdout = $stdoutTask.GetAwaiter().GetResult()
                     if (-not [string]::IsNullOrWhiteSpace($stdout)) {
@@ -469,7 +474,7 @@ function Invoke-TaskKillTree {
                 }
             }
             else {
-                $output.Add("taskkill.exe did not exit after an additional $TaskKillPostKillWaitSeconds second termination wait; redirected output was not read.")
+                $output.Add("taskkill.exe did not exit after an additional $TaskKillPostTerminationWaitSeconds seconds termination wait; redirected output was not read.")
             }
 
             return [pscustomobject]@{
@@ -510,6 +515,8 @@ function Invoke-TaskKillTree {
 function Test-ExpectedCmdProcess {
     param(
         [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
+        # Keep this nullable object-shaped parameter because callers pass the
+        # optional value returned by Get-ProcessStartTimeOrNull.
         [object]$ExpectedStartTime = $null
     )
 
@@ -659,9 +666,10 @@ function Assert-SafePackageIdentityPart {
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
-    # '...' and longer runs.
-    if ($Value.Contains('..') -or $Value -eq '.') {
-        throw "Manifest field '$Name' must not contain path traversal markers or consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
+    # '...' and longer runs. A single dot is rejected only when the whole value
+    # is '.', so ordinary version text such as '1.0.0' remains valid.
+    if ($Value.Contains('..') -or $Value -eq '.' -or $Value.StartsWith('.') -or $Value.EndsWith('.')) {
+        throw "Manifest field '$Name' must not contain path traversal markers, leading/trailing dots, or consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 }
 
@@ -916,8 +924,15 @@ foreach ($repository in $repositories) {
                 elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
                     Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
                     try {
-                        $process.Kill()
-                        if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
+                        $process.Refresh()
+                        if ($process.HasExited) {
+                            Write-Warning "[$repoDisplayName] Process exited immediately before direct Process.Kill(); no further termination was needed."
+                        }
+                        else {
+                            $process.Kill()
+                        }
+
+                        if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
                             Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Check the process tree manually before rerunning package validation."
                         }
                     }
@@ -930,12 +945,13 @@ foreach ($repository in $repositories) {
 
         $process.Refresh()
         if ($process.HasExited) {
-            # The timed overload observes process exit. The second, parameterless
-            # call is still required by .NET so redirected stdout/stderr are fully
-            # flushed before status checks inspect logs and package output. It is
-            # only called after HasExited so it cannot turn a timeout into an
-            # indefinite wait.
-            $process.WaitForExit() # Safe here because HasExited is true.
+            # Start-Process redirects stdout/stderr directly to files here, not
+            # through async .NET event handlers. A short bounded wait is enough
+            # to let the process object observe final stream state without
+            # introducing an unbounded wait after timeout handling.
+            if (-not $process.WaitForExit($StreamFlushWaitMilliseconds)) {
+                Write-Verbose "[$repoDisplayName] Process had exited, but final stream flush wait did not complete within $StreamFlushWaitSeconds seconds."
+            }
         }
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
