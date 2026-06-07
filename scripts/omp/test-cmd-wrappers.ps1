@@ -20,21 +20,23 @@ param(
     [string[]]$RepositoryName = @(),
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
-    # 60 seconds catches accidental tiny values; 3600 seconds prevents a hung
-    # wrapper validation from consuming an entire workday.
-    [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
+$MinimumTimeoutSeconds = 60
+$MaximumTimeoutSeconds = 3600
+$MillisecondsPerSecond = 1000
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
+$PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
+$GlobalPackageFileSegment = '__global__'
 $MinimumZipFileLengthBytes = 22
 
 # Give taskkill a short grace period to tear down child processes and flush
 # redirected streams without letting a stuck validation run hang indefinitely.
-$PostTerminationWaitMilliseconds = 10000
+$PostTerminationWaitMilliseconds = 10 * $MillisecondsPerSecond
 $PostTerminationWaitSeconds = [int]($PostTerminationWaitMilliseconds / 1000)
 $TaskKillExecutionExceptionExitCode = -1
 
@@ -72,6 +74,27 @@ function Resolve-FullDirectory {
     return $resolved
 }
 
+function Test-IsSubPath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$BasePath
+    )
+
+    $fullPath = [System.IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
+    $fullBasePath = [System.IO.Path]::GetFullPath($BasePath).TrimEnd('\', '/')
+    return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
+        $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
+        $fullPath.StartsWith($fullBasePath + [System.IO.Path]::AltDirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
+}
+
+function Get-ShortStableHash {
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
+    $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
+    return $hash.Substring(0, 8)
+}
+
 function Get-SafeFileName {
     param([Parameter(Mandatory = $true)][string]$Value)
 
@@ -79,7 +102,7 @@ function Get-SafeFileName {
     $safe = $Value -replace $SafeFileNamePattern, '-'
     $safe = $safe.Trim('-')
     if ([string]::IsNullOrWhiteSpace($safe)) {
-        return 'repository-{0}' -f [Guid]::NewGuid().ToString('N').Substring(0, 8)
+        return 'repository'
     }
 
     return $safe
@@ -91,11 +114,11 @@ function ConvertTo-CmdArgument {
     # This helper only supports the argument shapes generated below; reject
     # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
     if ($Value.Contains('"')) {
-        throw "CMD wrapper arguments cannot contain double quotes: $Value"
+        throw "CMD wrapper arguments cannot contain double quotes. Please use an alternative path or parameter value without double quotes: $Value"
     }
 
     if ($Value.Contains('%')) {
-        throw "CMD wrapper arguments cannot contain percent signs because cmd.exe expands environment variables: $Value"
+        throw "CMD wrapper arguments cannot contain percent signs; cmd.exe expands environment variables even within quoted strings. Please use an alternative path or parameter value without percent signs: $Value"
     }
 
     # cmd.exe treats ^ as its escape character, so double carets when the
@@ -124,8 +147,31 @@ function Get-ProcessExitCodeOrNull {
         }
     }
     catch [System.InvalidOperationException] {
+        Write-Verbose "Process state was unavailable while reading ExitCode. The process may still be running or may have already been disposed."
         return $null
     }
+    catch {
+        Write-Verbose "Could not read process state: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+function Get-ValidProcessIdOrNull {
+    param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
+
+    try {
+        $id = $Process.Id
+    }
+    catch {
+        Write-Verbose "Could not read process ID: $($_.Exception.Message)"
+        return $null
+    }
+
+    if ($null -eq $id -or $id -isnot [int] -or $id -lt 1) {
+        return $null
+    }
+
+    return [int]$id
 }
 
 function Write-TaskKillFailureWarning {
@@ -181,6 +227,18 @@ function Test-PackageCreated {
     }
 }
 
+function Assert-SafePackageIdentityPart {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Value,
+        [Parameter(Mandatory = $true)][string]$ManifestPath
+    )
+
+    if ($Value -notmatch $PackageIdentityPattern) {
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, hyphen, plus. Manifest: $ManifestPath"
+    }
+}
+
 $scriptDirectory = Get-ScriptDirectory
 $currentRepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDirectory '..\..'))
 
@@ -226,9 +284,13 @@ if (@($repositories).Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
-# WaitForExit expects a 32-bit millisecond value. The ValidateRange above keeps
-# this conversion safely below Int32.MaxValue.
-$timeoutMilliseconds = $PerRepositoryTimeoutSeconds * 1000
+if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
+    throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
+}
+
+# WaitForExit expects a 32-bit millisecond value. The named timeout bounds above
+# keep this conversion safely below Int32.MaxValue.
+$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
@@ -244,7 +306,17 @@ foreach ($repository in $repositories) {
         throw "Command wrapper not found: $cmdPath"
     }
 
-    $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    if (-not (Test-IsSubPath -Path $repository.FullName -BasePath $workspaceRootPath)) {
+        throw "Repository path must stay within the workspace root. Repository: $($repository.FullName). Workspace: $workspaceRootPath"
+    }
+
+    try {
+        $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+    }
+    catch {
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message)"
+    }
+
     $packageKey = [string]$manifest.repositoryKey
     $packageVersion = [string]$manifest.repositoryVersion
     if ([string]::IsNullOrWhiteSpace($packageKey) -or [string]::IsNullOrWhiteSpace($packageVersion)) {
@@ -260,15 +332,18 @@ foreach ($repository in $repositories) {
         throw "Manifest must contain non-empty repositoryKey and repositoryVersion. Missing: $($missingFields -join ', '). Manifest: $manifestPath"
     }
 
+    Assert-SafePackageIdentityPart -Name 'repositoryKey' -Value $packageKey -ManifestPath $manifestPath
+    Assert-SafePackageIdentityPart -Name 'repositoryVersion' -Value $packageVersion -ManifestPath $manifestPath
+
     # build-universal-package.cmd creates the repository's global package by
     # default, and global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
-    $expectedPackagePath = Join-Path $outputRootPath ('{0}__global__{1}.zip' -f $packageKey, $packageVersion)
+    $expectedPackagePath = Join-Path $outputRootPath ('{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileSegment, $packageVersion)
     if (Test-Path -LiteralPath $expectedPackagePath -PathType Leaf) {
         Remove-Item -LiteralPath $expectedPackagePath -Force
     }
 
-    $safeName = Get-SafeFileName -Value $repoDisplayName
+    $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
     $stdoutPath = Join-Path $logRootPath "$safeName.stdout.log"
     $stderrPath = Join-Path $logRootPath "$safeName.stderr.log"
     Remove-Item -LiteralPath $stdoutPath -Force -ErrorAction SilentlyContinue
@@ -281,32 +356,50 @@ foreach ($repository in $repositories) {
     $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
-    $process = Start-Process -FilePath $env:ComSpec `
-        -ArgumentList $cmdArguments `
-        -WorkingDirectory $repository.FullName `
-        -RedirectStandardOutput $stdoutPath `
-        -RedirectStandardError $stderrPath `
-        -WindowStyle Hidden `
-        -PassThru
+    try {
+        $process = Start-Process -FilePath $env:ComSpec `
+            -ArgumentList $cmdArguments `
+            -WorkingDirectory $repository.FullName `
+            -RedirectStandardOutput $stdoutPath `
+            -RedirectStandardError $stderrPath `
+            -WindowStyle Hidden `
+            -PassThru
+    }
+    catch {
+        $startError = $_.Exception.ToString()
+        Write-Warning "[$repoDisplayName] Failed to start CMD wrapper: $startError"
+        $results.Add([pscustomobject]@{
+            Repository = $repoDisplayName
+            Status = 'Start failed'
+            ExitCode = $null
+            Package = $expectedPackagePath
+            StdoutLog = $stdoutPath
+            StderrLog = $stderrPath
+            Detail = $startError
+        })
+        continue
+    }
 
     $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
     $timedOut = -not $exitedWithinTimeout
     if ($timedOut) {
-        Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds second(s). Terminating process tree for PID $($process.Id)."
+        $processId = Get-ValidProcessIdOrNull -Process $process
+        $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
+        Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds second(s). Terminating process tree for PID $processIdText."
         $process.Refresh()
         if ($process.HasExited) {
             Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
         }
-        elseif ($process.Id -le 0) {
-            Write-Warning "[$repoDisplayName] Process has an invalid PID '$($process.Id)'; taskkill was not attempted."
+        elseif ($null -eq $processId) {
+            Write-Warning "[$repoDisplayName] Process has an invalid or unavailable PID; taskkill was not attempted."
         }
         else {
             try {
-                $taskKillOutput = & taskkill.exe /PID $process.Id /T /F 2>&1
+                $taskKillOutput = & taskkill.exe /PID $processId /T /F 2>&1
                 $taskKillExitCode = $LASTEXITCODE
             }
             catch {
-                $taskKillOutput = @($_.Exception.Message)
+                $taskKillOutput = @($_.Exception.ToString())
                 $taskKillExitCode = $TaskKillExecutionExceptionExitCode
             }
 
@@ -314,8 +407,12 @@ foreach ($repository in $repositories) {
                 Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
             }
 
-            if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                Write-Warning "[$repoDisplayName] Process did not report exit within $PostTerminationWaitSeconds seconds after taskkill; exit code will be reported as null if the process is still running."
+            $process.Refresh()
+            if ($process.HasExited) {
+                Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
+            }
+            elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
+                Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
             }
         }
     }
@@ -348,6 +445,7 @@ foreach ($repository in $repositories) {
         Package = $expectedPackagePath
         StdoutLog = $stdoutPath
         StderrLog = $stderrPath
+        Detail = $packageValidation.Message
     })
 
     Write-Host "[$repoDisplayName] $status"
@@ -356,5 +454,7 @@ foreach ($repository in $repositories) {
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
 if (@($results | Where-Object { $_.Status -ne 'OK' }).Count -gt 0) {
+    # Keep one generic failure exit code for compatibility with existing
+    # callers; individual failure categories are reported in the table above.
     exit 1
 }
