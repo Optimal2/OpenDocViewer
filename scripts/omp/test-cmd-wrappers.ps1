@@ -1,13 +1,14 @@
 <#
 .SYNOPSIS
-Validates OMP repository command wrappers with per-repository timeouts.
+Validates configurable OMP repository command wrappers with per-repository timeouts.
 
 .DESCRIPTION
-Runs build-universal-package.cmd in non-interactive mode for one or more
-OMP-compatible repositories. Each repository is executed in its own process with
-stdout and stderr redirected to log files. If a repository exceeds the timeout,
-the whole command process tree is terminated with taskkill so validation cannot
-hang indefinitely.
+Runs the wrapper specified by -CommandWrapperRelativePath in non-interactive mode
+for one or more OMP-compatible repositories. The default wrapper is
+scripts/omp/build-universal-package.cmd. Each repository is executed in its own
+process with stdout and stderr redirected to log files. If a repository exceeds
+the timeout, the whole command process tree is terminated with taskkill so
+validation cannot hang indefinitely.
 
 The timeout is measured by WaitForExit after the child process has been started.
 WaitForExit returns true when the process exits within that interval and false
@@ -23,7 +24,7 @@ param(
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
     # The default gives ordinary repository builds 20 minutes. Larger package
-    # builds can opt in to a longer timeout, up to 3600 seconds (1 hour).
+    # builds can opt in to any value from 60 to 3600 seconds (1 hour).
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
     [ValidateRange(60, 3600)]
@@ -33,10 +34,11 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$SafeFileNamePattern = '[^A-Za-z0-9._-]+'
+$SafeFileNamePattern = '[^A-Za-z0-9._\-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
-# Includes both delimiter pairs used by repositoryKey__global__repositoryVersion.zip.
-$GlobalPackageFileInfix = '__global__'
+# Delimiter between repositoryKey and repositoryVersion in
+# repositoryKey__global__repositoryVersion.zip.
+$GlobalPackageFileDelimiter = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
@@ -73,12 +75,14 @@ function Convert-SecondsToIntMilliseconds {
     )
 
     $milliseconds = [TimeSpan]::FromSeconds($Seconds).TotalMilliseconds
-    # Round only after the range check so the [int] cast cannot overflow.
-    if ($milliseconds -gt [int]::MaxValue) {
+    $roundedMilliseconds = [Math]::Round($milliseconds)
+    # Check the rounded value before casting so the [int] conversion cannot
+    # throw if the parameter cap is widened later.
+    if ($roundedMilliseconds -gt [int]::MaxValue) {
         throw "$Name is too large for WaitForExit: $Seconds seconds."
     }
 
-    return [int][Math]::Round($milliseconds)
+    return [int]$roundedMilliseconds
 }
 
 function Get-SafeDiagnosticText {
@@ -225,14 +229,17 @@ function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
-    # SHA256 output is standardized; the concrete provider chosen by
-    # SHA256.Create() does not affect the resulting bytes.
-    $sha256 = [Security.Cryptography.SHA256]::Create()
+    $sha256 = $null
     try {
+        # SHA256 output is standardized; the concrete provider chosen by
+        # SHA256.Create() does not affect the resulting bytes.
+        $sha256 = [Security.Cryptography.SHA256]::Create()
         $hashBytes = $sha256.ComputeHash($bytes)
     }
     finally {
-        $sha256.Dispose()
+        if ($null -ne $sha256) {
+            $sha256.Dispose()
+        }
     }
 
     # 16 hex characters gives 64 bits of stable filename entropy, which is
@@ -280,6 +287,8 @@ function ConvertTo-CmdArgument {
 
     # This helper only supports the argument shapes generated below; reject
     # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
+    # In particular, double quotes are rejected before quoting; keep that
+    # pre-validation if this helper ever gains new callers.
     Assert-SafeCmdArgumentText -Name 'CMD wrapper argument' -Value $Value
 
     # cmd.exe treats ^ as its escape character. Escape carets before quoting so
@@ -311,22 +320,34 @@ function Resolve-CmdExePath {
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $systemCmd = Join-Path $systemRoot 'System32\cmd.exe'
         if (Test-Path -LiteralPath $systemCmd -PathType Leaf) {
-            return Resolve-FullPathSafely -Name 'system cmd.exe path' -Path $systemCmd
+            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmd
         }
     }
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw 'Could not locate cmd.exe because SystemRoot/System32/cmd.exe was missing and ComSpec was empty.'
+        throw 'Could not locate cmd.exe because $env:SystemRoot\System32\cmd.exe was missing and ComSpec was empty.'
     }
 
-    $candidate = Resolve-FullPathSafely -Name 'ComSpec path' -Path $candidate
+    return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
+}
+
+function Assert-CmdExecutablePath {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    $candidate = Resolve-FullPathSafely -Name $Name -Path $Path
     if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
-        throw "ComSpec points to a missing executable: $candidate"
+        throw "$Name points to a missing executable: $candidate"
     }
 
-    if (-not [StringComparer]::OrdinalIgnoreCase.Equals([System.IO.Path]::GetFileName($candidate), 'cmd.exe')) {
-        throw "ComSpec must point to cmd.exe for wrapper validation. Actual value: $candidate"
+    $fileName = [System.IO.Path]::GetFileName($candidate)
+    $extension = [System.IO.Path]::GetExtension($candidate)
+    if (-not [StringComparer]::OrdinalIgnoreCase.Equals($fileName, 'cmd.exe') -or
+        -not [StringComparer]::OrdinalIgnoreCase.Equals($extension, '.exe')) {
+        throw "$Name must point to cmd.exe for wrapper validation. Actual value: $candidate"
     }
 
     return $candidate
@@ -341,6 +362,9 @@ function Resolve-TaskKillExePath {
         }
     }
 
+    # taskkill.exe is not configurable like ComSpec; when SystemRoot lookup is
+    # unavailable, allow normal PATH resolution and surface any launch failure
+    # through Invoke-TaskKillTree diagnostics.
     return 'taskkill.exe'
 }
 
@@ -358,7 +382,7 @@ function Get-ProcessExitCodeOrNull {
         return $Process.ExitCode
     }
     catch [System.InvalidOperationException] {
-        Write-Verbose "Process has not exited or no process is associated with this Process object while reading ExitCode."
+        Write-Verbose 'Process has not exited or is no longer accessible while reading ExitCode. This may occur after a timeout before Windows completes process termination.'
         return $null
     }
     catch {
@@ -378,8 +402,8 @@ function Get-ValidProcessIdOrNull {
         return $null
     }
 
-    # Windows process IDs are positive decimal integers; zero or negative values
-    # are treated as invalid before any taskkill command is assembled.
+    # Windows never assigns process ID 0 or negative values to normal child
+    # processes; reject them before any taskkill command is assembled.
     if ($id -lt $MinimumValidProcessId) {
         return $null
     }
@@ -537,7 +561,7 @@ function Test-ExpectedCmdProcess {
         }
 
         if ($ExpectedStartTime -isnot [datetime]) {
-            Write-Verbose "Expected process start time had unexpected type '$($ExpectedStartTime.GetType().FullName)'."
+            Write-Verbose "Expected process start time should be of type [datetime] but got '$($ExpectedStartTime.GetType().FullName)'."
             return $false
         }
 
@@ -574,6 +598,28 @@ function Write-TaskKillFailureWarning {
     Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated, taskkill.exe may be unavailable, or the caller may lack permission. Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
+function New-ValidationResult {
+    param(
+        [Parameter(Mandatory = $true)][string]$Repository,
+        [Parameter(Mandatory = $true)][string]$Status,
+        [AllowNull()][object]$ExitCode,
+        [Parameter(Mandatory = $true)][string]$Package,
+        [Parameter(Mandatory = $true)][string]$StdoutLog,
+        [Parameter(Mandatory = $true)][string]$StderrLog,
+        [AllowNull()][string]$Detail
+    )
+
+    return [pscustomobject]@{
+        Repository = $Repository
+        Status = $Status
+        ExitCode = $ExitCode
+        Package = $Package
+        StdoutLog = $StdoutLog
+        StderrLog = $StderrLog
+        Detail = $Detail
+    }
+}
+
 function Test-PackageCreated {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -591,16 +637,18 @@ function Test-PackageCreated {
 
         $length = $item.Length
         $hasMeaningfulPayload = $length -gt $MinimumMeaningfulZipFileLengthBytes
+        $message = if ($hasMeaningfulPayload) {
+            'Package file exists and has meaningful zip content.'
+        }
+        else {
+            "Package file is too small to contain a meaningful zip payload. Expected size must be greater than $MinimumMeaningfulZipFileLengthBytes bytes."
+        }
+
         return [pscustomobject]@{
             Exists = $true
             IsValid = $hasMeaningfulPayload
             Length = $length
-            Message = if ($hasMeaningfulPayload) {
-                'Package file exists and has meaningful zip content.'
-            }
-            else {
-                "Package file is too small to contain a meaningful zip payload. Expected size must be greater than $MinimumMeaningfulZipFileLengthBytes bytes."
-            }
+            Message = $message
         }
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -662,7 +710,7 @@ function Assert-SafePackageIdentityPart {
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, plus sign, and hyphen. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters must match [A-Za-z0-9._+-]. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
@@ -725,8 +773,10 @@ New-DirectorySafely -Path $logRootPath -Description 'log root directory'
 $cmdExePath = Resolve-CmdExePath
 # The 'N' GUID format is 32 hexadecimal characters without hyphens, which gives
 # enough uniqueness while keeping log paths shorter. The run id is not a
-# security boundary; keep -LogRoot in a user-private or ACL-protected location
-# when logs can contain sensitive output.
+# security boundary. Keep -LogRoot in a user-private temp folder, an ACL-
+# protected workspace folder, or another location where other local users cannot
+# read build output that may include paths, environment-derived diagnostics, or
+# package validation details.
 $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
@@ -790,10 +840,17 @@ foreach ($repository in $repositories) {
     Assert-RepositoryPathUnderWorkspace -RepositoryPath $repository.FullName -WorkspaceRootPath $workspaceRootPath
 
     try {
-        $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+        $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest file must contain valid JSON."
+        throw "Could not read component manifest '$manifestPath': $($_.Exception.Message)"
+    }
+
+    try {
+        $manifest = $manifestJson | ConvertFrom-Json
+    }
+    catch {
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest file was read successfully but must contain valid JSON."
     }
 
     $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
@@ -803,7 +860,7 @@ foreach ($repository in $repositories) {
     # global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     # Global package files are named repositoryKey__global__repositoryVersion.zip.
-    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileInfix, $packageVersion
+    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileDelimiter, $packageVersion
     $expectedPackagePath = Join-Path $outputRootPath $expectedPackageFileName
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
@@ -853,21 +910,19 @@ foreach ($repository in $repositories) {
     catch {
         $startError = $_.Exception.ToString()
         Write-Warning "[$repoDisplayName] Failed to start CMD wrapper: $startError"
-        $results.Add([pscustomobject]@{
-            Repository = $repoDisplayName
-            Status = 'Start failed'
-            ExitCode = $null
-            Package = $expectedPackagePath
-            StdoutLog = $stdoutPath
-            StderrLog = $stderrPath
-            Detail = $startError
-        })
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Start failed' `
+            -ExitCode $null `
+            -Package $expectedPackagePath `
+            -StdoutLog $stdoutPath `
+            -StderrLog $stderrPath `
+            -Detail $startError))
         continue
     }
 
     try {
-        $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
-        $timedOut = -not $exitedWithinTimeout
+        $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
         if ($timedOut) {
             $processId = Get-ValidProcessIdOrNull -Process $process
             $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
@@ -933,7 +988,7 @@ foreach ($repository in $repositories) {
                         }
 
                         if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
-                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Check the process tree manually before rerunning package validation."
+                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or tasklist.exe to verify the process tree has terminated before rerunning package validation."
                         }
                     }
                     catch {
@@ -975,15 +1030,14 @@ foreach ($repository in $repositories) {
             'OK'
         }
 
-        $results.Add([pscustomobject]@{
-            Repository = $repoDisplayName
-            Status = $status
-            ExitCode = $exitCode
-            Package = $expectedPackagePath
-            StdoutLog = $stdoutPath
-            StderrLog = $stderrPath
-            Detail = $packageValidation.Message
-        })
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status $status `
+            -ExitCode $exitCode `
+            -Package $expectedPackagePath `
+            -StdoutLog $stdoutPath `
+            -StderrLog $stderrPath `
+            -Detail $packageValidation.Message))
 
         Write-Host "[$repoDisplayName] $status"
     }
@@ -996,9 +1050,14 @@ foreach ($repository in $repositories) {
 
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
-# Select-Object -First 1 keeps this compatible with Windows PowerShell, where
-# Where-Object does not have a portable -First parameter.
-$hasFailures = $null -ne ($results | Where-Object { $_.Status -ne 'OK' } | Select-Object -First 1)
+$hasFailures = $false
+foreach ($result in $results) {
+    if ($result.Status -ne 'OK') {
+        $hasFailures = $true
+        break
+    }
+}
+
 if ($hasFailures) {
     # Keep one generic failure exit code for compatibility with existing
     # callers; individual failure categories are reported in the table above.
