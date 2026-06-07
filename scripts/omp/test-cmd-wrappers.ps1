@@ -20,14 +20,13 @@ param(
     [string[]]$RepositoryName = @(),
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
+    [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$MinimumTimeoutSeconds = 60
-$MaximumTimeoutSeconds = 3600
 $MillisecondsPerSecond = 1000
 $ManifestRelativePath = 'omp-components.json'
 $CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
@@ -35,9 +34,10 @@ $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
-# ASCII control characters: NUL through Unit Separator plus DEL.
+# ASCII control characters: NUL through Unit Separator (US) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
+$MaximumCmdCommandLineLength = 8191
 # 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
 # packages must contain a manifest and object payload, so useful output must be
 # larger than this marker.
@@ -129,12 +129,25 @@ function Assert-RepositoryPathUnderWorkspace {
     }
 }
 
+function Assert-PathUnderBase {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$BasePath,
+        [Parameter(Mandatory = $true)][string]$PathDescription,
+        [Parameter(Mandatory = $true)][string]$BaseDescription
+    )
+
+    if (-not (Test-IsSubPath -Path $Path -BasePath $BasePath)) {
+        throw "$PathDescription must stay within $BaseDescription. Path: $Path. Base: $BasePath"
+    }
+}
+
 function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
     $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-    return $hash.Substring(0, 8)
+    return $hash.Substring(0, 16)
 }
 
 function Get-SafeFileName {
@@ -192,6 +205,14 @@ function Join-CmdCommandLine {
     return ($Arguments | ForEach-Object { ConvertTo-CmdArgument -Value $_ }) -join ' '
 }
 
+function Assert-CmdCommandLineLength {
+    param([Parameter(Mandatory = $true)][string]$CommandLine)
+
+    if ($CommandLine.Length -gt $MaximumCmdCommandLineLength) {
+        throw "CMD command line is $($CommandLine.Length) characters, which exceeds the Windows cmd.exe limit of $MaximumCmdCommandLineLength characters."
+    }
+}
+
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
@@ -216,6 +237,18 @@ function Resolve-CmdExePath {
     }
 
     return $candidate
+}
+
+function Resolve-TaskKillExePath {
+    $systemRoot = $env:SystemRoot
+    if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
+        $systemTaskKill = Join-Path $systemRoot 'System32\taskkill.exe'
+        if (Test-Path -LiteralPath $systemTaskKill -PathType Leaf) {
+            return Resolve-FullPathSafely -Name 'system taskkill.exe path' -Path $systemTaskKill
+        }
+    }
+
+    return 'taskkill.exe'
 }
 
 function Get-ProcessExitCodeOrNull {
@@ -281,6 +314,58 @@ function ConvertTo-TaskKillProcessIdArgument {
     }
 
     return $processIdText
+}
+
+function Invoke-TaskKillTree {
+    param([Parameter(Mandatory = $true)][int]$ProcessId)
+
+    $processIdArgument = ConvertTo-TaskKillProcessIdArgument -ProcessId $ProcessId
+    $startInfo = [System.Diagnostics.ProcessStartInfo]::new()
+    $startInfo.FileName = Resolve-TaskKillExePath
+    $startInfo.UseShellExecute = $false
+    $startInfo.CreateNoWindow = $true
+    $startInfo.RedirectStandardOutput = $true
+    $startInfo.RedirectStandardError = $true
+    $startInfo.ArgumentList.Add('/PID')
+    $startInfo.ArgumentList.Add($processIdArgument)
+    $startInfo.ArgumentList.Add('/T')
+    $startInfo.ArgumentList.Add('/F')
+
+    $taskKillProcess = $null
+    try {
+        $taskKillProcess = [System.Diagnostics.Process]::Start($startInfo)
+        if ($null -eq $taskKillProcess) {
+            throw 'Process.Start returned null.'
+        }
+
+        $stdout = $taskKillProcess.StandardOutput.ReadToEnd()
+        $stderr = $taskKillProcess.StandardError.ReadToEnd()
+        $taskKillProcess.WaitForExit()
+        $output = [System.Collections.Generic.List[string]]::new()
+        if (-not [string]::IsNullOrWhiteSpace($stdout)) {
+            $output.Add($stdout.Trim())
+        }
+
+        if (-not [string]::IsNullOrWhiteSpace($stderr)) {
+            $output.Add($stderr.Trim())
+        }
+
+        return [pscustomobject]@{
+            ExitCode = $taskKillProcess.ExitCode
+            Output = $output.ToArray()
+        }
+    }
+    catch {
+        return [pscustomobject]@{
+            ExitCode = $TaskKillExecutionExceptionExitCode
+            Output = @($_.Exception.ToString())
+        }
+    }
+    finally {
+        if ($null -ne $taskKillProcess) {
+            $taskKillProcess.Dispose()
+        }
+    }
 }
 
 function Test-ExpectedCmdProcess {
@@ -357,7 +442,7 @@ function Test-PackageCreated {
                 'Package file exists and has meaningful zip content.'
             }
             else {
-                "Package file is too small to contain a meaningful zip payload. Minimum expected size is greater than $MinimumZipFileLengthBytes bytes."
+                "Package file is too small to contain a meaningful zip payload. Expected size must be greater than $MinimumZipFileLengthBytes bytes."
             }
         }
     }
@@ -422,7 +507,7 @@ Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 [System.IO.Directory]::CreateDirectory($logRootPath) | Out-Null
 $cmdExePath = Resolve-CmdExePath
-$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N').Substring(0, 8))
+$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N'))
 $runLogRootPath = Join-Path $logRootPath $runId
 [System.IO.Directory]::CreateDirectory($runLogRootPath) | Out-Null
 
@@ -453,10 +538,6 @@ if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
-if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
-    throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
-}
-
 # WaitForExit expects a 32-bit millisecond value. The timeout bounds above keep
 # this conversion well below Int32.MaxValue.
 $timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
@@ -484,7 +565,7 @@ foreach ($repository in $repositories) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message) Check for trailing commas, invalid escape sequences, missing required JSON structure, or non-UTF-8 content."
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). Check for trailing commas, invalid escape sequences, missing required JSON structure, or non-UTF-8 content."
     }
 
     $packageKey = [string]$manifest.repositoryKey
@@ -499,7 +580,7 @@ foreach ($repository in $repositories) {
             $missingFields.Add('repositoryVersion')
         }
 
-        throw "Manifest must contain non-empty repositoryKey and repositoryVersion. Missing: $($missingFields -join ', '). Manifest: $manifestPath"
+        throw "Manifest must contain non-empty repositoryKey and repositoryVersion. Missing fields: $($missingFields -join ', '). Manifest: $manifestPath"
     }
 
     Assert-SafePackageIdentityPart -Name 'repositoryKey' -Value $packageKey -ManifestPath $manifestPath
@@ -509,6 +590,7 @@ foreach ($repository in $repositories) {
     # default, and global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     $expectedPackagePath = Join-Path $outputRootPath ('{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileSegment, $packageVersion)
+    Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     try {
         Remove-Item -LiteralPath $expectedPackagePath -Force -ErrorAction Stop
     }
@@ -529,7 +611,9 @@ foreach ($repository in $repositories) {
     # the underlying PowerShell script. call ensures the invoked .cmd file
     # returns control to this cmd.exe instance when it is run through /c.
     Assert-SafeCmdArgumentText -Name 'Command wrapper path' -Value $cmdPath
-    $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
+    Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
+    $cmdInvocation = 'call ' + (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
+    Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
     $process = $null
@@ -612,12 +696,9 @@ foreach ($repository in $repositories) {
                         # and HasExited/ProcessName/StartTime are checked
                         # immediately before taskkill, so PID reuse is not
                         # expected in normal Windows process lifetime semantics.
-                        $taskKillProcessId = ConvertTo-TaskKillProcessIdArgument -ProcessId $processId
-                        # Reset immediately before invocation so a failed
-                        # native process launch cannot inherit a stale value.
-                        $LASTEXITCODE = 0
-                        $taskKillOutput = & taskkill.exe /PID $taskKillProcessId /T /F 2>&1
-                        $taskKillExitCode = [int]$LASTEXITCODE
+                        $taskKillResult = Invoke-TaskKillTree -ProcessId $processId
+                        $taskKillOutput = $taskKillResult.Output
+                        $taskKillExitCode = $taskKillResult.ExitCode
                     }
                 }
                 catch {
