@@ -96,6 +96,9 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
+# Documentation mirrors for the literal ValidateRange bounds above. PowerShell
+# attributes cannot reference variables from the script body, so the attribute
+# remains the source of truth for parameter binding.
 $MinimumTimeoutSeconds = 60
 $MaximumTimeoutSeconds = 3600
 $MillisecondsPerSecond = [int64]1000
@@ -134,17 +137,10 @@ $StreamFlushWaitSeconds = 3
 # PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
 # Windows can round Process.StartTime differently between the original Process
-# handle and a refreshed lookup. A small tolerance avoids rejecting the same
+# handle and a refreshed lookup because process metadata is read from snapshots
+# with timer-resolution limits. A small tolerance avoids rejecting the same
 # child process because of timestamp precision differences.
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
-
-# ValidateRange rejects normal command-line input before the script body runs.
-# This is intentionally not the primary validation path; it is a maintainer
-# self-check that keeps the named documentation constants synchronized with the
-# literal ValidateRange bounds above.
-if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTimeoutSeconds -gt $MaximumTimeoutSeconds) {
-    throw "PerRepositoryTimeoutSeconds must be between $MinimumTimeoutSeconds and $MaximumTimeoutSeconds seconds."
-}
 
 function Convert-SecondsToIntMilliseconds {
     param(
@@ -296,6 +292,8 @@ function Trim-TrailingDirectorySeparators {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     $trimmed = $Path.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    # Get the root from the original path, not the trimmed path, so drive and
+    # UNC roots retain the separator that makes them absolute roots on Windows.
     $root = [System.IO.Path]::GetPathRoot($Path)
     if ([string]::IsNullOrEmpty($root)) {
         return $trimmed
@@ -454,13 +452,14 @@ function Assert-CmdCommandLineLength {
 
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
-    $systemCmdPathDescription = '$env:SystemRoot\System32\cmd.exe'
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
-        $systemCmd = Join-Path $systemRoot 'System32\cmd.exe'
-        $systemCmdPathDescription = $systemCmd
-        if (Test-Path -LiteralPath $systemCmd -PathType Leaf) {
-            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmd
+        $systemCmdPathDescription = Join-Path $systemRoot 'System32\cmd.exe'
+        if (Test-Path -LiteralPath $systemCmdPathDescription -PathType Leaf) {
+            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdPathDescription
         }
+    }
+    else {
+        $systemCmdPathDescription = '$env:SystemRoot\System32\cmd.exe'
     }
 
     $candidate = $env:ComSpec
@@ -602,7 +601,8 @@ function Add-TaskOutputOrDiagnostic {
         # Task.Wait can surface stream read failures as AggregateException; the
         # catch below converts them into diagnostics instead of hiding them. The
         # ReadToEndAsync tasks come from process streams and the wait is bounded,
-        # so this path is intentionally synchronous for Windows PowerShell 5.1.
+        # so this path is intentionally synchronous; Windows PowerShell 5.1 has
+        # no async/await syntax that would make the call clearer.
         if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
             return
@@ -629,6 +629,8 @@ function Invoke-TaskKillTree {
     $startInfo.CreateNoWindow = $true
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
+    # Add arguments one by one: ProcessStartInfo.ArgumentList is not guaranteed
+    # to expose AddRange across the Windows PowerShell/.NET versions we support.
     foreach ($argument in @('/PID', $processIdArgument, '/T', '/F')) {
         $startInfo.ArgumentList.Add($argument)
     }
@@ -738,6 +740,8 @@ function Test-ExpectedCmdProcess {
             return $false
         }
 
+        # TotalMilliseconds is a double; keep that precision for the tolerance
+        # comparison instead of rounding to whole milliseconds.
         $startTimeDeltaMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
         if ($startTimeDeltaMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
             Write-Verbose "Process start time changed by $startTimeDeltaMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
@@ -1044,6 +1048,7 @@ try {
 catch {
     throw "Invalid per-repository validation timeout configuration used by the main repository loop: $($_.Exception.Message)"
 }
+$timeoutSecondsDisplay = [int]($timeoutMilliseconds / $MillisecondsPerSecond)
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -1084,6 +1089,8 @@ foreach ($repository in $repositories) {
         # Keep -Encoding UTF8 for Windows PowerShell compatibility. The OMP
         # repository tooling writes component manifests as UTF-8 JSON. Avoid
         # utf8NoBOM here because Windows PowerShell 5.1 does not support it.
+        # For reads, this handles both BOM and no-BOM UTF-8 manifests in the
+        # PowerShell versions targeted by these wrapper scripts.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1098,7 +1105,7 @@ foreach ($repository in $repositories) {
         throw "Could not read component manifest '$manifestPath' because of an I/O error. Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
     }
     catch {
-        throw "Could not read component manifest '$manifestPath': $($_.Exception.Message)"
+        throw "Could not read component manifest '$manifestPath'. Verify that the path is a filesystem file, readable by the current user, and not blocked by another process: $($_.Exception.Message)"
     }
 
     try {
@@ -1133,7 +1140,7 @@ foreach ($repository in $repositories) {
     Remove-ExistingFileSafely -Path $stdoutPath -Description 'stdout log'
     Remove-ExistingFileSafely -Path $stderrPath -Description 'stderr log'
 
-    Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
+    Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $timeoutSecondsDisplay seconds)..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
@@ -1148,6 +1155,7 @@ foreach ($repository in $repositories) {
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
+    $cmdArgumentText = $cmdArguments -join ' '
     $process = $null
     $processStartTime = $null
     try {
@@ -1182,7 +1190,7 @@ foreach ($repository in $repositories) {
             -Package $expectedPackagePath `
             -StdoutLog $stdoutPath `
             -StderrLog $stderrPath `
-            -Detail "Process start failed. Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
+            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
         continue
     }
 
@@ -1199,7 +1207,7 @@ foreach ($repository in $repositories) {
             # and treats "already exited" as a successful no-op.
             $processId = Get-ValidProcessIdOrNull -Process $process
             $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
-            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
+            Write-Warning "[$repoDisplayName] Timeout reached after $timeoutSecondsDisplay seconds. Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
                 Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
