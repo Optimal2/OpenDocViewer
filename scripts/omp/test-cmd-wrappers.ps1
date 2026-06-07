@@ -59,9 +59,8 @@ param(
     # by passing -PerRepositoryTimeoutSeconds when invoking the script.
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
-    # ValidateRange requires literal values in a script parameter block. The
-    # mirrored constants below deliberately document the same limits for runtime
-    # diagnostics; update both places together if this range changes.
+    # ValidateRange requires literal values in a script parameter block; keep
+    # the accepted range documented here and in the parameter help above.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -83,6 +82,8 @@ $HashPrefixLength = 16
 $MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator), including all
 # whitespace controls such as TAB, vertical tab, form feed, CR, and LF, plus DEL.
+$AsciiControlUpperBound = 31
+$AsciiDeleteCodePoint = 127
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
@@ -99,15 +100,6 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
-# Documentation mirrors for the literal ValidateRange bounds in the parameter
-# block above. PowerShell attributes cannot reference variables from the script
-# body, so the attribute remains the source of truth for parameter binding.
-$MinimumTimeoutSeconds = 60
-$MaximumTimeoutSeconds = 3600
-if ($MinimumTimeoutSeconds -ne 60 -or $MaximumTimeoutSeconds -ne 3600) {
-    throw 'Timeout mirror constants must match the [ValidateRange(60, 3600)] attribute on PerRepositoryTimeoutSeconds.'
-}
-
 $MillisecondsPerSecond = [int64]1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # This relative path is validated during startup so moving the script fails loudly.
@@ -152,6 +144,9 @@ $TaskKillExecutionExceptionExitCode = -1
 $TaskKillProcessIdSwitch = '/PID'
 $TaskKillTerminateTreeSwitch = '/T'
 $TaskKillForceSwitch = '/F'
+$CmdCallKeyword = 'call'
+$StdoutLogExtension = '.stdout.log'
+$StderrLogExtension = '.stderr.log'
 # Windows can round Process.StartTime differently between the original Process
 # handle and a refreshed lookup because process metadata is read from snapshots
 # with timer-resolution limits. A small tolerance avoids rejecting the same
@@ -200,7 +195,7 @@ function Get-ControlCharacterDiagnostic {
 
     foreach ($character in $Value.ToCharArray()) {
         $codePoint = [int][char]$character
-        if ($codePoint -le 31 -or $codePoint -eq 127) {
+        if ($codePoint -le $AsciiControlUpperBound -or $codePoint -eq $AsciiDeleteCodePoint) {
             return ('U+{0:X4}' -f $codePoint)
         }
     }
@@ -371,12 +366,12 @@ function Assert-PathUnderBase {
 function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
-    $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
+    $bytes = [System.Text.Encoding]::UTF8.GetBytes($Value)
     $sha256 = $null
     try {
         # SHA256 output is standardized; the concrete provider chosen by
         # SHA256.Create() does not affect the resulting bytes.
-        $sha256 = [Security.Cryptography.SHA256]::Create()
+        $sha256 = [System.Security.Cryptography.SHA256]::Create()
         $hashBytes = $sha256.ComputeHash($bytes)
     }
     finally {
@@ -389,7 +384,7 @@ function Get-ShortStableHash {
     # intentionally more than enough for the small set of sibling repositories.
     # BitConverter is clear enough here; this script hashes only a small set of
     # repository paths, so avoiding Replace() would be a negligible micro-optimization.
-    $hashWithSeparators = [BitConverter]::ToString($hashBytes)
+    $hashWithSeparators = [System.BitConverter]::ToString($hashBytes)
     $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
 
     if ($HashPrefixLength -gt $hash.Length) {
@@ -632,7 +627,21 @@ function Add-TaskOutputOrDiagnostic {
             # ReadToEndAsync has no cancellation token in the runtimes this
             # script targets. Leave the task alone after this bounded diagnostic
             # wait; the owning process is already being observed separately.
+            # Attaching a continuation would only add asynchronous bookkeeping
+            # for helper-process diagnostics and would not make timeout handling
+            # safer in Windows PowerShell 5.1.
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
+            return
+        }
+
+        if ($Task.IsCanceled) {
+            $Output.Add("Could not read taskkill ${StreamName}; the async stream read task was canceled.")
+            return
+        }
+
+        if ($Task.IsFaulted) {
+            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { 'unknown task fault' }
+            $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
             return
         }
 
@@ -640,6 +649,9 @@ function Add-TaskOutputOrDiagnostic {
         if (-not [string]::IsNullOrWhiteSpace($text)) {
             $Output.Add($text.Trim())
         }
+    }
+    catch [System.AggregateException] {
+        $Output.Add("Could not read taskkill ${StreamName}; the async stream read task failed: $($_.Exception.GetBaseException().Message)")
     }
     catch {
         $Output.Add("Could not read taskkill ${StreamName}: $($_.Exception.Message)")
@@ -770,9 +782,9 @@ function Test-ExpectedCmdProcess {
 
         # TotalMilliseconds is a double; keep that precision for the tolerance
         # comparison instead of rounding to whole milliseconds.
-        $startTimeDeltaMs = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
-        if ($startTimeDeltaMs -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
-            Write-Verbose "Process start time changed by $startTimeDeltaMs ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
+        $startTimeDeltaMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
+        if ($startTimeDeltaMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
+            Write-Verbose "Process start time changed by $startTimeDeltaMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
             return $false
         }
 
@@ -799,6 +811,23 @@ function Get-ProcessIdentityDiagnostic {
     }
 }
 
+function Get-TaskListDiagnosticCommand {
+    param([int]$ProcessId = 0)
+
+    if ($ProcessId -ge $MinimumValidProcessId) {
+        return "tasklist /FI `"PID eq $ProcessId`""
+    }
+
+    return 'tasklist.exe'
+}
+
+function Get-TaskKillDiagnosticCommand {
+    param([int]$ProcessId = 0)
+
+    $processIdText = if ($ProcessId -ge $MinimumValidProcessId) { [string]$ProcessId } else { '<PID>' }
+    return "taskkill $TaskKillForceSwitch $TaskKillProcessIdSwitch $processIdText $TaskKillTerminateTreeSwitch"
+}
+
 function Write-TaskKillFailureWarning {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryName,
@@ -818,18 +847,9 @@ function Write-TaskKillFailureWarning {
         return
     }
 
-    $taskListAdvice = if ($ProcessId -ge $MinimumValidProcessId) {
-        "run 'tasklist /FI `"PID eq $ProcessId`"'"
-    }
-    else {
-        "run tasklist.exe for the suspected process ID"
-    }
-    $manualTaskKillAdvice = if ($ProcessId -ge $MinimumValidProcessId) {
-        "If the process is still running, verify it with Task Manager or $taskListAdvice, or run 'taskkill /F /PID $ProcessId /T' manually."
-    }
-    else {
-        "If the process is still running, verify it with Task Manager or $taskListAdvice, or run 'taskkill /F /PID <PID> /T' manually."
-    }
+    $taskListCommand = Get-TaskListDiagnosticCommand -ProcessId $ProcessId
+    $taskKillCommand = Get-TaskKillDiagnosticCommand -ProcessId $ProcessId
+    $manualTaskKillAdvice = "If the process is still running, verify it with Task Manager or run '$taskListCommand', or run '$taskKillCommand' manually."
     Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. $taskKillAvailabilityAdvice $manualTaskKillAdvice Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
@@ -972,6 +992,10 @@ function Assert-SafePackageIdentityPart {
     if ($Value.EndsWith('.')) {
         throw "Manifest field '$Name' must not end with a dot. Value: '$safeValue'. Manifest: $ManifestPath"
     }
+
+    if ($Value.Contains($GlobalPackageFileDelimiter)) {
+        throw "Manifest field '$Name' must not contain the global package filename delimiter '$GlobalPackageFileDelimiter'. Value: '$safeValue'. Manifest: $ManifestPath"
+    }
 }
 
 function Get-RequiredManifestText {
@@ -1010,8 +1034,11 @@ function Get-RequiredManifestText {
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
-if (-not [string]::Equals((Split-Path -Leaf $scriptDirectory), 'omp', [StringComparison]::OrdinalIgnoreCase) -or
-    -not [string]::Equals((Split-Path -Leaf (Split-Path -Parent $scriptDirectory)), 'scripts', [StringComparison]::OrdinalIgnoreCase)) {
+$scriptDirectoryLeaf = Split-Path -Leaf $scriptDirectory
+$scriptParentDirectory = Split-Path -Parent $scriptDirectory
+$scriptParentDirectoryLeaf = Split-Path -Leaf $scriptParentDirectory
+if (-not [string]::Equals($scriptDirectoryLeaf, 'omp', [StringComparison]::OrdinalIgnoreCase) -or
+    -not [string]::Equals($scriptParentDirectoryLeaf, 'scripts', [StringComparison]::OrdinalIgnoreCase)) {
     throw "test-cmd-wrappers.ps1 must be run from its shared scripts/omp location. Actual script directory: $scriptDirectory"
 }
 
@@ -1147,8 +1174,11 @@ foreach ($repository in $repositories) {
     try {
         # Keep -Encoding UTF8 for Windows PowerShell 5.1 compatibility. The OMP
         # repository tooling writes component manifests as UTF-8 JSON, with or
-        # without BOM depending on the writer. Avoid utf8NoBOM here because
-        # Windows PowerShell 5.1 does not support that encoding name.
+        # without BOM depending on the writer. Windows PowerShell 5.1 treats
+        # UTF8 writes differently from PowerShell 6+, but reads both BOM and
+        # non-BOM UTF-8 manifests correctly here. Avoid utf8NoBOM because
+        # Windows PowerShell 5.1 does not support that encoding name. -Raw is
+        # required so ConvertFrom-Json receives the whole manifest as one string.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1191,8 +1221,8 @@ foreach ($repository in $repositories) {
     # Keep the sanitized name for human-readable logs and the path hash for
     # uniqueness when different workspace roots contain same-named repositories.
     $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
-    $stdoutPath = Join-Path $runLogRootPath "$safeName.stdout.log"
-    $stderrPath = Join-Path $runLogRootPath "$safeName.stderr.log"
+    $stdoutPath = Join-Path $runLogRootPath "$safeName$StdoutLogExtension"
+    $stderrPath = Join-Path $runLogRootPath "$safeName$StderrLogExtension"
     Assert-PathUnderBase -Path $stdoutPath -BasePath $runLogRootPath -PathDescription 'stdout log path' -BaseDescription 'run log root'
     Assert-PathUnderBase -Path $stderrPath -BasePath $runLogRootPath -PathDescription 'stderr log path' -BaseDescription 'run log root'
     Remove-ExistingFileSafely -Path $stdoutPath -Description 'stdout log'
@@ -1209,7 +1239,7 @@ foreach ($repository in $repositories) {
     # Join-CmdCommandLine validates every argument immediately before quoting,
     # including the immutable output root path.
     $wrapperArguments = @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath)
-    $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments $wrapperArguments)
+    $cmdInvocation = '{0} {1}' -f $CmdCallKeyword, (Join-CmdCommandLine -Arguments $wrapperArguments)
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
@@ -1259,8 +1289,7 @@ foreach ($repository in $repositories) {
         # validation result, log paths, process identity diagnostics, and final
         # package inspection in one flow. Extracting it would require a wide
         # parameter object without making the operational logic safer.
-        $completedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
-        $timedOut = -not $completedWithinTimeout
+        $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
         if ($timedOut) {
             # The process can exit between timeout detection and the following
             # state reads. Every termination branch refreshes the Process object
@@ -1335,7 +1364,8 @@ foreach ($repository in $repositories) {
                         }
 
                         if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
-                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run 'tasklist /FI `"PID eq $processIdText`"' to verify the process tree has terminated before rerunning package validation."
+                            $taskListCommand = if ($null -ne $processId) { Get-TaskListDiagnosticCommand -ProcessId $processId } else { Get-TaskListDiagnosticCommand }
+                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run '$taskListCommand' to verify the process tree has terminated before rerunning package validation."
                         }
                     }
                     catch {
