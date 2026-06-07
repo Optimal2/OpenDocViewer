@@ -55,7 +55,8 @@ param(
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
     # The default gives ordinary repository builds 1200 seconds (20 minutes).
-    # Larger package builds can opt into any value from 60 to 3600 seconds (1 hour).
+    # Larger package builds can opt into any value from 60 to 3600 seconds (1 hour)
+    # by passing -PerRepositoryTimeoutSeconds when invoking the script.
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
     # ValidateRange requires literal values in a script parameter block. The
@@ -103,15 +104,20 @@ $MaximumDiagnosticTextLength = 160
 # body, so the attribute remains the source of truth for parameter binding.
 $MinimumTimeoutSeconds = 60
 $MaximumTimeoutSeconds = 3600
+if ($MinimumTimeoutSeconds -ne 60 -or $MaximumTimeoutSeconds -ne 3600) {
+    throw 'Timeout mirror constants must match the [ValidateRange(60, 3600)] attribute on PerRepositoryTimeoutSeconds.'
+}
+
 $MillisecondsPerSecond = [int64]1000
-$Sha256HexLength = 64
+# The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
+# This relative path is validated during startup so moving the script fails loudly.
 $RepositoryRootRelativePath = '..\..'
 # Store the millisecond limit separately because WaitForExit accepts an [int]
 # millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-# PowerShell division returns a floating-point value even for integer inputs, so
-# Floor keeps this as the largest whole number of seconds accepted by
-# WaitForExit's millisecond API.
+# PowerShell division returns a floating-point value even for integer inputs.
+# Keep the explicit Floor call so the derived second limit visibly rounds down
+# to the largest whole number accepted by WaitForExit's millisecond API.
 $MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
@@ -140,6 +146,12 @@ $StreamFlushWaitSeconds = 3
 # taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
 # PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
+# taskkill.exe flags used after a repository wrapper exceeds its timeout.
+# /T terminates the process tree; /F forces termination when cooperative exit
+# is no longer expected.
+$TaskKillProcessIdSwitch = '/PID'
+$TaskKillTerminateTreeSwitch = '/T'
+$TaskKillForceSwitch = '/F'
 # Windows can round Process.StartTime differently between the original Process
 # handle and a refreshed lookup because process metadata is read from snapshots
 # with timer-resolution limits. A small tolerance avoids rejecting the same
@@ -153,12 +165,18 @@ function Convert-SecondsToIntMilliseconds {
     )
 
     # The input is whole seconds, so use integer arithmetic instead of
-    # floating-point TimeSpan conversion or banker's rounding.
+    # floating-point TimeSpan conversion or banker's rounding. Most callers are
+    # script constants, but keep this guard because this helper is also used for
+    # any future timeout value that must fit WaitForExit(int milliseconds).
     if ($Seconds -gt $MaximumWaitForExitSeconds) {
-        throw "$Name is too large for WaitForExit: $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
+        throw "$Name is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
     }
 
     $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
+    if ($milliseconds -gt $MaximumWaitForExitMilliseconds) {
+        throw "$Name converts to $milliseconds milliseconds, which exceeds the .NET Process.WaitForExit(int) limit of $MaximumWaitForExitMilliseconds milliseconds."
+    }
+
     return [int]$milliseconds
 }
 
@@ -227,7 +245,8 @@ function Resolve-FullPathSafely {
 
     try {
         # This helper only canonicalizes paths, including rooted paths. It is
-        # not a security boundary: callers that accept rooted inputs must still
+        # intentionally not a security boundary because several callers resolve
+        # user-selected output/log roots. Callers that require containment must
         # validate the resolved path against the intended workspace/output base
         # with Assert-* helpers before using it.
         if ([System.IO.Path]::IsPathRooted($Path)) {
@@ -235,7 +254,12 @@ function Resolve-FullPathSafely {
         }
 
         $effectiveBasePath = if ([string]::IsNullOrWhiteSpace($BasePath)) {
-            (Get-Location).ProviderPath
+            $currentLocation = Get-Location
+            if ($currentLocation.Provider.Name -ne 'FileSystem') {
+                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name)"
+            }
+
+            $currentLocation.ProviderPath
         }
         else {
             $BasePath
@@ -367,9 +391,6 @@ function Get-ShortStableHash {
     # repository paths, so avoiding Replace() would be a negligible micro-optimization.
     $hashWithSeparators = [BitConverter]::ToString($hashBytes)
     $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
-    if ($hash.Length -ne $Sha256HexLength) {
-        throw "SHA256 hash output must be exactly $Sha256HexLength hexadecimal characters. Actual length: $($hash.Length)."
-    }
 
     if ($HashPrefixLength -gt $hash.Length) {
         throw "Configured hash prefix length $HashPrefixLength exceeds SHA256 hash length $($hash.Length)."
@@ -603,9 +624,10 @@ function Add-TaskOutputOrDiagnostic {
     try {
         # Task.Wait can surface stream read failures as AggregateException; the
         # catch below converts them into diagnostics instead of hiding them. The
-        # ReadToEndAsync tasks come from process streams and the wait is bounded,
-        # so this path is intentionally synchronous; Windows PowerShell 5.1 has
-        # no async/await syntax that would make the call clearer.
+        # ReadToEndAsync tasks come from short-lived taskkill.exe process
+        # streams and the wait is bounded, so leaving a timed-out read task alone
+        # is acceptable here; Windows PowerShell 5.1 has no async/await syntax
+        # that would make the call clearer.
         if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
             # ReadToEndAsync has no cancellation token in the runtimes this
             # script targets. Leave the task alone after this bounded diagnostic
@@ -637,7 +659,7 @@ function Invoke-TaskKillTree {
     $startInfo.RedirectStandardError = $true
     # Add arguments one by one: ProcessStartInfo.ArgumentList is not guaranteed
     # to expose AddRange across the Windows PowerShell/.NET versions we support.
-    foreach ($argument in @('/PID', $processIdArgument, '/T', '/F')) {
+    foreach ($argument in @($TaskKillProcessIdSwitch, $processIdArgument, $TaskKillTerminateTreeSwitch, $TaskKillForceSwitch)) {
         $startInfo.ArgumentList.Add($argument)
     }
 
@@ -781,6 +803,7 @@ function Write-TaskKillFailureWarning {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryName,
         [Parameter(Mandatory = $true)][int]$ExitCode,
+        [int]$ProcessId = 0,
         [object[]]$Output = @()
     )
 
@@ -795,7 +818,18 @@ function Write-TaskKillFailureWarning {
         return
     }
 
-    $manualTaskKillAdvice = "If the process is still running, verify it with Task Manager or run 'taskkill /F /PID <PID> /T' manually."
+    $taskListAdvice = if ($ProcessId -ge $MinimumValidProcessId) {
+        "run 'tasklist /FI `"PID eq $ProcessId`"'"
+    }
+    else {
+        "run tasklist.exe for the suspected process ID"
+    }
+    $manualTaskKillAdvice = if ($ProcessId -ge $MinimumValidProcessId) {
+        "If the process is still running, verify it with Task Manager or $taskListAdvice, or run 'taskkill /F /PID $ProcessId /T' manually."
+    }
+    else {
+        "If the process is still running, verify it with Task Manager or $taskListAdvice, or run 'taskkill /F /PID <PID> /T' manually."
+    }
     Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. $taskKillAvailabilityAdvice $manualTaskKillAdvice Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
@@ -941,6 +975,14 @@ function Assert-SafePackageIdentityPart {
 }
 
 function Get-RequiredManifestText {
+    <#
+    .SYNOPSIS
+    Reads a required string field from an OMP component manifest.
+
+    .DESCRIPTION
+    Validates that the requested manifest property exists, is non-empty, and is
+    safe to use as part of the expected universal package filename.
+    #>
     param(
         [Parameter(Mandatory = $true)][object]$Manifest,
         [Parameter(Mandatory = $true)][string]$PropertyName,
@@ -968,6 +1010,11 @@ function Get-RequiredManifestText {
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
+if (-not [string]::Equals((Split-Path -Leaf $scriptDirectory), 'omp', [StringComparison]::OrdinalIgnoreCase) -or
+    -not [string]::Equals((Split-Path -Leaf (Split-Path -Parent $scriptDirectory)), 'scripts', [StringComparison]::OrdinalIgnoreCase)) {
+    throw "test-cmd-wrappers.ps1 must be run from its shared scripts/omp location. Actual script directory: $scriptDirectory"
+}
+
 $currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path $RepositoryRootRelativePath -BasePath $scriptDirectory
 $currentRepositoryMarkerPath = Join-Path $currentRepositoryRoot 'omp-components.json'
 if (-not (Test-Path -LiteralPath $currentRepositoryMarkerPath -PathType Leaf)) {
@@ -1012,6 +1059,9 @@ $cmdExePath = Resolve-CmdExePath
 $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
+# Log directories are intentionally retained for failed-run diagnostics. Remove
+# old $ValidationDirectoryName log folders manually or point -LogRoot at a
+# disposable location when running frequent local validation loops.
 
 if ($repositoryNames.Length -gt 0) {
     $repositories = @(
@@ -1057,9 +1107,10 @@ catch {
     throw "Invalid per-repository validation timeout configuration used by the main repository loop: $($_.Exception.Message)"
 }
 $timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
-# Validation results are assembled as PSCustomObjects in several branches; a
-# generic object list keeps append behavior efficient without defining a custom
-# class for this script-only report.
+# Validation results are assembled as PSCustomObjects in several branches. Each
+# result has Repository, Status, ExitCode, Package, StdoutLog, StderrLog, and
+# Detail properties; a generic object list keeps append behavior efficient
+# without defining a custom class for this script-only report.
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
@@ -1094,12 +1145,10 @@ foreach ($repository in $repositories) {
     Assert-RepositoryPathUnderWorkspace -RepositoryPath $repository.FullName -WorkspaceRootPath $workspaceRootPath
 
     try {
-        # Keep -Encoding UTF8 for Windows PowerShell compatibility. The OMP
-        # repository tooling writes component manifests as UTF-8 JSON. Avoid
-        # utf8NoBOM here because Windows PowerShell 5.1 does not support it.
-        # For reads, -Encoding UTF8 handles both BOM and no-BOM UTF-8 manifests
-        # in the PowerShell versions targeted by these wrapper scripts, so avoid
-        # a version-specific branch only to choose utf8NoBOM on newer shells.
+        # Keep -Encoding UTF8 for Windows PowerShell 5.1 compatibility. The OMP
+        # repository tooling writes component manifests as UTF-8 JSON, with or
+        # without BOM depending on the writer. Avoid utf8NoBOM here because
+        # Windows PowerShell 5.1 does not support that encoding name.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1261,7 +1310,7 @@ foreach ($repository in $repositories) {
                 }
 
                 if ($taskKillAttempted -and $taskKillExitCode -ne 0) {
-                    Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -Output @($taskKillOutput)
+                    Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -ProcessId $processId -Output @($taskKillOutput)
                 }
 
                 $process.Refresh()
@@ -1286,7 +1335,7 @@ foreach ($repository in $repositories) {
                         }
 
                         if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
-                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or tasklist.exe to verify the process tree has terminated before rerunning package validation."
+                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run 'tasklist /FI `"PID eq $processIdText`"' to verify the process tree has terminated before rerunning package validation."
                         }
                     }
                     catch {
