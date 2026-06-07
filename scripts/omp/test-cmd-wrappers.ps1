@@ -49,8 +49,8 @@ param(
     [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
-    # The default gives ordinary repository builds 20 minutes. Larger package
-    # builds can opt in to any value from 60 to 3600 seconds (1 hour).
+    # The default gives ordinary repository builds 1200 seconds (20 minutes).
+    # Larger package builds can opt in to any value from 60 to 3600 seconds (1 hour).
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
     [ValidateRange(60, 3600)]
@@ -89,11 +89,14 @@ $MaximumDiagnosticTextLength = 160
 # helper functions intentionally read them from script scope after they are
 # converted to WaitForExit-compatible millisecond values below.
 $PostTerminationWaitSeconds = 10
-# taskkill.exe should be quick; ten seconds allows slow process creation on busy
-# runners without letting the wrapper validation hang.
+# taskkill.exe should be quick; ten seconds accommodates slow process creation
+# on busy runners without letting the wrapper validation hang.
 $TaskKillWaitSeconds = 10
 # After killing taskkill.exe itself, wait only briefly for redirected streams.
 $TaskKillPostTerminationWaitSeconds = 3
+# ReadToEndAsync tasks should complete after taskkill.exe exits. Keep a small
+# upper bound so diagnostics cannot hang if a redirected stream behaves oddly.
+$TaskKillStreamReadWaitSeconds = 3
 # Direct Process.Kill() is the last fallback for a stuck cmd.exe process.
 $DirectProcessKillWaitSeconds = 10
 # The command output is redirected to files, so only a short final flush wait is
@@ -142,6 +145,7 @@ try {
     $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
     $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
     $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
+    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
     $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
     $StreamFlushWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'StreamFlushWaitSeconds' -Seconds $StreamFlushWaitSeconds
 }
@@ -469,6 +473,21 @@ function Get-ProcessStartTimeOrNull {
     }
 }
 
+function Get-ObjectTypeName {
+    param([AllowNull()][object]$Value)
+
+    if ($null -eq $Value) {
+        return '<null>'
+    }
+
+    try {
+        return $Value.GetType().FullName
+    }
+    catch {
+        return '<unknown>'
+    }
+}
+
 function ConvertTo-TaskKillProcessIdArgument {
     param([Parameter(Mandatory = $true)][int]$ProcessId)
 
@@ -480,6 +499,29 @@ function ConvertTo-TaskKillProcessIdArgument {
     }
 
     return $processIdText
+}
+
+function Add-TaskOutputOrDiagnostic {
+    param(
+        [Parameter(Mandatory = $true)][System.Collections.Generic.List[string]]$Output,
+        [Parameter(Mandatory = $true)][object]$Task,
+        [Parameter(Mandatory = $true)][string]$StreamName
+    )
+
+    try {
+        if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
+            $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
+            return
+        }
+
+        $text = $Task.GetAwaiter().GetResult()
+        if (-not [string]::IsNullOrWhiteSpace($text)) {
+            $Output.Add($text.Trim())
+        }
+    }
+    catch {
+        $Output.Add("Could not read taskkill $StreamName`: $($_.Exception.Message)")
+    }
 }
 
 function Invoke-TaskKillTree {
@@ -520,25 +562,8 @@ function Invoke-TaskKillTree {
             $output.Add("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
 
             if ($taskKillProcess.WaitForExit($TaskKillPostTerminationWaitMilliseconds)) {
-                try {
-                    $stdout = $stdoutTask.GetAwaiter().GetResult()
-                    if (-not [string]::IsNullOrWhiteSpace($stdout)) {
-                        $output.Add($stdout.Trim())
-                    }
-                }
-                catch {
-                    $output.Add("Could not read taskkill stdout after timeout: $($_.Exception.Message)")
-                }
-
-                try {
-                    $stderr = $stderrTask.GetAwaiter().GetResult()
-                    if (-not [string]::IsNullOrWhiteSpace($stderr)) {
-                        $output.Add($stderr.Trim())
-                    }
-                }
-                catch {
-                    $output.Add("Could not read taskkill stderr after timeout: $($_.Exception.Message)")
-                }
+                Add-TaskOutputOrDiagnostic -Output $output -Task $stdoutTask -StreamName 'stdout'
+                Add-TaskOutputOrDiagnostic -Output $output -Task $stderrTask -StreamName 'stderr'
             }
             else {
                 $output.Add("taskkill.exe did not exit after an additional $TaskKillPostTerminationWaitSeconds seconds termination wait; redirected output was not read.")
@@ -550,16 +575,9 @@ function Invoke-TaskKillTree {
             }
         }
 
-        $stdout = $stdoutTask.GetAwaiter().GetResult()
-        $stderr = $stderrTask.GetAwaiter().GetResult()
         $output = [System.Collections.Generic.List[string]]::new()
-        if (-not [string]::IsNullOrWhiteSpace($stdout)) {
-            $output.Add($stdout.Trim())
-        }
-
-        if (-not [string]::IsNullOrWhiteSpace($stderr)) {
-            $output.Add($stderr.Trim())
-        }
+        Add-TaskOutputOrDiagnostic -Output $output -Task $stdoutTask -StreamName 'stdout'
+        Add-TaskOutputOrDiagnostic -Output $output -Task $stderrTask -StreamName 'stderr'
 
         return [pscustomobject]@{
             ExitCode = $taskKillProcess.ExitCode
@@ -604,7 +622,7 @@ function Test-ExpectedCmdProcess {
         }
 
         if ($ExpectedStartTime -isnot [datetime]) {
-            Write-Verbose "Expected process start time should be of type [datetime] but got '$($ExpectedStartTime.GetType().FullName)'."
+            Write-Verbose "Expected process start time should be of type [datetime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
             return $false
         }
 
@@ -768,7 +786,7 @@ function Assert-SafePackageIdentityPart {
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters must match [A-Za-z0-9._+-]. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters must match [A-Za-z0-9._+\-]. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
