@@ -18,6 +18,8 @@ cmd.exe process tree and avoids reading ExitCode until the process has exited.
 param(
     [string]$WorkspaceRoot = '',
     [string[]]$RepositoryName = @(),
+    [string]$ManifestRelativePath = 'omp-components.json',
+    [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
@@ -29,9 +31,6 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$MillisecondsPerSecond = 1000
-$ManifestRelativePath = 'omp-components.json'
-$CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
 $GlobalPackageFileSegment = '__global__'
@@ -41,6 +40,8 @@ $PositiveIntegerPattern = '^[1-9][0-9]*$'
 $MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
+# Whitespace and these cmd.exe metacharacters can change command parsing unless
+# the generated argument is quoted.
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
 $MaximumCmdCommandLineLength = 8191
 # 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
@@ -50,10 +51,13 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 
 $PostTerminationWaitSeconds = 10
 $TaskKillWaitSeconds = 10
-# Give taskkill and the target process a short grace period to tear down child
-# processes and flush redirected streams without letting validation hang.
-$PostTerminationWaitMilliseconds = $PostTerminationWaitSeconds * $MillisecondsPerSecond
-$TaskKillWaitMilliseconds = $TaskKillWaitSeconds * $MillisecondsPerSecond
+$TaskKillPostKillWaitSeconds = 3
+# Keep these timeouts separate even when defaults match: taskkill.exe has its
+# own startup/runtime budget, while the target cmd.exe gets a separate grace
+# period after taskkill asks Windows to terminate the process tree.
+$PostTerminationWaitMilliseconds = [int][TimeSpan]::FromSeconds($PostTerminationWaitSeconds).TotalMilliseconds
+$TaskKillWaitMilliseconds = [int][TimeSpan]::FromSeconds($TaskKillWaitSeconds).TotalMilliseconds
+$TaskKillPostKillWaitMilliseconds = [int][TimeSpan]::FromSeconds($TaskKillPostKillWaitSeconds).TotalMilliseconds
 # taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
 # PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
@@ -63,9 +67,13 @@ function Get-ScriptDirectory {
         return $PSScriptRoot
     }
 
-    $scriptPath = $script:PSCommandPath
+    $scriptPath = $PSCommandPath
     if ([string]::IsNullOrWhiteSpace($scriptPath)) {
-        $scriptPath = $script:MyInvocation.MyCommand.Path
+        $scriptPath = $MyInvocation.PSCommandPath
+    }
+
+    if ([string]::IsNullOrWhiteSpace($scriptPath)) {
+        $scriptPath = $MyInvocation.MyCommand.Path
     }
 
     if ([string]::IsNullOrWhiteSpace($scriptPath)) {
@@ -177,6 +185,8 @@ function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
+    # SHA256 output is standardized; the concrete provider chosen by
+    # SHA256.Create() does not affect the resulting bytes.
     $sha256 = [Security.Cryptography.SHA256]::Create()
     try {
         $hashBytes = $sha256.ComputeHash($bytes)
@@ -188,7 +198,7 @@ function Get-ShortStableHash {
     # 16 hex characters gives 64 bits of stable filename entropy, which is
     # intentionally more than enough for the small set of sibling repositories.
     $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
-    return $hash.Substring(0, [Math]::Min($HashPrefixLength, $hash.Length))
+    return $hash.Substring(0, $HashPrefixLength)
 }
 
 function Get-SafeFileName {
@@ -230,8 +240,8 @@ function ConvertTo-CmdArgument {
     # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
     Assert-SafeCmdArgumentText -Name 'CMD wrapper argument' -Value $Value
 
-    # cmd.exe treats ^ as its escape character, so double carets when the
-    # generated command line needs a literal caret.
+    # cmd.exe treats ^ as its escape character. Escape carets before quoting so
+    # a literal caret cannot alter parsing of the generated command line.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
@@ -306,7 +316,7 @@ function Get-ProcessExitCodeOrNull {
         return $Process.ExitCode
     }
     catch [System.InvalidOperationException] {
-        Write-Verbose "Process state is unavailable while reading ExitCode. The process may be running or may have been disposed."
+        Write-Verbose "Process has not exited or no process is associated with this Process object while reading ExitCode."
         return $null
     }
     catch {
@@ -343,6 +353,8 @@ function Get-ProcessStartTimeOrNull {
         return $Process.StartTime
     }
     catch {
+        # StartTime can be unavailable when the process exits between checks or
+        # when the caller lacks permission to inspect process metadata.
         Write-Verbose "Could not read process start time: $($_.Exception.Message)"
         return $null
     }
@@ -398,7 +410,7 @@ function Invoke-TaskKillTree {
             $output = [System.Collections.Generic.List[string]]::new()
             $output.Add("taskkill.exe did not exit within $TaskKillWaitSeconds seconds.")
 
-            if ($taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)) {
+            if ($taskKillProcess.WaitForExit($TaskKillPostKillWaitMilliseconds)) {
                 try {
                     $stdout = $stdoutTask.GetAwaiter().GetResult()
                     if (-not [string]::IsNullOrWhiteSpace($stdout)) {
@@ -420,7 +432,7 @@ function Invoke-TaskKillTree {
                 }
             }
             else {
-                $output.Add("taskkill.exe did not exit after an additional termination wait; redirected output was not read.")
+                $output.Add("taskkill.exe did not exit after an additional $TaskKillPostKillWaitSeconds second termination wait; redirected output was not read.")
             }
 
             return [pscustomobject]@{
@@ -478,7 +490,14 @@ function Test-ExpectedCmdProcess {
 
         if ($null -ne $ExpectedStartTime) {
             if ($ExpectedStartTime -isnot [datetime]) {
-                Write-Verbose "Expected process start time had unexpected type '$($ExpectedStartTime.GetType().FullName)'."
+                $expectedStartTimeType = if ($null -eq $ExpectedStartTime) {
+                    '<null>'
+                }
+                else {
+                    $ExpectedStartTime.GetType().FullName
+                }
+
+                Write-Verbose "Expected process start time had unexpected type '$expectedStartTimeType'."
                 return $false
             }
 
@@ -598,11 +617,14 @@ function Assert-SafePackageIdentityPart {
         [Parameter(Mandatory = $true)][string]$ManifestPath
     )
 
+    # The allow-list intentionally excludes slash, backslash, colon, and all
+    # other path syntax. The final package path is still checked with
+    # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
         throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, hyphen, plus. Manifest: $ManifestPath"
     }
 
-    if ($Value.Contains('..') -or $Value -eq '.' -or $Value -eq '..') {
+    if ($Value.Contains('..') -or $Value -eq '.') {
         throw "Manifest field '$Name' must not contain path traversal markers or consecutive dots. Manifest: $ManifestPath"
     }
 }
@@ -658,7 +680,9 @@ New-DirectorySafely -Path $outputRootPath -Description 'output root directory'
 New-DirectorySafely -Path $logRootPath -Description 'log root directory'
 $cmdExePath = Resolve-CmdExePath
 # The 'N' GUID format is 32 hexadecimal characters without hyphens, which gives
-# enough uniqueness while keeping log paths shorter.
+# enough uniqueness while keeping log paths shorter. The run id is not a
+# security boundary; keep -LogRoot in a user-private or ACL-protected location
+# when logs can contain sensitive output.
 $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
@@ -694,7 +718,12 @@ if ($repositories.Count -eq 0) {
 # from the parameter so the unit conversion stays close to the configured
 # timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
 # [int]::MaxValue.
-$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
+$timeoutMillisecondsRaw = [TimeSpan]::FromSeconds($PerRepositoryTimeoutSeconds).TotalMilliseconds
+if ($timeoutMillisecondsRaw -gt [int]::MaxValue) {
+    throw "Per-repository timeout is too large for WaitForExit: $PerRepositoryTimeoutSeconds seconds."
+}
+
+$timeoutMilliseconds = [int]$timeoutMillisecondsRaw
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -786,13 +815,6 @@ foreach ($repository in $repositories) {
 
     try {
         $exitedWithinTimeout = $process.WaitForExit($timeoutMilliseconds)
-        if ($exitedWithinTimeout) {
-            # The timed overload observes process exit. The second, parameterless
-            # call is still required by .NET so redirected stdout/stderr are fully
-            # flushed before status checks inspect logs and package output.
-            $process.WaitForExit()
-        }
-
         $timedOut = -not $exitedWithinTimeout
         if ($timedOut) {
             $processId = Get-ValidProcessIdOrNull -Process $process
@@ -846,8 +868,27 @@ foreach ($repository in $repositories) {
                 }
                 elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
                     Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+                    try {
+                        $process.Kill()
+                        if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
+                            Write-Warning "[$repoDisplayName] Process still did not exit after direct Process.Kill()."
+                        }
+                    }
+                    catch {
+                        Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed: $($_.Exception.Message)"
+                    }
                 }
             }
+        }
+
+        $process.Refresh()
+        if ($process.HasExited) {
+            # The timed overload observes process exit. The second, parameterless
+            # call is still required by .NET so redirected stdout/stderr are fully
+            # flushed before status checks inspect logs and package output. It is
+            # only called after HasExited so it cannot turn a timeout into an
+            # indefinite wait.
+            $process.WaitForExit()
         }
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
