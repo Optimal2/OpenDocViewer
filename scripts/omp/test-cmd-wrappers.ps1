@@ -43,7 +43,8 @@ Directory where stdout/stderr logs are written. Use a user-private or
 ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
-Maximum build time per repository. The accepted range is 60 to 3600 seconds.
+Maximum build time per repository. The accepted range is 60 to 3600 seconds;
+the default is 1200 seconds (20 minutes).
 #>
 [CmdletBinding()]
 param(
@@ -57,8 +58,9 @@ param(
     # Larger package builds can opt into any value from 60 to 3600 seconds (1 hour).
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
-    # ValidateRange requires literal values in a script parameter block; keep
-    # these in sync with $MinimumTimeoutSeconds and $MaximumTimeoutSeconds below.
+    # ValidateRange requires literal values in a script parameter block. The
+    # mirrored constants below deliberately document the same limits for runtime
+    # diagnostics; update both places together if this range changes.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -96,14 +98,16 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
-# Documentation mirrors for the literal ValidateRange bounds above. PowerShell
-# attributes cannot reference variables from the script body, so the attribute
-# remains the source of truth for parameter binding.
+# Documentation mirrors for the literal ValidateRange bounds in the parameter
+# block above. PowerShell attributes cannot reference variables from the script
+# body, so the attribute remains the source of truth for parameter binding.
 $MinimumTimeoutSeconds = 60
 $MaximumTimeoutSeconds = 3600
 $MillisecondsPerSecond = [int64]1000
 $Sha256HexLength = 64
 $RepositoryRootRelativePath = '..\..'
+# Store the millisecond limit separately because WaitForExit accepts an [int]
+# millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
 # PowerShell division returns a floating-point value even for integer inputs, so
 # Floor keeps this as the largest whole number of seconds accepted by
@@ -222,9 +226,10 @@ function Resolve-FullPathSafely {
     )
 
     try {
-        # This helper only canonicalizes paths. Callers that accept rooted
-        # inputs must still validate the resolved path against the intended
-        # workspace/output base with Assert-* helpers before using it.
+        # This helper only canonicalizes paths, including rooted paths. It is
+        # not a security boundary: callers that accept rooted inputs must still
+        # validate the resolved path against the intended workspace/output base
+        # with Assert-* helpers before using it.
         if ([System.IO.Path]::IsPathRooted($Path)) {
             return [System.IO.Path]::GetFullPath($Path)
         }
@@ -449,13 +454,14 @@ function Assert-CmdCommandLineLength {
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
-        $systemCmdDiagnosticPath = Join-Path $systemRoot 'System32\cmd.exe'
+        $system32Path = Join-Path $systemRoot 'System32'
+        $systemCmdDiagnosticPath = Join-Path $system32Path 'cmd.exe'
         if (Test-Path -LiteralPath $systemCmdDiagnosticPath -PathType Leaf) {
             return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdDiagnosticPath
         }
     }
     else {
-        $systemCmdDiagnosticPath = '$env:SystemRoot\System32\cmd.exe'
+        $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe (SystemRoot environment variable was empty)'
     }
 
     $candidate = $env:ComSpec
@@ -490,7 +496,8 @@ function Assert-CmdExecutablePath {
 function Resolve-TaskKillExePath {
     $systemRoot = $env:SystemRoot
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
-        $systemTaskKill = Join-Path $systemRoot 'System32\taskkill.exe'
+        $system32Path = Join-Path $systemRoot 'System32'
+        $systemTaskKill = Join-Path $system32Path 'taskkill.exe'
         if (Test-Path -LiteralPath $systemTaskKill -PathType Leaf) {
             return Resolve-FullPathSafely -Name 'system taskkill.exe path' -Path $systemTaskKill
         }
@@ -1006,7 +1013,7 @@ $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
 
-if ($repositoryNames.Count -gt 0) {
+if ($repositoryNames.Length -gt 0) {
     $repositories = @(
         foreach ($name in $repositoryNames) {
             $candidate = Join-Path $workspaceRootPath $name
@@ -1049,7 +1056,7 @@ try {
 catch {
     throw "Invalid per-repository validation timeout configuration used by the main repository loop: $($_.Exception.Message)"
 }
-$timeoutSecondsDisplay = [int]($timeoutMilliseconds / $MillisecondsPerSecond)
+$timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
