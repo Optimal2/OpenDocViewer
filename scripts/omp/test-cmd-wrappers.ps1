@@ -14,6 +14,32 @@ The timeout is measured by WaitForExit after the child process has been started.
 WaitForExit returns true when the process exits within that interval and false
 when the timeout expires. On timeout, the script attempts to terminate the whole
 cmd.exe process tree and avoids reading ExitCode until the process has exited.
+
+.PARAMETER WorkspaceRoot
+Workspace that contains the OMP-compatible repository folders. Defaults to the
+parent folder of the repository that contains this script.
+
+.PARAMETER RepositoryName
+Optional repository folder names to validate. When omitted, sibling folders are
+discovered only when they contain both the manifest and command wrapper paths.
+
+.PARAMETER ManifestRelativePath
+Manifest path inside each repository. Defaults to omp-components.json.
+
+.PARAMETER CommandWrapperRelativePath
+Command wrapper path inside each repository. Defaults to
+scripts/omp/build-universal-package.cmd.
+
+.PARAMETER OutputRoot
+Directory where generated universal packages are written during validation.
+Defaults to a user-temp validation folder.
+
+.PARAMETER LogRoot
+Directory where stdout/stderr logs are written. Use a user-private or
+ACL-protected location when logs may contain sensitive diagnostics.
+
+.PARAMETER PerRepositoryTimeoutSeconds
+Maximum build time per repository. The accepted range is 60 to 3600 seconds.
 #>
 [CmdletBinding()]
 param(
@@ -43,6 +69,9 @@ $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
 $PositiveIntegerPattern = '^[1-9][0-9]*$'
+# Only reject impossible child-process IDs. Windows reserves some low PIDs for
+# system processes, but this script starts cmd.exe itself and only needs to
+# prevent invalid zero/negative IDs from reaching taskkill.exe.
 $MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator) plus DEL.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
@@ -56,10 +85,19 @@ $MaximumCmdCommandLineLength = 8191
 $MinimumMeaningfulZipFileLengthBytes = 22
 $MaximumDiagnosticTextLength = 160
 
+# Script-scoped second values are retained for human-readable diagnostics;
+# helper functions intentionally read them from script scope after they are
+# converted to WaitForExit-compatible millisecond values below.
 $PostTerminationWaitSeconds = 10
+# taskkill.exe should be quick; ten seconds allows slow process creation on busy
+# runners without letting the wrapper validation hang.
 $TaskKillWaitSeconds = 10
+# After killing taskkill.exe itself, wait only briefly for redirected streams.
 $TaskKillPostTerminationWaitSeconds = 3
+# Direct Process.Kill() is the last fallback for a stuck cmd.exe process.
 $DirectProcessKillWaitSeconds = 10
+# The command output is redirected to files, so only a short final flush wait is
+# needed once the process has already exited.
 $StreamFlushWaitSeconds = 3
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
@@ -100,11 +138,16 @@ function Get-SafeDiagnosticText {
     return $safe
 }
 
-$PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
-$TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
-$TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
-$DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
-$StreamFlushWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'StreamFlushWaitSeconds' -Seconds $StreamFlushWaitSeconds
+try {
+    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
+    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
+    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
+    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
+    $StreamFlushWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'StreamFlushWaitSeconds' -Seconds $StreamFlushWaitSeconds
+}
+catch {
+    throw "Invalid built-in process wait timeout in test-cmd-wrappers.ps1: $($_.Exception.Message)"
+}
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -578,6 +621,21 @@ function Test-ExpectedCmdProcess {
     }
 }
 
+function Get-ProcessIdentityDiagnostic {
+    param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
+
+    try {
+        $Process.Refresh()
+        $processName = $Process.ProcessName
+        $processId = Get-ValidProcessIdOrNull -Process $Process
+        $startTime = Get-ProcessStartTimeOrNull -Process $Process
+        return "Name='$processName'; PID='$processId'; StartTime='$startTime'"
+    }
+    catch {
+        return "Unavailable: $($_.Exception.Message)"
+    }
+}
+
 function Write-TaskKillFailureWarning {
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryName,
@@ -628,7 +686,7 @@ function Test-PackageCreated {
 
         if ($item -isnot [System.IO.FileInfo]) {
             return [pscustomobject]@{
-                Exists = $false
+                Exists = $true
                 IsValid = $false
                 Length = 0L
                 Message = "Package path is not a file: $Path"
@@ -636,8 +694,8 @@ function Test-PackageCreated {
         }
 
         $length = $item.Length
-        $hasMeaningfulPayload = $length -gt $MinimumMeaningfulZipFileLengthBytes
-        $message = if ($hasMeaningfulPayload) {
+        $meetsMinimumSizeRequirement = $length -gt $MinimumMeaningfulZipFileLengthBytes
+        $message = if ($meetsMinimumSizeRequirement) {
             'Package file exists and has meaningful zip content.'
         }
         else {
@@ -646,7 +704,7 @@ function Test-PackageCreated {
 
         return [pscustomobject]@{
             Exists = $true
-            IsValid = $hasMeaningfulPayload
+            IsValid = $meetsMinimumSizeRequirement
             Length = $length
             Message = $message
         }
@@ -714,10 +772,23 @@ function Assert-SafePackageIdentityPart {
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
-    # '...' and longer runs. A single dot is rejected only when the whole value
-    # is '.', so ordinary version text such as '1.0.0' remains valid.
-    if ($Value.Contains('..') -or $Value -eq '.' -or $Value.StartsWith('.') -or $Value.EndsWith('.')) {
-        throw "Manifest field '$Name' must not contain path traversal markers, leading/trailing dots, or consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
+    # '...' and longer runs, while ordinary version text such as '1.0.0' remains
+    # valid. Leading/trailing dots are rejected separately because they can be
+    # normalized away by file systems and shells.
+    if ($Value.Contains('..')) {
+        throw "Manifest field '$Name' must not contain path traversal markers or two or more consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
+    }
+
+    if ($Value -eq '.') {
+        throw "Manifest field '$Name' must not be a single dot. Value: '$safeValue'. Manifest: $ManifestPath"
+    }
+
+    if ($Value.StartsWith('.')) {
+        throw "Manifest field '$Name' must not start with a dot. Value: '$safeValue'. Manifest: $ManifestPath"
+    }
+
+    if ($Value.EndsWith('.')) {
+        throw "Manifest field '$Name' must not end with a dot. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 }
 
@@ -772,11 +843,11 @@ New-DirectorySafely -Path $outputRootPath -Description 'output root directory'
 New-DirectorySafely -Path $logRootPath -Description 'log root directory'
 $cmdExePath = Resolve-CmdExePath
 # The 'N' GUID format is 32 hexadecimal characters without hyphens, which gives
-# enough uniqueness while keeping log paths shorter. The run id is not a
-# security boundary. Keep -LogRoot in a user-private temp folder, an ACL-
-# protected workspace folder, or another location where other local users cannot
-# read build output that may include paths, environment-derived diagnostics, or
-# package validation details.
+# enough uniqueness for concurrent validation runs while keeping log paths
+# shorter. The run id is not a security boundary. Keep -LogRoot in a
+# user-private temp folder, an ACL-protected workspace folder, or another
+# location where other local users cannot read build output that may include
+# paths, environment-derived diagnostics, or package validation details.
 $runId = [Guid]::NewGuid().ToString('N')
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
@@ -840,6 +911,9 @@ foreach ($repository in $repositories) {
     Assert-RepositoryPathUnderWorkspace -RepositoryPath $repository.FullName -WorkspaceRootPath $workspaceRootPath
 
     try {
+        # Keep -Encoding UTF8 for Windows PowerShell compatibility. Repository
+        # manifests are UTF-8 JSON, and this reader handles the BOM/no-BOM
+        # files produced by our repository tooling.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch {
@@ -865,6 +939,8 @@ foreach ($repository in $repositories) {
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
 
+    # Keep the sanitized name for human-readable logs and the path hash for
+    # uniqueness when different workspace roots contain same-named repositories.
     $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
     $stdoutPath = Join-Path $runLogRootPath "$safeName.stdout.log"
     $stderrPath = Join-Path $runLogRootPath "$safeName.stderr.log"
@@ -924,6 +1000,9 @@ foreach ($repository in $repositories) {
     try {
         $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
         if ($timedOut) {
+            # The process can exit between timeout detection and the following
+            # state reads. Every termination branch refreshes the Process object
+            # and treats "already exited" as a successful no-op.
             $processId = Get-ValidProcessIdOrNull -Process $process
             $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
             Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
@@ -932,10 +1011,10 @@ foreach ($repository in $repositories) {
                 Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
             }
             elseif ($null -eq $processId) {
-                Write-Warning "[$repoDisplayName] Process has an invalid or unavailable PID; taskkill was not attempted."
+                Write-Warning "[$repoDisplayName] Process PID could not be read or was invalid; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
             }
             elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted."
+                Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
             }
             else {
                 $taskKillAttempted = $false
@@ -947,7 +1026,7 @@ foreach ($repository in $repositories) {
                         Write-Warning "[$repoDisplayName] Process exited immediately before taskkill; termination was not needed."
                     }
                     elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                        Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted."
+                        Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
                     }
                     else {
                         # This intentionally repeats the earlier process-state
@@ -984,6 +1063,9 @@ foreach ($repository in $repositories) {
                             Write-Warning "[$repoDisplayName] Process exited immediately before direct Process.Kill(); no further termination was needed."
                         }
                         else {
+                            # The process can still exit between HasExited and
+                            # Kill(); the catch below treats that race as a
+                            # diagnostic warning instead of a script failure.
                             $process.Kill()
                         }
 
@@ -1050,6 +1132,8 @@ foreach ($repository in $repositories) {
 
 $results | Format-Table Repository, Status, ExitCode, Package -AutoSize
 
+# The table stays compact for CI logs. StdoutLog, StderrLog, and Detail remain
+# on each result object for callers that capture the script output.
 $hasFailures = $false
 foreach ($result in $results) {
     if ($result.Status -ne 'OK') {
