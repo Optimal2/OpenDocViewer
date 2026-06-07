@@ -68,7 +68,6 @@ $GlobalPackageFileDelimiter = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
-$PositiveIntegerPattern = '^[1-9][0-9]*$'
 # Only reject impossible child-process IDs. Windows reserves some low PIDs for
 # system processes, but this script starts cmd.exe itself and only needs to
 # prevent invalid zero/negative IDs from reaching taskkill.exe.
@@ -78,11 +77,17 @@ $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
+# Windows cmd.exe accepts at most 8191 characters in a command line. Keep this
+# guard because the wrapper path plus output directory is assembled as one
+# cmd.exe /c command.
 $MaximumCmdCommandLineLength = 8191
 # 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
-# packages must contain a manifest and object payload, so useful output must be
-# larger than this marker.
+# packages must contain at least the package manifest and object payload, so a
+# useful package must be larger than the empty-archive end-of-central-directory
+# marker.
 $MinimumMeaningfulZipFileLengthBytes = 22
+# Keep diagnostics short enough for CI tables and warnings while still showing
+# enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
 
 # Script-scoped second values are retained for human-readable diagnostics;
@@ -115,15 +120,14 @@ function Convert-SecondsToIntMilliseconds {
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
-    $milliseconds = [TimeSpan]::FromSeconds($Seconds).TotalMilliseconds
-    $roundedMilliseconds = [Math]::Round($milliseconds)
-    # Check the rounded value before casting so the [int] conversion cannot
-    # throw if the parameter cap is widened later.
-    if ($roundedMilliseconds -gt [int]::MaxValue) {
+    # The input is whole seconds, so use integer arithmetic instead of
+    # floating-point TimeSpan conversion or banker's rounding.
+    $milliseconds = ([int64]$Seconds) * ([int64]1000)
+    if ($milliseconds -gt [int]::MaxValue) {
         throw "$Name is too large for WaitForExit: $Seconds seconds."
     }
 
-    return [int]$roundedMilliseconds
+    return [int]$milliseconds
 }
 
 function Get-SafeDiagnosticText {
@@ -234,6 +238,8 @@ function Test-IsSubPath {
 
     $fullPath = ConvertTo-ComparablePath -Name 'path' -Path $Path
     $fullBasePath = ConvertTo-ComparablePath -Name 'base path' -Path $BasePath
+    # ConvertTo-ComparablePath trims trailing separators, so adding exactly one
+    # separator here works for both "C:\Root" and "C:\Root\" inputs.
     return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
 }
@@ -294,6 +300,10 @@ function Get-ShortStableHash {
     # BitConverter is clear enough here; this script hashes only a small set of
     # repository paths, so avoiding Replace() would be a negligible micro-optimization.
     $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
+    if ($hash.Length -lt $HashPrefixLength) {
+        throw "SHA256 hash output was shorter than the configured prefix length $HashPrefixLength."
+    }
+
     return $hash.Substring(0, $HashPrefixLength)
 }
 
@@ -491,14 +501,11 @@ function Get-ObjectTypeName {
 function ConvertTo-TaskKillProcessIdArgument {
     param([Parameter(Mandatory = $true)][int]$ProcessId)
 
-    $processIdText = [string]$ProcessId
-    # Defense in depth: the parameter is already an int, but taskkill receives a
-    # string argument and should only ever see a positive decimal PID.
-    if ($processIdText -notmatch $PositiveIntegerPattern) {
-        throw "Process ID is not a positive integer and cannot be passed to taskkill.exe: $processIdText"
+    if ($ProcessId -lt $MinimumValidProcessId) {
+        throw "Process ID must be positive before it is passed to taskkill.exe: $ProcessId"
     }
 
-    return $processIdText
+    return [string]$ProcessId
 }
 
 function Add-TaskOutputOrDiagnostic {
@@ -671,7 +678,7 @@ function Write-TaskKillFailureWarning {
         return
     }
 
-    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated, taskkill.exe may be unavailable, or the caller may lack permission. Output:$([Environment]::NewLine)$taskKillOutputText"
+    Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated, taskkill.exe may be unavailable, or the caller may lack permission. If the process is still running, verify it with Task Manager or run 'taskkill /F /PID <PID> /T' manually. Output:$([Environment]::NewLine)$taskKillOutputText"
 }
 
 function New-ValidationResult {
@@ -786,7 +793,7 @@ function Assert-SafePackageIdentityPart {
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters must match [A-Za-z0-9._+\-]. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. The entire value must match $PackageIdentityPattern. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
@@ -794,7 +801,7 @@ function Assert-SafePackageIdentityPart {
     # valid. Leading/trailing dots are rejected separately because they can be
     # normalized away by file systems and shells.
     if ($Value.Contains('..')) {
-        throw "Manifest field '$Name' must not contain path traversal markers or two or more consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' must not contain two or more consecutive dots, including path traversal sequences like '..'. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     if ($Value -eq '.') {
@@ -817,7 +824,16 @@ function Get-RequiredManifestText {
         [Parameter(Mandatory = $true)][string]$ManifestPath
     )
 
-    $value = [string]$Manifest.$PropertyName
+    $property = $Manifest.PSObject.Properties[$PropertyName]
+    if ($null -eq $property) {
+        throw "Manifest field '$PropertyName' is required. Manifest: $ManifestPath"
+    }
+
+    if ($null -eq $property.Value) {
+        throw "Manifest field '$PropertyName' is required and must not be null. Manifest: $ManifestPath"
+    }
+
+    $value = [string]$property.Value
     if ([string]::IsNullOrWhiteSpace($value)) {
         throw "Manifest field '$PropertyName' is required and must not be empty. Manifest: $ManifestPath"
     }
