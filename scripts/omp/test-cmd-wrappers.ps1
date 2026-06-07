@@ -93,6 +93,17 @@ function Test-IsSubPath {
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::AltDirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
 }
 
+function Assert-RepositoryPathUnderWorkspace {
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryPath,
+        [Parameter(Mandatory = $true)][string]$WorkspaceRootPath
+    )
+
+    if (-not (Test-IsSubPath -Path $RepositoryPath -BasePath $WorkspaceRootPath)) {
+        throw "Repository path must stay within the workspace root. Repository: $RepositoryPath. Workspace: $WorkspaceRootPath"
+    }
+}
+
 function Get-ShortStableHash {
     param([Parameter(Mandatory = $true)][string]$Value)
 
@@ -250,7 +261,6 @@ function Write-TaskKillFailureWarning {
     }
 
     Write-Warning "[$RepositoryName] taskkill failed with exit code $ExitCode. The process may have already terminated. Output:`n$taskKillOutputText"
-    return $null
 }
 
 function Test-PackageCreated {
@@ -372,7 +382,7 @@ if ($PerRepositoryTimeoutSeconds -lt $MinimumTimeoutSeconds -or $PerRepositoryTi
 
 # WaitForExit expects a 32-bit millisecond value. The timeout bounds above keep
 # this conversion well below Int32.MaxValue.
-$timeoutMilliseconds = [int](([int64]$PerRepositoryTimeoutSeconds) * $MillisecondsPerSecond)
+$timeoutMilliseconds = [int]($PerRepositoryTimeoutSeconds * $MillisecondsPerSecond)
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -391,9 +401,7 @@ foreach ($repository in $repositories) {
         throw "Command wrapper not found: $cmdPath"
     }
 
-    if (-not (Test-IsSubPath -Path $repository.FullName -BasePath $workspaceRootPath)) {
-        throw "Repository path must stay within the workspace root. Repository: $($repository.FullName). Workspace: $workspaceRootPath"
-    }
+    Assert-RepositoryPathUnderWorkspace -RepositoryPath $repository.FullName -WorkspaceRootPath $workspaceRootPath
 
     try {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
@@ -445,9 +453,11 @@ foreach ($repository in $repositories) {
         # -WindowStyle Hidden keeps validation non-interactive. -NoNewWindow is
         # intentionally not used because this script redirects stdout/stderr to
         # files and should not attach child command windows to the caller.
-        if (-not (Test-IsSubPath -Path $repository.FullName -BasePath $workspaceRootPath)) {
-            throw "Repository path must stay within the workspace root immediately before command execution. Repository: $($repository.FullName). Workspace: $workspaceRootPath"
-        }
+        # Re-check immediately before process start. This is intentionally kept
+        # even though the repository was validated earlier, because junctions or
+        # filesystem changes between enumeration and execution should not move
+        # command execution outside the intended workspace.
+        Assert-RepositoryPathUnderWorkspace -RepositoryPath $repository.FullName -WorkspaceRootPath $workspaceRootPath
 
         $process = Start-Process -FilePath $cmdExePath `
             -ArgumentList $cmdArguments `
