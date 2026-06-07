@@ -728,6 +728,9 @@ function Test-PackageCreated {
         $item = Get-Item -LiteralPath $Path -ErrorAction Stop
 
         if ($item -isnot [System.IO.FileInfo]) {
+            # A directory or other filesystem object at the expected package
+            # path is a failed validation result. Do not read Length here; only
+            # FileInfo exposes meaningful package size for the generated ZIP.
             return [pscustomobject]@{
                 Exists = $true
                 IsValid = $false
