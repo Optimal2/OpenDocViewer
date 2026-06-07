@@ -22,6 +22,8 @@ param(
     [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
+    # The default gives ordinary repository builds 20 minutes. Larger package
+    # builds can opt in to a longer timeout, up to the hard safety cap below.
     # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
     # CI/manual validation cannot hang indefinitely.
     [ValidateRange(60, 3600)]
@@ -35,6 +37,7 @@ $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
 $GlobalPackageFileSegment = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
+# 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
 $PositiveIntegerPattern = '^[1-9][0-9]*$'
 $MinimumValidProcessId = 1
@@ -48,6 +51,7 @@ $MaximumCmdCommandLineLength = 8191
 # packages must contain a manifest and object payload, so useful output must be
 # larger than this marker.
 $MinimumMeaningfulZipFileLengthBytes = 22
+$MaximumDiagnosticTextLength = 160
 
 $PostTerminationWaitSeconds = 10
 $TaskKillWaitSeconds = 10
@@ -55,12 +59,42 @@ $TaskKillPostKillWaitSeconds = 3
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
 # period after taskkill asks Windows to terminate the process tree.
-$PostTerminationWaitMilliseconds = [int][TimeSpan]::FromSeconds($PostTerminationWaitSeconds).TotalMilliseconds
-$TaskKillWaitMilliseconds = [int][TimeSpan]::FromSeconds($TaskKillWaitSeconds).TotalMilliseconds
-$TaskKillPostKillWaitMilliseconds = [int][TimeSpan]::FromSeconds($TaskKillPostKillWaitSeconds).TotalMilliseconds
 # taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
 # PowerShell could not start or observe taskkill.exe itself.
 $TaskKillExecutionExceptionExitCode = -1
+
+function Convert-SecondsToIntMilliseconds {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][int]$Seconds
+    )
+
+    $milliseconds = [TimeSpan]::FromSeconds($Seconds).TotalMilliseconds
+    if ($milliseconds -gt [int]::MaxValue) {
+        throw "$Name is too large for WaitForExit: $Seconds seconds."
+    }
+
+    return [int][Math]::Round($milliseconds)
+}
+
+function Get-SafeDiagnosticText {
+    param([AllowNull()][string]$Value)
+
+    if ($null -eq $Value) {
+        return '<null>'
+    }
+
+    $safe = $Value -replace $ControlCharacterPattern, '?'
+    if ($safe.Length -gt $MaximumDiagnosticTextLength) {
+        return $safe.Substring(0, $MaximumDiagnosticTextLength) + '...'
+    }
+
+    return $safe
+}
+
+$PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
+$TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
+$TaskKillPostKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostKillWaitSeconds' -Seconds $TaskKillPostKillWaitSeconds
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -488,23 +522,18 @@ function Test-ExpectedCmdProcess {
             return $false
         }
 
-        if ($null -ne $ExpectedStartTime) {
-            if ($ExpectedStartTime -isnot [datetime]) {
-                $expectedStartTimeType = if ($null -eq $ExpectedStartTime) {
-                    '<null>'
-                }
-                else {
-                    $ExpectedStartTime.GetType().FullName
-                }
+        if ($null -eq $ExpectedStartTime) {
+            return $true
+        }
 
-                Write-Verbose "Expected process start time had unexpected type '$expectedStartTimeType'."
-                return $false
-            }
+        if ($ExpectedStartTime -isnot [datetime]) {
+            Write-Verbose "Expected process start time had unexpected type '$($ExpectedStartTime.GetType().FullName)'."
+            return $false
+        }
 
-            $actualStartTime = Get-ProcessStartTimeOrNull -Process $Process
-            if ($null -eq $actualStartTime -or $actualStartTime -ne $ExpectedStartTime) {
-                return $false
-            }
+        $actualStartTime = Get-ProcessStartTimeOrNull -Process $Process
+        if ($null -eq $actualStartTime -or $actualStartTime -ne $ExpectedStartTime) {
+            return $false
         }
 
         return $true
@@ -615,17 +644,21 @@ function Assert-SafePackageIdentityPart {
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$Value,
         [Parameter(Mandatory = $true)][string]$ManifestPath
-    )
+)
+
+    $safeValue = Get-SafeDiagnosticText -Value $Value
 
     # The allow-list intentionally excludes slash, backslash, colon, and all
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, hyphen, plus. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Allowed characters are letters, digits, dot, underscore, plus sign, and hyphen. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
+    # Contains('..') rejects every run of two or more consecutive dots, including
+    # '...' and longer runs.
     if ($Value.Contains('..') -or $Value -eq '.') {
-        throw "Manifest field '$Name' must not contain path traversal markers or consecutive dots. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' must not contain path traversal markers or consecutive dots. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 }
 
@@ -710,6 +743,11 @@ else {
     )
 }
 
+$commandWrapperFileName = Split-Path -Leaf $CommandWrapperRelativePath
+if ([string]::IsNullOrWhiteSpace($commandWrapperFileName)) {
+    $commandWrapperFileName = $CommandWrapperRelativePath
+}
+
 if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath. Each repository must contain $ManifestRelativePath and $CommandWrapperRelativePath."
 }
@@ -717,13 +755,9 @@ if ($repositories.Count -eq 0) {
 # WaitForExit expects a 32-bit millisecond value. This is intentionally computed
 # from the parameter so the unit conversion stays close to the configured
 # timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
-# [int]::MaxValue.
-$timeoutMillisecondsRaw = [TimeSpan]::FromSeconds($PerRepositoryTimeoutSeconds).TotalMilliseconds
-if ($timeoutMillisecondsRaw -gt [int]::MaxValue) {
-    throw "Per-repository timeout is too large for WaitForExit: $PerRepositoryTimeoutSeconds seconds."
-}
-
-$timeoutMilliseconds = [int]$timeoutMillisecondsRaw
+# [int]::MaxValue. The helper still keeps an overflow guard if the parameter cap
+# is widened later.
+$timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
 # Validation results are assembled as PSCustomObjects in several branches; a
 # generic object list keeps append behavior efficient without defining a custom
 # class for this script-only report.
@@ -748,7 +782,7 @@ foreach ($repository in $repositories) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest must be valid JSON with repositoryKey and repositoryVersion fields."
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message). The manifest file must contain valid JSON."
     }
 
     $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
@@ -757,7 +791,8 @@ foreach ($repository in $repositories) {
     # build-universal-package.cmd creates the repository's global package by
     # default, and global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
-    $expectedPackagePath = Join-Path $outputRootPath ('{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileSegment, $packageVersion)
+    # Global package files are named repositoryKey__global__repositoryVersion.zip.
+    $expectedPackagePath = Join-Path $outputRootPath "$($packageKey)$GlobalPackageFileSegment$($packageVersion).zip"
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
 
@@ -767,11 +802,13 @@ foreach ($repository in $repositories) {
     Assert-PathUnderBase -Path $stdoutPath -BasePath $runLogRootPath -PathDescription 'stdout log path' -BaseDescription 'run log root'
     Assert-PathUnderBase -Path $stderrPath -BasePath $runLogRootPath -PathDescription 'stderr log path' -BaseDescription 'run log root'
 
-    Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a timeout of $PerRepositoryTimeoutSeconds seconds..."
+    Write-Host "[$repoDisplayName] Running $commandWrapperFileName with a timeout of $PerRepositoryTimeoutSeconds seconds..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
-    # returns control to this cmd.exe instance when it is run through /c.
+    # returns control to this cmd.exe instance when it is run through /c. The
+    # wrapper path and arguments are escaped first, then prefixed with the cmd.exe
+    # built-in keyword.
     Assert-SafeCmdArgumentText -Name 'Command wrapper path' -Value $cmdPath
     $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
@@ -843,6 +880,9 @@ foreach ($repository in $repositories) {
                         Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted."
                     }
                     else {
+                        # This intentionally repeats the earlier process-state
+                        # checks immediately before taskkill to narrow the
+                        # time-of-check/time-of-use window.
                         # The Process object keeps a handle to the child cmd.exe
                         # and HasExited/ProcessName/StartTime are checked
                         # immediately before taskkill, so PID reuse is not
@@ -871,7 +911,7 @@ foreach ($repository in $repositories) {
                     try {
                         $process.Kill()
                         if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                            Write-Warning "[$repoDisplayName] Process still did not exit after direct Process.Kill()."
+                            Write-Warning "[$repoDisplayName] Process still did not exit after direct Process.Kill(). Check the process tree manually before rerunning package validation."
                         }
                     }
                     catch {
