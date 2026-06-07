@@ -34,6 +34,10 @@ $CommandWrapperRelativePath = 'scripts\omp\build-universal-package.cmd'
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 $GlobalPackageFileSegment = '__global__'
+$ValidationDirectoryName = 'omp-cmd-wrapper-validation'
+# ASCII control characters: NUL through Unit Separator plus DEL.
+$ControlCharacterPattern = '[\x00-\x1F\x7F]'
+$CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
 # 22 bytes is the smallest structurally valid empty ZIP file. OMP universal
 # packages must contain a manifest and object payload, so useful output must be
 # larger than this marker.
@@ -51,9 +55,9 @@ function Get-ScriptDirectory {
         return $PSScriptRoot
     }
 
-    $scriptPath = $PSCommandPath
+    $scriptPath = $script:PSCommandPath
     if ([string]::IsNullOrWhiteSpace($scriptPath)) {
-        $scriptPath = $MyInvocation.MyCommand.Path
+        $scriptPath = $script:MyInvocation.MyCommand.Path
     }
 
     if ([string]::IsNullOrWhiteSpace($scriptPath)) {
@@ -63,15 +67,36 @@ function Get-ScriptDirectory {
     return Split-Path -Parent $scriptPath
 }
 
+function Resolve-FullPathSafely {
+    param(
+        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$Path,
+        [string]$BasePath = ''
+    )
+
+    try {
+        if ([System.IO.Path]::IsPathRooted($Path)) {
+            return [System.IO.Path]::GetFullPath($Path)
+        }
+
+        $effectiveBasePath = if ([string]::IsNullOrWhiteSpace($BasePath)) {
+            (Get-Location).ProviderPath
+        }
+        else {
+            $BasePath
+        }
+
+        return [System.IO.Path]::GetFullPath((Join-Path $effectiveBasePath $Path))
+    }
+    catch {
+        throw "Could not resolve $Name '$Path' to a full path: $($_.Exception.Message)"
+    }
+}
+
 function Resolve-FullDirectory {
     param([Parameter(Mandatory = $true)][string]$Path)
 
-    $resolved = if ([System.IO.Path]::IsPathRooted($Path)) {
-        [System.IO.Path]::GetFullPath($Path)
-    }
-    else {
-        [System.IO.Path]::GetFullPath((Join-Path (Get-Location) $Path))
-    }
+    $resolved = Resolve-FullPathSafely -Name 'directory path' -Path $Path
 
     if (-not (Test-Path -LiteralPath $resolved -PathType Container)) {
         throw "Directory not found: $resolved"
@@ -86,8 +111,8 @@ function Test-IsSubPath {
         [Parameter(Mandatory = $true)][string]$BasePath
     )
 
-    $fullPath = [System.IO.Path]::GetFullPath($Path).TrimEnd('\', '/')
-    $fullBasePath = [System.IO.Path]::GetFullPath($BasePath).TrimEnd('\', '/')
+    $fullPath = (Resolve-FullPathSafely -Name 'repository path' -Path $Path).TrimEnd('\', '/')
+    $fullBasePath = (Resolve-FullPathSafely -Name 'workspace root path' -Path $BasePath).TrimEnd('\', '/')
     return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::DirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePath + [System.IO.Path]::AltDirectorySeparatorChar, [StringComparison]::OrdinalIgnoreCase)
@@ -109,7 +134,7 @@ function Get-ShortStableHash {
 
     $bytes = [Text.Encoding]::UTF8.GetBytes($Value)
     $hash = [Convert]::ToHexString([Security.Cryptography.SHA256]::HashData($bytes)).ToLowerInvariant()
-    return $hash.Substring(0, [Math]::Min(8, $hash.Length))
+    return $hash.Substring(0, 8)
 }
 
 function Get-SafeFileName {
@@ -139,7 +164,7 @@ function Assert-SafeCmdArgumentText {
         throw "$Name cannot contain percent signs; cmd.exe expands environment variables even within quoted strings: $Value"
     }
 
-    if ($Value -match '[\x00-\x1F\x7F]') {
+    if ($Value -match $ControlCharacterPattern) {
         throw "$Name cannot contain control characters when it is passed through cmd.exe: $Value"
     }
 }
@@ -154,7 +179,7 @@ function ConvertTo-CmdArgument {
     # cmd.exe treats ^ as its escape character, so double carets when the
     # generated command line needs a literal caret.
     $escaped = $Value.Replace('^', '^^')
-    if ($escaped -notmatch '[\s&|<>]') {
+    if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
     }
 
@@ -172,7 +197,7 @@ function Resolve-CmdExePath {
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $systemCmd = Join-Path $systemRoot 'System32\cmd.exe'
         if (Test-Path -LiteralPath $systemCmd -PathType Leaf) {
-            return [System.IO.Path]::GetFullPath($systemCmd)
+            return Resolve-FullPathSafely -Name 'system cmd.exe path' -Path $systemCmd
         }
     }
 
@@ -181,7 +206,7 @@ function Resolve-CmdExePath {
         throw 'Could not locate cmd.exe because SystemRoot/System32/cmd.exe was missing and ComSpec was empty.'
     }
 
-    $candidate = [System.IO.Path]::GetFullPath($candidate)
+    $candidate = Resolve-FullPathSafely -Name 'ComSpec path' -Path $candidate
     if (-not (Test-Path -LiteralPath $candidate -PathType Leaf)) {
         throw "ComSpec points to a missing executable: $candidate"
     }
@@ -234,12 +259,56 @@ function Get-ValidProcessIdOrNull {
     return [int]$id
 }
 
-function Test-ExpectedCmdProcess {
+function Get-ProcessStartTimeOrNull {
     param([Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process)
 
     try {
         $Process.Refresh()
-        return $Process.ProcessName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase)
+        return $Process.StartTime
+    }
+    catch {
+        Write-Verbose "Could not read process start time: $($_.Exception.Message)"
+        return $null
+    }
+}
+
+function ConvertTo-TaskKillProcessIdArgument {
+    param([Parameter(Mandatory = $true)][int]$ProcessId)
+
+    $processIdText = [string]$ProcessId
+    if ($processIdText -notmatch '^[1-9][0-9]*$') {
+        throw "Process ID is not a positive integer and cannot be passed to taskkill.exe: $processIdText"
+    }
+
+    return $processIdText
+}
+
+function Test-ExpectedCmdProcess {
+    param(
+        [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
+        [object]$ExpectedStartTime = $null
+    )
+
+    try {
+        $Process.Refresh()
+        $processName = $Process.ProcessName
+        # ProcessName normally omits .exe on Windows, but accept both forms to
+        # keep the guard clear if the runtime behavior ever changes.
+        $isCmdProcess = $processName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase) -or
+            $processName.Equals('cmd.exe', [StringComparison]::OrdinalIgnoreCase)
+
+        if (-not $isCmdProcess) {
+            return $false
+        }
+
+        if ($null -ne $ExpectedStartTime) {
+            $actualStartTime = Get-ProcessStartTimeOrNull -Process $Process
+            if ($null -eq $actualStartTime -or $actualStartTime -ne [datetime]$ExpectedStartTime) {
+                return $false
+            }
+        }
+
+        return $true
     }
     catch {
         Write-Verbose "Could not verify process name before taskkill: $($_.Exception.Message)"
@@ -267,15 +336,7 @@ function Test-PackageCreated {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     try {
-        $item = Get-Item -LiteralPath $Path -ErrorAction SilentlyContinue
-        if ($null -eq $item) {
-            return [pscustomobject]@{
-                Exists = $false
-                IsValid = $false
-                Length = 0L
-                Message = 'Package file was not created.'
-            }
-        }
+        $item = Get-Item -LiteralPath $Path -ErrorAction Stop
 
         if ($item -isnot [System.IO.FileInfo]) {
             return [pscustomobject]@{
@@ -286,7 +347,7 @@ function Test-PackageCreated {
             }
         }
 
-        $length = [int64]$item.Length
+        $length = $item.Length
         $hasMeaningfulPayload = $length -gt $MinimumZipFileLengthBytes
         return [pscustomobject]@{
             Exists = $true
@@ -298,6 +359,14 @@ function Test-PackageCreated {
             else {
                 "Package file is too small to contain a meaningful zip payload. Minimum expected size is greater than $MinimumZipFileLengthBytes bytes."
             }
+        }
+    }
+    catch [System.Management.Automation.ItemNotFoundException] {
+        return [pscustomobject]@{
+            Exists = $false
+            IsValid = $false
+            Length = 0L
+            Message = 'Package file was not created.'
         }
     }
     catch {
@@ -325,36 +394,41 @@ function Assert-SafePackageIdentityPart {
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
-$currentRepositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDirectory '..\..'))
+$currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path '..\..' -BasePath $scriptDirectory
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
     $WorkspaceRoot = Split-Path -Parent $currentRepositoryRoot
 }
 
 $workspaceRootPath = Resolve-FullDirectory -Path $WorkspaceRoot
+$repositoryNames = @($RepositoryName)
+$defaultValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) $ValidationDirectoryName
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
     # On normal Windows developer machines and GitHub runners, GetTempPath()
     # resolves to a user-specific temp folder. Pass -OutputRoot explicitly when
     # validating packages that should not be written to temp storage.
-    $OutputRoot = Join-Path ([System.IO.Path]::GetTempPath()) 'omp-cmd-wrapper-validation\packages'
+    $OutputRoot = Join-Path $defaultValidationRoot 'packages'
 }
 
 if ([string]::IsNullOrWhiteSpace($LogRoot)) {
-    $LogRoot = Join-Path ([System.IO.Path]::GetTempPath()) 'omp-cmd-wrapper-validation\logs'
+    $LogRoot = Join-Path $defaultValidationRoot 'logs'
 }
 
-$outputRootPath = [System.IO.Path]::GetFullPath($OutputRoot)
-$logRootPath = [System.IO.Path]::GetFullPath($LogRoot)
+$outputRootPath = Resolve-FullPathSafely -Name 'output root path' -Path $OutputRoot
+$logRootPath = Resolve-FullPathSafely -Name 'log root path' -Path $LogRoot
 Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
 Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 [System.IO.Directory]::CreateDirectory($outputRootPath) | Out-Null
 [System.IO.Directory]::CreateDirectory($logRootPath) | Out-Null
 $cmdExePath = Resolve-CmdExePath
-$runStamp = Get-Date -Format 'yyyyMMdd-HHmmss'
+$runId = '{0}-{1}' -f (Get-Date -Format 'yyyyMMdd-HHmmss-fff'), ([Guid]::NewGuid().ToString('N').Substring(0, 8))
+$runLogRootPath = Join-Path $logRootPath $runId
+[System.IO.Directory]::CreateDirectory($runLogRootPath) | Out-Null
 
-if (@($RepositoryName).Count -gt 0) {
-    $repositories = foreach ($name in $RepositoryName) {
+if ($repositoryNames.Count -gt 0) {
+    $repositories = @(
+    foreach ($name in $repositoryNames) {
         $candidate = Join-Path $workspaceRootPath $name
         if (-not (Test-Path -LiteralPath $candidate -PathType Container)) {
             throw "Repository directory not found: $candidate"
@@ -362,17 +436,20 @@ if (@($RepositoryName).Count -gt 0) {
 
         Get-Item -LiteralPath $candidate
     }
+    )
 }
 else {
-    $repositories = Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
+    $repositories = @(
+    Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
         Where-Object {
             (Test-Path -LiteralPath (Join-Path $_.FullName $ManifestRelativePath) -PathType Leaf) -and
             (Test-Path -LiteralPath (Join-Path $_.FullName $CommandWrapperRelativePath) -PathType Leaf)
         } |
         Sort-Object Name
+    )
 }
 
-if ($null -eq $repositories -or @($repositories).Count -eq 0) {
+if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath."
 }
 
@@ -407,7 +484,7 @@ foreach ($repository in $repositories) {
         $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
     }
     catch {
-        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message)"
+        throw "Could not parse component manifest JSON '$manifestPath': $($_.Exception.Message) Check for trailing commas, invalid escape sequences, missing required JSON structure, or non-UTF-8 content."
     }
 
     $packageKey = [string]$manifest.repositoryKey
@@ -432,23 +509,31 @@ foreach ($repository in $repositories) {
     # default, and global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     $expectedPackagePath = Join-Path $outputRootPath ('{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileSegment, $packageVersion)
-    if (Test-Path -LiteralPath $expectedPackagePath -PathType Leaf) {
-        Remove-Item -LiteralPath $expectedPackagePath -Force
+    try {
+        Remove-Item -LiteralPath $expectedPackagePath -Force -ErrorAction Stop
+    }
+    catch [System.Management.Automation.ItemNotFoundException] {
+        # Nothing to remove; this is the expected state for a fresh run.
+    }
+    catch {
+        throw "Could not remove previous expected package '$expectedPackagePath': $($_.Exception.Message)"
     }
 
-    $safeName = '{0}-{1}-{2}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName), $runStamp
-    $stdoutPath = Join-Path $logRootPath "$safeName.stdout.log"
-    $stderrPath = Join-Path $logRootPath "$safeName.stderr.log"
+    $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
+    $stdoutPath = Join-Path $runLogRootPath "$safeName.stdout.log"
+    $stderrPath = Join-Path $runLogRootPath "$safeName.stderr.log"
 
     Write-Host "[$repoDisplayName] Running build-universal-package.cmd with a $PerRepositoryTimeoutSeconds second timeout..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
     # returns control to this cmd.exe instance when it is run through /c.
+    Assert-SafeCmdArgumentText -Name 'Command wrapper path' -Value $cmdPath
     $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
     $process = $null
+    $processStartTime = $null
     try {
         # -WindowStyle Hidden keeps validation non-interactive. -NoNewWindow is
         # intentionally not used because this script redirects stdout/stderr to
@@ -466,6 +551,7 @@ foreach ($repository in $repositories) {
             -RedirectStandardError $stderrPath `
             -WindowStyle Hidden `
             -PassThru
+        $processStartTime = Get-ProcessStartTimeOrNull -Process $process
     }
     catch {
         $startError = $_.Exception.ToString()
@@ -503,7 +589,7 @@ foreach ($repository in $repositories) {
             elseif ($null -eq $processId) {
                 Write-Warning "[$repoDisplayName] Process has an invalid or unavailable PID; taskkill was not attempted."
             }
-            elseif (-not (Test-ExpectedCmdProcess -Process $process)) {
+            elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
                 Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted."
             }
             else {
@@ -511,16 +597,26 @@ foreach ($repository in $repositories) {
                     $process.Refresh()
                     if ($process.HasExited) {
                         Write-Warning "[$repoDisplayName] Process exited immediately before taskkill; termination was not needed."
+                        # These values describe the skipped termination path,
+                        # not an actual taskkill.exe invocation.
+                        $taskKillOutput = @()
+                        $taskKillExitCode = 0
+                    }
+                    elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
+                        Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted."
                         $taskKillOutput = @()
                         $taskKillExitCode = 0
                     }
                     else {
                         # The Process object keeps a handle to the child cmd.exe
-                        # and HasExited/ProcessName are checked immediately
-                        # before taskkill, so PID reuse is not expected in normal
-                        # Windows process lifetime semantics.
+                        # and HasExited/ProcessName/StartTime are checked
+                        # immediately before taskkill, so PID reuse is not
+                        # expected in normal Windows process lifetime semantics.
+                        $taskKillProcessId = ConvertTo-TaskKillProcessIdArgument -ProcessId $processId
+                        # Reset immediately before invocation so a failed
+                        # native process launch cannot inherit a stale value.
                         $LASTEXITCODE = 0
-                        $taskKillOutput = & taskkill.exe /PID $processId /T /F 2>&1
+                        $taskKillOutput = & taskkill.exe /PID $taskKillProcessId /T /F 2>&1
                         $taskKillExitCode = [int]$LASTEXITCODE
                     }
                 }
