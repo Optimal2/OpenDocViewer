@@ -35,7 +35,8 @@ Set-StrictMode -Version Latest
 
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
-$GlobalPackageFileSegment = '__global__'
+# Includes both delimiter pairs used by repositoryKey__global__repositoryVersion.zip.
+$GlobalPackageFileInfix = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
@@ -231,6 +232,8 @@ function Get-ShortStableHash {
 
     # 16 hex characters gives 64 bits of stable filename entropy, which is
     # intentionally more than enough for the small set of sibling repositories.
+    # BitConverter is clear enough here; this script hashes only a small set of
+    # repository paths, so avoiding Replace() would be a negligible micro-optimization.
     $hash = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
     return $hash.Substring(0, $HashPrefixLength)
 }
@@ -644,7 +647,7 @@ function Assert-SafePackageIdentityPart {
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$Value,
         [Parameter(Mandatory = $true)][string]$ManifestPath
-)
+    )
 
     $safeValue = Get-SafeDiagnosticText -Value $Value
 
@@ -788,11 +791,12 @@ foreach ($repository in $repositories) {
     $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
     $packageVersion = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryVersion' -ManifestPath $manifestPath
 
-    # build-universal-package.cmd creates the repository's global package by
-    # default, and global packages use the same __global__ naming convention as
+    # The default command wrapper creates the repository's global package, and
+    # global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     # Global package files are named repositoryKey__global__repositoryVersion.zip.
-    $expectedPackagePath = Join-Path $outputRootPath "$($packageKey)$GlobalPackageFileSegment$($packageVersion).zip"
+    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileInfix, $packageVersion
+    $expectedPackagePath = Join-Path $outputRootPath $expectedPackageFileName
     Assert-PathUnderBase -Path $expectedPackagePath -BasePath $outputRootPath -PathDescription 'Expected package path' -BaseDescription 'output root'
     Remove-ExistingFileSafely -Path $expectedPackagePath -Description 'expected package'
 
@@ -810,7 +814,10 @@ foreach ($repository in $repositories) {
     # wrapper path and arguments are escaped first, then prefixed with the cmd.exe
     # built-in keyword.
     Assert-SafeCmdArgumentText -Name 'Command wrapper path' -Value $cmdPath
-    $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath))
+    # Join-CmdCommandLine validates every argument immediately before quoting,
+    # including the immutable output root path.
+    $wrapperArguments = @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath)
+    $cmdInvocation = 'call {0}' -f (Join-CmdCommandLine -Arguments $wrapperArguments)
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
@@ -911,7 +918,7 @@ foreach ($repository in $repositories) {
                     try {
                         $process.Kill()
                         if (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                            Write-Warning "[$repoDisplayName] Process still did not exit after direct Process.Kill(). Check the process tree manually before rerunning package validation."
+                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Check the process tree manually before rerunning package validation."
                         }
                     }
                     catch {
@@ -928,7 +935,7 @@ foreach ($repository in $repositories) {
             # flushed before status checks inspect logs and package output. It is
             # only called after HasExited so it cannot turn a timeout into an
             # indefinite wait.
-            $process.WaitForExit()
+            $process.WaitForExit() # Safe here because HasExited is true.
         }
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
