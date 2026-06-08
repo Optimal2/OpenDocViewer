@@ -43,8 +43,9 @@ Directory where stdout/stderr logs are written. Use a user-private or
 ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
-Maximum build time per repository. The bounds are enforced by ValidateRange;
-the default is 1200 seconds (20 minutes).
+Maximum build time per repository. Must be between 60 and 3600 seconds; the
+bounds are enforced by ValidateRange and the default is 1200 seconds
+(20 minutes).
 #>
 [CmdletBinding()]
 param(
@@ -54,9 +55,8 @@ param(
     [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
-    # The default gives ordinary repository builds 1200 seconds (20 minutes).
-    # Larger package builds can opt in to any value from 60 to 3600 seconds (1 hour)
-    # by passing -PerRepositoryTimeoutSeconds when invoking the script.
+    # Larger package builds can opt in to the ValidateRange-enforced range of
+    # 60 to 3600 seconds (1 hour) by passing -PerRepositoryTimeoutSeconds.
     # Allow at least 60 seconds for minimal build work, and keep the default
     # upper bound to 1 hour so CI/manual validation completes within a bounded
     # and predictable time.
@@ -69,11 +69,11 @@ param(
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
 
-$SafeFileNamePattern = '[^A-Za-z0-9._\-]+'
-$PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
+$SafeFileNamePattern = '[^A-Za-z0-9._-]+'
+$PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 # Delimiter between repositoryKey and repositoryVersion in
 # repositoryKey__global__repositoryVersion.zip.
-$GlobalPackageFileDelimiter = '__global__'
+$GlobalPackageFileNameDelimiter = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # A SHA256 digest is 32 bytes, represented here as 64 hexadecimal characters.
 $Sha256HexLength = 64
@@ -107,6 +107,7 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
+$TruncationIndicator = '...'
 $MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # This relative path is validated during startup so moving the script fails loudly.
@@ -152,33 +153,34 @@ $CmdCallKeyword = 'call'
 $StdoutLogExtension = '.stdout.log'
 $StderrLogExtension = '.stderr.log'
 $GuidFormatNoHyphens = 'N'
+$ValidationSummaryColumns = @('Repository', 'Status', 'ExitCode', 'Package')
 # Windows can round Process.StartTime differently between the original Process
 # handle and a refreshed lookup because process metadata is read from snapshots
-# with timer-resolution limits. A small tolerance avoids rejecting the same
-# child process because of timestamp precision differences.
-$ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
+# with timer-resolution limits. 100 ms is intentionally far above normal tick
+# variance while still small enough to catch a different process after PID reuse.
+$ProcessStartTimeToleranceMilliseconds = 100
+$ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds($ProcessStartTimeToleranceMilliseconds)
+$NoTaskExceptionDiagnostic = 'the async stream read task faulted but no exception information is available'
 
 function Convert-SecondsToIntMilliseconds {
     param(
-        [Parameter(Mandatory = $true)][string]$ValueDescription,
+        [Parameter(Mandatory = $true)][string]$TimeoutDescription,
+        [ValidateRange(0, [int]::MaxValue)]
         [Parameter(Mandatory = $true)][int]$Seconds
     )
-
-    if ($Seconds -lt 0) {
-        throw "$ValueDescription must be non-negative. Actual value: $Seconds seconds."
-    }
 
     # The input is whole seconds, so use integer arithmetic instead of
     # floating-point TimeSpan conversion or banker's rounding. Most callers are
     # script constants, but keep this guard because this helper is also used for
     # any future timeout value that must fit WaitForExit(int milliseconds).
     if ($Seconds -gt $MaximumWaitForExitSeconds) {
-        throw "$ValueDescription is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
+        throw "$TimeoutDescription is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
     }
 
     $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
+    # Defense in depth for future changes to the seconds cap above.
     if ($milliseconds -gt $MaximumWaitForExitMilliseconds) {
-        throw "$ValueDescription converts to $milliseconds milliseconds, which exceeds the .NET Process.WaitForExit(int) maximum of $MaximumWaitForExitMilliseconds milliseconds."
+        throw "$TimeoutDescription converts to $milliseconds milliseconds, which exceeds the .NET Process.WaitForExit(int) maximum of $MaximumWaitForExitMilliseconds milliseconds."
     }
 
     return [int]$milliseconds
@@ -193,7 +195,7 @@ function Get-SafeDiagnosticText {
 
     $safe = $Value -replace $ControlCharacterPattern, $ControlCharacterReplacement
     if ($safe.Length -gt $MaximumDiagnosticTextLength) {
-        return $safe.Substring(0, $MaximumDiagnosticTextLength) + '...'
+        return $safe.Substring(0, $MaximumDiagnosticTextLength) + $TruncationIndicator
     }
 
     return $safe
@@ -209,18 +211,19 @@ function Get-ControlCharacterDiagnostic {
         }
     }
 
-    return 'unknown control character'
+    # Callers should only invoke this after matching $ControlCharacterPattern.
+    return 'no control character found'
 }
 
 try {
     # Keep these conversions explicit instead of looping over variable names:
     # each output variable is consumed by different process-wait branches, and
     # spelling them out makes timeout diagnostics easier to trace.
-    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
-    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
-    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
-    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
-    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
+    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
+    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
+    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
+    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
+    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
 }
 catch {
     throw "Invalid built-in process wait timeout in test-cmd-wrappers.ps1: $($_.Exception.Message)"
@@ -259,7 +262,7 @@ function Resolve-FullPathSafely {
         $effectiveBasePath = if ([string]::IsNullOrWhiteSpace($BasePath)) {
             $currentLocation = Get-Location
             if ($currentLocation.Provider.Name -ne 'FileSystem') {
-                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name)"
+                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name). Use Set-Location to change to a filesystem path or provide an explicit BasePath parameter."
             }
 
             $currentLocation.ProviderPath
@@ -321,6 +324,8 @@ function Test-IsSubPath {
 function Trim-TrailingDirectorySeparators {
     param([Parameter(Mandatory = $true)][string]$Path)
 
+    # Trim both Windows separator styles so C:\path\ and C:/path/ compare the
+    # same way, while preserving roots where the trailing separator is semantic.
     $trimmed = $Path.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
     # Get the root from the original path, not the trimmed path, so drive and
     # UNC roots retain the separator that makes them absolute roots on Windows.
@@ -420,17 +425,17 @@ function Assert-SafeCmdArgumentText {
     )
 
     if ($Value.Contains('"')) {
-        throw "$Name cannot contain double quotes when it is passed through cmd.exe: $Value"
+        throw "$Name cannot contain double quotes when it is passed through cmd.exe: $(Get-SafeDiagnosticText -Value $Value)"
     }
 
     if ($Value.Contains('%')) {
-        throw "$Name cannot contain percent signs; cmd.exe expands environment variables even within quoted strings: $Value"
+        throw "$Name cannot contain percent signs; cmd.exe expands environment variables even within quoted strings: $(Get-SafeDiagnosticText -Value $Value)"
     }
 
     # Newlines are also covered by $ControlCharacterPattern. Keep this branch
     # first so users get a clearer error for the most common control characters.
     if ($Value.Contains("`r") -or $Value.Contains("`n")) {
-        throw "$Name cannot contain newline characters when it is passed through cmd.exe: $Value"
+        throw "$Name cannot contain newline characters when it is passed through cmd.exe: $(Get-SafeDiagnosticText -Value $Value)"
     }
 
     if ($Value -match $ControlCharacterPattern) {
@@ -479,7 +484,7 @@ function Resolve-CmdExePath {
     # close to the condition that made each path acceptable or unusable.
     $systemRoot = $env:SystemRoot
     $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe'
-    $systemCmdError = ''
+    $systemCmdError = $null
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $system32Path = Join-Path $systemRoot 'System32'
         $systemCmdDiagnosticPath = Join-Path $system32Path 'cmd.exe'
@@ -502,7 +507,8 @@ function Resolve-CmdExePath {
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw "Could not locate cmd.exe. System path check: $systemCmdError ComSpec was empty."
+        $systemCmdDetail = if ($null -eq $systemCmdError) { 'System cmd.exe path was not checked.' } else { $systemCmdError }
+        throw "Could not locate cmd.exe. System path check: $systemCmdDetail ComSpec was empty."
     }
 
     return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
@@ -577,7 +583,7 @@ function Get-ValidProcessIdOrNull {
         $id = $Process.Id
     }
     catch {
-        Write-Verbose "Could not read process ID: $($_.Exception.Message)"
+        Write-Verbose "Could not read process ID ($($_.Exception.GetType().FullName)): $($_.Exception.Message)"
         return $null
     }
 
@@ -664,7 +670,7 @@ function Add-TaskOutputOrDiagnostic {
         }
 
         if ($Task.IsFaulted) {
-            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { 'the async stream read task faulted but no exception information is available' }
+            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { $NoTaskExceptionDiagnostic }
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
             return
         }
@@ -1019,8 +1025,8 @@ function Assert-SafePackageIdentityPart {
         throw "Manifest field '$Name' must not end with a dot. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
-    if ($Value.Contains($GlobalPackageFileDelimiter)) {
-        throw "Manifest field '$Name' must not contain the global package filename delimiter '$GlobalPackageFileDelimiter'. Value: '$safeValue'. Manifest: $ManifestPath"
+    if ($Value.Contains($GlobalPackageFileNameDelimiter)) {
+        throw "Manifest field '$Name' must not contain the global package filename delimiter '$GlobalPackageFileNameDelimiter'. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 }
 
@@ -1109,6 +1115,9 @@ $cmdExePath = Resolve-CmdExePath
 # user-private temp folder, an ACL-protected workspace folder, or another
 # location where other local users cannot read build output that may include
 # paths, environment-derived diagnostics, or package validation details.
+# A GUID collision is not handled with a retry because the generated directory
+# lives below a caller-controlled log root and the collision probability is
+# negligible for this validation script.
 $runId = [Guid]::NewGuid().ToString($GuidFormatNoHyphens)
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
@@ -1154,7 +1163,7 @@ if ($repositories.Count -eq 0) {
 # [int]::MaxValue, and Convert-SecondsToIntMilliseconds also rejects values
 # above the WaitForExit-compatible seconds limit.
 try {
-    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
 }
 catch {
     throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
@@ -1202,9 +1211,10 @@ foreach ($repository in $repositories) {
         # repository tooling writes component manifests as UTF-8 JSON, with or
         # without BOM depending on the writer. Windows PowerShell 5.1 treats
         # UTF8 writes differently from PowerShell 6+, but reads both BOM and
-        # non-BOM UTF-8 manifests correctly here. Avoid utf8NoBOM because
-        # Windows PowerShell 5.1 does not support that encoding name. -Raw is
-        # required so ConvertFrom-Json receives the whole manifest as one string.
+        # non-BOM UTF-8 manifests correctly here. Avoid the literal utf8NoBOM
+        # -Encoding name because Windows PowerShell 5.1's Get-Content
+        # -Encoding parameter does not support that value. -Raw is required so
+        # ConvertFrom-Json receives the whole manifest as one string.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1289,7 +1299,7 @@ foreach ($repository in $repositories) {
     # global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     # Global package files are named repositoryKey__global__repositoryVersion.zip.
-    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileDelimiter, $packageVersion
+    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileNameDelimiter, $packageVersion
     $expectedPackagePath = Join-Path $outputRootPath $expectedPackageFileName
     # Manifest fields are allow-listed before the filename is built, and this
     # final base-path check is kept as defense in depth against traversal if the
@@ -1307,6 +1317,8 @@ foreach ($repository in $repositories) {
     Remove-ExistingFileSafely -Path $stdoutPath -Description 'stdout log'
     Remove-ExistingFileSafely -Path $stderrPath -Description 'stderr log'
 
+    # This script is a manual/CI validation command, not an importable module.
+    # Write-Host keeps progress visible even when the table output is captured.
     Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $timeoutSecondsDisplay seconds)..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
@@ -1352,6 +1364,12 @@ foreach ($repository in $repositories) {
     catch {
         $startError = $_.Exception.ToString()
         Write-Warning "[$repoDisplayName] Failed to start CMD wrapper: $startError"
+        $startFailureDetail = @(
+            "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticText"
+            'Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.'
+            $startError
+        ) -join [Environment]::NewLine
+
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
             -Status 'Start failed' `
@@ -1359,7 +1377,7 @@ foreach ($repository in $repositories) {
             -Package $expectedPackagePath `
             -StdoutLog $stdoutPath `
             -StderrLog $stderrPath `
-            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
+            -Detail $startFailureDetail))
         continue
     }
 
@@ -1374,7 +1392,12 @@ foreach ($repository in $repositories) {
             # state reads. Every termination branch refreshes the Process object
             # and treats "already exited" as a successful no-op.
             $processId = Get-ValidProcessIdOrNull -Process $process
-            $processIdText = if ($null -eq $processId) { '<unknown>' } else { [string]$processId }
+            if ($null -eq $processId) {
+                $processIdText = '<unknown>'
+            }
+            else {
+                $processIdText = [string]$processId
+            }
             Write-Warning "[$repoDisplayName] Timeout reached after $timeoutSecondsDisplay seconds. Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
@@ -1518,7 +1541,7 @@ foreach ($repository in $repositories) {
     }
 }
 
-$results | Format-Table Repository, Status, ExitCode, Package -AutoSize
+$results | Format-Table $ValidationSummaryColumns -AutoSize
 
 # The table stays compact for CI logs. StdoutLog, StderrLog, and Detail remain
 # on each result object for callers that capture the script output.
