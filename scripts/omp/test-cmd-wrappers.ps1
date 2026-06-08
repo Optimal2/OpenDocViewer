@@ -55,13 +55,10 @@ param(
     [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
-    # PerRepositoryTimeoutSeconds accepts the ValidateRange-enforced range of
-    # 60 to 3600 seconds (up to 1 hour).
-    # Allow at least 60 seconds for minimal build work, and cap the maximum
-    # allowed value at 3600 seconds (1 hour) so CI/manual validation completes
-    # within a bounded and predictable time.
-    # ValidateRange requires literal values in a script parameter block; keep
-    # the accepted range documented here and in the parameter help above.
+    # Allow at least 60 seconds for minimal build work, and cap the maximum at
+    # 3600 seconds (1 hour) so CI/manual validation stays bounded. ValidateRange
+    # requires literal values in a Windows PowerShell 5.1 script parameter block,
+    # so the accepted range is repeated here and in the parameter help above.
     [ValidateRange(60, 3600)]
     [int]$PerRepositoryTimeoutSeconds = 1200
 )
@@ -127,6 +124,11 @@ $MaximumWaitForExitMilliseconds = [int]::MaxValue
 # WaitForExit(int milliseconds) without overflowing after conversion back to
 # milliseconds.
 $MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
+# Named alias for the same computed limit. The ValidateRange attribute inside
+# Convert-SecondsToIntMilliseconds must still use a literal value in Windows
+# PowerShell 5.1, so its inline comment explicitly ties the literal to this
+# constant and the runtime check below remains the source of truth.
+$MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -168,15 +170,15 @@ $ValidationSummaryColumns = @('Repository', 'Status', 'ExitCode', 'Package')
 # variance while still small enough to catch a different process after PID reuse.
 $ProcessStartTimeToleranceMilliseconds = 100
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds($ProcessStartTimeToleranceMilliseconds)
-$NoTaskExceptionDiagnostic = 'the async stream read task faulted but no exception information is available'
+$NoTaskExceptionDiagnostic = 'Async stream read task faulted without exception information'
 
 function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
-        # 2147483 is floor([int]::MaxValue / 1000). ValidateRange catches most
-        # invalid direct calls at binding time; the computed check below remains
-        # the source of truth if the millisecond conversion constants change.
-        [ValidateRange(1, 2147483)] # 2147483 seconds safely fits WaitForExit(int milliseconds).
+        # ValidateRange requires a literal value. 2147483 is
+        # floor([int]::MaxValue / 1000) and matches
+        # $MaximumSafeSecondsForMillisecondConversion.
+        [ValidateRange(1, 2147483)]
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -184,10 +186,12 @@ function Convert-SecondsToIntMilliseconds {
     # floating-point TimeSpan conversion or banker's rounding. Most callers are
     # script constants, but keep this guard because this helper is also used for
     # any future timeout value that must fit WaitForExit(int milliseconds).
-    if ($Seconds -gt $MaximumWaitForExitSeconds) {
-        throw "$TimeoutDescription is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
+    if ($Seconds -gt $MaximumSafeSecondsForMillisecondConversion) {
+        throw "$TimeoutDescription is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumSafeSecondsForMillisecondConversion seconds."
     }
 
+    # Force Int64 multiplication before casting back to Int32 so future timeout
+    # constants cannot overflow during intermediate arithmetic.
     $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
     # Defense in depth for future changes to the seconds cap above.
     if ($milliseconds -gt $MaximumWaitForExitMilliseconds) {
@@ -724,7 +728,8 @@ function Add-TaskOutputOrDiagnostic {
                 $errorText = $Task.Exception.GetBaseException().Message
             }
             else {
-                $errorText = '{0} TaskType={1}.' -f $NoTaskExceptionDiagnostic, (Get-ObjectTypeName -Value $Task)
+                $taskObjectType = Get-ObjectTypeName -Value $Task
+                $errorText = "$NoTaskExceptionDiagnostic. TaskObjectType=$taskObjectType."
             }
 
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
@@ -1172,6 +1177,9 @@ Assert-SafeCmdArgumentText -Name 'OutputRoot' -Value $outputRootPath
 Assert-SafeCmdArgumentText -Name 'LogRoot' -Value $logRootPath
 New-DirectorySafely -Path $outputRootPath -Description 'output root directory'
 New-DirectorySafely -Path $logRootPath -Description 'log root directory'
+# Resolve once before the repository loop; cmd.exe is a host-level dependency
+# and does not vary per repository, while resolving it repeatedly would only add
+# noise to the per-repository validation path.
 $cmdExePath = Resolve-CmdExePath
 # The 'N' GUID format is 32 hexadecimal characters without hyphens, which gives
 # enough uniqueness for concurrent validation runs while keeping log paths
@@ -1223,7 +1231,7 @@ if ($repositories.Count -eq 0) {
 
 # WaitForExit expects a 32-bit millisecond value. This is intentionally computed
 # from the parameter so the unit conversion stays close to the configured
-# timeout; ValidateRange caps it at 3,600 seconds (3,600,000 ms), well below
+# timeout; ValidateRange caps it at 3600 seconds (3600000 ms), well below
 # [int]::MaxValue, and Convert-SecondsToIntMilliseconds also rejects values
 # above the WaitForExit-compatible seconds limit.
 try {
@@ -1278,7 +1286,8 @@ foreach ($repository in $repositories) {
         # non-BOM UTF-8 manifests correctly here. Avoid the literal utf8NoBOM
         # -Encoding name because Windows PowerShell 5.1's Get-Content
         # -Encoding parameter does not support that value. -Raw is required so
-        # ConvertFrom-Json receives the whole manifest as one string.
+        # ConvertFrom-Json receives the whole manifest as one string instead of
+        # line-by-line input from an array of strings.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1371,7 +1380,7 @@ foreach ($repository in $repositories) {
     # global packages use the same __global__ naming convention as
     # export-universal-package.ps1.
     # Global package files are named repositoryKey__global__repositoryVersion.zip.
-    $expectedPackageFileName = '{0}{1}{2}.zip' -f $packageKey, $GlobalPackageFileNameDelimiter, $packageVersion
+    $expectedPackageFileName = "${packageKey}${GlobalPackageFileNameDelimiter}${packageVersion}.zip"
     $expectedPackagePath = Join-Path $outputRootPath $expectedPackageFileName
     # Manifest fields are allow-listed before the filename is built, and this
     # final base-path check is kept as defense in depth against traversal if the
@@ -1381,7 +1390,9 @@ foreach ($repository in $repositories) {
 
     # Keep the sanitized name for human-readable logs and the path hash for
     # uniqueness when different workspace roots contain same-named repositories.
-    $safeName = '{0}-{1}' -f (Get-SafeFileName -Value $repoDisplayName), (Get-ShortStableHash -Value $repository.FullName)
+    $safeRepoDisplayName = Get-SafeFileName -Value $repoDisplayName
+    $repoPathHash = Get-ShortStableHash -Value $repository.FullName
+    $safeName = "$safeRepoDisplayName-$repoPathHash"
     $stdoutPath = Join-Path $runLogRootPath "$safeName$StdoutLogExtension"
     $stderrPath = Join-Path $runLogRootPath "$safeName$StderrLogExtension"
     Assert-PathUnderBase -Path $stdoutPath -BasePath $runLogRootPath -PathDescription 'stdout log path' -BaseDescription 'run log root'
@@ -1402,7 +1413,8 @@ foreach ($repository in $repositories) {
     # Join-CmdCommandLine validates every argument immediately before quoting,
     # including the immutable output root path.
     $wrapperArguments = @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath)
-    $cmdInvocation = '{0} {1}' -f $CmdCallKeyword, (Join-CmdCommandLine -Arguments $wrapperArguments)
+    $joinedWrapperArguments = Join-CmdCommandLine -Arguments $wrapperArguments
+    $cmdInvocation = "$CmdCallKeyword $joinedWrapperArguments"
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
