@@ -76,6 +76,9 @@ $GlobalPackageFileDelimiter = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
+if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt 64) {
+    throw "HashPrefixLength must be between 1 and 64 SHA256 hex characters. Actual value: $HashPrefixLength"
+}
 # Only reject impossible child-process IDs. Windows reserves some low PIDs for
 # system processes, but this script starts cmd.exe itself and only needs to
 # prevent invalid zero/negative IDs from reaching taskkill.exe.
@@ -107,10 +110,9 @@ $RepositoryRootRelativePath = '..\..'
 # Store the millisecond limit separately because WaitForExit accepts an [int]
 # millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-# PowerShell division returns a floating-point value even for integer inputs.
-# Keep the explicit Floor call so the derived second limit visibly rounds down
-# to the largest whole number accepted by WaitForExit's millisecond API.
-$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
+# Keep the explicit cast so the derived second limit visibly rounds down to the
+# largest whole number accepted by WaitForExit's millisecond API.
+$MaximumWaitForExitSeconds = [int]($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -225,7 +227,7 @@ function Get-ScriptDirectory {
 
     $scriptPath = $PSCommandPath
     if ([string]::IsNullOrWhiteSpace($scriptPath)) {
-        throw 'Could not resolve script directory.'
+        throw 'Could not resolve script directory because both $PSScriptRoot and $PSCommandPath were unavailable.'
     }
 
     return Split-Path -Parent $scriptPath
@@ -387,10 +389,6 @@ function Get-ShortStableHash {
     $hashWithSeparators = [System.BitConverter]::ToString($hashBytes)
     $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
 
-    if ($HashPrefixLength -gt $hash.Length) {
-        throw "Configured hash prefix length $HashPrefixLength exceeds SHA256 hash length $($hash.Length)."
-    }
-
     return $hash.Substring(0, $HashPrefixLength)
 }
 
@@ -469,20 +467,31 @@ function Assert-CmdCommandLineLength {
 
 function Resolve-CmdExePath {
     $systemRoot = $env:SystemRoot
+    $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe'
+    $systemCmdError = ''
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $system32Path = Join-Path $systemRoot 'System32'
         $systemCmdDiagnosticPath = Join-Path $system32Path 'cmd.exe'
         if (Test-Path -LiteralPath $systemCmdDiagnosticPath -PathType Leaf) {
-            return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdDiagnosticPath
+            try {
+                return Assert-CmdExecutablePath -Name 'system cmd.exe path' -Path $systemCmdDiagnosticPath
+            }
+            catch {
+                $systemCmdError = $_.Exception.Message
+            }
+        }
+        else {
+            $systemCmdError = "System cmd.exe path was missing: $systemCmdDiagnosticPath"
         }
     }
     else {
         $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe (SystemRoot environment variable was empty)'
+        $systemCmdError = 'SystemRoot environment variable was empty.'
     }
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        throw "Could not locate cmd.exe because '$systemCmdDiagnosticPath' was missing and ComSpec was empty."
+        throw "Could not locate cmd.exe. System path check: $systemCmdError ComSpec was empty."
     }
 
     return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
@@ -623,7 +632,12 @@ function Add-TaskOutputOrDiagnostic {
         # streams and the wait is bounded, so leaving a timed-out read task alone
         # is acceptable here; Windows PowerShell 5.1 has no async/await syntax
         # that would make the call clearer.
-        if (-not $Task.Wait($TaskKillStreamReadWaitMilliseconds)) {
+        $taskCompleted = $Task.IsCompleted
+        if (-not $taskCompleted) {
+            $taskCompleted = $Task.Wait($TaskKillStreamReadWaitMilliseconds)
+        }
+
+        if (-not $taskCompleted) {
             # ReadToEndAsync has no cancellation token in the runtimes this
             # script targets. Leave the task alone after this bounded diagnostic
             # wait; the owning process is already being observed separately.
@@ -782,9 +796,9 @@ function Test-ExpectedCmdProcess {
 
         # TotalMilliseconds is a double; keep that precision for the tolerance
         # comparison instead of rounding to whole milliseconds.
-        $startTimeDeltaMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
-        if ($startTimeDeltaMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
-            Write-Verbose "Process start time changed by $startTimeDeltaMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
+        $startTimeDifferenceMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
+        if ($startTimeDifferenceMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
+            Write-Verbose "Process start time changed by $startTimeDifferenceMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
             return $false
         }
 
@@ -970,7 +984,7 @@ function Assert-SafePackageIdentityPart {
     # other path syntax. The final package path is still checked with
     # Assert-PathUnderBase after it is constructed.
     if ($Value -notmatch $PackageIdentityPattern) {
-        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Only letters, digits, dots, underscores, plus signs, and hyphens are allowed. Pattern: $PackageIdentityPattern. Value: '$safeValue'. Manifest: $ManifestPath"
+        throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Only letters, digits, dots, underscores, plus signs, and hyphens are allowed. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
     # Contains('..') rejects every run of two or more consecutive dots, including
@@ -1090,7 +1104,7 @@ New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
 # old $ValidationDirectoryName log folders manually or point -LogRoot at a
 # disposable location when running frequent local validation loops.
 
-if ($repositoryNames.Length -gt 0) {
+if ($repositoryNames.Count -gt 0) {
     $repositories = @(
         foreach ($name in $repositoryNames) {
             $candidate = Join-Path $workspaceRootPath $name
@@ -1184,27 +1198,80 @@ foreach ($repository in $repositories) {
     catch [System.Management.Automation.ItemNotFoundException] {
         # The file was checked above, but it can still be removed or replaced
         # between Test-Path and Get-Content.
-        throw "Component manifest is missing: $manifestPath"
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail "Component manifest disappeared before it could be read: $manifestPath"))
+        continue
     }
     catch [System.UnauthorizedAccessException] {
-        throw "Could not read component manifest '$manifestPath' because access was denied. Check file permissions for the current user: $($_.Exception.Message)"
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail "Could not read component manifest '$manifestPath' because access was denied. Check file permissions for the current user: $($_.Exception.Message)"))
+        continue
     }
     catch [System.IO.IOException] {
-        throw "Could not read component manifest '$manifestPath' because of an I/O error. Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail "Could not read component manifest '$manifestPath' because of an I/O error. Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"))
+        continue
     }
     catch {
-        throw "Could not read component manifest '$manifestPath'. Verify that the path is a filesystem file, readable by the current user, and not blocked by another process: $($_.Exception.Message)"
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail "Could not read component manifest '$manifestPath'. Verify that the path is a filesystem file, readable by the current user, not a directory-like reparse target, and not blocked by another process: $($_.Exception.Message)"))
+        continue
     }
 
     try {
         $manifest = $manifestJson | ConvertFrom-Json
     }
     catch {
-        throw "Component manifest '$manifestPath' was read but could not be parsed as JSON. Check for common JSON syntax issues such as missing commas, trailing commas, or unescaped quotes: $($_.Exception.Message)"
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest parse failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail "Component manifest '$manifestPath' was read but could not be parsed as JSON. Common causes include missing commas, trailing commas, or unescaped quotes; parser message: $($_.Exception.Message)"))
+        continue
     }
 
-    $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
-    $packageVersion = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryVersion' -ManifestPath $manifestPath
+    try {
+        $packageKey = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryKey' -ManifestPath $manifestPath
+        $packageVersion = Get-RequiredManifestText -Manifest $manifest -PropertyName 'repositoryVersion' -ManifestPath $manifestPath
+    }
+    catch {
+        $results.Add((New-ValidationResult `
+            -Repository $repoDisplayName `
+            -Status 'Manifest invalid' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail $_.Exception.Message))
+        continue
+    }
 
     # The default command wrapper creates the repository's global package, and
     # global packages use the same __global__ naming convention as
