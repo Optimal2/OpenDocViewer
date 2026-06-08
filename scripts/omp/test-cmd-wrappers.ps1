@@ -604,7 +604,7 @@ function Get-ObjectTypeName {
         return $Value.GetType().FullName
     }
     catch {
-        return '<unknown>'
+        return "<unknown: $($_.Exception.Message)>"
     }
 }
 

@@ -37,14 +37,19 @@ you need explicit parameters such as host profiles, selected components, or
 extra object files.
 
 `bump-version.ps1` updates the current repository's `omp-components.json`.
-It can bump repository, component, and module-definition versions. When module
-definitions are selected it also updates the referenced module-definition JSON
-files. Use the `.cmd` launcher for an interactive double-click flow.
+It can bump repository, component, module-definition, and dashboard widget
+versions. When module definitions are selected it also updates the referenced
+module-definition JSON files. When widget files are selected it updates both the
+manifest `widgetVersion` and the referenced widget package JSON
+`packageVersion`/`widgetVersion` values. Use the `.cmd` launcher for an
+interactive double-click flow.
 
 ```powershell
 .\scripts\omp\bump-version.ps1 -ComponentKey omp-portal-web
 .\scripts\omp\bump-version.ps1 -AllComponents -Part minor
 .\scripts\omp\bump-version.ps1 -ModuleKey omp_portal -UpdateModuleMinimums
+.\scripts\omp\bump-version.ps1 -WidgetFile widgets/log-search-widgets.json
+.\scripts\omp\bump-version.ps1 -AllWidgets
 ```
 
 Double-click `bump-version.cmd` for an interactive version bump. The default
@@ -97,12 +102,20 @@ produce identical import-relevant artifact payload bytes whether the package is
 built from a repository script or by the Bootstrapper developer-source refresh.
 
 Use `-WidgetFile` for dashboard widget JSON objects that should be copied into
-the same output shape as the other portable OMP objects.
+the same output shape as the other portable OMP objects. Repository manifest
+`widgetFiles` entries should normally be objects with `path` and
+`widgetVersion`. The builder stamps the widget package root `packageVersion` and
+each widget's `widgetVersion`, and writes default destinations as
+`<name>__<widgetVersion>.json` so installer archives can keep several widget
+versions side by side.
 
 Use `-WidgetDataFile` for widget runtime-data zips that contain shared
 `widget_data` JSON and referenced `widget_binary_data` rows. Portal can export
 these objects from the universal package form for database-backed widget media
-such as music-player tracks and custom blank-widget images.
+such as music-player tracks and custom blank-widget images. When Portal exports
+runtime data together with dashboard widgets, the runtime-data package uses the
+same `packageVersion` as the widget package so the universal manifest can track
+the object version.
 
 When `-ComponentKey` is used, the builder exports only those component artifact
 packages and the module definition files whose `moduleKey` belongs to the
@@ -173,3 +186,51 @@ With no `-RepositoryName`, the validator scans the workspace for sibling
 repositories that contain both `omp-components.json` and
 `scripts\omp\build-universal-package.cmd`. The default output and log folders
 are below the current user's temp directory.
+
+## Comparing Package Generation Paths
+
+Universal package validation should compare the import-relevant portable object
+data, not the outer zip bytes. Zip timestamps, compression metadata, and the
+package manifest `createdUtc` value may differ without changing what Portal or
+HostAgent imports.
+
+Use these helpers when validating that repository scripts, the Bootstrapper
+developer-source refresh, and installer exports produce the same objects:
+
+```powershell
+.\scripts\omp\merge-universal-package-objects.ps1 `
+  -PackageRoot "$env:TEMP\omp-cmd-wrapper-validation\packages" `
+  -OutputRoot "$env:TEMP\omp-cmd-wrapper-validation\aggregate-objects"
+
+.\scripts\omp\compare-universal-package-data.ps1 `
+  -FirstPackage "$env:TEMP\omp-cmd-wrapper-validation\aggregate-objects" `
+  -SecondPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global"
+
+.\scripts\omp\compare-universal-package-data.ps1 `
+  -FirstPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\exports\omp-universal__global__20260606.zip" `
+  -SecondPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global"
+```
+
+`merge-universal-package-objects.ps1` extracts many repository-level universal
+packages into one object root and fails if two packages contain the same object
+path with different content. `compare-universal-package-data.ps1` normalizes
+universal object comparison and expands artifact packages before comparing
+their payloads. `compare-artifact-payload-files.ps1` is available for a focused
+artifact-to-artifact comparison when a single artifact identity is suspected.
+
+The Bootstrapper installer refresh may keep local `*.zip.source-stamp.json`
+files next to artifact packages in its object archive. Those files are cache
+metadata only: universal package export includes `artifacts/*.zip`, not the
+stamp files, and importers ignore them.
+
+To create a universal package from an already validated object root, use:
+
+```powershell
+.\scripts\omp\export-universal-object-root.ps1 `
+  -ObjectRoot "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global" `
+  -OutputPath "E:\Packages\omp-universal__global__verified.zip"
+```
+
+That helper is intended for validation and developer packaging. Normal
+repository builds should still use `build-universal-package.cmd` or
+`export-universal-package.ps1`.
