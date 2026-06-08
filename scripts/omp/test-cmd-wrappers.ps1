@@ -44,8 +44,8 @@ ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
 Maximum build time per repository. Must be between 60 and 3600 seconds
-(1 to 60 minutes); the bounds are enforced by ValidateRange and the default is
-1200 seconds (20 minutes).
+(1 hour maximum); the bounds are enforced by ValidateRange and the default is
+1200 seconds.
 #>
 [CmdletBinding()]
 param(
@@ -57,9 +57,9 @@ param(
     [string]$LogRoot = '',
     # Larger package builds can opt in to the ValidateRange-enforced range of
     # 60 to 3600 seconds (1 hour) by passing -PerRepositoryTimeoutSeconds.
-    # Allow at least 60 seconds for minimal build work, and keep the default
-    # upper bound to 1 hour so CI/manual validation completes within a bounded
-    # and predictable time.
+    # Allow at least 60 seconds for minimal build work, and cap the maximum
+    # allowed value at 3600 seconds (1 hour) so CI/manual validation completes
+    # within a bounded and predictable time.
     # ValidateRange requires literal values in a script parameter block; keep
     # the accepted range documented here and in the parameter help above.
     [ValidateRange(60, 3600)]
@@ -68,6 +68,13 @@ param(
 
 $ErrorActionPreference = 'Stop'
 Set-StrictMode -Version Latest
+
+$CurrentScriptDisplayName = if ([string]::IsNullOrWhiteSpace($PSCommandPath)) {
+    'this script'
+}
+else {
+    Split-Path -Leaf $PSCommandPath
+}
 
 $SafeFileNamePattern = '[^A-Za-z0-9._-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
@@ -86,10 +93,10 @@ $HashPrefixLength = 16
 $MinimumValidProcessId = 1
 # ASCII control characters: NUL through US (Unit Separator), including all
 # whitespace controls such as TAB, vertical tab, form feed, CR, and LF, plus DEL.
-$AsciiControlUpperBound = 31
+$AsciiControlMaximum = 31
 $AsciiDeleteCodePoint = 127
 $ControlCharacterReplacement = '?'
-# Same range as $AsciiControlUpperBound and $AsciiDeleteCodePoint, expressed in
+# Same range as $AsciiControlMaximum and $AsciiDeleteCodePoint, expressed in
 # regex hexadecimal notation for PowerShell's regular-expression engine.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
@@ -165,7 +172,10 @@ $NoTaskExceptionDiagnostic = 'the async stream read task faulted but no exceptio
 function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
-        [ValidateRange(1, [int]::MaxValue)]
+        # 2147483 is floor([int]::MaxValue / 1000). ValidateRange catches most
+        # invalid direct calls at binding time; the computed check below remains
+        # the source of truth if the millisecond conversion constants change.
+        [ValidateRange(1, 2147483)]
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -229,7 +239,9 @@ function Get-ControlCharacterDiagnostic {
 
     foreach ($character in $Value.ToCharArray()) {
         $codePoint = [int][char]$character
-        if ($codePoint -le $AsciiControlUpperBound -or $codePoint -eq $AsciiDeleteCodePoint) {
+        # This is intentionally ASCII-control detection. UTF-16 surrogate pairs
+        # are irrelevant for the 0..31 and 127 code-unit checks below.
+        if ($codePoint -le $AsciiControlMaximum -or $codePoint -eq $AsciiDeleteCodePoint) {
             return ('U+{0:X4}' -f $codePoint)
         }
     }
@@ -249,7 +261,7 @@ try {
     $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
 }
 catch {
-    throw "Invalid built-in process wait timeout in test-cmd-wrappers.ps1: $($_.Exception.Message)"
+    throw "Invalid built-in process wait timeout in ${CurrentScriptDisplayName}: $($_.Exception.Message)"
 }
 
 function Get-ScriptDirectory {
@@ -531,8 +543,7 @@ function Resolve-CmdExePath {
 
     $candidate = $env:ComSpec
     if ([string]::IsNullOrWhiteSpace($candidate)) {
-        $systemCmdDetail = if ($null -eq $systemCmdError) { 'System cmd.exe path was not checked.' } else { $systemCmdError }
-        throw "Could not locate cmd.exe. System path check: $systemCmdDetail ComSpec was empty."
+        throw "Could not locate cmd.exe. System path check: $systemCmdError ComSpec was empty."
     }
 
     return Assert-CmdExecutablePath -Name 'ComSpec path' -Path $candidate
@@ -674,7 +685,7 @@ function Add-TaskOutputOrDiagnostic {
         # The call blocks the current PowerShell thread, but the wait is
         # bounded and Windows PowerShell 5.1 has no async/await syntax that
         # would make this helper-process stream read clearer.
-        $taskCompleted = $Task.IsCompleted -or $Task.Wait($TaskKillStreamReadWaitMilliseconds)
+        $taskCompleted = $Task.Wait($TaskKillStreamReadWaitMilliseconds)
 
         if (-not $taskCompleted) {
             # ReadToEndAsync has no cancellation token in the runtimes this
@@ -697,12 +708,7 @@ function Add-TaskOutputOrDiagnostic {
                 $errorText = $Task.Exception.GetBaseException().Message
             }
             else {
-                $taskStateText = 'TaskState: Canceled={0}, Completed={1}, Faulted={2}, Type={3}.' -f
-                    $Task.IsCanceled,
-                    $Task.IsCompleted,
-                    $Task.IsFaulted,
-                    (Get-ObjectTypeName -Value $Task)
-                $errorText = "$NoTaskExceptionDiagnostic $taskStateText"
+                $errorText = "$NoTaskExceptionDiagnostic TaskType=$(Get-ObjectTypeName -Value $Task)."
             }
 
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
@@ -890,7 +896,13 @@ function Get-TaskListDiagnosticCommand {
 function Get-TaskKillDiagnosticCommand {
     param([int]$ProcessId = 0)
 
-    $processIdText = if ($ProcessId -ge $MinimumValidProcessId) { [string]$ProcessId } else { '<PID>' }
+    if ($ProcessId -ge $MinimumValidProcessId) {
+        $processIdText = [string]$ProcessId
+    }
+    else {
+        $processIdText = '<PID>'
+    }
+
     return "taskkill $TaskKillForceSwitch $TaskKillProcessIdSwitch $processIdText $TaskKillTerminateTreeSwitch"
 }
 
@@ -1105,13 +1117,13 @@ $scriptParentDirectory = Split-Path -Parent $scriptDirectory
 $scriptParentDirectoryLeaf = Split-Path -Leaf $scriptParentDirectory
 if (-not [string]::Equals($scriptDirectoryLeaf, 'omp', [StringComparison]::OrdinalIgnoreCase) -or
     -not [string]::Equals($scriptParentDirectoryLeaf, 'scripts', [StringComparison]::OrdinalIgnoreCase)) {
-    throw "test-cmd-wrappers.ps1 must be run from its shared scripts/omp location. Actual script directory: $scriptDirectory"
+    throw "$CurrentScriptDisplayName must be run from its shared scripts/omp location. Actual script directory: $scriptDirectory"
 }
 
 $currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path $RepositoryRootRelativePath -BasePath $scriptDirectory
 $currentRepositoryMarkerPath = Join-Path $currentRepositoryRoot $ManifestRelativePath
 if (-not (Test-Path -LiteralPath $currentRepositoryMarkerPath -PathType Leaf)) {
-    throw "Resolved repository root '$currentRepositoryRoot' does not contain $ManifestRelativePath. test-cmd-wrappers.ps1 assumes it is stored below scripts/omp."
+    throw "Resolved repository root '$currentRepositoryRoot' does not contain $ManifestRelativePath. $CurrentScriptDisplayName assumes it is stored below scripts/omp."
 }
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
@@ -1308,7 +1320,7 @@ foreach ($repository in $repositories) {
             'Common causes include missing commas, trailing commas, or unescaped quotes.'
             "First lines: $manifestExcerpt"
             "Parser message: $($_.Exception.Message)"
-        ) -join ' '
+        ) -join [Environment]::NewLine
 
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
@@ -1428,8 +1440,8 @@ foreach ($repository in $repositories) {
         # validation result, log paths, process identity diagnostics, and final
         # package inspection in one flow. Extracting it would require a wide
         # parameter object without making the operational logic safer.
-        $timedOut = -not $process.WaitForExit($timeoutMilliseconds)
-        if ($timedOut) {
+        $processTimedOut = -not $process.WaitForExit($timeoutMilliseconds)
+        if ($processTimedOut) {
             # The process can exit between timeout detection and the following
             # state reads. Every termination branch refreshes the Process object
             # and treats "already exited" as a successful no-op.
@@ -1546,7 +1558,7 @@ foreach ($repository in $repositories) {
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
         $packageValidation = Test-PackageCreated -Path $expectedPackagePath
-        $status = if ($timedOut) {
+        $status = if ($processTimedOut) {
             'Timeout'
         }
         elseif ($null -eq $exitCode) {
