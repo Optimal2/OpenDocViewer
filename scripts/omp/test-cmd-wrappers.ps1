@@ -43,7 +43,7 @@ Directory where stdout/stderr logs are written. Use a user-private or
 ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
-Maximum build time per repository. The accepted range is 60 to 3600 seconds;
+Maximum build time per repository. The bounds are enforced by ValidateRange;
 the default is 1200 seconds (20 minutes).
 #>
 [CmdletBinding()]
@@ -55,10 +55,11 @@ param(
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
     # The default gives ordinary repository builds 1200 seconds (20 minutes).
-    # Larger package builds can opt into any value from 60 to 3600 seconds (1 hour)
+    # Larger package builds can opt in to any value from 60 to 3600 seconds (1 hour)
     # by passing -PerRepositoryTimeoutSeconds when invoking the script.
-    # Allow at least 60 seconds for minimal build work, and cap at 1 hour so
-    # CI/manual validation cannot hang indefinitely.
+    # Allow at least 60 seconds for minimal build work, and keep the default
+    # upper bound to 1 hour so CI/manual validation completes within a bounded
+    # and predictable time.
     # ValidateRange requires literal values in a script parameter block; keep
     # the accepted range documented here and in the parameter help above.
     [ValidateRange(60, 3600)]
@@ -74,10 +75,12 @@ $PackageIdentityPattern = '^[A-Za-z0-9._+\-]+$'
 # repositoryKey__global__repositoryVersion.zip.
 $GlobalPackageFileDelimiter = '__global__'
 $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
+# A SHA256 digest is 32 bytes, represented here as 64 hexadecimal characters.
+$Sha256HexLength = 64
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
 $HashPrefixLength = 16
-if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt 64) {
-    throw "HashPrefixLength must be between 1 and 64 SHA256 hex characters. Actual value: $HashPrefixLength"
+if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt $Sha256HexLength) {
+    throw "HashPrefixLength must be between 1 and $Sha256HexLength SHA256 hex characters. Actual value: $HashPrefixLength"
 }
 # Only reject impossible child-process IDs. Windows reserves some low PIDs for
 # system processes, but this script starts cmd.exe itself and only needs to
@@ -87,6 +90,7 @@ $MinimumValidProcessId = 1
 # whitespace controls such as TAB, vertical tab, form feed, CR, and LF, plus DEL.
 $AsciiControlUpperBound = 31
 $AsciiDeleteCodePoint = 127
+$ControlCharacterReplacement = '?'
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
@@ -103,16 +107,17 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
-$MillisecondsPerSecond = [int]1000
+$MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # This relative path is validated during startup so moving the script fails loudly.
 $RepositoryRootRelativePath = '..\..'
 # Store the millisecond limit separately because WaitForExit accepts an [int]
 # millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-# Integer division gives the largest whole-second value that can round-trip
-# through WaitForExit(int).
-$MaximumWaitForExitSeconds = [int]($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
+# Floor gives the largest whole-second value that can round-trip through
+# WaitForExit(int milliseconds) without overflowing after conversion back to
+# milliseconds.
+$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -146,6 +151,7 @@ $TaskKillForceSwitch = '/F'
 $CmdCallKeyword = 'call'
 $StdoutLogExtension = '.stdout.log'
 $StderrLogExtension = '.stderr.log'
+$GuidFormatNoHyphens = 'N'
 # Windows can round Process.StartTime differently between the original Process
 # handle and a refreshed lookup because process metadata is read from snapshots
 # with timer-resolution limits. A small tolerance avoids rejecting the same
@@ -154,12 +160,12 @@ $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds(100)
 
 function Convert-SecondsToIntMilliseconds {
     param(
-        [Parameter(Mandatory = $true)][string]$Name,
+        [Parameter(Mandatory = $true)][string]$ValueDescription,
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
     if ($Seconds -lt 0) {
-        throw "$Name must be non-negative. Actual value: $Seconds seconds."
+        throw "$ValueDescription must be non-negative. Actual value: $Seconds seconds."
     }
 
     # The input is whole seconds, so use integer arithmetic instead of
@@ -167,10 +173,15 @@ function Convert-SecondsToIntMilliseconds {
     # script constants, but keep this guard because this helper is also used for
     # any future timeout value that must fit WaitForExit(int milliseconds).
     if ($Seconds -gt $MaximumWaitForExitSeconds) {
-        throw "$Name is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
+        throw "$ValueDescription is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
     }
 
-    return [int](([int64]$Seconds) * $MillisecondsPerSecond)
+    $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
+    if ($milliseconds -gt $MaximumWaitForExitMilliseconds) {
+        throw "$ValueDescription converts to $milliseconds milliseconds, which exceeds the .NET Process.WaitForExit(int) maximum of $MaximumWaitForExitMilliseconds milliseconds."
+    }
+
+    return [int]$milliseconds
 }
 
 function Get-SafeDiagnosticText {
@@ -180,7 +191,7 @@ function Get-SafeDiagnosticText {
         return '<null>'
     }
 
-    $safe = $Value -replace $ControlCharacterPattern, '?'
+    $safe = $Value -replace $ControlCharacterPattern, $ControlCharacterReplacement
     if ($safe.Length -gt $MaximumDiagnosticTextLength) {
         return $safe.Substring(0, $MaximumDiagnosticTextLength) + '...'
     }
@@ -205,11 +216,11 @@ try {
     # Keep these conversions explicit instead of looping over variable names:
     # each output variable is consumed by different process-wait branches, and
     # spelling them out makes timeout diagnostics easier to trace.
-    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
-    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
-    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
-    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
-    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
+    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
+    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
+    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
+    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
+    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
 }
 catch {
     throw "Invalid built-in process wait timeout in test-cmd-wrappers.ps1: $($_.Exception.Message)"
@@ -301,6 +312,8 @@ function Test-IsSubPath {
     # ConvertTo-ComparablePath trims trailing separators, so adding exactly one
     # separator here works for both "C:\Root" and "C:\Root\" inputs.
     $fullBasePathWithSeparator = $fullBasePath + [System.IO.Path]::DirectorySeparatorChar
+    # Exact matches are allowed because callers use this helper for both
+    # workspace roots themselves and strict children under those roots.
     return $fullPath.Equals($fullBasePath, [StringComparison]::OrdinalIgnoreCase) -or
         $fullPath.StartsWith($fullBasePathWithSeparator, [StringComparison]::OrdinalIgnoreCase)
 }
@@ -384,10 +397,6 @@ function Get-ShortStableHash {
     $hashWithSeparators = [System.BitConverter]::ToString($hashBytes)
     $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
 
-    if ($HashPrefixLength -gt $hash.Length) {
-        throw "HashPrefixLength cannot exceed the generated SHA256 hash length of $($hash.Length). Actual value: $HashPrefixLength"
-    }
-
     return $hash.Substring(0, $HashPrefixLength)
 }
 
@@ -466,6 +475,8 @@ function Assert-CmdCommandLineLength {
 }
 
 function Resolve-CmdExePath {
+    # Branch-specific early returns keep the system-cmd and ComSpec diagnostics
+    # close to the condition that made each path acceptable or unusable.
     $systemRoot = $env:SystemRoot
     $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe'
     $systemCmdError = ''
@@ -519,6 +530,8 @@ function Assert-CmdExecutablePath {
 }
 
 function Resolve-TaskKillExePath {
+    # Branch-specific early returns keep the preferred System32 lookup separate
+    # from the PATH fallback used only when SystemRoot is unavailable.
     $systemRoot = $env:SystemRoot
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $system32Path = Join-Path $systemRoot 'System32'
@@ -568,8 +581,8 @@ function Get-ValidProcessIdOrNull {
         return $null
     }
 
-    # Windows never assigns process ID 0 or negative values to normal child
-    # processes; reject them before any taskkill command is assembled.
+    # Reject PIDs below 1 before any taskkill command is assembled. PID 0 is
+    # the System Idle Process on Windows, not a normal child process.
     if ($id -lt $MinimumValidProcessId) {
         Write-Verbose "Rejected invalid process ID before taskkill: $id"
         return $null
@@ -651,7 +664,7 @@ function Add-TaskOutputOrDiagnostic {
         }
 
         if ($Task.IsFaulted) {
-            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { 'unknown task fault' }
+            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { 'the async stream read task faulted but no exception information is available' }
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
             return
         }
@@ -1096,7 +1109,7 @@ $cmdExePath = Resolve-CmdExePath
 # user-private temp folder, an ACL-protected workspace folder, or another
 # location where other local users cannot read build output that may include
 # paths, environment-derived diagnostics, or package validation details.
-$runId = [Guid]::NewGuid().ToString('N')
+$runId = [Guid]::NewGuid().ToString($GuidFormatNoHyphens)
 $runLogRootPath = Join-Path $logRootPath $runId
 New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
 # Log directories are intentionally retained for failed-run diagnostics. Remove
@@ -1141,7 +1154,7 @@ if ($repositories.Count -eq 0) {
 # [int]::MaxValue, and Convert-SecondsToIntMilliseconds also rejects values
 # above the WaitForExit-compatible seconds limit.
 try {
-    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -ValueDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
 }
 catch {
     throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
@@ -1311,7 +1324,7 @@ foreach ($repository in $repositories) {
     $cmdArguments = @('/d', '/c', $cmdInvocation)
     # Display-only diagnostic text. Do not feed this back into cmd.exe; actual
     # execution uses ArgumentList above so arguments stay separated.
-    $cmdArgumentDisplayText = $cmdArguments -join ' '
+    $cmdArgumentDiagnosticText = $cmdArguments -join ' '
     $process = $null
     $processStartTime = $null
     try {
@@ -1346,7 +1359,7 @@ foreach ($repository in $repositories) {
             -Package $expectedPackagePath `
             -StdoutLog $stdoutPath `
             -StderrLog $stderrPath `
-            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentDisplayText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
+            -Detail "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticText$([Environment]::NewLine)Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.$([Environment]::NewLine)$startError"))
         continue
     }
 
