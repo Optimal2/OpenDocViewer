@@ -110,9 +110,9 @@ $RepositoryRootRelativePath = '..\..'
 # Store the millisecond limit separately because WaitForExit accepts an [int]
 # millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-# Use floor explicitly so the derived second limit visibly rounds down to the
-# largest whole-second value that can round-trip through WaitForExit(int).
-$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
+# Integer division gives the largest whole-second value that can round-trip
+# through WaitForExit(int).
+$MaximumWaitForExitSeconds = [int]($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -157,6 +157,10 @@ function Convert-SecondsToIntMilliseconds {
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][int]$Seconds
     )
+
+    if ($Seconds -lt 0) {
+        throw "$Name must be non-negative. Actual value: $Seconds seconds."
+    }
 
     # The input is whole seconds, so use integer arithmetic instead of
     # floating-point TimeSpan conversion or banker's rounding. Most callers are
@@ -628,10 +632,7 @@ function Add-TaskOutputOrDiagnostic {
         # streams and the wait is bounded, so leaving a timed-out read task alone
         # is acceptable here; Windows PowerShell 5.1 has no async/await syntax
         # that would make the call clearer.
-        $taskCompleted = $Task.IsCompleted
-        if (-not $taskCompleted) {
-            $taskCompleted = $Task.Wait($TaskKillStreamReadWaitMilliseconds)
-        }
+        $taskCompleted = $Task.Wait($TaskKillStreamReadWaitMilliseconds)
 
         if (-not $taskCompleted) {
             # ReadToEndAsync has no cancellation token in the runtimes this
@@ -1055,9 +1056,9 @@ if (-not [string]::Equals($scriptDirectoryLeaf, 'omp', [StringComparison]::Ordin
 }
 
 $currentRepositoryRoot = Resolve-FullPathSafely -Name 'current repository root' -Path $RepositoryRootRelativePath -BasePath $scriptDirectory
-$currentRepositoryMarkerPath = Join-Path $currentRepositoryRoot 'omp-components.json'
+$currentRepositoryMarkerPath = Join-Path $currentRepositoryRoot $ManifestRelativePath
 if (-not (Test-Path -LiteralPath $currentRepositoryMarkerPath -PathType Leaf)) {
-    throw "Resolved repository root '$currentRepositoryRoot' does not contain omp-components.json. test-cmd-wrappers.ps1 assumes it is stored below scripts/omp."
+    throw "Resolved repository root '$currentRepositoryRoot' does not contain $ManifestRelativePath. test-cmd-wrappers.ps1 assumes it is stored below scripts/omp."
 }
 
 if ([string]::IsNullOrWhiteSpace($WorkspaceRoot)) {
@@ -1143,7 +1144,7 @@ try {
     $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -Name 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
 }
 catch {
-    throw "Invalid per-repository validation timeout configuration used by the main repository loop: $($_.Exception.Message)"
+    throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
 }
 $timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
 # Validation results are assembled as PSCustomObjects in several branches. Each
