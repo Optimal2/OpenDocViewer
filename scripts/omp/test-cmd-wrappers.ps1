@@ -43,9 +43,9 @@ Directory where stdout/stderr logs are written. Use a user-private or
 ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
-Maximum build time per repository. Must be between 60 and 3600 seconds; the
-bounds are enforced by ValidateRange and the default is 1200 seconds
-(20 minutes).
+Maximum build time per repository. Must be between 60 and 3600 seconds
+(1 to 60 minutes); the bounds are enforced by ValidateRange and the default is
+1200 seconds (20 minutes).
 #>
 [CmdletBinding()]
 param(
@@ -78,10 +78,8 @@ $ValidationDirectoryName = 'omp-cmd-wrapper-validation'
 # A SHA256 digest is 32 bytes, represented here as 64 hexadecimal characters.
 $Sha256HexLength = 64
 # 16 hex characters from SHA256 gives 64 bits of stable filename entropy.
+# Keep this between 1 and $Sha256HexLength if it ever becomes configurable.
 $HashPrefixLength = 16
-if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt $Sha256HexLength) {
-    throw "HashPrefixLength must be between 1 and $Sha256HexLength SHA256 hex characters. Actual value: $HashPrefixLength"
-}
 # Only reject impossible child-process IDs. Windows reserves some low PIDs for
 # system processes, but this script starts cmd.exe itself and only needs to
 # prevent invalid zero/negative IDs from reaching taskkill.exe.
@@ -91,6 +89,8 @@ $MinimumValidProcessId = 1
 $AsciiControlUpperBound = 31
 $AsciiDeleteCodePoint = 127
 $ControlCharacterReplacement = '?'
+# Same range as $AsciiControlUpperBound and $AsciiDeleteCodePoint, expressed in
+# regex hexadecimal notation for PowerShell's regular-expression engine.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
@@ -165,7 +165,7 @@ $NoTaskExceptionDiagnostic = 'the async stream read task faulted but no exceptio
 function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
-        [ValidateRange(0, [int]::MaxValue)]
+        [ValidateRange(1, [int]::MaxValue)]
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -201,6 +201,29 @@ function Get-SafeDiagnosticText {
     return $safe
 }
 
+function Get-SafeDiagnosticExcerpt {
+    param(
+        [AllowNull()][AllowEmptyString()][string]$Value,
+        [int]$MaximumLines = 5
+    )
+
+    if ([string]::IsNullOrWhiteSpace($Value)) {
+        return '<empty>'
+    }
+
+    $lines = $Value -split '\r?\n'
+    $safeLines = [System.Collections.Generic.List[string]]::new()
+    foreach ($line in $lines) {
+        if ($safeLines.Count -ge $MaximumLines) {
+            break
+        }
+
+        $safeLines.Add((Get-SafeDiagnosticText -Value $line))
+    }
+
+    return ($safeLines.ToArray() -join ' | ')
+}
+
 function Get-ControlCharacterDiagnostic {
     param([Parameter(Mandatory = $true)][string]$Value)
 
@@ -230,6 +253,9 @@ catch {
 }
 
 function Get-ScriptDirectory {
+    # $PSScriptRoot is expected for normal script execution. $PSCommandPath is
+    # retained as a cheap fallback for unusual hosts that expose the script path
+    # but not the script root.
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
         return $PSScriptRoot
     }
@@ -262,7 +288,7 @@ function Resolve-FullPathSafely {
         $effectiveBasePath = if ([string]::IsNullOrWhiteSpace($BasePath)) {
             $currentLocation = Get-Location
             if ($currentLocation.Provider.Name -ne 'FileSystem') {
-                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name). Use Set-Location to change to a filesystem path or provide an explicit BasePath parameter."
+                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name). Provide an explicit BasePath parameter, or use Set-Location to switch to the relevant workspace directory before calling this helper."
             }
 
             $currentLocation.ProviderPath
@@ -483,7 +509,6 @@ function Resolve-CmdExePath {
     # Branch-specific early returns keep the system-cmd and ComSpec diagnostics
     # close to the condition that made each path acceptable or unusable.
     $systemRoot = $env:SystemRoot
-    $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe'
     $systemCmdError = $null
     if (-not [string]::IsNullOrWhiteSpace($systemRoot)) {
         $system32Path = Join-Path $systemRoot 'System32'
@@ -501,7 +526,6 @@ function Resolve-CmdExePath {
         }
     }
     else {
-        $systemCmdDiagnosticPath = '<SystemRoot>\System32\cmd.exe (SystemRoot environment variable was empty)'
         $systemCmdError = 'SystemRoot environment variable was empty.'
     }
 
@@ -646,12 +670,11 @@ function Add-TaskOutputOrDiagnostic {
 
     try {
         # Task.Wait can surface stream read failures as AggregateException; the
-        # catch below converts them into diagnostics instead of hiding them. The
-        # ReadToEndAsync tasks come from short-lived taskkill.exe process
-        # streams and the wait is bounded, so leaving a timed-out read task alone
-        # is acceptable here; Windows PowerShell 5.1 has no async/await syntax
-        # that would make the call clearer.
-        $taskCompleted = $Task.Wait($TaskKillStreamReadWaitMilliseconds)
+        # catch below converts them into diagnostics instead of hiding them.
+        # The call blocks the current PowerShell thread, but the wait is
+        # bounded and Windows PowerShell 5.1 has no async/await syntax that
+        # would make this helper-process stream read clearer.
+        $taskCompleted = $Task.IsCompleted -or $Task.Wait($TaskKillStreamReadWaitMilliseconds)
 
         if (-not $taskCompleted) {
             # ReadToEndAsync has no cancellation token in the runtimes this
@@ -670,7 +693,18 @@ function Add-TaskOutputOrDiagnostic {
         }
 
         if ($Task.IsFaulted) {
-            $errorText = if ($null -ne $Task.Exception) { $Task.Exception.GetBaseException().Message } else { $NoTaskExceptionDiagnostic }
+            if ($null -ne $Task.Exception) {
+                $errorText = $Task.Exception.GetBaseException().Message
+            }
+            else {
+                $taskStateText = 'TaskState: Canceled={0}, Completed={1}, Faulted={2}, Type={3}.' -f
+                    $Task.IsCanceled,
+                    $Task.IsCompleted,
+                    $Task.IsFaulted,
+                    (Get-ObjectTypeName -Value $Task)
+                $errorText = "$NoTaskExceptionDiagnostic $taskStateText"
+            }
+
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
             return
         }
@@ -799,7 +833,7 @@ function Test-ExpectedCmdProcess {
             return $true
         }
 
-        if ($ExpectedStartTime -isnot [System.DateTime]) {
+        if (-not ($ExpectedStartTime -is [System.DateTime])) {
             Write-Verbose "Expected process start time should be of type [System.DateTime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
             return $false
         }
@@ -1268,6 +1302,14 @@ foreach ($repository in $repositories) {
         $manifest = $manifestJson | ConvertFrom-Json
     }
     catch {
+        $manifestExcerpt = Get-SafeDiagnosticExcerpt -Value $manifestJson
+        $manifestParseDetail = @(
+            "Component manifest '$manifestPath' was read but could not be parsed as JSON."
+            'Common causes include missing commas, trailing commas, or unescaped quotes.'
+            "First lines: $manifestExcerpt"
+            "Parser message: $($_.Exception.Message)"
+        ) -join ' '
+
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
             -Status 'Manifest parse failed' `
@@ -1275,7 +1317,7 @@ foreach ($repository in $repositories) {
             -Package '' `
             -StdoutLog '' `
             -StderrLog '' `
-            -Detail "Component manifest '$manifestPath' was read but could not be parsed as JSON. Common causes include missing commas, trailing commas, or unescaped quotes; parser message: $($_.Exception.Message)"))
+            -Detail $manifestParseDetail))
         continue
     }
 
