@@ -36,7 +36,7 @@ scripts/omp/build-universal-package.cmd.
 
 .PARAMETER OutputRoot
 Directory where generated universal packages are written during validation.
-Defaults to a user-temp validation folder.
+Defaults to a user-temp validation folder when omitted or empty.
 
 .PARAMETER LogRoot
 Directory where stdout/stderr logs are written. Use a user-private or
@@ -44,7 +44,7 @@ ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
 Maximum build time per repository. Must be between 60 and 3600 seconds
-(1 hour maximum); the bounds are enforced by ValidateRange and the default is
+(up to 1 hour); the bounds are enforced by ValidateRange and the default is
 1200 seconds.
 #>
 [CmdletBinding()]
@@ -55,8 +55,8 @@ param(
     [string]$CommandWrapperRelativePath = 'scripts/omp/build-universal-package.cmd',
     [string]$OutputRoot = '',
     [string]$LogRoot = '',
-    # Larger package builds can opt in to the ValidateRange-enforced range of
-    # 60 to 3600 seconds (1 hour) by passing -PerRepositoryTimeoutSeconds.
+    # PerRepositoryTimeoutSeconds accepts the ValidateRange-enforced range of
+    # 60 to 3600 seconds (up to 1 hour).
     # Allow at least 60 seconds for minimal build work, and cap the maximum
     # allowed value at 3600 seconds (1 hour) so CI/manual validation completes
     # within a bounded and predictable time.
@@ -99,6 +99,7 @@ $ControlCharacterReplacement = '?'
 # Same range as $AsciiControlMaximum and $AsciiDeleteCodePoint, expressed in
 # regex hexadecimal notation for PowerShell's regular-expression engine.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
+$LineEndingPattern = '\r\n|\r|\n'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
@@ -175,7 +176,7 @@ function Convert-SecondsToIntMilliseconds {
         # 2147483 is floor([int]::MaxValue / 1000). ValidateRange catches most
         # invalid direct calls at binding time; the computed check below remains
         # the source of truth if the millisecond conversion constants change.
-        [ValidateRange(1, 2147483)]
+        [ValidateRange(1, 2147483)] # 2147483 seconds safely fits WaitForExit(int milliseconds).
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -205,7 +206,8 @@ function Get-SafeDiagnosticText {
 
     $safe = $Value -replace $ControlCharacterPattern, $ControlCharacterReplacement
     if ($safe.Length -gt $MaximumDiagnosticTextLength) {
-        return $safe.Substring(0, $MaximumDiagnosticTextLength) + $TruncationIndicator
+        $prefixLength = [Math]::Max(0, $MaximumDiagnosticTextLength - $TruncationIndicator.Length)
+        return $safe.Substring(0, $prefixLength) + $TruncationIndicator
     }
 
     return $safe
@@ -221,7 +223,7 @@ function Get-SafeDiagnosticExcerpt {
         return '<empty>'
     }
 
-    $lines = $Value -split '\r?\n'
+    $lines = $Value -split $LineEndingPattern
     $safeLines = [System.Collections.Generic.List[string]]::new()
     foreach ($line in $lines) {
         if ($safeLines.Count -ge $MaximumLines) {
@@ -281,6 +283,12 @@ function Get-ScriptDirectory {
 }
 
 function Resolve-FullPathSafely {
+    <#
+    .PARAMETER BasePath
+    Optional base directory for relative paths. When omitted, the current
+    filesystem location is used; callers that need containment guarantees must
+    still validate the resolved path with the Assert-* helpers.
+    #>
     param(
         [Parameter(Mandatory = $true)][string]$Name,
         [Parameter(Mandatory = $true)][string]$Path,
@@ -294,6 +302,8 @@ function Resolve-FullPathSafely {
         # validate the resolved path against the intended workspace/output base
         # with Assert-* helpers before using it.
         if ([System.IO.Path]::IsPathRooted($Path)) {
+            # Rooted paths are canonicalized only. This function deliberately
+            # does not restrict them to the workspace or output root.
             return [System.IO.Path]::GetFullPath($Path)
         }
 
@@ -435,10 +445,15 @@ function Get-ShortStableHash {
 
     # 16 hex characters gives 64 bits of stable filename entropy, which is
     # intentionally more than enough for the small set of sibling repositories.
-    # BitConverter is clear enough here; this script hashes only a small set of
-    # repository paths, so avoiding Replace() would be a negligible micro-optimization.
-    $hashWithSeparators = [System.BitConverter]::ToString($hashBytes)
-    $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
+    $hashBuilder = [System.Text.StringBuilder]::new($hashBytes.Length * 2)
+    foreach ($hashByte in $hashBytes) {
+        [void]$hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
+    }
+
+    $hash = $hashBuilder.ToString()
+    if ($hash.Length -lt $HashPrefixLength) {
+        throw "Generated SHA256 hash was shorter than HashPrefixLength. HashLength=$($hash.Length), HashPrefixLength=$HashPrefixLength."
+    }
 
     return $hash.Substring(0, $HashPrefixLength)
 }
@@ -489,12 +504,13 @@ function ConvertTo-CmdArgument {
     # characters that cmd.exe can reinterpret instead of attempting lossy escaping.
     # In particular, double quotes are rejected before quoting; keep that
     # pre-validation if this helper ever gains new callers.
-    Assert-SafeCmdArgumentText -Name 'CMD wrapper argument' -Value $Value
+    Assert-SafeCmdArgumentText -Name 'cmd wrapper argument' -Value $Value
 
     # cmd.exe treats ^ as its escape character; ^^ emits one literal caret.
     # Escape carets before quoting so a literal caret cannot alter parsing of
     # the generated command line. The quoting pattern includes ^, so a caret
-    # escaped to ^^ is still forced into a quoted argument below.
+    # escaped to ^^ is still forced into a quoted argument below. Delayed
+    # expansion is not enabled for this cmd.exe invocation, so ! is not escaped.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
@@ -708,14 +724,16 @@ function Add-TaskOutputOrDiagnostic {
                 $errorText = $Task.Exception.GetBaseException().Message
             }
             else {
-                $errorText = "$NoTaskExceptionDiagnostic TaskType=$(Get-ObjectTypeName -Value $Task)."
+                $errorText = '{0} TaskType={1}.' -f $NoTaskExceptionDiagnostic, (Get-ObjectTypeName -Value $Task)
             }
 
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
             return
         }
 
-        $text = $Task.GetAwaiter().GetResult()
+        # The task has completed and was checked for cancellation/fault above,
+        # so reading Result is clearer than awaiting from Windows PowerShell 5.1.
+        $text = $Task.Result
         if (-not [string]::IsNullOrWhiteSpace($text)) {
             $Output.Add($text.Trim())
         }
