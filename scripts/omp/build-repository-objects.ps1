@@ -115,6 +115,22 @@ function Get-JsonPropertyValue {
     return $property.Value
 }
 
+function Set-JsonPropertyValue {
+    param(
+        [Parameter(Mandatory = $true)][object]$Object,
+        [Parameter(Mandatory = $true)][string]$Name,
+        [object]$Value
+    )
+
+    $property = $Object.PSObject.Properties[$Name]
+    if ($null -eq $property) {
+        $Object | Add-Member -NotePropertyName $Name -NotePropertyValue $Value
+        return
+    }
+
+    $property.Value = $Value
+}
+
 function Test-ArtifactComponent {
     param([object]$Component)
 
@@ -154,6 +170,113 @@ function Get-SafePathMapSegment {
     }
 
     return $safe
+}
+
+function Get-SafeFileNameSegment {
+    param([string]$Value)
+
+    $text = $Value.Trim()
+    foreach ($character in [System.IO.Path]::GetInvalidFileNameChars()) {
+        $text = $text.Replace($character, '-')
+    }
+
+    $text = $text.Trim('.', ' ')
+    if ([string]::IsNullOrWhiteSpace($text)) {
+        return 'item'
+    }
+
+    return $text
+}
+
+function Get-VersionedJsonFileName {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [string]$Version
+    )
+
+    $fileName = [System.IO.Path]::GetFileName($Path)
+    $baseName = [System.IO.Path]::GetFileNameWithoutExtension($fileName)
+    if ([string]::IsNullOrWhiteSpace($Version)) {
+        return $fileName
+    }
+
+    $safeVersion = Get-SafeFileNameSegment -Value $Version
+    if ($baseName.EndsWith("__$safeVersion", [StringComparison]::OrdinalIgnoreCase)) {
+        return "$baseName.json"
+    }
+
+    return ('{0}__{1}.json' -f $baseName, $safeVersion)
+}
+
+function New-WidgetFileItem {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [string]$DestinationName,
+        [string]$Version,
+        [string]$DefaultVersion
+    )
+
+    [pscustomobject]@{
+        SourcePath = $SourcePath.Trim()
+        DestinationName = if ([string]::IsNullOrWhiteSpace($DestinationName)) { '' } else { $DestinationName.Trim() }
+        Version = if ([string]::IsNullOrWhiteSpace($Version)) { '' } else { $Version.Trim() }
+        DefaultVersion = if ([string]::IsNullOrWhiteSpace($DefaultVersion)) { '' } else { $DefaultVersion.Trim() }
+    }
+}
+
+function Add-WidgetFileItemFromText {
+    param(
+        [Parameter(Mandatory = $true)][System.Collections.Generic.List[object]]$Items,
+        [Parameter(Mandatory = $true)][string]$Entry,
+        [string]$DefaultVersion
+    )
+
+    $separatorIndex = $Entry.IndexOf('=')
+    if ($separatorIndex -ge 0) {
+        $destinationName = $Entry.Substring(0, $separatorIndex).Trim()
+        $sourcePath = $Entry.Substring($separatorIndex + 1).Trim()
+    }
+    else {
+        $sourcePath = $Entry.Trim()
+        $destinationName = ''
+    }
+
+    if ([string]::IsNullOrWhiteSpace($sourcePath)) {
+        throw "Widget file source path is empty: $Entry"
+    }
+
+    $Items.Add((New-WidgetFileItem -SourcePath $sourcePath -DestinationName $destinationName -Version '' -DefaultVersion $DefaultVersion))
+}
+
+function Write-WidgetPackageFile {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$DestinationPath,
+        [string]$Version,
+        [string]$DefaultVersion
+    )
+
+    $document = Get-Content -LiteralPath $SourcePath -Raw -Encoding UTF8 | ConvertFrom-Json
+    $resolvedVersion = $Version
+    if ([string]::IsNullOrWhiteSpace($resolvedVersion)) {
+        $resolvedVersion = [string](Get-JsonPropertyValue -Object $document -Name 'packageVersion')
+    }
+
+    if ([string]::IsNullOrWhiteSpace($resolvedVersion)) {
+        $resolvedVersion = $DefaultVersion
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($resolvedVersion)) {
+        Set-JsonPropertyValue -Object $document -Name 'packageVersion' -Value $resolvedVersion.Trim()
+        foreach ($widget in @((Get-JsonPropertyValue -Object $document -Name 'widgets'))) {
+            if ($null -ne $widget) {
+                Set-JsonPropertyValue -Object $widget -Name 'widgetVersion' -Value $resolvedVersion.Trim()
+            }
+        }
+    }
+
+    $json = $document | ConvertTo-Json -Depth 50
+    [System.IO.File]::WriteAllText($DestinationPath, $json + [Environment]::NewLine, [System.Text.UTF8Encoding]::new($false))
 }
 
 function Read-ConfigurationMappings {
@@ -251,47 +374,15 @@ function Invoke-NativeChecked {
         [Parameter(Mandatory = $true)][string]$WorkingDirectory
     )
 
-    $logRoot = Join-Path ([System.IO.Path]::GetTempPath()) ('omp-native-' + [Guid]::NewGuid().ToString('N'))
-    $stdoutPath = Join-Path $logRoot 'stdout.log'
-    $stderrPath = Join-Path $logRoot 'stderr.log'
-
+    Push-Location $WorkingDirectory
     try {
-        New-Item -ItemType Directory -Path $logRoot | Out-Null
-        $resolvedFileName = $FileName
-        if ([string]::IsNullOrWhiteSpace([System.IO.Path]::GetExtension($FileName))) {
-            $cmdCandidate = Get-Command "$FileName.cmd" -CommandType Application -ErrorAction SilentlyContinue |
-                Select-Object -First 1
-            if ($null -ne $cmdCandidate) {
-                $resolvedFileName = $cmdCandidate.Source
-            }
-        }
-
-        $process = Start-Process `
-            -FilePath $resolvedFileName `
-            -ArgumentList $Arguments `
-            -WorkingDirectory $WorkingDirectory `
-            -RedirectStandardOutput $stdoutPath `
-            -RedirectStandardError $stderrPath `
-            -NoNewWindow `
-            -PassThru `
-            -Wait
-
-        if (Test-Path -LiteralPath $stdoutPath -PathType Leaf) {
-            Get-Content -LiteralPath $stdoutPath | ForEach-Object { Write-Host $_ }
-        }
-
-        if (Test-Path -LiteralPath $stderrPath -PathType Leaf) {
-            Get-Content -LiteralPath $stderrPath | ForEach-Object { Write-Warning $_ }
-        }
-
-        if ($process.ExitCode -ne 0) {
-            throw "$FileName failed with exit code $($process.ExitCode)."
+        & $FileName @Arguments 2>&1 | ForEach-Object { Write-Host $_ }
+        if ($LASTEXITCODE -ne 0) {
+            throw "$FileName failed with exit code $LASTEXITCODE."
         }
     }
     finally {
-        if (Test-Path -LiteralPath $logRoot -PathType Container) {
-            Remove-Item -LiteralPath $logRoot -Recurse -Force
-        }
+        Pop-Location
     }
 }
 
@@ -324,19 +415,7 @@ function Publish-NodeWebComponent {
     }
 
     if (Test-Path -LiteralPath (Join-Path $projectDirectory 'package-lock.json') -PathType Leaf) {
-        try {
-            Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
-        }
-        catch {
-            $nodeModulesPath = Join-Path $projectDirectory 'node_modules'
-            if (-not (Test-Path -LiteralPath $nodeModulesPath -PathType Container)) {
-                throw
-            }
-
-            Write-Warning "npm ci failed. Removing node_modules and retrying once."
-            Remove-Item -LiteralPath $nodeModulesPath -Recurse -Force
-            Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
-        }
+        Invoke-NativeChecked -FileName 'npm' -Arguments @('ci') -WorkingDirectory $projectDirectory
     }
 
     Invoke-NativeChecked -FileName 'npm' -Arguments @('run', 'build') -WorkingDirectory $projectDirectory
@@ -408,39 +487,44 @@ function Copy-PortableObjectFiles {
 
 function Copy-WidgetFiles {
     param(
-        [string[]]$Files,
+        [object[]]$Items,
         [string]$DestinationRoot
     )
 
-    foreach ($entry in @($Files)) {
-        if ([string]::IsNullOrWhiteSpace($entry)) {
+    foreach ($item in @($Items)) {
+        if ($null -eq $item) {
             continue
         }
 
-        $separatorIndex = $entry.IndexOf('=')
-        if ($separatorIndex -ge 0) {
-            $destinationName = $entry.Substring(0, $separatorIndex).Trim()
-            $sourcePath = $entry.Substring($separatorIndex + 1).Trim()
+        $sourcePath = [string]$item.SourcePath
+        $resolvedSource = Resolve-PathFromBase -Path $sourcePath -BasePath $repositoryRoot
+        if (-not (Test-Path -LiteralPath $resolvedSource -PathType Leaf)) {
+            throw "Widget file was not found: $resolvedSource"
         }
-        else {
-            $sourcePath = $entry.Trim()
-            $destinationName = [System.IO.Path]::GetFileName($sourcePath)
+
+        $version = [string]$item.Version
+        if ([string]::IsNullOrWhiteSpace($version)) {
+            $version = [string]$item.DefaultVersion
+        }
+
+        $destinationName = [string]$item.DestinationName
+        if ([string]::IsNullOrWhiteSpace($destinationName)) {
+            $destinationName = Get-VersionedJsonFileName -Path $resolvedSource -Version $version
         }
 
         if ([string]::IsNullOrWhiteSpace($destinationName)) {
-            throw "Widget file destination name is empty: $entry"
+            throw "Widget file destination name is empty: $sourcePath"
         }
 
         if (-not [System.IO.Path]::GetExtension($destinationName).Equals('.json', [StringComparison]::OrdinalIgnoreCase)) {
             throw "Widget files must be JSON files: $destinationName"
         }
 
-        $resolvedSource = Resolve-PathFromBase -Path $sourcePath -BasePath $repositoryRoot
-        if (-not (Test-Path -LiteralPath $resolvedSource -PathType Leaf)) {
-            throw "Widget file was not found: $resolvedSource"
-        }
-
-        Copy-Item -LiteralPath $resolvedSource -Destination (Join-Path $DestinationRoot $destinationName) -Force
+        Write-WidgetPackageFile `
+            -SourcePath $resolvedSource `
+            -DestinationPath (Join-Path $DestinationRoot $destinationName) `
+            -Version $version `
+            -DefaultVersion ([string]$item.DefaultVersion)
     }
 }
 
@@ -511,6 +595,13 @@ New-Item -ItemType Directory -Path $widgetsRoot -Force | Out-Null
 New-Item -ItemType Directory -Path $widgetDataRoot -Force | Out-Null
 
 $manifest = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8 | ConvertFrom-Json
+$repositoryVersion = [string](Get-JsonPropertyValue -Object $manifest -Name 'repositoryVersion')
+$widgetFileItems = [System.Collections.Generic.List[object]]::new()
+foreach ($entry in @($WidgetFile)) {
+    if (-not [string]::IsNullOrWhiteSpace($entry)) {
+        Add-WidgetFileItemFromText -Items $widgetFileItems -Entry $entry -DefaultVersion $repositoryVersion
+    }
+}
 
 $selectedComponents = @($manifest.components | Where-Object { Test-ArtifactComponent -Component $_ })
 $selectedModuleKeys = $null
@@ -541,7 +632,7 @@ if ($AllComponents -or $ComponentKey.Count -gt 0) {
 
         if ($entry -is [string]) {
             if (-not [string]::IsNullOrWhiteSpace($entry)) {
-                $WidgetFile += $entry
+                $widgetFileItems.Add((New-WidgetFileItem -SourcePath $entry -DestinationName '' -Version $repositoryVersion -DefaultVersion $repositoryVersion))
             }
 
             continue
@@ -563,12 +654,19 @@ if ($AllComponents -or $ComponentKey.Count -gt 0) {
         }
 
         $destinationName = [string](Get-JsonPropertyValue -Object $entry -Name 'destinationName')
-        if ([string]::IsNullOrWhiteSpace($destinationName)) {
-            $WidgetFile += $sourcePath
+        $widgetVersion = [string](Get-JsonPropertyValue -Object $entry -Name 'widgetVersion')
+        if ([string]::IsNullOrWhiteSpace($widgetVersion)) {
+            $widgetVersion = [string](Get-JsonPropertyValue -Object $entry -Name 'packageVersion')
         }
-        else {
-            $WidgetFile += "$($destinationName.Trim())=$($sourcePath.Trim())"
+        if ([string]::IsNullOrWhiteSpace($widgetVersion)) {
+            $widgetVersion = [string](Get-JsonPropertyValue -Object $entry -Name 'version')
         }
+
+        $widgetFileItems.Add((New-WidgetFileItem `
+            -SourcePath $sourcePath `
+            -DestinationName $destinationName `
+            -Version $widgetVersion `
+            -DefaultVersion $repositoryVersion))
     }
 }
 
@@ -662,7 +760,7 @@ try {
         }
 
         & $newArtifactPackageScript @artifactPackageArgs
-        if (-not $?) {
+        if ($LASTEXITCODE -ne 0) {
             throw "Artifact package creation failed for component '$($component.componentKey)'."
         }
     }
@@ -673,7 +771,7 @@ finally {
 
 Copy-PortableObjectFiles -Files $HostConfigurationFile -DestinationRoot $hostConfigsRoot -ObjectName 'Host configuration'
 Copy-PortableObjectFiles -Files $ConfigOverlayFile -DestinationRoot $configOverlaysRoot -ObjectName 'Config overlay'
-Copy-WidgetFiles -Files $WidgetFile -DestinationRoot $widgetsRoot
+Copy-WidgetFiles -Items $widgetFileItems.ToArray() -DestinationRoot $widgetsRoot
 Copy-WidgetDataFiles -Files $WidgetDataFile -DestinationRoot $widgetDataRoot
 
 Write-Host "OMP module definitions: $definitionsRoot"

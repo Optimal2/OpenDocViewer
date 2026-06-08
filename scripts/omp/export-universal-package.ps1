@@ -62,6 +62,7 @@ param(
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
+Add-Type -AssemblyName System.IO.Compression.FileSystem
 
 function Get-ScriptDirectory {
     if (-not [string]::IsNullOrWhiteSpace($PSScriptRoot)) {
@@ -380,6 +381,137 @@ function Add-ZipEntryFromText {
     }
 }
 
+function Get-PortableObjectVersion {
+    param(
+        [Parameter(Mandatory = $true)][string]$Kind,
+        [Parameter(Mandatory = $true)][string]$Path
+    )
+
+    if ($Kind.Equals('artifact-package', [StringComparison]::OrdinalIgnoreCase) -or $Kind.Equals('artifact', [StringComparison]::OrdinalIgnoreCase)) {
+        $name = [System.IO.Path]::GetFileNameWithoutExtension($Path)
+        $parts = $name.Split([string[]]@('__'), [StringSplitOptions]::None)
+        if ($parts.Length -ge 5 -and -not [string]::IsNullOrWhiteSpace($parts[$parts.Length - 1])) {
+            return $parts[$parts.Length - 1].Trim()
+        }
+
+        return ''
+    }
+
+    if ($Kind.Equals('module-definition', [StringComparison]::OrdinalIgnoreCase)) {
+        try {
+            $document = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+            $definitionVersion = [string](Get-JsonPropertyValue -Object $document -Name 'definitionVersion')
+            if ([string]::IsNullOrWhiteSpace($definitionVersion)) {
+                return ''
+            }
+
+            return $definitionVersion.Trim()
+        }
+        catch {
+            return ''
+        }
+    }
+
+    if ($Kind.Equals('host-config', [StringComparison]::OrdinalIgnoreCase) -or $Kind.Equals('host-configuration', [StringComparison]::OrdinalIgnoreCase)) {
+        return Get-JsonOrZipManifestVersion -Path $Path -JsonPropertyName 'configurationVersion' -ZipManifestName 'omp-host-config.json'
+    }
+
+    if ($Kind.Equals('config-overlay', [StringComparison]::OrdinalIgnoreCase)) {
+        return Get-JsonOrZipManifestVersion -Path $Path -JsonPropertyName 'overlayVersion' -ZipManifestName 'omp-config-overlay.json'
+    }
+
+    if ($Kind.Equals('widget-data', [StringComparison]::OrdinalIgnoreCase)) {
+        return Get-JsonOrZipManifestVersion -Path $Path -JsonPropertyName 'packageVersion' -ZipManifestName 'omp-widget-runtime-data.json'
+    }
+
+    if ($Kind.Equals('dashboard-widget', [StringComparison]::OrdinalIgnoreCase)) {
+        try {
+            $document = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+            $packageVersion = [string](Get-JsonPropertyValue -Object $document -Name 'packageVersion')
+            if (-not [string]::IsNullOrWhiteSpace($packageVersion)) {
+                return $packageVersion.Trim()
+            }
+
+            $widgetVersions = @(
+                foreach ($widget in @((Get-JsonPropertyValue -Object $document -Name 'widgets'))) {
+                    if ($null -eq $widget) {
+                        continue
+                    }
+
+                    $widgetVersion = [string](Get-JsonPropertyValue -Object $widget -Name 'widgetVersion')
+                    if (-not [string]::IsNullOrWhiteSpace($widgetVersion)) {
+                        $widgetVersion.Trim()
+                    }
+                }
+            )
+
+            $latestWidgetVersion = @($widgetVersions | Sort-Object -Descending | Select-Object -First 1)
+            return [string]($latestWidgetVersion | Select-Object -First 1)
+        }
+        catch {
+            return ''
+        }
+    }
+
+    return ''
+}
+
+function Get-JsonOrZipManifestVersion {
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][string]$JsonPropertyName,
+        [Parameter(Mandatory = $true)][string]$ZipManifestName
+    )
+
+    try {
+        if ([System.IO.Path]::GetExtension($Path).Equals('.json', [StringComparison]::OrdinalIgnoreCase)) {
+            $document = Get-Content -LiteralPath $Path -Raw -Encoding UTF8 | ConvertFrom-Json
+            $version = [string](Get-JsonPropertyValue -Object $document -Name $JsonPropertyName)
+            if ([string]::IsNullOrWhiteSpace($version)) {
+                return ''
+            }
+
+            return $version.Trim()
+        }
+
+        $archive = [System.IO.Compression.ZipFile]::OpenRead($Path)
+        try {
+            $manifestEntry = $archive.Entries |
+                Where-Object { $_.FullName -eq $ZipManifestName } |
+                Select-Object -First 1
+            if ($null -eq $manifestEntry) {
+                return ''
+            }
+
+            $stream = $manifestEntry.Open()
+            try {
+                $reader = [System.IO.StreamReader]::new($stream, [System.Text.Encoding]::UTF8)
+                try {
+                    $document = $reader.ReadToEnd() | ConvertFrom-Json
+                    $version = [string](Get-JsonPropertyValue -Object $document -Name $JsonPropertyName)
+                    if ([string]::IsNullOrWhiteSpace($version)) {
+                        return ''
+                    }
+
+                    return $version.Trim()
+                }
+                finally {
+                    $reader.Dispose()
+                }
+            }
+            finally {
+                $stream.Dispose()
+            }
+        }
+        finally {
+            $archive.Dispose()
+        }
+    }
+    catch {
+        return ''
+    }
+}
+
 function Get-ArchiveRelativePath {
     param(
         [Parameter(Mandatory = $true)][string]$BasePath,
@@ -424,6 +556,7 @@ function Get-UniversalPackageFiles {
                 Kind = $folderInfo.Kind
                 Path = $relativePath
                 FullName = $file.FullName
+                Version = Get-PortableObjectVersion -Kind $folderInfo.Kind -Path $file.FullName
             })
         }
     }
@@ -549,10 +682,15 @@ try {
     $files = Get-UniversalPackageFiles -ObjectRoot $objectRoot
     $manifestItems = @(
         foreach ($file in $files) {
-            [ordered]@{
+            $item = [ordered]@{
                 kind = $file.Kind
                 path = $file.Path
             }
+            if (-not [string]::IsNullOrWhiteSpace([string]$file.Version)) {
+                $item.version = [string]$file.Version
+            }
+
+            $item
         }
     )
 
@@ -584,7 +722,6 @@ try {
         Remove-Item -LiteralPath $outputPath -Force
     }
 
-    Add-Type -AssemblyName System.IO.Compression.FileSystem
     $archive = [System.IO.Compression.ZipFile]::Open($outputPath, [System.IO.Compression.ZipArchiveMode]::Create)
     try {
         foreach ($file in $files) {
