@@ -44,8 +44,8 @@ ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
 Maximum build time per repository. Must be between 60 and 3600 seconds
-(up to 1 hour); the bounds are enforced by ValidateRange and the default is
-1200 seconds.
+(1 hour = 3600 seconds); the bounds are enforced by ValidateRange and the
+default is 1200 seconds (20 minutes).
 #>
 [CmdletBinding()]
 param(
@@ -180,11 +180,22 @@ $ProcessStartTimeToleranceMilliseconds = 100
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds($ProcessStartTimeToleranceMilliseconds)
 $NoTaskExceptionDiagnostic = 'Async stream read task faulted without exception information'
 
+if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
+    $message = @(
+        'MaximumDiagnosticTextLength must be greater than the truncation indicator length.'
+        "MaximumDiagnosticTextLength=$MaximumDiagnosticTextLength."
+        "TruncationIndicatorLength=$($TruncationIndicator.Length)."
+    ) -join ' '
+    throw $message
+}
+
 function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
-        # ValidateRange requires a literal value. 2147483 is
-        # floor([int]::MaxValue / 1000) and matches
+        # ValidateRange requires a literal value in Windows PowerShell 5.1.
+        # 2147483 is floor([int]::MaxValue / 1000), or floor(2147483647 / 1000),
+        # which is the largest whole-second value that safely converts back to
+        # WaitForExit(int milliseconds). Keep this aligned with
         # $MaximumSafeSecondsForMillisecondConversion.
         [ValidateRange(1, 2147483)]
         [Parameter(Mandatory = $true)][int]$Seconds
@@ -300,6 +311,11 @@ function Resolve-FullPathSafely {
     Optional base directory for relative paths. When omitted, the current
     filesystem location is used; callers that need containment guarantees must
     still validate the resolved path with the Assert-* helpers.
+
+    .NOTES
+    If BasePath is omitted while the current PowerShell location is not backed
+    by the FileSystem provider, the helper throws a descriptive error instead
+    of resolving against a non-filesystem provider path.
     #>
     param(
         [Parameter(Mandatory = $true)][string]$Name,
@@ -325,6 +341,7 @@ function Resolve-FullPathSafely {
                 $message = @(
                     'Current PowerShell location must be a filesystem path before resolving relative paths.'
                     "Actual provider: $($currentLocation.Provider.Name)."
+                    "Current path: $($currentLocation.Path)."
                     'Provide an explicit BasePath parameter, or use Set-Location to switch to the relevant workspace directory before calling this helper.'
                 ) -join ' '
                 throw $message
@@ -732,6 +749,16 @@ function ConvertTo-TaskKillProcessIdArgument {
 }
 
 function Add-TaskOutputOrDiagnostic {
+    <#
+    .SYNOPSIS
+    Adds redirected taskkill.exe stream output or a bounded diagnostic message.
+
+    .NOTES
+    Windows PowerShell 5.1 has no async/await syntax and ReadToEndAsync has no
+    cancellation token on the supported runtimes. If the bounded Task.Wait call
+    times out, this helper reports that condition and leaves the read task to
+    complete later; timeout cleanup is handled by the owning process path.
+    #>
     param(
         [Parameter(Mandatory = $true)][System.Collections.Generic.List[string]]$Output,
         [Parameter(Mandatory = $true)][object]$Task,
@@ -828,7 +855,15 @@ function Invoke-TaskKillTree {
                 $taskKillProcess.Kill()
             }
             catch {
-                Write-Verbose "Could not terminate stuck taskkill.exe process: $($_.Exception.Message)"
+                $taskKillProcessId = Get-ValidProcessIdOrNull -Process $taskKillProcess
+                $taskKillListProcessId = if ($null -ne $taskKillProcessId) { $taskKillProcessId } else { 0 }
+                $taskKillListCommand = Get-TaskListDiagnosticCommand -ProcessId $taskKillListProcessId
+                $warning = @(
+                    'Could not terminate stuck taskkill.exe helper process.'
+                    "Use Task Manager or run '$taskKillListCommand' to verify its state."
+                    "Error: $($_.Exception.Message)"
+                ) -join ' '
+                Write-Warning $warning
             }
 
             $output = [System.Collections.Generic.List[string]]::new()
@@ -1177,12 +1212,13 @@ function Get-RequiredManifestText {
 # WaitForExit expects a 32-bit millisecond value. Validate timeout input before
 # path setup creates output/log directories, so invalid parameters fail fast.
 try {
-    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+    $perRepositoryTimeoutMilliseconds = Convert-SecondsToIntMilliseconds `
+        -TimeoutDescription 'PerRepositoryTimeoutSeconds' `
+        -Seconds $PerRepositoryTimeoutSeconds
 }
 catch {
     throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
 }
-$timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
 
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
@@ -1274,7 +1310,7 @@ else {
 
 $commandWrapperDisplayName = Split-Path -Leaf $CommandWrapperRelativePath
 if ([string]::IsNullOrWhiteSpace($commandWrapperDisplayName)) {
-    $commandWrapperDisplayName = $CommandWrapperRelativePath
+    $commandWrapperDisplayName = 'command wrapper'
 }
 
 if ($repositories.Count -eq 0) {
@@ -1457,8 +1493,10 @@ foreach ($repository in $repositories) {
     Remove-ExistingFileSafely -Path $stderrPath -Description 'stderr log'
 
     # This script is a manual/CI validation command, not an importable module.
-    # Write-Host keeps progress visible even when the table output is captured.
-    Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $timeoutSecondsDisplay seconds)..."
+    # Write-Host keeps progress visible even when the table output is captured;
+    # Write-Information is hidden by default in Windows PowerShell 5.1 unless
+    # callers remember to set InformationAction/InformationPreference.
+    Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
@@ -1476,7 +1514,7 @@ foreach ($repository in $repositories) {
     $cmdArguments = @('/d', '/c', $cmdInvocation)
     # Display-only diagnostic text. Do not feed this back into cmd.exe; actual
     # execution uses ArgumentList above so arguments stay separated.
-    $cmdArgumentDiagnosticText = $cmdArguments -join ' '
+    $cmdArgumentDiagnosticOnlyText = $cmdArguments -join ' '
     $process = $null
     $processStartTime = $null
     try {
@@ -1505,7 +1543,7 @@ foreach ($repository in $repositories) {
         $startError = $_.Exception.ToString()
         Write-Warning "[$repoDisplayName] Failed to start CMD wrapper: $startError"
         $startFailureDetail = @(
-            "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticText"
+            "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticOnlyText"
             'Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.'
             $startError
         ) -join [Environment]::NewLine
@@ -1526,7 +1564,7 @@ foreach ($repository in $repositories) {
         # validation result, log paths, process identity diagnostics, and final
         # package inspection in one flow. Extracting it would require a wide
         # parameter object without making the operational logic safer.
-        $processTimedOut = -not $process.WaitForExit($timeoutMilliseconds)
+        $processTimedOut = -not $process.WaitForExit($perRepositoryTimeoutMilliseconds)
         if ($processTimedOut) {
             # The process can exit between timeout detection and the following
             # state reads. Every termination branch refreshes the Process object
@@ -1538,7 +1576,7 @@ foreach ($repository in $repositories) {
             else {
                 $processIdText = [string]$processId
             }
-            Write-Warning "[$repoDisplayName] Timeout reached after $timeoutSecondsDisplay seconds. Terminating process tree for PID $processIdText."
+            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
                 Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
@@ -1606,7 +1644,8 @@ foreach ($repository in $repositories) {
                         }
 
                         if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
-                            $taskListCommand = if ($null -ne $processId) { Get-TaskListDiagnosticCommand -ProcessId $processId } else { Get-TaskListDiagnosticCommand }
+                            $taskListProcessId = if ($null -ne $processId) { $processId } else { 0 }
+                            $taskListCommand = Get-TaskListDiagnosticCommand -ProcessId $taskListProcessId
                             Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run '$taskListCommand' to verify the process tree has terminated before rerunning package validation."
                         }
                     }
@@ -1672,6 +1711,8 @@ foreach ($repository in $repositories) {
             -StderrLog $stderrPath `
             -Detail $packageValidation.Message))
 
+        # Keep final per-repository status visible for the same manual/CI
+        # progress reason as the "Running ..." message above.
         Write-Host "[$repoDisplayName] $status"
     }
     finally {
