@@ -103,16 +103,16 @@ $MinimumMeaningfulZipFileLengthBytes = 22
 # Keep diagnostics short enough for CI tables and warnings while still showing
 # enough context to identify the bad value.
 $MaximumDiagnosticTextLength = 160
-$MillisecondsPerSecond = [int64]1000
+$MillisecondsPerSecond = [int]1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # This relative path is validated during startup so moving the script fails loudly.
 $RepositoryRootRelativePath = '..\..'
 # Store the millisecond limit separately because WaitForExit accepts an [int]
 # millisecond value, while user-facing validation and diagnostics use seconds.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
-# Keep the explicit cast so the derived second limit visibly rounds down to the
-# largest whole number accepted by WaitForExit's millisecond API.
-$MaximumWaitForExitSeconds = [int]($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
+# Use floor explicitly so the derived second limit visibly rounds down to the
+# largest whole-second value that can round-trip through WaitForExit(int).
+$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -131,9 +131,6 @@ $TaskKillStreamReadWaitSeconds = 3
 # Direct Process.Kill() is the last fallback for a stuck cmd.exe process; reuse
 # the same ten-second grace period as taskkill-driven termination.
 $DirectProcessKillWaitSeconds = 10
-# The command output is redirected to files, so only a short final flush wait is
-# needed once the process has already exited.
-$StreamFlushWaitSeconds = 3
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
 # period after taskkill asks Windows to terminate the process tree.
@@ -169,16 +166,11 @@ function Convert-SecondsToIntMilliseconds {
         throw "$Name is too large for .NET Process.WaitForExit(int): $Seconds seconds. Maximum supported value is $MaximumWaitForExitSeconds seconds."
     }
 
-    $milliseconds = ([int64]$Seconds) * $MillisecondsPerSecond
-    if ($milliseconds -gt $MaximumWaitForExitMilliseconds) {
-        throw "$Name converts to $milliseconds milliseconds, which exceeds the .NET Process.WaitForExit(int) limit of $MaximumWaitForExitMilliseconds milliseconds."
-    }
-
-    return [int]$milliseconds
+    return [int](([int64]$Seconds) * $MillisecondsPerSecond)
 }
 
 function Get-SafeDiagnosticText {
-    param([AllowNull()][string]$Value)
+    param([AllowNull()][AllowEmptyString()][string]$Value)
 
     if ($null -eq $Value) {
         return '<null>'
@@ -214,7 +206,6 @@ try {
     $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
     $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
     $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
-    $StreamFlushWaitMilliseconds = Convert-SecondsToIntMilliseconds -Name 'StreamFlushWaitSeconds' -Seconds $StreamFlushWaitSeconds
 }
 catch {
     throw "Invalid built-in process wait timeout in test-cmd-wrappers.ps1: $($_.Exception.Message)"
@@ -389,6 +380,10 @@ function Get-ShortStableHash {
     $hashWithSeparators = [System.BitConverter]::ToString($hashBytes)
     $hash = $hashWithSeparators.Replace('-', '').ToLowerInvariant()
 
+    if ($HashPrefixLength -gt $hash.Length) {
+        throw "HashPrefixLength cannot exceed the generated SHA256 hash length of $($hash.Length). Actual value: $HashPrefixLength"
+    }
+
     return $hash.Substring(0, $HashPrefixLength)
 }
 
@@ -442,7 +437,8 @@ function ConvertTo-CmdArgument {
 
     # cmd.exe treats ^ as its escape character; ^^ emits one literal caret.
     # Escape carets before quoting so a literal caret cannot alter parsing of
-    # the generated command line.
+    # the generated command line. The quoting pattern includes ^, so a caret
+    # escaped to ^^ is still forced into a quoted argument below.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
@@ -597,7 +593,7 @@ function Get-ObjectTypeName {
     param([AllowNull()][object]$Value)
 
     if ($null -eq $Value) {
-        return '<null>'
+        return '[null type]'
     }
 
     try {
@@ -703,7 +699,7 @@ function Invoke-TaskKillTree {
         $taskKillCompletedWithinTimeout = $taskKillProcess.WaitForExit($TaskKillWaitMilliseconds)
         if (-not $taskKillCompletedWithinTimeout) {
             try {
-                Write-Verbose "taskkill.exe exceeded $TaskKillWaitSeconds seconds and is being forcefully terminated; this terminates the helper taskkill.exe process, not the target process tree."
+                Write-Warning "taskkill.exe exceeded $TaskKillWaitSeconds seconds and is being forcefully terminated; this terminates the helper taskkill.exe process, not the target process tree."
                 $taskKillProcess.Kill()
             }
             catch {
@@ -795,10 +791,12 @@ function Test-ExpectedCmdProcess {
         }
 
         # TotalMilliseconds is a double; keep that precision for the tolerance
-        # comparison instead of rounding to whole milliseconds.
-        $startTimeDifferenceMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
-        if ($startTimeDifferenceMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
-            Write-Verbose "Process start time changed by $startTimeDifferenceMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
+        # comparison instead of rounding to whole milliseconds. The absolute
+        # difference absorbs Windows timer-resolution variance between process
+        # metadata snapshots.
+        $startTimeDifferenceAbsoluteMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
+        if ($startTimeDifferenceAbsoluteMilliseconds -gt $ProcessStartTimeTolerance.TotalMilliseconds) {
+            Write-Verbose "Process start time changed by $startTimeDifferenceAbsoluteMilliseconds ms, which exceeds the $($ProcessStartTimeTolerance.TotalMilliseconds) ms tolerance."
             return $false
         }
 
@@ -1460,9 +1458,11 @@ foreach ($repository in $repositories) {
             # through async .NET event handlers. A short bounded wait is enough
             # to let the process object observe final stream state without
             # introducing an unbounded wait after timeout handling.
-            if (-not $process.WaitForExit($StreamFlushWaitMilliseconds)) {
-                Write-Verbose "[$repoDisplayName] Process had exited, but final stream flush wait did not complete within $StreamFlushWaitSeconds seconds."
-            }
+            # The timeout-based WaitForExit overload can return before all
+            # process bookkeeping has been observed. The parameterless overload
+            # returns immediately for an exited process and lets .NET finish its
+            # final stream/handle bookkeeping without adding another timeout.
+            $process.WaitForExit()
         }
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
