@@ -92,6 +92,8 @@ $MinimumValidProcessId = 1
 # whitespace controls such as TAB, vertical tab, form feed, CR, and LF, plus DEL.
 $AsciiControlMaximum = 31
 $AsciiDeleteCodePoint = 127
+# Keep the replacement compact because the first control character is reported
+# precisely by Get-ControlCharacterDiagnostic when validation rejects a value.
 $ControlCharacterReplacement = '?'
 # Same range as $AsciiControlMaximum and $AsciiDeleteCodePoint, expressed in
 # regex hexadecimal notation for PowerShell's regular-expression engine.
@@ -117,8 +119,9 @@ $MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # This relative path is validated during startup so moving the script fails loudly.
 $RepositoryRootRelativePath = '..\..'
-# Store the millisecond limit separately because WaitForExit accepts an [int]
-# millisecond value, while user-facing validation and diagnostics use seconds.
+# Store the theoretical .NET API limit separately because WaitForExit accepts an
+# [int] millisecond value. The practical wrapper timeout is much lower and is
+# constrained by the PerRepositoryTimeoutSeconds parameter.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
 # Floor gives the largest whole-second value that can round-trip through
 # WaitForExit(int milliseconds) without overflowing after conversion back to
@@ -126,13 +129,18 @@ $MaximumWaitForExitMilliseconds = [int]::MaxValue
 $MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 # Named alias for the same computed limit. The ValidateRange attribute inside
 # Convert-SecondsToIntMilliseconds must still use a literal value in Windows
-# PowerShell 5.1, so its inline comment explicitly ties the literal to this
+# PowerShell 5.1, because ValidateRange attribute arguments cannot reference
+# variables there. Its inline comment explicitly ties the literal to this
 # constant and the runtime check below remains the source of truth.
 $MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
 # converted to WaitForExit-compatible millisecond values below.
+# Keep them as conventional script constants instead of Set-Variable ReadOnly
+# values so the script remains straightforward to dot-source and parser-test in
+# Windows PowerShell 5.1. StrictMode and review keep this file from reassigning
+# them during normal execution.
 # Ten seconds is long enough for typical Windows process tree cleanup without
 # making timeout validation feel stuck when a child process is wedged.
 $PostTerminationWaitSeconds = 10
@@ -314,7 +322,12 @@ function Resolve-FullPathSafely {
         $effectiveBasePath = if ([string]::IsNullOrWhiteSpace($BasePath)) {
             $currentLocation = Get-Location
             if ($currentLocation.Provider.Name -ne 'FileSystem') {
-                throw "Current PowerShell location must be a filesystem path before resolving relative paths. Actual provider: $($currentLocation.Provider.Name). Provide an explicit BasePath parameter, or use Set-Location to switch to the relevant workspace directory before calling this helper."
+                $message = @(
+                    'Current PowerShell location must be a filesystem path before resolving relative paths.'
+                    "Actual provider: $($currentLocation.Provider.Name)."
+                    'Provide an explicit BasePath parameter, or use Set-Location to switch to the relevant workspace directory before calling this helper.'
+                ) -join ' '
+                throw $message
             }
 
             $currentLocation.ProviderPath
@@ -402,6 +415,9 @@ function ConvertTo-ComparablePath {
         [Parameter(Mandatory = $true)][string]$Path
     )
 
+    # The wrapper validation is Windows-only by design because it launches
+    # cmd.exe and taskkill.exe. Use OrdinalIgnoreCase path comparisons to match
+    # normal Windows filesystem behavior for local drives and UNC paths.
     $fullPath = Trim-TrailingDirectorySeparators -Path (Resolve-FullPathSafely -Name $Name -Path $Path)
     return $fullPath.Replace([System.IO.Path]::AltDirectorySeparatorChar, [System.IO.Path]::DirectorySeparatorChar)
 }
@@ -442,6 +458,8 @@ function Get-ShortStableHash {
         $hashBytes = $sha256.ComputeHash($bytes)
     }
     finally {
+        # SHA256.Create() can fail before assignment on unusual crypto-provider
+        # problems, so only dispose the provider when construction succeeded.
         if ($null -ne $sha256) {
             $sha256.Dispose()
         }
@@ -449,7 +467,9 @@ function Get-ShortStableHash {
 
     # 16 hex characters gives 64 bits of stable filename entropy, which is
     # intentionally more than enough for the small set of sibling repositories.
-    $hashBuilder = [System.Text.StringBuilder]::new($hashBytes.Length * 2)
+    # Build the full SHA256 hex string before taking the configured prefix so
+    # the length check below still verifies a complete digest.
+    $hashBuilder = [System.Text.StringBuilder]::new($Sha256HexLength)
     foreach ($hashByte in $hashBytes) {
         [void]$hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
     }
@@ -513,8 +533,9 @@ function ConvertTo-CmdArgument {
     # cmd.exe treats ^ as its escape character; ^^ emits one literal caret.
     # Escape carets before quoting so a literal caret cannot alter parsing of
     # the generated command line. The quoting pattern includes ^, so a caret
-    # escaped to ^^ is still forced into a quoted argument below. Delayed
-    # expansion is not enabled for this cmd.exe invocation, so ! is not escaped.
+    # escaped to ^^ is still forced into a quoted argument below. The script
+    # invokes cmd.exe without /v:on, so this cmd instance does not perform
+    # delayed ! expansion; AutoRun hooks are disabled later with /d.
     $escaped = $Value.Replace('^', '^^')
     if ($escaped -notmatch $CmdArgumentNeedsQuotingPattern) {
         return $escaped
@@ -682,6 +703,24 @@ function Get-ObjectTypeName {
     }
 }
 
+function Get-CurrentIdentityDiagnostic {
+    try {
+        $identity = [System.Security.Principal.WindowsIdentity]::GetCurrent()
+        if ($null -ne $identity -and -not [string]::IsNullOrWhiteSpace($identity.Name)) {
+            return $identity.Name
+        }
+    }
+    catch {
+        Write-Verbose "Could not read current Windows identity: $($_.Exception.Message)"
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($env:USERNAME)) {
+        return $env:USERNAME
+    }
+
+    return '<unknown user>'
+}
+
 function ConvertTo-TaskKillProcessIdArgument {
     param([Parameter(Mandatory = $true)][int]$ProcessId)
 
@@ -713,7 +752,10 @@ function Add-TaskOutputOrDiagnostic {
             # wait; the owning process is already being observed separately.
             # Attaching a continuation would only add asynchronous bookkeeping
             # for helper-process diagnostics and would not make timeout handling
-            # safer in Windows PowerShell 5.1.
+            # safer in Windows PowerShell 5.1. A timeout here can leave the
+            # stream read task completing later; that is acceptable because the
+            # helper process has already exited or is being handled by the
+            # process-timeout path.
             $Output.Add("Timed out after $TaskKillStreamReadWaitSeconds seconds while reading taskkill $StreamName.")
             return
         }
@@ -863,7 +905,7 @@ function Test-ExpectedCmdProcess {
         }
 
         if (-not ($ExpectedStartTime -is [System.DateTime])) {
-            Write-Verbose "Expected process start time should be of type [System.DateTime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
+            Write-Verbose "Expected process start time must be of type [System.DateTime] but got '$(Get-ObjectTypeName -Value $ExpectedStartTime)'."
             return $false
         }
 
@@ -1132,6 +1174,16 @@ function Get-RequiredManifestText {
     return $value
 }
 
+# WaitForExit expects a 32-bit millisecond value. Validate timeout input before
+# path setup creates output/log directories, so invalid parameters fail fast.
+try {
+    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
+}
+catch {
+    throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
+}
+$timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
+
 $scriptDirectory = Get-ScriptDirectory
 # This script is intentionally kept in scripts/omp, so ..\.. is the repository
 # root for every OMP-compatible repository that carries the shared wrappers.
@@ -1229,18 +1281,6 @@ if ($repositories.Count -eq 0) {
     throw "No OMP-compatible repositories found below $workspaceRootPath. Each repository must contain $ManifestRelativePath and $CommandWrapperRelativePath."
 }
 
-# WaitForExit expects a 32-bit millisecond value. This is intentionally computed
-# from the parameter so the unit conversion stays close to the configured
-# timeout; ValidateRange caps it at 3600 seconds (3600000 ms), well below
-# [int]::MaxValue, and Convert-SecondsToIntMilliseconds also rejects values
-# above the WaitForExit-compatible seconds limit.
-try {
-    $timeoutMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PerRepositoryTimeoutSeconds' -Seconds $PerRepositoryTimeoutSeconds
-}
-catch {
-    throw "Invalid timeout value for PerRepositoryTimeoutSeconds parameter: $($_.Exception.Message)"
-}
-$timeoutSecondsDisplay = $PerRepositoryTimeoutSeconds
 # Validation results are assembled as PSCustomObjects in several branches. Each
 # result has Repository, Status, ExitCode, Package, StdoutLog, StderrLog, and
 # Detail properties; a generic object list keeps append behavior efficient
@@ -1287,7 +1327,8 @@ foreach ($repository in $repositories) {
         # -Encoding name because Windows PowerShell 5.1's Get-Content
         # -Encoding parameter does not support that value. -Raw is required so
         # ConvertFrom-Json receives the whole manifest as one string instead of
-        # line-by-line input from an array of strings.
+        # line-by-line input from an array of strings. Component manifests are
+        # small repository metadata files, so full-document loading is expected.
         $manifestJson = Get-Content -LiteralPath $manifestPath -Raw -Encoding UTF8
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1304,6 +1345,11 @@ foreach ($repository in $repositories) {
         continue
     }
     catch [System.UnauthorizedAccessException] {
+        $currentIdentity = Get-CurrentIdentityDiagnostic
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath' because access was denied for '$currentIdentity'."
+            "Check file permissions: $($_.Exception.Message)"
+        ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
             -Status 'Manifest read failed' `
@@ -1311,10 +1357,14 @@ foreach ($repository in $repositories) {
             -Package '' `
             -StdoutLog '' `
             -StderrLog '' `
-            -Detail "Could not read component manifest '$manifestPath' because access was denied. Check file permissions for the current user: $($_.Exception.Message)"))
+            -Detail $manifestReadFailureDetail))
         continue
     }
     catch [System.IO.IOException] {
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath' because of an I/O error."
+            "Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
+        ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
             -Status 'Manifest read failed' `
@@ -1322,10 +1372,16 @@ foreach ($repository in $repositories) {
             -Package '' `
             -StdoutLog '' `
             -StderrLog '' `
-            -Detail "Could not read component manifest '$manifestPath' because of an I/O error. Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"))
+            -Detail $manifestReadFailureDetail))
         continue
     }
     catch {
+        $currentIdentity = Get-CurrentIdentityDiagnostic
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath'."
+            "Verify that the path is a filesystem file and readable by '$currentIdentity'."
+            "Also verify that it is not a directory-like reparse target or blocked by another process: $($_.Exception.Message)"
+        ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repoDisplayName `
             -Status 'Manifest read failed' `
@@ -1333,7 +1389,7 @@ foreach ($repository in $repositories) {
             -Package '' `
             -StdoutLog '' `
             -StderrLog '' `
-            -Detail "Could not read component manifest '$manifestPath'. Verify that the path is a filesystem file, readable by the current user, not a directory-like reparse target, and not blocked by another process: $($_.Exception.Message)"))
+            -Detail $manifestReadFailureDetail))
         continue
     }
 
