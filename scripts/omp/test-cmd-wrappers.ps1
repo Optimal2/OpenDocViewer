@@ -43,8 +43,8 @@ Directory where stdout/stderr logs are written. Use a user-private or
 ACL-protected location when logs may contain sensitive diagnostics.
 
 .PARAMETER PerRepositoryTimeoutSeconds
-Maximum build time per repository. Must be between 60 and 3600 seconds
-(1 hour = 3600 seconds); the bounds are enforced by ValidateRange and the
+Maximum build time per repository. Must be between 60 and 3600 seconds; the
+upper bound of 3600 seconds (1 hour) is enforced by ValidateRange and the
 default is 1200 seconds (20 minutes).
 #>
 [CmdletBinding()]
@@ -73,7 +73,7 @@ else {
     Split-Path -Leaf $PSCommandPath
 }
 
-$SafeFileNamePattern = '[^A-Za-z0-9._-]+'
+$SafeFileNamePattern = '[^A-Za-z0-9._\-]+'
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 # Delimiter between repositoryKey and repositoryVersion in
 # repositoryKey__global__repositoryVersion.zip.
@@ -98,7 +98,6 @@ $ControlCharacterReplacement = '?'
 # Same range as $AsciiControlMaximum and $AsciiDeleteCodePoint, expressed in
 # regex hexadecimal notation for PowerShell's regular-expression engine.
 $ControlCharacterPattern = '[\x00-\x1F\x7F]'
-$LineEndingPattern = '\r\n|\r|\n'
 # Whitespace and these cmd.exe metacharacters can change command parsing unless
 # the generated argument is quoted.
 $CmdArgumentNeedsQuotingPattern = '[\s&|<>()^,;=]'
@@ -117,8 +116,10 @@ $MaximumDiagnosticTextLength = 160
 $TruncationIndicator = '...'
 $MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
-# This relative path is validated during startup so moving the script fails loudly.
-$RepositoryRootRelativePath = '..\..'
+# Build the relative path from segments and validate it during startup so moving
+# the script fails loudly.
+$RepositoryRootRelativePathSegments = @('..', '..')
+$RepositoryRootRelativePath = Join-Path $RepositoryRootRelativePathSegments[0] $RepositoryRootRelativePathSegments[1]
 # Store the theoretical .NET API limit separately because WaitForExit accepts an
 # [int] millisecond value. The practical wrapper timeout is much lower and is
 # constrained by the PerRepositoryTimeoutSeconds parameter.
@@ -158,9 +159,11 @@ $DirectProcessKillWaitSeconds = 10
 # Keep these timeouts separate even when defaults match: taskkill.exe has its
 # own startup/runtime budget, while the target cmd.exe gets a separate grace
 # period after taskkill asks Windows to terminate the process tree.
-# taskkill.exe uses normal process exit codes. -1 is reserved here to mean that
-# PowerShell could not start or observe taskkill.exe itself.
-$TaskKillExecutionExceptionExitCode = -1
+# taskkill.exe uses normal process exit codes. This distinctive sentinel means
+# PowerShell could not start or observe taskkill.exe itself; it is not returned
+# by taskkill.exe during normal process termination.
+$TaskKillExecutionExceptionExitCode = [int]::MinValue
+$InvalidProcessIdSentinel = -1
 # taskkill.exe flags used after a repository wrapper exceeds its timeout.
 # /T terminates the process tree; /F forces termination when cooperative exit
 # is no longer expected.
@@ -180,6 +183,9 @@ $ProcessStartTimeToleranceMilliseconds = 100
 $ProcessStartTimeTolerance = [TimeSpan]::FromMilliseconds($ProcessStartTimeToleranceMilliseconds)
 $NoTaskExceptionDiagnostic = 'Async stream read task faulted without exception information'
 
+# This startup guard intentionally protects future edits to the script-level
+# constants. It keeps later truncation logic simple and avoids defensive math in
+# hot diagnostic paths.
 if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
     $message = @(
         'MaximumDiagnosticTextLength must be greater than the truncation indicator length.'
@@ -187,6 +193,10 @@ if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
         "TruncationIndicatorLength=$($TruncationIndicator.Length)."
     ) -join ' '
     throw $message
+}
+
+if ($MaximumSafeSecondsForMillisecondConversion -ne 2147483) {
+    throw "ValidateRange literal for Convert-SecondsToIntMilliseconds is out of sync. Expected 2147483 but computed $MaximumSafeSecondsForMillisecondConversion."
 }
 
 function Convert-SecondsToIntMilliseconds {
@@ -229,7 +239,7 @@ function Get-SafeDiagnosticText {
 
     $safe = $Value -replace $ControlCharacterPattern, $ControlCharacterReplacement
     if ($safe.Length -gt $MaximumDiagnosticTextLength) {
-        $prefixLength = [Math]::Max(0, $MaximumDiagnosticTextLength - $TruncationIndicator.Length)
+        $prefixLength = $MaximumDiagnosticTextLength - $TruncationIndicator.Length
         return $safe.Substring(0, $prefixLength) + $TruncationIndicator
     }
 
@@ -246,14 +256,20 @@ function Get-SafeDiagnosticExcerpt {
         return '<empty>'
     }
 
-    $lines = $Value -split $LineEndingPattern
     $safeLines = [System.Collections.Generic.List[string]]::new()
-    foreach ($line in $lines) {
-        if ($safeLines.Count -ge $MaximumLines) {
-            break
-        }
+    $reader = [System.IO.StringReader]::new($Value)
+    try {
+        while ($safeLines.Count -lt $MaximumLines) {
+            $line = $reader.ReadLine()
+            if ($null -eq $line) {
+                break
+            }
 
-        $safeLines.Add((Get-SafeDiagnosticText -Value $line))
+            $safeLines.Add((Get-SafeDiagnosticText -Value $line))
+        }
+    }
+    finally {
+        $reader.Dispose()
     }
 
     return ($safeLines.ToArray() -join ' | ')
@@ -416,8 +432,8 @@ function Trim-TrailingDirectorySeparators {
         return $trimmed
     }
 
-    $trimmedRoot = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
-    if ($trimmed.Equals($trimmedRoot, [StringComparison]::OrdinalIgnoreCase)) {
+    $rootWithoutTrailingSeparator = $root.TrimEnd([System.IO.Path]::DirectorySeparatorChar, [System.IO.Path]::AltDirectorySeparatorChar)
+    if ($trimmed.Equals($rootWithoutTrailingSeparator, [StringComparison]::OrdinalIgnoreCase)) {
         # Preserve the trailing separator for roots such as C:\ and \\server\share\
         # because C: has different semantics from C:\ on Windows.
         return $root
@@ -488,7 +504,7 @@ function Get-ShortStableHash {
     # the length check below still verifies a complete digest.
     $hashBuilder = [System.Text.StringBuilder]::new($Sha256HexLength)
     foreach ($hashByte in $hashBytes) {
-        [void]$hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
+        $null = $hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
     }
 
     $hash = $hashBuilder.ToString()
@@ -758,6 +774,8 @@ function Add-TaskOutputOrDiagnostic {
     cancellation token on the supported runtimes. If the bounded Task.Wait call
     times out, this helper reports that condition and leaves the read task to
     complete later; timeout cleanup is handled by the owning process path.
+    This is acceptable here because the tasks read independent helper-process
+    streams and do not marshal continuations back to the PowerShell thread.
     #>
     param(
         [Parameter(Mandatory = $true)][System.Collections.Generic.List[string]]$Output,
@@ -856,7 +874,7 @@ function Invoke-TaskKillTree {
             }
             catch {
                 $taskKillProcessId = Get-ValidProcessIdOrNull -Process $taskKillProcess
-                $taskKillListProcessId = if ($null -ne $taskKillProcessId) { $taskKillProcessId } else { 0 }
+                $taskKillListProcessId = if ($null -ne $taskKillProcessId) { $taskKillProcessId } else { $InvalidProcessIdSentinel }
                 $taskKillListCommand = Get-TaskListDiagnosticCommand -ProcessId $taskKillListProcessId
                 $warning = @(
                     'Could not terminate stuck taskkill.exe helper process.'
@@ -984,7 +1002,7 @@ function Get-ProcessIdentityDiagnostic {
 }
 
 function Get-TaskListDiagnosticCommand {
-    param([int]$ProcessId = 0)
+    param([int]$ProcessId = $InvalidProcessIdSentinel)
 
     if ($ProcessId -ge $MinimumValidProcessId) {
         return "tasklist /FI `"PID eq $ProcessId`""
@@ -994,7 +1012,7 @@ function Get-TaskListDiagnosticCommand {
 }
 
 function Get-TaskKillDiagnosticCommand {
-    param([int]$ProcessId = 0)
+    param([int]$ProcessId = $InvalidProcessIdSentinel)
 
     if ($ProcessId -ge $MinimumValidProcessId) {
         $processIdText = [string]$ProcessId
@@ -1324,13 +1342,13 @@ if ($repositories.Count -eq 0) {
 $results = [System.Collections.Generic.List[object]]::new()
 
 foreach ($repository in $repositories) {
-    $repoDisplayName = $repository.Name
+    $repositoryName = $repository.Name
     $manifestPath = Join-Path $repository.FullName $ManifestRelativePath
     $cmdPath = Join-Path $repository.FullName $CommandWrapperRelativePath
 
     if (-not (Test-Path -LiteralPath $manifestPath -PathType Leaf)) {
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Missing manifest' `
             -ExitCode $null `
             -Package '' `
@@ -1342,7 +1360,7 @@ foreach ($repository in $repositories) {
 
     if (-not (Test-Path -LiteralPath $cmdPath -PathType Leaf)) {
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Missing wrapper' `
             -ExitCode $null `
             -Package '' `
@@ -1371,7 +1389,7 @@ foreach ($repository in $repositories) {
         # The file was checked above, but it can still be removed or replaced
         # between Test-Path and Get-Content.
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest read failed' `
             -ExitCode $null `
             -Package '' `
@@ -1387,7 +1405,7 @@ foreach ($repository in $repositories) {
             "Check file permissions: $($_.Exception.Message)"
         ) -join ' '
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest read failed' `
             -ExitCode $null `
             -Package '' `
@@ -1402,7 +1420,7 @@ foreach ($repository in $repositories) {
             "Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
         ) -join ' '
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest read failed' `
             -ExitCode $null `
             -Package '' `
@@ -1419,7 +1437,7 @@ foreach ($repository in $repositories) {
             "Also verify that it is not a directory-like reparse target or blocked by another process: $($_.Exception.Message)"
         ) -join ' '
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest read failed' `
             -ExitCode $null `
             -Package '' `
@@ -1442,7 +1460,7 @@ foreach ($repository in $repositories) {
         ) -join [Environment]::NewLine
 
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest parse failed' `
             -ExitCode $null `
             -Package '' `
@@ -1458,7 +1476,7 @@ foreach ($repository in $repositories) {
     }
     catch {
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Manifest invalid' `
             -ExitCode $null `
             -Package '' `
@@ -1482,9 +1500,9 @@ foreach ($repository in $repositories) {
 
     # Keep the sanitized name for human-readable logs and the path hash for
     # uniqueness when different workspace roots contain same-named repositories.
-    $safeRepoDisplayName = Get-SafeFileName -Value $repoDisplayName
+    $safeRepositoryName = Get-SafeFileName -Value $repositoryName
     $repoPathHash = Get-ShortStableHash -Value $repository.FullName
-    $safeName = "$safeRepoDisplayName-$repoPathHash"
+    $safeName = "$safeRepositoryName-$repoPathHash"
     $stdoutPath = Join-Path $runLogRootPath "$safeName$StdoutLogExtension"
     $stderrPath = Join-Path $runLogRootPath "$safeName$StderrLogExtension"
     Assert-PathUnderBase -Path $stdoutPath -BasePath $runLogRootPath -PathDescription 'stdout log path' -BaseDescription 'run log root'
@@ -1496,7 +1514,7 @@ foreach ($repository in $repositories) {
     # Write-Host keeps progress visible even when the table output is captured;
     # Write-Information is hidden by default in Windows PowerShell 5.1 unless
     # callers remember to set InformationAction/InformationPreference.
-    Write-Host "[$repoDisplayName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
+    Write-Host "[$repositoryName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
@@ -1541,7 +1559,7 @@ foreach ($repository in $repositories) {
     }
     catch {
         $startError = $_.Exception.ToString()
-        Write-Warning "[$repoDisplayName] Failed to start CMD wrapper: $startError"
+        Write-Warning "[$repositoryName] Failed to start CMD wrapper: $startError"
         $startFailureDetail = @(
             "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticOnlyText"
             'Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.'
@@ -1549,7 +1567,7 @@ foreach ($repository in $repositories) {
         ) -join [Environment]::NewLine
 
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status 'Start failed' `
             -ExitCode $null `
             -Package $expectedPackagePath `
@@ -1576,16 +1594,16 @@ foreach ($repository in $repositories) {
             else {
                 $processIdText = [string]$processId
             }
-            Write-Warning "[$repoDisplayName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
+            Write-Warning "[$repositoryName] Timeout reached after $PerRepositoryTimeoutSeconds seconds. Terminating process tree for PID $processIdText."
             $process.Refresh()
             if ($process.HasExited) {
-                Write-Warning "[$repoDisplayName] Process exited after the timeout was detected; taskkill was not needed."
+                Write-Warning "[$repositoryName] Process exited after the timeout was detected; taskkill was not needed."
             }
             elseif ($null -eq $processId) {
-                Write-Warning "[$repoDisplayName] Process PID could not be read or was invalid; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
+                Write-Warning "[$repositoryName] Process PID could not be read or was invalid; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
             }
             elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                Write-Warning "[$repoDisplayName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
+                Write-Warning "[$repositoryName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
             }
             else {
                 $taskKillAttempted = $false
@@ -1594,10 +1612,10 @@ foreach ($repository in $repositories) {
                 try {
                     $process.Refresh()
                     if ($process.HasExited) {
-                        Write-Warning "[$repoDisplayName] Process exited immediately before taskkill; termination was not needed."
+                        Write-Warning "[$repositoryName] Process exited immediately before taskkill; termination was not needed."
                     }
                     elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                        Write-Warning "[$repoDisplayName] Process identity changed immediately before taskkill; termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
+                        Write-Warning "[$repositoryName] Process identity changed immediately before taskkill; termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
                     }
                     else {
                         # This intentionally repeats the earlier process-state
@@ -1619,22 +1637,22 @@ foreach ($repository in $repositories) {
                 }
 
                 if ($taskKillAttempted -and $taskKillExitCode -ne 0) {
-                    Write-TaskKillFailureWarning -RepositoryName $repoDisplayName -ExitCode $taskKillExitCode -ProcessId $processId -Output @($taskKillOutput)
+                    Write-TaskKillFailureWarning -RepositoryName $repositoryName -ExitCode $taskKillExitCode -ProcessId $processId -Output @($taskKillOutput)
                 }
 
                 $process.Refresh()
                 if ($process.HasExited) {
-                    Write-Verbose "[$repoDisplayName] Process exited after termination attempt."
+                    Write-Verbose "[$repositoryName] Process exited after termination attempt."
                 }
                 elseif (-not $process.WaitForExit($PostTerminationWaitMilliseconds)) {
-                    Write-Warning "[$repoDisplayName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
+                    Write-Warning "[$repositoryName] Process did not exit within $PostTerminationWaitSeconds seconds after termination attempt; exit code may be unavailable."
                     try {
                         $process.Refresh()
                         if ($process.HasExited) {
-                            Write-Warning "[$repoDisplayName] Process exited immediately before direct Process.Kill(); no further termination was needed."
+                            Write-Warning "[$repositoryName] Process exited immediately before direct Process.Kill(); no further termination was needed."
                         }
                         elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                            Write-Warning "[$repoDisplayName] Process identity changed immediately before direct Process.Kill(); termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
+                            Write-Warning "[$repositoryName] Process identity changed immediately before direct Process.Kill(); termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
                         }
                         else {
                             # The process can still exit between HasExited and
@@ -1644,9 +1662,9 @@ foreach ($repository in $repositories) {
                         }
 
                         if (-not $process.WaitForExit($DirectProcessKillWaitMilliseconds)) {
-                            $taskListProcessId = if ($null -ne $processId) { $processId } else { 0 }
+                            $taskListProcessId = if ($null -ne $processId) { $processId } else { $InvalidProcessIdSentinel }
                             $taskListCommand = Get-TaskListDiagnosticCommand -ProcessId $taskListProcessId
-                            Write-Warning "[$repoDisplayName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run '$taskListCommand' to verify the process tree has terminated before rerunning package validation."
+                            Write-Warning "[$repositoryName] Process with PID $processIdText still did not exit after direct Process.Kill(). Use Task Manager or run '$taskListCommand' to verify the process tree has terminated before rerunning package validation."
                         }
                     }
                     catch {
@@ -1654,14 +1672,14 @@ foreach ($repository in $repositories) {
                         try {
                             $process.Refresh()
                             if ($process.HasExited) {
-                                Write-Warning "[$repoDisplayName] Direct Process.Kill() raced with natural process exit; no further termination was needed. Original error: $killError"
+                                Write-Warning "[$repositoryName] Direct Process.Kill() raced with natural process exit; no further termination was needed. Original error: $killError"
                             }
                             else {
-                                Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed while the process still appeared to be running: $killError"
+                                Write-Warning "[$repositoryName] Direct Process.Kill() after timeout failed while the process still appeared to be running: $killError"
                             }
                         }
                         catch {
-                            Write-Warning "[$repoDisplayName] Direct Process.Kill() after timeout failed and the final process state could not be inspected: $killError"
+                            Write-Warning "[$repositoryName] Direct Process.Kill() after timeout failed and the final process state could not be inspected: $killError"
                         }
                     }
                 }
@@ -1703,7 +1721,7 @@ foreach ($repository in $repositories) {
         }
 
         $results.Add((New-ValidationResult `
-            -Repository $repoDisplayName `
+            -Repository $repositoryName `
             -Status $status `
             -ExitCode $exitCode `
             -Package $expectedPackagePath `
@@ -1713,7 +1731,7 @@ foreach ($repository in $repositories) {
 
         # Keep final per-repository status visible for the same manual/CI
         # progress reason as the "Running ..." message above.
-        Write-Host "[$repoDisplayName] $status"
+        Write-Host "[$repositoryName] $status"
     }
     finally {
         if ($null -ne $process) {
