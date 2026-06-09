@@ -134,6 +134,10 @@ $MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds 
 # variables there. Its inline comment explicitly ties the literal to this
 # constant and the runtime check below remains the source of truth.
 $MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
+# ValidateRange attributes in Windows PowerShell 5.1 cannot reference variables.
+# Keep this named constant as the single documented literal value and assert
+# below that the computed WaitForExit limit still matches it.
+$ValidateRangeLiteralForMaximumSafeSeconds = 2147483
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -174,6 +178,7 @@ $CmdCallKeyword = 'call'
 $StdoutLogExtension = '.stdout.log'
 $StderrLogExtension = '.stderr.log'
 $GuidFormatNoHyphens = 'N'
+$RunLogDirectoryCreationAttempts = 5
 $ValidationSummaryColumns = @('Repository', 'Status', 'ExitCode', 'Package')
 # Windows can round Process.StartTime differently between the original Process
 # handle and a refreshed lookup because process metadata is read from snapshots
@@ -195,18 +200,19 @@ if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
     throw $message
 }
 
-if ($MaximumSafeSecondsForMillisecondConversion -ne 2147483) {
-    throw "ValidateRange literal for Convert-SecondsToIntMilliseconds is out of sync. Expected 2147483 but computed $MaximumSafeSecondsForMillisecondConversion."
+if ($MaximumSafeSecondsForMillisecondConversion -ne $ValidateRangeLiteralForMaximumSafeSeconds) {
+    throw "ValidateRange literal for Convert-SecondsToIntMilliseconds is out of sync. Expected $ValidateRangeLiteralForMaximumSafeSeconds but computed $MaximumSafeSecondsForMillisecondConversion."
 }
 
 function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
+        # SYNC-WITH: $ValidateRangeLiteralForMaximumSafeSeconds.
         # ValidateRange requires a literal value in Windows PowerShell 5.1.
         # 2147483 is floor([int]::MaxValue / 1000), or floor(2147483647 / 1000),
         # which is the largest whole-second value that safely converts back to
-        # WaitForExit(int milliseconds). Keep this aligned with
-        # $MaximumSafeSecondsForMillisecondConversion.
+        # WaitForExit(int milliseconds). Startup asserts that this literal still
+        # matches $MaximumSafeSecondsForMillisecondConversion.
         [ValidateRange(1, 2147483)]
         [Parameter(Mandatory = $true)][int]$Seconds
     )
@@ -402,6 +408,23 @@ function New-DirectorySafely {
     }
 }
 
+function New-RunLogDirectory {
+    param([Parameter(Mandatory = $true)][string]$LogRootPath)
+
+    for ($attempt = 1; $attempt -le $RunLogDirectoryCreationAttempts; $attempt++) {
+        $runId = [Guid]::NewGuid().ToString($GuidFormatNoHyphens)
+        $candidate = Join-Path $LogRootPath $runId
+        if (Test-Path -LiteralPath $candidate) {
+            continue
+        }
+
+        New-DirectorySafely -Path $candidate -Description 'run log directory'
+        return $candidate
+    }
+
+    throw "Could not create a unique run log directory below '$LogRootPath' after $RunLogDirectoryCreationAttempts attempt(s)."
+}
+
 function Test-IsSubPath {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -504,6 +527,8 @@ function Get-ShortStableHash {
     # the length check below still verifies a complete digest.
     $hashBuilder = [System.Text.StringBuilder]::new($Sha256HexLength)
     foreach ($hashByte in $hashBytes) {
+        # Assign to $null to suppress StringBuilder output without adding
+        # pipeline overhead inside this tight loop.
         $null = $hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
     }
 
@@ -636,6 +661,9 @@ function Assert-CmdExecutablePath {
 
     $fileName = [System.IO.Path]::GetFileName($candidate)
     $extension = [System.IO.Path]::GetExtension($candidate)
+    # The filename check is authoritative. The extension check is kept as a
+    # narrow defense-in-depth assertion so odd provider/path behavior cannot
+    # silently broaden this validator beyond cmd.exe.
     if (-not [StringComparer]::OrdinalIgnoreCase.Equals($fileName, 'cmd.exe') -or
         -not [StringComparer]::OrdinalIgnoreCase.Equals($extension, '.exe')) {
         throw "$Name must point to cmd.exe for wrapper validation. Actual value: $candidate"
@@ -773,7 +801,9 @@ function Add-TaskOutputOrDiagnostic {
     Windows PowerShell 5.1 has no async/await syntax and ReadToEndAsync has no
     cancellation token on the supported runtimes. If the bounded Task.Wait call
     times out, this helper reports that condition and leaves the read task to
-    complete later; timeout cleanup is handled by the owning process path.
+    complete later; timeout cleanup is handled by the owning process path. A
+    timed-out read task may hold stream resources until the helper process exits
+    or the PowerShell process unloads its AppDomain.
     This is acceptable here because the tasks read independent helper-process
     streams and do not marshal continuations back to the PowerShell thread.
     #>
@@ -851,7 +881,8 @@ function Invoke-TaskKillTree {
     $startInfo.RedirectStandardError = $true
     # Add arguments one by one: ProcessStartInfo.ArgumentList is not guaranteed
     # to expose AddRange across the Windows PowerShell/.NET versions we support.
-    foreach ($argument in @($TaskKillProcessIdSwitch, $processIdArgument, $TaskKillTerminateTreeSwitch, $TaskKillForceSwitch)) {
+    $taskKillArguments = @($TaskKillProcessIdSwitch, $processIdArgument, $TaskKillTerminateTreeSwitch, $TaskKillForceSwitch)
+    foreach ($argument in $taskKillArguments) {
         $startInfo.ArgumentList.Add($argument)
     }
 
@@ -1169,10 +1200,10 @@ function Assert-SafePackageIdentityPart {
         throw "Manifest field '$Name' contains characters that are unsafe for package filenames. Only letters, digits, dots, underscores, plus signs, and hyphens are allowed. Value: '$safeValue'. Manifest: $ManifestPath"
     }
 
-    # Contains('..') rejects every run of two or more consecutive dots, including
-    # '...' and longer runs, while ordinary version text such as '1.0.0' remains
-    # valid. Leading/trailing dots are rejected separately because they can be
-    # normalized away by file systems and shells.
+    # Dot validation is intentionally split into explicit cases: reject every
+    # run of two or more consecutive dots, a single dot, and leading/trailing
+    # dots. Ordinary version text such as '1.0.0' stays valid, but path-like
+    # or shell-normalized identity text is rejected before filenames are built.
     if ($Value.Contains('..')) {
         throw "Manifest field '$Name' must not contain two or more consecutive dots, including path traversal sequences like '..'. Value: '$safeValue'. Manifest: $ManifestPath"
     }
@@ -1293,12 +1324,9 @@ $cmdExePath = Resolve-CmdExePath
 # user-private temp folder, an ACL-protected workspace folder, or another
 # location where other local users cannot read build output that may include
 # paths, environment-derived diagnostics, or package validation details.
-# A GUID collision is not handled with a retry because the generated directory
-# lives below a caller-controlled log root and the collision probability is
-# negligible for this validation script.
-$runId = [Guid]::NewGuid().ToString($GuidFormatNoHyphens)
-$runLogRootPath = Join-Path $logRootPath $runId
-New-DirectorySafely -Path $runLogRootPath -Description 'run log directory'
+# Retry a few times in the extremely unlikely event that concurrent validation
+# runs produce the same GUID-named log directory below the same -LogRoot.
+$runLogRootPath = New-RunLogDirectory -LogRootPath $logRootPath
 # Log directories are intentionally retained for failed-run diagnostics. Remove
 # old $ValidationDirectoryName log folders manually or point -LogRoot at a
 # disposable location when running frequent local validation loops.
@@ -1328,6 +1356,8 @@ else {
 
 $commandWrapperDisplayName = Split-Path -Leaf $CommandWrapperRelativePath
 if ([string]::IsNullOrWhiteSpace($commandWrapperDisplayName)) {
+    # Display-only fallback for edge-case paths such as a trailing separator.
+    # The actual wrapper path is validated separately before execution.
     $commandWrapperDisplayName = 'command wrapper'
 }
 
@@ -1526,13 +1556,18 @@ foreach ($repository in $repositories) {
     # including the immutable output root path.
     $wrapperArguments = @($cmdPath, '--no-pause', '-OutputDirectory', $outputRootPath)
     $joinedWrapperArguments = Join-CmdCommandLine -Arguments $wrapperArguments
+    # $CmdCallKeyword is the cmd.exe built-in keyword 'call', not user input.
+    # Only the wrapper path and arguments are escaped and quoted.
     $cmdInvocation = "$CmdCallKeyword $joinedWrapperArguments"
     Assert-CmdCommandLineLength -CommandLine $cmdInvocation
     # /d disables cmd.exe AutoRun hooks and /c runs the wrapper then exits.
     $cmdArguments = @('/d', '/c', $cmdInvocation)
     # Display-only diagnostic text. Do not feed this back into cmd.exe; actual
-    # execution uses ArgumentList above so arguments stay separated.
+    # execution uses ArgumentList above so arguments stay separated. Keep the
+    # executable path and argument list as separate labeled fields so paths with
+    # spaces are readable without pretending this is a pasteable command line.
     $cmdArgumentDiagnosticOnlyText = $cmdArguments -join ' '
+    $cmdStartDiagnosticText = "FilePath='$cmdExePath'; Arguments='$cmdArgumentDiagnosticOnlyText'"
     $process = $null
     $processStartTime = $null
     try {
@@ -1561,7 +1596,7 @@ foreach ($repository in $repositories) {
         $startError = $_.Exception.ToString()
         Write-Warning "[$repositoryName] Failed to start CMD wrapper: $startError"
         $startFailureDetail = @(
-            "Process start failed. Command: $cmdExePath $cmdArgumentDiagnosticOnlyText"
+            "Process start failed. Diagnostic only: $cmdStartDiagnosticText"
             'Stdout/stderr log files may not exist if cmd.exe could not start or if a redirected log path was locked.'
             $startError
         ) -join [Environment]::NewLine
@@ -1583,6 +1618,7 @@ foreach ($repository in $repositories) {
         # package inspection in one flow. Extracting it would require a wide
         # parameter object without making the operational logic safer.
         $processTimedOut = -not $process.WaitForExit($perRepositoryTimeoutMilliseconds)
+        $process.Refresh()
         if ($processTimedOut) {
             # The process can exit between timeout detection and the following
             # state reads. Every termination branch refreshes the Process object
@@ -1658,6 +1694,7 @@ foreach ($repository in $repositories) {
                             # The process can still exit between HasExited and
                             # Kill(); the catch below treats that race as a
                             # diagnostic warning instead of a script failure.
+                            Write-Warning "[$repositoryName] taskkill did not terminate the wrapper process tree; attempting direct Process.Kill() for PID $processIdText."
                             $process.Kill()
                         }
 
@@ -1696,7 +1733,12 @@ foreach ($repository in $repositories) {
             # process bookkeeping has been observed. The parameterless overload
             # returns immediately for an exited process and lets .NET finish its
             # final stream/handle bookkeeping without adding another timeout.
-            $process.WaitForExit()
+            try {
+                $process.WaitForExit()
+            }
+            catch {
+                Write-Verbose "Process exited but final WaitForExit bookkeeping failed: $($_.Exception.Message)"
+            }
         }
 
         $exitCode = Get-ProcessExitCodeOrNull -Process $process
