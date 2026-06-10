@@ -267,6 +267,8 @@ Assert-DiagnosticConstantsValid
 # against the independent [int]::MaxValue calculation, and the other validates
 # the named alias used by conversion logic. If either path drifts, fail at
 # startup before any child process is started.
+# Run this before launching child processes so ValidateRange/conversion drift
+# fails fast instead of surfacing as a timeout or cleanup problem later.
 Assert-ValidateRangeLiteralMatches `
     -LiteralName 'ValidateRangeLiteralForMaximumSafeSeconds' `
     -LiteralValue $ValidateRangeLiteralForMaximumSafeSeconds `
@@ -451,7 +453,7 @@ function Get-JsonParseLocationDiagnostic {
         return 'Parser location: not reported by this PowerShell runtime.'
     }
 
-    $matches = [regex]::Matches($message, '(?im)\b(line|position)\s+(\d+)\b')
+    $matches = [regex]::Matches($message, '(?i)\b(line|position)\s+(\d+)\b')
     if ($matches.Count -eq 0) {
         return 'Parser location: not reported by this PowerShell runtime.'
     }
@@ -1217,10 +1219,8 @@ function Invoke-TaskKillTree {
 function Test-IsCmdProcessName {
     param([Parameter(Mandatory = $true)][string]$ProcessName)
 
-    return (
-        $ProcessName.Equals('cmd', [StringComparison]::OrdinalIgnoreCase) -or
-        $ProcessName.Equals('cmd.exe', [StringComparison]::OrdinalIgnoreCase)
-    )
+    $normalizedProcessName = $ProcessName.ToLowerInvariant()
+    return $normalizedProcessName -eq 'cmd' -or $normalizedProcessName -eq 'cmd.exe'
 }
 
 function Test-IsValidProcessTimestamp {
@@ -2268,7 +2268,7 @@ foreach ($repository in $repositories) {
                 $process.WaitForExit()
             }
             catch {
-                Write-Verbose "Process exited, but final WaitForExit stream-flushing/process-handle cleanup failed: $($_.Exception.Message)"
+                Write-Verbose "Process exited, but best-effort final WaitForExit stream-flushing/process-handle cleanup failed; validation can still use the captured process result. Error: $($_.Exception.Message)"
             }
         }
 
