@@ -1039,12 +1039,7 @@ function Add-TaskOutputOrDiagnostic {
         # explicit millisecond timeout and is safe from synchronization-context
         # deadlocks because these tasks only read independent redirected streams
         # from taskkill.exe.
-        $taskCompleted = if ($Task.IsCompleted) {
-            $true
-        }
-        else {
-            $Task.Wait($TaskKillStreamReadWaitMilliseconds)
-        }
+        $taskCompleted = $Task.IsCompleted -or $Task.Wait($TaskKillStreamReadWaitMilliseconds)
 
         if (-not $taskCompleted) {
             # ReadToEndAsync has no cancellation token in the runtimes this
