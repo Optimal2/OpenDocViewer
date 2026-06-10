@@ -337,6 +337,10 @@ function Convert-NamedTimeoutsToMilliseconds {
     .DESCRIPTION
     Keeping built-in timeout conversion in a small loop avoids copy/paste drift
     while still assigning the resulting named values explicitly at the call site.
+
+    .PARAMETER Timeouts
+    Hashtable definitions with TargetName, Description, and Seconds values to
+    convert into millisecond values.
     #>
     param([Parameter(Mandatory = $true)][hashtable[]]$Timeouts)
 
@@ -369,6 +373,9 @@ function Get-SafeDiagnosticText {
     .DESCRIPTION
     Returns '<null>' for null input, preserves empty strings, replaces ASCII
     control characters, and truncates overly long values with an indicator.
+
+    .PARAMETER Value
+    The diagnostic text to sanitize for console and result output.
     #>
     param([AllowEmptyString()][string]$Value)
 
@@ -386,6 +393,21 @@ function Get-SafeDiagnosticText {
 }
 
 function Get-SafeDiagnosticExcerpt {
+    <#
+    .SYNOPSIS
+    Converts multi-line diagnostic output into a bounded one-line excerpt.
+
+    .DESCRIPTION
+    Keeps only the first MaximumLines lines, sanitizes each line with
+    Get-SafeDiagnosticText, and joins them with a compact separator for result
+    tables and warning messages.
+
+    .PARAMETER Value
+    The raw diagnostic text to summarize.
+
+    .PARAMETER MaximumLines
+    The maximum number of lines to include in the excerpt.
+    #>
     param(
         [AllowEmptyString()][string]$Value,
         [int]$MaximumLines = 5
@@ -410,6 +432,18 @@ function Get-SafeDiagnosticExcerpt {
 }
 
 function Get-JsonParseLocationDiagnostic {
+    <#
+    .SYNOPSIS
+    Extracts a compact parser location from a JSON parse exception.
+
+    .DESCRIPTION
+    Some supported PowerShell runtimes include line or position information only
+    in the exception message. This helper extracts those values when available
+    and returns a stable fallback otherwise.
+
+    .PARAMETER Exception
+    The JSON parse exception to inspect.
+    #>
     param([Parameter(Mandatory = $true)][System.Exception]$Exception)
 
     $message = $Exception.Message
