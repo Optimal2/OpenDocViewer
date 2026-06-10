@@ -138,6 +138,14 @@ $MaximumDiagnosticTextLength = 160
 # Keep at least a few characters before the truncation indicator so shortened
 # diagnostics remain useful if the maximum length is changed later.
 $MinimumDiagnosticPrefixLength = 8
+# Component manifests are small metadata files. A larger file almost certainly
+# means the caller pointed -ManifestRelativePath at the wrong file, so fail
+# before ReadAllText can allocate a large string.
+$MaximumManifestFileLengthBytes = 1MB
+# JSON parse diagnostics include a small excerpt. If a manifest is above this
+# threshold but still below the hard cap, add an explicit size hint to the parse
+# error so operators know the selected file is unusually large for OMP metadata.
+$LargeManifestDiagnosticThresholdBytes = 100KB
 $TruncationIndicator = '...'
 $MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
@@ -149,19 +157,9 @@ $RepositoryRootRelativePath = Join-Path '..' '..'
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
 # Floor gives the largest whole-second value that can round-trip through
 # WaitForExit(int milliseconds) without overflowing after conversion back to
-# milliseconds.
-$MaximumWaitForExitSeconds = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
-# Keep the explicit [int]::MaxValue calculation visible next to the literal
-# used by ValidateRange below. This duplicates the value intentionally so future
-# edits can validate the attribute literal without first reasoning through the
-# alias chain above.
-$ComputedValidateRangeMaximumSafeSeconds = [int][Math]::Floor([int]::MaxValue / $MillisecondsPerSecond)
-# Named alias for the same computed limit. The ValidateRange attribute inside
-# Convert-SecondsToIntMilliseconds must still use a literal value in Windows
-# PowerShell 5.1, because ValidateRange attribute arguments cannot reference
-# variables there. Its inline comment explicitly ties the literal to this
-# constant and the runtime check below remains the source of truth.
-$MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
+# milliseconds. This is about 24.855 days and is the single computed source of
+# truth for the ValidateRange literal below.
+$MaximumSafeSecondsForMillisecondConversion = [int][Math]::Floor($MaximumWaitForExitMilliseconds / $MillisecondsPerSecond)
 # ValidateRange attributes in Windows PowerShell 5.1 cannot reference variables.
 # Keep this named constant as the single documented literal value and assert
 # below that the computed WaitForExit limit still matches it.
@@ -220,8 +218,6 @@ $ValidationSummaryColumns = @('Repository', 'Status', 'ExitCode', 'Package')
 # intentionally far above normal tick variance while still small enough to catch
 # a different process after PID reuse.
 $ProcessStartTimeToleranceMilliseconds = 100
-$TaskFaultedWithoutExceptionMessage = 'Async stream read task faulted without exception information'
-
 # This startup guard intentionally protects future edits to the script-level
 # constants. It keeps later truncation logic simple and avoids defensive math in
 # hot diagnostic paths.
@@ -274,12 +270,6 @@ Assert-DiagnosticConstantsValid
 Assert-ValidateRangeLiteralMatches `
     -LiteralName 'ValidateRangeLiteralForMaximumSafeSeconds' `
     -LiteralValue $ValidateRangeLiteralForMaximumSafeSeconds `
-    -ComputedName 'floor([int]::MaxValue / 1000)' `
-    -ComputedValue $ComputedValidateRangeMaximumSafeSeconds
-
-Assert-ValidateRangeLiteralMatches `
-    -LiteralName 'ValidateRangeLiteralForMaximumSafeSeconds' `
-    -LiteralValue $ValidateRangeLiteralForMaximumSafeSeconds `
     -ComputedName 'MaximumSafeSecondsForMillisecondConversion' `
     -ComputedValue $MaximumSafeSecondsForMillisecondConversion
 
@@ -310,7 +300,8 @@ function Convert-SecondsToIntMilliseconds {
     #>
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
-        # SYNC-WITH: $ValidateRangeLiteralForMaximumSafeSeconds
+        # SYNC-WITH: $ValidateRangeLiteralForMaximumSafeSeconds. The literal
+        # 2147483 is floor([int]::MaxValue / 1000), approximately 24.855 days.
         # 2147483 is the literal form of
         # $ValidateRangeLiteralForMaximumSafeSeconds because Windows PowerShell
         # 5.1 does not allow constants in ValidateRange attributes.
@@ -336,6 +327,38 @@ function Convert-SecondsToIntMilliseconds {
     }
 
     return [int]$milliseconds
+}
+
+function Convert-NamedTimeoutsToMilliseconds {
+    <#
+    .SYNOPSIS
+    Converts named built-in timeout definitions to WaitForExit millisecond values.
+
+    .DESCRIPTION
+    Keeping built-in timeout conversion in a small loop avoids copy/paste drift
+    while still assigning the resulting named values explicitly at the call site.
+    #>
+    param([Parameter(Mandatory = $true)][hashtable[]]$Timeouts)
+
+    $converted = @{}
+    foreach ($timeout in $Timeouts) {
+        $targetName = [string]$timeout.TargetName
+        $description = [string]$timeout.Description
+        $seconds = [int]$timeout.Seconds
+        if ([string]::IsNullOrWhiteSpace($targetName)) {
+            throw 'Built-in timeout target name is required.'
+        }
+
+        if ([string]::IsNullOrWhiteSpace($description)) {
+            throw "Built-in timeout description is required for target '$targetName'."
+        }
+
+        $converted[$targetName] = Convert-SecondsToIntMilliseconds `
+            -TimeoutDescription $description `
+            -Seconds $seconds
+    }
+
+    return $converted
 }
 
 function Get-SafeDiagnosticText {
@@ -373,14 +396,14 @@ function Get-SafeDiagnosticExcerpt {
     }
 
     $safeLines = [System.Collections.Generic.List[string]]::new()
-    $lineLimit = 0
+    $linesProcessed = 0
     foreach ($line in ($Value -split $LineBreakPattern)) {
-        if ($lineLimit -ge $MaximumLines) {
+        if ($linesProcessed -ge $MaximumLines) {
             break
         }
 
         $safeLines.Add((Get-SafeDiagnosticText -Value $line))
-        $lineLimit++
+        $linesProcessed++
     }
 
     return ($safeLines.ToArray() -join ' | ')
@@ -424,15 +447,19 @@ function Get-ControlCharacterDiagnostic {
 }
 
 try {
-    # Keep these conversions explicit instead of looping over variable names.
-    # This is intentional duplication: each output variable is consumed by a
-    # different process-wait branch, and spelling them out makes timeout
-    # diagnostics easier to trace than a hashtable of indirect assignments.
-    $PostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'PostTerminationWaitSeconds' -Seconds $PostTerminationWaitSeconds
-    $TaskKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillWaitSeconds' -Seconds $TaskKillWaitSeconds
-    $TaskKillPostTerminationWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillPostTerminationWaitSeconds' -Seconds $TaskKillPostTerminationWaitSeconds
-    $TaskKillStreamReadWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'TaskKillStreamReadWaitSeconds' -Seconds $TaskKillStreamReadWaitSeconds
-    $DirectProcessKillWaitMilliseconds = Convert-SecondsToIntMilliseconds -TimeoutDescription 'DirectProcessKillWaitSeconds' -Seconds $DirectProcessKillWaitSeconds
+    $builtInWaitTimeouts = @(
+        @{ TargetName = 'PostTerminationWaitMilliseconds'; Description = 'Post-termination wait timeout'; Seconds = $PostTerminationWaitSeconds }
+        @{ TargetName = 'TaskKillWaitMilliseconds'; Description = 'taskkill.exe wait timeout'; Seconds = $TaskKillWaitSeconds }
+        @{ TargetName = 'TaskKillPostTerminationWaitMilliseconds'; Description = 'taskkill.exe post-termination wait timeout'; Seconds = $TaskKillPostTerminationWaitSeconds }
+        @{ TargetName = 'TaskKillStreamReadWaitMilliseconds'; Description = 'taskkill.exe stream-read wait timeout'; Seconds = $TaskKillStreamReadWaitSeconds }
+        @{ TargetName = 'DirectProcessKillWaitMilliseconds'; Description = 'direct Process.Kill wait timeout'; Seconds = $DirectProcessKillWaitSeconds }
+    )
+    $convertedBuiltInWaitTimeouts = Convert-NamedTimeoutsToMilliseconds -Timeouts $builtInWaitTimeouts
+    $PostTerminationWaitMilliseconds = $convertedBuiltInWaitTimeouts['PostTerminationWaitMilliseconds']
+    $TaskKillWaitMilliseconds = $convertedBuiltInWaitTimeouts['TaskKillWaitMilliseconds']
+    $TaskKillPostTerminationWaitMilliseconds = $convertedBuiltInWaitTimeouts['TaskKillPostTerminationWaitMilliseconds']
+    $TaskKillStreamReadWaitMilliseconds = $convertedBuiltInWaitTimeouts['TaskKillStreamReadWaitMilliseconds']
+    $DirectProcessKillWaitMilliseconds = $convertedBuiltInWaitTimeouts['DirectProcessKillWaitMilliseconds']
 }
 catch {
     throw "Invalid built-in process wait timeout in ${CurrentScriptDisplayName}: $($_.Exception.Message)"
@@ -1046,8 +1073,9 @@ function Add-TaskOutputOrDiagnostic {
                 # Purely defensive: a faulted Task should normally expose an
                 # AggregateException, but keep a useful diagnostic if a runtime
                 # or mocked task reports an inconsistent state.
+                $taskFaultedWithoutExceptionMessage = 'Async stream read task faulted without exception information'
                 $taskObjectType = Get-ObjectTypeName -Value $Task
-                $errorText = "$TaskFaultedWithoutExceptionMessage. TaskObjectType=$taskObjectType."
+                $errorText = "$taskFaultedWithoutExceptionMessage; TaskObjectType=$taskObjectType."
             }
 
             $Output.Add("Could not read taskkill ${StreamName}; the async stream read task faulted: $errorText")
@@ -1222,6 +1250,9 @@ function Test-ExpectedCmdProcess {
             $startTimeDifferenceMilliseconds = [Math]::Abs(($actualStartTime - $ExpectedStartTime).TotalMilliseconds)
         }
         catch [System.ArgumentOutOfRangeException] {
+            # Very defensive: subtracting two DateTime values can throw if the
+            # values are so far apart that the resulting TimeSpan exceeds the
+            # supported range. Treat that as an identity mismatch.
             Write-Verbose "Process start time comparison exceeded the supported TimeSpan range: $($_.Exception.Message)"
             return $false
         }
@@ -1241,6 +1272,38 @@ function Test-ExpectedCmdProcess {
         Write-Verbose "Could not verify process name before taskkill: $($_.Exception.Message)"
         return $false
     }
+}
+
+function Test-ExpectedRunningCmdProcess {
+    <#
+    .SYNOPSIS
+    Refreshes a Process object and verifies that it is still the expected cmd.exe.
+
+    .DESCRIPTION
+    Timeout cleanup has several natural-exit race windows. This helper keeps the
+    repeated Refresh/HasExited/process-identity check in one place while callers
+    provide phase-specific text for the warning.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][System.Diagnostics.Process]$Process,
+        [object]$ExpectedStartTime = $null,
+        [Parameter(Mandatory = $true)][string]$RepositoryName,
+        [Parameter(Mandatory = $true)][string]$Phase,
+        [Parameter(Mandatory = $true)][string]$ChangedIdentityAction
+    )
+
+    $Process.Refresh()
+    if ($Process.HasExited) {
+        Write-Warning "[$RepositoryName] Process exited $Phase; termination was not needed."
+        return $false
+    }
+
+    if (-not (Test-ExpectedCmdProcess -Process $Process -ExpectedStartTime $ExpectedStartTime)) {
+        Write-Warning "[$RepositoryName] Process identity changed $Phase; $ChangedIdentityAction Current identity: $(Get-ProcessIdentityDiagnostic -Process $Process)."
+        return $false
+    }
+
+    return $true
 }
 
 function Get-ProcessIdentityDiagnostic {
@@ -1361,12 +1424,15 @@ function Write-TaskKillFailureWarning {
 
 function New-ValidationResult {
     param(
+        # Repository remains object-shaped because callers may pass values
+        # derived from DirectoryInfo or future repository descriptors; the
+        # output is normalized to string below.
         [Parameter(Mandatory = $true)][object]$Repository,
-        [Parameter(Mandatory = $true)][object]$Status,
+        [Parameter(Mandatory = $true)][string]$Status,
         [object]$ExitCode,
-        [Parameter(Mandatory = $true)][object]$Package,
-        [Parameter(Mandatory = $true)][object]$StdoutLog,
-        [Parameter(Mandatory = $true)][object]$StderrLog,
+        [AllowEmptyString()][Parameter(Mandatory = $true)][string]$Package,
+        [AllowEmptyString()][Parameter(Mandatory = $true)][string]$StdoutLog,
+        [AllowEmptyString()][Parameter(Mandatory = $true)][string]$StderrLog,
         [string]$Detail
     )
 
@@ -1379,6 +1445,22 @@ function New-ValidationResult {
         StderrLog = [string]$StderrLog
         Detail = $Detail
     }
+}
+
+function Write-ValidationProgressMessage {
+    <#
+    .SYNOPSIS
+    Writes operator-facing progress without using the success output stream.
+
+    .DESCRIPTION
+    This script returns validation objects on the success stream. Progress is
+    sent to the information stream and forced visible for interactive/manual
+    runs, while callers can still redirect or suppress it with standard
+    PowerShell information-stream controls.
+    #>
+    param([Parameter(Mandatory = $true)][string]$Message)
+
+    Write-Information -MessageData $Message -InformationAction Continue
 }
 
 function Get-RepositoryPath {
@@ -1558,8 +1640,8 @@ function Get-RequiredManifestText {
 # but this conversion helper is also used for script constants and protects
 # future edits that may not pass through parameter binding.
 try {
-    $PerRepositoryTimeoutMilliseconds = Convert-SecondsToIntMilliseconds `
-        -TimeoutDescription 'PerRepositoryTimeoutSeconds' `
+    $repositoryTimeoutMilliseconds = Convert-SecondsToIntMilliseconds `
+        -TimeoutDescription 'Per-repository wrapper timeout' `
         -Seconds $PerRepositoryTimeoutSeconds
 }
 catch {
@@ -1704,17 +1786,28 @@ foreach ($repository in $repositories) {
 
     Assert-RepositoryPathUnderWorkspace -RepositoryPath $repositoryPath -WorkspaceRootPath $workspaceRootPath
 
+    $manifestFileLengthBytes = $null
     try {
+        $manifestItem = Get-Item -LiteralPath $manifestPath -ErrorAction Stop
+        if ($manifestItem -isnot [System.IO.FileInfo]) {
+            throw [System.IO.InvalidDataException]::new("Component manifest path is not a regular file: $manifestPath")
+        }
+
+        $manifestFileLengthBytes = $manifestItem.Length
+        if ($manifestFileLengthBytes -gt $MaximumManifestFileLengthBytes) {
+            $maximumManifestSizeKilobytes = [int]($MaximumManifestFileLengthBytes / 1KB)
+            throw [System.IO.InvalidDataException]::new("Component manifest '$manifestPath' is $manifestFileLengthBytes bytes, which exceeds the $maximumManifestSizeKilobytes KB limit. Component manifests are small metadata files; this usually means -ManifestRelativePath selected the wrong file.")
+        }
+
         # Use .NET UTF-8 reading instead of PowerShell's -Encoding names so BOM
         # and non-BOM UTF-8 manifests behave consistently in Windows PowerShell
-        # 5.1 and newer PowerShell versions. Component manifests are small
-        # repository metadata files, so full-document loading is expected; very
-        # large files normally indicate the wrong file was selected.
+        # 5.1 and newer PowerShell versions. Component manifests are capped
+        # above before full-document loading so an incorrect path fails fast.
         $manifestJson = [System.IO.File]::ReadAllText($manifestPath, [System.Text.Encoding]::UTF8)
     }
     catch [System.Management.Automation.ItemNotFoundException] {
         # The file was checked above, but it can still be removed or replaced
-        # between Test-Path and Get-Content.
+        # between Test-Path and manifest metadata/read operations.
         $results.Add((New-ValidationResult `
             -Repository $repositoryName `
             -Status 'Manifest read failed' `
@@ -1756,10 +1849,36 @@ foreach ($repository in $repositories) {
             -Detail $manifestReadFailureDetail))
         continue
     }
+    catch [System.IO.InvalidDataException] {
+        $results.Add((New-ValidationResult `
+            -Repository $repositoryName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail $_.Exception.Message))
+        continue
+    }
     catch [System.IO.IOException] {
         $manifestReadFailureDetail = @(
             "Could not read component manifest '$manifestPath' because of an I/O error."
             "Verify that the file is not locked, too large for a manifest, corrupted, being replaced, or on an unavailable drive: $($_.Exception.Message)"
+        ) -join ' '
+        $results.Add((New-ValidationResult `
+            -Repository $repositoryName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail $manifestReadFailureDetail))
+        continue
+    }
+    catch [System.OutOfMemoryException] {
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath' because the process ran out of memory while loading it."
+            "The script rejects manifests larger than $MaximumManifestFileLengthBytes bytes before ReadAllText; verify the file was not replaced between the size check and read operation."
         ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repositoryName `
@@ -1810,10 +1929,17 @@ foreach ($repository in $repositories) {
     catch {
         $manifestExcerpt = Get-SafeDiagnosticExcerpt -Value $manifestJson
         $manifestLocationDiagnostic = Get-JsonParseLocationDiagnostic -Exception $_.Exception
+        $manifestSizeDiagnostic = if ($manifestFileLengthBytes -gt $LargeManifestDiagnosticThresholdBytes) {
+            "Manifest size warning: $manifestFileLengthBytes bytes is unusually large for OMP component metadata. Verify that -ManifestRelativePath points to the repository manifest."
+        }
+        else {
+            'Manifest size warning: none.'
+        }
         $manifestParseDetail = @(
             "Component manifest '$manifestPath' was read but could not be parsed as JSON."
             "Parser message: $($_.Exception.Message)"
             $manifestLocationDiagnostic
+            $manifestSizeDiagnostic
             'Common causes include missing commas, trailing commas, or unescaped quotes.'
             "First lines from manifest: $manifestExcerpt"
             'Only the first few manifest lines are shown here; inspect the full file if the parser message points beyond this excerpt.'
@@ -1871,10 +1997,9 @@ foreach ($repository in $repositories) {
     Remove-ExistingFileSafely -Path $stderrPath -Description 'stderr log'
 
     # This script is a manual/CI validation command, not an importable module.
-    # Write-Host keeps progress visible even when the table output is captured;
-    # Write-Information is hidden by default in Windows PowerShell 5.1 unless
-    # callers remember to set InformationAction/InformationPreference.
-    Write-Host "[$repositoryName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
+    # Use the information stream for progress so the success output stream can
+    # remain reserved for validation result objects.
+    Write-ValidationProgressMessage "[$repositoryName] Running $commandWrapperDisplayName (timeout: $PerRepositoryTimeoutSeconds seconds)..."
 
     # --no-pause is a CMD-wrapper flag; the wrapper removes it before invoking
     # the underlying PowerShell script. call ensures the invoked .cmd file
@@ -1959,7 +2084,7 @@ foreach ($repository in $repositories) {
         # when the timeout elapsed. It can exit naturally before any later
         # Refresh(), HasExited check, or taskkill call, so every later decision
         # treats process state as a fresh best-effort snapshot.
-        $processTimedOut = -not $process.WaitForExit($PerRepositoryTimeoutMilliseconds)
+        $processTimedOut = -not $process.WaitForExit($repositoryTimeoutMilliseconds)
         if ($processTimedOut) {
             # The process can exit immediately after the timeout result is
             # observed. Refresh before every state decision and treat "already
@@ -1980,10 +2105,12 @@ foreach ($repository in $repositories) {
                 if ($null -eq $processId) {
                     Write-Warning "[$repositoryName] Process PID could not be read or was invalid; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
                 }
-                elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                    Write-Warning "[$repositoryName] Timed-out process is no longer the expected cmd.exe instance; taskkill was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
-                }
-                else {
+                elseif (Test-ExpectedRunningCmdProcess `
+                        -Process $process `
+                        -ExpectedStartTime $processStartTime `
+                        -RepositoryName $repositoryName `
+                        -Phase 'after the timeout was detected' `
+                        -ChangedIdentityAction 'taskkill was not attempted.') {
                     $taskKillAttempted = $false
                     $taskKillOutput = @()
                     $taskKillExitCode = $TaskKillExecutionExceptionExitCode
@@ -1994,14 +2121,12 @@ foreach ($repository in $repositories) {
                         # timeout handling steps. Windows process termination is
                         # asynchronous, so this is best-effort safety rather
                         # than an atomic guarantee.
-                        $process.Refresh()
-                        if ($process.HasExited) {
-                            Write-Warning "[$repositoryName] Process exited immediately before taskkill; termination was not needed."
-                        }
-                        elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                            Write-Warning "[$repositoryName] Process identity changed immediately before taskkill; termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
-                        }
-                        else {
+                        if (Test-ExpectedRunningCmdProcess `
+                                -Process $process `
+                                -ExpectedStartTime $processStartTime `
+                                -RepositoryName $repositoryName `
+                                -Phase 'immediately before taskkill' `
+                                -ChangedIdentityAction 'termination was not attempted.') {
                             # This intentionally repeats the earlier process-state
                             # checks immediately before taskkill to narrow the
                             # time-of-check/time-of-use window.
@@ -2043,14 +2168,12 @@ foreach ($repository in $repositories) {
                             # Invoke-TaskKillTree. The repeated Refresh() calls
                             # below intentionally narrow, but cannot eliminate,
                             # the natural-exit race before Kill().
-                            $process.Refresh()
-                            if ($process.HasExited) {
-                                Write-Warning "[$repositoryName] Process exited immediately before direct Process.Kill(); no further termination was needed."
-                            }
-                            elseif (-not (Test-ExpectedCmdProcess -Process $process -ExpectedStartTime $processStartTime)) {
-                                Write-Warning "[$repositoryName] Process identity changed immediately before direct Process.Kill(); termination was not attempted. Current identity: $(Get-ProcessIdentityDiagnostic -Process $process)."
-                            }
-                            else {
+                            if (Test-ExpectedRunningCmdProcess `
+                                    -Process $process `
+                                    -ExpectedStartTime $processStartTime `
+                                    -RepositoryName $repositoryName `
+                                    -Phase 'immediately before direct Process.Kill()' `
+                                    -ChangedIdentityAction 'termination was not attempted.') {
                                 # The process can still exit between HasExited and
                                 # Kill(); the catch below treats that race as a
                                 # diagnostic warning instead of a script failure.
@@ -2109,12 +2232,14 @@ foreach ($repository in $repositories) {
             # process bookkeeping has been observed. The parameterless overload
             # returns immediately for an exited process, but it still gives .NET
             # a chance to finish redirected stream flushing and process-handle
-            # cleanup that may not be complete after the timed overload.
+            # cleanup that may not be complete after the timed overload. This
+            # follows the .NET Process.WaitForExit guidance for redirected
+            # streams after using a timed wait.
             try {
                 $process.WaitForExit()
             }
             catch {
-                Write-Verbose "Process exited but final WaitForExit bookkeeping failed: $($_.Exception.Message)"
+                Write-Verbose "Process exited, but final WaitForExit stream-flushing/process-handle cleanup failed: $($_.Exception.Message)"
             }
         }
 
@@ -2150,7 +2275,7 @@ foreach ($repository in $repositories) {
 
         # Keep final per-repository status visible for the same manual/CI
         # progress reason as the "Running ..." message above.
-        Write-Host "[$repositoryName] $status"
+        Write-ValidationProgressMessage "[$repositoryName] $status"
     }
     finally {
         if ($null -ne $process) {
