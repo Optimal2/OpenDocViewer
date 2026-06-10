@@ -143,9 +143,9 @@ $MillisecondsPerSecond = 1000
 # The shared wrappers are intentionally stored at scripts/omp/test-cmd-wrappers.ps1.
 # Validate this relative path during startup so moving the script fails loudly.
 $RepositoryRootRelativePath = Join-Path '..' '..'
-# Store the theoretical .NET API limit separately because WaitForExit accepts an
-# [int] millisecond value. The practical wrapper timeout is much lower and is
-# constrained by the PerRepositoryTimeoutSeconds parameter.
+# Store the theoretical .NET API limit separately because WaitForExit(int)
+# accepts a signed Int32 millisecond value. The practical wrapper timeout is
+# much lower and is constrained by the PerRepositoryTimeoutSeconds parameter.
 $MaximumWaitForExitMilliseconds = [int]::MaxValue
 # Floor gives the largest whole-second value that can round-trip through
 # WaitForExit(int milliseconds) without overflowing after conversion back to
@@ -167,9 +167,10 @@ $MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
 # below that the computed WaitForExit limit still matches it.
 # [int]::MaxValue is 2147483647; 2147483647 / 1000 = 2147483.647,
 # and floor(2147483.647) gives the literal 2147483 used by ValidateRange
-# below. That value is about 24.8 days, far above the public wrapper timeout
+# below. That value is about 24.855 days, far above the public wrapper timeout
 # limit but still important for internal WaitForExit-compatible conversions.
 $ValidateRangeLiteralForMaximumSafeSeconds = 2147483
+$Win32ErrorAccessDenied = 5
 
 # Script-scoped second values are retained for human-readable diagnostics;
 # helper functions intentionally read them from script scope after they are
@@ -288,9 +289,9 @@ function Convert-SecondsToIntMilliseconds {
     Converts a timeout from whole seconds to WaitForExit-compatible milliseconds.
 
     .DESCRIPTION
-    Process.WaitForExit(int) accepts a 32-bit millisecond value. This helper
-    validates second-based timeout values before multiplying them so future
-    timeout constants cannot overflow during conversion.
+    Process.WaitForExit(int) accepts a signed Int32 millisecond value. This
+    helper validates second-based timeout values before multiplying them so
+    future timeout constants cannot overflow during conversion.
 
     .PARAMETER TimeoutDescription
     Human-readable timeout name used in validation errors.
@@ -314,7 +315,7 @@ function Convert-SecondsToIntMilliseconds {
         # $ValidateRangeLiteralForMaximumSafeSeconds because Windows PowerShell
         # 5.1 does not allow constants in ValidateRange attributes.
         # ValidateRange requires a literal value in Windows PowerShell 5.1.
-        [ValidateRange(1, 2147483)] # ~24.8 days; prevents WaitForExit(int) overflow.
+        [ValidateRange(1, 2147483)] # ~24.855 days; prevents WaitForExit(int) overflow.
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -1265,7 +1266,7 @@ function Get-ProcessKillFailureReason {
     }
 
     if ($Exception -is [System.ComponentModel.Win32Exception]) {
-        if ($Exception.NativeErrorCode -eq 5) {
+        if ($Exception.NativeErrorCode -eq $Win32ErrorAccessDenied) {
             return 'Access denied while terminating the process.'
         }
 
@@ -1594,9 +1595,11 @@ $repositoryNames = @($RepositoryName)
 $defaultValidationRoot = Join-Path ([System.IO.Path]::GetTempPath()) $ValidationDirectoryName
 
 if ([string]::IsNullOrWhiteSpace($OutputRoot)) {
-    # On normal Windows developer machines and GitHub runners, GetTempPath()
-    # resolves to a user-specific temp folder. Pass -OutputRoot explicitly when
-    # validating packages that should not be written to temp storage.
+    # This script is Windows-only because it launches cmd.exe and taskkill.exe.
+    # On normal Windows developer machines and Windows GitHub-hosted runners,
+    # GetTempPath() resolves to a user-specific temp folder. Pass -OutputRoot
+    # explicitly when validating packages that should not be written to temp
+    # storage.
     $OutputRoot = Join-Path $defaultValidationRoot 'packages'
 }
 

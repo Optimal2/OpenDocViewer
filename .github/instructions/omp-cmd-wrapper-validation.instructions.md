@@ -16,4 +16,11 @@ When reviewing this file, comment only on actionable issues that can change beha
 
 Do not request stylistic-only changes such as converting loops to another style, removing backtick continuations, extracting helpers only for testability, adding copyright headers, micro-optimizing tiny diagnostics, replacing explicit casts that suppress output, or reorganizing comments unless the suggestion fixes a concrete bug.
 
+Accepted patterns in this file:
+
+- The literal `2147483` in `ValidateRange` is intentional because Windows PowerShell 5.1 attributes cannot reference variables; startup assertions keep it synchronized with `$ValidateRangeLiteralForMaximumSafeSeconds`.
+- Timeout handling intentionally repeats `Refresh()` and process-state checks around `WaitForExit`, `taskkill.exe`, and `Process.Kill()` because Windows process exit and PID reuse checks are inherently race-prone.
+- `Task.Wait(...)`, parameterless `WaitForExit()`, backtick continuations, and explicit `[void]` casts are acceptable here when documented locally.
+- Do not ask for file-size prechecks, temp-folder warnings, helper extraction, hashtable state objects, or tiny wording/precision changes unless they prevent a real failure.
+
 Repo-local copies are intentional for now so each repository can validate its own wrapper offline. Any future centralization into OpenModulePlatform or a private tooling repository should be handled as a separate design change, not as a pull request nit.
