@@ -2,30 +2,31 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.5.0** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.5.1** is the current recommended release line and the preferred production target going forward.
 
-OpenDocViewer v2.4.0 through v1.8.0 remain supported for production environments that have not yet completed a v2.5.0 rollout. New deployments should use v2.5.0 to get the latest source-pack transport, large-session diagnostics, browser-aware worker routing, PDF loading performance work, and security hardening.
+OpenDocViewer v2.5.0 through v1.8.0 remain supported for production environments that have not yet completed a v2.5.1 rollout. New deployments should use v2.5.1 to get the latest source-pack transport, large-session diagnostics, browser-aware worker routing, PDF loading performance work, and security hardening.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.5.0   | :white_check_mark: | Current recommended release and latest supported baseline |
-| 2.4.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.3.3   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.3.2   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.3.1   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.3.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.2.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.1.1   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.5.0 and not the preferred target for new deployments |
+| 2.5.1   | :white_check_mark: | Current recommended security patch release and latest supported baseline |
+| 2.5.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 because v2.5.1 patches the locked `shell-quote` tooling dependency |
+| 2.4.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.3.3   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.3.2   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.3.1   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.3.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.2.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.1.1   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.5.1 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -43,6 +44,16 @@ Earlier releases are retained for historical reference only and are **not recomm
 ## Recent release context
 
 The most recent releases are listed below for operational context.
+
+### OpenDocViewer v2.5.1
+Changes since v2.5.0:
+
+- Forced the transitive `shell-quote` development dependency to `1.8.4`, addressing GHSA-w7jw-789q-3m8p / CVE-2026-9277 in local, CI, and release tooling.
+- Fixed PDF resolution boost state handling so pages are only marked as boosted after the rendered asset URL has actually changed.
+- Improved fitted-page transitions after PDF resolution boosts by treating a changed page URL as a real asset transition.
+- Improved print/progress dialog button contrast and focus styling.
+- Made Vite build identifiers deterministic by default, with explicit environment-variable overrides for release and diagnostics workflows.
+- Added and hardened OMP universal-package helper scripts and command-wrapper validation tooling.
 
 ### OpenDocViewer v2.5.0
 Changes since v2.4.0:
