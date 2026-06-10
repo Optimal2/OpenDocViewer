@@ -51,6 +51,12 @@ seconds, inclusive. The upper bound of 3600 seconds (1 hour) is enforced by
 ValidateRange and the default is 1200 seconds (20 minutes). The lower bound of
 60 seconds avoids premature timeout failures during minimal dependency restore
 and validation startup work on slower Windows runners.
+
+.EXAMPLE
+.\scripts\omp\test-cmd-wrappers.ps1 -RepositoryName OpenModulePlatform
+
+Validates the current OpenModulePlatform repository wrapper and writes packages
+and logs below the default user-temp validation folders.
 #>
 [CmdletBinding()]
 param(
@@ -84,6 +90,9 @@ function Get-CurrentScriptDisplayName {
 $CurrentScriptDisplayName = Get-CurrentScriptDisplayName
 
 $SafeFileNamePattern = '[^-A-Za-z0-9._]+'
+# Plus signs are allowed because repository versions can use SemVer build
+# metadata. These identity parts are used only for local package filenames and
+# are not embedded in URLs by this validation script.
 $PackageIdentityPattern = '^[A-Za-z0-9._+-]+$'
 # Delimiter between repositoryKey and repositoryVersion in
 # repositoryKey__global__repositoryVersion.zip.
@@ -157,7 +166,9 @@ $MaximumSafeSecondsForMillisecondConversion = $MaximumWaitForExitSeconds
 # Keep this named constant as the single documented literal value and assert
 # below that the computed WaitForExit limit still matches it.
 # [int]::MaxValue is 2147483647; 2147483647 / 1000 = 2147483.647,
-# and floor(2147483.647) gives the literal 2147483 used by ValidateRange.
+# and floor(2147483.647) gives the literal 2147483 used by ValidateRange
+# below. That value is about 24.8 days, far above the public wrapper timeout
+# limit but still important for internal WaitForExit-compatible conversions.
 $ValidateRangeLiteralForMaximumSafeSeconds = 2147483
 
 # Script-scoped second values are retained for human-readable diagnostics;
@@ -213,29 +224,6 @@ $TaskFaultedWithoutExceptionMessage = 'Async stream read task faulted without ex
 # This startup guard intentionally protects future edits to the script-level
 # constants. It keeps later truncation logic simple and avoids defensive math in
 # hot diagnostic paths.
-if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
-    $message = @(
-        'MaximumDiagnosticTextLength must be greater than the truncation indicator length.'
-        "MaximumDiagnosticTextLength=$MaximumDiagnosticTextLength."
-        "TruncationIndicatorLength=$($TruncationIndicator.Length)."
-    ) -join ' '
-    throw $message
-}
-
-if (($MaximumDiagnosticTextLength - $TruncationIndicator.Length) -lt $MinimumDiagnosticPrefixLength) {
-    $message = @(
-        'MaximumDiagnosticTextLength must leave a meaningful prefix before the truncation indicator.'
-        "MinimumDiagnosticPrefixLength=$MinimumDiagnosticPrefixLength."
-        "MaximumDiagnosticTextLength=$MaximumDiagnosticTextLength."
-        "TruncationIndicatorLength=$($TruncationIndicator.Length)."
-    ) -join ' '
-    throw $message
-}
-
-if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt $Sha256HexLength) {
-    throw "HashPrefixLength must be between 1 and Sha256HexLength. HashPrefixLength=$HashPrefixLength, Sha256HexLength=$Sha256HexLength."
-}
-
 function Assert-ValidateRangeLiteralMatches {
     param(
         [Parameter(Mandatory = $true)][string]$LiteralName,
@@ -248,6 +236,35 @@ function Assert-ValidateRangeLiteralMatches {
         throw "ValidateRange literal mismatch for $LiteralName. Actual literal: $LiteralValue. Expected computed ${ComputedName}: $ComputedValue."
     }
 }
+
+function Assert-DiagnosticConstantsValid {
+    if ($MaximumDiagnosticTextLength -le $TruncationIndicator.Length) {
+        $message = @(
+            'MaximumDiagnosticTextLength must be greater than the truncation indicator length.'
+            "MaximumDiagnosticTextLength=$MaximumDiagnosticTextLength."
+            "TruncationIndicatorLength=$($TruncationIndicator.Length)."
+        ) -join ' '
+        throw $message
+    }
+
+    if (($MaximumDiagnosticTextLength - $TruncationIndicator.Length) -lt $MinimumDiagnosticPrefixLength) {
+        $message = @(
+            'MaximumDiagnosticTextLength must leave a meaningful prefix before the truncation indicator.'
+            "MinimumDiagnosticPrefixLength=$MinimumDiagnosticPrefixLength."
+            "MaximumDiagnosticTextLength=$MaximumDiagnosticTextLength."
+            "TruncationIndicatorLength=$($TruncationIndicator.Length)."
+        ) -join ' '
+        throw $message
+    }
+
+    if ($HashPrefixLength -lt 1 -or $HashPrefixLength -gt $Sha256HexLength) {
+        throw "HashPrefixLength must be between 1 and Sha256HexLength. HashPrefixLength=$HashPrefixLength, Sha256HexLength=$Sha256HexLength."
+    }
+}
+
+# Keep one startup function for diagnostic-only constants so the intent remains
+# visible without mixing these checks with process execution logic below.
+Assert-DiagnosticConstantsValid
 
 # Keep both assertions separate on purpose: one validates the literal directly
 # against the independent [int]::MaxValue calculation, and the other validates
@@ -293,9 +310,11 @@ function Convert-SecondsToIntMilliseconds {
     param(
         [Parameter(Mandatory = $true)][string]$TimeoutDescription,
         # SYNC-WITH: $ValidateRangeLiteralForMaximumSafeSeconds
-        # 2147483 is the literal form of floor([int]::MaxValue / 1000).
+        # 2147483 is the literal form of
+        # $ValidateRangeLiteralForMaximumSafeSeconds because Windows PowerShell
+        # 5.1 does not allow constants in ValidateRange attributes.
         # ValidateRange requires a literal value in Windows PowerShell 5.1.
-        [ValidateRange(1, 2147483)] # 2147483 = floor([int]::MaxValue / 1000); prevents WaitForExit(int) overflow.
+        [ValidateRange(1, 2147483)] # ~24.8 days; prevents WaitForExit(int) overflow.
         [Parameter(Mandatory = $true)][int]$Seconds
     )
 
@@ -353,10 +372,14 @@ function Get-SafeDiagnosticExcerpt {
     }
 
     $safeLines = [System.Collections.Generic.List[string]]::new()
-    $lines = $Value -split $LineBreakPattern
-    $lineLimit = [Math]::Min($MaximumLines, $lines.Count)
-    for ($lineNumber = 0; $lineNumber -lt $lineLimit; $lineNumber++) {
-        $safeLines.Add((Get-SafeDiagnosticText -Value $lines[$lineNumber]))
+    $lineLimit = 0
+    foreach ($line in ($Value -split $LineBreakPattern)) {
+        if ($lineLimit -ge $MaximumLines) {
+            break
+        }
+
+        $safeLines.Add((Get-SafeDiagnosticText -Value $line))
+        $lineLimit++
     }
 
     return ($safeLines.ToArray() -join ' | ')
@@ -533,6 +556,7 @@ function New-DirectorySafely {
     )
 
     try {
+        # Suppress the returned DirectoryInfo; callers only need success/failure.
         [void][System.IO.Directory]::CreateDirectory($Path)
     }
     catch {
@@ -562,7 +586,7 @@ function New-RunLogDirectory {
         return $candidate
     }
 
-    throw "Could not create a unique run log directory below '$LogRootPath' after $RunLogDirectoryCreationAttempts attempt(s)."
+    throw "Could not create a unique run log directory below '$LogRootPath' after $RunLogDirectoryCreationAttempts attempt(s). This may indicate filesystem latency, permission problems, or concurrent validation runs against the same log root. Verify that the log root is accessible and not a slow or unstable network location."
 }
 
 function Test-IsSubPath {
@@ -575,6 +599,11 @@ function Test-IsSubPath {
 
     .PARAMETER BasePath
     Base path that must contain the candidate path.
+
+    .NOTES
+    Paths are normalized to Windows directory separators and compared with
+    OrdinalIgnoreCase to match normal Windows filesystem behavior for local
+    drives and UNC paths.
     #>
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -678,14 +707,8 @@ function Get-ShortStableHash {
     # intentionally more than enough for the small set of sibling repositories.
     # Startup validation keeps HashPrefixLength within the fixed SHA256 hex
     # length, so this hot path can take the configured prefix directly.
-    $hashBuilder = [System.Text.StringBuilder]::new($Sha256HexLength)
-    foreach ($hashByte in $hashBytes) {
-        # Cast to [void] to suppress StringBuilder output without adding
-        # pipeline overhead inside this tight loop.
-        [void]$hashBuilder.Append($hashByte.ToString('x2', [System.Globalization.CultureInfo]::InvariantCulture))
-    }
-
-    return $hashBuilder.ToString().Substring(0, $HashPrefixLength)
+    $hashText = [BitConverter]::ToString($hashBytes).Replace('-', '').ToLowerInvariant()
+    return $hashText.Substring(0, $HashPrefixLength)
 }
 
 function Get-SafeFileName {
@@ -1620,8 +1643,10 @@ else {
     $repositories = @(
         Get-ChildItem -LiteralPath $workspaceRootPath -Directory |
             Where-Object {
-                (Test-Path -LiteralPath (Join-Path $_.FullName $ManifestRelativePath) -PathType Leaf) -and
-                (Test-Path -LiteralPath (Join-Path $_.FullName $CommandWrapperRelativePath) -PathType Leaf)
+                $candidateManifestPath = Join-Path $_.FullName $ManifestRelativePath
+                $candidateWrapperPath = Join-Path $_.FullName $CommandWrapperRelativePath
+                (Test-Path -LiteralPath $candidateManifestPath -PathType Leaf) -and
+                    (Test-Path -LiteralPath $candidateWrapperPath -PathType Leaf)
             } |
             Sort-Object Name
     )
@@ -1680,7 +1705,8 @@ foreach ($repository in $repositories) {
         # Use .NET UTF-8 reading instead of PowerShell's -Encoding names so BOM
         # and non-BOM UTF-8 manifests behave consistently in Windows PowerShell
         # 5.1 and newer PowerShell versions. Component manifests are small
-        # repository metadata files, so full-document loading is expected.
+        # repository metadata files, so full-document loading is expected; very
+        # large files normally indicate the wrong file was selected.
         $manifestJson = [System.IO.File]::ReadAllText($manifestPath, [System.Text.Encoding]::UTF8)
     }
     catch [System.Management.Automation.ItemNotFoundException] {
@@ -1712,10 +1738,40 @@ foreach ($repository in $repositories) {
             -Detail $manifestReadFailureDetail))
         continue
     }
+    catch [System.IO.PathTooLongException] {
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath' because the path is too long for this Windows/.NET runtime."
+            "Shorten the workspace path or enable long-path support where appropriate: $($_.Exception.Message)"
+        ) -join ' '
+        $results.Add((New-ValidationResult `
+            -Repository $repositoryName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail $manifestReadFailureDetail))
+        continue
+    }
     catch [System.IO.IOException] {
         $manifestReadFailureDetail = @(
             "Could not read component manifest '$manifestPath' because of an I/O error."
-            "Verify that the file is not locked, being replaced, or on an unavailable drive: $($_.Exception.Message)"
+            "Verify that the file is not locked, too large for a manifest, corrupted, being replaced, or on an unavailable drive: $($_.Exception.Message)"
+        ) -join ' '
+        $results.Add((New-ValidationResult `
+            -Repository $repositoryName `
+            -Status 'Manifest read failed' `
+            -ExitCode $null `
+            -Package '' `
+            -StdoutLog '' `
+            -StderrLog '' `
+            -Detail $manifestReadFailureDetail))
+        continue
+    }
+    catch [System.Text.DecoderFallbackException] {
+        $manifestReadFailureDetail = @(
+            "Could not read component manifest '$manifestPath' as UTF-8 text."
+            "Verify that the manifest is valid UTF-8 JSON: $($_.Exception.Message)"
         ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repositoryName `
@@ -1732,7 +1788,7 @@ foreach ($repository in $repositories) {
         $manifestReadFailureDetail = @(
             "Could not read component manifest '$manifestPath'."
             "Verify that the path is a filesystem file and readable by '$currentIdentity'."
-            "Also verify that it is not a directory-like reparse target or blocked by another process: $($_.Exception.Message)"
+            "Also verify that it is not a directory-like reparse target, too large for a manifest, blocked by another process, or affected by path-length limits: $($_.Exception.Message)"
         ) -join ' '
         $results.Add((New-ValidationResult `
             -Repository $repositoryName `
@@ -2048,8 +2104,9 @@ foreach ($repository in $repositories) {
             # introducing an unbounded wait after timeout handling.
             # The timeout-based WaitForExit overload can return before all
             # process bookkeeping has been observed. The parameterless overload
-            # returns immediately for an exited process and lets .NET finish its
-            # final stream/handle bookkeeping without adding another timeout.
+            # returns immediately for an exited process, but it still gives .NET
+            # a chance to finish redirected stream flushing and process-handle
+            # cleanup that may not be complete after the timed overload.
             try {
                 $process.WaitForExit()
             }
