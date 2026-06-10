@@ -48,7 +48,7 @@ The most recent releases are listed below for operational context.
 ### OpenDocViewer v2.5.1
 Changes since v2.5.0:
 
-- Forced the transitive `shell-quote` development dependency to `1.8.4`, addressing GHSA-w7jw-789q-3m8p / CVE-2026-9277 in local, CI, and release tooling.
+- Pinned `concurrently` to the Node 20 compatible `9.2.0` line so the transitive `shell-quote` development dependency resolves to `1.8.4`, addressing GHSA-w7jw-789q-3m8p / CVE-2026-9277 in local, CI, and release tooling.
 - Fixed PDF resolution boost state handling so pages are only marked as boosted after the rendered asset URL has actually changed.
 - Improved fitted-page transitions after PDF resolution boosts by treating a changed page URL as a real asset transition.
 - Improved print/progress dialog button contrast and focus styling.
