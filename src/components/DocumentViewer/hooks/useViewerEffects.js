@@ -66,6 +66,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function} rotateRight
  * @property {Function=} onOpenPrintDialog
  * @property {boolean=} printEnabled
+ * @property {boolean=} interactionSuspended
  * @property {KeyboardPrintShortcutBehavior=} keyboardPrintShortcutBehavior
  */
 
@@ -151,6 +152,7 @@ export function useViewerEffects(args) {
     rotateRight,
     onOpenPrintDialog,
     printEnabled = true,
+    interactionSuspended = false,
     keyboardPrintShortcutBehavior = 'browser',
   } = args;
 
@@ -313,12 +315,13 @@ export function useViewerEffects(args) {
       if (isEditableTarget(e.target) || isEditableTarget(document.activeElement)) return;
 
       e.preventDefault();
+      if (interactionSuspended) return;
       if (e.deltaY < 0) zoomIn();
       else if (e.deltaY > 0) zoomOut();
     };
     window.addEventListener('wheel', onWheelGlobal, { passive: false, capture: true });
     return () => { window.removeEventListener('wheel', onWheelGlobal, { capture: true }); };
-  }, [zoomIn, zoomOut]);
+  }, [interactionSuspended, zoomIn, zoomOut]);
 
   // Config-driven Ctrl/Cmd+P handling.
   useEffect(() => {
@@ -328,6 +331,10 @@ export function useViewerEffects(args) {
       if (key !== 'p') return;
       if (!(e.ctrlKey || e.metaKey) || e.altKey || e.shiftKey) return;
       if (hasActiveModalDialog()) return;
+      if (interactionSuspended) {
+        e.preventDefault();
+        return;
+      }
       if (!printEnabled) {
         e.preventDefault();
         return;
@@ -342,7 +349,7 @@ export function useViewerEffects(args) {
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => { window.removeEventListener('keydown', onKeyDown, true); };
-  }, [keyboardPrintShortcutBehavior, onOpenPrintDialog, printEnabled]);
+  }, [interactionSuspended, keyboardPrintShortcutBehavior, onOpenPrintDialog, printEnabled]);
 
   // Global keyboard navigation & zoom shortcuts.
   // Repeat navigation uses the same timer hook as the toolbar buttons instead of relying on the
@@ -387,6 +394,10 @@ export function useViewerEffects(args) {
     /** @param {KeyboardEvent} e */
     function onKeyDown(e) {
       if (shouldIgnoreViewerShortcut(e)) return;
+      if (interactionSuspended) {
+        stopKeyboardRepeat();
+        return;
+      }
 
       const hasModifierKey = e.ctrlKey || e.metaKey;
       const target = getTarget(e);
@@ -522,6 +533,7 @@ export function useViewerEffects(args) {
       stopKeyboardRepeat();
     };
   }, [
+    interactionSuspended,
     printEnabled,
     startKeyboardNextRepeatTimer,
     startKeyboardPreviousRepeatTimer,

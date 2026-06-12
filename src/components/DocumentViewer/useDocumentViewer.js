@@ -120,6 +120,39 @@ function masksEqual(a, b, total) {
 }
 
 /**
+ * @param {*} sequence
+ * @param {number} total
+ * @returns {Array<number>}
+ */
+function normalizePrintPageSequence(sequence, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  const seen = new Set();
+  const next = [];
+  if (!Array.isArray(sequence) || safeTotal <= 0) return next;
+  for (const rawPageNumber of sequence) {
+    const pageNumber = Math.floor(Number(rawPageNumber));
+    if (!Number.isFinite(pageNumber) || pageNumber < 1 || pageNumber > safeTotal || seen.has(pageNumber)) continue;
+    seen.add(pageNumber);
+    next.push(pageNumber);
+  }
+  return next;
+}
+
+/**
+ * @param {Array<number>} sequence
+ * @param {number} total
+ * @returns {boolean}
+ */
+function isNaturalPrintPageSequence(sequence, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  if (!Array.isArray(sequence) || sequence.length !== safeTotal) return false;
+  for (let index = 0; index < safeTotal; index += 1) {
+    if (sequence[index] !== index + 1) return false;
+  }
+  return true;
+}
+
+/**
  * Resolve the nearest visible page number for a requested original page index.
  * Exact matches win. Otherwise the function prefers the first visible page after the requested
  * original index and falls back to the nearest visible page before it.
@@ -348,6 +381,8 @@ export function useDocumentViewer() {
   const [thumbnailPaneMode, setThumbnailPaneMode] = useState('thumbnails');
   const [appliedSelectionMask, setAppliedSelectionMask] = useState(/** @type {(Array<boolean>|null)} */ (null));
   const [draftSelectionMask, setDraftSelectionMask] = useState(/** @type {Array<boolean>} */ ([]));
+  const [customPrintSelectionSequence, setCustomPrintSelectionSequence] = useState(/** @type {(Array<number>|null)} */ (null));
+  const [printSelectionWorkspaceOpen, setPrintSelectionWorkspaceOpen] = useState(false);
   const lastRequestedOriginalIndexRef = useRef(0);
   const lastRequestedCompareOriginalIndexRef = useRef(0);
 
@@ -368,6 +403,8 @@ export function useDocumentViewer() {
     const nextMask = Array(totalSessionPages).fill(true);
     setAppliedSelectionMask(null);
     setDraftSelectionMask(nextMask);
+    setCustomPrintSelectionSequence(null);
+    setPrintSelectionWorkspaceOpen(false);
     setThumbnailPaneMode('thumbnails');
   }, [pageStructureSignature, totalSessionPages]);
 
@@ -427,6 +464,16 @@ export function useDocumentViewer() {
     () => visibleOriginalIndexes.map((index) => index + 1),
     [visibleOriginalIndexes]
   );
+  const normalizedCustomPrintSelectionSequence = useMemo(() => {
+    const normalized = normalizePrintPageSequence(customPrintSelectionSequence, totalSessionPages);
+    return normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
+      ? normalized
+      : null;
+  }, [customPrintSelectionSequence, totalSessionPages]);
+  const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence)
+    && normalizedCustomPrintSelectionSequence.length > 0;
+  const initialPrintSelectionWorkspaceSequence = normalizedCustomPrintSelectionSequence
+    || Array.from({ length: totalSessionPages }, (_, index) => index + 1);
   const visibleDocumentNavigationModel = useMemo(
     () => buildVisibleDocumentNavigationModel(allPages, visibleOriginalIndexes),
     [allPages, visibleOriginalIndexes]
@@ -1017,18 +1064,42 @@ export function useDocumentViewer() {
 
   // --- Print dialog --------------------------------------------------------------
   const openPrintDialog = useCallback(() => {
-    if (!printEnabled) return;
+    if (!printEnabled || printSelectionWorkspaceOpen) return;
     setPrintDialogOpen(true);
-  }, [printEnabled]);
+  }, [printEnabled, printSelectionWorkspaceOpen]);
 
   const closePrintDialog = useCallback(() => {
     setPrintDialogOpen(false);
   }, []);
 
-  useEffect(() => {
-    if (printEnabled) return;
+  const openPrintSelectionWorkspace = useCallback(() => {
+    if (!selectionPanelEnabled) return;
     setPrintDialogOpen(false);
-  }, [printEnabled]);
+    setPrintSelectionWorkspaceOpen(true);
+  }, [selectionPanelEnabled]);
+
+  const cancelPrintSelectionWorkspace = useCallback(() => {
+    setPrintSelectionWorkspaceOpen(false);
+  }, []);
+
+  const commitPrintSelectionWorkspace = useCallback((sequence) => {
+    const normalized = normalizePrintPageSequence(sequence, totalSessionPages);
+    setCustomPrintSelectionSequence(
+      normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
+        ? normalized
+        : null
+    );
+    setPrintSelectionWorkspaceOpen(false);
+  }, [totalSessionPages]);
+
+  const clearCustomPrintSelection = useCallback(() => {
+    setCustomPrintSelectionSequence(null);
+  }, []);
+
+  useEffect(() => {
+    if (printEnabled && !printSelectionWorkspaceOpen) return;
+    setPrintDialogOpen(false);
+  }, [printEnabled, printSelectionWorkspaceOpen]);
 
   // --- Zoom helpers --------------------------------------------------------------
   const tryCallDocumentRender = useCallback((methodName, warningMessage, ...args) => {
@@ -1387,7 +1458,8 @@ export function useDocumentViewer() {
     rotateRight: rotateRightPage,
     onOpenPrintDialog: openPrintDialog,
     keyboardPrintShortcutBehavior,
-    printEnabled,
+    printEnabled: printEnabled && !printSelectionWorkspaceOpen,
+    interactionSuspended: printSelectionWorkspaceOpen,
   });
 
   // --- Public API ---------------------------------------------------------------
@@ -1418,6 +1490,14 @@ export function useDocumentViewer() {
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
+    printSelectionWorkspaceOpen,
+    openPrintSelectionWorkspace,
+    cancelPrintSelectionWorkspace,
+    commitPrintSelectionWorkspace,
+    clearCustomPrintSelection,
+    customPrintSelectionActive,
+    customPrintSelectionSequence: normalizedCustomPrintSelectionSequence,
+    initialPrintSelectionWorkspaceSequence,
     primaryImageProperties,
     compareImageProperties,
     isExpanded,

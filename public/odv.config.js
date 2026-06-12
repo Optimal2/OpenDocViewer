@@ -188,6 +188,14 @@
       // override in viewer preferences. Supported values: "active", "all".
       defaultPageMode: 'active',
 
+      // Full-page print selection workspace. The document header template supports tokens such
+      // as {documentNumber}, {totalDocuments}, {documentId}, {pageCount},
+      // {metadata.caseNumber}, and {metaById.123.selectedValue}.
+      selectionWorkspace: {
+        enabled: true,
+        documentHeaderTemplate: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+      },
+
       // Optional generated-PDF backend for print output. Direct print remains the default.
       // PDF print generates a PDF inside OpenDocViewer and lets the browser print that PDF.
       pdf: {

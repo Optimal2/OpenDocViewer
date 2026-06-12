@@ -47,6 +47,7 @@ import {
 } from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '', minimized: false });
+const NOOP = () => {};
 
 /**
  * @param {*} error
@@ -195,6 +196,15 @@ function getPdfProgressPercent(progress) {
  * @property {boolean=} hasActiveSelection
  * @property {Array<number>=} visibleOriginalPageNumbers
  * @property {number=} selectionIncludedCount
+ * @property {boolean=} printSelectionSequenceLocked
+ * @property {boolean=} printSelectionWorkspaceEnabled
+ * @property {boolean=} printSelectionWorkspaceActive
+ * @property {boolean=} canOpenPrintSelectionWorkspace
+ * @property {function(): void=} openPrintSelectionWorkspace
+ * @property {number=} printSelectionZoomPercent
+ * @property {function(): void=} increasePrintSelectionZoom
+ * @property {function(): void=} decreasePrintSelectionZoom
+ * @property {function(number): void=} setPrintSelectionZoomFromPercent
  * @property {number=} sessionTotalPages
  * @property {Object|null=} bundle
  * @property {Array<*>=} allPages
@@ -316,6 +326,15 @@ const DocumentToolbar = ({
   hasActiveSelection = false,
   visibleOriginalPageNumbers = [],
   selectionIncludedCount = 0,
+  printSelectionSequenceLocked = false,
+  printSelectionWorkspaceEnabled = false,
+  printSelectionWorkspaceActive = false,
+  canOpenPrintSelectionWorkspace = false,
+  openPrintSelectionWorkspace,
+  printSelectionZoomPercent = 120,
+  increasePrintSelectionZoom,
+  decreasePrintSelectionZoom,
+  setPrintSelectionZoomFromPercent,
   sessionTotalPages = totalPagesDisplay,
   bundle = null,
   allPages = [],
@@ -1269,6 +1288,11 @@ const DocumentToolbar = ({
       : t('toolbar.printDisabledLoading', {
           defaultValue: 'Printing becomes available when all pages are fully loaded.',
         });
+  const printSelectionWorkspaceTitle = canOpenPrintSelectionWorkspace
+    ? t('toolbar.printSelectionWorkspace.open', { defaultValue: 'Choose pages for printing' })
+    : t('toolbar.printSelectionWorkspace.openDisabled', {
+        defaultValue: 'Page selection is available when all pages are fully loaded.',
+      });
 
   const printDefaultSettings = useMemo(() => {
     void printPreferenceRevision;
@@ -1316,6 +1340,68 @@ const DocumentToolbar = ({
     if (typeof setZoom === 'function') setZoom(1);
     if (typeof setZoomMode === 'function') setZoomMode('ACTUAL_SIZE');
   }, [actualSize, setZoom, setZoomMode]);
+
+  if (printSelectionWorkspaceActive) {
+    return (
+      <div className="toolbar toolbar--selection-workspace" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
+        <button
+          type="button"
+          className="odv-btn"
+          disabled
+          aria-label={t('toolbar.printDisabledInSelectionWorkspace', { defaultValue: 'Printing is disabled while choosing pages.' })}
+          title={t('toolbar.printDisabledInSelectionWorkspace', { defaultValue: 'Printing is disabled while choosing pages.' })}
+        >
+          <span className="material-icons" aria-hidden="true">print</span>
+        </button>
+
+        <div className="toolbar-selection-workspace-status" role="status">
+          <span className="material-icons" aria-hidden="true">playlist_add_check</span>
+          <span>{t('toolbar.printSelectionWorkspace.active', { defaultValue: 'Print selection mode' })}</span>
+        </div>
+
+        <div className="separator" />
+
+        <ZoomButtons
+          zoomIn={increasePrintSelectionZoom || NOOP}
+          zoomOut={decreasePrintSelectionZoom || NOOP}
+          fitToScreen={NOOP}
+          fitToCustomWidth={NOOP}
+          fitToWidth={NOOP}
+          zoomMode="CUSTOM"
+          zoomPercent={printSelectionZoomPercent}
+          onPercentApply={setPrintSelectionZoomFromPercent}
+          disableFits
+        />
+
+        <div className="toolbar-spacer" />
+
+        <div className="toolbar-end-actions">
+          <ThemeMenuButton />
+          <LanguageMenuButton />
+          <HelpMenuButton
+            onOpenManual={() => setIsManualDialogOpen(true)}
+            onOpenAbout={() => setIsAboutDialogOpen(true)}
+            statusLedState={runtimeStatusLedState}
+            statusLedTitle={runtimeStatusLedTitle}
+          />
+        </div>
+
+        <ManualOverlayDialog
+          isOpen={isManualDialogOpen}
+          onClose={() => setIsManualDialogOpen(false)}
+        />
+
+        <AboutOverlayDialog
+          isOpen={isAboutDialogOpen}
+          onClose={() => setIsAboutDialogOpen(false)}
+          benchmarkEnabled={pdfBenchmarkEnabled}
+          onRunPdfBenchmark={handleRunPdfBenchmark}
+          renderBenchmarkEnabled={renderBenchmarkEnabled}
+          onRunRenderBenchmark={handleRunRenderBenchmark}
+        />
+      </div>
+    );
+  }
 
   return (
     <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
@@ -1380,6 +1466,21 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">print</span>
         <StatusLed state={printLedState} size="xs" title={printLedTitle} className="odv-toolbar-print-led" />
       </SplitToolbarButton>
+
+      {printSelectionWorkspaceEnabled ? (
+        <button
+          type="button"
+          onClick={() => {
+            if (canOpenPrintSelectionWorkspace) openPrintSelectionWorkspace?.();
+          }}
+          aria-label={printSelectionWorkspaceTitle}
+          title={printSelectionWorkspaceTitle}
+          className={`odv-btn${printSelectionSequenceLocked ? ' is-active' : ''}`}
+          disabled={!canOpenPrintSelectionWorkspace}
+        >
+          <span className="material-icons" aria-hidden="true">playlist_add_check</span>
+        </button>
+      ) : null}
 
       <div className="separator" />
 
@@ -1646,6 +1747,7 @@ const DocumentToolbar = ({
         comparePageNumber={comparePaneVisible ? compareNavigationPageDisplay : null}
         isComparing={isComparing}
         hasActiveSelection={hasActiveSelection}
+        selectionSequenceLocked={printSelectionSequenceLocked}
         selectionIncludedCount={selectionIncludedCount}
         sessionTotalPages={sessionTotalPages}
       />
@@ -1897,6 +1999,15 @@ DocumentToolbar.propTypes = {
   hasActiveSelection: PropTypes.bool,
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number),
   selectionIncludedCount: PropTypes.number,
+  printSelectionSequenceLocked: PropTypes.bool,
+  printSelectionWorkspaceEnabled: PropTypes.bool,
+  printSelectionWorkspaceActive: PropTypes.bool,
+  canOpenPrintSelectionWorkspace: PropTypes.bool,
+  openPrintSelectionWorkspace: PropTypes.func,
+  printSelectionZoomPercent: PropTypes.number,
+  increasePrintSelectionZoom: PropTypes.func,
+  decreasePrintSelectionZoom: PropTypes.func,
+  setPrintSelectionZoomFromPercent: PropTypes.func,
   sessionTotalPages: PropTypes.number,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),

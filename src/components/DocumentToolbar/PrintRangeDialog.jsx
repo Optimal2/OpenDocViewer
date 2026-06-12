@@ -43,6 +43,7 @@ export default function PrintRangeDialog({
   comparePageNumber = null,
   isComparing = false,
   hasActiveSelection = false,
+  selectionSequenceLocked = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
 }) {
@@ -56,18 +57,27 @@ export default function PrintRangeDialog({
     activePageNumber,
     isComparing,
     hasActiveSelection,
+    selectionSequenceLocked,
     selectionIncludedCount,
     sessionTotalPages,
     t,
     i18n,
   });
 
-  const modeOptions = useMemo(() => ([
-    { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
-    { value: 'all', label: t('printDialog.modes.all', { defaultValue: 'All pages' }) },
-    { value: 'range', label: t('printDialog.modes.range', { defaultValue: 'Simple range' }) },
-    { value: 'custom', label: t('printDialog.modes.custom', { defaultValue: 'Custom pages' }) },
-  ]), [t]);
+  const modeOptions = useMemo(() => {
+    const base = [
+      { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
+      { value: 'all', label: ctrl.selectionSequenceLocked
+        ? t('printDialog.modes.selectedSequence', { defaultValue: 'Selected sequence' })
+        : t('printDialog.modes.all', { defaultValue: 'All pages' }) },
+    ];
+    if (ctrl.selectionSequenceLocked) return base;
+    return [
+      ...base,
+      { value: 'range', label: t('printDialog.modes.range', { defaultValue: 'Simple range' }) },
+      { value: 'custom', label: t('printDialog.modes.custom', { defaultValue: 'Custom pages' }) },
+    ];
+  }, [ctrl.selectionSequenceLocked, t]);
 
   const summaryText = useMemo(() => {
     if (ctrl.restrictToActivePage) {
@@ -93,7 +103,7 @@ export default function PrintRangeDialog({
     }
 
     if (ctrl.printMode === 'all') {
-      const count = ctrl.canPrintSelectionScope && ctrl.allScope === 'selection'
+      const count = (ctrl.selectionSequenceLocked || (ctrl.canPrintSelectionScope && ctrl.allScope === 'selection'))
         ? ctrl.selectionIncludedCount
         : ctrl.sessionTotalPages;
       return t('printDialog.summaryAll', {
@@ -124,6 +134,7 @@ export default function PrintRangeDialog({
     ctrl.printMode,
     ctrl.restrictToActivePage,
     ctrl.selectionIncludedCount,
+    ctrl.selectionSequenceLocked,
     ctrl.sessionTotalPages,
     ctrl.toValue,
     t,
@@ -255,7 +266,14 @@ export default function PrintRangeDialog({
 
             {ctrl.printMode === 'all' ? (
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.allGroup', { defaultValue: 'All pages options' })}>
-                {ctrl.canPrintSelectionScope ? (
+                {ctrl.selectionSequenceLocked ? (
+                  <div className="odv-prd-staticValue">
+                    {t('printDialog.allScope.lockedSelection', {
+                      count: ctrl.selectionIncludedCount,
+                      defaultValue: `${ctrl.selectionIncludedCount} selected pages will be prepared in the chosen order.`,
+                    })}
+                  </div>
+                ) : ctrl.canPrintSelectionScope ? (
                   <div className="odv-prd-subField" role="group" aria-label={t('printDialog.allScope.label')}>
                     <div className="odv-prd-radioList odv-prd-subRadioList">
                       <label className="odv-prd-radioRow">
@@ -530,6 +548,7 @@ PrintRangeDialog.propTypes = {
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
   isComparing: PropTypes.bool,
   hasActiveSelection: PropTypes.bool,
+  selectionSequenceLocked: PropTypes.bool,
   selectionIncludedCount: PropTypes.number,
   sessionTotalPages: PropTypes.number,
 };

@@ -11,6 +11,12 @@
 /** @typedef {'active'|'all'} PrintDefaultMode */
 
 /**
+ * @typedef {Object} PrintSelectionWorkspaceConfig
+ * @property {boolean} enabled
+ * @property {string} documentHeaderTemplate
+ */
+
+/**
  * @typedef {Object} ViewerEdgeScrollPageTurnConfig
  * @property {boolean} enabled
  * @property {number} thresholdPx
@@ -204,6 +210,34 @@ export function getPrintDefaultMode(cfg = getRuntimeConfig()) {
     cfg?.print?.defaultPageMode ?? cfg?.print?.defaultPrintMode ?? cfg?.viewer?.print?.defaultPageMode,
     'active'
   );
+}
+
+/**
+ * Resolve the print-selection workspace configuration.
+ *
+ * Runtime config values:
+ * - `print.selectionWorkspace.enabled`
+ * - `print.selectionWorkspace.documentHeaderTemplate`
+ *
+ * The document header template supports simple tokens such as `{documentNumber}`,
+ * `{totalDocuments}`, `{documentId}`, `{pageCount}`, `{metadata.caseNumber}`, and
+ * `{metaById.123.selectedValue}`.
+ *
+ * @param {Object=} cfg
+ * @returns {PrintSelectionWorkspaceConfig}
+ */
+export function getPrintSelectionWorkspaceConfig(cfg = getRuntimeConfig()) {
+  const raw = cfg?.print?.selectionWorkspace ?? cfg?.viewer?.printSelectionWorkspace ?? {};
+  const template = String(
+    raw?.documentHeaderTemplate
+    ?? raw?.headerTemplate
+    ?? 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+  ).trim();
+
+  return {
+    enabled: normalizeBoolean(raw?.enabled, true),
+    documentHeaderTemplate: template || 'Document {documentNumber} of {totalDocuments} · {pageCount} pages',
+  };
 }
 
 /**

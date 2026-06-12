@@ -29,6 +29,11 @@
       "title": "Standardomfång för utskrift",
       "useSystem": "Använd systemstandard ({mode})"
     },
+    "printSelectionWorkspace": {
+      "open": "Välj sidor för utskrift",
+      "openDisabled": "Sidurval är tillgängligt när alla sidor är helt inlästa.",
+      "active": "Utskriftsurvalsläge"
+    },
     "zoomPercentAria": "Aktuell zoomprocent",
     "firstPage": "Första sidan",
     "previousPage": "Föregående sida",
@@ -110,6 +115,7 @@
     "resetBrightness": "Återställ ljusstyrka",
     "resetContrast": "Återställ kontrast",
     "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa.",
+    "printDisabledInSelectionWorkspace": "Utskrift är inaktiverad medan du väljer sidor.",
     "printBusy": "Utskrift/export förbereds redan.",
     "printPrebuild": {
       "off": "Utskriftscache är inaktiv",
@@ -215,6 +221,7 @@
       "label": "Vad ska “Alla sidor” avse?",
       "selection": "Aktuellt urval ({count} sidor)",
       "session": "Hela sessionen ({count} sidor)",
+      "lockedSelection": "{count} valda sidor förbereds i vald ordning.",
       "hint": "Välj om utskriften ska följa aktuellt urval eller ignorera urvalet och skriva ut allt som finns i sessionen."
     },
     "activeScope": {
@@ -239,6 +246,7 @@
     "modes": {
       "active": "Aktiv sida",
       "all": "Alla sidor",
+      "selectedSequence": "Vald sekvens",
       "range": "Enkelt intervall",
       "custom": "Anpassade sidor"
     },
@@ -304,6 +312,25 @@
     "alt": {
       "printableDocument": "Utskrivbart dokument"
     }
+  },
+  "printSelectionWorkspace": {
+    "title": "Utskriftsurval",
+    "subtitle": "{selected} av {total} sidor valda för utskrift.",
+    "availablePages": "Tillgängliga sidor",
+    "selectedPages": "Valda sidor",
+    "availableCount": "{count} tillgängliga",
+    "selectedCount": "{count} valda",
+    "transferActions": "Flytta sidor",
+    "removeAll": "Ta bort alla",
+    "removeSelected": "Ta bort valda",
+    "addSelected": "Lägg till valda",
+    "addAll": "Lägg till alla",
+    "alreadyIncluded": "Sida {page} ingår redan i utskriftsurvalet.",
+    "pageTitle": "Sida {page}",
+    "pageLabel": "Sida {page}",
+    "cancelConfirm": "Kasta utkastet till utskriftsurval? Alla ändringar i detta läge försvinner.",
+    "emptySelection": "Inga sidor är valda för utskrift.",
+    "resizeDivider": "Ändra bredd på urvalspanelerna"
   },
   "demoControls": {
     "totalLabel": "Antal sidor/filer:",

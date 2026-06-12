@@ -83,6 +83,15 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} hasActiveSelection
  * @property {Array<number>} visibleOriginalPageNumbers
  * @property {number} selectionIncludedCount
+ * @property {boolean=} printSelectionSequenceLocked
+ * @property {boolean=} printSelectionWorkspaceEnabled
+ * @property {boolean=} printSelectionWorkspaceActive
+ * @property {boolean=} canOpenPrintSelectionWorkspace
+ * @property {function(): void=} openPrintSelectionWorkspace
+ * @property {number=} printSelectionZoomPercent
+ * @property {function(): void=} increasePrintSelectionZoom
+ * @property {function(): void=} decreasePrintSelectionZoom
+ * @property {function(number): void=} setPrintSelectionZoomFromPercent
  * @property {number} sessionTotalPages
  * @property {Object|null} bundle
  * @property {Array<*>} allPages
@@ -174,6 +183,15 @@ const DocumentViewerToolbar = ({
   hasActiveSelection,
   visibleOriginalPageNumbers,
   selectionIncludedCount,
+  printSelectionSequenceLocked = false,
+  printSelectionWorkspaceEnabled = false,
+  printSelectionWorkspaceActive = false,
+  canOpenPrintSelectionWorkspace = false,
+  openPrintSelectionWorkspace,
+  printSelectionZoomPercent = 120,
+  increasePrintSelectionZoom,
+  decreasePrintSelectionZoom,
+  setPrintSelectionZoomFromPercent,
   sessionTotalPages,
   bundle,
   allPages,
@@ -235,6 +253,15 @@ const DocumentViewerToolbar = ({
       hasActiveSelection={hasActiveSelection}
       visibleOriginalPageNumbers={visibleOriginalPageNumbers}
       selectionIncludedCount={selectionIncludedCount}
+      printSelectionSequenceLocked={printSelectionSequenceLocked}
+      printSelectionWorkspaceEnabled={printSelectionWorkspaceEnabled}
+      printSelectionWorkspaceActive={printSelectionWorkspaceActive}
+      canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
+      openPrintSelectionWorkspace={openPrintSelectionWorkspace}
+      printSelectionZoomPercent={printSelectionZoomPercent}
+      increasePrintSelectionZoom={increasePrintSelectionZoom}
+      decreasePrintSelectionZoom={decreasePrintSelectionZoom}
+      setPrintSelectionZoomFromPercent={setPrintSelectionZoomFromPercent}
       sessionTotalPages={sessionTotalPages}
       bundle={bundle || null}
       allPages={allPages || []}
@@ -338,6 +365,15 @@ DocumentViewerToolbar.propTypes = {
   hasActiveSelection: PropTypes.bool.isRequired,
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number).isRequired,
   selectionIncludedCount: PropTypes.number.isRequired,
+  printSelectionSequenceLocked: PropTypes.bool,
+  printSelectionWorkspaceEnabled: PropTypes.bool,
+  printSelectionWorkspaceActive: PropTypes.bool,
+  canOpenPrintSelectionWorkspace: PropTypes.bool,
+  openPrintSelectionWorkspace: PropTypes.func,
+  printSelectionZoomPercent: PropTypes.number,
+  increasePrintSelectionZoom: PropTypes.func,
+  decreasePrintSelectionZoom: PropTypes.func,
+  setPrintSelectionZoomFromPercent: PropTypes.func,
   sessionTotalPages: PropTypes.number.isRequired,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),
