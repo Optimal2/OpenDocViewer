@@ -76,14 +76,36 @@ Deployments can choose the initial zoom mode used when the first page opens:
 
 ```js
 viewer: {
-  // Supported values: "fit-page", "fit-width", "actual-size".
-  defaultZoomMode: 'fit-width'
+  // Supported values: "fit-page", "fit-width", "custom-fit-width", "actual-size".
+  defaultZoomMode: 'fit-width',
+  // Percentage of the calculated fit-width zoom used by the Custom Fit toolbar button.
+  customFitWidthFactorPercent: 70
 }
 ```
 
 The default is `fit-width`, so users start with the page width filling the pane and can scroll
 vertically through taller pages. Use `fit-page` when the full page should fit inside the viewer
-pane. Use `actual-size` for a 100% initial zoom.
+pane. Use `custom-fit-width` when the viewer should start at a percentage of the fit-width zoom,
+for example `70%` of the calculated width fit. Use `actual-size` for a 100% initial zoom.
+
+Users can override the default zoom mode and custom-fit factor from the toolbar. User choices are
+stored in viewer preferences and take precedence over `odv.site.config.js` until the user chooses
+the system default again.
+
+## Print Default Page Mode
+
+Deployments can choose which page scope the print dialog should select by default:
+
+```js
+print: {
+  // Supported values: "active", "all".
+  defaultPageMode: 'active'
+}
+```
+
+Only active-page and all-pages are persistent defaults. Range and custom sequences remain one-off
+dialog choices. Users can override this default from the print toolbar split-button; the persisted
+user choice takes precedence over runtime config until the user chooses the system default again.
 
 ## Edge Scroll Page Turn
 

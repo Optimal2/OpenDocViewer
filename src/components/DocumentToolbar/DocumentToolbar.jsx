@@ -21,6 +21,7 @@ import userLog from '../../logging/userLogger.js';
 import logger from '../../logging/systemLogger.js';
 import PageNavigationButtons from './PageNavigationButtons.jsx';
 import ZoomButtons from './ZoomButtons.jsx';
+import SplitToolbarButton from './SplitToolbarButton.jsx';
 import LanguageMenuButton from './LanguageMenuButton.jsx';
 import ThemeMenuButton from './ThemeMenuButton.jsx';
 import { handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, downloadPdfBlob, printPdfBlob } from '../../utils/printUtils.js';
@@ -29,7 +30,12 @@ import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
-import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { getPrintDefaultMode, getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import {
+  clearPrintDefaultModePreference,
+  getPrintDefaultModePreference,
+  setPrintDefaultModePreference,
+} from '../../utils/viewerPreferences.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
@@ -123,7 +129,7 @@ function getPdfProgressPercent(progress) {
 /**
  * Zoom display state used by the newer toolbar UX paths.
  * @typedef {Object} ZoomState
- * @property {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [mode]
+ * @property {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'} [mode]
  * @property {number} [scale]
  */
 
@@ -156,6 +162,7 @@ function getPdfProgressPercent(progress) {
  * @property {function(): void} zoomOut
  * @property {function(): void=} actualSize
  * @property {function(): void} fitToScreen
+ * @property {function(): void} fitToCustomWidth
  * @property {function(): void} fitToWidth
  * @property {AnyRef} documentRenderRef
  * @property {AnyRef} viewerContainerRef
@@ -178,6 +185,12 @@ function getPdfProgressPercent(progress) {
  * @property {number=} zoom
  * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
+ * @property {number=} customFitWidthFactorPercent
+ * @property {number=} configuredCustomFitWidthFactorPercent
+ * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null)=} userDefaultZoomMode
+ * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} configuredDefaultZoomMode
+ * @property {function(number): void=} setCustomFitWidthFactorPercent
+ * @property {function((string|null)): void=} setDefaultZoomModePreference
  * @property {function(number): void=} setZoom
  * @property {boolean=} hasActiveSelection
  * @property {Array<number>=} visibleOriginalPageNumbers
@@ -268,6 +281,7 @@ const DocumentToolbar = ({
   zoomOut,
   actualSize,
   fitToScreen,
+  fitToCustomWidth,
   fitToWidth,
   documentRenderRef,
   compareRef,
@@ -292,6 +306,12 @@ const DocumentToolbar = ({
   zoom,
   zoomState,
   setZoomMode,
+  customFitWidthFactorPercent = 70,
+  configuredCustomFitWidthFactorPercent = 70,
+  userDefaultZoomMode = null,
+  configuredDefaultZoomMode = 'FIT_WIDTH',
+  setCustomFitWidthFactorPercent,
+  setDefaultZoomModePreference,
   setZoom,
   hasActiveSelection = false,
   visibleOriginalPageNumbers = [],
@@ -318,6 +338,7 @@ const DocumentToolbar = ({
   // output is intentionally excluded because it includes transient visual edit state.
   const pdfPrintCacheRef = useRef(/** @type {Map<string, { blob:Blob, detail:Object, filename:string, total:number, createdAt:number }>} */ (new Map()));
   const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number, detail:Object }|null} */ (null));
+  const [printPreferenceRevision, setPrintPreferenceRevision] = useState(0);
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -1249,13 +1270,35 @@ const DocumentToolbar = ({
           defaultValue: 'Printing becomes available when all pages are fully loaded.',
         });
 
+  const printDefaultSettings = useMemo(() => {
+    void printPreferenceRevision;
+    const configuredDefaultMode = getPrintDefaultMode(getRuntimeConfig());
+    const userDefaultMode = getPrintDefaultModePreference();
+    return {
+      configuredDefaultMode,
+      userDefaultMode,
+    };
+  }, [printPreferenceRevision]);
+
+  const getPrintModeLabel = useCallback((mode) => (
+    mode === 'all'
+      ? t('printDialog.modes.all', { defaultValue: 'All pages' })
+      : t('printDialog.modes.active', { defaultValue: 'Active page' })
+  ), [t]);
+
+  const updatePrintDefaultModePreference = useCallback((mode) => {
+    if (mode === 'active' || mode === 'all') setPrintDefaultModePreference(mode);
+    else clearPrintDefaultModePreference();
+    setPrintPreferenceRevision((current) => current + 1);
+  }, []);
+
   // Derived display values (safe defaults if optional props are absent)
   const zoomPercent = Number.isFinite(zoom) ? Math.round(Number(zoom) * 100) : undefined;
   const zoomMode = zoomState?.mode || 'CUSTOM';
 
   // 1:1 active when NOT in a FIT mode and zoom ≈ 1.0
   const isOneToOneActive =
-    (zoomMode !== 'FIT_PAGE' && zoomMode !== 'FIT_WIDTH') &&
+    (zoomMode !== 'FIT_PAGE' && zoomMode !== 'FIT_WIDTH' && zoomMode !== 'FIT_CUSTOM') &&
     (typeof zoom === 'number' && Math.abs(zoom - 1) <= ONE_TO_ONE_EPS);
 
   // Apply typed percent → set zoom and switch to CUSTOM
@@ -1277,17 +1320,66 @@ const DocumentToolbar = ({
   return (
     <div className="toolbar" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
       {/* Print button → opens dialog */}
-      <button
-        type="button"
+      <SplitToolbarButton
         onClick={() => { if (toolbarPrintEnabled && !isPdfOutputLocked) openPrintDialog?.(); }}
         aria-label={printActionTitle}
         title={printActionTitle}
-        className="odv-btn odv-btn--with-status-led"
+        menuLabel={t('toolbar.printDefault.openMenu', { defaultValue: 'Print defaults' })}
+        mainClassName="odv-btn--with-status-led"
+        menuClassName="toolbar-popup-menu--align-left"
         disabled={!toolbarPrintEnabled || isPdfOutputLocked}
+        menuChildren={({ closeMenu }) => (
+          <div className="toolbar-split-menu-section">
+            <div className="toolbar-split-menu-title">
+              {t('toolbar.printDefault.title', { defaultValue: 'Default print scope' })}
+            </div>
+            <button
+              type="button"
+              role="menuitemradio"
+              aria-checked={printDefaultSettings.userDefaultMode == null}
+              className={`toolbar-popup-menu-item toolbar-split-menu-row${printDefaultSettings.userDefaultMode == null ? ' is-selected' : ''}`}
+              onClick={() => {
+                updatePrintDefaultModePreference(null);
+                closeMenu();
+              }}
+            >
+              <span className={`toolbar-popup-menu-check${printDefaultSettings.userDefaultMode == null ? ' material-icons is-selected' : ''}`} aria-hidden="true">
+                {printDefaultSettings.userDefaultMode == null ? 'check' : ''}
+              </span>
+              <span>
+                {t('toolbar.printDefault.useSystem', {
+                  mode: getPrintModeLabel(printDefaultSettings.configuredDefaultMode),
+                  defaultValue: `Use system default (${getPrintModeLabel(printDefaultSettings.configuredDefaultMode)})`,
+                })}
+              </span>
+            </button>
+            {['active', 'all'].map((mode) => {
+              const selected = printDefaultSettings.userDefaultMode === mode;
+              return (
+                <button
+                  key={mode}
+                  type="button"
+                  role="menuitemradio"
+                  aria-checked={selected}
+                  className={`toolbar-popup-menu-item toolbar-split-menu-row${selected ? ' is-selected' : ''}`}
+                  onClick={() => {
+                    updatePrintDefaultModePreference(mode);
+                    closeMenu();
+                  }}
+                >
+                  <span className={`toolbar-popup-menu-check${selected ? ' material-icons is-selected' : ''}`} aria-hidden="true">
+                    {selected ? 'check' : ''}
+                  </span>
+                  <span>{getPrintModeLabel(mode)}</span>
+                </button>
+              );
+            })}
+          </div>
+        )}
       >
         <span className="material-icons" aria-hidden="true">print</span>
         <StatusLed state={printLedState} size="xs" title={printLedTitle} className="odv-toolbar-print-led" />
-      </button>
+      </SplitToolbarButton>
 
       <div className="separator" />
 
@@ -1324,12 +1416,19 @@ const DocumentToolbar = ({
         zoomIn={zoomIn}
         zoomOut={zoomOut}
         fitToScreen={fitToScreen}
+        fitToCustomWidth={fitToCustomWidth}
         fitToWidth={fitToWidth}
         onActualSize={handleActualSize}
         zoomMode={zoomMode}
         zoomPercent={zoomPercent}
         isOneToOneActive={isOneToOneActive}
         onPercentApply={handlePercentApply}
+        customFitWidthFactorPercent={customFitWidthFactorPercent}
+        configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
+        onCustomFitWidthFactorChange={setCustomFitWidthFactorPercent}
+        userDefaultZoomMode={userDefaultZoomMode}
+        configuredDefaultZoomMode={configuredDefaultZoomMode}
+        onDefaultZoomModeChange={setDefaultZoomModePreference}
       />
 
       <div className="separator" />
@@ -1729,6 +1828,7 @@ DocumentToolbar.propTypes = {
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func,
   fitToScreen: PropTypes.func.isRequired,
+  fitToCustomWidth: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   documentRenderRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
@@ -1783,10 +1883,16 @@ DocumentToolbar.propTypes = {
   resetImageProperties: PropTypes.func.isRequired,
   zoom: PropTypes.number,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', 'CUSTOM']),
     scale: PropTypes.number,
   }),
   setZoomMode: PropTypes.func,
+  customFitWidthFactorPercent: PropTypes.number,
+  configuredCustomFitWidthFactorPercent: PropTypes.number,
+  userDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', null]),
+  configuredDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']),
+  setCustomFitWidthFactorPercent: PropTypes.func,
+  setDefaultZoomModePreference: PropTypes.func,
   setZoom: PropTypes.func,
   hasActiveSelection: PropTypes.bool,
   visibleOriginalPageNumbers: PropTypes.arrayOf(PropTypes.number),

@@ -6,6 +6,29 @@
     "zoomActual": "Faktisk storlek (1:1)",
     "fitToScreen": "Anpassa till skärmen",
     "fitToWidth": "Anpassa till bredden",
+    "fitCustomWidth": "Egen zoom ({percent}% av bredd)",
+    "fitCustomWidthTitle": "Anpassa till {percent}% av beräknad breddzoom",
+    "fitCustomWidthMenu": "Inställningar för egen zoom",
+    "fitCustomWidthFactor": {
+      "label": "Breddfaktor",
+      "inputLabel": "Procent av breddzoom",
+      "useSystem": "Använd systemfaktor ({percent}%)"
+    },
+    "zoomDefault": {
+      "title": "Startzoom",
+      "useSystem": "Använd systemstandard ({mode})",
+      "modes": {
+        "actual": "Faktisk storlek (1:1)",
+        "fitPage": "Anpassa sida",
+        "fitCustom": "Egen zoom",
+        "fitWidth": "Anpassa bredd"
+      }
+    },
+    "printDefault": {
+      "openMenu": "Utskriftsstandard",
+      "title": "Standardomfång för utskrift",
+      "useSystem": "Använd systemstandard ({mode})"
+    },
     "zoomPercentAria": "Aktuell zoomprocent",
     "firstPage": "Första sidan",
     "previousPage": "Föregående sida",

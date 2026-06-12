@@ -9,6 +9,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parsePrintSequence } from '../../utils/printUtils.js';
 import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localizedValue.js';
+import { getPrintDefaultMode } from '../../utils/runtimeConfig.js';
+import { getPrintDefaultModePreference } from '../../utils/viewerPreferences.js';
 
 /**
  * Structured payload returned to the caller on submit.
@@ -266,6 +268,9 @@ export function usePrintRangeController({
   const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
   const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox || showPdfOrientation);
   const restrictToActivePage = !!isDocumentLoading;
+  const configuredDefaultPrintMode = getPrintDefaultMode(cfg);
+  const userDefaultPrintMode = getPrintDefaultModePreference();
+  const defaultPrintMode = restrictToActivePage ? 'active' : (userDefaultPrintMode || configuredDefaultPrintMode);
   const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
   const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
   const forWhomRegex = safeRegex(forWhomCfg?.regex, forWhomCfg?.regexFlags);
@@ -276,7 +281,7 @@ export function usePrintRangeController({
   const hasOptions = Array.isArray(reasonOptions) && reasonOptions.length > 0;
   const defaultReason = reasonCfg?.default ?? (hasOptions ? (reasonOptions[0]?.value ?? '') : '');
 
-  const [printMode, setPrintMode] = useState(/** @type {'active'|'all'|'range'|'custom'} */ ('active'));
+  const [printMode, setPrintMode] = useState(/** @type {'active'|'all'|'range'|'custom'} */ (defaultPrintMode));
   const [activeScope, setActiveScope] = useState(/** @type {'primary'|'compare-both'} */ ('primary'));
   const [allScope, setAllScope] = useState(/** @type {'selection'|'session'} */ (canPrintSelectionScope ? 'selection' : 'session'));
   const [fromValue, setFromValue] = useState('1');
@@ -311,6 +316,7 @@ export function usePrintRangeController({
   useEffect(() => { ensureODVPrintCSS(); }, []);
 
   const previousDefaultReasonRef = useRef(defaultReason);
+  const previousDefaultPrintModeRef = useRef(defaultPrintMode);
   const previousDefaultPrintFormatCheckedRef = useRef(defaultPrintFormatChecked);
   const previousPdfOrientationDefaultAutoRef = useRef(pdfOrientationDefaultAuto);
   const wasOpenRef = useRef(false);
@@ -319,6 +325,7 @@ export function usePrintRangeController({
     if (!isOpen) {
       wasOpenRef.current = false;
       previousDefaultReasonRef.current = defaultReason;
+      previousDefaultPrintModeRef.current = defaultPrintMode;
       previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
       previousPdfOrientationDefaultAutoRef.current = pdfOrientationDefaultAuto;
       return;
@@ -326,16 +333,18 @@ export function usePrintRangeController({
 
     const openedNow = !wasOpenRef.current;
     const defaultReasonChanged = previousDefaultReasonRef.current !== defaultReason;
+    const defaultPrintModeChanged = previousDefaultPrintModeRef.current !== defaultPrintMode;
     const defaultPrintFormatChanged = previousDefaultPrintFormatCheckedRef.current !== defaultPrintFormatChecked;
     const defaultPdfOrientationChanged = previousPdfOrientationDefaultAutoRef.current !== pdfOrientationDefaultAuto;
     wasOpenRef.current = true;
     previousDefaultReasonRef.current = defaultReason;
+    previousDefaultPrintModeRef.current = defaultPrintMode;
     previousDefaultPrintFormatCheckedRef.current = defaultPrintFormatChecked;
     previousPdfOrientationDefaultAutoRef.current = pdfOrientationDefaultAuto;
 
-    if (!openedNow && !defaultReasonChanged && !defaultPrintFormatChanged && !defaultPdfOrientationChanged) return;
+    if (!openedNow && !defaultReasonChanged && !defaultPrintModeChanged && !defaultPrintFormatChanged && !defaultPdfOrientationChanged) return;
 
-    setPrintMode('active');
+    setPrintMode(defaultPrintMode);
     setActiveScope('primary');
     setAllScope(canPrintSelectionScope ? 'selection' : 'session');
     setFromValue('1');
@@ -349,7 +358,7 @@ export function usePrintRangeController({
     setPdfAutoOrientationChecked(pdfOrientationDefaultAuto);
     setPrintBackend(defaultPrintBackend);
     setError('');
-  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultReason, isOpen, pdfOrientationDefaultAuto, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultPrintMode, defaultReason, isOpen, pdfOrientationDefaultAuto, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;

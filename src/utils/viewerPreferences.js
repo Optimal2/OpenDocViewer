@@ -7,11 +7,19 @@
  * unavailable. Legacy theme values are still tolerated for backwards compatibility with older builds.
  */
 
+import {
+  normalizeCustomFitWidthFactorPercent,
+  normalizePrintDefaultMode,
+} from './runtimeConfig.js';
+
 /**
  * @typedef {Object} ViewerPreferences
  * @property {('normal'|'light'|'dark')=} theme
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
  * @property {string=} language
+ * @property {('active'|'all')=} printDefaultMode
+ * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
+ * @property {number=} customFitWidthFactorPercent
  */
 
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
@@ -19,6 +27,7 @@ const COOKIE_KEY = 'ODV_USER_PREFERENCES';
 const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
 const EXPLICIT_THEMES = Object.freeze(['normal', 'light', 'dark']);
 const THEME_MODES = Object.freeze(['system', 'normal', 'light', 'dark']);
+const DEFAULT_ZOOM_MODES = Object.freeze(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']);
 
 /**
  * @param {*} value
@@ -50,6 +59,33 @@ function normalizeThemeModeValue(value) {
 
 /**
  * @param {*} value
+ * @returns {(('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')|null)}
+ */
+function normalizeDefaultZoomModePreference(value) {
+  const raw = String(value || '').trim();
+  if (DEFAULT_ZOOM_MODES.includes(/** @type {any} */ (raw))) return /** @type {any} */ (raw);
+
+  const normalized = raw.toLowerCase().replace(/[_\s]+/g, '-');
+  if (normalized === 'fit-page' || normalized === 'fit-screen' || normalized === 'page') return 'FIT_PAGE';
+  if (normalized === 'fit-width' || normalized === 'fit-to-width' || normalized === 'width') return 'FIT_WIDTH';
+  if (
+    normalized === 'fit-custom'
+    || normalized === 'custom-fit'
+    || normalized === 'custom-fit-width'
+    || normalized === 'fit-width-factor'
+    || normalized === 'user-zoom'
+    || normalized === 'custom-width'
+  ) {
+    return 'FIT_CUSTOM';
+  }
+  if (normalized === 'actual-size' || normalized === 'actual' || normalized === '100%' || normalized === '1:1') {
+    return 'ACTUAL_SIZE';
+  }
+  return null;
+}
+
+/**
+ * @param {*} value
  * @returns {ViewerPreferences}
  */
 function normalizePreferences(value) {
@@ -62,6 +98,14 @@ function normalizePreferences(value) {
   if (typeof source.language === 'string') {
     const trimmedLanguage = source.language.trim();
     if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
+  }
+  if (source.printDefaultMode != null) {
+    next.printDefaultMode = normalizePrintDefaultMode(source.printDefaultMode, 'active');
+  }
+  const normalizedDefaultZoomMode = normalizeDefaultZoomModePreference(source.defaultZoomMode);
+  if (normalizedDefaultZoomMode) next.defaultZoomMode = normalizedDefaultZoomMode;
+  if (source.customFitWidthFactorPercent != null) {
+    next.customFitWidthFactorPercent = normalizeCustomFitWidthFactorPercent(source.customFitWidthFactorPercent, 70);
   }
   return next;
 }
@@ -161,6 +205,20 @@ export function setViewerPreferences(next) {
 }
 
 /**
+ * Persist an already-normalized full preference object. This is used by clear helpers because
+ * setViewerPreferences intentionally merges partial updates.
+ *
+ * @param {ViewerPreferences} next
+ * @returns {ViewerPreferences}
+ */
+function replaceViewerPreferences(next) {
+  const normalized = normalizePreferences(next);
+  writePreferencesToStorage(normalized);
+  writePreferencesToCookie(normalized);
+  return normalized;
+}
+
+/**
  * @returns {(('normal'|'light'|'dark')|null)}
  */
 export function getThemePreference() {
@@ -242,4 +300,85 @@ export function getLanguagePreference() {
  */
 export function setLanguagePreference(language) {
   return setViewerPreferences({ language: String(language || '').trim().toLowerCase() });
+}
+
+/**
+ * @returns {(('active'|'all')|null)}
+ */
+export function getPrintDefaultModePreference() {
+  const prefs = getViewerPreferences();
+  return prefs.printDefaultMode === 'all' || prefs.printDefaultMode === 'active'
+    ? prefs.printDefaultMode
+    : null;
+}
+
+/**
+ * @param {('active'|'all')} mode
+ * @returns {ViewerPreferences}
+ */
+export function setPrintDefaultModePreference(mode) {
+  return setViewerPreferences({ printDefaultMode: normalizePrintDefaultMode(mode, 'active') });
+}
+
+/**
+ * @returns {ViewerPreferences}
+ */
+export function clearPrintDefaultModePreference() {
+  const next = { ...getViewerPreferences() };
+  delete next.printDefaultMode;
+  return replaceViewerPreferences(next);
+}
+
+/**
+ * @returns {(('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')|null)}
+ */
+export function getDefaultZoomModePreference() {
+  return normalizeDefaultZoomModePreference(getViewerPreferences().defaultZoomMode);
+}
+
+/**
+ * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')} mode
+ * @returns {ViewerPreferences}
+ */
+export function setDefaultZoomModePreference(mode) {
+  const normalized = normalizeDefaultZoomModePreference(mode) || 'FIT_WIDTH';
+  return setViewerPreferences({ defaultZoomMode: normalized });
+}
+
+/**
+ * @returns {ViewerPreferences}
+ */
+export function clearDefaultZoomModePreference() {
+  const next = { ...getViewerPreferences() };
+  delete next.defaultZoomMode;
+  return replaceViewerPreferences(next);
+}
+
+/**
+ * @returns {(number|null)}
+ */
+export function getCustomFitWidthFactorPreference() {
+  const prefs = getViewerPreferences();
+  return typeof prefs.customFitWidthFactorPercent === 'number'
+    ? prefs.customFitWidthFactorPercent
+    : null;
+}
+
+/**
+ * @param {number} percent
+ * @returns {ViewerPreferences}
+ */
+export function setCustomFitWidthFactorPreference(percent) {
+  return setViewerPreferences({
+    customFitWidthFactorPercent: normalizeCustomFitWidthFactorPercent(percent, 70),
+  });
+}
+
+/**
+ * @returns {ViewerPreferences}
+ */
+export function clearCustomFitWidthFactorPreference() {
+  const next = { ...getViewerPreferences() };
+  delete next.customFitWidthFactorPercent;
+  return replaceViewerPreferences(next);
 }
