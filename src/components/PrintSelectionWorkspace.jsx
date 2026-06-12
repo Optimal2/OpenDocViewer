@@ -241,12 +241,15 @@ const PrintSelectionWorkspace = ({
   const [rightSelected, setRightSelected] = useState([]);
   const [leftAnchor, setLeftAnchor] = useState(null);
   const [rightAnchor, setRightAnchor] = useState(null);
+  const [draftHistory, setDraftHistory] = useState({ undo: null, redo: null });
   const [dragState, setDragState] = useState(null);
   const [rightDropIndex, setRightDropIndex] = useState(null);
+  const [rightDropMarkerStyle, setRightDropMarkerStyle] = useState(null);
   const [pulseIndex, setPulseIndex] = useState(null);
   const [leftPanelPercent, setLeftPanelPercent] = useState(50);
   const bodyRef = useRef(null);
   const rightPanelRef = useRef(null);
+  const rightGridRef = useRef(null);
 
   useEffect(() => {
     setDraftIndexes(initialIndexes);
@@ -254,6 +257,7 @@ const PrintSelectionWorkspace = ({
     setRightSelected([]);
     setLeftAnchor(null);
     setRightAnchor(null);
+    setDraftHistory({ undo: null, redo: null });
   }, [initialIndexes]);
 
   const draftSet = useMemo(() => new Set(draftIndexes), [draftIndexes]);
@@ -265,6 +269,24 @@ const PrintSelectionWorkspace = ({
   );
   const isDirty = useMemo(() => !sequencesEqual(draftIndexes, initialIndexes), [draftIndexes, initialIndexes]);
   const thumbSize = Math.round(92 * (clampPercent(zoomPercent) / 100));
+  const canUndoDraftChange = Array.isArray(draftHistory.undo);
+  const canRedoDraftChange = !canUndoDraftChange && Array.isArray(draftHistory.redo);
+  const historyActionIcon = canRedoDraftChange ? 'redo' : 'undo';
+  const historyActionText = canRedoDraftChange
+    ? t('printSelectionWorkspace.redo', { defaultValue: 'Redo' })
+    : t('printSelectionWorkspace.undo', { defaultValue: 'Undo' });
+  const historyActionTitle = canRedoDraftChange
+    ? t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })
+    : t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' });
+
+  const applyDraftChange = useCallback((producer) => {
+    setDraftIndexes((current) => {
+      const next = typeof producer === 'function' ? producer(current) : producer;
+      if (!Array.isArray(next) || sequencesEqual(current, next)) return current;
+      setDraftHistory({ undo: current, redo: null });
+      return next;
+    });
+  }, []);
 
   const revealIncludedPage = useCallback((originalIndex) => {
     const node = rightPanelRef.current?.querySelector?.(`[data-selection-page="${originalIndex}"]`);
@@ -284,9 +306,10 @@ const PrintSelectionWorkspace = ({
     }
 
     const toggle = !!(event?.ctrlKey || event?.metaKey);
-    const range = !!event?.shiftKey && leftAnchor != null;
+    const anchor = leftAnchor ?? leftSelected[leftSelected.length - 1] ?? null;
+    const range = !!event?.shiftKey && anchor != null;
     if (range) {
-      const nextRange = rangeSelection(availableLeftIndexes, leftAnchor, originalIndex);
+      const nextRange = rangeSelection(availableLeftIndexes, anchor, originalIndex);
       setLeftSelected(nextRange);
     } else if (toggle) {
       setLeftSelected((current) => {
@@ -301,13 +324,14 @@ const PrintSelectionWorkspace = ({
       setLeftAnchor(originalIndex);
     }
     setRightSelected([]);
-  }, [availableLeftIndexes, draftSet, leftAnchor, revealIncludedPage]);
+  }, [availableLeftIndexes, draftSet, leftAnchor, leftSelected, revealIncludedPage]);
 
   const selectRight = useCallback((originalIndex, event) => {
     const toggle = !!(event?.ctrlKey || event?.metaKey);
-    const range = !!event?.shiftKey && rightAnchor != null;
+    const anchor = rightAnchor ?? rightSelected[rightSelected.length - 1] ?? null;
+    const range = !!event?.shiftKey && anchor != null;
     if (range) {
-      setRightSelected(rangeSelection(draftIndexes, rightAnchor, originalIndex));
+      setRightSelected(rangeSelection(draftIndexes, anchor, originalIndex));
     } else if (toggle) {
       setRightSelected((current) => {
         const set = new Set(current);
@@ -321,28 +345,46 @@ const PrintSelectionWorkspace = ({
       setRightAnchor(originalIndex);
     }
     setLeftSelected([]);
-  }, [draftIndexes, rightAnchor]);
+  }, [draftIndexes, rightAnchor, rightSelected]);
 
-  const addIndexes = useCallback((indexes, insertIndex = draftIndexes.length) => {
+  const addIndexes = useCallback((indexes, insertIndex = null) => {
     const ordered = uniqueOrdered(indexes, naturalIndexes);
-    setDraftIndexes((current) => insertUnique(current, ordered, insertIndex));
+    applyDraftChange((current) => insertUnique(current, ordered, insertIndex ?? current.length));
     setLeftSelected((current) => current.filter((index) => !ordered.includes(index)));
-  }, [draftIndexes.length, naturalIndexes]);
+  }, [applyDraftChange, naturalIndexes]);
 
   const removeIndexes = useCallback((indexes) => {
     const removeSet = new Set(indexes);
     if (removeSet.size <= 0) return;
-    setDraftIndexes((current) => current.filter((index) => !removeSet.has(index)));
+    applyDraftChange((current) => current.filter((index) => !removeSet.has(index)));
     setRightSelected((current) => current.filter((index) => !removeSet.has(index)));
-  }, []);
+  }, [applyDraftChange]);
 
   const addSelected = useCallback(() => addIndexes(leftSelected), [addIndexes, leftSelected]);
   const addAll = useCallback(() => addIndexes(availableLeftIndexes), [addIndexes, availableLeftIndexes]);
   const removeSelected = useCallback(() => removeIndexes(rightSelected), [removeIndexes, rightSelected]);
   const removeAll = useCallback(() => {
-    setDraftIndexes([]);
+    applyDraftChange([]);
     setRightSelected([]);
-  }, []);
+  }, [applyDraftChange]);
+
+  const runHistoryAction = useCallback(() => {
+    setDraftIndexes((current) => {
+      if (Array.isArray(draftHistory.undo)) {
+        setDraftHistory({ undo: null, redo: current });
+        return draftHistory.undo;
+      }
+      if (Array.isArray(draftHistory.redo)) {
+        setDraftHistory({ undo: current, redo: null });
+        return draftHistory.redo;
+      }
+      return current;
+    });
+    setLeftSelected([]);
+    setRightSelected([]);
+    setLeftAnchor(null);
+    setRightAnchor(null);
+  }, [draftHistory]);
 
   const getDragIndexes = useCallback((side, originalIndex) => {
     if (side === 'right') {
@@ -372,18 +414,19 @@ const PrintSelectionWorkspace = ({
   const clearDrag = useCallback(() => {
     setDragState(null);
     setRightDropIndex(null);
+    setRightDropMarkerStyle(null);
   }, []);
 
   const dropOnRight = useCallback((event, insertIndex) => {
     event.preventDefault();
     if (!dragState || dragState.indexes.length <= 0) return;
     if (dragState.side === 'right') {
-      setDraftIndexes((current) => moveWithinSequence(current, dragState.indexes, insertIndex));
+      applyDraftChange((current) => moveWithinSequence(current, dragState.indexes, insertIndex));
     } else {
       addIndexes(dragState.indexes, insertIndex);
     }
     clearDrag();
-  }, [addIndexes, clearDrag, dragState]);
+  }, [addIndexes, applyDraftChange, clearDrag, dragState]);
 
   const dropOnLeft = useCallback((event) => {
     event.preventDefault();
@@ -391,33 +434,125 @@ const PrintSelectionWorkspace = ({
     clearDrag();
   }, [clearDrag, dragState, removeIndexes]);
 
-  const getRightDropIndexFromEvent = useCallback((event) => {
-    const panelNode = rightPanelRef.current;
-    const fallback = draftIndexes.length;
-    const rawTarget = event?.target;
-    const targetNode = rawTarget && typeof rawTarget.closest === 'function' ? rawTarget : null;
-    const tileNode = targetNode?.closest?.('.print-selection-panel-right .print-selection-tile');
-    if (!panelNode || !tileNode || !panelNode.contains(tileNode)) return fallback;
+  const handleLeftDragOver = useCallback((event) => {
+    if (dragState?.side !== 'right') return;
+    event.preventDefault();
+    setRightDropIndex(null);
+    setRightDropMarkerStyle(null);
+  }, [dragState]);
 
-    const orderIndex = Math.max(0, Math.floor(Number(tileNode.getAttribute('data-print-order-index')) || 0));
-    const rect = tileNode.getBoundingClientRect();
-    const centerY = rect.top + (rect.height / 2);
-    const centerX = rect.left + (rect.width / 2);
-    const sameRowBand = Math.abs((Number(event?.clientY) || 0) - centerY) <= (rect.height * 0.35);
-    const after = (Number(event?.clientY) || 0) > centerY || (sameRowBand && (Number(event?.clientX) || 0) > centerX);
-    return Math.max(0, Math.min(draftIndexes.length, orderIndex + (after ? 1 : 0)));
-  }, [draftIndexes.length]);
+  const getRightDropIntentFromEvent = useCallback((event) => {
+    const panelNode = rightPanelRef.current;
+    const gridNode = rightGridRef.current;
+    if (!panelNode || !gridNode) {
+      return { index: draftIndexes.length, markerStyle: null };
+    }
+
+    const panelRect = panelNode.getBoundingClientRect();
+    const tileNodes = Array.from(gridNode.querySelectorAll('.print-selection-tile[data-print-order-index]'));
+    const metrics = tileNodes
+      .map((tileNode) => {
+        const stageNode = tileNode.querySelector('.print-selection-tile-stage') || tileNode;
+        const orderIndex = Math.max(0, Math.floor(Number(tileNode.getAttribute('data-print-order-index')) || 0));
+        const rect = stageNode.getBoundingClientRect();
+        return {
+          orderIndex,
+          rect,
+          centerX: rect.left + (rect.width / 2),
+          centerY: rect.top + (rect.height / 2),
+        };
+      })
+      .filter((metric) => metric.rect.width > 0 && metric.rect.height > 0)
+      .sort((a, b) => a.orderIndex - b.orderIndex);
+
+    const markerStyleFromRect = (rect, viewportLeft) => ({
+      left: Math.round(viewportLeft - panelRect.left + panelNode.scrollLeft),
+      top: Math.round(rect.top - panelRect.top + panelNode.scrollTop),
+      height: Math.round(rect.height),
+    });
+
+    if (metrics.length <= 0) {
+      const gridRect = gridNode.getBoundingClientRect();
+      return {
+        index: 0,
+        markerStyle: {
+          left: Math.round(gridRect.left - panelRect.left + panelNode.scrollLeft + 8),
+          top: Math.round(gridRect.top - panelRect.top + panelNode.scrollTop + 8),
+          height: Math.round(thumbSize * 1.36),
+        },
+      };
+    }
+
+    const rows = [];
+    for (const metric of metrics) {
+      const row = rows.find((candidate) => Math.abs(candidate.centerY - metric.centerY) <= Math.max(16, metric.rect.height * 0.45));
+      if (row) {
+        row.items.push(metric);
+        row.top = Math.min(row.top, metric.rect.top);
+        row.bottom = Math.max(row.bottom, metric.rect.bottom);
+        row.centerY = row.items.reduce((sum, item) => sum + item.centerY, 0) / row.items.length;
+      } else {
+        rows.push({
+          centerY: metric.centerY,
+          top: metric.rect.top,
+          bottom: metric.rect.bottom,
+          items: [metric],
+        });
+      }
+    }
+    rows.sort((a, b) => a.centerY - b.centerY);
+    rows.forEach((row) => row.items.sort((a, b) => a.centerX - b.centerX));
+
+    const clientX = Number(event?.clientX) || 0;
+    const clientY = Number(event?.clientY) || 0;
+    let row = rows[rows.length - 1];
+    for (const candidate of rows) {
+      if (clientY <= candidate.bottom + 14) {
+        row = candidate;
+        break;
+      }
+    }
+
+    const items = row.items;
+    const first = items[0];
+    const last = items[items.length - 1];
+    if (clientX <= first.centerX) {
+      return {
+        index: first.orderIndex,
+        markerStyle: markerStyleFromRect(first.rect, first.rect.left - 7),
+      };
+    }
+
+    for (let itemIndex = 0; itemIndex + 1 < items.length; itemIndex += 1) {
+      const current = items[itemIndex];
+      const next = items[itemIndex + 1];
+      const midpoint = current.centerX + ((next.centerX - current.centerX) / 2);
+      if (clientX <= midpoint) {
+        return {
+          index: current.orderIndex + 1,
+          markerStyle: markerStyleFromRect(current.rect, (current.rect.right + next.rect.left) / 2),
+        };
+      }
+    }
+
+    return {
+      index: last.orderIndex + 1,
+      markerStyle: markerStyleFromRect(last.rect, last.rect.right + 7),
+    };
+  }, [draftIndexes.length, thumbSize]);
 
   const handleRightDragOver = useCallback((event) => {
     if (!dragState) return;
     event.preventDefault();
     if (event.dataTransfer) event.dataTransfer.dropEffect = dragState.side === 'right' ? 'move' : 'copy';
-    setRightDropIndex(getRightDropIndexFromEvent(event));
-  }, [dragState, getRightDropIndexFromEvent]);
+    const intent = getRightDropIntentFromEvent(event);
+    setRightDropIndex(intent.index);
+    setRightDropMarkerStyle(intent.markerStyle);
+  }, [dragState, getRightDropIntentFromEvent]);
 
   const handleRightDrop = useCallback((event) => {
-    dropOnRight(event, rightDropIndex ?? getRightDropIndexFromEvent(event));
-  }, [dropOnRight, getRightDropIndexFromEvent, rightDropIndex]);
+    dropOnRight(event, rightDropIndex ?? getRightDropIntentFromEvent(event).index);
+  }, [dropOnRight, getRightDropIntentFromEvent, rightDropIndex]);
 
   const cancel = useCallback(() => {
     if (isDirty) {
@@ -466,6 +601,7 @@ const PrintSelectionWorkspace = ({
     const selected = side === 'left' ? leftSelectedSet.has(originalIndex) : rightSelectedSet.has(originalIndex);
     const disabled = side === 'left' && included;
     const pulsing = pulseIndex === originalIndex;
+    const draggingSource = dragState?.side === side && dragState.indexes.includes(originalIndex);
     const contextPageNumber = side === 'right' && orderIndex >= 0 ? orderIndex + 1 : item.pageNumber;
     const documentPageNumber = getDocumentPageNumber(item);
     const documentPageCount = getDocumentPageCount(item);
@@ -532,6 +668,7 @@ const PrintSelectionWorkspace = ({
           'print-selection-tile',
           selected ? 'is-selected' : '',
           disabled ? 'is-included' : '',
+          draggingSource ? 'is-dragging-source' : '',
           pulsing ? 'is-pulsing' : '',
         ].filter(Boolean).join(' ')}
         style={{ '--print-selection-thumb-size': `${thumbSize}px` }}
@@ -570,21 +707,15 @@ const PrintSelectionWorkspace = ({
       </button>
     );
 
-    if (side !== 'right') return tile;
-    return (
-      <React.Fragment key={`right-fragment-${originalIndex}`}>
-        {rightDropIndex === orderIndex ? <span className="print-selection-drop-marker" aria-hidden="true" /> : null}
-        {tile}
-      </React.Fragment>
-    );
+    return tile;
   }, [
     addIndexes,
     clearDrag,
+    dragState,
     draftSet,
     leftSelectedSet,
     pulseIndex,
     removeIndexes,
-    rightDropIndex,
     rightSelectedSet,
     selectLeft,
     selectRight,
@@ -607,6 +738,17 @@ const PrintSelectionWorkspace = ({
           </p>
         </div>
         <div className="print-selection-workspace-actions">
+          <button
+            type="button"
+            className="print-selection-secondary print-selection-history-action"
+            onClick={runHistoryAction}
+            disabled={!canUndoDraftChange && !canRedoDraftChange}
+            title={historyActionTitle}
+            aria-label={historyActionTitle}
+          >
+            <span className="material-icons" aria-hidden="true">{historyActionIcon}</span>
+            <span>{historyActionText}</span>
+          </button>
           <button type="button" className="print-selection-secondary" onClick={cancel}>
             {t('common.cancel', { defaultValue: 'Cancel' })}
           </button>
@@ -626,7 +768,7 @@ const PrintSelectionWorkspace = ({
       >
         <div
           className="print-selection-panel print-selection-panel-left"
-          onDragOver={(event) => { if (dragState?.side === 'right') event.preventDefault(); }}
+          onDragOver={handleLeftDragOver}
           onDrop={dropOnLeft}
         >
           <div className="print-selection-panel-header">
@@ -721,13 +863,19 @@ const PrintSelectionWorkspace = ({
             onDragOver={handleRightDragOver}
             onDrop={handleRightDrop}
           >
-            <div className="print-selection-grid">
+            <div ref={rightGridRef} className="print-selection-grid">
               {draftIndexes.map((originalIndex, orderIndex) => {
                 const item = itemByIndex.get(originalIndex);
                 return item ? renderTile(item, 'right', orderIndex) : null;
               })}
-              {rightDropIndex === draftIndexes.length ? <span className="print-selection-drop-marker" aria-hidden="true" /> : null}
             </div>
+            {rightDropMarkerStyle ? (
+              <span
+                className="print-selection-drop-marker"
+                style={rightDropMarkerStyle}
+                aria-hidden="true"
+              />
+            ) : null}
             {draftIndexes.length <= 0 ? (
               <div className="print-selection-empty" role="status">
                 {t('printSelectionWorkspace.emptySelection', { defaultValue: 'No pages are selected for printing.' })}
