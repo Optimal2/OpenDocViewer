@@ -328,6 +328,9 @@
     "alreadyIncluded": "Sida {page} ingår redan i utskriftsurvalet.",
     "pageTitle": "Sida {page}",
     "pageLabel": "Sida {page}",
+    "sourcePageTitle": "Källsida {page}. Dokument {document}, dokumentsida {documentPage}.",
+    "printPageTitle": "Utskriftssida {printPage}. Källsida {sourcePage}, dokument {document}, dokumentsida {documentPage}.",
+    "printOrderBadgeTitle": "Utskriftssida {page} i utkastet",
     "cancelConfirm": "Kasta utkastet till utskriftsurval? Alla ändringar i detta läge försvinner.",
     "emptySelection": "Inga sidor är valda för utskrift.",
     "resizeDivider": "Ändra bredd på urvalspanelerna"

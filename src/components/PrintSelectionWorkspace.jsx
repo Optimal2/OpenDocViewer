@@ -111,6 +111,24 @@ function buildPageItems(allPages) {
   }));
 }
 
+function formatMetricValue(value) {
+  return String(Math.max(0, Math.floor(Number(value) || 0)));
+}
+
+function getDocumentPageNumber(item) {
+  return Math.max(1, Number(item?.documentPageNumber) || Number(item?.pageNumber) || 1);
+}
+
+function getDocumentPageCount(item) {
+  return Math.max(0, Number(item?.documentPageCount) || 0);
+}
+
+function formatMetricFraction(value, total) {
+  const safeValue = Math.max(0, Math.floor(Number(value) || 0));
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  return safeTotal > 0 ? `${safeValue}/${safeTotal}` : formatMetricValue(safeValue);
+}
+
 function buildDocumentGroups(pageItems, bundle, headerTemplate) {
   const groups = [];
   for (const item of pageItems) {
@@ -373,6 +391,34 @@ const PrintSelectionWorkspace = ({
     clearDrag();
   }, [clearDrag, dragState, removeIndexes]);
 
+  const getRightDropIndexFromEvent = useCallback((event) => {
+    const panelNode = rightPanelRef.current;
+    const fallback = draftIndexes.length;
+    const rawTarget = event?.target;
+    const targetNode = rawTarget && typeof rawTarget.closest === 'function' ? rawTarget : null;
+    const tileNode = targetNode?.closest?.('.print-selection-panel-right .print-selection-tile');
+    if (!panelNode || !tileNode || !panelNode.contains(tileNode)) return fallback;
+
+    const orderIndex = Math.max(0, Math.floor(Number(tileNode.getAttribute('data-print-order-index')) || 0));
+    const rect = tileNode.getBoundingClientRect();
+    const centerY = rect.top + (rect.height / 2);
+    const centerX = rect.left + (rect.width / 2);
+    const sameRowBand = Math.abs((Number(event?.clientY) || 0) - centerY) <= (rect.height * 0.35);
+    const after = (Number(event?.clientY) || 0) > centerY || (sameRowBand && (Number(event?.clientX) || 0) > centerX);
+    return Math.max(0, Math.min(draftIndexes.length, orderIndex + (after ? 1 : 0)));
+  }, [draftIndexes.length]);
+
+  const handleRightDragOver = useCallback((event) => {
+    if (!dragState) return;
+    event.preventDefault();
+    if (event.dataTransfer) event.dataTransfer.dropEffect = dragState.side === 'right' ? 'move' : 'copy';
+    setRightDropIndex(getRightDropIndexFromEvent(event));
+  }, [dragState, getRightDropIndexFromEvent]);
+
+  const handleRightDrop = useCallback((event) => {
+    dropOnRight(event, rightDropIndex ?? getRightDropIndexFromEvent(event));
+  }, [dropOnRight, getRightDropIndexFromEvent, rightDropIndex]);
+
   const cancel = useCallback(() => {
     if (isDirty) {
       const ok = window.confirm(t('printSelectionWorkspace.cancelConfirm', {
@@ -420,15 +466,68 @@ const PrintSelectionWorkspace = ({
     const selected = side === 'left' ? leftSelectedSet.has(originalIndex) : rightSelectedSet.has(originalIndex);
     const disabled = side === 'left' && included;
     const pulsing = pulseIndex === originalIndex;
+    const contextPageNumber = side === 'right' && orderIndex >= 0 ? orderIndex + 1 : item.pageNumber;
+    const documentPageNumber = getDocumentPageNumber(item);
+    const documentPageCount = getDocumentPageCount(item);
+    const documentFraction = formatMetricFraction(item.documentNumber, item.totalDocuments);
+    const documentPageFraction = formatMetricFraction(documentPageNumber, documentPageCount);
     const title = side === 'left' && included
       ? t('printSelectionWorkspace.alreadyIncluded', { page: item.pageNumber, defaultValue: `Page ${item.pageNumber} is already included in the print selection.` })
-      : t('printSelectionWorkspace.pageTitle', { page: item.pageNumber, defaultValue: `Page ${item.pageNumber}` });
+      : side === 'right'
+        ? t('printSelectionWorkspace.printPageTitle', {
+            printPage: contextPageNumber,
+            sourcePage: item.pageNumber,
+            document: item.documentNumber,
+            documentPage: documentPageNumber,
+            defaultValue: `Print page ${contextPageNumber}. Source page ${item.pageNumber}, document ${item.documentNumber}, document page ${documentPageNumber}.`,
+          })
+        : t('printSelectionWorkspace.sourcePageTitle', {
+            page: item.pageNumber,
+            document: item.documentNumber,
+            documentPage: documentPageNumber,
+            defaultValue: `Source page ${item.pageNumber}. Document ${item.documentNumber}, document page ${documentPageNumber}.`,
+          });
+    const metricBadges = [
+      {
+        key: 'context-page',
+        position: 'top-left',
+        prefix: t('thumbnails.metrics.totalPagePrefix', { defaultValue: 'T' }),
+        value: formatMetricValue(contextPageNumber),
+        title: side === 'right'
+          ? t('printSelectionWorkspace.printOrderBadgeTitle', {
+              page: contextPageNumber,
+              defaultValue: `Print page ${contextPageNumber} in the draft output`,
+            })
+          : t('thumbnails.metrics.totalPageBadgeTitle', {
+              defaultValue: 'Visible page number in the current selection',
+            }),
+      },
+      {
+        key: 'document',
+        position: 'bottom-left',
+        prefix: t('thumbnails.metrics.documentPrefix', { defaultValue: 'D' }),
+        value: formatMetricValue(item.documentNumber),
+        title: `${t('thumbnails.metrics.documentBadgeTitle', {
+          defaultValue: 'Document number in current session',
+        })} - ${documentFraction}`,
+      },
+      {
+        key: 'document-page',
+        position: 'bottom-right',
+        prefix: t('thumbnails.metrics.documentPagePrefix', { defaultValue: 'P' }),
+        value: formatMetricValue(documentPageNumber),
+        title: `${t('thumbnails.metrics.documentPageBadgeTitle', {
+          defaultValue: 'Page number within the current document',
+        })} - ${documentPageFraction}`,
+      },
+    ];
 
     const tile = (
       <button
         key={`${side}-${originalIndex}`}
         type="button"
         data-selection-page={originalIndex}
+        data-print-order-index={side === 'right' ? orderIndex : undefined}
         className={[
           'print-selection-tile',
           selected ? 'is-selected' : '',
@@ -444,15 +543,18 @@ const PrintSelectionWorkspace = ({
         onDoubleClick={() => (side === 'left' ? addIndexes([originalIndex]) : removeIndexes([originalIndex]))}
         onDragStart={(event) => startDrag(side, originalIndex, event)}
         onDragEnd={clearDrag}
-        onDragOver={side === 'right' ? (event) => {
-          event.preventDefault();
-          const rect = event.currentTarget.getBoundingClientRect();
-          const nextIndex = event.clientY > rect.top + (rect.height / 2) ? orderIndex + 1 : orderIndex;
-          setRightDropIndex(nextIndex);
-        } : undefined}
-        onDrop={side === 'right' ? (event) => dropOnRight(event, rightDropIndex ?? orderIndex) : undefined}
       >
         <span className="print-selection-tile-stage">
+          {metricBadges.map((metric) => (
+            <span
+              key={metric.key}
+              className={`print-selection-metric-badge metric-${metric.key} position-${metric.position}`}
+              title={metric.title}
+            >
+              <span className="print-selection-metric-badge-prefix">{metric.prefix}</span>
+              <span className="print-selection-metric-badge-value">{metric.value}</span>
+            </span>
+          ))}
           <img src={item.imageUrl} alt="" draggable={false} />
           {item.loading ? (
             <span className="print-selection-loading" aria-hidden="true">
@@ -464,9 +566,6 @@ const PrintSelectionWorkspace = ({
               <span className="material-icons">done</span>
             </span>
           ) : null}
-        </span>
-        <span className="print-selection-tile-caption">
-          {t('printSelectionWorkspace.pageLabel', { page: item.pageNumber, defaultValue: `Page ${item.pageNumber}` })}
         </span>
       </button>
     );
@@ -482,7 +581,6 @@ const PrintSelectionWorkspace = ({
     addIndexes,
     clearDrag,
     draftSet,
-    dropOnRight,
     leftSelectedSet,
     pulseIndex,
     removeIndexes,
@@ -521,7 +619,10 @@ const PrintSelectionWorkspace = ({
       <div
         ref={bodyRef}
         className="print-selection-workspace-body"
-        style={{ '--print-selection-left-panel': `${leftPanelPercent}%` }}
+        style={{
+          '--print-selection-left-panel': `${leftPanelPercent}%`,
+          '--print-selection-thumb-size': `${thumbSize}px`,
+        }}
       >
         <div
           className="print-selection-panel print-selection-panel-left"
@@ -549,48 +650,63 @@ const PrintSelectionWorkspace = ({
         <div className="print-selection-transfer-column" aria-label={t('printSelectionWorkspace.transferActions', { defaultValue: 'Transfer pages' })}>
           <button
             type="button"
-            className="print-selection-resize-handle"
+            className="print-selection-resize-zone print-selection-resize-zone-top"
             onPointerDown={startPanelResize}
             aria-label={t('printSelectionWorkspace.resizeDivider', { defaultValue: 'Resize print selection panels' })}
             title={t('printSelectionWorkspace.resizeDivider', { defaultValue: 'Resize print selection panels' })}
           >
             <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
           </button>
+          <div className="print-selection-transfer-buttons">
+            <button
+              type="button"
+              onClick={removeAll}
+              disabled={draftIndexes.length <= 0}
+              title={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
+              aria-label={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
+            >
+              <span className="material-icons" aria-hidden="true">keyboard_double_arrow_left</span>
+            </button>
+            <button
+              type="button"
+              onClick={removeSelected}
+              disabled={rightSelected.length <= 0}
+              title={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
+              aria-label={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
+            >
+              <span className="material-icons" aria-hidden="true">chevron_left</span>
+            </button>
+            <button
+              type="button"
+              onClick={addSelected}
+              disabled={leftSelected.length <= 0}
+              title={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
+              aria-label={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
+            >
+              <span className="material-icons" aria-hidden="true">chevron_right</span>
+            </button>
+            <button
+              type="button"
+              onClick={addAll}
+              disabled={availableLeftIndexes.length <= 0}
+              title={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
+              aria-label={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
+            >
+              <span className="material-icons" aria-hidden="true">keyboard_double_arrow_right</span>
+            </button>
+          </div>
           <button
             type="button"
-            onClick={removeAll}
-            disabled={draftIndexes.length <= 0}
-            title={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
-            aria-label={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
+            className="print-selection-resize-zone print-selection-resize-zone-bottom"
+            onPointerDown={startPanelResize}
+            aria-label={t('printSelectionWorkspace.resizeDivider', { defaultValue: 'Resize print selection panels' })}
+            title={t('printSelectionWorkspace.resizeDivider', { defaultValue: 'Resize print selection panels' })}
           >
-            <span className="material-icons" aria-hidden="true">keyboard_double_arrow_left</span>
-          </button>
-          <button
-            type="button"
-            onClick={removeSelected}
-            disabled={rightSelected.length <= 0}
-            title={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
-            aria-label={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
-          >
-            <span className="material-icons" aria-hidden="true">chevron_left</span>
-          </button>
-          <button
-            type="button"
-            onClick={addSelected}
-            disabled={leftSelected.length <= 0}
-            title={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
-            aria-label={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
-          >
-            <span className="material-icons" aria-hidden="true">chevron_right</span>
-          </button>
-          <button
-            type="button"
-            onClick={addAll}
-            disabled={availableLeftIndexes.length <= 0}
-            title={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
-            aria-label={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
-          >
-            <span className="material-icons" aria-hidden="true">keyboard_double_arrow_right</span>
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
+            <span aria-hidden="true" />
           </button>
         </div>
 
@@ -602,12 +718,8 @@ const PrintSelectionWorkspace = ({
           <div
             ref={rightPanelRef}
             className="print-selection-panel-scroll"
-            onDragOver={(event) => {
-              if (!dragState) return;
-              event.preventDefault();
-              setRightDropIndex(draftIndexes.length);
-            }}
-            onDrop={(event) => dropOnRight(event, rightDropIndex ?? draftIndexes.length)}
+            onDragOver={handleRightDragOver}
+            onDrop={handleRightDrop}
           >
             <div className="print-selection-grid">
               {draftIndexes.map((originalIndex, orderIndex) => {
