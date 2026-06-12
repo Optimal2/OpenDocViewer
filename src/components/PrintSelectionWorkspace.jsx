@@ -213,6 +213,18 @@ function moveWithinSequence(current, indexes, insertIndex) {
   ];
 }
 
+function isActivationKey(event) {
+  const key = String(event?.key || '');
+  return key === 'Enter' || key === ' ';
+}
+
+function shouldIgnoreModifiedCommandClick(event) {
+  if (!(event?.ctrlKey || event?.shiftKey || event?.metaKey)) return false;
+  event.preventDefault?.();
+  event.stopPropagation?.();
+  return true;
+}
+
 const PrintSelectionWorkspace = ({
   allPages,
   bundle,
@@ -300,6 +312,8 @@ const PrintSelectionWorkspace = ({
   }, []);
 
   const selectLeft = useCallback((originalIndex, event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
     if (draftSet.has(originalIndex)) {
       revealIncludedPage(originalIndex);
       return;
@@ -327,6 +341,8 @@ const PrintSelectionWorkspace = ({
   }, [availableLeftIndexes, draftSet, leftAnchor, leftSelected, revealIncludedPage]);
 
   const selectRight = useCallback((originalIndex, event) => {
+    event?.preventDefault?.();
+    event?.stopPropagation?.();
     const toggle = !!(event?.ctrlKey || event?.metaKey);
     const anchor = rightAnchor ?? rightSelected[rightSelected.length - 1] ?? null;
     const range = !!event?.shiftKey && anchor != null;
@@ -386,6 +402,11 @@ const PrintSelectionWorkspace = ({
     setRightAnchor(null);
   }, [draftHistory]);
 
+  const runTransferCommand = useCallback((event, command) => {
+    if (shouldIgnoreModifiedCommandClick(event)) return;
+    command?.();
+  }, []);
+
   const getDragIndexes = useCallback((side, originalIndex) => {
     if (side === 'right') {
       return rightSelectedSet.has(originalIndex)
@@ -399,6 +420,7 @@ const PrintSelectionWorkspace = ({
   }, [availableLeftIndexes, draftIndexes, draftSet, leftSelected, leftSelectedSet, rightSelected, rightSelectedSet]);
 
   const startDrag = useCallback((side, originalIndex, event) => {
+    event?.stopPropagation?.();
     const indexes = getDragIndexes(side, originalIndex);
     if (indexes.length <= 0) {
       event.preventDefault();
@@ -657,11 +679,26 @@ const PrintSelectionWorkspace = ({
         })} - ${documentPageFraction}`,
       },
     ];
+    const activateTile = (event) => {
+      if (side === 'left') selectLeft(originalIndex, event);
+      else selectRight(originalIndex, event);
+    };
+    const handleTileKeyDown = (event) => {
+      if (!isActivationKey(event)) return;
+      activateTile(event);
+    };
+    const handleTileDoubleClick = (event) => {
+      event.preventDefault();
+      event.stopPropagation();
+      if (side === 'left') addIndexes([originalIndex]);
+      else removeIndexes([originalIndex]);
+    };
 
     const tile = (
-      <button
+      <div
         key={`${side}-${originalIndex}`}
-        type="button"
+        role="button"
+        tabIndex={disabled ? -1 : 0}
         data-selection-page={originalIndex}
         data-print-order-index={side === 'right' ? orderIndex : undefined}
         className={[
@@ -676,10 +713,11 @@ const PrintSelectionWorkspace = ({
         aria-pressed={selected}
         aria-disabled={disabled}
         draggable={!disabled}
-        onClick={(event) => (side === 'left' ? selectLeft(originalIndex, event) : selectRight(originalIndex, event))}
-        onDoubleClick={() => (side === 'left' ? addIndexes([originalIndex]) : removeIndexes([originalIndex]))}
+        onClick={activateTile}
+        onDoubleClick={handleTileDoubleClick}
         onDragStart={(event) => startDrag(side, originalIndex, event)}
         onDragEnd={clearDrag}
+        onKeyDown={handleTileKeyDown}
       >
         <span className="print-selection-tile-stage">
           {metricBadges.map((metric) => (
@@ -704,7 +742,7 @@ const PrintSelectionWorkspace = ({
             </span>
           ) : null}
         </span>
-      </button>
+      </div>
     );
 
     return tile;
@@ -725,7 +763,12 @@ const PrintSelectionWorkspace = ({
   ]);
 
   return (
-    <section className="print-selection-workspace" aria-label={t('printSelectionWorkspace.title', { defaultValue: 'Print selection' })}>
+    <section
+      className="print-selection-workspace"
+      data-odv-shortcuts="off"
+      aria-label={t('printSelectionWorkspace.title', { defaultValue: 'Print selection' })}
+      onClick={(event) => event.stopPropagation()}
+    >
       <div className="print-selection-workspace-header">
         <div>
           <h2>{t('printSelectionWorkspace.title', { defaultValue: 'Print selection' })}</h2>
@@ -804,7 +847,7 @@ const PrintSelectionWorkspace = ({
           <div className="print-selection-transfer-buttons">
             <button
               type="button"
-              onClick={removeAll}
+              onClick={(event) => runTransferCommand(event, removeAll)}
               disabled={draftIndexes.length <= 0}
               title={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
               aria-label={t('printSelectionWorkspace.removeAll', { defaultValue: 'Remove all' })}
@@ -813,7 +856,7 @@ const PrintSelectionWorkspace = ({
             </button>
             <button
               type="button"
-              onClick={removeSelected}
+              onClick={(event) => runTransferCommand(event, removeSelected)}
               disabled={rightSelected.length <= 0}
               title={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
               aria-label={t('printSelectionWorkspace.removeSelected', { defaultValue: 'Remove selected' })}
@@ -822,7 +865,7 @@ const PrintSelectionWorkspace = ({
             </button>
             <button
               type="button"
-              onClick={addSelected}
+              onClick={(event) => runTransferCommand(event, addSelected)}
               disabled={leftSelected.length <= 0}
               title={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
               aria-label={t('printSelectionWorkspace.addSelected', { defaultValue: 'Add selected' })}
@@ -831,7 +874,7 @@ const PrintSelectionWorkspace = ({
             </button>
             <button
               type="button"
-              onClick={addAll}
+              onClick={(event) => runTransferCommand(event, addAll)}
               disabled={availableLeftIndexes.length <= 0}
               title={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
               aria-label={t('printSelectionWorkspace.addAll', { defaultValue: 'Add all' })}
