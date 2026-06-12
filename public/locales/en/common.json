@@ -29,6 +29,11 @@
       "title": "Default print scope",
       "useSystem": "Use system default ({mode})"
     },
+    "printSelectionWorkspace": {
+      "open": "Choose pages for printing",
+      "openDisabled": "Page selection is available when all pages are fully loaded.",
+      "active": "Print selection mode"
+    },
     "zoomPercentAria": "Current zoom percent",
     "firstPage": "First page",
     "previousPage": "Previous page",
@@ -110,6 +115,7 @@
     "resetBrightness": "Reset brightness",
     "resetContrast": "Reset contrast",
     "printDisabledLoading": "Printing becomes available when all pages are fully loaded.",
+    "printDisabledInSelectionWorkspace": "Printing is disabled while choosing pages.",
     "printBusy": "Print/export output is already being prepared.",
     "printPrebuild": {
       "off": "Print cache inactive",
@@ -215,6 +221,7 @@
       "label": "What should “All pages” include?",
       "selection": "Current selection ({count} pages)",
       "session": "Entire session ({count} pages)",
+      "lockedSelection": "{count} selected pages will be prepared in the chosen order.",
       "hint": "Choose whether printing should follow the current selection or ignore the selection and print the full session."
     },
     "activeScope": {
@@ -239,6 +246,7 @@
     "modes": {
       "active": "Active page",
       "all": "All pages",
+      "selectedSequence": "Selected sequence",
       "range": "Simple range",
       "custom": "Custom pages"
     },
@@ -304,6 +312,25 @@
     "alt": {
       "printableDocument": "Printable Document"
     }
+  },
+  "printSelectionWorkspace": {
+    "title": "Print selection",
+    "subtitle": "{selected} of {total} pages selected for printing.",
+    "availablePages": "Available pages",
+    "selectedPages": "Selected pages",
+    "availableCount": "{count} available",
+    "selectedCount": "{count} selected",
+    "transferActions": "Transfer pages",
+    "removeAll": "Remove all",
+    "removeSelected": "Remove selected",
+    "addSelected": "Add selected",
+    "addAll": "Add all",
+    "alreadyIncluded": "Page {page} is already included in the print selection.",
+    "pageTitle": "Page {page}",
+    "pageLabel": "Page {page}",
+    "cancelConfirm": "Discard the draft print selection? All changes in this selection mode will be lost.",
+    "emptySelection": "No pages are selected for printing.",
+    "resizeDivider": "Resize print selection panels"
   },
   "demoControls": {
     "totalLabel": "Total pages/files:",

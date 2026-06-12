@@ -182,6 +182,7 @@ export function ensureODVPrintCSS() {
  * @param {number=} params.activePageNumber
  * @param {boolean=} params.isComparing
  * @param {boolean=} params.hasActiveSelection
+ * @param {boolean=} params.selectionSequenceLocked
  * @param {number=} params.selectionIncludedCount
  * @param {number=} params.sessionTotalPages
  * @param {function(string, Object=): string} params.t
@@ -196,6 +197,7 @@ export function usePrintRangeController({
   activePageNumber = 1,
   isComparing = false,
   hasActiveSelection = false,
+  selectionSequenceLocked = false,
   selectionIncludedCount = 0,
   sessionTotalPages = totalPages,
   t,
@@ -272,6 +274,7 @@ export function usePrintRangeController({
   const userDefaultPrintMode = getPrintDefaultModePreference();
   const defaultPrintMode = restrictToActivePage ? 'active' : (userDefaultPrintMode || configuredDefaultPrintMode);
   const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
+  const sequenceLockedToSelection = !!selectionSequenceLocked && canPrintSelectionScope;
   const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
   const forWhomRegex = safeRegex(forWhomCfg?.regex, forWhomCfg?.regexFlags);
   const reasonMax = Number.isFinite(reasonCfg?.maxLen) ? reasonCfg.maxLen : 255;
@@ -344,9 +347,9 @@ export function usePrintRangeController({
 
     if (!openedNow && !defaultReasonChanged && !defaultPrintModeChanged && !defaultPrintFormatChanged && !defaultPdfOrientationChanged) return;
 
-    setPrintMode(defaultPrintMode);
+    setPrintMode(sequenceLockedToSelection && (defaultPrintMode === 'range' || defaultPrintMode === 'custom') ? 'all' : defaultPrintMode);
     setActiveScope('primary');
-    setAllScope(canPrintSelectionScope ? 'selection' : 'session');
+    setAllScope(sequenceLockedToSelection ? 'selection' : (canPrintSelectionScope ? 'selection' : 'session'));
     setFromValue('1');
     setToValue(String(totalPages || 1));
     setCustomText('');
@@ -358,7 +361,7 @@ export function usePrintRangeController({
     setPdfAutoOrientationChecked(pdfOrientationDefaultAuto);
     setPrintBackend(defaultPrintBackend);
     setError('');
-  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultPrintMode, defaultReason, isOpen, pdfOrientationDefaultAuto, totalPages]);
+  }, [canPrintSelectionScope, defaultPrintBackend, defaultPrintFormatChecked, defaultPrintMode, defaultReason, isOpen, pdfOrientationDefaultAuto, sequenceLockedToSelection, totalPages]);
 
   useEffect(() => {
     if (!isOpen || !restrictToActivePage) return;
@@ -375,6 +378,14 @@ export function usePrintRangeController({
     if (canPrintSelectionScope) return;
     setAllScope('session');
   }, [canPrintSelectionScope]);
+
+  useEffect(() => {
+    if (!sequenceLockedToSelection) return;
+    setAllScope('selection');
+    if (printMode === 'range' || printMode === 'custom') {
+      setPrintMode('all');
+    }
+  }, [printMode, sequenceLockedToSelection]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -588,7 +599,9 @@ export function usePrintRangeController({
 
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
     if (printMode === 'active') return { mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...common };
-    if (printMode === 'all') return { mode: 'all', allScope: canPrintSelectionScope ? allScope : 'session', ...common };
+    if (printMode === 'all' || sequenceLockedToSelection) {
+      return { mode: 'all', allScope: sequenceLockedToSelection ? 'selection' : (canPrintSelectionScope ? allScope : 'session'), ...common };
+    }
 
     if (printMode === 'range') {
       const rangeValidation = validateRange();
@@ -621,6 +634,7 @@ export function usePrintRangeController({
     printBackend,
     printMode,
     restrictToActivePage,
+    sequenceLockedToSelection,
     t,
     totalPages,
     validateRange,
@@ -775,6 +789,7 @@ export function usePrintRangeController({
     isComparing,
     hasActiveSelection,
     canPrintSelectionScope,
+    selectionSequenceLocked: sequenceLockedToSelection,
     selectionIncludedCount,
     sessionTotalPages,
     showUserSection,

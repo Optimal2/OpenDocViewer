@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
+import PrintSelectionWorkspace from '../PrintSelectionWorkspace.jsx';
 import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
@@ -35,6 +36,7 @@ import ViewerProblemNotice from '../ViewerProblemNotice.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
 import {
   getRuntimeConfig,
+  getPrintSelectionWorkspaceConfig,
   getViewerEdgeScrollPageTurnConfig,
   isDocumentMetadataUiEnabled,
 } from '../../utils/runtimeConfig.js';
@@ -72,6 +74,13 @@ const DocumentViewer = () => {
     isPrintDialogOpen,
     openPrintDialog,
     closePrintDialog,
+    printSelectionWorkspaceOpen,
+    openPrintSelectionWorkspace,
+    cancelPrintSelectionWorkspace,
+    commitPrintSelectionWorkspace,
+    customPrintSelectionActive,
+    customPrintSelectionSequence,
+    initialPrintSelectionWorkspaceSequence,
     primaryImageProperties,
     compareImageProperties,
     isExpanded,
@@ -163,8 +172,10 @@ const DocumentViewer = () => {
 
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
+  const [printSelectionZoomPercent, setPrintSelectionZoomPercent] = useState(120);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
   const edgeScrollPageTurnConfig = useMemo(() => getViewerEdgeScrollPageTurnConfig(getRuntimeConfig()), []);
+  const printSelectionWorkspaceConfig = useMemo(() => getPrintSelectionWorkspaceConfig(getRuntimeConfig()), []);
 
   const metadataMatrixView = useMemo(
     () => (metadataUiEnabled ? buildDocumentMetadataMatrixView(bundle) : null),
@@ -228,6 +239,7 @@ const DocumentViewer = () => {
 
     /** @param {KeyboardEvent} event */
     const onKeyDown = (event) => {
+      if (printSelectionWorkspaceOpen) return;
       if (!canOpenMetadataMatrix) return;
       if (event.defaultPrevented || event.isComposing) return;
       const key = String(event.key || '').toLowerCase();
@@ -241,7 +253,7 @@ const DocumentViewer = () => {
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [canOpenMetadataMatrix, openMetadataMatrix]);
+  }, [canOpenMetadataMatrix, openMetadataMatrix, printSelectionWorkspaceOpen]);
 
   const viewerRuntimeStatus = useMemo(() => {
     if (error) {
@@ -276,8 +288,19 @@ const DocumentViewer = () => {
 
 
   const hasVisiblePages = totalPages > 0;
-  const hasPrintableSelection = selectionActive && visibleOriginalPageNumbers.length > 0;
+  const effectivePrintSelectionPageNumbers = customPrintSelectionActive
+    ? (customPrintSelectionSequence || [])
+    : visibleOriginalPageNumbers;
+  const hasPrintableSelection = customPrintSelectionActive
+    ? effectivePrintSelectionPageNumbers.length > 0
+    : selectionActive && visibleOriginalPageNumbers.length > 0;
   const showEmptySelectionState = selectionActive && !hasVisiblePages;
+  const canOpenPrintSelectionWorkspace = printSelectionWorkspaceConfig.enabled
+    && selectionPanelEnabled
+    && !isDocumentLoading
+    && Array.isArray(allPages)
+    && allPages.length > 0
+    && pageLoadState?.allPagesReady === true;
   const effectivePane = useMemo(() => {
     if (!isComparing) return 'primary';
     const basePane = activePane === 'compare' ? 'compare' : 'primary';
@@ -289,6 +312,17 @@ const DocumentViewer = () => {
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
   const lastPageDisabled = pageNumber >= totalPages;
+  const increasePrintSelectionZoom = useCallback(() => {
+    setPrintSelectionZoomPercent((current) => Math.min(260, Math.round((Number(current) || 120) + 10)));
+  }, []);
+  const decreasePrintSelectionZoom = useCallback(() => {
+    setPrintSelectionZoomPercent((current) => Math.max(50, Math.round((Number(current) || 120) - 10)));
+  }, []);
+  const setPrintSelectionZoomFromPercent = useCallback((percent) => {
+    const next = Math.round(Number(percent));
+    if (!Number.isFinite(next)) return;
+    setPrintSelectionZoomPercent(Math.max(50, Math.min(260, next)));
+  }, []);
 
   logger.debug('Rendering DocumentViewer', {
     totalSessionPages: Array.isArray(allPages) ? allPages.length : 0,
@@ -364,10 +398,19 @@ const DocumentViewer = () => {
         isPrintDialogOpen={isPrintDialogOpen}
         openPrintDialog={openPrintDialog}
         closePrintDialog={closePrintDialog}
-        printEnabled={printEnabled}
+        printEnabled={printEnabled && !printSelectionWorkspaceOpen}
         hasActiveSelection={hasPrintableSelection}
-        visibleOriginalPageNumbers={visibleOriginalPageNumbers}
-        selectionIncludedCount={visibleOriginalPageNumbers.length}
+        visibleOriginalPageNumbers={effectivePrintSelectionPageNumbers}
+        selectionIncludedCount={effectivePrintSelectionPageNumbers.length}
+        printSelectionSequenceLocked={customPrintSelectionActive}
+        printSelectionWorkspaceEnabled={printSelectionWorkspaceConfig.enabled}
+        printSelectionWorkspaceActive={printSelectionWorkspaceOpen}
+        canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
+        openPrintSelectionWorkspace={openPrintSelectionWorkspace}
+        printSelectionZoomPercent={printSelectionZoomPercent}
+        increasePrintSelectionZoom={increasePrintSelectionZoom}
+        decreasePrintSelectionZoom={decreasePrintSelectionZoom}
+        setPrintSelectionZoomFromPercent={setPrintSelectionZoomFromPercent}
         sessionTotalPages={totalPagesDisplay}
         bundle={bundle || null}
         allPages={allPages || []}
@@ -414,13 +457,24 @@ const DocumentViewer = () => {
         loadingRunActive={loadingRunActive}
       />
 
-      <div
-        className="document-viewer-wrapper"
-        ref={viewerContainerRef}
-        id="viewerContainer"
-        tabIndex={0}
-        aria-label={t('viewer.aria.main')}
-      >
+      {printSelectionWorkspaceOpen ? (
+        <PrintSelectionWorkspace
+          allPages={allPages || []}
+          bundle={bundle || null}
+          initialSequence={initialPrintSelectionWorkspaceSequence}
+          documentHeaderTemplate={printSelectionWorkspaceConfig.documentHeaderTemplate}
+          zoomPercent={printSelectionZoomPercent}
+          onCommit={commitPrintSelectionWorkspace}
+          onCancel={cancelPrintSelectionWorkspace}
+        />
+      ) : (
+        <div
+          className="document-viewer-wrapper"
+          ref={viewerContainerRef}
+          id="viewerContainer"
+          tabIndex={0}
+          aria-label={t('viewer.aria.main')}
+        >
         {thumbnailWidth > 0 ? (
           <>
             <div className="thumbnail-pane-column" style={{ width: `${thumbnailWidth}px`, minWidth: `${thumbnailWidth}px`, flexShrink: 0 }}>
@@ -545,6 +599,7 @@ const DocumentViewer = () => {
           />
         )}
       </div>
+      )}
 
       <DocumentMetadataOverlayDialog
         isOpen={metadataUiEnabled && !!metadataOverlayState}

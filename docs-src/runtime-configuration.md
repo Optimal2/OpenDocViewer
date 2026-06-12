@@ -107,6 +107,24 @@ Only active-page and all-pages are persistent defaults. Range and custom sequenc
 dialog choices. Users can override this default from the print toolbar split-button; the persisted
 user choice takes precedence over runtime config until the user chooses the system default again.
 
+## Print Selection Workspace
+
+Deployments can enable or disable the full-page print selection workspace and control the document
+header shown above grouped pages:
+
+```js
+print: {
+  selectionWorkspace: {
+    enabled: true,
+    documentHeaderTemplate: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+  }
+}
+```
+
+The header template supports simple tokens from the grouped document and bundle metadata, including
+`{documentNumber}`, `{totalDocuments}`, `{documentId}`, `{pageCount}`, `{firstPage}`, `{lastPage}`,
+`{metadata.someField}`, `{metadataDetails.someField}`, and `{metaById.123.selectedValue}`.
+
 ## Edge Scroll Page Turn
 
 Deployments can configure or disable wheel-based page changes at the vertical scroll edges:
