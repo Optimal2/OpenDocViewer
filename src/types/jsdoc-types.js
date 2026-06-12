@@ -78,7 +78,7 @@
 
 /**
  * Sticky zoom modes used by the viewer.
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
 
 /**

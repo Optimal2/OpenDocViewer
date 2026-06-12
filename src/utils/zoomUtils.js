@@ -23,6 +23,8 @@ const ZOOM_CHANGE_THRESHOLD = 0.0005;
  * @typedef {Object} ZoomCalcOptions
  * @property {number=} viewportInsetPx Conservative safety inset subtracted from the measured
  *     viewport on each axis. Leave at 0 to use the full client box.
+ * @property {number=} widthFactor Optional multiplier for fit-width calculations. Use 0.7 to
+ *     apply 70% of the normal fit-width zoom.
  */
 
 /**
@@ -186,7 +188,9 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
     return;
   }
 
-  let zoom = vw / size.w;
+  const rawFactor = Number(opts?.widthFactor ?? 1);
+  const factor = Number.isFinite(rawFactor) && rawFactor > 0 ? rawFactor : 1;
+  let zoom = (vw / size.w) * factor;
   if (!Number.isFinite(zoom) || zoom <= 0) zoom = 1;
 
   applyZoom(setZoom, zoom);

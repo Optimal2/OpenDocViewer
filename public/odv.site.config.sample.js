@@ -71,8 +71,11 @@
     },
     viewer: {
       // Initial zoom mode when the first page opens.
-      // Supported values: "fit-page", "fit-width" (default), "actual-size".
+      // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".
       defaultZoomMode: 'fit-width',
+      // Percentage of the calculated fit-width zoom used by the Custom Fit toolbar button.
+      // Example: fit-width would be 100%, factor 70 means Custom Fit becomes 70%.
+      customFitWidthFactorPercent: 70,
       // Optional page turn gesture at the top/bottom scroll edge. When enabled, continued wheel
       // scrolling at the edge fills a small progress indicator before changing page.
       edgeScrollPageTurn: {
@@ -150,6 +153,10 @@
       // Deprecated/no-op since PDF progress became the only print progress overlay.
       // Kept as a harmless compatibility key for older site-local configs.
       preparationNoticeThresholdPages: 0,
+
+      // Default page scope used when the print dialog opens and the user has not stored an
+      // override in viewer preferences. Supported values: "active", "all".
+      defaultPageMode: 'active',
 
       // Optional generated-PDF backend for print output. Direct print remains the default.
       // PDF print generates a PDF inside OpenDocViewer and lets the browser print that PDF.

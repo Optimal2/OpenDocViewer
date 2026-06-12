@@ -40,8 +40,8 @@ The codebase now has four documentation layers:
   - TIFF via `utif2`
   - Common image formats such as JPG and PNG
 - **Viewer behavior**
-  - Fit-to-page and fit-to-width sticky zoom modes
-  - Runtime-configurable default zoom mode
+  - Fit-to-page, fit-to-width, and custom fit-width-factor sticky zoom modes
+  - Runtime-configurable and user-overridable default zoom mode
   - Double-click the main page surface to toggle between fit-to-width and fit-to-page
   - Optional edge-scroll page turn gesture with a visual progress indicator
   - Explicit zoom controls, typed zoom percentage, and 1:1 mode
@@ -50,7 +50,7 @@ The codebase now has four documentation layers:
   - Lazy full-page / thumbnail rendering with bounded cache sizes
   - Basic visual image adjustments for raster pages (rotation, brightness, contrast)
 - **Printing**
-  - Current page, all pages, range, and explicit sequence printing
+  - Current page, all pages, range, and explicit sequence printing with configurable/user default page scope
   - Browser HTML print and generated-PDF print/download paths
   - Optional print headers, footers, watermarks, action labels, and generated-PDF prebuild/cache behavior through runtime configuration
 - **Runtime flexibility**

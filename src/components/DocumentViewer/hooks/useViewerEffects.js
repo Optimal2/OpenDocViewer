@@ -25,7 +25,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
 
 /**
  * Sticky zoom modes used by the viewer.
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'} ZoomMode
  */
 
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
@@ -61,6 +61,7 @@ import usePageTimer from '../../../hooks/usePageTimer.js';
  * @property {Function=} hideCurrentDocumentFromSelection
  * @property {Function} zoomIn
  * @property {Function} zoomOut
+ * @property {Function} fitToCustomWidth
  * @property {Function} rotateLeft
  * @property {Function} rotateRight
  * @property {Function=} onOpenPrintDialog
@@ -145,6 +146,7 @@ export function useViewerEffects(args) {
     hideCurrentDocumentFromSelection,
     zoomIn,
     zoomOut,
+    fitToCustomWidth,
     rotateLeft,
     rotateRight,
     onOpenPrintDialog,
@@ -247,7 +249,7 @@ export function useViewerEffects(args) {
   // stack synchronous layout work in the middle of React state commits.
   useEffect(() => {
     const mode = zoomState.mode;
-    if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return undefined;
+    if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH' && mode !== 'FIT_CUSTOM') return undefined;
 
     const ref = documentRenderRef.current;
     if (!ref) return undefined;
@@ -256,6 +258,7 @@ export function useViewerEffects(args) {
       try {
         if (mode === 'FIT_PAGE') ref.fitToScreen?.();
         else if (mode === 'FIT_WIDTH') ref.fitToWidth?.();
+        else if (mode === 'FIT_CUSTOM') ref.fitToCustomWidth?.();
       } catch (error) {
         logger.warn('Sticky fit recomputation failed', {
           mode,
@@ -278,12 +281,13 @@ export function useViewerEffects(args) {
     let rafId = 0;
     const ro = new ResizeObserver(() => {
       const mode = zoomState.mode;
-      if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH') return;
+      if (mode !== 'FIT_PAGE' && mode !== 'FIT_WIDTH' && mode !== 'FIT_CUSTOM') return;
       cancelAnimationFrame(rafId);
       rafId = requestAnimationFrame(() => {
         try {
           if (mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
           else if (mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
+          else if (mode === 'FIT_CUSTOM') documentRenderRef.current?.fitToCustomWidth?.();
         } catch (error) {
           logger.warn('ResizeObserver fit recomputation failed', {
             mode,
@@ -531,9 +535,10 @@ export function useViewerEffects(args) {
     const t = setTimeout(() => {
       try {
         if (mode === 'FIT_WIDTH') documentRenderRef.current?.fitToWidth?.();
+        else if (mode === 'FIT_CUSTOM') documentRenderRef.current?.fitToCustomWidth?.();
         else if (mode === 'FIT_PAGE') documentRenderRef.current?.fitToScreen?.();
       } catch {}
     }, 0);
     return () => { clearTimeout(t); };
-  }, [documentRenderRef, zoomState.mode]);
+  }, [documentRenderRef, fitToCustomWidth, zoomState.mode]);
 }

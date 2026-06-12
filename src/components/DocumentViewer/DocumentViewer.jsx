@@ -103,6 +103,7 @@ const DocumentViewer = () => {
     zoomOut,
     actualSize,
     fitToScreen,
+    fitToCustomWidth,
     fitToWidth,
     toggleFitZoomMode,
     handleContainerClick,
@@ -117,6 +118,12 @@ const DocumentViewer = () => {
     setIsExpanded,
     zoomState,
     setZoomMode,
+    customFitWidthFactorPercent,
+    configuredCustomFitWidthFactorPercent,
+    userDefaultZoomMode,
+    configuredDefaultZoomMode,
+    setCustomFitWidthFactorPercent,
+    setDefaultZoomModePreference,
     postZoomLeft,
     postZoomRight,
     bumpPostZoomLeft,
@@ -343,9 +350,16 @@ const DocumentViewer = () => {
         zoomOut={zoomOut}
         actualSize={actualSize}
         fitToScreen={fitToScreen}
+        fitToCustomWidth={fitToCustomWidth}
         fitToWidth={fitToWidth}
         zoomState={zoomState}
         setZoomMode={setZoomMode}
+        customFitWidthFactorPercent={customFitWidthFactorPercent}
+        configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
+        userDefaultZoomMode={userDefaultZoomMode}
+        configuredDefaultZoomMode={configuredDefaultZoomMode}
+        setCustomFitWidthFactorPercent={setCustomFitWidthFactorPercent}
+        setDefaultZoomModePreference={setDefaultZoomModePreference}
 
         isPrintDialogOpen={isPrintDialogOpen}
         openPrintDialog={openPrintDialog}
@@ -513,6 +527,7 @@ const DocumentViewer = () => {
             compareRef={compareRef}
             allPages={allPages}
             zoomMode={zoomState?.mode}
+            customFitWidthFactorPercent={customFitWidthFactorPercent}
             onToggleFitZoomMode={toggleFitZoomMode}
             edgeScrollPageTurnConfig={edgeScrollPageTurnConfig}
             onEdgeScrollPreviousPage={goToPreviousPage}

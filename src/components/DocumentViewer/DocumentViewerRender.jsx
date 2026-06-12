@@ -179,7 +179,8 @@ function preventDefaultIfCancelable(event) {
  * @param {number} props.totalVisiblePages
  * @param {RefLike} props.compareRef
  * @param {Array} props.allPages
- * @param {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
+ * @param {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
+ * @param {number=} props.customFitWidthFactorPercent
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {{ enabled:boolean, thresholdPx:number, quietMs:number, decayMs:number }=} props.edgeScrollPageTurnConfig
  * @param {function(ViewerPaneKey): void=} props.onEdgeScrollPreviousPage
@@ -214,6 +215,7 @@ const DocumentViewerRender = ({
   compareRef,
   allPages,
   zoomMode = 'CUSTOM',
+  customFitWidthFactorPercent = 70,
   onToggleFitZoomMode,
   edgeScrollPageTurnConfig,
   onEdgeScrollPreviousPage,
@@ -277,6 +279,8 @@ const DocumentViewerRender = ({
       documentRenderRef?.current?.fitToScreen?.();
     } else if (zoomMode === 'FIT_WIDTH') {
       documentRenderRef?.current?.fitToWidth?.();
+    } else if (zoomMode === 'FIT_CUSTOM') {
+      documentRenderRef?.current?.fitToCustomWidth?.();
     }
   }, [documentRenderRef, zoomMode]);
 
@@ -285,6 +289,8 @@ const DocumentViewerRender = ({
       compareRef?.current?.fitToScreen?.();
     } else if (zoomMode === 'FIT_WIDTH') {
       compareRef?.current?.fitToWidth?.();
+    } else if (zoomMode === 'FIT_CUSTOM') {
+      compareRef?.current?.fitToCustomWidth?.();
     }
   }, [compareRef, zoomMode]);
 
@@ -847,6 +853,7 @@ const DocumentViewerRender = ({
               isCanvasEnabled={primaryCanvasEnabled}
               allPages={allPages}
               zoomMode={zoomMode}
+              customFitWidthFactorPercent={customFitWidthFactorPercent}
               onToggleFitZoomMode={onToggleFitZoomMode}
               onDisplayStateChange={onPrimaryDisplayStateChange}
             />
@@ -893,6 +900,7 @@ const DocumentViewerRender = ({
                 isCanvasEnabled={compareCanvasEnabled}
                 allPages={allPages}
                 zoomMode={zoomMode}
+                customFitWidthFactorPercent={customFitWidthFactorPercent}
                 onToggleFitZoomMode={onToggleFitZoomMode}
               />
             </div>
@@ -1012,7 +1020,8 @@ DocumentViewerRender.propTypes = {
   totalVisiblePages: PropTypes.number.isRequired,
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
-  zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']),
+  zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', 'CUSTOM']),
+  customFitWidthFactorPercent: PropTypes.number,
   onToggleFitZoomMode: PropTypes.func,
   edgeScrollPageTurnConfig: PropTypes.shape({
     enabled: PropTypes.bool.isRequired,

@@ -90,7 +90,8 @@ function isBlobAssetUrl(url) {
  * @param {boolean} props.isCanvasEnabled
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
- * @param {('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
+ * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
+ * @param {number=} props.customFitWidthFactorPercent
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
  * @returns {React.ReactElement}
@@ -107,6 +108,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     forceRender,
     allPages,
     zoomMode = 'FIT_PAGE',
+    customFitWidthFactorPercent = 70,
     onToggleFitZoomMode,
     onDisplayStateChange = () => {},
   },
@@ -220,6 +222,21 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, []);
 
   const normalizedRotation = ((Number(imageProperties?.rotation || 0) % 360) + 360) % 360;
+  const normalizedCustomFitWidthFactorPercent = useMemo(() => {
+    const numeric = Math.round(Number(customFitWidthFactorPercent));
+    if (!Number.isFinite(numeric)) return 70;
+    return Math.max(1, Math.min(100, numeric));
+  }, [customFitWidthFactorPercent]);
+
+  /**
+   * @param {*} percent
+   * @returns {number}
+   */
+  const resolveCustomFitWidthFactor = useCallback((percent = normalizedCustomFitWidthFactorPercent) => {
+    const numeric = Math.round(Number(percent));
+    const safePercent = Number.isFinite(numeric) ? Math.max(1, Math.min(100, numeric)) : 70;
+    return safePercent / 100;
+  }, [normalizedCustomFitWidthFactorPercent]);
 
   const fallbackRenderSize = useMemo(() => {
     const naturalSizeMatchesDisplayedAsset = naturalSize.pageIndex === displayedAsset.pageIndex
@@ -367,6 +384,18 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [getActiveRenderSurface, setZoom]);
 
   /**
+   * @param {number=} factorPercent
+   * @returns {void}
+   */
+  const fitToCustomWidth = useCallback((factorPercent = normalizedCustomFitWidthFactorPercent) => {
+    const surface = getActiveRenderSurface();
+    if (!surface) return;
+    calculateFitToWidthZoom(surface, renderViewportRef, setZoom, {
+      widthFactor: resolveCustomFitWidthFactor(factorPercent),
+    });
+  }, [getActiveRenderSurface, normalizedCustomFitWidthFactorPercent, resolveCustomFitWidthFactor, setZoom]);
+
+  /**
    * Apply sticky fit modes before a newly loaded page becomes visible. That avoids a one-frame jump
    * when two pages have the same proportions but different raster resolution.
    *
@@ -380,10 +409,14 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const syntheticSurface = { width: size.width, height: size.height };
     if (zoomMode === 'FIT_WIDTH') {
       calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom);
+    } else if (zoomMode === 'FIT_CUSTOM') {
+      calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom, {
+        widthFactor: resolveCustomFitWidthFactor(),
+      });
     } else if (zoomMode === 'FIT_PAGE') {
       calculateFitToScreenZoom(syntheticSurface, renderViewportRef, setZoom);
     }
-  }, [setZoom, zoomMode]);
+  }, [resolveCustomFitWidthFactor, setZoom, zoomMode]);
 
   /**
    * @returns {void}
@@ -394,13 +427,18 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       return;
     }
 
+    if (zoomMode === 'FIT_CUSTOM') {
+      fitToCustomWidth();
+      return;
+    }
+
     if (zoomMode === 'ACTUAL_SIZE') {
       setZoom(1);
       return;
     }
 
     fitToScreen();
-  }, [fitToScreen, fitToWidth, setZoom, zoomMode]);
+  }, [fitToCustomWidth, fitToScreen, fitToWidth, setZoom, zoomMode]);
 
   /**
    * @param {React.MouseEvent<HTMLDivElement>} event
@@ -872,6 +910,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     fitToWidth() {
       fitToWidth();
     },
+    fitToCustomWidth(factorPercent) {
+      fitToCustomWidth(factorPercent);
+    },
     zoomIn() {
       handleZoomIn(setZoom);
     },
@@ -896,6 +937,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }), [
     drawImageOnCanvas,
     fitToScreen,
+    fitToCustomWidth,
     fitToWidth,
     getPrintablePageUrls,
     isCanvasEnabled,

@@ -61,10 +61,17 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {function(): void} zoomOut
  * @property {function(): void} actualSize
  * @property {function(): void} fitToScreen
+ * @property {function(): void} fitToCustomWidth
  * @property {function(): void} fitToWidth
  * @property {number} zoom
- * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'), scale: number }} zoomState
- * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, ACTUAL_SIZE, or CUSTOM.
+ * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'), scale: number }} zoomState
+ * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, FIT_CUSTOM, ACTUAL_SIZE, or CUSTOM.
+ * @property {number} customFitWidthFactorPercent
+ * @property {number} configuredCustomFitWidthFactorPercent
+ * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null)} userDefaultZoomMode
+ * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')} configuredDefaultZoomMode
+ * @property {function(number): void} setCustomFitWidthFactorPercent
+ * @property {function((string|null)): void} setDefaultZoomModePreference
  * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
  * @property {RefLike} documentRenderRef
@@ -133,10 +140,17 @@ const DocumentViewerToolbar = ({
   zoomOut,
   actualSize,
   fitToScreen,
+  fitToCustomWidth,
   fitToWidth,
   zoom,
   zoomState,
   setZoomMode,
+  customFitWidthFactorPercent,
+  configuredCustomFitWidthFactorPercent,
+  userDefaultZoomMode,
+  configuredDefaultZoomMode,
+  setCustomFitWidthFactorPercent,
+  setDefaultZoomModePreference,
   setZoom,
   viewerContainerRef,
   handleCompare,
@@ -203,8 +217,15 @@ const DocumentViewerToolbar = ({
       zoomOut={zoomOut}
       actualSize={actualSize}
       fitToScreen={fitToScreen}
+      fitToCustomWidth={fitToCustomWidth}
       fitToWidth={fitToWidth}
       setZoom={setZoom}
+      customFitWidthFactorPercent={customFitWidthFactorPercent}
+      configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
+      userDefaultZoomMode={userDefaultZoomMode}
+      configuredDefaultZoomMode={configuredDefaultZoomMode}
+      setCustomFitWidthFactorPercent={setCustomFitWidthFactorPercent}
+      setDefaultZoomModePreference={setDefaultZoomModePreference}
       viewerContainerRef={viewerContainerRef}
       documentRenderRef={documentRenderRef}
       isPrintDialogOpen={isPrintDialogOpen}
@@ -269,13 +290,20 @@ DocumentViewerToolbar.propTypes = {
   zoomOut: PropTypes.func.isRequired,
   actualSize: PropTypes.func.isRequired,
   fitToScreen: PropTypes.func.isRequired,
+  fitToCustomWidth: PropTypes.func.isRequired,
   fitToWidth: PropTypes.func.isRequired,
   zoom: PropTypes.number.isRequired,
   zoomState: PropTypes.shape({
-    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'ACTUAL_SIZE', 'CUSTOM']).isRequired,
+    mode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', 'CUSTOM']).isRequired,
     scale: PropTypes.number.isRequired,
   }).isRequired,
   setZoomMode: PropTypes.func.isRequired,
+  customFitWidthFactorPercent: PropTypes.number.isRequired,
+  configuredCustomFitWidthFactorPercent: PropTypes.number.isRequired,
+  userDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', null]),
+  configuredDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']).isRequired,
+  setCustomFitWidthFactorPercent: PropTypes.func.isRequired,
+  setDefaultZoomModePreference: PropTypes.func.isRequired,
   setZoom: PropTypes.func.isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   handleCompare: PropTypes.func.isRequired,

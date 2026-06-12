@@ -7,7 +7,8 @@
  */
 
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
-/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
+/** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
+/** @typedef {'active'|'all'} PrintDefaultMode */
 
 /**
  * @typedef {Object} ViewerEdgeScrollPageTurnConfig
@@ -113,10 +114,47 @@ function normalizeResetSessionTarget(value, fallback) {
 function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
   const raw = String(value || fallback || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
   if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
+  if (
+    raw === 'fit-custom'
+    || raw === 'custom-fit'
+    || raw === 'custom-fit-width'
+    || raw === 'fit-width-factor'
+    || raw === 'user-zoom'
+    || raw === 'custom-width'
+  ) {
+    return 'FIT_CUSTOM';
+  }
   if (raw === 'actual-size' || raw === 'actualsize' || raw === 'actual' || raw === '100%' || raw === '1:1') {
     return 'ACTUAL_SIZE';
   }
   return 'FIT_PAGE';
+}
+
+/**
+ * Normalize a user-facing print default mode. Only active page and all pages are allowed as
+ * persistent defaults; range/custom choices remain one-off dialog choices.
+ *
+ * @param {*} value
+ * @param {PrintDefaultMode} fallback
+ * @returns {PrintDefaultMode}
+ */
+export function normalizePrintDefaultMode(value, fallback = 'active') {
+  const raw = String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+  if (raw === 'all' || raw === 'all-pages' || raw === 'everything') return 'all';
+  if (raw === 'active' || raw === 'active-page' || raw === 'current' || raw === 'current-page') return 'active';
+  return fallback === 'all' ? 'all' : 'active';
+}
+
+/**
+ * Normalize a custom fit-width factor. The public config/preference value is an integer percentage
+ * of the calculated fit-width zoom, not a direct zoom percentage.
+ *
+ * @param {*} value
+ * @param {number} fallback
+ * @returns {number}
+ */
+export function normalizeCustomFitWidthFactorPercent(value, fallback = 70) {
+  return normalizeInteger(value, fallback, 1, 100);
 }
 
 /**
@@ -126,6 +164,7 @@ function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
  * Supported values:
  * - `fit-page`: fit the full page inside the viewport
  * - `fit-width`: fit the page width to the viewport
+ * - `custom-fit-width`: fit page width and multiply by `viewer.customFitWidthFactorPercent`
  * - `actual-size`: start at 100%
  *
  * @param {Object=} cfg
@@ -133,6 +172,38 @@ function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
  */
 export function getViewerDefaultZoomMode(cfg = getRuntimeConfig()) {
   return normalizeDefaultZoomMode(cfg?.viewer?.defaultZoomMode, 'fit-width');
+}
+
+/**
+ * Resolve the custom fit-width factor percentage.
+ *
+ * Runtime config value: `viewer.customFitWidthFactorPercent`
+ * Supported range: 1..100, where 70 means 70% of the calculated fit-width zoom.
+ *
+ * @param {Object=} cfg
+ * @returns {number}
+ */
+export function getViewerCustomFitWidthFactorPercent(cfg = getRuntimeConfig()) {
+  return normalizeCustomFitWidthFactorPercent(
+    cfg?.viewer?.customFitWidthFactorPercent ?? cfg?.viewer?.customFitWidthPercent,
+    70
+  );
+}
+
+/**
+ * Resolve the default print page mode used when the user has not stored an override.
+ *
+ * Runtime config value: `print.defaultPageMode`
+ * Supported values: `active` / `all`
+ *
+ * @param {Object=} cfg
+ * @returns {PrintDefaultMode}
+ */
+export function getPrintDefaultMode(cfg = getRuntimeConfig()) {
+  return normalizePrintDefaultMode(
+    cfg?.print?.defaultPageMode ?? cfg?.print?.defaultPrintMode ?? cfg?.viewer?.print?.defaultPageMode,
+    'active'
+  );
 }
 
 /**

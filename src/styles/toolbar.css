@@ -2,11 +2,14 @@
    Toolbar, grouped “white areas”, percent/page inputs, editing tools, compare/edit active states. */
 
 .toolbar {
+  position: relative;
+  z-index: 2000;
   display: flex;
   justify-content: flex-start;
   align-items: center;
   width: 100%;
   min-height: 48px;
+  overflow: visible;
   background-color: var(--toolbar-background-color);
   box-shadow: var(--box-shadow);
   border-radius: 8px;
@@ -102,8 +105,8 @@
 .toolbar .odv-btn.is-active:focus {
   background-color: var(--warning-color) !important;
   color: #fff;
-  outline: 2px solid #ffffff;
-  box-shadow: 0 0 0 2px rgba(255, 255, 255, 0.35) inset;
+  outline: 0;
+  box-shadow: none;
   transform: none;
   cursor: default;
 }
@@ -367,6 +370,102 @@
   border-radius: 10px;
   background: color-mix(in srgb, var(--canvas-background-color) 94%, var(--toolbar-background-color) 6%);
   box-shadow: 0 12px 28px rgba(0, 0, 0, 0.18);
+}
+
+.toolbar-popup-menu--align-left {
+  right: auto;
+  left: 0;
+}
+
+.toolbar-split-button {
+  gap: 0;
+}
+
+.toolbar-split-button.is-open {
+  z-index: 2100;
+}
+
+.toolbar .toolbar-split-main {
+  border-top-right-radius: 0;
+  border-bottom-right-radius: 0;
+}
+
+.toolbar .toolbar-split-arrow {
+  min-width: 22px;
+  width: 22px;
+  padding-inline: 0;
+  border-top-left-radius: 0;
+  border-bottom-left-radius: 0;
+  border-left: 1px solid rgba(255, 255, 255, 0.26);
+  box-shadow: var(--box-shadow);
+}
+
+.toolbar .toolbar-split-arrow .material-icons {
+  font-size: 1rem;
+}
+
+.toolbar-split-button.is-open .toolbar-split-arrow,
+.toolbar-split-button.is-open .toolbar-split-main {
+  background-color: var(--primary-color-hover);
+}
+
+.toolbar-split-button.is-active .toolbar-split-arrow,
+.toolbar-split-button.is-active .toolbar-split-main {
+  background-color: var(--warning-color) !important;
+  color: #fff;
+  box-shadow: none;
+}
+
+.toolbar-split-menu {
+  min-width: 220px;
+}
+
+.toolbar-split-menu-section {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  padding: 4px;
+}
+
+.toolbar-split-menu-section + .toolbar-split-menu-section {
+  border-top: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 72%, transparent 28%);
+}
+
+.toolbar-split-menu-title {
+  padding: 4px 8px 2px;
+  color: var(--text-muted-color, #64748b);
+  font-size: 0.72rem;
+  font-weight: 700;
+  text-transform: uppercase;
+  letter-spacing: 0.02em;
+}
+
+.toolbar .toolbar-popup-menu-item.toolbar-split-menu-row {
+  justify-content: flex-start;
+}
+
+.toolbar-split-menu-form {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) 4.5rem;
+  gap: 8px;
+  align-items: center;
+  padding: 6px 8px 8px;
+}
+
+.toolbar-split-menu-form label {
+  color: var(--text-color);
+  font-size: 0.78rem;
+}
+
+.toolbar-split-menu-form input {
+  min-width: 0;
+  width: 100%;
+  box-sizing: border-box;
+  padding: 4px 6px;
+  border: 1px solid color-mix(in srgb, var(--thumbnail-border-color) 86%, transparent 14%);
+  border-radius: 7px;
+  background: var(--canvas-background-color);
+  color: var(--text-color);
 }
 
 .toolbar .toolbar-popup-menu-item {

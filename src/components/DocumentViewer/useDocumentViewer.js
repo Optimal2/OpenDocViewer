@@ -16,7 +16,19 @@
 import { useState, useRef, useMemo, useEffect, useCallback, useContext } from 'react';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
-import { getKeyboardPrintShortcutBehavior, getViewerDefaultZoomMode } from '../../utils/runtimeConfig.js';
+import {
+  getKeyboardPrintShortcutBehavior,
+  getViewerCustomFitWidthFactorPercent,
+  getViewerDefaultZoomMode,
+  normalizeCustomFitWidthFactorPercent,
+} from '../../utils/runtimeConfig.js';
+import {
+  clearDefaultZoomModePreference,
+  getCustomFitWidthFactorPreference,
+  getDefaultZoomModePreference,
+  setCustomFitWidthFactorPreference,
+  setDefaultZoomModePreference,
+} from '../../utils/viewerPreferences.js';
 import { useViewerPostZoom } from './hooks/useViewerPostZoom.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
@@ -275,7 +287,7 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
 
 /**
  * Sticky zoom modes used by the viewer (subset is used here).
- * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'CUSTOM'|'ACTUAL_SIZE'} ZoomMode
+ * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'CUSTOM'|'ACTUAL_SIZE'} ZoomMode
  */
 
 /**
@@ -314,6 +326,20 @@ export function useDocumentViewer() {
   const { allPages, pageLoadState } = useContext(ViewerContext);
   const totalSessionPages = Array.isArray(allPages) ? allPages.length : 0;
   const keyboardPrintShortcutBehavior = getKeyboardPrintShortcutBehavior();
+  const initialZoomSettingsRef = useRef(null);
+  if (!initialZoomSettingsRef.current) {
+    const configuredDefaultZoomMode = getViewerDefaultZoomMode();
+    const userDefaultZoomMode = getDefaultZoomModePreference();
+    const configuredCustomFitWidthFactorPercent = getViewerCustomFitWidthFactorPercent();
+    const userCustomFitWidthFactorPercent = getCustomFitWidthFactorPreference();
+    initialZoomSettingsRef.current = {
+      configuredDefaultZoomMode,
+      userDefaultZoomMode,
+      defaultZoomMode: userDefaultZoomMode || configuredDefaultZoomMode,
+      configuredCustomFitWidthFactorPercent,
+      customFitWidthFactorPercent: userCustomFitWidthFactorPercent ?? configuredCustomFitWidthFactorPercent,
+    };
+  }
 
   // --- Core viewer interaction state ----------------------------------------------
   const [pageNumberRaw, setPageNumberRaw] = useState(1); // original 1-based page number
@@ -431,7 +457,13 @@ export function useDocumentViewer() {
   const [zoom, setZoom] = useState(1);
   const [zoomState, setZoomState] = useState(
     /** @returns {ZoomState} */
-    () => ({ mode: getViewerDefaultZoomMode(), scale: 1 })
+    () => ({ mode: initialZoomSettingsRef.current.defaultZoomMode, scale: 1 })
+  );
+  const [customFitWidthFactorPercent, setCustomFitWidthFactorPercentState] = useState(
+    initialZoomSettingsRef.current.customFitWidthFactorPercent
+  );
+  const [userDefaultZoomMode, setUserDefaultZoomMode] = useState(
+    initialZoomSettingsRef.current.userDefaultZoomMode
   );
 
   const [isComparing, setIsComparing] = useState(false);
@@ -999,12 +1031,12 @@ export function useDocumentViewer() {
   }, [printEnabled]);
 
   // --- Zoom helpers --------------------------------------------------------------
-  const tryCallDocumentRender = useCallback((methodName, warningMessage) => {
+  const tryCallDocumentRender = useCallback((methodName, warningMessage, ...args) => {
     try {
       const target = documentRenderRef.current;
       const method = target?.[methodName];
       if (typeof method !== 'function') return false;
-      method.call(target);
+      method.call(target, ...args);
       return true;
     } catch (error) {
       logger.warn(warningMessage, { error: String(error?.message || error) });
@@ -1042,7 +1074,18 @@ export function useDocumentViewer() {
     tryCallDocumentRender('fitToWidth', 'DocumentRender fitToWidth failed');
   }, [resetPostZoom, tryCallDocumentRender, zoom]);
 
-  /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'ACTUAL_SIZE'|'CUSTOM'). */
+  const fitToCustomWidth = useCallback((factorPercent = customFitWidthFactorPercent) => {
+    const safeFactorPercent = normalizeCustomFitWidthFactorPercent(factorPercent, customFitWidthFactorPercent);
+    resetPostZoom();
+    setZoomState({ mode: 'FIT_CUSTOM', scale: zoom });
+    tryCallDocumentRender(
+      'fitToCustomWidth',
+      'DocumentRender fitToCustomWidth failed',
+      safeFactorPercent
+    );
+  }, [customFitWidthFactorPercent, resetPostZoom, tryCallDocumentRender, zoom]);
+
+  /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'). */
   const setZoomMode = useCallback((mode) => {
     if (mode === 'FIT_PAGE') {
       fitToScreen();
@@ -1052,12 +1095,37 @@ export function useDocumentViewer() {
       fitToWidth();
       return;
     }
+    if (mode === 'FIT_CUSTOM') {
+      fitToCustomWidth();
+      return;
+    }
     if (mode === 'ACTUAL_SIZE') {
       actualSize();
       return;
     }
     setZoomState((s) => ({ ...s, mode: 'CUSTOM' }));
-  }, [actualSize, fitToScreen, fitToWidth]);
+  }, [actualSize, fitToCustomWidth, fitToScreen, fitToWidth]);
+
+  const updateCustomFitWidthFactorPercent = useCallback((percent) => {
+    const normalized = normalizeCustomFitWidthFactorPercent(percent, customFitWidthFactorPercent);
+    setCustomFitWidthFactorPercentState(normalized);
+    setCustomFitWidthFactorPreference(normalized);
+    if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(normalized);
+  }, [customFitWidthFactorPercent, fitToCustomWidth, zoomState?.mode]);
+
+  const updateDefaultZoomModePreference = useCallback((mode) => {
+    const normalized = mode === 'FIT_PAGE' || mode === 'FIT_WIDTH' || mode === 'FIT_CUSTOM' || mode === 'ACTUAL_SIZE'
+      ? mode
+      : null;
+    if (!normalized) {
+      clearDefaultZoomModePreference();
+      setUserDefaultZoomMode(null);
+      return;
+    }
+    setDefaultZoomModePreference(normalized);
+    setUserDefaultZoomMode(normalized);
+    setZoomMode(normalized);
+  }, [setZoomMode]);
 
   /**
    * Toggle between the two fit modes from the page surface. Any non-fit-width mode moves to
@@ -1312,6 +1380,7 @@ export function useDocumentViewer() {
     zoomOut,
     actualSize,
     fitToScreen,
+    fitToCustomWidth,
     fitToWidth,
     handleCompare,
     rotateLeft: rotateLeftPage,
@@ -1382,6 +1451,7 @@ export function useDocumentViewer() {
     zoomOut,
     actualSize,
     fitToScreen,
+    fitToCustomWidth,
     fitToWidth,
     toggleFitZoomMode,
     handleContainerClick,
@@ -1396,6 +1466,12 @@ export function useDocumentViewer() {
     setIsExpanded, // guarded setter
     zoomState,
     setZoomMode,
+    customFitWidthFactorPercent,
+    configuredCustomFitWidthFactorPercent: initialZoomSettingsRef.current.configuredCustomFitWidthFactorPercent,
+    userDefaultZoomMode,
+    configuredDefaultZoomMode: initialZoomSettingsRef.current.configuredDefaultZoomMode,
+    setCustomFitWidthFactorPercent: updateCustomFitWidthFactorPercent,
+    setDefaultZoomModePreference: updateDefaultZoomModePreference,
 
     // visible/selection data
     viewerPages: visiblePages,
