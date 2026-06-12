@@ -328,6 +328,9 @@
     "alreadyIncluded": "Page {page} is already included in the print selection.",
     "pageTitle": "Page {page}",
     "pageLabel": "Page {page}",
+    "sourcePageTitle": "Source page {page}. Document {document}, document page {documentPage}.",
+    "printPageTitle": "Print page {printPage}. Source page {sourcePage}, document {document}, document page {documentPage}.",
+    "printOrderBadgeTitle": "Print page {page} in the draft output",
     "cancelConfirm": "Discard the draft print selection? All changes in this selection mode will be lost.",
     "emptySelection": "No pages are selected for printing.",
     "resizeDivider": "Resize print selection panels"

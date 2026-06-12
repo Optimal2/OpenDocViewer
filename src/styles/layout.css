@@ -170,18 +170,10 @@
   gap: 10px;
 }
 
-.print-selection-panel-right .print-selection-grid {
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  gap: 8px;
-}
-
 .print-selection-tile {
   display: inline-flex;
   flex-direction: column;
   align-items: center;
-  gap: 6px;
   min-width: 0;
   padding: 8px 6px;
   border: 1px solid transparent;
@@ -228,6 +220,53 @@
   overflow: hidden;
 }
 
+.print-selection-metric-badge {
+  position: absolute;
+  z-index: 2;
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+  min-width: 22px;
+  max-width: calc(100% - 8px);
+  height: 20px;
+  padding: 0 5px;
+  border: 1px solid rgba(255, 255, 255, 0.72);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.8);
+  color: #fff;
+  font-size: 0.66rem;
+  font-weight: 700;
+  line-height: 1;
+}
+
+.print-selection-metric-badge.position-top-left {
+  top: 4px;
+  left: 4px;
+}
+
+.print-selection-metric-badge.position-bottom-left {
+  bottom: 4px;
+  left: 4px;
+}
+
+.print-selection-metric-badge.position-bottom-right {
+  right: 4px;
+  bottom: 4px;
+}
+
+.print-selection-metric-badge-prefix {
+  opacity: 0.76;
+  font-size: 0.58rem;
+  text-transform: uppercase;
+}
+
+.print-selection-metric-badge-value {
+  overflow: hidden;
+  min-width: 0;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
 .print-selection-tile-stage img {
   max-width: 100%;
   max-height: 100%;
@@ -259,37 +298,14 @@
   font-size: 20px;
 }
 
-.print-selection-tile-caption {
-  max-width: calc(var(--print-selection-thumb-size, 92px) + 20px);
-  overflow: hidden;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  font-size: 0.78rem;
-}
-
-.print-selection-panel-right .print-selection-tile {
-  flex-direction: row;
-  justify-content: flex-start;
-  text-align: left;
-}
-
-.print-selection-panel-right .print-selection-tile-stage {
-  flex: 0 0 auto;
-  width: calc(var(--print-selection-thumb-size, 92px) * 0.72);
-  height: calc(var(--print-selection-thumb-size, 92px) * 0.98);
-}
-
-.print-selection-panel-right .print-selection-tile-caption {
-  max-width: none;
-  white-space: normal;
-}
-
 .print-selection-drop-marker {
   display: block;
-  height: 4px;
-  border-radius: 999px;
-  background: var(--primary-color);
-  grid-column: 1 / -1;
+  width: var(--print-selection-thumb-size, 92px);
+  height: calc(var(--print-selection-thumb-size, 92px) * 1.36);
+  justify-self: center;
+  border: 2px dashed var(--primary-color);
+  border-radius: 8px;
+  background: color-mix(in srgb, var(--primary-color) 12%, transparent 88%);
 }
 
 .print-selection-transfer-column {
@@ -297,13 +313,22 @@
   display: flex;
   flex-direction: column;
   align-items: center;
-  justify-content: center;
-  gap: 8px;
+  justify-content: stretch;
   min-width: 48px;
   background: color-mix(in srgb, var(--background-color) 90%, var(--border-color) 10%);
 }
 
-.print-selection-transfer-column > button:not(.print-selection-resize-handle) {
+.print-selection-transfer-buttons {
+  position: relative;
+  z-index: 2;
+  display: flex;
+  flex: 0 0 auto;
+  flex-direction: column;
+  gap: 8px;
+  padding: 10px 0;
+}
+
+.print-selection-transfer-buttons > button {
   display: grid;
   place-items: center;
   width: 34px;
@@ -315,34 +340,43 @@
   cursor: pointer;
 }
 
-.print-selection-transfer-column > button:not(.print-selection-resize-handle):hover,
-.print-selection-transfer-column > button:not(.print-selection-resize-handle):focus-visible {
+.print-selection-transfer-buttons > button:hover,
+.print-selection-transfer-buttons > button:focus-visible {
   border-color: var(--primary-color);
   color: var(--primary-color);
 }
 
-.print-selection-transfer-column > button:disabled {
+.print-selection-transfer-buttons > button:disabled {
   opacity: 0.45;
   cursor: default;
 }
 
-.print-selection-resize-handle {
-  position: absolute;
-  inset: 8px auto;
-  left: 50%;
-  width: 8px;
+.print-selection-resize-zone {
+  position: relative;
+  z-index: 1;
+  display: inline-flex;
+  flex: 1 1 0;
+  align-items: center;
+  justify-content: center;
+  gap: 3px;
+  width: 100%;
+  min-height: 44px;
   padding: 0;
-  transform: translateX(-50%);
   border: 0;
   background: transparent;
   cursor: col-resize;
 }
 
-.print-selection-resize-handle span {
+.print-selection-resize-zone:hover,
+.print-selection-resize-zone:focus-visible {
+  background: color-mix(in srgb, var(--primary-color) 8%, transparent 92%);
+  outline: none;
+}
+
+.print-selection-resize-zone span {
   display: block;
   width: 2px;
-  height: 100%;
-  margin: 0 auto;
+  height: 46px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--border-color) 70%, var(--text-color) 30%);
 }
