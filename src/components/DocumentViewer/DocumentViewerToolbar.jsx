@@ -86,6 +86,7 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean=} printSelectionSequenceLocked
  * @property {boolean=} printSelectionWorkspaceEnabled
  * @property {boolean=} printSelectionWorkspaceActive
+ * @property {Object|null=} printSelectionWorkspaceToolbarState
  * @property {boolean=} canOpenPrintSelectionWorkspace
  * @property {function(): void=} openPrintSelectionWorkspace
  * @property {number} sessionTotalPages
@@ -182,6 +183,7 @@ const DocumentViewerToolbar = ({
   printSelectionSequenceLocked = false,
   printSelectionWorkspaceEnabled = false,
   printSelectionWorkspaceActive = false,
+  printSelectionWorkspaceToolbarState = null,
   canOpenPrintSelectionWorkspace = false,
   openPrintSelectionWorkspace,
   sessionTotalPages,
@@ -248,6 +250,7 @@ const DocumentViewerToolbar = ({
       printSelectionSequenceLocked={printSelectionSequenceLocked}
       printSelectionWorkspaceEnabled={printSelectionWorkspaceEnabled}
       printSelectionWorkspaceActive={printSelectionWorkspaceActive}
+      printSelectionWorkspaceToolbarState={printSelectionWorkspaceToolbarState}
       canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
       openPrintSelectionWorkspace={openPrintSelectionWorkspace}
       sessionTotalPages={sessionTotalPages}
@@ -356,6 +359,7 @@ DocumentViewerToolbar.propTypes = {
   printSelectionSequenceLocked: PropTypes.bool,
   printSelectionWorkspaceEnabled: PropTypes.bool,
   printSelectionWorkspaceActive: PropTypes.bool,
+  printSelectionWorkspaceToolbarState: PropTypes.object,
   canOpenPrintSelectionWorkspace: PropTypes.bool,
   openPrintSelectionWorkspace: PropTypes.func,
   sessionTotalPages: PropTypes.number.isRequired,

@@ -38,8 +38,7 @@
     },
     "printSelectionWorkspace": {
       "open": "Choose pages for printing",
-      "openDisabled": "Page selection is available when all pages are fully loaded.",
-      "active": "Print selection mode"
+      "openDisabled": "Page selection is available when all pages are fully loaded."
     },
     "zoomPercentAria": "Current zoom percent",
     "firstPage": "First page",
@@ -122,7 +121,6 @@
     "resetBrightness": "Reset brightness",
     "resetContrast": "Reset contrast",
     "printDisabledLoading": "Printing becomes available when all pages are fully loaded.",
-    "printDisabledInSelectionWorkspace": "Printing is disabled while choosing pages.",
     "printBusy": "Print/export output is already being prepared.",
     "printPrebuild": {
       "off": "Print cache inactive",
@@ -346,6 +344,9 @@
     "pageOrderWarning": "This page is out of the original order within its document.",
     "dragDocumentTitle": "Drag to move this document in the draft order.",
     "documentPageCount": "{count, plural, =1 {# page} other {# pages}}",
+    "thumbnailSizeLabel": "Thumbnail size",
+    "smallerThumbnails": "Smaller thumbnails",
+    "largerThumbnails": "Larger thumbnails",
     "panelModeLabel": "Panel layout",
     "showBothPanels": "Show both panels",
     "showLeftPanel": "Show source overview",

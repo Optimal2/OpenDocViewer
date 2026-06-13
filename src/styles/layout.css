@@ -44,22 +44,14 @@
   user-select: none;
 }
 
-.print-selection-workspace-header {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 16px;
-  min-height: 44px;
-  padding: 5px 12px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--toolbar-background, var(--background-color));
-}
-
-.print-selection-workspace-actions {
+.print-selection-toolbar-controls {
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  flex-shrink: 0;
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .print-selection-mode-toggle {
@@ -135,6 +127,54 @@
 
 .print-selection-panel-mode-actions .material-icons {
   font-size: 19px;
+}
+
+.print-selection-thumbnail-size-actions {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  min-height: 32px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--button-background, var(--background-color));
+  color: var(--text-color);
+  white-space: nowrap;
+}
+
+.print-selection-thumbnail-size-actions > button {
+  display: grid;
+  place-items: center;
+  width: 32px;
+  height: 30px;
+  border: 0;
+  border-left: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.print-selection-thumbnail-size-actions > button:first-child {
+  border-left: 0;
+}
+
+.print-selection-thumbnail-size-actions > button:hover,
+.print-selection-thumbnail-size-actions > button:focus-visible {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
+  color: var(--primary-color);
+  outline: none;
+}
+
+.print-selection-thumbnail-size-actions > span {
+  min-width: 44px;
+  padding: 0 8px;
+  color: var(--muted-text-color);
+  font-size: 0.78rem;
+  font-weight: 700;
+  text-align: center;
+}
+
+.print-selection-thumbnail-size-actions .material-icons {
+  font-size: 18px;
 }
 
 .print-selection-history-action {
@@ -316,12 +356,12 @@
 
 .print-selection-tile.has-order-warning {
   border-color: #d97706;
-  background: color-mix(in srgb, #f59e0b 16%, transparent 84%);
+  background: color-mix(in srgb, #f59e0b 8%, transparent 92%);
 }
 
 .print-selection-tile.has-boundary-warning {
   border-color: #dc2626;
-  background: color-mix(in srgb, #ef4444 16%, transparent 84%);
+  background: color-mix(in srgb, #ef4444 8%, transparent 92%);
 }
 
 .print-selection-tile.has-order-warning .print-selection-tile-stage {
@@ -415,15 +455,15 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  min-width: 22px;
+  min-width: 26px;
   max-width: calc(100% - 8px);
-  height: 20px;
-  padding: 0 5px;
+  height: 22px;
+  padding: 0 7px;
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.8);
   color: #fff;
-  font-size: 0.66rem;
+  font-size: 0.78rem;
   font-weight: 700;
   line-height: 1;
 }
@@ -685,15 +725,6 @@
   object-fit: contain;
   background: #fff;
   box-shadow: 0 12px 34px rgba(15, 23, 42, 0.28);
-}
-
-.toolbar--selection-workspace .toolbar-selection-workspace-status {
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  color: var(--muted-text-color);
-  font-size: 0.86rem;
-  white-space: nowrap;
 }
 
 .viewer-section {

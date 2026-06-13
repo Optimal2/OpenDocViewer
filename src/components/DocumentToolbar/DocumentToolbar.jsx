@@ -198,6 +198,7 @@ function getPdfProgressPercent(progress) {
  * @property {boolean=} printSelectionSequenceLocked
  * @property {boolean=} printSelectionWorkspaceEnabled
  * @property {boolean=} printSelectionWorkspaceActive
+ * @property {Object|null=} printSelectionWorkspaceToolbarState
  * @property {boolean=} canOpenPrintSelectionWorkspace
  * @property {function(): void=} openPrintSelectionWorkspace
  * @property {number=} sessionTotalPages
@@ -324,6 +325,7 @@ const DocumentToolbar = ({
   printSelectionSequenceLocked = false,
   printSelectionWorkspaceEnabled = false,
   printSelectionWorkspaceActive = false,
+  printSelectionWorkspaceToolbarState = null,
   canOpenPrintSelectionWorkspace = false,
   openPrintSelectionWorkspace,
   sessionTotalPages = totalPagesDisplay,
@@ -1333,24 +1335,127 @@ const DocumentToolbar = ({
   }, [actualSize, setZoom, setZoomMode]);
 
   if (printSelectionWorkspaceActive) {
+    const state = printSelectionWorkspaceToolbarState || {};
+    const selectedCount = Math.max(0, Number(state.selectedCount) || 0);
+    const workspaceTotalPages = Math.max(0, Number(state.totalPages) || 0);
+    const thumbnailPercent = Math.max(0, Number(state.thumbnailPercent) || 0);
+
     return (
       <div className="toolbar toolbar--selection-workspace" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
-        <button
-          type="button"
-          className="odv-btn"
-          disabled
-          aria-label={t('toolbar.printDisabledInSelectionWorkspace', { defaultValue: 'Printing is disabled while choosing pages.' })}
-          title={t('toolbar.printDisabledInSelectionWorkspace', { defaultValue: 'Printing is disabled while choosing pages.' })}
-        >
-          <span className="material-icons" aria-hidden="true">print</span>
-        </button>
+        {printSelectionWorkspaceToolbarState ? (
+          <div className="print-selection-toolbar-controls">
+            <div className="print-selection-mode-toggle" aria-label={t('printSelectionWorkspace.modeLabel', { defaultValue: 'Mode' })}>
+              <label title={t('printSelectionWorkspace.documentModeTitle', { defaultValue: 'Respect document boundaries' })}>
+                <input
+                  type="radio"
+                  name="print-selection-workspace-mode-toolbar"
+                  checked={state.workspaceMode === 'documents'}
+                  onChange={() => state.onWorkspaceModeChange?.('documents')}
+                />
+                <span>{t('printSelectionWorkspace.documentMode', { defaultValue: 'Documents' })}</span>
+              </label>
+              <label title={t('printSelectionWorkspace.pageModeTitle', { defaultValue: 'Free page placement' })}>
+                <input
+                  type="radio"
+                  name="print-selection-workspace-mode-toolbar"
+                  checked={state.workspaceMode === 'pages'}
+                  onChange={() => state.onWorkspaceModeChange?.('pages')}
+                />
+                <span>{t('printSelectionWorkspace.pageMode', { defaultValue: 'Pages' })}</span>
+              </label>
+            </div>
 
-        <div className="toolbar-selection-workspace-status" role="status">
-          <span className="material-icons" aria-hidden="true">playlist_add_check</span>
-          <span>{t('toolbar.printSelectionWorkspace.active', { defaultValue: 'Print selection mode' })}</span>
-        </div>
+            <div className="print-selection-panel-mode-actions" aria-label={t('printSelectionWorkspace.panelModeLabel', { defaultValue: 'Panel layout' })}>
+              <button
+                type="button"
+                className={state.panelMode === 'both' ? 'is-active' : ''}
+                onClick={() => state.onPanelModeChange?.('both')}
+                title={t('printSelectionWorkspace.showBothPanels', { defaultValue: 'Show both panels' })}
+                aria-label={t('printSelectionWorkspace.showBothPanels', { defaultValue: 'Show both panels' })}
+              >
+                <span className="material-icons" aria-hidden="true">view_week</span>
+              </button>
+              <button
+                type="button"
+                className={state.panelMode === 'left' ? 'is-active' : ''}
+                onClick={() => state.onPanelModeChange?.('left')}
+                title={t('printSelectionWorkspace.showLeftPanel', { defaultValue: 'Show source overview' })}
+                aria-label={t('printSelectionWorkspace.showLeftPanel', { defaultValue: 'Show source overview' })}
+              >
+                <span className="material-icons" aria-hidden="true">align_horizontal_left</span>
+              </button>
+              <button
+                type="button"
+                className={state.panelMode === 'right' ? 'is-active' : ''}
+                onClick={() => state.onPanelModeChange?.('right')}
+                title={t('printSelectionWorkspace.showRightPanel', { defaultValue: 'Show selected pages' })}
+                aria-label={t('printSelectionWorkspace.showRightPanel', { defaultValue: 'Show selected pages' })}
+              >
+                <span className="material-icons" aria-hidden="true">align_horizontal_right</span>
+              </button>
+            </div>
+
+            <div className="print-selection-thumbnail-size-actions" aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}>
+              <button
+                type="button"
+                onClick={() => state.onDecreaseThumbnailSize?.()}
+                title={t('printSelectionWorkspace.smallerThumbnails', { defaultValue: 'Smaller thumbnails' })}
+                aria-label={t('printSelectionWorkspace.smallerThumbnails', { defaultValue: 'Smaller thumbnails' })}
+              >
+                <span className="material-icons" aria-hidden="true">remove</span>
+              </button>
+              <span title={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}>{thumbnailPercent}%</span>
+              <button
+                type="button"
+                onClick={() => state.onIncreaseThumbnailSize?.()}
+                title={t('printSelectionWorkspace.largerThumbnails', { defaultValue: 'Larger thumbnails' })}
+                aria-label={t('printSelectionWorkspace.largerThumbnails', { defaultValue: 'Larger thumbnails' })}
+              >
+                <span className="material-icons" aria-hidden="true">add</span>
+              </button>
+            </div>
+
+            <div className="print-selection-workspace-status" role="status">
+              {t('printSelectionWorkspace.subtitle', {
+                selected: selectedCount,
+                total: workspaceTotalPages,
+                defaultValue: `${selectedCount} of ${workspaceTotalPages} pages selected for printing.`,
+              })}
+            </div>
+
+            <button
+              type="button"
+              className="print-selection-secondary print-selection-history-action"
+              onClick={() => state.onRunHistoryAction?.()}
+              disabled={!state.canUndoDraftChange && !state.canRedoDraftChange}
+              title={state.historyActionTitle || ''}
+              aria-label={state.historyActionTitle || ''}
+            >
+              <span className="material-icons" aria-hidden="true">{state.historyActionIcon || 'undo'}</span>
+              <span>{state.historyActionText || t('printSelectionWorkspace.undo', { defaultValue: 'Undo' })}</span>
+            </button>
+
+            <button type="button" className="print-selection-secondary" onClick={() => state.onCancel?.()}>
+              {t('common.cancel', { defaultValue: 'Cancel' })}
+            </button>
+            <button type="button" className="print-selection-primary" onClick={() => state.onCommit?.()} disabled={!state.canCommit}>
+              {t('common.ok', { defaultValue: 'OK' })}
+            </button>
+          </div>
+        ) : null}
 
         <div className="toolbar-spacer" />
+
+        <div className="toolbar-end-actions">
+          <ThemeMenuButton />
+          <LanguageMenuButton />
+          <HelpMenuButton
+            onOpenManual={() => setIsManualDialogOpen(true)}
+            onOpenAbout={() => setIsAboutDialogOpen(true)}
+            statusLedState={runtimeStatusLedState}
+            statusLedTitle={runtimeStatusLedTitle}
+          />
+        </div>
 
         <ManualOverlayDialog
           isOpen={isManualDialogOpen}
@@ -1968,6 +2073,7 @@ DocumentToolbar.propTypes = {
   printSelectionSequenceLocked: PropTypes.bool,
   printSelectionWorkspaceEnabled: PropTypes.bool,
   printSelectionWorkspaceActive: PropTypes.bool,
+  printSelectionWorkspaceToolbarState: PropTypes.object,
   canOpenPrintSelectionWorkspace: PropTypes.bool,
   openPrintSelectionWorkspace: PropTypes.func,
   sessionTotalPages: PropTypes.number,
