@@ -282,35 +282,48 @@ function analyzeDraftDocumentOrder(indexes, itemByIndex) {
   const entries = (Array.isArray(indexes) ? indexes : [])
     .map((index) => ({ index, item: itemByIndex.get(index) }))
     .filter((entry) => entry.item);
-  const entriesByDocument = new Map();
   const documentRuns = [];
+  const documentRunsByKey = new Map();
 
   for (const entry of entries) {
     const key = getDocumentGroupKeyForItem(entry.item);
-    if (!entriesByDocument.has(key)) entriesByDocument.set(key, []);
-    entriesByDocument.get(key).push(entry);
-
     const currentRun = documentRuns[documentRuns.length - 1] || null;
     if (currentRun?.key === key) currentRun.entries.push(entry);
-    else documentRuns.push({ key, entries: [entry] });
+    else {
+      const run = { key, entries: [entry] };
+      documentRuns.push(run);
+      if (!documentRunsByKey.has(key)) documentRunsByKey.set(key, []);
+      documentRunsByKey.get(key).push(run);
+    }
   }
 
-  const runCountByDocument = new Map();
-  for (const run of documentRuns) {
-    runCountByDocument.set(run.key, (runCountByDocument.get(run.key) || 0) + 1);
-  }
   const boundaryDocuments = new Set(
-    Array.from(runCountByDocument.entries())
-      .filter(([, count]) => count > 1)
+    Array.from(documentRunsByKey.entries())
+      .filter(([, runs]) => runs.length > 1)
       .map(([key]) => key)
   );
 
   const warnings = new Map();
-  for (const [key, documentEntries] of entriesByDocument.entries()) {
-    const keep = getBestIncreasingDocumentEntryIndexes(documentEntries);
-    for (const entry of documentEntries) {
+  for (const run of documentRuns) {
+    const keep = getBestIncreasingDocumentEntryIndexes(run.entries);
+    for (const entry of run.entries) {
       if (keep.has(entry.index)) continue;
-      warnings.set(entry.index, boundaryDocuments.has(key) ? 'document-boundary' : 'page-order');
+      warnings.set(entry.index, 'page-order');
+    }
+  }
+
+  for (const runs of documentRunsByKey.values()) {
+    if (runs.length <= 1) continue;
+    let primaryRun = runs[0];
+    for (const run of runs.slice(1)) {
+      if (run.entries.length > primaryRun.entries.length) primaryRun = run;
+    }
+
+    for (const run of runs) {
+      if (run === primaryRun) continue;
+      for (const entry of run.entries) {
+        warnings.set(entry.index, 'document-boundary');
+      }
     }
   }
 
@@ -592,14 +605,9 @@ const PrintSelectionWorkspace = ({
   const isDirty = useMemo(() => !sequencesEqual(draftIndexes, initialIndexes), [draftIndexes, initialIndexes]);
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
   const canUndoDraftChange = Array.isArray(draftHistory.undo);
-  const canRedoDraftChange = !canUndoDraftChange && Array.isArray(draftHistory.redo);
-  const historyActionIcon = canRedoDraftChange ? 'redo' : 'undo';
-  const historyActionText = canRedoDraftChange
-    ? t('printSelectionWorkspace.redo', { defaultValue: 'Redo' })
-    : t('printSelectionWorkspace.undo', { defaultValue: 'Undo' });
-  const historyActionTitle = canRedoDraftChange
-    ? t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })
-    : t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' });
+  const canRedoDraftChange = Array.isArray(draftHistory.redo);
+  const undoActionTitle = t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' });
+  const redoActionTitle = t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' });
 
   const applyDraftChange = useCallback((producer) => {
     setDraftIndexes((current) => {
@@ -700,12 +708,20 @@ const PrintSelectionWorkspace = ({
     removeIndexes(getIndexesForDocument(draftIndexes, itemByIndex, documentKey));
   }, [draftIndexes, itemByIndex, removeIndexes]);
 
-  const runHistoryAction = useCallback(() => {
+  const undoDraftChange = useCallback(() => {
     setDraftIndexes((current) => {
       if (Array.isArray(draftHistory.undo)) {
         setDraftHistory({ undo: null, redo: current });
         return draftHistory.undo;
       }
+      return current;
+    });
+    setLeftSelected([]);
+    setRightSelected([]);
+  }, [draftHistory.undo]);
+
+  const redoDraftChange = useCallback(() => {
+    setDraftIndexes((current) => {
       if (Array.isArray(draftHistory.redo)) {
         setDraftHistory({ undo: current, redo: null });
         return draftHistory.redo;
@@ -714,7 +730,7 @@ const PrintSelectionWorkspace = ({
     });
     setLeftSelected([]);
     setRightSelected([]);
-  }, [draftHistory]);
+  }, [draftHistory.redo]);
 
   const decreaseThumbnailSize = useCallback(() => {
     setThumbnailPercent((current) => clampPercent((Number(current) || 120) - 10));
@@ -1437,9 +1453,15 @@ const PrintSelectionWorkspace = ({
   ]);
 
   const handleWorkspaceKeyDownCapture = useCallback((event) => {
+    if (String(event?.key || '') === 'Escape') {
+      event.preventDefault();
+      event.stopPropagation();
+      cancel();
+      return;
+    }
     if (!isModifierOnlyKey(event)) return;
     event.stopPropagation();
-  }, []);
+  }, [cancel]);
 
   const toolbarState = useMemo(() => ({
     workspaceMode,
@@ -1449,16 +1471,16 @@ const PrintSelectionWorkspace = ({
     thumbnailPercent,
     canUndoDraftChange,
     canRedoDraftChange,
-    historyActionIcon,
-    historyActionText,
-    historyActionTitle,
+    undoActionTitle,
+    redoActionTitle,
     canCommit: draftIndexes.length > 0,
     onWorkspaceModeChange: changeWorkspaceMode,
     onPanelModeChange: setPanelMode,
     onDecreaseThumbnailSize: decreaseThumbnailSize,
     onIncreaseThumbnailSize: increaseThumbnailSize,
     onThumbnailSizeChange: setThumbnailSize,
-    onRunHistoryAction: runHistoryAction,
+    onUndoDraftChange: undoDraftChange,
+    onRedoDraftChange: redoDraftChange,
     onCancel: cancel,
     onCommit: commit,
   }), [
@@ -1469,15 +1491,15 @@ const PrintSelectionWorkspace = ({
     commit,
     decreaseThumbnailSize,
     draftIndexes.length,
-    historyActionIcon,
-    historyActionText,
-    historyActionTitle,
     increaseThumbnailSize,
     panelMode,
-    runHistoryAction,
+    redoActionTitle,
+    redoDraftChange,
     setThumbnailSize,
     thumbnailPercent,
     totalPages,
+    undoActionTitle,
+    undoDraftChange,
     workspaceMode,
   ]);
 
