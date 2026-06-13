@@ -1,4 +1,11 @@
 {
+  "common": {
+    "cancel": "Cancel",
+    "ok": "OK",
+    "close": "Close",
+    "previous": "Previous",
+    "next": "Next"
+  },
   "toolbar": {
     "print": "Print",
     "zoomIn": "Zoom in",
@@ -329,6 +336,16 @@
     "undoTitle": "Undo the latest print-selection change.",
     "redo": "Redo",
     "redoTitle": "Redo the latest undone print-selection change.",
+    "modeLabel": "Mode",
+    "pageMode": "Free pages",
+    "documentMode": "Documents",
+    "panelModeLabel": "Panel layout",
+    "showBothPanels": "Show both panels",
+    "showLeftPanel": "Show source overview",
+    "showRightPanel": "Show selected pages",
+    "previewPage": "Show page",
+    "previewDialog": "Page preview",
+    "previewContext": "Page {page} of {total}. Document {document}, document page {documentPage}.",
     "alreadyIncluded": "Page {page} is already included in the print selection.",
     "pageTitle": "Page {page}",
     "pageLabel": "Page {page}",
