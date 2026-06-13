@@ -11,10 +11,14 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 
-function clampPercent(value, fallback = 120) {
+const MIN_THUMBNAIL_PERCENT = 70;
+const DEFAULT_THUMBNAIL_PERCENT = 120;
+const MAX_THUMBNAIL_PERCENT = 320;
+
+function clampPercent(value, fallback = DEFAULT_THUMBNAIL_PERCENT) {
   const next = Math.round(Number(value));
   if (!Number.isFinite(next)) return fallback;
-  return Math.max(50, Math.min(260, next));
+  return Math.max(MIN_THUMBNAIL_PERCENT, Math.min(MAX_THUMBNAIL_PERCENT, next));
 }
 
 function normalizeIndexSequence(sequence, totalPages) {
@@ -42,6 +46,17 @@ function sequencesEqual(a, b) {
     if (a[index] !== b[index]) return false;
   }
   return true;
+}
+
+function getDraftChangeRevealIndex(previous, next) {
+  const before = Array.isArray(previous) ? previous : [];
+  const after = Array.isArray(next) ? next : [];
+  const count = Math.max(before.length, after.length);
+  for (let index = 0; index < count; index += 1) {
+    if (before[index] === after[index]) continue;
+    return after[index] ?? after[Math.max(0, index - 1)] ?? after[index + 1] ?? null;
+  }
+  return after[0] ?? null;
 }
 
 function getPageImageUrl(page) {
@@ -312,18 +327,40 @@ function analyzeDraftDocumentOrder(indexes, itemByIndex) {
     }
   }
 
-  for (const runs of documentRunsByKey.values()) {
-    if (runs.length <= 1) continue;
-    let primaryRun = runs[0];
-    for (const run of runs.slice(1)) {
-      if (run.entries.length > primaryRun.entries.length) primaryRun = run;
+  const boundaryRuns = new Set();
+  for (let runIndex = 1; runIndex + 1 < documentRuns.length; runIndex += 1) {
+    const current = documentRuns[runIndex];
+    const previousKeys = new Set(documentRuns.slice(0, runIndex).map((run) => run.key));
+    const nextKeys = new Set(documentRuns.slice(runIndex + 1).map((run) => run.key));
+    const interruptsDocument = Array.from(previousKeys).some((key) => key !== current.key && nextKeys.has(key));
+    if (interruptsDocument) boundaryRuns.add(runIndex);
+  }
+
+  const lastCleanRunIndexByKey = new Map();
+  for (let runIndex = 0; runIndex < documentRuns.length; runIndex += 1) {
+    const run = documentRuns[runIndex];
+    if (boundaryRuns.has(runIndex)) continue;
+
+    const previousCleanRunIndex = lastCleanRunIndexByKey.get(run.key);
+    if (previousCleanRunIndex != null) {
+      const crossesOtherCleanDocument = documentRuns
+        .slice(previousCleanRunIndex + 1, runIndex)
+        .some((candidate, candidateOffset) => {
+          const candidateRunIndex = previousCleanRunIndex + 1 + candidateOffset;
+          return !boundaryRuns.has(candidateRunIndex) && candidate.key !== run.key;
+        });
+      if (crossesOtherCleanDocument) {
+        boundaryRuns.add(runIndex);
+        continue;
+      }
     }
 
-    for (const run of runs) {
-      if (run === primaryRun) continue;
-      for (const entry of run.entries) {
-        warnings.set(entry.index, 'document-boundary');
-      }
+    lastCleanRunIndexByKey.set(run.key, runIndex);
+  }
+
+  for (const runIndex of boundaryRuns) {
+    for (const entry of documentRuns[runIndex]?.entries || []) {
+      warnings.set(entry.index, 'document-boundary');
     }
   }
 
@@ -638,6 +675,14 @@ const PrintSelectionWorkspace = ({
     }, 1100);
   }, []);
 
+  const revealDraftChange = useCallback((previous, next) => {
+    const originalIndex = getDraftChangeRevealIndex(previous, next);
+    if (originalIndex == null) return;
+    const reveal = () => revealIncludedPage(originalIndex);
+    if (typeof window.requestAnimationFrame === 'function') window.requestAnimationFrame(reveal);
+    else window.setTimeout(reveal, 0);
+  }, [revealIncludedPage]);
+
   const selectLeft = useCallback((originalIndex, event) => {
     stopSelectionEvent(event);
     if (draftSet.has(originalIndex)) {
@@ -712,33 +757,27 @@ const PrintSelectionWorkspace = ({
     setDraftIndexes((current) => {
       if (Array.isArray(draftHistory.undo)) {
         setDraftHistory({ undo: null, redo: current });
+        revealDraftChange(current, draftHistory.undo);
         return draftHistory.undo;
       }
       return current;
     });
     setLeftSelected([]);
     setRightSelected([]);
-  }, [draftHistory.undo]);
+  }, [draftHistory.undo, revealDraftChange]);
 
   const redoDraftChange = useCallback(() => {
     setDraftIndexes((current) => {
       if (Array.isArray(draftHistory.redo)) {
         setDraftHistory({ undo: current, redo: null });
+        revealDraftChange(current, draftHistory.redo);
         return draftHistory.redo;
       }
       return current;
     });
     setLeftSelected([]);
     setRightSelected([]);
-  }, [draftHistory.redo]);
-
-  const decreaseThumbnailSize = useCallback(() => {
-    setThumbnailPercent((current) => clampPercent((Number(current) || 120) - 10));
-  }, []);
-
-  const increaseThumbnailSize = useCallback(() => {
-    setThumbnailPercent((current) => clampPercent((Number(current) || 120) + 10));
-  }, []);
+  }, [draftHistory.redo, revealDraftChange]);
 
   const setThumbnailSize = useCallback((value) => {
     setThumbnailPercent(clampPercent(value));
@@ -1476,8 +1515,6 @@ const PrintSelectionWorkspace = ({
     canCommit: draftIndexes.length > 0,
     onWorkspaceModeChange: changeWorkspaceMode,
     onPanelModeChange: setPanelMode,
-    onDecreaseThumbnailSize: decreaseThumbnailSize,
-    onIncreaseThumbnailSize: increaseThumbnailSize,
     onThumbnailSizeChange: setThumbnailSize,
     onUndoDraftChange: undoDraftChange,
     onRedoDraftChange: redoDraftChange,
@@ -1489,9 +1526,7 @@ const PrintSelectionWorkspace = ({
     cancel,
     changeWorkspaceMode,
     commit,
-    decreaseThumbnailSize,
     draftIndexes.length,
-    increaseThumbnailSize,
     panelMode,
     redoActionTitle,
     redoDraftChange,
@@ -1723,28 +1758,24 @@ const PrintSelectionWorkspace = ({
 
       {lightboxItem ? (
         <div className="print-selection-lightbox" role="dialog" aria-modal="true" aria-label={t('printSelectionWorkspace.previewDialog', { defaultValue: 'Page preview' })}>
-          <div className="print-selection-lightbox-toolbar">
-            <div>
-              <strong>{t('printSelectionWorkspace.previewDialog', { defaultValue: 'Page preview' })}</strong>
-              <span>
-                {t('printSelectionWorkspace.previewContext', {
-                  page: lightboxItem.pageNumber,
-                  total: totalPages,
-                  document: lightboxItem.documentNumber,
-                  documentPage: getDocumentPageNumber(lightboxItem),
-                  defaultValue: `Page ${lightboxItem.pageNumber} of ${totalPages}. Document ${lightboxItem.documentNumber}, document page ${getDocumentPageNumber(lightboxItem)}.`,
-                })}
-              </span>
-            </div>
-            <button
-              type="button"
-              onClick={closeLightbox}
-              title={t('common.close', { defaultValue: 'Close' })}
-              aria-label={t('common.close', { defaultValue: 'Close' })}
-            >
-              <span className="material-icons" aria-hidden="true">close</span>
-            </button>
+          <div className="print-selection-lightbox-info">
+            {t('printSelectionWorkspace.previewContext', {
+              page: lightboxItem.pageNumber,
+              total: totalPages,
+              document: lightboxItem.documentNumber,
+              documentPage: getDocumentPageNumber(lightboxItem),
+              defaultValue: `Page ${lightboxItem.pageNumber} of ${totalPages}. Document ${lightboxItem.documentNumber}, document page ${getDocumentPageNumber(lightboxItem)}.`,
+            })}
           </div>
+          <button
+            type="button"
+            className="print-selection-lightbox-close"
+            onClick={closeLightbox}
+            title={t('common.close', { defaultValue: 'Close' })}
+            aria-label={t('common.close', { defaultValue: 'Close' })}
+          >
+            <span className="material-icons" aria-hidden="true">close</span>
+          </button>
           <div className="print-selection-lightbox-body">
             <button
               type="button"

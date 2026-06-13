@@ -213,6 +213,27 @@ function getPdfProgressPercent(progress) {
 const SLIDER_CENTER_RANGE = 20;
 /** Epsilon for considering zoom ≈ 100% (0.5%). */
 const ONE_TO_ONE_EPS = 0.005;
+const PRINT_SELECTION_THUMBNAIL_SLIDER_MIN = -100;
+const PRINT_SELECTION_THUMBNAIL_SLIDER_MAX = 100;
+const PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT = 120;
+
+function thumbnailPercentToSliderValue(percent) {
+  const safePercent = Math.max(70, Math.min(320, Math.round(Number(percent) || PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT)));
+  if (safePercent < PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT) {
+    return Math.round((safePercent - PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT) / 0.5);
+  }
+  return Math.round((safePercent - PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT) / 2);
+}
+
+function thumbnailSliderValueToPercent(value) {
+  const safeValue = Math.max(
+    PRINT_SELECTION_THUMBNAIL_SLIDER_MIN,
+    Math.min(PRINT_SELECTION_THUMBNAIL_SLIDER_MAX, Math.round(Number(value) || 0))
+  );
+  return safeValue < 0
+    ? Math.round(PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT + (safeValue * 0.5))
+    : Math.round(PRINT_SELECTION_THUMBNAIL_STANDARD_PERCENT + (safeValue * 2));
+}
 
 /**
  * Clamp a page number into the valid viewer range while preserving a safe fallback.
@@ -1337,7 +1358,7 @@ const DocumentToolbar = ({
   if (printSelectionWorkspaceActive) {
     const state = printSelectionWorkspaceToolbarState || {};
     const thumbnailPercent = Math.max(0, Number(state.thumbnailPercent) || 0);
-    const thumbnailSliderOffset = Math.max(-70, Math.min(70, thumbnailPercent - 120));
+    const thumbnailSliderValue = thumbnailPercentToSliderValue(thumbnailPercent);
 
     return (
       <div className="toolbar toolbar--selection-workspace" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
@@ -1398,17 +1419,17 @@ const DocumentToolbar = ({
               <span className="material-icons" aria-hidden="true">search</span>
               <input
                 type="range"
-                min="-70"
-                max="70"
-                step="10"
-                value={thumbnailSliderOffset}
+                min={PRINT_SELECTION_THUMBNAIL_SLIDER_MIN}
+                max={PRINT_SELECTION_THUMBNAIL_SLIDER_MAX}
+                step="5"
+                value={thumbnailSliderValue}
                 title={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
                 aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
                 aria-valuetext={t('printSelectionWorkspace.thumbnailSizeValue', {
                   percent: thumbnailPercent,
                   defaultValue: `${thumbnailPercent}%`,
                 })}
-                onChange={(event) => state.onThumbnailSizeChange?.(120 + Number(event.target.value))}
+                onChange={(event) => state.onThumbnailSizeChange?.(thumbnailSliderValueToPercent(event.target.value))}
               />
             </div>
 
