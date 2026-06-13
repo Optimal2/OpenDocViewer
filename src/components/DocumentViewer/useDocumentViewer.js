@@ -472,8 +472,12 @@ export function useDocumentViewer() {
   }, [customPrintSelectionSequence, totalSessionPages]);
   const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence)
     && normalizedCustomPrintSelectionSequence.length > 0;
+  const naturalPrintSelectionSequence = useMemo(
+    () => Array.from({ length: totalSessionPages }, (_, index) => index + 1),
+    [totalSessionPages]
+  );
   const initialPrintSelectionWorkspaceSequence = normalizedCustomPrintSelectionSequence
-    || Array.from({ length: totalSessionPages }, (_, index) => index + 1);
+    || naturalPrintSelectionSequence;
   const visibleDocumentNavigationModel = useMemo(
     () => buildVisibleDocumentNavigationModel(allPages, visibleOriginalIndexes),
     [allPages, visibleOriginalIndexes]
