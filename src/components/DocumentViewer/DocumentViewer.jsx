@@ -173,6 +173,7 @@ const DocumentViewer = () => {
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
   const [printSelectionZoomPercent] = useState(120);
+  const [printSelectionToolbarState, setPrintSelectionToolbarState] = useState(null);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
   const edgeScrollPageTurnConfig = useMemo(() => getViewerEdgeScrollPageTurnConfig(getRuntimeConfig()), []);
   const printSelectionWorkspaceConfig = useMemo(() => getPrintSelectionWorkspaceConfig(getRuntimeConfig()), []);
@@ -224,6 +225,10 @@ const DocumentViewer = () => {
       setIsMetadataMatrixOpen(false);
     }
   }, [canOpenMetadataMatrix]);
+
+  useEffect(() => {
+    if (!printSelectionWorkspaceOpen) setPrintSelectionToolbarState(null);
+  }, [printSelectionWorkspaceOpen]);
 
   useEffect(() => {
     /** @param {*} target */
@@ -393,6 +398,7 @@ const DocumentViewer = () => {
         printSelectionSequenceLocked={customPrintSelectionActive}
         printSelectionWorkspaceEnabled={printSelectionWorkspaceConfig.enabled}
         printSelectionWorkspaceActive={printSelectionWorkspaceOpen}
+        printSelectionWorkspaceToolbarState={printSelectionToolbarState}
         canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
         openPrintSelectionWorkspace={openPrintSelectionWorkspace}
         sessionTotalPages={totalPagesDisplay}
@@ -448,6 +454,7 @@ const DocumentViewer = () => {
           initialSequence={initialPrintSelectionWorkspaceSequence}
           documentHeaderTemplate={printSelectionWorkspaceConfig.documentHeaderTemplate}
           zoomPercent={printSelectionZoomPercent}
+          onToolbarStateChange={setPrintSelectionToolbarState}
           onCommit={commitPrintSelectionWorkspace}
           onCancel={cancelPrintSelectionWorkspace}
         />

@@ -38,8 +38,7 @@
     },
     "printSelectionWorkspace": {
       "open": "Välj sidor för utskrift",
-      "openDisabled": "Sidurval är tillgängligt när alla sidor är helt inlästa.",
-      "active": "Utskriftsurvalsläge"
+      "openDisabled": "Sidurval är tillgängligt när alla sidor är helt inlästa."
     },
     "zoomPercentAria": "Aktuell zoomprocent",
     "firstPage": "Första sidan",
@@ -122,7 +121,6 @@
     "resetBrightness": "Återställ ljusstyrka",
     "resetContrast": "Återställ kontrast",
     "printDisabledLoading": "Utskrift blir tillgänglig när alla sidor är helt inlästa.",
-    "printDisabledInSelectionWorkspace": "Utskrift är inaktiverad medan du väljer sidor.",
     "printBusy": "Utskrift/export förbereds redan.",
     "printPrebuild": {
       "off": "Utskriftscache är inaktiv",
@@ -346,6 +344,9 @@
     "pageOrderWarning": "Den här sidan ligger inte i ursprunglig ordning inom sitt dokument.",
     "dragDocumentTitle": "Dra för att flytta dokumentet i utkastets ordning.",
     "documentPageCount": "{count, plural, =1 {# sida} other {# sidor}}",
+    "thumbnailSizeLabel": "Miniatyrstorlek",
+    "smallerThumbnails": "Mindre miniatyrer",
+    "largerThumbnails": "Större miniatyrer",
     "panelModeLabel": "Panellayout",
     "showBothPanels": "Visa båda panelerna",
     "showLeftPanel": "Visa källöversikt",
