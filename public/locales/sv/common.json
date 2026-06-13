@@ -339,6 +339,7 @@
     "documentMode": "Dokument",
     "pageModeTitle": "Fri placering av sidor",
     "documentModeTitle": "Respektera dokumentgränser",
+    "documentModeUnavailableTitle": "Dokumentläge kräver tydlig dokumentmetadata från systemet som startade visaren.",
     "documentModeResetConfirm": "Den aktuella sidordningen korsar dokumentgränser. Återställ till ursprunglig dokument- och sidordning och byt till dokumentläge?",
     "pageOrderWarning": "Den här sidan ligger inte i ursprunglig ordning inom sitt dokument.",
     "dragDocumentTitle": "Dra för att flytta dokumentet i utkastets ordning.",
@@ -349,7 +350,6 @@
     "largerThumbnails": "Större miniatyrer",
     "panelModeLabel": "Panellayout",
     "showBothPanels": "Visa båda panelerna",
-    "showLeftPanel": "Visa källöversikt",
     "showRightPanel": "Visa valda sidor",
     "previewPage": "Visa sida",
     "previewDialog": "Sidförhandsvisning",
@@ -449,9 +449,8 @@
     },
     "selectionEmpty": {
       "title": "Inga sidor återstår i det aktuella urvalet",
-      "description": "Det aktiva urvalet döljer just nu alla sidor. Återställ urvalsfiltreringen för att visa hela sessionen igen, eller öppna urvalsfliken och välj ett nytt delmängdsurval.",
-      "showAll": "Visa alla sidor",
-      "openSelection": "Öppna urval"
+      "description": "Det aktiva urvalet döljer just nu alla sidor. Återställ urvalet för att visa hela sessionen igen.",
+      "showAll": "Visa alla sidor"
     },
     "paneSelector": {
       "primary": "Använd huvudvy / vänster vy",
@@ -631,10 +630,10 @@
       },
       "selection": {
         "title": "Urval",
-        "body": "Fliken Urval låter dig inkludera eller exkludera hela dokument eller enskilda sidor. Spara verkställer urvalet. Avbryt ignorerar osparade ändringar och återgår till miniatyrvyn.",
-        "empty": "Om det sparade urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen eller öppna Urval igen.",
-        "collapse": "Varje dokument kan expanderas eller fällas ihop i fliken Urval så att stora sessioner blir lättare att hantera.",
-        "shortcut": "Tryck Delete för att dölja aktuell aktiv sida från det sparade urvalet. Håll ned Shift i jämförelsevy för att dölja den tillfälligt motsatta sidan i stället. Håll ned Ctrl för att dölja hela aktuella dokumentet för den riktade vyn."
+        "body": "Öppna utskriftsurvalet från verktygsfältet för att välja bort sidor, ändra ordning och spara den sekvens som ska användas i visaren.",
+        "empty": "Om urvalet döljer allt visas en informationsruta där du kan återställa hela sessionen.",
+        "collapse": "När tydlig dokumentmetadata finns kan dokumentläget användas för att flytta hela dokument och samtidigt respektera dokumentgränser.",
+        "shortcut": "Tryck Delete för att dölja aktuell aktiv sida från urvalet. Håll ned Shift i jämförelsevy för att dölja den tillfälligt motsatta sidan i stället. Håll ned Ctrl för att dölja hela aktuella dokumentet för den riktade vyn."
       },
       "adjustments": {
         "title": "Bildjusteringar",
@@ -647,7 +646,7 @@
       "printing": {
         "title": "Utskrift",
         "body": "Öppna utskriftsdialogen från verktygsfältet. Välj en utskriftsmetod i listan och granska sedan utskriftsuppgifterna innan webbläsaren förbereder förhandsgranskningen.",
-        "selection": "Om ett sparat urval döljer sidor kan “Alla sidor” avse antingen det aktuella urvalet eller hela sessionen."
+        "selection": "Om ett sparat urval ändrar sidmängd eller ordning kan “Alla sidor” avse antingen det aktuella urvalet eller hela sessionen."
       },
       "shortcuts": {
         "title": "Stäng dialoger",

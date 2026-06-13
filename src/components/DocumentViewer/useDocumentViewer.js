@@ -416,9 +416,17 @@ export function useDocumentViewer() {
     () => normalizeSelectionMask(draftSelectionMask, totalSessionPages),
     [draftSelectionMask, totalSessionPages]
   );
+  const normalizedCustomPrintSelectionSequence = useMemo(() => {
+    const normalized = normalizePrintPageSequence(customPrintSelectionSequence, totalSessionPages);
+    return normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
+      ? normalized
+      : null;
+  }, [customPrintSelectionSequence, totalSessionPages]);
+  const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence)
+    && normalizedCustomPrintSelectionSequence.length > 0;
   const selectionActive = useMemo(
-    () => hasExcludedPages(normalizedAppliedSelectionMask, totalSessionPages),
-    [normalizedAppliedSelectionMask, totalSessionPages]
+    () => customPrintSelectionActive || hasExcludedPages(normalizedAppliedSelectionMask, totalSessionPages),
+    [customPrintSelectionActive, normalizedAppliedSelectionMask, totalSessionPages]
   );
   const draftSelectionDirty = useMemo(
     () => !masksEqual(normalizedDraftSelectionMask, normalizedAppliedSelectionMask, totalSessionPages),
@@ -435,6 +443,12 @@ export function useDocumentViewer() {
   const thumbnailWidthDefault = THUMBNAIL_WIDTH_DEFAULT;
 
   const visibleOriginalIndexes = useMemo(() => {
+    if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
+      return normalizedCustomPrintSelectionSequence
+        .map((pageNumber) => Math.max(0, Math.floor(Number(pageNumber) || 0) - 1))
+        .filter((originalIndex) => originalIndex >= 0 && originalIndex < totalSessionPages && !!allPages[originalIndex]);
+    }
+
     const indexes = [];
     for (let originalIndex = 0; originalIndex < totalSessionPages; originalIndex += 1) {
       if (normalizedAppliedSelectionMask[originalIndex] === false) continue;
@@ -442,7 +456,7 @@ export function useDocumentViewer() {
       indexes.push(originalIndex);
     }
     return indexes;
-  }, [allPages, normalizedAppliedSelectionMask, totalSessionPages]);
+  }, [allPages, customPrintSelectionActive, normalizedAppliedSelectionMask, normalizedCustomPrintSelectionSequence, totalSessionPages]);
 
   const visiblePages = useMemo(
     () => visibleOriginalIndexes.map((originalIndex) => allPages[originalIndex]).filter(Boolean),
@@ -464,20 +478,8 @@ export function useDocumentViewer() {
     () => visibleOriginalIndexes.map((index) => index + 1),
     [visibleOriginalIndexes]
   );
-  const normalizedCustomPrintSelectionSequence = useMemo(() => {
-    const normalized = normalizePrintPageSequence(customPrintSelectionSequence, totalSessionPages);
-    return normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
-      ? normalized
-      : null;
-  }, [customPrintSelectionSequence, totalSessionPages]);
-  const customPrintSelectionActive = Array.isArray(normalizedCustomPrintSelectionSequence)
-    && normalizedCustomPrintSelectionSequence.length > 0;
-  const naturalPrintSelectionSequence = useMemo(
-    () => Array.from({ length: totalSessionPages }, (_, index) => index + 1),
-    [totalSessionPages]
-  );
   const initialPrintSelectionWorkspaceSequence = normalizedCustomPrintSelectionSequence
-    || naturalPrintSelectionSequence;
+    || visibleOriginalPageNumbers;
   const visibleDocumentNavigationModel = useMemo(
     () => buildVisibleDocumentNavigationModel(allPages, visibleOriginalIndexes),
     [allPages, visibleOriginalIndexes]
@@ -745,6 +747,7 @@ export function useDocumentViewer() {
     if (masksEqual(nextMask, normalizedAppliedSelectionMask, totalSessionPages)) return;
     setAppliedSelectionMask(nextMask);
     setDraftSelectionMask(nextMask);
+    setCustomPrintSelectionSequence(null);
     setThumbnailPaneMode('thumbnails');
   }, [normalizedAppliedSelectionMask, normalizedDraftSelectionMask, totalSessionPages]);
 
@@ -757,6 +760,7 @@ export function useDocumentViewer() {
     const nextMask = Array(totalSessionPages).fill(true);
     setAppliedSelectionMask(nextMask);
     setDraftSelectionMask(nextMask);
+    setCustomPrintSelectionSequence(null);
     setThumbnailPaneMode('thumbnails');
   }, [totalSessionPages]);
 
@@ -773,6 +777,18 @@ export function useDocumentViewer() {
     const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
     if (safeOriginalIndex < 0 || safeOriginalIndex >= totalSessionPages) return false;
 
+    if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
+      const nextSequence = normalizedCustomPrintSelectionSequence.filter((pageNumber) => pageNumber !== safeOriginalIndex + 1);
+      if (nextSequence.length === normalizedCustomPrintSelectionSequence.length) return false;
+      setCustomPrintSelectionSequence(
+        nextSequence.length > 0 && !isNaturalPrintPageSequence(nextSequence, totalSessionPages)
+          ? nextSequence
+          : null
+      );
+      setThumbnailPaneMode('thumbnails');
+      return true;
+    }
+
     const base = normalizeSelectionMask(normalizedAppliedSelectionMask, totalSessionPages);
     if (base[safeOriginalIndex] === false) return false;
 
@@ -783,7 +799,7 @@ export function useDocumentViewer() {
     setDraftSelectionMask(nextMask);
     setThumbnailPaneMode('thumbnails');
     return true;
-  }, [normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
+  }, [customPrintSelectionActive, normalizedAppliedSelectionMask, normalizedCustomPrintSelectionSequence, selectionPanelEnabled, totalSessionPages]);
 
   /**
    * Immediately exclude every page that belongs to the same document as the provided original page
@@ -802,6 +818,25 @@ export function useDocumentViewer() {
     const sourcePage = allPages[safeOriginalIndex] || null;
     const documentId = String(sourcePage?.documentId || '').trim();
     const documentNumber = Math.max(1, Number(sourcePage?.documentNumber) || 1);
+
+    if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
+      const nextSequence = normalizedCustomPrintSelectionSequence.filter((pageNumber) => {
+        const page = allPages[Math.max(0, Math.floor(Number(pageNumber) || 0) - 1)] || null;
+        const sameDocument = documentId
+          ? String(page?.documentId || '').trim() === documentId
+          : Math.max(1, Number(page?.documentNumber) || 1) === documentNumber;
+        return !sameDocument;
+      });
+      if (nextSequence.length === normalizedCustomPrintSelectionSequence.length) return false;
+      setCustomPrintSelectionSequence(
+        nextSequence.length > 0 && !isNaturalPrintPageSequence(nextSequence, totalSessionPages)
+          ? nextSequence
+          : null
+      );
+      setThumbnailPaneMode('thumbnails');
+      return true;
+    }
+
     const base = normalizeSelectionMask(normalizedAppliedSelectionMask, totalSessionPages);
     const nextMask = base.slice();
     let changed = false;
@@ -822,7 +857,7 @@ export function useDocumentViewer() {
     setDraftSelectionMask(nextMask);
     setThumbnailPaneMode('thumbnails');
     return true;
-  }, [allPages, normalizedAppliedSelectionMask, selectionPanelEnabled, totalSessionPages]);
+  }, [allPages, customPrintSelectionActive, normalizedAppliedSelectionMask, normalizedCustomPrintSelectionSequence, selectionPanelEnabled, totalSessionPages]);
 
   const hideCurrentPageFromSelection = useCallback((target = 'primary') => {
     const updateTarget = target === 'compare' ? 'compare' : 'primary';
@@ -1088,11 +1123,15 @@ export function useDocumentViewer() {
 
   const commitPrintSelectionWorkspace = useCallback((sequence) => {
     const normalized = normalizePrintPageSequence(sequence, totalSessionPages);
+    const fullMask = Array(totalSessionPages).fill(true);
     setCustomPrintSelectionSequence(
       normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
         ? normalized
         : null
     );
+    setAppliedSelectionMask(fullMask);
+    setDraftSelectionMask(fullMask);
+    setThumbnailPaneMode('thumbnails');
     setPrintSelectionWorkspaceOpen(false);
   }, [totalSessionPages]);
 

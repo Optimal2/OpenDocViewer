@@ -67,9 +67,7 @@ export default function PrintRangeDialog({
   const modeOptions = useMemo(() => {
     const base = [
       { value: 'active', label: t('printDialog.modes.active', { defaultValue: 'Active page' }) },
-      { value: 'all', label: ctrl.selectionSequenceLocked
-        ? t('printDialog.modes.selectedSequence', { defaultValue: 'Selected sequence' })
-        : t('printDialog.modes.all', { defaultValue: 'All pages' }) },
+      { value: 'all', label: t('printDialog.modes.all', { defaultValue: 'All pages' }) },
     ];
     if (ctrl.selectionSequenceLocked) return base;
     return [
@@ -103,7 +101,7 @@ export default function PrintRangeDialog({
     }
 
     if (ctrl.printMode === 'all') {
-      const count = (ctrl.selectionSequenceLocked || (ctrl.canPrintSelectionScope && ctrl.allScope === 'selection'))
+      const count = ctrl.canPrintSelectionScope && ctrl.allScope === 'selection'
         ? ctrl.selectionIncludedCount
         : ctrl.sessionTotalPages;
       return t('printDialog.summaryAll', {
@@ -134,7 +132,6 @@ export default function PrintRangeDialog({
     ctrl.printMode,
     ctrl.restrictToActivePage,
     ctrl.selectionIncludedCount,
-    ctrl.selectionSequenceLocked,
     ctrl.sessionTotalPages,
     ctrl.toValue,
     t,
@@ -266,14 +263,7 @@ export default function PrintRangeDialog({
 
             {ctrl.printMode === 'all' ? (
               <div className="odv-prd-section" role="group" aria-label={t('printDialog.aria.allGroup', { defaultValue: 'All pages options' })}>
-                {ctrl.selectionSequenceLocked ? (
-                  <div className="odv-prd-staticValue">
-                    {t('printDialog.allScope.lockedSelection', {
-                      count: ctrl.selectionIncludedCount,
-                      defaultValue: `${ctrl.selectionIncludedCount} selected pages will be prepared in the chosen order.`,
-                    })}
-                  </div>
-                ) : ctrl.canPrintSelectionScope ? (
+                {ctrl.canPrintSelectionScope ? (
                   <div className="odv-prd-subField" role="group" aria-label={t('printDialog.allScope.label')}>
                     <div className="odv-prd-radioList odv-prd-subRadioList">
                       <label className="odv-prd-radioRow">

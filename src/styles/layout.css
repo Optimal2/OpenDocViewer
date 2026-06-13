@@ -88,6 +88,15 @@
   color: var(--text-color);
 }
 
+.print-selection-mode-toggle label.is-disabled {
+  cursor: not-allowed;
+  opacity: 0.58;
+}
+
+.print-selection-mode-toggle label.is-disabled span {
+  color: var(--muted-text-color);
+}
+
 .print-selection-panel-mode-actions {
   display: inline-flex;
   align-items: center;
@@ -162,6 +171,13 @@
 
 .print-selection-history-action:first-of-type {
   margin-left: 10px;
+}
+
+.print-selection-history-action {
+  justify-content: center;
+  width: 34px;
+  min-width: 34px;
+  padding-inline: 0;
 }
 
 .toolbar .print-selection-cancel-action,

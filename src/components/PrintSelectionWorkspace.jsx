@@ -126,6 +126,48 @@ function buildPageItems(allPages) {
   }));
 }
 
+function hasReliableDocumentGrouping(pageItems, bundle) {
+  const documents = Array.isArray(bundle?.documents) ? bundle.documents : [];
+  const items = Array.isArray(pageItems) ? pageItems : [];
+  if (documents.length <= 0 || items.length <= 0) return false;
+
+  const documentIds = documents
+    .map((document) => String(document?.documentId || '').trim())
+    .filter(Boolean);
+  if (documentIds.length !== documents.length || new Set(documentIds).size !== documentIds.length) return false;
+
+  const expectedTotalDocuments = documents.length;
+  const documentCounts = new Map(documentIds.map((documentId) => [documentId, 0]));
+  const documentPageCounts = new Map();
+
+  for (const item of items) {
+    const page = item?.page || null;
+    const documentId = String(page?.documentId || '').trim();
+    const documentNumber = Math.floor(Number(page?.documentNumber) || 0);
+    const totalDocuments = Math.floor(Number(page?.totalDocuments) || 0);
+    const documentPageNumber = Math.floor(Number(page?.documentPageNumber) || 0);
+    const documentPageCount = Math.floor(Number(page?.documentPageCount) || 0);
+
+    if (!documentId || !documentCounts.has(documentId)) return false;
+    if (documentNumber < 1 || documentNumber > expectedTotalDocuments) return false;
+    if (totalDocuments !== expectedTotalDocuments) return false;
+    if (documentPageNumber < 1 || documentPageCount < 1 || documentPageNumber > documentPageCount) return false;
+
+    documentCounts.set(documentId, (documentCounts.get(documentId) || 0) + 1);
+    const previousPageCount = documentPageCounts.get(documentId);
+    if (previousPageCount != null && previousPageCount !== documentPageCount) return false;
+    documentPageCounts.set(documentId, documentPageCount);
+  }
+
+  for (const documentId of documentIds) {
+    const count = documentCounts.get(documentId) || 0;
+    const pageCount = documentPageCounts.get(documentId) || 0;
+    if (count <= 0 || pageCount <= 0 || count !== pageCount) return false;
+  }
+
+  return true;
+}
+
 function formatMetricValue(value) {
   return String(Math.max(0, Math.floor(Number(value) || 0)));
 }
@@ -534,6 +576,10 @@ const PrintSelectionWorkspace = ({
   const pageItems = useMemo(() => buildPageItems(allPages), [allPages]);
   const itemByIndex = useMemo(() => new Map(pageItems.map((item) => [item.originalIndex, item])), [pageItems]);
   const naturalIndexes = useMemo(() => pageItems.map((item) => item.originalIndex), [pageItems]);
+  const documentModeAvailable = useMemo(
+    () => hasReliableDocumentGrouping(pageItems, bundle),
+    [bundle, pageItems]
+  );
   const documentGroups = useMemo(
     () => buildDocumentGroups(pageItems, bundle, documentHeaderTemplate),
     [bundle, documentHeaderTemplate, pageItems]
@@ -551,7 +597,7 @@ const PrintSelectionWorkspace = ({
   const [draftIndexes, setDraftIndexes] = useState(initialIndexes);
   const [leftSelected, setLeftSelected] = useState([]);
   const [rightSelected, setRightSelected] = useState([]);
-  const [workspaceMode, setWorkspaceMode] = useState('documents');
+  const [workspaceMode, setWorkspaceMode] = useState(() => (documentModeAvailable ? 'documents' : 'pages'));
   const [panelMode, setPanelMode] = useState('both');
   const [lightboxState, setLightboxState] = useState(null);
   const [selectionBox, setSelectionBox] = useState(null);
@@ -574,6 +620,18 @@ const PrintSelectionWorkspace = ({
     setRightSelected([]);
     setDraftHistory({ undo: null, redo: null });
   }, [initialIndexes, initialIndexesSignature]);
+
+  useEffect(() => {
+    if (documentModeAvailable || workspaceMode !== 'documents') return;
+    setWorkspaceMode('pages');
+    setLeftSelected([]);
+    setRightSelected([]);
+  }, [documentModeAvailable, workspaceMode]);
+
+  useEffect(() => {
+    if (panelMode !== 'left') return;
+    setPanelMode('both');
+  }, [panelMode]);
 
   const draftSet = useMemo(() => new Set(draftIndexes), [draftIndexes]);
   const leftSelectedSet = useMemo(() => new Set(leftSelected), [leftSelected]);
@@ -1189,6 +1247,7 @@ const PrintSelectionWorkspace = ({
   const changeWorkspaceMode = useCallback((nextMode) => {
     const normalizedMode = String(nextMode || 'documents') === 'pages' ? 'pages' : 'documents';
     if (normalizedMode === workspaceMode) return;
+    if (normalizedMode === 'documents' && !documentModeAvailable) return;
     if (normalizedMode === 'documents' && !documentModeCompatible) {
       const reset = window.confirm(t('printSelectionWorkspace.documentModeResetConfirm', {
         defaultValue: 'The current page order crosses document boundaries. Reset to the original document/page order and switch to document mode?',
@@ -1199,7 +1258,11 @@ const PrintSelectionWorkspace = ({
     setWorkspaceMode(normalizedMode);
     setLeftSelected([]);
     setRightSelected([]);
-  }, [applyDraftChange, documentModeCompatible, naturalIndexes, t, workspaceMode]);
+  }, [applyDraftChange, documentModeAvailable, documentModeCompatible, naturalIndexes, t, workspaceMode]);
+
+  const changePanelMode = useCallback((nextMode) => {
+    setPanelMode(String(nextMode || '') === 'right' ? 'right' : 'both');
+  }, []);
 
   const openLightbox = useCallback((originalIndex, side, event) => {
     event?.preventDefault?.();
@@ -1471,13 +1534,14 @@ const PrintSelectionWorkspace = ({
     selectedCount: draftIndexes.length,
     totalPages,
     thumbnailPercent,
+    documentModeAvailable,
     canUndoDraftChange,
     canRedoDraftChange,
     undoActionTitle,
     redoActionTitle,
     canCommit: draftIndexes.length > 0,
     onWorkspaceModeChange: changeWorkspaceMode,
-    onPanelModeChange: setPanelMode,
+    onPanelModeChange: changePanelMode,
     onThumbnailSizeChange: setThumbnailSize,
     onUndoDraftChange: undoDraftChange,
     onRedoDraftChange: redoDraftChange,
@@ -1488,7 +1552,9 @@ const PrintSelectionWorkspace = ({
     canUndoDraftChange,
     cancel,
     changeWorkspaceMode,
+    changePanelMode,
     commit,
+    documentModeAvailable,
     draftIndexes.length,
     panelMode,
     redoActionTitle,

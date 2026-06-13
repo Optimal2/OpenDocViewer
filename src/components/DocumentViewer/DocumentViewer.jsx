@@ -7,7 +7,7 @@
  * PURPOSE
  *   Tie together:
  *     • Toolbar (actions, zoom, adjustments)
- *     • Thumbnails / selection pane (navigation + filtering)
+ *     • Thumbnails (navigation + selection reset)
  *     • Main renderer (canvas/img)
  *   This component wires ViewerContext state into the viewer UI and delegates
  *   heavy logic to the dedicated hook `useDocumentViewer`.
@@ -146,18 +146,8 @@ const DocumentViewer = () => {
     compareDocumentNavigation,
     selectionPanelEnabled,
     printEnabled,
-    selectionDocuments,
     selectionActive,
-    draftSelectionMask,
     draftSelectionDirty,
-    draftIncludedCount,
-    thumbnailPaneMode,
-    setThumbnailPaneMode,
-    toggleDraftSelectAll,
-    toggleDraftDocument,
-    toggleDraftPage,
-    saveDraftSelection,
-    cancelDraftSelection,
     clearSelectionFilter,
     hidePageFromSelection,
     hideDocumentFromSelection,
@@ -395,7 +385,7 @@ const DocumentViewer = () => {
         hasActiveSelection={hasPrintableSelection}
         visibleOriginalPageNumbers={effectivePrintSelectionPageNumbers}
         selectionIncludedCount={effectivePrintSelectionPageNumbers.length}
-        printSelectionSequenceLocked={customPrintSelectionActive}
+        printSelectionSequenceLocked={hasPrintableSelection}
         printSelectionWorkspaceEnabled={printSelectionWorkspaceConfig.enabled}
         printSelectionWorkspaceActive={printSelectionWorkspaceOpen}
         printSelectionWorkspaceToolbarState={printSelectionToolbarState}
@@ -475,32 +465,18 @@ const DocumentViewer = () => {
                 setPageNumber={setPageNumber}
                 thumbnailsContainerRef={thumbnailsContainerRef}
                 width={thumbnailWidth}
-                sessionTotalPages={totalPagesDisplay}
                 selectForCompare={selectForCompare}
                 isComparing={isComparing}
                 comparePageNumber={compareThumbnailPageNumber}
                 activePane={activePane}
                 navigationModifierState={navigationModifierState}
-                paneMode={thumbnailPaneMode}
-                setPaneMode={setThumbnailPaneMode}
                 selectionPanelEnabled={selectionPanelEnabled}
-                pageLoadState={pageLoadState}
-                selectionDocuments={selectionDocuments}
-                draftSelectionMask={draftSelectionMask}
                 draftSelectionDirty={draftSelectionDirty}
                 selectionActive={selectionActive}
-                draftIncludedCount={draftIncludedCount}
-                toggleDraftSelectAll={toggleDraftSelectAll}
-                toggleDraftDocument={toggleDraftDocument}
-                toggleDraftPage={toggleDraftPage}
-                saveDraftSelection={saveDraftSelection}
-                cancelDraftSelection={cancelDraftSelection}
                 clearSelectionFilter={clearSelectionFilter}
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
                 onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
-                canOpenMetadataMatrix={canOpenMetadataMatrix}
-                onOpenMetadataMatrix={openMetadataMatrix}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -534,7 +510,7 @@ const DocumentViewer = () => {
             <div className="viewer-empty-state-card">
               <span className="material-icons viewer-empty-state-icon" aria-hidden="true">filter_alt_off</span>
               <h2>{t('viewer.selectionEmpty.title', { defaultValue: 'No pages remain in the current selection' })}</h2>
-              <p>{t('viewer.selectionEmpty.description', { defaultValue: 'The active selection currently hides every page. Reset the selection filter to show the full session again, or open the selection tab to choose a new subset.' })}</p>
+              <p>{t('viewer.selectionEmpty.description', { defaultValue: 'The active selection currently hides every page. Reset the selection to show the full session again.' })}</p>
               <div className="viewer-empty-state-actions">
                 <button
                   type="button"
@@ -542,13 +518,6 @@ const DocumentViewer = () => {
                   onClick={clearSelectionFilter}
                 >
                   {t('viewer.selectionEmpty.showAll', { defaultValue: 'Show all pages' })}
-                </button>
-                <button
-                  type="button"
-                  className="viewer-empty-state-button secondary"
-                  onClick={() => setThumbnailPaneMode('selection')}
-                >
-                  {t('viewer.selectionEmpty.openSelection', { defaultValue: 'Open selection' })}
                 </button>
               </div>
             </div>
