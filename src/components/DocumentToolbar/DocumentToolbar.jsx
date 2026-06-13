@@ -1303,9 +1303,9 @@ const DocumentToolbar = ({
           defaultValue: 'Printing becomes available when all pages are fully loaded.',
         });
   const printSelectionWorkspaceTitle = canOpenPrintSelectionWorkspace
-    ? t('toolbar.printSelectionWorkspace.open', { defaultValue: 'Choose pages for printing' })
+    ? t('toolbar.printSelectionWorkspace.open', { defaultValue: 'Manage the pages shown and printed' })
     : t('toolbar.printSelectionWorkspace.openDisabled', {
-        defaultValue: 'Page selection is available when all pages are fully loaded.',
+        defaultValue: 'Selection management is available when all pages are fully loaded.',
       });
 
   const printDefaultSettings = useMemo(() => {
@@ -1452,6 +1452,18 @@ const DocumentToolbar = ({
               aria-label={state.redoActionTitle || t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })}
             >
               <span className="material-icons" aria-hidden="true">redo</span>
+            </button>
+
+            <button
+              type="button"
+              className="print-selection-secondary print-selection-reset-action"
+              onClick={() => state.onResetToDefault?.()}
+              disabled={!state.canResetToDefault}
+              title={state.resetToDefaultTitle || t('printSelectionWorkspace.resetToDefaultTitle', { defaultValue: 'Reset to the original session order with every page included.' })}
+              aria-label={state.resetToDefaultTitle || t('printSelectionWorkspace.resetToDefaultTitle', { defaultValue: 'Reset to the original session order with every page included.' })}
+            >
+              <span className="material-icons" aria-hidden="true">restart_alt</span>
+              {t('printSelectionWorkspace.resetToDefault', { defaultValue: 'Reset' })}
             </button>
 
             <button type="button" className="print-selection-secondary print-selection-cancel-action" onClick={() => state.onCancel?.()}>

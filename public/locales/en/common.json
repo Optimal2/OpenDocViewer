@@ -37,8 +37,8 @@
       "useSystem": "Use system default ({mode})"
     },
     "printSelectionWorkspace": {
-      "open": "Choose pages for printing",
-      "openDisabled": "Page selection is available when all pages are fully loaded."
+      "open": "Manage the pages shown and printed",
+      "openDisabled": "Selection management is available when all pages are fully loaded."
     },
     "zoomPercentAria": "Current zoom percent",
     "firstPage": "First page",
@@ -319,7 +319,7 @@
     }
   },
   "printSelectionWorkspace": {
-    "title": "Print selection",
+    "title": "Manage selection",
     "subtitle": "{selected} of {total} pages selected for printing.",
     "availablePages": "Available pages",
     "selectedPages": "Selected pages",
@@ -334,6 +334,8 @@
     "undoTitle": "Undo the latest print-selection change.",
     "redo": "Redo",
     "redoTitle": "Redo the latest undone print-selection change.",
+    "resetToDefault": "Reset",
+    "resetToDefaultTitle": "Reset to the default: every page and document in the original order.",
     "modeLabel": "Mode",
     "pageMode": "Pages",
     "documentMode": "Documents",
