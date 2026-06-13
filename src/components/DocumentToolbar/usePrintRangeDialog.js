@@ -349,7 +349,7 @@ export function usePrintRangeController({
 
     setPrintMode(sequenceLockedToSelection && (defaultPrintMode === 'range' || defaultPrintMode === 'custom') ? 'all' : defaultPrintMode);
     setActiveScope('primary');
-    setAllScope(sequenceLockedToSelection ? 'selection' : (canPrintSelectionScope ? 'selection' : 'session'));
+    setAllScope(canPrintSelectionScope ? 'selection' : 'session');
     setFromValue('1');
     setToValue(String(totalPages || 1));
     setCustomText('');
@@ -381,7 +381,6 @@ export function usePrintRangeController({
 
   useEffect(() => {
     if (!sequenceLockedToSelection) return;
-    setAllScope('selection');
     if (printMode === 'range' || printMode === 'custom') {
       setPrintMode('all');
     }
@@ -600,7 +599,7 @@ export function usePrintRangeController({
     if (restrictToActivePage) return { mode: 'active', activeScope: 'primary', ...common };
     if (printMode === 'active') return { mode: 'active', activeScope: isComparing ? activeScope : 'primary', ...common };
     if (printMode === 'all' || sequenceLockedToSelection) {
-      return { mode: 'all', allScope: sequenceLockedToSelection ? 'selection' : (canPrintSelectionScope ? allScope : 'session'), ...common };
+      return { mode: 'all', allScope: canPrintSelectionScope ? allScope : 'session', ...common };
     }
 
     if (printMode === 'range') {

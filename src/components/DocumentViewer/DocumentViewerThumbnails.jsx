@@ -1,15 +1,13 @@
 // File: src/components/DocumentViewer/DocumentViewerThumbnails.jsx
 /**
- * OpenDocViewer — Document Viewer Thumbnails / Selection Pane (Wrapper)
+ * OpenDocViewer — Document Viewer Thumbnails (Wrapper)
  *
- * Provides the deterministic thumbnail list, local width controls, and the document/page selection
- * editor that can hide pages from the viewer flow once the user saves a selection.
+ * Provides the deterministic thumbnail list and local width controls for the viewer shell.
  */
 import React from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
-import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
 
 /**
  * @param {Object} props
@@ -18,31 +16,17 @@ import DocumentSelectionPanel from '../DocumentSelectionPanel.jsx';
  * @param {function(number): void} props.setPageNumber - Accepts original 1-based page number.
  * @param {Object} props.thumbnailsContainerRef
  * @param {number} props.width
- * @param {number} props.sessionTotalPages
  * @param {function(number, Object=): void} [props.selectForCompare]
  * @param {boolean} [props.isComparing]
  * @param {(number|null)} [props.comparePageNumber]
  * @param {'primary'|'compare'} [props.activePane]
  * @param {{ shift:boolean, ctrl:boolean }} props.navigationModifierState
- * @param {'thumbnails'|'selection'} props.paneMode
- * @param {function(string): void} props.setPaneMode
  * @param {boolean} props.selectionPanelEnabled
- * @param {Object} props.pageLoadState
- * @param {Array} props.selectionDocuments
- * @param {Array<boolean>} props.draftSelectionMask
  * @param {boolean} props.draftSelectionDirty
  * @param {boolean} props.selectionActive
- * @param {number} props.draftIncludedCount
- * @param {function(boolean): void} props.toggleDraftSelectAll
- * @param {function(string, boolean): void} props.toggleDraftDocument
- * @param {function(number, boolean): void} props.toggleDraftPage
- * @param {function(): void} props.saveDraftSelection
- * @param {function(): void} props.cancelDraftSelection
  * @param {function(): void} props.clearSelectionFilter
  * @param {function(number): boolean} props.hidePageFromSelection
  * @param {function(number): boolean} props.hideDocumentFromSelection
- * @param {boolean} [props.canOpenMetadataMatrix]
- * @param {function(): boolean} [props.onOpenMetadataMatrix]
  * @param {function(number): boolean} [props.onOpenDocumentMetadata]
  * @param {number} props.minWidth
  * @param {number} props.maxWidth
@@ -61,32 +45,18 @@ const DocumentViewerThumbnails = ({
   setPageNumber,
   thumbnailsContainerRef,
   width,
-  sessionTotalPages,
   selectForCompare,
   isComparing = false,
   comparePageNumber = null,
   activePane = 'primary',
   navigationModifierState,
-  paneMode,
-  setPaneMode,
   selectionPanelEnabled,
-  pageLoadState,
-  selectionDocuments,
-  draftSelectionMask,
   draftSelectionDirty,
   selectionActive,
-  draftIncludedCount,
-  toggleDraftSelectAll,
-  toggleDraftDocument,
-  toggleDraftPage,
-  saveDraftSelection,
-  cancelDraftSelection,
   clearSelectionFilter,
   hidePageFromSelection,
   hideDocumentFromSelection,
   onOpenDocumentMetadata,
-  canOpenMetadataMatrix = false,
-  onOpenMetadataMatrix = undefined,
   minWidth,
   maxWidth,
   defaultWidth,
@@ -102,11 +72,6 @@ const DocumentViewerThumbnails = ({
   const widthAtMax = width >= maxWidth;
   const widthAtDefault = width === defaultWidth;
   const canClearSelection = selectionActive || draftSelectionDirty;
-
-  React.useEffect(() => {
-    if (selectionPanelEnabled) return;
-    if (paneMode === 'selection') setPaneMode('thumbnails');
-  }, [paneMode, selectionPanelEnabled, setPaneMode]);
 
   return (
     <div className="thumbnail-pane-shell" style={{ width: `${width}px`, minWidth: `${width}px` }}>
@@ -178,100 +143,38 @@ const DocumentViewerThumbnails = ({
             >
               <span className="material-icons" aria-hidden="true">visibility_off</span>
             </button>
-          </div>
-        </div>
-
-        <div className="thumbnail-pane-toolbar-row is-tabs">
-          <div className="thumbnail-pane-mode-switch" role="tablist" aria-label={t('thumbnails.selection.tabGroup', { defaultValue: 'Thumbnail pane content' })}>
-            <button
-              type="button"
-              role="tab"
-              aria-selected={paneMode === 'thumbnails'}
-              className={`thumbnail-pane-mode-button ${paneMode === 'thumbnails' ? 'is-active' : ''}`}
-              onClick={() => setPaneMode('thumbnails')}
-              title={t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
-            >
-              {t('thumbnails.selection.thumbnailsTab', { defaultValue: 'Thumbnails' })}
-            </button>
-            <div className={`thumbnail-pane-mode-button-wrap ${canClearSelection ? 'has-inline-tool' : ''}`}>
+            {canClearSelection ? (
               <button
                 type="button"
-                role="tab"
-                aria-selected={paneMode === 'selection'}
-                aria-disabled={!selectionPanelEnabled}
-                className={[
-                  'thumbnail-pane-mode-button',
-                  paneMode === 'selection' ? 'is-active' : '',
-                  selectionActive ? 'has-selection' : '',
-                  canClearSelection ? 'has-inline-tool' : '',
-                ].filter(Boolean).join(' ')}
-                onClick={() => { if (selectionPanelEnabled) setPaneMode('selection'); }}
-                title={selectionPanelEnabled
-                  ? t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })
-                  : t('thumbnails.selection.loadingStatusShort', {
-                      ready: Number(pageLoadState?.readyPages) || 0,
-                      total: Math.max(Number(pageLoadState?.expectedPages) || 0, Number(sessionTotalPages) || 0),
-                      defaultValue: 'Selection will be available when all pages are fully loaded.',
-                    })}
-                disabled={!selectionPanelEnabled}
+                className="thumbnail-pane-toolbar-button is-compact is-warning"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={clearSelectionFilter}
+                aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear the selection filter and show all pages' })}
+                title={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear the selection filter and show all pages' })}
               >
-                <span className="thumbnail-pane-mode-button-label">
-                  {t('thumbnails.selection.selectionTab', { defaultValue: 'Selection' })}
-                </span>
+                <span className="material-icons" aria-hidden="true">filter_alt_off</span>
               </button>
-              {canClearSelection ? (
-                <button
-                  type="button"
-                  className="thumbnail-pane-mode-inline-tool is-danger"
-                  onMouseDown={(event) => event.preventDefault()}
-                  onClick={(event) => { event.preventDefault(); event.stopPropagation(); clearSelectionFilter(); }}
-                  aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
-                  title={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear selection filter and show all pages' })}
-                >
-                  <span className="material-icons" aria-hidden="true">close</span>
-                </button>
-              ) : null}
-            </div>
+            ) : null}
           </div>
         </div>
       </div>
 
-      {paneMode === 'selection' ? (
-        <DocumentSelectionPanel
-          enabled={selectionPanelEnabled}
-          pageLoadState={pageLoadState}
-          documents={selectionDocuments}
-          draftSelectionMask={draftSelectionMask}
-          draftSelectionDirty={draftSelectionDirty}
-          selectionActive={selectionActive}
-          draftIncludedCount={draftIncludedCount}
-          totalSessionPages={sessionTotalPages}
-          onToggleAll={toggleDraftSelectAll}
-          onToggleDocument={toggleDraftDocument}
-          onTogglePage={toggleDraftPage}
-          onSave={saveDraftSelection}
-          onCancel={cancelDraftSelection}
-          canOpenMetadataMatrix={canOpenMetadataMatrix}
-          onOpenMetadataMatrix={onOpenMetadataMatrix}
-        />
-      ) : (
-        <DocumentThumbnailList
-          allPages={allPages}
-          pageNumber={pageNumber}
-          setPageNumber={setPageNumber}
-          thumbnailsContainerRef={thumbnailsContainerRef}
-          width={width}
-          selectForCompare={selectForCompare}
-          isComparing={isComparing}
-          comparePageNumber={comparePageNumber}
-          activePane={activePane}
-          navigationModifierState={navigationModifierState}
-          selectionPanelEnabled={selectionPanelEnabled}
-          onHidePageFromSelection={hidePageFromSelection}
-          onHideDocumentFromSelection={hideDocumentFromSelection}
-          onOpenDocumentMetadata={onOpenDocumentMetadata}
-        />
-      )}
+      <DocumentThumbnailList
+        allPages={allPages}
+        pageNumber={pageNumber}
+        setPageNumber={setPageNumber}
+        thumbnailsContainerRef={thumbnailsContainerRef}
+        width={width}
+        selectForCompare={selectForCompare}
+        isComparing={isComparing}
+        comparePageNumber={comparePageNumber}
+        activePane={activePane}
+        navigationModifierState={navigationModifierState}
+        selectionPanelEnabled={selectionPanelEnabled}
+        onHidePageFromSelection={hidePageFromSelection}
+        onHideDocumentFromSelection={hideDocumentFromSelection}
+        onOpenDocumentMetadata={onOpenDocumentMetadata}
+      />
     </div>
   );
 };
@@ -289,7 +192,6 @@ DocumentViewerThumbnails.propTypes = {
     current: PropTypes.any,
   }).isRequired,
   width: PropTypes.number.isRequired,
-  sessionTotalPages: PropTypes.number.isRequired,
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
   comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
@@ -298,26 +200,13 @@ DocumentViewerThumbnails.propTypes = {
     shift: PropTypes.bool.isRequired,
     ctrl: PropTypes.bool.isRequired,
   }).isRequired,
-  paneMode: PropTypes.oneOf(['thumbnails', 'selection']).isRequired,
-  setPaneMode: PropTypes.func.isRequired,
   selectionPanelEnabled: PropTypes.bool.isRequired,
-  pageLoadState: PropTypes.object,
-  selectionDocuments: PropTypes.array.isRequired,
-  draftSelectionMask: PropTypes.arrayOf(PropTypes.bool).isRequired,
   draftSelectionDirty: PropTypes.bool.isRequired,
   selectionActive: PropTypes.bool.isRequired,
-  draftIncludedCount: PropTypes.number.isRequired,
-  toggleDraftSelectAll: PropTypes.func.isRequired,
-  toggleDraftDocument: PropTypes.func.isRequired,
-  toggleDraftPage: PropTypes.func.isRequired,
-  saveDraftSelection: PropTypes.func.isRequired,
-  cancelDraftSelection: PropTypes.func.isRequired,
   clearSelectionFilter: PropTypes.func.isRequired,
   hidePageFromSelection: PropTypes.func.isRequired,
   hideDocumentFromSelection: PropTypes.func.isRequired,
   onOpenDocumentMetadata: PropTypes.func,
-  canOpenMetadataMatrix: PropTypes.bool,
-  onOpenMetadataMatrix: PropTypes.func,
   minWidth: PropTypes.number.isRequired,
   maxWidth: PropTypes.number.isRequired,
   defaultWidth: PropTypes.number.isRequired,

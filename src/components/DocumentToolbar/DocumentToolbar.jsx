@@ -1365,11 +1365,19 @@ const DocumentToolbar = ({
         {printSelectionWorkspaceToolbarState ? (
           <div className="print-selection-toolbar-controls">
             <div className="print-selection-mode-toggle" aria-label={t('printSelectionWorkspace.modeLabel', { defaultValue: 'Mode' })}>
-              <label title={t('printSelectionWorkspace.documentModeTitle', { defaultValue: 'Respect document boundaries' })}>
+              <label
+                className={state.documentModeAvailable ? '' : 'is-disabled'}
+                title={state.documentModeAvailable
+                  ? t('printSelectionWorkspace.documentModeTitle', { defaultValue: 'Respect document boundaries' })
+                  : t('printSelectionWorkspace.documentModeUnavailableTitle', {
+                      defaultValue: 'Document mode requires explicit document metadata from the host application.',
+                    })}
+              >
                 <input
                   type="radio"
                   name="print-selection-workspace-mode-toolbar"
                   checked={state.workspaceMode === 'documents'}
+                  disabled={!state.documentModeAvailable}
                   onChange={() => state.onWorkspaceModeChange?.('documents')}
                 />
                 <span>{t('printSelectionWorkspace.documentMode', { defaultValue: 'Documents' })}</span>
@@ -1394,15 +1402,6 @@ const DocumentToolbar = ({
                 aria-label={t('printSelectionWorkspace.showBothPanels', { defaultValue: 'Show both panels' })}
               >
                 <span className="material-icons" aria-hidden="true">view_week</span>
-              </button>
-              <button
-                type="button"
-                className={state.panelMode === 'left' ? 'is-active' : ''}
-                onClick={() => state.onPanelModeChange?.('left')}
-                title={t('printSelectionWorkspace.showLeftPanel', { defaultValue: 'Show source overview' })}
-                aria-label={t('printSelectionWorkspace.showLeftPanel', { defaultValue: 'Show source overview' })}
-              >
-                <span className="material-icons" aria-hidden="true">align_horizontal_left</span>
               </button>
               <button
                 type="button"
@@ -1442,7 +1441,6 @@ const DocumentToolbar = ({
               aria-label={state.undoActionTitle || t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' })}
             >
               <span className="material-icons" aria-hidden="true">undo</span>
-              <span>{t('printSelectionWorkspace.undo', { defaultValue: 'Undo' })}</span>
             </button>
 
             <button
@@ -1454,7 +1452,6 @@ const DocumentToolbar = ({
               aria-label={state.redoActionTitle || t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })}
             >
               <span className="material-icons" aria-hidden="true">redo</span>
-              <span>{t('printSelectionWorkspace.redo', { defaultValue: 'Redo' })}</span>
             </button>
 
             <button type="button" className="print-selection-secondary print-selection-cancel-action" onClick={() => state.onCancel?.()}>

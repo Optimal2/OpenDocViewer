@@ -339,6 +339,7 @@
     "documentMode": "Documents",
     "pageModeTitle": "Free page placement",
     "documentModeTitle": "Respect document boundaries",
+    "documentModeUnavailableTitle": "Document mode requires explicit document metadata from the host application.",
     "documentModeResetConfirm": "The current page order crosses document boundaries. Reset to the original document/page order and switch to document mode?",
     "pageOrderWarning": "This page is out of the original order within its document.",
     "dragDocumentTitle": "Drag to move this document in the draft order.",
@@ -349,7 +350,6 @@
     "largerThumbnails": "Larger thumbnails",
     "panelModeLabel": "Panel layout",
     "showBothPanels": "Show both panels",
-    "showLeftPanel": "Show source overview",
     "showRightPanel": "Show selected pages",
     "previewPage": "Show page",
     "previewDialog": "Page preview",
@@ -449,9 +449,8 @@
     },
     "selectionEmpty": {
       "title": "No pages remain in the current selection",
-      "description": "The active selection currently hides every page. Reset the selection filter to show the full session again, or open the selection tab to choose a new subset.",
-      "showAll": "Show all pages",
-      "openSelection": "Open selection"
+      "description": "The active selection currently hides every page. Reset the selection to show the full session again.",
+      "showAll": "Show all pages"
     },
     "paneSelector": {
       "primary": "Use primary / left pane",
@@ -631,10 +630,10 @@
       },
       "selection": {
         "title": "Selection",
-        "body": "The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel ignores unsaved changes and returns to the thumbnail view.",
-        "empty": "If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.",
-        "collapse": "Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.",
-        "shortcut": "Press Delete to hide the current active page from the saved selection. Hold Shift in compare mode to hide the temporary opposite page instead. Hold Ctrl to hide the whole current document for the targeted pane."
+        "body": "Open print selection from the toolbar to remove pages, change order, and save the sequence used by the viewer.",
+        "empty": "If the selection hides everything, the viewer shows a message where you can restore the full session.",
+        "collapse": "When explicit document metadata is available, document mode can move whole documents while respecting document boundaries.",
+        "shortcut": "Press Delete to hide the current active page from the selection. Hold Shift in compare mode to hide the temporary opposite page instead. Hold Ctrl to hide the whole current document for the targeted pane."
       },
       "adjustments": {
         "title": "Image adjustments",
@@ -647,7 +646,7 @@
       "printing": {
         "title": "Printing",
         "body": "Open the print dialog from the toolbar. Choose a print method from the list, then review the print details before the browser prepares the preview.",
-        "selection": "If a saved selection hides pages, “All pages” can use either the current selection or the full session."
+        "selection": "If a saved selection changes page membership or order, “All pages” can use either the current selection or the full session."
       },
       "shortcuts": {
         "title": "Close dialogs",
