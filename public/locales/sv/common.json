@@ -37,8 +37,8 @@
       "useSystem": "Använd systemstandard ({mode})"
     },
     "printSelectionWorkspace": {
-      "open": "Välj sidor för utskrift",
-      "openDisabled": "Sidurval är tillgängligt när alla sidor är helt inlästa."
+      "open": "Hantera vilka sidor som visas och skrivs ut",
+      "openDisabled": "Urval kan hanteras när alla sidor är helt inlästa."
     },
     "zoomPercentAria": "Aktuell zoomprocent",
     "firstPage": "Första sidan",
@@ -319,7 +319,7 @@
     }
   },
   "printSelectionWorkspace": {
-    "title": "Utskriftsurval",
+    "title": "Hantera urval",
     "subtitle": "{selected} av {total} sidor valda för utskrift.",
     "availablePages": "Tillgängliga sidor",
     "selectedPages": "Valda sidor",
@@ -334,6 +334,8 @@
     "undoTitle": "Ångra den senaste ändringen i utskriftsurvalet.",
     "redo": "Gör om",
     "redoTitle": "Gör om den senast ångrade ändringen i utskriftsurvalet.",
+    "resetToDefault": "Återställ",
+    "resetToDefaultTitle": "Återställ till standard: alla sidor och dokument i den ursprungliga ordningen.",
     "modeLabel": "Läge",
     "pageMode": "Sidor",
     "documentMode": "Dokument",

@@ -146,7 +146,7 @@ const DocumentViewerThumbnails = ({
             {canClearSelection ? (
               <button
                 type="button"
-                className="thumbnail-pane-toolbar-button is-compact is-warning"
+                className="thumbnail-pane-toolbar-button is-compact is-danger"
                 onMouseDown={(event) => event.preventDefault()}
                 onClick={clearSelectionFilter}
                 aria-label={t('thumbnails.selection.clearFilter', { defaultValue: 'Clear the selection filter and show all pages' })}

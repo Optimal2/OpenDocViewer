@@ -665,8 +665,12 @@ const PrintSelectionWorkspace = ({
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
   const canUndoDraftChange = Array.isArray(draftHistory.undo);
   const canRedoDraftChange = Array.isArray(draftHistory.redo);
+  const canResetToDefault = !sequencesEqual(draftIndexes, naturalIndexes);
   const undoActionTitle = t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' });
   const redoActionTitle = t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' });
+  const resetToDefaultTitle = t('printSelectionWorkspace.resetToDefaultTitle', {
+    defaultValue: 'Reset to the original session order with every page included.',
+  });
 
   const applyDraftChange = useCallback((producer) => {
     setDraftIndexes((current) => {
@@ -1264,6 +1268,13 @@ const PrintSelectionWorkspace = ({
     setPanelMode(String(nextMode || '') === 'right' ? 'right' : 'both');
   }, []);
 
+  const resetToDefault = useCallback(() => {
+    if (!canResetToDefault) return;
+    applyDraftChange(naturalIndexes);
+    setLeftSelected([]);
+    setRightSelected([]);
+  }, [applyDraftChange, canResetToDefault, naturalIndexes]);
+
   const openLightbox = useCallback((originalIndex, side, event) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
@@ -1537,18 +1548,22 @@ const PrintSelectionWorkspace = ({
     documentModeAvailable,
     canUndoDraftChange,
     canRedoDraftChange,
+    canResetToDefault,
     undoActionTitle,
     redoActionTitle,
+    resetToDefaultTitle,
     canCommit: draftIndexes.length > 0,
     onWorkspaceModeChange: changeWorkspaceMode,
     onPanelModeChange: changePanelMode,
     onThumbnailSizeChange: setThumbnailSize,
     onUndoDraftChange: undoDraftChange,
     onRedoDraftChange: redoDraftChange,
+    onResetToDefault: resetToDefault,
     onCancel: cancel,
     onCommit: commit,
   }), [
     canRedoDraftChange,
+    canResetToDefault,
     canUndoDraftChange,
     cancel,
     changeWorkspaceMode,
@@ -1559,6 +1574,8 @@ const PrintSelectionWorkspace = ({
     panelMode,
     redoActionTitle,
     redoDraftChange,
+    resetToDefault,
+    resetToDefaultTitle,
     setThumbnailSize,
     thumbnailPercent,
     totalPages,
