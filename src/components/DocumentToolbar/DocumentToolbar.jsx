@@ -47,7 +47,6 @@ import {
 } from '../../utils/pdfPrintCacheKey.js';
 
 const EMPTY_PDF_PROGRESS = Object.freeze({ open: false, action: '', phase: '', current: 0, progressValue: 0, page: 0, total: 0, error: '', minimized: false });
-const NOOP = () => {};
 
 /**
  * @param {*} error
@@ -201,10 +200,6 @@ function getPdfProgressPercent(progress) {
  * @property {boolean=} printSelectionWorkspaceActive
  * @property {boolean=} canOpenPrintSelectionWorkspace
  * @property {function(): void=} openPrintSelectionWorkspace
- * @property {number=} printSelectionZoomPercent
- * @property {function(): void=} increasePrintSelectionZoom
- * @property {function(): void=} decreasePrintSelectionZoom
- * @property {function(number): void=} setPrintSelectionZoomFromPercent
  * @property {number=} sessionTotalPages
  * @property {Object|null=} bundle
  * @property {Array<*>=} allPages
@@ -331,10 +326,6 @@ const DocumentToolbar = ({
   printSelectionWorkspaceActive = false,
   canOpenPrintSelectionWorkspace = false,
   openPrintSelectionWorkspace,
-  printSelectionZoomPercent = 120,
-  increasePrintSelectionZoom,
-  decreasePrintSelectionZoom,
-  setPrintSelectionZoomFromPercent,
   sessionTotalPages = totalPagesDisplay,
   bundle = null,
   allPages = [],
@@ -1359,32 +1350,7 @@ const DocumentToolbar = ({
           <span>{t('toolbar.printSelectionWorkspace.active', { defaultValue: 'Print selection mode' })}</span>
         </div>
 
-        <div className="separator" />
-
-        <ZoomButtons
-          zoomIn={increasePrintSelectionZoom || NOOP}
-          zoomOut={decreasePrintSelectionZoom || NOOP}
-          fitToScreen={NOOP}
-          fitToCustomWidth={NOOP}
-          fitToWidth={NOOP}
-          zoomMode="CUSTOM"
-          zoomPercent={printSelectionZoomPercent}
-          onPercentApply={setPrintSelectionZoomFromPercent}
-          disableFits
-        />
-
         <div className="toolbar-spacer" />
-
-        <div className="toolbar-end-actions">
-          <ThemeMenuButton />
-          <LanguageMenuButton />
-          <HelpMenuButton
-            onOpenManual={() => setIsManualDialogOpen(true)}
-            onOpenAbout={() => setIsAboutDialogOpen(true)}
-            statusLedState={runtimeStatusLedState}
-            statusLedTitle={runtimeStatusLedTitle}
-          />
-        </div>
 
         <ManualOverlayDialog
           isOpen={isManualDialogOpen}
@@ -2004,10 +1970,6 @@ DocumentToolbar.propTypes = {
   printSelectionWorkspaceActive: PropTypes.bool,
   canOpenPrintSelectionWorkspace: PropTypes.bool,
   openPrintSelectionWorkspace: PropTypes.func,
-  printSelectionZoomPercent: PropTypes.number,
-  increasePrintSelectionZoom: PropTypes.func,
-  decreasePrintSelectionZoom: PropTypes.func,
-  setPrintSelectionZoomFromPercent: PropTypes.func,
   sessionTotalPages: PropTypes.number,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),

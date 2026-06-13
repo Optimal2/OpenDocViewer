@@ -167,9 +167,56 @@ function buildDocumentGroups(pageItems, bundle, headerTemplate) {
   });
 }
 
+function buildDraftDocumentGroups(draftIndexes, itemByIndex, bundle, headerTemplate) {
+  const groups = [];
+  for (let orderIndex = 0; orderIndex < draftIndexes.length; orderIndex += 1) {
+    const item = itemByIndex.get(draftIndexes[orderIndex]);
+    if (!item) continue;
+    const key = getDocumentGroupKeyForItem(item);
+    let group = groups[groups.length - 1] || null;
+    if (!group || group.key !== key) {
+      const documentEntry = getDocumentEntry(bundle, item.documentId, item.documentNumber);
+      group = {
+        key,
+        blockKey: `${key}:${groups.length}`,
+        documentId: item.documentId,
+        documentNumber: item.documentNumber,
+        totalDocuments: item.totalDocuments,
+        documentEntry,
+        pages: [],
+      };
+      groups.push(group);
+    }
+    group.pages.push({ item, orderIndex });
+  }
+
+  return groups.map((group) => {
+    const first = group.pages[0]?.item || null;
+    const last = group.pages[group.pages.length - 1]?.item || first;
+    const context = {
+      documentNumber: group.documentNumber,
+      totalDocuments: group.totalDocuments,
+      documentId: group.documentId,
+      pageCount: group.pages.length,
+      firstPage: first?.pageNumber ?? '',
+      lastPage: last?.pageNumber ?? '',
+    };
+    return {
+      ...group,
+      header: applyTemplate(headerTemplate, context, group.documentEntry),
+    };
+  });
+}
+
 function uniqueOrdered(indexes, order) {
   const wanted = new Set(Array.isArray(indexes) ? indexes : []);
   return order.filter((index) => wanted.has(index));
+}
+
+function sortByOrder(indexes, order) {
+  const orderPosition = new Map(order.map((index, position) => [index, position]));
+  return [...(Array.isArray(indexes) ? indexes : [])]
+    .sort((a, b) => (orderPosition.get(a) ?? Number.MAX_SAFE_INTEGER) - (orderPosition.get(b) ?? Number.MAX_SAFE_INTEGER));
 }
 
 function getDocumentGroupKeyForItem(item) {
@@ -177,19 +224,113 @@ function getDocumentGroupKeyForItem(item) {
   return item.documentId || `doc:${item.documentNumber}`;
 }
 
-function expandIndexesToDocuments(indexes, pageItems, order) {
-  const documentKeys = new Set();
-  const itemByOriginalIndex = new Map(pageItems.map((item) => [item.originalIndex, item]));
-  for (const index of Array.isArray(indexes) ? indexes : []) {
-    const item = itemByOriginalIndex.get(index);
-    const key = getDocumentGroupKeyForItem(item);
-    if (key) documentKeys.add(key);
+function getDocumentKeyForIndex(index, itemByIndex) {
+  return getDocumentGroupKeyForItem(itemByIndex.get(index));
+}
+
+function getIndexesForDocument(indexes, itemByIndex, documentKey) {
+  return (Array.isArray(indexes) ? indexes : [])
+    .filter((index) => getDocumentKeyForIndex(index, itemByIndex) === documentKey);
+}
+
+function analyzeDraftDocumentOrder(indexes, itemByIndex) {
+  const entries = (Array.isArray(indexes) ? indexes : [])
+    .map((index) => ({ index, item: itemByIndex.get(index) }))
+    .filter((entry) => entry.item);
+  const documentOrder = [];
+  const countsByDocument = new Map();
+  for (const entry of entries) {
+    const key = getDocumentGroupKeyForItem(entry.item);
+    if (!countsByDocument.has(key)) documentOrder.push(key);
+    countsByDocument.set(key, (countsByDocument.get(key) || 0) + 1);
   }
-  if (documentKeys.size <= 0) return [];
-  const expanded = pageItems
-    .filter((item) => documentKeys.has(getDocumentGroupKeyForItem(item)))
-    .map((item) => item.originalIndex);
-  return uniqueOrdered(expanded, order);
+
+  const expectedDocuments = [];
+  for (const key of documentOrder) {
+    const count = countsByDocument.get(key) || 0;
+    for (let index = 0; index < count; index += 1) expectedDocuments.push(key);
+  }
+
+  const warnings = new Map();
+  const maxPageByDocument = new Map();
+  let hasBoundaryViolation = false;
+  for (let position = 0; position < entries.length; position += 1) {
+    const entry = entries[position];
+    const key = getDocumentGroupKeyForItem(entry.item);
+    if (key !== expectedDocuments[position]) {
+      warnings.set(entry.index, 'document-boundary');
+      hasBoundaryViolation = true;
+    }
+
+    const documentPageNumber = getDocumentPageNumber(entry.item);
+    const previousMaxPage = maxPageByDocument.get(key) || 0;
+    if (!warnings.has(entry.index) && documentPageNumber < previousMaxPage) {
+      warnings.set(entry.index, 'page-order');
+    }
+    maxPageByDocument.set(key, Math.max(previousMaxPage, documentPageNumber));
+  }
+
+  return { warnings, hasBoundaryViolation };
+}
+
+function mergeAdditionsIntoDocumentBlocks(current, additions, itemByIndex, naturalIndexes) {
+  let next = [...current];
+  const additionKeys = [];
+  for (const index of sortByOrder(additions, naturalIndexes)) {
+    const key = getDocumentKeyForIndex(index, itemByIndex);
+    if (key && !additionKeys.includes(key)) additionKeys.push(key);
+  }
+
+  for (const key of additionKeys) {
+    const documentAdditions = sortByOrder(
+      additions.filter((index) => getDocumentKeyForIndex(index, itemByIndex) === key && !next.includes(index)),
+      naturalIndexes
+    );
+    if (documentAdditions.length <= 0) continue;
+
+    const positions = next
+      .map((index, position) => ({ index, position }))
+      .filter((entry) => getDocumentKeyForIndex(entry.index, itemByIndex) === key)
+      .map((entry) => entry.position);
+
+    if (positions.length <= 0) {
+      next = insertUnique(next, documentAdditions, next.length);
+      continue;
+    }
+
+    const start = Math.min(...positions);
+    const end = Math.max(...positions) + 1;
+    const block = next.slice(start, end);
+    const merged = sortByOrder([...new Set([...block, ...documentAdditions])], naturalIndexes);
+    next = [
+      ...next.slice(0, start),
+      ...merged,
+      ...next.slice(end),
+    ];
+  }
+
+  return next;
+}
+
+function moveDocumentBlock(current, documentKey, targetDocumentKey, placement, itemByIndex) {
+  if (!documentKey || !targetDocumentKey || documentKey === targetDocumentKey) return current;
+  const moving = current.filter((index) => getDocumentKeyForIndex(index, itemByIndex) === documentKey);
+  if (moving.length <= 0) return current;
+  const remaining = current.filter((index) => getDocumentKeyForIndex(index, itemByIndex) !== documentKey);
+  const targetPositions = remaining
+    .map((index, position) => ({ index, position }))
+    .filter((entry) => getDocumentKeyForIndex(entry.index, itemByIndex) === targetDocumentKey)
+    .map((entry) => entry.position);
+  if (targetPositions.length <= 0) return current;
+
+  const insertIndex = placement === 'after'
+    ? Math.max(...targetPositions) + 1
+    : Math.min(...targetPositions);
+  return [
+    ...remaining.slice(0, insertIndex),
+    ...moving,
+    ...remaining.slice(insertIndex),
+  ];
 }
 
 function rectsIntersect(first, second) {
@@ -319,14 +460,13 @@ const PrintSelectionWorkspace = ({
   const [draftIndexes, setDraftIndexes] = useState(initialIndexes);
   const [leftSelected, setLeftSelected] = useState([]);
   const [rightSelected, setRightSelected] = useState([]);
-  const [workspaceMode, setWorkspaceMode] = useState('pages');
+  const [workspaceMode, setWorkspaceMode] = useState('documents');
   const [panelMode, setPanelMode] = useState('both');
   const [lightboxIndex, setLightboxIndex] = useState(null);
   const [selectionBox, setSelectionBox] = useState(null);
   const [draftHistory, setDraftHistory] = useState({ undo: null, redo: null });
   const [dragState, setDragState] = useState(null);
-  const [rightDropIndex, setRightDropIndex] = useState(null);
-  const [rightDropMarkerStyle, setRightDropMarkerStyle] = useState(null);
+  const [rightDropIntent, setRightDropIntent] = useState(null);
   const [pulseIndex, setPulseIndex] = useState(null);
   const [leftPanelPercent, setLeftPanelPercent] = useState(50);
   const bodyRef = useRef(null);
@@ -344,6 +484,16 @@ const PrintSelectionWorkspace = ({
   const draftSet = useMemo(() => new Set(draftIndexes), [draftIndexes]);
   const leftSelectedSet = useMemo(() => new Set(leftSelected), [leftSelected]);
   const rightSelectedSet = useMemo(() => new Set(rightSelected), [rightSelected]);
+  const draftDocumentGroups = useMemo(
+    () => buildDraftDocumentGroups(draftIndexes, itemByIndex, bundle, documentHeaderTemplate),
+    [bundle, documentHeaderTemplate, draftIndexes, itemByIndex]
+  );
+  const draftDocumentOrderAnalysis = useMemo(
+    () => analyzeDraftDocumentOrder(draftIndexes, itemByIndex),
+    [draftIndexes, itemByIndex]
+  );
+  const draftWarningMap = draftDocumentOrderAnalysis.warnings;
+  const documentModeCompatible = !draftDocumentOrderAnalysis.hasBoundaryViolation;
   const availableLeftIndexes = useMemo(
     () => naturalIndexes.filter((index) => !draftSet.has(index)),
     [draftSet, naturalIndexes]
@@ -374,20 +524,14 @@ const PrintSelectionWorkspace = ({
     });
   }, []);
 
-  const expandWorkspaceIndexes = useCallback((indexes) => (
-    workspaceModeIsDocuments
-      ? expandIndexesToDocuments(indexes, pageItems, naturalIndexes)
-      : uniqueOrdered(indexes, naturalIndexes)
-  ), [naturalIndexes, pageItems, workspaceModeIsDocuments]);
-
   const getSelectableLeftIndexes = useCallback((indexes) => (
-    expandWorkspaceIndexes(indexes).filter((index) => !draftSet.has(index))
-  ), [draftSet, expandWorkspaceIndexes]);
+    uniqueOrdered(indexes, naturalIndexes).filter((index) => !draftSet.has(index))
+  ), [draftSet, naturalIndexes]);
 
   useEffect(() => {
     setLeftSelected((current) => getSelectableLeftIndexes(current));
-    setRightSelected((current) => uniqueOrdered(expandWorkspaceIndexes(current), draftIndexes));
-  }, [draftIndexes, expandWorkspaceIndexes, getSelectableLeftIndexes]);
+    setRightSelected((current) => uniqueOrdered(current, draftIndexes));
+  }, [draftIndexes, getSelectableLeftIndexes]);
 
   const revealIncludedPage = useCallback((originalIndex) => {
     const node = rightPanelRef.current?.querySelector?.(`[data-selection-page="${originalIndex}"]`);
@@ -413,22 +557,28 @@ const PrintSelectionWorkspace = ({
 
   const selectRight = useCallback((originalIndex, event) => {
     stopSelectionEvent(event);
-    setRightSelected(uniqueOrdered(expandWorkspaceIndexes([originalIndex]), draftIndexes));
+    setRightSelected(uniqueOrdered([originalIndex], draftIndexes));
     setLeftSelected([]);
-  }, [draftIndexes, expandWorkspaceIndexes]);
+  }, [draftIndexes]);
 
   const addIndexes = useCallback((indexes, insertIndex = null) => {
     const ordered = getSelectableLeftIndexes(indexes);
-    applyDraftChange((current) => insertUnique(current, ordered, insertIndex ?? current.length));
+    applyDraftChange((current) => (
+      workspaceModeIsDocuments
+        ? (insertIndex == null
+            ? mergeAdditionsIntoDocumentBlocks(current, ordered, itemByIndex, naturalIndexes)
+            : insertUnique(current, ordered, insertIndex))
+        : insertUnique(current, ordered, insertIndex ?? current.length)
+    ));
     setLeftSelected((current) => current.filter((index) => !ordered.includes(index)));
-  }, [applyDraftChange, getSelectableLeftIndexes]);
+  }, [applyDraftChange, getSelectableLeftIndexes, itemByIndex, naturalIndexes, workspaceModeIsDocuments]);
 
   const removeIndexes = useCallback((indexes) => {
-    const removeSet = new Set(uniqueOrdered(expandWorkspaceIndexes(indexes), draftIndexes));
+    const removeSet = new Set(uniqueOrdered(indexes, draftIndexes));
     if (removeSet.size <= 0) return;
     applyDraftChange((current) => current.filter((index) => !removeSet.has(index)));
     setRightSelected((current) => current.filter((index) => !removeSet.has(index)));
-  }, [applyDraftChange, draftIndexes, expandWorkspaceIndexes]);
+  }, [applyDraftChange, draftIndexes]);
 
   const addSelected = useCallback(() => addIndexes(leftSelected), [addIndexes, leftSelected]);
   const addAll = useCallback(() => addIndexes(availableLeftIndexes), [addIndexes, availableLeftIndexes]);
@@ -474,25 +624,38 @@ const PrintSelectionWorkspace = ({
   }, []);
 
   const getDragIndexes = useCallback((side, originalIndex) => {
+    const documentKey = getDocumentKeyForIndex(originalIndex, itemByIndex);
+    const keepCurrentDocument = (indexes, order) => uniqueOrdered(
+      getIndexesForDocument(indexes, itemByIndex, documentKey),
+      order
+    );
+
     if (side === 'right') {
-      return rightSelectedSet.has(originalIndex)
-        ? uniqueOrdered(rightSelected, draftIndexes)
-        : uniqueOrdered(expandWorkspaceIndexes([originalIndex]), draftIndexes);
+      if (rightSelectedSet.has(originalIndex)) {
+        return workspaceModeIsDocuments
+          ? keepCurrentDocument(rightSelected, draftIndexes)
+          : uniqueOrdered(rightSelected, draftIndexes);
+      }
+      return uniqueOrdered([originalIndex], draftIndexes);
     }
     if (draftSet.has(originalIndex)) return [];
-    return leftSelectedSet.has(originalIndex)
-      ? uniqueOrdered(leftSelected, availableLeftIndexes)
-      : getSelectableLeftIndexes([originalIndex]);
+    if (leftSelectedSet.has(originalIndex)) {
+      return workspaceModeIsDocuments
+        ? keepCurrentDocument(leftSelected, availableLeftIndexes)
+        : uniqueOrdered(leftSelected, availableLeftIndexes);
+    }
+    return getSelectableLeftIndexes([originalIndex]);
   }, [
     availableLeftIndexes,
     draftIndexes,
     draftSet,
-    expandWorkspaceIndexes,
     getSelectableLeftIndexes,
+    itemByIndex,
     leftSelected,
     leftSelectedSet,
     rightSelected,
     rightSelectedSet,
+    workspaceModeIsDocuments,
   ]);
 
   const startDrag = useCallback((side, originalIndex, event) => {
@@ -504,27 +667,39 @@ const PrintSelectionWorkspace = ({
     }
     if (side === 'left' && !leftSelectedSet.has(originalIndex)) setLeftSelected(indexes);
     if (side === 'right' && !rightSelectedSet.has(originalIndex)) setRightSelected(indexes);
-    setDragState({ side, indexes });
+    setDragState({
+      side,
+      indexes,
+      kind: 'page',
+      documentKey: getDocumentKeyForIndex(originalIndex, itemByIndex),
+    });
     event.dataTransfer.effectAllowed = side === 'right' ? 'move' : 'copyMove';
     event.dataTransfer.setData('text/plain', indexes.map((index) => String(index + 1)).join(','));
-  }, [getDragIndexes, leftSelectedSet, rightSelectedSet]);
+  }, [getDragIndexes, itemByIndex, leftSelectedSet, rightSelectedSet]);
+
+  const startDocumentDrag = useCallback((documentKey, event) => {
+    event?.stopPropagation?.();
+    const indexes = getIndexesForDocument(draftIndexes, itemByIndex, documentKey);
+    if (indexes.length <= 0) {
+      event.preventDefault();
+      return;
+    }
+    setRightSelected(indexes);
+    setLeftSelected([]);
+    setDragState({
+      side: 'right',
+      kind: 'document',
+      documentKey,
+      indexes,
+    });
+    event.dataTransfer.effectAllowed = 'move';
+    event.dataTransfer.setData('text/plain', indexes.map((index) => String(index + 1)).join(','));
+  }, [draftIndexes, itemByIndex]);
 
   const clearDrag = useCallback(() => {
     setDragState(null);
-    setRightDropIndex(null);
-    setRightDropMarkerStyle(null);
+    setRightDropIntent(null);
   }, []);
-
-  const dropOnRight = useCallback((event, insertIndex) => {
-    event.preventDefault();
-    if (!dragState || dragState.indexes.length <= 0) return;
-    if (dragState.side === 'right') {
-      applyDraftChange((current) => moveWithinSequence(current, dragState.indexes, insertIndex));
-    } else {
-      addIndexes(dragState.indexes, insertIndex);
-    }
-    clearDrag();
-  }, [addIndexes, applyDraftChange, clearDrag, dragState]);
 
   const dropOnLeft = useCallback((event) => {
     event.preventDefault();
@@ -535,8 +710,7 @@ const PrintSelectionWorkspace = ({
   const handleLeftDragOver = useCallback((event) => {
     if (dragState?.side !== 'right') return;
     event.preventDefault();
-    setRightDropIndex(null);
-    setRightDropMarkerStyle(null);
+    setRightDropIntent(null);
   }, [dragState]);
 
   const selectTilesInRect = useCallback((side, panelNode, selectionRect) => {
@@ -551,14 +725,14 @@ const PrintSelectionWorkspace = ({
       return;
     }
 
-    setRightSelected(uniqueOrdered(expandWorkspaceIndexes(selectedIndexes), draftIndexes));
+    setRightSelected(uniqueOrdered(selectedIndexes, draftIndexes));
     setLeftSelected([]);
-  }, [draftIndexes, expandWorkspaceIndexes, getSelectableLeftIndexes]);
+  }, [draftIndexes, getSelectableLeftIndexes]);
 
   const startMarqueeSelection = useCallback((side, event) => {
     if (event.button !== 0) return;
     if (dragState) return;
-    if (event.target?.closest?.('.print-selection-tile, button, a, input, textarea, select, summary')) return;
+    if (event.target?.closest?.('.print-selection-tile, .print-selection-document-header, button, a, input, textarea, select, summary')) return;
 
     const panelNode = event.currentTarget;
     if (!(panelNode instanceof HTMLElement)) return;
@@ -610,16 +784,12 @@ const PrintSelectionWorkspace = ({
     panelNode.addEventListener('pointercancel', done);
   }, [dragState, selectTilesInRect]);
 
-  const getRightDropIntentFromEvent = useCallback((event) => {
+  const getPageDropIntentFromTiles = useCallback((event, tileNodes, fallbackIndex = 0) => {
     const panelNode = rightPanelRef.current;
-    const gridNode = rightGridRef.current;
-    if (!panelNode || !gridNode) {
-      return { index: draftIndexes.length, markerStyle: null };
-    }
+    if (!panelNode) return null;
 
     const panelRect = panelNode.getBoundingClientRect();
-    const tileNodes = Array.from(gridNode.querySelectorAll('.print-selection-tile[data-print-order-index]'));
-    const metrics = tileNodes
+    const metrics = Array.from(tileNodes || [])
       .map((tileNode) => {
         const stageNode = tileNode.querySelector('.print-selection-tile-stage') || tileNode;
         const orderIndex = Math.max(0, Math.floor(Number(tileNode.getAttribute('data-print-order-index')) || 0));
@@ -641,14 +811,10 @@ const PrintSelectionWorkspace = ({
     });
 
     if (metrics.length <= 0) {
-      const gridRect = gridNode.getBoundingClientRect();
       return {
-        index: 0,
-        markerStyle: {
-          left: Math.round(gridRect.left - panelRect.left + panelNode.scrollLeft + 8),
-          top: Math.round(gridRect.top - panelRect.top + panelNode.scrollTop + 8),
-          height: Math.round(thumbSize * 1.36),
-        },
+        type: 'page',
+        index: fallbackIndex,
+        markerStyle: null,
       };
     }
 
@@ -687,6 +853,7 @@ const PrintSelectionWorkspace = ({
     const last = items[items.length - 1];
     if (clientX <= first.centerX) {
       return {
+        type: 'page',
         index: first.orderIndex,
         markerStyle: markerStyleFromRect(first.rect, first.rect.left - 7),
       };
@@ -698,6 +865,7 @@ const PrintSelectionWorkspace = ({
       const midpoint = current.centerX + ((next.centerX - current.centerX) / 2);
       if (clientX <= midpoint) {
         return {
+          type: 'page',
           index: current.orderIndex + 1,
           markerStyle: markerStyleFromRect(current.rect, (current.rect.right + next.rect.left) / 2),
         };
@@ -705,23 +873,131 @@ const PrintSelectionWorkspace = ({
     }
 
     return {
+      type: 'page',
       index: last.orderIndex + 1,
       markerStyle: markerStyleFromRect(last.rect, last.rect.right + 7),
     };
-  }, [draftIndexes.length, thumbSize]);
+  }, []);
+
+  const getFlatRightDropIntentFromEvent = useCallback((event) => {
+    const gridNode = rightGridRef.current;
+    if (!gridNode) return { type: 'page', index: draftIndexes.length, markerStyle: null };
+    return getPageDropIntentFromTiles(
+      event,
+      gridNode.querySelectorAll('.print-selection-tile[data-print-order-index]'),
+      draftIndexes.length
+    );
+  }, [draftIndexes.length, getPageDropIntentFromTiles]);
+
+  const getDocumentDropMarkerStyle = useCallback((sectionNode, placement) => {
+    const panelNode = rightPanelRef.current;
+    if (!panelNode || !(sectionNode instanceof HTMLElement)) return null;
+    const panelRect = panelNode.getBoundingClientRect();
+    const sectionRect = sectionNode.getBoundingClientRect();
+    return {
+      left: 12,
+      top: Math.round((placement === 'after' ? sectionRect.bottom : sectionRect.top) - panelRect.top + panelNode.scrollTop),
+      width: Math.max(44, Math.round(panelRect.width - 24)),
+    };
+  }, []);
+
+  const getDocumentModeDropIntentFromEvent = useCallback((event) => {
+    const panelNode = rightPanelRef.current;
+    if (!panelNode || !dragState) return null;
+    const sectionNodes = Array.from(panelNode.querySelectorAll('.print-selection-document-group-right[data-document-key]'));
+
+    if (dragState.kind === 'document') {
+      if (sectionNodes.length <= 0) return null;
+      const clientY = Number(event?.clientY) || 0;
+      let targetSection = sectionNodes[sectionNodes.length - 1];
+      let placement = 'after';
+      for (const sectionNode of sectionNodes) {
+        const rect = sectionNode.getBoundingClientRect();
+        if (clientY <= rect.top + (rect.height / 2)) {
+          targetSection = sectionNode;
+          placement = 'before';
+          break;
+        }
+      }
+      const targetDocumentKey = targetSection.getAttribute('data-document-key') || '';
+      if (targetDocumentKey === dragState.documentKey) return null;
+      return {
+        type: 'document',
+        targetDocumentKey,
+        placement,
+        markerStyle: getDocumentDropMarkerStyle(targetSection, placement),
+      };
+    }
+
+    const sourceDocumentKey = dragState.documentKey || '';
+    const sectionNode = event.target?.closest?.('.print-selection-document-group-right[data-document-key]');
+    if (sectionNode) {
+      const targetDocumentKey = sectionNode.getAttribute('data-document-key') || '';
+      if (targetDocumentKey !== sourceDocumentKey) return null;
+      const tileNodes = sectionNode.querySelectorAll('.print-selection-tile[data-print-order-index]');
+      const fallbackIndex = draftIndexes.findIndex((index) => getDocumentKeyForIndex(index, itemByIndex) === sourceDocumentKey);
+      return getPageDropIntentFromTiles(event, tileNodes, Math.max(0, fallbackIndex));
+    }
+
+    const sourceExistsInDraft = draftIndexes.some((index) => getDocumentKeyForIndex(index, itemByIndex) === sourceDocumentKey);
+    if (dragState.side === 'left' && !sourceExistsInDraft) {
+      return { type: 'page', index: draftIndexes.length, markerStyle: null };
+    }
+    return null;
+  }, [draftIndexes, dragState, getDocumentDropMarkerStyle, getPageDropIntentFromTiles, itemByIndex]);
 
   const handleRightDragOver = useCallback((event) => {
     if (!dragState) return;
+    const intent = workspaceModeIsDocuments
+      ? getDocumentModeDropIntentFromEvent(event)
+      : getFlatRightDropIntentFromEvent(event);
+    if (!intent) {
+      setRightDropIntent(null);
+      if (event.dataTransfer) event.dataTransfer.dropEffect = 'none';
+      return;
+    }
     event.preventDefault();
     if (event.dataTransfer) event.dataTransfer.dropEffect = dragState.side === 'right' ? 'move' : 'copy';
-    const intent = getRightDropIntentFromEvent(event);
-    setRightDropIndex(intent.index);
-    setRightDropMarkerStyle(intent.markerStyle);
-  }, [dragState, getRightDropIntentFromEvent]);
+    setRightDropIntent(intent);
+  }, [dragState, getDocumentModeDropIntentFromEvent, getFlatRightDropIntentFromEvent, workspaceModeIsDocuments]);
 
   const handleRightDrop = useCallback((event) => {
-    dropOnRight(event, rightDropIndex ?? getRightDropIntentFromEvent(event).index);
-  }, [dropOnRight, getRightDropIntentFromEvent, rightDropIndex]);
+    if (!dragState) return;
+    const intent = rightDropIntent
+      || (workspaceModeIsDocuments ? getDocumentModeDropIntentFromEvent(event) : getFlatRightDropIntentFromEvent(event));
+    if (!intent) {
+      clearDrag();
+      return;
+    }
+
+    event.preventDefault();
+    if (workspaceModeIsDocuments && intent.type === 'document' && dragState.kind === 'document') {
+      applyDraftChange((current) => moveDocumentBlock(
+        current,
+        dragState.documentKey,
+        intent.targetDocumentKey,
+        intent.placement,
+        itemByIndex
+      ));
+    } else if (intent.type === 'page') {
+      if (dragState.side === 'right') {
+        applyDraftChange((current) => moveWithinSequence(current, dragState.indexes, intent.index));
+      } else {
+        addIndexes(dragState.indexes, intent.index);
+      }
+    }
+    clearDrag();
+  }, [
+    addIndexes,
+    applyDraftChange,
+    clearDrag,
+    dragState,
+    getDocumentModeDropIntentFromEvent,
+    getFlatRightDropIntentFromEvent,
+    itemByIndex,
+    rightDropIntent,
+    workspaceModeIsDocuments,
+  ]);
 
   const cancel = useCallback(() => {
     if (isDirty) {
@@ -738,12 +1014,20 @@ const PrintSelectionWorkspace = ({
     onCommit?.(draftIndexes.map((index) => index + 1));
   }, [draftIndexes, onCommit]);
 
-  const changeWorkspaceMode = useCallback((event) => {
-    const nextMode = String(event?.target?.value || 'pages');
-    setWorkspaceMode(nextMode === 'documents' ? 'documents' : 'pages');
+  const changeWorkspaceMode = useCallback((nextMode) => {
+    const normalizedMode = String(nextMode || 'documents') === 'pages' ? 'pages' : 'documents';
+    if (normalizedMode === workspaceMode) return;
+    if (normalizedMode === 'documents' && !documentModeCompatible) {
+      const reset = window.confirm(t('printSelectionWorkspace.documentModeResetConfirm', {
+        defaultValue: 'The current page order crosses document boundaries. Reset to the original document/page order and switch to document mode?',
+      }));
+      if (!reset) return;
+      applyDraftChange(naturalIndexes);
+    }
+    setWorkspaceMode(normalizedMode);
     setLeftSelected([]);
     setRightSelected([]);
-  }, []);
+  }, [applyDraftChange, documentModeCompatible, naturalIndexes, t, workspaceMode]);
 
   const openLightbox = useCallback((originalIndex, event) => {
     event?.preventDefault?.();
@@ -830,12 +1114,13 @@ const PrintSelectionWorkspace = ({
     const disabled = side === 'left' && included;
     const pulsing = pulseIndex === originalIndex;
     const draggingSource = dragState?.side === side && dragState.indexes.includes(originalIndex);
+    const warningLevel = side === 'right' ? draftWarningMap.get(originalIndex) || '' : '';
     const contextPageNumber = side === 'right' && orderIndex >= 0 ? orderIndex + 1 : item.pageNumber;
     const documentPageNumber = getDocumentPageNumber(item);
     const documentPageCount = getDocumentPageCount(item);
     const documentFraction = formatMetricFraction(item.documentNumber, item.totalDocuments);
     const documentPageFraction = formatMetricFraction(documentPageNumber, documentPageCount);
-    const title = side === 'left' && included
+    const baseTitle = side === 'left' && included
       ? t('printSelectionWorkspace.alreadyIncluded', { page: item.pageNumber, defaultValue: `Page ${item.pageNumber} is already included in the print selection.` })
       : side === 'right'
         ? t('printSelectionWorkspace.printPageTitle', {
@@ -851,6 +1136,16 @@ const PrintSelectionWorkspace = ({
             documentPage: documentPageNumber,
             defaultValue: `Source page ${item.pageNumber}. Document ${item.documentNumber}, document page ${documentPageNumber}.`,
           });
+    const warningTitle = warningLevel === 'document-boundary'
+      ? t('printSelectionWorkspace.documentBoundaryWarning', {
+          defaultValue: 'This page crosses document boundaries in the draft order.',
+        })
+      : warningLevel === 'page-order'
+        ? t('printSelectionWorkspace.pageOrderWarning', {
+            defaultValue: 'This page is out of the original order within its document.',
+          })
+        : '';
+    const title = warningTitle ? `${baseTitle} ${warningTitle}` : baseTitle;
     const metricBadges = [
       {
         key: 'context-page',
@@ -926,6 +1221,8 @@ const PrintSelectionWorkspace = ({
           disabled ? 'is-included' : '',
           draggingSource ? 'is-dragging-source' : '',
           pulsing ? 'is-pulsing' : '',
+          warningLevel === 'page-order' ? 'has-order-warning' : '',
+          warningLevel === 'document-boundary' ? 'has-boundary-warning' : '',
         ].filter(Boolean).join(' ')}
         style={{ '--print-selection-thumb-size': `${thumbSize}px` }}
         title={title}
@@ -980,6 +1277,7 @@ const PrintSelectionWorkspace = ({
     clearDrag,
     dragState,
     draftSet,
+    draftWarningMap,
     leftSelectedSet,
     openLightbox,
     pulseIndex,
@@ -1008,24 +1306,27 @@ const PrintSelectionWorkspace = ({
       onKeyDownCapture={handleWorkspaceKeyDownCapture}
     >
       <div className="print-selection-workspace-header">
-        <div>
-          <h2>{t('printSelectionWorkspace.title', { defaultValue: 'Print selection' })}</h2>
-          <p>
-            {t('printSelectionWorkspace.subtitle', {
-              selected: draftIndexes.length,
-              total: totalPages,
-              defaultValue: `${draftIndexes.length} of ${totalPages} pages selected for printing.`,
-            })}
-          </p>
+        <div className="print-selection-mode-toggle" aria-label={t('printSelectionWorkspace.modeLabel', { defaultValue: 'Mode' })}>
+          <label title={t('printSelectionWorkspace.documentModeTitle', { defaultValue: 'Respect document boundaries' })}>
+            <input
+              type="radio"
+              name="print-selection-workspace-mode"
+              checked={workspaceMode === 'documents'}
+              onChange={() => changeWorkspaceMode('documents')}
+            />
+            <span>{t('printSelectionWorkspace.documentMode', { defaultValue: 'Documents' })}</span>
+          </label>
+          <label title={t('printSelectionWorkspace.pageModeTitle', { defaultValue: 'Free page placement' })}>
+            <input
+              type="radio"
+              name="print-selection-workspace-mode"
+              checked={workspaceMode === 'pages'}
+              onChange={() => changeWorkspaceMode('pages')}
+            />
+            <span>{t('printSelectionWorkspace.pageMode', { defaultValue: 'Pages' })}</span>
+          </label>
         </div>
         <div className="print-selection-workspace-actions">
-          <label className="print-selection-mode-control">
-            <span>{t('printSelectionWorkspace.modeLabel', { defaultValue: 'Mode' })}</span>
-            <select value={workspaceMode} onChange={changeWorkspaceMode}>
-              <option value="pages">{t('printSelectionWorkspace.pageMode', { defaultValue: 'Pages' })}</option>
-              <option value="documents">{t('printSelectionWorkspace.documentMode', { defaultValue: 'Documents' })}</option>
-            </select>
-          </label>
           <div className="print-selection-panel-mode-actions" aria-label={t('printSelectionWorkspace.panelModeLabel', { defaultValue: 'Panel layout' })}>
             <button
               type="button"
@@ -1054,6 +1355,13 @@ const PrintSelectionWorkspace = ({
             >
               <span className="material-icons" aria-hidden="true">align_horizontal_right</span>
             </button>
+          </div>
+          <div className="print-selection-workspace-status" role="status">
+            {t('printSelectionWorkspace.subtitle', {
+              selected: draftIndexes.length,
+              total: totalPages,
+              defaultValue: `${draftIndexes.length} of ${totalPages} pages selected for printing.`,
+            })}
           </div>
           <button
             type="button"
@@ -1206,16 +1514,40 @@ const PrintSelectionWorkspace = ({
               onDragOver={handleRightDragOver}
               onDrop={handleRightDrop}
             >
-              <div ref={rightGridRef} className="print-selection-grid">
-                {draftIndexes.map((originalIndex, orderIndex) => {
-                  const item = itemByIndex.get(originalIndex);
-                  return item ? renderTile(item, 'right', orderIndex) : null;
-                })}
-              </div>
-              {rightDropMarkerStyle ? (
+              {workspaceModeIsDocuments ? (
+                draftDocumentGroups.map((group) => (
+                  <section
+                    key={group.blockKey}
+                    className="print-selection-document-group print-selection-document-group-right"
+                    data-document-key={group.key}
+                  >
+                    <div
+                      className="print-selection-document-header print-selection-document-header-draggable"
+                      draggable
+                      onDragStart={(event) => startDocumentDrag(group.key, event)}
+                      onDragEnd={clearDrag}
+                      title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
+                    >
+                      <span>{group.header}</span>
+                      <span>{t('printSelectionWorkspace.documentPageCount', { count: group.pages.length, defaultValue: `${group.pages.length} pages` })}</span>
+                    </div>
+                    <div className="print-selection-grid">
+                      {group.pages.map(({ item, orderIndex }) => renderTile(item, 'right', orderIndex))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <div ref={rightGridRef} className="print-selection-grid">
+                  {draftIndexes.map((originalIndex, orderIndex) => {
+                    const item = itemByIndex.get(originalIndex);
+                    return item ? renderTile(item, 'right', orderIndex) : null;
+                  })}
+                </div>
+              )}
+              {rightDropIntent?.markerStyle ? (
                 <span
-                  className="print-selection-drop-marker"
-                  style={rightDropMarkerStyle}
+                  className={`print-selection-drop-marker ${rightDropIntent.type === 'document' ? 'is-document-marker' : ''}`}
+                  style={rightDropIntent.markerStyle}
                   aria-hidden="true"
                 />
               ) : null}

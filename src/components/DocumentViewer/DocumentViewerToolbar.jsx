@@ -88,10 +88,6 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean=} printSelectionWorkspaceActive
  * @property {boolean=} canOpenPrintSelectionWorkspace
  * @property {function(): void=} openPrintSelectionWorkspace
- * @property {number=} printSelectionZoomPercent
- * @property {function(): void=} increasePrintSelectionZoom
- * @property {function(): void=} decreasePrintSelectionZoom
- * @property {function(number): void=} setPrintSelectionZoomFromPercent
  * @property {number} sessionTotalPages
  * @property {Object|null} bundle
  * @property {Array<*>} allPages
@@ -188,10 +184,6 @@ const DocumentViewerToolbar = ({
   printSelectionWorkspaceActive = false,
   canOpenPrintSelectionWorkspace = false,
   openPrintSelectionWorkspace,
-  printSelectionZoomPercent = 120,
-  increasePrintSelectionZoom,
-  decreasePrintSelectionZoom,
-  setPrintSelectionZoomFromPercent,
   sessionTotalPages,
   bundle,
   allPages,
@@ -258,10 +250,6 @@ const DocumentViewerToolbar = ({
       printSelectionWorkspaceActive={printSelectionWorkspaceActive}
       canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
       openPrintSelectionWorkspace={openPrintSelectionWorkspace}
-      printSelectionZoomPercent={printSelectionZoomPercent}
-      increasePrintSelectionZoom={increasePrintSelectionZoom}
-      decreasePrintSelectionZoom={decreasePrintSelectionZoom}
-      setPrintSelectionZoomFromPercent={setPrintSelectionZoomFromPercent}
       sessionTotalPages={sessionTotalPages}
       bundle={bundle || null}
       allPages={allPages || []}
@@ -370,10 +358,6 @@ DocumentViewerToolbar.propTypes = {
   printSelectionWorkspaceActive: PropTypes.bool,
   canOpenPrintSelectionWorkspace: PropTypes.bool,
   openPrintSelectionWorkspace: PropTypes.func,
-  printSelectionZoomPercent: PropTypes.number,
-  increasePrintSelectionZoom: PropTypes.func,
-  decreasePrintSelectionZoom: PropTypes.func,
-  setPrintSelectionZoomFromPercent: PropTypes.func,
   sessionTotalPages: PropTypes.number.isRequired,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),
