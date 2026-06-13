@@ -172,7 +172,7 @@ const DocumentViewer = () => {
 
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
-  const [printSelectionZoomPercent, setPrintSelectionZoomPercent] = useState(120);
+  const [printSelectionZoomPercent] = useState(120);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
   const edgeScrollPageTurnConfig = useMemo(() => getViewerEdgeScrollPageTurnConfig(getRuntimeConfig()), []);
   const printSelectionWorkspaceConfig = useMemo(() => getPrintSelectionWorkspaceConfig(getRuntimeConfig()), []);
@@ -312,18 +312,6 @@ const DocumentViewer = () => {
   const nextPageDisabled = pageNumber >= totalPages;
   const firstPageDisabled = pageNumber <= 1;
   const lastPageDisabled = pageNumber >= totalPages;
-  const increasePrintSelectionZoom = useCallback(() => {
-    setPrintSelectionZoomPercent((current) => Math.min(260, Math.round((Number(current) || 120) + 10)));
-  }, []);
-  const decreasePrintSelectionZoom = useCallback(() => {
-    setPrintSelectionZoomPercent((current) => Math.max(50, Math.round((Number(current) || 120) - 10)));
-  }, []);
-  const setPrintSelectionZoomFromPercent = useCallback((percent) => {
-    const next = Math.round(Number(percent));
-    if (!Number.isFinite(next)) return;
-    setPrintSelectionZoomPercent(Math.max(50, Math.min(260, next)));
-  }, []);
-
   logger.debug('Rendering DocumentViewer', {
     totalSessionPages: Array.isArray(allPages) ? allPages.length : 0,
     totalVisiblePages: totalPages,
@@ -407,10 +395,6 @@ const DocumentViewer = () => {
         printSelectionWorkspaceActive={printSelectionWorkspaceOpen}
         canOpenPrintSelectionWorkspace={canOpenPrintSelectionWorkspace}
         openPrintSelectionWorkspace={openPrintSelectionWorkspace}
-        printSelectionZoomPercent={printSelectionZoomPercent}
-        increasePrintSelectionZoom={increasePrintSelectionZoom}
-        decreasePrintSelectionZoom={decreasePrintSelectionZoom}
-        setPrintSelectionZoomFromPercent={setPrintSelectionZoomFromPercent}
         sessionTotalPages={totalPagesDisplay}
         bundle={bundle || null}
         allPages={allPages || []}
