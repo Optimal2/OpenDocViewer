@@ -30,6 +30,7 @@
 }
 
 .print-selection-workspace {
+  position: relative;
   display: flex;
   flex: 1 1 auto;
   flex-direction: column;
@@ -70,6 +71,67 @@
   align-items: center;
   gap: 8px;
   flex-shrink: 0;
+}
+
+.print-selection-mode-control {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-height: 34px;
+  color: var(--muted-text-color);
+  font-size: 0.82rem;
+  white-space: nowrap;
+}
+
+.print-selection-mode-control select {
+  min-height: 34px;
+  padding: 0 28px 0 10px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--button-background, var(--background-color));
+  color: var(--text-color);
+  font: inherit;
+}
+
+.print-selection-panel-mode-actions {
+  display: inline-flex;
+  align-items: center;
+  overflow: hidden;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--button-background, var(--background-color));
+}
+
+.print-selection-panel-mode-actions > button {
+  display: grid;
+  place-items: center;
+  width: 34px;
+  height: 32px;
+  border: 0;
+  border-left: 1px solid var(--border-color);
+  background: transparent;
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.print-selection-panel-mode-actions > button:first-child {
+  border-left: 0;
+}
+
+.print-selection-panel-mode-actions > button:hover,
+.print-selection-panel-mode-actions > button:focus-visible {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
+  color: var(--primary-color);
+  outline: none;
+}
+
+.print-selection-panel-mode-actions > button.is-active {
+  background: var(--primary-color);
+  color: var(--primary-contrast-color, #fff);
+}
+
+.print-selection-panel-mode-actions .material-icons {
+  font-size: 19px;
 }
 
 .print-selection-history-action {
@@ -117,6 +179,17 @@
   min-height: 0;
   gap: 0;
   overflow: hidden;
+}
+
+.print-selection-workspace-body.is-panel-mode-left,
+.print-selection-workspace-body.is-panel-mode-right {
+  grid-template-columns: minmax(0, 1fr);
+}
+
+.print-selection-workspace-body.is-panel-mode-left .print-selection-panel,
+.print-selection-workspace-body.is-panel-mode-right .print-selection-panel {
+  border-right: 0;
+  border-left: 0;
 }
 
 .print-selection-panel {
@@ -250,6 +323,41 @@
   overflow: hidden;
 }
 
+.print-selection-tile-preview {
+  position: absolute;
+  top: 4px;
+  right: 4px;
+  z-index: 5;
+  display: grid;
+  place-items: center;
+  width: 24px;
+  height: 24px;
+  padding: 0;
+  border: 1px solid rgba(255, 255, 255, 0.76);
+  border-radius: 999px;
+  background: rgba(15, 23, 42, 0.72);
+  color: #fff;
+  cursor: pointer;
+  opacity: 0;
+  transition: opacity 120ms ease, background-color 120ms ease, transform 120ms ease;
+}
+
+.print-selection-tile:hover .print-selection-tile-preview,
+.print-selection-tile:focus-within .print-selection-tile-preview {
+  opacity: 1;
+}
+
+.print-selection-tile-preview:hover,
+.print-selection-tile-preview:focus-visible {
+  background: var(--primary-color);
+  outline: none;
+  transform: scale(1.04);
+}
+
+.print-selection-tile-preview .material-icons {
+  font-size: 15px;
+}
+
 .print-selection-metric-badge {
   position: absolute;
   z-index: 2;
@@ -319,6 +427,7 @@
 .print-selection-included-overlay {
   background: color-mix(in srgb, var(--primary-color) 24%, transparent 76%);
   color: var(--primary-color);
+  pointer-events: none;
 }
 
 .print-selection-included-overlay .material-icons {
@@ -339,6 +448,17 @@
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color) 20%, transparent 80%);
   pointer-events: none;
   transform: translateX(-50%);
+}
+
+.print-selection-marquee {
+  position: absolute;
+  z-index: 8;
+  display: block;
+  border: 2px solid var(--primary-color);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--primary-color) 16%, transparent 84%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--primary-color) 20%, transparent 80%);
+  pointer-events: none;
 }
 
 .print-selection-transfer-column {
@@ -420,6 +540,92 @@
   margin: 24px auto;
   color: var(--muted-text-color);
   text-align: center;
+}
+
+.print-selection-lightbox {
+  position: absolute;
+  inset: 0;
+  z-index: 80;
+  display: flex;
+  flex-direction: column;
+  background: color-mix(in srgb, var(--background-color) 90%, #000 10%);
+  color: var(--text-color);
+}
+
+.print-selection-lightbox-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  min-height: 54px;
+  padding: 10px 16px;
+  border-bottom: 1px solid var(--border-color);
+  background: var(--toolbar-background, var(--background-color));
+}
+
+.print-selection-lightbox-toolbar > div {
+  display: flex;
+  min-width: 0;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.print-selection-lightbox-toolbar span {
+  color: var(--muted-text-color);
+  font-size: 0.82rem;
+}
+
+.print-selection-lightbox-toolbar button,
+.print-selection-lightbox-step {
+  display: grid;
+  place-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  background: var(--button-background, var(--background-color));
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.print-selection-lightbox-toolbar button {
+  width: 36px;
+  height: 36px;
+}
+
+.print-selection-lightbox-body {
+  display: grid;
+  grid-template-columns: 56px minmax(0, 1fr) 56px;
+  flex: 1 1 auto;
+  min-height: 0;
+  gap: 12px;
+  padding: 16px;
+}
+
+.print-selection-lightbox-step {
+  align-self: center;
+  width: 44px;
+  height: 68px;
+}
+
+.print-selection-lightbox-step:disabled {
+  opacity: 0.4;
+  cursor: default;
+}
+
+.print-selection-lightbox-image {
+  display: grid;
+  min-width: 0;
+  min-height: 0;
+  place-items: center;
+  overflow: auto;
+}
+
+.print-selection-lightbox-image img {
+  display: block;
+  max-width: 100%;
+  max-height: 100%;
+  object-fit: contain;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.28);
 }
 
 .toolbar--selection-workspace .toolbar-selection-workspace-status {

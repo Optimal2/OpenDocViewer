@@ -1,4 +1,11 @@
 {
+  "common": {
+    "cancel": "Avbryt",
+    "ok": "OK",
+    "close": "Stäng",
+    "previous": "Föregående",
+    "next": "Nästa"
+  },
   "toolbar": {
     "print": "Skriv ut",
     "zoomIn": "Zooma in",
@@ -329,6 +336,16 @@
     "undoTitle": "Ångra den senaste ändringen i utskriftsurvalet.",
     "redo": "Gör om",
     "redoTitle": "Gör om den senast ångrade ändringen i utskriftsurvalet.",
+    "modeLabel": "Läge",
+    "pageMode": "Fria sidor",
+    "documentMode": "Dokument",
+    "panelModeLabel": "Panellayout",
+    "showBothPanels": "Visa båda panelerna",
+    "showLeftPanel": "Visa källöversikt",
+    "showRightPanel": "Visa valda sidor",
+    "previewPage": "Visa sida",
+    "previewDialog": "Sidförhandsvisning",
+    "previewContext": "Sida {page} av {total}. Dokument {document}, dokumentsida {documentPage}.",
     "alreadyIncluded": "Sida {page} ingår redan i utskriftsurvalet.",
     "pageTitle": "Sida {page}",
     "pageLabel": "Sida {page}",
