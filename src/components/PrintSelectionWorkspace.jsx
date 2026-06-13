@@ -518,6 +518,11 @@ const PrintSelectionWorkspace = ({
     () => normalizeIndexSequence(initialSequence, totalPages),
     [initialSequence, totalPages]
   );
+  const initialIndexesSignature = useMemo(
+    () => initialIndexes.join(','),
+    [initialIndexes]
+  );
+  const previousInitialIndexesSignatureRef = useRef(initialIndexesSignature);
 
   const [draftIndexes, setDraftIndexes] = useState(initialIndexes);
   const [leftSelected, setLeftSelected] = useState([]);
@@ -538,11 +543,13 @@ const PrintSelectionWorkspace = ({
   const rightGridRef = useRef(null);
 
   useEffect(() => {
+    if (previousInitialIndexesSignatureRef.current === initialIndexesSignature) return;
+    previousInitialIndexesSignatureRef.current = initialIndexesSignature;
     setDraftIndexes(initialIndexes);
     setLeftSelected([]);
     setRightSelected([]);
     setDraftHistory({ undo: null, redo: null });
-  }, [initialIndexes]);
+  }, [initialIndexes, initialIndexesSignature]);
 
   const draftSet = useMemo(() => new Set(draftIndexes), [draftIndexes]);
   const leftSelectedSet = useMemo(() => new Set(leftSelected), [leftSelected]);
