@@ -439,13 +439,13 @@
 
 .print-selection-tile-preview {
   position: absolute;
-  top: 4px;
-  right: 4px;
+  top: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px);
+  right: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 4px);
   z-index: 5;
   display: grid;
   place-items: center;
-  width: 24px;
-  height: 24px;
+  width: clamp(18px, calc(var(--print-selection-thumb-size, 92px) / 3.85), 26px);
+  height: clamp(18px, calc(var(--print-selection-thumb-size, 92px) / 3.85), 26px);
   padding: 0;
   border: 1px solid rgba(255, 255, 255, 0.76);
   border-radius: 999px;
@@ -469,7 +469,7 @@
 }
 
 .print-selection-tile-preview .material-icons {
-  font-size: 15px;
+  font-size: clamp(12px, calc(var(--print-selection-thumb-size, 92px) / 6.25), 16px);
 }
 
 .print-selection-metric-badge {
@@ -478,32 +478,32 @@
   display: inline-flex;
   align-items: center;
   gap: 2px;
-  min-width: 26px;
-  max-width: calc(100% - 8px);
-  height: 22px;
-  padding: 0 7px;
+  min-width: clamp(18px, calc(var(--print-selection-thumb-size, 92px) / 4.2), 30px);
+  max-width: calc(100% - clamp(4px, calc(var(--print-selection-thumb-size, 92px) / 11), 10px));
+  height: clamp(16px, calc(var(--print-selection-thumb-size, 92px) / 4.55), 24px);
+  padding: 0 clamp(5px, calc(var(--print-selection-thumb-size, 92px) / 13.3), 8px);
   border: 1px solid rgba(255, 255, 255, 0.72);
   border-radius: 999px;
   background: rgba(15, 23, 42, 0.8);
   color: #fff;
-  font-size: 0.78rem;
+  font-size: clamp(9px, calc(var(--print-selection-thumb-size, 92px) / 7.2), 13px);
   font-weight: 700;
   line-height: 1;
 }
 
 .print-selection-metric-badge.position-top-left {
-  top: 4px;
-  left: 4px;
+  top: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
+  left: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
 }
 
 .print-selection-metric-badge.position-bottom-left {
-  bottom: 4px;
-  left: 4px;
+  bottom: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
+  left: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
 }
 
 .print-selection-metric-badge.position-bottom-right {
-  right: 4px;
-  bottom: 4px;
+  right: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
+  bottom: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
 }
 
 .print-selection-metric-badge-prefix {
@@ -671,67 +671,84 @@
 }
 
 .print-selection-lightbox {
-  position: absolute;
+  position: fixed;
   inset: 0;
-  z-index: 80;
-  display: flex;
-  flex-direction: column;
-  background: color-mix(in srgb, var(--background-color) 90%, #000 10%);
+  z-index: 5000;
+  display: grid;
+  width: 100vw;
+  height: 100vh;
+  background: color-mix(in srgb, var(--background-color) 80%, #000 20%);
   color: var(--text-color);
 }
 
-.print-selection-lightbox-toolbar {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-  min-height: 54px;
-  padding: 10px 16px;
-  border-bottom: 1px solid var(--border-color);
-  background: var(--toolbar-background, var(--background-color));
+.print-selection-lightbox-info {
+  position: absolute;
+  top: 14px;
+  left: 14px;
+  z-index: 2;
+  max-width: min(560px, calc(100vw - 96px));
+  padding: 8px 12px;
+  border: 1px solid color-mix(in srgb, var(--border-color) 72%, transparent 28%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--background-color) 86%, transparent 14%);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.22);
+  color: var(--text-color);
+  font-size: 0.84rem;
+  font-weight: 700;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  backdrop-filter: blur(10px);
 }
 
-.print-selection-lightbox-toolbar > div {
-  display: flex;
-  min-width: 0;
-  flex-direction: column;
-  gap: 2px;
-}
-
-.print-selection-lightbox-toolbar span {
-  color: var(--muted-text-color);
-  font-size: 0.82rem;
-}
-
-.print-selection-lightbox-toolbar button,
+.print-selection-lightbox-close,
 .print-selection-lightbox-step {
   display: grid;
   place-items: center;
   border: 1px solid var(--border-color);
-  border-radius: 6px;
-  background: var(--button-background, var(--background-color));
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--background-color) 88%, transparent 12%);
   color: var(--text-color);
+  box-shadow: 0 8px 22px rgba(15, 23, 42, 0.24);
   cursor: pointer;
+  backdrop-filter: blur(10px);
 }
 
-.print-selection-lightbox-toolbar button {
-  width: 36px;
-  height: 36px;
+.print-selection-lightbox-close {
+  position: absolute;
+  top: 14px;
+  right: 14px;
+  z-index: 3;
+  width: 42px;
+  height: 42px;
+}
+
+.print-selection-lightbox-close:hover,
+.print-selection-lightbox-close:focus-visible,
+.print-selection-lightbox-step:hover,
+.print-selection-lightbox-step:focus-visible {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 16%, var(--background-color) 84%);
+  color: var(--primary-color);
+  outline: none;
 }
 
 .print-selection-lightbox-body {
   display: grid;
-  grid-template-columns: 56px minmax(0, 1fr) 56px;
-  flex: 1 1 auto;
+  grid-template-columns: 64px minmax(0, 1fr) 64px;
+  width: 100%;
+  height: 100%;
   min-height: 0;
-  gap: 12px;
-  padding: 16px;
+  gap: 16px;
+  padding: 18px 22px;
+  box-sizing: border-box;
 }
 
 .print-selection-lightbox-step {
   align-self: center;
-  width: 44px;
-  height: 68px;
+  width: 52px;
+  height: 84px;
+  border-radius: 999px;
 }
 
 .print-selection-lightbox-step:disabled {
@@ -745,6 +762,7 @@
   min-height: 0;
   place-items: center;
   overflow: auto;
+  padding: 0;
 }
 
 .print-selection-lightbox-image img {

@@ -762,3 +762,60 @@
   .odv-status-led--pending,
   .odv-status-led--active { animation: none; }
 }
+
+.toolbar.toolbar--selection-workspace .print-selection-primary,
+.toolbar.toolbar--selection-workspace .print-selection-secondary {
+  min-height: 34px;
+  padding: 0 14px;
+  border: 1px solid var(--border-color);
+  border-radius: 6px;
+  box-shadow: none;
+  transform: none;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-secondary {
+  background-color: var(--button-background, transparent);
+  color: var(--text-color);
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-secondary:hover,
+.toolbar.toolbar--selection-workspace .print-selection-secondary:focus-visible {
+  background-color: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
+  color: var(--primary-color);
+  transform: none;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-cancel-action {
+  border-color: color-mix(in srgb, #dc2626 70%, var(--border-color) 30%);
+  background-color: color-mix(in srgb, #dc2626 18%, var(--button-background, var(--background-color)) 82%);
+  color: color-mix(in srgb, #dc2626 82%, var(--text-color) 18%);
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-cancel-action:hover,
+.toolbar.toolbar--selection-workspace .print-selection-cancel-action:focus-visible {
+  border-color: #dc2626;
+  background-color: #dc2626;
+  color: #fff;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-commit-action,
+.toolbar.toolbar--selection-workspace .print-selection-commit-action:hover,
+.toolbar.toolbar--selection-workspace .print-selection-commit-action:focus-visible {
+  border-color: #15803d;
+  background-color: #16a34a;
+  color: #fff;
+  transform: none;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-commit-action:hover,
+.toolbar.toolbar--selection-workspace .print-selection-commit-action:focus-visible {
+  background-color: #15803d;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-primary:disabled,
+.toolbar.toolbar--selection-workspace .print-selection-secondary:disabled {
+  background-color: var(--disabled-color);
+  color: color-mix(in srgb, var(--text-color) 52%, transparent 48%);
+  opacity: 0.72;
+  cursor: not-allowed;
+}
