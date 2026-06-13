@@ -39,6 +39,8 @@
   background: var(--background-color);
   color: var(--text-color);
   overflow: hidden;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .print-selection-workspace-header {
@@ -369,6 +371,8 @@
   background: var(--button-background, var(--background-color));
   color: var(--text-color);
   cursor: pointer;
+  -webkit-user-select: none;
+  user-select: none;
 }
 
 .print-selection-transfer-buttons > button:hover,
