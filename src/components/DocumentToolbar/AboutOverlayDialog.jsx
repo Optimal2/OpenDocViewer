@@ -9,6 +9,8 @@ import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import { collectSupportDiagnostics, downloadJsonFile, loadLatestPdfBenchmarkResult, loadLatestRenderDecodeBenchmarkResult } from '../../utils/supportDiagnostics.js';
 
+const I18N_VERSION_STORAGE_KEY = 'ODV_I18N_VERSION';
+
 /**
  * @returns {{ version:string, buildId:string, githubUrl:string, contactEmail:string }}
  */
@@ -49,13 +51,14 @@ export default function AboutOverlayDialog({
   renderBenchmarkEnabled = false,
   onRunRenderBenchmark,
 }) {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const aboutInfo = useMemo(() => resolveAboutInfo(), []);
   const [latestBenchmark, setLatestBenchmark] = useState(() => loadLatestPdfBenchmarkResult());
   const [latestRenderBenchmark, setLatestRenderBenchmark] = useState(() => loadLatestRenderDecodeBenchmarkResult());
   const [benchmarkState, setBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
   const [renderBenchmarkState, setRenderBenchmarkState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
+  const [resourceReloadState, setResourceReloadState] = useState(/** @type {{status:string,message:string}} */ ({ status: 'idle', message: '' }));
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -90,6 +93,48 @@ export default function AboutOverlayDialog({
       latestRenderDecodeBenchmark: latestRenderBenchmark,
     }));
   }, [latestBenchmark, latestRenderBenchmark]);
+
+  const reloadResourceFiles = useCallback(async () => {
+    setResourceReloadState({
+      status: 'running',
+      message: t('about.resources.reloadRunning', { defaultValue: 'Reloading resource files…' }),
+    });
+
+    try {
+      const now = new Date();
+      const token = [
+        now.getFullYear(),
+        String(now.getMonth() + 1).padStart(2, '0'),
+        String(now.getDate()).padStart(2, '0'),
+        String(now.getHours()).padStart(2, '0'),
+        String(now.getMinutes()).padStart(2, '0'),
+        String(now.getSeconds()).padStart(2, '0'),
+      ].join('');
+
+      try {
+        window.localStorage.setItem(I18N_VERSION_STORAGE_KEY, token);
+      } catch {
+        // Resource reload still works in-memory when localStorage is unavailable.
+      }
+
+      const language = String(i18n?.resolvedLanguage || i18n?.language || 'en').toLowerCase().split('-')[0] || 'en';
+      await i18n.reloadResources([language], ['common']);
+      await i18n.changeLanguage(language);
+
+      setResourceReloadState({
+        status: 'done',
+        message: t('about.resources.reloadDone', { defaultValue: 'Resource files were reloaded.' }),
+      });
+    } catch (error) {
+      setResourceReloadState({
+        status: 'error',
+        message: t('about.resources.reloadError', {
+          error: String(error?.message || error),
+          defaultValue: `Resource reload failed: ${String(error?.message || error)}`,
+        }),
+      });
+    }
+  }, [i18n, t]);
 
   const downloadBenchmark = useCallback(() => {
     if (!latestBenchmark) return;
@@ -286,6 +331,16 @@ export default function AboutOverlayDialog({
           <details className="odv-about-diagnostics">
             <summary>{t('about.diagnostics.summary', { defaultValue: 'Diagnostics' })}</summary>
             <div className="odv-about-diagnostics-actions">
+              <button
+                type="button"
+                className="odv-help-close-button"
+                onClick={reloadResourceFiles}
+                disabled={resourceReloadState.status === 'running'}
+              >
+                {resourceReloadState.status === 'running'
+                  ? t('about.resources.reloadRunningShort', { defaultValue: 'Reloading…' })
+                  : t('about.resources.reload', { defaultValue: 'Reload resource files' })}
+              </button>
               <button type="button" className="odv-help-close-button" onClick={downloadDiagnostics}>
                 {t('about.diagnostics.download', { defaultValue: 'Download diagnostics JSON' })}
               </button>
@@ -334,6 +389,11 @@ export default function AboutOverlayDialog({
                 {renderBenchmarkState.message || renderBenchmarkSummary}
               </p>
             ) : null}
+            {resourceReloadState.message ? (
+              <p className={`odv-about-diagnostics-status is-${resourceReloadState.status}`}>
+                {resourceReloadState.message}
+              </p>
+            ) : null}
             <pre className="odv-about-diagnostics-json">
               {JSON.stringify({
                 app: diagnostics.app,
@@ -366,6 +426,23 @@ export default function AboutOverlayDialog({
         </div>
 
         <div className="odv-help-footer">
+          <div className="odv-help-footer-start">
+            <button
+              type="button"
+              className="odv-help-close-button"
+              onClick={reloadResourceFiles}
+              disabled={resourceReloadState.status === 'running'}
+            >
+              {resourceReloadState.status === 'running'
+                ? t('about.resources.reloadRunningShort', { defaultValue: 'Reloading…' })
+                : t('about.resources.reload', { defaultValue: 'Reload resource files' })}
+            </button>
+            {resourceReloadState.message ? (
+              <span className={`odv-help-footer-status is-${resourceReloadState.status}`}>
+                {resourceReloadState.message}
+              </span>
+            ) : null}
+          </div>
           <button type="button" className="odv-help-close-button" onClick={onClose}>
             {t('about.close', { defaultValue: 'Close' })}
           </button>

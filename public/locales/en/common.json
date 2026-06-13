@@ -340,7 +340,6 @@
     "pageModeTitle": "Free page placement",
     "documentModeTitle": "Respect document boundaries",
     "documentModeResetConfirm": "The current page order crosses document boundaries. Reset to the original document/page order and switch to document mode?",
-    "documentBoundaryWarning": "This page crosses document boundaries in the draft order.",
     "pageOrderWarning": "This page is out of the original order within its document.",
     "dragDocumentTitle": "Drag to move this document in the draft order.",
     "documentPageCount": "{count, plural, =1 {# page} other {# pages}}",
@@ -686,6 +685,13 @@
     "buildId": "Build id",
     "project": "Project",
     "contact": "Contact",
+    "resources": {
+      "reload": "Reload resource files",
+      "reloadRunningShort": "Reloading…",
+      "reloadRunning": "Reloading resource files…",
+      "reloadDone": "Resource files were reloaded.",
+      "reloadError": "Resource reload failed: {error}"
+    },
     "diagnostics": {
       "summary": "Diagnostics",
       "download": "Download diagnostics JSON",

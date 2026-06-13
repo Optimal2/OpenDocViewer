@@ -340,7 +340,6 @@
     "pageModeTitle": "Fri placering av sidor",
     "documentModeTitle": "Respektera dokumentgränser",
     "documentModeResetConfirm": "Den aktuella sidordningen korsar dokumentgränser. Återställ till ursprunglig dokument- och sidordning och byt till dokumentläge?",
-    "documentBoundaryWarning": "Den här sidan korsar dokumentgränser i utkastets ordning.",
     "pageOrderWarning": "Den här sidan ligger inte i ursprunglig ordning inom sitt dokument.",
     "dragDocumentTitle": "Dra för att flytta dokumentet i utkastets ordning.",
     "documentPageCount": "{count, plural, =1 {# sida} other {# sidor}}",
@@ -686,6 +685,13 @@
     "buildId": "Build-id",
     "project": "Projekt",
     "contact": "Kontakt",
+    "resources": {
+      "reload": "Ladda om resursfiler",
+      "reloadRunningShort": "Laddar om…",
+      "reloadRunning": "Laddar om resursfiler…",
+      "reloadDone": "Resursfilerna har laddats om.",
+      "reloadError": "Omladdning av resursfiler misslyckades: {error}"
+    },
     "diagnostics": {
       "summary": "Diagnostik",
       "download": "Ladda ned diagnostik som JSON",

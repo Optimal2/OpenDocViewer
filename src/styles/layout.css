@@ -382,17 +382,8 @@
   background: color-mix(in srgb, #f59e0b 8%, transparent 92%);
 }
 
-.print-selection-tile.has-boundary-warning {
-  border-color: #dc2626;
-  background: color-mix(in srgb, #ef4444 8%, transparent 92%);
-}
-
 .print-selection-tile.has-order-warning .print-selection-tile-stage {
   box-shadow: 0 0 0 2px rgba(245, 158, 11, 0.45);
-}
-
-.print-selection-tile.has-boundary-warning .print-selection-tile-stage {
-  box-shadow: 0 0 0 2px rgba(239, 68, 68, 0.5);
 }
 
 .print-selection-tile.is-included {
