@@ -312,12 +312,6 @@ function analyzeDraftDocumentOrder(indexes, itemByIndex) {
     }
   }
 
-  const boundaryDocuments = new Set(
-    Array.from(documentRunsByKey.entries())
-      .filter(([, runs]) => runs.length > 1)
-      .map(([key]) => key)
-  );
-
   const warnings = new Map();
   for (const run of documentRuns) {
     const keep = getBestIncreasingDocumentEntryIndexes(run.entries);
@@ -327,44 +321,8 @@ function analyzeDraftDocumentOrder(indexes, itemByIndex) {
     }
   }
 
-  const boundaryRuns = new Set();
-  for (let runIndex = 1; runIndex + 1 < documentRuns.length; runIndex += 1) {
-    const current = documentRuns[runIndex];
-    const previousKeys = new Set(documentRuns.slice(0, runIndex).map((run) => run.key));
-    const nextKeys = new Set(documentRuns.slice(runIndex + 1).map((run) => run.key));
-    const interruptsDocument = Array.from(previousKeys).some((key) => key !== current.key && nextKeys.has(key));
-    if (interruptsDocument) boundaryRuns.add(runIndex);
-  }
-
-  const lastCleanRunIndexByKey = new Map();
-  for (let runIndex = 0; runIndex < documentRuns.length; runIndex += 1) {
-    const run = documentRuns[runIndex];
-    if (boundaryRuns.has(runIndex)) continue;
-
-    const previousCleanRunIndex = lastCleanRunIndexByKey.get(run.key);
-    if (previousCleanRunIndex != null) {
-      const crossesOtherCleanDocument = documentRuns
-        .slice(previousCleanRunIndex + 1, runIndex)
-        .some((candidate, candidateOffset) => {
-          const candidateRunIndex = previousCleanRunIndex + 1 + candidateOffset;
-          return !boundaryRuns.has(candidateRunIndex) && candidate.key !== run.key;
-        });
-      if (crossesOtherCleanDocument) {
-        boundaryRuns.add(runIndex);
-        continue;
-      }
-    }
-
-    lastCleanRunIndexByKey.set(run.key, runIndex);
-  }
-
-  for (const runIndex of boundaryRuns) {
-    for (const entry of documentRuns[runIndex]?.entries || []) {
-      warnings.set(entry.index, 'document-boundary');
-    }
-  }
-
-  return { warnings, hasBoundaryViolation: boundaryDocuments.size > 0 };
+  const hasBoundaryViolation = Array.from(documentRunsByKey.values()).some((runs) => runs.length > 1);
+  return { warnings, hasBoundaryViolation };
 }
 
 function mergeAdditionsIntoDocumentBlocks(current, additions, itemByIndex, naturalIndexes) {
@@ -595,7 +553,7 @@ const PrintSelectionWorkspace = ({
   const [rightSelected, setRightSelected] = useState([]);
   const [workspaceMode, setWorkspaceMode] = useState('documents');
   const [panelMode, setPanelMode] = useState('both');
-  const [lightboxIndex, setLightboxIndex] = useState(null);
+  const [lightboxState, setLightboxState] = useState(null);
   const [selectionBox, setSelectionBox] = useState(null);
   const [draftHistory, setDraftHistory] = useState({ undo: null, redo: null });
   const [dragState, setDragState] = useState(null);
@@ -628,7 +586,6 @@ const PrintSelectionWorkspace = ({
     () => analyzeDraftDocumentOrder(draftIndexes, itemByIndex),
     [draftIndexes, itemByIndex]
   );
-  const draftWarningMap = draftDocumentOrderAnalysis.warnings;
   const documentModeCompatible = !draftDocumentOrderAnalysis.hasBoundaryViolation;
   const availableLeftIndexes = useMemo(
     () => naturalIndexes.filter((index) => !draftSet.has(index)),
@@ -638,6 +595,13 @@ const PrintSelectionWorkspace = ({
   const visibleRightPanel = panelMode !== 'left';
   const panelModeClass = `is-panel-mode-${panelMode}`;
   const workspaceModeIsDocuments = workspaceMode === 'documents';
+  const draftWarningMap = useMemo(
+    () => (workspaceModeIsDocuments ? draftDocumentOrderAnalysis.warnings : new Map()),
+    [draftDocumentOrderAnalysis.warnings, workspaceModeIsDocuments]
+  );
+  const lightboxIndex = lightboxState?.index ?? null;
+  const lightboxIndexes = Array.isArray(lightboxState?.indexes) ? lightboxState.indexes : naturalIndexes;
+  const lightboxPosition = lightboxIndex == null ? -1 : lightboxIndexes.indexOf(lightboxIndex);
   const lightboxItem = lightboxIndex == null ? null : itemByIndex.get(lightboxIndex) || null;
   const isDirty = useMemo(() => !sequencesEqual(draftIndexes, initialIndexes), [draftIndexes, initialIndexes]);
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
@@ -1237,26 +1201,30 @@ const PrintSelectionWorkspace = ({
     setRightSelected([]);
   }, [applyDraftChange, documentModeCompatible, naturalIndexes, t, workspaceMode]);
 
-  const openLightbox = useCallback((originalIndex, event) => {
+  const openLightbox = useCallback((originalIndex, side, event) => {
     event?.preventDefault?.();
     event?.stopPropagation?.();
     if (!itemByIndex.has(originalIndex)) return;
-    setLightboxIndex(originalIndex);
-  }, [itemByIndex]);
+    const sourceIndexes = side === 'right' ? draftIndexes : naturalIndexes;
+    const indexes = sourceIndexes.filter((index) => itemByIndex.has(index));
+    setLightboxState({ index: originalIndex, indexes });
+  }, [draftIndexes, itemByIndex, naturalIndexes]);
 
   const closeLightbox = useCallback(() => {
-    setLightboxIndex(null);
+    setLightboxState(null);
   }, []);
 
   const stepLightbox = useCallback((delta) => {
-    setLightboxIndex((current) => {
-      const currentPosition = naturalIndexes.indexOf(current);
+    setLightboxState((current) => {
+      if (!current) return current;
+      const indexes = Array.isArray(current.indexes) && current.indexes.length > 0 ? current.indexes : naturalIndexes;
+      const currentPosition = indexes.indexOf(current.index);
       const fallbackPosition = 0;
       const nextPosition = Math.max(
         0,
-        Math.min(naturalIndexes.length - 1, (currentPosition < 0 ? fallbackPosition : currentPosition) + delta)
+        Math.min(indexes.length - 1, (currentPosition < 0 ? fallbackPosition : currentPosition) + delta)
       );
-      return naturalIndexes[nextPosition] ?? current;
+      return { ...current, index: indexes[nextPosition] ?? current.index };
     });
   }, [naturalIndexes]);
 
@@ -1344,11 +1312,7 @@ const PrintSelectionWorkspace = ({
             documentPage: documentPageNumber,
             defaultValue: `Source page ${item.pageNumber}. Document ${item.documentNumber}, document page ${documentPageNumber}.`,
           });
-    const warningTitle = warningLevel === 'document-boundary'
-      ? t('printSelectionWorkspace.documentBoundaryWarning', {
-          defaultValue: 'This page crosses document boundaries in the draft order.',
-        })
-      : warningLevel === 'page-order'
+    const warningTitle = warningLevel === 'page-order'
         ? t('printSelectionWorkspace.pageOrderWarning', {
             defaultValue: 'This page is out of the original order within its document.',
           })
@@ -1423,7 +1387,6 @@ const PrintSelectionWorkspace = ({
           draggingSource ? 'is-dragging-source' : '',
           pulsing ? 'is-pulsing' : '',
           warningLevel === 'page-order' ? 'has-order-warning' : '',
-          warningLevel === 'document-boundary' ? 'has-boundary-warning' : '',
         ].filter(Boolean).join(' ')}
         style={{ '--print-selection-thumb-size': `${thumbSize}px` }}
         title={title}
@@ -1457,7 +1420,7 @@ const PrintSelectionWorkspace = ({
           <button
             type="button"
             className="print-selection-tile-preview"
-            onClick={(event) => openLightbox(originalIndex, event)}
+            onClick={(event) => openLightbox(originalIndex, side, event)}
             title={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
             aria-label={t('printSelectionWorkspace.previewPage', { defaultValue: 'Show page' })}
           >
@@ -1781,7 +1744,7 @@ const PrintSelectionWorkspace = ({
               type="button"
               className="print-selection-lightbox-step"
               onClick={() => stepLightbox(-1)}
-              disabled={naturalIndexes.indexOf(lightboxItem.originalIndex) <= 0}
+              disabled={lightboxPosition <= 0}
               title={t('common.previous', { defaultValue: 'Previous' })}
               aria-label={t('common.previous', { defaultValue: 'Previous' })}
             >
@@ -1794,7 +1757,7 @@ const PrintSelectionWorkspace = ({
               type="button"
               className="print-selection-lightbox-step"
               onClick={() => stepLightbox(1)}
-              disabled={naturalIndexes.indexOf(lightboxItem.originalIndex) >= naturalIndexes.length - 1}
+              disabled={lightboxPosition < 0 || lightboxPosition >= lightboxIndexes.length - 1}
               title={t('common.next', { defaultValue: 'Next' })}
               aria-label={t('common.next', { defaultValue: 'Next' })}
             >

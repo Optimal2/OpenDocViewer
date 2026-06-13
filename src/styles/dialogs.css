@@ -555,10 +555,35 @@
 
 .odv-help-footer {
   display: flex;
+  align-items: center;
   justify-content: flex-end;
+  gap: 12px;
   padding: 14px 22px 20px;
   border-top: 1px solid var(--odv-border, #d5dae1);
   background: color-mix(in srgb, var(--odv-surface-elevated) 92%, transparent 8%);
+}
+
+.odv-help-footer-start {
+  display: inline-flex;
+  flex: 1 1 auto;
+  align-items: center;
+  justify-content: flex-start;
+  gap: 10px;
+  min-width: 0;
+}
+
+.odv-help-footer-status {
+  min-width: 0;
+  overflow: hidden;
+  color: var(--text-muted-color);
+  font-size: 0.82rem;
+  line-height: 1.35;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.odv-help-footer-status.is-error {
+  color: var(--warning-color);
 }
 
 .odv-prd-card-first {
