@@ -345,6 +345,7 @@
     "dragDocumentTitle": "Drag to move this document in the draft order.",
     "documentPageCount": "{count, plural, =1 {# page} other {# pages}}",
     "thumbnailSizeLabel": "Thumbnail size",
+    "thumbnailSizeValue": "{percent}%",
     "smallerThumbnails": "Smaller thumbnails",
     "largerThumbnails": "Larger thumbnails",
     "panelModeLabel": "Panel layout",

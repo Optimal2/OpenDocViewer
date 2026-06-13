@@ -345,6 +345,7 @@
     "dragDocumentTitle": "Dra för att flytta dokumentet i utkastets ordning.",
     "documentPageCount": "{count, plural, =1 {# sida} other {# sidor}}",
     "thumbnailSizeLabel": "Miniatyrstorlek",
+    "thumbnailSizeValue": "{percent} %",
     "smallerThumbnails": "Mindre miniatyrer",
     "largerThumbnails": "Större miniatyrer",
     "panelModeLabel": "Panellayout",
