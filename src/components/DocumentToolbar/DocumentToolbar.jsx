@@ -340,7 +340,6 @@ const DocumentToolbar = ({
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
-  const [isPrintSelectionThumbnailMenuOpen, setIsPrintSelectionThumbnailMenuOpen] = useState(false);
   const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, progressValue:number, page:number, total:number, error:string, minimized:boolean }} */ (EMPTY_PDF_PROGRESS));
   const pdfAbortControllerRef = useRef(/** @type {AbortController|null} */ (null));
   const pdfStartTimeoutRef = useRef(/** @type {number|null} */ (null));
@@ -352,8 +351,6 @@ const DocumentToolbar = ({
   const pdfPrintCacheRef = useRef(/** @type {Map<string, { blob:Blob, detail:Object, filename:string, total:number, createdAt:number }>} */ (new Map()));
   const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number, detail:Object }|null} */ (null));
   const [printPreferenceRevision, setPrintPreferenceRevision] = useState(0);
-  const printSelectionThumbnailButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
-  const printSelectionThumbnailMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -395,41 +392,6 @@ const DocumentToolbar = ({
       document.removeEventListener('keydown', handleEscape, true);
     };
   }, [openAdjustmentMenu]);
-
-  useEffect(() => {
-    if (!isPrintSelectionThumbnailMenuOpen) return undefined;
-
-    /** @param {MouseEvent | TouchEvent} event */
-    const handlePointerDown = (event) => {
-      const target = event?.target;
-      if (printSelectionThumbnailButtonRef.current?.contains(target)) return;
-      if (printSelectionThumbnailMenuRef.current?.contains(target)) return;
-      setIsPrintSelectionThumbnailMenuOpen(false);
-    };
-
-    /** @param {KeyboardEvent} event */
-    const handleEscape = (event) => {
-      if (String(event?.key || '') !== 'Escape') return;
-      event.preventDefault();
-      event.stopPropagation();
-      setIsPrintSelectionThumbnailMenuOpen(false);
-    };
-
-    document.addEventListener('mousedown', handlePointerDown, true);
-    document.addEventListener('touchstart', handlePointerDown, true);
-    document.addEventListener('keydown', handleEscape, true);
-
-    return () => {
-      document.removeEventListener('mousedown', handlePointerDown, true);
-      document.removeEventListener('touchstart', handlePointerDown, true);
-      document.removeEventListener('keydown', handleEscape, true);
-    };
-  }, [isPrintSelectionThumbnailMenuOpen]);
-
-  useEffect(() => {
-    if (printSelectionWorkspaceActive) return;
-    setIsPrintSelectionThumbnailMenuOpen(false);
-  }, [printSelectionWorkspaceActive]);
 
   useEffect(() => {
     setOpenAdjustmentMenu(null);
@@ -1374,9 +1336,8 @@ const DocumentToolbar = ({
 
   if (printSelectionWorkspaceActive) {
     const state = printSelectionWorkspaceToolbarState || {};
-    const selectedCount = Math.max(0, Number(state.selectedCount) || 0);
-    const workspaceTotalPages = Math.max(0, Number(state.totalPages) || 0);
     const thumbnailPercent = Math.max(0, Number(state.thumbnailPercent) || 0);
+    const thumbnailSliderOffset = Math.max(-70, Math.min(70, thumbnailPercent - 120));
 
     return (
       <div className="toolbar toolbar--selection-workspace" role="toolbar" aria-label={t('toolbar.aria.documentControls')}>
@@ -1433,78 +1394,54 @@ const DocumentToolbar = ({
               </button>
             </div>
 
-            <div className="toolbar-menu-shell print-selection-thumbnail-menu-shell">
-              <button
-                ref={printSelectionThumbnailButtonRef}
-                type="button"
-                className="odv-btn print-selection-thumbnail-menu-button"
-                onClick={() => setIsPrintSelectionThumbnailMenuOpen((current) => !current)}
+            <div className="print-selection-thumbnail-slider-inline">
+              <span className="material-icons" aria-hidden="true">search</span>
+              <input
+                type="range"
+                min="-70"
+                max="70"
+                step="10"
+                value={thumbnailSliderOffset}
                 title={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
                 aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
-                aria-haspopup="menu"
-                aria-expanded={isPrintSelectionThumbnailMenuOpen}
-              >
-                <span className="material-icons" aria-hidden="true">search</span>
-              </button>
-              {isPrintSelectionThumbnailMenuOpen ? (
-                <div
-                  ref={printSelectionThumbnailMenuRef}
-                  className="toolbar-popup-menu print-selection-thumbnail-menu"
-                  role="menu"
-                  aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
-                >
-                  <label className="print-selection-thumbnail-slider-label" htmlFor="print-selection-thumbnail-size">
-                    {t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
-                  </label>
-                  <input
-                    id="print-selection-thumbnail-size"
-                    className="print-selection-thumbnail-slider"
-                    type="range"
-                    min="50"
-                    max="260"
-                    step="10"
-                    value={thumbnailPercent}
-                    aria-orientation="vertical"
-                    aria-valuetext={t('printSelectionWorkspace.thumbnailSizeValue', {
-                      percent: thumbnailPercent,
-                      defaultValue: `${thumbnailPercent}%`,
-                    })}
-                    onChange={(event) => state.onThumbnailSizeChange?.(Number(event.target.value))}
-                  />
-                  <span className="print-selection-thumbnail-slider-value">
-                    {t('printSelectionWorkspace.thumbnailSizeValue', {
-                      percent: thumbnailPercent,
-                      defaultValue: `${thumbnailPercent}%`,
-                    })}
-                  </span>
-                </div>
-              ) : null}
-            </div>
-
-            <div className="print-selection-workspace-status" role="status">
-              {t('printSelectionWorkspace.subtitle', {
-                selected: selectedCount,
-                total: workspaceTotalPages,
-                defaultValue: `${selectedCount} of ${workspaceTotalPages} pages selected for printing.`,
-              })}
+                aria-valuetext={t('printSelectionWorkspace.thumbnailSizeValue', {
+                  percent: thumbnailPercent,
+                  defaultValue: `${thumbnailPercent}%`,
+                })}
+                onChange={(event) => state.onThumbnailSizeChange?.(120 + Number(event.target.value))}
+              />
             </div>
 
             <button
               type="button"
               className="print-selection-secondary print-selection-history-action"
-              onClick={() => state.onRunHistoryAction?.()}
-              disabled={!state.canUndoDraftChange && !state.canRedoDraftChange}
-              title={state.historyActionTitle || ''}
-              aria-label={state.historyActionTitle || ''}
+              onClick={() => state.onUndoDraftChange?.()}
+              disabled={!state.canUndoDraftChange}
+              title={state.undoActionTitle || t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' })}
+              aria-label={state.undoActionTitle || t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' })}
             >
-              <span className="material-icons" aria-hidden="true">{state.historyActionIcon || 'undo'}</span>
-              <span>{state.historyActionText || t('printSelectionWorkspace.undo', { defaultValue: 'Undo' })}</span>
+              <span className="material-icons" aria-hidden="true">undo</span>
+              <span>{t('printSelectionWorkspace.undo', { defaultValue: 'Undo' })}</span>
             </button>
 
-            <button type="button" className="print-selection-secondary" onClick={() => state.onCancel?.()}>
+            <button
+              type="button"
+              className="print-selection-secondary print-selection-history-action"
+              onClick={() => state.onRedoDraftChange?.()}
+              disabled={!state.canRedoDraftChange}
+              title={state.redoActionTitle || t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })}
+              aria-label={state.redoActionTitle || t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' })}
+            >
+              <span className="material-icons" aria-hidden="true">redo</span>
+              <span>{t('printSelectionWorkspace.redo', { defaultValue: 'Redo' })}</span>
+            </button>
+
+            <button type="button" className="print-selection-secondary print-selection-cancel-action" onClick={() => state.onCancel?.()}>
+              <span className="material-icons" aria-hidden="true">close</span>
               {t('common.cancel', { defaultValue: 'Cancel' })}
             </button>
-            <button type="button" className="print-selection-primary" onClick={() => state.onCommit?.()} disabled={!state.canCommit}>
+            <button type="button" className="print-selection-primary print-selection-commit-action" onClick={() => state.onCommit?.()} disabled={!state.canCommit}>
+              <span className="material-icons" aria-hidden="true">check</span>
               {t('common.ok', { defaultValue: 'OK' })}
             </button>
           </div>

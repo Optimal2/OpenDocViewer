@@ -129,114 +129,77 @@
   font-size: 19px;
 }
 
-.print-selection-thumbnail-size-actions {
+.print-selection-thumbnail-slider-inline {
   display: inline-flex;
   align-items: center;
-  overflow: hidden;
-  min-height: 32px;
+  gap: 7px;
+  min-height: 34px;
+  padding: 0 10px;
   border: 1px solid var(--border-color);
   border-radius: 6px;
   background: var(--button-background, var(--background-color));
   color: var(--text-color);
-  white-space: nowrap;
 }
 
-.print-selection-thumbnail-size-actions > button {
-  display: grid;
-  place-items: center;
-  width: 32px;
-  height: 30px;
-  border: 0;
-  border-left: 1px solid var(--border-color);
-  background: transparent;
-  color: var(--text-color);
-  cursor: pointer;
-}
-
-.print-selection-thumbnail-size-actions > button:first-child {
-  border-left: 0;
-}
-
-.print-selection-thumbnail-size-actions > button:hover,
-.print-selection-thumbnail-size-actions > button:focus-visible {
-  background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
-  color: var(--primary-color);
-  outline: none;
-}
-
-.print-selection-thumbnail-size-actions > span {
-  min-width: 44px;
-  padding: 0 8px;
+.print-selection-thumbnail-slider-inline .material-icons {
   color: var(--muted-text-color);
-  font-size: 0.78rem;
-  font-weight: 700;
-  text-align: center;
+  font-size: 19px;
 }
 
-.print-selection-thumbnail-size-actions .material-icons {
-  font-size: 18px;
-}
-
-.print-selection-thumbnail-menu-shell {
-  position: relative;
-}
-
-.toolbar .print-selection-thumbnail-menu-button {
-  display: grid;
-  place-items: center;
-}
-
-.print-selection-thumbnail-menu {
-  right: auto;
-  left: 0;
-  display: grid;
-  justify-items: center;
-  min-width: 74px;
-  padding: 10px 8px;
-  gap: 8px;
-}
-
-.print-selection-thumbnail-slider-label {
-  max-width: 68px;
-  color: var(--muted-text-color);
-  font-size: 0.68rem;
-  font-weight: 700;
-  line-height: 1.1;
-  text-align: center;
-}
-
-.print-selection-thumbnail-slider {
-  width: 32px;
-  height: 150px;
+.print-selection-thumbnail-slider-inline input[type='range'] {
+  width: 132px;
   margin: 0;
   accent-color: var(--primary-color);
-  writing-mode: vertical-lr;
-  direction: rtl;
 }
 
-.print-selection-thumbnail-slider-value {
-  color: var(--text-color);
-  font-size: 0.78rem;
-  font-weight: 800;
-}
-
-.print-selection-history-action {
+.print-selection-history-action,
+.print-selection-cancel-action,
+.print-selection-commit-action {
   display: inline-flex;
   align-items: center;
   gap: 6px;
 }
 
-.print-selection-history-action .material-icons {
-  font-size: 18px;
+.print-selection-history-action:first-of-type {
+  margin-left: 10px;
 }
 
-.print-selection-workspace-status {
-  max-width: 220px;
-  overflow: hidden;
-  color: var(--muted-text-color);
-  font-size: 0.78rem;
-  text-overflow: ellipsis;
-  white-space: nowrap;
+.toolbar .print-selection-cancel-action,
+.print-selection-cancel-action {
+  margin-left: 10px;
+  border-color: color-mix(in srgb, #dc2626 62%, var(--border-color) 38%);
+  background: color-mix(in srgb, #dc2626 14%, var(--button-background, var(--background-color)) 86%);
+  color: color-mix(in srgb, #dc2626 78%, var(--text-color) 22%);
+}
+
+.toolbar .print-selection-cancel-action:hover,
+.toolbar .print-selection-cancel-action:focus-visible,
+.print-selection-cancel-action:hover,
+.print-selection-cancel-action:focus-visible {
+  border-color: #dc2626;
+  background: color-mix(in srgb, #dc2626 22%, var(--button-background, var(--background-color)) 78%);
+  color: #dc2626;
+}
+
+.toolbar .print-selection-commit-action,
+.print-selection-commit-action {
+  border-color: #15803d;
+  background: #16a34a;
+  color: #fff;
+}
+
+.toolbar .print-selection-commit-action:hover,
+.toolbar .print-selection-commit-action:focus-visible,
+.print-selection-commit-action:hover,
+.print-selection-commit-action:focus-visible {
+  background: #15803d;
+  color: #fff;
+}
+
+.print-selection-cancel-action .material-icons,
+.print-selection-commit-action .material-icons,
+.print-selection-history-action .material-icons {
+  font-size: 18px;
 }
 
 .print-selection-primary,
@@ -249,15 +212,29 @@
   cursor: pointer;
 }
 
+.toolbar .print-selection-primary,
 .print-selection-primary {
   border-color: var(--primary-color);
   background: var(--primary-color);
   color: var(--primary-contrast-color, #fff);
 }
 
+.toolbar .print-selection-secondary,
 .print-selection-secondary {
   background: var(--button-background, transparent);
   color: var(--text-color);
+}
+
+.toolbar .print-selection-primary:hover,
+.toolbar .print-selection-primary:focus-visible {
+  background: var(--primary-color-hover);
+  color: var(--primary-contrast-color, #fff);
+}
+
+.toolbar .print-selection-secondary:hover,
+.toolbar .print-selection-secondary:focus-visible {
+  background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
+  color: var(--primary-color);
 }
 
 .print-selection-primary:disabled,

@@ -361,7 +361,7 @@
     "sourcePageTitle": "Källsida {page}. Dokument {document}, dokumentsida {documentPage}.",
     "printPageTitle": "Utskriftssida {printPage}. Källsida {sourcePage}, dokument {document}, dokumentsida {documentPage}.",
     "printOrderBadgeTitle": "Utskriftssida {page} i utkastet",
-    "cancelConfirm": "Kasta utkastet till utskriftsurval? Alla ändringar i detta läge försvinner.",
+    "cancelConfirm": "Avbryt utskriftsurvalet och kasta ändringarna? Alla ändringar du gjort i detta läge försvinner.",
     "emptySelection": "Inga sidor är valda för utskrift.",
     "resizeDivider": "Ändra bredd på urvalspanelerna"
   },
