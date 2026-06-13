@@ -335,11 +335,12 @@ const DocumentToolbar = ({
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
 }) => {
-  const { t, i18n } = useTranslation();
+  const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
   const [isManualDialogOpen, setIsManualDialogOpen] = useState(false);
   const [isAboutDialogOpen, setIsAboutDialogOpen] = useState(false);
   const [openAdjustmentMenu, setOpenAdjustmentMenu] = useState(/** @type {(null|'brightness'|'contrast')} */ (null));
+  const [isPrintSelectionThumbnailMenuOpen, setIsPrintSelectionThumbnailMenuOpen] = useState(false);
   const [pdfProgress, setPdfProgress] = useState(/** @type {{ open:boolean, action:string, phase:string, current:number, progressValue:number, page:number, total:number, error:string, minimized:boolean }} */ (EMPTY_PDF_PROGRESS));
   const pdfAbortControllerRef = useRef(/** @type {AbortController|null} */ (null));
   const pdfStartTimeoutRef = useRef(/** @type {number|null} */ (null));
@@ -351,6 +352,8 @@ const DocumentToolbar = ({
   const pdfPrintCacheRef = useRef(/** @type {Map<string, { blob:Blob, detail:Object, filename:string, total:number, createdAt:number }>} */ (new Map()));
   const [lastPdfPrintInfo, setLastPdfPrintInfo] = useState(/** @type {{ total:number, createdAt:number, detail:Object }|null} */ (null));
   const [printPreferenceRevision, setPrintPreferenceRevision] = useState(0);
+  const printSelectionThumbnailButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
+  const printSelectionThumbnailMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const brightnessButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -392,6 +395,41 @@ const DocumentToolbar = ({
       document.removeEventListener('keydown', handleEscape, true);
     };
   }, [openAdjustmentMenu]);
+
+  useEffect(() => {
+    if (!isPrintSelectionThumbnailMenuOpen) return undefined;
+
+    /** @param {MouseEvent | TouchEvent} event */
+    const handlePointerDown = (event) => {
+      const target = event?.target;
+      if (printSelectionThumbnailButtonRef.current?.contains(target)) return;
+      if (printSelectionThumbnailMenuRef.current?.contains(target)) return;
+      setIsPrintSelectionThumbnailMenuOpen(false);
+    };
+
+    /** @param {KeyboardEvent} event */
+    const handleEscape = (event) => {
+      if (String(event?.key || '') !== 'Escape') return;
+      event.preventDefault();
+      event.stopPropagation();
+      setIsPrintSelectionThumbnailMenuOpen(false);
+    };
+
+    document.addEventListener('mousedown', handlePointerDown, true);
+    document.addEventListener('touchstart', handlePointerDown, true);
+    document.addEventListener('keydown', handleEscape, true);
+
+    return () => {
+      document.removeEventListener('mousedown', handlePointerDown, true);
+      document.removeEventListener('touchstart', handlePointerDown, true);
+      document.removeEventListener('keydown', handleEscape, true);
+    };
+  }, [isPrintSelectionThumbnailMenuOpen]);
+
+  useEffect(() => {
+    if (printSelectionWorkspaceActive) return;
+    setIsPrintSelectionThumbnailMenuOpen(false);
+  }, [printSelectionWorkspaceActive]);
 
   useEffect(() => {
     setOpenAdjustmentMenu(null);
@@ -1395,24 +1433,52 @@ const DocumentToolbar = ({
               </button>
             </div>
 
-            <div className="print-selection-thumbnail-size-actions" aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}>
+            <div className="toolbar-menu-shell print-selection-thumbnail-menu-shell">
               <button
+                ref={printSelectionThumbnailButtonRef}
                 type="button"
-                onClick={() => state.onDecreaseThumbnailSize?.()}
-                title={t('printSelectionWorkspace.smallerThumbnails', { defaultValue: 'Smaller thumbnails' })}
-                aria-label={t('printSelectionWorkspace.smallerThumbnails', { defaultValue: 'Smaller thumbnails' })}
+                className="odv-btn print-selection-thumbnail-menu-button"
+                onClick={() => setIsPrintSelectionThumbnailMenuOpen((current) => !current)}
+                title={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
+                aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
+                aria-haspopup="menu"
+                aria-expanded={isPrintSelectionThumbnailMenuOpen}
               >
-                <span className="material-icons" aria-hidden="true">remove</span>
+                <span className="material-icons" aria-hidden="true">search</span>
               </button>
-              <span title={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}>{thumbnailPercent}%</span>
-              <button
-                type="button"
-                onClick={() => state.onIncreaseThumbnailSize?.()}
-                title={t('printSelectionWorkspace.largerThumbnails', { defaultValue: 'Larger thumbnails' })}
-                aria-label={t('printSelectionWorkspace.largerThumbnails', { defaultValue: 'Larger thumbnails' })}
-              >
-                <span className="material-icons" aria-hidden="true">add</span>
-              </button>
+              {isPrintSelectionThumbnailMenuOpen ? (
+                <div
+                  ref={printSelectionThumbnailMenuRef}
+                  className="toolbar-popup-menu print-selection-thumbnail-menu"
+                  role="menu"
+                  aria-label={t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
+                >
+                  <label className="print-selection-thumbnail-slider-label" htmlFor="print-selection-thumbnail-size">
+                    {t('printSelectionWorkspace.thumbnailSizeLabel', { defaultValue: 'Thumbnail size' })}
+                  </label>
+                  <input
+                    id="print-selection-thumbnail-size"
+                    className="print-selection-thumbnail-slider"
+                    type="range"
+                    min="50"
+                    max="260"
+                    step="10"
+                    value={thumbnailPercent}
+                    aria-orientation="vertical"
+                    aria-valuetext={t('printSelectionWorkspace.thumbnailSizeValue', {
+                      percent: thumbnailPercent,
+                      defaultValue: `${thumbnailPercent}%`,
+                    })}
+                    onChange={(event) => state.onThumbnailSizeChange?.(Number(event.target.value))}
+                  />
+                  <span className="print-selection-thumbnail-slider-value">
+                    {t('printSelectionWorkspace.thumbnailSizeValue', {
+                      percent: thumbnailPercent,
+                      defaultValue: `${thumbnailPercent}%`,
+                    })}
+                  </span>
+                </div>
+              ) : null}
             </div>
 
             <div className="print-selection-workspace-status" role="status">

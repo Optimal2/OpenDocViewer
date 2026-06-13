@@ -177,6 +177,49 @@
   font-size: 18px;
 }
 
+.print-selection-thumbnail-menu-shell {
+  position: relative;
+}
+
+.toolbar .print-selection-thumbnail-menu-button {
+  display: grid;
+  place-items: center;
+}
+
+.print-selection-thumbnail-menu {
+  right: auto;
+  left: 0;
+  display: grid;
+  justify-items: center;
+  min-width: 74px;
+  padding: 10px 8px;
+  gap: 8px;
+}
+
+.print-selection-thumbnail-slider-label {
+  max-width: 68px;
+  color: var(--muted-text-color);
+  font-size: 0.68rem;
+  font-weight: 700;
+  line-height: 1.1;
+  text-align: center;
+}
+
+.print-selection-thumbnail-slider {
+  width: 32px;
+  height: 150px;
+  margin: 0;
+  accent-color: var(--primary-color);
+  writing-mode: vertical-lr;
+  direction: rtl;
+}
+
+.print-selection-thumbnail-slider-value {
+  color: var(--text-color);
+  font-size: 0.78rem;
+  font-weight: 800;
+}
+
 .print-selection-history-action {
   display: inline-flex;
   align-items: center;
@@ -230,6 +273,7 @@
   flex: 1 1 auto;
   min-height: 0;
   gap: 0;
+  background: color-mix(in srgb, var(--background-color) 78%, var(--border-color) 22%);
   overflow: hidden;
 }
 
@@ -250,6 +294,7 @@
   min-width: 0;
   min-height: 0;
   border-right: 1px solid var(--border-color);
+  background: color-mix(in srgb, var(--background-color) 96%, var(--primary-color) 4%);
 }
 
 .print-selection-panel-right {
@@ -284,6 +329,7 @@
   min-height: 0;
   overflow: auto;
   padding: 12px;
+  background: color-mix(in srgb, var(--background-color) 94%, var(--primary-color) 6%);
 }
 
 .print-selection-document-group {
@@ -567,7 +613,7 @@
   align-items: center;
   justify-content: stretch;
   min-width: 48px;
-  background: color-mix(in srgb, var(--background-color) 90%, var(--border-color) 10%);
+  background: color-mix(in srgb, var(--background-color) 72%, var(--border-color) 28%);
 }
 
 .print-selection-transfer-buttons {
@@ -629,10 +675,16 @@
 
 .print-selection-resize-zone span {
   display: block;
-  width: 2px;
-  height: 46px;
+  width: 3px;
+  height: 58px;
   border-radius: 999px;
-  background: color-mix(in srgb, var(--border-color) 70%, var(--text-color) 30%);
+  background: color-mix(in srgb, var(--primary-color) 58%, var(--text-color) 42%);
+  box-shadow: 0 0 0 1px color-mix(in srgb, var(--background-color) 58%, transparent 42%);
+}
+
+.print-selection-resize-zone:hover span,
+.print-selection-resize-zone:focus-visible span {
+  background: var(--primary-color);
 }
 
 .print-selection-empty {

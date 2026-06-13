@@ -338,7 +338,7 @@ function mergeAdditionsIntoDocumentBlocks(current, additions, itemByIndex, natur
       .map((entry) => entry.position);
 
     if (positions.length <= 0) {
-      next = insertUnique(next, documentAdditions, next.length);
+      next = insertByNaturalOrder(next, documentAdditions, naturalIndexes);
       continue;
     }
 
@@ -426,6 +426,22 @@ function insertUnique(current, indexes, insertIndex) {
     ...additions,
     ...current.slice(target),
   ];
+}
+
+function insertByNaturalOrder(current, indexes, naturalIndexes) {
+  const orderPosition = new Map(naturalIndexes.map((index, position) => [index, position]));
+  let next = [...current];
+
+  for (const index of sortByOrder(indexes, naturalIndexes)) {
+    if (next.includes(index)) continue;
+    const naturalPosition = orderPosition.get(index) ?? Number.MAX_SAFE_INTEGER;
+    const insertIndex = next.findIndex((existingIndex) => (
+      (orderPosition.get(existingIndex) ?? Number.MAX_SAFE_INTEGER) > naturalPosition
+    ));
+    next = insertUnique(next, [index], insertIndex < 0 ? next.length : insertIndex);
+  }
+
+  return next;
 }
 
 function moveWithinSequence(current, indexes, insertIndex) {
@@ -654,7 +670,9 @@ const PrintSelectionWorkspace = ({
         ? (insertIndex == null
             ? mergeAdditionsIntoDocumentBlocks(current, ordered, itemByIndex, naturalIndexes)
             : insertUnique(current, ordered, insertIndex))
-        : insertUnique(current, ordered, insertIndex ?? current.length)
+        : (insertIndex == null
+            ? insertByNaturalOrder(current, ordered, naturalIndexes)
+            : insertUnique(current, ordered, insertIndex))
     ));
     setLeftSelected((current) => current.filter((index) => !ordered.includes(index)));
   }, [applyDraftChange, getSelectableLeftIndexes, itemByIndex, naturalIndexes, workspaceModeIsDocuments]);
@@ -673,6 +691,14 @@ const PrintSelectionWorkspace = ({
     applyDraftChange([]);
     setRightSelected([]);
   }, [applyDraftChange]);
+  const addDocument = useCallback((documentKey, event) => {
+    stopSelectionEvent(event);
+    addIndexes(getIndexesForDocument(naturalIndexes, itemByIndex, documentKey));
+  }, [addIndexes, itemByIndex, naturalIndexes]);
+  const removeDocument = useCallback((documentKey, event) => {
+    stopSelectionEvent(event);
+    removeIndexes(getIndexesForDocument(draftIndexes, itemByIndex, documentKey));
+  }, [draftIndexes, itemByIndex, removeIndexes]);
 
   const runHistoryAction = useCallback(() => {
     setDraftIndexes((current) => {
@@ -696,6 +722,10 @@ const PrintSelectionWorkspace = ({
 
   const increaseThumbnailSize = useCallback(() => {
     setThumbnailPercent((current) => clampPercent((Number(current) || 120) + 10));
+  }, []);
+
+  const setThumbnailSize = useCallback((value) => {
+    setThumbnailPercent(clampPercent(value));
   }, []);
 
   const runTransferCommand = useCallback((event, command) => {
@@ -1427,6 +1457,7 @@ const PrintSelectionWorkspace = ({
     onPanelModeChange: setPanelMode,
     onDecreaseThumbnailSize: decreaseThumbnailSize,
     onIncreaseThumbnailSize: increaseThumbnailSize,
+    onThumbnailSizeChange: setThumbnailSize,
     onRunHistoryAction: runHistoryAction,
     onCancel: cancel,
     onCommit: commit,
@@ -1444,6 +1475,7 @@ const PrintSelectionWorkspace = ({
     increaseThumbnailSize,
     panelMode,
     runHistoryAction,
+    setThumbnailSize,
     thumbnailPercent,
     totalPages,
     workspaceMode,
@@ -1496,6 +1528,7 @@ const PrintSelectionWorkspace = ({
                     className="print-selection-document-header print-selection-document-header-draggable"
                     draggable
                     onPointerDown={(event) => selectDocument('left', group.key, event)}
+                    onDoubleClick={(event) => addDocument(group.key, event)}
                     onDragStart={(event) => startDocumentDrag('left', group.key, event)}
                     onDragEnd={clearDrag}
                     title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
@@ -1616,6 +1649,7 @@ const PrintSelectionWorkspace = ({
                       className="print-selection-document-header print-selection-document-header-draggable"
                       draggable
                       onPointerDown={(event) => selectDocument('right', group.key, event)}
+                      onDoubleClick={(event) => removeDocument(group.key, event)}
                       onDragStart={(event) => startDocumentDrag('right', group.key, event)}
                       onDragEnd={clearDrag}
                       title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
