@@ -776,6 +776,24 @@
   height: 42px;
 }
 
+.print-selection-lightbox-actions > .print-selection-lightbox-add-action.is-active {
+  border-color: color-mix(in srgb, #16a34a 78%, #fff 22%);
+  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  color: #fff;
+}
+
+.print-selection-lightbox-actions > .print-selection-lightbox-remove-action.is-active {
+  border-color: color-mix(in srgb, #dc2626 78%, #fff 22%);
+  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  color: #fff;
+}
+
+.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:hover,
+.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:focus-visible {
+  color: #fff;
+  filter: brightness(1.08);
+}
+
 .print-selection-lightbox-close {
   position: absolute;
   top: 14px;
@@ -807,6 +825,7 @@
   border-color: var(--border-color);
   background: color-mix(in srgb, var(--background-color) 88%, transparent 12%);
   color: var(--text-color);
+  filter: none;
 }
 
 .print-selection-lightbox-body {
@@ -841,13 +860,39 @@
   padding: 0;
 }
 
+.print-selection-lightbox-page {
+  position: relative;
+  display: grid;
+  max-width: 100%;
+  max-height: 100%;
+  place-items: center;
+  overflow: hidden;
+  background: #fff;
+  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.28);
+}
+
+.print-selection-lightbox-page::before {
+  content: '';
+  position: absolute;
+  inset: 0 0 auto 0;
+  z-index: 1;
+  height: min(18%, 140px);
+  pointer-events: none;
+}
+
+.print-selection-lightbox-page.is-in-selection::before {
+  background: linear-gradient(180deg, rgba(22, 163, 74, 0.96) 0, rgba(22, 163, 74, 0.58) 28%, rgba(22, 163, 74, 0) 100%);
+}
+
+.print-selection-lightbox-page.is-out-of-selection::before {
+  background: linear-gradient(180deg, rgba(220, 38, 38, 0.96) 0, rgba(220, 38, 38, 0.58) 28%, rgba(220, 38, 38, 0) 100%);
+}
+
 .print-selection-lightbox-image img {
   display: block;
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
-  background: #fff;
-  box-shadow: 0 12px 34px rgba(15, 23, 42, 0.28);
 }
 
 .viewer-section {
