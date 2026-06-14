@@ -87,6 +87,101 @@ function resolvePathValue(source, path) {
   return '';
 }
 
+function parseInteger(value) {
+  const parsed = Number.parseInt(String(value || '').trim(), 10);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
+function zeroPad(value, length = 2) {
+  return String(value).padStart(length, '0');
+}
+
+function formatDateParts(parts, pattern) {
+  const replacements = {
+    yyyy: String(parts.year),
+    MM: zeroPad(parts.month),
+    dd: zeroPad(parts.day),
+    HH: zeroPad(parts.hour),
+    mm: zeroPad(parts.minute),
+    ss: zeroPad(parts.second),
+    SSS: zeroPad(parts.millisecond, 3),
+  };
+  const resolvedPattern = String(pattern || 'yyyy-MM-dd');
+  return resolvedPattern.replace(/yyyy|SSS|MM|dd|HH|mm|ss/g, (token) => replacements[token] ?? token);
+}
+
+function formatDateValue(value, pattern) {
+  const text = String(value ?? '').trim();
+  if (!text) return '';
+
+  const textParts = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?/.exec(text);
+  if (textParts) {
+    return formatDateParts({
+      year: textParts[1],
+      month: textParts[2],
+      day: textParts[3],
+      hour: textParts[4] || '00',
+      minute: textParts[5] || '00',
+      second: textParts[6] || '00',
+      millisecond: textParts[7] || '000',
+    }, pattern);
+  }
+
+  const date = new Date(text);
+  if (Number.isNaN(date.getTime())) return text;
+
+  return formatDateParts({
+    year: date.getFullYear(),
+    month: date.getMonth() + 1,
+    day: date.getDate(),
+    hour: date.getHours(),
+    minute: date.getMinutes(),
+    second: date.getSeconds(),
+    millisecond: date.getMilliseconds(),
+  }, pattern);
+}
+
+function applyTemplateFilter(value, rawFilter) {
+  const filterText = String(rawFilter || '').trim();
+  if (!filterText) return value;
+
+  const separatorIndex = filterText.indexOf(':');
+  const name = (separatorIndex === -1 ? filterText : filterText.slice(0, separatorIndex)).trim().toLowerCase();
+  const argumentText = separatorIndex === -1 ? '' : filterText.slice(separatorIndex + 1).trim();
+  const text = String(value ?? '');
+
+  switch (name) {
+    case 'date':
+      return formatDateValue(text, argumentText || 'yyyy-MM-dd');
+    case 'substring':
+    case 'substr':
+    case 'slice': {
+      const args = argumentText.split(',').map((entry) => parseInteger(entry));
+      const start = args[0] ?? 0;
+      const end = args[1];
+      return end == null ? text.slice(start) : text.slice(start, end);
+    }
+    case 'trim':
+      return text.trim();
+    case 'lower':
+    case 'lowercase':
+      return text.toLocaleLowerCase();
+    case 'upper':
+    case 'uppercase':
+      return text.toLocaleUpperCase();
+    default:
+      return text;
+  }
+}
+
+function applyTemplateFilters(value, filters) {
+  let next = value;
+  for (const filter of filters) {
+    next = applyTemplateFilter(next, filter);
+  }
+  return next;
+}
+
 function getDocumentEntry(bundle, documentId, documentNumber) {
   const documents = Array.isArray(bundle?.documents) ? bundle.documents : [];
   const id = String(documentId || '').trim();
@@ -100,18 +195,24 @@ function getDocumentEntry(bundle, documentId, documentNumber) {
 
 function applyTemplate(template, context, documentEntry) {
   return String(template || '').replace(/\{\{([^}]+)\}\}|\{([^}]+)\}/g, (match, rawDoubleToken, rawSingleToken) => {
-    const token = String(rawDoubleToken || rawSingleToken || '').trim();
+    const tokenParts = String(rawDoubleToken || rawSingleToken || '').split('|').map((part) => part.trim());
+    const token = tokenParts.shift() || '';
+    const filters = tokenParts.filter(Boolean);
     if (!token) return match;
-    if (Object.prototype.hasOwnProperty.call(context, token)) return String(context[token] ?? '');
+    let value = '';
+    if (Object.prototype.hasOwnProperty.call(context, token)) {
+      value = String(context[token] ?? '');
+      return applyTemplateFilters(value, filters);
+    }
     if (token.includes('.')) {
       const fromContext = resolvePathValue(context, token);
-      if (fromContext) return fromContext;
+      if (fromContext) return applyTemplateFilters(fromContext, filters);
     }
-    if (token.startsWith('metadata.')) return resolvePathValue(documentEntry?.metadata, token.slice('metadata.'.length));
-    if (token.startsWith('metadataDetails.')) return resolvePathValue(documentEntry?.metadataDetails, token.slice('metadataDetails.'.length));
-    if (token.startsWith('metaById.')) return resolvePathValue(documentEntry?.metaById, token.slice('metaById.'.length));
-    if (token.startsWith('meta.')) return resolvePathValue(documentEntry?.meta, token.slice('meta.'.length));
-    return '';
+    if (token.startsWith('metadata.')) value = resolvePathValue(documentEntry?.metadata, token.slice('metadata.'.length));
+    else if (token.startsWith('metadataDetails.')) value = resolvePathValue(documentEntry?.metadataDetails, token.slice('metadataDetails.'.length));
+    else if (token.startsWith('metaById.')) value = resolvePathValue(documentEntry?.metaById, token.slice('metaById.'.length));
+    else if (token.startsWith('meta.')) value = resolvePathValue(documentEntry?.meta, token.slice('meta.'.length));
+    return applyTemplateFilters(value, filters);
   });
 }
 
