@@ -124,8 +124,12 @@ function normalizeResetSessionTarget(value, defaultTarget) {
   return 'parent-or-current';
 }
 
+function normalizeZoomModeText(value) {
+  return String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+}
+
 function normalizeDefaultZoomMode(value, defaultMode = 'fit-width') {
-  const raw = String(value || defaultMode || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+  const raw = normalizeZoomModeText(value) || normalizeZoomModeText(defaultMode) || 'fit-width';
   if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
   if (
     raw === 'fit-custom'

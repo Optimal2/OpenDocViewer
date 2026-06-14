@@ -370,64 +370,64 @@
         // Use aliases when a deployment wants stable semantic names for UI/print logic.
         // Field ids below are illustrative examples and should be adjusted per installation.
         metadataAliases: {
-          patientId: {
-            fieldId: '1001',
+          referenceId: {
+            fieldId: 'reference-id',
             prefer: 'value',
-            label: { en: 'Patient ID', sv: 'Personnummer' },
+            label: { en: 'Reference ID', sv: 'Referens-ID' },
             type: 'string',
             contexts: ['screen', 'print', 'sort', 'filter', 'selection']
           },
-          patientName: {
-            fieldId: '1002',
+          subjectName: {
+            fieldId: 'subject-name',
             prefer: 'value',
-            label: { en: 'Name', sv: 'Namn' },
+            label: { en: 'Subject', sv: 'Ämne' },
             type: 'string',
             contexts: ['screen', 'print', 'sort', 'filter', 'selection']
           },
           unitCode: {
-            fieldId: '1011',
+            fieldId: 'unit-code',
             prefer: 'value',
-            label: { en: 'Unit code', sv: 'Avd/Mott kod' },
+            label: { en: 'Unit code', sv: 'Enhetskod' },
             type: 'string',
             contexts: ['screen', 'print', 'filter', 'debug']
           },
           unitName: {
-            fieldId: '1011',
+            fieldId: 'unit-name',
             prefer: 'lookupValue',
-            label: { en: 'Unit name', sv: 'Avd/Mott namn' },
+            label: { en: 'Unit name', sv: 'Enhetsnamn' },
             type: 'string',
             contexts: ['screen', 'print', 'filter']
           },
-          careContact: {
-            fieldId: '1003',
+          documentCategory: {
+            fieldId: 'category',
             prefer: 'value',
-            label: { en: 'Care contact', sv: 'Vårdkontakt' },
+            label: { en: 'Category', sv: 'Kategori' },
             type: 'string',
             contexts: ['screen', 'print', 'filter']
           },
           documentDate: {
-            fieldId: '1007',
+            fieldId: 'document-date',
             prefer: 'value',
             label: { en: 'Document date', sv: 'Dokumentdatum' },
             type: 'datetime',
             contexts: ['screen', 'print', 'sort', 'filter', 'selection']
           },
           createdTimestamp: {
-            fieldId: '500',
+            fieldId: 'created-at',
             prefer: 'value',
             label: { en: 'Created timestamp', sv: 'Skapad' },
             type: 'datetime',
             contexts: ['debug', 'support', 'sort']
           },
           modifiedTimestamp: {
-            fieldId: '502',
+            fieldId: 'modified-at',
             prefer: 'value',
             label: { en: 'Modified timestamp', sv: 'Ändrad' },
             type: 'datetime',
             contexts: ['debug', 'support', 'sort']
           },
           numberOfPages: {
-            fieldId: '504',
+            fieldId: 'page-count',
             prefer: 'value',
             label: { en: 'Number of pages', sv: 'Antal sidor' },
             type: 'integer',
@@ -565,8 +565,8 @@
       // scaled into the remaining page area, so large headers reduce image size instead of
       // covering source content.
       template: {
-        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Page {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient ID: {{metadata.patientId}}"]][[{{metadata.patientName}}, " | Name: {{metadata.patientName}}"]]\n[[{{metadata.unitName}}, "Unit: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Reason: {{reasonSelection.output}} | "]][[{{forWhom}}, "For: {{forWhom}} | "]][[{{UserId}}, "Printed by: {{UserId}}"]]',
-        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}[[{{metadata.patientId}}, " | Patient-ID: {{metadata.patientId}}"]][[{{metadata.patientName}}, " | Namn: {{metadata.patientName}}"]]\n[[{{metadata.unitName}}, "Avd/Mott: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Orsak: {{reasonSelection.output}} | "]][[{{forWhom}}, "För: {{forWhom}} | "]][[{{UserId}}, "Utskriven av: {{UserId}}"]]'
+        en: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Page {{page}}/{{totalPages}}[[{{metadata.referenceId}}, " | Reference: {{metadata.referenceId}}"]][[{{metadata.subjectName}}, " | Subject: {{metadata.subjectName}}"]]\n[[{{metadata.unitName}}, "Unit: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Reason: {{reasonSelection.output}} | "]][[{{forWhom}}, "For: {{forWhom}} | "]][[{{UserId}}, "Printed by: {{UserId}}"]]',
+        sv: '[[{{isCopy}}, "<strong>{{isCopy}}</strong> | "]]{{date}} {{time}} | Sida {{page}}/{{totalPages}}[[{{metadata.referenceId}}, " | Referens: {{metadata.referenceId}}"]][[{{metadata.subjectName}}, " | Ämne: {{metadata.subjectName}}"]]\n[[{{metadata.unitName}}, "Enhet: {{metadata.unitName}} | "]][[{{reasonSelection.output}}, "Orsak: {{reasonSelection.output}} | "]][[{{forWhom}}, "För: {{forWhom}} | "]][[{{UserId}}, "Utskriven av: {{UserId}}"]]'
       },
       css: `
 .odv-print-header{ font:8.5px/1.15 Arial,Helvetica,sans-serif; color:#222;
