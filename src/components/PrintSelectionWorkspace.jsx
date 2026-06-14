@@ -15,6 +15,10 @@ import { resolveLocalizedValue } from '../utils/localizedValue.js';
 const MIN_THUMBNAIL_PERCENT = 70;
 const DEFAULT_THUMBNAIL_PERCENT = 120;
 const MAX_THUMBNAIL_PERCENT = 320;
+const DEFAULT_ORDER_POSITION = Number.MAX_SAFE_INTEGER;
+// Matches WebClient/SQL-style date values used by metadata templates:
+// yyyy-MM-dd, optionally followed by a time part separated by T or whitespace.
+const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?/;
 
 function clampPercent(value, fallback = DEFAULT_THUMBNAIL_PERCENT) {
   const next = Math.round(Number(value));
@@ -114,7 +118,7 @@ function formatDateValue(value, pattern) {
   const text = String(value ?? '').trim();
   if (!text) return '';
 
-  const textParts = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?/.exec(text);
+  const textParts = ISO_DATE_PATTERN.exec(text);
   if (textParts) {
     return formatDateParts({
       year: textParts[1],
@@ -165,10 +169,10 @@ function applyTemplateFilter(value, rawFilter) {
       return text.trim();
     case 'lower':
     case 'lowercase':
-      return text.toLocaleLowerCase();
+      return text.toLowerCase();
     case 'upper':
     case 'uppercase':
-      return text.toLocaleUpperCase();
+      return text.toUpperCase();
     default:
       return text;
   }
@@ -410,7 +414,7 @@ function uniqueOrdered(indexes, order) {
 function sortByOrder(indexes, order) {
   const orderPosition = new Map(order.map((index, position) => [index, position]));
   return [...(Array.isArray(indexes) ? indexes : [])]
-    .sort((a, b) => (orderPosition.get(a) ?? Number.MAX_SAFE_INTEGER) - (orderPosition.get(b) ?? Number.MAX_SAFE_INTEGER));
+    .sort((a, b) => (orderPosition.get(a) ?? DEFAULT_ORDER_POSITION) - (orderPosition.get(b) ?? DEFAULT_ORDER_POSITION));
 }
 
 function getDocumentGroupKeyForItem(item) {
@@ -621,9 +625,9 @@ function insertByNaturalOrder(current, indexes, naturalIndexes) {
 
   for (const index of sortByOrder(indexes, naturalIndexes)) {
     if (next.includes(index)) continue;
-    const naturalPosition = orderPosition.get(index) ?? Number.MAX_SAFE_INTEGER;
+    const naturalPosition = orderPosition.get(index) ?? DEFAULT_ORDER_POSITION;
     const insertIndex = next.findIndex((existingIndex) => (
-      (orderPosition.get(existingIndex) ?? Number.MAX_SAFE_INTEGER) > naturalPosition
+      (orderPosition.get(existingIndex) ?? DEFAULT_ORDER_POSITION) > naturalPosition
     ));
     next = insertUnique(next, [index], insertIndex < 0 ? next.length : insertIndex);
   }

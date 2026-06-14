@@ -188,6 +188,11 @@ function extFromString(s) {
   return undefined;
 }
 
+function normalizeTicketExtension(value) {
+  const text = String(value || '').trim();
+  return text ? text.toLowerCase() : undefined;
+}
+
 function toTicket(objOrStr) {
   if (typeof objOrStr === 'string') {
     if (objOrStr.includes('|')) {
@@ -198,7 +203,7 @@ function toTicket(objOrStr) {
         const normalizedLocation = rawLocation ? absUrl(rawLocation) : undefined;
         return {
           id: rawId ? String(rawId) : undefined,
-          ext: (rawExt || undefined)?.toLowerCase(),
+          ext: normalizeTicketExtension(rawExt),
           path: rawLocation || undefined,
           url: normalizedLocation,
         };
@@ -210,9 +215,10 @@ function toTicket(objOrStr) {
   if (isObject(objOrStr)) {
     const { id, ext, path, url } = /** @type {Object.<string, *>} */ (objOrStr);
     const resolved = url ? absUrl(url) : (path ? absUrl(path) : undefined);
+    const sourceExt = ext || extFromString(resolved || path || '');
     return {
       id: id != null ? String(id) : undefined,
-      ext: (ext || extFromString(resolved || path || ''))?.toLowerCase(),
+      ext: normalizeTicketExtension(sourceExt),
       path: path != null ? String(path) : undefined,
       url: resolved,
       ...spreadUnknown(/** @type {Object.<string, *>} */ (objOrStr), ['id', 'ext', 'path', 'url']),

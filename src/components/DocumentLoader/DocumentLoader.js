@@ -173,7 +173,12 @@ function createLimiter(concurrency) {
         .then(next.task)
         .then(next.resolve, next.reject)
         .finally(() => {
-          activeCount = Math.max(0, activeCount - 1);
+          if (activeCount <= 0) {
+            logger.warn('Document loader concurrency counter was already zero before task completion.');
+            activeCount = 0;
+          } else {
+            activeCount -= 1;
+          }
           pump();
         });
     }
@@ -187,7 +192,8 @@ function createLimiter(concurrency) {
 
 function nowMs() {
   try {
-    return typeof globalThis.performance?.now === 'function' ? globalThis.performance.now() : Date.now();
+    const performanceRef = typeof globalThis !== 'undefined' ? globalThis.performance : null;
+    return performanceRef && typeof performanceRef.now === 'function' ? performanceRef.now() : Date.now();
   } catch {
     return Date.now();
   }
@@ -367,7 +373,14 @@ async function resolveFetchedSourcePayload({ entry, blob, responseMimeType = '' 
   }
 
   let detectedType = null;
-  try { detectedType = await fileTypeFromBlob(blob); } catch {}
+  try {
+    detectedType = await fileTypeFromBlob(blob);
+  } catch (error) {
+    logger.debug('File type detector failed; falling back to MIME type and source extension.', {
+      url: redactUrlForLog(entry?.url || ''),
+      error: String(error?.message || error),
+    });
+  }
 
   const mimeType = String(
     detectedType?.mime
@@ -534,7 +547,10 @@ async function resolvePrefetchedPageCountHint({
  */
 function redactUrlForLog(url) {
   try {
-    const parsed = new URL(String(url || ''), globalThis.location?.href || 'http://localhost/');
+    const baseUrl = typeof globalThis !== 'undefined' && globalThis.location
+      ? globalThis.location.href
+      : 'http://localhost/';
+    const parsed = new URL(String(url || ''), baseUrl || 'http://localhost/');
     parsed.search = parsed.search ? '?...' : '';
     parsed.hash = '';
     return parsed.toString();
@@ -864,8 +880,12 @@ function getSourcePackUrl(entries) {
   return first ? String(first.sourcePackUrl).trim() : '';
 }
 
+/**
+ * @param {*} bytes
+ * @returns {(number|undefined)}
+ */
 function readUint32LittleEndian(bytes) {
-  if (!(bytes instanceof Uint8Array) || bytes.length < 4) return 0;
+  if (!(bytes instanceof Uint8Array) || bytes.length < 4) return undefined;
   return (bytes[0] | (bytes[1] << 8) | (bytes[2] << 16) | (bytes[3] << 24)) >>> 0;
 }
 
@@ -1719,6 +1739,7 @@ const DocumentLoader = ({
             if (!headerLengthBytes) break;
 
             const headerLength = readUint32LittleEndian(headerLengthBytes);
+            if (headerLength == null) throw new Error('Source pack stream ended inside a frame header length.');
             if (headerLength === 0) break;
             if (headerLength > SOURCE_PACK_HEADER_LIMIT_BYTES) {
               throw new Error(`Source pack frame header is too large (${headerLength} bytes).`);
