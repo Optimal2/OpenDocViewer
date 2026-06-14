@@ -107,9 +107,12 @@
       // Initial zoom mode when the first page opens.
       // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".
       defaultZoomMode: 'fit-width',
-      // Percentage of the calculated fit-width zoom used by the Custom Fit toolbar button.
-      // Example: fit-width would be 100%, factor 70 means Custom Fit becomes 70%.
+      // Percentage caps used by the Custom Size toolbar button.
+      // Width defaults to 70% of calculated fit-width zoom. Height and actual size are optional
+      // caps; leave them null to avoid limiting by viewport height or actual 1:1 size.
       customFitWidthFactorPercent: 70,
+      customFitHeightFactorPercent: null,
+      customFitActualSizeFactorPercent: null,
       // Optional page turn gesture at the top/bottom scroll edge. When enabled, continued wheel
       // scrolling at the edge fills a small progress indicator before changing page.
       edgeScrollPageTurn: {

@@ -25,6 +25,10 @@ const ZOOM_CHANGE_THRESHOLD = 0.0005;
  *     viewport on each axis. Leave at 0 to use the full client box.
  * @property {number=} widthFactor Optional multiplier for fit-width calculations. Use 0.7 to
  *     apply 70% of the normal fit-width zoom.
+ * @property {number=} heightFactor Optional multiplier for fit-height calculations. Use 0.7 to
+ *     apply 70% of the normal fit-height zoom.
+ * @property {number=} actualSizeFactor Optional multiplier for 1:1 zoom. Use 0.8 to cap the
+ *     result at 80% actual size.
  */
 
 /**
@@ -182,7 +186,7 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
     return;
   }
 
-  const { vw } = getViewportSize(viewport, opts);
+  const { vw, vh } = getViewportSize(viewport, opts);
   if (vw <= 0) {
     logger.warn('Non-positive viewport width for fit-to-width', { vw });
     return;
@@ -190,7 +194,17 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
 
   const rawFactor = Number(opts?.widthFactor ?? 1);
   const factor = Number.isFinite(rawFactor) && rawFactor > 0 ? rawFactor : 1;
-  let zoom = (vw / size.w) * factor;
+  const candidates = [(vw / size.w) * factor];
+
+  const rawHeightFactor = Number(opts?.heightFactor);
+  const heightFactor = Number.isFinite(rawHeightFactor) && rawHeightFactor > 0 ? rawHeightFactor : null;
+  if (heightFactor != null && vh > 0) candidates.push((vh / size.h) * heightFactor);
+
+  const rawActualSizeFactor = Number(opts?.actualSizeFactor);
+  const actualSizeFactor = Number.isFinite(rawActualSizeFactor) && rawActualSizeFactor > 0 ? rawActualSizeFactor : null;
+  if (actualSizeFactor != null) candidates.push(actualSizeFactor);
+
+  let zoom = Math.min(...candidates.filter((candidate) => Number.isFinite(candidate) && candidate > 0));
   if (!Number.isFinite(zoom) || zoom <= 0) zoom = 1;
 
   applyZoom(setZoom, zoom);

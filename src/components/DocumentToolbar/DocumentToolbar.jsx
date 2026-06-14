@@ -30,7 +30,7 @@ import HelpMenuButton from './HelpMenuButton.jsx';
 import ManualOverlayDialog from './ManualOverlayDialog.jsx';
 import AboutOverlayDialog from './AboutOverlayDialog.jsx';
 import usePdfPrebuildAllPages from './usePdfPrebuildAllPages.js';
-import { getPrintDefaultMode, getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import {
   clearPrintDefaultModePreference,
   getPrintDefaultModePreference,
@@ -186,10 +186,14 @@ function getPdfProgressPercent(progress) {
  * @property {ZoomState=} zoomState
  * @property {function(*): void=} setZoomMode
  * @property {number=} customFitWidthFactorPercent
+ * @property {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} customFitSizeLimits
+ * @property {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} configuredCustomFitSizeLimits
+ * @property {{ widthFactorPercent:(number|null), heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} userCustomFitSizeLimits
  * @property {number=} configuredCustomFitWidthFactorPercent
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null)=} userDefaultZoomMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} configuredDefaultZoomMode
  * @property {function(number): void=} setCustomFitWidthFactorPercent
+ * @property {function({ widthFactorPercent:*, heightFactorPercent:*, actualSizeFactorPercent:* }): void=} setCustomFitSizeLimits
  * @property {function((string|null)): void=} setDefaultZoomModePreference
  * @property {function(number): void=} setZoom
  * @property {boolean=} hasActiveSelection
@@ -334,10 +338,14 @@ const DocumentToolbar = ({
   zoomState,
   setZoomMode,
   customFitWidthFactorPercent = 70,
+  customFitSizeLimits,
+  configuredCustomFitSizeLimits,
+  userCustomFitSizeLimits,
   configuredCustomFitWidthFactorPercent = 70,
   userDefaultZoomMode = null,
   configuredDefaultZoomMode = 'FIT_WIDTH',
   setCustomFitWidthFactorPercent,
+  setCustomFitSizeLimits,
   setDefaultZoomModePreference,
   setZoom,
   hasActiveSelection = false,
@@ -1310,10 +1318,8 @@ const DocumentToolbar = ({
 
   const printDefaultSettings = useMemo(() => {
     void printPreferenceRevision;
-    const configuredDefaultMode = getPrintDefaultMode(getRuntimeConfig());
     const userDefaultMode = getPrintDefaultModePreference();
     return {
-      configuredDefaultMode,
       userDefaultMode,
     };
   }, [printPreferenceRevision]);
@@ -1525,26 +1531,6 @@ const DocumentToolbar = ({
             <div className="toolbar-split-menu-title">
               {t('toolbar.printDefault.title', { defaultValue: 'Default print scope' })}
             </div>
-            <button
-              type="button"
-              role="menuitemradio"
-              aria-checked={printDefaultSettings.userDefaultMode == null}
-              className={`toolbar-popup-menu-item toolbar-split-menu-row${printDefaultSettings.userDefaultMode == null ? ' is-selected' : ''}`}
-              onClick={() => {
-                updatePrintDefaultModePreference(null);
-                closeMenu();
-              }}
-            >
-              <span className={`toolbar-popup-menu-check${printDefaultSettings.userDefaultMode == null ? ' material-icons is-selected' : ''}`} aria-hidden="true">
-                {printDefaultSettings.userDefaultMode == null ? 'check' : ''}
-              </span>
-              <span>
-                {t('toolbar.printDefault.useSystem', {
-                  mode: getPrintModeLabel(printDefaultSettings.configuredDefaultMode),
-                  defaultValue: `Use system default (${getPrintModeLabel(printDefaultSettings.configuredDefaultMode)})`,
-                })}
-              </span>
-            </button>
             {['active', 'all'].map((mode) => {
               const selected = printDefaultSettings.userDefaultMode === mode;
               return (
@@ -1555,7 +1541,7 @@ const DocumentToolbar = ({
                   aria-checked={selected}
                   className={`toolbar-popup-menu-item toolbar-split-menu-row${selected ? ' is-selected' : ''}`}
                   onClick={() => {
-                    updatePrintDefaultModePreference(mode);
+                    updatePrintDefaultModePreference(selected ? null : mode);
                     closeMenu();
                   }}
                 >
@@ -1631,8 +1617,12 @@ const DocumentToolbar = ({
         isOneToOneActive={isOneToOneActive}
         onPercentApply={handlePercentApply}
         customFitWidthFactorPercent={customFitWidthFactorPercent}
+        customFitSizeLimits={customFitSizeLimits}
+        configuredCustomFitSizeLimits={configuredCustomFitSizeLimits}
+        userCustomFitSizeLimits={userCustomFitSizeLimits}
         configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
         onCustomFitWidthFactorChange={setCustomFitWidthFactorPercent}
+        onCustomFitSizeLimitsChange={setCustomFitSizeLimits}
         userDefaultZoomMode={userDefaultZoomMode}
         configuredDefaultZoomMode={configuredDefaultZoomMode}
         onDefaultZoomModeChange={setDefaultZoomModePreference}
@@ -2096,10 +2086,26 @@ DocumentToolbar.propTypes = {
   }),
   setZoomMode: PropTypes.func,
   customFitWidthFactorPercent: PropTypes.number,
+  customFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }),
+  configuredCustomFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }),
+  userCustomFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }),
   configuredCustomFitWidthFactorPercent: PropTypes.number,
   userDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', null]),
   configuredDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']),
   setCustomFitWidthFactorPercent: PropTypes.func,
+  setCustomFitSizeLimits: PropTypes.func,
   setDefaultZoomModePreference: PropTypes.func,
   setZoom: PropTypes.func,
   hasActiveSelection: PropTypes.bool,

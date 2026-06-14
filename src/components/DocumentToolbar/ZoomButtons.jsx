@@ -26,11 +26,10 @@
  * @param {boolean} [props.disableZoomOut=false]    Disable the "zoom out" action.
  * @param {boolean} [props.disableZoomIn=false]     Disable the "zoom in" action.
  * @param {boolean} [props.disableFits=false]       Disable fit actions.
- * @param {number=} props.customFitWidthFactorPercent
- * @param {number=} props.configuredCustomFitWidthFactorPercent
+ * @param {{ widthFactorPercent:(number|null), heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} props.userCustomFitSizeLimits
  * @param {function(number):void=} props.onCustomFitWidthFactorChange
+ * @param {function({ widthFactorPercent:*, heightFactorPercent:*, actualSizeFactorPercent:* }):void=} props.onCustomFitSizeLimitsChange
  * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null)=} props.userDefaultZoomMode
- * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} props.configuredDefaultZoomMode
  * @param {function((string|null)):void=} props.onDefaultZoomModeChange
  * @returns {JSX.Element}
  */
@@ -51,6 +50,11 @@ function clampFactorPercent(n) {
   const v = Math.round(Number(n));
   if (!Number.isFinite(v)) return null;
   return Math.max(1, Math.min(100, v));
+}
+
+function getOptionalFactorDraft(value) {
+  const next = clampFactorPercent(value);
+  return next == null ? '' : String(next);
 }
 
 /**
@@ -96,11 +100,10 @@ const ZoomButtons = ({
   disableZoomOut = false,
   disableZoomIn = false,
   disableFits = false,
-  customFitWidthFactorPercent = 70,
-  configuredCustomFitWidthFactorPercent = 70,
+  userCustomFitSizeLimits = null,
   onCustomFitWidthFactorChange,
+  onCustomFitSizeLimitsChange,
   userDefaultZoomMode = null,
-  configuredDefaultZoomMode = 'FIT_WIDTH',
   onDefaultZoomModeChange,
 }) => {
   const { t } = useTranslation();
@@ -114,7 +117,11 @@ const ZoomButtons = ({
     Number.isFinite(zoomPercent) ? String(Math.round(zoomPercent)) : ''
   );
   const [isFocused, setIsFocused] = useState(false);
-  const [factorDraft, setFactorDraft] = useState(String(clampFactorPercent(customFitWidthFactorPercent) || 70));
+  const [customSizeDraft, setCustomSizeDraft] = useState(() => ({
+    widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent),
+    heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent),
+    actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent),
+  }));
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
@@ -127,9 +134,16 @@ const ZoomButtons = ({
   }, [zoomPercent, isFocused]);
 
   useEffect(() => {
-    const next = clampFactorPercent(customFitWidthFactorPercent) || 70;
-    setFactorDraft(String(next));
-  }, [customFitWidthFactorPercent]);
+    setCustomSizeDraft({
+      widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent),
+      heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent),
+      actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent),
+    });
+  }, [
+    userCustomFitSizeLimits?.actualSizeFactorPercent,
+    userCustomFitSizeLimits?.heightFactorPercent,
+    userCustomFitSizeLimits?.widthFactorPercent,
+  ]);
 
   function applyDraft() {
     const next = parsePercentInput(draft);
@@ -154,21 +168,40 @@ const ZoomButtons = ({
     }
   }
 
-  function applyFactorDraft() {
-    const next = clampFactorPercent(factorDraft);
-    if (next == null) {
-      setFactorDraft(String(clampFactorPercent(customFitWidthFactorPercent) || 70));
-      return;
+  function parseOptionalFactorDraft(value) {
+    if (value == null || String(value).trim() === '') return null;
+    return clampFactorPercent(value);
+  }
+
+  function updateCustomSizeDraft(key, value) {
+    setCustomSizeDraft((current) => ({ ...current, [key]: value }));
+  }
+
+  function applyCustomSizeDraft(closeMenu) {
+    const next = {
+      widthFactorPercent: parseOptionalFactorDraft(customSizeDraft.widthFactorPercent),
+      heightFactorPercent: parseOptionalFactorDraft(customSizeDraft.heightFactorPercent),
+      actualSizeFactorPercent: parseOptionalFactorDraft(customSizeDraft.actualSizeFactorPercent),
+    };
+    setCustomSizeDraft({
+      widthFactorPercent: getOptionalFactorDraft(next.widthFactorPercent),
+      heightFactorPercent: getOptionalFactorDraft(next.heightFactorPercent),
+      actualSizeFactorPercent: getOptionalFactorDraft(next.actualSizeFactorPercent),
+    });
+
+    if (typeof onCustomFitSizeLimitsChange === 'function') {
+      onCustomFitSizeLimitsChange(next);
+    } else if (next.widthFactorPercent != null) {
+      onCustomFitWidthFactorChange?.(next.widthFactorPercent);
     }
-    setFactorDraft(String(next));
-    onCustomFitWidthFactorChange?.(next);
+    closeMenu?.();
   }
 
   const getZoomModeLabel = (mode) => {
     if (mode === 'ACTUAL_SIZE') return t('toolbar.zoomDefault.modes.actual', { defaultValue: 'Actual size (1:1)' });
-    if (mode === 'FIT_PAGE') return t('toolbar.zoomDefault.modes.fitPage', { defaultValue: 'Fit page' });
-    if (mode === 'FIT_CUSTOM') return t('toolbar.zoomDefault.modes.fitCustom', { defaultValue: 'Custom fit' });
-    return t('toolbar.zoomDefault.modes.fitWidth', { defaultValue: 'Fit width' });
+    if (mode === 'FIT_PAGE') return t('toolbar.zoomDefault.modes.fitPage', { defaultValue: 'Fit to screen' });
+    if (mode === 'FIT_CUSTOM') return t('toolbar.zoomDefault.modes.fitCustom', { defaultValue: 'Custom size' });
+    return t('toolbar.zoomDefault.modes.fitWidth', { defaultValue: 'Fit to width' });
   };
 
   const renderDefaultZoomModeRow = (mode, closeMenu) => {
@@ -181,7 +214,7 @@ const ZoomButtons = ({
         aria-checked={selected}
         className={`toolbar-popup-menu-item toolbar-split-menu-row${selected ? ' is-selected' : ''}`}
         onClick={() => {
-          onDefaultZoomModeChange?.(mode);
+          onDefaultZoomModeChange?.(selected ? null : mode);
           closeMenu();
         }}
       >
@@ -327,18 +360,12 @@ const ZoomButtons = ({
         <span className="material-symbols-outlined" aria-hidden="true">fit_width</span>
       </button>
 
-      {/* Custom fit-width factor */}
+      {/* Custom size */}
       <SplitToolbarButton
         onClick={fitToCustomWidth}
-        ariaLabel={t('toolbar.fitCustomWidth', {
-          percent: customFitWidthFactorPercent,
-          defaultValue: `Custom fit (${customFitWidthFactorPercent}% of width)`,
-        })}
-        title={t('toolbar.fitCustomWidthTitle', {
-          percent: customFitWidthFactorPercent,
-          defaultValue: `Fit to ${customFitWidthFactorPercent}% of the calculated fit-width zoom`,
-        })}
-        menuLabel={t('toolbar.fitCustomWidthMenu', { defaultValue: 'Custom zoom settings' })}
+        ariaLabel={t('toolbar.fitCustomWidth', { defaultValue: 'Custom size' })}
+        title={t('toolbar.fitCustomWidthTitle', { defaultValue: 'Custom size' })}
+        menuLabel={t('toolbar.fitCustomWidthMenu', { defaultValue: 'Custom size settings' })}
         className={fitCustomActive ? 'is-active' : ''}
         mainClassName={fitCustomActive ? 'is-active' : ''}
         disabled={disableFitCustom}
@@ -346,82 +373,64 @@ const ZoomButtons = ({
           <>
             <div className="toolbar-split-menu-section">
               <div className="toolbar-split-menu-title">
-                {t('toolbar.fitCustomWidthFactor.label', { defaultValue: 'Width factor' })}
+                {t('toolbar.fitCustomWidthFactor.label', { defaultValue: 'Custom size (max % of)' })}
               </div>
-              <div className="toolbar-split-menu-form">
-                <label htmlFor="odv-custom-fit-width-factor">
-                  {t('toolbar.fitCustomWidthFactor.inputLabel', { defaultValue: 'Percent of fit width' })}
-                </label>
-                <input
-                  id="odv-custom-fit-width-factor"
-                  type="number"
-                  min="1"
-                  max="100"
-                  step="1"
-                  value={factorDraft}
-                  onChange={(event) => setFactorDraft(event.target.value)}
-                  onBlur={applyFactorDraft}
-                  onKeyDown={(event) => {
-                    if (event.key === 'Enter') {
-                      event.preventDefault();
-                      applyFactorDraft();
-                      closeMenu();
-                    } else if (event.key === 'Escape') {
-                      closeMenu();
-                    }
-                  }}
-                />
+              <div className="toolbar-split-menu-description">
+                {t('toolbar.fitCustomWidthFactor.emptyHint', { defaultValue: 'Leave empty to use default values.' })}
               </div>
-              <button
-                type="button"
-                role="menuitem"
-                className="toolbar-popup-menu-item toolbar-split-menu-row"
-                onClick={() => {
-                  const next = clampFactorPercent(configuredCustomFitWidthFactorPercent) || 70;
-                  setFactorDraft(String(next));
-                  onCustomFitWidthFactorChange?.(next);
-                  closeMenu();
-                }}
-              >
-                <span className="toolbar-popup-menu-check material-icons" aria-hidden="true">restart_alt</span>
-                <span>
-                  {t('toolbar.fitCustomWidthFactor.useSystem', {
-                    percent: configuredCustomFitWidthFactorPercent,
-                    defaultValue: `Use system factor (${configuredCustomFitWidthFactorPercent}%)`,
-                  })}
-                </span>
-              </button>
+              {[
+                {
+                  key: 'widthFactorPercent',
+                  id: 'odv-custom-fit-width-factor',
+                  label: t('toolbar.fitCustomWidthFactor.widthLabel', { defaultValue: 'Window width' }),
+                },
+                {
+                  key: 'heightFactorPercent',
+                  id: 'odv-custom-fit-height-factor',
+                  label: t('toolbar.fitCustomWidthFactor.heightLabel', { defaultValue: 'Window height' }),
+                },
+                {
+                  key: 'actualSizeFactorPercent',
+                  id: 'odv-custom-fit-actual-size-factor',
+                  label: t('toolbar.fitCustomWidthFactor.actualSizeLabel', { defaultValue: 'Actual size' }),
+                },
+              ].map((field) => (
+                <div className="toolbar-split-menu-form toolbar-split-menu-form--inline" key={field.key}>
+                  <label htmlFor={field.id}>{field.label}</label>
+                  <input
+                    id={field.id}
+                    type="number"
+                    min="1"
+                    max="100"
+                    step="1"
+                    value={customSizeDraft[field.key]}
+                    onChange={(event) => updateCustomSizeDraft(field.key, event.target.value)}
+                    onBlur={() => applyCustomSizeDraft()}
+                    onKeyDown={(event) => {
+                      if (event.key === 'Enter') {
+                        event.preventDefault();
+                        applyCustomSizeDraft(closeMenu);
+                      } else if (event.key === 'Escape') {
+                        closeMenu();
+                      }
+                    }}
+                  />
+                </div>
+              ))}
             </div>
             <div className="toolbar-split-menu-section">
               <div className="toolbar-split-menu-title">
-                {t('toolbar.zoomDefault.title', { defaultValue: 'Startup zoom' })}
+                {t('toolbar.zoomDefault.title', { defaultValue: 'Default zoom/size' })}
               </div>
-              <button
-                type="button"
-                role="menuitemradio"
-                aria-checked={userDefaultZoomMode == null}
-                className={`toolbar-popup-menu-item toolbar-split-menu-row${userDefaultZoomMode == null ? ' is-selected' : ''}`}
-                onClick={() => {
-                  onDefaultZoomModeChange?.(null);
-                  closeMenu();
-                }}
-              >
-                <span className={`toolbar-popup-menu-check${userDefaultZoomMode == null ? ' material-icons is-selected' : ''}`} aria-hidden="true">
-                  {userDefaultZoomMode == null ? 'check' : ''}
-                </span>
-                <span>
-                  {t('toolbar.zoomDefault.useSystem', {
-                    mode: getZoomModeLabel(configuredDefaultZoomMode),
-                    defaultValue: `Use system default (${getZoomModeLabel(configuredDefaultZoomMode)})`,
-                  })}
-                </span>
-              </button>
+              <div className="toolbar-split-menu-description">
+                {t('toolbar.zoomDefault.description', { defaultValue: 'Used for each new session.' })}
+              </div>
               {['ACTUAL_SIZE', 'FIT_PAGE', 'FIT_CUSTOM', 'FIT_WIDTH'].map((mode) => renderDefaultZoomModeRow(mode, closeMenu))}
             </div>
           </>
         )}
       >
-        <span className="material-symbols-outlined" aria-hidden="true">center_focus_strong</span>
+        <span className="toolbar-custom-fit-mark" aria-hidden="true">1:X</span>
       </SplitToolbarButton>
     </>
   );
@@ -441,11 +450,14 @@ ZoomButtons.propTypes = {
   disableZoomOut: PropTypes.bool,
   disableZoomIn: PropTypes.bool,
   disableFits: PropTypes.bool,
-  customFitWidthFactorPercent: PropTypes.number,
-  configuredCustomFitWidthFactorPercent: PropTypes.number,
   onCustomFitWidthFactorChange: PropTypes.func,
+  onCustomFitSizeLimitsChange: PropTypes.func,
+  userCustomFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }),
   userDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', null]),
-  configuredDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']),
   onDefaultZoomModeChange: PropTypes.func,
 };
 

@@ -91,7 +91,7 @@ function isBlobAssetUrl(url) {
  * @param {boolean=} props.forceRender
  * @param {Array<any>} props.allPages
  * @param {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM')=} props.zoomMode
- * @param {number=} props.customFitWidthFactorPercent
+ * @param {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} props.customFitSizeLimits
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {function({ requestedPageNumber:number, displayedPageNumber:number, pending:boolean, blockingLoading:boolean, hasError:boolean }): void=} props.onDisplayStateChange
  * @returns {React.ReactElement}
@@ -108,7 +108,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     forceRender,
     allPages,
     zoomMode = 'FIT_PAGE',
-    customFitWidthFactorPercent = 70,
+    customFitSizeLimits = null,
     onToggleFitZoomMode,
     onDisplayStateChange = () => {},
   },
@@ -222,21 +222,51 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, []);
 
   const normalizedRotation = ((Number(imageProperties?.rotation || 0) % 360) + 360) % 360;
-  const normalizedCustomFitWidthFactorPercent = useMemo(() => {
-    const numeric = Math.round(Number(customFitWidthFactorPercent));
-    if (!Number.isFinite(numeric)) return 70;
-    return Math.max(1, Math.min(100, numeric));
-  }, [customFitWidthFactorPercent]);
+  const normalizedCustomFitSizeLimits = useMemo(() => {
+    const normalizeRequired = (value, fallback) => {
+      const numeric = Math.round(Number(value));
+      if (!Number.isFinite(numeric)) return fallback;
+      return Math.max(1, Math.min(100, numeric));
+    };
+    const normalizeOptional = (value) => {
+      if (value == null || String(value).trim?.() === '') return null;
+      const numeric = Math.round(Number(value));
+      if (!Number.isFinite(numeric)) return null;
+      return Math.max(1, Math.min(100, numeric));
+    };
+    return {
+      widthFactorPercent: normalizeRequired(customFitSizeLimits?.widthFactorPercent, 70),
+      heightFactorPercent: normalizeOptional(customFitSizeLimits?.heightFactorPercent),
+      actualSizeFactorPercent: normalizeOptional(customFitSizeLimits?.actualSizeFactorPercent),
+    };
+  }, [customFitSizeLimits]);
 
   /**
-   * @param {*} percent
-   * @returns {number}
+   * @param {*} limits
+   * @returns {{ widthFactor:number, heightFactor:(number|null), actualSizeFactor:(number|null) }}
    */
-  const resolveCustomFitWidthFactor = useCallback((percent = normalizedCustomFitWidthFactorPercent) => {
-    const numeric = Math.round(Number(percent));
-    const safePercent = Number.isFinite(numeric) ? Math.max(1, Math.min(100, numeric)) : 70;
-    return safePercent / 100;
-  }, [normalizedCustomFitWidthFactorPercent]);
+  const resolveCustomFitOptions = useCallback((limits = normalizedCustomFitSizeLimits) => {
+    const normalizedLimits = typeof limits === 'number'
+      ? { ...normalizedCustomFitSizeLimits, widthFactorPercent: limits }
+      : limits && typeof limits === 'object'
+        ? limits
+        : normalizedCustomFitSizeLimits;
+    const widthPercent = Math.round(Number(normalizedLimits.widthFactorPercent));
+    const safeWidthPercent = Number.isFinite(widthPercent) ? Math.max(1, Math.min(100, widthPercent)) : 70;
+
+    const resolveOptionalFactor = (percent) => {
+      if (percent == null) return null;
+      const numeric = Math.round(Number(percent));
+      if (!Number.isFinite(numeric)) return null;
+      return Math.max(1, Math.min(100, numeric)) / 100;
+    };
+
+    return {
+      widthFactor: safeWidthPercent / 100,
+      heightFactor: resolveOptionalFactor(normalizedLimits.heightFactorPercent),
+      actualSizeFactor: resolveOptionalFactor(normalizedLimits.actualSizeFactorPercent),
+    };
+  }, [normalizedCustomFitSizeLimits]);
 
   const fallbackRenderSize = useMemo(() => {
     const naturalSizeMatchesDisplayedAsset = naturalSize.pageIndex === displayedAsset.pageIndex
@@ -387,13 +417,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
    * @param {number=} factorPercent
    * @returns {void}
    */
-  const fitToCustomWidth = useCallback((factorPercent = normalizedCustomFitWidthFactorPercent) => {
+  const fitToCustomWidth = useCallback((limits = normalizedCustomFitSizeLimits) => {
     const surface = getActiveRenderSurface();
     if (!surface) return;
-    calculateFitToWidthZoom(surface, renderViewportRef, setZoom, {
-      widthFactor: resolveCustomFitWidthFactor(factorPercent),
-    });
-  }, [getActiveRenderSurface, normalizedCustomFitWidthFactorPercent, resolveCustomFitWidthFactor, setZoom]);
+    calculateFitToWidthZoom(surface, renderViewportRef, setZoom, resolveCustomFitOptions(limits));
+  }, [getActiveRenderSurface, normalizedCustomFitSizeLimits, resolveCustomFitOptions, setZoom]);
 
   /**
    * Apply sticky fit modes before a newly loaded page becomes visible. That avoids a one-frame jump
@@ -410,13 +438,11 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     if (zoomMode === 'FIT_WIDTH') {
       calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom);
     } else if (zoomMode === 'FIT_CUSTOM') {
-      calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom, {
-        widthFactor: resolveCustomFitWidthFactor(),
-      });
+      calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom, resolveCustomFitOptions());
     } else if (zoomMode === 'FIT_PAGE') {
       calculateFitToScreenZoom(syntheticSurface, renderViewportRef, setZoom);
     }
-  }, [resolveCustomFitWidthFactor, setZoom, zoomMode]);
+  }, [resolveCustomFitOptions, setZoom, zoomMode]);
 
   /**
    * @returns {void}

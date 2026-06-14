@@ -9,6 +9,12 @@
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 /** @typedef {'active'|'all'} PrintDefaultMode */
+/**
+ * @typedef {Object} ViewerCustomFitSizeLimits
+ * @property {number=} widthFactorPercent
+ * @property {(number|null)=} heightFactorPercent
+ * @property {(number|null)=} actualSizeFactorPercent
+ */
 
 /**
  * @typedef {Object} PrintSelectionWorkspaceConfig
@@ -165,13 +171,44 @@ export function normalizeCustomFitWidthFactorPercent(value, fallback = 70) {
 }
 
 /**
+ * Normalize an optional custom-size limit percentage. Blank values mean "no user limit".
+ *
+ * @param {*} value
+ * @returns {(number|null)}
+ */
+export function normalizeOptionalCustomFitFactorPercent(value) {
+  if (value == null || String(value).trim() === '') return null;
+  const numeric = Math.round(Number(value));
+  if (!Number.isFinite(numeric)) return null;
+  return Math.max(1, Math.min(100, numeric));
+}
+
+/**
+ * Normalize the optional user custom-size limits.
+ *
+ * @param {*} value
+ * @returns {{ widthFactorPercent: (number|null), heightFactorPercent: (number|null), actualSizeFactorPercent: (number|null) }}
+ */
+export function normalizeCustomFitSizeLimitPreference(value) {
+  if (!value || typeof value !== 'object' || Array.isArray(value)) {
+    return { widthFactorPercent: null, heightFactorPercent: null, actualSizeFactorPercent: null };
+  }
+
+  return {
+    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(value.widthFactorPercent ?? value.widthPercent),
+    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(value.heightFactorPercent ?? value.heightPercent),
+    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(value.actualSizeFactorPercent ?? value.actualPercent),
+  };
+}
+
+/**
  * Resolve the initial page zoom mode.
  *
  * Runtime config value: `viewer.defaultZoomMode`
  * Supported values:
  * - `fit-page`: fit the full page inside the viewport
  * - `fit-width`: fit the page width to the viewport
- * - `custom-fit-width`: fit page width and multiply by `viewer.customFitWidthFactorPercent`
+ * - `custom-fit-width`: use the custom size caps from `viewer.customFit*FactorPercent`
  * - `actual-size`: start at 100%
  *
  * @param {Object=} cfg
@@ -182,7 +219,7 @@ export function getViewerDefaultZoomMode(cfg = getRuntimeConfig()) {
 }
 
 /**
- * Resolve the custom fit-width factor percentage.
+ * Resolve the custom-size width factor percentage.
  *
  * Runtime config value: `viewer.customFitWidthFactorPercent`
  * Supported range: 1..100, where 70 means 70% of the calculated fit-width zoom.
@@ -195,6 +232,25 @@ export function getViewerCustomFitWidthFactorPercent(cfg = getRuntimeConfig()) {
     cfg?.viewer?.customFitWidthFactorPercent ?? cfg?.viewer?.customFitWidthPercent,
     70
   );
+}
+
+/**
+ * Resolve the configured custom-size limits. Width defaults to the legacy site.config value;
+ * height and actual-size limits are opt-in only.
+ *
+ * @param {Object=} cfg
+ * @returns {{ widthFactorPercent: number, heightFactorPercent: (number|null), actualSizeFactorPercent: (number|null) }}
+ */
+export function getViewerCustomFitSizeLimits(cfg = getRuntimeConfig()) {
+  return {
+    widthFactorPercent: getViewerCustomFitWidthFactorPercent(cfg),
+    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(
+      cfg?.viewer?.customFitHeightFactorPercent ?? cfg?.viewer?.customFitHeightPercent
+    ),
+    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(
+      cfg?.viewer?.customFitActualSizeFactorPercent ?? cfg?.viewer?.customFitActualPercent
+    ),
+  };
 }
 
 /**

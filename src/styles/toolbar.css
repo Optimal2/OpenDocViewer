@@ -436,8 +436,14 @@
   color: var(--text-muted-color, #64748b);
   font-size: 0.72rem;
   font-weight: 700;
-  text-transform: uppercase;
-  letter-spacing: 0.02em;
+  letter-spacing: 0;
+}
+
+.toolbar-split-menu-description {
+  padding: 0 8px 4px;
+  color: var(--text-muted-color, #64748b);
+  font-size: 0.72rem;
+  line-height: 1.25;
 }
 
 .toolbar .toolbar-popup-menu-item.toolbar-split-menu-row {
@@ -466,6 +472,22 @@
   border-radius: 7px;
   background: var(--canvas-background-color);
   color: var(--text-color);
+}
+
+.toolbar-split-menu-form--inline {
+  padding-block: 3px;
+}
+
+.toolbar-custom-fit-mark {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 1.65rem;
+  font-size: 0.72rem;
+  font-weight: 800;
+  letter-spacing: 0;
+  line-height: 1;
+  user-select: none;
 }
 
 .toolbar .toolbar-popup-menu-item {
