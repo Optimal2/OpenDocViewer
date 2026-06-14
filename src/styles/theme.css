@@ -132,10 +132,17 @@ body {
   user-select: none;
 }
 
-input, textarea, select, label, button, [contenteditable="true"], .odv-allow-select {
+input, textarea, select, label, [contenteditable="true"], .odv-allow-select {
   -webkit-user-select: text;
   user-select: text;
   caret-color: auto;
+}
+
+button,
+button * {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
 }
 
 #root {

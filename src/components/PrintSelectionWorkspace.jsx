@@ -874,6 +874,19 @@ const PrintSelectionWorkspace = ({
     if (lightboxSide === 'right') removeIndexFromLightboxList(lightboxIndex);
   }, [draftSet, lightboxIndex, lightboxSide, removeIndexFromLightboxList, removeIndexes]);
 
+  const runLightboxPrimaryAction = useCallback(() => {
+    if (!lightboxItem) return false;
+    if (lightboxCanAdd) {
+      addLightboxPage();
+      return true;
+    }
+    if (lightboxCanRemove) {
+      removeLightboxPage();
+      return true;
+    }
+    return false;
+  }, [addLightboxPage, lightboxCanAdd, lightboxCanRemove, lightboxItem, removeLightboxPage]);
+
   const addDocument = useCallback((documentKey, event) => {
     stopSelectionEvent(event);
     addIndexes(getIndexesForDocument(naturalIndexes, itemByIndex, documentKey));
@@ -1448,12 +1461,18 @@ const PrintSelectionWorkspace = ({
         event.preventDefault();
         event.stopPropagation();
         stepLightbox(1);
+        return;
+      }
+      if (key === ' ' || key === 'Spacebar' || event.code === 'Space') {
+        if (!runLightboxPrimaryAction()) return;
+        event.preventDefault();
+        event.stopPropagation();
       }
     };
 
     window.addEventListener('keydown', handleKeyDown, true);
     return () => window.removeEventListener('keydown', handleKeyDown, true);
-  }, [closeLightbox, lightboxItem, stepLightbox]);
+  }, [closeLightbox, lightboxItem, runLightboxPrimaryAction, stepLightbox]);
 
   const startPanelResize = useCallback((event) => {
     const bodyNode = bodyRef.current;
