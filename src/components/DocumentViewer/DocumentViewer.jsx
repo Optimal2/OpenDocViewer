@@ -443,6 +443,7 @@ const DocumentViewer = () => {
           bundle={bundle || null}
           initialSequence={initialPrintSelectionWorkspaceSequence}
           documentHeaderTemplate={printSelectionWorkspaceConfig.documentHeaderTemplate}
+          previewInfoTemplate={printSelectionWorkspaceConfig.previewInfoTemplate}
           zoomPercent={printSelectionZoomPercent}
           onToolbarStateChange={setPrintSelectionToolbarState}
           onCommit={commitPrintSelectionWorkspace}

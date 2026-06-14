@@ -116,7 +116,14 @@ header shown above grouped pages:
 print: {
   selectionWorkspace: {
     enabled: true,
-    documentHeaderTemplate: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+    documentHeaderTemplate: {
+      en: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages',
+      sv: 'Dokument {documentNumber} av {totalDocuments} · {pageCount} sidor'
+    },
+    previewInfoTemplate: {
+      en: 'Page {sourcePage} of {totalPages} · {documentNumber}-{documentPageNumber}',
+      sv: 'Sida {sourcePage} av {totalPages} · {documentNumber}-{documentPageNumber}'
+    }
   }
 }
 ```
@@ -124,6 +131,10 @@ print: {
 The header template supports simple tokens from the grouped document and bundle metadata, including
 `{documentNumber}`, `{totalDocuments}`, `{documentId}`, `{pageCount}`, `{firstPage}`, `{lastPage}`,
 `{metadata.someField}`, `{metadataDetails.someField}`, and `{metaById.123.selectedValue}`.
+The preview info template supports the same document metadata tokens plus page-oriented values such
+as `{sourcePage}`, `{printPage}`, `{totalPages}`, `{documentPageNumber}`, and
+`{documentPageCount}`. Both templates may be plain strings or localized objects such as
+`{ en: "...", sv: "..." }`.
 
 ## Edge Scroll Page Turn
 

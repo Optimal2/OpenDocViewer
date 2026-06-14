@@ -13,7 +13,8 @@
 /**
  * @typedef {Object} PrintSelectionWorkspaceConfig
  * @property {boolean} enabled
- * @property {string} documentHeaderTemplate
+ * @property {*} documentHeaderTemplate
+ * @property {*} previewInfoTemplate
  */
 
 /**
@@ -218,25 +219,28 @@ export function getPrintDefaultMode(cfg = getRuntimeConfig()) {
  * Runtime config values:
  * - `print.selectionWorkspace.enabled`
  * - `print.selectionWorkspace.documentHeaderTemplate`
+ * - `print.selectionWorkspace.previewInfoTemplate`
  *
  * The document header template supports simple tokens such as `{documentNumber}`,
  * `{totalDocuments}`, `{documentId}`, `{pageCount}`, `{metadata.caseNumber}`, and
- * `{metaById.123.selectedValue}`.
+ * `{metaById.123.selectedValue}`. The preview info template supports the same metadata tokens
+ * plus page-oriented values such as `{sourcePage}`, `{printPage}`, `{documentPageNumber}`, and
+ * `{documentPageCount}`.
  *
  * @param {Object=} cfg
  * @returns {PrintSelectionWorkspaceConfig}
  */
 export function getPrintSelectionWorkspaceConfig(cfg = getRuntimeConfig()) {
   const raw = cfg?.print?.selectionWorkspace ?? cfg?.viewer?.printSelectionWorkspace ?? {};
-  const template = String(
-    raw?.documentHeaderTemplate
-    ?? raw?.headerTemplate
-    ?? 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
-  ).trim();
+  const defaultHeaderTemplate = 'Document {documentNumber} of {totalDocuments} · {pageCount} pages';
+  const defaultPreviewInfoTemplate = 'Page {sourcePage} of {totalPages} · {documentNumber}-{documentPageNumber}';
+  const documentHeaderTemplate = raw?.documentHeaderTemplate ?? raw?.headerTemplate ?? defaultHeaderTemplate;
+  const previewInfoTemplate = raw?.previewInfoTemplate ?? raw?.lightboxInfoTemplate ?? defaultPreviewInfoTemplate;
 
   return {
     enabled: normalizeBoolean(raw?.enabled, true),
-    documentHeaderTemplate: template || 'Document {documentNumber} of {totalDocuments} · {pageCount} pages',
+    documentHeaderTemplate: documentHeaderTemplate || defaultHeaderTemplate,
+    previewInfoTemplate: previewInfoTemplate || defaultPreviewInfoTemplate,
   };
 }
 

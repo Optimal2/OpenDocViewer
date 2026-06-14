@@ -188,12 +188,20 @@
       // override in viewer preferences. Supported values: "active", "all".
       defaultPageMode: 'active',
 
-      // Full-page print selection workspace. The document header template supports tokens such
-      // as {documentNumber}, {totalDocuments}, {documentId}, {pageCount},
-      // {metadata.caseNumber}, and {metaById.123.selectedValue}.
+      // Full-page print selection workspace. Templates support tokens such as {documentNumber},
+      // {totalDocuments}, {documentId}, {documentTitle}, {pageCount}, {sourcePage},
+      // {printPage}, {documentPageNumber}, {metadata.caseNumber}, and
+      // {metaById.123.selectedValue}. Values may be localized objects.
       selectionWorkspace: {
         enabled: true,
-        documentHeaderTemplate: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+        documentHeaderTemplate: {
+          en: 'Document {documentNumber} of {totalDocuments} · {pageCount} pages',
+          sv: 'Dokument {documentNumber} av {totalDocuments} · {pageCount} sidor'
+        },
+        previewInfoTemplate: {
+          en: 'Page {sourcePage} of {totalPages} · {documentNumber}-{documentPageNumber}',
+          sv: 'Sida {sourcePage} av {totalPages} · {documentNumber}-{documentPageNumber}'
+        }
       },
 
       // Optional generated-PDF backend for print output. Direct print remains the default.

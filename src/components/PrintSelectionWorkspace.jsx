@@ -10,6 +10,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
+import { resolveLocalizedValue } from '../utils/localizedValue.js';
 
 const MIN_THUMBNAIL_PERCENT = 70;
 const DEFAULT_THUMBNAIL_PERCENT = 120;
@@ -98,16 +99,51 @@ function getDocumentEntry(bundle, documentId, documentNumber) {
 }
 
 function applyTemplate(template, context, documentEntry) {
-  return String(template || '').replace(/\{([^}]+)\}/g, (match, rawToken) => {
-    const token = String(rawToken || '').trim();
+  return String(template || '').replace(/\{\{([^}]+)\}\}|\{([^}]+)\}/g, (match, rawDoubleToken, rawSingleToken) => {
+    const token = String(rawDoubleToken || rawSingleToken || '').trim();
     if (!token) return match;
     if (Object.prototype.hasOwnProperty.call(context, token)) return String(context[token] ?? '');
+    if (token.includes('.')) {
+      const fromContext = resolvePathValue(context, token);
+      if (fromContext) return fromContext;
+    }
     if (token.startsWith('metadata.')) return resolvePathValue(documentEntry?.metadata, token.slice('metadata.'.length));
     if (token.startsWith('metadataDetails.')) return resolvePathValue(documentEntry?.metadataDetails, token.slice('metadataDetails.'.length));
     if (token.startsWith('metaById.')) return resolvePathValue(documentEntry?.metaById, token.slice('metaById.'.length));
     if (token.startsWith('meta.')) return resolvePathValue(documentEntry?.meta, token.slice('meta.'.length));
     return '';
   });
+}
+
+function buildPageTemplateContext(item, totalPages, printPageNumber = null, documentEntry = null) {
+  const documentPageNumber = getDocumentPageNumber(item);
+  const documentPageCount = getDocumentPageCount(item);
+  const documentId = String(item?.documentId || documentEntry?.documentId || '').trim();
+  const documentTitle = String(documentEntry?.title || documentEntry?.name || documentId || '').trim();
+  const sourcePage = Math.max(1, Number(item?.pageNumber) || 1);
+  const safePrintPage = Math.max(0, Math.floor(Number(printPageNumber) || 0));
+  return {
+    page: sourcePage,
+    sourcePage,
+    printPage: safePrintPage || '',
+    totalPages: Math.max(0, Math.floor(Number(totalPages) || 0)),
+    documentNumber: Math.max(1, Number(item?.documentNumber) || 1),
+    totalDocuments: Math.max(1, Number(item?.totalDocuments) || 1),
+    documentId,
+    documentTitle,
+    documentPageNumber,
+    documentPageCount: documentPageCount || '',
+    doc: {
+      ...(documentEntry && typeof documentEntry === 'object' ? documentEntry : {}),
+      id: documentId,
+      documentId,
+      documentNumber: Math.max(1, Number(item?.documentNumber) || 1),
+      totalDocuments: Math.max(1, Number(item?.totalDocuments) || 1),
+      documentPageNumber,
+      documentPageCount: documentPageCount || '',
+      title: documentTitle,
+    },
+  };
 }
 
 function buildPageItems(allPages) {
@@ -566,23 +602,30 @@ const PrintSelectionWorkspace = ({
   bundle,
   initialSequence,
   documentHeaderTemplate,
+  previewInfoTemplate,
   zoomPercent = 120,
   onToolbarStateChange,
   onCommit,
   onCancel,
 }) => {
-  const { t } = useTranslation('common');
+  const { t, i18n } = useTranslation('common');
   const totalPages = Array.isArray(allPages) ? allPages.length : 0;
   const pageItems = useMemo(() => buildPageItems(allPages), [allPages]);
   const itemByIndex = useMemo(() => new Map(pageItems.map((item) => [item.originalIndex, item])), [pageItems]);
   const naturalIndexes = useMemo(() => pageItems.map((item) => item.originalIndex), [pageItems]);
+  const resolvedDocumentHeaderTemplate = useMemo(() => (
+    resolveLocalizedValue(documentHeaderTemplate, i18n) || 'Document {documentNumber} of {totalDocuments} · {pageCount} pages'
+  ), [documentHeaderTemplate, i18n]);
+  const resolvedPreviewInfoTemplate = useMemo(() => (
+    resolveLocalizedValue(previewInfoTemplate, i18n) || 'Page {sourcePage} of {totalPages} · {documentNumber}-{documentPageNumber}'
+  ), [i18n, previewInfoTemplate]);
   const documentModeAvailable = useMemo(
     () => hasReliableDocumentGrouping(pageItems, bundle),
     [bundle, pageItems]
   );
   const documentGroups = useMemo(
-    () => buildDocumentGroups(pageItems, bundle, documentHeaderTemplate),
-    [bundle, documentHeaderTemplate, pageItems]
+    () => buildDocumentGroups(pageItems, bundle, resolvedDocumentHeaderTemplate),
+    [bundle, pageItems, resolvedDocumentHeaderTemplate]
   );
   const initialIndexes = useMemo(
     () => normalizeIndexSequence(initialSequence, totalPages),
@@ -599,6 +642,7 @@ const PrintSelectionWorkspace = ({
   const [rightSelected, setRightSelected] = useState([]);
   const [workspaceMode, setWorkspaceMode] = useState(() => (documentModeAvailable ? 'documents' : 'pages'));
   const [panelMode, setPanelMode] = useState('both');
+  const [hideIncludedLeftPages, setHideIncludedLeftPages] = useState(false);
   const [lightboxState, setLightboxState] = useState(null);
   const [selectionBox, setSelectionBox] = useState(null);
   const [draftHistory, setDraftHistory] = useState({ undo: null, redo: null });
@@ -637,8 +681,8 @@ const PrintSelectionWorkspace = ({
   const leftSelectedSet = useMemo(() => new Set(leftSelected), [leftSelected]);
   const rightSelectedSet = useMemo(() => new Set(rightSelected), [rightSelected]);
   const draftDocumentGroups = useMemo(
-    () => buildDraftDocumentGroups(draftIndexes, itemByIndex, bundle, documentHeaderTemplate),
-    [bundle, documentHeaderTemplate, draftIndexes, itemByIndex]
+    () => buildDraftDocumentGroups(draftIndexes, itemByIndex, bundle, resolvedDocumentHeaderTemplate),
+    [bundle, draftIndexes, itemByIndex, resolvedDocumentHeaderTemplate]
   );
   const draftDocumentOrderAnalysis = useMemo(
     () => analyzeDraftDocumentOrder(draftIndexes, itemByIndex),
@@ -649,6 +693,16 @@ const PrintSelectionWorkspace = ({
     () => naturalIndexes.filter((index) => !draftSet.has(index)),
     [draftSet, naturalIndexes]
   );
+  const leftSourceIndexes = hideIncludedLeftPages ? availableLeftIndexes : naturalIndexes;
+  const leftSourceIndexSet = useMemo(() => new Set(leftSourceIndexes), [leftSourceIndexes]);
+  const leftDocumentGroups = useMemo(() => (
+    documentGroups
+      .map((group) => ({
+        ...group,
+        pages: group.pages.filter((item) => leftSourceIndexSet.has(item.originalIndex)),
+      }))
+      .filter((group) => group.pages.length > 0)
+  ), [documentGroups, leftSourceIndexSet]);
   const visibleLeftPanel = panelMode !== 'right';
   const visibleRightPanel = panelMode !== 'left';
   const panelModeClass = `is-panel-mode-${panelMode}`;
@@ -658,9 +712,28 @@ const PrintSelectionWorkspace = ({
     [draftDocumentOrderAnalysis.warnings, workspaceModeIsDocuments]
   );
   const lightboxIndex = lightboxState?.index ?? null;
+  const lightboxSide = lightboxState?.side === 'right' ? 'right' : 'left';
   const lightboxIndexes = Array.isArray(lightboxState?.indexes) ? lightboxState.indexes : naturalIndexes;
   const lightboxPosition = lightboxIndex == null ? -1 : lightboxIndexes.indexOf(lightboxIndex);
   const lightboxItem = lightboxIndex == null ? null : itemByIndex.get(lightboxIndex) || null;
+  const lightboxItemIncluded = lightboxIndex != null && draftSet.has(lightboxIndex);
+  const lightboxDocumentEntry = lightboxItem ? getDocumentEntry(bundle, lightboxItem.documentId, lightboxItem.documentNumber) : null;
+  const lightboxInfoText = lightboxItem
+    ? applyTemplate(
+        resolvedPreviewInfoTemplate,
+        buildPageTemplateContext(
+          lightboxItem,
+          totalPages,
+          lightboxSide === 'right' ? lightboxPosition + 1 : null,
+          lightboxDocumentEntry
+        ),
+        lightboxDocumentEntry
+      )
+    : '';
+  const showLightboxAdd = !!lightboxItem && lightboxSide === 'left';
+  const showLightboxRemove = !!lightboxItem && (lightboxSide === 'right' || !hideIncludedLeftPages);
+  const lightboxCanAdd = showLightboxAdd && !lightboxItemIncluded;
+  const lightboxCanRemove = showLightboxRemove && lightboxItemIncluded;
   const isDirty = useMemo(() => !sequencesEqual(draftIndexes, initialIndexes), [draftIndexes, initialIndexes]);
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
   const canUndoDraftChange = Array.isArray(draftHistory.undo);
@@ -770,6 +843,37 @@ const PrintSelectionWorkspace = ({
     applyDraftChange([]);
     setRightSelected([]);
   }, [applyDraftChange]);
+
+  const removeIndexFromLightboxList = useCallback((removedIndex) => {
+    setLightboxState((current) => {
+      if (!current) return current;
+      const currentIndexes = Array.isArray(current.indexes) ? current.indexes : [];
+      const previousPosition = Math.max(0, currentIndexes.indexOf(removedIndex));
+      const nextIndexes = currentIndexes.filter((index) => index !== removedIndex);
+      if (nextIndexes.length <= 0) return null;
+      const nextIndex = current.index === removedIndex
+        ? nextIndexes[Math.min(previousPosition, nextIndexes.length - 1)]
+        : current.index;
+      return {
+        ...current,
+        index: nextIndexes.includes(nextIndex) ? nextIndex : nextIndexes[Math.min(previousPosition, nextIndexes.length - 1)],
+        indexes: nextIndexes,
+      };
+    });
+  }, []);
+
+  const addLightboxPage = useCallback(() => {
+    if (lightboxIndex == null || draftSet.has(lightboxIndex)) return;
+    addIndexes([lightboxIndex]);
+    if (lightboxSide === 'left' && hideIncludedLeftPages) removeIndexFromLightboxList(lightboxIndex);
+  }, [addIndexes, draftSet, hideIncludedLeftPages, lightboxIndex, lightboxSide, removeIndexFromLightboxList]);
+
+  const removeLightboxPage = useCallback(() => {
+    if (lightboxIndex == null || !draftSet.has(lightboxIndex)) return;
+    removeIndexes([lightboxIndex]);
+    if (lightboxSide === 'right') removeIndexFromLightboxList(lightboxIndex);
+  }, [draftSet, lightboxIndex, lightboxSide, removeIndexFromLightboxList, removeIndexes]);
+
   const addDocument = useCallback((documentKey, event) => {
     stopSelectionEvent(event);
     addIndexes(getIndexesForDocument(naturalIndexes, itemByIndex, documentKey));
@@ -1279,10 +1383,13 @@ const PrintSelectionWorkspace = ({
     event?.preventDefault?.();
     event?.stopPropagation?.();
     if (!itemByIndex.has(originalIndex)) return;
-    const sourceIndexes = side === 'right' ? draftIndexes : naturalIndexes;
+    const normalizedSide = side === 'right' ? 'right' : 'left';
+    const sourceIndexes = normalizedSide === 'right'
+      ? draftIndexes
+      : (hideIncludedLeftPages ? availableLeftIndexes : naturalIndexes);
     const indexes = sourceIndexes.filter((index) => itemByIndex.has(index));
-    setLightboxState({ index: originalIndex, indexes });
-  }, [draftIndexes, itemByIndex, naturalIndexes]);
+    setLightboxState({ index: originalIndex, indexes, side: normalizedSide });
+  }, [availableLeftIndexes, draftIndexes, hideIncludedLeftPages, itemByIndex, naturalIndexes]);
 
   const closeLightbox = useCallback(() => {
     setLightboxState(null);
@@ -1301,6 +1408,23 @@ const PrintSelectionWorkspace = ({
       return { ...current, index: indexes[nextPosition] ?? current.index };
     });
   }, [naturalIndexes]);
+
+  useEffect(() => {
+    setLightboxState((current) => {
+      if (!current) return current;
+      const sourceIndexes = current.side === 'right'
+        ? draftIndexes
+        : (hideIncludedLeftPages ? availableLeftIndexes : naturalIndexes);
+      const indexes = sourceIndexes.filter((index) => itemByIndex.has(index));
+      if (indexes.length <= 0) return null;
+      if (sequencesEqual(indexes, current.indexes || []) && indexes.includes(current.index)) return current;
+      const previousPosition = Math.max(0, (current.indexes || []).indexOf(current.index));
+      const nextIndex = indexes.includes(current.index)
+        ? current.index
+        : indexes[Math.min(previousPosition, indexes.length - 1)];
+      return { ...current, index: nextIndex, indexes };
+    });
+  }, [availableLeftIndexes, draftIndexes, hideIncludedLeftPages, itemByIndex, naturalIndexes]);
 
   useEffect(() => {
     if (!lightboxItem) return undefined;
@@ -1617,32 +1741,58 @@ const PrintSelectionWorkspace = ({
             onDrop={dropOnLeft}
           >
             <div className="print-selection-panel-header">
-              <h3>{t('printSelectionWorkspace.availablePages', { defaultValue: 'Available pages' })}</h3>
-              <span>{t('printSelectionWorkspace.availableCount', { count: availableLeftIndexes.length, defaultValue: `${availableLeftIndexes.length} available` })}</span>
+              <div className="print-selection-panel-header-main">
+                <h3>{t('printSelectionWorkspace.availablePages', { defaultValue: 'Available pages' })}</h3>
+                <label className="print-selection-hide-included-toggle">
+                  <input
+                    type="checkbox"
+                    checked={hideIncludedLeftPages}
+                    onChange={(event) => setHideIncludedLeftPages(!!event.target.checked)}
+                  />
+                  <span>{t('printSelectionWorkspace.hideIncludedPages', { defaultValue: 'Hide added pages' })}</span>
+                </label>
+              </div>
+              <span>{hideIncludedLeftPages
+                ? t('printSelectionWorkspace.remainingCount', { count: availableLeftIndexes.length, defaultValue: `${availableLeftIndexes.length} remaining` })
+                : t('printSelectionWorkspace.sourceCount', { count: leftSourceIndexes.length, defaultValue: `${leftSourceIndexes.length} pages` })}</span>
             </div>
             <div
               ref={leftPanelRef}
               className="print-selection-panel-scroll"
               onPointerDown={(event) => startMarqueeSelection('left', event)}
             >
-              {documentGroups.map((group) => (
-                <section key={group.key} className="print-selection-document-group">
-                  <div
-                    className="print-selection-document-header print-selection-document-header-draggable"
-                    draggable
-                    onPointerDown={(event) => selectDocument('left', group.key, event)}
-                    onDoubleClick={(event) => addDocument(group.key, event)}
-                    onDragStart={(event) => startDocumentDrag('left', group.key, event)}
-                    onDragEnd={clearDrag}
-                    title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
-                  >
-                    <span>{group.header}</span>
-                  </div>
-                  <div className="print-selection-grid">
-                    {group.pages.map((item) => renderTile(item, 'left'))}
-                  </div>
-                </section>
-              ))}
+              {workspaceModeIsDocuments ? (
+                leftDocumentGroups.map((group) => (
+                  <section key={group.key} className="print-selection-document-group">
+                    <div
+                      className="print-selection-document-header print-selection-document-header-draggable"
+                      draggable
+                      onPointerDown={(event) => selectDocument('left', group.key, event)}
+                      onDoubleClick={(event) => addDocument(group.key, event)}
+                      onDragStart={(event) => startDocumentDrag('left', group.key, event)}
+                      onDragEnd={clearDrag}
+                      title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
+                    >
+                      <span>{group.header}</span>
+                    </div>
+                    <div className="print-selection-grid">
+                      {group.pages.map((item) => renderTile(item, 'left'))}
+                    </div>
+                  </section>
+                ))
+              ) : (
+                <div className="print-selection-grid">
+                  {leftSourceIndexes.map((originalIndex) => {
+                    const item = itemByIndex.get(originalIndex);
+                    return item ? renderTile(item, 'left') : null;
+                  })}
+                </div>
+              )}
+              {leftSourceIndexes.length <= 0 ? (
+                <div className="print-selection-empty" role="status">
+                  {t('printSelectionWorkspace.noAvailablePages', { defaultValue: 'No remaining source pages.' })}
+                </div>
+              ) : null}
               {selectionBox?.side === 'left' ? (
                 <span
                   className="print-selection-marquee"
@@ -1805,13 +1955,45 @@ const PrintSelectionWorkspace = ({
       {lightboxItem ? (
         <div className="print-selection-lightbox" role="dialog" aria-modal="true" aria-label={t('printSelectionWorkspace.previewDialog', { defaultValue: 'Page preview' })}>
           <div className="print-selection-lightbox-info">
-            {t('printSelectionWorkspace.previewContext', {
+            {lightboxInfoText || t('printSelectionWorkspace.previewContext', {
               page: lightboxItem.pageNumber,
               total: totalPages,
               document: lightboxItem.documentNumber,
               documentPage: getDocumentPageNumber(lightboxItem),
               defaultValue: `Page ${lightboxItem.pageNumber} of ${totalPages}. Document ${lightboxItem.documentNumber}, document page ${getDocumentPageNumber(lightboxItem)}.`,
             })}
+          </div>
+          <div className="print-selection-lightbox-actions" aria-label={t('printSelectionWorkspace.previewActions', { defaultValue: 'Preview actions' })}>
+            {showLightboxAdd ? (
+              <button
+                type="button"
+                onClick={addLightboxPage}
+                disabled={!lightboxCanAdd}
+                title={lightboxCanAdd
+                  ? t('printSelectionWorkspace.previewAddPage', { defaultValue: 'Add this page to the selection' })
+                  : t('printSelectionWorkspace.previewPageAlreadyAdded', { defaultValue: 'This page is already in the selection' })}
+                aria-label={lightboxCanAdd
+                  ? t('printSelectionWorkspace.previewAddPage', { defaultValue: 'Add this page to the selection' })
+                  : t('printSelectionWorkspace.previewPageAlreadyAdded', { defaultValue: 'This page is already in the selection' })}
+              >
+                <span className="material-icons" aria-hidden="true">add</span>
+              </button>
+            ) : null}
+            {showLightboxRemove ? (
+              <button
+                type="button"
+                onClick={removeLightboxPage}
+                disabled={!lightboxCanRemove}
+                title={lightboxCanRemove
+                  ? t('printSelectionWorkspace.previewRemovePage', { defaultValue: 'Remove this page from the selection' })
+                  : t('printSelectionWorkspace.previewPageNotAdded', { defaultValue: 'This page is not in the selection' })}
+                aria-label={lightboxCanRemove
+                  ? t('printSelectionWorkspace.previewRemovePage', { defaultValue: 'Remove this page from the selection' })
+                  : t('printSelectionWorkspace.previewPageNotAdded', { defaultValue: 'This page is not in the selection' })}
+              >
+                <span className="material-icons" aria-hidden="true">remove</span>
+              </button>
+            ) : null}
           </div>
           <button
             type="button"
@@ -1857,7 +2039,8 @@ PrintSelectionWorkspace.propTypes = {
   allPages: PropTypes.arrayOf(PropTypes.object).isRequired,
   bundle: PropTypes.object,
   initialSequence: PropTypes.arrayOf(PropTypes.number).isRequired,
-  documentHeaderTemplate: PropTypes.string.isRequired,
+  documentHeaderTemplate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
+  previewInfoTemplate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   zoomPercent: PropTypes.number,
   onToolbarStateChange: PropTypes.func,
   onCommit: PropTypes.func.isRequired,
