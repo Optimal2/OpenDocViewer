@@ -490,11 +490,13 @@ function resolveMetadataAliases(metaById, aliasMap) {
 
 function resolveMetadataAlias(metaById, alias, selector) {
   const fieldIds = Array.isArray(selector?.fieldIds) ? selector.fieldIds : [];
+  const requiresDateValue = isDateTimeAliasSelector(selector);
   for (const fieldId of fieldIds) {
     const record = metaById[fieldId];
     if (!record) continue;
     const picked = pickRecordText(record, selector?.prefer);
     if (!picked?.selectedValue) continue;
+    if (requiresDateValue && !isDateLikeMetadataValue(picked.selectedValue)) continue;
     return {
       alias,
       fieldId,
@@ -512,6 +514,19 @@ function resolveMetadataAlias(metaById, alias, selector) {
     };
   }
   return undefined;
+}
+
+function isDateTimeAliasSelector(selector) {
+  return String(selector?.type || '').trim().toLowerCase() === 'datetime';
+}
+
+function isDateLikeMetadataValue(value) {
+  const text = coerceOptionalString(value);
+  if (!text) return false;
+
+  // WebClient date fields arrive as ISO/SQL-like strings. When several fields
+  // are configured as fallbacks, ignore non-date text so the next field can win.
+  return /^\d{4}-\d{2}-\d{2}(?:$|[T\s])/.test(text);
 }
 
 function pickRecordText(record, prefer) {
