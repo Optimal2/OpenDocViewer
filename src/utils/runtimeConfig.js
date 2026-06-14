@@ -97,8 +97,8 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
   return cfg?.metadata?.enabled !== false;
 }
 
-function normalizeBoolean(value, fallback) {
-  return typeof value === 'boolean' ? value : fallback;
+function normalizeBoolean(value, defaultValue) {
+  return typeof value === 'boolean' ? value : defaultValue;
 }
 
 function clampNumber(value, min, max) {
@@ -106,26 +106,26 @@ function clampNumber(value, min, max) {
   return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
 }
 
-function normalizeInteger(value, fallback, min, max) {
+function normalizeInteger(value, defaultValue, min, max) {
   const next = Math.floor(Number(value));
-  if (!Number.isFinite(next)) return fallback;
+  if (!Number.isFinite(next)) return defaultValue;
   return clampNumber(next, min, max);
 }
 
-function normalizeFloat(value, fallback, min, max) {
+function normalizeFloat(value, defaultValue, min, max) {
   const next = Number(value);
-  if (!Number.isFinite(next)) return fallback;
+  if (!Number.isFinite(next)) return defaultValue;
   return clampNumber(next, min, max);
 }
 
-function normalizeResetSessionTarget(value, fallback) {
-  const raw = String(value || fallback || '').trim().toLowerCase();
+function normalizeResetSessionTarget(value, defaultTarget) {
+  const raw = String(value || defaultTarget || '').trim().toLowerCase();
   if (raw === 'current' || raw === 'parent' || raw === 'none') return raw;
   return 'parent-or-current';
 }
 
-function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
-  const raw = String(value || fallback || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
+function normalizeDefaultZoomMode(value, defaultMode = 'fit-width') {
+  const raw = String(value || defaultMode || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
   if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
   if (
     raw === 'fit-custom'
@@ -148,14 +148,14 @@ function normalizeDefaultZoomMode(value, fallback = 'fit-width') {
  * persistent defaults; range/custom choices remain one-off dialog choices.
  *
  * @param {*} value
- * @param {PrintDefaultMode} fallback
+ * @param {PrintDefaultMode} defaultMode
  * @returns {PrintDefaultMode}
  */
-export function normalizePrintDefaultMode(value, fallback = 'active') {
+export function normalizePrintDefaultMode(value, defaultMode = 'active') {
   const raw = String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
   if (raw === 'all' || raw === 'all-pages' || raw === 'everything') return 'all';
   if (raw === 'active' || raw === 'active-page' || raw === 'current' || raw === 'current-page') return 'active';
-  return fallback === 'all' ? 'all' : 'active';
+  return defaultMode === 'all' ? 'all' : 'active';
 }
 
 /**
@@ -163,11 +163,11 @@ export function normalizePrintDefaultMode(value, fallback = 'active') {
  * of the calculated fit-width zoom, not a direct zoom percentage.
  *
  * @param {*} value
- * @param {number} fallback
+ * @param {number} defaultValue
  * @returns {number}
  */
-export function normalizeCustomFitWidthFactorPercent(value, fallback = 70) {
-  return normalizeInteger(value, fallback, 1, 100);
+export function normalizeCustomFitWidthFactorPercent(value, defaultValue = 70) {
+  return normalizeInteger(value, defaultValue, 1, 100);
 }
 
 /**
