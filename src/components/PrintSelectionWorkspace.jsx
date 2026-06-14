@@ -734,6 +734,7 @@ const PrintSelectionWorkspace = ({
   const showLightboxRemove = !!lightboxItem && (lightboxSide === 'right' || !hideIncludedLeftPages);
   const lightboxCanAdd = showLightboxAdd && !lightboxItemIncluded;
   const lightboxCanRemove = showLightboxRemove && lightboxItemIncluded;
+  const lightboxSelectionStatusClass = lightboxItemIncluded ? 'is-in-selection' : 'is-out-of-selection';
   const isDirty = useMemo(() => !sequencesEqual(draftIndexes, initialIndexes), [draftIndexes, initialIndexes]);
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
   const canUndoDraftChange = Array.isArray(draftHistory.undo);
@@ -1972,7 +1973,7 @@ const PrintSelectionWorkspace = ({
       </div>
 
       {lightboxItem ? (
-        <div className="print-selection-lightbox" role="dialog" aria-modal="true" aria-label={t('printSelectionWorkspace.previewDialog', { defaultValue: 'Page preview' })}>
+        <div className={`print-selection-lightbox ${lightboxSelectionStatusClass}`} role="dialog" aria-modal="true" aria-label={t('printSelectionWorkspace.previewDialog', { defaultValue: 'Page preview' })}>
           <div className="print-selection-lightbox-info">
             {lightboxInfoText || t('printSelectionWorkspace.previewContext', {
               page: lightboxItem.pageNumber,
@@ -1986,6 +1987,7 @@ const PrintSelectionWorkspace = ({
             {showLightboxAdd ? (
               <button
                 type="button"
+                className={`print-selection-lightbox-action print-selection-lightbox-add-action ${lightboxCanAdd ? 'is-active' : ''}`}
                 onClick={addLightboxPage}
                 disabled={!lightboxCanAdd}
                 title={lightboxCanAdd
@@ -2001,6 +2003,7 @@ const PrintSelectionWorkspace = ({
             {showLightboxRemove ? (
               <button
                 type="button"
+                className={`print-selection-lightbox-action print-selection-lightbox-remove-action ${lightboxCanRemove ? 'is-active' : ''}`}
                 onClick={removeLightboxPage}
                 disabled={!lightboxCanRemove}
                 title={lightboxCanRemove
@@ -2035,7 +2038,9 @@ const PrintSelectionWorkspace = ({
               <span className="material-icons" aria-hidden="true">chevron_left</span>
             </button>
             <div className="print-selection-lightbox-image">
-              <img src={lightboxItem.imageUrl} alt={t('viewer.pageAlt', { page: lightboxItem.pageNumber, defaultValue: `Page ${lightboxItem.pageNumber}` })} />
+              <div className={`print-selection-lightbox-page ${lightboxSelectionStatusClass}`}>
+                <img src={lightboxItem.imageUrl} alt={t('viewer.pageAlt', { page: lightboxItem.pageNumber, defaultValue: `Page ${lightboxItem.pageNumber}` })} />
+              </div>
             </div>
             <button
               type="button"
