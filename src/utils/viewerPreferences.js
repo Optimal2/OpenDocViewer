@@ -433,9 +433,9 @@ export function getCustomFitSizeLimitPreference() {
  */
 export function setCustomFitSizeLimitPreference(limits) {
   const normalized = normalizeCustomFitSizeLimitPreference({
-    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.widthFactorPercent),
-    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.heightFactorPercent),
-    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.actualSizeFactorPercent),
+    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.widthFactorPercent, 100),
+    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.heightFactorPercent, 500),
+    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.actualSizeFactorPercent, 200),
   });
   const next = { ...getViewerPreferences() };
   delete next.customFitWidthFactorPercent;

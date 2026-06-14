@@ -40,20 +40,49 @@ import { useTranslation } from 'react-i18next';
 import useAcceleratingHoldRepeat from '../../hooks/useAcceleratingHoldRepeat.js';
 import SplitToolbarButton from './SplitToolbarButton.jsx';
 
+const CUSTOM_SIZE_FIELDS = Object.freeze([
+  {
+    key: 'widthFactorPercent',
+    id: 'odv-custom-fit-width-factor',
+    max: 100,
+    labelKey: 'toolbar.fitCustomWidthFactor.widthLabel',
+    defaultLabel: 'Window width',
+  },
+  {
+    key: 'heightFactorPercent',
+    id: 'odv-custom-fit-height-factor',
+    max: 500,
+    labelKey: 'toolbar.fitCustomWidthFactor.heightLabel',
+    defaultLabel: 'Window height',
+  },
+  {
+    key: 'actualSizeFactorPercent',
+    id: 'odv-custom-fit-actual-size-factor',
+    max: 200,
+    labelKey: 'toolbar.fitCustomWidthFactor.actualSizeLabel',
+    defaultLabel: 'Actual size',
+  },
+]);
+
+function getCustomSizeField(key) {
+  return CUSTOM_SIZE_FIELDS.find((field) => field.key === key) || CUSTOM_SIZE_FIELDS[0];
+}
+
 function clampPercent(n) {
   const v = Math.round(Number(n));
   if (!Number.isFinite(v)) return null;
   return Math.max(5, Math.min(800, v));
 }
 
-function clampFactorPercent(n) {
+function clampFactorPercent(n, max = 100) {
   const v = Math.round(Number(n));
   if (!Number.isFinite(v)) return null;
-  return Math.max(1, Math.min(100, v));
+  const safeMax = Math.max(1, Math.round(Number(max)) || 100);
+  return Math.max(1, Math.min(safeMax, v));
 }
 
-function getOptionalFactorDraft(value) {
-  const next = clampFactorPercent(value);
+function getOptionalFactorDraft(value, max = 100) {
+  const next = clampFactorPercent(value, max);
   return next == null ? '' : String(next);
 }
 
@@ -118,10 +147,11 @@ const ZoomButtons = ({
   );
   const [isFocused, setIsFocused] = useState(false);
   const [customSizeDraft, setCustomSizeDraft] = useState(() => ({
-    widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent),
-    heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent),
-    actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent),
+    widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent, 100),
+    heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent, 500),
+    actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
   }));
+  const [customSizeFocusedField, setCustomSizeFocusedField] = useState(null);
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
@@ -135,9 +165,9 @@ const ZoomButtons = ({
 
   useEffect(() => {
     setCustomSizeDraft({
-      widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent),
-      heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent),
-      actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent),
+      widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent, 100),
+      heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent, 500),
+      actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
     });
   }, [
     userCustomFitSizeLimits?.actualSizeFactorPercent,
@@ -168,26 +198,33 @@ const ZoomButtons = ({
     }
   }
 
-  function parseOptionalFactorDraft(value) {
-    if (value == null || String(value).trim() === '') return null;
-    return clampFactorPercent(value);
+  function updateCustomSizeDraft(key, value) {
+    setCustomSizeDraft((current) => ({ ...current, [key]: String(value || '').replace(/\D/g, '') }));
   }
 
-  function updateCustomSizeDraft(key, value) {
-    setCustomSizeDraft((current) => ({ ...current, [key]: value }));
+  function getCustomSizeDisplayValue(key) {
+    const value = customSizeDraft[key];
+    if (customSizeFocusedField === key || String(value || '').trim() === '') return value;
+    return `${value}%`;
+  }
+
+  function parseCustomSizeFieldDraft(key, value) {
+    if (value == null || String(value).trim() === '') return null;
+    return clampFactorPercent(value, getCustomSizeField(key).max);
   }
 
   function applyCustomSizeDraft(closeMenu) {
     const next = {
-      widthFactorPercent: parseOptionalFactorDraft(customSizeDraft.widthFactorPercent),
-      heightFactorPercent: parseOptionalFactorDraft(customSizeDraft.heightFactorPercent),
-      actualSizeFactorPercent: parseOptionalFactorDraft(customSizeDraft.actualSizeFactorPercent),
+      widthFactorPercent: parseCustomSizeFieldDraft('widthFactorPercent', customSizeDraft.widthFactorPercent),
+      heightFactorPercent: parseCustomSizeFieldDraft('heightFactorPercent', customSizeDraft.heightFactorPercent),
+      actualSizeFactorPercent: parseCustomSizeFieldDraft('actualSizeFactorPercent', customSizeDraft.actualSizeFactorPercent),
     };
     setCustomSizeDraft({
-      widthFactorPercent: getOptionalFactorDraft(next.widthFactorPercent),
-      heightFactorPercent: getOptionalFactorDraft(next.heightFactorPercent),
-      actualSizeFactorPercent: getOptionalFactorDraft(next.actualSizeFactorPercent),
+      widthFactorPercent: getOptionalFactorDraft(next.widthFactorPercent, 100),
+      heightFactorPercent: getOptionalFactorDraft(next.heightFactorPercent, 500),
+      actualSizeFactorPercent: getOptionalFactorDraft(next.actualSizeFactorPercent, 200),
     });
+    setCustomSizeFocusedField(null);
 
     if (typeof onCustomFitSizeLimitsChange === 'function') {
       onCustomFitSizeLimitsChange(next);
@@ -195,6 +232,15 @@ const ZoomButtons = ({
       onCustomFitWidthFactorChange?.(next.widthFactorPercent);
     }
     closeMenu?.();
+  }
+
+  function cancelCustomSizeDraft() {
+    setCustomSizeDraft({
+      widthFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.widthFactorPercent, 100),
+      heightFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.heightFactorPercent, 500),
+      actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
+    });
+    setCustomSizeFocusedField(null);
   }
 
   const getZoomModeLabel = (mode) => {
@@ -332,7 +378,7 @@ const ZoomButtons = ({
           className={`odv-btn ${isOneToOneActive ? 'is-active' : ''}`}
           disabled={disableOneToOne}
         >
-          1:1
+          <span className="toolbar-ratio-mark" aria-hidden="true">1:1</span>
         </button>
       )}
 
@@ -378,39 +424,35 @@ const ZoomButtons = ({
               <div className="toolbar-split-menu-description">
                 {t('toolbar.fitCustomWidthFactor.emptyHint', { defaultValue: 'Leave empty to use default values.' })}
               </div>
-              {[
-                {
-                  key: 'widthFactorPercent',
-                  id: 'odv-custom-fit-width-factor',
-                  label: t('toolbar.fitCustomWidthFactor.widthLabel', { defaultValue: 'Window width' }),
-                },
-                {
-                  key: 'heightFactorPercent',
-                  id: 'odv-custom-fit-height-factor',
-                  label: t('toolbar.fitCustomWidthFactor.heightLabel', { defaultValue: 'Window height' }),
-                },
-                {
-                  key: 'actualSizeFactorPercent',
-                  id: 'odv-custom-fit-actual-size-factor',
-                  label: t('toolbar.fitCustomWidthFactor.actualSizeLabel', { defaultValue: 'Actual size' }),
-                },
-              ].map((field) => (
+              {CUSTOM_SIZE_FIELDS.map((field) => (
                 <div className="toolbar-split-menu-form toolbar-split-menu-form--inline" key={field.key}>
-                  <label htmlFor={field.id}>{field.label}</label>
+                  <label htmlFor={field.id}>{t(field.labelKey, { defaultValue: field.defaultLabel })}</label>
                   <input
                     id={field.id}
-                    type="number"
-                    min="1"
-                    max="100"
-                    step="1"
-                    value={customSizeDraft[field.key]}
+                    type="text"
+                    inputMode="numeric"
+                    pattern="[0-9%]*"
+                    role="spinbutton"
+                    aria-valuemin={1}
+                    aria-valuemax={field.max}
+                    aria-valuenow={customSizeDraft[field.key] === '' ? undefined : Number(customSizeDraft[field.key])}
+                    aria-valuetext={customSizeDraft[field.key] === '' ? undefined : `${customSizeDraft[field.key]}%`}
+                    value={getCustomSizeDisplayValue(field.key)}
                     onChange={(event) => updateCustomSizeDraft(field.key, event.target.value)}
-                    onBlur={() => applyCustomSizeDraft()}
+                    onFocus={(event) => {
+                      setCustomSizeFocusedField(field.key);
+                      event.currentTarget.select();
+                    }}
+                    onBlur={() => {
+                      applyCustomSizeDraft();
+                    }}
                     onKeyDown={(event) => {
                       if (event.key === 'Enter') {
                         event.preventDefault();
                         applyCustomSizeDraft(closeMenu);
                       } else if (event.key === 'Escape') {
+                        event.preventDefault();
+                        cancelCustomSizeDraft();
                         closeMenu();
                       }
                     }}
@@ -430,7 +472,7 @@ const ZoomButtons = ({
           </>
         )}
       >
-        <span className="toolbar-custom-fit-mark" aria-hidden="true">1:X</span>
+        <span className="toolbar-ratio-mark" aria-hidden="true">1:X</span>
       </SplitToolbarButton>
     </>
   );

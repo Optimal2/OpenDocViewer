@@ -40,7 +40,7 @@ The codebase now has four documentation layers:
   - TIFF via `utif2`
   - Common image formats such as JPG and PNG
 - **Viewer behavior**
-  - Fit-to-page, fit-to-width, and custom fit-width-factor sticky zoom modes
+  - Fit-to-page, fit-to-width, and custom-size sticky zoom modes
   - Runtime-configurable and user-overridable default zoom mode
   - Double-click the main page surface to toggle between fit-to-width and fit-to-page
   - Optional edge-scroll page turn gesture with a visual progress indicator

@@ -478,12 +478,12 @@
   padding-block: 3px;
 }
 
-.toolbar-custom-fit-mark {
+.toolbar-ratio-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
   min-width: 1.65rem;
-  font-size: 0.72rem;
+  font-size: 0.76rem;
   font-weight: 800;
   letter-spacing: 0;
   line-height: 1;

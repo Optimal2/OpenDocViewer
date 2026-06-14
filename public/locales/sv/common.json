@@ -11,7 +11,7 @@
     "zoomIn": "Zooma in",
     "zoomOut": "Zooma ut",
     "zoomActual": "Faktisk storlek (1:1)",
-    "fitToScreen": "Anpassa till skärmen",
+    "fitToScreen": "Anpassa till skärm",
     "fitToWidth": "Anpassa till bredd",
     "fitCustomWidth": "Egen storlek",
     "fitCustomWidthTitle": "Egen storlek",
@@ -28,7 +28,7 @@
       "description": "Används vid varje ny session.",
       "modes": {
         "actual": "Faktisk storlek (1:1)",
-        "fitPage": "Anpassa till skärmen",
+        "fitPage": "Anpassa till skärm",
         "fitCustom": "Egen storlek",
         "fitWidth": "Anpassa till bredd"
       }

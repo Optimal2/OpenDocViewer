@@ -228,16 +228,16 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       if (!Number.isFinite(numeric)) return fallback;
       return Math.max(1, Math.min(100, numeric));
     };
-    const normalizeOptional = (value) => {
+    const normalizeOptional = (value, max) => {
       if (value == null || String(value).trim?.() === '') return null;
       const numeric = Math.round(Number(value));
       if (!Number.isFinite(numeric)) return null;
-      return Math.max(1, Math.min(100, numeric));
+      return Math.max(1, Math.min(max, numeric));
     };
     return {
       widthFactorPercent: normalizeRequired(customFitSizeLimits?.widthFactorPercent, 70),
-      heightFactorPercent: normalizeOptional(customFitSizeLimits?.heightFactorPercent),
-      actualSizeFactorPercent: normalizeOptional(customFitSizeLimits?.actualSizeFactorPercent),
+      heightFactorPercent: normalizeOptional(customFitSizeLimits?.heightFactorPercent, 500),
+      actualSizeFactorPercent: normalizeOptional(customFitSizeLimits?.actualSizeFactorPercent, 200),
     };
   }, [customFitSizeLimits]);
 
@@ -254,17 +254,17 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const widthPercent = Math.round(Number(normalizedLimits.widthFactorPercent));
     const safeWidthPercent = Number.isFinite(widthPercent) ? Math.max(1, Math.min(100, widthPercent)) : 70;
 
-    const resolveOptionalFactor = (percent) => {
+    const resolveOptionalFactor = (percent, max) => {
       if (percent == null) return null;
       const numeric = Math.round(Number(percent));
       if (!Number.isFinite(numeric)) return null;
-      return Math.max(1, Math.min(100, numeric)) / 100;
+      return Math.max(1, Math.min(max, numeric)) / 100;
     };
 
     return {
       widthFactor: safeWidthPercent / 100,
-      heightFactor: resolveOptionalFactor(normalizedLimits.heightFactorPercent),
-      actualSizeFactor: resolveOptionalFactor(normalizedLimits.actualSizeFactorPercent),
+      heightFactor: resolveOptionalFactor(normalizedLimits.heightFactorPercent, 500),
+      actualSizeFactor: resolveOptionalFactor(normalizedLimits.actualSizeFactorPercent, 200),
     };
   }, [normalizedCustomFitSizeLimits]);
 

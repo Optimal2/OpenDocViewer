@@ -74,8 +74,8 @@
       // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".
       defaultZoomMode: 'fit-width',
       // Percentage caps used by the Custom Size toolbar button.
-      // Width defaults to 70% of calculated fit-width zoom. Height and actual size are optional
-      // caps; leave them null to avoid limiting by viewport height or actual 1:1 size.
+      // Width supports 1..100 and defaults to 70% of calculated fit-width zoom.
+      // Height supports 1..500. Actual size supports 1..200. Use null for no cap.
       customFitWidthFactorPercent: 70,
       customFitHeightFactorPercent: null,
       customFitActualSizeFactorPercent: null,

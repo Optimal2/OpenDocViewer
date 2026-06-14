@@ -174,13 +174,15 @@ export function normalizeCustomFitWidthFactorPercent(value, fallback = 70) {
  * Normalize an optional custom-size limit percentage. Blank values mean "no user limit".
  *
  * @param {*} value
+ * @param {number} max
  * @returns {(number|null)}
  */
-export function normalizeOptionalCustomFitFactorPercent(value) {
+export function normalizeOptionalCustomFitFactorPercent(value, max = 100) {
   if (value == null || String(value).trim() === '') return null;
   const numeric = Math.round(Number(value));
   if (!Number.isFinite(numeric)) return null;
-  return Math.max(1, Math.min(100, numeric));
+  const safeMax = Math.max(1, Math.round(Number(max)) || 100);
+  return Math.max(1, Math.min(safeMax, numeric));
 }
 
 /**
@@ -195,9 +197,9 @@ export function normalizeCustomFitSizeLimitPreference(value) {
   }
 
   return {
-    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(value.widthFactorPercent ?? value.widthPercent),
-    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(value.heightFactorPercent ?? value.heightPercent),
-    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(value.actualSizeFactorPercent ?? value.actualPercent),
+    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(value.widthFactorPercent ?? value.widthPercent, 100),
+    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(value.heightFactorPercent ?? value.heightPercent, 500),
+    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(value.actualSizeFactorPercent ?? value.actualPercent, 200),
   };
 }
 
@@ -245,10 +247,12 @@ export function getViewerCustomFitSizeLimits(cfg = getRuntimeConfig()) {
   return {
     widthFactorPercent: getViewerCustomFitWidthFactorPercent(cfg),
     heightFactorPercent: normalizeOptionalCustomFitFactorPercent(
-      cfg?.viewer?.customFitHeightFactorPercent ?? cfg?.viewer?.customFitHeightPercent
+      cfg?.viewer?.customFitHeightFactorPercent ?? cfg?.viewer?.customFitHeightPercent,
+      500
     ),
     actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(
-      cfg?.viewer?.customFitActualSizeFactorPercent ?? cfg?.viewer?.customFitActualPercent
+      cfg?.viewer?.customFitActualSizeFactorPercent ?? cfg?.viewer?.customFitActualPercent,
+      200
     ),
   };
 }
