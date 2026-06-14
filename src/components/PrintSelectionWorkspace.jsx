@@ -16,7 +16,7 @@ const MIN_THUMBNAIL_PERCENT = 70;
 const DEFAULT_THUMBNAIL_PERCENT = 120;
 const MAX_THUMBNAIL_PERCENT = 320;
 const DEFAULT_ORDER_POSITION = Number.MAX_SAFE_INTEGER;
-// Matches WebClient/SQL-style date values used by metadata templates:
+// Matches host/SQL-style date values used by metadata templates:
 // yyyy-MM-dd, optionally followed by a time part separated by T or whitespace.
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?/;
 

@@ -530,7 +530,7 @@ function isDateLikeMetadataValue(value) {
   const text = coerceOptionalString(value);
   if (!text) return false;
 
-  // WebClient date fields arrive as ISO/SQL-like strings. When several fields
+  // Host date fields can arrive as ISO/SQL-like strings. When several fields
   // are configured as fallbacks, ignore non-date text so the next field can win.
   return /^\d{4}-\d{2}-\d{2}(?:$|[T\s])/.test(text);
 }
