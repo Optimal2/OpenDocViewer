@@ -1606,6 +1606,20 @@ const PrintSelectionWorkspace = ({
     return () => window.removeEventListener('keydown', handleKeyDown, true);
   }, [closeLightbox, lightboxItem, runLightboxPrimaryAction, stepLightbox]);
 
+  useEffect(() => {
+    /** @param {KeyboardEvent} event */
+    const handleKeyDown = (event) => {
+      if (String(event?.key || '') !== 'Escape') return;
+      if (lightboxItem) return;
+      event.preventDefault();
+      event.stopPropagation();
+      leaveWorkspace();
+    };
+
+    window.addEventListener('keydown', handleKeyDown, true);
+    return () => window.removeEventListener('keydown', handleKeyDown, true);
+  }, [leaveWorkspace, lightboxItem]);
+
   const startPanelResize = useCallback((event) => {
     const bodyNode = bodyRef.current;
     if (!bodyNode) return;
