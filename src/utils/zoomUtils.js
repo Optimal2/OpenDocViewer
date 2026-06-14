@@ -48,7 +48,7 @@ function clamp(value, min, max) {
  * @param {number} value
  * @returns {boolean}
  */
-function hasPositiveFiniteNumber(value) {
+function isPositiveFiniteNumber(value) {
   return Number.isFinite(value) && value > 0;
 }
 
@@ -58,7 +58,7 @@ function hasPositiveFiniteNumber(value) {
  * @returns {boolean}
  */
 function hasValidDimensions(width, height) {
-  return hasPositiveFiniteNumber(width) && hasPositiveFiniteNumber(height);
+  return isPositiveFiniteNumber(width) && isPositiveFiniteNumber(height);
 }
 
 /**
@@ -68,7 +68,7 @@ function hasValidDimensions(width, height) {
  */
 function normalizeOptionalFactor(value, defaultValue = null) {
   const numeric = Number(value);
-  return hasPositiveFiniteNumber(numeric) ? numeric : defaultValue;
+  return isPositiveFiniteNumber(numeric) ? numeric : defaultValue;
 }
 
 /**
@@ -216,7 +216,7 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
   }
 
   const { vw, vh } = getViewportSize(viewport, opts);
-  if (!hasPositiveFiniteNumber(vw)) {
+  if (!isPositiveFiniteNumber(vw)) {
     logger.warn('Non-positive viewport width for fit-to-width', { vw });
     return;
   }
@@ -225,12 +225,12 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
   const candidates = [(vw / size.w) * factor];
 
   const heightFactor = normalizeOptionalFactor(opts?.heightFactor);
-  if (heightFactor != null && vh > 0) candidates.push((vh / size.h) * heightFactor);
+  if (heightFactor != null && isPositiveFiniteNumber(vh)) candidates.push((vh / size.h) * heightFactor);
 
   const actualSizeFactor = normalizeOptionalFactor(opts?.actualSizeFactor);
   if (actualSizeFactor != null) candidates.push(actualSizeFactor);
 
-  let zoom = Math.min(...candidates.filter((candidate) => Number.isFinite(candidate) && candidate > 0));
+  let zoom = Math.min(...candidates.filter(isPositiveFiniteNumber));
   if (!Number.isFinite(zoom) || zoom <= 0) zoom = 1;
 
   applyZoom(setZoom, zoom);
