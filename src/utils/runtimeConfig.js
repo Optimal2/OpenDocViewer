@@ -286,7 +286,8 @@ export function getPrintDefaultMode(cfg = getRuntimeConfig()) {
  * `{totalDocuments}`, `{documentId}`, `{pageCount}`, `{metadata.caseNumber}`, and
  * `{metaById.123.selectedValue}`. The preview info template supports the same metadata tokens
  * plus page-oriented values such as `{sourcePage}`, `{printPage}`, `{documentPageNumber}`, and
- * `{documentPageCount}`.
+ * `{documentPageCount}`. Tokens may use a small filter pipeline, for example
+ * `{metadata.documentDate|date:yyyy-MM-dd}` or `{metadata.documentDate|substring:0,10}`.
  *
  * @param {Object=} cfg
  * @returns {PrintSelectionWorkspaceConfig}
