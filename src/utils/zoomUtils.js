@@ -13,7 +13,7 @@ import logger from '../logging/systemLogger.js';
 const MIN_ZOOM = 0.05;
 /** Maximum allowed zoom factor (800%). */
 const MAX_ZOOM = 8;
-/** Zoom-in multiplier: each click increases zoom by 10%. */
+/** Zoom-in multiplier: each click increases zoom by 10% of the current zoom level (1.1x). */
 const ZOOM_IN_MULTIPLIER = 1.1;
 /** Zoom-out multiplier: inverse of +10%, approximately a 9.09% decrease. */
 const ZOOM_OUT_MULTIPLIER = 1 / ZOOM_IN_MULTIPLIER;
