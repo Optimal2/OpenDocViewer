@@ -15,6 +15,13 @@ import {
 } from './runtimeConfig.js';
 
 /**
+ * @typedef {Object} CustomFitSizeLimitPreference
+ * @property {number=} widthFactorPercent
+ * @property {number=} heightFactorPercent
+ * @property {number=} actualSizeFactorPercent
+ */
+
+/**
  * @typedef {Object} ViewerPreferences
  * @property {('normal'|'light'|'dark')=} theme
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
@@ -22,7 +29,7 @@ import {
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
- * @property {{ widthFactorPercent?:number, heightFactorPercent?:number, actualSizeFactorPercent?:number }=} customFitSizeLimits
+ * @property {CustomFitSizeLimitPreference=} customFitSizeLimits
  */
 
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
@@ -428,7 +435,7 @@ export function getCustomFitSizeLimitPreference() {
 }
 
 /**
- * @param {{ widthFactorPercent?: *, heightFactorPercent?: *, actualSizeFactorPercent?: * }} limits
+ * @param {CustomFitSizeLimitPreference=} limits
  * @returns {ViewerPreferences}
  */
 export function setCustomFitSizeLimitPreference(limits) {

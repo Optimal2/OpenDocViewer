@@ -181,6 +181,7 @@ export function normalizeOptionalCustomFitFactorPercent(value, max = 100) {
   if (value == null || String(value).trim() === '') return null;
   const numeric = Math.round(Number(value));
   if (!Number.isFinite(numeric)) return null;
+  if (numeric <= 0) return null;
   const safeMax = Math.max(1, Math.round(Number(max)) || 100);
   return Math.max(1, Math.min(safeMax, numeric));
 }
