@@ -1453,41 +1453,43 @@ const DocumentToolbar = ({
             >
               <span className="material-icons" aria-hidden="true">redo</span>
             </button>
-
-            <button
-              type="button"
-              className="print-selection-secondary print-selection-reset-action"
-              onClick={() => state.onResetToDefault?.()}
-              disabled={!state.canResetToDefault}
-              title={state.resetToDefaultTitle || t('printSelectionWorkspace.resetToDefaultTitle', { defaultValue: 'Reset to the original session order with every page included.' })}
-              aria-label={state.resetToDefaultTitle || t('printSelectionWorkspace.resetToDefaultTitle', { defaultValue: 'Reset to the original session order with every page included.' })}
-            >
-              <span className="material-icons" aria-hidden="true">restart_alt</span>
-              {t('printSelectionWorkspace.resetToDefault', { defaultValue: 'Reset' })}
-            </button>
-
-            <button type="button" className="print-selection-secondary print-selection-cancel-action" onClick={() => state.onCancel?.()}>
-              <span className="material-icons" aria-hidden="true">close</span>
-              {t('common.cancel', { defaultValue: 'Cancel' })}
-            </button>
-            <button type="button" className="print-selection-primary print-selection-commit-action" onClick={() => state.onCommit?.()} disabled={!state.canCommit}>
-              <span className="material-icons" aria-hidden="true">check</span>
-              {t('common.ok', { defaultValue: 'OK' })}
-            </button>
           </div>
         ) : null}
 
         <div className="toolbar-spacer" />
 
-        <div className="toolbar-end-actions">
-          <ThemeMenuButton />
-          <LanguageMenuButton />
-          <HelpMenuButton
-            onOpenManual={() => setIsManualDialogOpen(true)}
-            onOpenAbout={() => setIsAboutDialogOpen(true)}
-            statusLedState={runtimeStatusLedState}
-            statusLedTitle={runtimeStatusLedTitle}
-          />
+        <div className="toolbar-end-actions print-selection-toolbar-end-actions">
+          <button
+            type="button"
+            className="print-selection-secondary print-selection-reset-draft-action"
+            onClick={() => state.onResetDraftChanges?.()}
+            disabled={!state.canResetDraftChanges}
+            title={state.resetDraftChangesTitle || t('printSelectionWorkspace.resetDraftChangesTitle', { defaultValue: 'Discard unsaved changes and return to the latest saved page selection.' })}
+            aria-label={state.resetDraftChangesTitle || t('printSelectionWorkspace.resetDraftChangesTitle', { defaultValue: 'Discard unsaved changes and return to the latest saved page selection.' })}
+          >
+            <span className="material-icons" aria-hidden="true">restart_alt</span>
+          </button>
+          <button
+            type="button"
+            className="print-selection-primary print-selection-save-action"
+            onClick={() => state.onSaveDraftChange?.()}
+            disabled={!state.canSaveDraftChange}
+            title={t('printSelectionWorkspace.saveChangesTitle', { defaultValue: 'Save the current page selection without leaving edit mode.' })}
+            aria-label={t('printSelectionWorkspace.saveChangesTitle', { defaultValue: 'Save the current page selection without leaving edit mode.' })}
+          >
+            <span className="material-icons" aria-hidden="true">save</span>
+            {t('printSelectionWorkspace.save', { defaultValue: 'Save' })}
+          </button>
+          <button
+            type="button"
+            className="print-selection-secondary print-selection-leave-action"
+            onClick={() => state.onLeaveWorkspace?.()}
+            title={t('printSelectionWorkspace.leaveEditingTitle', { defaultValue: 'Leave selection editing.' })}
+            aria-label={t('printSelectionWorkspace.leaveEditingTitle', { defaultValue: 'Leave selection editing.' })}
+          >
+            <span className="material-icons" aria-hidden="true">exit_to_app</span>
+            {t('printSelectionWorkspace.leaveEditing', { defaultValue: 'Leave' })}
+          </button>
         </div>
 
         <ManualOverlayDialog

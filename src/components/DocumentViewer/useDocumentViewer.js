@@ -1121,7 +1121,7 @@ export function useDocumentViewer() {
     setPrintSelectionWorkspaceOpen(false);
   }, []);
 
-  const commitPrintSelectionWorkspace = useCallback((sequence) => {
+  const savePrintSelectionWorkspace = useCallback((sequence) => {
     const normalized = normalizePrintPageSequence(sequence, totalSessionPages);
     const fullMask = Array(totalSessionPages).fill(true);
     setCustomPrintSelectionSequence(
@@ -1132,7 +1132,6 @@ export function useDocumentViewer() {
     setAppliedSelectionMask(fullMask);
     setDraftSelectionMask(fullMask);
     setThumbnailPaneMode('thumbnails');
-    setPrintSelectionWorkspaceOpen(false);
   }, [totalSessionPages]);
 
   const clearCustomPrintSelection = useCallback(() => {
@@ -1536,7 +1535,7 @@ export function useDocumentViewer() {
     printSelectionWorkspaceOpen,
     openPrintSelectionWorkspace,
     cancelPrintSelectionWorkspace,
-    commitPrintSelectionWorkspace,
+    savePrintSelectionWorkspace,
     clearCustomPrintSelection,
     customPrintSelectionActive,
     customPrintSelectionSequence: normalizedCustomPrintSelectionSequence,
