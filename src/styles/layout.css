@@ -324,6 +324,31 @@
   font-size: 0.9rem;
 }
 
+.print-selection-panel-header-main {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  min-width: 0;
+}
+
+.print-selection-hide-included-toggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  min-width: 0;
+  color: var(--muted-text-color);
+  font-size: 0.78rem;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.print-selection-hide-included-toggle input {
+  width: 14px;
+  height: 14px;
+  margin: 0;
+}
+
 .print-selection-panel-header span {
   color: var(--muted-text-color);
   font-size: 0.78rem;
@@ -723,6 +748,7 @@
 }
 
 .print-selection-lightbox-close,
+.print-selection-lightbox-actions > button,
 .print-selection-lightbox-step {
   display: grid;
   place-items: center;
@@ -733,6 +759,21 @@
   box-shadow: 0 8px 22px rgba(15, 23, 42, 0.24);
   cursor: pointer;
   backdrop-filter: blur(10px);
+}
+
+.print-selection-lightbox-actions {
+  position: absolute;
+  top: 14px;
+  left: 50%;
+  z-index: 3;
+  display: inline-flex;
+  gap: 8px;
+  transform: translateX(-50%);
+}
+
+.print-selection-lightbox-actions > button {
+  width: 42px;
+  height: 42px;
 }
 
 .print-selection-lightbox-close {
@@ -746,12 +787,26 @@
 
 .print-selection-lightbox-close:hover,
 .print-selection-lightbox-close:focus-visible,
+.print-selection-lightbox-actions > button:hover,
+.print-selection-lightbox-actions > button:focus-visible,
 .print-selection-lightbox-step:hover,
 .print-selection-lightbox-step:focus-visible {
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 16%, var(--background-color) 84%);
   color: var(--primary-color);
   outline: none;
+}
+
+.print-selection-lightbox-actions > button:disabled {
+  opacity: 0.42;
+  cursor: default;
+}
+
+.print-selection-lightbox-actions > button:disabled:hover,
+.print-selection-lightbox-actions > button:disabled:focus-visible {
+  border-color: var(--border-color);
+  background: color-mix(in srgb, var(--background-color) 88%, transparent 12%);
+  color: var(--text-color);
 }
 
 .print-selection-lightbox-body {
