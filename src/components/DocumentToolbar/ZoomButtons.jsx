@@ -77,6 +77,7 @@ function clampPercent(n) {
 function clampFactorPercent(n, max = 100) {
   const v = Math.round(Number(n));
   if (!Number.isFinite(v)) return null;
+  if (v <= 0) return null;
   const safeMax = Math.max(1, Math.round(Number(max)) || 100);
   return Math.max(1, Math.min(safeMax, v));
 }
@@ -433,7 +434,7 @@ const ZoomButtons = ({
                     inputMode="numeric"
                     pattern="[0-9%]*"
                     role="spinbutton"
-                    aria-valuemin={1}
+                    aria-valuemin={0}
                     aria-valuemax={field.max}
                     aria-valuenow={customSizeDraft[field.key] === '' ? undefined : Number(customSizeDraft[field.key])}
                     aria-valuetext={customSizeDraft[field.key] === '' ? undefined : `${customSizeDraft[field.key]}%`}

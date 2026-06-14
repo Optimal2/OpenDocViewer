@@ -532,6 +532,9 @@ export function useDocumentViewer() {
   const [customFitSizeLimits, setCustomFitSizeLimitsState] = useState(
     initialZoomSettingsRef.current.customFitSizeLimits
   );
+  const [userCustomFitSizeLimits, setUserCustomFitSizeLimits] = useState(
+    initialZoomSettingsRef.current.userCustomFitSizeLimits
+  );
   const [userDefaultZoomMode, setUserDefaultZoomMode] = useState(
     initialZoomSettingsRef.current.userDefaultZoomMode
   );
@@ -1244,23 +1247,34 @@ export function useDocumentViewer() {
   const updateCustomFitWidthFactorPercent = useCallback((percent) => {
     const normalized = normalizeCustomFitWidthFactorPercent(percent, customFitWidthFactorPercent);
     setCustomFitWidthFactorPercentState(normalized);
+    const nextUserLimits = {
+      ...userCustomFitSizeLimits,
+      widthFactorPercent: normalized,
+    };
     const nextLimits = {
       ...customFitSizeLimits,
       widthFactorPercent: normalized,
     };
     setCustomFitSizeLimitsState(nextLimits);
+    setUserCustomFitSizeLimits(nextUserLimits);
     setCustomFitWidthFactorPreference(normalized);
     if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(nextLimits);
-  }, [customFitSizeLimits, customFitWidthFactorPercent, fitToCustomWidth, zoomState?.mode]);
+  }, [customFitSizeLimits, customFitWidthFactorPercent, fitToCustomWidth, userCustomFitSizeLimits, zoomState?.mode]);
 
   const updateCustomFitSizeLimits = useCallback((limits) => {
     const normalized = normalizeCustomFitSizeLimitPreference(limits);
+    const nextUserLimits = {
+      widthFactorPercent: normalized.widthFactorPercent,
+      heightFactorPercent: normalized.heightFactorPercent,
+      actualSizeFactorPercent: normalized.actualSizeFactorPercent,
+    };
     const nextLimits = {
       widthFactorPercent: normalized.widthFactorPercent ?? initialZoomSettingsRef.current.configuredCustomFitSizeLimits.widthFactorPercent,
       heightFactorPercent: normalized.heightFactorPercent,
       actualSizeFactorPercent: normalized.actualSizeFactorPercent,
     };
     setCustomFitSizeLimitsState(nextLimits);
+    setUserCustomFitSizeLimits(nextUserLimits);
     setCustomFitWidthFactorPercentState(nextLimits.widthFactorPercent);
     setCustomFitSizeLimitPreference(normalized);
     if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(nextLimits);
@@ -1632,7 +1646,7 @@ export function useDocumentViewer() {
     customFitSizeLimits,
     configuredCustomFitSizeLimits: initialZoomSettingsRef.current.configuredCustomFitSizeLimits,
     configuredCustomFitWidthFactorPercent: initialZoomSettingsRef.current.configuredCustomFitWidthFactorPercent,
-    userCustomFitSizeLimits: getCustomFitSizeLimitPreference(),
+    userCustomFitSizeLimits,
     userDefaultZoomMode,
     configuredDefaultZoomMode: initialZoomSettingsRef.current.configuredDefaultZoomMode,
     setCustomFitWidthFactorPercent: updateCustomFitWidthFactorPercent,
