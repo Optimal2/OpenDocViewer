@@ -925,7 +925,7 @@ function toPositiveIntOrUndefined(value) {
  * Extract multi-document source context from an entry or placeholder input.
  *
  * @param {*} value
- * @returns {{ documentId:(string|undefined), documentNumber:(number|undefined), totalDocuments:(number|undefined), documentFileNumber:(number|undefined), documentFileCount:(number|undefined), hasMultipleDocuments:boolean }}
+ * @returns {{ documentId:(string|undefined), documentNumber:(number|undefined), totalDocuments:(number|undefined), documentFileNumber:(number|undefined), documentFileCount:(number|undefined), hasDocumentContext:boolean, hasMultipleDocuments:boolean }}
  */
 function resolveDocumentSourceContext(value) {
   const documentNumber = toPositiveIntOrUndefined(value?.documentNumber);
@@ -936,6 +936,7 @@ function resolveDocumentSourceContext(value) {
   const documentId = rawDocumentId != null && String(rawDocumentId).trim()
     ? String(rawDocumentId)
     : undefined;
+  const hasDocumentContext = !!documentId && !!documentNumber && !!totalDocuments;
 
   return {
     documentId,
@@ -943,7 +944,8 @@ function resolveDocumentSourceContext(value) {
     totalDocuments,
     documentFileNumber,
     documentFileCount,
-    hasMultipleDocuments: !!documentNumber && !!totalDocuments && totalDocuments > 1,
+    hasDocumentContext,
+    hasMultipleDocuments: hasDocumentContext && totalDocuments > 1,
   };
 }
 
@@ -953,7 +955,7 @@ function resolveDocumentSourceContext(value) {
  */
 function getDocumentProgressKey(entry) {
   const context = resolveDocumentSourceContext(entry);
-  if (!context.hasMultipleDocuments) return '';
+  if (!context.hasDocumentContext) return '';
   return context.documentId ? `doc:${context.documentId}` : `doc:${context.documentNumber}`;
 }
 
@@ -998,7 +1000,7 @@ function createPagePlaceholders(input) {
   const finalDocumentPageCount = toPositiveIntOrUndefined(input.documentPageCount);
 
   for (let pageIndex = 0; pageIndex < input.pageCount; pageIndex += 1) {
-    const documentPageNumber = documentContext.hasMultipleDocuments
+    const documentPageNumber = documentContext.hasDocumentContext
       ? documentPageStart + pageIndex + 1
       : undefined;
 
@@ -1037,7 +1039,7 @@ function createFailedPlaceholder(input) {
   const documentContext = resolveDocumentSourceContext(input);
   const documentPageStart = Math.max(0, Number(input.documentPageStart) || 0);
   const finalDocumentPageCount = toPositiveIntOrUndefined(input.documentPageCount);
-  const documentPageNumber = documentContext.hasMultipleDocuments
+  const documentPageNumber = documentContext.hasDocumentContext
     ? documentPageStart + 1
     : undefined;
 
