@@ -13,8 +13,10 @@ import logger from '../logging/systemLogger.js';
 const MIN_ZOOM = 0.05;
 /** Maximum allowed zoom factor (800%). */
 const MAX_ZOOM = 8;
-/** Zoom step multiplier: 1.1x for zoom in, divide by 1.1 for zoom out. */
-const ZOOM_STEP = 1.1;
+/** Zoom-in multiplier: each click increases zoom by 10%. */
+const ZOOM_IN_MULTIPLIER = 1.1;
+/** Zoom-out multiplier: inverse of +10%, approximately a 9.09% decrease. */
+const ZOOM_OUT_MULTIPLIER = 1 / ZOOM_IN_MULTIPLIER;
 /** Treat zoom deltas smaller than this as unchanged to avoid redundant React updates. */
 const ZOOM_CHANGE_THRESHOLD = 0.0005;
 
@@ -40,6 +42,33 @@ const ZOOM_CHANGE_THRESHOLD = 0.0005;
  */
 function clamp(value, min, max) {
   return Math.min(max, Math.max(min, value));
+}
+
+/**
+ * @param {number} value
+ * @returns {boolean}
+ */
+function hasPositiveFiniteNumber(value) {
+  return Number.isFinite(value) && value > 0;
+}
+
+/**
+ * @param {number} width
+ * @param {number} height
+ * @returns {boolean}
+ */
+function hasValidDimensions(width, height) {
+  return hasPositiveFiniteNumber(width) && hasPositiveFiniteNumber(height);
+}
+
+/**
+ * @param {*} value
+ * @param {(number|null)=} defaultValue
+ * @returns {(number|null)}
+ */
+function normalizeOptionalFactor(value, defaultValue = null) {
+  const numeric = Number(value);
+  return hasPositiveFiniteNumber(numeric) ? numeric : defaultValue;
 }
 
 /**
@@ -80,7 +109,7 @@ function getRenderableSize(surface) {
     height = Number(surface?.height || 0);
   }
 
-  if (!Number.isFinite(width) || !Number.isFinite(height) || width <= 0 || height <= 0) {
+  if (!hasValidDimensions(width, height)) {
     return null;
   }
 
@@ -147,7 +176,7 @@ export function calculateFitToScreenZoom(surface, viewportOrRef, setZoom, opts) 
   }
 
   const { vw, vh } = getViewportSize(viewport, opts);
-  if (vw <= 0 || vh <= 0) {
+  if (!hasValidDimensions(vw, vh)) {
     logger.warn('Non-positive viewport for fit-to-screen', { vw, vh });
     return;
   }
@@ -187,21 +216,18 @@ export function calculateFitToWidthZoom(surface, viewportOrRef, setZoom, opts) {
   }
 
   const { vw, vh } = getViewportSize(viewport, opts);
-  if (vw <= 0) {
+  if (!hasPositiveFiniteNumber(vw)) {
     logger.warn('Non-positive viewport width for fit-to-width', { vw });
     return;
   }
 
-  const rawFactor = Number(opts?.widthFactor ?? 1);
-  const factor = Number.isFinite(rawFactor) && rawFactor > 0 ? rawFactor : 1;
+  const factor = normalizeOptionalFactor(opts?.widthFactor, 1);
   const candidates = [(vw / size.w) * factor];
 
-  const rawHeightFactor = Number(opts?.heightFactor);
-  const heightFactor = Number.isFinite(rawHeightFactor) && rawHeightFactor > 0 ? rawHeightFactor : null;
+  const heightFactor = normalizeOptionalFactor(opts?.heightFactor);
   if (heightFactor != null && vh > 0) candidates.push((vh / size.h) * heightFactor);
 
-  const rawActualSizeFactor = Number(opts?.actualSizeFactor);
-  const actualSizeFactor = Number.isFinite(rawActualSizeFactor) && rawActualSizeFactor > 0 ? rawActualSizeFactor : null;
+  const actualSizeFactor = normalizeOptionalFactor(opts?.actualSizeFactor);
   if (actualSizeFactor != null) candidates.push(actualSizeFactor);
 
   let zoom = Math.min(...candidates.filter((candidate) => Number.isFinite(candidate) && candidate > 0));
@@ -220,7 +246,7 @@ export function handleZoomIn(setZoom) {
   logger.info('Zooming in');
   setZoom((prevZoom) => {
     const current = Number(prevZoom) || 1;
-    const next = clamp(current * ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
+    const next = clamp(current * ZOOM_IN_MULTIPLIER, MIN_ZOOM, MAX_ZOOM);
     return next;
   });
 }
@@ -235,7 +261,7 @@ export function handleZoomOut(setZoom) {
   logger.info('Zooming out');
   setZoom((prevZoom) => {
     const current = Number(prevZoom) || 1;
-    const next = clamp(current / ZOOM_STEP, MIN_ZOOM, MAX_ZOOM);
+    const next = clamp(current * ZOOM_OUT_MULTIPLIER, MIN_ZOOM, MAX_ZOOM);
     return next;
   });
 }

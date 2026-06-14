@@ -34,7 +34,7 @@ import {
 
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
 const COOKIE_KEY = 'ODV_USER_PREFERENCES';
-const COOKIE_MAX_AGE_SECONDS = 60 * 60 * 24 * 365;
+const COOKIE_MAX_AGE_SECONDS = 31557600; // 365.25 days, matching an average calendar year.
 const EXPLICIT_THEMES = Object.freeze(['normal', 'light', 'dark']);
 const THEME_MODES = Object.freeze(['system', 'normal', 'light', 'dark']);
 const DEFAULT_ZOOM_MODES = Object.freeze(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']);
@@ -300,8 +300,7 @@ export function setThemeModePreference(mode) {
   if (normalized === 'system') delete next.theme;
   else next.theme = normalized;
 
-  writePreferencesToStorage(next);
-  writePreferencesToCookie(next);
+  const persisted = replaceViewerPreferences(next);
 
   try {
     if (typeof window !== 'undefined' && window.localStorage) {
@@ -310,7 +309,7 @@ export function setThemeModePreference(mode) {
     }
   } catch {}
 
-  return next;
+  return persisted;
 }
 
 /**
