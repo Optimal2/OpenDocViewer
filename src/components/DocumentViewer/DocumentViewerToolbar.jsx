@@ -67,10 +67,14 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {{ mode: ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'), scale: number }} zoomState
  * @property {function(string): void} setZoomMode - Accepts FIT_PAGE, FIT_WIDTH, FIT_CUSTOM, ACTUAL_SIZE, or CUSTOM.
  * @property {number} customFitWidthFactorPercent
+ * @property {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }} customFitSizeLimits
+ * @property {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }} configuredCustomFitSizeLimits
+ * @property {{ widthFactorPercent:(number|null), heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }} userCustomFitSizeLimits
  * @property {number} configuredCustomFitWidthFactorPercent
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null)} userDefaultZoomMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')} configuredDefaultZoomMode
  * @property {function(number): void} setCustomFitWidthFactorPercent
+ * @property {function({ widthFactorPercent:*, heightFactorPercent:*, actualSizeFactorPercent:* }): void} setCustomFitSizeLimits
  * @property {function((string|null)): void} setDefaultZoomModePreference
  * @property {function(number): void} setZoom
  * @property {RefLike} viewerContainerRef
@@ -152,10 +156,14 @@ const DocumentViewerToolbar = ({
   zoomState,
   setZoomMode,
   customFitWidthFactorPercent,
+  customFitSizeLimits,
+  configuredCustomFitSizeLimits,
+  userCustomFitSizeLimits,
   configuredCustomFitWidthFactorPercent,
   userDefaultZoomMode,
   configuredDefaultZoomMode,
   setCustomFitWidthFactorPercent,
+  setCustomFitSizeLimits,
   setDefaultZoomModePreference,
   setZoom,
   viewerContainerRef,
@@ -233,10 +241,14 @@ const DocumentViewerToolbar = ({
       fitToWidth={fitToWidth}
       setZoom={setZoom}
       customFitWidthFactorPercent={customFitWidthFactorPercent}
+      customFitSizeLimits={customFitSizeLimits}
+      configuredCustomFitSizeLimits={configuredCustomFitSizeLimits}
+      userCustomFitSizeLimits={userCustomFitSizeLimits}
       configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
       userDefaultZoomMode={userDefaultZoomMode}
       configuredDefaultZoomMode={configuredDefaultZoomMode}
       setCustomFitWidthFactorPercent={setCustomFitWidthFactorPercent}
+      setCustomFitSizeLimits={setCustomFitSizeLimits}
       setDefaultZoomModePreference={setDefaultZoomModePreference}
       viewerContainerRef={viewerContainerRef}
       documentRenderRef={documentRenderRef}
@@ -317,10 +329,26 @@ DocumentViewerToolbar.propTypes = {
   }).isRequired,
   setZoomMode: PropTypes.func.isRequired,
   customFitWidthFactorPercent: PropTypes.number.isRequired,
+  customFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }).isRequired,
+  configuredCustomFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }).isRequired,
+  userCustomFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }).isRequired,
   configuredCustomFitWidthFactorPercent: PropTypes.number.isRequired,
   userDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', null]),
   configuredDefaultZoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE']).isRequired,
   setCustomFitWidthFactorPercent: PropTypes.func.isRequired,
+  setCustomFitSizeLimits: PropTypes.func.isRequired,
   setDefaultZoomModePreference: PropTypes.func.isRequired,
   setZoom: PropTypes.func.isRequired,
   viewerContainerRef: PropTypes.shape({ current: PropTypes.any }).isRequired,

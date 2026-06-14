@@ -18,14 +18,18 @@ import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import {
   getKeyboardPrintShortcutBehavior,
+  getViewerCustomFitSizeLimits,
   getViewerCustomFitWidthFactorPercent,
   getViewerDefaultZoomMode,
+  normalizeCustomFitSizeLimitPreference,
   normalizeCustomFitWidthFactorPercent,
 } from '../../utils/runtimeConfig.js';
 import {
   clearDefaultZoomModePreference,
+  getCustomFitSizeLimitPreference,
   getCustomFitWidthFactorPreference,
   getDefaultZoomModePreference,
+  setCustomFitSizeLimitPreference,
   setCustomFitWidthFactorPreference,
   setDefaultZoomModePreference,
 } from '../../utils/viewerPreferences.js';
@@ -363,14 +367,24 @@ export function useDocumentViewer() {
   if (!initialZoomSettingsRef.current) {
     const configuredDefaultZoomMode = getViewerDefaultZoomMode();
     const userDefaultZoomMode = getDefaultZoomModePreference();
+    const configuredCustomFitSizeLimits = getViewerCustomFitSizeLimits();
     const configuredCustomFitWidthFactorPercent = getViewerCustomFitWidthFactorPercent();
+    const userCustomFitSizeLimits = getCustomFitSizeLimitPreference();
     const userCustomFitWidthFactorPercent = getCustomFitWidthFactorPreference();
+    const customFitSizeLimits = {
+      widthFactorPercent: userCustomFitSizeLimits.widthFactorPercent ?? userCustomFitWidthFactorPercent ?? configuredCustomFitSizeLimits.widthFactorPercent,
+      heightFactorPercent: userCustomFitSizeLimits.heightFactorPercent,
+      actualSizeFactorPercent: userCustomFitSizeLimits.actualSizeFactorPercent,
+    };
     initialZoomSettingsRef.current = {
       configuredDefaultZoomMode,
       userDefaultZoomMode,
       defaultZoomMode: userDefaultZoomMode || configuredDefaultZoomMode,
+      configuredCustomFitSizeLimits,
       configuredCustomFitWidthFactorPercent,
-      customFitWidthFactorPercent: userCustomFitWidthFactorPercent ?? configuredCustomFitWidthFactorPercent,
+      userCustomFitSizeLimits,
+      customFitSizeLimits,
+      customFitWidthFactorPercent: customFitSizeLimits.widthFactorPercent,
     };
   }
 
@@ -514,6 +528,9 @@ export function useDocumentViewer() {
   );
   const [customFitWidthFactorPercent, setCustomFitWidthFactorPercentState] = useState(
     initialZoomSettingsRef.current.customFitWidthFactorPercent
+  );
+  const [customFitSizeLimits, setCustomFitSizeLimitsState] = useState(
+    initialZoomSettingsRef.current.customFitSizeLimits
   );
   const [userDefaultZoomMode, setUserDefaultZoomMode] = useState(
     initialZoomSettingsRef.current.userDefaultZoomMode
@@ -1187,16 +1204,21 @@ export function useDocumentViewer() {
     tryCallDocumentRender('fitToWidth', 'DocumentRender fitToWidth failed');
   }, [resetPostZoom, tryCallDocumentRender, zoom]);
 
-  const fitToCustomWidth = useCallback((factorPercent = customFitWidthFactorPercent) => {
-    const safeFactorPercent = normalizeCustomFitWidthFactorPercent(factorPercent, customFitWidthFactorPercent);
+  const fitToCustomWidth = useCallback((limits = customFitSizeLimits) => {
+    const normalizedLimits = normalizeCustomFitSizeLimitPreference(limits);
+    const effectiveLimits = {
+      widthFactorPercent: normalizedLimits.widthFactorPercent ?? customFitWidthFactorPercent,
+      heightFactorPercent: normalizedLimits.heightFactorPercent,
+      actualSizeFactorPercent: normalizedLimits.actualSizeFactorPercent,
+    };
     resetPostZoom();
     setZoomState({ mode: 'FIT_CUSTOM', scale: zoom });
     tryCallDocumentRender(
       'fitToCustomWidth',
       'DocumentRender fitToCustomWidth failed',
-      safeFactorPercent
+      effectiveLimits
     );
-  }, [customFitWidthFactorPercent, resetPostZoom, tryCallDocumentRender, zoom]);
+  }, [customFitSizeLimits, customFitWidthFactorPercent, resetPostZoom, tryCallDocumentRender, zoom]);
 
   /** Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'). */
   const setZoomMode = useCallback((mode) => {
@@ -1222,9 +1244,27 @@ export function useDocumentViewer() {
   const updateCustomFitWidthFactorPercent = useCallback((percent) => {
     const normalized = normalizeCustomFitWidthFactorPercent(percent, customFitWidthFactorPercent);
     setCustomFitWidthFactorPercentState(normalized);
+    const nextLimits = {
+      ...customFitSizeLimits,
+      widthFactorPercent: normalized,
+    };
+    setCustomFitSizeLimitsState(nextLimits);
     setCustomFitWidthFactorPreference(normalized);
-    if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(normalized);
-  }, [customFitWidthFactorPercent, fitToCustomWidth, zoomState?.mode]);
+    if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(nextLimits);
+  }, [customFitSizeLimits, customFitWidthFactorPercent, fitToCustomWidth, zoomState?.mode]);
+
+  const updateCustomFitSizeLimits = useCallback((limits) => {
+    const normalized = normalizeCustomFitSizeLimitPreference(limits);
+    const nextLimits = {
+      widthFactorPercent: normalized.widthFactorPercent ?? initialZoomSettingsRef.current.configuredCustomFitSizeLimits.widthFactorPercent,
+      heightFactorPercent: normalized.heightFactorPercent,
+      actualSizeFactorPercent: normalized.actualSizeFactorPercent,
+    };
+    setCustomFitSizeLimitsState(nextLimits);
+    setCustomFitWidthFactorPercentState(nextLimits.widthFactorPercent);
+    setCustomFitSizeLimitPreference(normalized);
+    if (zoomState?.mode === 'FIT_CUSTOM') fitToCustomWidth(nextLimits);
+  }, [fitToCustomWidth, zoomState?.mode]);
 
   const updateDefaultZoomModePreference = useCallback((mode) => {
     const normalized = mode === 'FIT_PAGE' || mode === 'FIT_WIDTH' || mode === 'FIT_CUSTOM' || mode === 'ACTUAL_SIZE'
@@ -1589,10 +1629,14 @@ export function useDocumentViewer() {
     zoomState,
     setZoomMode,
     customFitWidthFactorPercent,
+    customFitSizeLimits,
+    configuredCustomFitSizeLimits: initialZoomSettingsRef.current.configuredCustomFitSizeLimits,
     configuredCustomFitWidthFactorPercent: initialZoomSettingsRef.current.configuredCustomFitWidthFactorPercent,
+    userCustomFitSizeLimits: getCustomFitSizeLimitPreference(),
     userDefaultZoomMode,
     configuredDefaultZoomMode: initialZoomSettingsRef.current.configuredDefaultZoomMode,
     setCustomFitWidthFactorPercent: updateCustomFitWidthFactorPercent,
+    setCustomFitSizeLimits: updateCustomFitSizeLimits,
     setDefaultZoomModePreference: updateDefaultZoomModePreference,
 
     // visible/selection data

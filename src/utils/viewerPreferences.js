@@ -8,7 +8,9 @@
  */
 
 import {
+  normalizeCustomFitSizeLimitPreference,
   normalizeCustomFitWidthFactorPercent,
+  normalizeOptionalCustomFitFactorPercent,
   normalizePrintDefaultMode,
 } from './runtimeConfig.js';
 
@@ -20,6 +22,7 @@ import {
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
+ * @property {{ widthFactorPercent?:number, heightFactorPercent?:number, actualSizeFactorPercent?:number }=} customFitSizeLimits
  */
 
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
@@ -106,6 +109,23 @@ function normalizePreferences(value) {
   if (normalizedDefaultZoomMode) next.defaultZoomMode = normalizedDefaultZoomMode;
   if (source.customFitWidthFactorPercent != null) {
     next.customFitWidthFactorPercent = normalizeCustomFitWidthFactorPercent(source.customFitWidthFactorPercent, 70);
+  }
+  const customFitSizeLimits = normalizeCustomFitSizeLimitPreference(source.customFitSizeLimits);
+  if (
+    customFitSizeLimits.widthFactorPercent != null
+    || customFitSizeLimits.heightFactorPercent != null
+    || customFitSizeLimits.actualSizeFactorPercent != null
+  ) {
+    next.customFitSizeLimits = {};
+    if (customFitSizeLimits.widthFactorPercent != null) {
+      next.customFitSizeLimits.widthFactorPercent = customFitSizeLimits.widthFactorPercent;
+    }
+    if (customFitSizeLimits.heightFactorPercent != null) {
+      next.customFitSizeLimits.heightFactorPercent = customFitSizeLimits.heightFactorPercent;
+    }
+    if (customFitSizeLimits.actualSizeFactorPercent != null) {
+      next.customFitSizeLimits.actualSizeFactorPercent = customFitSizeLimits.actualSizeFactorPercent;
+    }
   }
   return next;
 }
@@ -359,6 +379,8 @@ export function clearDefaultZoomModePreference() {
  */
 export function getCustomFitWidthFactorPreference() {
   const prefs = getViewerPreferences();
+  const sizeLimits = normalizeCustomFitSizeLimitPreference(prefs.customFitSizeLimits);
+  if (sizeLimits.widthFactorPercent != null) return sizeLimits.widthFactorPercent;
   return typeof prefs.customFitWidthFactorPercent === 'number'
     ? prefs.customFitWidthFactorPercent
     : null;
@@ -371,6 +393,10 @@ export function getCustomFitWidthFactorPreference() {
 export function setCustomFitWidthFactorPreference(percent) {
   return setViewerPreferences({
     customFitWidthFactorPercent: normalizeCustomFitWidthFactorPercent(percent, 70),
+    customFitSizeLimits: {
+      ...normalizeCustomFitSizeLimitPreference(getViewerPreferences().customFitSizeLimits),
+      widthFactorPercent: normalizeCustomFitWidthFactorPercent(percent, 70),
+    },
   });
 }
 
@@ -380,5 +406,61 @@ export function setCustomFitWidthFactorPreference(percent) {
 export function clearCustomFitWidthFactorPreference() {
   const next = { ...getViewerPreferences() };
   delete next.customFitWidthFactorPercent;
+  if (next.customFitSizeLimits) {
+    const limits = { ...next.customFitSizeLimits };
+    delete limits.widthFactorPercent;
+    if (Object.keys(limits).length > 0) next.customFitSizeLimits = limits;
+    else delete next.customFitSizeLimits;
+  }
+  return replaceViewerPreferences(next);
+}
+
+/**
+ * @returns {{ widthFactorPercent: (number|null), heightFactorPercent: (number|null), actualSizeFactorPercent: (number|null) }}
+ */
+export function getCustomFitSizeLimitPreference() {
+  const prefs = getViewerPreferences();
+  const limits = normalizeCustomFitSizeLimitPreference(prefs.customFitSizeLimits);
+  if (limits.widthFactorPercent == null && typeof prefs.customFitWidthFactorPercent === 'number') {
+    limits.widthFactorPercent = normalizeCustomFitWidthFactorPercent(prefs.customFitWidthFactorPercent, 70);
+  }
+  return limits;
+}
+
+/**
+ * @param {{ widthFactorPercent?: *, heightFactorPercent?: *, actualSizeFactorPercent?: * }} limits
+ * @returns {ViewerPreferences}
+ */
+export function setCustomFitSizeLimitPreference(limits) {
+  const normalized = normalizeCustomFitSizeLimitPreference({
+    widthFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.widthFactorPercent),
+    heightFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.heightFactorPercent),
+    actualSizeFactorPercent: normalizeOptionalCustomFitFactorPercent(limits?.actualSizeFactorPercent),
+  });
+  const next = { ...getViewerPreferences() };
+  delete next.customFitWidthFactorPercent;
+  delete next.customFitSizeLimits;
+
+  if (
+    normalized.widthFactorPercent != null
+    || normalized.heightFactorPercent != null
+    || normalized.actualSizeFactorPercent != null
+  ) {
+    next.customFitSizeLimits = {};
+    if (normalized.widthFactorPercent != null) next.customFitSizeLimits.widthFactorPercent = normalized.widthFactorPercent;
+    if (normalized.heightFactorPercent != null) next.customFitSizeLimits.heightFactorPercent = normalized.heightFactorPercent;
+    if (normalized.actualSizeFactorPercent != null) next.customFitSizeLimits.actualSizeFactorPercent = normalized.actualSizeFactorPercent;
+  }
+
+  return replaceViewerPreferences(next);
+}
+
+/**
+ * @returns {ViewerPreferences}
+ */
+export function clearCustomFitSizeLimitPreference() {
+  const next = { ...getViewerPreferences() };
+  delete next.customFitWidthFactorPercent;
+  delete next.customFitSizeLimits;
   return replaceViewerPreferences(next);
 }

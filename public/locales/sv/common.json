@@ -12,29 +12,30 @@
     "zoomOut": "Zooma ut",
     "zoomActual": "Faktisk storlek (1:1)",
     "fitToScreen": "Anpassa till skärmen",
-    "fitToWidth": "Anpassa till bredden",
-    "fitCustomWidth": "Egen zoom ({percent}% av bredd)",
-    "fitCustomWidthTitle": "Anpassa till {percent}% av beräknad breddzoom",
-    "fitCustomWidthMenu": "Inställningar för egen zoom",
+    "fitToWidth": "Anpassa till bredd",
+    "fitCustomWidth": "Egen storlek",
+    "fitCustomWidthTitle": "Egen storlek",
+    "fitCustomWidthMenu": "Inställningar för egen storlek",
     "fitCustomWidthFactor": {
-      "label": "Breddfaktor",
-      "inputLabel": "Procent av breddzoom",
-      "useSystem": "Använd systemfaktor ({percent}%)"
+      "label": "Egen storlek (max % av)",
+      "emptyHint": "Lämna tomt för att använda standardvärden.",
+      "widthLabel": "Fönsterbredd",
+      "heightLabel": "Fönsterhöjd",
+      "actualSizeLabel": "Faktisk storlek"
     },
     "zoomDefault": {
-      "title": "Startzoom",
-      "useSystem": "Använd systemstandard ({mode})",
+      "title": "Standard zoom/storlek",
+      "description": "Används vid varje ny session.",
       "modes": {
         "actual": "Faktisk storlek (1:1)",
-        "fitPage": "Anpassa sida",
-        "fitCustom": "Egen zoom",
-        "fitWidth": "Anpassa bredd"
+        "fitPage": "Anpassa till skärmen",
+        "fitCustom": "Egen storlek",
+        "fitWidth": "Anpassa till bredd"
       }
     },
     "printDefault": {
       "openMenu": "Utskriftsstandard",
-      "title": "Standardomfång för utskrift",
-      "useSystem": "Använd systemstandard ({mode})"
+      "title": "Standardomfång för utskrift"
     },
     "printSelectionWorkspace": {
       "open": "Hantera vilka sidor som visas och skrivs ut",

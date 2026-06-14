@@ -128,10 +128,14 @@ const DocumentViewer = () => {
     zoomState,
     setZoomMode,
     customFitWidthFactorPercent,
+    customFitSizeLimits,
+    configuredCustomFitSizeLimits,
+    userCustomFitSizeLimits,
     configuredCustomFitWidthFactorPercent,
     userDefaultZoomMode,
     configuredDefaultZoomMode,
     setCustomFitWidthFactorPercent,
+    setCustomFitSizeLimits,
     setDefaultZoomModePreference,
     postZoomLeft,
     postZoomRight,
@@ -372,10 +376,14 @@ const DocumentViewer = () => {
         zoomState={zoomState}
         setZoomMode={setZoomMode}
         customFitWidthFactorPercent={customFitWidthFactorPercent}
+        customFitSizeLimits={customFitSizeLimits}
+        configuredCustomFitSizeLimits={configuredCustomFitSizeLimits}
+        userCustomFitSizeLimits={userCustomFitSizeLimits}
         configuredCustomFitWidthFactorPercent={configuredCustomFitWidthFactorPercent}
         userDefaultZoomMode={userDefaultZoomMode}
         configuredDefaultZoomMode={configuredDefaultZoomMode}
         setCustomFitWidthFactorPercent={setCustomFitWidthFactorPercent}
+        setCustomFitSizeLimits={setCustomFitSizeLimits}
         setDefaultZoomModePreference={setDefaultZoomModePreference}
 
         isPrintDialogOpen={isPrintDialogOpen}
@@ -542,7 +550,7 @@ const DocumentViewer = () => {
             compareRef={compareRef}
             allPages={allPages}
             zoomMode={zoomState?.mode}
-            customFitWidthFactorPercent={customFitWidthFactorPercent}
+            customFitSizeLimits={customFitSizeLimits}
             onToggleFitZoomMode={toggleFitZoomMode}
             edgeScrollPageTurnConfig={edgeScrollPageTurnConfig}
             onEdgeScrollPreviousPage={goToPreviousPage}

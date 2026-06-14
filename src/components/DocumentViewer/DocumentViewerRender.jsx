@@ -180,7 +180,7 @@ function preventDefaultIfCancelable(event) {
  * @param {RefLike} props.compareRef
  * @param {Array} props.allPages
  * @param {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM'} [props.zoomMode='CUSTOM']
- * @param {number=} props.customFitWidthFactorPercent
+ * @param {{ widthFactorPercent:number, heightFactorPercent:(number|null), actualSizeFactorPercent:(number|null) }=} props.customFitSizeLimits
  * @param {function(): void=} props.onToggleFitZoomMode
  * @param {{ enabled:boolean, thresholdPx:number, quietMs:number, decayMs:number }=} props.edgeScrollPageTurnConfig
  * @param {function(ViewerPaneKey): void=} props.onEdgeScrollPreviousPage
@@ -215,7 +215,7 @@ const DocumentViewerRender = ({
   compareRef,
   allPages,
   zoomMode = 'CUSTOM',
-  customFitWidthFactorPercent = 70,
+  customFitSizeLimits = null,
   onToggleFitZoomMode,
   edgeScrollPageTurnConfig,
   onEdgeScrollPreviousPage,
@@ -853,7 +853,7 @@ const DocumentViewerRender = ({
               isCanvasEnabled={primaryCanvasEnabled}
               allPages={allPages}
               zoomMode={zoomMode}
-              customFitWidthFactorPercent={customFitWidthFactorPercent}
+              customFitSizeLimits={customFitSizeLimits}
               onToggleFitZoomMode={onToggleFitZoomMode}
               onDisplayStateChange={onPrimaryDisplayStateChange}
             />
@@ -900,7 +900,7 @@ const DocumentViewerRender = ({
                 isCanvasEnabled={compareCanvasEnabled}
                 allPages={allPages}
                 zoomMode={zoomMode}
-                customFitWidthFactorPercent={customFitWidthFactorPercent}
+                customFitSizeLimits={customFitSizeLimits}
                 onToggleFitZoomMode={onToggleFitZoomMode}
               />
             </div>
@@ -1021,7 +1021,11 @@ DocumentViewerRender.propTypes = {
   compareRef: PropTypes.shape({ current: PropTypes.any }).isRequired,
   allPages: PropTypes.array.isRequired,
   zoomMode: PropTypes.oneOf(['FIT_PAGE', 'FIT_WIDTH', 'FIT_CUSTOM', 'ACTUAL_SIZE', 'CUSTOM']),
-  customFitWidthFactorPercent: PropTypes.number,
+  customFitSizeLimits: PropTypes.shape({
+    widthFactorPercent: PropTypes.number,
+    heightFactorPercent: PropTypes.number,
+    actualSizeFactorPercent: PropTypes.number,
+  }),
   onToggleFitZoomMode: PropTypes.func,
   edgeScrollPageTurnConfig: PropTypes.shape({
     enabled: PropTypes.bool.isRequired,

@@ -13,28 +13,29 @@
     "zoomActual": "Actual size (1:1)",
     "fitToScreen": "Fit to screen",
     "fitToWidth": "Fit to width",
-    "fitCustomWidth": "Custom fit ({percent}% of width)",
-    "fitCustomWidthTitle": "Fit to {percent}% of the calculated fit-width zoom",
-    "fitCustomWidthMenu": "Custom zoom settings",
+    "fitCustomWidth": "Custom size",
+    "fitCustomWidthTitle": "Custom size",
+    "fitCustomWidthMenu": "Custom size settings",
     "fitCustomWidthFactor": {
-      "label": "Width factor",
-      "inputLabel": "Percent of fit width",
-      "useSystem": "Use system factor ({percent}%)"
+      "label": "Custom size (max % of)",
+      "emptyHint": "Leave empty to use default values.",
+      "widthLabel": "Window width",
+      "heightLabel": "Window height",
+      "actualSizeLabel": "Actual size"
     },
     "zoomDefault": {
-      "title": "Startup zoom",
-      "useSystem": "Use system default ({mode})",
+      "title": "Default zoom/size",
+      "description": "Used for each new session.",
       "modes": {
         "actual": "Actual size (1:1)",
-        "fitPage": "Fit page",
-        "fitCustom": "Custom fit",
-        "fitWidth": "Fit width"
+        "fitPage": "Fit to screen",
+        "fitCustom": "Custom size",
+        "fitWidth": "Fit to width"
       }
     },
     "printDefault": {
       "openMenu": "Print defaults",
-      "title": "Default print scope",
-      "useSystem": "Use system default ({mode})"
+      "title": "Default print scope"
     },
     "printSelectionWorkspace": {
       "open": "Manage the pages shown and printed",
