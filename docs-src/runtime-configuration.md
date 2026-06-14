@@ -78,17 +78,22 @@ Deployments can choose the initial zoom mode used when the first page opens:
 viewer: {
   // Supported values: "fit-page", "fit-width", "custom-fit-width", "actual-size".
   defaultZoomMode: 'fit-width',
-  // Percentage of the calculated fit-width zoom used by the Custom Fit toolbar button.
-  customFitWidthFactorPercent: 70
+  // Percentage caps used by the Custom Size toolbar button.
+  // Width supports 1..100 and defaults to 70% of calculated fit-width zoom.
+  // Height supports 1..500. Actual size supports 1..200. Use null for no cap.
+  customFitWidthFactorPercent: 70,
+  customFitHeightFactorPercent: null,
+  customFitActualSizeFactorPercent: null
 }
 ```
 
 The default is `fit-width`, so users start with the page width filling the pane and can scroll
 vertically through taller pages. Use `fit-page` when the full page should fit inside the viewer
 pane. Use `custom-fit-width` when the viewer should start at a percentage of the fit-width zoom,
-for example `70%` of the calculated width fit. Use `actual-size` for a 100% initial zoom.
+for example `70%` of the calculated width fit, optionally capped by viewport height or actual size.
+Use `actual-size` for a 100% initial zoom.
 
-Users can override the default zoom mode and custom-fit factor from the toolbar. User choices are
+Users can override the default zoom mode and custom-size caps from the toolbar. User choices are
 stored in viewer preferences and take precedence over `odv.site.config.js` until the user chooses
 the system default again.
 
