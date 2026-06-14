@@ -819,3 +819,29 @@
   opacity: 0.72;
   cursor: not-allowed;
 }
+
+.toolbar.toolbar--selection-workspace .print-selection-reset-draft-action:not(:disabled) {
+  border-color: color-mix(in srgb, #f59e0b 76%, var(--border-color) 24%);
+  background-color: #f59e0b;
+  color: #fff;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-reset-draft-action:not(:disabled):hover,
+.toolbar.toolbar--selection-workspace .print-selection-reset-draft-action:not(:disabled):focus-visible {
+  border-color: #d97706;
+  background-color: #d97706;
+  color: #fff;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-save-action:not(:disabled),
+.toolbar.toolbar--selection-workspace .print-selection-save-action:not(:disabled):hover,
+.toolbar.toolbar--selection-workspace .print-selection-save-action:not(:disabled):focus-visible {
+  border-color: #15803d;
+  background-color: #16a34a;
+  color: #fff;
+}
+
+.toolbar.toolbar--selection-workspace .print-selection-save-action:not(:disabled):hover,
+.toolbar.toolbar--selection-workspace .print-selection-save-action:not(:disabled):focus-visible {
+  background-color: #15803d;
+}

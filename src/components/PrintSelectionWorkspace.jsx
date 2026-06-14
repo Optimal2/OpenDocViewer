@@ -3,7 +3,7 @@
  * Full-window print-selection workspace.
  *
  * This mode is intentionally separate from the legacy thumbnail-pane selection filter. It edits an
- * ordered draft print sequence and only commits that sequence when the user confirms with OK.
+ * ordered draft page sequence and saves that sequence explicitly from the workspace toolbar.
  */
 
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
@@ -605,7 +605,7 @@ const PrintSelectionWorkspace = ({
   previewInfoTemplate,
   zoomPercent = 120,
   onToolbarStateChange,
-  onCommit,
+  onSave,
   onCancel,
 }) => {
   const { t, i18n } = useTranslation('common');
@@ -649,6 +649,7 @@ const PrintSelectionWorkspace = ({
   const [dragState, setDragState] = useState(null);
   const [rightDropIntent, setRightDropIntent] = useState(null);
   const [pulseIndex, setPulseIndex] = useState(null);
+  const [leavePromptOpen, setLeavePromptOpen] = useState(false);
   const [leftPanelPercent, setLeftPanelPercent] = useState(50);
   const [thumbnailPercent, setThumbnailPercent] = useState(() => clampPercent(zoomPercent));
   const bodyRef = useRef(null);
@@ -739,11 +740,10 @@ const PrintSelectionWorkspace = ({
   const thumbSize = Math.round(92 * (thumbnailPercent / 100));
   const canUndoDraftChange = Array.isArray(draftHistory.undo);
   const canRedoDraftChange = Array.isArray(draftHistory.redo);
-  const canResetToDefault = !sequencesEqual(draftIndexes, naturalIndexes);
   const undoActionTitle = t('printSelectionWorkspace.undoTitle', { defaultValue: 'Undo the latest print-selection change.' });
   const redoActionTitle = t('printSelectionWorkspace.redoTitle', { defaultValue: 'Redo the latest undone print-selection change.' });
-  const resetToDefaultTitle = t('printSelectionWorkspace.resetToDefaultTitle', {
-    defaultValue: 'Reset to the original session order with every page included.',
+  const resetDraftChangesTitle = t('printSelectionWorkspace.resetDraftChangesTitle', {
+    defaultValue: 'Discard unsaved changes and return to the latest saved page selection.',
   });
 
   const applyDraftChange = useCallback((producer) => {
@@ -1351,20 +1351,38 @@ const PrintSelectionWorkspace = ({
     workspaceModeIsDocuments,
   ]);
 
-  const cancel = useCallback(() => {
-    if (isDirty) {
-      const ok = window.confirm(t('printSelectionWorkspace.cancelConfirm', {
-        defaultValue: 'Discard the draft print selection? All changes in this selection mode will be lost.',
-      }));
-      if (!ok) return;
-    }
+  const closeWorkspace = useCallback(() => {
     onCancel?.();
-  }, [isDirty, onCancel, t]);
+  }, [onCancel]);
 
-  const commit = useCallback(() => {
+  const saveDraft = useCallback(() => {
     if (draftIndexes.length <= 0) return;
-    onCommit?.(draftIndexes.map((index) => index + 1));
-  }, [draftIndexes, onCommit]);
+    onSave?.(draftIndexes.map((index) => index + 1));
+  }, [draftIndexes, onSave]);
+
+  const leaveWorkspace = useCallback(() => {
+    if (isDirty) {
+      setLeavePromptOpen(true);
+      return;
+    }
+    closeWorkspace();
+  }, [closeWorkspace, isDirty]);
+
+  const saveAndLeaveWorkspace = useCallback(() => {
+    if (draftIndexes.length <= 0) return;
+    saveDraft();
+    setLeavePromptOpen(false);
+    closeWorkspace();
+  }, [closeWorkspace, draftIndexes.length, saveDraft]);
+
+  const discardAndLeaveWorkspace = useCallback(() => {
+    setLeavePromptOpen(false);
+    closeWorkspace();
+  }, [closeWorkspace]);
+
+  const continueEditingWorkspace = useCallback(() => {
+    setLeavePromptOpen(false);
+  }, []);
 
   const changeWorkspaceMode = useCallback((nextMode) => {
     const normalizedMode = String(nextMode || 'documents') === 'pages' ? 'pages' : 'documents';
@@ -1386,12 +1404,12 @@ const PrintSelectionWorkspace = ({
     setPanelMode(String(nextMode || '') === 'right' ? 'right' : 'both');
   }, []);
 
-  const resetToDefault = useCallback(() => {
-    if (!canResetToDefault) return;
-    applyDraftChange(naturalIndexes);
+  const resetDraftChanges = useCallback(() => {
+    if (!isDirty) return;
+    applyDraftChange(initialIndexes);
     setLeftSelected([]);
     setRightSelected([]);
-  }, [applyDraftChange, canResetToDefault, naturalIndexes]);
+  }, [applyDraftChange, initialIndexes, isDirty]);
 
   const openLightbox = useCallback((originalIndex, side, event) => {
     event?.preventDefault?.();
@@ -1404,6 +1422,18 @@ const PrintSelectionWorkspace = ({
     const indexes = sourceIndexes.filter((index) => itemByIndex.has(index));
     setLightboxState({ index: originalIndex, indexes, side: normalizedSide });
   }, [availableLeftIndexes, draftIndexes, hideIncludedLeftPages, itemByIndex, naturalIndexes]);
+
+  const openPanelLightbox = useCallback((side, event) => {
+    const normalizedSide = side === 'right' ? 'right' : 'left';
+    const indexes = normalizedSide === 'right' ? draftIndexes : leftSourceIndexes;
+    const firstIndex = indexes.find((index) => itemByIndex.has(index));
+    if (firstIndex == null) {
+      event?.preventDefault?.();
+      event?.stopPropagation?.();
+      return;
+    }
+    openLightbox(firstIndex, normalizedSide, event);
+  }, [draftIndexes, itemByIndex, leftSourceIndexes, openLightbox]);
 
   const closeLightbox = useCallback(() => {
     setLightboxState(null);
@@ -1676,12 +1706,12 @@ const PrintSelectionWorkspace = ({
     if (String(event?.key || '') === 'Escape') {
       event.preventDefault();
       event.stopPropagation();
-      cancel();
+      leaveWorkspace();
       return;
     }
     if (!isModifierOnlyKey(event)) return;
     event.stopPropagation();
-  }, [cancel]);
+  }, [leaveWorkspace]);
 
   const toolbarState = useMemo(() => ({
     workspaceMode,
@@ -1692,34 +1722,34 @@ const PrintSelectionWorkspace = ({
     documentModeAvailable,
     canUndoDraftChange,
     canRedoDraftChange,
-    canResetToDefault,
+    canResetDraftChanges: isDirty,
     undoActionTitle,
     redoActionTitle,
-    resetToDefaultTitle,
-    canCommit: draftIndexes.length > 0,
+    resetDraftChangesTitle,
+    canSaveDraftChange: draftIndexes.length > 0 && isDirty,
     onWorkspaceModeChange: changeWorkspaceMode,
     onPanelModeChange: changePanelMode,
     onThumbnailSizeChange: setThumbnailSize,
     onUndoDraftChange: undoDraftChange,
     onRedoDraftChange: redoDraftChange,
-    onResetToDefault: resetToDefault,
-    onCancel: cancel,
-    onCommit: commit,
+    onResetDraftChanges: resetDraftChanges,
+    onSaveDraftChange: saveDraft,
+    onLeaveWorkspace: leaveWorkspace,
   }), [
     canRedoDraftChange,
-    canResetToDefault,
     canUndoDraftChange,
-    cancel,
     changeWorkspaceMode,
     changePanelMode,
-    commit,
     documentModeAvailable,
     draftIndexes.length,
+    isDirty,
+    leaveWorkspace,
     panelMode,
     redoActionTitle,
     redoDraftChange,
-    resetToDefault,
-    resetToDefaultTitle,
+    resetDraftChanges,
+    resetDraftChangesTitle,
+    saveDraft,
     setThumbnailSize,
     thumbnailPercent,
     totalPages,
@@ -1762,7 +1792,23 @@ const PrintSelectionWorkspace = ({
           >
             <div className="print-selection-panel-header">
               <div className="print-selection-panel-header-main">
-                <h3>{t('printSelectionWorkspace.availablePages', { defaultValue: 'Available pages' })}</h3>
+                <div className="print-selection-panel-title-row">
+                  <button
+                    type="button"
+                    className="print-selection-panel-preview-button"
+                    onClick={(event) => openPanelLightbox('left', event)}
+                    disabled={leftSourceIndexes.length <= 0}
+                    title={leftSourceIndexes.length > 0
+                      ? t('printSelectionWorkspace.previewAvailablePages', { defaultValue: 'Preview available pages from the first page' })
+                      : t('printSelectionWorkspace.previewAvailablePagesDisabled', { defaultValue: 'There are no available pages to preview' })}
+                    aria-label={leftSourceIndexes.length > 0
+                      ? t('printSelectionWorkspace.previewAvailablePages', { defaultValue: 'Preview available pages from the first page' })
+                      : t('printSelectionWorkspace.previewAvailablePagesDisabled', { defaultValue: 'There are no available pages to preview' })}
+                  >
+                    <span className="material-icons" aria-hidden="true">visibility</span>
+                  </button>
+                  <h3>{t('printSelectionWorkspace.availablePages', { defaultValue: 'Available pages' })}</h3>
+                </div>
                 <label className="print-selection-hide-included-toggle">
                   <input
                     type="checkbox"
@@ -1901,7 +1947,23 @@ const PrintSelectionWorkspace = ({
         {visibleRightPanel ? (
           <div className="print-selection-panel print-selection-panel-right">
             <div className="print-selection-panel-header">
-              <h3>{t('printSelectionWorkspace.selectedPages', { defaultValue: 'Selected pages' })}</h3>
+              <div className="print-selection-panel-title-row">
+                <button
+                  type="button"
+                  className="print-selection-panel-preview-button"
+                  onClick={(event) => openPanelLightbox('right', event)}
+                  disabled={draftIndexes.length <= 0}
+                  title={draftIndexes.length > 0
+                    ? t('printSelectionWorkspace.previewSelectedPages', { defaultValue: 'Preview selected pages from the first page' })
+                    : t('printSelectionWorkspace.previewSelectedPagesDisabled', { defaultValue: 'There are no selected pages to preview' })}
+                  aria-label={draftIndexes.length > 0
+                    ? t('printSelectionWorkspace.previewSelectedPages', { defaultValue: 'Preview selected pages from the first page' })
+                    : t('printSelectionWorkspace.previewSelectedPagesDisabled', { defaultValue: 'There are no selected pages to preview' })}
+                >
+                  <span className="material-icons" aria-hidden="true">visibility</span>
+                </button>
+                <h3>{t('printSelectionWorkspace.selectedPages', { defaultValue: 'Selected pages' })}</h3>
+              </div>
               <span>{t('printSelectionWorkspace.selectedCount', { count: draftIndexes.length, defaultValue: `${draftIndexes.length} selected` })}</span>
             </div>
             <div
@@ -2055,6 +2117,47 @@ const PrintSelectionWorkspace = ({
           </div>
         </div>
       ) : null}
+      {leavePromptOpen ? (
+        <div className="print-selection-unsaved-overlay" role="presentation">
+          <div
+            className="print-selection-unsaved-dialog"
+            role="dialog"
+            aria-modal="true"
+            aria-labelledby="print-selection-unsaved-title"
+          >
+            <h2 id="print-selection-unsaved-title">
+              {t('printSelectionWorkspace.unsavedChangesTitle', { defaultValue: 'Unsaved changes' })}
+            </h2>
+            <p>{t('printSelectionWorkspace.unsavedChangesBody', {
+              defaultValue: 'You have unsaved selection changes. Do you want to save them before leaving edit mode?',
+            })}</p>
+            <div className="print-selection-unsaved-actions">
+              <button
+                type="button"
+                className="print-selection-primary print-selection-save-action"
+                onClick={saveAndLeaveWorkspace}
+                disabled={draftIndexes.length <= 0}
+              >
+                {t('printSelectionWorkspace.saveChanges', { defaultValue: 'Save changes' })}
+              </button>
+              <button
+                type="button"
+                className="print-selection-secondary"
+                onClick={discardAndLeaveWorkspace}
+              >
+                {t('printSelectionWorkspace.discardChanges', { defaultValue: 'Discard changes' })}
+              </button>
+              <button
+                type="button"
+                className="print-selection-secondary"
+                onClick={continueEditingWorkspace}
+              >
+                {t('printSelectionWorkspace.continueEditing', { defaultValue: 'Continue editing' })}
+              </button>
+            </div>
+          </div>
+        </div>
+      ) : null}
     </section>
   );
 };
@@ -2067,7 +2170,7 @@ PrintSelectionWorkspace.propTypes = {
   previewInfoTemplate: PropTypes.oneOfType([PropTypes.string, PropTypes.object]).isRequired,
   zoomPercent: PropTypes.number,
   onToolbarStateChange: PropTypes.func,
-  onCommit: PropTypes.func.isRequired,
+  onSave: PropTypes.func.isRequired,
   onCancel: PropTypes.func.isRequired,
 };
 

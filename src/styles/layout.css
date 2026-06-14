@@ -193,6 +193,44 @@
   color: var(--primary-color);
 }
 
+.print-selection-toolbar-end-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.print-selection-reset-draft-action {
+  min-width: 42px;
+  padding-inline: 0;
+  border-color: color-mix(in srgb, #f59e0b 76%, var(--border-color) 24%);
+  background: #f59e0b;
+  color: #fff;
+}
+
+.print-selection-reset-draft-action:hover,
+.print-selection-reset-draft-action:focus-visible {
+  border-color: #d97706;
+  background: #d97706;
+  color: #fff;
+}
+
+.print-selection-save-action {
+  border-color: #15803d;
+  background: #16a34a;
+  color: #fff;
+}
+
+.print-selection-save-action:hover,
+.print-selection-save-action:focus-visible {
+  border-color: #15803d;
+  background: #15803d;
+  color: #fff;
+}
+
+.print-selection-leave-action {
+  border-color: color-mix(in srgb, var(--text-color) 48%, var(--border-color) 52%);
+}
+
 .toolbar .print-selection-cancel-action,
 .print-selection-cancel-action {
   margin-left: 10px;
@@ -228,7 +266,10 @@
 .print-selection-cancel-action .material-icons,
 .print-selection-commit-action .material-icons,
 .print-selection-history-action .material-icons,
-.print-selection-reset-action .material-icons {
+.print-selection-reset-action .material-icons,
+.print-selection-reset-draft-action .material-icons,
+.print-selection-save-action .material-icons,
+.print-selection-leave-action .material-icons {
   font-size: 18px;
 }
 
@@ -311,7 +352,7 @@
 
 .print-selection-panel-header {
   display: flex;
-  align-items: baseline;
+  align-items: center;
   justify-content: space-between;
   gap: 12px;
   padding: 10px 14px;
@@ -329,6 +370,52 @@
   align-items: center;
   gap: 12px;
   min-width: 0;
+}
+
+.print-selection-panel-title-row {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+}
+
+.print-selection-panel-preview-button {
+  display: grid;
+  width: 30px;
+  height: 30px;
+  min-width: 30px;
+  padding: 0;
+  place-items: center;
+  border: 1px solid var(--border-color);
+  border-radius: 999px;
+  background: var(--button-background, var(--background-color));
+  color: var(--text-color);
+  cursor: pointer;
+}
+
+.print-selection-panel-preview-button:hover,
+.print-selection-panel-preview-button:focus-visible {
+  border-color: var(--primary-color);
+  background: color-mix(in srgb, var(--primary-color) 12%, var(--background-color) 88%);
+  color: var(--primary-color);
+  outline: none;
+}
+
+.print-selection-panel-preview-button:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+.print-selection-panel-preview-button:disabled:hover,
+.print-selection-panel-preview-button:disabled:focus-visible {
+  border-color: var(--border-color);
+  background: var(--button-background, var(--background-color));
+  color: var(--text-color);
+}
+
+.print-selection-panel-preview-button .material-icons {
+  color: inherit;
+  font-size: 18px;
 }
 
 .print-selection-hide-included-toggle {
@@ -893,6 +980,42 @@
   max-width: 100%;
   max-height: 100%;
   object-fit: contain;
+}
+
+.print-selection-unsaved-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 5100;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+  background: rgba(15, 23, 42, 0.38);
+}
+
+.print-selection-unsaved-dialog {
+  width: min(720px, 100%);
+  padding: 24px 26px;
+  border: 1px solid var(--border-color);
+  border-radius: 10px;
+  background: var(--background-color);
+  color: var(--text-color);
+  box-shadow: 0 24px 70px rgba(15, 23, 42, 0.32);
+}
+
+.print-selection-unsaved-dialog h2 {
+  margin: 0 0 16px;
+  font-size: 1.15rem;
+}
+
+.print-selection-unsaved-dialog p {
+  margin: 0 0 18px;
+  color: var(--muted-text-color);
+}
+
+.print-selection-unsaved-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
 }
 
 .viewer-section {

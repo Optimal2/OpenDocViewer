@@ -77,7 +77,7 @@ const DocumentViewer = () => {
     printSelectionWorkspaceOpen,
     openPrintSelectionWorkspace,
     cancelPrintSelectionWorkspace,
-    commitPrintSelectionWorkspace,
+    savePrintSelectionWorkspace,
     customPrintSelectionActive,
     customPrintSelectionSequence,
     initialPrintSelectionWorkspaceSequence,
@@ -446,7 +446,7 @@ const DocumentViewer = () => {
           previewInfoTemplate={printSelectionWorkspaceConfig.previewInfoTemplate}
           zoomPercent={printSelectionZoomPercent}
           onToolbarStateChange={setPrintSelectionToolbarState}
-          onCommit={commitPrintSelectionWorkspace}
+          onSave={savePrintSelectionWorkspace}
           onCancel={cancelPrintSelectionWorkspace}
         />
       ) : (
