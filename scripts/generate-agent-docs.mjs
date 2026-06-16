@@ -27,17 +27,12 @@ function parseArgs(argv) {
     ['--source-metadata', 'sourceMetadata'],
   ]);
 
-  let i = 0;
-  while (i < argv.length) {
-    const arg = argv[i];
+  const iterator = argv[Symbol.iterator]();
+  for (const arg of iterator) {
     if (valueOptions.has(arg)) {
-      options[valueOptions.get(arg)] = readOptionValue(argv, i, arg);
-      i += 2;
-      continue;
+      options[valueOptions.get(arg)] = readOptionValue(iterator, arg);
     } else if (arg === '-h' || arg === '--help') {
       options.help = true;
-      i += 1;
-      continue;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -46,12 +41,13 @@ function parseArgs(argv) {
   return options;
 }
 
-function readOptionValue(argv, index, optionName) {
-  if (index + 1 >= argv.length) {
+function readOptionValue(iterator, optionName) {
+  const next = iterator.next();
+  if (next.done) {
     throw new Error(`${optionName} requires a value.`);
   }
 
-  return argv[index + 1];
+  return next.value;
 }
 
 function printHelp() {
@@ -123,6 +119,10 @@ function main() {
     throw new Error(`Failed to start AgentDocMap command: ${commandSummary}. ${result.error.message}`, {
       cause: result.error,
     });
+  }
+
+  if (result.signal) {
+    throw new Error(`AgentDocMap terminated by signal ${result.signal}. Command: ${commandSummary}`);
   }
 
   if (result.status !== null && result.status !== 0) {
