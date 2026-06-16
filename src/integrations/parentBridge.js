@@ -15,7 +15,7 @@
 /**
  * Result object when data is obtained from a same-origin parent.
  * @typedef {Object} ParentBootstrapResult
- * @property {'parent'} source
+ * @property {('parent'|'opener')} source
  * @property {*} data
  */
 
@@ -35,6 +35,26 @@ function getSameOriginParent() {
       // If this line does not throw, we can safely treat the parent as same-origin.
       void window.parent.location.href;
       return window.parent;
+    }
+  } catch {
+    // cross-origin access denied
+  }
+  return null;
+}
+
+/**
+ * Try to obtain a same-origin opener window reference.
+ * Returns null when the viewer was opened with noopener, from another origin,
+ * or without an opener.
+ *
+ * @returns {(Window|null)}
+ */
+function getSameOriginOpener() {
+  try {
+    if (typeof window === 'undefined') return null;
+    if (window.opener && window.opener !== window) {
+      void window.opener.location.href;
+      return window.opener;
     }
   } catch {
     // cross-origin access denied
@@ -78,23 +98,20 @@ function b64DecodeUnicode(str) {
 }
 
 /**
- * Attempt to read a bootstrap object from a same-origin parent.
+ * Attempt to read a bootstrap object from a same-origin related window.
  *
- * Priority:
- *   1) parent.ODV_BOOTSTRAP   (generic, recommended)
- *   2) parent.modelRaw/model  (legacy compatibility)
- *
+ * @param {(Window|null)} candidate
+ * @param {('parent'|'opener')} source
  * @returns {(ParentBootstrapResult|null)}
  */
-export function readFromParent() {
-  const p = getSameOriginParent();
-  if (!p) return null;
+function readFromWindow(candidate, source) {
+  if (!candidate) return null;
 
   // 1) Preferred generic surface
   try {
-    if (p.ODV_BOOTSTRAP && typeof p.ODV_BOOTSTRAP === 'object') {
-      const clone = safeClone(p.ODV_BOOTSTRAP);
-      if (clone) return { source: 'parent', data: clone };
+    if (candidate.ODV_BOOTSTRAP && typeof candidate.ODV_BOOTSTRAP === 'object') {
+      const clone = safeClone(candidate.ODV_BOOTSTRAP);
+      if (clone) return { source, data: clone };
     }
   } catch {
     // ignore and continue probing
@@ -102,12 +119,12 @@ export function readFromParent() {
 
   // 2a) Legacy: base64 JSON
   try {
-    if (typeof p.modelRaw === 'string') {
-      const json = b64DecodeUnicode(p.modelRaw);
+    if (typeof candidate.modelRaw === 'string') {
+      const json = b64DecodeUnicode(candidate.modelRaw);
       if (json) {
         try {
           const obj = JSON.parse(json);
-          return { source: 'parent', data: obj };
+          return { source, data: obj };
         } catch {
           // fall through
         }
@@ -119,9 +136,9 @@ export function readFromParent() {
 
   // 2b) Legacy: expanded object
   try {
-    if (p.model && typeof p.model === 'object') {
-      const clone = safeClone(p.model);
-      if (clone) return { source: 'parent', data: clone };
+    if (candidate.model && typeof candidate.model === 'object') {
+      const clone = safeClone(candidate.model);
+      if (clone) return { source, data: clone };
     }
   } catch {
     // ignore
@@ -130,4 +147,35 @@ export function readFromParent() {
   return null;
 }
 
-export default { readFromParent };
+/**
+ * Attempt to read a bootstrap object from a same-origin parent.
+ *
+ * Priority:
+ *   1) parent.ODV_BOOTSTRAP   (generic, recommended)
+ *   2) parent.modelRaw/model  (legacy compatibility)
+ *
+ * @returns {(ParentBootstrapResult|null)}
+ */
+export function readFromParent() {
+  return readFromWindow(getSameOriginParent(), 'parent');
+}
+
+/**
+ * Attempt to read a bootstrap object from a same-origin opener.
+ *
+ * @returns {(ParentBootstrapResult|null)}
+ */
+export function readFromOpener() {
+  return readFromWindow(getSameOriginOpener(), 'opener');
+}
+
+/**
+ * Attempt to read a bootstrap object from a same-origin parent or opener.
+ *
+ * @returns {(ParentBootstrapResult|null)}
+ */
+export function readFromRelatedWindow() {
+  return readFromParent() || readFromOpener();
+}
+
+export default { readFromParent, readFromOpener, readFromRelatedWindow };
