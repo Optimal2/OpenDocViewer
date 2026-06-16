@@ -502,7 +502,7 @@ export class SourceTempStore {
       }
       return null;
     }
-    let blob = null;
+    let blob;
     try {
       blob = await this.recordToBlob(record);
     } catch (error) {

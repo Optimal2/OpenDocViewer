@@ -392,7 +392,7 @@ const ZoomButtons = ({
         className={`odv-btn ${fitPageActive ? 'is-active' : ''}`}
         disabled={disableFitPage}
       >
-        <span className="material-symbols-outlined" aria-hidden="true">fit_page</span>
+        <span className="material-icons" aria-hidden="true">fit_screen</span>
       </button>
 
       {/* Fit Width */}
@@ -404,7 +404,7 @@ const ZoomButtons = ({
         className={`odv-btn ${fitWidthActive ? 'is-active' : ''}`}
         disabled={disableFitWidth}
       >
-        <span className="material-symbols-outlined" aria-hidden="true">fit_width</span>
+        <span className="material-icons" aria-hidden="true">width_full</span>
       </button>
 
       {/* Custom size */}

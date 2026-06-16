@@ -649,7 +649,7 @@
 
 .print-selection-metric-badge-prefix {
   opacity: 0.76;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   text-transform: uppercase;
 }
 
@@ -1304,8 +1304,7 @@ canvas {
   height: 24px;
   padding: 0 4px;
 }
-.compare-zoom-overlay .material-icons,
-.compare-zoom-overlay .material-symbols-outlined {
+.compare-zoom-overlay .material-icons {
   font-size: 18px;
   vertical-align: middle;
   color: currentColor;
@@ -1714,7 +1713,7 @@ canvas {
   min-width: 16px;
   padding: 0 3px;
   border-radius: 7px;
-  font-size: 0.58rem;
+  font-size: 0.75rem;
   font-weight: 800;
   line-height: 1;
   white-space: nowrap;

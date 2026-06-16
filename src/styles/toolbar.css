@@ -39,15 +39,13 @@
 .toolbar button,
 .toolbar .odv-btn,
 .toolbar .toggle-collapse,
-.toolbar .material-icons,
-.toolbar .material-symbols-outlined {
+.toolbar .material-icons {
   -webkit-user-select: none !important;
   user-select: none !important;
   -webkit-touch-callout: none;
 }
 /* Ensure clicks hit the button, not the glyph span */
-.toolbar .material-icons,
-.toolbar .material-symbols-outlined {
+.toolbar .material-icons {
   pointer-events: none;
   font-size: 1.14rem;
 }

@@ -863,7 +863,7 @@ async function loadImagesConcurrently(urls, signal, onLoaded, concurrency = 1) {
         results[index] = await loadImage(urls[index], signal);
       } catch (error) {
         throwIfAborted(signal);
-        throw new Error(`Failed to load image ${index + 1} for PDF generation: ${String(error?.message || error)}`);
+        throw new Error(`Failed to load image ${index + 1} for PDF generation: ${String(error?.message || error)}`, { cause: error });
       }
       reportImageLoaded();
     }
@@ -1651,7 +1651,7 @@ async function loadJsPdf() {
     return jsPDF;
   } catch (error) {
     logger.warn('PDF generation library failed to load', { error: String(error?.message || error) });
-    throw new Error(`Failed to load PDF generation library. ${JSPDF_LOAD_ERROR_HINT} Details: ${String(error?.message || error)}`);
+    throw new Error(`Failed to load PDF generation library. ${JSPDF_LOAD_ERROR_HINT} Details: ${String(error?.message || error)}`, { cause: error });
   }
 }
 
@@ -1740,7 +1740,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
       try {
         pdf = new jsPDF(createJsPdfOptions(pdfPageWidth, pdfPageHeight, orientation));
       } catch (error) {
-        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock.json and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`);
+        throw new Error(`PDF initialization failed with ODV's tested jsPDF options. Verify that the installed jsPDF package matches package-lock.json and that the generated build includes jsPDF correctly. Details: ${String(error?.message || error)}`, { cause: error });
       }
     } else {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
@@ -1972,7 +1972,7 @@ async function getSelectedPrintableDataUrls(documentRenderRef, pageNumbers, sign
     const methodName = typeof preferredGetUrls === 'function'
       ? 'getAllPrintableDataUrls'
       : 'exportAllPagesAsDataUrls';
-    throw new Error(`Document handle method ${methodName}() failed while collecting printable page URLs. Details: ${String(error?.message || error)}`);
+    throw new Error(`Document handle method ${methodName}() failed while collecting printable page URLs. Details: ${String(error?.message || error)}`, { cause: error });
   }
   throwIfAborted(signal);
   if (!Array.isArray(allUrls) || !allUrls.length) throw new Error('No printable page URLs were returned.');

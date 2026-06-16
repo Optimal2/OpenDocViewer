@@ -150,7 +150,7 @@ This lets the same build work for demo use, embedded use, and host-integrated de
 
 ## Requirements
 
-- **Node.js 20.19+ or 22.12+**
+- **Node.js 22.18+**
 - Primary target browsers: Microsoft Edge and Google Chrome (Chromium)
 - Firefox may work for basic viewing, but it is not the primary support target and may differ in diagnostics and some HTML input-validation behavior
 - Safari is not the primary operational target

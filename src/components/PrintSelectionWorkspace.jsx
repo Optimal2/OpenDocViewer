@@ -15,6 +15,7 @@ import { resolveLocalizedValue } from '../utils/localizedValue.js';
 const MIN_THUMBNAIL_PERCENT = 70;
 const DEFAULT_THUMBNAIL_PERCENT = 120;
 const MAX_THUMBNAIL_PERCENT = 320;
+// Pages without an explicit source-order position sort after all known pages.
 const DEFAULT_ORDER_POSITION = Number.MAX_SAFE_INTEGER;
 // Matches host/SQL-style date values used by metadata templates:
 // yyyy-MM-dd, optionally followed by a time part separated by T or whitespace.
@@ -261,7 +262,9 @@ function buildPageItems(allPages) {
     documentNumber: Math.max(1, Number(page?.documentNumber) || 1),
     totalDocuments: Math.max(1, Number(page?.totalDocuments) || 1),
     documentPageNumber: Math.max(1, Number(page?.documentPageNumber) || 0) || null,
-    documentPageCount: Math.max(1, Number(page?.documentPageCount) || 0) || null,
+    documentPageCount: Number(page?.documentPageCount) > 0
+      ? Math.max(1, Number(page.documentPageCount))
+      : null,
     imageUrl: getPageImageUrl(page),
     loading: !(page?.thumbnailStatus === 1 || page?.fullSizeStatus === 1 || page?.status === -1),
   }));
@@ -701,7 +704,7 @@ function isActivationKey(event) {
 
 function isModifierOnlyKey(event) {
   const key = String(event?.key || '');
-  return key === 'Shift' || key === 'Control' || key === 'Meta';
+  return key === 'Shift' || key === 'Control' || key === 'Meta' || key === 'Alt';
 }
 
 function stopSelectionEvent(event) {
@@ -735,7 +738,7 @@ function getTilePanelRect(panelNode, tileNode) {
 }
 
 function shouldIgnoreModifiedCommandClick(event) {
-  if (!(event?.ctrlKey || event?.shiftKey || event?.metaKey)) return false;
+  if (!(event?.ctrlKey || event?.shiftKey || event?.metaKey || event?.altKey)) return false;
   event.preventDefault?.();
   event.stopPropagation?.();
   return true;
@@ -1735,7 +1738,7 @@ const PrintSelectionWorkspace = ({
         stepLightbox(1);
         return;
       }
-      if (key === ' ' || key === 'Spacebar' || event.code === 'Space') {
+      if (key === ' ') {
         if (!runLightboxPrimaryAction()) return;
         event.preventDefault();
         event.stopPropagation();
