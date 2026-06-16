@@ -2,51 +2,34 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.6.2** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.6.3** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.5.1 through v1.8.0 remain supported for production environments that have not yet completed a v2.6 rollout. New deployments should use v2.6.2 to get the latest selection workspace, print-preparation workflow, custom size zoom controls, metadata display fixes, source-pack transport, large-session diagnostics, browser-aware worker routing, PDF loading performance work, and security hardening.
+OpenDocViewer v2.6.2 and earlier are superseded by v2.6.3 and are no longer supported for production deployments. v2.6.3 refreshes the runtime and development dependency baseline, including updates that address serious security advisories reported by GitHub Dependabot. Operators should upgrade to v2.6.3 before opening new support or security issues.
 
-Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
+Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.6.2   | :white_check_mark: | Current recommended patch release and latest supported baseline |
-| 2.6.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 for selection-workspace multi-select, preview polish, and opener-bootstrap fixes |
-| 2.6.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 for metadata fallback, selection workspace, and runtime configuration fixes |
-| 2.5.1   | :white_check_mark: | Still supported, but superseded by v2.6.2; recommended minimum for the patched locked `shell-quote` tooling dependency |
-| 2.5.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 because v2.5.1 patches the locked `shell-quote` tooling dependency |
-| 2.4.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.3.3   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.3.2   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.3.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.3.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.2.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.1.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
-| 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
-| 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
-| 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
-| 1.4.1   | :x: | Superseded by later releases; not recommended for current deployments |
-| 1.4.0   | :x: | Unsupported |
-| 1.3.1   | :x: | Unsupported |
-| 1.3.0   | :x: | Unsupported |
-| 1.2.0   | :x: | Unsupported |
-| 1.1.0   | :x: | Unsupported |
-| 1.0.1   | :x: | Unsupported |
-| 1.0.0   | :x: | Unsupported |
-| 0.9.0   | :x: | Unsupported |
-| < 0.9.0 | :x: | Unsupported |
+| 2.6.3   | :white_check_mark: | Current recommended patch release and only supported baseline |
+| <= 2.6.2 | :x: | Superseded by v2.6.3 dependency and security updates; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.3 is supported.
+
+### OpenDocViewer v2.6.3
+Changes since v2.6.2:
+
+- Updated the dependency baseline and lockfile to resolve GitHub Dependabot security alerts, including the Vite Windows alternate-path `server.fs.deny` bypass advisory fixed by Vite 8.0.16.
+- Raised the development, CI, and release baseline to Node.js 22.18.0 and updated CI/release workflows accordingly.
+- Updated key runtime dependencies, including React 19.2.7, pdf.js 6.0.227, DOMPurify 3.4.10, axios 1.18.0, i18next 26.3.1, react-i18next 17.0.8, Express 5.2.1, Helmet 8.2.0, express-rate-limit 8.5.2, and Morgan 1.11.0.
+- Updated development tooling to current stable lines, including Vite 8.0.16, `@vitejs/plugin-react` 6.0.2, ESLint 10.5.0, Babel 8, Rolldown 1.1.1, concurrently 10.0.3, and Prettier 3.8.4.
+- Removed unused direct dependencies and development tools so the dependency graph is smaller and easier to audit.
+- Removed the unused SVGR build plugin and the legacy React ESLint plugin after confirming the project no longer needs them.
+- Replaced Google Fonts runtime icon loading with the self-hosted `material-icons` npm package so toolbar icons are packaged with the viewer and no longer require network access to Google font endpoints.
+- Removed the unused Vite starter SVG from public assets.
+- Hardened lint compatibility for ESLint 10 by attaching error causes where failures are wrapped and by removing stale initialization patterns.
+- Addressed selection-workspace review feedback around default order sorting, modifier-key handling, lightbox keyboard handling, and small badge text readability.
 
 ### OpenDocViewer v2.6.2
 Changes since v2.6.1:
