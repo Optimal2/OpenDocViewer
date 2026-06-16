@@ -2,33 +2,34 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.6.1** is the current recommended release line and the preferred production target going forward.
+**OpenDocViewer v2.6.2** is the current recommended release line and the preferred production target going forward.
 
-OpenDocViewer v2.5.1 through v1.8.0 remain supported for production environments that have not yet completed a v2.6 rollout. New deployments should use v2.6.1 to get the latest selection workspace, print-preparation workflow, custom size zoom controls, metadata display fixes, source-pack transport, large-session diagnostics, browser-aware worker routing, PDF loading performance work, and security hardening.
+OpenDocViewer v2.5.1 through v1.8.0 remain supported for production environments that have not yet completed a v2.6 rollout. New deployments should use v2.6.2 to get the latest selection workspace, print-preparation workflow, custom size zoom controls, metadata display fixes, source-pack transport, large-session diagnostics, browser-aware worker routing, PDF loading performance work, and security hardening.
 
 Earlier releases are retained for historical reference only and are **not recommended** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.6.1   | :white_check_mark: | Current recommended patch release and latest supported baseline |
-| 2.6.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 for metadata fallback, selection workspace, and runtime configuration fixes |
-| 2.5.1   | :white_check_mark: | Still supported, but superseded by v2.6.1; recommended minimum for the patched locked `shell-quote` tooling dependency |
-| 2.5.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 because v2.5.1 patches the locked `shell-quote` tooling dependency |
-| 2.4.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.3.3   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.3.2   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.3.1   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.3.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.2.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.1.1   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
-| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.6.1 and not the preferred target for new deployments |
+| 2.6.2   | :white_check_mark: | Current recommended patch release and latest supported baseline |
+| 2.6.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 for selection-workspace multi-select, preview polish, and opener-bootstrap fixes |
+| 2.6.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 for metadata fallback, selection workspace, and runtime configuration fixes |
+| 2.5.1   | :white_check_mark: | Still supported, but superseded by v2.6.2; recommended minimum for the patched locked `shell-quote` tooling dependency |
+| 2.5.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 because v2.5.1 patches the locked `shell-quote` tooling dependency |
+| 2.4.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.3.3   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.3.2   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.3.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.3.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.2.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.1.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.1.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.0.3   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.0.2   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.0.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 2.0.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 1.9.1   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 1.9.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
+| 1.8.0   | :white_check_mark: | Still supported, but superseded by v2.6.2 and not the preferred target for new deployments |
 | 1.7.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.6.0   | :x: | Superseded by later releases; not recommended for current deployments |
 | 1.5.0   | :x: | Superseded by later releases; not recommended for current deployments |
@@ -46,6 +47,19 @@ Earlier releases are retained for historical reference only and are **not recomm
 ## Recent release context
 
 The most recent releases are listed below for operational context.
+
+### OpenDocViewer v2.6.2
+Changes since v2.6.1:
+
+- Improved selection-workspace multi-select behavior so Ctrl toggles individual pages and Shift selects page ranges in a more familiar desktop-style pattern.
+- Added Ctrl-additive rectangle selection so marquee selection can extend an existing page selection instead of replacing it.
+- Tightened document-mode drag rules so selected pages can be moved within their document while page mode remains available for free page placement.
+- Added left-panel double-click toggling for pages that are already included in the active selection when all source pages are visible.
+- Added document-header double-click removal when all pages in that source document are already included in the active selection.
+- Fixed the thumbnail preview eye button so it no longer remains visible on the last clicked thumbnail after the pointer leaves the tile.
+- Made the selection-workspace print-order badge visually distinct from the source document/page badge.
+- Added same-origin opener bootstrap support so host pages can open OpenDocViewer in a new tab while preserving prepared session payloads such as local-file demo bundles.
+- Updated the OMP component manifest during artifact-only delivery testing. OMP artifact versions remain independent from this public OpenDocViewer release version.
 
 ### OpenDocViewer v2.6.1
 Changes since v2.6.0:
