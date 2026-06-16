@@ -1872,8 +1872,12 @@ const PrintSelectionWorkspace = ({
     const handleTileDoubleClick = (event) => {
       event.preventDefault();
       event.stopPropagation();
-      if (side === 'left') addIndexes([originalIndex]);
-      else removeIndexes([originalIndex]);
+      if (side === 'left') {
+        if (included && !hideIncludedLeftPages) removeIndexes([originalIndex]);
+        else addIndexes([originalIndex]);
+        return;
+      }
+      removeIndexes([originalIndex]);
     };
 
     const tile = (
@@ -1945,6 +1949,7 @@ const PrintSelectionWorkspace = ({
     dragState,
     draftSet,
     draftWarningMap,
+    hideIncludedLeftPages,
     leftSelectedSet,
     openLightbox,
     pulseIndex,
@@ -2083,24 +2088,33 @@ const PrintSelectionWorkspace = ({
               onPointerDown={(event) => startMarqueeSelection('left', event)}
             >
               {workspaceModeIsDocuments ? (
-                leftDocumentGroups.map((group) => (
-                  <section key={group.key} className="print-selection-document-group">
-                    <div
-                      className="print-selection-document-header print-selection-document-header-draggable"
-                      draggable
-                      onPointerDown={(event) => selectDocument('left', group.key, event)}
-                      onDoubleClick={(event) => addDocument(group.key, event)}
-                      onDragStart={(event) => startDocumentDrag('left', group.key, event)}
-                      onDragEnd={clearDrag}
-                      title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
-                    >
-                      <span>{group.header}</span>
-                    </div>
-                    <div className="print-selection-grid">
-                      {group.pages.map((item) => renderTile(item, 'left'))}
-                    </div>
-                  </section>
-                ))
+                leftDocumentGroups.map((group) => {
+                  const allPagesIncluded = group.pages.every((page) => draftSet.has(page.originalIndex));
+                  return (
+                    <section key={group.key} className="print-selection-document-group">
+                      <div
+                        className="print-selection-document-header print-selection-document-header-draggable"
+                        draggable
+                        onPointerDown={(event) => selectDocument('left', group.key, event)}
+                        onDoubleClick={(event) => {
+                          if (allPagesIncluded && !hideIncludedLeftPages) {
+                            removeDocument(group.key, event);
+                            return;
+                          }
+                          addDocument(group.key, event);
+                        }}
+                        onDragStart={(event) => startDocumentDrag('left', group.key, event)}
+                        onDragEnd={clearDrag}
+                        title={t('printSelectionWorkspace.dragDocumentTitle', { defaultValue: 'Drag to move this document in the draft order.' })}
+                      >
+                        <span>{group.header}</span>
+                      </div>
+                      <div className="print-selection-grid">
+                        {group.pages.map((item) => renderTile(item, 'left'))}
+                      </div>
+                    </section>
+                  );
+                })
               ) : (
                 <div className="print-selection-grid">
                   {leftSourceIndexes.map((originalIndex) => {
