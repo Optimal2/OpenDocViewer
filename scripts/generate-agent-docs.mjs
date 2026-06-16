@@ -127,16 +127,7 @@ function main() {
 }
 
 function formatCommand(args) {
-  return args.map(formatCommandArgument).join(' ');
-}
-
-function formatCommandArgument(value) {
-  const text = String(value || '');
-  if (/^[A-Za-z0-9_./:=@-]+$/.test(text)) {
-    return text;
-  }
-
-  return `"${text.replace(/"/g, '\\"')}"`;
+  return JSON.stringify(args);
 }
 
 try {
