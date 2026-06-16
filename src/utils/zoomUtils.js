@@ -95,8 +95,8 @@ function getViewport(viewportOrRef) {
 function getRenderableSize(surface) {
   if (!surface) return null;
 
-  let width = 0;
-  let height = 0;
+  let width;
+  let height;
 
   if (surface instanceof HTMLImageElement) {
     width = Number(surface.naturalWidth || surface.width || 0);

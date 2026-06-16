@@ -7,7 +7,6 @@
  *  - Predictable production builds with ES module workers (pdf.js, image workers)
  *  - App source uses `.jsx` for JSX and `.js` for logic-only modules
  *  - Keep dependency parsing conservative to avoid surprising 3P deps
- *  - SVGs via SVGR (icon mode on)
  *
  * Important notes:
  *  - **Web Workers as ES modules**: `worker.format = 'es'` ensures worker code is bundled
@@ -23,7 +22,6 @@
 import { defineConfig } from 'vite';
 import { existsSync, readdirSync, readFileSync } from 'node:fs';
 import react from '@vitejs/plugin-react';
-import svgr from 'vite-plugin-svgr';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
@@ -105,9 +103,6 @@ export default defineConfig(({ mode }) => {
     plugins: [
       // React + Fast Refresh
       react(),
-
-      // Import SVGs as React components: `import { ReactComponent as Icon } from './icon.svg'`
-      svgr({ svgrOptions: { icon: true } }),
 
       // pdf.js loads codec WASM/fallback modules by filename from `wasmUrl`.
       pdfJsWasmAssetsPlugin(),
