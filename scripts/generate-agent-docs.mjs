@@ -1,4 +1,6 @@
 #!/usr/bin/env node
+// Keep the plain node shebang: supported Node versions run ES modules natively,
+// and this validation helper should not suppress runtime warnings.
 
 import fs from 'node:fs';
 import path from 'node:path';
@@ -87,7 +89,7 @@ function main() {
   const options = parseArgs(process.argv.slice(2));
   if (options.help) {
     printHelp();
-    return;
+    process.exit(0);
   }
 
   const agentDocMapRoot = resolveAgentDocMapRoot(options.agentDocMapRoot);
@@ -106,6 +108,7 @@ function main() {
     '--source-metadata',
     options.sourceMetadata,
   ];
+  const commandSummary = formatCommand([process.execPath, ...args]);
 
   const result = spawnSync(process.execPath, args, {
     cwd: agentDocMapRoot,
@@ -113,12 +116,27 @@ function main() {
   });
 
   if (result.error) {
-    throw result.error;
+    throw new Error(`Failed to start AgentDocMap command: ${commandSummary}. ${result.error.message}`, {
+      cause: result.error,
+    });
   }
 
   if (result.status !== null && result.status !== 0) {
-    throw new Error(`AgentDocMap exited with code ${result.status}.`);
+    throw new Error(`AgentDocMap exited with code ${result.status}. Command: ${commandSummary}`);
   }
+}
+
+function formatCommand(args) {
+  return args.map(formatCommandArgument).join(' ');
+}
+
+function formatCommandArgument(value) {
+  const text = String(value || '');
+  if (/^[A-Za-z0-9_./:=@-]+$/.test(text)) {
+    return text;
+  }
+
+  return `"${text.replace(/"/g, '\\"')}"`;
 }
 
 try {
