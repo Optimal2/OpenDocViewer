@@ -224,6 +224,8 @@ if (-not $SkipValidation) {
   $null = ExecNpm -NpmArgs @('run', 'lint')  -Cwd $repoRoot
   $null = ExecNpm -NpmArgs @('run', 'build') -Cwd $repoRoot
   $null = ExecNpm -NpmArgs @('run', 'doc')   -Cwd $repoRoot
+  # doc:agent regenerates the committed docs-agent packet; the clean-tree
+  # assertion below intentionally fails if release prep forgot to commit it.
   $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
   Write-Host 'Validation passed.' -ForegroundColor Green
   Assert-CleanWorkingTree $repoRoot 'after validation'

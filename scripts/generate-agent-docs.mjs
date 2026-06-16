@@ -16,21 +16,20 @@ function parseArgs(argv) {
     generatedAt: 'committed-docs',
     sourceMetadata: 'none',
   };
+  const valueOptions = new Map([
+    ['--agentdocmap-root', 'agentDocMapRoot'],
+    ['--target', 'target'],
+    ['--out', 'out'],
+    ['--project-name', 'projectName'],
+    ['--generated-at', 'generatedAt'],
+    ['--source-metadata', 'sourceMetadata'],
+  ]);
 
   for (let i = 0; i < argv.length; i += 1) {
     const arg = argv[i];
-    if (arg === '--agentdocmap-root') {
-      options.agentDocMapRoot = argv[++i];
-    } else if (arg === '--target') {
-      options.target = argv[++i];
-    } else if (arg === '--out') {
-      options.out = argv[++i];
-    } else if (arg === '--project-name') {
-      options.projectName = argv[++i];
-    } else if (arg === '--generated-at') {
-      options.generatedAt = argv[++i];
-    } else if (arg === '--source-metadata') {
-      options.sourceMetadata = argv[++i];
+    if (valueOptions.has(arg)) {
+      options[valueOptions.get(arg)] = readOptionValue(argv, i, arg);
+      i += 1;
     } else if (arg === '-h' || arg === '--help') {
       options.help = true;
     } else {
@@ -39,6 +38,14 @@ function parseArgs(argv) {
   }
 
   return options;
+}
+
+function readOptionValue(argv, index, optionName) {
+  if (index + 1 >= argv.length) {
+    throw new Error(`${optionName} requires a value.`);
+  }
+
+  return argv[index + 1];
 }
 
 function printHelp() {
