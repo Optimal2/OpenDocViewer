@@ -33,6 +33,7 @@
     "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
     "format": "prettier --write \"src/**/*.{js,jsx,css,scss,md}\"",
     "doc": "jsdoc -c jsdoc.json",
+    "doc:agent": "node scripts/generate-agent-docs.mjs",
     "start:system-log": "node server/system-log-server.js",
     "start:user-log": "node server/user-log-server.js",
     "start:logs": "concurrently -n sys,user -c auto \"npm run start:system-log\" \"npm run start:user-log\"",

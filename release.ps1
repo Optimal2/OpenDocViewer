@@ -17,8 +17,8 @@ Version bump type passed to the matching npm release script: patch, minor, or ma
 Confirms the release summary without prompting.
 
 .PARAMETER SkipValidation
-Skips lint/build/JSDoc validation. Use only when those checks have already been run for the
-exact commit being released.
+Skips lint/build/JSDoc/agent-doc validation. Use only when those checks have already been run
+for the exact commit being released.
 
 .EXAMPLE
 .\release.ps1 -ReleaseType minor -Yes
@@ -220,10 +220,11 @@ if (-not $Yes) {
 }
 
 if (-not $SkipValidation) {
-  Write-Host "`nRunning pre-release validation (lint, build, doc)..." -ForegroundColor Yellow
+  Write-Host "`nRunning pre-release validation (lint, build, doc, agent docs)..." -ForegroundColor Yellow
   $null = ExecNpm -NpmArgs @('run', 'lint')  -Cwd $repoRoot
   $null = ExecNpm -NpmArgs @('run', 'build') -Cwd $repoRoot
   $null = ExecNpm -NpmArgs @('run', 'doc')   -Cwd $repoRoot
+  $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
   Write-Host 'Validation passed.' -ForegroundColor Green
   Assert-CleanWorkingTree $repoRoot 'after validation'
 } else {

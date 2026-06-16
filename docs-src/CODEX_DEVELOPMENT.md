@@ -10,6 +10,10 @@ OpenDocViewer should stay host-neutral. IbsPackager manual-review support belong
 
 Use these files as the main map:
 
+- `docs-agent/AGENT_CONTEXT.md` - generated AI-agent entry point. Read this first when available.
+- `docs-agent/MODULES.md` - generated module grouping and high-signal files.
+- `docs-agent/ENTRYPOINTS.md` - generated package scripts, runtime entrypoints, and import hubs.
+- `docs-agent/DEPENDENCIES.md` - generated package usage surface.
 - `AGENTS.md` - operational rules for Codex and other coding agents.
 - `README.md` - product overview, setup, deployment, and documentation map.
 - `CONTRIBUTING.md` - repository conventions and review checklist.
@@ -45,6 +49,7 @@ Use the narrowest level that gives real confidence:
 - JavaScript or React changes: `npm run lint`
 - Bundling/runtime import changes: `npm run build`
 - JSDoc/commented API changes: `npm run doc`
+- Agent map/source-structure/dependency changes: `npm run doc:agent`
 - PowerShell script changes: parse the changed `.ps1` file with `System.Management.Automation.Language.Parser`
 - Documentation-only changes: `git diff --check`
 - Local hosted visibility: build `dist/`, update the hosted directory, then verify the relevant localhost URL
@@ -72,6 +77,7 @@ These are local development defaults. Do not hardcode user-specific paths into r
 npm run lint
 npm run build
 npm run doc
+npm run doc:agent
 ```
 
 For local development:
@@ -100,6 +106,8 @@ For AI-operated official releases:
 3. Update `SECURITY.md` for the version that `release.ps1` is about to create. Do not manually
    bump `package.json` or `package-lock.json`.
 4. Run `npm run lint`, `npm run build`, `npm run doc`, and `git diff --check`.
+   Run `npm run doc:agent` as well when source structure, JSDoc, package
+   dependencies, or major module responsibilities changed.
 5. Commit and push the release-prep changes.
 6. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes` from a clean branch that matches
    `origin/<branch>`.
@@ -132,6 +140,9 @@ Read `docs-src/integrations.md` before changing `src/integrations/bootstrapRunti
 
 - `dist/` is build output.
 - `docs/` is generated JSDoc output.
+- `docs-agent/` is generated AI-agent documentation from AgentDocMap. It is
+  intentionally committed and should be regenerated when source structure,
+  dependencies, or JSDoc-backed APIs change.
 - Hand-written source documentation belongs in `README.md`, `CONTRIBUTING.md`, `AGENTS.md`, and `docs-src/`.
 
-Do not commit generated output unless the task or release process explicitly requires it.
+Do not commit generated output unless the task or release process explicitly requires it. `docs-agent/` is the exception because it is the committed agent-orientation packet.

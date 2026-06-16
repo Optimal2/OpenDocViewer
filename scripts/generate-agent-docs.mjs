@@ -1,0 +1,122 @@
+#!/usr/bin/env node
+
+import fs from 'node:fs';
+import path from 'node:path';
+import { spawnSync } from 'node:child_process';
+import { fileURLToPath } from 'node:url';
+
+const scriptDir = path.dirname(fileURLToPath(import.meta.url));
+const repoRoot = path.resolve(scriptDir, '..');
+
+function parseArgs(argv) {
+  const options = {
+    target: repoRoot,
+    out: path.join(repoRoot, 'docs-agent'),
+    projectName: 'OpenDocViewer',
+    generatedAt: 'committed-docs',
+    sourceMetadata: 'none',
+  };
+
+  for (let i = 0; i < argv.length; i += 1) {
+    const arg = argv[i];
+    if (arg === '--agentdocmap-root') {
+      options.agentDocMapRoot = argv[++i];
+    } else if (arg === '--target') {
+      options.target = argv[++i];
+    } else if (arg === '--out') {
+      options.out = argv[++i];
+    } else if (arg === '--project-name') {
+      options.projectName = argv[++i];
+    } else if (arg === '--generated-at') {
+      options.generatedAt = argv[++i];
+    } else if (arg === '--source-metadata') {
+      options.sourceMetadata = argv[++i];
+    } else if (arg === '-h' || arg === '--help') {
+      options.help = true;
+    } else {
+      throw new Error(`Unknown argument: ${arg}`);
+    }
+  }
+
+  return options;
+}
+
+function printHelp() {
+  console.log(`Generate OpenDocViewer agent documentation with AgentDocMap.
+
+Usage:
+  npm run doc:agent -- [--agentdocmap-root <path>] [--out <path>]
+
+Options:
+  --agentdocmap-root <path>  AgentDocMap repository root.
+  --target <path>           Target repository root. Defaults to this repository.
+  --out <path>              Output directory. Defaults to docs-agent.
+  --project-name <name>     Project name used in generated docs.
+  --generated-at <text>     Stable generated label. Defaults to committed-docs.
+  --source-metadata <mode>  AgentDocMap source metadata mode. Defaults to none.
+`);
+}
+
+function resolveAgentDocMapRoot(value) {
+  const candidates = [
+    value,
+    process.env.AGENTDOCMAP_ROOT,
+    path.resolve(repoRoot, '..', 'AgentDocMap'),
+  ].filter(Boolean);
+
+  for (const candidate of candidates) {
+    const absolute = path.resolve(candidate);
+    if (fs.existsSync(path.join(absolute, 'src', 'cli.js'))) {
+      return absolute;
+    }
+  }
+
+  throw new Error(
+    'AgentDocMap was not found. Use --agentdocmap-root, set AGENTDOCMAP_ROOT, or clone AgentDocMap next to OpenDocViewer.',
+  );
+}
+
+function main() {
+  const options = parseArgs(process.argv.slice(2));
+  if (options.help) {
+    printHelp();
+    return;
+  }
+
+  const agentDocMapRoot = resolveAgentDocMapRoot(options.agentDocMapRoot);
+  const cliPath = path.join(agentDocMapRoot, 'src', 'cli.js');
+  const args = [
+    cliPath,
+    'generate',
+    '--target',
+    path.resolve(options.target),
+    '--out',
+    path.resolve(options.out),
+    '--project-name',
+    options.projectName,
+    '--generated-at',
+    options.generatedAt,
+    '--source-metadata',
+    options.sourceMetadata,
+  ];
+
+  const result = spawnSync(process.execPath, args, {
+    cwd: agentDocMapRoot,
+    stdio: 'inherit',
+  });
+
+  if (result.error) {
+    throw result.error;
+  }
+
+  if (result.status !== 0) {
+    throw new Error(`AgentDocMap exited with code ${result.status}.`);
+  }
+}
+
+try {
+  main();
+} catch (error) {
+  console.error(error instanceof Error ? error.message : String(error));
+  process.exitCode = 1;
+}

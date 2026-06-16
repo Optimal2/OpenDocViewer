@@ -4,7 +4,9 @@
 
 This repository is developed on Windows with VS Code, PowerShell, Node.js, Vite, React, IIS static hosting, and optional Node-based log servers.
 
-Read `docs-src/CODEX_DEVELOPMENT.md` for the repository map, validation ladder, and local runtime workflow before doing broad changes.
+Read `docs-agent/AGENT_CONTEXT.md` first for a generated AI-oriented map, then
+read `docs-src/CODEX_DEVELOPMENT.md` for the repository workflow, validation
+ladder, and local runtime notes before doing broad changes.
 
 Before making changes:
 - Inspect actual files and repository structure first.
@@ -15,6 +17,8 @@ Before making changes:
 - Keep OpenDocViewer generic. Do not bake IbsPackager-specific behavior into viewer code unless the integration contract explicitly supports it as optional metadata.
 - Keep code, comments, scripts, and development documentation in English. Swedish belongs only in application localization/help resources.
 - If a change must be visible in a local hosted runtime, run the matching build/publish/deployment step after the code change.
+- If source structure, JSDoc, dependencies, or module responsibilities change,
+  regenerate `docs-agent/` with `npm run doc:agent`.
 - When a task produces repository changes, validate them, commit with a focused message, and push unless the user asks not to or the worktree contains unrelated user changes.
 
 ## Security / Antivirus Compatibility

@@ -73,17 +73,21 @@ Before opening or merging a change, verify at least the following when relevant:
 npm run lint
 npm run build
 npm run doc
+npm run doc:agent
 ```
 
 Also check:
 
 - imports point to the new canonical path after renames
 - no generated output (`dist/`, `docs/`, `node_modules/`) is included in source zips or commits unless explicitly intended
+- `docs-agent/` is regenerated when source structure, JSDoc, dependencies, or
+  major module responsibilities change
 - README / `docs-src/` / JSDoc still match the implementation
 
 ## Documentation map
 
 - `AGENTS.md` — operational rules for Codex and other coding agents
+- `docs-agent/AGENT_CONTEXT.md` — generated AI-agent orientation map
 - `docs-src/CODEX_DEVELOPMENT.md` — agent-friendly repository map, validation ladder, and local workflow notes
 - `README.md` — product and deployment overview
 - `docs-src/architecture.md` — architecture and flow notes
@@ -103,6 +107,7 @@ When a change affects runtime behavior or operations, update the matching docume
 - `docs-src/deploy-ops.md` for IIS, proxy, or deployment workflow changes
 - `docs-src/printing.md` for print-pipeline design changes
 - `docs-src/integrations.md` for bootstrap or host payload changes
+- `docs-src/agent-documentation.md` for AgentDocMap and `docs-agent/` workflow changes
 
 ## Language policy
 
