@@ -411,6 +411,45 @@ function uniqueOrdered(indexes, order) {
   return order.filter((index) => wanted.has(index));
 }
 
+function unionOrdered(indexes, additions, order) {
+  return uniqueOrdered([...(Array.isArray(indexes) ? indexes : []), ...(Array.isArray(additions) ? additions : [])], order);
+}
+
+function toggleOrderedIndex(indexes, index, order) {
+  const current = new Set(uniqueOrdered(indexes, order));
+  if (current.has(index)) current.delete(index);
+  else current.add(index);
+  return order.filter((candidate) => current.has(candidate));
+}
+
+function getRangeSelection(anchorIndex, targetIndex, order) {
+  const anchorPosition = order.indexOf(anchorIndex);
+  const targetPosition = order.indexOf(targetIndex);
+  if (anchorPosition < 0 || targetPosition < 0) return uniqueOrdered([targetIndex], order);
+  const start = Math.min(anchorPosition, targetPosition);
+  const end = Math.max(anchorPosition, targetPosition);
+  return order.slice(start, end + 1);
+}
+
+function resolveRangeOrToggleSelection(current, targetIndex, order, anchorIndex, options = {}) {
+  const allowedIndexes = Array.isArray(options.allowedIndexes) ? options.allowedIndexes : order;
+  const allowedSet = new Set(allowedIndexes);
+  if (!allowedSet.has(targetIndex)) return uniqueOrdered(current, order).filter((index) => allowedSet.has(index));
+
+  const normalizedCurrent = uniqueOrdered(current, order).filter((index) => allowedSet.has(index));
+  const append = !!options.append;
+  const range = !!options.range;
+
+  if (range) {
+    const rangeIndexes = getRangeSelection(anchorIndex, targetIndex, order).filter((index) => allowedSet.has(index));
+    return append ? unionOrdered(normalizedCurrent, rangeIndexes, order) : uniqueOrdered(rangeIndexes, order);
+  }
+
+  if (append) return toggleOrderedIndex(normalizedCurrent, targetIndex, order);
+  if (normalizedCurrent.includes(targetIndex)) return normalizedCurrent;
+  return uniqueOrdered([targetIndex], order);
+}
+
 function sortByOrder(indexes, order) {
   const orderPosition = new Map(order.map((index, position) => [index, position]));
   return [...(Array.isArray(indexes) ? indexes : [])]
@@ -702,6 +741,14 @@ function shouldIgnoreModifiedCommandClick(event) {
   return true;
 }
 
+function isAppendSelectionGesture(event) {
+  return !!(event?.ctrlKey || event?.metaKey);
+}
+
+function isRangeSelectionGesture(event) {
+  return !!event?.shiftKey;
+}
+
 const PrintSelectionWorkspace = ({
   allPages,
   bundle,
@@ -761,6 +808,8 @@ const PrintSelectionWorkspace = ({
   const leftPanelRef = useRef(null);
   const rightPanelRef = useRef(null);
   const rightGridRef = useRef(null);
+  const leftSelectionAnchorRef = useRef(null);
+  const rightSelectionAnchorRef = useRef(null);
 
   useEffect(() => {
     if (previousInitialIndexesSignatureRef.current === initialIndexesSignature) return;
@@ -768,6 +817,8 @@ const PrintSelectionWorkspace = ({
     setDraftIndexes(initialIndexes);
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
     setDraftHistory({ undo: null, redo: null });
   }, [initialIndexes, initialIndexesSignature]);
 
@@ -776,6 +827,8 @@ const PrintSelectionWorkspace = ({
     setWorkspaceMode('pages');
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
   }, [documentModeAvailable, workspaceMode]);
 
   useEffect(() => {
@@ -851,6 +904,26 @@ const PrintSelectionWorkspace = ({
     defaultValue: 'Discard unsaved changes and return to the latest saved page selection.',
   });
 
+  useEffect(() => {
+    if (leftSelected.length <= 0) {
+      leftSelectionAnchorRef.current = null;
+      return;
+    }
+    if (!leftSelectedSet.has(leftSelectionAnchorRef.current)) {
+      leftSelectionAnchorRef.current = leftSelected[leftSelected.length - 1] ?? null;
+    }
+  }, [leftSelected, leftSelectedSet]);
+
+  useEffect(() => {
+    if (rightSelected.length <= 0) {
+      rightSelectionAnchorRef.current = null;
+      return;
+    }
+    if (!rightSelectedSet.has(rightSelectionAnchorRef.current)) {
+      rightSelectionAnchorRef.current = rightSelected[rightSelected.length - 1] ?? null;
+    }
+  }, [rightSelected, rightSelectedSet]);
+
   const applyDraftChange = useCallback((producer) => {
     setDraftIndexes((current) => {
       const next = typeof producer === 'function' ? producer(current) : producer;
@@ -895,15 +968,30 @@ const PrintSelectionWorkspace = ({
       return;
     }
 
-    setLeftSelected(getSelectableLeftIndexes([originalIndex]));
+    const selectableIndexes = getSelectableLeftIndexes(leftSourceIndexes);
+    const next = resolveRangeOrToggleSelection(leftSelected, originalIndex, leftSourceIndexes, leftSelectionAnchorRef.current, {
+      allowedIndexes: selectableIndexes,
+      append: isAppendSelectionGesture(event),
+      range: isRangeSelectionGesture(event),
+    });
+    setLeftSelected(next);
     setRightSelected([]);
-  }, [draftSet, getSelectableLeftIndexes, revealIncludedPage]);
+    leftSelectionAnchorRef.current = originalIndex;
+    rightSelectionAnchorRef.current = null;
+  }, [draftSet, getSelectableLeftIndexes, leftSelected, leftSourceIndexes, revealIncludedPage]);
 
   const selectRight = useCallback((originalIndex, event) => {
     stopSelectionEvent(event);
-    setRightSelected(uniqueOrdered([originalIndex], draftIndexes));
+    const next = resolveRangeOrToggleSelection(rightSelected, originalIndex, draftIndexes, rightSelectionAnchorRef.current, {
+      allowedIndexes: draftIndexes,
+      append: isAppendSelectionGesture(event),
+      range: isRangeSelectionGesture(event),
+    });
+    setRightSelected(next);
     setLeftSelected([]);
-  }, [draftIndexes]);
+    rightSelectionAnchorRef.current = originalIndex;
+    leftSelectionAnchorRef.current = null;
+  }, [draftIndexes, rightSelected]);
 
   const selectDocument = useCallback((side, documentKey, event) => {
     stopSelectionEvent(event);
@@ -913,12 +1001,17 @@ const PrintSelectionWorkspace = ({
       const selectable = getSelectableLeftIndexes(indexes);
       setLeftSelected(selectable);
       setRightSelected([]);
+      leftSelectionAnchorRef.current = selectable[0] ?? null;
+      rightSelectionAnchorRef.current = null;
       if (selectable.length <= 0 && indexes.length > 0) revealIncludedPage(indexes[0]);
       return;
     }
 
-    setRightSelected(uniqueOrdered(indexes, draftIndexes));
+    const selectedIndexes = uniqueOrdered(indexes, draftIndexes);
+    setRightSelected(selectedIndexes);
     setLeftSelected([]);
+    rightSelectionAnchorRef.current = selectedIndexes[0] ?? null;
+    leftSelectionAnchorRef.current = null;
   }, [draftIndexes, getSelectableLeftIndexes, itemByIndex, naturalIndexes, revealIncludedPage]);
 
   const addIndexes = useCallback((indexes, insertIndex = null) => {
@@ -948,6 +1041,7 @@ const PrintSelectionWorkspace = ({
   const removeAll = useCallback(() => {
     applyDraftChange([]);
     setRightSelected([]);
+    rightSelectionAnchorRef.current = null;
   }, [applyDraftChange]);
 
   const removeIndexFromLightboxList = useCallback((removedIndex) => {
@@ -1013,6 +1107,8 @@ const PrintSelectionWorkspace = ({
     });
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
   }, [draftHistory.undo, revealDraftChange]);
 
   const redoDraftChange = useCallback(() => {
@@ -1026,6 +1122,8 @@ const PrintSelectionWorkspace = ({
     });
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
   }, [draftHistory.redo, revealDraftChange]);
 
   const setThumbnailSize = useCallback((value) => {
@@ -1093,8 +1191,16 @@ const PrintSelectionWorkspace = ({
       event.preventDefault();
       return;
     }
-    if (side === 'left' && !leftSelectedSet.has(originalIndex)) setLeftSelected(indexes);
-    if (side === 'right' && !rightSelectedSet.has(originalIndex)) setRightSelected(indexes);
+    if (side === 'left' && !leftSelectedSet.has(originalIndex)) {
+      setLeftSelected(indexes);
+      leftSelectionAnchorRef.current = indexes[0] ?? null;
+      rightSelectionAnchorRef.current = null;
+    }
+    if (side === 'right' && !rightSelectedSet.has(originalIndex)) {
+      setRightSelected(indexes);
+      rightSelectionAnchorRef.current = indexes[0] ?? null;
+      leftSelectionAnchorRef.current = null;
+    }
     setDragState({
       side,
       indexes,
@@ -1118,9 +1224,13 @@ const PrintSelectionWorkspace = ({
     if (side === 'left') {
       setLeftSelected(indexes);
       setRightSelected([]);
+      leftSelectionAnchorRef.current = indexes[0] ?? null;
+      rightSelectionAnchorRef.current = null;
     } else {
       setRightSelected(indexes);
       setLeftSelected([]);
+      rightSelectionAnchorRef.current = indexes[0] ?? null;
+      leftSelectionAnchorRef.current = null;
     }
     setDragState({
       side,
@@ -1149,21 +1259,35 @@ const PrintSelectionWorkspace = ({
     setRightDropIntent(null);
   }, [dragState]);
 
-  const selectTilesInRect = useCallback((side, panelNode, selectionRect) => {
+  const selectTilesInRect = useCallback((side, panelNode, selectionRect, options = {}) => {
     if (!(panelNode instanceof HTMLElement)) return;
     const selectedIndexes = Array.from(panelNode.querySelectorAll('.print-selection-tile[data-selection-page]'))
       .filter((tileNode) => rectsIntersect(selectionRect, getTilePanelRect(panelNode, tileNode)))
       .map((tileNode) => Math.max(0, Math.floor(Number(tileNode.getAttribute('data-selection-page')) || 0)));
+    const baseSelection = Array.isArray(options.baseSelection) ? options.baseSelection : [];
+    const append = !!options.append;
 
     if (side === 'left') {
-      setLeftSelected(getSelectableLeftIndexes(selectedIndexes));
+      const selectedLeftIndexes = getSelectableLeftIndexes(selectedIndexes);
+      const next = append
+        ? getSelectableLeftIndexes(unionOrdered(baseSelection, selectedLeftIndexes, leftSourceIndexes))
+        : selectedLeftIndexes;
+      setLeftSelected(next);
       setRightSelected([]);
+      leftSelectionAnchorRef.current = next[next.length - 1] ?? null;
+      rightSelectionAnchorRef.current = null;
       return;
     }
 
-    setRightSelected(uniqueOrdered(selectedIndexes, draftIndexes));
+    const selectedRightIndexes = uniqueOrdered(selectedIndexes, draftIndexes);
+    const next = append
+      ? unionOrdered(baseSelection, selectedRightIndexes, draftIndexes)
+      : selectedRightIndexes;
+    setRightSelected(next);
     setLeftSelected([]);
-  }, [draftIndexes, getSelectableLeftIndexes]);
+    rightSelectionAnchorRef.current = next[next.length - 1] ?? null;
+    leftSelectionAnchorRef.current = null;
+  }, [draftIndexes, getSelectableLeftIndexes, leftSourceIndexes]);
 
   const startMarqueeSelection = useCallback((side, event) => {
     if (event.button !== 0) return;
@@ -1178,6 +1302,8 @@ const PrintSelectionWorkspace = ({
 
     const pointerId = event.pointerId;
     const start = getPanelPointerPosition(panelNode, event);
+    const append = isAppendSelectionGesture(event);
+    const baseSelection = side === 'left' ? leftSelected : rightSelected;
     let moved = false;
     panelNode.setPointerCapture?.(pointerId);
     setSelectionBox({
@@ -1201,7 +1327,7 @@ const PrintSelectionWorkspace = ({
         width: rect.width,
         height: rect.height,
       });
-      selectTilesInRect(side, panelNode, rect);
+      selectTilesInRect(side, panelNode, rect, { append, baseSelection });
     };
 
     const done = () => {
@@ -1210,15 +1336,21 @@ const PrintSelectionWorkspace = ({
       panelNode.removeEventListener('pointercancel', done);
       setSelectionBox(null);
       if (!moved) {
-        if (side === 'left') setLeftSelected([]);
-        else setRightSelected([]);
+        if (append) return;
+        if (side === 'left') {
+          setLeftSelected([]);
+          leftSelectionAnchorRef.current = null;
+        } else {
+          setRightSelected([]);
+          rightSelectionAnchorRef.current = null;
+        }
       }
     };
 
     panelNode.addEventListener('pointermove', move);
     panelNode.addEventListener('pointerup', done);
     panelNode.addEventListener('pointercancel', done);
-  }, [dragState, selectTilesInRect]);
+  }, [dragState, leftSelected, rightSelected, selectTilesInRect]);
 
   const getPageDropIntentFromTiles = useCallback((event, tileNodes, fallbackIndex = 0) => {
     const panelNode = rightPanelRef.current;
@@ -1503,6 +1635,8 @@ const PrintSelectionWorkspace = ({
     setWorkspaceMode(normalizedMode);
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
   }, [applyDraftChange, documentModeAvailable, documentModeCompatible, naturalIndexes, t, workspaceMode]);
 
   const changePanelMode = useCallback((nextMode) => {
@@ -1514,6 +1648,8 @@ const PrintSelectionWorkspace = ({
     applyDraftChange(initialIndexes);
     setLeftSelected([]);
     setRightSelected([]);
+    leftSelectionAnchorRef.current = null;
+    rightSelectionAnchorRef.current = null;
   }, [applyDraftChange, initialIndexes, isDirty]);
 
   const openLightbox = useCallback((originalIndex, side, event) => {
