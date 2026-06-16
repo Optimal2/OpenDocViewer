@@ -93,14 +93,16 @@ function main() {
   }
 
   const agentDocMapRoot = resolveAgentDocMapRoot(options.agentDocMapRoot);
+  const targetPath = resolveTargetPath(options.target);
+  const outPath = resolveOutputPath(options.out);
   const cliPath = path.join(agentDocMapRoot, 'src', 'cli.js');
   const args = [
     cliPath,
     'generate',
     '--target',
-    path.resolve(options.target),
+    targetPath,
     '--out',
-    path.resolve(options.out),
+    outPath,
     '--project-name',
     options.projectName,
     '--generated-at',
@@ -128,6 +130,44 @@ function main() {
   if (result.status !== null && result.status !== 0) {
     throw new Error(`AgentDocMap exited with code ${result.status}. Command: ${commandSummary}`);
   }
+}
+
+function resolveTargetPath(value) {
+  const workspaceRoot = path.dirname(repoRoot);
+  const resolved = resolveLocalPathOption('--target', value, workspaceRoot);
+  if (!fs.existsSync(path.join(resolved, 'package.json')) || !fs.existsSync(path.join(resolved, 'jsdoc.json'))) {
+    throw new Error('--target must point to a local repository with package.json and jsdoc.json.');
+  }
+
+  return resolved;
+}
+
+function resolveOutputPath(value) {
+  const resolved = resolveLocalPathOption('--out', value, repoRoot);
+  if (path.basename(resolved) !== 'docs-agent') {
+    throw new Error('--out must point to a docs-agent directory inside this repository.');
+  }
+
+  return resolved;
+}
+
+function resolveLocalPathOption(optionName, value, allowedRoot) {
+  if (typeof value !== 'string' || value.trim() === '' || value.includes('\0')) {
+    throw new Error(`${optionName} must be a non-empty local path.`);
+  }
+
+  const resolved = path.resolve(repoRoot, value);
+  const root = path.resolve(allowedRoot);
+  if (!isPathInsideOrSame(resolved, root)) {
+    throw new Error(`${optionName} must stay inside ${root}. Actual path: ${resolved}`);
+  }
+
+  return resolved;
+}
+
+function isPathInsideOrSame(candidate, root) {
+  const relative = path.relative(root, candidate);
+  return relative === '' || (!relative.startsWith('..') && !path.isAbsolute(relative));
 }
 
 function formatCommand(args) {
