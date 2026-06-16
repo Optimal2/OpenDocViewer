@@ -13,21 +13,21 @@
 | `buildDemoSourceList` | function | `src/app/AppBootstrap.jsx:227` | Build a demo source list from the /public sample files. |
 | `DemoBuildOptions` | typedef | `src/app/AppBootstrap.jsx:71` | Options for building a demo source list. |
 | `DemoSourceItem` | typedef | `src/app/AppBootstrap.jsx:79` | One entry in the demo source list. |
-| `ExplicitItem` | typedef | `src/app/AppBootstrap.jsx:39` | Explicit item (URL list). |
+| `ExplicitItem` | typedef | `src/app/AppBootstrap.jsx:39` | Explicit item \(URL list\). |
 | `module.exports` | function | `src/app/AppBootstrap.jsx:249` | Top-level bootstrapper component. |
 | `makeReloadCacheSeedFromBundle` | function | `src/app/AppBootstrap.jsx:209` | Build a stable reload-cache scope from host/user identity without including short-lived source URLs/tickets, session ids, or the current document selection. |
 | `PortableDocumentBundle` | typedef | `src/app/AppBootstrap.jsx:47` | Portable document bundle shape. |
 | `SessionShape` | typedef | `src/app/AppBootstrap.jsx:31` | Session metadata for a bundle. |
-| `UrlConfig` | typedef | `src/app/AppBootstrap.jsx:54` | URL parameter config (pattern mode). |
-| `getAppBase` | function | `src/app/bootConfig.js:16` | Return the application base path (always with a trailing slash) derived from the current page URL. |
+| `UrlConfig` | typedef | `src/app/AppBootstrap.jsx:54` | URL parameter config \(pattern mode\). |
+| `getAppBase` | function | `src/app/bootConfig.js:16` | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
 | `isJsContentType` | function | `src/app/bootConfig.js:29` | Heuristic: does a content-type look like JavaScript? |
-| `loadClassicScript` | function | `src/app/bootConfig.js:58` | Load a classic script and resolve when it executes (or errors). |
-| `loadFromCandidates` | function | `src/app/bootConfig.js:71` | Try multiple candidate URLs (in order) until one probes as JS, then load it. |
+| `loadClassicScript` | function | `src/app/bootConfig.js:58` | Load a classic script and resolve when it executes \(or errors\). |
+| `loadFromCandidates` | function | `src/app/bootConfig.js:71` | Try multiple candidate URLs \(in order\) until one probes as JS, then load it. |
 | `probeScriptUrl` | function | `src/app/bootConfig.js:42` | Probe a candidate script URL and only accept it when the response looks like JavaScript. |
 | `BootstrapDebugInfo` | typedef | `src/app/OpenDocViewer.jsx:33` | Diagnostics-only startup details surfaced through the performance overlay. |
 | `OpenDocViewer` | function | `src/app/OpenDocViewer.jsx:67` | OpenDocViewer — Top-level component. |
 | `OpenDocViewer~resizeRaf` | constant | `src/app/OpenDocViewer.jsx:93` | rAF-throttled resize handler: Avoids re-render spam during window drags. |
-| `OpenDocViewer~showPerf` | constant | `src/app/OpenDocViewer.jsx:134` | Decide if the Performance HUD should render: Runtime flag (config/env/meta) OR explicit URL opt-in: ?perf=1 (handy during support sessions) |
+| `OpenDocViewer~showPerf` | constant | `src/app/OpenDocViewer.jsx:134` | Decide if the Performance HUD should render: Runtime flag \(config/env/meta\) OR explicit URL opt-in: ?perf=1 \(handy during support sessions\) |
 | `SourceItem` | typedef | `src/app/OpenDocViewer.jsx:25` | Item in the explicit source list mode. |
 | `CanvasRenderer` | constant | `src/components/CanvasRenderer.jsx:40` | CanvasRenderer component. |
 | `module.exports` | function | `src/components/common/StatusLed.jsx:17` |  |
@@ -37,12 +37,12 @@
 | `batchHandler` | constant | `src/components/DocumentLoader/batchHandler.js:201` | Batch scheduler entry point. |
 | `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/batchHandler.js:51` | Signature for the function that inserts a page record at a specific index. |
 | `pump` | function | `src/components/DocumentLoader/batchHandler.js:85` | Schedule a short, fair distribution pass: Assigns at most one batch per idle worker. |
-| `PUMP_DELAY_MS` | constant | `src/components/DocumentLoader/batchHandler.js:70` | Small delay so the event loop can breathe between pumps (ms). |
+| `PUMP_DELAY_MS` | constant | `src/components/DocumentLoader/batchHandler.js:70` | Small delay so the event loop can breathe between pumps \(ms\). |
 | `WorkerJob` | typedef | `src/components/DocumentLoader/batchHandler.js:31` | A single decoding/rendering unit handed to a worker. |
-| `WorkerMessageHandler` | typedef | `src/components/DocumentLoader/batchHandler.js:59` | Handle a worker's message and insert results. |
+| `WorkerMessageHandler` | typedef | `src/components/DocumentLoader/batchHandler.js:59` | Handle a worker&#39;s message and insert results. |
 | `module.exports` | function | `src/components/DocumentLoader/DemoControls.jsx:35` | DemoControls — wraps DocumentLoader with demo-mode props and a small control UI. |
 | `asciiHead` | function | `src/components/DocumentLoader/DocumentLoader.js:254` |  |
-| `buildInlineSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:847` | Decode host-provided Base64 source bytes without routing through fetch(data:...) . |
+| `buildInlineSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:847` | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
 | `createFailedPlaceholder` | function | `src/components/DocumentLoader/DocumentLoader.js:1058` |  |
 | `createInvalidSourcePayloadError` | function | `src/components/DocumentLoader/DocumentLoader.js:742` | Build a source-validation error. |
 | `createLimiter` | function | `src/components/DocumentLoader/DocumentLoader.js:161` |  |
@@ -98,28 +98,28 @@
 | `startsWithAscii` | function | `src/components/DocumentLoader/DocumentLoader.js:284` |  |
 | `toPositiveIntOrUndefined` | function | `src/components/DocumentLoader/DocumentLoader.js:939` |  |
 | `updatePageEstimateStats` | function | `src/components/DocumentLoader/DocumentLoader.js:619` | Update per-extension page-count statistics used by the conservative warning estimator. |
-| `validateFetchedSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:764` | Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store. |
+| `validateFetchedSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:764` | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
 | `fetchAndArrayBuffer` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:119` | Fetch a resource and return its ArrayBuffer. |
 | `FetchOptions` | typedef | `src/components/DocumentLoader/documentLoaderUtils.js:105` | Options for fetchAndArrayBuffer. |
 | `generateDemoList` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:80` | Generate a list of demo document URLs by repeating or mixing sample files. |
 | `generateDocumentList` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:52` | Generate a list of document URLs using a simple pattern: 001..NNN + extension. |
 | `generateThumbnail` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:202` | Create a small thumbnail data URL for a given image URL. |
-| `getTiffMetadata` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:172` | Extract light-weight metadata from a TIFF buffer (best-effort). |
+| `getTiffMetadata` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:172` | Extract light-weight metadata from a TIFF buffer \(best-effort\). |
 | `getTotalPages` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:140` | Determine total pages for a given document by inspecting its buffer and type. |
 | `TRANSPARENT_1x1` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:37` | Tiny transparent PNG as a safe fallback when thumbnails cannot be produced. |
 | `module.exports` | function | `src/components/DocumentLoader/LoadPressureDialog.jsx:35` | Large-load warning dialog shown before / during very heavy loading runs. |
 | `LoadPressureDialogProps` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:21` |  |
 | `LoadPressureDialogSummary` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:8` |  |
 | `LoadPressureDialog~tr` | function | `src/components/DocumentLoader/LoadPressureDialog.jsx:43` |  |
-| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:90` | One-time init of pdf.js classic worker script URL (dev == build). |
+| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:90` | One-time init of pdf.js classic worker script URL \(dev == build\). |
 | `addToUrlRegistry` | function | `src/components/DocumentLoader/mainThreadRenderer.js:81` | Track a created object URL so it can be revoked later. |
-| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:256` | Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips... |
+| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:256` | Build a standard JPEG Blob from an OJPEG \(old-style JPEG-in-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy-coded scan strips... |
 | `ensurePdfWorker` | function | `src/components/DocumentLoader/mainThreadRenderer.js:97` | Ensure a pdf.js worker is ready for this runtime. |
 | `getTagArray` | function | `src/components/DocumentLoader/mainThreadRenderer.js:240` | Safely read a TIFF tag array from a utif2 IFD object. |
 | `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:45` | Signature for inserting a page structure into the page list at an index. |
 | `RenderJob` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:31` | Render job passed to the main-thread renderer. |
 | `renderPDFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:121` | Render PDF pages on the main thread and INSERT THEM DIRECTLY. |
-| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:318` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
+| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:318` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 \(old-style JPEG-in-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
 | `ExplicitSourceList` | typedef | `src/components/DocumentLoader/sources/explicitListSource.js:3` | OpenDocViewer — Explicit Source List Normalizer PURPOSE Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
 | `firstDocumentField` | function | `src/components/DocumentLoader/sources/explicitListSource.js:102` |  |
 | `inferExtFromUrl` | function | `src/components/DocumentLoader/sources/explicitListSource.js:77` | Infer a lowercase extension from a URL if present. |
@@ -135,9 +135,9 @@
 | `createWorker` | function | `src/components/DocumentLoader/workerHandler.js:94` | Create a new image worker instance. |
 | `getNumberOfWorkers` | function | `src/components/DocumentLoader/workerHandler.js:109` | Decide how many workers to spawn, leaving one logical core for the UI when possible. |
 | `HandleOpts` | typedef | `src/components/DocumentLoader/workerHandler.js:75` | Options passed to the handler to coordinate main-thread rendering. |
-| `handleWorkerMessage` | constant | `src/components/DocumentLoader/workerHandler.js:203` | Handle a message payload from an image worker and insert resulting page(s). |
+| `handleWorkerMessage` | constant | `src/components/DocumentLoader/workerHandler.js:203` | Handle a message payload from an image worker and insert resulting page\(s\). |
 | `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/workerHandler.js:67` | Signature for inserting a page structure into the viewer at a specific index. |
-| `scheduleMainThread` | function | `src/components/DocumentLoader/workerHandler.js:167` | Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue (deferred execution). |
+| `scheduleMainThread` | function | `src/components/DocumentLoader/workerHandler.js:167` | Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue \(deferred execution\). |
 | `WorkerJob` | typedef | `src/components/DocumentLoader/workerHandler.js:41` | A single job/result entry communicated between worker and main thread. |
 | `WorkerMessage` | typedef | `src/components/DocumentLoader/workerHandler.js:57` | Worker → main message envelope. |
 | `module.exports` | function | `src/components/DocumentMetadataMatrixOverlayDialog.jsx:17` |  |
@@ -170,7 +170,7 @@
 | `<anonymous>~resolveCustomFitOptions` | constant | `src/components/DocumentRender.jsx:248` |  |
 | `module.exports` | function | `src/components/DocumentSelectionPanel.jsx:89` |  |
 | `SelectionCheckboxRow` | function | `src/components/DocumentSelectionPanel.jsx:30` |  |
-| `buildCenterOutQueue` | function | `src/components/DocumentThumbnailList.jsx:150` | Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1. |
+| `buildCenterOutQueue` | function | `src/components/DocumentThumbnailList.jsx:150` | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
 | `clamp` | function | `src/components/DocumentThumbnailList.jsx:63` |  |
 | `DocumentThumbnailList` | constant | `src/components/DocumentThumbnailList.jsx:529` |  |
 | `formatMetricFraction` | function | `src/components/DocumentThumbnailList.jsx:107` |  |
@@ -199,7 +199,7 @@
 | `<anonymous>~handleEscape` | function | `src/components/DocumentToolbar/AboutOverlayDialog.jsx:70` |  |
 | `resolveAboutInfo` | function | `src/components/DocumentToolbar/AboutOverlayDialog.jsx:17` |  |
 | `AnyRef` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:108` | Mutable ref-like object used by the toolbar. |
-| `DocumentToolbar~dispatchPrintRequest` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1106` | Execute the actual print helper after the dialog has resolved the user's choices. |
+| `DocumentToolbar~dispatchPrintRequest` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1106` | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
 | `DocumentToolbar` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:285` | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | `DocumentToolbarProps` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:136` | Props for {@link DocumentToolbar}. |
 | `formatPdfProgressBody` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:64` |  |
@@ -218,16 +218,16 @@
 | `makePdfResolutionPageKey` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:262` |  |
 | `DocumentToolbar~makePrintOptions` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:858` |  |
 | `normalizeToolbarPageNumber` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:250` | Clamp a page number into the valid viewer range while preserving a safe fallback. |
-| `ONE_TO_ONE_EPS` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:219` | Epsilon for considering zoom ≈ 100% (0.5%). |
+| `ONE_TO_ONE_EPS` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:219` | Epsilon for considering zoom ≈ 100% \(0.5%\). |
 | `PageNumberSetter` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:122` | React-like numeric page setter used by the toolbar. |
 | `PrintSubmitDetail` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:88` | Detail payload emitted by the print dialog. |
 | `DocumentToolbar~resolvePrintPageContexts` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:808` | Resolve page metadata objects aligned with the printed page sequence. |
 | `DocumentToolbar~resolvePrintPageCount` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:786` | Estimate the number of pages the user is about to print. |
 | `DocumentToolbar~resolvePrintPageNumbers` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:822` |  |
-| `SLIDER_CENTER_RANGE` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:217` | Range (±) around 100% where sliders snap back to the neutral value. |
+| `SLIDER_CENTER_RANGE` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:217` | Range \(±\) around 100% where sliders snap back to the neutral value. |
 | `DocumentToolbar~submitUserPrintLog` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:886` | Fire-and-forget user print log. |
 | `DocumentToolbar~toggleAdjustmentMenu` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:739` |  |
-| `DocumentToolbar~toPagesString` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:766` | Build a compact &quot;pages&quot; descriptor for logging. |
+| `DocumentToolbar~toPagesString` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:766` | Build a compact &amp;quot;pages&amp;quot; descriptor for logging. |
 | `ZoomState` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:129` | Zoom display state used by the newer toolbar UX paths. |
 | `<anonymous>~handleKeyDown` | function | `src/components/DocumentToolbar/HelpMenuButton.jsx:30` |  |
 | `<anonymous>~handlePointerDown` | function | `src/components/DocumentToolbar/HelpMenuButton.jsx:22` |  |
@@ -267,7 +267,7 @@
 | `usePrintRangeController~composeSubmitDetail` | constant | `src/components/DocumentToolbar/usePrintRangeDialog.js:588` | Compose and validate the print payload for the current dialog state. |
 | `ensureODVPrintCSS` | function | `src/components/DocumentToolbar/usePrintRangeDialog.js:163` | Ensure base print CSS is injected once per document. |
 | `usePrintRangeController~extras` | constant | `src/components/DocumentToolbar/usePrintRangeDialog.js:568` |  |
-| `getCfg` | function | `src/components/DocumentToolbar/usePrintRangeDialog.js:37` | Read the runtime configuration (merged defaults + site overrides). |
+| `getCfg` | function | `src/components/DocumentToolbar/usePrintRangeDialog.js:37` | Read the runtime configuration \(merged defaults + site overrides\). |
 | `hasTextValue` | function | `src/components/DocumentToolbar/usePrintRangeDialog.js:57` |  |
 | `usePrintRangeController~makeDescendingSequence` | constant | `src/components/DocumentToolbar/usePrintRangeDialog.js:440` |  |
 | `normalizePdfOrientationMode` | function | `src/components/DocumentToolbar/usePrintRangeDialog.js:110` |  |
@@ -285,7 +285,7 @@
 | `usePrintRangeController~validateRange` | constant | `src/components/DocumentToolbar/usePrintRangeDialog.js:449` |  |
 | `usePrintRangeController~validateUserFields` | constant | `src/components/DocumentToolbar/usePrintRangeDialog.js:461` |  |
 | `parsePercentInput` | function | `src/components/DocumentToolbar/ZoomButtons.jsx:98` | Parse a percent-like string safely. |
-| `CompareZoomOverlay` | function | `src/components/DocumentViewer/CompareZoomOverlay.jsx:28` | CompareZoomOverlay Presentational-only (no state). |
+| `CompareZoomOverlay` | function | `src/components/DocumentViewer/CompareZoomOverlay.jsx:28` | CompareZoomOverlay Presentational-only \(no state\). |
 | `<anonymous>~allowNativeContextMenu` | function | `src/components/DocumentViewer/DocumentViewer.jsx:328` |  |
 | `<anonymous>~hasActiveModalDialog` | function | `src/components/DocumentViewer/DocumentViewer.jsx:236` |  |
 | `<anonymous>~isEditableTarget` | function | `src/components/DocumentViewer/DocumentViewer.jsx:229` |  |
@@ -333,10 +333,10 @@
 | `module:useViewerEffects~ZoomMode` | typedef | `src/components/DocumentViewer/hooks/useViewerEffects.js:26` | Sticky zoom modes used by the viewer. |
 | `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomLeft` | constant | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:59` | Adjust left pane post-zoom by ±0.1 steps. |
 | `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomRight` | constant | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:68` | Adjust right pane post-zoom by ±0.1 steps. |
-| `module:useViewerPostZoom~clamp` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:20` | Clamp a numeric value to [min, max]. |
+| `module:useViewerPostZoom~clamp` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:20` | Clamp a numeric value to \[min, max\]. |
 | `module:useViewerPostZoom.useViewerPostZoom~resetPostZoom` | constant | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:50` | Reset both per-pane factors to 1.0. |
-| `module:useViewerPostZoom~round1` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:29` | Round to one decimal place (avoids float drift when stepping by 0.1). |
-| `module:useViewerPostZoom` | module | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:2` | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode. |
+| `module:useViewerPostZoom~round1` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:29` | Round to one decimal place \(avoids float drift when stepping by 0.1\). |
+| `module:useViewerPostZoom` | module | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:2` | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
 | `module:useViewerPostZoom.useViewerPostZoom` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:45` | Hook managing per-pane post-zoom factors for compare mode. |
 | `useDocumentViewer~activateComparePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1344` | Open compare mode when needed and make the right pane the default target. |
 | `useDocumentViewer~activatePrimaryPane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1336` |  |
@@ -344,7 +344,7 @@
 | `buildDocumentSelectionModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:188` |  |
 | `buildImageRotationDependencyKey` | function | `src/components/DocumentViewer/useDocumentViewer.js:79` |  |
 | `buildVisibleDocumentNavigationModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:271` | Build the visible-document grouping used by document-level navigation. |
-| `clampPage` | function | `src/components/DocumentViewer/useDocumentViewer.js:45` | Clamp a 1-based page number into [1, total]. |
+| `clampPage` | function | `src/components/DocumentViewer/useDocumentViewer.js:45` | Clamp a 1-based page number into \[1, total\]. |
 | `useDocumentViewer~closeCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1372` | Close compare mode without affecting the left page. |
 | `DEFAULT_IMAGE_PROPERTIES` | constant | `src/components/DocumentViewer/useDocumentViewer.js:67` | Neutral per-page image adjustment state. |
 | `findNearestVisiblePageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:168` | Resolve the nearest visible page number for a requested original page index. |
@@ -357,12 +357,12 @@
 | `useDocumentViewer~goToLastPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1071` | Jump to the last visible page in the requested target pane. |
 | `useDocumentViewer~goToNextDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1094` | Jump to the first page of the next visible document. |
 | `useDocumentViewer~goToNextPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1053` | Move one page forward in the requested target pane. |
-| `useDocumentViewer~goToPreviousDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1082` | Jump to the first page of the previous visible document (or to the current document start when the active pane already points inside the first visible document). |
+| `useDocumentViewer~goToPreviousDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1082` | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
 | `useDocumentViewer~goToPreviousPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1044` | Move one page backward in the requested target pane. |
 | `useDocumentViewer~handleBrightnessChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1412` |  |
 | `useDocumentViewer~handleCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1354` | Toggle compare mode. |
 | `useDocumentViewer~handleContrastChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1420` |  |
-| `useDocumentViewer~handlePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:960` | Change the primary page using an original page number (or a visible-page updater function when called from navigation helpers). |
+| `useDocumentViewer~handlePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:960` | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
 | `useDocumentViewer~handlePrimaryDisplayStateChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1008` | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
 | `useDocumentViewer~handleVisiblePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:969` | Change the primary page by a visible page number from the thumbnail strip. |
 | `hasExcludedPages` | function | `src/components/DocumentViewer/useDocumentViewer.js:104` |  |
@@ -374,23 +374,23 @@
 | `normalizePrintPageSequence` | function | `src/components/DocumentViewer/useDocumentViewer.js:131` |  |
 | `normalizeRotationDegrees` | function | `src/components/DocumentViewer/useDocumentViewer.js:61` | Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer. |
 | `normalizeSelectionMask` | function | `src/components/DocumentViewer/useDocumentViewer.js:88` |  |
-| `normalizeViewerPaneTarget` | function | `src/components/DocumentViewer/useDocumentViewer.js:345` | Normalize any pane key into the viewer's two supported navigation targets. |
+| `normalizeViewerPaneTarget` | function | `src/components/DocumentViewer/useDocumentViewer.js:345` | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
 | `<anonymous>~onMove` | function | `src/components/DocumentViewer/useDocumentViewer.js:1499` |  |
 | `useDocumentViewer~resolveNearestVisibleOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:651` |  |
 | `useDocumentViewer~resolveTargetOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:908` | Resolve the next original 1-based page number from a visible-page update. |
 | `useDocumentViewer~selectForCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1387` | Select a page for the right-hand compare pane. |
 | `useDocumentViewer~setActivePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1329` | Set the default pane for compare-aware navigation and editing actions. |
-| `useDocumentViewer~setComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:996` | Change the compare page using an original page number (or a visible-page updater function when called from compare navigation helpers). |
+| `useDocumentViewer~setComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:996` | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
 | `useDocumentViewer~setIsExpanded` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1317` | Setter for the editing controls visibility. |
 | `useDocumentViewer~setVisibleComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:982` | Change the compare page by a visible page number from the toolbar page field. |
-| `useDocumentViewer~setZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1227` | Set zoom mode directly ('FIT_PAGE'\|'FIT_WIDTH'\|'FIT_CUSTOM'\|'ACTUAL_SIZE'\|'CUSTOM'). |
+| `useDocumentViewer~setZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1227` | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
 | `useDocumentViewer~thumbnailSelectionPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1036` | The thumbnail pane should react immediately when the user changes page. |
 | `useDocumentViewer~toggleFitZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1301` | Toggle between the two fit modes from the page surface. |
 | `useDocumentViewer~updatePageTarget` | constant | `src/components/DocumentViewer/useDocumentViewer.js:935` | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
 | `useDocumentViewer` | function | `src/components/DocumentViewer/useDocumentViewer.js:362` | Hook that centralizes viewer UI state and event handlers. |
 | `ViewerPageTarget` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:337` |  |
-| `ZoomMode` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:325` | Sticky zoom modes used by the viewer (subset is used here). |
-| `ZoomState` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:330` | Zoom state (mode + current numeric scale). |
+| `ZoomMode` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:325` | Sticky zoom modes used by the viewer \(subset is used here\). |
+| `ZoomState` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:330` | Zoom state \(mode + current numeric scale\). |
 | `ImageRenderer` | constant | `src/components/ImageRenderer.jsx:51` | ImageRenderer component. |
 | `ImgEventHandler` | typedef | `src/components/ImageRenderer.jsx:28` | Image load/error handler. |
 | `LoadingMessage` | function | `src/components/LoadingMessage.jsx:43` | LoadingMessage component. |
@@ -398,15 +398,15 @@
 | `LoadingSpinner.propTypes.label` | member | `src/components/LoadingSpinner.jsx:85` | Accessible label announced by assistive technologies. |
 | `LoadingSpinner` | function | `src/components/LoadingSpinner.jsx:55` | LoadingSpinner component. |
 | `LoadingSpinner.propTypes.size` | member | `src/components/LoadingSpinner.jsx:83` | Optional width/height; if omitted, CSS controls dimensions. |
-| `srOnlyStyle` | constant | `src/components/LoadingSpinner.jsx:33` | Inline “visually hidden” style for screen-reader-only text (no CSS dependency). |
+| `srOnlyStyle` | constant | `src/components/LoadingSpinner.jsx:33` | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
 | `<anonymous>~handleDone` | function | `src/components/PrintSelectionWorkspace.jsx:1781` |  |
 | `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1721` |  |
 | `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1754` |  |
 | `<anonymous>~handleMove` | function | `src/components/PrintSelectionWorkspace.jsx:1774` |  |
 | `Resizer.propTypes.ariaLabel` | member | `src/components/Resizer.jsx:103` | Accessible name for assistive technologies. |
 | `Resizer.propTypes.className` | member | `src/components/Resizer.jsx:105` | Extra class names to append to the root element. |
-| `<anonymous>~handleKeyDown` | constant | `src/components/Resizer.jsx:70` | Keyboard handler (Enter/Space) to initiate the same flow as mouse down. |
-| `Resizer.propTypes.onMouseDown` | member | `src/components/Resizer.jsx:99` | Initiates resize in the parent (mouse or keyboard-initiated). |
+| `<anonymous>~handleKeyDown` | constant | `src/components/Resizer.jsx:70` | Keyboard handler \(Enter/Space\) to initiate the same flow as mouse down. |
+| `Resizer.propTypes.onMouseDown` | member | `src/components/Resizer.jsx:99` | Initiates resize in the parent \(mouse or keyboard-initiated\). |
 | `Resizer.propTypes.orientation` | member | `src/components/Resizer.jsx:101` | Visual/semantic orientation of the separator. |
 | `Resizer` | constant | `src/components/Resizer.jsx:61` | Resizer component. |
 | `ResizerProps` | typedef | `src/components/Resizer.jsx:43` | Props for . |
@@ -418,8 +418,8 @@
 | `ThemeContext` | constant | `src/contexts/themeContext.js:26` | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | `ThemeContextValue` | typedef | `src/contexts/themeContext.js:10` | Context value shape for the theme. |
 | `ThemeMode` | typedef | `src/contexts/themeContext.js:4` | Theme identifier. |
-| `applyThemeToDocument` | function | `src/contexts/ThemeProvider.jsx:69` | Apply the resolved theme to the DOM (SSR-safe). |
-| `detectSystemTheme` | function | `src/contexts/ThemeProvider.jsx:38` | Detect system preferred color scheme (SSR-safe; defaults to light). |
+| `applyThemeToDocument` | function | `src/contexts/ThemeProvider.jsx:69` | Apply the resolved theme to the DOM \(SSR-safe\). |
+| `detectSystemTheme` | function | `src/contexts/ThemeProvider.jsx:38` | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
 | `<anonymous>~onChange` | function | `src/contexts/ThemeProvider.jsx:162` |  |
 | `resolveInitialThemeMode` | function | `src/contexts/ThemeProvider.jsx:87` | Resolve the initial theme mode once during provider initialization. |
 | `resolveThemeForMode` | function | `src/contexts/ThemeProvider.jsx:55` | Resolve the concrete theme for a theme mode. |
@@ -441,7 +441,7 @@
 | `ViewerProvider~addMessage` | constant | `src/contexts/ViewerProvider.jsx:897` |  |
 | `ViewerProvider~announceIndexedDbAssetMode` | constant | `src/contexts/ViewerProvider.jsx:1222` |  |
 | `ViewerProvider~applySessionConfig` | constant | `src/contexts/ViewerProvider.jsx:912` |  |
-| `ViewerProvider~clearPageAssetReference` | constant | `src/contexts/ViewerProvider.jsx:1371` | Drop a page's current object URL reference from React state and the in-memory cache. |
+| `ViewerProvider~clearPageAssetReference` | constant | `src/contexts/ViewerProvider.jsx:1371` | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
 | `ViewerProvider~clearWarmupQueue` | constant | `src/contexts/ViewerProvider.jsx:939` |  |
 | `ViewerProvider~collectRuntimeDiagnostics` | constant | `src/contexts/ViewerProvider.jsx:519` | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | `createLimiter` | function | `src/contexts/ViewerProvider.jsx:203` |  |
@@ -497,17 +497,17 @@
 | `ViewerProvider` | constant | `src/contexts/ViewerProvider.jsx:324` |  |
 | `ViewerProviderProps` | typedef | `src/contexts/ViewerProvider.jsx:313` |  |
 | `componentDidCatch` | function | `src/ErrorBoundary.jsx:152` | Log error details for diagnostics. |
-| `module.exports#copyDetails` | member | `src/ErrorBoundary.jsx:189` | Copy a concise diagnostic bundle to the clipboard (best effort). |
+| `module.exports#copyDetails` | member | `src/ErrorBoundary.jsx:189` | Copy a concise diagnostic bundle to the clipboard \(best effort\). |
 | `ErrorBoundaryProps` | typedef | `src/ErrorBoundary.jsx:103` | Props for the ErrorBoundary component. |
 | `ErrorBoundaryState` | typedef | `src/ErrorBoundary.jsx:115` | Internal state for the ErrorBoundary. |
 | `module.exports` | class | `src/ErrorBoundary.jsx:130` | React Error Boundary implementation with: runtime-controlled stack visibility copy-to-clipboard helper for diagnostics reset handler to re-render child tree |
 | `getDerivedStateFromError` | function | `src/ErrorBoundary.jsx:139` |  |
 | `IS_DEV` | constant | `src/ErrorBoundary.jsx:34` | Determine whether we are in development mode. |
-| `readConfigFlag` | function | `src/ErrorBoundary.jsx:80` | Read a runtime configuration flag (SSR-safe). |
+| `readConfigFlag` | function | `src/ErrorBoundary.jsx:80` | Read a runtime configuration flag \(SSR-safe\). |
 | `render` | function | `src/ErrorBoundary.jsx:208` |  |
 | `module.exports#reset` | member | `src/ErrorBoundary.jsx:166` | Reset the boundary and optionally call the external onReset handler. |
 | `toBool` | function | `src/ErrorBoundary.jsx:59` | Coerce unknown values to boolean using common string/number forms. |
-| `tr` | function | `src/ErrorBoundary.jsx:45` | Tiny helper to translate with safe fallback (NS: 'common'). |
+| `tr` | function | `src/ErrorBoundary.jsx:45` | Tiny helper to translate with safe fallback \(NS: &#39;common&#39;\). |
 | `module.exports` | function | `src/hooks/useAcceleratingHoldRepeat.js:57` |  |
 | `<anonymous>~applyState` | function | `src/hooks/useNavigationModifierState.js:59` |  |
 | `<anonymous>~clearState` | function | `src/hooks/useNavigationModifierState.js:71` |  |
@@ -517,38 +517,38 @@
 | `resolveModifierState` | function | `src/hooks/useNavigationModifierState.js:34` |  |
 | `<anonymous>~syncModifierState` | function | `src/hooks/useNavigationModifierState.js:79` |  |
 | `useNavigationModifierState` | function | `src/hooks/useNavigationModifierState.js:44` |  |
-| `usePageNavigation~fastNext` | constant | `src/hooks/usePageNavigation.js:140` | Fast step: next (used by timers). |
-| `usePageNavigation~fastPrev` | constant | `src/hooks/usePageNavigation.js:131` | Fast step: previous (used by timers). |
+| `usePageNavigation~fastNext` | constant | `src/hooks/usePageNavigation.js:140` | Fast step: next \(used by timers\). |
+| `usePageNavigation~fastPrev` | constant | `src/hooks/usePageNavigation.js:131` | Fast step: previous \(used by timers\). |
 | `usePageNavigation~handleFirstPageWrapper` | constant | `src/hooks/usePageNavigation.js:104` | Wrapper: go to first page. |
 | `usePageNavigation~handleLastPageWrapper` | constant | `src/hooks/usePageNavigation.js:117` | Wrapper: go to last page. |
-| `usePageNavigation~handleNextPageWrapper` | constant | `src/hooks/usePageNavigation.js:91` | Wrapper: go to next page (logs once per user action). |
-| `usePageNavigation~handlePrevPageWrapper` | constant | `src/hooks/usePageNavigation.js:78` | Wrapper: go to previous page (logs once per user action). |
+| `usePageNavigation~handleNextPageWrapper` | constant | `src/hooks/usePageNavigation.js:91` | Wrapper: go to next page \(logs once per user action\). |
+| `usePageNavigation~handlePrevPageWrapper` | constant | `src/hooks/usePageNavigation.js:78` | Wrapper: go to previous page \(logs once per user action\). |
 | `PageNavigationAPI` | typedef | `src/hooks/usePageNavigation.js:49` | API returned by usePageNavigation. |
 | `usePageNavigation` | function | `src/hooks/usePageNavigation.js:69` | Custom hook to handle document page navigation with keyboard/mouse. |
-| `DEFAULT_REPEAT_INTERVAL_MS` | constant | `src/hooks/usePageTimer.js:41` | Default repeat cadence (ms). |
+| `DEFAULT_REPEAT_INTERVAL_MS` | constant | `src/hooks/usePageTimer.js:41` | Default repeat cadence \(ms\). |
 | `PageDirection` | typedef | `src/hooks/usePageTimer.js:38` |  |
 | `PageTimerAPI` | typedef | `src/hooks/usePageTimer.js:43` | API returned by usePageTimer. |
 | `usePageTimer~startPageTimer` | constant | `src/hooks/usePageTimer.js:75` | Start the timer for continuous page navigation. |
-| `usePageTimer~stopPageTimer` | constant | `src/hooks/usePageTimer.js:123` | Stop any active delay or interval timer (idempotent). |
+| `usePageTimer~stopPageTimer` | constant | `src/hooks/usePageTimer.js:123` | Stop any active delay or interval timer \(idempotent\). |
 | `usePageTimer` | function | `src/hooks/usePageTimer.js:60` | Custom hook to handle page change with a timer for continuous navigation. |
 | `appendQuery` | function | `src/i18n.js:140` | Helper: append query params safely to a URL. |
 | `BUNDLED_I18N_RESOURCE_REVISION` | constant | `src/i18n.js:90` | Fallback cache-busting token for bundled locale resources. |
 | `computeBaseHref` | function | `src/i18n.js:372` | Compute a normalized base href. |
 | `DIAGNOSTIC_RELOAD_DELAY_MS` | constant | `src/i18n.js:99` | Dev-only reload delay after diagnostic localStorage writes. |
 | `getBaseLanguageCode` | function | `src/i18n.js:243` | Extract the lowercase base language code from a locale candidate. |
-| `getI18nVersion` | function | `src/i18n.js:111` | Return cache-busting version token (see header). |
+| `getI18nVersion` | function | `src/i18n.js:111` | Return cache-busting version token \(see header\). |
 | `getImportMetaEnv` | function | `src/i18n.js:57` | Return Vite import.meta.env safely. |
 | `getNormalizedSupportedLanguages` | function | `src/i18n.js:257` | Normalize configured supported languages to non-empty base language codes. |
 | `getSafeWindow` | function | `src/i18n.js:40` | Return browser window safely in browser, SSR, test, and documentation contexts. |
-| `getStaticI18nDefaults` | function | `src/i18n.js:217` | Compute app config &amp; defaults safely. |
+| `getStaticI18nDefaults` | function | `src/i18n.js:217` | Compute app config &amp;amp; defaults safely. |
 | `getUnsupportedVersionPlaceholders` | function | `src/i18n.js:173` | Find malformed version-like placeholders in loadPath without extra array passes. |
-| `IS_DEV` | constant | `src/i18n.js:68` | Dev-mode detector (Vite + Node envs). |
+| `IS_DEV` | constant | `src/i18n.js:68` | Dev-mode detector \(Vite + Node envs\). |
 | `normalizeSupportedLanguage` | function | `src/i18n.js:272` | Normalize an arbitrary language candidate to a supported base language. |
 | `normalizeVersionToken` | function | `src/i18n.js:102` | Normalize optional version tokens from runtime config or globals. |
-| `readQuery` | function | `src/i18n.js:73` | Read a query parameter by name (no deps). |
+| `readQuery` | function | `src/i18n.js:73` | Read a query parameter by name \(no deps\). |
 | `reloadAfterDiagnosticStorageWrite` | function | `src/i18n.js:196` | Refresh i18n resources after a diagnostic localStorage write. |
 | `resolveInitialLanguage` | function | `src/i18n.js:302` | Resolve the initial UI language without relying on persisted i18next cache state. |
-| `resolveLoadPath` | function | `src/i18n.js:390` | Resolve the final translation URL at request time (with cache buster). |
+| `resolveLoadPath` | function | `src/i18n.js:390` | Resolve the final translation URL at request time \(with cache buster\). |
 | `sanitizeI18nPathSegment` | function | `src/i18n.js:161` | Keep i18n URL template substitutions constrained to plain path segments. |
 | `syncDocumentLanguage` | function | `src/i18n.js:353` | Keep the document language synchronized with the active UI language. |
 | `WANT_DIAG` | constant | `src/i18n.js:82` | Diagnostics ON only in dev builds. |
@@ -564,7 +564,7 @@
 | `bootstrapDetect~probeParent` | function | `src/integrations/bootstrapRuntime.js:256` |  |
 | `bootstrapDetect~probeSessionToken` | function | `src/integrations/bootstrapRuntime.js:284` |  |
 | `bootstrapDetect~probeSessionUrl` | function | `src/integrations/bootstrapRuntime.js:270` |  |
-| `<anonymous>~api.start` | function | `src/integrations/bootstrapRuntime.js:81` | Queue a start payload to be consumed by bootstrapDetect(). |
+| `<anonymous>~api.start` | function | `src/integrations/bootstrapRuntime.js:81` | Queue a start payload to be consumed by bootstrapDetect\(\). |
 | `tryNormalizeBundle` | function | `src/integrations/bootstrapRuntime.js:94` | Try to normalize a candidate payload into a bundle with documents. |
 | `normalizeToPortableBundle` | function | `src/integrations/normalizePortableBundle.js:116` | Normalize many incoming shapes to a neutral PortableDocumentBundle v1. |
 | `PortableBundleMetadataAliasMap` | typedef | `src/integrations/normalizePortableBundle.js:94` | Runtime-configurable mapping between semantic metadata aliases and metadata record identifiers used by a host-specific object-document payload. |
@@ -575,7 +575,7 @@
 | `PortableMetadataRecord` | typedef | `src/integrations/normalizePortableBundle.js:38` | A normalized raw metadata record attached to a document. |
 | `PortableSession` | typedef | `src/integrations/normalizePortableBundle.js:20` | Session info stored on a bundle. |
 | `spreadUnknown` | function | `src/integrations/normalizePortableBundle.js:240` | Preserve unknown own enumerable properties from host input while excluding keys that were already normalized explicitly. |
-| `b64DecodeUnicode` | function | `src/integrations/parentBridge.js:88` | Decode a base64-encoded Unicode string into text (handles UTF-8). |
+| `b64DecodeUnicode` | function | `src/integrations/parentBridge.js:88` | Decode a base64-encoded Unicode string into text \(handles UTF-8\). |
 | `getSameOriginOpener` | function | `src/integrations/parentBridge.js:52` | Try to obtain a same-origin opener window reference. |
 | `getSameOriginParent` | function | `src/integrations/parentBridge.js:30` | Try to obtain a same-origin parent window reference. |
 | `ParentBootstrapResult` | typedef | `src/integrations/parentBridge.js:15` | Result object when data is obtained from a same-origin parent. |
@@ -585,9 +585,9 @@
 | `readFromWindow` | function | `src/integrations/parentBridge.js:107` | Attempt to read a bootstrap object from a same-origin related window. |
 | `safeClone` | function | `src/integrations/parentBridge.js:73` | Perform a safe, structured clone of serializable data. |
 | `b64DecodeUnicode` | function | `src/integrations/sessionToken.js:75` | Decode a Base64 string into a UTF-8 JavaScript string. |
-| `MAX_B64_LEN` | constant | `src/integrations/sessionToken.js:34` | Upper bound for the Base64 token length (~200 KB base64 ≈ 150 KB raw). |
+| `MAX_B64_LEN` | constant | `src/integrations/sessionToken.js:34` | Upper bound for the Base64 token length \(~200 KB base64 ≈ 150 KB raw\). |
 | `MAX_RAW_LEN` | constant | `src/integrations/sessionToken.js:36` | Upper bound for the decoded raw string length. |
-| `normalizeBase64` | function | `src/integrations/sessionToken.js:54` | Normalize a Base64 string to a decodable form: Trim whitespace Convert URL-safe chars '-' → '+', '_' → '/' Add '=' padding to reach a length divisible by 4 |
+| `normalizeBase64` | function | `src/integrations/sessionToken.js:54` | Normalize a Base64 string to a decodable form: Trim whitespace Convert URL-safe chars &#39;-&#39; → &#39;+&#39;, &#39;_&#39; → &#39;/&#39; Add &#39;=&#39; padding to reach a length divisible by 4 |
 | `readFromSessionToken` | function | `src/integrations/sessionToken.js:104` | Read and decode a session payload from the URL query string. |
 | `SessionTokenResult` | typedef | `src/integrations/sessionToken.js:38` | Session token read result. |
 | `MAX_RESPONSE_TEXT_LEN` | constant | `src/integrations/sessionUrl.js:9` | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
@@ -598,7 +598,7 @@
 | `readFromUrlParams` | function | `src/integrations/urlParams.js:83` | Reads common query params used by the demo and other hosts. |
 | `UrlParamsData` | typedef | `src/integrations/urlParams.js:32` |  |
 | `UrlParamsResult` | typedef | `src/integrations/urlParams.js:39` |  |
-| `clearTimeoutSafe` | function | `src/integrations/viewerEvents.js:187` | Clear a timer if it exists (tiny helper). |
+| `clearTimeoutSafe` | function | `src/integrations/viewerEvents.js:187` | Clear a timer if it exists \(tiny helper\). |
 | `createCustomEvent` | function | `src/integrations/viewerEvents.js:56` | Create a CustomEvent with best-effort fallback for older browsers. |
 | `emitODVEvent` | function | `src/integrations/viewerEvents.js:79` | Emit a namespaced OpenDocViewer event with an optional detail payload. |
 | `ODVEventHandler` | typedef | `src/integrations/viewerEvents.js:29` | Listener signature for ODV events. |
@@ -611,33 +611,33 @@
 | `LogController#disableBackendLogging` | member | `src/logging/systemLogger.js:365` | Disable backend forwarding after a non-recoverable configuration/runtime failure. |
 | `LogController#error` | member | `src/logging/systemLogger.js:426` |  |
 | `LogController#info` | member | `src/logging/systemLogger.js:420` |  |
-| `levelGte` | function | `src/logging/systemLogger.js:186` | Compare two log levels (is a &gt;= b ?). |
+| `levelGte` | function | `src/logging/systemLogger.js:186` | Compare two log levels \(is a &amp;gt;= b ?\). |
 | `LogController#log` | member | `src/logging/systemLogger.js:338` | Log a message with a given level and optional context. |
 | `LOG_LEVELS` | constant | `src/logging/systemLogger.js:44` | Valid log levels in ascending verbosity. |
 | `LogController` | class | `src/logging/systemLogger.js:210` | LogController — small facade around console + optional HTTP forwarding. |
-| `logger` | constant | `src/logging/systemLogger.js:430` | Export a singleton instance (sufficient for app usage). |
+| `logger` | constant | `src/logging/systemLogger.js:430` | Export a singleton instance \(sufficient for app usage\). |
 | `LogLevel` | typedef | `src/logging/systemLogger.js:41` |  |
 | `NOOP` | function | `src/logging/systemLogger.js:47` | No-op function used when we want to swallow calls cleanly. |
 | `normalizeLevel` | function | `src/logging/systemLogger.js:175` | Normalize and validate a log level. |
-| `readMeta` | function | `src/logging/systemLogger.js:54` | Resolve a string from a meta tag (SSR-safe). |
+| `readMeta` | function | `src/logging/systemLogger.js:54` | Resolve a string from a meta tag \(SSR-safe\). |
 | `readMetaBool` | function | `src/logging/systemLogger.js:69` | Resolve a boolean from a meta tag content. |
-| `readRuntimeConfig` | function | `src/logging/systemLogger.js:81` | Resolve a runtime config snapshot from runtime globals (SSR-safe). |
+| `readRuntimeConfig` | function | `src/logging/systemLogger.js:81` | Resolve a runtime config snapshot from runtime globals \(SSR-safe\). |
 | `resolveAuthToken` | function | `src/logging/systemLogger.js:146` | Resolve the shared auth token used for posting to /log. |
-| `resolveBackendUrl` | function | `src/logging/systemLogger.js:115` | Resolve a candidate backend URL using precedence rules and make it absolute relative to document.baseURI (SSR-safe). |
-| `resolveEnabledOverride` | function | `src/logging/systemLogger.js:163` | Resolve an explicit &quot;enabled&quot; boolean if one exists. |
+| `resolveBackendUrl` | function | `src/logging/systemLogger.js:115` | Resolve a candidate backend URL using precedence rules and make it absolute relative to document.baseURI \(SSR-safe\). |
+| `resolveEnabledOverride` | function | `src/logging/systemLogger.js:163` | Resolve an explicit &amp;quot;enabled&amp;quot; boolean if one exists. |
 | `LogController#sendLogToBackend` | member | `src/logging/systemLogger.js:383` | Attempt to POST the log to the backend, with simple linear retries. |
-| `LogController#setAuthToken` | member | `src/logging/systemLogger.js:311` | Update/replace the auth token used in 'x-log-token'. |
-| `LogController#setBackendUrl` | member | `src/logging/systemLogger.js:260` | Set the backend ingestion URL (absolute or relative). |
-| `LogController#setHttpTimeout` | member | `src/logging/systemLogger.js:302` | Set axios timeout (ms) for backend posts. |
+| `LogController#setAuthToken` | member | `src/logging/systemLogger.js:311` | Update/replace the auth token used in &#39;x-log-token&#39;. |
+| `LogController#setBackendUrl` | member | `src/logging/systemLogger.js:260` | Set the backend ingestion URL \(absolute or relative\). |
+| `LogController#setHttpTimeout` | member | `src/logging/systemLogger.js:302` | Set axios timeout \(ms\) for backend posts. |
 | `LogController#setLogLevel` | member | `src/logging/systemLogger.js:274` | Set the current log level. |
 | `LogController#setLogToBackend` | member | `src/logging/systemLogger.js:247` | Enable/disable HTTP forwarding at runtime. |
-| `LogController#setRetryInterval` | member | `src/logging/systemLogger.js:293` | Set retry interval (ms) for backend forwarding. |
+| `LogController#setRetryInterval` | member | `src/logging/systemLogger.js:293` | Set retry interval \(ms\) for backend forwarding. |
 | `LogController#setRetryLimit` | member | `src/logging/systemLogger.js:284` | Set retry limit for backend forwarding. |
-| `LogController#shouldLog` | member | `src/logging/systemLogger.js:324` | Internal: should this level be logged at all (console or backend)? |
+| `LogController#shouldLog` | member | `src/logging/systemLogger.js:324` | Internal: should this level be logged at all \(console or backend\)? |
 | `LogController#warn` | member | `src/logging/systemLogger.js:423` |  |
-| `__DEV__` | constant | `src/logging/userLogger.js:59` | True when running in dev (for debug logging only). |
-| `UserLogController#_captureCookieFingerprint` | function | `src/logging/userLogger.js:168` | Internal: hash document.cookie once (non-blocking). |
-| `abToBase64` | function | `src/logging/userLogger.js:110` | Base64 from ArrayBuffer (for cookie fingerprint). |
+| `__DEV__` | constant | `src/logging/userLogger.js:59` | True when running in dev \(for debug logging only\). |
+| `UserLogController#_captureCookieFingerprint` | function | `src/logging/userLogger.js:168` | Internal: hash document.cookie once \(non-blocking\). |
+| `abToBase64` | function | `src/logging/userLogger.js:110` | Base64 from ArrayBuffer \(for cookie fingerprint\). |
 | `BootContext` | typedef | `src/logging/userLogger.js:37` |  |
 | `debug` | function | `src/logging/userLogger.js:62` | Dev-only logger. |
 | `getRuntimeConfig` | function | `src/logging/userLogger.js:71` | Safely read runtime config from window. |
@@ -646,10 +646,10 @@
 | `PrintLogPayload` | typedef | `src/logging/userLogger.js:43` |  |
 | `UserLogController#setUserResolver` | function | `src/logging/userLogger.js:142` | Optional identity resolver supplied by host app. |
 | `UserLogController#setViewerVersion` | function | `src/logging/userLogger.js:150` | Optional viewer version to add in meta.viewerVersion. |
-| `sha256Base64` | function | `src/logging/userLogger.js:120` | Async SHA-256 of a string → &quot;sha256- &quot; (or null). |
-| `UserLogController#submitPrint` | function | `src/logging/userLogger.js:189` | Submit a &quot;print&quot; user-log event. |
+| `sha256Base64` | function | `src/logging/userLogger.js:120` | Async SHA-256 of a string → &amp;quot;sha256- &amp;quot; \(or null\). |
+| `UserLogController#submitPrint` | function | `src/logging/userLogger.js:189` | Submit a &amp;quot;print&amp;quot; user-log event. |
 | `toAbsoluteUrl` | function | `src/logging/userLogger.js:82` | Make absolute using document.baseURI when available. |
-| `tzOffset` | function | `src/logging/userLogger.js:100` | Return timezone offset as &quot;+HH:MM&quot; or &quot;-HH:MM&quot;. |
+| `tzOffset` | function | `src/logging/userLogger.js:100` | Return timezone offset as &amp;quot;+HH:MM&amp;quot; or &amp;quot;-HH:MM&amp;quot;. |
 | `UserIdentity` | typedef | `src/logging/userLogger.js:31` |  |
 | `userLog` | constant | `src/logging/userLogger.js:306` | Export singleton instance. |
 | `analyzePageIntegrity` | function | `src/PerformanceMonitor.jsx:103` | Check the flat viewer page list for ordering mistakes that would be user-visible. |
@@ -673,9 +673,9 @@
 | `toMB` | function | `src/PerformanceMonitor.jsx:37` |  |
 | `PerformanceMonitor~updateMemory` | constant | `src/PerformanceMonitor.jsx:494` |  |
 | `CreateBundleResult` | typedef | `src/schemas/portableBundle.js:82` | Result object for createPortableBundle |
-| `createPortableBundle` | function | `src/schemas/portableBundle.js:343` | Convenience constructor: normalize → (optionally validate) → freeze. |
-| `extFromString` | function | `src/schemas/portableBundle.js:107` | Extract lowercase file extension from a string (best-effort). |
-| `freezePortableBundle` | function | `src/schemas/portableBundle.js:326` | Create a shallow, immutable copy of a normalized bundle (Object.freeze tree). |
+| `createPortableBundle` | function | `src/schemas/portableBundle.js:343` | Convenience constructor: normalize → \(optionally validate\) → freeze. |
+| `extFromString` | function | `src/schemas/portableBundle.js:107` | Extract lowercase file extension from a string \(best-effort\). |
+| `freezePortableBundle` | function | `src/schemas/portableBundle.js:326` | Create a shallow, immutable copy of a normalized bundle \(Object.freeze tree\). |
 | `normalizeDocumentEntry` | function | `src/schemas/portableBundle.js:225` | Normalize a single document entry. |
 | `normalizeDocumentFile` | function | `src/schemas/portableBundle.js:197` | Normalize a file entry. |
 | `normalizeMetadataAliasDetails` | function | `src/schemas/portableBundle.js:150` | Preserve a richer semantic alias object map without trying to deeply validate every property. |
@@ -687,19 +687,19 @@
 | `PortableDocumentEntry` | typedef | `src/schemas/portableBundle.js:53` | A single document entry containing one or more files. |
 | `PortableDocumentFile` | typedef | `src/schemas/portableBundle.js:39` | A single file reference inside a document. |
 | `PortableSession` | typedef | `src/schemas/portableBundle.js:31` | Session context for a bundle. |
-| `toObject` | function | `src/schemas/portableBundle.js:98` | Coerce unknown input to a plain object (or return null). |
-| `validatePortableBundle` | function | `src/schemas/portableBundle.js:283` | Validate a normalized (or raw) bundle. |
+| `toObject` | function | `src/schemas/portableBundle.js:98` | Coerce unknown input to a plain object \(or return null\). |
+| `validatePortableBundle` | function | `src/schemas/portableBundle.js:283` | Validate a normalized \(or raw\) bundle. |
 | `ValidateReport` | typedef | `src/schemas/portableBundle.js:74` | Validation report for a bundle. |
 | `BumpPostZoom` | typedef | `src/types/jsdoc-types.js:84` | Step the per-pane post-zoom by ±0.1. |
 | `DocumentRenderHandle` | typedef | `src/types/jsdoc-types.js:67` | Minimal imperative handle exposed by the page renderer for printing. |
 | `FallbackRenderer` | typedef | `src/types/jsdoc-types.js:58` | Render function signature for ErrorBoundary fallbacks. |
 | `PageDirection` | typedef | `src/types/jsdoc-types.js:52` | Direction token used by page timers / navigation. |
 | `PostZoomApi` | typedef | `src/types/jsdoc-types.js:91` | Per-pane post-zoom API that augments the document viewer hook. |
-| `RefLike` | typedef | `src/types/jsdoc-types.js:73` | Generic &quot;ref-like&quot; object (for places where React.MutableRefObject is too specific). |
-| `SetBooleanState` | typedef | `src/types/jsdoc-types.js:36` | React-like state setter for booleans: accepts a boolean or an updater (boolean)-&gt;boolean. |
-| `SetNumber` | typedef | `src/types/jsdoc-types.js:22` | Simple number setter (no updater function). |
-| `SetNumberState` | typedef | `src/types/jsdoc-types.js:7` | Generic React-like state setter for numbers: accepts either a number or an updater function (number)-&gt;number. |
-| `SetPageNumber` | typedef | `src/types/jsdoc-types.js:44` | React-like state setter for page number: accepts a number or an updater (number)-&gt;number. |
+| `RefLike` | typedef | `src/types/jsdoc-types.js:73` | Generic &amp;quot;ref-like&amp;quot; object \(for places where React.MutableRefObject is too specific\). |
+| `SetBooleanState` | typedef | `src/types/jsdoc-types.js:36` | React-like state setter for booleans: accepts a boolean or an updater \(boolean\)-&amp;gt;boolean. |
+| `SetNumber` | typedef | `src/types/jsdoc-types.js:22` | Simple number setter \(no updater function\). |
+| `SetNumberState` | typedef | `src/types/jsdoc-types.js:7` | Generic React-like state setter for numbers: accepts either a number or an updater function \(number\)-&amp;gt;number. |
+| `SetPageNumber` | typedef | `src/types/jsdoc-types.js:44` | React-like state setter for page number: accepts a number or an updater \(number\)-&amp;gt;number. |
 | `SetString` | typedef | `src/types/jsdoc-types.js:29` | Simple string setter. |
 | `SetStringNullable` | typedef | `src/types/jsdoc-types.js:15` | Setter for string-or-null values. |
 | `ZoomMode` | typedef | `src/types/jsdoc-types.js:79` | Sticky zoom modes used by the viewer. |
@@ -738,7 +738,7 @@
 | `buildAliasDetailRow` | function | `src/utils/documentMetadata.js:183` |  |
 | `buildAliasLabelsByFieldId` | function | `src/utils/documentMetadata.js:209` |  |
 | `buildDocumentMetadataMatrixView` | function | `src/utils/documentMetadata.js:341` | Build a session-wide metadata matrix with one row per document and one column per metadata field. |
-| `buildDocumentMetadataView` | function | `src/utils/documentMetadata.js:311` | Build a UI-friendly projection of one document's metadata. |
+| `buildDocumentMetadataView` | function | `src/utils/documentMetadata.js:311` | Build a UI-friendly projection of one document&#39;s metadata. |
 | `buildDocumentRows` | function | `src/utils/documentMetadata.js:293` |  |
 | `buildFieldPresentationHints` | function | `src/utils/documentMetadata.js:77` |  |
 | `buildRowsFromMetadataAliases` | function | `src/utils/documentMetadata.js:274` |  |
@@ -769,13 +769,13 @@
 | `resolveTier` | function | `src/utils/memoryProfile.js:52` |  |
 | `RuntimeMemoryProfile` | typedef | `src/utils/memoryProfile.js:12` |  |
 | `RuntimeMemoryTier` | typedef | `src/utils/memoryProfile.js:10` |  |
-| `clampPage` | function | `src/utils/navigationUtils.js:54` | Clamp a page number into [1, totalPages]. |
-| `handleFirstPage` | constant | `src/utils/navigationUtils.js:124` | Navigate to the first page (always sets page to 1). |
-| `handleLastPage` | constant | `src/utils/navigationUtils.js:149` | Navigate to the last page (no-op if totalPages invalid). |
-| `handleNextPage` | constant | `src/utils/navigationUtils.js:94` | Navigate to the next page (no-op if already at the last page). |
-| `handlePrevPage` | constant | `src/utils/navigationUtils.js:69` | Navigate to the previous page (no-op if already at page 1). |
-| `isValidTotalPages` | function | `src/utils/navigationUtils.js:43` | Check whether totalPages looks valid (&gt;= 1). |
-| `toPositiveInt` | function | `src/utils/navigationUtils.js:31` | Coerce a value to a positive integer (minimum 1). |
+| `clampPage` | function | `src/utils/navigationUtils.js:54` | Clamp a page number into \[1, totalPages\]. |
+| `handleFirstPage` | constant | `src/utils/navigationUtils.js:124` | Navigate to the first page \(always sets page to 1\). |
+| `handleLastPage` | constant | `src/utils/navigationUtils.js:149` | Navigate to the last page \(no-op if totalPages invalid\). |
+| `handleNextPage` | constant | `src/utils/navigationUtils.js:94` | Navigate to the next page \(no-op if already at the last page\). |
+| `handlePrevPage` | constant | `src/utils/navigationUtils.js:69` | Navigate to the previous page \(no-op if already at page 1\). |
+| `isValidTotalPages` | function | `src/utils/navigationUtils.js:43` | Check whether totalPages looks valid \(&amp;gt;= 1\). |
+| `toPositiveInt` | function | `src/utils/navigationUtils.js:31` | Coerce a value to a positive integer \(minimum 1\). |
 | `createTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:17` |  |
 | `getTrackedObjectUrlCount` | function | `src/utils/objectUrlRegistry.js:61` |  |
 | `isTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:51` | Check whether a blob/object URL is still tracked as live by the viewer. |
@@ -921,7 +921,7 @@
 | `throwIfAborted` | function | `src/utils/pdfWorkerDispatcher.js:101` |  |
 | `escapeMetaName` | function | `src/utils/performanceOverlayFlag.js:14` |  |
 | `isPerformanceOverlayEnabled` | function | `src/utils/performanceOverlayFlag.js:72` | Determine whether the diagnostics/performance overlay is enabled. |
-| `readRuntimeBooleanFlag` | function | `src/utils/performanceOverlayFlag.js:34` | Resolve a boolean flag from (precedence order): window. |
+| `readRuntimeBooleanFlag` | function | `src/utils/performanceOverlayFlag.js:34` | Resolve a boolean flag from \(precedence order\): window. |
 | `collectAllPrintableDataUrlsFromDom` | function | `src/utils/printCore.js:379` | Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list. |
 | `createHiddenIframe` | function | `src/utils/printCore.js:230` | Create the temporary hidden iframe used as the print document host. |
 | `getODVConfig` | function | `src/utils/printCore.js:189` | Read runtime configuration from the globals populated by public/odv.config.js . |
@@ -934,16 +934,16 @@
 | `HiddenIframe` | typedef | `src/utils/printCore.js:84` | Return type for the hidden-iframe factory. |
 | `isVisiblyMeasurable` | function | `src/utils/printCore.js:98` | Check whether a candidate element is both present in layout and not hidden by basic CSS visibility. |
 | `PageRange` | typedef | `src/utils/printCore.js:45` | A 1-based inclusive page range. |
-| `pickLargestVisibleElement` | function | `src/utils/printCore.js:115` | Best-effort: pick the largest visible or inside a container (or document). |
-| `PrintAllOptions` | typedef | `src/utils/printCore.js:52` | Options for printing multiple pages (all/range/sequence). |
-| `PrintCandidate` | typedef | `src/utils/printCore.js:65` | Internal: candidate node for &quot;largest visible&quot; heuristics. |
-| `PrintHeaderCfg` | typedef | `src/utils/printCore.js:72` | Print header config (runtime) consumed by the print overlay logic. |
+| `pickLargestVisibleElement` | function | `src/utils/printCore.js:115` | Best-effort: pick the largest visible or inside a container \(or document\). |
+| `PrintAllOptions` | typedef | `src/utils/printCore.js:52` | Options for printing multiple pages \(all/range/sequence\). |
+| `PrintCandidate` | typedef | `src/utils/printCore.js:65` | Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics. |
+| `PrintHeaderCfg` | typedef | `src/utils/printCore.js:72` | Print header config \(runtime\) consumed by the print overlay logic. |
 | `PrintOptions` | typedef | `src/utils/printCore.js:32` | Options for single-page printing. |
 | `resolveActiveNode` | function | `src/utils/printCore.js:212` | Attempt to resolve the currently active visual node to print. |
-| `resolveAllPageDataUrls` | function | `src/utils/printCore.js:398` | Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection. |
-| `resolveOrientation` | function | `src/utils/printCore.js:175` | Compute page orientation from dimensions when options.orientation === 'auto'. |
+| `resolveAllPageDataUrls` | function | `src/utils/printCore.js:398` | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
+| `resolveOrientation` | function | `src/utils/printCore.js:175` | Compute page orientation from dimensions when options.orientation === &#39;auto&#39;. |
 | `buildOverlayElement` | function | `src/utils/printDom.js:223` | Build a header/footer DIV element for a page using config + tokens. |
-| `buildPrintCss` | function | `src/utils/printDom.js:130` | Build the print-only CSS string (inlined within the print iframe). |
+| `buildPrintCss` | function | `src/utils/printDom.js:130` | Build the print-only CSS string \(inlined within the print iframe\). |
 | `buildPrintFormatElements` | function | `src/utils/printDom.js:264` | Build configured print-format header/watermark elements for a page. |
 | `enabled` | function | `src/utils/printDom.js:119` |  |
 | `ensureBody` | function | `src/utils/printDom.js:198` |  |
@@ -953,15 +953,15 @@
 | `normalizeNonNegativeNumber` | function | `src/utils/printDom.js:71` | Normalize an unknown configuration value to a non-negative number. |
 | `normalizePageOrientation` | function | `src/utils/printDom.js:102` |  |
 | `normalizeTrustedExtraCss` | function | `src/utils/printDom.js:111` |  |
-| `populateBodyAndPrint` | function | `src/utils/printDom.js:338` | Attach pages and images into the (cleared) body, wait for image terminal states, then print. |
-| `PrintOverlayCfg` | typedef | `src/utils/printDom.js:20` | Print overlay config (runtime) consumed by the print overlay logic. |
+| `populateBodyAndPrint` | function | `src/utils/printDom.js:338` | Attach pages and images into the \(cleared\) body, wait for image terminal states, then print. |
+| `PrintOverlayCfg` | typedef | `src/utils/printDom.js:20` | Print overlay config \(runtime\) consumed by the print overlay logic. |
 | `renderMultiDocument` | function | `src/utils/printDom.js:442` | Render a multi-page print document in the given print iframe document. |
 | `renderSingleDocument` | function | `src/utils/printDom.js:413` | Render a single-page print document in the given print iframe document. |
 | `shouldApplyOverlay` | function | `src/utils/printDom.js:92` |  |
 | `TokenContext` | typedef | `src/utils/printDom.js:32` | Token context used by templates. |
 | `tr` | function | `src/utils/printDom.js:58` | Tiny helper to translate with safe fallback. |
 | `waitForImagesToLoad` | function | `src/utils/printDom.js:300` |  |
-| `parsePrintSequence` | function | `src/utils/printParse.js:48` | Parse &quot;Custom pages&quot; into a sequence. |
+| `parsePrintSequence` | function | `src/utils/printParse.js:48` | Parse &amp;quot;Custom pages&amp;quot; into a sequence. |
 | `ParseResult` | typedef | `src/utils/printParse.js:15` | Result of parsing a custom pages string. |
 | `tr` | function | `src/utils/printParse.js:30` | Tiny helper to translate with safe fallback. |
 | `addImageWithFallback` | function | `src/utils/printPdf.js:969` |  |
@@ -1058,7 +1058,7 @@
 | `yieldToBrowser` | function | `src/utils/printPdf.js:277` | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
 | `isSafeImageSrc` | function | `src/utils/printSanitize.js:16` | Allow-list image sources used for printing. |
 | `applyBraceTokensEscaped` | function | `src/utils/printTemplate.js:649` |  |
-| `applyConditionalBlocks` | function | `src/utils/printTemplate.js:720` | Resolve conditional blocks of the form [[{{path}}, &quot;content&quot;]]. |
+| `applyConditionalBlocks` | function | `src/utils/printTemplate.js:720` | Resolve conditional blocks of the form \[\[{{path}}, &amp;quot;content&amp;quot;\]\]. |
 | `applyLegacyTokensEscaped` | function | `src/utils/printTemplate.js:749` | Expand legacy ${...} tokens. |
 | `applyTemplateTokensEscaped` | function | `src/utils/printTemplate.js:798` | Perform safe token substitution for print templates. |
 | `buildMetadataTokenMap` | function | `src/utils/printTemplate.js:326` | Build a generic metadata lookup map from raw metadata, aliases and details. |
@@ -1069,7 +1069,7 @@
 | `findCaseInsensitiveKey` | function | `src/utils/printTemplate.js:222` |  |
 | `findFirstPresentText` | function | `src/utils/printTemplate.js:208` | Return the first present text value from an iterable collection. |
 | `formatDateTokens` | function | `src/utils/printTemplate.js:105` | Format the built-in print date tokens. |
-| `getByPath` | function | `src/utils/printTemplate.js:252` | Resolve a dotted-path property from an object (e.g., &quot;doc.title&quot;). |
+| `getByPath` | function | `src/utils/printTemplate.js:252` | Resolve a dotted-path property from an object \(e.g., &amp;quot;doc.title&amp;quot;\). |
 | `hasPrintableValue` | function | `src/utils/printTemplate.js:143` | Treat null-like host values as absent so conditional blocks suppress their whole label/value pair. |
 | `isPlainObject` | function | `src/utils/printTemplate.js:123` |  |
 | `isPresentText` | function | `src/utils/printTemplate.js:199` | Test whether optionalText returned a usable string. |
@@ -1241,28 +1241,28 @@
 | `setDefaultZoomModePreference` | function | `src/utils/viewerPreferences.js:369` |  |
 | `setLanguagePreference` | function | `src/utils/viewerPreferences.js:327` |  |
 | `setPrintDefaultModePreference` | function | `src/utils/viewerPreferences.js:345` |  |
-| `setThemeModePreference` | function | `src/utils/viewerPreferences.js:297` | Persist the user's theme mode preference. |
+| `setThemeModePreference` | function | `src/utils/viewerPreferences.js:297` | Persist the user&#39;s theme mode preference. |
 | `setThemePreference` | function | `src/utils/viewerPreferences.js:270` |  |
 | `setViewerPreferences` | function | `src/utils/viewerPreferences.js:219` |  |
 | `ViewerPreferences` | typedef | `src/utils/viewerPreferences.js:24` |  |
 | `writePreferencesToCookie` | function | `src/utils/viewerPreferences.js:186` |  |
 | `writePreferencesToStorage` | function | `src/utils/viewerPreferences.js:199` |  |
-| `applyZoom` | function | `src/utils/zoomUtils.js:140` | Set a new zoom value using the provided setter, clamped to [MIN_ZOOM, MAX_ZOOM]. |
+| `applyZoom` | function | `src/utils/zoomUtils.js:140` | Set a new zoom value using the provided setter, clamped to \[MIN_ZOOM, MAX_ZOOM\]. |
 | `calculateFitToScreenZoom` | function | `src/utils/zoomUtils.js:160` | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | `calculateFitToWidthZoom` | function | `src/utils/zoomUtils.js:200` | Calculate and set a zoom that fits the render surface width within the pane viewport. |
-| `clamp` | function | `src/utils/zoomUtils.js:43` | Clamp a numeric value into the inclusive range [min, max]. |
+| `clamp` | function | `src/utils/zoomUtils.js:43` | Clamp a numeric value into the inclusive range \[min, max\]. |
 | `getRenderableSize` | function | `src/utils/zoomUtils.js:95` | Read the intrinsic size of the active render surface. |
 | `getViewport` | function | `src/utils/zoomUtils.js:80` | Resolve an exact viewport element from either a DOM node or a React-like ref. |
 | `getViewportSize` | function | `src/utils/zoomUtils.js:126` | Read the exact client viewport available to the rendered pane. |
-| `handleZoomIn` | function | `src/utils/zoomUtils.js:245` | Increase the zoom level by 10% (multiplicative), clamped to the safe range. |
-| `handleZoomOut` | function | `src/utils/zoomUtils.js:260` | Decrease the zoom level by ~9.09% (inverse of +10%), clamped to the safe range. |
+| `handleZoomIn` | function | `src/utils/zoomUtils.js:245` | Increase the zoom level by 10% \(multiplicative\), clamped to the safe range. |
+| `handleZoomOut` | function | `src/utils/zoomUtils.js:260` | Decrease the zoom level by ~9.09% \(inverse of +10%\), clamped to the safe range. |
 | `hasValidDimensions` | function | `src/utils/zoomUtils.js:60` |  |
 | `isPositiveFiniteNumber` | function | `src/utils/zoomUtils.js:51` |  |
-| `MAX_ZOOM` | constant | `src/utils/zoomUtils.js:15` | Maximum allowed zoom factor (800%). |
-| `MIN_ZOOM` | constant | `src/utils/zoomUtils.js:13` | Minimum allowed zoom factor (5%). |
+| `MAX_ZOOM` | constant | `src/utils/zoomUtils.js:15` | Maximum allowed zoom factor \(800%\). |
+| `MIN_ZOOM` | constant | `src/utils/zoomUtils.js:13` | Minimum allowed zoom factor \(5%\). |
 | `normalizeOptionalFactor` | function | `src/utils/zoomUtils.js:69` |  |
 | `ZOOM_CHANGE_THRESHOLD` | constant | `src/utils/zoomUtils.js:21` | Treat zoom deltas smaller than this as unchanged to avoid redundant React updates. |
-| `ZOOM_IN_MULTIPLIER` | constant | `src/utils/zoomUtils.js:17` | Zoom-in multiplier: each click increases zoom by 10% of the current zoom level (1.1x). |
+| `ZOOM_IN_MULTIPLIER` | constant | `src/utils/zoomUtils.js:17` | Zoom-in multiplier: each click increases zoom by 10% of the current zoom level \(1.1x\). |
 | `ZOOM_OUT_MULTIPLIER` | constant | `src/utils/zoomUtils.js:19` | Zoom-out multiplier: inverse of +10%, approximately a 9.09% decrease. |
 | `ZoomCalcOptions` | typedef | `src/utils/zoomUtils.js:23` | Optional calculation overrides. |
 | `createFallbackMainThreadError` | function | `src/workers/imageWorker.js:43` | Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread. |
