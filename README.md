@@ -7,6 +7,7 @@ The codebase now has four documentation layers:
 - `README.md` — product-level overview, setup, deployment, and developer workflow
 - `CONTRIBUTING.md` — repository conventions, naming rules, and review checklist
 - `AGENTS.md` and `docs-src/CODEX_DEVELOPMENT.md` — compact instructions for Codex and other coding agents
+- `docs-agent/` — generated AI-agent orientation packet from AgentDocMap
 - `docs-src/` — deeper architecture and runtime-configuration notes for maintainers
 
 ---
@@ -15,6 +16,7 @@ The codebase now has four documentation layers:
 
 - [Features](#features)
 - [Documentation map](#documentation-map)
+- [AI agent documentation](#ai-agent-documentation)
 - [Architecture overview](#architecture-overview)
 - [Bootstrap modes](#bootstrap-modes)
 - [Requirements](#requirements)
@@ -94,6 +96,32 @@ Use the following files depending on what you are trying to understand:
   - rationale for the high-memory, fast-feeling customer profile bundled in this build
 - `src/types/jsdoc-types.js`
   - shared JSDoc-only callback/type aliases used across the UI
+
+---
+
+## AI agent documentation
+
+OpenDocViewer includes a generated AI-agent documentation packet under
+`docs-agent/`. It is generated from the existing JSDoc comments and source
+structure with AgentDocMap, without requiring AgentDocMap-specific annotations
+in application code.
+
+AI agents should start with:
+
+1. `docs-agent/AGENT_CONTEXT.md`
+2. `docs-agent/MODULES.md`
+3. `docs-agent/ENTRYPOINTS.md`
+4. `docs-agent/DEPENDENCIES.md`
+5. `docs-agent/FILE_MAP.md` for the area being changed
+
+Regenerate the packet when source structure, public JSDoc, dependencies, or
+major module responsibilities change:
+
+```bash
+npm run doc:agent
+```
+
+See `docs-src/agent-documentation.md` for the full workflow.
 
 ---
 
@@ -183,9 +211,15 @@ npm run preview
 
 # JSDoc site (generated into ./docs/)
 npm run doc
+
+# AI-agent documentation packet (generated into ./docs-agent/)
+npm run doc:agent
 ```
 
-The generated JSDoc output is not intended to be committed. The hand-written source documentation lives in `README.md`, `CONTRIBUTING.md`, and `docs-src/`.
+The generated JSDoc output is not intended to be committed. The generated
+`docs-agent/` packet is intentionally committed so AI agents can orient quickly
+without first running tooling. The hand-written source documentation lives in
+`README.md`, `CONTRIBUTING.md`, and `docs-src/`.
 
 ---
 
@@ -199,11 +233,14 @@ npm audit --audit-level=low
 npm run lint
 npm run build
 npm run doc
+npm run doc:agent
 ```
 
 The final pre-release commit is the same shape for patch, minor, and major releases:
 
 - Include all intended application changes, dependency/lockfile changes, source documentation, and `SECURITY.md` updates.
+- Include regenerated `docs-agent/` output when source structure, JSDoc,
+  dependencies, or major module responsibilities changed.
 - Make sure `SECURITY.md` already names the version that is about to be released in both `Supported Versions` and `Recent release context`.
 - Keep generated output such as `dist/` and `docs/` out of the commit unless a specific release process explicitly asks for it.
 - Leave `package.json` and `package-lock.json` at the current version until the release helper runs; `release.ps1` owns the npm version commit and Git tag.

@@ -43,6 +43,9 @@ logs/
 # consider using a dedicated branch or an explicit workflow instead of committing here.
 docs/
 
+# Generated AI-agent documentation from AgentDocMap is intentionally tracked in
+# docs-agent/ so agents can orient before running local tooling.
+
 # Test coverage outputs (if enabled later)
 coverage/
 .nyc_output/

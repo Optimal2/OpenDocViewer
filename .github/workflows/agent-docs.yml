@@ -1,0 +1,47 @@
+name: Agent Documentation
+
+on:
+  push:
+    branches: ['**']
+    tags: ['v*.*.*']
+  pull_request:
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  validate-agent-docs:
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Check out OpenDocViewer
+        uses: actions/checkout@v4
+        with:
+          path: OpenDocViewer
+
+      - name: Check out AgentDocMap
+        uses: actions/checkout@v4
+        with:
+          repository: Optimal2/AgentDocMap
+          path: AgentDocMap
+
+      - name: Use Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '22.18.0'
+          cache: 'npm'
+          cache-dependency-path: AgentDocMap/package-lock.json
+          registry-url: 'https://registry.npmjs.org'
+
+      - name: Install AgentDocMap dependencies
+        working-directory: AgentDocMap
+        run: npm ci --no-audit --fund=false
+
+      - name: Regenerate agent documentation
+        working-directory: OpenDocViewer
+        run: npm run doc:agent -- --agentdocmap-root ../AgentDocMap
+
+      - name: Verify committed agent documentation is current
+        working-directory: OpenDocViewer
+        run: git diff --exit-code -- docs-agent
