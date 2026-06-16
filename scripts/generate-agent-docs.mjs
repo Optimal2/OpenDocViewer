@@ -27,13 +27,17 @@ function parseArgs(argv) {
     ['--source-metadata', 'sourceMetadata'],
   ]);
 
-  for (let i = 0; i < argv.length; i += 1) {
+  let i = 0;
+  while (i < argv.length) {
     const arg = argv[i];
     if (valueOptions.has(arg)) {
       options[valueOptions.get(arg)] = readOptionValue(argv, i, arg);
-      i += 1;
+      i += 2;
+      continue;
     } else if (arg === '-h' || arg === '--help') {
       options.help = true;
+      i += 1;
+      continue;
     } else {
       throw new Error(`Unknown argument: ${arg}`);
     }
@@ -127,7 +131,16 @@ function main() {
 }
 
 function formatCommand(args) {
-  return JSON.stringify(args);
+  return args.map(formatCommandArgument).join(' ');
+}
+
+function formatCommandArgument(value) {
+  const text = String(value ?? '');
+  if (/^[A-Za-z0-9_./:=@-]+$/.test(text)) {
+    return text;
+  }
+
+  return JSON.stringify(text);
 }
 
 try {
