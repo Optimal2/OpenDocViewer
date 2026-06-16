@@ -116,7 +116,7 @@ function main() {
     throw result.error;
   }
 
-  if (result.status !== 0) {
+  if (result.status !== null && result.status !== 0) {
     throw new Error(`AgentDocMap exited with code ${result.status}.`);
   }
 }

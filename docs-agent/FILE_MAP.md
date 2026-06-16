@@ -7,7 +7,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `server/system-log-server.js` | 237 | 0 | 5 | Token auth middleware |
 | `server/user-log-server.js` | 271 | 0 | 2 | Resolve user identity without cookies. |
 | `src/app/AppBootstrap.jsx` | 432 | 1 | 10 | Session metadata for a bundle. |
-| `src/app/bootConfig.js` | 106 | 0 | 5 | Return the application base path (always with a trailing slash) derived from the current page URL. |
+| `src/app/bootConfig.js` | 106 | 0 | 5 | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
 | `src/app/OpenDocViewer.jsx` | 193 | 1 | 5 | OpenDocViewer — Top-level component. |
 | `src/components/CanvasRenderer.jsx` | 84 | 1 | 1 | CanvasRenderer component. |
 | `src/components/common/StatusLed.jsx` | 36 | 2 | 1 | Exports StatusLed. |
@@ -24,7 +24,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentMetadataOverlayDialog.jsx` | 191 | 1 | 2 | Exports DocumentMetadataOverlayDialog. |
 | `src/components/DocumentRender.jsx` | 1074 | 1 | 24 | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
 | `src/components/DocumentSelectionPanel.jsx` | 335 | 0 | 2 | Exports DocumentSelectionPanel. |
-| `src/components/DocumentThumbnailList.jsx` | 1364 | 1 | 25 | Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1. |
+| `src/components/DocumentThumbnailList.jsx` | 1364 | 1 | 25 | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
 | `src/components/DocumentToolbar/AboutOverlayDialog.jsx` | 463 | 1 | 3 | Exports AboutOverlayDialog. |
 | `src/components/DocumentToolbar/DocumentToolbar.jsx` | 2126 | 1 | 31 | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | `src/components/DocumentToolbar/HelpMenuButton.jsx` | 109 | 1 | 2 | Exports HelpMenuButton. |
@@ -37,15 +37,15 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentToolbar/ThemeMenuButton.jsx` | 166 | 1 | 5 | Exports ThemeMenuButton. |
 | `src/components/DocumentToolbar/ThemeToggleButton.jsx` | 55 | 0 | 0 | Exports ThemeToggleButton. |
 | `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` | 362 | 1 | 8 | Run async work with bounded concurrency. |
-| `src/components/DocumentToolbar/usePrintRangeDialog.js` | 828 | 1 | 23 | Read the runtime configuration (merged defaults + site overrides). |
+| `src/components/DocumentToolbar/usePrintRangeDialog.js` | 828 | 1 | 23 | Read the runtime configuration \(merged defaults + site overrides\). |
 | `src/components/DocumentToolbar/ZoomButtons.jsx` | 508 | 1 | 1 | Parse a percent-like string safely. |
-| `src/components/DocumentViewer/CompareZoomOverlay.jsx` | 100 | 1 | 1 | CompareZoomOverlay Presentational-only (no state). |
+| `src/components/DocumentViewer/CompareZoomOverlay.jsx` | 100 | 1 | 1 | CompareZoomOverlay Presentational-only \(no state\). |
 | `src/components/DocumentViewer/DocumentViewer.jsx` | 593 | 0 | 4 | Exports DocumentViewer. |
 | `src/components/DocumentViewer/DocumentViewerRender.jsx` | 1051 | 1 | 17 | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | `src/components/DocumentViewer/DocumentViewerThumbnails.jsx` | 222 | 1 | 1 | Exports DocumentViewerThumbnails. |
 | `src/components/DocumentViewer/DocumentViewerToolbar.jsx` | 418 | 1 | 5 | Renders the toolbar for the document viewer by delegating to . |
 | `src/components/DocumentViewer/hooks/useViewerEffects.js` | 557 | 1 | 18 | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
-| `src/components/DocumentViewer/hooks/useViewerPostZoom.js` | 86 | 1 | 7 | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode. |
+| `src/components/DocumentViewer/hooks/useViewerPostZoom.js` | 86 | 1 | 7 | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
 | `src/components/DocumentViewer/useDocumentViewer.js` | 1690 | 1 | 53 | Hook that centralizes viewer UI state and event handlers. |
 | `src/components/ImageRenderer.jsx` | 121 | 1 | 2 | ImageRenderer component. |
 | `src/components/LoadingMessage.jsx` | 90 | 1 | 1 | LoadingMessage component. |
@@ -57,7 +57,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/contexts/ThemeProvider.jsx` | 202 | 1 | 11 | ThemeProvider component to manage and provide theme-related state and functions. |
 | `src/contexts/viewerContext.js` | 207 | 10 | 9 | Exports ViewerContext. |
 | `src/contexts/ViewerProvider.jsx` | 2551 | 1 | 58 | Record that a page now has a reusable full-size asset available. |
-| `src/ErrorBoundary.jsx` | 297 | 1 | 12 | Tiny helper to translate with safe fallback (NS: 'common'). |
+| `src/ErrorBoundary.jsx` | 297 | 1 | 12 | Tiny helper to translate with safe fallback \(NS: &#39;common&#39;\). |
 | `src/hooks/useAcceleratingHoldRepeat.js` | 210 | 2 | 1 | Exports useAcceleratingHoldRepeat. |
 | `src/hooks/useNavigationModifierState.js` | 109 | 1 | 8 | Exports useNavigationModifierState. |
 | `src/hooks/usePageNavigation.js` | 182 | 0 | 8 | Custom hook to handle document page navigation with keyboard/mouse. |
@@ -71,17 +71,17 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/integrations/sessionUrl.js` | 157 | 1 | 3 | Read and fetch a session payload URL from the viewer query string. |
 | `src/integrations/urlParams.js` | 110 | 1 | 5 | Reads common query params used by the demo and other hosts. |
 | `src/integrations/viewerEvents.js` | 192 | 0 | 8 | Emit a namespaced OpenDocViewer event with an optional detail payload. |
-| `src/logging/systemLogger.js` | 432 | 35 | 29 | Export a singleton instance (sufficient for app usage). |
+| `src/logging/systemLogger.js` | 432 | 35 | 29 | Export a singleton instance \(sufficient for app usage\). |
 | `src/logging/userLogger.js` | 308 | 1 | 17 | Export singleton instance. |
 | `src/PerformanceMonitor.jsx` | 1346 | 1 | 20 | PerformanceMonitor component. |
 | `src/schemas/portableBundle.js` | 363 | 0 | 18 | Schema version of this portable bundle definition. |
-| `src/types/jsdoc-types.js` | 101 | 0 | 13 | Generic React-like state setter for numbers: accepts either a number or an updater function (number)-&gt;number. |
+| `src/types/jsdoc-types.js` | 101 | 0 | 13 | Generic React-like state setter for numbers: accepts either a number or an updater function \(number\)-&amp;gt;number. |
 | `src/utils/documentLoadingConfig.js` | 1045 | 12 | 32 | Count PDF pages in a page descriptor list. |
-| `src/utils/documentMetadata.js` | 404 | 3 | 18 | Build a UI-friendly projection of one document's metadata. |
+| `src/utils/documentMetadata.js` | 404 | 3 | 18 | Build a UI-friendly projection of one document&#39;s metadata. |
 | `src/utils/idUtils.js` | 64 | 1 | 4 | Create an opaque identifier fragment suitable for synthetic keys and document ids. |
 | `src/utils/localizedValue.js` | 113 | 6 | 6 | Return the best string for the active language. |
 | `src/utils/memoryProfile.js` | 75 | 1 | 6 | Exports getRuntimeMemoryProfile. |
-| `src/utils/navigationUtils.js` | 172 | 1 | 7 | Navigate to the previous page (no-op if already at page 1). |
+| `src/utils/navigationUtils.js` | 172 | 1 | 7 | Navigate to the previous page \(no-op if already at page 1\). |
 | `src/utils/objectUrlRegistry.js` | 72 | 1 | 6 | Check whether a blob/object URL is still tracked as live by the viewer. |
 | `src/utils/pageAssetRenderer.js` | 850 | 2 | 5 | Render a PDF page set through the PDF worker pool as one partitioned batch. |
 | `src/utils/pageAssetStore.js` | 746 | 1 | 33 | Update runtime thresholds for the active session. |
@@ -92,10 +92,10 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/pdfPrebuildPlan.js` | 343 | 2 | 17 | Return the language dependency that should invalidate an all-pages prebuild run. |
 | `src/utils/pdfPrintCacheKey.js` | 117 | 4 | 8 | Compare the content-affecting print settings that determine whether an existing generated PDF can be reused. |
 | `src/utils/pdfWorkerDispatcher.js` | 451 | 2 | 18 | Pick a conservative future batch size from a pages-per-worker target. |
-| `src/utils/performanceOverlayFlag.js` | 86 | 2 | 3 | Resolve a boolean flag from (precedence order): window. |
+| `src/utils/performanceOverlayFlag.js` | 86 | 2 | 3 | Resolve a boolean flag from \(precedence order\): window. |
 | `src/utils/printCore.js` | 569 | 1 | 20 | Handles the print functionality for the CURRENT page/image. |
 | `src/utils/printDom.js` | 462 | 1 | 19 | Render a single-page print document in the given print iframe document. |
-| `src/utils/printParse.js` | 100 | 1 | 3 | Parse &quot;Custom pages&quot; into a sequence. |
+| `src/utils/printParse.js` | 100 | 1 | 3 | Parse &amp;quot;Custom pages&amp;quot; into a sequence. |
 | `src/utils/printPdf.js` | 2174 | 3 | 92 | Build a PDF blob from page image URLs and print metadata. |
 | `src/utils/printSanitize.js` | 23 | 3 | 1 | Allow-list image sources used for printing. |
 | `src/utils/printTemplate.js` | 809 | 3 | 34 | Resolve the configured copy/print-format marker text consistently across print backends. |
@@ -108,7 +108,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/runtimeConfig.js` | 363 | 13 | 21 | Read the merged runtime configuration from the browser environment. |
 | `src/utils/sourceTempStore.js` | 913 | 1 | 40 | Update runtime thresholds for the active session. |
 | `src/utils/supportDiagnostics.js` | 370 | 3 | 18 | Download a JSON diagnostics payload in browser environments. |
-| `src/utils/viewerPreferences.js` | 473 | 5 | 33 | Persist the user's theme mode preference. |
+| `src/utils/viewerPreferences.js` | 473 | 5 | 33 | Persist the user&#39;s theme mode preference. |
 | `src/utils/zoomUtils.js` | 268 | 1 | 18 | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | `src/workers/imageWorker.js` | 488 | 0 | 1 | Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread. |
 | `src/workers/pdfPageWorker.js` | 433 | 0 | 1 | Defines createFallbackMainThreadError, getWorkerEnvironmentDiagnostics, serializeError, fitScale, normalizeThumbnailBound. |
