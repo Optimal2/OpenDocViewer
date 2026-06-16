@@ -590,7 +590,8 @@
 }
 
 .print-selection-tile:hover .print-selection-tile-preview,
-.print-selection-tile:focus-within .print-selection-tile-preview {
+.print-selection-tile:focus-visible .print-selection-tile-preview,
+.print-selection-tile-preview:focus-visible {
   opacity: 1;
 }
 
@@ -627,6 +628,13 @@
 .print-selection-metric-badge.position-top-left {
   top: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
   left: clamp(2px, calc(var(--print-selection-thumb-size, 92px) / 22), 5px);
+}
+
+.print-selection-metric-badge.metric-context-page {
+  border-color: color-mix(in srgb, var(--primary-color) 52%, rgba(255, 255, 255, 0.72) 48%);
+  background: color-mix(in srgb, var(--primary-color) 82%, #fff 18%);
+  color: #fff;
+  box-shadow: 0 1px 4px rgba(15, 23, 42, 0.22);
 }
 
 .print-selection-metric-badge.position-bottom-left {

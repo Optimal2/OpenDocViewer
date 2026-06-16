@@ -11,7 +11,7 @@
  * - report the selected bootstrap mode back to `AppBootstrap`
  */
 
-import { readFromParent } from './parentBridge.js';
+import { readFromRelatedWindow } from './parentBridge.js';
 import { readFromSessionToken } from './sessionToken.js';
 import { hasSessionUrlParameter, readFromSessionUrl } from './sessionUrl.js';
 import { readFromUrlParams } from './urlParams.js';
@@ -257,7 +257,7 @@ export async function bootstrapDetect(options = {}) {
     if (parentProbed) return parent;
     parentProbed = true;
     try {
-      parent = readFromParent();
+      parent = readFromRelatedWindow();
     } catch {
       parent = null;
     }
@@ -338,7 +338,7 @@ export async function bootstrapDetect(options = {}) {
     };
   }
 
-  // 2) Parent page (same-origin bridge)
+  // 2) Related window (same-origin parent frame or opener tab)
   try {
     const parentCandidate = probeParent();
     if (parentCandidate?.data) {
@@ -354,7 +354,7 @@ export async function bootstrapDetect(options = {}) {
           bundle,
           debugInfo: makeDebugInfo(
             ODV_BOOTSTRAP_MODES.PARENT_PAGE,
-            String(parentCandidate.source || 'parent'),
+            String(parentCandidate.source || 'related-window'),
             parentPayload.payload,
             diagnosticsEnabled,
             parentPayload.filterInfo
