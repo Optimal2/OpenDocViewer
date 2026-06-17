@@ -61,7 +61,7 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedSt
         aria-label={t('help.open', { defaultValue: 'Open help menu' })}
         title={t('help.open', { defaultValue: 'Open help menu' })}
         aria-haspopup="menu"
-        aria-controls={menuId}
+        aria-controls={open ? menuId : undefined}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >

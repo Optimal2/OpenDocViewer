@@ -116,7 +116,7 @@ const ThemeMenuButton = ({ className = '' }) => {
           defaultValue: `Theme: ${currentLabel}`,
         })}
         aria-haspopup="menu"
-        aria-controls={menuId}
+        aria-controls={open ? menuId : undefined}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >

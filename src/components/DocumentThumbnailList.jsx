@@ -402,7 +402,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       ? t('thumbnails.goToPageRightPane', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber} (right pane)` })
       : isPrimarySelected
         ? t('thumbnails.goToPageLeftPane', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber} (left pane)` })
-        : t('thumbnails.goToPage', { page: visiblePageNumber });
+        : t('thumbnails.goToPage', { page: visiblePageNumber, defaultValue: `Go to page ${visiblePageNumber}` });
 
   const rowTitle = documentContext.hasMultipleDocuments
     ? `${navigationTitle} — ${metricTitles.combinedTitle}`
@@ -485,7 +485,10 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           {thumbnailStatus === -1 && (
             <img
               src={getPublicAssetUrl('lost.png')}
-              alt={t('thumbnails.pageFailedAlt', { page: visiblePageNumber })}
+              alt={t('thumbnails.pageFailedAlt', {
+                page: visiblePageNumber,
+                defaultValue: `Page ${visiblePageNumber} failed to load`,
+              })}
               className="thumbnail"
               decoding="async"
               draggable={false}
@@ -494,7 +497,10 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
           {thumbnailStatus === 1 && thumbnailUrl && (
             <img
               src={thumbnailUrl}
-              alt={t('viewer.pageAlt', { page: visiblePageNumber })}
+              alt={t('viewer.pageAlt', {
+                page: visiblePageNumber,
+                defaultValue: `Page ${visiblePageNumber}`,
+              })}
               className="thumbnail"
               decoding="async"
               draggable={false}
@@ -1187,7 +1193,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       className="thumbnails-container"
       ref={setContainerRef}
       role="listbox"
-      aria-label={t('thumbnails.aria.container')}
+      aria-label={t('thumbnails.aria.container', { defaultValue: 'Document thumbnails' })}
       aria-activedescendant={activeDescendantId}
       onScroll={handleScroll}
       style={{

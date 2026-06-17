@@ -17,7 +17,7 @@ import { useTranslation } from 'react-i18next';
 import ThemeContext from '../../contexts/themeContext.js';
 
 const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
-  const { t } = useTranslation();
+  const { t } = useTranslation('common');
   const ctx = useContext(ThemeContext);
   const theme = (ctx?.theme === 'dark' || ctx?.theme === 'light') ? ctx.theme : 'light';
   const doToggle = toggleTheme || ctx?.toggleTheme;
@@ -26,8 +26,12 @@ const ThemeToggleButton = ({ toggleTheme, className = '' }) => {
 
   const labels = useMemo(() => {
     return {
-      aria: isDark ? t('toolbar.theme.switchToLight') : t('toolbar.theme.switchToDark'),
-      title: isDark ? t('toolbar.theme.switchToLight') : t('toolbar.theme.switchToDark'),
+      aria: isDark
+        ? t('toolbar.theme.switchToLight', { defaultValue: 'Switch to light theme' })
+        : t('toolbar.theme.switchToDark', { defaultValue: 'Switch to dark theme' }),
+      title: isDark
+        ? t('toolbar.theme.switchToLight', { defaultValue: 'Switch to light theme' })
+        : t('toolbar.theme.switchToDark', { defaultValue: 'Switch to dark theme' }),
       icon: isDark ? 'light_mode' : 'dark_mode',
     };
   }, [isDark, t]);

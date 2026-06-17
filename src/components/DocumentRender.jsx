@@ -1060,7 +1060,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
           <LoadingMessage
             pageStatus={0}
             className="document-render-loading-message"
-            loadingText={t('viewer.loadingPagesWait')}
+            loadingText={t('viewer.loadingPagesWait', { defaultValue: 'Loading pages… Please wait.' })}
           />
         </div>
       )}
