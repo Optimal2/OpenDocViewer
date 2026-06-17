@@ -4608,7 +4608,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 529,
+    "line": 535,
     "description": "",
     "params": [
       {
@@ -5051,7 +5051,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1045,
+    "line": 1051,
     "description": "",
     "params": [
       {
@@ -5082,7 +5082,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1138,
+    "line": 1144,
     "description": "",
     "params": [
       {
@@ -5113,7 +5113,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1071,
+    "line": 1077,
     "description": "",
     "params": [
       {
@@ -5144,7 +5144,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 940,
+    "line": 946,
     "description": "",
     "params": [
       {
@@ -5169,7 +5169,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1084,
+    "line": 1090,
     "description": "",
     "params": [
       {
@@ -5206,7 +5206,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 931,
+    "line": 937,
     "description": "",
     "params": [
       {
@@ -5231,7 +5231,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1018,
+    "line": 1024,
     "description": "",
     "params": [
       {
@@ -5287,7 +5287,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 702,
+    "line": 708,
     "description": "",
     "params": [
       {

@@ -1,10 +1,10 @@
 # OpenDocViewer / src/components
 
-File count: 13. Line count: 6527. JSDoc symbol count: 82.
+File count: 13. Line count: 6533. JSDoc symbol count: 82.
 
 ## src/components/CanvasRenderer.jsx
 
-CanvasRenderer component.
+OpenDocViewer — Absolute-positioned Canvas Renderer Render a <canvas> element for a single page at a specified zoom factor.
 
 Exports: CanvasRenderer
 
@@ -14,7 +14,7 @@ Symbols:
 
 ## src/components/DocumentConsumerWrapper.jsx
 
-DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts.
+OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: [{ url, ext?, fileIn
 
 Exports: DocumentConsumerWrapper
 
@@ -27,7 +27,7 @@ Symbols:
 
 ## src/components/DocumentMetadataMatrixOverlayDialog.jsx
 
-Exports DocumentMetadataMatrixOverlayDialog.
+Session-wide document metadata matrix overlay.
 
 Exports: DocumentMetadataMatrixOverlayDialog
 
@@ -38,7 +38,7 @@ Symbols:
 
 ## src/components/DocumentMetadataOverlayDialog.jsx
 
-Exports DocumentMetadataOverlayDialog.
+Document metadata overlay shown from viewer-owned context menus.
 
 Exports: DocumentMetadataOverlayDialog
 
@@ -49,7 +49,7 @@ Symbols:
 
 ## src/components/DocumentRender.jsx
 
-Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.
+OpenDocViewer — Active page renderer.
 
 Exports: DocumentRender
 
@@ -72,7 +72,7 @@ Symbols:
 
 ## src/components/DocumentSelectionPanel.jsx
 
-Exports DocumentSelectionPanel.
+Hierarchical page-selection editor shown inside the thumbnail pane.
 
 Exports: DocumentSelectionPanel
 
@@ -83,7 +83,7 @@ Symbols:
 
 ## src/components/DocumentThumbnailList.jsx
 
-Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.
+OpenDocViewer — Deterministic thumbnail strip.
 
 Exports: DocumentThumbnailList
 
@@ -106,7 +106,7 @@ Symbols:
 
 ## src/components/ImageRenderer.jsx
 
-ImageRenderer component.
+OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor.
 
 Exports: ImageRenderer
 
@@ -117,7 +117,7 @@ Symbols:
 
 ## src/components/LoadingMessage.jsx
 
-LoadingMessage component.
+OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status.
 
 Exports: LoadingMessage
 
@@ -129,7 +129,7 @@ Symbols:
 
 ## src/components/LoadingSpinner.jsx
 
-LoadingSpinner component.
+OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
 
 Exports: LoadingSpinner
 
@@ -143,7 +143,7 @@ Symbols:
 
 ## src/components/PrintSelectionWorkspace.jsx
 
-Exports PrintSelectionWorkspace.
+Full-window print-selection workspace.
 
 Exports: PrintSelectionWorkspace
 
@@ -158,7 +158,7 @@ Symbols:
 
 ## src/components/Resizer.jsx
 
-Resizer component.
+OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content) via mouse drag or keyboard interaction.
 
 Exports: Resizer
 
@@ -175,7 +175,7 @@ Symbols:
 
 ## src/components/ViewerProblemNotice.jsx
 
-Exports ViewerProblemNotice.
+OpenDocViewer — configurable viewer-level problem notice.
 
 Exports: ViewerProblemNotice
 

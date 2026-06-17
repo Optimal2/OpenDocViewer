@@ -4,7 +4,7 @@ File count: 3. Line count: 731. JSDoc symbol count: 20.
 
 ## src/app/AppBootstrap.jsx
 
-Session metadata for a bundle.
+Application bootstrap React component.
 
 Exports: AppBootstrap
 
@@ -25,7 +25,7 @@ Symbols:
 
 ## src/app/bootConfig.js
 
-Return the application base path (always with a trailing slash) derived from the current page URL.
+Runtime boot loader that resolves configuration scripts before React starts.
 
 Symbols:
 
@@ -37,7 +37,7 @@ Symbols:
 
 ## src/app/OpenDocViewer.jsx
 
-OpenDocViewer — Top-level component.
+src/app/OpenDocViewer.jsx Main application shell for the viewer.
 
 Exports: OpenDocViewer
 

@@ -4,7 +4,7 @@ File count: 3. Line count: 1549. JSDoc symbol count: 3.
 
 ## src/workers/imageWorker.js
 
-Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread.
+OpenDocViewer — image / TIFF worker.
 
 Symbols:
 
@@ -12,7 +12,7 @@ Symbols:
 
 ## src/workers/pdfPageWorker.js
 
-Defines createFallbackMainThreadError, getWorkerEnvironmentDiagnostics, serializeError, fitScale, normalizeThumbnailBound.
+OpenDocViewer - PDF page image worker.
 
 Local imports: src/utils/pdfjsDocumentOptions.js
 

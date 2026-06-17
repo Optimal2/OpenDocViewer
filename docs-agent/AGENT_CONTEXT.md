@@ -15,31 +15,35 @@ Source commit: not embedded
 2. Open `MODULES.md` for top-level structure.
 3. Open `FILE_MAP.md` only for the area you need.
 4. Open `ENTRYPOINTS.md` when you need startup, package scripts, or import hubs.
-5. Open `DEPENDENCIES.md` when external package behavior matters.
-6. Use `SYMBOL_INDEX.md` for JSDoc-backed APIs.
-7. Use `agent-map.json` for tool-driven navigation.
+5. Open `CROSS_CUTTING.md` for hooks, contexts, workers, and risky source patterns.
+6. Open `DEPENDENCIES.md` when external package behavior matters.
+7. Open `BUDGET.md` when you need output size and token estimates.
+8. Use `SYMBOL_INDEX.md` for JSDoc-backed APIs.
+9. Use `agent-map.json` for tool-driven navigation.
 
 ## Stats
 
 - Source files: 109
+- Source lines: 48109
 - JSDoc symbols: 1266
 - Files with JSDoc: 105
+- Low-confidence summaries: 0
 - Parse errors: 0
 
 ## High-Signal Files
 
-- `src/utils/documentLoadingConfig.js` - Count PDF pages in a page descriptor list.
-- `src/utils/runtimeConfig.js` - Read the merged runtime configuration from the browser environment.
-- `src/utils/viewerPreferences.js` - Persist the user's theme mode preference.
-- `src/utils/printPdf.js` - Build a PDF blob from page image URLs and print metadata.
-- `src/logging/systemLogger.js` - Export a singleton instance (sufficient for app usage).
+- `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
+- `src/utils/runtimeConfig.js` - Runtime configuration helpers.
+- `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
+- `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
-- `src/index.jsx` - Determine environment and set a sensible client-side log level.
-- `src/utils/pdfPrintCacheKey.js` - Compare the content-affecting print settings that determine whether an existing generated PDF can be reused.
-- `src/utils/printTemplate.js` - Resolve the configured copy/print-format marker text consistently across print backends.
-- `src/utils/supportDiagnostics.js` - Download a JSON diagnostics payload in browser environments.
-- `src/components/DocumentLoader/documentLoaderUtils.js` - Generate a list of document URLs using a simple pattern: 001..NNN + extension.
-- `src/utils/documentMetadata.js` - Build a UI-friendly projection of one document's metadata.
+- `src/index.jsx` - OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).
+- `src/utils/pdfPrintCacheKey.js` - Generated-PDF cache key helpers.
+- `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.
+- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt-in troubleshooting tools.
+- `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF
+- `src/utils/documentMetadata.js` - Helpers for resolving document-level metadata from the normalized portable bundle.
 
 ## Agent Notes
 

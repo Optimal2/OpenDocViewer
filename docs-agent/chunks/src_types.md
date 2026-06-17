@@ -4,7 +4,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/types/jsdoc-types.js
 
-Generic React-like state setter for numbers: accepts either a number or an updater function (number)-&gt;number.
+Centralized JSDoc-only type and callback definitions.
 
 Symbols:
 

@@ -4,7 +4,7 @@ File count: 1. Line count: 1346. JSDoc symbol count: 20.
 
 ## src/PerformanceMonitor.jsx
 
-PerformanceMonitor component.
+src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state.
 
 Exports: PerformanceMonitor
 

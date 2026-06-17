@@ -79,11 +79,14 @@
   },
   "stats": {
     "fileCount": 109,
+    "sourceLineCount": 48109,
     "docletCount": 1266,
     "documentedFileCount": 105,
+    "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 21,
-    "devDependencyCount": 17
+    "devDependencyCount": 17,
+    "estimatedSourceTokens": 3481
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -360,7 +363,8 @@
       "lines": 1045,
       "incomingLocalImports": 12,
       "doclets": 32,
-      "summary": "Count PDF pages in a page descriptor list."
+      "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/runtimeConfig.js",
@@ -368,7 +372,8 @@
       "lines": 363,
       "incomingLocalImports": 13,
       "doclets": 21,
-      "summary": "Read the merged runtime configuration from the browser environment."
+      "summary": "Runtime configuration helpers.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/viewerPreferences.js",
@@ -376,7 +381,8 @@
       "lines": 473,
       "incomingLocalImports": 5,
       "doclets": 33,
-      "summary": "Persist the user's theme mode preference."
+      "summary": "Lightweight persisted viewer preferences.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/printPdf.js",
@@ -384,7 +390,8 @@
       "lines": 2174,
       "incomingLocalImports": 3,
       "doclets": 92,
-      "summary": "Build a PDF blob from page image URLs and print metadata."
+      "summary": "OpenDocViewer — Generated PDF print backend.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/logging/systemLogger.js",
@@ -392,7 +399,8 @@
       "lines": 432,
       "incomingLocalImports": 35,
       "doclets": 29,
-      "summary": "Export a singleton instance (sufficient for app usage)."
+      "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/contexts/viewerContext.js",
@@ -400,7 +408,8 @@
       "lines": 207,
       "incomingLocalImports": 10,
       "doclets": 9,
-      "summary": "Exports ViewerContext."
+      "summary": "Exports ViewerContext.",
+      "summaryConfidence": "medium"
     },
     {
       "path": "src/index.jsx",
@@ -408,7 +417,8 @@
       "lines": 59,
       "incomingLocalImports": 0,
       "doclets": 2,
-      "summary": "Determine environment and set a sensible client-side log level."
+      "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/pdfPrintCacheKey.js",
@@ -416,7 +426,8 @@
       "lines": 117,
       "incomingLocalImports": 4,
       "doclets": 8,
-      "summary": "Compare the content-affecting print settings that determine whether an existing generated PDF can be reused."
+      "summary": "Generated-PDF cache key helpers.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/printTemplate.js",
@@ -424,7 +435,8 @@
       "lines": 809,
       "incomingLocalImports": 3,
       "doclets": 34,
-      "summary": "Resolve the configured copy/print-format marker text consistently across print backends."
+      "summary": "OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/supportDiagnostics.js",
@@ -432,7 +444,8 @@
       "lines": 370,
       "incomingLocalImports": 3,
       "doclets": 18,
-      "summary": "Download a JSON diagnostics payload in browser environments."
+      "summary": "Support diagnostics helpers for opt-in troubleshooting tools.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/components/DocumentLoader/documentLoaderUtils.js",
@@ -440,7 +453,8 @@
       "lines": 254,
       "incomingLocalImports": 3,
       "doclets": 8,
-      "summary": "Generate a list of document URLs using a simple pattern: 001..NNN + extension."
+      "summary": "OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/documentMetadata.js",
@@ -448,7 +462,8 @@
       "lines": 404,
       "incomingLocalImports": 3,
       "doclets": 18,
-      "summary": "Build a UI-friendly projection of one document's metadata."
+      "summary": "Helpers for resolving document-level metadata from the normalized portable bundle.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/localizedValue.js",
@@ -456,7 +471,8 @@
       "lines": 113,
       "incomingLocalImports": 6,
       "doclets": 6,
-      "summary": "Return the best string for the active language."
+      "summary": "Localized string resolver for admin-supplied config values.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/reloadCacheIdentity.js",
@@ -464,7 +480,8 @@
       "lines": 154,
       "incomingLocalImports": 2,
       "doclets": 7,
-      "summary": "Exports stableHash, createReloadCacheSessionId, describeDocumentSourceKey, createDocumentSourceKey, createRenderAssetSignature."
+      "summary": "Stable identities for the opt-in reload/document cache.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/pdfPrebuildPlan.js",
@@ -472,7 +489,8 @@
       "lines": 343,
       "incomingLocalImports": 2,
       "doclets": 17,
-      "summary": "Return the language dependency that should invalidate an all-pages prebuild run."
+      "summary": "OpenDocViewer - generated-PDF prebuild planning.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/printCore.js",
@@ -480,7 +498,8 @@
       "lines": 569,
       "incomingLocalImports": 1,
       "doclets": 20,
-      "summary": "Handles the print functionality for the CURRENT page/image."
+      "summary": "Core print coordinator for the frontend.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/publicAssetUrl.js",
@@ -488,7 +507,8 @@
       "lines": 29,
       "incomingLocalImports": 6,
       "doclets": 1,
-      "summary": "Exports getPublicAssetUrl, default."
+      "summary": "Resolve a public asset path against the viewer base URL.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
@@ -496,7 +516,8 @@
       "lines": 828,
       "incomingLocalImports": 1,
       "doclets": 23,
-      "summary": "Read the runtime configuration (merged defaults + site overrides)."
+      "summary": "Hook + helpers for PrintRangeDialog.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/utils/pdfWorkerDispatcher.js",
@@ -504,7 +525,8 @@
       "lines": 451,
       "incomingLocalImports": 2,
       "doclets": 18,
-      "summary": "Pick a conservative future batch size from a pages-per-worker target."
+      "summary": "OpenDocViewer - generated PDF worker dispatcher.",
+      "summaryConfidence": "high"
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
@@ -512,9 +534,186 @@
       "lines": 2551,
       "incomingLocalImports": 1,
       "doclets": 58,
-      "summary": "Record that a page now has a reusable full-size asset available."
+      "summary": "OpenDocViewer — Viewer state provider.",
+      "summaryConfidence": "high"
     }
   ],
+  "crossCutting": {
+    "roles": [
+      {
+        "role": "context",
+        "files": [
+          {
+            "path": "src/contexts/viewerContext.js",
+            "score": 90,
+            "lines": 207,
+            "summary": "Exports ViewerContext."
+          },
+          {
+            "path": "src/contexts/ViewerProvider.jsx",
+            "score": 57,
+            "lines": 2551,
+            "summary": "OpenDocViewer — Viewer state provider."
+          },
+          {
+            "path": "src/contexts/themeContext.js",
+            "score": 38,
+            "lines": 37,
+            "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake."
+          },
+          {
+            "path": "src/contexts/ThemeProvider.jsx",
+            "score": 38,
+            "lines": 202,
+            "summary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen"
+          }
+        ]
+      },
+      {
+        "role": "hook",
+        "files": [
+          {
+            "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
+            "score": 58,
+            "lines": 828,
+            "summary": "Hook + helpers for PrintRangeDialog."
+          },
+          {
+            "path": "src/components/DocumentViewer/useDocumentViewer.js",
+            "score": 51,
+            "lines": 1690,
+            "summary": "Primary viewer-state hook."
+          },
+          {
+            "path": "src/hooks/useNavigationModifierState.js",
+            "score": 42,
+            "lines": 109,
+            "summary": "Shared modifier-key state for navigation and compare-aware viewer actions."
+          },
+          {
+            "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
+            "score": 41,
+            "lines": 557,
+            "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res..."
+          },
+          {
+            "path": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js",
+            "score": 40,
+            "lines": 362,
+            "summary": "Background prebuild/cache for configured \"all pages\" generated-PDF variants."
+          },
+          {
+            "path": "src/hooks/usePageTimer.js",
+            "score": 40,
+            "lines": 149,
+            "summary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia"
+          },
+          {
+            "path": "src/components/DocumentViewer/hooks/useViewerPostZoom.js",
+            "score": 34,
+            "lines": 86,
+            "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode."
+          },
+          {
+            "path": "src/hooks/usePageNavigation.js",
+            "score": 30,
+            "lines": 182,
+            "summary": "OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown)."
+          },
+          {
+            "path": "src/hooks/useAcceleratingHoldRepeat.js",
+            "score": 25,
+            "lines": 210,
+            "summary": "Reusable press-and-hold behavior for toolbar buttons."
+          }
+        ]
+      },
+      {
+        "role": "worker",
+        "files": [
+          {
+            "path": "src/utils/pdfWorkerDispatcher.js",
+            "score": 58,
+            "lines": 451,
+            "summary": "OpenDocViewer - generated PDF worker dispatcher."
+          },
+          {
+            "path": "src/utils/pageAssetWorkerPool.js",
+            "score": 44,
+            "lines": 320,
+            "summary": "OpenDocViewer — Page-asset worker pool."
+          },
+          {
+            "path": "src/components/DocumentLoader/workerHandler.js",
+            "score": 41,
+            "lines": 330,
+            "summary": "OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion."
+          },
+          {
+            "path": "src/utils/pdfPageWorkerPool.js",
+            "score": 38,
+            "lines": 477,
+            "summary": "OpenDocViewer - PDF page-image worker pool."
+          },
+          {
+            "path": "src/workers/pdfWorker.js",
+            "score": 8,
+            "lines": 628,
+            "summary": "OpenDocViewer - generated PDF worker."
+          },
+          {
+            "path": "src/workers/imageWorker.js",
+            "score": 7,
+            "lines": 488,
+            "summary": "OpenDocViewer — image / TIFF worker."
+          },
+          {
+            "path": "src/workers/pdfPageWorker.js",
+            "score": 6,
+            "lines": 433,
+            "summary": "OpenDocViewer - PDF page image worker."
+          }
+        ]
+      }
+    ],
+    "riskPatterns": [
+      {
+        "key": "dangerouslySetInnerHTML",
+        "description": "React raw HTML rendering",
+        "files": [
+          {
+            "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+            "lines": [
+              339
+            ],
+            "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
+          }
+        ]
+      },
+      {
+        "key": "innerHTML",
+        "description": "Direct DOM HTML assignment or access",
+        "files": [
+          {
+            "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+            "lines": [
+              100,
+              101,
+              102
+            ],
+            "summary": "Manual overlay that loads simple external HTML fragments from the public help folder."
+          },
+          {
+            "path": "src/utils/printDom.js",
+            "lines": [
+              253
+            ],
+            "summary": "OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print()."
+          }
+        ]
+      }
+    ]
+  },
   "modules": [
     {
       "name": "server",
@@ -528,7 +727,8 @@
           "lines": 237,
           "incomingLocalImports": 0,
           "doclets": 5,
-          "summary": "Token auth middleware"
+          "summary": "System Log Server — Single-file, standalone (ESM) Responsibilities: - Expose POST /log for structured system logs (tiny JSON bodies) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error",
+          "summaryConfidence": "high"
         },
         {
           "path": "server/user-log-server.js",
@@ -536,7 +736,8 @@
           "lines": 271,
           "incomingLocalImports": 0,
           "doclets": 2,
-          "summary": "Resolve user identity without cookies."
+          "summary": "User Action Log Server — Single-file, standalone (ESM) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string|null - forWhom: string|null - Response: 200 OK with body: true (JSO",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -552,7 +753,8 @@
           "lines": 432,
           "incomingLocalImports": 1,
           "doclets": 10,
-          "summary": "Session metadata for a bundle."
+          "summary": "Application bootstrap React component.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/app/OpenDocViewer.jsx",
@@ -560,7 +762,8 @@
           "lines": 193,
           "incomingLocalImports": 1,
           "doclets": 5,
-          "summary": "OpenDocViewer — Top-level component."
+          "summary": "src/app/OpenDocViewer.jsx Main application shell for the viewer.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/app/bootConfig.js",
@@ -568,23 +771,25 @@
           "lines": 106,
           "incomingLocalImports": 0,
           "doclets": 5,
-          "summary": "Return the application base path (always with a trailing slash) derived from the current page URL."
+          "summary": "Runtime boot loader that resolves configuration scripts before React starts.",
+          "summaryConfidence": "high"
         }
       ]
     },
     {
       "name": "src/components",
       "fileCount": 13,
-      "lineCount": 6527,
+      "lineCount": 6533,
       "docletCount": 82,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
           "score": 48,
-          "lines": 1364,
+          "lines": 1370,
           "incomingLocalImports": 1,
           "doclets": 25,
-          "summary": "Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1."
+          "summary": "OpenDocViewer — Deterministic thumbnail strip.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentRender.jsx",
@@ -592,7 +797,8 @@
           "lines": 1074,
           "incomingLocalImports": 1,
           "doclets": 24,
-          "summary": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes."
+          "summary": "OpenDocViewer — Active page renderer.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/PrintSelectionWorkspace.jsx",
@@ -600,7 +806,8 @@
           "lines": 2450,
           "incomingLocalImports": 1,
           "doclets": 4,
-          "summary": "Exports PrintSelectionWorkspace."
+          "summary": "Full-window print-selection workspace.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/Resizer.jsx",
@@ -608,7 +815,8 @@
           "lines": 111,
           "incomingLocalImports": 1,
           "doclets": 8,
-          "summary": "Resizer component."
+          "summary": "OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content) via mouse drag or keyboard interaction.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/LoadingSpinner.jsx",
@@ -616,7 +824,8 @@
           "lines": 91,
           "incomingLocalImports": 1,
           "doclets": 5,
-          "summary": "LoadingSpinner component."
+          "summary": "OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/ViewerProblemNotice.jsx",
@@ -624,7 +833,8 @@
           "lines": 267,
           "incomingLocalImports": 1,
           "doclets": 4,
-          "summary": "Exports ViewerProblemNotice."
+          "summary": "OpenDocViewer — configurable viewer-level problem notice.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentConsumerWrapper.jsx",
@@ -632,7 +842,8 @@
           "lines": 172,
           "incomingLocalImports": 1,
           "doclets": 2,
-          "summary": "DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts."
+          "summary": "OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: [{ url, ext?, fileIn",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
@@ -640,7 +851,8 @@
           "lines": 177,
           "incomingLocalImports": 1,
           "doclets": 2,
-          "summary": "Exports DocumentMetadataMatrixOverlayDialog."
+          "summary": "Session-wide document metadata matrix overlay.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -656,7 +868,8 @@
           "lines": 36,
           "incomingLocalImports": 2,
           "doclets": 1,
-          "summary": "Exports StatusLed."
+          "summary": "Small reusable LED-style status indicator.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -672,7 +885,8 @@
           "lines": 254,
           "incomingLocalImports": 3,
           "doclets": 8,
-          "summary": "Generate a list of document URLs using a simple pattern: 001..NNN + extension."
+          "summary": "OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/DocumentLoader.js",
@@ -680,7 +894,8 @@
           "lines": 2163,
           "incomingLocalImports": 1,
           "doclets": 58,
-          "summary": "Resolve source type information with a cheap signature-first path."
+          "summary": "OpenDocViewer — Document loader orchestrator.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/mainThreadRenderer.js",
@@ -688,7 +903,8 @@
           "lines": 507,
           "incomingLocalImports": 1,
           "doclets": 9,
-          "summary": "Render PDF pages on the main thread and INSERT THEM DIRECTLY."
+          "summary": "OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/workerHandler.js",
@@ -696,7 +912,8 @@
           "lines": 330,
           "incomingLocalImports": 0,
           "doclets": 9,
-          "summary": "Create a new image worker instance."
+          "summary": "OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/sources/explicitListSource.js",
@@ -704,7 +921,8 @@
           "lines": 231,
           "incomingLocalImports": 1,
           "doclets": 11,
-          "summary": "Convert a PortableDocumentBundle into a flat, ordered list of file URLs."
+          "summary": "OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/batchHandler.js",
@@ -712,7 +930,8 @@
           "lines": 226,
           "incomingLocalImports": 0,
           "doclets": 7,
-          "summary": "Batch scheduler entry point."
+          "summary": "OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentLoader/LoadPressureDialog.jsx",
@@ -720,7 +939,8 @@
           "lines": 172,
           "incomingLocalImports": 1,
           "doclets": 4,
-          "summary": "Large-load warning dialog shown before / during very heavy loading runs."
+          "summary": "Large-load warning dialog shown before / during very heavy loading runs.",
+          "summaryConfidence": "medium"
         },
         {
           "path": "src/components/DocumentLoader/DemoControls.jsx",
@@ -728,14 +948,15 @@
           "lines": 101,
           "incomingLocalImports": 0,
           "doclets": 1,
-          "summary": "DemoControls — wraps DocumentLoader with demo-mode props and a small control UI."
+          "summary": "OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: \"Total pages/files\" + JPG/PNG/TIF/PDF buttons + a new \"Mix\" button.",
+          "summaryConfidence": "high"
         }
       ]
     },
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 14,
-      "lineCount": 6326,
+      "lineCount": 6329,
       "docletCount": 90,
       "importantFiles": [
         {
@@ -744,7 +965,8 @@
           "lines": 828,
           "incomingLocalImports": 1,
           "doclets": 23,
-          "summary": "Read the runtime configuration (merged defaults + site overrides)."
+          "summary": "Hook + helpers for PrintRangeDialog.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
@@ -752,7 +974,8 @@
           "lines": 2126,
           "incomingLocalImports": 1,
           "doclets": 31,
-          "summary": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry."
+          "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js",
@@ -760,7 +983,8 @@
           "lines": 362,
           "incomingLocalImports": 1,
           "doclets": 8,
-          "summary": "Run async work with bounded concurrency."
+          "summary": "Background prebuild/cache for configured \"all pages\" generated-PDF variants.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
@@ -768,7 +992,8 @@
           "lines": 357,
           "incomingLocalImports": 1,
           "doclets": 10,
-          "summary": "Exports ManualOverlayDialog."
+          "summary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
@@ -776,7 +1001,8 @@
           "lines": 166,
           "incomingLocalImports": 1,
           "doclets": 5,
-          "summary": "Exports ThemeMenuButton."
+          "summary": "Compact theme selector for the toolbar.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
@@ -784,7 +1010,8 @@
           "lines": 154,
           "incomingLocalImports": 1,
           "doclets": 4,
-          "summary": "Exports LanguageMenuButton."
+          "summary": "Compact language selector for the toolbar.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
@@ -792,7 +1019,8 @@
           "lines": 463,
           "incomingLocalImports": 1,
           "doclets": 3,
-          "summary": "Exports AboutOverlayDialog."
+          "summary": "Small About dialog for version/build/support information.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
@@ -800,7 +1028,8 @@
           "lines": 108,
           "incomingLocalImports": 2,
           "doclets": 0,
-          "summary": "Exports SplitToolbarButton."
+          "summary": "Reusable toolbar split-button.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -816,7 +1045,8 @@
           "lines": 1690,
           "incomingLocalImports": 1,
           "doclets": 53,
-          "summary": "Hook that centralizes viewer UI state and event handlers."
+          "summary": "Primary viewer-state hook.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
@@ -824,7 +1054,8 @@
           "lines": 1051,
           "incomingLocalImports": 1,
           "doclets": 17,
-          "summary": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane."
+          "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
@@ -832,7 +1063,8 @@
           "lines": 557,
           "incomingLocalImports": 1,
           "doclets": 18,
-          "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res..."
+          "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/hooks/useViewerPostZoom.js",
@@ -840,7 +1072,8 @@
           "lines": 86,
           "incomingLocalImports": 1,
           "doclets": 7,
-          "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode."
+          "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
@@ -848,7 +1081,8 @@
           "lines": 418,
           "incomingLocalImports": 1,
           "doclets": 5,
-          "summary": "Renders the toolbar for the document viewer by delegating to ."
+          "summary": "Toolbar adapter for the document viewer.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/DocumentViewer.jsx",
@@ -856,7 +1090,8 @@
           "lines": 593,
           "incomingLocalImports": 0,
           "doclets": 4,
-          "summary": "Exports DocumentViewer."
+          "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
@@ -864,7 +1099,8 @@
           "lines": 222,
           "incomingLocalImports": 1,
           "doclets": 1,
-          "summary": "Exports DocumentViewerThumbnails."
+          "summary": "OpenDocViewer — Document Viewer Thumbnails (Wrapper) Provides the deterministic thumbnail list and local width controls for the viewer shell.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
@@ -872,7 +1108,8 @@
           "lines": 100,
           "incomingLocalImports": 1,
           "doclets": 1,
-          "summary": "CompareZoomOverlay Presentational-only (no state)."
+          "summary": "Per-pane “post-zoom” controls shown in comparison mode.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -888,7 +1125,8 @@
           "lines": 207,
           "incomingLocalImports": 10,
           "doclets": 9,
-          "summary": "Exports ViewerContext."
+          "summary": "Exports ViewerContext.",
+          "summaryConfidence": "medium"
         },
         {
           "path": "src/contexts/ViewerProvider.jsx",
@@ -896,7 +1134,8 @@
           "lines": 2551,
           "incomingLocalImports": 1,
           "doclets": 58,
-          "summary": "Record that a page now has a reusable full-size asset available."
+          "summary": "OpenDocViewer — Viewer state provider.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/contexts/themeContext.js",
@@ -904,7 +1143,8 @@
           "lines": 37,
           "incomingLocalImports": 3,
           "doclets": 3,
-          "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake."
+          "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/contexts/ThemeProvider.jsx",
@@ -912,7 +1152,8 @@
           "lines": 202,
           "incomingLocalImports": 1,
           "doclets": 11,
-          "summary": "ThemeProvider component to manage and provide theme-related state and functions."
+          "summary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -928,7 +1169,8 @@
           "lines": 297,
           "incomingLocalImports": 1,
           "doclets": 12,
-          "summary": "Tiny helper to translate with safe fallback (NS: 'common')."
+          "summary": "OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -944,7 +1186,8 @@
           "lines": 109,
           "incomingLocalImports": 1,
           "doclets": 8,
-          "summary": "Exports useNavigationModifierState."
+          "summary": "Shared modifier-key state for navigation and compare-aware viewer actions.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/hooks/usePageTimer.js",
@@ -952,7 +1195,8 @@
           "lines": 149,
           "incomingLocalImports": 2,
           "doclets": 6,
-          "summary": "Custom hook to handle page change with a timer for continuous navigation."
+          "summary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/hooks/usePageNavigation.js",
@@ -960,7 +1204,8 @@
           "lines": 182,
           "incomingLocalImports": 0,
           "doclets": 8,
-          "summary": "Custom hook to handle document page navigation with keyboard/mouse."
+          "summary": "OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown).",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/hooks/useAcceleratingHoldRepeat.js",
@@ -968,7 +1213,8 @@
           "lines": 210,
           "incomingLocalImports": 2,
           "doclets": 1,
-          "summary": "Exports useAcceleratingHoldRepeat."
+          "summary": "Reusable press-and-hold behavior for toolbar buttons.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -984,7 +1230,8 @@
           "lines": 566,
           "incomingLocalImports": 2,
           "doclets": 21,
-          "summary": "Return browser window safely in browser, SSR, test, and documentation contexts."
+          "summary": "i18n bootstrap for OpenDocViewer.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1000,7 +1247,8 @@
           "lines": 59,
           "incomingLocalImports": 0,
           "doclets": 2,
-          "summary": "Determine environment and set a sensible client-side log level."
+          "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1016,7 +1264,8 @@
           "lines": 182,
           "incomingLocalImports": 1,
           "doclets": 9,
-          "summary": "Attempt to read a bootstrap object from a same-origin parent."
+          "summary": "Same-origin parent-window bootstrap adapter.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/normalizePortableBundle.js",
@@ -1024,7 +1273,8 @@
           "lines": 833,
           "incomingLocalImports": 1,
           "doclets": 9,
-          "summary": "Normalize many incoming shapes to a neutral PortableDocumentBundle v1."
+          "summary": "Normalizes multiple host payload shapes into the project's neutral portable bundle shape.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/bootstrapRuntime.js",
@@ -1032,7 +1282,8 @@
           "lines": 457,
           "incomingLocalImports": 1,
           "doclets": 12,
-          "summary": "Canonical bootstrap modes."
+          "summary": "Startup mode detection and host-integration entry point.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/viewerEvents.js",
@@ -1040,7 +1291,8 @@
           "lines": 192,
           "incomingLocalImports": 0,
           "doclets": 8,
-          "summary": "Emit a namespaced OpenDocViewer event with an optional detail payload."
+          "summary": "OpenDocViewer — Tiny Event Emitter/Listener Utilities (Browser-only) Lightweight helpers for broadcasting and listening to app-level DOM events.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/sessionToken.js",
@@ -1048,7 +1300,8 @@
           "lines": 142,
           "incomingLocalImports": 1,
           "doclets": 6,
-          "summary": "Decode a Base64 string into a UTF-8 JavaScript string."
+          "summary": "OpenDocViewer — Session Token Reader (Browser-only) Decode an optional Base64/URL-safe Base64 JSON payload provided via the query string: ?sessiondata=<base64> This enables hosts to pass a compact, self-contained “portab",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/sessionUrl.js",
@@ -1056,7 +1309,8 @@
           "lines": 157,
           "incomingLocalImports": 1,
           "doclets": 3,
-          "summary": "Read and fetch a session payload URL from the viewer query string."
+          "summary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/integrations/urlParams.js",
@@ -1064,7 +1318,8 @@
           "lines": 110,
           "incomingLocalImports": 1,
           "doclets": 5,
-          "summary": "Reads common query params used by the demo and other hosts."
+          "summary": "OpenDocViewer — URL Parameter Reader (Browser-only) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1080,7 +1335,8 @@
           "lines": 432,
           "incomingLocalImports": 35,
           "doclets": 29,
-          "summary": "Export a singleton instance (sufficient for app usage)."
+          "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/logging/userLogger.js",
@@ -1088,7 +1344,8 @@
           "lines": 308,
           "incomingLocalImports": 1,
           "doclets": 17,
-          "summary": "Export singleton instance."
+          "summary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1104,7 +1361,8 @@
           "lines": 1346,
           "incomingLocalImports": 1,
           "doclets": 20,
-          "summary": "PerformanceMonitor component."
+          "summary": "src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1120,7 +1378,8 @@
           "lines": 363,
           "incomingLocalImports": 0,
           "doclets": 18,
-          "summary": "Schema version of this portable bundle definition."
+          "summary": "OpenDocViewer — Portable Document Bundle Schema & Helpers (ESM) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1136,7 +1395,8 @@
           "lines": 101,
           "incomingLocalImports": 0,
           "doclets": 13,
-          "summary": "Generic React-like state setter for numbers: accepts either a number or an updater function (number)-&gt;number."
+          "summary": "Centralized JSDoc-only type and callback definitions.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1152,7 +1412,8 @@
           "lines": 1045,
           "incomingLocalImports": 12,
           "doclets": 32,
-          "summary": "Count PDF pages in a page descriptor list."
+          "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/runtimeConfig.js",
@@ -1160,7 +1421,8 @@
           "lines": 363,
           "incomingLocalImports": 13,
           "doclets": 21,
-          "summary": "Read the merged runtime configuration from the browser environment."
+          "summary": "Runtime configuration helpers.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/viewerPreferences.js",
@@ -1168,7 +1430,8 @@
           "lines": 473,
           "incomingLocalImports": 5,
           "doclets": 33,
-          "summary": "Persist the user's theme mode preference."
+          "summary": "Lightweight persisted viewer preferences.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/printPdf.js",
@@ -1176,7 +1439,8 @@
           "lines": 2174,
           "incomingLocalImports": 3,
           "doclets": 92,
-          "summary": "Build a PDF blob from page image URLs and print metadata."
+          "summary": "OpenDocViewer — Generated PDF print backend.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/pdfPrintCacheKey.js",
@@ -1184,7 +1448,8 @@
           "lines": 117,
           "incomingLocalImports": 4,
           "doclets": 8,
-          "summary": "Compare the content-affecting print settings that determine whether an existing generated PDF can be reused."
+          "summary": "Generated-PDF cache key helpers.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/printTemplate.js",
@@ -1192,7 +1457,8 @@
           "lines": 809,
           "incomingLocalImports": 3,
           "doclets": 34,
-          "summary": "Resolve the configured copy/print-format marker text consistently across print backends."
+          "summary": "OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/supportDiagnostics.js",
@@ -1200,7 +1466,8 @@
           "lines": 370,
           "incomingLocalImports": 3,
           "doclets": 18,
-          "summary": "Download a JSON diagnostics payload in browser environments."
+          "summary": "Support diagnostics helpers for opt-in troubleshooting tools.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/utils/documentMetadata.js",
@@ -1208,7 +1475,8 @@
           "lines": 404,
           "incomingLocalImports": 3,
           "doclets": 18,
-          "summary": "Build a UI-friendly projection of one document's metadata."
+          "summary": "Helpers for resolving document-level metadata from the normalized portable bundle.",
+          "summaryConfidence": "high"
         }
       ]
     },
@@ -1224,7 +1492,8 @@
           "lines": 628,
           "incomingLocalImports": 0,
           "doclets": 1,
-          "summary": "OpenDocViewer - generated PDF worker."
+          "summary": "OpenDocViewer - generated PDF worker.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/workers/imageWorker.js",
@@ -1232,7 +1501,8 @@
           "lines": 488,
           "incomingLocalImports": 0,
           "doclets": 1,
-          "summary": "Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread."
+          "summary": "OpenDocViewer — image / TIFF worker.",
+          "summaryConfidence": "high"
         },
         {
           "path": "src/workers/pdfPageWorker.js",
@@ -1240,7 +1510,8 @@
           "lines": 433,
           "incomingLocalImports": 0,
           "doclets": 1,
-          "summary": "Defines createFallbackMainThreadError, getWorkerEnvironmentDiagnostics, serializeError, fitScale, normalizeThumbnailBound."
+          "summary": "OpenDocViewer - PDF page image worker.",
+          "summaryConfidence": "high"
         }
       ]
     }
@@ -1251,6 +1522,7 @@
       "lines": 237,
       "extension": ".js",
       "jsdocBlockCount": 11,
+      "sourceSummary": "System Log Server — Single-file, standalone (ESM) Responsibilities: - Expose POST /log for structured system logs (tiny JSON bodies) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error",
       "imports": [
         {
           "source": "node:fs",
@@ -1387,6 +1659,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "TRUST_PROXY_RAW",
@@ -1530,13 +1806,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 36,
-      "summary": "Token auth middleware"
+      "summary": "System Log Server — Single-file, standalone (ESM) Responsibilities: - Expose POST /log for structured system logs (tiny JSON bodies) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "server/user-log-server.js",
       "lines": 271,
       "extension": ".js",
       "jsdocBlockCount": 7,
+      "sourceSummary": "User Action Log Server — Single-file, standalone (ESM) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string|null - forWhom: string|null - Response: 200 OK with body: true (JSO",
       "imports": [
         {
           "source": "node:fs",
@@ -1676,6 +1955,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "resolveUser",
@@ -1773,13 +2056,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 28,
-      "summary": "Resolve user identity without cookies."
+      "summary": "User Action Log Server — Single-file, standalone (ESM) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string|null - forWhom: string|null - Response: 200 OK with body: true (JSO",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/app/AppBootstrap.jsx",
       "lines": 432,
       "extension": ".jsx",
       "jsdocBlockCount": 15,
+      "sourceSummary": "Application bootstrap React component.",
       "imports": [
         {
           "source": "react",
@@ -1888,6 +2174,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SessionShape",
@@ -2129,13 +2419,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 40,
-      "summary": "Session metadata for a bundle."
+      "summary": "Application bootstrap React component.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/app/bootConfig.js",
       "lines": 106,
       "extension": ".js",
       "jsdocBlockCount": 6,
+      "sourceSummary": "Runtime boot loader that resolves configuration scripts before React starts.",
       "imports": [],
       "exports": [],
       "declarations": [
@@ -2171,6 +2464,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "getAppBase",
@@ -2243,13 +2540,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 15,
-      "summary": "Return the application base path (always with a trailing slash) derived from the current page URL."
+      "summary": "Runtime boot loader that resolves configuration scripts before React starts.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/app/OpenDocViewer.jsx",
       "lines": 193,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
+      "sourceSummary": "src/app/OpenDocViewer.jsx Main application shell for the viewer.",
       "imports": [
         {
           "source": "react",
@@ -2321,6 +2621,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SourceItem",
@@ -2532,13 +2836,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 29,
-      "summary": "OpenDocViewer — Top-level component."
+      "summary": "src/app/OpenDocViewer.jsx Main application shell for the viewer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/CanvasRenderer.jsx",
       "lines": 84,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
+      "sourceSummary": "OpenDocViewer — Absolute-positioned Canvas Renderer Render a <canvas> element for a single page at a specified zoom factor.",
       "imports": [
         {
           "source": "react",
@@ -2571,6 +2878,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "CanvasRenderer",
@@ -2643,13 +2954,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 16,
-      "summary": "CanvasRenderer component."
+      "summary": "OpenDocViewer — Absolute-positioned Canvas Renderer Render a <canvas> element for a single page at a specified zoom factor.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/common/StatusLed.jsx",
       "lines": 36,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Small reusable LED-style status indicator.",
       "imports": [
         {
           "source": "react",
@@ -2681,6 +2995,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -2752,13 +3070,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 24,
-      "summary": "Exports StatusLed."
+      "summary": "Small reusable LED-style status indicator.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentConsumerWrapper.jsx",
       "lines": 172,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
+      "sourceSummary": "OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: [{ url, ext?, fileIn",
       "imports": [
         {
           "source": "react",
@@ -2816,6 +3137,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SourceItem",
@@ -2971,13 +3296,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts."
+      "summary": "OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: [{ url, ext?, fileIn",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/batchHandler.js",
       "lines": 226,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": "OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread.",
       "imports": [
         {
           "source": "../../logging/systemLogger.js",
@@ -3007,6 +3335,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "WorkerJob",
@@ -3253,13 +3585,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 27,
-      "summary": "Batch scheduler entry point."
+      "summary": "OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/DemoControls.jsx",
       "lines": 101,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: \"Total pages/files\" + JPG/PNG/TIF/PDF buttons + a new \"Mix\" button.",
       "imports": [
         {
           "source": "react",
@@ -3305,6 +3640,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -3369,13 +3708,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 8,
-      "summary": "DemoControls — wraps DocumentLoader with demo-mode props and a small control UI."
+      "summary": "OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: \"Total pages/files\" + JPG/PNG/TIF/PDF buttons + a new \"Mix\" button.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/DocumentLoader.js",
       "lines": 2163,
       "extension": ".js",
       "jsdocBlockCount": 60,
+      "sourceSummary": "OpenDocViewer — Document loader orchestrator.",
       "imports": [
         {
           "source": "react",
@@ -3782,6 +4124,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "DocumentSourceItem",
@@ -5482,13 +5828,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 55,
-      "summary": "Resolve source type information with a cheap signature-first path."
+      "summary": "OpenDocViewer — Document loader orchestrator.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/documentLoaderUtils.js",
       "lines": 254,
       "extension": ".js",
       "jsdocBlockCount": 9,
+      "sourceSummary": "OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF",
       "imports": [
         {
           "source": "../../logging/systemLogger.js",
@@ -5596,6 +5945,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "TRANSPARENT_1x1",
@@ -5872,13 +6225,16 @@
       ],
       "incomingLocalImports": 3,
       "importanceScore": 80,
-      "summary": "Generate a list of document URLs using a simple pattern: 001..NNN + extension."
+      "summary": "OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/LoadPressureDialog.jsx",
       "lines": 172,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": null,
       "imports": [
         {
           "source": "react",
@@ -5937,6 +6293,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "LoadPressureDialogSummary",
@@ -6060,13 +6420,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 26,
-      "summary": "Large-load warning dialog shown before / during very heavy loading runs."
+      "summary": "Large-load warning dialog shown before / during very heavy loading runs.",
+      "summaryConfidence": "medium",
+      "summarySource": "doclet"
     },
     {
       "path": "src/components/DocumentLoader/mainThreadRenderer.js",
       "lines": 507,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": "OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).",
       "imports": [
         {
           "source": "../../logging/systemLogger.js",
@@ -6170,6 +6533,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "RenderJob",
@@ -6464,13 +6831,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 46,
-      "summary": "Render PDF pages on the main thread and INSERT THEM DIRECTLY."
+      "summary": "OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/sources/explicitListSource.js",
       "lines": 231,
       "extension": ".js",
       "jsdocBlockCount": 12,
+      "sourceSummary": "OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.",
       "imports": [],
       "exports": [
         {
@@ -6517,6 +6887,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ExplicitSourceList",
@@ -6769,13 +7143,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 38,
-      "summary": "Convert a PortableDocumentBundle into a flat, ordered list of file URLs."
+      "summary": "OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentLoader/workerHandler.js",
       "lines": 330,
       "extension": ".js",
       "jsdocBlockCount": 14,
+      "sourceSummary": "OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.",
       "imports": [
         {
           "source": "../../logging/systemLogger.js",
@@ -6889,6 +7266,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "WorkerJob",
@@ -7162,13 +7545,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 41,
-      "summary": "Create a new image worker instance."
+      "summary": "OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
       "lines": 177,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": "Session-wide document metadata matrix overlay.",
       "imports": [
         {
           "source": "react",
@@ -7214,6 +7600,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -7308,13 +7698,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "Exports DocumentMetadataMatrixOverlayDialog."
+      "summary": "Session-wide document metadata matrix overlay.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentMetadataOverlayDialog.jsx",
       "lines": 191,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": "Document metadata overlay shown from viewer-owned context menus.",
       "imports": [
         {
           "source": "react",
@@ -7360,6 +7753,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -7478,13 +7875,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "Exports DocumentMetadataOverlayDialog."
+      "summary": "Document metadata overlay shown from viewer-owned context menus.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentRender.jsx",
       "lines": 1074,
       "extension": ".jsx",
       "jsdocBlockCount": 34,
+      "sourceSummary": "OpenDocViewer — Active page renderer.",
       "imports": [
         {
           "source": "react",
@@ -7621,6 +8021,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "getCurrentPage",
@@ -8370,13 +8774,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 45,
-      "summary": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes."
+      "summary": "OpenDocViewer — Active page renderer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentSelectionPanel.jsx",
       "lines": 335,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": "Hierarchical page-selection editor shown inside the thumbnail pane.",
       "imports": [
         {
           "source": "react",
@@ -8430,6 +8837,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SelectionCheckboxRow",
@@ -8646,13 +9057,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 13,
-      "summary": "Exports DocumentSelectionPanel."
+      "summary": "Hierarchical page-selection editor shown inside the thumbnail pane.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentThumbnailList.jsx",
-      "lines": 1364,
+      "lines": 1370,
       "extension": ".jsx",
       "jsdocBlockCount": 29,
+      "sourceSummary": "OpenDocViewer — Deterministic thumbnail strip.",
       "imports": [
         {
           "source": "react",
@@ -8730,7 +9144,7 @@
         {
           "name": "DocumentThumbnailList",
           "kind": "default",
-          "line": 1363
+          "line": 1369
         }
       ],
       "declarations": [
@@ -8812,50 +9226,54 @@
         {
           "name": "DocumentThumbnailList",
           "kind": "component",
-          "line": 529
+          "line": 535
         },
         {
           "name": "updateMeasurements",
           "kind": "function",
-          "line": 720
+          "line": 726
         },
         {
           "name": "ranks",
           "kind": "object",
-          "line": 791
+          "line": 797
         },
         {
           "name": "isThumbnailReady",
           "kind": "function",
-          "line": 792
+          "line": 798
         },
         {
           "name": "pushIndex",
           "kind": "function",
-          "line": 795
+          "line": 801
         },
         {
           "name": "touchVisibleIndex",
           "kind": "function",
-          "line": 813
+          "line": 819
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 931
+          "line": 937
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 940
+          "line": 946
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 978
+          "line": 984
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ThumbnailRowProps",
@@ -9372,7 +9790,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 529,
+          "line": 535,
           "description": "",
           "params": [
             {
@@ -9481,7 +9899,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 702,
+          "line": 708,
           "description": "",
           "params": [
             {
@@ -9506,7 +9924,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 931,
+          "line": 937,
           "description": "",
           "params": [
             {
@@ -9531,7 +9949,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 940,
+          "line": 946,
           "description": "",
           "params": [
             {
@@ -9556,7 +9974,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1018,
+          "line": 1024,
           "description": "",
           "params": [
             {
@@ -9581,7 +9999,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1045,
+          "line": 1051,
           "description": "",
           "params": [
             {
@@ -9612,7 +10030,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1071,
+          "line": 1077,
           "description": "",
           "params": [
             {
@@ -9643,7 +10061,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1084,
+          "line": 1090,
           "description": "",
           "params": [
             {
@@ -9680,7 +10098,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1138,
+          "line": 1144,
           "description": "",
           "params": [
             {
@@ -9789,13 +10207,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 48,
-      "summary": "Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1."
+      "summary": "OpenDocViewer — Deterministic thumbnail strip.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
       "lines": 463,
       "extension": ".jsx",
       "jsdocBlockCount": 8,
+      "sourceSummary": "Small About dialog for version/build/support information.",
       "imports": [
         {
           "source": "react",
@@ -9866,6 +10287,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "resolveAboutInfo",
@@ -10019,13 +10444,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 25,
-      "summary": "Exports AboutOverlayDialog."
+      "summary": "Small About dialog for version/build/support information.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
       "lines": 2126,
       "extension": ".jsx",
       "jsdocBlockCount": 43,
+      "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
       "imports": [
         {
           "source": "react",
@@ -10295,6 +10723,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "isPdfAbortError",
@@ -11211,13 +11643,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 54,
-      "summary": "Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry."
+      "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/HelpMenuButton.jsx",
       "lines": 109,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
+      "sourceSummary": "Toolbar help menu with entries for the manual and About dialog.",
       "imports": [
         {
           "source": "react",
@@ -11287,6 +11722,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "<anonymous>~handlePointerDown",
@@ -11369,13 +11808,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 19,
-      "summary": "Exports HelpMenuButton."
+      "summary": "Toolbar help menu with entries for the manual and About dialog.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
       "lines": 216,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": "Full-screen help overlay for OpenDocViewer.",
       "imports": [
         {
           "source": "react",
@@ -11421,6 +11863,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -11509,13 +11955,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 12,
-      "summary": "Exports HelpOverlayDialog."
+      "summary": "Full-screen help overlay for OpenDocViewer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
       "lines": 154,
       "extension": ".jsx",
       "jsdocBlockCount": 5,
+      "sourceSummary": "Compact language selector for the toolbar.",
       "imports": [
         {
           "source": "react",
@@ -11579,6 +12028,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "resolveLanguageLabel",
@@ -11709,13 +12162,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 26,
-      "summary": "Exports LanguageMenuButton."
+      "summary": "Compact language selector for the toolbar.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
       "lines": 357,
       "extension": ".jsx",
       "jsdocBlockCount": 12,
+      "sourceSummary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
       "imports": [
         {
           "source": "react",
@@ -11823,6 +12279,27 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": [
+          {
+            "key": "dangerouslySetInnerHTML",
+            "description": "React raw HTML rendering",
+            "lines": [
+              339
+            ]
+          },
+          {
+            "key": "innerHTML",
+            "description": "Direct DOM HTML assignment or access",
+            "lines": [
+              100,
+              101,
+              102
+            ]
+          }
+        ]
+      },
       "doclets": [
         {
           "id": "toText",
@@ -12154,13 +12631,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 39,
-      "summary": "Exports ManualOverlayDialog."
+      "summary": "Manual overlay that loads simple external HTML fragments from the public help folder.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/PageNavigationButtons.jsx",
       "lines": 329,
       "extension": ".jsx",
       "jsdocBlockCount": 1,
+      "sourceSummary": "Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.",
       "imports": [
         {
           "source": "react",
@@ -12217,6 +12697,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [
@@ -12260,13 +12744,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 15,
-      "summary": "Exports PageNavigationButtons."
+      "summary": "Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-      "lines": 545,
+      "lines": 544,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Unified print dialog with a single print-method selector and shared print-details section.",
       "imports": [
         {
           "source": "react",
@@ -12313,6 +12800,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PrintSubmitDetail",
@@ -12365,13 +12856,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "Structured payload returned to the caller on submit."
+      "summary": "Unified print dialog with a single print-method selector and shared print-details section.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
       "lines": 108,
       "extension": ".jsx",
       "jsdocBlockCount": 1,
+      "sourceSummary": "Reusable toolbar split-button.",
       "imports": [
         {
           "source": "react",
@@ -12422,6 +12916,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [],
@@ -12447,13 +12945,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 21,
-      "summary": "Exports SplitToolbarButton."
+      "summary": "Reusable toolbar split-button.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
       "lines": 166,
       "extension": ".jsx",
       "jsdocBlockCount": 8,
+      "sourceSummary": "Compact theme selector for the toolbar.",
       "imports": [
         {
           "source": "react",
@@ -12530,6 +13031,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "resolveThemeModeLabel",
@@ -12690,13 +13195,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 29,
-      "summary": "Exports ThemeMenuButton."
+      "summary": "Compact theme selector for the toolbar.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/ThemeToggleButton.jsx",
-      "lines": 55,
+      "lines": 59,
       "extension": ".jsx",
       "jsdocBlockCount": 1,
+      "sourceSummary": "Small button that toggles between light/dark themes using the ThemeContext.",
       "imports": [
         {
           "source": "react",
@@ -12733,7 +13241,7 @@
         {
           "name": "ThemeToggleButton",
           "kind": "default",
-          "line": 54
+          "line": 58
         }
       ],
       "declarations": [
@@ -12744,6 +13252,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [
@@ -12783,13 +13295,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 5,
-      "summary": "Exports ThemeToggleButton."
+      "summary": "Small button that toggles between light/dark themes using the ThemeContext.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js",
       "lines": 362,
       "extension": ".js",
       "jsdocBlockCount": 11,
+      "sourceSummary": "Background prebuild/cache for configured \"all pages\" generated-PDF variants.",
       "imports": [
         {
           "source": "react",
@@ -12902,6 +13417,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "throwIfAborted",
@@ -13238,13 +13759,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 40,
-      "summary": "Run async work with bounded concurrency."
+      "summary": "Background prebuild/cache for configured \"all pages\" generated-PDF variants.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
       "lines": 828,
       "extension": ".js",
       "jsdocBlockCount": 30,
+      "sourceSummary": "Hook + helpers for PrintRangeDialog.",
       "imports": [
         {
           "source": "react",
@@ -13382,6 +13906,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PrintSubmitDetail",
@@ -14067,13 +14597,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 58,
-      "summary": "Read the runtime configuration (merged defaults + site overrides)."
+      "summary": "Hook + helpers for PrintRangeDialog.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentToolbar/ZoomButtons.jsx",
       "lines": 508,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
       "imports": [
         {
           "source": "react",
@@ -14204,6 +14737,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "parsePercentInput",
@@ -14266,13 +14803,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "Parse a percent-like string safely."
+      "summary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
       "lines": 100,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Per-pane “post-zoom” controls shown in comparison mode.",
       "imports": [
         {
           "source": "react",
@@ -14316,6 +14856,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "CompareZoomOverlay",
@@ -14358,13 +14902,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 16,
-      "summary": "CompareZoomOverlay Presentational-only (no state)."
+      "summary": "Per-pane “post-zoom” controls shown in comparison mode.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewer.jsx",
       "lines": 593,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
+      "sourceSummary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
       "imports": [
         {
           "source": "react",
@@ -14523,6 +15070,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "<anonymous>~isEditableTarget",
@@ -14750,13 +15301,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 21,
-      "summary": "Exports DocumentViewer."
+      "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
       "lines": 1051,
       "extension": ".jsx",
       "jsdocBlockCount": 28,
+      "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
       "imports": [
         {
           "source": "react",
@@ -14918,6 +15472,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ViewerPaneKey",
@@ -15604,13 +16162,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 45,
-      "summary": "DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane."
+      "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
       "lines": 222,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "OpenDocViewer — Document Viewer Thumbnails (Wrapper) Provides the deterministic thumbnail list and local width controls for the viewer shell.",
       "imports": [
         {
           "source": "react",
@@ -15656,6 +16217,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "DocumentViewerThumbnails",
@@ -15875,13 +16440,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 17,
-      "summary": "Exports DocumentViewerThumbnails."
+      "summary": "OpenDocViewer — Document Viewer Thumbnails (Wrapper) Provides the deterministic thumbnail list and local width controls for the viewer shell.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
       "lines": 418,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
+      "sourceSummary": "Toolbar adapter for the document viewer.",
       "imports": [
         {
           "source": "react",
@@ -15920,6 +16488,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "RefLike",
@@ -16052,13 +16624,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 31,
-      "summary": "Renders the toolbar for the document viewer by delegating to ."
+      "summary": "Toolbar adapter for the document viewer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
       "lines": 557,
       "extension": ".js",
       "jsdocBlockCount": 19,
+      "sourceSummary": "Cross-cutting viewer effects: - Sync zoomState.scale from numeric zoom - Sticky Fit recomputation on relevant changes - ResizeObserver to re-fit on container resize - Global Ctrl/Cmd + wheel zoom - Global keyboard naviga",
       "imports": [
         {
           "source": "react",
@@ -16164,6 +16739,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module:useViewerEffects",
@@ -16559,13 +17140,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 41,
-      "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res..."
+      "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
     },
     {
       "path": "src/components/DocumentViewer/hooks/useViewerPostZoom.js",
       "lines": 86,
       "extension": ".js",
       "jsdocBlockCount": 7,
+      "sourceSummary": "Encapsulates per-pane \"post-zoom\" state & handlers used only in compare mode.",
       "imports": [
         {
           "source": "react",
@@ -16602,6 +17186,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module:useViewerPostZoom",
@@ -16772,13 +17362,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 34,
-      "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode."
+      "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
     },
     {
       "path": "src/components/DocumentViewer/useDocumentViewer.js",
       "lines": 1690,
       "extension": ".js",
       "jsdocBlockCount": 68,
+      "sourceSummary": "Primary viewer-state hook.",
       "imports": [
         {
           "source": "react",
@@ -16981,6 +17574,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "clampPage",
@@ -18314,13 +18913,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 51,
-      "summary": "Hook that centralizes viewer UI state and event handlers."
+      "summary": "Primary viewer-state hook.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/ImageRenderer.jsx",
       "lines": 121,
       "extension": ".jsx",
       "jsdocBlockCount": 4,
+      "sourceSummary": "OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor.",
       "imports": [
         {
           "source": "react",
@@ -18364,6 +18966,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ImgEventHandler",
@@ -18503,13 +19109,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 20,
-      "summary": "ImageRenderer component."
+      "summary": "OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/LoadingMessage.jsx",
       "lines": 90,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
+      "sourceSummary": "OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status.",
       "imports": [
         {
           "source": "react",
@@ -18555,6 +19164,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "LoadingMessage",
@@ -18654,13 +19267,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 16,
-      "summary": "LoadingMessage component."
+      "summary": "OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/LoadingSpinner.jsx",
       "lines": 91,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
+      "sourceSummary": "OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.",
       "imports": [
         {
           "source": "react",
@@ -18704,6 +19320,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "srOnlyStyle",
@@ -18828,13 +19448,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 28,
-      "summary": "LoadingSpinner component."
+      "summary": "OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/PrintSelectionWorkspace.jsx",
       "lines": 2450,
       "extension": ".jsx",
       "jsdocBlockCount": 5,
+      "sourceSummary": "Full-window print-selection workspace.",
       "imports": [
         {
           "source": "react",
@@ -19232,6 +19855,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "<anonymous>~handleKeyDown",
@@ -19361,13 +19988,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 45,
-      "summary": "Exports PrintSelectionWorkspace."
+      "summary": "Full-window print-selection workspace.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/Resizer.jsx",
       "lines": 111,
       "extension": ".jsx",
       "jsdocBlockCount": 9,
+      "sourceSummary": "OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content) via mouse drag or keyboard interaction.",
       "imports": [
         {
           "source": "react",
@@ -19407,6 +20037,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ResizeStartHandler",
@@ -19577,13 +20211,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 37,
-      "summary": "Resizer component."
+      "summary": "OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content) via mouse drag or keyboard interaction.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/components/ViewerProblemNotice.jsx",
       "lines": 267,
       "extension": ".jsx",
       "jsdocBlockCount": 5,
+      "sourceSummary": "OpenDocViewer — configurable viewer-level problem notice.",
       "imports": [
         {
           "source": "react",
@@ -19685,6 +20322,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "toCount",
@@ -19871,13 +20512,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 27,
-      "summary": "Exports ViewerProblemNotice."
+      "summary": "OpenDocViewer — configurable viewer-level problem notice.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/contexts/themeContext.js",
       "lines": 37,
       "extension": ".js",
       "jsdocBlockCount": 4,
+      "sourceSummary": null,
       "imports": [
         {
           "source": "react",
@@ -19896,6 +20540,12 @@
       ],
       "declarations": [],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "context"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ThemeMode",
@@ -19950,13 +20600,16 @@
       ],
       "incomingLocalImports": 3,
       "importanceScore": 38,
-      "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake."
+      "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.",
+      "summaryConfidence": "high",
+      "summarySource": "doclet"
     },
     {
       "path": "src/contexts/ThemeProvider.jsx",
       "lines": 202,
       "extension": ".jsx",
       "jsdocBlockCount": 15,
+      "sourceSummary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen",
       "imports": [
         {
           "source": "react",
@@ -20032,6 +20685,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "context"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ThemeName",
@@ -20308,13 +20967,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 38,
-      "summary": "ThemeProvider component to manage and provide theme-related state and functions."
+      "summary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/contexts/viewerContext.js",
       "lines": 207,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": null,
       "imports": [
         {
           "source": "react",
@@ -20333,6 +20995,12 @@
       ],
       "declarations": [],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "context"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ViewerPageEntry",
@@ -20465,13 +21133,16 @@
       ],
       "incomingLocalImports": 10,
       "importanceScore": 90,
-      "summary": "Exports ViewerContext."
+      "summary": "Exports ViewerContext.",
+      "summaryConfidence": "medium",
+      "summarySource": "source-export"
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
       "lines": 2551,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
+      "sourceSummary": "OpenDocViewer — Viewer state provider.",
       "imports": [
         {
           "source": "react",
@@ -20713,6 +21384,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "context"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "DocumentSessionInitOptions",
@@ -22325,13 +23002,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 57,
-      "summary": "Record that a page now has a reusable full-size asset available."
+      "summary": "OpenDocViewer — Viewer state provider.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/ErrorBoundary.jsx",
       "lines": 297,
       "extension": ".jsx",
       "jsdocBlockCount": 20,
+      "sourceSummary": "OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components.",
       "imports": [
         {
           "source": "react",
@@ -22410,6 +23090,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "IS_DEV",
@@ -22704,13 +23388,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 39,
-      "summary": "Tiny helper to translate with safe fallback (NS: 'common')."
+      "summary": "OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/hooks/useAcceleratingHoldRepeat.js",
       "lines": 210,
       "extension": ".js",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Reusable press-and-hold behavior for toolbar buttons.",
       "imports": [
         {
           "source": "react",
@@ -22759,6 +23446,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "module.exports",
@@ -22846,13 +23539,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 25,
-      "summary": "Exports useAcceleratingHoldRepeat."
+      "summary": "Reusable press-and-hold behavior for toolbar buttons.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/hooks/useNavigationModifierState.js",
       "lines": 109,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": "Shared modifier-key state for navigation and compare-aware viewer actions.",
       "imports": [
         {
           "source": "react",
@@ -22919,6 +23615,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "NavigationModifierState",
@@ -23096,13 +23798,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 42,
-      "summary": "Exports useNavigationModifierState."
+      "summary": "Shared modifier-key state for navigation and compare-aware viewer actions.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/hooks/usePageNavigation.js",
       "lines": 182,
       "extension": ".js",
       "jsdocBlockCount": 11,
+      "sourceSummary": "OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown).",
       "imports": [
         {
           "source": "react",
@@ -23151,6 +23856,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PageNavigationAPI",
@@ -23336,13 +24047,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 30,
-      "summary": "Custom hook to handle document page navigation with keyboard/mouse."
+      "summary": "OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/hooks/usePageTimer.js",
       "lines": 149,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia",
       "imports": [
         {
           "source": "react",
@@ -23376,6 +24090,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PageDirection",
@@ -23515,13 +24235,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 40,
-      "summary": "Custom hook to handle page change with a timer for continuous navigation."
+      "summary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/i18n.js",
       "lines": 566,
       "extension": ".js",
       "jsdocBlockCount": 22,
+      "sourceSummary": "i18n bootstrap for OpenDocViewer.",
       "imports": [
         {
           "source": "i18next",
@@ -23655,6 +24378,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "getSafeWindow",
@@ -24143,13 +24870,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 49,
-      "summary": "Return browser window safely in browser, SSR, test, and documentation contexts."
+      "summary": "i18n bootstrap for OpenDocViewer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/index.jsx",
       "lines": 59,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
+      "sourceSummary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
       "imports": [
         {
           "source": "react",
@@ -24205,6 +24935,10 @@
       "exports": [],
       "declarations": [],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "isDev",
@@ -24295,13 +25029,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 86,
-      "summary": "Determine environment and set a sensible client-side log level."
+      "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/bootstrapRuntime.js",
       "lines": 457,
       "extension": ".js",
       "jsdocBlockCount": 15,
+      "sourceSummary": "Startup mode detection and host-integration entry point.",
       "imports": [
         {
           "source": "./parentBridge.js",
@@ -24430,6 +25167,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ODV_BOOTSTRAP_MODES",
@@ -24722,13 +25463,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 45,
-      "summary": "Canonical bootstrap modes."
+      "summary": "Startup mode detection and host-integration entry point.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/normalizePortableBundle.js",
       "lines": 833,
       "extension": ".js",
       "jsdocBlockCount": 26,
+      "sourceSummary": "Normalizes multiple host payload shapes into the project's neutral portable bundle shape.",
       "imports": [
         {
           "source": "../utils/runtimeConfig.js",
@@ -25025,6 +25769,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PortableSession",
@@ -25196,13 +25944,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 48,
-      "summary": "Normalize many incoming shapes to a neutral PortableDocumentBundle v1."
+      "summary": "Normalizes multiple host payload shapes into the project's neutral portable bundle shape.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/parentBridge.js",
       "lines": 182,
       "extension": ".js",
       "jsdocBlockCount": 10,
+      "sourceSummary": "Same-origin parent-window bootstrap adapter.",
       "imports": [],
       "exports": [
         {
@@ -25269,6 +26020,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ParentBootstrapResult",
@@ -25460,13 +26215,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 53,
-      "summary": "Attempt to read a bootstrap object from a same-origin parent."
+      "summary": "Same-origin parent-window bootstrap adapter.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/sessionToken.js",
       "lines": 142,
       "extension": ".js",
       "jsdocBlockCount": 7,
+      "sourceSummary": "OpenDocViewer — Session Token Reader (Browser-only) Decode an optional Base64/URL-safe Base64 JSON payload provided via the query string: ?sessiondata=<base64> This enables hosts to pass a compact, self-contained “portab",
       "imports": [],
       "exports": [
         {
@@ -25503,6 +26261,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "MAX_B64_LEN",
@@ -25617,13 +26379,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 42,
-      "summary": "Decode a Base64 string into a UTF-8 JavaScript string."
+      "summary": "OpenDocViewer — Session Token Reader (Browser-only) Decode an optional Base64/URL-safe Base64 JSON payload provided via the query string: ?sessiondata=<base64> This enables hosts to pass a compact, self-contained “portab",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/sessionUrl.js",
       "lines": 157,
       "extension": ".js",
       "jsdocBlockCount": 3,
+      "sourceSummary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
       "imports": [],
       "exports": [
         {
@@ -25675,6 +26440,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "MAX_RESPONSE_TEXT_LEN",
@@ -25726,13 +26495,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 33,
-      "summary": "Read and fetch a session payload URL from the viewer query string."
+      "summary": "Fetch a host-prepared Portable Document Bundle from a short URL query value.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/urlParams.js",
       "lines": 110,
       "extension": ".js",
       "jsdocBlockCount": 6,
+      "sourceSummary": "OpenDocViewer — URL Parameter Reader (Browser-only) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -25772,6 +26544,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "UrlParamsData",
@@ -25888,13 +26664,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 33,
-      "summary": "Reads common query params used by the demo and other hosts."
+      "summary": "OpenDocViewer — URL Parameter Reader (Browser-only) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/integrations/viewerEvents.js",
       "lines": 192,
       "extension": ".js",
       "jsdocBlockCount": 9,
+      "sourceSummary": "OpenDocViewer — Tiny Event Emitter/Listener Utilities (Browser-only) Lightweight helpers for broadcasting and listening to app-level DOM events.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -25959,6 +26738,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ODVEventHandler",
@@ -26187,13 +26970,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 45,
-      "summary": "Emit a namespaced OpenDocViewer event with an optional detail payload."
+      "summary": "OpenDocViewer — Tiny Event Emitter/Listener Utilities (Browser-only) Lightweight helpers for broadcasting and listening to app-level DOM events.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/logging/systemLogger.js",
       "lines": 432,
       "extension": ".js",
       "jsdocBlockCount": 45,
+      "sourceSummary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
       "imports": [
         {
           "source": "axios",
@@ -26268,6 +27054,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "LogLevel",
@@ -26929,13 +27719,16 @@
       ],
       "incomingLocalImports": 35,
       "importanceScore": 92,
-      "summary": "Export a singleton instance (sufficient for app usage)."
+      "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/logging/userLogger.js",
       "lines": 308,
       "extension": ".js",
       "jsdocBlockCount": 21,
+      "sourceSummary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
       "imports": [],
       "exports": [
         {
@@ -26992,6 +27785,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "UserIdentity",
@@ -27253,13 +28050,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 39,
-      "summary": "Export singleton instance."
+      "summary": "UserLogController — client-side controller for **user** print logs (backend-agnostic).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/PerformanceMonitor.jsx",
       "lines": 1346,
       "extension": ".jsx",
       "jsdocBlockCount": 23,
+      "sourceSummary": "src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state.",
       "imports": [
         {
           "source": "react",
@@ -27453,6 +28253,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "MemorySnapshot",
@@ -28022,13 +28826,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 48,
-      "summary": "PerformanceMonitor component."
+      "summary": "src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/schemas/portableBundle.js",
       "lines": 363,
       "extension": ".js",
       "jsdocBlockCount": 28,
+      "sourceSummary": "OpenDocViewer — Portable Document Bundle Schema & Helpers (ESM) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input.",
       "imports": [],
       "exports": [
         {
@@ -28160,6 +28967,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PORTABLE_BUNDLE_SCHEMA_VERSION",
@@ -28539,17 +29350,24 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 57,
-      "summary": "Schema version of this portable bundle definition."
+      "summary": "OpenDocViewer — Portable Document Bundle Schema & Helpers (ESM) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/types/jsdoc-types.js",
       "lines": 101,
       "extension": ".js",
       "jsdocBlockCount": 14,
+      "sourceSummary": "Centralized JSDoc-only type and callback definitions.",
       "imports": [],
       "exports": [],
       "declarations": [],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SetNumberState",
@@ -28834,13 +29652,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 24,
-      "summary": "Generic React-like state setter for numbers: accepts either a number or an updater function (number)-&gt;number."
+      "summary": "Centralized JSDoc-only type and callback definitions.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/documentLoadingConfig.js",
       "lines": 1045,
       "extension": ".js",
       "jsdocBlockCount": 34,
+      "sourceSummary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
       "imports": [
         {
           "source": "./runtimeConfig.js",
@@ -29132,6 +29953,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "SourceStoreMode",
@@ -29714,13 +30539,16 @@
       "packageImports": [],
       "incomingLocalImports": 12,
       "importanceScore": 122,
-      "summary": "Count PDF pages in a page descriptor list."
+      "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/documentMetadata.js",
       "lines": 404,
       "extension": ".js",
       "jsdocBlockCount": 20,
+      "sourceSummary": "Helpers for resolving document-level metadata from the normalized portable bundle.",
       "imports": [],
       "exports": [
         {
@@ -29857,6 +30685,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "isObject",
@@ -30357,13 +31189,16 @@
       "packageImports": [],
       "incomingLocalImports": 3,
       "importanceScore": 76,
-      "summary": "Build a UI-friendly projection of one document's metadata."
+      "summary": "Helpers for resolving document-level metadata from the normalized portable bundle.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/idUtils.js",
       "lines": 64,
       "extension": ".js",
       "jsdocBlockCount": 4,
+      "sourceSummary": "OpenDocViewer — small opaque identifier helpers.",
       "imports": [],
       "exports": [
         {
@@ -30395,6 +31230,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "fallbackCounter",
@@ -30496,13 +31335,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 30,
-      "summary": "Create an opaque identifier fragment suitable for synthetic keys and document ids."
+      "summary": "OpenDocViewer — small opaque identifier helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/localizedValue.js",
       "lines": 113,
       "extension": ".js",
       "jsdocBlockCount": 16,
+      "sourceSummary": "Localized string resolver for admin-supplied config values.",
       "imports": [],
       "exports": [
         {
@@ -30529,6 +31371,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "LocalizedString",
@@ -30656,13 +31502,16 @@
       "packageImports": [],
       "incomingLocalImports": 6,
       "importanceScore": 76,
-      "summary": "Return the best string for the active language."
+      "summary": "Localized string resolver for admin-supplied config values.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/memoryProfile.js",
       "lines": 75,
       "extension": ".js",
       "jsdocBlockCount": 7,
+      "sourceSummary": "OpenDocViewer — Runtime memory profile helpers.",
       "imports": [],
       "exports": [
         {
@@ -30694,6 +31543,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "RuntimeMemoryTier",
@@ -30812,13 +31665,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 31,
-      "summary": "Exports getRuntimeMemoryProfile."
+      "summary": "OpenDocViewer — Runtime memory profile helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/navigationUtils.js",
       "lines": 172,
       "extension": ".js",
       "jsdocBlockCount": 8,
+      "sourceSummary": "OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -30888,6 +31744,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "toPositiveInt",
@@ -31103,13 +31963,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 50,
-      "summary": "Navigate to the previous page (no-op if already at page 1)."
+      "summary": "OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/objectUrlRegistry.js",
       "lines": 72,
       "extension": ".js",
       "jsdocBlockCount": 8,
+      "sourceSummary": "Centralized helpers for object/blob URL lifecycle management.",
       "imports": [],
       "exports": [
         {
@@ -31176,6 +32039,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "createTrackedObjectUrl",
@@ -31319,13 +32186,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 56,
-      "summary": "Check whether a blob/object URL is still tracked as live by the viewer."
+      "summary": "Centralized helpers for object/blob URL lifecycle management.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pageAssetRenderer.js",
       "lines": 850,
       "extension": ".js",
       "jsdocBlockCount": 6,
+      "sourceSummary": "OpenDocViewer — hybrid page-asset renderer.",
       "imports": [
         {
           "source": "utif2",
@@ -31465,6 +32335,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PageAssetRendererOptions",
@@ -31631,13 +32505,16 @@
       ],
       "incomingLocalImports": 2,
       "importanceScore": 48,
-      "summary": "Render a PDF page set through the PDF worker pool as one partitioned batch."
+      "summary": "OpenDocViewer — hybrid page-asset renderer.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pageAssetStore.js",
       "lines": 746,
       "extension": ".js",
       "jsdocBlockCount": 38,
+      "sourceSummary": "OpenDocViewer — Browser-side rendered page-asset storage.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -31742,6 +32619,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "makeStorageKey",
@@ -32494,13 +33375,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 48,
-      "summary": "Update runtime thresholds for the active session."
+      "summary": "OpenDocViewer — Browser-side rendered page-asset storage.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pageAssetWorkerPool.js",
       "lines": 320,
       "extension": ".js",
       "jsdocBlockCount": 19,
+      "sourceSummary": "OpenDocViewer — Page-asset worker pool.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -32552,6 +33436,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PageAssetWorkerPoolOptions",
@@ -32888,13 +33778,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 44,
-      "summary": "Exports createPageAssetWorkerPool, PageAssetWorkerPool."
+      "summary": "OpenDocViewer — Page-asset worker pool.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfBenchmark.js",
       "lines": 965,
       "extension": ".js",
       "jsdocBlockCount": 37,
+      "sourceSummary": "Opt-in generated-PDF benchmark tooling.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -33157,6 +34050,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "normalizeInteger",
@@ -34337,13 +35234,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 50,
-      "summary": "Keep a batch-size list ordered and unique."
+      "summary": "Opt-in generated-PDF benchmark tooling.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfjsDocumentOptions.js",
       "lines": 30,
       "extension": ".js",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Shared pdf.js document-loading options.",
       "imports": [],
       "exports": [
         {
@@ -34371,6 +35271,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PDFJS_WASM_BASE_URL",
@@ -34416,13 +35320,16 @@
       "packageImports": [],
       "incomingLocalImports": 4,
       "importanceScore": 48,
-      "summary": "Shared pdf.js document-loading options."
+      "summary": "Shared pdf.js document-loading options.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfPageWorkerPool.js",
       "lines": 477,
       "extension": ".js",
       "jsdocBlockCount": 7,
+      "sourceSummary": "OpenDocViewer - PDF page-image worker pool.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -34499,6 +35406,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PdfPageWorkerPoolOptions",
@@ -34569,13 +35482,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 38,
-      "summary": "Exports createPdfPageWorkerPool, PdfPageWorkerPool."
+      "summary": "OpenDocViewer - PDF page-image worker pool.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfPrebuildPlan.js",
       "lines": 343,
       "extension": ".js",
       "jsdocBlockCount": 21,
+      "sourceSummary": "OpenDocViewer - generated-PDF prebuild planning.",
       "imports": [
         {
           "source": "./localizedValue.js",
@@ -34703,6 +35619,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "clampInteger",
@@ -35249,13 +36169,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 62,
-      "summary": "Return the language dependency that should invalidate an all-pages prebuild run."
+      "summary": "OpenDocViewer - generated-PDF prebuild planning.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfPrintCacheKey.js",
       "lines": 117,
       "extension": ".js",
       "jsdocBlockCount": 9,
+      "sourceSummary": "Generated-PDF cache key helpers.",
       "imports": [],
       "exports": [
         {
@@ -35337,6 +36260,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "stablePrintText",
@@ -35562,13 +36489,16 @@
       "packageImports": [],
       "incomingLocalImports": 4,
       "importanceScore": 86,
-      "summary": "Compare the content-affecting print settings that determine whether an existing generated PDF can be reused."
+      "summary": "Generated-PDF cache key helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfWorkerDispatcher.js",
       "lines": 451,
       "extension": ".js",
       "jsdocBlockCount": 20,
+      "sourceSummary": "OpenDocViewer - generated PDF worker dispatcher.",
       "imports": [
         {
           "source": "../workers/pdfWorker.js?worker",
@@ -35713,6 +36643,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PdfWorkerBatch",
@@ -36347,13 +37283,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 58,
-      "summary": "Pick a conservative future batch size from a pages-per-worker target."
+      "summary": "OpenDocViewer - generated PDF worker dispatcher.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/performanceOverlayFlag.js",
       "lines": 86,
       "extension": ".js",
       "jsdocBlockCount": 4,
+      "sourceSummary": "Shared runtime toggle helpers for optional diagnostics UI.",
       "imports": [],
       "exports": [
         {
@@ -36390,6 +37329,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "escapeMetaName",
@@ -36483,13 +37426,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 40,
-      "summary": "Resolve a boolean flag from (precedence order): window."
+      "summary": "Shared runtime toggle helpers for optional diagnostics UI.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printCore.js",
       "lines": 569,
       "extension": ".js",
       "jsdocBlockCount": 40,
+      "sourceSummary": "Core print coordinator for the frontend.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -36631,6 +37577,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PrintOptions",
@@ -37171,13 +38121,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 61,
-      "summary": "Handles the print functionality for the CURRENT page/image."
+      "summary": "Core print coordinator for the frontend.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printDom.js",
       "lines": 462,
       "extension": ".js",
       "jsdocBlockCount": 20,
+      "sourceSummary": "OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().",
       "imports": [
         {
           "source": "i18next",
@@ -37329,6 +38282,18 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": [
+          {
+            "key": "innerHTML",
+            "description": "Direct DOM HTML assignment or access",
+            "lines": [
+              253
+            ]
+          }
+        ]
+      },
       "doclets": [
         {
           "id": "PrintOverlayCfg",
@@ -38078,13 +39043,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 45,
-      "summary": "Render a single-page print document in the given print iframe document."
+      "summary": "OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printParse.js",
       "lines": 100,
       "extension": ".js",
       "jsdocBlockCount": 5,
+      "sourceSummary": "OpenDocViewer — Print Sequence Parser Parse a user-entered \"Custom pages\" string into a sequence of page indices.",
       "imports": [
         {
           "source": "i18next",
@@ -38114,6 +39082,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "ParseResult",
@@ -38210,13 +39182,16 @@
       ],
       "incomingLocalImports": 1,
       "importanceScore": 22,
-      "summary": "Parse &quot;Custom pages&quot; into a sequence."
+      "summary": "OpenDocViewer — Print Sequence Parser Parse a user-entered \"Custom pages\" string into a sequence of page indices.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printPdf.js",
       "lines": 2174,
       "extension": ".js",
       "jsdocBlockCount": 100,
+      "sourceSummary": "OpenDocViewer — Generated PDF print backend.",
       "imports": [
         {
           "source": "i18next",
@@ -38836,6 +39811,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "escapeRegExp",
@@ -41679,13 +42658,16 @@
       ],
       "incomingLocalImports": 3,
       "importanceScore": 96,
-      "summary": "Build a PDF blob from page image URLs and print metadata."
+      "summary": "OpenDocViewer — Generated PDF print backend.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printSanitize.js",
       "lines": 23,
       "extension": ".js",
       "jsdocBlockCount": 2,
+      "sourceSummary": "OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules.",
       "imports": [],
       "exports": [
         {
@@ -41702,6 +42684,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "isSafeImageSrc",
@@ -41734,13 +42720,16 @@
       "packageImports": [],
       "incomingLocalImports": 3,
       "importanceScore": 32,
-      "summary": "Allow-list image sources used for printing."
+      "summary": "OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printTemplate.js",
       "lines": 809,
       "extension": ".js",
       "jsdocBlockCount": 38,
+      "sourceSummary": "OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.",
       "imports": [],
       "exports": [
         {
@@ -41987,6 +42976,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "escapeHtmlSegment",
@@ -42952,13 +43945,16 @@
       "packageImports": [],
       "incomingLocalImports": 3,
       "importanceScore": 84,
-      "summary": "Resolve the configured copy/print-format marker text consistently across print backends."
+      "summary": "OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printUtils.js",
       "lines": 37,
       "extension": ".js",
       "jsdocBlockCount": 1,
+      "sourceSummary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
       "imports": [
         {
           "source": "./printCore.js",
@@ -43072,6 +44068,10 @@
       ],
       "declarations": [],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [],
       "moduleKey": "src/utils",
       "localImports": [
@@ -43112,13 +44112,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 46,
-      "summary": "Exports handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence."
+      "summary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/printWatermark.js",
       "lines": 80,
       "extension": ".js",
       "jsdocBlockCount": 6,
+      "sourceSummary": "OpenDocViewer — Print watermark mode helpers.",
       "imports": [],
       "exports": [
         {
@@ -43170,6 +44173,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "currentLanguage",
@@ -43314,13 +44321,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 51,
-      "summary": "Resolve the image asset for COPY/KOPIA watermark modes."
+      "summary": "OpenDocViewer — Print watermark mode helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/publicAssetUrl.js",
       "lines": 29,
       "extension": ".js",
       "jsdocBlockCount": 2,
+      "sourceSummary": "Resolve a public asset path against the viewer base URL.",
       "imports": [],
       "exports": [
         {
@@ -43342,6 +44352,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "getPublicAssetUrl",
@@ -43374,13 +44388,16 @@
       "packageImports": [],
       "incomingLocalImports": 6,
       "importanceScore": 61,
-      "summary": "Exports getPublicAssetUrl, default."
+      "summary": "Resolve a public asset path against the viewer base URL.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/reloadCacheCrypto.js",
       "lines": 165,
       "extension": ".js",
       "jsdocBlockCount": 3,
+      "sourceSummary": "Short-lived reload-cache key helpers.",
       "imports": [],
       "exports": [
         {
@@ -43457,6 +44474,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "STORAGE_PREFIX",
@@ -43545,13 +44566,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 36,
-      "summary": "Short-lived reload-cache key helpers."
+      "summary": "Short-lived reload-cache key helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/reloadCacheIdentity.js",
       "lines": 154,
       "extension": ".js",
       "jsdocBlockCount": 8,
+      "sourceSummary": "Stable identities for the opt-in reload/document cache.",
       "imports": [],
       "exports": [
         {
@@ -43623,6 +44647,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "stableHash",
@@ -43841,13 +44869,16 @@
       "packageImports": [],
       "incomingLocalImports": 2,
       "importanceScore": 68,
-      "summary": "Exports stableHash, createReloadCacheSessionId, describeDocumentSourceKey, createDocumentSourceKey, createRenderAssetSignature."
+      "summary": "Stable identities for the opt-in reload/document cache.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/renderDecodeBenchmark.js",
       "lines": 1211,
       "extension": ".js",
       "jsdocBlockCount": 29,
+      "sourceSummary": "Opt-in render/decode benchmark tooling for the already loaded document session.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -44138,6 +45169,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "normalizeInteger",
@@ -45188,13 +46223,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 52,
-      "summary": "Exports isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark."
+      "summary": "Opt-in render/decode benchmark tooling for the already loaded document session.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/runtimeConfig.js",
       "lines": 363,
       "extension": ".js",
       "jsdocBlockCount": 22,
+      "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
         {
@@ -45376,6 +46414,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "KeyboardPrintShortcutBehavior",
@@ -45835,13 +46877,16 @@
       "packageImports": [],
       "incomingLocalImports": 13,
       "importanceScore": 117,
-      "summary": "Read the merged runtime configuration from the browser environment."
+      "summary": "Runtime configuration helpers.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/sourceTempStore.js",
       "lines": 913,
       "extension": ".js",
       "jsdocBlockCount": 45,
+      "sourceSummary": "OpenDocViewer — Browser-side temporary source storage.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -45962,6 +47007,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "makeStorageKey",
@@ -46907,13 +47956,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 49,
-      "summary": "Update runtime thresholds for the active session."
+      "summary": "OpenDocViewer — Browser-side temporary source storage.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/supportDiagnostics.js",
       "lines": 370,
       "extension": ".js",
       "jsdocBlockCount": 19,
+      "sourceSummary": "Support diagnostics helpers for opt-in troubleshooting tools.",
       "imports": [
         {
           "source": "./runtimeConfig.js",
@@ -47062,6 +48114,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "getAppVersionFromWindowGlobals",
@@ -47493,13 +48549,16 @@
       "packageImports": [],
       "incomingLocalImports": 3,
       "importanceScore": 81,
-      "summary": "Download a JSON diagnostics payload in browser environments."
+      "summary": "Support diagnostics helpers for opt-in troubleshooting tools.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/viewerPreferences.js",
       "lines": 473,
       "extension": ".js",
       "jsdocBlockCount": 39,
+      "sourceSummary": "Lightweight persisted viewer preferences.",
       "imports": [
         {
           "source": "./runtimeConfig.js",
@@ -47807,6 +48866,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "CustomFitSizeLimitPreference",
@@ -48529,13 +49592,16 @@
       "packageImports": [],
       "incomingLocalImports": 5,
       "importanceScore": 97,
-      "summary": "Persist the user's theme mode preference."
+      "summary": "Lightweight persisted viewer preferences.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/zoomUtils.js",
       "lines": 268,
       "extension": ".js",
       "jsdocBlockCount": 20,
+      "sourceSummary": "OpenDocViewer — Zoom utilities.",
       "imports": [
         {
           "source": "../logging/systemLogger.js",
@@ -48630,6 +49696,10 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "MIN_ZOOM",
@@ -49096,13 +50166,16 @@
       "packageImports": [],
       "incomingLocalImports": 1,
       "importanceScore": 54,
-      "summary": "Calculate and set a zoom that fits the render surface within both viewport axes."
+      "summary": "OpenDocViewer — Zoom utilities.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/workers/imageWorker.js",
       "lines": 488,
       "extension": ".js",
       "jsdocBlockCount": 5,
+      "sourceSummary": "OpenDocViewer — image / TIFF worker.",
       "imports": [],
       "exports": [],
       "declarations": [
@@ -49213,6 +50286,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "createFallbackMainThreadError",
@@ -49245,13 +50324,16 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 7,
-      "summary": "Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread."
+      "summary": "OpenDocViewer — image / TIFF worker.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/workers/pdfPageWorker.js",
       "lines": 433,
       "extension": ".js",
       "jsdocBlockCount": 3,
+      "sourceSummary": "OpenDocViewer - PDF page image worker.",
       "imports": [
         {
           "source": "pdfjs-dist/legacy/build/pdf",
@@ -49389,6 +50471,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "PdfCacheEntry",
@@ -49433,13 +50521,16 @@
       ],
       "incomingLocalImports": 0,
       "importanceScore": 6,
-      "summary": "Defines createFallbackMainThreadError, getWorkerEnvironmentDiagnostics, serializeError, fitScale, normalizeThumbnailBound."
+      "summary": "OpenDocViewer - PDF page image worker.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/workers/pdfWorker.js",
       "lines": 628,
       "extension": ".js",
       "jsdocBlockCount": 1,
+      "sourceSummary": "OpenDocViewer - generated PDF worker.",
       "imports": [],
       "exports": [],
       "declarations": [
@@ -49635,6 +50726,12 @@
         }
       ],
       "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
       "doclets": [
         {
           "id": "workerScope",
@@ -49655,7 +50752,9 @@
       "packageImports": [],
       "incomingLocalImports": 0,
       "importanceScore": 8,
-      "summary": "OpenDocViewer - generated PDF worker."
+      "summary": "OpenDocViewer - generated PDF worker.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
     }
   ],
   "symbols": [
@@ -54268,7 +55367,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 529,
+      "line": 535,
       "description": "",
       "params": [
         {
@@ -54711,7 +55810,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1045,
+      "line": 1051,
       "description": "",
       "params": [
         {
@@ -54742,7 +55841,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1138,
+      "line": 1144,
       "description": "",
       "params": [
         {
@@ -54773,7 +55872,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1071,
+      "line": 1077,
       "description": "",
       "params": [
         {
@@ -54804,7 +55903,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 940,
+      "line": 946,
       "description": "",
       "params": [
         {
@@ -54829,7 +55928,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1084,
+      "line": 1090,
       "description": "",
       "params": [
         {
@@ -54866,7 +55965,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 931,
+      "line": 937,
       "description": "",
       "params": [
         {
@@ -54891,7 +55990,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1018,
+      "line": 1024,
       "description": "",
       "params": [
         {
@@ -54947,7 +56046,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 702,
+      "line": 708,
       "description": "",
       "params": [
         {

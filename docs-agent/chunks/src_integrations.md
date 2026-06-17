@@ -4,7 +4,7 @@ File count: 7. Line count: 2073. JSDoc symbol count: 52.
 
 ## src/integrations/bootstrapRuntime.js
 
-Canonical bootstrap modes.
+Startup mode detection and host-integration entry point.
 
 Exports: ODV_BOOTSTRAP_MODES, bootstrapDetect
 
@@ -27,7 +27,7 @@ Symbols:
 
 ## src/integrations/normalizePortableBundle.js
 
-Normalize many incoming shapes to a neutral PortableDocumentBundle v1.
+Normalizes multiple host payload shapes into the project's neutral portable bundle shape.
 
 Exports: normalizeToPortableBundle, default
 
@@ -47,7 +47,7 @@ Symbols:
 
 ## src/integrations/parentBridge.js
 
-Attempt to read a bootstrap object from a same-origin parent.
+Same-origin parent-window bootstrap adapter.
 
 Exports: readFromParent, readFromOpener, readFromRelatedWindow, default
 
@@ -65,7 +65,7 @@ Symbols:
 
 ## src/integrations/sessionToken.js
 
-Decode a Base64 string into a UTF-8 JavaScript string.
+OpenDocViewer — Session Token Reader (Browser-only) Decode an optional Base64/URL-safe Base64 JSON payload provided via the query string: ?sessiondata=<base64> This enables hosts to pass a compact, self-contained “portab
 
 Exports: b64DecodeUnicode, readFromSessionToken, default
 
@@ -80,7 +80,7 @@ Symbols:
 
 ## src/integrations/sessionUrl.js
 
-Read and fetch a session payload URL from the viewer query string.
+Fetch a host-prepared Portable Document Bundle from a short URL query value.
 
 Exports: hasSessionUrlParameter, readFromSessionUrl, default
 
@@ -92,7 +92,7 @@ Symbols:
 
 ## src/integrations/urlParams.js
 
-Reads common query params used by the demo and other hosts.
+OpenDocViewer — URL Parameter Reader (Browser-only) Read a minimal set of query parameters to bootstrap the viewer in “pattern mode”, i.e.
 
 Exports: readFromUrlParams, default
 
@@ -108,7 +108,7 @@ Symbols:
 
 ## src/integrations/viewerEvents.js
 
-Emit a namespaced OpenDocViewer event with an optional detail payload.
+OpenDocViewer — Tiny Event Emitter/Listener Utilities (Browser-only) Lightweight helpers for broadcasting and listening to app-level DOM events.
 
 Exports: emitODVEvent, onODVEvent, onceODVEvent, default
 

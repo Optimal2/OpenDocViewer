@@ -4,7 +4,7 @@ File count: 2. Line count: 740. JSDoc symbol count: 46.
 
 ## src/logging/systemLogger.js
 
-Export a singleton instance (sufficient for app usage).
+src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.
 
 Exports: logger
 
@@ -25,7 +25,7 @@ Symbols:
 
 ## src/logging/userLogger.js
 
-Export singleton instance.
+UserLogController — client-side controller for **user** print logs (backend-agnostic).
 
 Exports: userLog
 

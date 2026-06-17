@@ -16,7 +16,7 @@ Symbols:
 
 ## src/contexts/ThemeProvider.jsx
 
-ThemeProvider component to manage and provide theme-related state and functions.
+src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen
 
 Exports: ThemeProvider
 
@@ -56,7 +56,7 @@ Symbols:
 
 ## src/contexts/ViewerProvider.jsx
 
-Record that a page now has a reusable full-size asset available.
+OpenDocViewer — Viewer state provider.
 
 Exports: ViewerProvider
 
