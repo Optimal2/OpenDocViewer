@@ -14,18 +14,18 @@ jobs:
 
     steps:
       - name: Checkout
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           fetch-depth: 0
 
       - name: Check out AgentDocMap
-        uses: actions/checkout@v4
+        uses: actions/checkout@v6
         with:
           repository: Optimal2/AgentDocMap
           path: _tools/AgentDocMap
 
       - name: Use Node
-        uses: actions/setup-node@v4
+        uses: actions/setup-node@v6
         with:
           node-version: '22.18.0'
           cache: 'npm'
