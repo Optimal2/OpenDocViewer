@@ -4,7 +4,7 @@ File count: 4. Line count: 650. JSDoc symbol count: 23.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
-Exports useAcceleratingHoldRepeat.
+Reusable press-and-hold behavior for toolbar buttons.
 
 Exports: useAcceleratingHoldRepeat
 
@@ -16,7 +16,7 @@ Symbols:
 
 ## src/hooks/useNavigationModifierState.js
 
-Exports useNavigationModifierState.
+Shared modifier-key state for navigation and compare-aware viewer actions.
 
 Exports: useNavigationModifierState, useNavigationModifierState
 
@@ -33,7 +33,7 @@ Symbols:
 
 ## src/hooks/usePageNavigation.js
 
-Custom hook to handle document page navigation with keyboard/mouse.
+OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown).
 
 Exports: usePageNavigation
 
@@ -52,7 +52,7 @@ Symbols:
 
 ## src/hooks/usePageTimer.js
 
-Custom hook to handle page change with a timer for continuous navigation.
+OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia
 
 Exports: usePageTimer
 

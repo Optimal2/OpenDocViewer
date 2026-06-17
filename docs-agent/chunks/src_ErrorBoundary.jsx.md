@@ -4,7 +4,7 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/ErrorBoundary.jsx
 
-Tiny helper to translate with safe fallback (NS: 'common').
+OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components.
 
 Exports: ErrorBoundary
 

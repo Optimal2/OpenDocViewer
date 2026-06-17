@@ -4,7 +4,7 @@ File count: 8. Line count: 3984. JSDoc symbol count: 107.
 
 ## src/components/DocumentLoader/batchHandler.js
 
-Batch scheduler entry point.
+OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread.
 
 Exports: batchHandler
 
@@ -22,7 +22,7 @@ Symbols:
 
 ## src/components/DocumentLoader/DemoControls.jsx
 
-DemoControls — wraps DocumentLoader with demo-mode props and a small control UI.
+OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: "Total pages/files" + JPG/PNG/TIF/PDF buttons + a new "Mix" button.
 
 Exports: DemoControls
 
@@ -34,7 +34,7 @@ Symbols:
 
 ## src/components/DocumentLoader/DocumentLoader.js
 
-Resolve source type information with a cheap signature-first path.
+OpenDocViewer — Document loader orchestrator.
 
 Exports: DocumentLoader
 
@@ -57,7 +57,7 @@ Symbols:
 
 ## src/components/DocumentLoader/documentLoaderUtils.js
 
-Generate a list of document URLs using a simple pattern: 001..NNN + extension.
+OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF
 
 Exports: generateDocumentList, generateDemoList, fetchAndArrayBuffer, getTotalPages, getTiffMetadata, generateThumbnail
 
@@ -91,7 +91,7 @@ Symbols:
 
 ## src/components/DocumentLoader/mainThreadRenderer.js
 
-Render PDF pages on the main thread and INSERT THEM DIRECTLY.
+OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).
 
 Exports: renderPDFInMainThread, renderTIFFInMainThread
 
@@ -111,7 +111,7 @@ Symbols:
 
 ## src/components/DocumentLoader/sources/explicitListSource.js
 
-Convert a PortableDocumentBundle into a flat, ordered list of file URLs.
+OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.
 
 Exports: makeExplicitSource
 
@@ -131,7 +131,7 @@ Symbols:
 
 ## src/components/DocumentLoader/workerHandler.js
 
-Create a new image worker instance.
+OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
 
 Exports: createWorker, getNumberOfWorkers, handleWorkerMessage
 

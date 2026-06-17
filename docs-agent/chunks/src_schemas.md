@@ -4,7 +4,7 @@ File count: 1. Line count: 363. JSDoc symbol count: 18.
 
 ## src/schemas/portableBundle.js
 
-Schema version of this portable bundle definition.
+OpenDocViewer — Portable Document Bundle Schema & Helpers (ESM) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input.
 
 Exports: PORTABLE_BUNDLE_SCHEMA_VERSION, normalizeDocumentFile, normalizeDocumentEntry, normalizePortableBundle, validatePortableBundle, freezePortableBundle, createPortableBundle, default
 

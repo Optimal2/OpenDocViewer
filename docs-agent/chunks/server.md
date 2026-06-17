@@ -4,7 +4,7 @@ File count: 2. Line count: 508. JSDoc symbol count: 7.
 
 ## server/system-log-server.js
 
-Token auth middleware
+System Log Server — Single-file, standalone (ESM) Responsibilities: - Expose POST /log for structured system logs (tiny JSON bodies) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error
 
 Symbols:
 
@@ -16,7 +16,7 @@ Symbols:
 
 ## server/user-log-server.js
 
-Resolve user identity without cookies.
+User Action Log Server — Single-file, standalone (ESM) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string|null - forWhom: string|null - Response: 200 OK with body: true (JSO
 
 Symbols:
 

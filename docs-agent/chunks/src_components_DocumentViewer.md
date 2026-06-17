@@ -4,7 +4,7 @@ File count: 8. Line count: 4717. JSDoc symbol count: 106.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
-CompareZoomOverlay Presentational-only (no state).
+Per-pane “post-zoom” controls shown in comparison mode.
 
 Exports: CompareZoomOverlay
 
@@ -14,7 +14,7 @@ Symbols:
 
 ## src/components/DocumentViewer/DocumentViewer.jsx
 
-Exports DocumentViewer.
+OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the
 
 Exports: DocumentViewer
 
@@ -29,7 +29,7 @@ Symbols:
 
 ## src/components/DocumentViewer/DocumentViewerRender.jsx
 
-DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane.
+OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.
 
 Exports: DocumentViewerRender
 
@@ -52,7 +52,7 @@ Symbols:
 
 ## src/components/DocumentViewer/DocumentViewerThumbnails.jsx
 
-Exports DocumentViewerThumbnails.
+OpenDocViewer — Document Viewer Thumbnails (Wrapper) Provides the deterministic thumbnail list and local width controls for the viewer shell.
 
 Exports: DocumentViewerThumbnails
 
@@ -64,7 +64,7 @@ Symbols:
 
 ## src/components/DocumentViewer/DocumentViewerToolbar.jsx
 
-Renders the toolbar for the document viewer by delegating to .
+Toolbar adapter for the document viewer.
 
 Exports: DocumentViewerToolbar
 
@@ -119,7 +119,7 @@ Symbols:
 
 ## src/components/DocumentViewer/useDocumentViewer.js
 
-Hook that centralizes viewer UI state and event handlers.
+Primary viewer-state hook.
 
 Exports: useDocumentViewer
 

@@ -4,7 +4,7 @@ File count: 34. Line count: 14530. JSDoc symbol count: 562.
 
 ## src/utils/documentLoadingConfig.js
 
-Count PDF pages in a page descriptor list.
+OpenDocViewer — runtime helpers for fetch/render/memory policies.
 
 Exports: MAX_RELOAD_CACHE_TTL_MS, resolveRecommendedWorkerCount, DOCUMENT_LOADING_DEFAULTS, cloneDocumentLoadingConfig, countPdfPages, resolvePdfWorkerPlanForPageCount, resolvePdfRenderConfigForPageCount, applyDocumentLoadingMode, applyMemoryPressureStage, getPerformanceWindowPageCount, getDocumentLoadingConfig, isRasterImageExtension, shouldUseFullImagesForThumbnails, shouldKeepAllFullImageAssets, formatBytes, formatCount, shouldRecommendStopping
 
@@ -27,7 +27,7 @@ Symbols:
 
 ## src/utils/documentMetadata.js
 
-Build a UI-friendly projection of one document's metadata.
+Helpers for resolving document-level metadata from the normalized portable bundle.
 
 Exports: getBundleDocumentById, documentHasMetadata, bundleDocumentHasMetadata, buildDocumentMetadataView, buildDocumentMetadataMatrixView
 
@@ -48,7 +48,7 @@ Symbols:
 
 ## src/utils/idUtils.js
 
-Create an opaque identifier fragment suitable for synthetic keys and document ids.
+OpenDocViewer — small opaque identifier helpers.
 
 Exports: createOpaqueIdFragment, createOpaqueId
 
@@ -61,7 +61,7 @@ Symbols:
 
 ## src/utils/localizedValue.js
 
-Return the best string for the active language.
+Localized string resolver for admin-supplied config values.
 
 Exports: resolveLocalizedValue, resolveOptionLabel
 
@@ -76,7 +76,7 @@ Symbols:
 
 ## src/utils/memoryProfile.js
 
-Exports getRuntimeMemoryProfile.
+OpenDocViewer — Runtime memory profile helpers.
 
 Exports: getRuntimeMemoryProfile
 
@@ -91,7 +91,7 @@ Symbols:
 
 ## src/utils/navigationUtils.js
 
-Navigate to the previous page (no-op if already at page 1).
+OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer.
 
 Exports: handlePrevPage, handleNextPage, handleFirstPage, handleLastPage
 
@@ -109,7 +109,7 @@ Symbols:
 
 ## src/utils/objectUrlRegistry.js
 
-Check whether a blob/object URL is still tracked as live by the viewer.
+Centralized helpers for object/blob URL lifecycle management.
 
 Exports: createTrackedObjectUrl, revokeTrackedObjectUrl, revokeTrackedObjectUrls, isTrackedObjectUrl, getTrackedObjectUrlCount, revokeAllTrackedObjectUrls
 
@@ -124,7 +124,7 @@ Symbols:
 
 ## src/utils/pageAssetRenderer.js
 
-Render a PDF page set through the PDF worker pool as one partitioned batch.
+OpenDocViewer — hybrid page-asset renderer.
 
 Exports: createPageAssetRenderer, PageAssetRenderer
 
@@ -140,7 +140,7 @@ Symbols:
 
 ## src/utils/pageAssetStore.js
 
-Update runtime thresholds for the active session.
+OpenDocViewer — Browser-side rendered page-asset storage.
 
 Exports: createPageAssetStore, PageAssetStore
 
@@ -163,7 +163,7 @@ Symbols:
 
 ## src/utils/pageAssetWorkerPool.js
 
-Exports createPageAssetWorkerPool, PageAssetWorkerPool.
+OpenDocViewer — Page-asset worker pool.
 
 Exports: createPageAssetWorkerPool, PageAssetWorkerPool
 
@@ -186,7 +186,7 @@ Symbols:
 
 ## src/utils/pdfBenchmark.js
 
-Keep a batch-size list ordered and unique.
+Opt-in generated-PDF benchmark tooling.
 
 Exports: isPdfBenchmarkEnabled, runPdfGenerationBenchmark
 
@@ -220,7 +220,7 @@ Symbols:
 
 ## src/utils/pdfPageWorkerPool.js
 
-Exports createPdfPageWorkerPool, PdfPageWorkerPool.
+OpenDocViewer - PDF page-image worker pool.
 
 Exports: createPdfPageWorkerPool, PdfPageWorkerPool
 
@@ -234,7 +234,7 @@ Symbols:
 
 ## src/utils/pdfPrebuildPlan.js
 
-Return the language dependency that should invalidate an all-pages prebuild run.
+OpenDocViewer - generated-PDF prebuild planning.
 
 Exports: normalizePdfPrebuildAllPagesConfig, getPdfPrebuildAllPagesLanguageDependency, createPdfPrebuildAllPagesVariants, createPdfPrebuildVariantKey
 
@@ -257,7 +257,7 @@ Symbols:
 
 ## src/utils/pdfPrintCacheKey.js
 
-Compare the content-affecting print settings that determine whether an existing generated PDF can be reused.
+Generated-PDF cache key helpers.
 
 Exports: normalizePdfPrintCacheLanguageMode, getPdfPrintCacheKeyOptions, isPdfPrintCacheLanguageIgnored, normalizePdfPrintCachePageNumbers, getPdfPrintCacheKey, canReuseGeneratedPdfPrint, isFullSessionPageSequence
 
@@ -274,7 +274,7 @@ Symbols:
 
 ## src/utils/pdfWorkerDispatcher.js
 
-Pick a conservative future batch size from a pages-per-worker target.
+OpenDocViewer - generated PDF worker dispatcher.
 
 Exports: resolveAutoPdfWorkerBatchSize, planPdfWorkerBatches, createPdfWithWorkerDispatcher
 
@@ -297,7 +297,7 @@ Symbols:
 
 ## src/utils/performanceOverlayFlag.js
 
-Resolve a boolean flag from (precedence order): window.
+Shared runtime toggle helpers for optional diagnostics UI.
 
 Exports: readRuntimeBooleanFlag, isPerformanceOverlayEnabled, default
 
@@ -309,7 +309,7 @@ Symbols:
 
 ## src/utils/printCore.js
 
-Handles the print functionality for the CURRENT page/image.
+Core print coordinator for the frontend.
 
 Exports: handlePrint, handlePrintCurrentComparison, handlePrintAll, handlePrintSequence, handlePrintRange
 
@@ -332,7 +332,7 @@ Symbols:
 
 ## src/utils/printDom.js
 
-Render a single-page print document in the given print iframe document.
+OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().
 
 Exports: renderSingleDocument, renderMultiDocument
 
@@ -355,7 +355,7 @@ Symbols:
 
 ## src/utils/printParse.js
 
-Parse &quot;Custom pages&quot; into a sequence.
+OpenDocViewer — Print Sequence Parser Parse a user-entered "Custom pages" string into a sequence of page indices.
 
 Exports: parsePrintSequence
 
@@ -367,7 +367,7 @@ Symbols:
 
 ## src/utils/printPdf.js
 
-Build a PDF blob from page image URLs and print metadata.
+OpenDocViewer — Generated PDF print backend.
 
 Exports: createPrintPdfBlob, downloadPdfBlob, printPdfBlob, collectPrintablePdfSources, createPdfFromDocumentHandle, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison
 
@@ -390,7 +390,7 @@ Symbols:
 
 ## src/utils/printSanitize.js
 
-Allow-list image sources used for printing.
+OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules.
 
 Exports: isSafeImageSrc
 
@@ -400,7 +400,7 @@ Symbols:
 
 ## src/utils/printTemplate.js
 
-Resolve the configured copy/print-format marker text consistently across print backends.
+OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.
 
 Exports: escapeHtml, resolveCopyMarkerText, getByPath, makeBaseTokenContext, makePageTokenContext, applyTemplateTokensEscaped
 
@@ -421,7 +421,7 @@ Symbols:
 
 ## src/utils/printUtils.js
 
-Exports handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence.
+OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.
 
 Exports: handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, parsePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob, default
 
@@ -429,7 +429,7 @@ Local imports: src/utils/printCore.js, src/utils/printParse.js, src/utils/printP
 
 ## src/utils/printWatermark.js
 
-Resolve the image asset for COPY/KOPIA watermark modes.
+OpenDocViewer — Print watermark mode helpers.
 
 Exports: normalizeWatermarkMode, resolveWatermarkMode, resolveWatermarkAssetSrc, default
 
@@ -443,7 +443,7 @@ Symbols:
 
 ## src/utils/publicAssetUrl.js
 
-Exports getPublicAssetUrl, default.
+Resolve a public asset path against the viewer base URL.
 
 Exports: getPublicAssetUrl, default
 
@@ -465,7 +465,7 @@ Symbols:
 
 ## src/utils/reloadCacheIdentity.js
 
-Exports stableHash, createReloadCacheSessionId, describeDocumentSourceKey, createDocumentSourceKey, createRenderAssetSignature.
+Stable identities for the opt-in reload/document cache.
 
 Exports: stableHash, createReloadCacheSessionId, describeDocumentSourceKey, createDocumentSourceKey, createRenderAssetSignature, createPersistedPageAssetKey
 
@@ -481,7 +481,7 @@ Symbols:
 
 ## src/utils/renderDecodeBenchmark.js
 
-Exports isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark.
+Opt-in render/decode benchmark tooling for the already loaded document session.
 
 Exports: isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark
 
@@ -504,7 +504,7 @@ Symbols:
 
 ## src/utils/runtimeConfig.js
 
-Read the merged runtime configuration from the browser environment.
+Runtime configuration helpers.
 
 Exports: getRuntimeConfig, getKeyboardPrintShortcutBehavior, isDocumentMetadataUiEnabled, normalizePrintDefaultMode, normalizeCustomFitWidthFactorPercent, normalizeOptionalCustomFitFactorPercent, normalizeCustomFitSizeLimitPreference, getViewerDefaultZoomMode, getViewerCustomFitWidthFactorPercent, getViewerCustomFitSizeLimits, getPrintDefaultMode, getPrintSelectionWorkspaceConfig, getViewerEdgeScrollPageTurnConfig, getViewerProblemNoticeConfig
 
@@ -525,7 +525,7 @@ Symbols:
 
 ## src/utils/sourceTempStore.js
 
-Update runtime thresholds for the active session.
+OpenDocViewer — Browser-side temporary source storage.
 
 Exports: createSourceTempStore, SourceTempStore
 
@@ -548,7 +548,7 @@ Symbols:
 
 ## src/utils/supportDiagnostics.js
 
-Download a JSON diagnostics payload in browser environments.
+Support diagnostics helpers for opt-in troubleshooting tools.
 
 Exports: loadLatestPdfBenchmarkResult, saveLatestPdfBenchmarkResult, loadLatestRenderDecodeBenchmarkResult, saveLatestRenderDecodeBenchmarkResult, collectSupportDiagnostics, downloadJsonFile
 
@@ -571,7 +571,7 @@ Symbols:
 
 ## src/utils/viewerPreferences.js
 
-Persist the user's theme mode preference.
+Lightweight persisted viewer preferences.
 
 Exports: getViewerPreferences, setViewerPreferences, getThemePreference, setThemePreference, getThemeModePreference, setThemeModePreference, getLanguagePreference, setLanguagePreference, getPrintDefaultModePreference, setPrintDefaultModePreference, clearPrintDefaultModePreference, getDefaultZoomModePreference, setDefaultZoomModePreference, clearDefaultZoomModePreference, getCustomFitWidthFactorPreference, setCustomFitWidthFactorPreference, clearCustomFitWidthFactorPreference, getCustomFitSizeLimitPreference, setCustomFitSizeLimitPreference, clearCustomFitSizeLimitPreference
 
@@ -594,7 +594,7 @@ Symbols:
 
 ## src/utils/zoomUtils.js
 
-Calculate and set a zoom that fits the render surface within both viewport axes.
+OpenDocViewer — Zoom utilities.
 
 Exports: calculateFitToScreenZoom, calculateFitToWidthZoom, handleZoomIn, handleZoomOut
 

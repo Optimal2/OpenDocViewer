@@ -1,10 +1,10 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 14. Line count: 6326. JSDoc symbol count: 90.
+File count: 14. Line count: 6329. JSDoc symbol count: 90.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
-Exports AboutOverlayDialog.
+Small About dialog for version/build/support information.
 
 Exports: AboutOverlayDialog
 
@@ -18,7 +18,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/DocumentToolbar.jsx
 
-Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
+Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 
 Exports: DocumentToolbar
 
@@ -41,7 +41,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/HelpMenuButton.jsx
 
-Exports HelpMenuButton.
+Toolbar help menu with entries for the manual and About dialog.
 
 Exports: HelpMenuButton
 
@@ -54,7 +54,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/HelpOverlayDialog.jsx
 
-Exports HelpOverlayDialog.
+Full-screen help overlay for OpenDocViewer.
 
 Exports: HelpOverlayDialog
 
@@ -65,7 +65,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/LanguageMenuButton.jsx
 
-Exports LanguageMenuButton.
+Compact language selector for the toolbar.
 
 Exports: LanguageMenuButton
 
@@ -78,7 +78,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/ManualOverlayDialog.jsx
 
-Exports ManualOverlayDialog.
+Manual overlay that loads simple external HTML fragments from the public help folder.
 
 Exports: ManualOverlayDialog
 
@@ -99,7 +99,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/PageNavigationButtons.jsx
 
-Exports PageNavigationButtons.
+Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.
 
 Exports: PageNavigationButtons
 
@@ -107,7 +107,7 @@ Local imports: src/hooks/useAcceleratingHoldRepeat.js
 
 ## src/components/DocumentToolbar/PrintRangeDialog.jsx
 
-Structured payload returned to the caller on submit.
+Unified print dialog with a single print-method selector and shared print-details section.
 
 Exports: PrintRangeDialog
 
@@ -119,13 +119,13 @@ Symbols:
 
 ## src/components/DocumentToolbar/SplitToolbarButton.jsx
 
-Exports SplitToolbarButton.
+Reusable toolbar split-button.
 
 Exports: SplitToolbarButton
 
 ## src/components/DocumentToolbar/ThemeMenuButton.jsx
 
-Exports ThemeMenuButton.
+Compact theme selector for the toolbar.
 
 Exports: ThemeMenuButton
 
@@ -141,7 +141,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/ThemeToggleButton.jsx
 
-Exports ThemeToggleButton.
+Small button that toggles between light/dark themes using the ThemeContext.
 
 Exports: ThemeToggleButton
 
@@ -149,7 +149,7 @@ Local imports: src/contexts/themeContext.js
 
 ## src/components/DocumentToolbar/usePdfPrebuildAllPages.js
 
-Run async work with bounded concurrency.
+Background prebuild/cache for configured "all pages" generated-PDF variants.
 
 Exports: usePdfPrebuildAllPages
 
@@ -168,7 +168,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/usePrintRangeDialog.js
 
-Read the runtime configuration (merged defaults + site overrides).
+Hook + helpers for PrintRangeDialog.
 
 Exports: getCfg, safeRegex, ensureODVPrintCSS, usePrintRangeController
 
@@ -191,7 +191,7 @@ Symbols:
 
 ## src/components/DocumentToolbar/ZoomButtons.jsx
 
-Parse a percent-like string safely.
+Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.
 
 Exports: ZoomButtons
 

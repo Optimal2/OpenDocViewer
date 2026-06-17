@@ -4,7 +4,7 @@ File count: 1. Line count: 566. JSDoc symbol count: 21.
 
 ## src/i18n.js
 
-Return browser window safely in browser, SSR, test, and documentation contexts.
+i18n bootstrap for OpenDocViewer.
 
 Exports: i18next
 

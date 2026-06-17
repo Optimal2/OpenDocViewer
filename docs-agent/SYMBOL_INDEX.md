@@ -172,7 +172,7 @@
 | `SelectionCheckboxRow` | function | `src/components/DocumentSelectionPanel.jsx:30` |  |
 | `buildCenterOutQueue` | function | `src/components/DocumentThumbnailList.jsx:150` | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
 | `clamp` | function | `src/components/DocumentThumbnailList.jsx:63` |  |
-| `DocumentThumbnailList` | constant | `src/components/DocumentThumbnailList.jsx:529` |  |
+| `DocumentThumbnailList` | constant | `src/components/DocumentThumbnailList.jsx:535` |  |
 | `formatMetricFraction` | function | `src/components/DocumentThumbnailList.jsx:107` |  |
 | `formatMetricValue` | function | `src/components/DocumentThumbnailList.jsx:117` |  |
 | `getDocumentBoundaryLabel` | function | `src/components/DocumentThumbnailList.jsx:315` |  |
@@ -183,15 +183,15 @@
 | `getPageDocumentKey` | function | `src/components/DocumentThumbnailList.jsx:171` |  |
 | `getSessionPageIndex` | function | `src/components/DocumentThumbnailList.jsx:126` |  |
 | `getThumbnailLayout` | function | `src/components/DocumentThumbnailList.jsx:86` |  |
-| `<anonymous>~handleActivate` | constant | `src/components/DocumentThumbnailList.jsx:1045` |  |
-| `<anonymous>~handleImageLoad` | constant | `src/components/DocumentThumbnailList.jsx:1138` |  |
-| `<anonymous>~handleKeyActivate` | constant | `src/components/DocumentThumbnailList.jsx:1071` |  |
-| `<anonymous>~handleKeyDown` | function | `src/components/DocumentThumbnailList.jsx:940` |  |
-| `<anonymous>~handleOpenContextMenu` | constant | `src/components/DocumentThumbnailList.jsx:1084` |  |
-| `<anonymous>~handlePointerDown` | function | `src/components/DocumentThumbnailList.jsx:931` |  |
-| `<anonymous>~handleScroll` | constant | `src/components/DocumentThumbnailList.jsx:1018` |  |
+| `<anonymous>~handleActivate` | constant | `src/components/DocumentThumbnailList.jsx:1051` |  |
+| `<anonymous>~handleImageLoad` | constant | `src/components/DocumentThumbnailList.jsx:1144` |  |
+| `<anonymous>~handleKeyActivate` | constant | `src/components/DocumentThumbnailList.jsx:1077` |  |
+| `<anonymous>~handleKeyDown` | function | `src/components/DocumentThumbnailList.jsx:946` |  |
+| `<anonymous>~handleOpenContextMenu` | constant | `src/components/DocumentThumbnailList.jsx:1090` |  |
+| `<anonymous>~handlePointerDown` | function | `src/components/DocumentThumbnailList.jsx:937` |  |
+| `<anonymous>~handleScroll` | constant | `src/components/DocumentThumbnailList.jsx:1024` |  |
 | `isIndexInRange` | function | `src/components/DocumentThumbnailList.jsx:137` |  |
-| `<anonymous>~setContainerRef` | constant | `src/components/DocumentThumbnailList.jsx:702` |  |
+| `<anonymous>~setContainerRef` | constant | `src/components/DocumentThumbnailList.jsx:708` |  |
 | `shouldWarmAllThumbnails` | function | `src/components/DocumentThumbnailList.jsx:72` |  |
 | `ThumbnailRow` | constant | `src/components/DocumentThumbnailList.jsx:342` |  |
 | `ThumbnailRowProps` | typedef | `src/components/DocumentThumbnailList.jsx:35` |  |

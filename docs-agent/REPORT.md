@@ -3,8 +3,10 @@
 ## Coverage
 
 - Files: 109
+- Source lines: 48109
 - JSDoc symbols: 1266
 - Files without JSDoc doclets: 4
+- Low-confidence summaries: 0
 - Parse errors: 0
 
 ## Import Hubs
@@ -33,7 +35,7 @@
 - `src/components/DocumentLoader/DocumentLoader.js`: 2163 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2126 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1690 lines
-- `src/components/DocumentThumbnailList.jsx`: 1364 lines
+- `src/components/DocumentThumbnailList.jsx`: 1370 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1211 lines
 - `src/components/DocumentRender.jsx`: 1074 lines
