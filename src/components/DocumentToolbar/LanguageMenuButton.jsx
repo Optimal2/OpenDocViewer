@@ -105,7 +105,7 @@ const LanguageMenuButton = ({ className = '' }) => {
           defaultValue: `Language: ${resolveLanguageLabel(currentLanguage, t)}`,
         })}
         aria-haspopup="menu"
-        aria-controls={menuId}
+        aria-controls={open ? menuId : undefined}
         aria-expanded={open}
         onClick={() => setOpen((current) => !current)}
       >

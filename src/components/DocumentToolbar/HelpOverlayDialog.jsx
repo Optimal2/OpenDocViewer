@@ -98,13 +98,13 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
             })}</p>
             <ul>
               <li>{t('help.sections.navigation.pageMode', {
-                defaultValue: 'Normal navigation moves page by page.',
+                defaultValue: 'Normal navigation moves one page at a time.',
               })}</li>
               <li>{t('help.sections.navigation.shiftMode', {
                 defaultValue: 'Use Arrow Right to open or select the right compare pane. Use Arrow Left to select the primary / left pane; press Arrow Left again while the primary pane is active to close compare mode. Hold Shift in compare mode to temporarily target the opposite pane.',
               })}</li>
               <li>{t('help.sections.navigation.ctrlMode', {
-                defaultValue: 'Hold Ctrl when multiple documents are loaded to move whole documents instead of single pages.',
+                defaultValue: 'Hold Ctrl when more than one document is loaded to move document by document instead of page by page.',
               })}</li>
               <li>{t('help.sections.navigation.ctrlShiftMode', {
                 defaultValue: 'Hold Ctrl + Shift in compare mode to navigate whole documents in the temporary opposite pane.',
@@ -115,18 +115,18 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.compare.title', { defaultValue: 'Compare mode' })}</h3>
             <p>{t('help.sections.compare.body', {
-              defaultValue: 'Enable compare mode to show two pages side by side. The left page is the primary page. The right page is the compare page.',
+              defaultValue: 'Compare mode shows two pages side by side. The left page is the primary page and the right page is the compare page.',
             })}</p>
           </section>
 
           <section className="odv-help-section">
             <h3>{t('help.sections.thumbnails.title', { defaultValue: 'Thumbnails and document grouping' })}</h3>
             <p>{t('help.sections.thumbnails.body', {
-              defaultValue: 'The thumbnail strip shows document boundaries and page metadata. T shows the current page number in the visible selection. D shows the document number. S shows the page number inside that document.',
+              defaultValue: 'The thumbnail pane shows document boundaries and page metadata. T shows the visible page number in the current selection. D shows the document number. S shows the page number inside that document.',
             })}</p>
             <ul>
               <li>{t('help.sections.thumbnails.boundaries', {
-                defaultValue: 'The sticky document label at the top of the strip follows your current scroll position.',
+                defaultValue: 'The sticky document label at the top of the thumbnail pane follows your current position in the list.',
               })}</li>
               <li>{t('help.sections.thumbnails.contextMenu', {
                 defaultValue: 'Right-click a thumbnail or a large page to hide the current page, hide the whole document from the active selection, or show document metadata when it is available.',
@@ -137,25 +137,25 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.selection.title', { defaultValue: 'Selection' })}</h3>
             <p>{t('help.sections.selection.body', {
-              defaultValue: 'The Selection tab lets you include or exclude whole documents or individual pages. Save applies the filter. Cancel restores the last saved selection.',
+              defaultValue: 'Open print selection from the toolbar to remove pages, change order, and save the sequence used by the viewer.',
             })}</p>
             <ul>
               <li>{t('help.sections.selection.collapse', {
-                defaultValue: 'Each document can be expanded or collapsed in the Selection tab so large sessions remain easier to manage.',
+                defaultValue: 'When explicit document metadata is available, document mode can move whole documents while respecting document boundaries.',
               })}</li>
               <li>{t('help.sections.selection.shortcut', {
                 defaultValue: 'Press Delete to hide the current active page from the saved selection. Hold Shift in compare mode to hide the temporary opposite page instead. Hold Ctrl to hide the whole current document for the targeted pane.',
               })}</li>
             </ul>
             <p>{t('help.sections.selection.empty', {
-              defaultValue: 'If the saved selection hides everything, the viewer shows an empty-selection message with actions to restore the full session or reopen the Selection tab.',
+              defaultValue: 'If the selection hides everything, the viewer shows a message where you can restore the full session.',
             })}</p>
           </section>
 
           <section className="odv-help-section">
             <h3>{t('help.sections.adjustments.title', { defaultValue: 'Image adjustments' })}</h3>
             <p>{t('help.sections.adjustments.body', {
-              defaultValue: 'Rotation, brightness, contrast, and reset are always available in the toolbar. The viewer stays on fast image rendering until you actually apply a non-neutral adjustment, then that pane switches to canvas rendering automatically.',
+              defaultValue: 'Rotation, brightness, contrast, and reset are always available in the toolbar. Brightness and contrast open from their icons. The viewer keeps using fast image rendering until you actually apply a real adjustment. Only then does that pane switch to canvas rendering.',
             })}</p>
             <ul>
               <li>{t('help.sections.adjustments.primary', {
@@ -184,15 +184,15 @@ export default function HelpOverlayDialog({ isOpen, onClose }) {
           <section className="odv-help-section">
             <h3>{t('help.sections.printing.title', { defaultValue: 'Printing' })}</h3>
             <p>{t('help.sections.printing.body', {
-              defaultValue: 'Open the print dialog from the toolbar. Choose a print method from the list, then review the print details before preparing the browser print preview.',
+              defaultValue: 'Open the print dialog from the toolbar. Choose a print method from the list, then review the print details before the browser prepares the preview.',
             })}</p>
             <p>{t('help.sections.printing.selection', {
-              defaultValue: 'If a saved selection hides any pages, “All pages” can use either the current selection or the full session.',
+              defaultValue: 'If a saved selection changes page membership or order, “All pages” can use either the current selection or the full session.',
             })}</p>
           </section>
 
           <section className="odv-help-section">
-            <h3>{t('help.sections.shortcuts.title', { defaultValue: 'Closing dialogs' })}</h3>
+            <h3>{t('help.sections.shortcuts.title', { defaultValue: 'Close dialogs' })}</h3>
             <p>{t('help.sections.shortcuts.body', {
               defaultValue: 'Press Escape to close the print dialog or this help overlay.',
             })}</p>

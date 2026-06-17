@@ -501,10 +501,9 @@ export default function PrintRangeDialog({
           ) : null}
           {ctrl.printHtmlEnabled ? (
             <button
-              type="button"
+              type="submit"
               className="odv-prd-action secondary"
               title={ctrl.printHtmlAction.tooltip}
-              onClick={ctrl.submitPrintDirect}
             >
               {ctrl.printHtmlAction.label}
             </button>

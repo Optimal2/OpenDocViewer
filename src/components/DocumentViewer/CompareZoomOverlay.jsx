@@ -55,8 +55,8 @@ const CompareZoomOverlay = ({ value, onInc, onDec, min = 0.1, max = 4.0 }) => {
         onMouseDown={preventSelect}
         onDoubleClick={preventSelect}
         draggable={false}
-        title={t('compareZoom.decrease')}
-        aria-label={t('compareZoom.decrease')}
+        title={t('compareZoom.decrease', { defaultValue: 'Decrease pane zoom' })}
+        aria-label={t('compareZoom.decrease', { defaultValue: 'Decrease pane zoom' })}
         disabled={atMin}
       >
         {/* Use same icon family as main toolbar, just smaller; CSS will size/color */}
@@ -65,7 +65,7 @@ const CompareZoomOverlay = ({ value, onInc, onDec, min = 0.1, max = 4.0 }) => {
 
       <span
         className="factor"
-        aria-label={t('compareZoom.factor')}
+        aria-label={t('compareZoom.factor', { defaultValue: 'Pane zoom factor' })}
         aria-live="polite"
       >
         {display}
@@ -78,8 +78,8 @@ const CompareZoomOverlay = ({ value, onInc, onDec, min = 0.1, max = 4.0 }) => {
         onMouseDown={preventSelect}
         onDoubleClick={preventSelect}
         draggable={false}
-        title={t('compareZoom.increase')}
-        aria-label={t('compareZoom.increase')}
+        title={t('compareZoom.increase', { defaultValue: 'Increase pane zoom' })}
+        aria-label={t('compareZoom.increase', { defaultValue: 'Increase pane zoom' })}
         disabled={atMax}
       >
         <span className="material-icons" aria-hidden="true">zoom_in</span>
