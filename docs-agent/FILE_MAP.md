@@ -46,7 +46,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentViewer/DocumentViewerToolbar.jsx` | 418 | 1 | 5 | high | Toolbar adapter for the document viewer. |
 | `src/components/DocumentViewer/hooks/useViewerEffects.js` | 557 | 1 | 18 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
 | `src/components/DocumentViewer/hooks/useViewerPostZoom.js` | 86 | 1 | 7 | high | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
-| `src/components/DocumentViewer/useDocumentViewer.js` | 1805 | 1 | 57 | high | Primary viewer-state hook. |
+| `src/components/DocumentViewer/useDocumentViewer.js` | 1861 | 1 | 59 | high | Primary viewer-state hook. |
 | `src/components/ImageRenderer.jsx` | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | `src/components/LoadingMessage.jsx` | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | `src/components/LoadingSpinner.jsx` | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |

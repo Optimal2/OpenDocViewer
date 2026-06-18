@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 109
-- Source lines: 48237
-- JSDoc symbols: 1271
+- Source lines: 48293
+- JSDoc symbols: 1273
 - Files without JSDoc doclets: 4
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -34,7 +34,7 @@
 - `src/utils/printPdf.js`: 2174 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2163 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2126 lines
-- `src/components/DocumentViewer/useDocumentViewer.js`: 1805 lines
+- `src/components/DocumentViewer/useDocumentViewer.js`: 1861 lines
 - `src/components/DocumentThumbnailList.jsx`: 1370 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1211 lines
