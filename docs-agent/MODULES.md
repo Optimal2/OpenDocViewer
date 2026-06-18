@@ -62,7 +62,7 @@ File count: 14. Line count: 6342. JSDoc symbol count: 91.
 
 ## src/components/DocumentViewer
 
-File count: 8. Line count: 4812. JSDoc symbol count: 109.
+File count: 8. Line count: 4832. JSDoc symbol count: 110.
 
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.
