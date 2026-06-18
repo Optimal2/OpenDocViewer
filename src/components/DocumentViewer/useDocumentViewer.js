@@ -220,6 +220,20 @@ function findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex) {
 }
 
 /**
+ * Resolve either a direct visible-page value or a React setState-style updater function.
+ *
+ * @param {(number|function(number): number)} next
+ * @param {number} baseVisiblePageNumber
+ * @param {number} totalVisiblePages
+ * @returns {number}
+ */
+function resolveProposedVisiblePageNumber(next, baseVisiblePageNumber, totalVisiblePages) {
+  const safeBase = clampPage(baseVisiblePageNumber, totalVisiblePages);
+  const proposed = typeof next === 'function' ? next(safeBase) : next;
+  return clampPage(proposed, totalVisiblePages);
+}
+
+/**
  * @param {*} page
  * @param {number} documentNumber
  * @param {{ documentNumber:number, pages:Array<*> }|null} previousDocument
@@ -544,6 +558,8 @@ export function useDocumentViewer() {
     () => visibleOriginalIndexes.map((index) => index + 1),
     [visibleOriginalIndexes]
   );
+  // A saved print-selection workspace sequence may also reorder pages. Without one, initialize
+  // the workspace from the current visible pages produced by the active selection mask.
   const initialPrintSelectionWorkspaceSequence = normalizedCustomPrintSelectionSequence
     || visibleOriginalPageNumbers;
   const visibleDocumentNavigationModel = useMemo(
@@ -703,7 +719,10 @@ export function useDocumentViewer() {
   const resolveNearestVisibleOriginalPageNumber = useCallback((originalIndex) => {
     if (visibleOriginalIndexes.length <= 0) return 1;
     const visiblePageNumber = findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex);
-    const resolvedOriginalIndex = visibleOriginalIndexes[Math.max(0, visiblePageNumber - 1)] ?? visibleOriginalIndexes[0] ?? 0;
+    const resolvedVisibleIndex = Math.max(0, visiblePageNumber - 1);
+    const originalIndexAtResolvedVisiblePage = visibleOriginalIndexes[resolvedVisibleIndex];
+    const firstVisibleOriginalIndex = visibleOriginalIndexes[0] ?? 0;
+    const resolvedOriginalIndex = originalIndexAtResolvedVisiblePage ?? firstVisibleOriginalIndex;
     return resolvedOriginalIndex + 1;
   }, [visibleOriginalIndexes]);
 
@@ -963,11 +982,7 @@ export function useDocumentViewer() {
 
     const compareBase = !isComparing || compareVisiblePageNumber == null ? currentVisiblePageNumber : compareVisiblePageNumber;
     const currentBase = target === 'compare' ? compareBase : currentVisiblePageNumber;
-    const safeBase = clampPage(currentBase, totalPages);
-    const proposedVisiblePageNumber = clampPage(
-      typeof next === 'function' ? next(safeBase) : next,
-      totalPages
-    );
+    const proposedVisiblePageNumber = resolveProposedVisiblePageNumber(next, currentBase, totalPages);
     const resolvedOriginalIndex = visibleOriginalIndexes[Math.max(0, proposedVisiblePageNumber - 1)] ?? 0;
     return resolvedOriginalIndex + 1;
   }, [compareVisiblePageNumber, currentVisiblePageNumber, isComparing, totalPages, visibleOriginalIndexes]);
@@ -1228,6 +1243,8 @@ export function useDocumentViewer() {
       method.call(target, ...args);
       return true;
     } catch (error) {
+      // DocumentRender is an imperative renderer bridge. Viewer state remains the source of truth,
+      // so renderer failures are logged and the React state fallback path continues.
       logger.warn(warningMessage, { error: String(error?.message || error) });
       return false;
     }

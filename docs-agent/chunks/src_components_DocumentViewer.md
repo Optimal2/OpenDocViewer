@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4789. JSDoc symbol count: 108.
+File count: 8. Line count: 4806. JSDoc symbol count: 109.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -138,4 +138,4 @@ Symbols:
 - `normalizePrintPageSequence` (function) - No description.
 - `isNaturalPrintPageSequence` (function) - No description.
 - `findNearestVisiblePageNumber` (function) - Resolve the nearest visible page number for a requested original page index.
-- `resolveDocumentSelectionPageNumber` (function) - No description.
+- `resolveProposedVisiblePageNumber` (function) - Resolve either a direct visible-page value or a React setState-style updater function.
