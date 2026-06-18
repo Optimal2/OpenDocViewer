@@ -72,26 +72,33 @@ const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, c
 const HANDLE_CONTAINER_CLICK_NOOP = () => {};
 
 /**
- * Resolve initial custom-fit limits from persisted user preferences and runtime config.
- * Preference order for width keeps backward compatibility with the older width-only cookie.
+ * Resolve effective custom-fit limits from a preferred value set and runtime config.
+ * The optional width fallback keeps backward compatibility with the older width-only cookie.
  *
- * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} userCustomFitSizeLimits
- * @param {number|null|undefined} userCustomFitWidthFactorPercent
+ * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} preferredCustomFitSizeLimits
  * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} configuredCustomFitSizeLimits
+ * @param {number|null|undefined} widthFactorFallback
  * @returns {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }}
  */
-function resolveInitialCustomFitSizeLimits(
-  userCustomFitSizeLimits,
-  userCustomFitWidthFactorPercent,
-  configuredCustomFitSizeLimits
+function resolveEffectiveCustomFitSizeLimits(
+  preferredCustomFitSizeLimits,
+  configuredCustomFitSizeLimits,
+  widthFactorFallback = null
 ) {
+  const preferred = preferredCustomFitSizeLimits || {};
+  const configured = configuredCustomFitSizeLimits || {};
+
   return {
     widthFactorPercent:
-      userCustomFitSizeLimits.widthFactorPercent
-      ?? userCustomFitWidthFactorPercent
-      ?? configuredCustomFitSizeLimits.widthFactorPercent,
-    heightFactorPercent: userCustomFitSizeLimits.heightFactorPercent,
-    actualSizeFactorPercent: userCustomFitSizeLimits.actualSizeFactorPercent,
+      preferred.widthFactorPercent
+      ?? widthFactorFallback
+      ?? configured.widthFactorPercent,
+    heightFactorPercent:
+      preferred.heightFactorPercent
+      ?? configured.heightFactorPercent,
+    actualSizeFactorPercent:
+      preferred.actualSizeFactorPercent
+      ?? configured.actualSizeFactorPercent,
   };
 }
 
@@ -437,10 +444,10 @@ export function useDocumentViewer() {
     const configuredCustomFitWidthFactorPercent = getViewerCustomFitWidthFactorPercent();
     const userCustomFitSizeLimits = getCustomFitSizeLimitPreference();
     const userCustomFitWidthFactorPercent = getCustomFitWidthFactorPreference();
-    const customFitSizeLimits = resolveInitialCustomFitSizeLimits(
+    const customFitSizeLimits = resolveEffectiveCustomFitSizeLimits(
       userCustomFitSizeLimits,
-      userCustomFitWidthFactorPercent,
-      configuredCustomFitSizeLimits
+      configuredCustomFitSizeLimits,
+      userCustomFitWidthFactorPercent
     );
     initialZoomSettingsRef.current = {
       configuredDefaultZoomMode,
@@ -513,7 +520,7 @@ export function useDocumentViewer() {
     [normalizedAppliedSelectionMask, normalizedDraftSelectionMask, totalSessionPages]
   );
   const draftIncludedCount = useMemo(
-    () => normalizedDraftSelectionMask.reduce((count, included) => count + (included === false ? 0 : 1), 0),
+    () => normalizedDraftSelectionMask.reduce((count, included) => count + (included ? 1 : 0), 0),
     [normalizedDraftSelectionMask]
   );
   const selectionPanelEnabled = !!pageLoadState?.allPagesReady && totalSessionPages > 0;
@@ -1282,11 +1289,11 @@ export function useDocumentViewer() {
 
   const fitToCustomWidth = useCallback((limits = customFitSizeLimits) => {
     const normalizedLimits = normalizeCustomFitSizeLimitPreference(limits);
-    const effectiveLimits = {
-      widthFactorPercent: normalizedLimits.widthFactorPercent ?? customFitWidthFactorPercent,
-      heightFactorPercent: normalizedLimits.heightFactorPercent,
-      actualSizeFactorPercent: normalizedLimits.actualSizeFactorPercent,
-    };
+    const effectiveLimits = resolveEffectiveCustomFitSizeLimits(
+      normalizedLimits,
+      initialZoomSettingsRef.current.configuredCustomFitSizeLimits,
+      customFitWidthFactorPercent
+    );
     resetPostZoom();
     setZoomState({ mode: 'FIT_CUSTOM', scale: zoom });
     tryCallDocumentRender(
@@ -1343,11 +1350,10 @@ export function useDocumentViewer() {
       heightFactorPercent: normalized.heightFactorPercent,
       actualSizeFactorPercent: normalized.actualSizeFactorPercent,
     };
-    const nextLimits = {
-      widthFactorPercent: normalized.widthFactorPercent ?? initialZoomSettingsRef.current.configuredCustomFitSizeLimits.widthFactorPercent,
-      heightFactorPercent: normalized.heightFactorPercent,
-      actualSizeFactorPercent: normalized.actualSizeFactorPercent,
-    };
+    const nextLimits = resolveEffectiveCustomFitSizeLimits(
+      normalized,
+      initialZoomSettingsRef.current.configuredCustomFitSizeLimits
+    );
     // These states are consumed independently by toolbar controls and persisted preferences.
     // React batches this UI-driven update path, so keep the public state shape explicit.
     setCustomFitSizeLimitsState(nextLimits);
