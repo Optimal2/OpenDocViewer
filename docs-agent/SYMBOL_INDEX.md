@@ -339,62 +339,63 @@
 | `module:useViewerPostZoom~round1` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:29` | Round to one decimal place \(avoids float drift when stepping by 0.1\). |
 | `module:useViewerPostZoom` | module | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:2` | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
 | `module:useViewerPostZoom.useViewerPostZoom` | function | `src/components/DocumentViewer/hooks/useViewerPostZoom.js:45` | Hook managing per-pane post-zoom factors for compare mode. |
-| `useDocumentViewer~activateComparePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1427` | Open compare mode when needed and make the right pane the default target. |
-| `useDocumentViewer~activatePrimaryPane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1419` |  |
-| `useDocumentViewer~applyThumbnailWidth` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1529` | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
-| `buildDocumentSelectionModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:266` |  |
+| `useDocumentViewer~activateComparePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1447` | Open compare mode when needed and make the right pane the default target. |
+| `useDocumentViewer~activatePrimaryPane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1439` |  |
+| `useDocumentViewer~applyThumbnailWidth` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1549` | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |
+| `buildDocumentSelectionModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:285` |  |
 | `buildImageRotationDependencyKey` | function | `src/components/DocumentViewer/useDocumentViewer.js:110` |  |
-| `buildVisibleDocumentNavigationModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:344` | Build the visible-document grouping used by document-level navigation. |
+| `buildVisibleDocumentNavigationModel` | function | `src/components/DocumentViewer/useDocumentViewer.js:363` | Build the visible-document grouping used by document-level navigation. |
 | `clampPage` | function | `src/components/DocumentViewer/useDocumentViewer.js:45` | Clamp a 1-based page number into \[1, total\]. |
-| `useDocumentViewer~closeCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1455` | Close compare mode without affecting the left page. |
+| `useDocumentViewer~closeCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1475` | Close compare mode without affecting the left page. |
 | `DEFAULT_IMAGE_PROPERTIES` | constant | `src/components/DocumentViewer/useDocumentViewer.js:67` | Neutral per-page image adjustment state. |
-| `findNearestVisiblePageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:213` | Resolve the nearest visible page number for a requested original page index. |
-| `useDocumentViewer~getDocumentNavigationState` | constant | `src/components/DocumentViewer/useDocumentViewer.js:648` | Resolve document-navigation state for the requested pane. |
-| `useDocumentViewer~getImagePropertiesSetter` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1481` |  |
-| `getPageDocumentNavigationMeta` | function | `src/components/DocumentViewer/useDocumentViewer.js:318` |  |
-| `useDocumentViewer~goToFirstDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1181` | Jump to the first page of the first visible document. |
-| `useDocumentViewer~goToFirstPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1137` | Jump to the first visible page in the requested target pane. |
-| `useDocumentViewer~goToLastDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1193` | Jump to the first page of the last visible document. |
-| `useDocumentViewer~goToLastPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1146` | Jump to the last visible page in the requested target pane. |
-| `useDocumentViewer~goToNextDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1169` | Jump to the first page of the next visible document. |
-| `useDocumentViewer~goToNextPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1128` | Move one page forward in the requested target pane. |
-| `useDocumentViewer~goToPreviousDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1157` | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
-| `useDocumentViewer~goToPreviousPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1119` | Move one page backward in the requested target pane. |
-| `useDocumentViewer~handleBrightnessChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1495` |  |
-| `useDocumentViewer~handleCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1437` | Toggle compare mode. |
-| `useDocumentViewer~handleContrastChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1503` |  |
-| `useDocumentViewer~handlePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1035` | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
-| `useDocumentViewer~handlePrimaryDisplayStateChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1083` | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
-| `useDocumentViewer~handleVisiblePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1044` | Change the primary page by a visible page number from the thumbnail strip. |
+| `findNearestVisiblePageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:232` | Resolve the nearest visible page number for a requested original page index. |
+| `useDocumentViewer~getDocumentNavigationState` | constant | `src/components/DocumentViewer/useDocumentViewer.js:667` | Resolve document-navigation state for the requested pane. |
+| `useDocumentViewer~getImagePropertiesSetter` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1501` |  |
+| `getPageDocumentNavigationMeta` | function | `src/components/DocumentViewer/useDocumentViewer.js:337` |  |
+| `useDocumentViewer~goToFirstDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1201` | Jump to the first page of the first visible document. |
+| `useDocumentViewer~goToFirstPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1157` | Jump to the first visible page in the requested target pane. |
+| `useDocumentViewer~goToLastDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1213` | Jump to the first page of the last visible document. |
+| `useDocumentViewer~goToLastPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1166` | Jump to the last visible page in the requested target pane. |
+| `useDocumentViewer~goToNextDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1189` | Jump to the first page of the next visible document. |
+| `useDocumentViewer~goToNextPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1148` | Move one page forward in the requested target pane. |
+| `useDocumentViewer~goToPreviousDocument` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1177` | Jump to the first page of the previous visible document \(or to the current document start when the active pane already points inside the first visible document\). |
+| `useDocumentViewer~goToPreviousPage` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1139` | Move one page backward in the requested target pane. |
+| `useDocumentViewer~handleBrightnessChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1515` |  |
+| `useDocumentViewer~handleCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1457` | Toggle compare mode. |
+| `useDocumentViewer~handleContrastChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1523` |  |
+| `useDocumentViewer~handlePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1055` | Change the primary page using an original page number \(or a visible-page updater function when called from navigation helpers\). |
+| `useDocumentViewer~handlePrimaryDisplayStateChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1103` | Keep requested-page state and the actually displayed page synchronized for diagnostics. |
+| `useDocumentViewer~handleVisiblePageNumberChange` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1064` | Change the primary page by a visible page number from the thumbnail strip. |
 | `hasExcludedPages` | function | `src/components/DocumentViewer/useDocumentViewer.js:135` |  |
-| `useDocumentViewer~hideDocumentFromSelection` | constant | `src/components/DocumentViewer/useDocumentViewer.js:911` | Immediately exclude every page that belongs to the same document as the provided original page index. |
-| `useDocumentViewer~hidePageFromSelection` | constant | `src/components/DocumentViewer/useDocumentViewer.js:873` | Immediately exclude a page from the active selection and apply the filtered session. |
-| `ImageProperties` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:390` | Image adjustment properties for canvas edit mode. |
-| `isNaturalPrintPageSequence` | function | `src/components/DocumentViewer/useDocumentViewer.js:195` |  |
+| `useDocumentViewer~hideDocumentFromSelection` | constant | `src/components/DocumentViewer/useDocumentViewer.js:930` | Immediately exclude every page that belongs to the same document as the provided original page index. |
+| `useDocumentViewer~hidePageFromSelection` | constant | `src/components/DocumentViewer/useDocumentViewer.js:892` | Immediately exclude a page from the active selection and apply the filtered session. |
+| `ImageProperties` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:409` | Image adjustment properties for canvas edit mode. |
+| `isNaturalPrintPageSequence` | function | `src/components/DocumentViewer/useDocumentViewer.js:214` |  |
 | `masksEqual` | function | `src/components/DocumentViewer/useDocumentViewer.js:149` |  |
-| `normalizePrintPageSequence` | function | `src/components/DocumentViewer/useDocumentViewer.js:162` |  |
+| `normalizePrintPageSequence` | function | `src/components/DocumentViewer/useDocumentViewer.js:178` |  |
 | `normalizeRotationDegrees` | function | `src/components/DocumentViewer/useDocumentViewer.js:61` | Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer. |
 | `normalizeSelectionMask` | function | `src/components/DocumentViewer/useDocumentViewer.js:119` |  |
-| `normalizeViewerPaneTarget` | function | `src/components/DocumentViewer/useDocumentViewer.js:418` | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
-| `<anonymous>~onMove` | function | `src/components/DocumentViewer/useDocumentViewer.js:1594` |  |
-| `resolveDocumentSelectionPageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:249` |  |
+| `normalizeViewerPaneTarget` | function | `src/components/DocumentViewer/useDocumentViewer.js:437` | Normalize any pane key into the viewer&#39;s two supported navigation targets. |
+| `<anonymous>~onMove` | function | `src/components/DocumentViewer/useDocumentViewer.js:1614` |  |
+| `resolveDocumentSelectionPageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:268` |  |
 | `resolveEffectiveCustomFitSizeLimits` | function | `src/components/DocumentViewer/useDocumentViewer.js:83` | Resolve effective custom-fit limits from a preferred value set and runtime config. |
-| `useDocumentViewer~resolveNearestVisibleOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:726` |  |
-| `resolveProposedVisiblePageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:237` | Resolve either a direct visible-page value or a React setState-style updater function. |
-| `useDocumentViewer~resolveTargetOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:987` | Resolve the next original 1-based page number from a visible-page update. |
-| `useDocumentViewer~selectForCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1470` | Select a page for the right-hand compare pane. |
-| `useDocumentViewer~setActivePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1412` | Set the default pane for compare-aware navigation and editing actions. |
-| `useDocumentViewer~setComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1071` | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
-| `useDocumentViewer~setIsExpanded` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1400` | Setter for the editing controls visibility. |
-| `useDocumentViewer~setVisibleComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1057` | Change the compare page by a visible page number from the toolbar page field. |
-| `useDocumentViewer~setZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1307` | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
-| `useDocumentViewer~thumbnailSelectionPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1111` | The thumbnail pane should react immediately when the user changes page. |
-| `useDocumentViewer~toggleFitZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1384` | Toggle between the two fit modes from the page surface. |
-| `useDocumentViewer~updatePageTarget` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1010` | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
-| `useDocumentViewer` | function | `src/components/DocumentViewer/useDocumentViewer.js:435` | Hook that centralizes viewer UI state and event handlers. |
-| `ViewerPageTarget` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:410` |  |
-| `ZoomMode` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:398` | Sticky zoom modes used by the viewer \(subset is used here\). |
-| `ZoomState` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:403` | Zoom state \(mode + current numeric scale\). |
+| `useDocumentViewer~resolveNearestVisibleOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:745` |  |
+| `resolveOriginalIndexFromPrintPageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:164` | Convert a 1-based print/session page number to a zero-based original page index. |
+| `resolveProposedVisiblePageNumber` | function | `src/components/DocumentViewer/useDocumentViewer.js:256` | Resolve either a direct visible-page value or a React setState-style updater function. |
+| `useDocumentViewer~resolveTargetOriginalPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1007` | Resolve the next original 1-based page number from a visible-page update. |
+| `useDocumentViewer~selectForCompare` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1490` | Select a page for the right-hand compare pane. |
+| `useDocumentViewer~setActivePane` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1432` | Set the default pane for compare-aware navigation and editing actions. |
+| `useDocumentViewer~setComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1091` | Change the compare page using an original page number \(or a visible-page updater function when called from compare navigation helpers\). |
+| `useDocumentViewer~setIsExpanded` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1420` | Setter for the editing controls visibility. |
+| `useDocumentViewer~setVisibleComparePageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1077` | Change the compare page by a visible page number from the toolbar page field. |
+| `useDocumentViewer~setZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1327` | Set zoom mode directly \(&#39;FIT_PAGE&#39;\|&#39;FIT_WIDTH&#39;\|&#39;FIT_CUSTOM&#39;\|&#39;ACTUAL_SIZE&#39;\|&#39;CUSTOM&#39;\). |
+| `useDocumentViewer~thumbnailSelectionPageNumber` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1131` | The thumbnail pane should react immediately when the user changes page. |
+| `useDocumentViewer~toggleFitZoomMode` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1404` | Toggle between the two fit modes from the page surface. |
+| `useDocumentViewer~updatePageTarget` | constant | `src/components/DocumentViewer/useDocumentViewer.js:1030` | Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number. |
+| `useDocumentViewer` | function | `src/components/DocumentViewer/useDocumentViewer.js:454` | Hook that centralizes viewer UI state and event handlers. |
+| `ViewerPageTarget` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:429` |  |
+| `ZoomMode` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:417` | Sticky zoom modes used by the viewer \(subset is used here\). |
+| `ZoomState` | typedef | `src/components/DocumentViewer/useDocumentViewer.js:422` | Zoom state \(mode + current numeric scale\). |
 | `ImageRenderer` | constant | `src/components/ImageRenderer.jsx:51` | ImageRenderer component. |
 | `ImgEventHandler` | typedef | `src/components/ImageRenderer.jsx:28` | Image load/error handler. |
 | `LoadingMessage` | function | `src/components/LoadingMessage.jsx:43` | LoadingMessage component. |

@@ -155,6 +155,22 @@ function masksEqual(a, b, total) {
 }
 
 /**
+ * Convert a 1-based print/session page number to a zero-based original page index.
+ *
+ * @param {*} rawPageNumber
+ * @param {number} total
+ * @returns {number}
+ */
+function resolveOriginalIndexFromPrintPageNumber(rawPageNumber, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  const numericPageNumber = Number(rawPageNumber);
+  if (!Number.isFinite(numericPageNumber) || safeTotal <= 0) return -1;
+
+  const pageNumber = Math.floor(numericPageNumber);
+  return pageNumber >= 1 && pageNumber <= safeTotal ? pageNumber - 1 : -1;
+}
+
+/**
  * @param {*} sequence
  * @param {number} total
  * @returns {Array<number>}
@@ -165,8 +181,11 @@ function normalizePrintPageSequence(sequence, total) {
   const next = [];
   if (!Array.isArray(sequence) || safeTotal <= 0) return next;
   for (const rawPageNumber of sequence) {
-    const pageNumber = Math.floor(Number(rawPageNumber));
-    if (!Number.isFinite(pageNumber) || pageNumber < 1 || pageNumber > safeTotal || seen.has(pageNumber)) continue;
+    const originalIndex = resolveOriginalIndexFromPrintPageNumber(rawPageNumber, safeTotal);
+    if (originalIndex < 0) continue;
+
+    const pageNumber = originalIndex + 1;
+    if (seen.has(pageNumber)) continue;
     seen.add(pageNumber);
     next.push(pageNumber);
   }
@@ -179,8 +198,8 @@ function buildSelectionMaskFromPrintPageSequence(sequence, total) {
   if (!Array.isArray(sequence) || safeTotal <= 0) return next;
 
   for (const rawPageNumber of sequence) {
-    const originalIndex = Math.floor(Number(rawPageNumber)) - 1;
-    if (!Number.isFinite(originalIndex) || originalIndex < 0 || originalIndex >= safeTotal) continue;
+    const originalIndex = resolveOriginalIndexFromPrintPageNumber(rawPageNumber, safeTotal);
+    if (originalIndex < 0) continue;
     next[originalIndex] = true;
   }
 
@@ -532,7 +551,7 @@ export function useDocumentViewer() {
   const visibleOriginalIndexes = useMemo(() => {
     if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
       return normalizedCustomPrintSelectionSequence
-        .map((pageNumber) => Math.max(0, Math.floor(Number(pageNumber) || 0) - 1))
+        .map((pageNumber) => resolveOriginalIndexFromPrintPageNumber(pageNumber, totalSessionPages))
         .filter((originalIndex) => originalIndex >= 0 && originalIndex < totalSessionPages && !!allPages[originalIndex]);
     }
 
@@ -920,7 +939,8 @@ export function useDocumentViewer() {
 
     if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
       const nextSequence = normalizedCustomPrintSelectionSequence.filter((pageNumber) => {
-        const page = allPages[Math.max(0, Math.floor(Number(pageNumber) || 0) - 1)] || null;
+        const originalPageIndex = resolveOriginalIndexFromPrintPageNumber(pageNumber, totalSessionPages);
+        const page = originalPageIndex >= 0 ? allPages[originalPageIndex] || null : null;
         const sameDocument = documentId
           ? String(page?.documentId || '').trim() === documentId
           : Math.max(1, Number(page?.documentNumber) || 1) === documentNumber;
