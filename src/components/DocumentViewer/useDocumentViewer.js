@@ -72,6 +72,30 @@ const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, c
 const HANDLE_CONTAINER_CLICK_NOOP = () => {};
 
 /**
+ * Resolve initial custom-fit limits from persisted user preferences and runtime config.
+ * Preference order for width keeps backward compatibility with the older width-only cookie.
+ *
+ * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} userCustomFitSizeLimits
+ * @param {number|null|undefined} userCustomFitWidthFactorPercent
+ * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} configuredCustomFitSizeLimits
+ * @returns {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }}
+ */
+function resolveInitialCustomFitSizeLimits(
+  userCustomFitSizeLimits,
+  userCustomFitWidthFactorPercent,
+  configuredCustomFitSizeLimits
+) {
+  return {
+    widthFactorPercent:
+      userCustomFitSizeLimits.widthFactorPercent
+      ?? userCustomFitWidthFactorPercent
+      ?? configuredCustomFitSizeLimits.widthFactorPercent,
+    heightFactorPercent: userCustomFitSizeLimits.heightFactorPercent,
+    actualSizeFactorPercent: userCustomFitSizeLimits.actualSizeFactorPercent,
+  };
+}
+
+/**
  * @param {*} primaryRotation
  * @param {*} compareRotation
  * @returns {string}
@@ -196,6 +220,25 @@ function findNearestVisiblePageNumber(visibleOriginalIndexes, originalIndex) {
 }
 
 /**
+ * @param {*} page
+ * @param {number} documentNumber
+ * @param {{ documentNumber:number, pages:Array<*> }|null} previousDocument
+ * @returns {number}
+ */
+function resolveDocumentSelectionPageNumber(page, documentNumber, previousDocument) {
+  const explicitPageNumber = Number(page?.documentPageNumber);
+  if (Number.isFinite(explicitPageNumber) && explicitPageNumber > 0) {
+    return Math.max(1, Math.floor(explicitPageNumber));
+  }
+
+  const inferredPageNumber = previousDocument?.documentNumber === documentNumber
+    ? previousDocument.pages.length + 1
+    : 1;
+
+  return Math.max(1, inferredPageNumber);
+}
+
+/**
  * @param {Array<any>} pages
  * @returns {Array<{ key:string, documentNumber:number, totalDocuments:number, startOriginalIndex:number, endOriginalIndex:number, pageCount:number, pages:Array<{ originalIndex:number, originalPageNumber:number, documentPageNumber:number }> }>}
  */
@@ -213,15 +256,10 @@ function buildDocumentSelectionModel(pages) {
     const totalDocuments = Math.max(documentNumber, Number(page?.totalDocuments) || 1);
     const documentId = String(page?.documentId || '').trim();
     const key = documentId || `doc:${documentNumber}`;
-    const documentPageNumber = Math.max(
-      1,
-      Number(page?.documentPageNumber)
-      || ((documents[documents.length - 1]?.documentNumber === documentNumber
-        ? documents[documents.length - 1].pages.length
-        : 0) + 1)
-    );
+    const previousDocument = documents[documents.length - 1] || null;
+    const documentPageNumber = resolveDocumentSelectionPageNumber(page, documentNumber, previousDocument);
 
-    let current = documents[documents.length - 1] || null;
+    let current = previousDocument;
     if (!current || current.key !== key) {
       current = {
         key,
@@ -385,11 +423,11 @@ export function useDocumentViewer() {
     const configuredCustomFitWidthFactorPercent = getViewerCustomFitWidthFactorPercent();
     const userCustomFitSizeLimits = getCustomFitSizeLimitPreference();
     const userCustomFitWidthFactorPercent = getCustomFitWidthFactorPreference();
-    const customFitSizeLimits = {
-      widthFactorPercent: userCustomFitSizeLimits.widthFactorPercent ?? userCustomFitWidthFactorPercent ?? configuredCustomFitSizeLimits.widthFactorPercent,
-      heightFactorPercent: userCustomFitSizeLimits.heightFactorPercent,
-      actualSizeFactorPercent: userCustomFitSizeLimits.actualSizeFactorPercent,
-    };
+    const customFitSizeLimits = resolveInitialCustomFitSizeLimits(
+      userCustomFitSizeLimits,
+      userCustomFitWidthFactorPercent,
+      configuredCustomFitSizeLimits
+    );
     initialZoomSettingsRef.current = {
       configuredDefaultZoomMode,
       userDefaultZoomMode,
@@ -710,6 +748,7 @@ export function useDocumentViewer() {
   const [isExpanded, setIsExpandedState] = useState(false); // editing-controls visibility
 
   const [thumbnailWidth, setThumbnailWidth] = useState(THUMBNAIL_WIDTH_DEFAULT);
+  const thumbnailDragHandlersRef = useRef(null);
 
   // Refs shared with the renderer layer and the effect helpers.
   /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
@@ -1272,6 +1311,8 @@ export function useDocumentViewer() {
       ...customFitSizeLimits,
       widthFactorPercent: normalized,
     };
+    // These states are consumed independently by toolbar controls and persisted preferences.
+    // React batches this UI-driven update path, so keep the public state shape explicit.
     setCustomFitSizeLimitsState(nextLimits);
     setUserCustomFitSizeLimits(nextUserLimits);
     setCustomFitWidthFactorPreference(normalized);
@@ -1290,6 +1331,8 @@ export function useDocumentViewer() {
       heightFactorPercent: normalized.heightFactorPercent,
       actualSizeFactorPercent: normalized.actualSizeFactorPercent,
     };
+    // These states are consumed independently by toolbar controls and persisted preferences.
+    // React batches this UI-driven update path, so keep the public state shape explicit.
     setCustomFitSizeLimitsState(nextLimits);
     setUserCustomFitSizeLimits(nextUserLimits);
     setCustomFitWidthFactorPercentState(nextLimits.widthFactorPercent);
@@ -1507,8 +1550,20 @@ export function useDocumentViewer() {
     applyThumbnailWidth(THUMBNAIL_WIDTH_MAX);
   }, [applyThumbnailWidth]);
 
+  const removeThumbnailDragListeners = useCallback(() => {
+    const handlers = thumbnailDragHandlersRef.current;
+    if (!handlers) return;
+
+    window.removeEventListener('mousemove', handlers.onMove);
+    window.removeEventListener('mouseup', handlers.onUp);
+    thumbnailDragHandlersRef.current = null;
+  }, []);
+
+  useEffect(() => removeThumbnailDragListeners, [removeThumbnailDragListeners]);
+
   const handleMouseDown = useCallback((e) => {
     e.preventDefault();
+    removeThumbnailDragListeners();
     const startX = e.clientX;
     const startWidth = Math.max(THUMBNAIL_WIDTH_MIN, thumbnailWidth || THUMBNAIL_WIDTH_DEFAULT);
 
@@ -1519,12 +1574,12 @@ export function useDocumentViewer() {
       setThumbnailWidth(next);
     }
     function onUp() {
-      window.removeEventListener('mousemove', onMove);
-      window.removeEventListener('mouseup', onUp);
+      removeThumbnailDragListeners();
     }
+    thumbnailDragHandlersRef.current = { onMove, onUp };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
-  }, [thumbnailWidth]);
+  }, [removeThumbnailDragListeners, thumbnailWidth]);
 
   const handleContainerClick = HANDLE_CONTAINER_CLICK_NOOP;
   const imageRotationKey = buildImageRotationDependencyKey(

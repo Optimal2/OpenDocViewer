@@ -46,7 +46,7 @@ const CompareZoomOverlay = ({ value, onInc, onDec, min = 0.1, max = 4.0 }) => {
       // Also prevent accidental text selection when double-clicking near the label
       onMouseDown={preventSelect}
       onDoubleClick={preventSelect}
-      onSelect={(e) => e.preventDefault()}
+      onSelectStart={preventSelect}
     >
       <button
         type="button"

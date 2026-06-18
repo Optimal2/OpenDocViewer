@@ -1354,7 +1354,7 @@ DocumentThumbnailList.propTypes = {
   width: PropTypes.number.isRequired,
   selectForCompare: PropTypes.func,
   isComparing: PropTypes.bool,
-  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  comparePageNumber: PropTypes.number,
   activePane: PropTypes.oneOf(['primary', 'compare']),
   navigationModifierState: PropTypes.shape({
     shift: PropTypes.bool.isRequired,

@@ -534,7 +534,7 @@ PrintRangeDialog.propTypes = {
   totalPages: PropTypes.number.isRequired,
   isDocumentLoading: PropTypes.bool,
   activePageNumber: PropTypes.number,
-  comparePageNumber: PropTypes.oneOfType([PropTypes.number, PropTypes.oneOf([null])]),
+  comparePageNumber: PropTypes.number,
   isComparing: PropTypes.bool,
   hasActiveSelection: PropTypes.bool,
   selectionSequenceLocked: PropTypes.bool,

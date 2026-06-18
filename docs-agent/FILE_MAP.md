@@ -34,7 +34,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentToolbar/PageNavigationButtons.jsx` | 329 | 1 | 0 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
 | `src/components/DocumentToolbar/PrintRangeDialog.jsx` | 544 | 1 | 1 | high | Unified print dialog with a single print-method selector and shared print-details section. |
 | `src/components/DocumentToolbar/SplitToolbarButton.jsx` | 108 | 2 | 0 | high | Reusable toolbar split-button. |
-| `src/components/DocumentToolbar/ThemeMenuButton.jsx` | 166 | 1 | 5 | high | Compact theme selector for the toolbar. |
+| `src/components/DocumentToolbar/ThemeMenuButton.jsx` | 179 | 1 | 6 | high | Compact theme selector for the toolbar. |
 | `src/components/DocumentToolbar/ThemeToggleButton.jsx` | 59 | 0 | 0 | high | Small button that toggles between light/dark themes using the ThemeContext. |
 | `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` | 362 | 1 | 8 | high | Background prebuild/cache for configured &quot;all pages&quot; generated-PDF variants. |
 | `src/components/DocumentToolbar/usePrintRangeDialog.js` | 828 | 1 | 23 | high | Hook + helpers for PrintRangeDialog. |
@@ -46,7 +46,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentViewer/DocumentViewerToolbar.jsx` | 418 | 1 | 5 | high | Toolbar adapter for the document viewer. |
 | `src/components/DocumentViewer/hooks/useViewerEffects.js` | 557 | 1 | 18 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
 | `src/components/DocumentViewer/hooks/useViewerPostZoom.js` | 86 | 1 | 7 | high | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
-| `src/components/DocumentViewer/useDocumentViewer.js` | 1690 | 1 | 53 | high | Primary viewer-state hook. |
+| `src/components/DocumentViewer/useDocumentViewer.js` | 1762 | 1 | 55 | high | Primary viewer-state hook. |
 | `src/components/ImageRenderer.jsx` | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | `src/components/LoadingMessage.jsx` | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | `src/components/LoadingSpinner.jsx` | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |

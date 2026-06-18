@@ -49,7 +49,7 @@ File count: 8. Line count: 3984. JSDoc symbol count: 107.
 
 ## src/components/DocumentToolbar
 
-File count: 14. Line count: 6329. JSDoc symbol count: 90.
+File count: 14. Line count: 6342. JSDoc symbol count: 91.
 
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook + helpers for PrintRangeDialog.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
@@ -62,7 +62,7 @@ File count: 14. Line count: 6329. JSDoc symbol count: 90.
 
 ## src/components/DocumentViewer
 
-File count: 8. Line count: 4717. JSDoc symbol count: 106.
+File count: 8. Line count: 4789. JSDoc symbol count: 108.
 
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.
