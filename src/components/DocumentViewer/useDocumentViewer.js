@@ -63,7 +63,37 @@ function normalizeRotationDegrees(value) {
   return ((numeric % 360) + 360) % 360;
 }
 
+/**
+ * Optional maximum percentage limits for the custom fit-to-size zoom mode.
+ * Missing values inherit the runtime configuration or remain unbounded, depending on the limit.
+ *
+ * @typedef {Object} CustomFitSizeLimits
+ * @property {number|null|undefined} widthFactorPercent
+ * @property {number|null|undefined} heightFactorPercent
+ * @property {number|null|undefined} actualSizeFactorPercent
+ */
+/** @typedef {Array<boolean>} SelectionMask */
+/** @typedef {Array<number>} PrintPageSequence */
+/** @typedef {'primary'|'compare'} ViewerPageTarget */
+/**
+ * Image adjustment properties for canvas edit mode.
+ * @typedef {Object} ImageProperties
+ * @property {number} rotation       Degrees, positive clockwise. 0 is neutral.
+ * @property {number} brightness     0..200 (100 = neutral)
+ * @property {number} contrast       0..200 (100 = neutral)
+ */
+
+/** @type {SelectionMask|null} */
+const INITIAL_APPLIED_SELECTION_MASK = null;
+/** @type {PrintPageSequence|null} */
+const INITIAL_PRINT_PAGE_SEQUENCE = null;
+/** @type {ViewerPageTarget} */
+const INITIAL_ACTIVE_PANE = 'primary';
+/** @type {number|null} */
+const INITIAL_COMPARE_PAGE_NUMBER = null;
+
 /** Neutral per-page image adjustment state. */
+/** @type {ImageProperties} */
 const DEFAULT_IMAGE_PROPERTIES = Object.freeze({ rotation: 0, brightness: 100, contrast: 100 });
 
 // The viewer API still exposes a container-click hook for shell components, but
@@ -75,10 +105,10 @@ const HANDLE_CONTAINER_CLICK_NOOP = () => {};
  * Resolve effective custom-fit limits from a preferred value set and runtime config.
  * The optional width fallback keeps backward compatibility with the older width-only cookie.
  *
- * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} preferredCustomFitSizeLimits
- * @param {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }} configuredCustomFitSizeLimits
+ * @param {CustomFitSizeLimits|null|undefined} preferredCustomFitSizeLimits
+ * @param {CustomFitSizeLimits|null|undefined} configuredCustomFitSizeLimits
  * @param {number|null|undefined} widthFactorFallback
- * @returns {{ widthFactorPercent:(number|null|undefined), heightFactorPercent:(number|null|undefined), actualSizeFactorPercent:(number|null|undefined) }}
+ * @returns {CustomFitSizeLimits}
  */
 function resolveEffectiveCustomFitSizeLimits(
   preferredCustomFitSizeLimits,
@@ -434,14 +464,6 @@ const THUMBNAIL_WIDTH_STEP = 48;
 const THUMBNAIL_WIDTH_DEFAULT = 220;
 
 /**
- * Image adjustment properties for canvas edit mode.
- * @typedef {Object} ImageProperties
- * @property {number} rotation       Degrees, positive clockwise. 0 is neutral.
- * @property {number} brightness     0..200 (100 = neutral)
- * @property {number} contrast       0..200 (100 = neutral)
- */
-
-/**
  * Sticky zoom modes used by the viewer (subset is used here).
  * @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'CUSTOM'|'ACTUAL_SIZE'} ZoomMode
  */
@@ -452,8 +474,6 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
  * @property {ZoomMode} mode
  * @property {number} scale
  */
-
-/** @typedef {'primary'|'compare'} ViewerPageTarget */
 
 /**
  * Normalize any pane key into the viewer's two supported navigation targets.
@@ -516,9 +536,9 @@ export function useDocumentViewer() {
   const pageNumberRef = useRef(1);
   pageNumberRef.current = pageNumberRaw;
   const [thumbnailPaneMode, setThumbnailPaneMode] = useState('thumbnails');
-  const [appliedSelectionMask, setAppliedSelectionMask] = useState(/** @type {(Array<boolean>|null)} */ (null));
-  const [draftSelectionMask, setDraftSelectionMask] = useState(/** @type {Array<boolean>} */ ([]));
-  const [customPrintSelectionSequence, setCustomPrintSelectionSequence] = useState(/** @type {(Array<number>|null)} */ (null));
+  const [appliedSelectionMask, setAppliedSelectionMask] = useState(INITIAL_APPLIED_SELECTION_MASK);
+  const [draftSelectionMask, setDraftSelectionMask] = useState(() => []);
+  const [customPrintSelectionSequence, setCustomPrintSelectionSequence] = useState(INITIAL_PRINT_PAGE_SEQUENCE);
   const [printSelectionWorkspaceOpen, setPrintSelectionWorkspaceOpen] = useState(false);
   const lastRequestedOriginalIndexRef = useRef(0);
   const lastRequestedCompareOriginalIndexRef = useRef(0);
@@ -665,8 +685,8 @@ export function useDocumentViewer() {
   );
 
   const [isComparing, setIsComparing] = useState(false);
-  const [activePane, setActivePaneRaw] = useState(/** @type {ViewerPageTarget} */ ('primary'));
-  const [comparePageNumberRaw, setComparePageNumberRaw] = useState(/** @type {(number|null)} */ (null)); // original 1-based
+  const [activePane, setActivePaneInternal] = useState(INITIAL_ACTIVE_PANE);
+  const [comparePageNumberRaw, setComparePageNumberRaw] = useState(INITIAL_COMPARE_PAGE_NUMBER); // original 1-based
   const [isPrintDialogOpen, setPrintDialogOpen] = useState(false);
 
   const compareOriginalPageNumber = comparePageNumberRaw == null
@@ -788,7 +808,7 @@ export function useDocumentViewer() {
       if (pageNumberRaw !== 1) setPageNumberRaw(1);
       if (comparePageNumberRaw !== null) setComparePageNumberRaw(null);
       if (isComparing) setIsComparing(false);
-      if (activePane !== 'primary') setActivePaneRaw('primary');
+      if (activePane !== 'primary') setActivePaneInternal('primary');
       return;
     }
 
@@ -814,12 +834,8 @@ export function useDocumentViewer() {
     totalPages,
   ]);
 
-  const [primaryImageProperties, setPrimaryImageProperties] = useState(/** @type {ImageProperties} */ ({
-    ...DEFAULT_IMAGE_PROPERTIES,
-  }));
-  const [compareImageProperties, setCompareImageProperties] = useState(/** @type {ImageProperties} */ ({
-    ...DEFAULT_IMAGE_PROPERTIES,
-  }));
+  const [primaryImageProperties, setPrimaryImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
+  const [compareImageProperties, setCompareImageProperties] = useState(DEFAULT_IMAGE_PROPERTIES);
 
   const [isExpanded, setIsExpandedState] = useState(false); // editing-controls visibility
 
@@ -837,18 +853,18 @@ export function useDocumentViewer() {
   useEffect(() => {
     if (previousPrimaryOriginalPageRef.current === currentOriginalPageNumber) return;
     previousPrimaryOriginalPageRef.current = currentOriginalPageNumber;
-    setPrimaryImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+    setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
   }, [currentOriginalPageNumber]);
 
   useEffect(() => {
     if (!isComparing) {
       previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-      setCompareImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+      setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
       return;
     }
     if (previousCompareOriginalPageRef.current === compareOriginalPageNumber) return;
     previousCompareOriginalPageRef.current = compareOriginalPageNumber;
-    setCompareImageProperties({ ...DEFAULT_IMAGE_PROPERTIES });
+    setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
   }, [compareOriginalPageNumber, isComparing]);
 
   // --- Post-zoom (compare panes) -------------------------------------------------
@@ -1463,12 +1479,12 @@ export function useDocumentViewer() {
   const setActivePane = useCallback((pane) => {
     const nextPane = normalizeViewerPaneTarget(pane);
     if (nextPane === 'compare' && !isComparing) return;
-    setActivePaneRaw(nextPane);
+    setActivePaneInternal(nextPane);
   }, [isComparing]);
 
   /** @returns {void} */
   const activatePrimaryPane = useCallback(() => {
-    setActivePaneRaw('primary');
+    setActivePaneInternal('primary');
   }, []);
 
   /**
@@ -1481,7 +1497,7 @@ export function useDocumentViewer() {
       : currentOriginalPageNumber;
     setComparePageNumberRaw(fallbackOriginalPage);
     setIsComparing(true);
-    setActivePaneRaw('compare');
+    setActivePaneInternal('compare');
   }, [compareOriginalPageNumber, currentOriginalPageNumber]);
 
   /** Toggle compare mode. */
@@ -1494,7 +1510,7 @@ export function useDocumentViewer() {
           : currentOriginalPageNumber;
         setComparePageNumberRaw(fallbackOriginalPage);
       }
-      setActivePaneRaw(next ? 'compare' : 'primary');
+      setActivePaneInternal(next ? 'compare' : 'primary');
       return next;
     });
   }, [compareOriginalPageNumber, currentOriginalPageNumber]);
@@ -1505,7 +1521,7 @@ export function useDocumentViewer() {
    */
   const closeCompare = useCallback(() => {
     setIsComparing(false);
-    setActivePaneRaw('primary');
+    setActivePaneInternal('primary');
   }, []);
 
   /**
@@ -1520,48 +1536,55 @@ export function useDocumentViewer() {
    */
   const selectForCompare = useCallback((page, options = {}) => {
     setComparePageNumber(page);
-    if (!options?.preserveActivePane) setActivePaneRaw('compare');
+    if (!options?.preserveActivePane) setActivePaneInternal('compare');
     logger.info('Compare selection updated', { comparePage: page });
   }, [setComparePageNumber]);
 
   // --- Image adjustments ---------------------------------------------------------
-  /**
-   * @param {'primary'|'compare'} target
-   * @returns {function((ImageProperties|function(ImageProperties): ImageProperties)): void}
-   */
-  const getImagePropertiesSetter = useCallback((target) => (
-    target === 'compare' ? setCompareImageProperties : setPrimaryImageProperties
-  ), []);
-
   const handleRotationChange = useCallback((delta, target = 'primary') => {
     const d = Number(delta || 0);
-    const updateTarget = target === 'compare' ? 'compare' : 'primary';
-    getImagePropertiesSetter(updateTarget)((state) => ({
+    const update = (state) => ({
       ...state,
       rotation: normalizeRotationDegrees((Number(state.rotation) || 0) + d),
-    }));
-  }, [getImagePropertiesSetter]);
+    });
+    if (target === 'compare') {
+      setCompareImageProperties(update);
+      return;
+    }
+    setPrimaryImageProperties(update);
+  }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleBrightnessChange = useCallback((e, target = 'primary') => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    const updateTarget = target === 'compare' ? 'compare' : 'primary';
-    getImagePropertiesSetter(updateTarget)((state) => ({ ...state, brightness: v }));
-  }, [getImagePropertiesSetter]);
+    const update = (state) => ({ ...state, brightness: v });
+    if (target === 'compare') {
+      setCompareImageProperties(update);
+      return;
+    }
+    setPrimaryImageProperties(update);
+  }, []);
 
   /** @param {{target:{value:*}}} e */
   const handleContrastChange = useCallback((e, target = 'primary') => {
     const raw = Number(e && e.target ? e.target.value : undefined);
     const v = Number.isFinite(raw) ? Math.max(0, Math.min(200, raw)) : 100;
-    const updateTarget = target === 'compare' ? 'compare' : 'primary';
-    getImagePropertiesSetter(updateTarget)((state) => ({ ...state, contrast: v }));
-  }, [getImagePropertiesSetter]);
+    const update = (state) => ({ ...state, contrast: v });
+    if (target === 'compare') {
+      setCompareImageProperties(update);
+      return;
+    }
+    setPrimaryImageProperties(update);
+  }, []);
 
   const resetImageProperties = useCallback((target = 'primary') => {
-    const updateTarget = target === 'compare' ? 'compare' : 'primary';
-    getImagePropertiesSetter(updateTarget)({ ...DEFAULT_IMAGE_PROPERTIES });
-  }, [getImagePropertiesSetter]);
+    if (target === 'compare') {
+      setCompareImageProperties(DEFAULT_IMAGE_PROPERTIES);
+      return;
+    }
+    setPrimaryImageProperties(DEFAULT_IMAGE_PROPERTIES);
+  }, []);
 
   const rotateLeftPage = useCallback((target = 'primary') => {
     handleRotationChange(-90, target);

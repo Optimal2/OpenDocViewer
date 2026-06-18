@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4888. JSDoc symbol count: 112.
+File count: 8. Line count: 4911. JSDoc symbol count: 113.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -129,13 +129,13 @@ Symbols:
 
 - `clampPage` (function) - Clamp a 1-based page number into [1, total].
 - `normalizeRotationDegrees` (function) - Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer.
-- `DEFAULT_IMAGE_PROPERTIES` (constant) - Neutral per-page image adjustment state.
+- `CustomFitSizeLimits` (typedef) - Optional maximum percentage limits for the custom fit-to-size zoom mode.
+- `SelectionMask` (typedef) - No description.
+- `PrintPageSequence` (typedef) - No description.
+- `ViewerPageTarget` (typedef) - No description.
+- `ImageProperties` (typedef) - Image adjustment properties for canvas edit mode.
 - `resolveEffectiveCustomFitSizeLimits` (function) - Resolve effective custom-fit limits from a preferred value set and runtime config.
 - `buildImageRotationDependencyKey` (function) - No description.
 - `normalizeSelectionMask` (function) - No description.
 - `hasExcludedPages` (function) - No description.
 - `masksEqual` (function) - No description.
-- `resolveOriginalIndexFromPrintPageNumber` (function) - Convert a 1-based print/session page number to a zero-based original page index.
-- `normalizeOriginalPageIndex` (function) - Normalize a zero-based original page index and reject invalid/out-of-range values.
-- `normalizePrintPageSequence` (function) - No description.
-- `buildSelectionMaskFromPrintPageSequence` (function) - Build an inclusion mask from a print-page sequence.
