@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4717. JSDoc symbol count: 106.
+File count: 8. Line count: 4789. JSDoc symbol count: 108.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -130,6 +130,7 @@ Symbols:
 - `clampPage` (function) - Clamp a 1-based page number into [1, total].
 - `normalizeRotationDegrees` (function) - Normalize a rotation angle into the canonical 0..359 range used by the canvas renderer.
 - `DEFAULT_IMAGE_PROPERTIES` (constant) - Neutral per-page image adjustment state.
+- `resolveInitialCustomFitSizeLimits` (function) - Resolve initial custom-fit limits from persisted user preferences and runtime config.
 - `buildImageRotationDependencyKey` (function) - No description.
 - `normalizeSelectionMask` (function) - No description.
 - `hasExcludedPages` (function) - No description.
@@ -137,5 +138,4 @@ Symbols:
 - `normalizePrintPageSequence` (function) - No description.
 - `isNaturalPrintPageSequence` (function) - No description.
 - `findNearestVisiblePageNumber` (function) - Resolve the nearest visible page number for a requested original page index.
-- `buildDocumentSelectionModel` (function) - No description.
-- `getPageDocumentNavigationMeta` (function) - No description.
+- `resolveDocumentSelectionPageNumber` (function) - No description.

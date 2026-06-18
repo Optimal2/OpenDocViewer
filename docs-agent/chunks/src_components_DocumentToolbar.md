@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 14. Line count: 6329. JSDoc symbol count: 90.
+File count: 14. Line count: 6342. JSDoc symbol count: 91.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -135,6 +135,7 @@ Symbols:
 
 - `resolveThemeModeLabel` (function) - No description.
 - `resolveThemeModeIcon` (function) - No description.
+- `resolveSelectedMode` (function) - No description.
 - `<anonymous>~handlePointerDown` (function) - No description.
 - `<anonymous>~handleKeyDown` (function) - No description.
 - `ThemeMenuButton~handleSelect` (function) - No description.

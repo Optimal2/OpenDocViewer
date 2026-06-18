@@ -38,6 +38,19 @@ function resolveThemeModeIcon(mode) {
   return 'settings_suggest';
 }
 
+/**
+ * @param {'system'|'normal'|'light'|'dark'} currentMode
+ * @param {'normal'|'light'|'dark'} resolvedTheme
+ * @returns {'normal'|'light'|'dark'}
+ */
+function resolveSelectedMode(currentMode, resolvedTheme) {
+  if (currentMode === 'system') {
+    return resolvedTheme === 'dark' ? 'dark' : 'light';
+  }
+
+  return currentMode;
+}
+
 const ThemeMenuButton = ({ className = '' }) => {
   const { t } = useTranslation('common');
   const buttonRef = useRef(null);
@@ -51,7 +64,7 @@ const ThemeMenuButton = ({ className = '' }) => {
   const resolvedTheme = (ctx?.theme === 'normal' || ctx?.theme === 'dark' || ctx?.theme === 'light')
     ? ctx.theme
     : 'light';
-  const selectedMode = currentMode === 'system' ? (resolvedTheme === 'dark' ? 'dark' : 'light') : currentMode;
+  const selectedMode = resolveSelectedMode(currentMode, resolvedTheme);
   const setThemeMode = typeof ctx?.setThemeMode === 'function' ? ctx.setThemeMode : null;
 
   const options = useMemo(() => ([
