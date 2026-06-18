@@ -142,6 +142,20 @@ function normalizePrintPageSequence(sequence, total) {
   return next;
 }
 
+function buildSelectionMaskFromPrintPageSequence(sequence, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  const next = Array(safeTotal).fill(false);
+  if (!Array.isArray(sequence) || safeTotal <= 0) return next;
+
+  for (const rawPageNumber of sequence) {
+    const originalIndex = Math.floor(Number(rawPageNumber)) - 1;
+    if (!Number.isFinite(originalIndex) || originalIndex < 0 || originalIndex >= safeTotal) continue;
+    next[originalIndex] = true;
+  }
+
+  return next;
+}
+
 /**
  * @param {Array<number>} sequence
  * @param {number} total
@@ -1143,14 +1157,17 @@ export function useDocumentViewer() {
 
   const savePrintSelectionWorkspace = useCallback((sequence) => {
     const normalized = normalizePrintPageSequence(sequence, totalSessionPages);
-    const fullMask = Array(totalSessionPages).fill(true);
+    const isNaturalSequence = isNaturalPrintPageSequence(normalized, totalSessionPages);
+    const nextMask = isNaturalSequence
+      ? Array(totalSessionPages).fill(true)
+      : buildSelectionMaskFromPrintPageSequence(normalized, totalSessionPages);
     setCustomPrintSelectionSequence(
-      normalized.length > 0 && !isNaturalPrintPageSequence(normalized, totalSessionPages)
+      normalized.length > 0 && !isNaturalSequence
         ? normalized
         : null
     );
-    setAppliedSelectionMask(fullMask);
-    setDraftSelectionMask(fullMask);
+    setAppliedSelectionMask(nextMask);
+    setDraftSelectionMask(nextMask);
     setThumbnailPaneMode('thumbnails');
   }, [totalSessionPages]);
 
