@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4832. JSDoc symbol count: 110.
+File count: 8. Line count: 4888. JSDoc symbol count: 112.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -136,6 +136,6 @@ Symbols:
 - `hasExcludedPages` (function) - No description.
 - `masksEqual` (function) - No description.
 - `resolveOriginalIndexFromPrintPageNumber` (function) - Convert a 1-based print/session page number to a zero-based original page index.
+- `normalizeOriginalPageIndex` (function) - Normalize a zero-based original page index and reject invalid/out-of-range values.
 - `normalizePrintPageSequence` (function) - No description.
-- `isNaturalPrintPageSequence` (function) - No description.
-- `findNearestVisiblePageNumber` (function) - Resolve the nearest visible page number for a requested original page index.
+- `buildSelectionMaskFromPrintPageSequence` (function) - Build an inclusion mask from a print-page sequence.

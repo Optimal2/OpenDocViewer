@@ -171,6 +171,22 @@ function resolveOriginalIndexFromPrintPageNumber(rawPageNumber, total) {
 }
 
 /**
+ * Normalize a zero-based original page index and reject invalid/out-of-range values.
+ *
+ * @param {*} originalIndex
+ * @param {number} total
+ * @returns {number}
+ */
+function normalizeOriginalPageIndex(originalIndex, total) {
+  const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
+  const numericOriginalIndex = Number(originalIndex);
+  if (!Number.isFinite(numericOriginalIndex) || safeTotal <= 0) return -1;
+
+  const normalizedIndex = Math.floor(numericOriginalIndex);
+  return normalizedIndex >= 0 && normalizedIndex < safeTotal ? normalizedIndex : -1;
+}
+
+/**
  * @param {*} sequence
  * @param {number} total
  * @returns {Array<number>}
@@ -192,6 +208,17 @@ function normalizePrintPageSequence(sequence, total) {
   return next;
 }
 
+/**
+ * Build an inclusion mask from a print-page sequence.
+ *
+ * Sequence values are 1-based page numbers in the original session order. Invalid,
+ * duplicate, and out-of-range values are ignored; every valid page is marked true
+ * in the returned zero-based mask.
+ *
+ * @param {*} sequence
+ * @param {number} total
+ * @returns {Array<boolean>}
+ */
 function buildSelectionMaskFromPrintPageSequence(sequence, total) {
   const safeTotal = Math.max(0, Math.floor(Number(total) || 0));
   const next = Array(safeTotal).fill(false);
@@ -435,7 +462,11 @@ const THUMBNAIL_WIDTH_DEFAULT = 220;
  * @returns {ViewerPageTarget}
  */
 function normalizeViewerPaneTarget(pane) {
-  return pane === 'compare' ? 'compare' : 'primary';
+  if (pane === 'compare') return 'compare';
+  if (pane !== undefined && pane !== null && pane !== '' && pane !== 'primary') {
+    logger.warn('Unexpected viewer pane target; falling back to primary.', { pane: String(pane) });
+  }
+  return 'primary';
 }
 
 /**
@@ -850,10 +881,10 @@ export function useDocumentViewer() {
   }, [selectionDocuments, totalSessionPages]);
 
   const toggleDraftPage = useCallback((originalIndex, checked) => {
-    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
+    const safeOriginalIndex = normalizeOriginalPageIndex(originalIndex, totalSessionPages);
     setDraftSelectionMask((current) => {
       const base = normalizeSelectionMask(current, totalSessionPages);
-      if (safeOriginalIndex >= base.length) return base;
+      if (safeOriginalIndex < 0) return base;
       const next = base.slice();
       next[safeOriginalIndex] = !!checked;
       return next;
@@ -892,8 +923,8 @@ export function useDocumentViewer() {
   const hidePageFromSelection = useCallback((originalIndex) => {
     if (!selectionPanelEnabled) return false;
 
-    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
-    if (safeOriginalIndex < 0 || safeOriginalIndex >= totalSessionPages) return false;
+    const safeOriginalIndex = normalizeOriginalPageIndex(originalIndex, totalSessionPages);
+    if (safeOriginalIndex < 0) return false;
 
     if (customPrintSelectionActive && Array.isArray(normalizedCustomPrintSelectionSequence)) {
       const nextSequence = normalizedCustomPrintSelectionSequence.filter((pageNumber) => pageNumber !== safeOriginalIndex + 1);
@@ -930,8 +961,8 @@ export function useDocumentViewer() {
   const hideDocumentFromSelection = useCallback((originalIndex) => {
     if (!selectionPanelEnabled) return false;
 
-    const safeOriginalIndex = Math.max(0, Math.floor(Number(originalIndex) || 0));
-    if (safeOriginalIndex < 0 || safeOriginalIndex >= totalSessionPages) return false;
+    const safeOriginalIndex = normalizeOriginalPageIndex(originalIndex, totalSessionPages);
+    if (safeOriginalIndex < 0) return false;
 
     const sourcePage = allPages[safeOriginalIndex] || null;
     const documentId = String(sourcePage?.documentId || '').trim();
@@ -1597,6 +1628,9 @@ export function useDocumentViewer() {
     const handlers = thumbnailDragHandlersRef.current;
     if (!handlers) return;
 
+    if (typeof handlers.cancelFrame === 'function') {
+      handlers.cancelFrame();
+    }
     window.removeEventListener('mousemove', handlers.onMove);
     window.removeEventListener('mouseup', handlers.onUp);
     thumbnailDragHandlersRef.current = null;
@@ -1609,17 +1643,39 @@ export function useDocumentViewer() {
     removeThumbnailDragListeners();
     const startX = e.clientX;
     const startWidth = Math.max(THUMBNAIL_WIDTH_MIN, thumbnailWidth || THUMBNAIL_WIDTH_DEFAULT);
+    let animationFrameId = 0;
+    let pendingWidth = startWidth;
+
+    const scheduleWidthUpdate = (next) => {
+      pendingWidth = next;
+      if (animationFrameId) return;
+
+      animationFrameId = window.requestAnimationFrame(() => {
+        animationFrameId = 0;
+        setThumbnailWidth(pendingWidth);
+      });
+    };
+
+    const cancelFrame = () => {
+      if (!animationFrameId) return;
+      window.cancelAnimationFrame(animationFrameId);
+      animationFrameId = 0;
+    };
 
     /** @param {MouseEvent} ev */
     function onMove(ev) {
       const dx = ev.clientX - startX;
       const next = Math.max(THUMBNAIL_WIDTH_MIN, Math.min(THUMBNAIL_WIDTH_MAX, startWidth + dx));
-      setThumbnailWidth(next);
+      scheduleWidthUpdate(next);
     }
+
     function onUp() {
+      cancelFrame();
+      setThumbnailWidth(pendingWidth);
       removeThumbnailDragListeners();
     }
-    thumbnailDragHandlersRef.current = { onMove, onUp };
+
+    thumbnailDragHandlersRef.current = { onMove, onUp, cancelFrame };
     window.addEventListener('mousemove', onMove);
     window.addEventListener('mouseup', onUp);
   }, [removeThumbnailDragListeners, thumbnailWidth]);
