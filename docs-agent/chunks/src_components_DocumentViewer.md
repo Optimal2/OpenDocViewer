@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4911. JSDoc symbol count: 113.
+File count: 8. Line count: 4926. JSDoc symbol count: 113.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -136,6 +136,6 @@ Symbols:
 - `ImageProperties` (typedef) - Image adjustment properties for canvas edit mode.
 - `resolveEffectiveCustomFitSizeLimits` (function) - Resolve effective custom-fit limits from a preferred value set and runtime config.
 - `buildImageRotationDependencyKey` (function) - No description.
-- `normalizeSelectionMask` (function) - No description.
-- `hasExcludedPages` (function) - No description.
-- `masksEqual` (function) - No description.
+- `normalizeSelectionMask` (function) - Normalize a persisted/host-provided page-selection mask to the current page count.
+- `hasExcludedPages` (function) - Return true when the normalized mask excludes at least one page from the current session.
+- `masksEqual` (function) - Compare two selection masks over the active page count.

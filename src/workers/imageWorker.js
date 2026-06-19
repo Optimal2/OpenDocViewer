@@ -25,6 +25,7 @@ const COMPRESSION_JPEG2000 = 34712;
 const MIN_THUMBNAIL_DIMENSION = 24;
 const DEFAULT_THUMBNAIL_WIDTH = 220;
 const DEFAULT_THUMBNAIL_HEIGHT = 310;
+const MAX_OJPEG_SCAN_SIZE_BYTES = 512 * 1024 * 1024;
 
 function normalizeThumbnailBound(value, fallback) {
   const numericValue = Number(value);
@@ -171,19 +172,19 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     const bytes = new Uint8Array(arrayBuffer);
     const parts = [bytes.subarray(tablesOffset, tablesOffset + tablesLen)];
 
-    const minLen = Math.min(t273.length, t279.length);
-    if (minLen <= 0) return null;
+    const stripCount = Math.min(t273.length, t279.length);
+    if (stripCount <= 0) return null;
     let totalScanLen = 0;
-    for (let i = 0; i < minLen; i += 1) {
+    for (let i = 0; i < stripCount; i += 1) {
       const offset = t273[i] >>> 0;
       const len = t279[i] >>> 0;
       if (offset > byteLength || len > (byteLength - offset)) return null;
       totalScanLen += len;
-      if (totalScanLen > 512 * 1024 * 1024) return null;
+      if (totalScanLen > MAX_OJPEG_SCAN_SIZE_BYTES) return null;
     }
     const scanAll = new Uint8Array(totalScanLen);
     let cursor = 0;
-    for (let i = 0; i < minLen; i += 1) {
+    for (let i = 0; i < stripCount; i += 1) {
       const offset = t273[i] >>> 0;
       const len = t279[i] >>> 0;
       scanAll.set(bytes.subarray(offset, offset + len), cursor);
@@ -445,6 +446,8 @@ async function handleLegacyBatchMessage(event) {
     workerScope.postMessage({ jobs: jobResults, fileExtension });
   } catch (error) {
     const safeJobs = jobs.map((job) => ({
+      // Prefer the per-job extension when available; legacy batch messages carry
+      // one event-level extension, while fallback jobs may already be normalized.
       fileIndex: job.index,
       pageIndex: job.pageStartIndex || 0,
       pageStartIndex: job.pageStartIndex || 0,

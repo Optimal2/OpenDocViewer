@@ -63,7 +63,7 @@ import logger from '../../logging/systemLogger.js';
  * @param {InsertPageAtIndex} insertPageAtIndex
  * @param {boolean} sameBlob
  * @param {{ current: boolean }} [isMounted]
- * @returns {void}
+ * @returns {(void|Promise<void>)}
  */
 
 /** Small delay so the event loop can breathe between pumps (ms). */
@@ -107,9 +107,9 @@ function pump(
     worker.__busy = true;
 
     // Install handlers before postMessage to avoid races.
-    worker.onmessage = (event) => {
+    worker.onmessage = async (event) => {
       try {
-        handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
+        await handleWorkerMessage(event, insertPageAtIndex, sameBlob, isMounted);
       } finally {
         // @ts-ignore
         worker.__busy = false;
@@ -121,7 +121,7 @@ function pump(
       }
     };
 
-    worker.onerror = (err) => {
+    worker.onerror = async (err) => {
       try {
         // If a worker fails, synthesize "main-thread" jobs preserving original metadata.
         const jobs = (batch.jobs || []).map((j) => ({
@@ -142,7 +142,7 @@ function pump(
         });
 
         // Signal the central handler to route these to main-thread renderers.
-        handleWorkerMessage(
+        await handleWorkerMessage(
           { data: { handleInMainThread: true, jobs, fileExtension: batch.fileExtension } },
           insertPageAtIndex,
           sameBlob,

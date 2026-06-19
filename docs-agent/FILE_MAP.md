@@ -17,9 +17,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentLoader/DocumentLoader.js` | 2170 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
 | `src/components/DocumentLoader/documentLoaderUtils.js` | 254 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | `src/components/DocumentLoader/LoadPressureDialog.jsx` | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
-| `src/components/DocumentLoader/mainThreadRenderer.js` | 478 | 1 | 8 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
+| `src/components/DocumentLoader/mainThreadRenderer.js` | 481 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
 | `src/components/DocumentLoader/sources/explicitListSource.js` | 231 | 1 | 11 | high | OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
-| `src/components/DocumentLoader/workerHandler.js` | 300 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
+| `src/components/DocumentLoader/workerHandler.js` | 301 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | `src/components/DocumentMetadataMatrixOverlayDialog.jsx` | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
 | `src/components/DocumentMetadataOverlayDialog.jsx` | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
 | `src/components/DocumentRender.jsx` | 1112 | 1 | 24 | high | OpenDocViewer — Active page renderer. |
@@ -46,7 +46,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentViewer/DocumentViewerToolbar.jsx` | 418 | 1 | 5 | high | Toolbar adapter for the document viewer. |
 | `src/components/DocumentViewer/hooks/useViewerEffects.js` | 557 | 1 | 18 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
 | `src/components/DocumentViewer/hooks/useViewerPostZoom.js` | 86 | 1 | 7 | high | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
-| `src/components/DocumentViewer/useDocumentViewer.js` | 1884 | 1 | 60 | high | Primary viewer-state hook. |
+| `src/components/DocumentViewer/useDocumentViewer.js` | 1899 | 1 | 60 | high | Primary viewer-state hook. |
 | `src/components/ImageRenderer.jsx` | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | `src/components/LoadingMessage.jsx` | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | `src/components/LoadingSpinner.jsx` | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
@@ -111,7 +111,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/supportDiagnostics.js` | 370 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | `src/utils/viewerPreferences.js` | 473 | 5 | 33 | high | Lightweight persisted viewer preferences. |
 | `src/utils/zoomUtils.js` | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |
-| `src/workers/imageWorker.js` | 497 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
+| `src/workers/imageWorker.js` | 500 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
 | `src/workers/pdfPageWorker.js` | 433 | 0 | 1 | high | OpenDocViewer - PDF page image worker. |
 | `src/workers/pdfWorker.js` | 628 | 0 | 1 | high | OpenDocViewer - generated PDF worker. |
 

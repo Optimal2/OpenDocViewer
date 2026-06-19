@@ -446,7 +446,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   }, [getActiveRenderSurface, setZoom]);
 
   /**
-   * @param {number=} factorPercent
+   * @param {(*|number)=} limits Custom-fit limit object, or a legacy width-factor percent.
    * @returns {void}
    */
   const fitToCustomWidth = useCallback((limits = normalizedCustomFitSizeLimits) => {
@@ -974,8 +974,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     fitToWidth() {
       fitToWidth();
     },
-    fitToCustomWidth(factorPercent) {
-      fitToCustomWidth(factorPercent);
+    fitToCustomWidth(limits) {
+      fitToCustomWidth(limits);
     },
     zoomIn() {
       handleZoomIn(setZoom);

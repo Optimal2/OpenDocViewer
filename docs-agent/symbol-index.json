@@ -883,7 +883,7 @@
     ],
     "returns": [
       {
-        "type": "void",
+        "type": "void|Promise.<void>",
         "description": ""
       }
     ],
@@ -2844,7 +2844,7 @@
     "kind": "member",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 56,
+    "line": 59,
     "description": "One-time init of pdf.js classic worker script URL (dev == build).",
     "params": [],
     "returns": [],
@@ -2857,7 +2857,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 221,
+    "line": 224,
     "description": "Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips...",
     "params": [
       {
@@ -2888,7 +2888,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 63,
+    "line": 66,
     "description": "Ensure a pdf.js worker is ready for this runtime.",
     "params": [],
     "returns": [
@@ -2906,7 +2906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 205,
+    "line": 208,
     "description": "Safely read a TIFF tag array from a utif2 IFD object.",
     "params": [
       {
@@ -2937,8 +2937,21 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 46,
+    "line": 49,
     "description": "Signature for inserting a page structure into the page list at an index.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MAX_OJPEG_SCAN_SIZE_BYTES",
+    "name": "MAX_OJPEG_SCAN_SIZE_BYTES",
+    "longname": "MAX_OJPEG_SCAN_SIZE_BYTES",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentLoader/mainThreadRenderer.js",
+    "line": 33,
+    "description": "Upper bound for reconstructed OJPEG entropy-coded scan data.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -2950,7 +2963,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 32,
+    "line": 35,
     "description": "Render job passed to the main-thread renderer.",
     "params": [],
     "returns": [],
@@ -2963,7 +2976,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 87,
+    "line": 90,
     "description": "Render PDF pages on the main thread and INSERT THEM DIRECTLY.",
     "params": [
       {
@@ -3006,7 +3019,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 291,
+    "line": 294,
     "description": "Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t...",
     "params": [
       {
@@ -3386,7 +3399,7 @@
     ],
     "returns": [
       {
-        "type": "void",
+        "type": "Promise.<void>",
         "description": ""
       }
     ],
@@ -3923,10 +3936,10 @@
     "description": "",
     "params": [
       {
-        "name": "factorPercent",
-        "type": "number",
+        "name": "limits",
+        "type": "*|number",
         "optional": true,
-        "description": ""
+        "description": "Custom-fit limit object, or a legacy width-factor percent."
       }
     ],
     "returns": [
@@ -9209,7 +9222,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1494,
+    "line": 1509,
     "description": "Open compare mode when needed and make the right pane the default target.",
     "params": [],
     "returns": [
@@ -9227,7 +9240,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1486,
+    "line": 1501,
     "description": "",
     "params": [],
     "returns": [
@@ -9245,7 +9258,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1603,
+    "line": 1618,
     "description": "Mouse down handler for the thumbnail resizer; listens for mousemove/up on window.",
     "params": [
       {
@@ -9270,7 +9283,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 342,
+    "line": 357,
     "description": "",
     "params": [
       {
@@ -9326,7 +9339,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 252,
+    "line": 263,
     "description": "Build an inclusion mask from a print-page sequence.",
     "params": [
       {
@@ -9357,7 +9370,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 420,
+    "line": 435,
     "description": "Build the visible-document grouping used by document-level navigation.",
     "params": [
       {
@@ -9419,7 +9432,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1522,
+    "line": 1537,
     "description": "Close compare mode without affecting the left page.",
     "params": [],
     "returns": [
@@ -9450,7 +9463,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 289,
+    "line": 300,
     "description": "Resolve the nearest visible page number for a requested original page index.",
     "params": [
       {
@@ -9481,7 +9494,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 718,
+    "line": 733,
     "description": "Resolve document-navigation state for the requested pane.",
     "params": [
       {
@@ -9506,7 +9519,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 394,
+    "line": 409,
     "description": "",
     "params": [
       {
@@ -9531,7 +9544,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1248,
+    "line": 1263,
     "description": "Jump to the first page of the first visible document.",
     "params": [
       {
@@ -9556,7 +9569,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1204,
+    "line": 1219,
     "description": "Jump to the first visible page in the requested target pane.",
     "params": [
       {
@@ -9581,7 +9594,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1260,
+    "line": 1275,
     "description": "Jump to the first page of the last visible document.",
     "params": [
       {
@@ -9606,7 +9619,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1213,
+    "line": 1228,
     "description": "Jump to the last visible page in the requested target pane.",
     "params": [
       {
@@ -9631,7 +9644,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1236,
+    "line": 1251,
     "description": "Jump to the first page of the next visible document.",
     "params": [
       {
@@ -9656,7 +9669,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1195,
+    "line": 1210,
     "description": "Move one page forward in the requested target pane.",
     "params": [
       {
@@ -9681,7 +9694,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1224,
+    "line": 1239,
     "description": "Jump to the first page of the previous visible document (or to the current document start when the active pane already points inside the first visible document).",
     "params": [
       {
@@ -9706,7 +9719,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1186,
+    "line": 1201,
     "description": "Move one page backward in the requested target pane.",
     "params": [
       {
@@ -9731,7 +9744,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1558,
+    "line": 1573,
     "description": "",
     "params": [
       {
@@ -9751,7 +9764,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1504,
+    "line": 1519,
     "description": "Toggle compare mode.",
     "params": [],
     "returns": [],
@@ -9764,7 +9777,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1570,
+    "line": 1585,
     "description": "",
     "params": [
       {
@@ -9784,7 +9797,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1102,
+    "line": 1117,
     "description": "Change the primary page using an original page number (or a visible-page updater function when called from navigation helpers).",
     "params": [
       {
@@ -9809,7 +9822,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1150,
+    "line": 1165,
     "description": "Keep requested-page state and the actually displayed page synchronized for diagnostics.",
     "params": [
       {
@@ -9834,7 +9847,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1111,
+    "line": 1126,
     "description": "Change the primary page by a visible page number from the thumbnail strip.",
     "params": [
       {
@@ -9859,8 +9872,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 165,
-    "description": "",
+    "line": 173,
+    "description": "Return true when the normalized mask excludes at least one page from the current session.",
     "params": [
       {
         "name": "mask",
@@ -9890,7 +9903,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 977,
+    "line": 992,
     "description": "Immediately exclude every page that belongs to the same document as the provided original page index.",
     "params": [
       {
@@ -9915,7 +9928,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 939,
+    "line": 954,
     "description": "Immediately exclude a page from the active selection and apply the filtered session.",
     "params": [
       {
@@ -9953,7 +9966,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 271,
+    "line": 282,
     "description": "",
     "params": [
       {
@@ -9984,8 +9997,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 179,
-    "description": "",
+    "line": 190,
+    "description": "Compare two selection masks over the active page count.",
     "params": [
       {
         "name": "a",
@@ -10021,7 +10034,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 210,
+    "line": 221,
     "description": "Normalize a zero-based original page index and reject invalid/out-of-range values.",
     "params": [
       {
@@ -10052,7 +10065,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 224,
+    "line": 235,
     "description": "",
     "params": [
       {
@@ -10108,8 +10121,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 149,
-    "description": "",
+    "line": 153,
+    "description": "Normalize a persisted/host-provided page-selection mask to the current page count.",
     "params": [
       {
         "name": "mask",
@@ -10139,7 +10152,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 484,
+    "line": 499,
     "description": "Normalize any pane key into the viewer's two supported navigation targets.",
     "params": [
       {
@@ -10164,7 +10177,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1689,
+    "line": 1704,
     "description": "",
     "params": [
       {
@@ -10197,8 +10210,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 325,
-    "description": "",
+    "line": 340,
+    "description": "Resolve a page's 1-based page number within the current document-selection group.",
     "params": [
       {
         "name": "page",
@@ -10271,7 +10284,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 796,
+    "line": 811,
     "description": "",
     "params": [
       {
@@ -10296,7 +10309,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 194,
+    "line": 205,
     "description": "Convert a 1-based print/session page number to a zero-based original page index.",
     "params": [
       {
@@ -10327,7 +10340,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 313,
+    "line": 324,
     "description": "Resolve either a direct visible-page value or a React setState-style updater function.",
     "params": [
       {
@@ -10364,7 +10377,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1054,
+    "line": 1069,
     "description": "Resolve the next original 1-based page number from a visible-page update.",
     "params": [
       {
@@ -10395,7 +10408,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1537,
+    "line": 1552,
     "description": "Select a page for the right-hand compare pane.",
     "params": [
       {
@@ -10445,7 +10458,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1479,
+    "line": 1494,
     "description": "Set the default pane for compare-aware navigation and editing actions.",
     "params": [
       {
@@ -10470,7 +10483,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1138,
+    "line": 1153,
     "description": "Change the compare page using an original page number (or a visible-page updater function when called from compare navigation helpers).",
     "params": [
       {
@@ -10495,7 +10508,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1467,
+    "line": 1482,
     "description": "Setter for the editing controls visibility.",
     "params": [
       {
@@ -10515,7 +10528,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1124,
+    "line": 1139,
     "description": "Change the compare page by a visible page number from the toolbar page field.",
     "params": [
       {
@@ -10540,7 +10553,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1374,
+    "line": 1389,
     "description": "Set zoom mode directly ('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|'CUSTOM').",
     "params": [],
     "returns": [],
@@ -10553,7 +10566,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1178,
+    "line": 1193,
     "description": "The thumbnail pane should react immediately when the user changes page.",
     "params": [],
     "returns": [],
@@ -10566,7 +10579,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1451,
+    "line": 1466,
     "description": "Toggle between the two fit modes from the page surface.",
     "params": [],
     "returns": [],
@@ -10579,7 +10592,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 1077,
+    "line": 1092,
     "description": "Generic primary/compare page setter that accepts either a visible-page updater function or a concrete original page number.",
     "params": [
       {
@@ -10610,7 +10623,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 505,
+    "line": 520,
     "description": "Hook that centralizes viewer UI state and event handlers.",
     "params": [],
     "returns": [
@@ -10641,7 +10654,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 466,
+    "line": 481,
     "description": "Sticky zoom modes used by the viewer (subset is used here).",
     "params": [],
     "returns": [],
@@ -10654,7 +10667,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentViewer/useDocumentViewer.js",
-    "line": 471,
+    "line": 486,
     "description": "Zoom state (mode + current numeric scale).",
     "params": [],
     "returns": [],
@@ -32417,7 +32430,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/workers/imageWorker.js",
-    "line": 43,
+    "line": 44,
     "description": "Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread.",
     "params": [
       {

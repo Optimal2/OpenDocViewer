@@ -169,9 +169,9 @@ function scheduleMainThread(job, insertPageAtIndex, sameBlob, isMounted, opts) {
  * @param {boolean} sameBlob
  * @param {{ current: boolean }} [isMounted]
  * @param {HandleOpts} [opts]
- * @returns {void}
+ * @returns {Promise<void>}
  */
-export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounted, opts) => {
+export const handleWorkerMessage = async (event, insertPageAtIndex, sameBlob, isMounted, opts) => {
   if (isMounted && isMounted.current === false) return;
 
   const { data } = event || {};
@@ -243,7 +243,8 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
   }
 
   // Normal success path: insert each rendered page (or placeholder if missing blob/url).
-  msg.jobs.forEach(async (job) => {
+  // Process jobs sequentially so thumbnail generation and insert ordering stay explicit.
+  for (const job of msg.jobs) {
     try {
       if (isMounted && isMounted.current === false) return;
       if (isStale(job)) {
@@ -295,5 +296,5 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
     } catch (e) {
       logger.error('handleWorkerMessage: per-job failure', { error: String(e?.message || e) });
     }
-  });
+  }
 };
