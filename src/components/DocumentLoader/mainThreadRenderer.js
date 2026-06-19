@@ -255,6 +255,7 @@ function getTagArray(ifd, tagId) {
  */
 function buildOjpegJpeg(arrayBuffer, ifd) {
   try {
+    const byteLength = Number(arrayBuffer?.byteLength) || 0;
     const t513 = getTagArray(ifd, 513); // JPEGInterchangeFormat (offset to tables)
     const t514 = getTagArray(ifd, 514); // JPEGInterchangeFormatLength
     const t273 = getTagArray(ifd, 273); // StripOffsets (scan data offsets)
@@ -265,6 +266,7 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     const tablesOffset = t513[0] >>> 0;
     const tablesLen = t514[0] >>> 0;
     if (!tablesLen) return null;
+    if (tablesOffset > byteLength || tablesLen > (byteLength - tablesOffset)) return null;
 
     const u8 = new Uint8Array(arrayBuffer);
     const parts = [];
@@ -273,13 +275,19 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     parts.push(u8.subarray(tablesOffset, tablesOffset + tablesLen));
 
     // Concatenate all strips (usually single-strip; support multi-strip just in case)
+    const stripCount = Math.min(t273.length, t279.length);
+    if (stripCount <= 0) return null;
     let totalScanLen = 0;
-    for (let i = 0; i < t273.length && i < t279.length; i++) {
-      totalScanLen += (t279[i] >>> 0);
+    for (let i = 0; i < stripCount; i++) {
+      const off = t273[i] >>> 0;
+      const len = t279[i] >>> 0;
+      if (off > byteLength || len > (byteLength - off)) return null;
+      totalScanLen += len;
+      if (totalScanLen > 512 * 1024 * 1024) return null;
     }
     const scanAll = new Uint8Array(totalScanLen);
     let cursor = 0;
-    for (let i = 0; i < t273.length && i < t279.length; i++) {
+    for (let i = 0; i < stripCount; i++) {
       const off = t273[i] >>> 0;
       const len = t279[i] >>> 0;
       scanAll.set(u8.subarray(off, off + len), cursor);
