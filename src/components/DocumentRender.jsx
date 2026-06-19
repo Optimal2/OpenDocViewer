@@ -34,6 +34,7 @@ import {
   handleZoomOut,
 } from '../utils/zoomUtils.js';
 import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
+import { clampRenderSurfaceSize } from '../utils/renderSurfaceBounds.js';
 
 /**
  * @param {Array<any>} allPages
@@ -158,6 +159,12 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const [transitionPending, setTransitionPending] = useState(false);
   const [blockingLoading, setBlockingLoading] = useState(false);
   const [canvasReady, setCanvasReady] = useState(false);
+  const [canvasRenderSize, setCanvasRenderSize] = useState({
+    width: 0,
+    height: 0,
+    pageIndex: -1,
+    url: '',
+  });
   const [naturalSize, setNaturalSize] = useState({
     width: 0,
     height: 0,
@@ -288,11 +295,26 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   const effectiveRenderSize = useMemo(() => {
     if (!isCanvasEnabled) return fallbackRenderSize;
+
+    const canvasSizeMatchesDisplayedAsset = canvasRenderSize.pageIndex === displayedAsset.pageIndex
+      && String(canvasRenderSize.url || '') === String(displayedAsset.url || '');
+    if (canvasSizeMatchesDisplayedAsset && hasUsableSize(canvasRenderSize)) {
+      return normalizeSize(canvasRenderSize);
+    }
+
     const swapAxes = normalizedRotation === 90 || normalizedRotation === 270;
-    return swapAxes
+    const rotatedFallbackSize = swapAxes
       ? { width: fallbackRenderSize.height, height: fallbackRenderSize.width }
       : fallbackRenderSize;
-  }, [fallbackRenderSize, isCanvasEnabled, normalizedRotation]);
+    const boundedFallbackSize = clampRenderSurfaceSize(
+      rotatedFallbackSize.width,
+      rotatedFallbackSize.height
+    );
+    return {
+      width: boundedFallbackSize.width,
+      height: boundedFallbackSize.height,
+    };
+  }, [canvasRenderSize, displayedAsset.pageIndex, displayedAsset.url, fallbackRenderSize, isCanvasEnabled, normalizedRotation]);
 
   const stageWidthPx = useMemo(() => {
     const width = Number(effectiveRenderSize.width || 0);
@@ -320,6 +342,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
 
   useLayoutEffect(() => {
     setCanvasReady(false);
+    setCanvasRenderSize({ width: 0, height: 0, pageIndex: -1, url: '' });
   }, [currentIndex, displayedAsset.url, isCanvasEnabled]);
 
   useEffect(() => {
@@ -360,22 +383,31 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const contrastRaw = Number(imageProperties?.contrast ?? 100);
     const brightness = Number.isFinite(brightnessRaw) ? brightnessRaw : 100;
     const contrast = Number.isFinite(contrastRaw) ? contrastRaw : 100;
+    const rotated = rotation === 90 || rotation === 270;
+    const requestedCanvasSize = clampRenderSurfaceSize(
+      rotated ? sourceHeight : sourceWidth,
+      rotated ? sourceWidth : sourceHeight
+    );
+    const drawScale = requestedCanvasSize.scale;
+    const drawWidth = Math.max(1, Math.floor(sourceWidth * drawScale));
+    const drawHeight = Math.max(1, Math.floor(sourceHeight * drawScale));
 
-    if (rotation === 90 || rotation === 270) {
-      canvas.width = sourceHeight;
-      canvas.height = sourceWidth;
-    } else {
-      canvas.width = sourceWidth;
-      canvas.height = sourceHeight;
-    }
+    canvas.width = requestedCanvasSize.width;
+    canvas.height = requestedCanvasSize.height;
 
     ctx.clearRect(0, 0, canvas.width, canvas.height);
     ctx.save();
     ctx.translate(canvas.width / 2, canvas.height / 2);
     ctx.rotate((rotation * Math.PI) / 180);
     ctx.filter = `brightness(${brightness}%) contrast(${contrast}%)`;
-    ctx.drawImage(image, -sourceWidth / 2, -sourceHeight / 2, sourceWidth, sourceHeight);
+    ctx.drawImage(image, -drawWidth / 2, -drawHeight / 2, drawWidth, drawHeight);
     ctx.restore();
+    setCanvasRenderSize({
+      width: canvas.width,
+      height: canvas.height,
+      pageIndex: displayedAssetRef.current.pageIndex,
+      url: String(displayedAssetRef.current.url || image.currentSrc || image.src || ''),
+    });
     setCanvasReady(true);
   }, [currentPage?.realHeight, currentPage?.realWidth, imageProperties, normalizedRotation]);
 
@@ -434,7 +466,13 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     const size = normalizeSize(renderSize);
     if (!hasUsableSize(size)) return;
 
-    const syntheticSurface = { width: size.width, height: size.height };
+    const boundedSize = isCanvasEnabled
+      ? clampRenderSurfaceSize(size.width, size.height)
+      : size;
+    const syntheticSurface = {
+      width: boundedSize.width,
+      height: boundedSize.height,
+    };
     if (zoomMode === 'FIT_WIDTH') {
       calculateFitToWidthZoom(syntheticSurface, renderViewportRef, setZoom);
     } else if (zoomMode === 'FIT_CUSTOM') {
@@ -442,7 +480,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     } else if (zoomMode === 'FIT_PAGE') {
       calculateFitToScreenZoom(syntheticSurface, renderViewportRef, setZoom);
     }
-  }, [resolveCustomFitOptions, setZoom, zoomMode]);
+  }, [isCanvasEnabled, resolveCustomFitOptions, setZoom, zoomMode]);
 
   /**
    * @returns {void}
