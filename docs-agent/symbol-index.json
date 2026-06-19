@@ -295,7 +295,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/app/bootConfig.js",
-    "line": 71,
+    "line": 100,
     "description": "Try multiple candidate URLs (in order) until one probes as JS, then load it.",
     "params": [],
     "returns": [],
@@ -977,7 +977,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1058,
+    "line": 1059,
     "description": "",
     "params": [
       {
@@ -1058,7 +1058,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1016,
+    "line": 1017,
     "description": "",
     "params": [
       {
@@ -1182,7 +1182,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1168,
+    "line": 1169,
     "description": "",
     "params": [
       {
@@ -1289,7 +1289,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 992,
+    "line": 993,
     "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
     "params": [
       {
@@ -1332,7 +1332,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 976,
+    "line": 977,
     "description": "",
     "params": [
       {
@@ -1626,7 +1626,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1282,
+    "line": 1283,
     "description": "",
     "params": [
       {
@@ -1651,7 +1651,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 922,
+    "line": 923,
     "description": "",
     "params": [
       {
@@ -1790,7 +1790,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1303,
+    "line": 1304,
     "description": "Fetch and persist one source blob with conservative retry behavior.",
     "params": [
       {
@@ -1821,7 +1821,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1212,
+    "line": 1213,
     "description": "",
     "params": [
       {
@@ -1871,7 +1871,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 887,
+    "line": 888,
     "description": "",
     "params": [
       {
@@ -1921,7 +1921,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1581,
+    "line": 1582,
     "description": "",
     "params": [],
     "returns": [],
@@ -1947,7 +1947,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 950,
+    "line": 951,
     "description": "Extract multi-document source context from an entry or placeholder input.",
     "params": [
       {
@@ -1972,7 +1972,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1100,
+    "line": 1101,
     "description": "",
     "params": [
       {
@@ -2162,7 +2162,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1221,
+    "line": 1222,
     "description": "",
     "params": [
       {
@@ -2267,7 +2267,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1160,
+    "line": 1161,
     "description": "",
     "params": [
       {
@@ -2335,7 +2335,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1276,
+    "line": 1277,
     "description": "Whether this load run is no longer allowed to mutate React state.",
     "params": [],
     "returns": [
@@ -2409,7 +2409,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 939,
+    "line": 940,
     "description": "",
     "params": [
       {
@@ -2844,35 +2844,10 @@
     "kind": "member",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 90,
+    "line": 56,
     "description": "One-time init of pdf.js classic worker script URL (dev == build).",
     "params": [],
     "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "addToUrlRegistry",
-    "name": "addToUrlRegistry",
-    "longname": "addToUrlRegistry",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 81,
-    "description": "Track a created object URL so it can be revoked later.",
-    "params": [
-      {
-        "name": "url",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "void",
-        "description": ""
-      }
-    ],
     "examples": 0
   },
   {
@@ -2882,7 +2857,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 256,
+    "line": 221,
     "description": "Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips...",
     "params": [
       {
@@ -2913,7 +2888,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 97,
+    "line": 63,
     "description": "Ensure a pdf.js worker is ready for this runtime.",
     "params": [],
     "returns": [
@@ -2931,7 +2906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 240,
+    "line": 205,
     "description": "Safely read a TIFF tag array from a utif2 IFD object.",
     "params": [
       {
@@ -2962,7 +2937,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 45,
+    "line": 46,
     "description": "Signature for inserting a page structure into the page list at an index.",
     "params": [],
     "returns": [],
@@ -2975,7 +2950,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 31,
+    "line": 32,
     "description": "Render job passed to the main-thread renderer.",
     "params": [],
     "returns": [],
@@ -2988,7 +2963,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 121,
+    "line": 87,
     "description": "Render PDF pages on the main thread and INSERT THEM DIRECTLY.",
     "params": [
       {
@@ -3031,7 +3006,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-    "line": 318,
+    "line": 291,
     "description": "Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t...",
     "params": [
       {
@@ -3313,26 +3288,13 @@
     "examples": 0
   },
   {
-    "id": "addToUrlRegistry",
-    "name": "addToUrlRegistry",
-    "longname": "addToUrlRegistry",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 126,
-    "description": "Create / get a global URL registry and install unload cleanup once.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "createWorker",
     "name": "createWorker",
     "longname": "createWorker",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 94,
+    "line": 95,
     "description": "Create a new image worker instance.",
     "params": [],
     "returns": [
@@ -3350,7 +3312,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 109,
+    "line": 110,
     "description": "Decide how many workers to spawn, leaving one logical core for the UI when possible.",
     "params": [
       {
@@ -3375,7 +3337,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 75,
+    "line": 76,
     "description": "Options passed to the handler to coordinate main-thread rendering.",
     "params": [],
     "returns": [],
@@ -3388,7 +3350,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 203,
+    "line": 174,
     "description": "Handle a message payload from an image worker and insert resulting page(s).",
     "params": [
       {
@@ -3437,7 +3399,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 67,
+    "line": 68,
     "description": "Signature for inserting a page structure into the viewer at a specific index.",
     "params": [
       {
@@ -3468,7 +3430,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 167,
+    "line": 138,
     "description": "Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue (deferred execution).",
     "params": [
       {
@@ -3517,7 +3479,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 41,
+    "line": 42,
     "description": "A single job/result entry communicated between worker and main thread.",
     "params": [],
     "returns": [],
@@ -3530,7 +3492,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentLoader/workerHandler.js",
-    "line": 57,
+    "line": 58,
     "description": "Worker → main message envelope.",
     "params": [],
     "returns": [],
@@ -3693,7 +3655,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 433,
+    "line": 465,
     "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
     "params": [
       {
@@ -3718,7 +3680,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 450,
+    "line": 488,
     "description": "",
     "params": [],
     "returns": [
@@ -3736,7 +3698,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 208,
+    "line": 215,
     "description": "",
     "params": [
       {
@@ -3767,7 +3729,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 196,
+    "line": 203,
     "description": "",
     "params": [],
     "returns": [
@@ -3785,7 +3747,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 75,
+    "line": 76,
     "description": "",
     "params": [],
     "returns": [],
@@ -3798,7 +3760,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 99,
+    "line": 100,
     "description": "",
     "params": [
       {
@@ -3901,7 +3863,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 351,
+    "line": 374,
     "description": "",
     "params": [
       {
@@ -3926,7 +3888,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 671,
+    "line": 709,
     "description": "",
     "params": [
       {
@@ -3957,7 +3919,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 420,
+    "line": 452,
     "description": "",
     "params": [
       {
@@ -3982,7 +3944,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 401,
+    "line": 433,
     "description": "",
     "params": [],
     "returns": [
@@ -4000,7 +3962,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 410,
+    "line": 442,
     "description": "",
     "params": [],
     "returns": [
@@ -4018,7 +3980,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 388,
+    "line": 420,
     "description": "Returns the surface whose intrinsic size should drive fit calculations.",
     "params": [],
     "returns": [
@@ -4036,7 +3998,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 43,
+    "line": 44,
     "description": "",
     "params": [
       {
@@ -4067,7 +4029,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 855,
+    "line": 893,
     "description": "",
     "params": [
       {
@@ -4098,7 +4060,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 788,
+    "line": 826,
     "description": "",
     "params": [
       {
@@ -4129,7 +4091,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 473,
+    "line": 511,
     "description": "",
     "params": [
       {
@@ -4154,7 +4116,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 883,
+    "line": 921,
     "description": "",
     "params": [],
     "returns": [
@@ -4172,7 +4134,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 731,
+    "line": 769,
     "description": "",
     "params": [
       {
@@ -4197,7 +4159,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 63,
+    "line": 64,
     "description": "",
     "params": [
       {
@@ -4222,7 +4184,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 71,
+    "line": 72,
     "description": "",
     "params": [
       {
@@ -4247,7 +4209,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentRender.jsx",
-    "line": 52,
+    "line": 53,
     "description": "",
     "params": [
       {
@@ -4272,7 +4234,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 814,
+    "line": 852,
     "description": "",
     "params": [
       {
@@ -4309,7 +4271,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 189,
+    "line": 196,
     "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
     "params": [],
     "returns": [
@@ -4327,7 +4289,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 248,
+    "line": 255,
     "description": "",
     "params": [
       {
@@ -5493,7 +5455,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1106,
+    "line": 1119,
     "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
     "params": [
       {
@@ -5727,7 +5689,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1263,
+    "line": 1287,
     "description": "Handle the dialog submit event and dispatch the correct print action.",
     "params": [
       {
@@ -11189,7 +11151,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/ViewerProblemNotice.jsx",
-    "line": 179,
+    "line": 197,
     "description": "",
     "params": [
       {
@@ -19113,7 +19075,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 17,
+    "line": 30,
     "description": "",
     "params": [
       {
@@ -19138,7 +19100,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 61,
+    "line": 75,
     "description": "",
     "params": [],
     "returns": [
@@ -19156,7 +19118,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 51,
+    "line": 65,
     "description": "Check whether a blob/object URL is still tracked as live by the viewer.",
     "params": [
       {
@@ -19181,7 +19143,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 69,
+    "line": 83,
     "description": "Revoke every tracked object URL.",
     "params": [],
     "returns": [
@@ -19199,7 +19161,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 27,
+    "line": 41,
     "description": "",
     "params": [
       {
@@ -19224,7 +19186,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/objectUrlRegistry.js",
-    "line": 40,
+    "line": 54,
     "description": "",
     "params": [
       {
@@ -19275,7 +19237,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 625,
+    "line": 635,
     "description": "Render one requested page asset.",
     "params": [
       {
@@ -19319,7 +19281,7 @@
     "kind": "function",
     "scope": "instance",
     "file": "src/utils/pageAssetRenderer.js",
-    "line": 499,
+    "line": 509,
     "description": "Render a PDF page set through the PDF worker pool as one partitioned batch.",
     "params": [
       {
@@ -23528,7 +23490,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 223,
+    "line": 227,
     "description": "Build a header/footer DIV element for a page using config + tokens.",
     "params": [
       {
@@ -23583,7 +23545,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 130,
+    "line": 134,
     "description": "Build the print-only CSS string (inlined within the print iframe).",
     "params": [
       {
@@ -23620,7 +23582,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 264,
+    "line": 275,
     "description": "Build configured print-format header/watermark elements for a page.",
     "params": [
       {
@@ -23657,7 +23619,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 119,
+    "line": 123,
     "description": "",
     "params": [
       {
@@ -23682,7 +23644,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 198,
+    "line": 202,
     "description": "",
     "params": [
       {
@@ -23707,7 +23669,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 172,
+    "line": 176,
     "description": "",
     "params": [
       {
@@ -23738,7 +23700,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 393,
+    "line": 404,
     "description": "",
     "params": [
       {
@@ -23769,7 +23731,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 81,
+    "line": 85,
     "description": "Normalize runtime overlay application mode.",
     "params": [
       {
@@ -23794,7 +23756,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 71,
+    "line": 75,
     "description": "Normalize an unknown configuration value to a non-negative number.",
     "params": [
       {
@@ -23819,7 +23781,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 102,
+    "line": 106,
     "description": "",
     "params": [
       {
@@ -23844,7 +23806,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 111,
+    "line": 115,
     "description": "",
     "params": [
       {
@@ -23869,7 +23831,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 338,
+    "line": 349,
     "description": "Attach pages and images into the (cleared) body, wait for image terminal states, then print.",
     "params": [
       {
@@ -23936,7 +23898,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 20,
+    "line": 24,
     "description": "Print overlay config (runtime) consumed by the print overlay logic.",
     "params": [],
     "returns": [],
@@ -23949,7 +23911,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 442,
+    "line": 453,
     "description": "Render a multi-page print document in the given print iframe document.",
     "params": [
       {
@@ -24022,7 +23984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 413,
+    "line": 424,
     "description": "Render a single-page print document in the given print iframe document.",
     "params": [
       {
@@ -24101,7 +24063,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 92,
+    "line": 96,
     "description": "",
     "params": [
       {
@@ -24138,7 +24100,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 32,
+    "line": 36,
     "description": "Token context used by templates.",
     "params": [],
     "returns": [],
@@ -24151,7 +24113,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 58,
+    "line": 62,
     "description": "Tiny helper to translate with safe fallback.",
     "params": [
       {
@@ -24188,7 +24150,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printDom.js",
-    "line": 300,
+    "line": 311,
     "description": "",
     "params": [
       {
@@ -24300,7 +24262,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 969,
+    "line": 970,
     "description": "",
     "params": [
       {
@@ -24361,7 +24323,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 593,
+    "line": 594,
     "description": "",
     "params": [
       {
@@ -24392,7 +24354,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 554,
+    "line": 555,
     "description": "",
     "params": [
       {
@@ -24417,7 +24379,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 564,
+    "line": 565,
     "description": "",
     "params": [
       {
@@ -24454,7 +24416,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 218,
+    "line": 219,
     "description": "Convert a value to a finite number for PDF layout calculations.",
     "params": [
       {
@@ -24479,7 +24441,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2112,
+    "line": 2206,
     "description": "",
     "params": [
       {
@@ -24504,7 +24466,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1561,
+    "line": 1562,
     "description": "",
     "params": [
       {
@@ -24535,7 +24497,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1606,
+    "line": 1607,
     "description": "",
     "params": [
       {
@@ -24578,7 +24540,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2097,
+    "line": 2191,
     "description": "",
     "params": [
       {
@@ -24609,7 +24571,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2083,
+    "line": 2177,
     "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
     "params": [
       {
@@ -24634,7 +24596,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 243,
+    "line": 244,
     "description": "Clamp a numeric value to the inclusive 0..1 range.",
     "params": [
       {
@@ -24659,7 +24621,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2005,
+    "line": 2099,
     "description": "Collect printable page image URLs without creating or opening a PDF.",
     "params": [
       {
@@ -24696,7 +24658,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 250,
+    "line": 251,
     "description": "",
     "params": [],
     "returns": [
@@ -24714,7 +24676,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1145,
+    "line": 1146,
     "description": "",
     "params": [
       {
@@ -24739,7 +24701,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1042,
+    "line": 1043,
     "description": "",
     "params": [
       {
@@ -24776,7 +24738,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2029,
+    "line": 2123,
     "description": "",
     "params": [
       {
@@ -24813,7 +24775,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1664,
+    "line": 1665,
     "description": "Build a PDF blob from page image URLs and print metadata.",
     "params": [
       {
@@ -24844,7 +24806,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1582,
+    "line": 1583,
     "description": "",
     "params": [
       {
@@ -24887,7 +24849,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 798,
+    "line": 799,
     "description": "",
     "params": [
       {
@@ -24912,7 +24874,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1631,
+    "line": 1632,
     "description": "",
     "params": [
       {
@@ -24937,7 +24899,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 824,
+    "line": 825,
     "description": "",
     "params": [
       {
@@ -24962,7 +24924,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1807,
+    "line": 1817,
     "description": "",
     "params": [
       {
@@ -24993,7 +24955,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1361,
+    "line": 1362,
     "description": "",
     "params": [
       {
@@ -25036,7 +24998,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1384,
+    "line": 1385,
     "description": "",
     "params": [
       {
@@ -25103,7 +25065,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1416,
+    "line": 1417,
     "description": "",
     "params": [
       {
@@ -25146,7 +25108,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1463,
+    "line": 1464,
     "description": "Draw a prepared transparent PNG watermark, scaled to page width and centered.",
     "params": [
       {
@@ -25189,7 +25151,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 360,
+    "line": 361,
     "description": "",
     "params": [
       {
@@ -25220,7 +25182,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 546,
+    "line": 547,
     "description": "",
     "params": [
       {
@@ -25270,7 +25232,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1912,
+    "line": 2006,
     "description": "",
     "params": [
       {
@@ -25294,7 +25256,7 @@
     ],
     "returns": [
       {
-        "type": "void",
+        "type": "Promise.<void>",
         "description": ""
       }
     ],
@@ -25307,7 +25269,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1186,
+    "line": 1187,
     "description": "",
     "params": [
       {
@@ -25350,7 +25312,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1156,
+    "line": 1157,
     "description": "",
     "params": [
       {
@@ -25393,7 +25355,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 613,
+    "line": 614,
     "description": "",
     "params": [
       {
@@ -25418,7 +25380,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 421,
+    "line": 422,
     "description": "",
     "params": [
       {
@@ -25449,7 +25411,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 942,
+    "line": 943,
     "description": "",
     "params": [
       {
@@ -25480,7 +25442,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1075,
+    "line": 1076,
     "description": "",
     "params": [
       {
@@ -25505,7 +25467,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1947,
+    "line": 2041,
     "description": "Read printable page image URLs from the document renderer.",
     "params": [
       {
@@ -25542,7 +25504,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2133,
+    "line": 2227,
     "description": "Generate/print/download a PDF from the currently rendered active page surface.",
     "params": [
       {
@@ -25573,7 +25535,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2156,
+    "line": 2250,
     "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
     "params": [
       {
@@ -25610,7 +25572,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2040,
+    "line": 2134,
     "description": "",
     "params": [
       {
@@ -25647,7 +25609,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 637,
+    "line": 638,
     "description": "Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF.",
     "params": [
       {
@@ -25678,7 +25640,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 895,
+    "line": 896,
     "description": "",
     "params": [
       {
@@ -25703,7 +25665,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 953,
+    "line": 954,
     "description": "",
     "params": [
       {
@@ -25728,7 +25690,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 916,
+    "line": 917,
     "description": "Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly.",
     "params": [
       {
@@ -25759,7 +25721,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 880,
+    "line": 881,
     "description": "",
     "params": [
       {
@@ -25784,7 +25746,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 437,
+    "line": 438,
     "description": "Check whether an HTML node name should be treated as block-level in PDF text flow.",
     "params": [
       {
@@ -25809,7 +25771,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 294,
+    "line": 295,
     "description": "Check whether a CSS font-weight value should be treated as bold text.",
     "params": [
       {
@@ -25834,7 +25796,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1230,
+    "line": 1231,
     "description": "",
     "params": [
       {
@@ -25877,7 +25839,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 748,
+    "line": 749,
     "description": "",
     "params": [
       {
@@ -25908,7 +25870,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 839,
+    "line": 840,
     "description": "",
     "params": [
       {
@@ -25951,7 +25913,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1644,
+    "line": 1645,
     "description": "Dynamically load the jsPDF constructor used by generated PDF output.",
     "params": [],
     "returns": [
@@ -25969,7 +25931,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1497,
+    "line": 1498,
     "description": "",
     "params": [
       {
@@ -25994,7 +25956,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1124,
+    "line": 1125,
     "description": "",
     "params": [
       {
@@ -26031,7 +25993,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1136,
+    "line": 1137,
     "description": "",
     "params": [
       {
@@ -26068,7 +26030,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1001,
+    "line": 1002,
     "description": "",
     "params": [
       {
@@ -26099,7 +26061,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 230,
+    "line": 231,
     "description": "Normalize canvas/PDF image quality to the browser-supported 0..1 range.",
     "params": [
       {
@@ -26136,7 +26098,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1099,
+    "line": 1100,
     "description": "",
     "params": [
       {
@@ -26161,7 +26123,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1058,
+    "line": 1059,
     "description": "",
     "params": [
       {
@@ -26186,7 +26148,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1030,
+    "line": 1031,
     "description": "",
     "params": [
       {
@@ -26223,7 +26185,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2016,
+    "line": 2110,
     "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
     "params": [
       {
@@ -26254,7 +26216,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 336,
+    "line": 337,
     "description": "Parse a supported class-only selector into descendant selector parts.",
     "params": [
       {
@@ -26279,7 +26241,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 399,
+    "line": 400,
     "description": "Parse only the small CSS subset used by trusted print header/footer templates.",
     "params": [
       {
@@ -26304,7 +26266,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 306,
+    "line": 307,
     "description": "",
     "params": [
       {
@@ -26329,7 +26291,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 158,
+    "line": 159,
     "description": "",
     "params": [],
     "returns": [],
@@ -26342,7 +26304,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 201,
+    "line": 202,
     "description": "",
     "params": [],
     "returns": [],
@@ -26355,7 +26317,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 209,
+    "line": 210,
     "description": "",
     "params": [],
     "returns": [],
@@ -26368,7 +26330,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 193,
+    "line": 194,
     "description": "",
     "params": [],
     "returns": [],
@@ -26381,7 +26343,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 187,
+    "line": 188,
     "description": "",
     "params": [],
     "returns": [],
@@ -26394,7 +26356,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 177,
+    "line": 178,
     "description": "",
     "params": [],
     "returns": [],
@@ -26407,7 +26369,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2056,
+    "line": 2150,
     "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
     "params": [
       {
@@ -26432,7 +26394,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1827,
+    "line": 1837,
     "description": "Print a generated PDF through a hidden iframe.",
     "params": [
       {
@@ -26444,7 +26406,7 @@
     ],
     "returns": [
       {
-        "type": "void",
+        "type": "Promise.<void>",
         "description": ""
       }
     ],
@@ -26457,7 +26419,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 732,
+    "line": 733,
     "description": "",
     "params": [
       {
@@ -26500,7 +26462,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1512,
+    "line": 1513,
     "description": "",
     "params": [
       {
@@ -26531,7 +26493,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1618,
+    "line": 1619,
     "description": "Resolve jsPDF from common ESM/CJS export shapes used by bundlers.",
     "params": [
       {
@@ -26556,7 +26518,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1525,
+    "line": 1526,
     "description": "",
     "params": [
       {
@@ -26581,7 +26543,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1011,
+    "line": 1012,
     "description": "",
     "params": [
       {
@@ -26606,7 +26568,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1538,
+    "line": 1539,
     "description": "Resolve the generated-PDF worker plan.",
     "params": [
       {
@@ -26637,7 +26599,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 515,
+    "line": 516,
     "description": "",
     "params": [
       {
@@ -26662,7 +26624,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 523,
+    "line": 524,
     "description": "",
     "params": [
       {
@@ -26687,7 +26649,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 811,
+    "line": 812,
     "description": "",
     "params": [
       {
@@ -26712,7 +26674,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 500,
+    "line": 501,
     "description": "Keep only the attributes used by the generated-PDF rich text subset.",
     "params": [
       {
@@ -26737,7 +26699,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 486,
+    "line": 487,
     "description": "Keep generated-PDF print templates inside the small rich-text subset consumed below.",
     "params": [
       {
@@ -26762,7 +26724,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1111,
+    "line": 1112,
     "description": "",
     "params": [
       {
@@ -26787,7 +26749,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1902,
+    "line": 1996,
     "description": "",
     "params": [
       {
@@ -26818,7 +26780,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 449,
+    "line": 450,
     "description": "Remove elements that are never meaningful in generated PDF header/footer text.",
     "params": [
       {
@@ -26843,7 +26805,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 535,
+    "line": 536,
     "description": "Replace one line buffer with another while preserving the original array object.",
     "params": [
       {
@@ -26874,7 +26836,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 369,
+    "line": 370,
     "description": "",
     "params": [
       {
@@ -26905,7 +26867,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 267,
+    "line": 268,
     "description": "Stop PDF generation as soon as the caller cancels the operation.",
     "params": [
       {
@@ -26930,7 +26892,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/printPdf.js",
-    "line": 652,
+    "line": 653,
     "description": "",
     "params": [
       {
@@ -26961,7 +26923,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1928,
+    "line": 2022,
     "description": "",
     "params": [
       {
@@ -26986,7 +26948,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 1311,
+    "line": 1312,
     "description": "",
     "params": [
       {
@@ -27035,7 +26997,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 277,
+    "line": 278,
     "description": "Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread.",
     "params": [
       {
@@ -29490,13 +29452,57 @@
     "examples": 0
   },
   {
+    "id": "clampRenderSurfaceSize",
+    "name": "clampRenderSurfaceSize",
+    "longname": "clampRenderSurfaceSize",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/renderSurfaceBounds.js",
+    "line": 25,
+    "description": "Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio.",
+    "params": [
+      {
+        "name": "width",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "height",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "MAX_RENDER_SURFACE_DIMENSION",
+    "name": "MAX_RENDER_SURFACE_DIMENSION",
+    "longname": "MAX_RENDER_SURFACE_DIMENSION",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/renderSurfaceBounds.js",
+    "line": 9,
+    "description": "OpenDocViewer — conservative raster surface bounds.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "getKeyboardPrintShortcutBehavior",
     "name": "getKeyboardPrintShortcutBehavior",
     "longname": "getKeyboardPrintShortcutBehavior",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 82,
+    "line": 83,
     "description": "Resolve the configured Ctrl/Cmd+P behavior.",
     "params": [
       {
@@ -29521,7 +29527,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 274,
+    "line": 275,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29546,7 +29552,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 299,
+    "line": 300,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29571,7 +29577,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 59,
+    "line": 60,
     "description": "Read the merged runtime configuration from the browser environment.",
     "params": [],
     "returns": [
@@ -29589,7 +29595,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 251,
+    "line": 252,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29614,7 +29620,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 237,
+    "line": 238,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29639,7 +29645,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 224,
+    "line": 225,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29664,7 +29670,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 323,
+    "line": 324,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29689,7 +29695,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 341,
+    "line": 342,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -29714,7 +29720,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 96,
+    "line": 97,
     "description": "Resolve whether document metadata UI affordances should be available.",
     "params": [
       {
@@ -29752,7 +29758,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 199,
+    "line": 200,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -29777,7 +29783,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 173,
+    "line": 174,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -29808,7 +29814,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 184,
+    "line": 185,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -29839,7 +29845,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 158,
+    "line": 159,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {

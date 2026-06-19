@@ -32,12 +32,88 @@ If a deployment must be validated formally, test Edge and Chrome first. Treat Fi
 
 - `index.html`: `no-store, no-cache, must-revalidate`
 - `odv.config.js`: `no-store, no-cache, must-revalidate`
+- `odv.site.config.js`: `no-store, no-cache, must-revalidate`
 - hashed static assets: `public, max-age=31536000, immutable`
 
 That split is important:
 
 - the shell HTML and runtime config must reflect the newest deployment immediately
 - hashed JS/CSS assets are safe to long-cache
+
+### CSP and runtime-config trust
+
+OpenDocViewer now ships with a baseline Content Security Policy on `index.html` and the same policy
+as a fallback `<meta>` tag in the shell. The baseline is intentionally focused on the browser
+execution boundary:
+
+- scripts are limited to same-origin files plus the hashed inline i18n bootstrap block
+- plugin/object content is disabled
+- workers and print iframes remain allowed from same-origin and `blob:`
+- `connect-src` and `img-src` remain broad enough for existing host-owned document endpoints,
+  proxy paths, and dev-server WebSockets
+
+This baseline is not a substitute for deployment review. The viewer executes `index.html`,
+`odv.config.js`, and optional `odv.site.config.js` as first-party code. Treat all three files as
+the same trust boundary as the shipped bundle: same write controls, same deployment review, and no
+secrets.
+
+If a deployment platform can emit a stricter per-site CSP header, prefer doing that at the host
+layer. Typical follow-ups are:
+
+- narrow `connect-src` and `img-src` to the exact host domains used in that environment
+- add per-request script nonces or hashes at the host layer
+- pin runtime-config files with SRI hashes when packaging or site-deployment automation can refresh
+  those hashes atomically with the config content
+
+OMP package builds can now compute SRI hashes for `odv.config.js` and optional
+`odv.site.config.js` and inject them into the deployed `index.html`. Treat `index.html`,
+`odv.config.js`, and `odv.site.config.js` as the same trust boundary and deployment unit: if a site
+override is changed after packaging without rebuilding the package or redeploying synchronized
+markup, the browser will refuse to load that config file.
+
+### Per-deployment CSP tightening
+
+Keep the shipped baseline permissive enough for static hosting, host-owned document endpoints, and
+existing embedded deployments. Tighten it per environment at the IIS or reverse-proxy header layer
+once the real origins and paths are known.
+
+For production tightening:
+
+- replace `connect-src 'self' http: https: ws: wss:` with the exact viewer, host, document,
+  bundle, source-pack, and log-proxy origins used in that environment
+- replace `img-src 'self' blob: data: http: https:` with `'self' blob: data:` plus only the image
+  origins that remain necessary after deployment review
+- remove `ws:` and `wss:` unless the deployment intentionally uses WebSockets outside local Vite
+  development
+- keep `worker-src 'self' blob:` and `frame-src 'self' blob:` because worker startup, rendered
+  page blobs, and print flows depend on them
+- do not remove `blob:` or `data:` from image/print-related directives while OpenDocViewer still
+  renders pages and print output through object URLs and data URLs
+
+`frame-ancestors` is a host/header concern, not a viewer-meta concern. If a deployment wants to
+restrict who may embed OpenDocViewer, emit that directive as an HTTP response header from IIS or
+the reverse proxy. The `<meta http-equiv="Content-Security-Policy">` tag in `index.html` cannot
+enforce `frame-ancestors`.
+
+Embedded deployments also need to review the parent page's own CSP. If a host page loads
+OpenDocViewer in an `<iframe>`, the host CSP must allow:
+
+- the viewer origin in `frame-src` or `child-src`
+- the bundle, document, source-pack, and log endpoints in `connect-src`
+- any direct image/document origins that the parent page itself loads in `img-src`
+- any inline bootstrap script only when the host intentionally uses it and provides a matching
+  nonce or hash
+
+Example same-origin OMP host header:
+
+```xml
+<add
+  name="Content-Security-Policy"
+  value="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-VLp8cNctLQHS+quZb8UEJAQpLDhxTlAGTn8HeEru0Zs='; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: https://host.example; font-src 'self' data:; connect-src 'self' https://host.example https://host.example/opendocviewer-demo/bundle https://host.example/ODVProxy/log https://host.example/ODVProxy/userlog/record; worker-src 'self' blob:; frame-src 'self' blob:; form-action 'self'; frame-ancestors 'self' https://host.example;" />
+```
+
+Treat that example as a template, not a default. Replace the sample host and endpoint values with
+the exact deployment URLs before enabling it.
 
 ### SPA routing
 
@@ -113,7 +189,10 @@ Main responsibilities of that script:
 
 - build output copied to the IIS app root
 - `index.html` and `odv.config.js` are not cached
+- `odv.site.config.js` is not cached when site overrides are used
 - runtime config values are deployment-local and correct
+- CSP reviewed for the target environment; `connect-src` and `img-src` narrowed where possible
+- any `frame-ancestors` policy is emitted from IIS or the reverse proxy, not only the meta tag
 - URL Rewrite module is installed
 
 ### Proxy

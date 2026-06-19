@@ -7,26 +7,26 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `server/system-log-server.js` | 237 | 0 | 5 | high | System Log Server — Single-file, standalone \(ESM\) Responsibilities: - Expose POST /log for structured system logs \(tiny JSON bodies\) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error |
 | `server/user-log-server.js` | 271 | 0 | 2 | high | User Action Log Server — Single-file, standalone \(ESM\) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string\|null - forWhom: string\|null - Response: 200 OK with body: true \(JSO |
 | `src/app/AppBootstrap.jsx` | 432 | 1 | 10 | high | Application bootstrap React component. |
-| `src/app/bootConfig.js` | 106 | 0 | 5 | high | Runtime boot loader that resolves configuration scripts before React starts. |
+| `src/app/bootConfig.js` | 138 | 0 | 5 | high | Runtime boot loader that resolves configuration scripts before React starts. |
 | `src/app/OpenDocViewer.jsx` | 193 | 1 | 5 | high | src/app/OpenDocViewer.jsx Main application shell for the viewer. |
 | `src/components/CanvasRenderer.jsx` | 84 | 1 | 1 | high | OpenDocViewer — Absolute-positioned Canvas Renderer Render a &lt;canvas&gt; element for a single page at a specified zoom factor. |
 | `src/components/common/StatusLed.jsx` | 36 | 2 | 1 | high | Small reusable LED-style status indicator. |
 | `src/components/DocumentConsumerWrapper.jsx` | 172 | 1 | 2 | high | OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: \[{ url, ext?, fileIn |
 | `src/components/DocumentLoader/batchHandler.js` | 226 | 0 | 7 | high | OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread. |
 | `src/components/DocumentLoader/DemoControls.jsx` | 101 | 0 | 1 | high | OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: &quot;Total pages/files&quot; + JPG/PNG/TIF/PDF buttons + a new &quot;Mix&quot; button. |
-| `src/components/DocumentLoader/DocumentLoader.js` | 2163 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
+| `src/components/DocumentLoader/DocumentLoader.js` | 2170 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
 | `src/components/DocumentLoader/documentLoaderUtils.js` | 254 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | `src/components/DocumentLoader/LoadPressureDialog.jsx` | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
-| `src/components/DocumentLoader/mainThreadRenderer.js` | 507 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
+| `src/components/DocumentLoader/mainThreadRenderer.js` | 478 | 1 | 8 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
 | `src/components/DocumentLoader/sources/explicitListSource.js` | 231 | 1 | 11 | high | OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
-| `src/components/DocumentLoader/workerHandler.js` | 330 | 0 | 9 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
+| `src/components/DocumentLoader/workerHandler.js` | 300 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | `src/components/DocumentMetadataMatrixOverlayDialog.jsx` | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
 | `src/components/DocumentMetadataOverlayDialog.jsx` | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
-| `src/components/DocumentRender.jsx` | 1074 | 1 | 24 | high | OpenDocViewer — Active page renderer. |
+| `src/components/DocumentRender.jsx` | 1112 | 1 | 24 | high | OpenDocViewer — Active page renderer. |
 | `src/components/DocumentSelectionPanel.jsx` | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | `src/components/DocumentThumbnailList.jsx` | 1370 | 1 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | `src/components/DocumentToolbar/AboutOverlayDialog.jsx` | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
-| `src/components/DocumentToolbar/DocumentToolbar.jsx` | 2126 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| `src/components/DocumentToolbar/DocumentToolbar.jsx` | 2150 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | `src/components/DocumentToolbar/HelpMenuButton.jsx` | 109 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | `src/components/DocumentToolbar/HelpOverlayDialog.jsx` | 216 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | `src/components/DocumentToolbar/LanguageMenuButton.jsx` | 154 | 1 | 4 | high | Compact language selector for the toolbar. |
@@ -52,7 +52,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/LoadingSpinner.jsx` | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | `src/components/PrintSelectionWorkspace.jsx` | 2450 | 1 | 4 | high | Full-window print-selection workspace. |
 | `src/components/Resizer.jsx` | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
-| `src/components/ViewerProblemNotice.jsx` | 267 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
+| `src/components/ViewerProblemNotice.jsx` | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
 | `src/contexts/themeContext.js` | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | `src/contexts/ThemeProvider.jsx` | 202 | 1 | 11 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | `src/contexts/viewerContext.js` | 207 | 10 | 9 | medium | Exports ViewerContext. |
@@ -82,8 +82,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/localizedValue.js` | 113 | 6 | 6 | high | Localized string resolver for admin-supplied config values. |
 | `src/utils/memoryProfile.js` | 75 | 1 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | `src/utils/navigationUtils.js` | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
-| `src/utils/objectUrlRegistry.js` | 72 | 1 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
-| `src/utils/pageAssetRenderer.js` | 850 | 2 | 5 | high | OpenDocViewer — hybrid page-asset renderer. |
+| `src/utils/objectUrlRegistry.js` | 86 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
+| `src/utils/pageAssetRenderer.js` | 860 | 2 | 5 | high | OpenDocViewer — hybrid page-asset renderer. |
 | `src/utils/pageAssetStore.js` | 746 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |
 | `src/utils/pageAssetWorkerPool.js` | 320 | 1 | 15 | high | OpenDocViewer — Page-asset worker pool. |
 | `src/utils/pdfBenchmark.js` | 965 | 1 | 36 | high | Opt-in generated-PDF benchmark tooling. |
@@ -94,9 +94,9 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/pdfWorkerDispatcher.js` | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | `src/utils/performanceOverlayFlag.js` | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | `src/utils/printCore.js` | 569 | 1 | 20 | high | Core print coordinator for the frontend. |
-| `src/utils/printDom.js` | 462 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
+| `src/utils/printDom.js` | 473 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
 | `src/utils/printParse.js` | 100 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
-| `src/utils/printPdf.js` | 2174 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
+| `src/utils/printPdf.js` | 2268 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
 | `src/utils/printSanitize.js` | 23 | 3 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
 | `src/utils/printTemplate.js` | 809 | 3 | 34 | high | OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates. |
 | `src/utils/printUtils.js` | 37 | 2 | 0 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
@@ -105,12 +105,13 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/reloadCacheCrypto.js` | 165 | 2 | 3 | high | Short-lived reload-cache key helpers. |
 | `src/utils/reloadCacheIdentity.js` | 154 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | `src/utils/renderDecodeBenchmark.js` | 1211 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
-| `src/utils/runtimeConfig.js` | 363 | 13 | 21 | high | Runtime configuration helpers. |
+| `src/utils/renderSurfaceBounds.js` | 52 | 1 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
+| `src/utils/runtimeConfig.js` | 367 | 13 | 21 | high | Runtime configuration helpers. |
 | `src/utils/sourceTempStore.js` | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | `src/utils/supportDiagnostics.js` | 370 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | `src/utils/viewerPreferences.js` | 473 | 5 | 33 | high | Lightweight persisted viewer preferences. |
 | `src/utils/zoomUtils.js` | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |
-| `src/workers/imageWorker.js` | 488 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
+| `src/workers/imageWorker.js` | 497 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
 | `src/workers/pdfPageWorker.js` | 433 | 0 | 1 | high | OpenDocViewer - PDF page image worker. |
 | `src/workers/pdfWorker.js` | 628 | 0 | 1 | high | OpenDocViewer - generated PDF worker. |
 

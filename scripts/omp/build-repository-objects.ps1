@@ -438,6 +438,100 @@ function Publish-NodeWebComponent {
     return $outputPath
 }
 
+function Get-SubresourceIntegrityHash {
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        throw "Cannot compute SRI hash; file not found: $Path"
+    }
+
+    $bytes = [System.IO.File]::ReadAllBytes($Path)
+    $sha384 = [System.Security.Cryptography.SHA384]::Create()
+    try {
+        $hash = $sha384.ComputeHash($bytes)
+        return 'sha384-' + [Convert]::ToBase64String($hash)
+    }
+    finally {
+        $sha384.Dispose()
+    }
+}
+
+function Update-OpenDocViewerIndexHtmlIntegrity {
+    param(
+        [Parameter(Mandatory = $true)][string]$PayloadPath,
+        [Parameter(Mandatory = $true)][string]$ComponentKey,
+        [System.Collections.IDictionary]$ConfigurationMappings
+    )
+
+    $indexHtmlPath = Join-Path $PayloadPath 'index.html'
+    if (-not (Test-Path -LiteralPath $indexHtmlPath -PathType Leaf)) {
+        Write-Warning "OpenDocViewer payload for '$ComponentKey' has no index.html; skipping SRI injection."
+        return
+    }
+
+    $html = [System.IO.File]::ReadAllText($indexHtmlPath, [System.Text.UTF8Encoding]::new($false))
+    $bootstrapMatch = [Regex]::Match($html, '<script\s+[^>]*data-odv-bootstrap[^>]*>', [System.Text.RegularExpressions.RegexOptions]::IgnoreCase)
+    if (-not $bootstrapMatch.Success) {
+        throw "OpenDocViewer payload index.html is missing the data-odv-bootstrap script tag. Ensure vite.config.js preserves the bootConfig entry."
+    }
+    $bootstrapTag = $bootstrapMatch.Value
+
+    $defaultConfigPath = Join-Path $PayloadPath 'odv.config.js'
+    if (-not (Test-Path -LiteralPath $defaultConfigPath -PathType Leaf)) {
+        throw "OpenDocViewer payload is missing odv.config.js; cannot compute SRI hash."
+    }
+
+    $attributes = [ordered]@{
+        'data-odv-config-integrity' = Get-SubresourceIntegrityHash -Path $defaultConfigPath
+    }
+
+    $siteConfigSource = $null
+    if ($null -ne $ConfigurationMappings -and $ConfigurationMappings.Contains($ComponentKey)) {
+        foreach ($mapping in @($ConfigurationMappings[$ComponentKey])) {
+            if ([string]::IsNullOrWhiteSpace([string]$mapping)) {
+                continue
+            }
+
+            $equalsIndex = $mapping.IndexOf('=')
+            if ($equalsIndex -le 0 -or $equalsIndex -eq ($mapping.Length - 1)) {
+                continue
+            }
+
+            $relativePath = $mapping.Substring(0, $equalsIndex).Trim()
+            if (-not [string]::Equals($relativePath, 'odv.site.config.js', [StringComparison]::OrdinalIgnoreCase)) {
+                continue
+            }
+
+            $siteConfigSource = $mapping.Substring($equalsIndex + 1).Trim()
+            break
+        }
+    }
+
+    if (-not [string]::IsNullOrWhiteSpace($siteConfigSource)) {
+        if (-not (Test-Path -LiteralPath $siteConfigSource -PathType Leaf)) {
+            throw "OpenDocViewer site config source was not found: $siteConfigSource"
+        }
+
+        $attributes['data-odv-site-config-integrity'] = Get-SubresourceIntegrityHash -Path $siteConfigSource
+    }
+
+    foreach ($attributeName in $attributes.Keys) {
+        $attributeValue = [string]$attributes[$attributeName]
+        $attributePattern = "$attributeName=""[^""]*"""
+        $attributeReplacement = "$attributeName=""$attributeValue"""
+        if ($bootstrapTag -match $attributePattern) {
+            $bootstrapTag = $bootstrapTag -replace $attributePattern, $attributeReplacement
+        }
+        else {
+            $bootstrapTag = $bootstrapTag -replace '>$', " $attributeReplacement>"
+        }
+    }
+
+    $html = $html.Substring(0, $bootstrapMatch.Index) + $bootstrapTag + $html.Substring($bootstrapMatch.Index + $bootstrapMatch.Length)
+    [System.IO.File]::WriteAllText($indexHtmlPath, $html, [System.Text.UTF8Encoding]::new($false))
+    Write-Host "Injected runtime config SRI hashes into $indexHtmlPath"
+}
+
 function Remove-RuntimeConfigurationFilesFromFolder {
     param([Parameter(Mandatory = $true)][string]$Path)
 
@@ -735,6 +829,18 @@ try {
 
             Write-Warning "Skipping component '$($component.componentKey)' because no existing package was found and no publishable .NET or Node web projectPath is configured."
             continue
+        }
+
+        if ([string]::Equals([string]$component.packageType, 'web-app', [StringComparison]::OrdinalIgnoreCase)) {
+            $indexHtmlPath = Join-Path $payloadPath 'index.html'
+            $odvConfigPath = Join-Path $payloadPath 'odv.config.js'
+            if ((Test-Path -LiteralPath $indexHtmlPath -PathType Leaf) -and
+                (Test-Path -LiteralPath $odvConfigPath -PathType Leaf)) {
+                Update-OpenDocViewerIndexHtmlIntegrity `
+                    -PayloadPath $payloadPath `
+                    -ComponentKey ([string]$component.componentKey) `
+                    -ConfigurationMappings $configurationMappings
+            }
         }
 
         Remove-RuntimeConfigurationFilesFromFolder -Path $payloadPath

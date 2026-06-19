@@ -22,7 +22,7 @@
 | `getAppBase` | function | `src/app/bootConfig.js:16` | Return the application base path \(always with a trailing slash\) derived from the current page URL. |
 | `isJsContentType` | function | `src/app/bootConfig.js:29` | Heuristic: does a content-type look like JavaScript? |
 | `loadClassicScript` | function | `src/app/bootConfig.js:58` | Load a classic script and resolve when it executes \(or errors\). |
-| `loadFromCandidates` | function | `src/app/bootConfig.js:71` | Try multiple candidate URLs \(in order\) until one probes as JS, then load it. |
+| `loadFromCandidates` | function | `src/app/bootConfig.js:100` | Try multiple candidate URLs \(in order\) until one probes as JS, then load it. |
 | `probeScriptUrl` | function | `src/app/bootConfig.js:42` | Probe a candidate script URL and only accept it when the response looks like JavaScript. |
 | `BootstrapDebugInfo` | typedef | `src/app/OpenDocViewer.jsx:33` | Diagnostics-only startup details surfaced through the performance overlay. |
 | `OpenDocViewer` | function | `src/app/OpenDocViewer.jsx:67` | OpenDocViewer — Top-level component. |
@@ -43,20 +43,20 @@
 | `module.exports` | function | `src/components/DocumentLoader/DemoControls.jsx:35` | DemoControls — wraps DocumentLoader with demo-mode props and a small control UI. |
 | `asciiHead` | function | `src/components/DocumentLoader/DocumentLoader.js:254` |  |
 | `buildInlineSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:847` | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
-| `createFailedPlaceholder` | function | `src/components/DocumentLoader/DocumentLoader.js:1058` |  |
+| `createFailedPlaceholder` | function | `src/components/DocumentLoader/DocumentLoader.js:1059` |  |
 | `createInvalidSourcePayloadError` | function | `src/components/DocumentLoader/DocumentLoader.js:742` | Build a source-validation error. |
 | `createLimiter` | function | `src/components/DocumentLoader/DocumentLoader.js:161` |  |
-| `createPagePlaceholders` | function | `src/components/DocumentLoader/DocumentLoader.js:1016` |  |
+| `createPagePlaceholders` | function | `src/components/DocumentLoader/DocumentLoader.js:1017` |  |
 | `createPrefetchHttpError` | function | `src/components/DocumentLoader/DocumentLoader.js:682` | Build a consistent HTTP error so the retry classifier can inspect the status code. |
 | `createPrefetchTimeoutError` | function | `src/components/DocumentLoader/DocumentLoader.js:726` | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
 | `createSourceUnavailableSessionError` | function | `src/components/DocumentLoader/DocumentLoader.js:710` |  |
-| `DocumentLoader` | function | `src/components/DocumentLoader/DocumentLoader.js:1168` |  |
+| `DocumentLoader` | function | `src/components/DocumentLoader/DocumentLoader.js:1169` |  |
 | `DocumentLoaderProps` | typedef | `src/components/DocumentLoader/DocumentLoader.js:58` |  |
 | `DocumentSourceItem` | typedef | `src/components/DocumentLoader/DocumentLoader.js:35` |  |
 | `estimateTotalPagesConservatively` | function | `src/components/DocumentLoader/DocumentLoader.js:645` | Estimate the final page count conservatively. |
 | `FailedPlaceholderInput` | typedef | `src/components/DocumentLoader/DocumentLoader.js:91` |  |
-| `finalizeDocumentPages` | function | `src/components/DocumentLoader/DocumentLoader.js:992` | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
-| `getDocumentProgressKey` | function | `src/components/DocumentLoader/DocumentLoader.js:976` |  |
+| `finalizeDocumentPages` | function | `src/components/DocumentLoader/DocumentLoader.js:993` | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
+| `getDocumentProgressKey` | function | `src/components/DocumentLoader/DocumentLoader.js:977` |  |
 | `getEstimatedEntryExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:604` | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
 | `getInitialTempStoreMode` | function | `src/components/DocumentLoader/DocumentLoader.js:591` |  |
 | `inferUrlExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:206` |  |
@@ -68,35 +68,35 @@
 | `LoadPressureSummary` | typedef | `src/components/DocumentLoader/DocumentLoader.js:121` |  |
 | `looksLikeTextPayload` | function | `src/components/DocumentLoader/DocumentLoader.js:269` |  |
 | `matchesKnownSourceSignature` | function | `src/components/DocumentLoader/DocumentLoader.js:298` |  |
-| `<anonymous>~maybePrompt` | function | `src/components/DocumentLoader/DocumentLoader.js:1282` |  |
-| `mimeForExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:922` |  |
+| `<anonymous>~maybePrompt` | function | `src/components/DocumentLoader/DocumentLoader.js:1283` |  |
+| `mimeForExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:923` |  |
 | `mimeToExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:566` |  |
 | `needsPageCountAnalysis` | function | `src/components/DocumentLoader/DocumentLoader.js:452` |  |
 | `normalizeExtension` | function | `src/components/DocumentLoader/DocumentLoader.js:215` |  |
 | `PageEstimateStats` | typedef | `src/components/DocumentLoader/DocumentLoader.js:134` |  |
 | `PagePlaceholderInput` | typedef | `src/components/DocumentLoader/DocumentLoader.js:73` |  |
 | `PrefetchResult` | typedef | `src/components/DocumentLoader/DocumentLoader.js:140` |  |
-| `<anonymous>~prefetchSource` | function | `src/components/DocumentLoader/DocumentLoader.js:1303` | Fetch and persist one source blob with conservative retry behavior. |
-| `DocumentLoader~promptForPressure` | constant | `src/components/DocumentLoader/DocumentLoader.js:1212` |  |
+| `<anonymous>~prefetchSource` | function | `src/components/DocumentLoader/DocumentLoader.js:1304` | Fetch and persist one source blob with conservative retry behavior. |
+| `DocumentLoader~promptForPressure` | constant | `src/components/DocumentLoader/DocumentLoader.js:1213` |  |
 | `readBlobHeadBytes` | function | `src/components/DocumentLoader/DocumentLoader.js:335` |  |
-| `readUint32LittleEndian` | function | `src/components/DocumentLoader/DocumentLoader.js:887` |  |
+| `readUint32LittleEndian` | function | `src/components/DocumentLoader/DocumentLoader.js:888` |  |
 | `redactUrlForLog` | function | `src/components/DocumentLoader/DocumentLoader.js:548` |  |
-| `<anonymous>~resolve` | function | `src/components/DocumentLoader/DocumentLoader.js:1581` |  |
+| `<anonymous>~resolve` | function | `src/components/DocumentLoader/DocumentLoader.js:1582` |  |
 | `ResolvedEntry` | typedef | `src/components/DocumentLoader/DocumentLoader.js:102` |  |
-| `resolveDocumentSourceContext` | function | `src/components/DocumentLoader/DocumentLoader.js:950` | Extract multi-document source context from an entry or placeholder input. |
-| `resolveEntries` | function | `src/components/DocumentLoader/DocumentLoader.js:1100` |  |
+| `resolveDocumentSourceContext` | function | `src/components/DocumentLoader/DocumentLoader.js:951` | Extract multi-document source context from an entry or placeholder input. |
+| `resolveEntries` | function | `src/components/DocumentLoader/DocumentLoader.js:1101` |  |
 | `resolveExactPlannedPageCount` | function | `src/components/DocumentLoader/DocumentLoader.js:477` |  |
 | `resolveFetchedSourcePayload` | function | `src/components/DocumentLoader/DocumentLoader.js:353` | Resolve source type information with a cheap signature-first path. |
 | `resolvePrefetchedPageCountHint` | function | `src/components/DocumentLoader/DocumentLoader.js:517` | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
-| `DocumentLoader~resolvePressurePrompt` | constant | `src/components/DocumentLoader/DocumentLoader.js:1221` |  |
+| `DocumentLoader~resolvePressurePrompt` | constant | `src/components/DocumentLoader/DocumentLoader.js:1222` |  |
 | `resolveTrustedEntryPageCountHint` | function | `src/components/DocumentLoader/DocumentLoader.js:462` |  |
 | `resolveTrustedSourcePackPayload` | function | `src/components/DocumentLoader/DocumentLoader.js:418` | Gateway source packs already carry trusted file metadata from the prepared server-side session. |
-| `safeMessage` | function | `src/components/DocumentLoader/DocumentLoader.js:1160` |  |
+| `safeMessage` | function | `src/components/DocumentLoader/DocumentLoader.js:1161` |  |
 | `shouldDeferSourceWarmup` | function | `src/components/DocumentLoader/DocumentLoader.js:499` | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
-| `<anonymous>~shouldStopRun` | function | `src/components/DocumentLoader/DocumentLoader.js:1276` | Whether this load run is no longer allowed to mutate React state. |
+| `<anonymous>~shouldStopRun` | function | `src/components/DocumentLoader/DocumentLoader.js:1277` | Whether this load run is no longer allowed to mutate React state. |
 | `sleep` | function | `src/components/DocumentLoader/DocumentLoader.js:667` |  |
 | `startsWithAscii` | function | `src/components/DocumentLoader/DocumentLoader.js:284` |  |
-| `toPositiveIntOrUndefined` | function | `src/components/DocumentLoader/DocumentLoader.js:939` |  |
+| `toPositiveIntOrUndefined` | function | `src/components/DocumentLoader/DocumentLoader.js:940` |  |
 | `updatePageEstimateStats` | function | `src/components/DocumentLoader/DocumentLoader.js:619` | Update per-extension page-count statistics used by the conservative warning estimator. |
 | `validateFetchedSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:764` | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
 | `fetchAndArrayBuffer` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:119` | Fetch a resource and return its ArrayBuffer. |
@@ -111,15 +111,14 @@
 | `LoadPressureDialogProps` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:21` |  |
 | `LoadPressureDialogSummary` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:8` |  |
 | `LoadPressureDialog~tr` | function | `src/components/DocumentLoader/LoadPressureDialog.jsx:43` |  |
-| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:90` | One-time init of pdf.js classic worker script URL \(dev == build\). |
-| `addToUrlRegistry` | function | `src/components/DocumentLoader/mainThreadRenderer.js:81` | Track a created object URL so it can be revoked later. |
-| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:256` | Build a standard JPEG Blob from an OJPEG \(old-style JPEG-in-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy-coded scan strips... |
-| `ensurePdfWorker` | function | `src/components/DocumentLoader/mainThreadRenderer.js:97` | Ensure a pdf.js worker is ready for this runtime. |
-| `getTagArray` | function | `src/components/DocumentLoader/mainThreadRenderer.js:240` | Safely read a TIFF tag array from a utif2 IFD object. |
-| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:45` | Signature for inserting a page structure into the page list at an index. |
-| `RenderJob` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:31` | Render job passed to the main-thread renderer. |
-| `renderPDFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:121` | Render PDF pages on the main thread and INSERT THEM DIRECTLY. |
-| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:318` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 \(old-style JPEG-in-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
+| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:56` | One-time init of pdf.js classic worker script URL \(dev == build\). |
+| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:221` | Build a standard JPEG Blob from an OJPEG \(old-style JPEG-in-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy-coded scan strips... |
+| `ensurePdfWorker` | function | `src/components/DocumentLoader/mainThreadRenderer.js:63` | Ensure a pdf.js worker is ready for this runtime. |
+| `getTagArray` | function | `src/components/DocumentLoader/mainThreadRenderer.js:205` | Safely read a TIFF tag array from a utif2 IFD object. |
+| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:46` | Signature for inserting a page structure into the page list at an index. |
+| `RenderJob` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:32` | Render job passed to the main-thread renderer. |
+| `renderPDFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:87` | Render PDF pages on the main thread and INSERT THEM DIRECTLY. |
+| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:291` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 \(old-style JPEG-in-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
 | `ExplicitSourceList` | typedef | `src/components/DocumentLoader/sources/explicitListSource.js:3` | OpenDocViewer — Explicit Source List Normalizer PURPOSE Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
 | `firstDocumentField` | function | `src/components/DocumentLoader/sources/explicitListSource.js:102` |  |
 | `inferExtFromUrl` | function | `src/components/DocumentLoader/sources/explicitListSource.js:77` | Infer a lowercase extension from a URL if present. |
@@ -131,43 +130,42 @@
 | `PortableDocumentBundle` | typedef | `src/components/DocumentLoader/sources/explicitListSource.js:65` | Bundle containing multiple portable documents. |
 | `PortableFile` | typedef | `src/components/DocumentLoader/sources/explicitListSource.js:38` | A single file reference in a portable document. |
 | `resolveDocumentVersion` | function | `src/components/DocumentLoader/sources/explicitListSource.js:152` |  |
-| `addToUrlRegistry` | function | `src/components/DocumentLoader/workerHandler.js:126` | Create / get a global URL registry and install unload cleanup once. |
-| `createWorker` | function | `src/components/DocumentLoader/workerHandler.js:94` | Create a new image worker instance. |
-| `getNumberOfWorkers` | function | `src/components/DocumentLoader/workerHandler.js:109` | Decide how many workers to spawn, leaving one logical core for the UI when possible. |
-| `HandleOpts` | typedef | `src/components/DocumentLoader/workerHandler.js:75` | Options passed to the handler to coordinate main-thread rendering. |
-| `handleWorkerMessage` | constant | `src/components/DocumentLoader/workerHandler.js:203` | Handle a message payload from an image worker and insert resulting page\(s\). |
-| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/workerHandler.js:67` | Signature for inserting a page structure into the viewer at a specific index. |
-| `scheduleMainThread` | function | `src/components/DocumentLoader/workerHandler.js:167` | Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue \(deferred execution\). |
-| `WorkerJob` | typedef | `src/components/DocumentLoader/workerHandler.js:41` | A single job/result entry communicated between worker and main thread. |
-| `WorkerMessage` | typedef | `src/components/DocumentLoader/workerHandler.js:57` | Worker → main message envelope. |
+| `createWorker` | function | `src/components/DocumentLoader/workerHandler.js:95` | Create a new image worker instance. |
+| `getNumberOfWorkers` | function | `src/components/DocumentLoader/workerHandler.js:110` | Decide how many workers to spawn, leaving one logical core for the UI when possible. |
+| `HandleOpts` | typedef | `src/components/DocumentLoader/workerHandler.js:76` | Options passed to the handler to coordinate main-thread rendering. |
+| `handleWorkerMessage` | constant | `src/components/DocumentLoader/workerHandler.js:174` | Handle a message payload from an image worker and insert resulting page\(s\). |
+| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/workerHandler.js:68` | Signature for inserting a page structure into the viewer at a specific index. |
+| `scheduleMainThread` | function | `src/components/DocumentLoader/workerHandler.js:138` | Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue \(deferred execution\). |
+| `WorkerJob` | typedef | `src/components/DocumentLoader/workerHandler.js:42` | A single job/result entry communicated between worker and main thread. |
+| `WorkerMessage` | typedef | `src/components/DocumentLoader/workerHandler.js:58` | Worker → main message envelope. |
 | `module.exports` | function | `src/components/DocumentMetadataMatrixOverlayDialog.jsx:17` |  |
 | `<anonymous>~handleEscape` | function | `src/components/DocumentMetadataMatrixOverlayDialog.jsx:30` |  |
 | `module.exports` | function | `src/components/DocumentMetadataOverlayDialog.jsx:21` |  |
 | `<anonymous>~handleEscape` | function | `src/components/DocumentMetadataOverlayDialog.jsx:38` |  |
-| `<anonymous>~applyFitZoomForKnownSize` | constant | `src/components/DocumentRender.jsx:433` | Apply sticky fit modes before a newly loaded page becomes visible. |
-| `<anonymous>~applyInitialZoomMode` | constant | `src/components/DocumentRender.jsx:450` |  |
-| `<anonymous>~claimAssetRetry` | constant | `src/components/DocumentRender.jsx:208` |  |
-| `<anonymous>~clearLoadingOverlayTimer` | constant | `src/components/DocumentRender.jsx:196` |  |
-| `DisplayedAsset` | typedef | `src/components/DocumentRender.jsx:75` |  |
-| `DocumentRender` | constant | `src/components/DocumentRender.jsx:99` |  |
-| `<anonymous>~drawImageOnCanvas` | constant | `src/components/DocumentRender.jsx:351` |  |
-| `<anonymous>~finalizeDisplayedAsset` | constant | `src/components/DocumentRender.jsx:671` |  |
-| `<anonymous>~fitToCustomWidth` | constant | `src/components/DocumentRender.jsx:420` |  |
-| `<anonymous>~fitToScreen` | constant | `src/components/DocumentRender.jsx:401` |  |
-| `<anonymous>~fitToWidth` | constant | `src/components/DocumentRender.jsx:410` |  |
-| `<anonymous>~getActiveRenderSurface` | constant | `src/components/DocumentRender.jsx:388` | Returns the surface whose intrinsic size should drive fit calculations. |
-| `getCurrentPage` | function | `src/components/DocumentRender.jsx:43` |  |
-| `<anonymous>~handlePendingImageError` | constant | `src/components/DocumentRender.jsx:855` |  |
-| `<anonymous>~handlePendingImageLoad` | constant | `src/components/DocumentRender.jsx:788` |  |
-| `<anonymous>~handleViewportDoubleClick` | constant | `src/components/DocumentRender.jsx:473` |  |
-| `<anonymous>~handleVisibleImageError` | constant | `src/components/DocumentRender.jsx:883` |  |
-| `<anonymous>~handleVisibleImageLoad` | constant | `src/components/DocumentRender.jsx:731` |  |
-| `hasUsableSize` | function | `src/components/DocumentRender.jsx:63` |  |
-| `isBlobAssetUrl` | function | `src/components/DocumentRender.jsx:71` |  |
-| `normalizeSize` | function | `src/components/DocumentRender.jsx:52` |  |
-| `<anonymous>~recoverPageAsset` | constant | `src/components/DocumentRender.jsx:814` |  |
-| `<anonymous>~resetAssetRetry` | constant | `src/components/DocumentRender.jsx:189` | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
-| `<anonymous>~resolveCustomFitOptions` | constant | `src/components/DocumentRender.jsx:248` |  |
+| `<anonymous>~applyFitZoomForKnownSize` | constant | `src/components/DocumentRender.jsx:465` | Apply sticky fit modes before a newly loaded page becomes visible. |
+| `<anonymous>~applyInitialZoomMode` | constant | `src/components/DocumentRender.jsx:488` |  |
+| `<anonymous>~claimAssetRetry` | constant | `src/components/DocumentRender.jsx:215` |  |
+| `<anonymous>~clearLoadingOverlayTimer` | constant | `src/components/DocumentRender.jsx:203` |  |
+| `DisplayedAsset` | typedef | `src/components/DocumentRender.jsx:76` |  |
+| `DocumentRender` | constant | `src/components/DocumentRender.jsx:100` |  |
+| `<anonymous>~drawImageOnCanvas` | constant | `src/components/DocumentRender.jsx:374` |  |
+| `<anonymous>~finalizeDisplayedAsset` | constant | `src/components/DocumentRender.jsx:709` |  |
+| `<anonymous>~fitToCustomWidth` | constant | `src/components/DocumentRender.jsx:452` |  |
+| `<anonymous>~fitToScreen` | constant | `src/components/DocumentRender.jsx:433` |  |
+| `<anonymous>~fitToWidth` | constant | `src/components/DocumentRender.jsx:442` |  |
+| `<anonymous>~getActiveRenderSurface` | constant | `src/components/DocumentRender.jsx:420` | Returns the surface whose intrinsic size should drive fit calculations. |
+| `getCurrentPage` | function | `src/components/DocumentRender.jsx:44` |  |
+| `<anonymous>~handlePendingImageError` | constant | `src/components/DocumentRender.jsx:893` |  |
+| `<anonymous>~handlePendingImageLoad` | constant | `src/components/DocumentRender.jsx:826` |  |
+| `<anonymous>~handleViewportDoubleClick` | constant | `src/components/DocumentRender.jsx:511` |  |
+| `<anonymous>~handleVisibleImageError` | constant | `src/components/DocumentRender.jsx:921` |  |
+| `<anonymous>~handleVisibleImageLoad` | constant | `src/components/DocumentRender.jsx:769` |  |
+| `hasUsableSize` | function | `src/components/DocumentRender.jsx:64` |  |
+| `isBlobAssetUrl` | function | `src/components/DocumentRender.jsx:72` |  |
+| `normalizeSize` | function | `src/components/DocumentRender.jsx:53` |  |
+| `<anonymous>~recoverPageAsset` | constant | `src/components/DocumentRender.jsx:852` |  |
+| `<anonymous>~resetAssetRetry` | constant | `src/components/DocumentRender.jsx:196` | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
+| `<anonymous>~resolveCustomFitOptions` | constant | `src/components/DocumentRender.jsx:255` |  |
 | `module.exports` | function | `src/components/DocumentSelectionPanel.jsx:89` |  |
 | `SelectionCheckboxRow` | function | `src/components/DocumentSelectionPanel.jsx:30` |  |
 | `buildCenterOutQueue` | function | `src/components/DocumentThumbnailList.jsx:150` | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
@@ -199,7 +197,7 @@
 | `<anonymous>~handleEscape` | function | `src/components/DocumentToolbar/AboutOverlayDialog.jsx:70` |  |
 | `resolveAboutInfo` | function | `src/components/DocumentToolbar/AboutOverlayDialog.jsx:17` |  |
 | `AnyRef` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:108` | Mutable ref-like object used by the toolbar. |
-| `DocumentToolbar~dispatchPrintRequest` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1106` | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
+| `DocumentToolbar~dispatchPrintRequest` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1119` | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
 | `DocumentToolbar` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:285` | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | `DocumentToolbarProps` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:136` | Props for {@link DocumentToolbar}. |
 | `formatPdfProgressBody` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:64` |  |
@@ -209,7 +207,7 @@
 | `DocumentToolbar~handleEnhancePdfResolutionClick` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:717` |  |
 | `<anonymous>~handleEscape` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:407` |  |
 | `<anonymous>~handlePointerDown` | function | `src/components/DocumentToolbar/DocumentToolbar.jsx:399` |  |
-| `DocumentToolbar~handlePrintSubmit` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1263` | Handle the dialog submit event and dispatch the correct print action. |
+| `DocumentToolbar~handlePrintSubmit` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:1287` | Handle the dialog submit event and dispatch the correct print action. |
 | `DocumentToolbar~handleResetAdjustmentsClick` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:730` |  |
 | `DocumentToolbar~handleRotationButtonClick` | constant | `src/components/DocumentToolbar/DocumentToolbar.jsx:709` |  |
 | `ImageProperties` | typedef | `src/components/DocumentToolbar/DocumentToolbar.jsx:114` | Editable image state shown by the toolbar. |
@@ -419,7 +417,7 @@
 | `Resizer` | constant | `src/components/Resizer.jsx:61` | Resizer component. |
 | `ResizerProps` | typedef | `src/components/Resizer.jsx:43` | Props for . |
 | `ResizeStartHandler` | typedef | `src/components/Resizer.jsx:36` | Handler invoked when a resize interaction is initiated. |
-| `module.exports` | function | `src/components/ViewerProblemNotice.jsx:179` |  |
+| `module.exports` | function | `src/components/ViewerProblemNotice.jsx:197` |  |
 | `ProblemNoticeTrigger` | typedef | `src/components/ViewerProblemNotice.jsx:26` |  |
 | `resolveProblemTrigger` | function | `src/components/ViewerProblemNotice.jsx:44` |  |
 | `toCount` | function | `src/components/ViewerProblemNotice.jsx:21` |  |
@@ -784,17 +782,17 @@
 | `handlePrevPage` | constant | `src/utils/navigationUtils.js:69` | Navigate to the previous page \(no-op if already at page 1\). |
 | `isValidTotalPages` | function | `src/utils/navigationUtils.js:43` | Check whether totalPages looks valid \(&amp;gt;= 1\). |
 | `toPositiveInt` | function | `src/utils/navigationUtils.js:31` | Coerce a value to a positive integer \(minimum 1\). |
-| `createTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:17` |  |
-| `getTrackedObjectUrlCount` | function | `src/utils/objectUrlRegistry.js:61` |  |
-| `isTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:51` | Check whether a blob/object URL is still tracked as live by the viewer. |
-| `revokeAllTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:69` | Revoke every tracked object URL. |
-| `revokeTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:27` |  |
-| `revokeTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:40` |  |
+| `createTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:30` |  |
+| `getTrackedObjectUrlCount` | function | `src/utils/objectUrlRegistry.js:75` |  |
+| `isTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:65` | Check whether a blob/object URL is still tracked as live by the viewer. |
+| `revokeAllTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:83` | Revoke every tracked object URL. |
+| `revokeTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:41` |  |
+| `revokeTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:54` |  |
 | `PageAssetDescriptor` | typedef | `src/utils/pageAssetRenderer.js:34` |  |
 | `PageAssetRendererOptions` | typedef | `src/utils/pageAssetRenderer.js:28` |  |
-| `PageAssetRenderer#renderPageAsset` | function | `src/utils/pageAssetRenderer.js:625` | Render one requested page asset. |
+| `PageAssetRenderer#renderPageAsset` | function | `src/utils/pageAssetRenderer.js:635` | Render one requested page asset. |
 | `RenderPageAssetOptions` | typedef | `src/utils/pageAssetRenderer.js:42` |  |
-| `PageAssetRenderer#renderPdfPageAssetBatch` | function | `src/utils/pageAssetRenderer.js:499` | Render a PDF page set through the PDF worker pool as one partitioned batch. |
+| `PageAssetRenderer#renderPdfPageAssetBatch` | function | `src/utils/pageAssetRenderer.js:509` | Render a PDF page set through the PDF worker pool as one partitioned batch. |
 | `BlobLruCache` | class | `src/utils/pageAssetStore.js:170` |  |
 | `PageAssetStore#cleanup` | function | `src/utils/pageAssetStore.js:455` |  |
 | `PageAssetStore#cleanupStaleSessions` | function | `src/utils/pageAssetStore.js:499` |  |
@@ -950,120 +948,120 @@
 | `resolveActiveNode` | function | `src/utils/printCore.js:212` | Attempt to resolve the currently active visual node to print. |
 | `resolveAllPageDataUrls` | function | `src/utils/printCore.js:398` | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
 | `resolveOrientation` | function | `src/utils/printCore.js:175` | Compute page orientation from dimensions when options.orientation === &#39;auto&#39;. |
-| `buildOverlayElement` | function | `src/utils/printDom.js:223` | Build a header/footer DIV element for a page using config + tokens. |
-| `buildPrintCss` | function | `src/utils/printDom.js:130` | Build the print-only CSS string \(inlined within the print iframe\). |
-| `buildPrintFormatElements` | function | `src/utils/printDom.js:264` | Build configured print-format header/watermark elements for a page. |
-| `enabled` | function | `src/utils/printDom.js:119` |  |
-| `ensureBody` | function | `src/utils/printDom.js:198` |  |
-| `ensureHead` | function | `src/utils/printDom.js:172` |  |
-| `mergeOverlayCss` | function | `src/utils/printDom.js:393` |  |
-| `normalizeApplyTo` | function | `src/utils/printDom.js:81` | Normalize runtime overlay application mode. |
-| `normalizeNonNegativeNumber` | function | `src/utils/printDom.js:71` | Normalize an unknown configuration value to a non-negative number. |
-| `normalizePageOrientation` | function | `src/utils/printDom.js:102` |  |
-| `normalizeTrustedExtraCss` | function | `src/utils/printDom.js:111` |  |
-| `populateBodyAndPrint` | function | `src/utils/printDom.js:338` | Attach pages and images into the \(cleared\) body, wait for image terminal states, then print. |
-| `PrintOverlayCfg` | typedef | `src/utils/printDom.js:20` | Print overlay config \(runtime\) consumed by the print overlay logic. |
-| `renderMultiDocument` | function | `src/utils/printDom.js:442` | Render a multi-page print document in the given print iframe document. |
-| `renderSingleDocument` | function | `src/utils/printDom.js:413` | Render a single-page print document in the given print iframe document. |
-| `shouldApplyOverlay` | function | `src/utils/printDom.js:92` |  |
-| `TokenContext` | typedef | `src/utils/printDom.js:32` | Token context used by templates. |
-| `tr` | function | `src/utils/printDom.js:58` | Tiny helper to translate with safe fallback. |
-| `waitForImagesToLoad` | function | `src/utils/printDom.js:300` |  |
+| `buildOverlayElement` | function | `src/utils/printDom.js:227` | Build a header/footer DIV element for a page using config + tokens. |
+| `buildPrintCss` | function | `src/utils/printDom.js:134` | Build the print-only CSS string \(inlined within the print iframe\). |
+| `buildPrintFormatElements` | function | `src/utils/printDom.js:275` | Build configured print-format header/watermark elements for a page. |
+| `enabled` | function | `src/utils/printDom.js:123` |  |
+| `ensureBody` | function | `src/utils/printDom.js:202` |  |
+| `ensureHead` | function | `src/utils/printDom.js:176` |  |
+| `mergeOverlayCss` | function | `src/utils/printDom.js:404` |  |
+| `normalizeApplyTo` | function | `src/utils/printDom.js:85` | Normalize runtime overlay application mode. |
+| `normalizeNonNegativeNumber` | function | `src/utils/printDom.js:75` | Normalize an unknown configuration value to a non-negative number. |
+| `normalizePageOrientation` | function | `src/utils/printDom.js:106` |  |
+| `normalizeTrustedExtraCss` | function | `src/utils/printDom.js:115` |  |
+| `populateBodyAndPrint` | function | `src/utils/printDom.js:349` | Attach pages and images into the \(cleared\) body, wait for image terminal states, then print. |
+| `PrintOverlayCfg` | typedef | `src/utils/printDom.js:24` | Print overlay config \(runtime\) consumed by the print overlay logic. |
+| `renderMultiDocument` | function | `src/utils/printDom.js:453` | Render a multi-page print document in the given print iframe document. |
+| `renderSingleDocument` | function | `src/utils/printDom.js:424` | Render a single-page print document in the given print iframe document. |
+| `shouldApplyOverlay` | function | `src/utils/printDom.js:96` |  |
+| `TokenContext` | typedef | `src/utils/printDom.js:36` | Token context used by templates. |
+| `tr` | function | `src/utils/printDom.js:62` | Tiny helper to translate with safe fallback. |
+| `waitForImagesToLoad` | function | `src/utils/printDom.js:311` |  |
 | `parsePrintSequence` | function | `src/utils/printParse.js:48` | Parse &amp;quot;Custom pages&amp;quot; into a sequence. |
 | `ParseResult` | typedef | `src/utils/printParse.js:15` | Result of parsing a custom pages string. |
 | `tr` | function | `src/utils/printParse.js:30` | Tiny helper to translate with safe fallback. |
-| `addImageWithFallback` | function | `src/utils/printPdf.js:969` |  |
-| `appendRichColumnLine` | function | `src/utils/printPdf.js:593` |  |
-| `appendRichLineBreak` | function | `src/utils/printPdf.js:554` |  |
-| `appendRichText` | function | `src/utils/printPdf.js:564` |  |
-| `asNumber` | function | `src/utils/printPdf.js:218` | Convert a value to a finite number for PDF layout calculations. |
-| `blobToDataUrl` | function | `src/utils/printPdf.js:2112` |  |
-| `buildPdfPagePlans` | function | `src/utils/printPdf.js:1561` |  |
-| `calculateOverlayReserve` | function | `src/utils/printPdf.js:1606` |  |
-| `canvasToBlob` | function | `src/utils/printPdf.js:2097` |  |
-| `canvasToPngDataUrl` | function | `src/utils/printPdf.js:2083` | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
-| `clamp01` | function | `src/utils/printPdf.js:243` | Clamp a numeric value to the inclusive 0..1 range. |
-| `collectPrintablePdfSources` | function | `src/utils/printPdf.js:2005` | Collect printable page image URLs without creating or opening a PDF. |
-| `createAbortError` | function | `src/utils/printPdf.js:250` |  |
-| `createDefaultSegment` | function | `src/utils/printPdf.js:1145` |  |
-| `createJsPdfOptions` | function | `src/utils/printPdf.js:1042` |  |
-| `createPdfFromDocumentHandle` | function | `src/utils/printPdf.js:2029` |  |
-| `createPrintPdfBlob` | function | `src/utils/printPdf.js:1664` | Build a PDF blob from page image URLs and print metadata. |
-| `createPrintPdfBlobInWorker` | function | `src/utils/printPdf.js:1582` |  |
-| `describeImageSource` | function | `src/utils/printPdf.js:798` |  |
-| `describeModuleExports` | function | `src/utils/printPdf.js:1631` |  |
-| `describeValueType` | function | `src/utils/printPdf.js:824` |  |
-| `downloadPdfBlob` | function | `src/utils/printPdf.js:1807` |  |
-| `drawRichSegments` | function | `src/utils/printPdf.js:1361` |  |
-| `drawRichTextBlock` | function | `src/utils/printPdf.js:1384` |  |
-| `drawWatermark` | function | `src/utils/printPdf.js:1416` |  |
-| `drawWatermarkImage` | function | `src/utils/printPdf.js:1463` | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
-| `elementMatchesClassSelectorPart` | function | `src/utils/printPdf.js:360` |  |
-| `ensureWritableRichLine` | function | `src/utils/printPdf.js:546` |  |
+| `addImageWithFallback` | function | `src/utils/printPdf.js:970` |  |
+| `appendRichColumnLine` | function | `src/utils/printPdf.js:594` |  |
+| `appendRichLineBreak` | function | `src/utils/printPdf.js:555` |  |
+| `appendRichText` | function | `src/utils/printPdf.js:565` |  |
+| `asNumber` | function | `src/utils/printPdf.js:219` | Convert a value to a finite number for PDF layout calculations. |
+| `blobToDataUrl` | function | `src/utils/printPdf.js:2206` |  |
+| `buildPdfPagePlans` | function | `src/utils/printPdf.js:1562` |  |
+| `calculateOverlayReserve` | function | `src/utils/printPdf.js:1607` |  |
+| `canvasToBlob` | function | `src/utils/printPdf.js:2191` |  |
+| `canvasToPngDataUrl` | function | `src/utils/printPdf.js:2177` | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
+| `clamp01` | function | `src/utils/printPdf.js:244` | Clamp a numeric value to the inclusive 0..1 range. |
+| `collectPrintablePdfSources` | function | `src/utils/printPdf.js:2099` | Collect printable page image URLs without creating or opening a PDF. |
+| `createAbortError` | function | `src/utils/printPdf.js:251` |  |
+| `createDefaultSegment` | function | `src/utils/printPdf.js:1146` |  |
+| `createJsPdfOptions` | function | `src/utils/printPdf.js:1043` |  |
+| `createPdfFromDocumentHandle` | function | `src/utils/printPdf.js:2123` |  |
+| `createPrintPdfBlob` | function | `src/utils/printPdf.js:1665` | Build a PDF blob from page image URLs and print metadata. |
+| `createPrintPdfBlobInWorker` | function | `src/utils/printPdf.js:1583` |  |
+| `describeImageSource` | function | `src/utils/printPdf.js:799` |  |
+| `describeModuleExports` | function | `src/utils/printPdf.js:1632` |  |
+| `describeValueType` | function | `src/utils/printPdf.js:825` |  |
+| `downloadPdfBlob` | function | `src/utils/printPdf.js:1817` |  |
+| `drawRichSegments` | function | `src/utils/printPdf.js:1362` |  |
+| `drawRichTextBlock` | function | `src/utils/printPdf.js:1385` |  |
+| `drawWatermark` | function | `src/utils/printPdf.js:1417` |  |
+| `drawWatermarkImage` | function | `src/utils/printPdf.js:1464` | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
+| `elementMatchesClassSelectorPart` | function | `src/utils/printPdf.js:361` |  |
+| `ensureWritableRichLine` | function | `src/utils/printPdf.js:547` |  |
 | `escapeRegExp` | function | `src/utils/printPdf.js:28` | Escape regular-expression metacharacters in literal text. |
-| `executeOutputAction` | function | `src/utils/printPdf.js:1912` |  |
-| `fitRichSegmentsToWidth` | function | `src/utils/printPdf.js:1186` |  |
-| `fitRichSegmentTextToWidth` | function | `src/utils/printPdf.js:1156` |  |
-| `flattenRichLines` | function | `src/utils/printPdf.js:613` |  |
-| `getElementStyleHints` | function | `src/utils/printPdf.js:421` |  |
-| `getImageDimension` | function | `src/utils/printPdf.js:942` |  |
-| `getRichLineColumns` | function | `src/utils/printPdf.js:1075` |  |
-| `getSelectedPrintableDataUrls` | function | `src/utils/printPdf.js:1947` | Read printable page image URLs from the document renderer. |
-| `handlePdfCurrent` | function | `src/utils/printPdf.js:2133` | Generate/print/download a PDF from the currently rendered active page surface. |
-| `handlePdfCurrentComparison` | function | `src/utils/printPdf.js:2156` | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
-| `handlePdfOutput` | function | `src/utils/printPdf.js:2040` |  |
-| `htmlToRichLines` | function | `src/utils/printPdf.js:637` | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
-| `imageExtensionFromUrl` | function | `src/utils/printPdf.js:895` |  |
-| `imageFormatAttempts` | function | `src/utils/printPdf.js:953` |  |
-| `imageToJpegDataUrl` | function | `src/utils/printPdf.js:916` | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
-| `inferImageFormat` | function | `src/utils/printPdf.js:880` |  |
-| `isBlockNode` | function | `src/utils/printPdf.js:437` | Check whether an HTML node name should be treated as block-level in PDF text flow. |
-| `isBoldFontWeight` | function | `src/utils/printPdf.js:294` | Check whether a CSS font-weight value should be treated as bold text. |
-| `layoutRichColumns` | function | `src/utils/printPdf.js:1230` |  |
-| `loadImage` | function | `src/utils/printPdf.js:748` |  |
-| `loadImagesConcurrently` | function | `src/utils/printPdf.js:839` |  |
-| `loadJsPdf` | function | `src/utils/printPdf.js:1644` | Dynamically load the jsPDF constructor used by generated PDF output. |
-| `makeTokenContext` | function | `src/utils/printPdf.js:1497` |  |
-| `measureRichSegment` | function | `src/utils/printPdf.js:1124` |  |
-| `measureRichSegments` | function | `src/utils/printPdf.js:1136` |  |
-| `normalizePdfOrientationMode` | function | `src/utils/printPdf.js:1001` |  |
-| `normalizeQuality` | function | `src/utils/printPdf.js:230` | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
-| `normalizeRichLine` | function | `src/utils/printPdf.js:1099` |  |
-| `normalizeRichSegments` | function | `src/utils/printPdf.js:1058` |  |
-| `pageFormatForImage` | function | `src/utils/printPdf.js:1030` |  |
-| `pageNumberToIndex` | function | `src/utils/printPdf.js:2016` | Convert a 1-based printable page number into the matching 0-based data URL index. |
-| `parseTemplateCssClassSelector` | function | `src/utils/printPdf.js:336` | Parse a supported class-only selector into descendant selector parts. |
-| `parseTemplateCssStyleRules` | function | `src/utils/printPdf.js:399` | Parse only the small CSS subset used by trusted print header/footer templates. |
-| `parseTextStyleDeclarations` | function | `src/utils/printPdf.js:306` |  |
-| `PdfPrintOptions` | typedef | `src/utils/printPdf.js:158` |  |
-| `PdfRichColumn` | typedef | `src/utils/printPdf.js:201` |  |
-| `PdfRichLine` | typedef | `src/utils/printPdf.js:209` |  |
-| `PdfRichSegment` | typedef | `src/utils/printPdf.js:193` |  |
-| `PdfTemplateCssStyleRule` | typedef | `src/utils/printPdf.js:187` |  |
-| `PdfTextStyleHints` | typedef | `src/utils/printPdf.js:177` |  |
-| `printableSourceFromElement` | function | `src/utils/printPdf.js:2056` | Extract a safe printable image source from an already-rendered canvas or image element. |
-| `printPdfBlob` | function | `src/utils/printPdf.js:1827` | Print a generated PDF through a hidden iframe. |
-| `renderOverlayRichLines` | function | `src/utils/printPdf.js:732` |  |
-| `reportProgress` | function | `src/utils/printPdf.js:1512` |  |
-| `resolveJsPdfConstructor` | function | `src/utils/printPdf.js:1618` | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
-| `resolvePdfImageLoadConcurrency` | function | `src/utils/printPdf.js:1525` |  |
-| `resolvePdfOrientationMode` | function | `src/utils/printPdf.js:1011` |  |
-| `resolvePdfWorkerPlan` | function | `src/utils/printPdf.js:1538` | Resolve the generated-PDF worker plan. |
-| `richLineHasText` | function | `src/utils/printPdf.js:515` |  |
-| `richLineIsEmpty` | function | `src/utils/printPdf.js:523` |  |
-| `sanitizeDiagnosticText` | function | `src/utils/printPdf.js:811` |  |
-| `sanitizeParsedTemplateDocument` | function | `src/utils/printPdf.js:500` | Keep only the attributes used by the generated-PDF rich text subset. |
-| `sanitizeTemplateHtmlForPdf` | function | `src/utils/printPdf.js:486` | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
-| `segmentFontStyle` | function | `src/utils/printPdf.js:1111` |  |
-| `selectPageContexts` | function | `src/utils/printPdf.js:1902` |  |
-| `stripDisallowedTemplateElements` | function | `src/utils/printPdf.js:449` | Remove elements that are never meaningful in generated PDF header/footer text. |
-| `swapRichLineBufferContents` | function | `src/utils/printPdf.js:535` | Replace one line buffer with another while preserving the original array object. |
-| `templateCssRuleMatchesElement` | function | `src/utils/printPdf.js:369` |  |
-| `throwIfAborted` | function | `src/utils/printPdf.js:267` | Stop PDF generation as soon as the caller cancels the operation. |
-| `htmlToRichLines~walk` | function | `src/utils/printPdf.js:652` |  |
-| `warnDeprecatedPrintableUrlExportAlias` | function | `src/utils/printPdf.js:1928` |  |
-| `wrapRichLines` | function | `src/utils/printPdf.js:1311` |  |
-| `yieldToBrowser` | function | `src/utils/printPdf.js:277` | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
+| `executeOutputAction` | function | `src/utils/printPdf.js:2006` |  |
+| `fitRichSegmentsToWidth` | function | `src/utils/printPdf.js:1187` |  |
+| `fitRichSegmentTextToWidth` | function | `src/utils/printPdf.js:1157` |  |
+| `flattenRichLines` | function | `src/utils/printPdf.js:614` |  |
+| `getElementStyleHints` | function | `src/utils/printPdf.js:422` |  |
+| `getImageDimension` | function | `src/utils/printPdf.js:943` |  |
+| `getRichLineColumns` | function | `src/utils/printPdf.js:1076` |  |
+| `getSelectedPrintableDataUrls` | function | `src/utils/printPdf.js:2041` | Read printable page image URLs from the document renderer. |
+| `handlePdfCurrent` | function | `src/utils/printPdf.js:2227` | Generate/print/download a PDF from the currently rendered active page surface. |
+| `handlePdfCurrentComparison` | function | `src/utils/printPdf.js:2250` | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
+| `handlePdfOutput` | function | `src/utils/printPdf.js:2134` |  |
+| `htmlToRichLines` | function | `src/utils/printPdf.js:638` | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
+| `imageExtensionFromUrl` | function | `src/utils/printPdf.js:896` |  |
+| `imageFormatAttempts` | function | `src/utils/printPdf.js:954` |  |
+| `imageToJpegDataUrl` | function | `src/utils/printPdf.js:917` | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
+| `inferImageFormat` | function | `src/utils/printPdf.js:881` |  |
+| `isBlockNode` | function | `src/utils/printPdf.js:438` | Check whether an HTML node name should be treated as block-level in PDF text flow. |
+| `isBoldFontWeight` | function | `src/utils/printPdf.js:295` | Check whether a CSS font-weight value should be treated as bold text. |
+| `layoutRichColumns` | function | `src/utils/printPdf.js:1231` |  |
+| `loadImage` | function | `src/utils/printPdf.js:749` |  |
+| `loadImagesConcurrently` | function | `src/utils/printPdf.js:840` |  |
+| `loadJsPdf` | function | `src/utils/printPdf.js:1645` | Dynamically load the jsPDF constructor used by generated PDF output. |
+| `makeTokenContext` | function | `src/utils/printPdf.js:1498` |  |
+| `measureRichSegment` | function | `src/utils/printPdf.js:1125` |  |
+| `measureRichSegments` | function | `src/utils/printPdf.js:1137` |  |
+| `normalizePdfOrientationMode` | function | `src/utils/printPdf.js:1002` |  |
+| `normalizeQuality` | function | `src/utils/printPdf.js:231` | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
+| `normalizeRichLine` | function | `src/utils/printPdf.js:1100` |  |
+| `normalizeRichSegments` | function | `src/utils/printPdf.js:1059` |  |
+| `pageFormatForImage` | function | `src/utils/printPdf.js:1031` |  |
+| `pageNumberToIndex` | function | `src/utils/printPdf.js:2110` | Convert a 1-based printable page number into the matching 0-based data URL index. |
+| `parseTemplateCssClassSelector` | function | `src/utils/printPdf.js:337` | Parse a supported class-only selector into descendant selector parts. |
+| `parseTemplateCssStyleRules` | function | `src/utils/printPdf.js:400` | Parse only the small CSS subset used by trusted print header/footer templates. |
+| `parseTextStyleDeclarations` | function | `src/utils/printPdf.js:307` |  |
+| `PdfPrintOptions` | typedef | `src/utils/printPdf.js:159` |  |
+| `PdfRichColumn` | typedef | `src/utils/printPdf.js:202` |  |
+| `PdfRichLine` | typedef | `src/utils/printPdf.js:210` |  |
+| `PdfRichSegment` | typedef | `src/utils/printPdf.js:194` |  |
+| `PdfTemplateCssStyleRule` | typedef | `src/utils/printPdf.js:188` |  |
+| `PdfTextStyleHints` | typedef | `src/utils/printPdf.js:178` |  |
+| `printableSourceFromElement` | function | `src/utils/printPdf.js:2150` | Extract a safe printable image source from an already-rendered canvas or image element. |
+| `printPdfBlob` | function | `src/utils/printPdf.js:1837` | Print a generated PDF through a hidden iframe. |
+| `renderOverlayRichLines` | function | `src/utils/printPdf.js:733` |  |
+| `reportProgress` | function | `src/utils/printPdf.js:1513` |  |
+| `resolveJsPdfConstructor` | function | `src/utils/printPdf.js:1619` | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
+| `resolvePdfImageLoadConcurrency` | function | `src/utils/printPdf.js:1526` |  |
+| `resolvePdfOrientationMode` | function | `src/utils/printPdf.js:1012` |  |
+| `resolvePdfWorkerPlan` | function | `src/utils/printPdf.js:1539` | Resolve the generated-PDF worker plan. |
+| `richLineHasText` | function | `src/utils/printPdf.js:516` |  |
+| `richLineIsEmpty` | function | `src/utils/printPdf.js:524` |  |
+| `sanitizeDiagnosticText` | function | `src/utils/printPdf.js:812` |  |
+| `sanitizeParsedTemplateDocument` | function | `src/utils/printPdf.js:501` | Keep only the attributes used by the generated-PDF rich text subset. |
+| `sanitizeTemplateHtmlForPdf` | function | `src/utils/printPdf.js:487` | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
+| `segmentFontStyle` | function | `src/utils/printPdf.js:1112` |  |
+| `selectPageContexts` | function | `src/utils/printPdf.js:1996` |  |
+| `stripDisallowedTemplateElements` | function | `src/utils/printPdf.js:450` | Remove elements that are never meaningful in generated PDF header/footer text. |
+| `swapRichLineBufferContents` | function | `src/utils/printPdf.js:536` | Replace one line buffer with another while preserving the original array object. |
+| `templateCssRuleMatchesElement` | function | `src/utils/printPdf.js:370` |  |
+| `throwIfAborted` | function | `src/utils/printPdf.js:268` | Stop PDF generation as soon as the caller cancels the operation. |
+| `htmlToRichLines~walk` | function | `src/utils/printPdf.js:653` |  |
+| `warnDeprecatedPrintableUrlExportAlias` | function | `src/utils/printPdf.js:2022` |  |
+| `wrapRichLines` | function | `src/utils/printPdf.js:1312` |  |
+| `yieldToBrowser` | function | `src/utils/printPdf.js:278` | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
 | `isSafeImageSrc` | function | `src/utils/printSanitize.js:16` | Allow-list image sources used for printing. |
 | `applyBraceTokensEscaped` | function | `src/utils/printTemplate.js:649` |  |
 | `applyConditionalBlocks` | function | `src/utils/printTemplate.js:720` | Resolve conditional blocks of the form \[\[{{path}}, &amp;quot;content&amp;quot;\]\]. |
@@ -1143,21 +1141,23 @@
 | `summarizeByExtension` | function | `src/utils/renderDecodeBenchmark.js:590` |  |
 | `throwIfAborted` | function | `src/utils/renderDecodeBenchmark.js:329` |  |
 | `withTimeout` | function | `src/utils/renderDecodeBenchmark.js:352` |  |
-| `getKeyboardPrintShortcutBehavior` | function | `src/utils/runtimeConfig.js:82` | Resolve the configured Ctrl/Cmd+P behavior. |
-| `getPrintDefaultMode` | function | `src/utils/runtimeConfig.js:274` | Resolve the default print page mode used when the user has not stored an override. |
-| `getPrintSelectionWorkspaceConfig` | function | `src/utils/runtimeConfig.js:299` | Resolve the print-selection workspace configuration. |
-| `getRuntimeConfig` | function | `src/utils/runtimeConfig.js:59` | Read the merged runtime configuration from the browser environment. |
-| `getViewerCustomFitSizeLimits` | function | `src/utils/runtimeConfig.js:251` | Resolve the configured custom-size limits. |
-| `getViewerCustomFitWidthFactorPercent` | function | `src/utils/runtimeConfig.js:237` | Resolve the custom-size width factor percentage. |
-| `getViewerDefaultZoomMode` | function | `src/utils/runtimeConfig.js:224` | Resolve the initial page zoom mode. |
-| `getViewerEdgeScrollPageTurnConfig` | function | `src/utils/runtimeConfig.js:323` | Resolve the optional scroll-at-edge page turn gesture. |
-| `getViewerProblemNoticeConfig` | function | `src/utils/runtimeConfig.js:341` | Resolve the configurable viewer-level problem notice. |
-| `isDocumentMetadataUiEnabled` | function | `src/utils/runtimeConfig.js:96` | Resolve whether document metadata UI affordances should be available. |
+| `clampRenderSurfaceSize` | function | `src/utils/renderSurfaceBounds.js:25` | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
+| `MAX_RENDER_SURFACE_DIMENSION` | constant | `src/utils/renderSurfaceBounds.js:9` | OpenDocViewer — conservative raster surface bounds. |
+| `getKeyboardPrintShortcutBehavior` | function | `src/utils/runtimeConfig.js:83` | Resolve the configured Ctrl/Cmd+P behavior. |
+| `getPrintDefaultMode` | function | `src/utils/runtimeConfig.js:275` | Resolve the default print page mode used when the user has not stored an override. |
+| `getPrintSelectionWorkspaceConfig` | function | `src/utils/runtimeConfig.js:300` | Resolve the print-selection workspace configuration. |
+| `getRuntimeConfig` | function | `src/utils/runtimeConfig.js:60` | Read the merged runtime configuration from the browser environment. |
+| `getViewerCustomFitSizeLimits` | function | `src/utils/runtimeConfig.js:252` | Resolve the configured custom-size limits. |
+| `getViewerCustomFitWidthFactorPercent` | function | `src/utils/runtimeConfig.js:238` | Resolve the custom-size width factor percentage. |
+| `getViewerDefaultZoomMode` | function | `src/utils/runtimeConfig.js:225` | Resolve the initial page zoom mode. |
+| `getViewerEdgeScrollPageTurnConfig` | function | `src/utils/runtimeConfig.js:324` | Resolve the optional scroll-at-edge page turn gesture. |
+| `getViewerProblemNoticeConfig` | function | `src/utils/runtimeConfig.js:342` | Resolve the configurable viewer-level problem notice. |
+| `isDocumentMetadataUiEnabled` | function | `src/utils/runtimeConfig.js:97` | Resolve whether document metadata UI affordances should be available. |
 | `KeyboardPrintShortcutBehavior` | typedef | `src/utils/runtimeConfig.js:9` |  |
-| `normalizeCustomFitSizeLimitPreference` | function | `src/utils/runtimeConfig.js:199` | Normalize the optional user custom-size limits. |
-| `normalizeCustomFitWidthFactorPercent` | function | `src/utils/runtimeConfig.js:173` | Normalize a custom fit-width factor. |
-| `normalizeOptionalCustomFitFactorPercent` | function | `src/utils/runtimeConfig.js:184` | Normalize an optional custom-size limit percentage. |
-| `normalizePrintDefaultMode` | function | `src/utils/runtimeConfig.js:158` | Normalize a user-facing print default mode. |
+| `normalizeCustomFitSizeLimitPreference` | function | `src/utils/runtimeConfig.js:200` | Normalize the optional user custom-size limits. |
+| `normalizeCustomFitWidthFactorPercent` | function | `src/utils/runtimeConfig.js:174` | Normalize a custom fit-width factor. |
+| `normalizeOptionalCustomFitFactorPercent` | function | `src/utils/runtimeConfig.js:185` | Normalize an optional custom-size limit percentage. |
+| `normalizePrintDefaultMode` | function | `src/utils/runtimeConfig.js:159` | Normalize a user-facing print default mode. |
 | `PrintDefaultMode` | typedef | `src/utils/runtimeConfig.js:11` |  |
 | `PrintSelectionWorkspaceConfig` | typedef | `src/utils/runtimeConfig.js:19` |  |
 | `ViewerCustomFitSizeLimits` | typedef | `src/utils/runtimeConfig.js:12` |  |

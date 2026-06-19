@@ -55,34 +55,53 @@ async function probeScriptUrl(url) {
 }
 
 /** Load a classic script and resolve when it executes (or errors). */
-function loadClassicScript(src, nonce = '') {
+function loadClassicScript(src, { nonce = '', integrity = '' } = {}) {
   return new Promise((resolve) => {
     const s = document.createElement('script');
     s.src = src;
     s.async = false;  // preserve order
     s.defer = false;  // execute ASAP after insertion
     if (nonce) s.nonce = nonce;
+    if (integrity) s.integrity = integrity;
     s.onload = () => resolve({ ok: true, src });
     s.onerror = () => resolve({ ok: false, src });
     document.head.appendChild(s);
   });
 }
 
+function getBootstrapScriptElement() {
+  try {
+    return document.querySelector('script[data-odv-bootstrap]');
+  } catch {
+    return null;
+  }
+}
+
 function getBootstrapScriptNonce() {
   try {
-    const script = document.querySelector('script[data-odv-bootstrap]');
+    const script = getBootstrapScriptElement();
     return typeof script?.nonce === 'string' ? script.nonce : '';
   } catch {
     return '';
   }
 }
 
+function getBootstrapScriptIntegrityValue(name) {
+  try {
+    const script = getBootstrapScriptElement();
+    const value = script?.dataset?.[name];
+    return typeof value === 'string' ? value.trim() : '';
+  } catch {
+    return '';
+  }
+}
+
 /** Try multiple candidate URLs (in order) until one probes as JS, then load it. */
-async function loadFromCandidates(name, candidates, { optional = false, nonce = '' } = {}) {
+async function loadFromCandidates(name, candidates, { optional = false, nonce = '', integrity = '' } = {}) {
   for (const url of candidates) {
     const probe = await probeScriptUrl(url);
     if (probe.ok) {
-      const res = await loadClassicScript(url, nonce);
+      const res = await loadClassicScript(url, { nonce, integrity });
       if (res.ok) return { ok: true, url };
       // If injecting failed, try next candidate
     }
@@ -95,19 +114,21 @@ async function loadFromCandidates(name, candidates, { optional = false, nonce = 
   const base = getAppBase(); // e.g., "/OpenDocViewer/" in IIS, or "/" in dev
   const bust = () => Date.now();
   const nonce = getBootstrapScriptNonce();
+  const siteConfigIntegrity = getBootstrapScriptIntegrityValue('odvSiteConfigIntegrity');
+  const defaultConfigIntegrity = getBootstrapScriptIntegrityValue('odvConfigIntegrity');
 
   // 1) Optional site overrides — ONLY try from app base (no root fallback → no 404 noise).
   await loadFromCandidates(
     'odv.site.config.js',
     [ base + 'odv.site.config.js?_=' + bust() ],
-    { optional: true, nonce }
+    { optional: true, nonce, integrity: siteConfigIntegrity }
   );
 
   // 2) Required default config — try app base, then site root (dev).
   const mainCfg = await loadFromCandidates(
     'odv.config.js',
     [ base + 'odv.config.js?_=' + bust(), '/odv.config.js?_=' + bust() ],
-    { optional: false, nonce }
+    { optional: false, nonce, integrity: defaultConfigIntegrity }
   );
   if (!mainCfg.ok) return; // cannot run without defaults
 

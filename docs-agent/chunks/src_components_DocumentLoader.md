@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentLoader
 
-File count: 8. Line count: 3984. JSDoc symbol count: 107.
+File count: 8. Line count: 3932. JSDoc symbol count: 105.
 
 ## src/components/DocumentLoader/batchHandler.js
 
@@ -95,13 +95,12 @@ OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats
 
 Exports: renderPDFInMainThread, renderTIFFInMainThread
 
-Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, src/utils/pdfjsDocumentOptions.js
+Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, src/utils/pdfjsDocumentOptions.js, src/utils/objectUrlRegistry.js
 
 Symbols:
 
 - `RenderJob` (typedef) - Render job passed to the main-thread renderer.
 - `InsertPageAtIndex` (typedef) - Signature for inserting a page structure into the page list at an index.
-- `addToUrlRegistry` (function) - Track a created object URL so it can be revoked later.
 - `__pdfWorkerInitialized` (member) - One-time init of pdf.js classic worker script URL (dev == build).
 - `ensurePdfWorker` (function) - Ensure a pdf.js worker is ready for this runtime.
 - `renderPDFInMainThread` (constant) - Render PDF pages on the main thread and INSERT THEM DIRECTLY.
@@ -135,7 +134,7 @@ OpenDocViewer — Worker orchestration & message handling - Create image workers
 
 Exports: createWorker, getNumberOfWorkers, handleWorkerMessage
 
-Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/mainThreadRenderer.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, ../../workers/imageWorker.js?worker
+Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/mainThreadRenderer.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, src/utils/objectUrlRegistry.js, ../../workers/imageWorker.js?worker
 
 Symbols:
 
@@ -145,6 +144,5 @@ Symbols:
 - `HandleOpts` (typedef) - Options passed to the handler to coordinate main-thread rendering.
 - `createWorker` (function) - Create a new image worker instance.
 - `getNumberOfWorkers` (function) - Decide how many workers to spawn, leaving one logical core for the UI when possible.
-- `addToUrlRegistry` (function) - Create / get a global URL registry and install unload cleanup once.
 - `scheduleMainThread` (function) - Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue (deferred execution).
 - `handleWorkerMessage` (constant) - Handle a message payload from an image worker and insert resulting page(s).

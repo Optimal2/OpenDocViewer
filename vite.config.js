@@ -20,7 +20,9 @@
  */
 
 import { defineConfig } from 'vite';
-import { existsSync, readdirSync, readFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { resolve } from 'node:path';
+import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
@@ -77,6 +79,43 @@ function pdfJsWasmAssetsPlugin() {
   };
 }
 
+function preserveBootstrapDataAttributePlugin() {
+  /** @type {import('vite').ResolvedConfig | null} */
+  let resolvedConfig = null;
+
+  return {
+    name: 'odv-preserve-bootstrap-data-attribute',
+    apply: 'build',
+    configResolved(config) {
+      resolvedConfig = config;
+    },
+    closeBundle() {
+      if (!resolvedConfig) {
+        return;
+      }
+
+      const indexHtmlPath = resolve(resolvedConfig.root, resolvedConfig.build.outDir, 'index.html');
+      if (!existsSync(indexHtmlPath)) {
+        return;
+      }
+
+      const html = readFileSync(indexHtmlPath, 'utf8');
+      const scriptPattern = new RegExp(
+        '(<script\\b[^>]*\\btype=["\']module["\'][^>]*\\bsrc=["\'][^"\']+["\'][^>]*)(>)',
+        'i'
+      );
+
+      const updatedHtml = html.replace(scriptPattern, (match, attrs, close) => (
+        attrs.includes('data-odv-bootstrap') ? match : `${attrs} data-odv-bootstrap${close}`
+      ));
+
+      if (updatedHtml !== html) {
+        writeFileSync(indexHtmlPath, updatedHtml, 'utf8');
+      }
+    },
+  };
+}
+
 /**
  * @typedef {import('vite').UserConfigExport} UserConfigExport
  * @typedef {import('vite').ConfigEnv} ConfigEnv
@@ -106,6 +145,11 @@ export default defineConfig(({ mode }) => {
 
       // pdf.js loads codec WASM/fallback modules by filename from `wasmUrl`.
       pdfJsWasmAssetsPlugin(),
+
+      // Vite emits a small HTML entry chunk that imports bootConfig. Keep the
+      // bootstrap data marker on that emitted script so runtime config SRI
+      // attributes survive in dist/index.html.
+      preserveBootstrapDataAttributePlugin(),
     ],
 
     /**
@@ -137,6 +181,10 @@ export default defineConfig(({ mode }) => {
      */
     build: {
       rollupOptions: {
+        input: {
+          main: fileURLToPath(new URL('./index.html', import.meta.url)),
+          bootConfig: fileURLToPath(new URL('./src/app/bootConfig.js', import.meta.url)),
+        },
         output: {
           manualChunks(id) {
             if (id.includes('pdfjs-dist')) return 'pdfjs';

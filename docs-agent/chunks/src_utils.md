@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 34. Line count: 14530. JSDoc symbol count: 562.
+File count: 35. Line count: 14715. JSDoc symbol count: 564.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -501,6 +501,17 @@ Symbols:
 - `getHardwareConcurrency` (function) - No description.
 - `mergePositiveCounts` (function) - No description.
 - `deriveCountsFromMultipliers` (function) - No description.
+
+## src/utils/renderSurfaceBounds.js
+
+OpenDocViewer — conservative raster surface bounds.
+
+Exports: MAX_RENDER_SURFACE_DIMENSION, MAX_RENDER_SURFACE_PIXELS, clampRenderSurfaceSize
+
+Symbols:
+
+- `MAX_RENDER_SURFACE_DIMENSION` (constant) - OpenDocViewer — conservative raster surface bounds.
+- `clampRenderSurfaceSize` (function) - Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio.
 
 ## src/utils/runtimeConfig.js
 
