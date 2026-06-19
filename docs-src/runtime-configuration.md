@@ -181,6 +181,7 @@ viewer: {
     showReloadButton: true,
     showResetSessionButton: true,
     resetSessionTarget: 'parent-or-current',
+    resetSessionAllowedOrigin: 'https://host.example.test',
     showTechnicalDetails: false,
     title: {
       en: 'The documents could not be shown correctly',
@@ -223,6 +224,10 @@ then follows `resetSessionTarget`:
 - `parent` only reloads the same-origin parent page.
 - `current` reloads the viewer URL with an `odvSessionReset` cache-busting parameter.
 - `none` only emits the event/message so the embedding host can handle recovery itself.
+
+`resetSessionAllowedOrigin` optionally pins cross-origin `postMessage` delivery to a specific parent
+origin. When unset, the viewer falls back to `document.referrer` and skips the cross-origin message
+when no trustworthy origin can be derived.
 
 Use the reset action for host integrations where reloading only the iframe can reuse the same stale
 parent payload and therefore the same expired document tickets.

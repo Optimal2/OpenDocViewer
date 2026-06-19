@@ -55,24 +55,34 @@ async function probeScriptUrl(url) {
 }
 
 /** Load a classic script and resolve when it executes (or errors). */
-function loadClassicScript(src) {
+function loadClassicScript(src, nonce = '') {
   return new Promise((resolve) => {
     const s = document.createElement('script');
     s.src = src;
     s.async = false;  // preserve order
     s.defer = false;  // execute ASAP after insertion
+    if (nonce) s.nonce = nonce;
     s.onload = () => resolve({ ok: true, src });
     s.onerror = () => resolve({ ok: false, src });
     document.head.appendChild(s);
   });
 }
 
+function getBootstrapScriptNonce() {
+  try {
+    const script = document.querySelector('script[data-odv-bootstrap]');
+    return typeof script?.nonce === 'string' ? script.nonce : '';
+  } catch {
+    return '';
+  }
+}
+
 /** Try multiple candidate URLs (in order) until one probes as JS, then load it. */
-async function loadFromCandidates(name, candidates, { optional = false } = {}) {
+async function loadFromCandidates(name, candidates, { optional = false, nonce = '' } = {}) {
   for (const url of candidates) {
     const probe = await probeScriptUrl(url);
     if (probe.ok) {
-      const res = await loadClassicScript(url);
+      const res = await loadClassicScript(url, nonce);
       if (res.ok) return { ok: true, url };
       // If injecting failed, try next candidate
     }
@@ -84,19 +94,20 @@ async function loadFromCandidates(name, candidates, { optional = false } = {}) {
 (async function boot() {
   const base = getAppBase(); // e.g., "/OpenDocViewer/" in IIS, or "/" in dev
   const bust = () => Date.now();
+  const nonce = getBootstrapScriptNonce();
 
   // 1) Optional site overrides — ONLY try from app base (no root fallback → no 404 noise).
   await loadFromCandidates(
     'odv.site.config.js',
     [ base + 'odv.site.config.js?_=' + bust() ],
-    { optional: true }
+    { optional: true, nonce }
   );
 
   // 2) Required default config — try app base, then site root (dev).
   const mainCfg = await loadFromCandidates(
     'odv.config.js',
     [ base + 'odv.config.js?_=' + bust(), '/odv.config.js?_=' + bust() ],
-    { optional: false }
+    { optional: false, nonce }
   );
   if (!mainCfg.ok) return; // cannot run without defaults
 

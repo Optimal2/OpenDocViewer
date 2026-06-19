@@ -118,10 +118,28 @@ function dispatchResetEvent(target, detail) {
   }
 }
 
-function postResetMessageToParent(detail) {
+function getAllowedResetOrigin(config) {
+  const configured = typeof config?.resetSessionAllowedOrigin === 'string'
+    ? config.resetSessionAllowedOrigin.trim()
+    : '';
+  if (configured) {
+    try {
+      return new URL(configured, window.location.href).origin;
+    } catch {}
+  }
+
+  try {
+    if (document.referrer) return new URL(document.referrer).origin;
+  } catch {}
+  return '';
+}
+
+function postResetMessageToParent(detail, config) {
   try {
     if (typeof window === 'undefined' || !window.parent || window.parent === window) return;
-    window.parent.postMessage({ type: 'odv:session-reset-requested', detail }, '*');
+    const targetOrigin = getAllowedResetOrigin(config);
+    if (!targetOrigin) return;
+    window.parent.postMessage({ type: 'odv:session-reset-requested', detail }, targetOrigin);
   } catch {
     // Best-effort support signal only.
   }
@@ -135,7 +153,7 @@ function reloadCurrentViewer() {
   }
 }
 
-function resetViewerSession(trigger, targetMode) {
+function resetViewerSession(trigger, targetMode, config) {
   if (typeof window === 'undefined') return;
 
   const detail = {
@@ -154,7 +172,7 @@ function resetViewerSession(trigger, targetMode) {
   if (parent) {
     if (dispatchResetEvent(parent, detail) === false) return;
   } else {
-    postResetMessageToParent(detail);
+    postResetMessageToParent(detail, config);
   }
 
   if ((mode === 'parent' || mode === 'parent-or-current') && parent) {
@@ -231,7 +249,7 @@ export default function ViewerProblemNotice({ error, pageLoadState, loadingRunAc
           <button
             type="button"
             className="viewer-problem-notice-button primary"
-            onClick={() => resetViewerSession(trigger, config.resetSessionTarget)}
+            onClick={() => resetViewerSession(trigger, config.resetSessionTarget, config)}
           >
             {resetSessionLabel}
           </button>
