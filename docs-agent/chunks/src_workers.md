@@ -1,6 +1,6 @@
 # OpenDocViewer / src/workers
 
-File count: 3. Line count: 1549. JSDoc symbol count: 3.
+File count: 3. Line count: 1558. JSDoc symbol count: 3.
 
 ## src/workers/imageWorker.js
 

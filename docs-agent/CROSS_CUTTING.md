@@ -27,10 +27,10 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 - `src/utils/pdfWorkerDispatcher.js` (451 lines) - OpenDocViewer - generated PDF worker dispatcher.
 - `src/utils/pageAssetWorkerPool.js` (320 lines) - OpenDocViewer — Page-asset worker pool.
-- `src/components/DocumentLoader/workerHandler.js` (330 lines) - OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
+- `src/components/DocumentLoader/workerHandler.js` (300 lines) - OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
 - `src/utils/pdfPageWorkerPool.js` (477 lines) - OpenDocViewer - PDF page-image worker pool.
 - `src/workers/pdfWorker.js` (628 lines) - OpenDocViewer - generated PDF worker.
-- `src/workers/imageWorker.js` (488 lines) - OpenDocViewer — image / TIFF worker.
+- `src/workers/imageWorker.js` (497 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (433 lines) - OpenDocViewer - PDF page image worker.
 
 ## Risky Source Patterns
@@ -46,4 +46,4 @@ React raw HTML rendering.
 Direct DOM HTML assignment or access.
 
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 100, 101, 102 - Manual overlay that loads simple external HTML fragments from the public help folder.
-- `src/utils/printDom.js` lines 253 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().
+- `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().

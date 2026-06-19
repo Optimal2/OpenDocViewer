@@ -8,7 +8,7 @@ This file combines package.json declarations with observed source imports.
 | --- | --- | ---: | --- |
 | `axios` | `^1.18.0` | 1 | `src/logging/systemLogger.js` |
 | `cors` | `^2.8.6` | 1 | `server/system-log-server.js` |
-| `dompurify` | `^3.4.10` | 2 | `src/components/DocumentToolbar/ManualOverlayDialog.jsx`<br>`src/utils/printPdf.js` |
+| `dompurify` | `^3.4.11` | 3 | `src/components/DocumentToolbar/ManualOverlayDialog.jsx`<br>`src/utils/printDom.js`<br>`src/utils/printPdf.js` |
 | `dotenv` | `^17.4.2` | 2 | `server/system-log-server.js`<br>`server/user-log-server.js` |
 | `express` | `^5.2.1` | 2 | `server/system-log-server.js`<br>`server/user-log-server.js` |
 | `express-rate-limit` | `^8.5.2` | 2 | `server/system-log-server.js`<br>`server/user-log-server.js` |

@@ -83,6 +83,7 @@ const PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS = 2 * ONE_MINUTE_MS;
 const PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS = 1800;
 // Give the hidden PDF iframe a brief moment to finish navigation before focus/print.
 const PRINT_IFRAME_FOCUS_DELAY_MS = 250;
+const GENERATED_PDF_PREVIEW_FAILURE_HINT = 'The browser could not open the generated PDF print preview. Allow pop-ups for this site or use Save PDF instead.';
 const ELLIPSIS = '...';
 const SAFE_IMAGE_SOURCE_HINT = 'Expected data:image/* data URLs, blob: URLs, or http(s) image URLs that the browser can load.';
 const SUPPORTED_PDF_IMAGE_FORMATS = 'PNG, JPEG, and WebP';
@@ -1831,76 +1832,160 @@ export function downloadPdfBlob(blob, filename = DEFAULT_PDF_FILENAME) {
 /**
  * Print a generated PDF through a hidden iframe. The caller should invoke this from a user action.
  * @param {Blob} blob
- * @returns {void}
+ * @returns {Promise<void>}
  */
 export function printPdfBlob(blob) {
-  const url = URL.createObjectURL(blob);
-  const frame = document.createElement('iframe');
-  frame.setAttribute('aria-hidden', 'true');
-  Object.assign(frame.style, {
-    position: 'fixed',
-    right: '0',
-    bottom: '0',
-    width: '0',
-    height: '0',
-    border: '0',
-    visibility: 'hidden',
-  });
+  return new Promise((resolve, reject) => {
+    let url = '';
+    try {
+      url = URL.createObjectURL(blob);
+    } catch (error) {
+      reject(new Error(`Failed to prepare the generated PDF for printing. Details: ${String(error?.message || error)}`, { cause: error }));
+      return;
+    }
 
-  let printed = false;
-  let cleaned = false;
-  const cleanup = (delayMs = 0) => {
-    if (cleaned) return;
-    cleaned = true;
-    window.setTimeout(() => {
+    const frame = document.createElement('iframe');
+    frame.setAttribute('aria-hidden', 'true');
+    Object.assign(frame.style, {
+      position: 'fixed',
+      right: '0',
+      bottom: '0',
+      width: '0',
+      height: '0',
+      border: '0',
+      visibility: 'hidden',
+    });
+
+    let printed = false;
+    let cleaned = false;
+    let settled = false;
+    const cleanup = (delayMs = 0) => {
+      if (cleaned) return;
+      cleaned = true;
+      window.setTimeout(() => {
+        try {
+          frame.remove();
+        } catch (error) {
+          logger.debug('PDF print iframe cleanup failed', { error: String(error?.message || error) });
+        }
+        try {
+          URL.revokeObjectURL(url);
+        } catch (error) {
+          logger.debug('PDF print object URL cleanup failed', { error: String(error?.message || error) });
+        }
+      }, Math.max(0, delayMs));
+    };
+    const settleResolve = () => {
+      if (settled) return;
+      settled = true;
+      resolve();
+    };
+    const settleReject = (error) => {
+      if (settled) return;
+      settled = true;
+      cleanup(0);
+      reject(error);
+    };
+    const scheduleFallbackCleanup = () => {
+      // Edge/Chromium may keep the PDF preview dependent on the iframe/blob URL while
+      // the preview dialog is open. Do not remove the iframe shortly after print(); it
+      // can make the PDF preview disappear. afterprint normally cleans it up; this long
+      // fallback avoids leaking the object URL if afterprint is not fired.
+      window.setTimeout(() => cleanup(0), PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS);
+    };
+    const afterPrint = () => cleanup(PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS);
+    const tryWindowFallback = (reason, originalError = null) => {
       try {
-        frame.remove();
+        const fallbackWindow = window.open('about:blank', '_blank');
+        if (fallbackWindow) {
+          try {
+            fallbackWindow.opener = null;
+          } catch (openerError) {
+            logger.debug('Generated PDF fallback window opener cleanup failed', {
+              error: String(openerError?.message || openerError),
+            });
+          }
+          try {
+            fallbackWindow.location.replace(url);
+          } catch (navigationError) {
+            try {
+              fallbackWindow.location.href = url;
+            } catch (hrefError) {
+              throw new Error(
+                `Fallback window navigation failed. replace(): ${String(navigationError?.message || navigationError)}; href: ${String(hrefError?.message || hrefError)}`,
+                { cause: hrefError }
+              );
+            }
+          }
+          logger.warn(reason, {
+            error: originalError ? String(originalError?.message || originalError) : '',
+            fallback: 'window.open',
+          });
+          scheduleFallbackCleanup();
+          settleResolve();
+          return true;
+        }
+      } catch (fallbackError) {
+        logger.warn('Generated PDF print fallback window failed', {
+          error: String(fallbackError?.message || fallbackError),
+        });
+        settleReject(new Error(`${GENERATED_PDF_PREVIEW_FAILURE_HINT} Details: ${String(fallbackError?.message || fallbackError)}`, { cause: fallbackError }));
+        return true;
+      }
+
+      settleReject(new Error(GENERATED_PDF_PREVIEW_FAILURE_HINT, originalError ? { cause: originalError } : undefined));
+      return false;
+    };
+    const invokePrint = () => {
+      if (printed) return;
+      printed = true;
+      try {
+        frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true });
       } catch (error) {
-        logger.debug('PDF print iframe cleanup failed', { error: String(error?.message || error) });
+        logger.debug('PDF iframe afterprint listener setup failed', { error: String(error?.message || error) });
       }
       try {
-        URL.revokeObjectURL(url);
+        window.addEventListener('afterprint', afterPrint, { once: true });
       } catch (error) {
-        logger.debug('PDF print object URL cleanup failed', { error: String(error?.message || error) });
+        logger.debug('Window afterprint listener setup failed', { error: String(error?.message || error) });
       }
-    }, Math.max(0, delayMs));
-  };
-  const scheduleFallbackCleanup = () => {
-    // Edge/Chromium may keep the PDF preview dependent on the iframe/blob URL while
-    // the preview dialog is open. Do not remove the iframe shortly after print(); it
-    // can make the PDF preview disappear. afterprint normally cleans it up; this long
-    // fallback avoids leaking the object URL if afterprint is not fired.
-    window.setTimeout(() => cleanup(0), PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS);
-  };
-  const afterPrint = () => cleanup(PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS);
-  const invokePrint = () => {
-    if (printed) return;
-    printed = true;
+      window.setTimeout(() => {
+        const contentWindow = frame.contentWindow;
+        if (!contentWindow || typeof contentWindow.print !== 'function') {
+          tryWindowFallback('Generated PDF iframe was not ready for printing');
+          return;
+        }
+
+        try {
+          contentWindow.focus?.();
+          contentWindow.print();
+          scheduleFallbackCleanup();
+          settleResolve();
+        } catch (error) {
+          tryWindowFallback('Generated PDF print invocation failed', error);
+        }
+      }, PRINT_IFRAME_FOCUS_DELAY_MS);
+    };
+
+    frame.addEventListener('load', invokePrint, { once: true });
+    frame.addEventListener('error', () => {
+      tryWindowFallback('Generated PDF iframe failed to load');
+    }, { once: true });
+
     try {
-      frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true });
-    } catch (error) {
-      logger.debug('PDF iframe afterprint listener setup failed', { error: String(error?.message || error) });
-    }
-    try {
-      window.addEventListener('afterprint', afterPrint, { once: true });
-    } catch (error) {
-      logger.debug('Window afterprint listener setup failed', { error: String(error?.message || error) });
-    }
-    window.setTimeout(() => {
-      try {
-        frame.contentWindow?.focus?.();
-        frame.contentWindow?.print?.();
-      } catch (error) {
-        logger.warn('Generated PDF print invocation failed', { error: String(error?.message || error) });
-        window.open(url, '_blank', 'noopener,noreferrer');
+      frame.src = url;
+      const body = document.body;
+      if (!body) {
+        throw new Error('document.body is not available.');
       }
-      scheduleFallbackCleanup();
-    }, PRINT_IFRAME_FOCUS_DELAY_MS);
-  };
-  frame.addEventListener('load', invokePrint, { once: true });
-  frame.src = url;
-  document.body.appendChild(frame);
-  window.setTimeout(invokePrint, PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS);
+      body.appendChild(frame);
+    } catch (error) {
+      settleReject(new Error(`Failed to attach the generated PDF print preview frame. Details: ${String(error?.message || error)}`, { cause: error }));
+      return;
+    }
+
+    window.setTimeout(invokePrint, PRINT_IFRAME_LOAD_FALLBACK_TIMEOUT_MS);
+  });
 }
 
 /**
@@ -1916,9 +2001,9 @@ function selectPageContexts(pageContexts, count) {
  * @param {Blob} blob
  * @param {PdfPrintOptions} options
  * @param {number} count
- * @returns {void}
+ * @returns {Promise<void>}
  */
-function executeOutputAction(blob, options, count) {
+async function executeOutputAction(blob, options, count) {
   const total = Math.max(0, count);
   if (options.action === 'download') {
     reportProgress(options, { phase: 'downloading', current: total, total });
@@ -1927,7 +2012,7 @@ function executeOutputAction(blob, options, count) {
   }
 
   reportProgress(options, { phase: 'opening-preview', current: total, total });
-  printPdfBlob(blob);
+  await printPdfBlob(blob);
 }
 
 /**
@@ -2053,7 +2138,7 @@ export async function handlePdfOutput(documentRenderRef, pageNumbers, options = 
   const blob = await createPrintPdfBlob(selected, options);
   throwIfAborted(options.signal);
   if (options.deferOutput === true) return blob;
-  executeOutputAction(blob, options, selectedCount);
+  await executeOutputAction(blob, options, selectedCount);
 }
 
 
@@ -2152,7 +2237,7 @@ export async function handlePdfCurrent(documentRenderRef, options = {}) {
   const blob = await createPrintPdfBlob([src], { ...options, pageContexts: selectPageContexts(options.pageContexts, 1) });
   throwIfAborted(options.signal);
   if (options.deferOutput === true) return blob;
-  executeOutputAction(blob, options, 1);
+  await executeOutputAction(blob, options, 1);
 }
 
 /**
@@ -2178,5 +2263,5 @@ export async function handlePdfCurrentComparison(primaryRenderRef, compareRender
   const blob = await createPrintPdfBlob(urls, { ...options, pageContexts: selectPageContexts(options.pageContexts, urls.length) });
   throwIfAborted(options.signal);
   if (options.deferOutput === true) return blob;
-  executeOutputAction(blob, options, urls.length);
+  await executeOutputAction(blob, options, urls.length);
 }

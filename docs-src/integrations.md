@@ -174,6 +174,23 @@ Operational rules for that flow:
   that its `GetStream` endpoint can no longer resolve. OpenDocViewer can detect this and stop early,
   but it cannot renew the tickets; the embedding host must provide a fresh session handoff.
 
+### Host CSP requirements for embedded deployments
+
+When a host page embeds OpenDocViewer in an `<iframe>`, the host page's CSP still applies to that
+page and can block the integration even if the viewer's own CSP is correct.
+
+Review the host policy for these cases:
+
+- allow the viewer origin in `frame-src` or `child-src`
+- allow bundle, document, source-pack, and log-proxy endpoints in `connect-src`
+- allow any direct image/document origins that the host page itself fetches in `img-src`
+- if the host uses inline `window.ODV_BOOTSTRAP` data, provide a matching nonce or hash in the host
+  `script-src`; otherwise prefer `?sessionurl=` or `?bundleUrl=` startup
+
+If the viewer deployment also needs embedding restrictions, emit `frame-ancestors` as an HTTP
+response header from IIS or the reverse proxy that serves OpenDocViewer. Do not rely on the
+viewer's `<meta http-equiv="Content-Security-Policy">` tag for that directive.
+
 ## Database-Backed Host Files
 
 Some host applications intentionally keep the web tier away from worker-only file shares. In that topology, the worker can copy reviewable source bytes into a database table and the web application can expose a short, authenticated file endpoint.

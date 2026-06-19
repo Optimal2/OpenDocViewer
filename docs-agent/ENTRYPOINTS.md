@@ -42,6 +42,7 @@
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
 - `src/utils/documentMetadata.js`: 3 incoming local imports
+- `src/utils/objectUrlRegistry.js`: 3 incoming local imports
 - `src/utils/printPdf.js`: 3 incoming local imports
 - `src/utils/printSanitize.js`: 3 incoming local imports
 - `src/utils/printTemplate.js`: 3 incoming local imports
@@ -49,4 +50,3 @@
 - `src/components/common/StatusLed.jsx`: 2 incoming local imports
 - `src/components/DocumentToolbar/SplitToolbarButton.jsx`: 2 incoming local imports
 - `src/hooks/useAcceleratingHoldRepeat.js`: 2 incoming local imports
-- `src/hooks/usePageTimer.js`: 2 incoming local imports

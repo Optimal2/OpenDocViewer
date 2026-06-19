@@ -13,6 +13,9 @@
   <head>
     <!-- Basic document metadata -->
     <meta charset="utf-8" />
+    <!-- Keep this fallback CSP aligned with public/web.config. The hash covers the inline i18n shell script below. -->
+    <meta http-equiv="Content-Security-Policy"
+          content="default-src 'self'; base-uri 'self'; object-src 'none'; script-src 'self' 'sha256-VLp8cNctLQHS+quZb8UEJAQpLDhxTlAGTn8HeEru0Zs='; style-src 'self' 'unsafe-inline'; img-src 'self' blob: data: http: https:; font-src 'self' data:; connect-src 'self' http: https: ws: wss:; worker-src 'self' blob:; frame-src 'self' blob:; form-action 'self';" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
     <meta name="theme-color" content="#000000" />
 
@@ -94,7 +97,10 @@
     <div id="root" aria-live="polite"></div>
 
     <!-- Module bootstrap: loads odv.site.config.js (optional) and odv.config.js (required)
-         from the *application base path*, then imports /src/index.jsx. -->
+         from the *application base path*, then imports /src/index.jsx.
+         Deployments that pin runtime-config hashes may add:
+         - data-odv-site-config-integrity="sha384-..."
+         - data-odv-config-integrity="sha384-..." -->
     <script type="module" data-odv-bootstrap src="./src/app/bootConfig.js"></script>
   </body>
 </html>

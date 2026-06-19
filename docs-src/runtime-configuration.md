@@ -35,6 +35,49 @@ The boot loader uses a fetch probe before adding script tags so it can reject ca
 
 Without that probe, config failures are harder to diagnose in production.
 
+## Trust boundary and integrity
+
+OpenDocViewer runtime config is executable JavaScript, not passive JSON. `index.html`,
+`odv.config.js`, and optional `odv.site.config.js` all execute in the viewer origin before React
+starts. Anyone who can change any of those files can run arbitrary code in the same trust boundary
+as the shipped application bundle.
+
+Operational implications:
+
+- treat runtime-config files with the same write-access controls as deployed JS/CSS assets
+- keep runtime config same-origin with the viewer shell unless a host has intentionally designed and
+  reviewed a different bootstrap boundary
+- do not place secrets in runtime config; every value is readable by the browser
+- keep `index.html`, `odv.config.js`, and `odv.site.config.js` on no-store caching so security or
+  operational changes take effect immediately
+
+The shell now carries a baseline Content Security Policy that blocks third-party script/object
+injection while still allowing same-origin worker modules, blob-backed print frames, and the
+deployment-specific document/log endpoints that existing integrations use.
+
+When a deployment wants stronger pinning for runtime config, `src/app/bootConfig.js` can forward
+Subresource Integrity attributes from the bootstrap script to the injected config scripts:
+
+```html
+<script
+  type="module"
+  data-odv-bootstrap
+  data-odv-config-integrity="sha384-..."
+  data-odv-site-config-integrity="sha384-..."
+  src="./src/app/bootConfig.js"></script>
+```
+
+Use those attributes only when deployment automation can update the hashes every time the matching
+config file changes. This is straightforward for immutable packaged defaults and only safe for
+site-local overrides when the local deployment step owns both the file content and the bootstrap
+markup that carries the hash.
+
+When the OMP packaging scripts generate those hashes automatically, they inject the matching
+`data-odv-config-integrity` and optional `data-odv-site-config-integrity` attributes into the built
+`index.html`. Treat that as one deployment unit: do not edit `odv.site.config.js` directly on the
+IIS server after packaging, because a content change without a matching hash update will cause the
+browser to reject the file and OpenDocViewer will not start.
+
 ## What belongs in runtime config
 
 Good runtime-config candidates:

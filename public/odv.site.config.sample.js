@@ -6,10 +6,13 @@
  *   This file is the full site-local override surface for OpenDocViewer.
  *   Keep `public/odv.config.js` under application control. Copy this file, rename it to
  *   `odv.site.config.js`, and edit only the values that should differ for a specific site.
+ *   This file is executable JavaScript in the viewer origin. Anyone who can modify it can run
+ *   arbitrary code with the same trust as the deployed application bundle.
  *
  * UPGRADE STRATEGY
  *   - Keep `odv.config.js` unchanged when upgrading the application.
  *   - Keep `odv.site.config.js` under site/customer control.
+ *   - Apply the same write-access controls and deployment review to this file as to app code.
  *   - During upgrades, replace the application files and keep the site-local config file.
  *   - When a new OpenDocViewer version adds settings, compare the local file with this sample.
  *
