@@ -14,7 +14,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 ### Hooks
 
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` (828 lines) - Hook + helpers for PrintRangeDialog.
-- `src/components/DocumentViewer/useDocumentViewer.js` (1884 lines) - Primary viewer-state hook.
+- `src/components/DocumentViewer/useDocumentViewer.js` (1899 lines) - Primary viewer-state hook.
 - `src/hooks/useNavigationModifierState.js` (109 lines) - Shared modifier-key state for navigation and compare-aware viewer actions.
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` (557 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (362 lines) - Background prebuild/cache for configured "all pages" generated-PDF variants.
@@ -27,10 +27,10 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 - `src/utils/pdfWorkerDispatcher.js` (451 lines) - OpenDocViewer - generated PDF worker dispatcher.
 - `src/utils/pageAssetWorkerPool.js` (320 lines) - OpenDocViewer — Page-asset worker pool.
-- `src/components/DocumentLoader/workerHandler.js` (300 lines) - OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
+- `src/components/DocumentLoader/workerHandler.js` (301 lines) - OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
 - `src/utils/pdfPageWorkerPool.js` (477 lines) - OpenDocViewer - PDF page-image worker pool.
 - `src/workers/pdfWorker.js` (628 lines) - OpenDocViewer - generated PDF worker.
-- `src/workers/imageWorker.js` (497 lines) - OpenDocViewer — image / TIFF worker.
+- `src/workers/imageWorker.js` (500 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (433 lines) - OpenDocViewer - PDF page image worker.
 
 ## Risky Source Patterns

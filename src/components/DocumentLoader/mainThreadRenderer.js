@@ -29,6 +29,9 @@ import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
 import { createTrackedObjectUrl } from '../../utils/objectUrlRegistry.js';
 
+/** Upper bound for reconstructed OJPEG entropy-coded scan data. */
+const MAX_OJPEG_SCAN_SIZE_BYTES = 512 * 1024 * 1024;
+
 /**
  * Render job passed to the main-thread renderer.
  * @typedef {Object} RenderJob
@@ -248,7 +251,7 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
       const len = t279[i] >>> 0;
       if (off > byteLength || len > (byteLength - off)) return null;
       totalScanLen += len;
-      if (totalScanLen > 512 * 1024 * 1024) return null;
+      if (totalScanLen > MAX_OJPEG_SCAN_SIZE_BYTES) return null;
     }
     const scanAll = new Uint8Array(totalScanLen);
     let cursor = 0;

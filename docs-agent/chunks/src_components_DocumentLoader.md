@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentLoader
 
-File count: 8. Line count: 3932. JSDoc symbol count: 105.
+File count: 8. Line count: 3936. JSDoc symbol count: 106.
 
 ## src/components/DocumentLoader/batchHandler.js
 
@@ -99,6 +99,7 @@ Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/docume
 
 Symbols:
 
+- `MAX_OJPEG_SCAN_SIZE_BYTES` (constant) - Upper bound for reconstructed OJPEG entropy-coded scan data.
 - `RenderJob` (typedef) - Render job passed to the main-thread renderer.
 - `InsertPageAtIndex` (typedef) - Signature for inserting a page structure into the page list at an index.
 - `__pdfWorkerInitialized` (member) - One-time init of pdf.js classic worker script URL (dev == build).

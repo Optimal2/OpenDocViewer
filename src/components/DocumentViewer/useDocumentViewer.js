@@ -142,6 +142,10 @@ function buildImageRotationDependencyKey(primaryRotation, compareRotation) {
 }
 
 /**
+ * Normalize a persisted/host-provided page-selection mask to the current page
+ * count. Invalid or missing masks intentionally default to all pages included
+ * because the viewer's safe baseline is the original full document set.
+ *
  * @param {(Array<boolean>|null|undefined)} mask
  * @param {number} total
  * @returns {Array<boolean>}
@@ -158,6 +162,10 @@ function normalizeSelectionMask(mask, total) {
 }
 
 /**
+ * Return true when the normalized mask excludes at least one page from the
+ * current session. Missing indexes are treated as included by callers through
+ * normalizeSelectionMask().
+ *
  * @param {Array<boolean>} mask
  * @param {number} total
  * @returns {boolean}
@@ -171,6 +179,9 @@ function hasExcludedPages(mask, total) {
 }
 
 /**
+ * Compare two selection masks over the active page count. Values are coerced to
+ * booleans so truthy host/runtime values compare the same as literal true.
+ *
  * @param {Array<boolean>} a
  * @param {Array<boolean>} b
  * @param {number} total
@@ -317,6 +328,10 @@ function resolveProposedVisiblePageNumber(next, baseVisiblePageNumber, totalVisi
 }
 
 /**
+ * Resolve a page's 1-based page number within the current document-selection
+ * group. Explicit metadata wins; otherwise consecutive pages in the same
+ * document are inferred from the previous document group.
+ *
  * @param {*} page
  * @param {number} documentNumber
  * @param {{ documentNumber:number, pages:Array<*> }|null} previousDocument
