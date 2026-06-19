@@ -27,6 +27,7 @@ import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
+import { createTrackedObjectUrl } from '../../utils/objectUrlRegistry.js';
 
 /**
  * Render job passed to the main-thread renderer.
@@ -46,41 +47,6 @@ import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
  * Signature for inserting a page structure into the page list at an index.
  * @typedef {function(*, number): void} InsertPageAtIndex
  */
-
-/* ------------------------------------------------------------------------------------------------
- * Global URL registry + unload cleanup to prevent memory leaks
- * ------------------------------------------------------------------------------------------------ */
-
-(function installUrlCleanup(w) {
-  try {
-    if (!w.__odv_url_registry) w.__odv_url_registry = new Set();
-    if (!w.__odv_url_cleanup_installed && typeof w.addEventListener === 'function') {
-      const cleanup = () => {
-        try {
-          for (const u of w.__odv_url_registry) {
-            try { URL.revokeObjectURL(u); } catch {}
-          }
-        } finally {
-          try { w.__odv_url_registry.clear(); } catch {}
-        }
-      };
-      w.addEventListener('beforeunload', cleanup, { once: true });
-      w.addEventListener('pagehide', cleanup, { once: true });
-      w.__odv_url_cleanup_installed = true;
-    }
-  } catch {
-    // ignore
-  }
-})(globalThis);
-
-/**
- * Track a created object URL so it can be revoked later.
- * @param {string} url
- * @returns {void}
- */
-function addToUrlRegistry(url) {
-  try { globalThis.__odv_url_registry?.add(url); } catch {}
-}
 
 /* ------------------------------------------------------------------------------------------------
  * PDF — main-thread renderer
@@ -167,8 +133,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
       if (!blob) throw new Error('Failed to create blob from PDF canvas');
 
-      const url = URL.createObjectURL(blob);
-      addToUrlRegistry(url);
+      const url = createTrackedObjectUrl(blob);
 
       const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
       const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
@@ -362,8 +327,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
         try {
           const jpegBlob = buildOjpegJpeg(buffer, ifd);
           if (jpegBlob) {
-            const url = URL.createObjectURL(jpegBlob);
-            addToUrlRegistry(url);
+            const url = createTrackedObjectUrl(jpegBlob);
 
             const at = job.allPagesStartingIndex + (i - job.pageStartIndex);
             const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
@@ -426,8 +390,7 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
         const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
         if (!blob) throw new Error('Failed to create blob from TIFF canvas');
 
-        const url = URL.createObjectURL(blob);
-        addToUrlRegistry(url);
+        const url = createTrackedObjectUrl(blob);
 
         if (isMounted && isMounted.current === false) return;
 

@@ -9,12 +9,26 @@
 
 /** @type {Set<string>} */
 const TRACKED_URLS = new Set();
+let cleanupInstalled = false;
+
+function installTrackedUrlCleanup() {
+  if (cleanupInstalled || typeof globalThis?.addEventListener !== 'function') return;
+
+  const cleanup = () => {
+    revokeAllTrackedObjectUrls();
+  };
+
+  globalThis.addEventListener('beforeunload', cleanup, { once: true });
+  globalThis.addEventListener('pagehide', cleanup, { once: true });
+  cleanupInstalled = true;
+}
 
 /**
  * @param {Blob} blob
  * @returns {string}
  */
 export function createTrackedObjectUrl(blob) {
+  installTrackedUrlCleanup();
   const url = URL.createObjectURL(blob);
   TRACKED_URLS.add(url);
   return url;

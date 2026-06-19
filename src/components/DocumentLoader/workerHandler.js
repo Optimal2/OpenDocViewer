@@ -29,6 +29,7 @@ import {
 } from './mainThreadRenderer.js';
 import { generateThumbnail } from './documentLoaderUtils.js';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
+import { createTrackedObjectUrl } from '../../utils/objectUrlRegistry.js';
 
 /**
  * ✅ IMPORTANT:
@@ -116,36 +117,6 @@ export function getNumberOfWorkers(maxDesired = 1) {
   const n = Math.max(1, Math.min(hard, Math.max(1, Number(maxDesired) || 1)));
   logger.debug('getNumberOfWorkers decision', { cores, leaveForMain, hard, maxDesired, chosen: n });
   return n;
-}
-
-/* ------------------------------------------------------------------------------------------------
- * Blob URL lifetime management
- * ------------------------------------------------------------------------------------------------ */
-
-/** Create / get a global URL registry and install unload cleanup once. */
-function addToUrlRegistry(url) {
-  try {
-    const w = /** @type {*} */ (globalThis);
-    if (!w.__odv_url_registry) w.__odv_url_registry = new Set();
-    w.__odv_url_registry.add(url);
-
-    if (!w.__odv_url_cleanup_installed && typeof w.addEventListener === 'function') {
-      const cleanup = () => {
-        try {
-          for (const u of w.__odv_url_registry) {
-            try { URL.revokeObjectURL(u); } catch {}
-          }
-        } finally {
-          try { w.__odv_url_registry.clear(); } catch {}
-        }
-      };
-      w.addEventListener('beforeunload', cleanup, { once: true });
-      w.addEventListener('pagehide', cleanup, { once: true });
-      w.__odv_url_cleanup_installed = true;
-    }
-  } catch {
-    // non-fatal
-  }
 }
 
 /* ------------------------------------------------------------------------------------------------
@@ -285,8 +256,7 @@ export const handleWorkerMessage = (event, insertPageAtIndex, sameBlob, isMounte
 
       let fullSizeUrl = job.fullSizeUrl || null;
       if (!fullSizeUrl && job.blob instanceof Blob) {
-        fullSizeUrl = URL.createObjectURL(job.blob);
-        addToUrlRegistry(fullSizeUrl);
+        fullSizeUrl = createTrackedObjectUrl(job.blob);
       }
 
       if (isMounted && isMounted.current === false) return;
