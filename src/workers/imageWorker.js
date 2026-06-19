@@ -156,6 +156,7 @@ function getTagArray(ifd, tagId) {
 
 function buildOjpegJpeg(arrayBuffer, ifd) {
   try {
+    const byteLength = Number(arrayBuffer?.byteLength) || 0;
     const t513 = getTagArray(ifd, 513);
     const t514 = getTagArray(ifd, 514);
     const t273 = getTagArray(ifd, 273);
@@ -165,13 +166,21 @@ function buildOjpegJpeg(arrayBuffer, ifd) {
     const tablesOffset = t513[0] >>> 0;
     const tablesLen = t514[0] >>> 0;
     if (!tablesLen) return null;
+    if (tablesOffset > byteLength || tablesLen > (byteLength - tablesOffset)) return null;
 
     const bytes = new Uint8Array(arrayBuffer);
     const parts = [bytes.subarray(tablesOffset, tablesOffset + tablesLen)];
 
     const minLen = Math.min(t273.length, t279.length);
+    if (minLen <= 0) return null;
     let totalScanLen = 0;
-    for (let i = 0; i < minLen; i += 1) totalScanLen += (t279[i] >>> 0);
+    for (let i = 0; i < minLen; i += 1) {
+      const offset = t273[i] >>> 0;
+      const len = t279[i] >>> 0;
+      if (offset > byteLength || len > (byteLength - offset)) return null;
+      totalScanLen += len;
+      if (totalScanLen > 512 * 1024 * 1024) return null;
+    }
     const scanAll = new Uint8Array(totalScanLen);
     let cursor = 0;
     for (let i = 0; i < minLen; i += 1) {

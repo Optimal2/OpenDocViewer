@@ -873,6 +873,7 @@ function buildInlineSourceBlob(entry) {
 
 const SOURCE_PACK_MAGIC = 'ODVSP1\n';
 const SOURCE_PACK_HEADER_LIMIT_BYTES = 64 * 1024;
+const SOURCE_PACK_MAX_PAYLOAD_BYTES = 64 * 1024 * 1024;
 
 function getSourcePackUrl(entries) {
   if (!Array.isArray(entries) || entries.length <= 0) return '';
@@ -1748,7 +1749,13 @@ const DocumentLoader = ({
             const headerBytes = await readExactStreamBytes(reader, state, headerLength);
             if (!headerBytes) throw new Error('Source pack stream ended inside a frame header.');
             const header = JSON.parse(decoder.decode(headerBytes));
-            const payloadBytes = Math.max(0, Number(header?.payloadBytes || 0));
+            const payloadBytesRaw = Number(header?.payloadBytes || 0);
+            const payloadBytes = Number.isFinite(payloadBytesRaw)
+              ? Math.max(0, Math.floor(payloadBytesRaw))
+              : 0;
+            if (payloadBytes > SOURCE_PACK_MAX_PAYLOAD_BYTES) {
+              throw new Error(`Source pack frame payload is too large (${payloadBytes} bytes).`);
+            }
             const payload = await readExactStreamBytes(reader, state, payloadBytes);
             if (!payload) throw new Error('Source pack stream ended inside a frame payload.');
             recordLoaderPhaseTiming?.('fetch', nowMs() - frameStartedAt);
