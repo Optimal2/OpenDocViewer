@@ -1664,10 +1664,19 @@ async function loadJsPdf() {
 export async function createPrintPdfBlob(dataUrls, options = {}) {
   throwIfAborted(options.signal);
   const providedUrls = Array.isArray(dataUrls) ? dataUrls : [];
-  const urls = providedUrls.filter((url) => typeof url === 'string' && url && isSafeImageSrc(url));
+  const safeUrlEntries = providedUrls
+    .map((url, index) => ({ url, index }))
+    .filter(({ url }) => typeof url === 'string' && url && isSafeImageSrc(url));
+  const urls = safeUrlEntries.map(({ url }) => url);
   if (!urls.length) {
     throw new Error(`No printable image URLs were available for PDF generation. Received ${providedUrls.length} URL value(s); 0 passed safety checks. Provided values were empty, invalid, or rejected by image source safety checks. ${SAFE_IMAGE_SOURCE_HINT}`);
   }
+  const filteredPageContexts = Array.isArray(options.pageContexts)
+    ? safeUrlEntries.map(({ index }) => options.pageContexts[index] ?? null)
+    : null;
+  const alignedOptions = filteredPageContexts
+    ? { ...options, pageContexts: filteredPageContexts }
+    : options;
 
   const pdfCfg = options.pdfCfg || {};
   const pdfOrientationMode = resolvePdfOrientationMode(options);
@@ -1683,7 +1692,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
   const watermarkAssetSrc = resolveWatermarkAssetSrc(options.printFormatCfg?.watermark || {}, i18next);
   if (workerPlan.enabled && typeof Worker !== 'undefined') {
     try {
-      return await createPrintPdfBlobInWorker(urls, options, workerPlan, watermarkAssetSrc);
+      return await createPrintPdfBlobInWorker(urls, alignedOptions, workerPlan, watermarkAssetSrc);
     } catch (error) {
       throwIfAborted(options.signal);
       logger.warn('PDF worker generation failed; falling back to main-thread PDF generation', {
@@ -1746,7 +1755,7 @@ export async function createPrintPdfBlob(dataUrls, options = {}) {
       pdf.addPage([pdfPageWidth, pdfPageHeight], orientation);
     }
 
-    const pageInfo = Array.isArray(options.pageContexts) ? options.pageContexts[i] : null;
+    const pageInfo = filteredPageContexts ? filteredPageContexts[i] : null;
     const pageContext = makePageTokenContext(baseContext, pageInfo, bundle);
     const headerLines = renderOverlayRichLines(options.printHeaderCfg || {}, pageContext, i + 1, total);
     const footerLines = renderOverlayRichLines(options.printFooterCfg || {}, pageContext, i + 1, total);

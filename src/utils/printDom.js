@@ -11,11 +11,15 @@
  */
 
 import i18next from 'i18next';
+import DOMPurify from 'dompurify';
 import logger from '../logging/systemLogger.js';
 import { applyTemplateTokensEscaped, makePageTokenContext, resolveCopyMarkerText } from './printTemplate.js';
 import { isSafeImageSrc } from './printSanitize.js';
 import { resolveLocalizedValue } from './localizedValue.js';
 import { resolveWatermarkAssetSrc } from './printWatermark.js';
+
+const PRINT_TEMPLATE_ALLOWED_TAGS = ['b', 'br', 'div', 'em', 'i', 'p', 'small', 'span', 'strong', 'u'];
+const PRINT_TEMPLATE_ALLOWED_ATTR = ['class', 'style'];
 
 /**
  * Print overlay config (runtime) consumed by the print overlay logic.
@@ -236,6 +240,12 @@ function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
     totalPages: total,
   });
   if (!content) return null;
+  const safeContent = DOMPurify.sanitize(content, {
+    ALLOW_UNKNOWN_PROTOCOLS: false,
+    ALLOWED_TAGS: PRINT_TEMPLATE_ALLOWED_TAGS,
+    ALLOWED_ATTR: PRINT_TEMPLATE_ALLOWED_ATTR,
+  });
+  if (!safeContent) return null;
 
   const heightPx = normalizeNonNegativeNumber(cfg.heightPx);
   const div = doc.createElement('div');
@@ -249,8 +259,9 @@ function buildOverlayElement(doc, cfg, tokenContext, page, total, kind) {
       (heightPx > 0 ? `min-height:${heightPx}px;box-sizing:border-box;` : '');
   div.setAttribute('style', style);
 
-  // Token values are escaped in applyTemplateTokensEscaped; admin-authored markup is preserved.
-  div.innerHTML = content;
+  // Token values are escaped in applyTemplateTokensEscaped; admin-authored markup is preserved
+  // and then constrained to a small rich-text subset here.
+  div.innerHTML = safeContent;
   return div;
 }
 

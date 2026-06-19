@@ -50,6 +50,7 @@
  * @property {*} closeLabel
  * @property {*} detailsLabel
  * @property {string} resetSessionTarget
+ * @property {string} resetSessionAllowedOrigin
  */
 
 /**
@@ -358,5 +359,8 @@ export function getViewerProblemNoticeConfig(cfg = getRuntimeConfig()) {
     closeLabel: raw.closeLabel,
     detailsLabel: raw.detailsLabel,
     resetSessionTarget: normalizeResetSessionTarget(raw.resetSessionTarget, 'parent-or-current'),
+    resetSessionAllowedOrigin: typeof raw.resetSessionAllowedOrigin === 'string'
+      ? raw.resetSessionAllowedOrigin.trim()
+      : '',
   };
 }
