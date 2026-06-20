@@ -111,15 +111,15 @@
 | `LoadPressureDialogProps` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:21` |  |
 | `LoadPressureDialogSummary` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:8` |  |
 | `LoadPressureDialog~tr` | function | `src/components/DocumentLoader/LoadPressureDialog.jsx:43` |  |
-| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:59` | One-time init of pdf.js classic worker script URL \(dev == build\). |
-| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:224` | Build a standard JPEG Blob from an OJPEG \(old-style JPEG-in-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy-coded scan strips... |
-| `ensurePdfWorker` | function | `src/components/DocumentLoader/mainThreadRenderer.js:66` | Ensure a pdf.js worker is ready for this runtime. |
-| `getTagArray` | function | `src/components/DocumentLoader/mainThreadRenderer.js:208` | Safely read a TIFF tag array from a utif2 IFD object. |
-| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:49` | Signature for inserting a page structure into the page list at an index. |
+| `__pdfWorkerInitialized` | member | `src/components/DocumentLoader/mainThreadRenderer.js:71` | One-time init of pdf.js classic worker script URL \(dev == build\). |
+| `buildOjpegJpeg` | function | `src/components/DocumentLoader/mainThreadRenderer.js:248` | Build a standard JPEG Blob from an OJPEG \(old-style JPEG-in-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy-coded scan strips... |
+| `ensurePdfWorker` | function | `src/components/DocumentLoader/mainThreadRenderer.js:78` | Ensure a pdf.js worker is ready for this runtime. |
+| `getTagArray` | function | `src/components/DocumentLoader/mainThreadRenderer.js:232` | Safely read a TIFF tag array from a utif2 IFD object. |
+| `InsertPageAtIndex` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:61` | Signature for inserting a page structure into the page list at an index. |
 | `MAX_OJPEG_SCAN_SIZE_BYTES` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:33` | Upper bound for reconstructed OJPEG entropy-coded scan data. |
-| `RenderJob` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:35` | Render job passed to the main-thread renderer. |
-| `renderPDFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:90` | Render PDF pages on the main thread and INSERT THEM DIRECTLY. |
-| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:294` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 \(old-style JPEG-in-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
+| `RenderJob` | typedef | `src/components/DocumentLoader/mainThreadRenderer.js:47` | Render job passed to the main-thread renderer. |
+| `renderPDFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:102` | Render PDF pages on the main thread and INSERT THEM DIRECTLY. |
+| `renderTIFFInMainThread` | constant | `src/components/DocumentLoader/mainThreadRenderer.js:318` | Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 \(old-style JPEG-in-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t... |
 | `ExplicitSourceList` | typedef | `src/components/DocumentLoader/sources/explicitListSource.js:3` | OpenDocViewer — Explicit Source List Normalizer PURPOSE Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
 | `firstDocumentField` | function | `src/components/DocumentLoader/sources/explicitListSource.js:102` |  |
 | `inferExtFromUrl` | function | `src/components/DocumentLoader/sources/explicitListSource.js:77` | Infer a lowercase extension from a URL if present. |
@@ -445,25 +445,25 @@
 | `ViewerPageLoadState` | typedef | `src/contexts/viewerContext.js:155` |  |
 | `ViewerRuntimeDiagnostics` | typedef | `src/contexts/viewerContext.js:78` |  |
 | `ViewerSourceDescriptor` | typedef | `src/contexts/viewerContext.js:65` |  |
-| `ViewerProvider~addMessage` | constant | `src/contexts/ViewerProvider.jsx:897` |  |
-| `ViewerProvider~announceIndexedDbAssetMode` | constant | `src/contexts/ViewerProvider.jsx:1222` |  |
-| `ViewerProvider~applySessionConfig` | constant | `src/contexts/ViewerProvider.jsx:912` |  |
-| `ViewerProvider~clearPageAssetReference` | constant | `src/contexts/ViewerProvider.jsx:1371` | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
-| `ViewerProvider~clearWarmupQueue` | constant | `src/contexts/ViewerProvider.jsx:939` |  |
+| `ViewerProvider~addMessage` | constant | `src/contexts/ViewerProvider.jsx:918` |  |
+| `ViewerProvider~announceIndexedDbAssetMode` | constant | `src/contexts/ViewerProvider.jsx:1243` |  |
+| `ViewerProvider~applySessionConfig` | constant | `src/contexts/ViewerProvider.jsx:933` |  |
+| `ViewerProvider~clearPageAssetReference` | constant | `src/contexts/ViewerProvider.jsx:1392` | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| `ViewerProvider~clearWarmupQueue` | constant | `src/contexts/ViewerProvider.jsx:960` |  |
 | `ViewerProvider~collectRuntimeDiagnostics` | constant | `src/contexts/ViewerProvider.jsx:519` | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | `createLimiter` | function | `src/contexts/ViewerProvider.jsx:203` |  |
-| `ViewerProvider~disposeDocumentSession` | constant | `src/contexts/ViewerProvider.jsx:1011` |  |
+| `ViewerProvider~disposeDocumentSession` | constant | `src/contexts/ViewerProvider.jsx:1032` |  |
 | `DisposeDocumentSessionOptions` | typedef | `src/contexts/ViewerProvider.jsx:47` |  |
 | `DocumentSessionInitOptions` | typedef | `src/contexts/ViewerProvider.jsx:41` |  |
-| `ViewerProvider~enforceCacheLimit` | constant | `src/contexts/ViewerProvider.jsx:1469` |  |
-| `ViewerProvider~enhancePdfPageResolution` | constant | `src/contexts/ViewerProvider.jsx:1841` | Render one PDF page again at twice the configured full-page PDF scale. |
-| `ViewerProvider~ensurePageAsset` | constant | `src/contexts/ViewerProvider.jsx:1680` |  |
+| `ViewerProvider~enforceCacheLimit` | constant | `src/contexts/ViewerProvider.jsx:1490` |  |
+| `ViewerProvider~enhancePdfPageResolution` | constant | `src/contexts/ViewerProvider.jsx:1862` | Render one PDF page again at twice the configured full-page PDF scale. |
+| `ViewerProvider~ensurePageAsset` | constant | `src/contexts/ViewerProvider.jsx:1701` |  |
 | `EnsurePageAssetOptions` | typedef | `src/contexts/ViewerProvider.jsx:62` |  |
 | `getPageAt` | function | `src/contexts/ViewerProvider.jsx:135` |  |
-| `ViewerProvider~getPrintablePageUrls` | constant | `src/contexts/ViewerProvider.jsx:2218` |  |
-| `ViewerProvider~getVariantCache` | constant | `src/contexts/ViewerProvider.jsx:1349` |  |
-| `ViewerProvider~getVariantCacheLimit` | constant | `src/contexts/ViewerProvider.jsx:1445` |  |
-| `ViewerProvider~initializeDocumentSession` | constant | `src/contexts/ViewerProvider.jsx:948` |  |
+| `ViewerProvider~getPrintablePageUrls` | constant | `src/contexts/ViewerProvider.jsx:2239` |  |
+| `ViewerProvider~getVariantCache` | constant | `src/contexts/ViewerProvider.jsx:1370` |  |
+| `ViewerProvider~getVariantCacheLimit` | constant | `src/contexts/ViewerProvider.jsx:1466` |  |
+| `ViewerProvider~initializeDocumentSession` | constant | `src/contexts/ViewerProvider.jsx:969` |  |
 | `ViewerProvider~insertPageAtIndex` | constant | `src/contexts/ViewerProvider.jsx:832` |  |
 | `ViewerProvider~insertPagesAtIndex` | constant | `src/contexts/ViewerProvider.jsx:849` |  |
 | `isBlobObjectUrl` | function | `src/contexts/ViewerProvider.jsx:169` |  |
@@ -475,31 +475,31 @@
 | `makePdfResolutionPageKey` | function | `src/contexts/ViewerProvider.jsx:98` |  |
 | `makePendingAssetKey` | function | `src/contexts/ViewerProvider.jsx:87` |  |
 | `makePersistedAssetKey` | function | `src/contexts/ViewerProvider.jsx:118` |  |
-| `ViewerProvider~maybeReleaseSinglePageRasterSource` | constant | `src/contexts/ViewerProvider.jsx:1234` |  |
+| `ViewerProvider~maybeReleaseSinglePageRasterSource` | constant | `src/contexts/ViewerProvider.jsx:1255` |  |
 | `createLimiter~normalizePriority` | function | `src/contexts/ViewerProvider.jsx:214` |  |
 | `ViewerProvider~noteFullAssetReady` | constant | `src/contexts/ViewerProvider.jsx:496` | Record that a page now has a reusable full-size asset available. |
 | `ViewerProvider~noteThumbnailAssetReady` | constant | `src/contexts/ViewerProvider.jsx:506` | Record that a page now has a reusable thumbnail asset available. |
 | `ViewerProvider~patchPageAtIndex` | constant | `src/contexts/ViewerProvider.jsx:870` |  |
-| `ViewerProvider~persistRenderedAsset` | constant | `src/contexts/ViewerProvider.jsx:1281` |  |
-| `ViewerProvider~pinPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1423` |  |
-| `ViewerProvider~pumpWarmupQueue` | constant | `src/contexts/ViewerProvider.jsx:2084` | Drain background eager-render work without blocking the UI thread. |
-| `ViewerProvider~readSourceArrayBuffer` | constant | `src/contexts/ViewerProvider.jsx:1205` |  |
-| `ViewerProvider~readSourceBlob` | constant | `src/contexts/ViewerProvider.jsx:1214` |  |
-| `ViewerProvider~recordLoaderPhaseTiming` | constant | `src/contexts/ViewerProvider.jsx:1904` |  |
-| `ViewerProvider~registerSourceDescriptor` | constant | `src/contexts/ViewerProvider.jsx:1162` |  |
-| `ViewerProvider~renderPageBlob` | constant | `src/contexts/ViewerProvider.jsx:1594` |  |
+| `ViewerProvider~persistRenderedAsset` | constant | `src/contexts/ViewerProvider.jsx:1302` |  |
+| `ViewerProvider~pinPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1444` |  |
+| `ViewerProvider~pumpWarmupQueue` | constant | `src/contexts/ViewerProvider.jsx:2105` | Drain background eager-render work without blocking the UI thread. |
+| `ViewerProvider~readSourceArrayBuffer` | constant | `src/contexts/ViewerProvider.jsx:1226` |  |
+| `ViewerProvider~readSourceBlob` | constant | `src/contexts/ViewerProvider.jsx:1235` |  |
+| `ViewerProvider~recordLoaderPhaseTiming` | constant | `src/contexts/ViewerProvider.jsx:1925` |  |
+| `ViewerProvider~registerSourceDescriptor` | constant | `src/contexts/ViewerProvider.jsx:1183` |  |
+| `ViewerProvider~renderPageBlob` | constant | `src/contexts/ViewerProvider.jsx:1615` |  |
 | `ViewerProvider~resetViewerState` | constant | `src/contexts/ViewerProvider.jsx:672` |  |
 | `resolvePatch` | function | `src/contexts/ViewerProvider.jsx:145` |  |
-| `ViewerProvider~restorePersistedAsset` | constant | `src/contexts/ViewerProvider.jsx:1527` |  |
+| `ViewerProvider~restorePersistedAsset` | constant | `src/contexts/ViewerProvider.jsx:1548` |  |
 | `ViewerProvider~revokeSessionUrls` | constant | `src/contexts/ViewerProvider.jsx:650` |  |
-| `ViewerProvider~scheduleSourceWarmup` | constant | `src/contexts/ViewerProvider.jsx:2175` | Enqueue eager page rendering for a newly discovered source range. |
-| `ViewerProvider~shouldReuseFullAssetForThumbnail` | constant | `src/contexts/ViewerProvider.jsx:1514` |  |
-| `ViewerProvider~storeSourceBlob` | constant | `src/contexts/ViewerProvider.jsx:1181` |  |
+| `ViewerProvider~scheduleSourceWarmup` | constant | `src/contexts/ViewerProvider.jsx:2196` | Enqueue eager page rendering for a newly discovered source range. |
+| `ViewerProvider~shouldReuseFullAssetForThumbnail` | constant | `src/contexts/ViewerProvider.jsx:1535` |  |
+| `ViewerProvider~storeSourceBlob` | constant | `src/contexts/ViewerProvider.jsx:1202` |  |
 | `StoreSourceBlobInput` | typedef | `src/contexts/ViewerProvider.jsx:52` |  |
 | `touchCacheEntry` | function | `src/contexts/ViewerProvider.jsx:158` |  |
-| `ViewerProvider~touchPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1358` |  |
-| `ViewerProvider~tryRenderPdfWarmupBatch` | constant | `src/contexts/ViewerProvider.jsx:1926` | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| `ViewerProvider~unpinPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1434` |  |
+| `ViewerProvider~touchPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1379` |  |
+| `ViewerProvider~tryRenderPdfWarmupBatch` | constant | `src/contexts/ViewerProvider.jsx:1947` | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| `ViewerProvider~unpinPageAsset` | constant | `src/contexts/ViewerProvider.jsx:1455` |  |
 | `ViewerProvider~updateAllPages` | constant | `src/contexts/ViewerProvider.jsx:472` |  |
 | `ViewerProvider` | constant | `src/contexts/ViewerProvider.jsx:324` |  |
 | `ViewerProviderProps` | typedef | `src/contexts/ViewerProvider.jsx:313` |  |
@@ -783,17 +783,17 @@
 | `handlePrevPage` | constant | `src/utils/navigationUtils.js:69` | Navigate to the previous page \(no-op if already at page 1\). |
 | `isValidTotalPages` | function | `src/utils/navigationUtils.js:43` | Check whether totalPages looks valid \(&amp;gt;= 1\). |
 | `toPositiveInt` | function | `src/utils/navigationUtils.js:31` | Coerce a value to a positive integer \(minimum 1\). |
-| `createTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:30` |  |
-| `getTrackedObjectUrlCount` | function | `src/utils/objectUrlRegistry.js:75` |  |
-| `isTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:65` | Check whether a blob/object URL is still tracked as live by the viewer. |
-| `revokeAllTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:83` | Revoke every tracked object URL. |
-| `revokeTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:41` |  |
-| `revokeTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:54` |  |
+| `createTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:31` |  |
+| `getTrackedObjectUrlCount` | function | `src/utils/objectUrlRegistry.js:81` |  |
+| `isTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:71` | Check whether a blob/object URL is still tracked as live by the viewer. |
+| `revokeAllTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:89` | Revoke every tracked object URL. |
+| `revokeTrackedObjectUrl` | function | `src/utils/objectUrlRegistry.js:47` |  |
+| `revokeTrackedObjectUrls` | function | `src/utils/objectUrlRegistry.js:60` |  |
 | `PageAssetDescriptor` | typedef | `src/utils/pageAssetRenderer.js:34` |  |
 | `PageAssetRendererOptions` | typedef | `src/utils/pageAssetRenderer.js:28` |  |
-| `PageAssetRenderer#renderPageAsset` | function | `src/utils/pageAssetRenderer.js:635` | Render one requested page asset. |
+| `PageAssetRenderer#renderPageAsset` | function | `src/utils/pageAssetRenderer.js:660` | Render one requested page asset. |
 | `RenderPageAssetOptions` | typedef | `src/utils/pageAssetRenderer.js:42` |  |
-| `PageAssetRenderer#renderPdfPageAssetBatch` | function | `src/utils/pageAssetRenderer.js:509` | Render a PDF page set through the PDF worker pool as one partitioned batch. |
+| `PageAssetRenderer#renderPdfPageAssetBatch` | function | `src/utils/pageAssetRenderer.js:534` | Render a PDF page set through the PDF worker pool as one partitioned batch. |
 | `BlobLruCache` | class | `src/utils/pageAssetStore.js:170` |  |
 | `PageAssetStore#cleanup` | function | `src/utils/pageAssetStore.js:455` |  |
 | `PageAssetStore#cleanupStaleSessions` | function | `src/utils/pageAssetStore.js:499` |  |

@@ -1,14 +1,14 @@
 # OpenDocViewer / src/components/DocumentLoader
 
-File count: 8. Line count: 3936. JSDoc symbol count: 106.
+File count: 8. Line count: 3964. JSDoc symbol count: 106.
 
 ## src/components/DocumentLoader/batchHandler.js
 
-OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread.
+OpenDocViewer — Minimal, fair worker\-batch scheduler Distribute image\-decoding jobs across a pool of Web Workers without monopolizing the main thread.
 
-Exports: batchHandler
+Exports: `batchHandler`
 
-Local imports: src/logging/systemLogger.js
+Local imports: `src/logging/systemLogger.js`
 
 Symbols:
 
@@ -16,29 +16,29 @@ Symbols:
 - `Batch` (typedef) - A batch groups one or more jobs of the same file type.
 - `InsertPageAtIndex` (typedef) - Signature for the function that inserts a page record at a specific index.
 - `WorkerMessageHandler` (typedef) - Handle a worker's message and insert results.
-- `PUMP_DELAY_MS` (constant) - Small delay so the event loop can breathe between pumps (ms).
+- `PUMP_DELAY_MS` (constant) - Small delay so the event loop can breathe between pumps \(ms\).
 - `pump` (function) - Schedule a short, fair distribution pass: Assigns at most one batch per idle worker.
 - `batchHandler` (constant) - Batch scheduler entry point.
 
 ## src/components/DocumentLoader/DemoControls.jsx
 
-OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: "Total pages/files" + JPG/PNG/TIF/PDF buttons + a new "Mix" button.
+OpenDocViewer — Demo Controls for “one\-file\-per\-format” demo mode \- Provide a simple control bar: "Total pages/files" \+ JPG/PNG/TIF/PDF buttons \+ a new "Mix" button.
 
-Exports: DemoControls
+Exports: `DemoControls`
 
-Local imports: src/components/DocumentLoader/DocumentLoader.js
+Local imports: `src/components/DocumentLoader/DocumentLoader.js`
 
 Symbols:
 
-- `module.exports` (function) - DemoControls — wraps DocumentLoader with demo-mode props and a small control UI.
+- `module.exports` (function) - DemoControls — wraps DocumentLoader with demo\-mode props and a small control UI.
 
 ## src/components/DocumentLoader/DocumentLoader.js
 
 OpenDocViewer — Document loader orchestrator.
 
-Exports: DocumentLoader
+Exports: `DocumentLoader`
 
-Local imports: src/contexts/viewerContext.js, src/logging/systemLogger.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/documentLoadingConfig.js, src/components/DocumentLoader/LoadPressureDialog.jsx, src/utils/publicAssetUrl.js, src/utils/reloadCacheIdentity.js
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/documentLoadingConfig.js`, `src/components/DocumentLoader/LoadPressureDialog.jsx`, `src/utils/publicAssetUrl.js`, `src/utils/reloadCacheIdentity.js`
 
 Symbols:
 
@@ -57,63 +57,63 @@ Symbols:
 
 ## src/components/DocumentLoader/documentLoaderUtils.js
 
-OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF
+OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 
-Exports: generateDocumentList, generateDemoList, fetchAndArrayBuffer, getTotalPages, getTiffMetadata, generateThumbnail
+Exports: `generateDocumentList`, `generateDemoList`, `fetchAndArrayBuffer`, `getTotalPages`, `getTiffMetadata`, `generateThumbnail`
 
-Local imports: src/logging/systemLogger.js, src/utils/pdfjsDocumentOptions.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/pdfjsDocumentOptions.js`
 
 Symbols:
 
 - `TRANSPARENT_1x1` (constant) - Tiny transparent PNG as a safe fallback when thumbnails cannot be produced.
-- `generateDocumentList` (constant) - Generate a list of document URLs using a simple pattern: 001..NNN + extension.
+- `generateDocumentList` (constant) - Generate a list of document URLs using a simple pattern: 001..NNN \+ extension.
 - `generateDemoList` (constant) - Generate a list of demo document URLs by repeating or mixing sample files.
 - `FetchOptions` (typedef) - Options for fetchAndArrayBuffer.
 - `fetchAndArrayBuffer` (constant) - Fetch a resource and return its ArrayBuffer.
 - `getTotalPages` (constant) - Determine total pages for a given document by inspecting its buffer and type.
-- `getTiffMetadata` (constant) - Extract light-weight metadata from a TIFF buffer (best-effort).
+- `getTiffMetadata` (constant) - Extract light\-weight metadata from a TIFF buffer \(best\-effort\).
 - `generateThumbnail` (constant) - Create a small thumbnail data URL for a given image URL.
 
 ## src/components/DocumentLoader/LoadPressureDialog.jsx
 
-Large-load warning dialog shown before / during very heavy loading runs.
+Large\-load warning dialog shown before / during very heavy loading runs.
 
-Exports: LoadPressureDialog
+Exports: `LoadPressureDialog`
 
-Local imports: src/utils/documentLoadingConfig.js
+Local imports: `src/utils/documentLoadingConfig.js`
 
 Symbols:
 
 - `LoadPressureDialogSummary` (typedef) - No description.
 - `LoadPressureDialogProps` (typedef) - No description.
-- `module.exports` (function) - Large-load warning dialog shown before / during very heavy loading runs.
+- `module.exports` (function) - Large\-load warning dialog shown before / during very heavy loading runs.
 - `LoadPressureDialog~tr` (function) - No description.
 
 ## src/components/DocumentLoader/mainThreadRenderer.js
 
-OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).
+OpenDocViewer — Main\-thread renderers for PDF &amp; TIFF Render multi\-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low\-core devices, or when explicitly configured\).
 
-Exports: renderPDFInMainThread, renderTIFFInMainThread
+Exports: `renderPDFInMainThread`, `renderTIFFInMainThread`
 
-Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, src/utils/pdfjsDocumentOptions.js, src/utils/objectUrlRegistry.js
+Local imports: `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/publicAssetUrl.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/objectUrlRegistry.js`
 
 Symbols:
 
-- `MAX_OJPEG_SCAN_SIZE_BYTES` (constant) - Upper bound for reconstructed OJPEG entropy-coded scan data.
-- `RenderJob` (typedef) - Render job passed to the main-thread renderer.
+- `MAX_OJPEG_SCAN_SIZE_BYTES` (constant) - Upper bound for reconstructed OJPEG entropy\-coded scan data.
+- `RenderJob` (typedef) - Render job passed to the main\-thread renderer.
 - `InsertPageAtIndex` (typedef) - Signature for inserting a page structure into the page list at an index.
-- `__pdfWorkerInitialized` (member) - One-time init of pdf.js classic worker script URL (dev == build).
+- `__pdfWorkerInitialized` (member) - One\-time init of pdf.js classic worker script URL \(dev \=\= build\).
 - `ensurePdfWorker` (function) - Ensure a pdf.js worker is ready for this runtime.
 - `renderPDFInMainThread` (constant) - Render PDF pages on the main thread and INSERT THEM DIRECTLY.
 - `getTagArray` (function) - Safely read a TIFF tag array from a utif2 IFD object.
-- `buildOjpegJpeg` (function) - Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips...
-- `renderTIFFInMainThread` (constant) - Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t...
+- `buildOjpegJpeg` (function) - Build a standard JPEG Blob from an OJPEG \(old\-style JPEG\-in\-TIFF\) IFD by concatenating the tables \( JPEGInterchangeFormat / Length : t513/t514\) with the entropy\-coded scan strips...
+- `renderTIFFInMainThread` (constant) - Render TIFF pages on the main thread with an ultra\-light OJPEG fast path: If Compression\=6 \(old\-style JPEG\-in\-TIFF\), reconstruct a standard JPEG stream by concatenating the JFIF/t...
 
 ## src/components/DocumentLoader/sources/explicitListSource.js
 
 OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.
 
-Exports: makeExplicitSource
+Exports: `makeExplicitSource`
 
 Symbols:
 
@@ -131,19 +131,19 @@ Symbols:
 
 ## src/components/DocumentLoader/workerHandler.js
 
-OpenDocViewer — Worker orchestration & message handling - Create image workers for off-main-thread rasterization/conversion.
+OpenDocViewer — Worker orchestration &amp; message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 
-Exports: createWorker, getNumberOfWorkers, handleWorkerMessage
+Exports: `createWorker`, `getNumberOfWorkers`, `handleWorkerMessage`
 
-Local imports: src/logging/systemLogger.js, src/components/DocumentLoader/mainThreadRenderer.js, src/components/DocumentLoader/documentLoaderUtils.js, src/utils/publicAssetUrl.js, src/utils/objectUrlRegistry.js, ../../workers/imageWorker.js?worker
+Local imports: `src/logging/systemLogger.js`, `src/components/DocumentLoader/mainThreadRenderer.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/publicAssetUrl.js`, `src/utils/objectUrlRegistry.js`, `../../workers/imageWorker.js?worker`
 
 Symbols:
 
 - `WorkerJob` (typedef) - A single job/result entry communicated between worker and main thread.
 - `WorkerMessage` (typedef) - Worker → main message envelope.
 - `InsertPageAtIndex` (typedef) - Signature for inserting a page structure into the viewer at a specific index.
-- `HandleOpts` (typedef) - Options passed to the handler to coordinate main-thread rendering.
+- `HandleOpts` (typedef) - Options passed to the handler to coordinate main\-thread rendering.
 - `createWorker` (function) - Create a new image worker instance.
 - `getNumberOfWorkers` (function) - Decide how many workers to spawn, leaving one logical core for the UI when possible.
-- `scheduleMainThread` (function) - Decide how to schedule/execute a main-thread render job based on options: If a queue ref is provided → push the job to the queue (deferred execution).
-- `handleWorkerMessage` (constant) - Handle a message payload from an image worker and insert resulting page(s).
+- `scheduleMainThread` (function) - Decide how to schedule/execute a main\-thread render job based on options: If a queue ref is provided → push the job to the queue \(deferred execution\).
+- `handleWorkerMessage` (constant) - Handle a message payload from an image worker and insert resulting page\(s\).

@@ -17,7 +17,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentLoader/DocumentLoader.js` | 2170 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
 | `src/components/DocumentLoader/documentLoaderUtils.js` | 254 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | `src/components/DocumentLoader/LoadPressureDialog.jsx` | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
-| `src/components/DocumentLoader/mainThreadRenderer.js` | 481 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
+| `src/components/DocumentLoader/mainThreadRenderer.js` | 509 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
 | `src/components/DocumentLoader/sources/explicitListSource.js` | 231 | 1 | 11 | high | OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
 | `src/components/DocumentLoader/workerHandler.js` | 301 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | `src/components/DocumentMetadataMatrixOverlayDialog.jsx` | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
@@ -56,7 +56,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/contexts/themeContext.js` | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | `src/contexts/ThemeProvider.jsx` | 202 | 1 | 11 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | `src/contexts/viewerContext.js` | 207 | 10 | 9 | medium | Exports ViewerContext. |
-| `src/contexts/ViewerProvider.jsx` | 2551 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
+| `src/contexts/ViewerProvider.jsx` | 2572 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
 | `src/ErrorBoundary.jsx` | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | `src/hooks/useAcceleratingHoldRepeat.js` | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | `src/hooks/useNavigationModifierState.js` | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
@@ -82,8 +82,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/localizedValue.js` | 113 | 6 | 6 | high | Localized string resolver for admin-supplied config values. |
 | `src/utils/memoryProfile.js` | 75 | 1 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | `src/utils/navigationUtils.js` | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
-| `src/utils/objectUrlRegistry.js` | 86 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
-| `src/utils/pageAssetRenderer.js` | 860 | 2 | 5 | high | OpenDocViewer — hybrid page-asset renderer. |
+| `src/utils/objectUrlRegistry.js` | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
+| `src/utils/pageAssetRenderer.js` | 895 | 2 | 5 | high | OpenDocViewer — hybrid page-asset renderer. |
 | `src/utils/pageAssetStore.js` | 746 | 1 | 33 | high | OpenDocViewer — Browser-side rendered page-asset storage. |
 | `src/utils/pageAssetWorkerPool.js` | 320 | 1 | 15 | high | OpenDocViewer — Page-asset worker pool. |
 | `src/utils/pdfBenchmark.js` | 965 | 1 | 36 | high | Opt-in generated-PDF benchmark tooling. |

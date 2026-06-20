@@ -79,7 +79,7 @@
   },
   "stats": {
     "fileCount": 110,
-    "sourceLineCount": 48652,
+    "sourceLineCount": 48742,
     "docletCount": 1275,
     "documentedFileCount": 106,
     "lowConfidenceSummaryCount": 0,
@@ -478,7 +478,7 @@
     {
       "path": "src/utils/objectUrlRegistry.js",
       "score": 72,
-      "lines": 86,
+      "lines": 92,
       "incomingLocalImports": 3,
       "doclets": 6,
       "summary": "Centralized helpers for object/blob URL lifecycle management.",
@@ -553,7 +553,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2551,
+            "lines": 2572,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -877,7 +877,7 @@
     {
       "name": "src/components/DocumentLoader",
       "fileCount": 8,
-      "lineCount": 3936,
+      "lineCount": 3964,
       "docletCount": 106,
       "importantFiles": [
         {
@@ -901,7 +901,7 @@
         {
           "path": "src/components/DocumentLoader/mainThreadRenderer.js",
           "score": 46,
-          "lines": 481,
+          "lines": 509,
           "incomingLocalImports": 1,
           "doclets": 9,
           "summary": "OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).",
@@ -1117,7 +1117,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 2997,
+      "lineCount": 3018,
       "docletCount": 81,
       "importantFiles": [
         {
@@ -1132,7 +1132,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2551,
+          "lines": 2572,
           "incomingLocalImports": 1,
           "doclets": 58,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1404,7 +1404,7 @@
     {
       "name": "src/utils",
       "fileCount": 35,
-      "lineCount": 14752,
+      "lineCount": 14793,
       "docletCount": 564,
       "importantFiles": [
         {
@@ -6442,7 +6442,7 @@
     },
     {
       "path": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "lines": 481,
+      "lines": 509,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": "OpenDocViewer — Main-thread renderers for PDF & TIFF Render multi-page formats (PDF/TIFF) on the main thread when necessary (e.g., worker fallback, low-core devices, or when explicitly configured).",
@@ -6510,39 +6510,49 @@
         {
           "name": "renderPDFInMainThread",
           "kind": "variable",
-          "line": 90
+          "line": 102
         },
         {
           "name": "renderTIFFInMainThread",
           "kind": "variable",
-          "line": 294
+          "line": 318
         }
       ],
       "declarations": [
         {
+          "name": "releaseCanvas",
+          "kind": "function",
+          "line": 35
+        },
+        {
+          "name": "releaseTiffIfdBuffers",
+          "kind": "function",
+          "line": 41
+        },
+        {
           "name": "ensurePdfWorker",
           "kind": "function",
-          "line": 66
+          "line": 78
         },
         {
           "name": "renderPDFInMainThread",
           "kind": "function",
-          "line": 90
+          "line": 102
         },
         {
           "name": "getTagArray",
           "kind": "function",
-          "line": 208
+          "line": 232
         },
         {
           "name": "buildOjpegJpeg",
           "kind": "function",
-          "line": 224
+          "line": 248
         },
         {
           "name": "renderTIFFInMainThread",
           "kind": "function",
-          "line": 294
+          "line": 318
         }
       ],
       "parseError": null,
@@ -6571,7 +6581,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 35,
+          "line": 47,
           "description": "Render job passed to the main-thread renderer.",
           "params": [],
           "returns": [],
@@ -6584,7 +6594,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 49,
+          "line": 61,
           "description": "Signature for inserting a page structure into the page list at an index.",
           "params": [],
           "returns": [],
@@ -6597,7 +6607,7 @@
           "kind": "member",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 59,
+          "line": 71,
           "description": "One-time init of pdf.js classic worker script URL (dev == build).",
           "params": [],
           "returns": [],
@@ -6610,7 +6620,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 66,
+          "line": 78,
           "description": "Ensure a pdf.js worker is ready for this runtime.",
           "params": [],
           "returns": [
@@ -6628,7 +6638,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 90,
+          "line": 102,
           "description": "Render PDF pages on the main thread and INSERT THEM DIRECTLY.",
           "params": [
             {
@@ -6671,7 +6681,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 208,
+          "line": 232,
           "description": "Safely read a TIFF tag array from a utif2 IFD object.",
           "params": [
             {
@@ -6702,7 +6712,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 224,
+          "line": 248,
           "description": "Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips...",
           "params": [
             {
@@ -6733,7 +6743,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-          "line": 294,
+          "line": 318,
           "description": "Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t...",
           "params": [
             {
@@ -21461,7 +21471,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2551,
+      "lines": 2572,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -21665,44 +21675,49 @@
           "line": 560
         },
         {
+          "name": "nextPage",
+          "kind": "object",
+          "line": 887
+        },
+        {
           "name": "renderTask",
           "kind": "function",
-          "line": 1606
+          "line": 1627
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 1964
+          "line": 1985
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 1978
+          "line": 1999
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 1992
+          "line": 2013
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2025
+          "line": 2046
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2194
+          "line": 2215
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2285
+          "line": 2306
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2287
+          "line": 2308
         }
       ],
       "parseError": null,
@@ -22430,7 +22445,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 897,
+          "line": 918,
           "description": "",
           "params": [
             {
@@ -22455,7 +22470,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 912,
+          "line": 933,
           "description": "",
           "params": [
             {
@@ -22492,7 +22507,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 939,
+          "line": 960,
           "description": "",
           "params": [],
           "returns": [
@@ -22510,7 +22525,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 948,
+          "line": 969,
           "description": "",
           "params": [
             {
@@ -22535,7 +22550,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1011,
+          "line": 1032,
           "description": "",
           "params": [
             {
@@ -22560,7 +22575,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1162,
+          "line": 1183,
           "description": "",
           "params": [
             {
@@ -22585,7 +22600,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1181,
+          "line": 1202,
           "description": "",
           "params": [
             {
@@ -22610,7 +22625,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1205,
+          "line": 1226,
           "description": "",
           "params": [
             {
@@ -22635,7 +22650,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1214,
+          "line": 1235,
           "description": "",
           "params": [
             {
@@ -22660,7 +22675,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1222,
+          "line": 1243,
           "description": "",
           "params": [],
           "returns": [
@@ -22678,7 +22693,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1234,
+          "line": 1255,
           "description": "",
           "params": [
             {
@@ -22703,7 +22718,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1281,
+          "line": 1302,
           "description": "",
           "params": [
             {
@@ -22740,7 +22755,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1349,
+          "line": 1370,
           "description": "",
           "params": [
             {
@@ -22765,7 +22780,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1358,
+          "line": 1379,
           "description": "",
           "params": [
             {
@@ -22796,7 +22811,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1371,
+          "line": 1392,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -22833,7 +22848,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1423,
+          "line": 1444,
           "description": "",
           "params": [
             {
@@ -22864,7 +22879,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1434,
+          "line": 1455,
           "description": "",
           "params": [
             {
@@ -22895,7 +22910,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1445,
+          "line": 1466,
           "description": "",
           "params": [
             {
@@ -22920,7 +22935,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1469,
+          "line": 1490,
           "description": "",
           "params": [
             {
@@ -22945,7 +22960,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1514,
+          "line": 1535,
           "description": "",
           "params": [
             {
@@ -22970,7 +22985,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1527,
+          "line": 1548,
           "description": "",
           "params": [
             {
@@ -23007,7 +23022,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1594,
+          "line": 1615,
           "description": "",
           "params": [
             {
@@ -23044,7 +23059,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1680,
+          "line": 1701,
           "description": "",
           "params": [
             {
@@ -23081,7 +23096,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1841,
+          "line": 1862,
           "description": "Render one PDF page again at twice the configured full-page PDF scale.",
           "params": [
             {
@@ -23106,7 +23121,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1904,
+          "line": 1925,
           "description": "",
           "params": [
             {
@@ -23137,7 +23152,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1926,
+          "line": 1947,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -23162,7 +23177,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2084,
+          "line": 2105,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -23180,7 +23195,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2175,
+          "line": 2196,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -23211,7 +23226,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2218,
+          "line": 2239,
           "description": "",
           "params": [
             {
@@ -32291,7 +32306,7 @@
     },
     {
       "path": "src/utils/objectUrlRegistry.js",
-      "lines": 86,
+      "lines": 92,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "Centralized helpers for object/blob URL lifecycle management.",
@@ -32300,74 +32315,74 @@
         {
           "name": "createTrackedObjectUrl",
           "kind": "function",
-          "line": 30
+          "line": 31
         },
         {
           "name": "revokeTrackedObjectUrl",
           "kind": "function",
-          "line": 41
+          "line": 47
         },
         {
           "name": "revokeTrackedObjectUrls",
           "kind": "function",
-          "line": 54
+          "line": 60
         },
         {
           "name": "isTrackedObjectUrl",
           "kind": "function",
-          "line": 65
+          "line": 71
         },
         {
           "name": "getTrackedObjectUrlCount",
           "kind": "function",
-          "line": 75
+          "line": 81
         },
         {
           "name": "revokeAllTrackedObjectUrls",
           "kind": "function",
-          "line": 83
+          "line": 89
         }
       ],
       "declarations": [
         {
           "name": "installTrackedUrlCleanup",
           "kind": "function",
-          "line": 14
+          "line": 15
         },
         {
           "name": "cleanup",
           "kind": "function",
-          "line": 17
+          "line": 18
         },
         {
           "name": "createTrackedObjectUrl",
           "kind": "function",
-          "line": 30
+          "line": 31
         },
         {
           "name": "revokeTrackedObjectUrl",
           "kind": "function",
-          "line": 41
+          "line": 47
         },
         {
           "name": "revokeTrackedObjectUrls",
           "kind": "function",
-          "line": 54
+          "line": 60
         },
         {
           "name": "isTrackedObjectUrl",
           "kind": "function",
-          "line": 65
+          "line": 71
         },
         {
           "name": "getTrackedObjectUrlCount",
           "kind": "function",
-          "line": 75
+          "line": 81
         },
         {
           "name": "revokeAllTrackedObjectUrls",
           "kind": "function",
-          "line": 83
+          "line": 89
         }
       ],
       "parseError": null,
@@ -32383,7 +32398,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 30,
+          "line": 31,
           "description": "",
           "params": [
             {
@@ -32408,7 +32423,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 41,
+          "line": 47,
           "description": "",
           "params": [
             {
@@ -32433,7 +32448,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 54,
+          "line": 60,
           "description": "",
           "params": [
             {
@@ -32458,7 +32473,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 65,
+          "line": 71,
           "description": "Check whether a blob/object URL is still tracked as live by the viewer.",
           "params": [
             {
@@ -32483,7 +32498,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 75,
+          "line": 81,
           "description": "",
           "params": [],
           "returns": [
@@ -32501,7 +32516,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/objectUrlRegistry.js",
-          "line": 83,
+          "line": 89,
           "description": "Revoke every tracked object URL.",
           "params": [],
           "returns": [
@@ -32524,7 +32539,7 @@
     },
     {
       "path": "src/utils/pageAssetRenderer.js",
-      "lines": 860,
+      "lines": 895,
       "extension": ".js",
       "jsdocBlockCount": 6,
       "sourceSummary": "OpenDocViewer — hybrid page-asset renderer.",
@@ -32586,12 +32601,12 @@
         {
           "name": "createPageAssetRenderer",
           "kind": "function",
-          "line": 242
+          "line": 254
         },
         {
           "name": "PageAssetRenderer",
           "kind": "class",
-          "line": 246
+          "line": 258
         }
       ],
       "declarations": [
@@ -32611,59 +32626,69 @@
           "line": 69
         },
         {
-          "name": "partitionContiguous",
+          "name": "releaseCanvas",
           "kind": "function",
           "line": 75
         },
         {
+          "name": "releaseTiffIfdBuffers",
+          "kind": "function",
+          "line": 81
+        },
+        {
+          "name": "partitionContiguous",
+          "kind": "function",
+          "line": 87
+        },
+        {
           "name": "canvasToBlob",
           "kind": "function",
-          "line": 90
+          "line": 102
         },
         {
           "name": "normalizeFallbackDetails",
           "kind": "function",
-          "line": 99
+          "line": 111
         },
         {
           "name": "loadBlobForDrawing",
           "kind": "function",
-          "line": 121
+          "line": 133
         },
         {
           "name": "scaleBlob",
           "kind": "function",
-          "line": 165
+          "line": 177
         },
         {
           "name": "getTagArray",
           "kind": "function",
-          "line": 183
+          "line": 195
         },
         {
           "name": "buildOjpegJpeg",
           "kind": "function",
-          "line": 190
+          "line": 202
         },
         {
           "name": "createPageAssetRenderer",
           "kind": "function",
-          "line": 242
+          "line": 254
         },
         {
           "name": "PageAssetRenderer",
           "kind": "class",
-          "line": 246
+          "line": 258
         },
         {
           "name": "entry",
           "kind": "object",
-          "line": 423
+          "line": 438
         },
         {
           "name": "onItemResult",
           "kind": "function",
-          "line": 561
+          "line": 586
         }
       ],
       "parseError": null,
@@ -32718,7 +32743,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetRenderer.js",
-          "line": 509,
+          "line": 534,
           "description": "Render a PDF page set through the PDF worker pool as one partitioned batch.",
           "params": [
             {
@@ -32749,7 +32774,7 @@
           "kind": "function",
           "scope": "instance",
           "file": "src/utils/pageAssetRenderer.js",
-          "line": 635,
+          "line": 660,
           "description": "Render one requested page asset.",
           "params": [
             {
@@ -54065,7 +54090,7 @@
       "kind": "member",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 59,
+      "line": 71,
       "description": "One-time init of pdf.js classic worker script URL (dev == build).",
       "params": [],
       "returns": [],
@@ -54078,7 +54103,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 224,
+      "line": 248,
       "description": "Build a standard JPEG Blob from an OJPEG (old-style JPEG-in-TIFF) IFD by concatenating the tables ( JPEGInterchangeFormat / Length : t513/t514) with the entropy-coded scan strips...",
       "params": [
         {
@@ -54109,7 +54134,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 66,
+      "line": 78,
       "description": "Ensure a pdf.js worker is ready for this runtime.",
       "params": [],
       "returns": [
@@ -54127,7 +54152,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 208,
+      "line": 232,
       "description": "Safely read a TIFF tag array from a utif2 IFD object.",
       "params": [
         {
@@ -54158,7 +54183,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 49,
+      "line": 61,
       "description": "Signature for inserting a page structure into the page list at an index.",
       "params": [],
       "returns": [],
@@ -54184,7 +54209,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 35,
+      "line": 47,
       "description": "Render job passed to the main-thread renderer.",
       "params": [],
       "returns": [],
@@ -54197,7 +54222,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 90,
+      "line": 102,
       "description": "Render PDF pages on the main thread and INSERT THEM DIRECTLY.",
       "params": [
         {
@@ -54240,7 +54265,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentLoader/mainThreadRenderer.js",
-      "line": 294,
+      "line": 318,
       "description": "Render TIFF pages on the main thread with an ultra-light OJPEG fast path: If Compression=6 (old-style JPEG-in-TIFF), reconstruct a standard JPEG stream by concatenating the JFIF/t...",
       "params": [
         {
@@ -62908,7 +62933,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 897,
+      "line": 918,
       "description": "",
       "params": [
         {
@@ -62933,7 +62958,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1222,
+      "line": 1243,
       "description": "",
       "params": [],
       "returns": [
@@ -62951,7 +62976,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 912,
+      "line": 933,
       "description": "",
       "params": [
         {
@@ -62988,7 +63013,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1371,
+      "line": 1392,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -63025,7 +63050,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 939,
+      "line": 960,
       "description": "",
       "params": [],
       "returns": [
@@ -63086,7 +63111,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1011,
+      "line": 1032,
       "description": "",
       "params": [
         {
@@ -63137,7 +63162,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1469,
+      "line": 1490,
       "description": "",
       "params": [
         {
@@ -63162,7 +63187,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1841,
+      "line": 1862,
       "description": "Render one PDF page again at twice the configured full-page PDF scale.",
       "params": [
         {
@@ -63187,7 +63212,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1680,
+      "line": 1701,
       "description": "",
       "params": [
         {
@@ -63268,7 +63293,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2218,
+      "line": 2239,
       "description": "",
       "params": [
         {
@@ -63293,7 +63318,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1349,
+      "line": 1370,
       "description": "",
       "params": [
         {
@@ -63318,7 +63343,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1445,
+      "line": 1466,
       "description": "",
       "params": [
         {
@@ -63343,7 +63368,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 948,
+      "line": 969,
       "description": "",
       "params": [
         {
@@ -63685,7 +63710,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1234,
+      "line": 1255,
       "description": "",
       "params": [
         {
@@ -63816,7 +63841,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1281,
+      "line": 1302,
       "description": "",
       "params": [
         {
@@ -63853,7 +63878,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1423,
+      "line": 1444,
       "description": "",
       "params": [
         {
@@ -63884,7 +63909,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2084,
+      "line": 2105,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -63902,7 +63927,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1205,
+      "line": 1226,
       "description": "",
       "params": [
         {
@@ -63927,7 +63952,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1214,
+      "line": 1235,
       "description": "",
       "params": [
         {
@@ -63952,7 +63977,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1904,
+      "line": 1925,
       "description": "",
       "params": [
         {
@@ -63983,7 +64008,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1162,
+      "line": 1183,
       "description": "",
       "params": [
         {
@@ -64008,7 +64033,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1594,
+      "line": 1615,
       "description": "",
       "params": [
         {
@@ -64094,7 +64119,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1527,
+      "line": 1548,
       "description": "",
       "params": [
         {
@@ -64149,7 +64174,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2175,
+      "line": 2196,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -64180,7 +64205,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1514,
+      "line": 1535,
       "description": "",
       "params": [
         {
@@ -64205,7 +64230,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1181,
+      "line": 1202,
       "description": "",
       "params": [
         {
@@ -64274,7 +64299,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1358,
+      "line": 1379,
       "description": "",
       "params": [
         {
@@ -64305,7 +64330,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1926,
+      "line": 1947,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -64330,7 +64355,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1434,
+      "line": 1455,
       "description": "",
       "params": [
         {
@@ -70309,7 +70334,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 30,
+      "line": 31,
       "description": "",
       "params": [
         {
@@ -70334,7 +70359,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 75,
+      "line": 81,
       "description": "",
       "params": [],
       "returns": [
@@ -70352,7 +70377,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 65,
+      "line": 71,
       "description": "Check whether a blob/object URL is still tracked as live by the viewer.",
       "params": [
         {
@@ -70377,7 +70402,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 83,
+      "line": 89,
       "description": "Revoke every tracked object URL.",
       "params": [],
       "returns": [
@@ -70395,7 +70420,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 41,
+      "line": 47,
       "description": "",
       "params": [
         {
@@ -70420,7 +70445,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/objectUrlRegistry.js",
-      "line": 54,
+      "line": 60,
       "description": "",
       "params": [
         {
@@ -70471,7 +70496,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetRenderer.js",
-      "line": 635,
+      "line": 660,
       "description": "Render one requested page asset.",
       "params": [
         {
@@ -70515,7 +70540,7 @@
       "kind": "function",
       "scope": "instance",
       "file": "src/utils/pageAssetRenderer.js",
-      "line": 509,
+      "line": 534,
       "description": "Render a PDF page set through the PDF worker pool as one partitioned batch.",
       "params": [
         {

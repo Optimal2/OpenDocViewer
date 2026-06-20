@@ -9,6 +9,7 @@
 
 /** @type {Set<string>} */
 const TRACKED_URLS = new Set();
+const MAX_TRACKED_URLS = 16384;
 let cleanupInstalled = false;
 
 function installTrackedUrlCleanup() {
@@ -31,6 +32,11 @@ export function createTrackedObjectUrl(blob) {
   installTrackedUrlCleanup();
   const url = URL.createObjectURL(blob);
   TRACKED_URLS.add(url);
+  while (TRACKED_URLS.size > MAX_TRACKED_URLS) {
+    const oldest = TRACKED_URLS.values().next().value;
+    if (!oldest) break;
+    revokeTrackedObjectUrl(oldest);
+  }
   return url;
 }
 

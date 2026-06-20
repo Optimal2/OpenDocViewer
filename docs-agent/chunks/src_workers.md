@@ -12,9 +12,9 @@ Symbols:
 
 ## src/workers/pdfPageWorker.js
 
-OpenDocViewer - PDF page image worker.
+OpenDocViewer \- PDF page image worker.
 
-Local imports: src/utils/pdfjsDocumentOptions.js
+Local imports: `src/utils/pdfjsDocumentOptions.js`
 
 Symbols:
 
@@ -22,8 +22,8 @@ Symbols:
 
 ## src/workers/pdfWorker.js
 
-OpenDocViewer - generated PDF worker.
+OpenDocViewer \- generated PDF worker.
 
 Symbols:
 
-- `workerScope` (constant) - OpenDocViewer - generated PDF worker.
+- `workerScope` (constant) - OpenDocViewer \- generated PDF worker.
