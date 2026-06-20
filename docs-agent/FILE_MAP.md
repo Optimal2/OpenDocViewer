@@ -93,7 +93,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/pdfPrintCacheKey.js` | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
 | `src/utils/pdfWorkerDispatcher.js` | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | `src/utils/performanceOverlayFlag.js` | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
-| `src/utils/printCore.js` | 569 | 1 | 20 | high | Core print coordinator for the frontend. |
+| `src/utils/printCore.js` | 588 | 1 | 20 | high | Core print coordinator for the frontend. |
 | `src/utils/printDom.js` | 473 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
 | `src/utils/printParse.js` | 100 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
 | `src/utils/printPdf.js` | 2268 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |

@@ -929,26 +929,26 @@
 | `escapeMetaName` | function | `src/utils/performanceOverlayFlag.js:14` |  |
 | `isPerformanceOverlayEnabled` | function | `src/utils/performanceOverlayFlag.js:72` | Determine whether the diagnostics/performance overlay is enabled. |
 | `readRuntimeBooleanFlag` | function | `src/utils/performanceOverlayFlag.js:34` | Resolve a boolean flag from \(precedence order\): window. |
-| `collectAllPrintableDataUrlsFromDom` | function | `src/utils/printCore.js:379` | Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list. |
-| `createHiddenIframe` | function | `src/utils/printCore.js:230` | Create the temporary hidden iframe used as the print document host. |
-| `getODVConfig` | function | `src/utils/printCore.js:189` | Read runtime configuration from the globals populated by public/odv.config.js . |
-| `getPrintableDataUrl` | function | `src/utils/printCore.js:140` | Safely derive a printable data URL from an element that is either a or an . |
-| `handlePrint` | function | `src/utils/printCore.js:265` | Handles the print functionality for the CURRENT page/image. |
-| `handlePrintAll` | function | `src/utils/printCore.js:432` | Print all available pages in viewer order. |
-| `handlePrintCurrentComparison` | function | `src/utils/printCore.js:331` | Print both currently visible compare panes as a two-page print job. |
-| `handlePrintRange` | function | `src/utils/printCore.js:566` | Print an inclusive page range. |
-| `handlePrintSequence` | function | `src/utils/printCore.js:501` | Print an explicit page sequence such as 3,1,2 . |
-| `HiddenIframe` | typedef | `src/utils/printCore.js:84` | Return type for the hidden-iframe factory. |
-| `isVisiblyMeasurable` | function | `src/utils/printCore.js:98` | Check whether a candidate element is both present in layout and not hidden by basic CSS visibility. |
-| `PageRange` | typedef | `src/utils/printCore.js:45` | A 1-based inclusive page range. |
-| `pickLargestVisibleElement` | function | `src/utils/printCore.js:115` | Best-effort: pick the largest visible or inside a container \(or document\). |
-| `PrintAllOptions` | typedef | `src/utils/printCore.js:52` | Options for printing multiple pages \(all/range/sequence\). |
-| `PrintCandidate` | typedef | `src/utils/printCore.js:65` | Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics. |
-| `PrintHeaderCfg` | typedef | `src/utils/printCore.js:72` | Print header config \(runtime\) consumed by the print overlay logic. |
-| `PrintOptions` | typedef | `src/utils/printCore.js:32` | Options for single-page printing. |
-| `resolveActiveNode` | function | `src/utils/printCore.js:212` | Attempt to resolve the currently active visual node to print. |
-| `resolveAllPageDataUrls` | function | `src/utils/printCore.js:398` | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
-| `resolveOrientation` | function | `src/utils/printCore.js:175` | Compute page orientation from dimensions when options.orientation === &#39;auto&#39;. |
+| `collectAllPrintableDataUrlsFromDom` | function | `src/utils/printCore.js:390` | Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list. |
+| `createHiddenIframe` | function | `src/utils/printCore.js:235` | Create the temporary hidden iframe used as the print document host. |
+| `getODVConfig` | function | `src/utils/printCore.js:194` | Read runtime configuration from the globals populated by public/odv.config.js . |
+| `getPrintableDataUrl` | function | `src/utils/printCore.js:145` | Safely derive a printable data URL from an element that is either a or an . |
+| `handlePrint` | function | `src/utils/printCore.js:270` | Handles the print functionality for the CURRENT page/image. |
+| `handlePrintAll` | function | `src/utils/printCore.js:443` | Print all available pages in viewer order. |
+| `handlePrintCurrentComparison` | function | `src/utils/printCore.js:339` | Print both currently visible compare panes as a two-page print job. |
+| `handlePrintRange` | function | `src/utils/printCore.js:585` | Print an inclusive page range. |
+| `handlePrintSequence` | function | `src/utils/printCore.js:516` | Print an explicit page sequence such as 3,1,2 . |
+| `HiddenIframe` | typedef | `src/utils/printCore.js:89` | Return type for the hidden-iframe factory. |
+| `isVisiblyMeasurable` | function | `src/utils/printCore.js:103` | Check whether a candidate element is both present in layout and not hidden by basic CSS visibility. |
+| `PageRange` | typedef | `src/utils/printCore.js:50` | A 1-based inclusive page range. |
+| `pickLargestVisibleElement` | function | `src/utils/printCore.js:120` | Best-effort: pick the largest visible or inside a container \(or document\). |
+| `PrintAllOptions` | typedef | `src/utils/printCore.js:57` | Options for printing multiple pages \(all/range/sequence\). |
+| `PrintCandidate` | typedef | `src/utils/printCore.js:70` | Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics. |
+| `PrintHeaderCfg` | typedef | `src/utils/printCore.js:77` | Print header config \(runtime\) consumed by the print overlay logic. |
+| `PrintOptions` | typedef | `src/utils/printCore.js:37` | Options for single-page printing. |
+| `resolveActiveNode` | function | `src/utils/printCore.js:217` | Attempt to resolve the currently active visual node to print. |
+| `resolveAllPageDataUrls` | function | `src/utils/printCore.js:409` | Resolve all printable page URLs, preferring the renderer&#39;s imperative API and falling back to DOM inspection. |
+| `resolveOrientation` | function | `src/utils/printCore.js:180` | Compute page orientation from dimensions when options.orientation === &#39;auto&#39;. |
 | `buildOverlayElement` | function | `src/utils/printDom.js:227` | Build a header/footer DIV element for a page using config + tokens. |
 | `buildPrintCss` | function | `src/utils/printDom.js:134` | Build the print-only CSS string \(inlined within the print iframe\). |
 | `buildPrintFormatElements` | function | `src/utils/printDom.js:275` | Build configured print-format header/watermark elements for a page. |

@@ -23004,7 +23004,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 379,
+    "line": 390,
     "description": "Collect printable image sources from the DOM as a fallback when the renderer handle cannot provide an explicit all-pages list.",
     "params": [
       {
@@ -23029,7 +23029,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 230,
+    "line": 235,
     "description": "Create the temporary hidden iframe used as the print document host.",
     "params": [
       {
@@ -23054,7 +23054,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 189,
+    "line": 194,
     "description": "Read runtime configuration from the globals populated by public/odv.config.js .",
     "params": [],
     "returns": [
@@ -23072,7 +23072,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 140,
+    "line": 145,
     "description": "Safely derive a printable data URL from an element that is either a or an .",
     "params": [
       {
@@ -23097,7 +23097,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 265,
+    "line": 270,
     "description": "Handles the print functionality for the CURRENT page/image.",
     "params": [
       {
@@ -23128,7 +23128,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 432,
+    "line": 443,
     "description": "Print all available pages in viewer order.",
     "params": [
       {
@@ -23159,7 +23159,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 331,
+    "line": 339,
     "description": "Print both currently visible compare panes as a two-page print job.",
     "params": [
       {
@@ -23196,7 +23196,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 566,
+    "line": 585,
     "description": "Print an inclusive page range.",
     "params": [
       {
@@ -23239,7 +23239,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 501,
+    "line": 516,
     "description": "Print an explicit page sequence such as 3,1,2 .",
     "params": [
       {
@@ -23276,7 +23276,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 84,
+    "line": 89,
     "description": "Return type for the hidden-iframe factory.",
     "params": [],
     "returns": [],
@@ -23289,7 +23289,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 98,
+    "line": 103,
     "description": "Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.",
     "params": [
       {
@@ -23314,7 +23314,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 45,
+    "line": 50,
     "description": "A 1-based inclusive page range.",
     "params": [],
     "returns": [],
@@ -23327,7 +23327,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 115,
+    "line": 120,
     "description": "Best-effort: pick the largest visible or inside a container (or document).",
     "params": [
       {
@@ -23352,7 +23352,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 52,
+    "line": 57,
     "description": "Options for printing multiple pages (all/range/sequence).",
     "params": [],
     "returns": [],
@@ -23365,7 +23365,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 65,
+    "line": 70,
     "description": "Internal: candidate node for &quot;largest visible&quot; heuristics.",
     "params": [],
     "returns": [],
@@ -23378,7 +23378,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 72,
+    "line": 77,
     "description": "Print header config (runtime) consumed by the print overlay logic.",
     "params": [],
     "returns": [],
@@ -23391,7 +23391,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 32,
+    "line": 37,
     "description": "Options for single-page printing.",
     "params": [],
     "returns": [],
@@ -23404,7 +23404,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 212,
+    "line": 217,
     "description": "Attempt to resolve the currently active visual node to print.",
     "params": [
       {
@@ -23435,7 +23435,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 398,
+    "line": 409,
     "description": "Resolve all printable page URLs, preferring the renderer's imperative API and falling back to DOM inspection.",
     "params": [
       {
@@ -23466,7 +23466,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printCore.js",
-    "line": 175,
+    "line": 180,
     "description": "Compute page orientation from dimensions when options.orientation === 'auto'.",
     "params": [
       {
