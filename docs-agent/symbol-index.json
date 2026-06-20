@@ -1921,7 +1921,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentLoader/DocumentLoader.js",
-    "line": 1582,
+    "line": 1584,
     "description": "",
     "params": [],
     "returns": [],
@@ -2532,7 +2532,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/documentLoaderUtils.js",
-    "line": 119,
+    "line": 170,
     "description": "Fetch a resource and return its ArrayBuffer.",
     "params": [
       {
@@ -2656,7 +2656,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/documentLoaderUtils.js",
-    "line": 202,
+    "line": 337,
     "description": "Create a small thumbnail data URL for a given image URL.",
     "params": [
       {
@@ -2693,7 +2693,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/documentLoaderUtils.js",
-    "line": 172,
+    "line": 307,
     "description": "Extract light-weight metadata from a TIFF buffer (best-effort).",
     "params": [
       {
@@ -2718,7 +2718,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentLoader/documentLoaderUtils.js",
-    "line": 140,
+    "line": 275,
     "description": "Determine total pages for a given document by inspecting its buffer and type.",
     "params": [
       {
@@ -17513,7 +17513,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 504,
+    "line": 506,
     "description": "Count PDF pages in a page descriptor list.",
     "params": [
       {
@@ -17538,7 +17538,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 166,
+    "line": 167,
     "description": "",
     "params": [],
     "returns": [
@@ -17569,7 +17569,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 70,
+    "line": 71,
     "description": "",
     "params": [],
     "returns": [],
@@ -17582,7 +17582,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 151,
+    "line": 152,
     "description": "",
     "params": [],
     "returns": [],
@@ -17621,7 +17621,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 132,
+    "line": 133,
     "description": "",
     "params": [],
     "returns": [],
@@ -17660,7 +17660,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 119,
+    "line": 120,
     "description": "",
     "params": [],
     "returns": [],
@@ -17686,7 +17686,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 86,
+    "line": 87,
     "description": "",
     "params": [],
     "returns": [],
@@ -17712,7 +17712,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 59,
+    "line": 60,
     "description": "",
     "params": [],
     "returns": [],
@@ -17738,7 +17738,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1006,
+    "line": 1009,
     "description": "",
     "params": [
       {
@@ -17763,7 +17763,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1024,
+    "line": 1027,
     "description": "",
     "params": [
       {
@@ -17788,7 +17788,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 833,
+    "line": 835,
     "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
     "params": [
       {
@@ -17813,7 +17813,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 180,
+    "line": 181,
     "description": "",
     "params": [],
     "returns": [
@@ -17844,7 +17844,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 588,
+    "line": 590,
     "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
     "params": [
       {
@@ -17875,7 +17875,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 524,
+    "line": 526,
     "description": "Resolve the PDF page-worker policy for the current document size.",
     "params": [
       {
@@ -17906,7 +17906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 214,
+    "line": 215,
     "description": "",
     "params": [
       {
@@ -17937,7 +17937,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 193,
+    "line": 194,
     "description": "",
     "params": [
       {
@@ -17981,7 +17981,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1032,
+    "line": 1035,
     "description": "",
     "params": [
       {
@@ -18032,7 +18032,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 144,
+    "line": 145,
     "description": "",
     "params": [],
     "returns": [],

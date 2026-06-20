@@ -20,7 +20,7 @@ import { useTranslation } from 'react-i18next';
 import { fileTypeFromBlob } from 'file-type';
 import ViewerContext from '../../contexts/viewerContext.js';
 import logger from '../../logging/systemLogger.js';
-import { generateDocumentList, generateDemoList, getTotalPages } from './documentLoaderUtils.js';
+import { fetchAndArrayBuffer, generateDocumentList, generateDemoList, getTotalPages } from './documentLoaderUtils.js';
 import {
   getDocumentLoadingConfig,
   shouldRecommendStopping,
@@ -1314,6 +1314,10 @@ const DocumentLoader = ({
       const maxAttempts = Math.max(1, (Number(config.fetch.prefetchRetryCount) || 0) + 1);
       const retryBaseDelayMs = Math.max(0, Number(config.fetch.prefetchRetryBaseDelayMs) || 0);
       const requestTimeoutMs = Math.max(0, Number(config.fetch.prefetchRequestTimeoutMs) || 0);
+      const maxSourceSizeMiB = Math.max(0, Number(config.fetch.maxSourceSizeMiB) || 0);
+      const maxSourceBytes = maxSourceSizeMiB > 0
+        ? Math.round(maxSourceSizeMiB * 1024 * 1024)
+        : 0;
       const sourceIdentity = describeDocumentSourceKey(entry, orderIndex);
       const sourceKey = sourceIdentity.sourceKey;
 
@@ -1442,27 +1446,26 @@ const DocumentLoader = ({
       for (let attempt = 1; attempt <= maxAttempts; attempt += 1) {
         const controller = new AbortController();
         activeControllersRef.current.add(controller);
-        let timeoutId = 0;
-        let didTimeout = false;
 
         try {
-          if (requestTimeoutMs > 0) {
-            timeoutId = globalThis.setTimeout(() => {
-              didTimeout = true;
-              try { controller.abort(); } catch {}
-            }, requestTimeoutMs);
-          }
-
           const fetchStartedAt = nowMs();
-          const response = await fetch(entry.url, {
+          let responseMimeType = '';
+          const arrayBuffer = await fetchAndArrayBuffer(entry.url, {
             signal: controller.signal,
-            cache: 'no-store',
-            credentials: 'same-origin',
+            timeoutMs: requestTimeoutMs,
+            maxBytes: maxSourceBytes,
+            requestInit: {
+              cache: 'no-store',
+              credentials: 'same-origin',
+            },
+            onResponse: (response) => {
+              responseMimeType = response.headers.get('content-type') || '';
+            },
           });
-          if (!response.ok) throw createPrefetchHttpError(entry.url, response.status);
-
-          const blob = await response.blob();
           recordLoaderPhaseTiming?.('fetch', nowMs() - fetchStartedAt);
+          const blob = new Blob([arrayBuffer], {
+            type: String(responseMimeType || mimeForExtension(entry.ext) || 'application/octet-stream'),
+          });
           if (!(blob instanceof Blob) || blob.size <= 0) {
             throw new Error(`Fetched source ${entry.url} is empty or invalid.`);
           }
@@ -1471,7 +1474,7 @@ const DocumentLoader = ({
           const resolvedPayload = await resolveFetchedSourcePayload({
             entry,
             blob,
-            responseMimeType: response.headers.get('content-type') || blob.type,
+            responseMimeType: responseMimeType || blob.type,
           });
 
           await validateFetchedSourceBlob({
@@ -1518,11 +1521,11 @@ const DocumentLoader = ({
             pageCountHint,
           };
         } catch (error) {
-          const normalizedError = didTimeout
+          const normalizedError = error?.code === 'document-fetch-timeout'
             ? createPrefetchTimeoutError(entry.url, requestTimeoutMs)
             : error;
 
-          if ((controller.signal.aborted && !didTimeout) || cancelled) {
+          if ((controller.signal.aborted && error?.code !== 'document-fetch-timeout') || cancelled) {
             return {
               ok: false,
               aborted: true,
@@ -1563,7 +1566,6 @@ const DocumentLoader = ({
           });
           if (retryDelayMs > 0) await sleep(retryDelayMs);
         } finally {
-          if (timeoutId) globalThis.clearTimeout(timeoutId);
           activeControllersRef.current.delete(controller);
         }
       }

@@ -24,7 +24,7 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 110
-- Source lines: 48742
+- Source lines: 48882
 - JSDoc symbols: 1275
 - Files with JSDoc: 106
 - Low-confidence summaries: 0
@@ -41,8 +41,8 @@ Source commit: not embedded
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
-- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
+- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
 - `src/utils/documentMetadata.js` - Helpers for resolving document\-level metadata from the normalized portable bundle.
 
 ## Agent Notes

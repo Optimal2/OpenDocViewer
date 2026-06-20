@@ -105,8 +105,59 @@ export const generateDemoList = ({ strategy, count, formats = ['jpg','png','tif'
 /**
  * Options for fetchAndArrayBuffer.
  * @typedef {Object} FetchOptions
- * @property {(AbortSignal|undefined)} signal
+ * @property {AbortSignal} [signal]
+ * @property {number} [timeoutMs]
+ * @property {number} [maxBytes]
+ * @property {RequestInit} [requestInit]
+ * @property {function(Response): void} [onResponse]
  */
+
+function formatFetchBytes(bytes) {
+  const value = Math.max(0, Number(bytes) || 0);
+  if (value < 1024) return `${value} B`;
+  const units = ['KiB', 'MiB', 'GiB', 'TiB'];
+  let size = value;
+  let unit = 'B';
+  for (const nextUnit of units) {
+    size /= 1024;
+    unit = nextUnit;
+    if (size < 1024) break;
+  }
+  return `${size.toFixed(size >= 100 ? 0 : size >= 10 ? 1 : 2)} ${unit}`;
+}
+
+function createFetchTimeoutError(url, timeoutMs) {
+  const error = new Error(`Document fetch timed out for ${url} after ${timeoutMs} ms.`);
+  error.name = 'TimeoutError';
+  error.code = 'document-fetch-timeout';
+  error.timeoutMs = Number(timeoutMs) || 0;
+  return error;
+}
+
+function createFetchTooLargeError(url, sizeBytes, maxBytes) {
+  const error = new Error(
+    `Document source at ${url} is ${formatFetchBytes(sizeBytes)}, which exceeds the configured limit of ${formatFetchBytes(maxBytes)}.`
+  );
+  error.name = 'DocumentFetchTooLargeError';
+  error.code = 'document-fetch-too-large';
+  error.sizeBytes = Math.max(0, Number(sizeBytes) || 0);
+  error.maxBytes = Math.max(0, Number(maxBytes) || 0);
+  return error;
+}
+
+function createFetchHttpError(url, status) {
+  const error = new Error('Failed to fetch document at ' + url + ' (status ' + status + ')');
+  error.status = Number(status) || 0;
+  error.isHttpError = true;
+  return error;
+}
+
+function parseContentLength(response) {
+  const raw = response?.headers?.get?.('content-length');
+  const value = Number(raw);
+  if (!Number.isFinite(value) || value <= 0) return 0;
+  return Math.floor(value);
+}
 
 /**
  * Fetch a resource and return its ArrayBuffer.
@@ -118,11 +169,95 @@ export const generateDemoList = ({ strategy, count, formats = ['jpg','png','tif'
  */
 export const fetchAndArrayBuffer = async (url, opts = {}) => {
   logger.debug('Fetching array buffer', { url });
-  const res = await fetch(url, { signal: opts.signal });
-  if (!res.ok) {
-    throw new Error('Failed to fetch document at ' + url + ' (status ' + res.status + ')');
+  const timeoutMs = Math.max(0, Number(opts.timeoutMs) || 0);
+  const maxBytes = Math.max(0, Number(opts.maxBytes) || 0);
+  const controller = new AbortController();
+  const upstreamSignal = opts.signal;
+  let timeoutId = 0;
+  let didTimeout = false;
+
+  const abortFromUpstream = () => {
+    try {
+      controller.abort(upstreamSignal?.reason);
+    } catch {
+      controller.abort();
+    }
+  };
+
+  if (upstreamSignal) {
+    if (upstreamSignal.aborted) abortFromUpstream();
+    else upstreamSignal.addEventListener('abort', abortFromUpstream, { once: true });
   }
-  return res.arrayBuffer();
+
+  try {
+    if (timeoutMs > 0) {
+      timeoutId = globalThis.setTimeout(() => {
+        didTimeout = true;
+        try {
+          controller.abort(createFetchTimeoutError(url, timeoutMs));
+        } catch {
+          controller.abort();
+        }
+      }, timeoutMs);
+    }
+
+    const res = await fetch(url, {
+      ...(opts.requestInit || {}),
+      signal: controller.signal,
+    });
+    if (!res.ok) {
+      throw createFetchHttpError(url, res.status);
+    }
+
+    opts.onResponse?.(res);
+
+    const contentLength = parseContentLength(res);
+    if (maxBytes > 0 && contentLength > maxBytes) {
+      throw createFetchTooLargeError(url, contentLength, maxBytes);
+    }
+
+    if (!res.body || typeof res.body.getReader !== 'function') {
+      const fallbackBuffer = await res.arrayBuffer();
+      if (maxBytes > 0 && fallbackBuffer.byteLength > maxBytes) {
+        throw createFetchTooLargeError(url, fallbackBuffer.byteLength, maxBytes);
+      }
+      return fallbackBuffer;
+    }
+
+    const reader = res.body.getReader();
+    const chunks = [];
+    let totalBytes = 0;
+
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+      if (!(value instanceof Uint8Array) || value.byteLength <= 0) continue;
+      totalBytes += value.byteLength;
+      if (maxBytes > 0 && totalBytes > maxBytes) {
+        try { await reader.cancel(); } catch {}
+        throw createFetchTooLargeError(url, totalBytes, maxBytes);
+      }
+      chunks.push(value);
+    }
+
+    const bytes = new Uint8Array(totalBytes);
+    let offset = 0;
+    for (const chunk of chunks) {
+      bytes.set(chunk, offset);
+      offset += chunk.byteLength;
+    }
+    return bytes.buffer;
+  } catch (error) {
+    if (didTimeout || error?.code === 'document-fetch-timeout') {
+      throw createFetchTimeoutError(url, timeoutMs);
+    }
+    throw error;
+  } finally {
+    if (timeoutId) globalThis.clearTimeout(timeoutId);
+    if (upstreamSignal && !upstreamSignal.aborted) {
+      upstreamSignal.removeEventListener('abort', abortFromUpstream);
+    }
+  }
 };
 
 /**

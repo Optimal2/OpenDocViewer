@@ -53,6 +53,7 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {number} prefetchRetryCount
  * @property {number} prefetchRetryBaseDelayMs
  * @property {number} prefetchRequestTimeoutMs
+ * @property {number} maxSourceSizeMiB
  * @property {number} abortOnSourceUnavailableCount
  */
 
@@ -256,6 +257,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       prefetchRetryCount: 0,
       prefetchRetryBaseDelayMs: 750,
       prefetchRequestTimeoutMs: 10000,
+      maxSourceSizeMiB: 512,
       abortOnSourceUnavailableCount: 8,
     },
     sourceStore: {
@@ -890,6 +892,7 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       prefetchRetryCount: normalizeNumber(raw?.fetch?.prefetchRetryCount, adaptiveDefaults.fetch.prefetchRetryCount, 0, 5),
       prefetchRetryBaseDelayMs: normalizeNumber(raw?.fetch?.prefetchRetryBaseDelayMs, adaptiveDefaults.fetch.prefetchRetryBaseDelayMs, 100, 60000),
       prefetchRequestTimeoutMs: normalizeNumber(raw?.fetch?.prefetchRequestTimeoutMs, adaptiveDefaults.fetch.prefetchRequestTimeoutMs, 1000, 120000),
+      maxSourceSizeMiB: normalizeNumber(raw?.fetch?.maxSourceSizeMiB, adaptiveDefaults.fetch.maxSourceSizeMiB, 16, 4096),
       abortOnSourceUnavailableCount: normalizeThreshold(raw?.fetch?.abortOnSourceUnavailableCount, adaptiveDefaults.fetch.abortOnSourceUnavailableCount, 1000000),
     },
     sourceStore: {
