@@ -25,6 +25,11 @@ const MIN_MULTI_PAGE_CLEANUP_MS = 2500;
 const BASE_MULTI_PAGE_CLEANUP_MS = 1000;
 const PER_PAGE_CLEANUP_MS = 5;
 
+function resolveIframeCleanupDelay(baseMs, printDelayMs = 0) {
+  const delayMs = Number(printDelayMs) || 0;
+  return Math.max(baseMs, baseMs + delayMs + 500);
+}
+
 function normalizePageContexts(value) {
   return Array.isArray(value) ? value : [];
 }
@@ -298,10 +303,13 @@ export function handlePrint(documentRenderRef, options = {}) {
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame } = createHiddenIframe(DEFAULT_IFRAME_CLEANUP_MS);
+  const { frame, cleanup } = createHiddenIframe(
+    resolveIframeCleanupDelay(DEFAULT_IFRAME_CLEANUP_MS, printDelayMs)
+  );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
+    cleanup();
     return;
   }
 
@@ -351,10 +359,13 @@ export function handlePrintCurrentComparison(primaryRenderRef, compareRenderRef,
   const anyHandle = /** @type {*} */ (primaryRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame } = createHiddenIframe(MIN_MULTI_PAGE_CLEANUP_MS);
+  const { frame, cleanup } = createHiddenIframe(
+    resolveIframeCleanupDelay(MIN_MULTI_PAGE_CLEANUP_MS, printDelayMs)
+  );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for compare printing');
+    cleanup();
     return;
   }
 
@@ -467,15 +478,19 @@ export async function handlePrintAll(documentRenderRef, options = {}) {
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame } = createHiddenIframe(
-    Math.max(
-      MIN_MULTI_PAGE_CLEANUP_MS,
-      BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+  const { frame, cleanup } = createHiddenIframe(
+    resolveIframeCleanupDelay(
+      Math.max(
+        MIN_MULTI_PAGE_CLEANUP_MS,
+        BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+      ),
+      printDelayMs
     )
   );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
+    cleanup();
     return;
   }
 
@@ -527,15 +542,19 @@ export async function handlePrintSequence(documentRenderRef, sequence, options =
   const anyHandle = /** @type {*} */ (documentRenderRef?.current);
   const tokenContext = makeBaseTokenContext(anyHandle, reason, forWhom, printFormat, { bundle, reasonSelection, printFormatSelection });
 
-  const { frame } = createHiddenIframe(
-    Math.max(
-      MIN_MULTI_PAGE_CLEANUP_MS,
-      BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+  const { frame, cleanup } = createHiddenIframe(
+    resolveIframeCleanupDelay(
+      Math.max(
+        MIN_MULTI_PAGE_CLEANUP_MS,
+        BASE_MULTI_PAGE_CLEANUP_MS + toPrint.length * PER_PAGE_CLEANUP_MS
+      ),
+      printDelayMs
     )
   );
   const doc = frame.contentDocument || frame.contentWindow?.document;
   if (!doc) {
     logger.error('Failed to get iframe document for printing');
+    cleanup();
     return;
   }
 
