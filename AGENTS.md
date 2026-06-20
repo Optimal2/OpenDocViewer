@@ -14,7 +14,7 @@ Before making changes:
 - Prefer direct file edits over generated shell scripts.
 - Keep changes small and reviewable.
 - Show a concise summary, validation results, and git diff after changes.
-- Keep OpenDocViewer generic. Do not bake IbsPackager-specific behavior into viewer code unless the integration contract explicitly supports it as optional metadata.
+- Keep OpenDocViewer generic. Do not bake host-application-specific behavior into viewer code unless the integration contract explicitly supports it as optional metadata.
 - Keep code, comments, scripts, and development documentation in English. Swedish belongs only in application localization/help resources.
 - If a change must be visible in a local hosted runtime, run the matching build/publish/deployment step after the code change.
 - If source structure, JSDoc, dependencies, or module responsibilities change,
@@ -46,9 +46,9 @@ Follow these rules strictly:
 Default local development paths:
 
 - OpenDocViewer repo: `<workspace>\OpenDocViewer`
-- Optional platform/host repos: `<workspace>\OpenModulePlatform`, `<workspace>\IbsPackager`
-- Runtime root: `E:\OMP`
-- Portal URL: `http://localhost:8088/`
-- IbsPackager URL: `http://localhost:8088/ibspackager/`
+- Optional platform/host repos: `<workspace>\OpenModulePlatform`, `<workspace>\<host-app-repo>`
+- Runtime root: `<runtime-root>`
+- Portal URL: `http://localhost:<portal-port>/`
+- Host app URL: `http://localhost:<portal-port>/<host-app>/`
 
 These paths are local development defaults. Do not hardcode user-specific paths into reusable scripts unless explicitly requested.

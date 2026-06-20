@@ -1,6 +1,6 @@
 # Integration Guide
 
-This document defines how host applications should provide OpenDocViewer with files and document metadata. It is both the human integration guide and the Codex-facing contract for future host work, including IbsPackager manual review.
+This document defines how host applications should provide OpenDocViewer with files and document metadata. It is both the human integration guide and the Codex-facing contract for future host work, including manual-review integrations.
 
 ## Goals
 
@@ -84,7 +84,7 @@ window.ODV.start({
       }
     ],
     integration: {
-      source: 'IbsPackager.ManualReview'
+      source: 'ManualReviewHost'
     }
   }
 });
@@ -326,13 +326,13 @@ Use this decision table for new integrations:
 | URL params | Host can derive a simple numbered source pattern | `?folder=...&ext=...&pages=...` | Legacy/simple mode; not recommended for manual review metadata. |
 | Demo | No host data exists | bundled public sample assets | Development fallback. |
 
-## IbsPackager Manual Review Guidance
+## Manual Review Host Guidance
 
-For the upcoming IbsPackager manual-review integration, prefer this boundary:
+For manual-review host integrations, prefer this boundary:
 
-- IbsPackager supplies one Portable Document Bundle for the active review item or review batch.
-- IbsPackager exposes file URLs through authenticated same-origin endpoints.
-- IbsPackager owns review commands such as approve, reject, retry, route, or save comment.
+- The host application supplies one Portable Document Bundle for the active review item or review batch.
+- The host application exposes file URLs through authenticated same-origin endpoints.
+- The host application owns review commands such as approve, reject, retry, route, or save comment.
 - OpenDocViewer displays files and metadata and may emit generic viewer events only if such a bridge is explicitly added later.
 
 Recommended metadata for manual review:
@@ -349,7 +349,7 @@ Recommended metadata for manual review:
 - last updated timestamp
 - current manual-review status
 
-Do not let ODV infer business meaning from IbsPackager-specific field ids. Either display raw metadata generically or use runtime-configured aliases.
+Do not let ODV infer business meaning from host-specific field ids. Either display raw metadata generically or use runtime-configured aliases.
 
 ## Versioning
 

@@ -26,8 +26,8 @@ All `.cmd` wrappers forward additional arguments to the underlying `.ps1`
 script. Examples:
 
 ```cmd
-scripts\omp\build-universal-package.cmd --no-pause -OutputDirectory E:\Packages
-scripts\omp\export-universal-package.cmd -AllComponents -BuildArtifacts -OutputPath E:\Packages\my-package.zip
+scripts\omp\build-universal-package.cmd --no-pause -OutputDirectory <package-output-root>
+scripts\omp\export-universal-package.cmd -AllComponents -BuildArtifacts -OutputPath <package-output-root>\my-package.zip
 ```
 
 For most manual package builds, use `build-universal-package.cmd`. It defaults
@@ -72,7 +72,7 @@ components and writes a universal zip named from `repositoryKey` and
 
 ```powershell
 .\scripts\omp\build-universal-package.ps1
-.\scripts\omp\build-universal-package.ps1 -OutputDirectory E:\Packages
+.\scripts\omp\build-universal-package.ps1 -OutputDirectory <package-output-root>
 ```
 
 The default output folder is `artifacts\universal-packages`. Set
@@ -135,14 +135,14 @@ Examples:
 .\scripts\omp\export-universal-package.ps1 `
   -AllComponents `
   -BuildArtifacts `
-  -TargetHostProfile vgr-test `
-  -ArtifactConfigurationFile 'opendocviewer-web:odv.site.config.js=E:\Secure\odv.site.config.js'
+  -TargetHostProfile example-host `
+  -ArtifactConfigurationFile 'opendocviewer-web:odv.site.config.js=<config-root>\odv.site.config.js'
 
 .\scripts\omp\export-universal-package.ps1 `
   -AllComponents `
   -BuildArtifacts `
-  -HostProfilePath E:\Private\profiles\vgr-test.package-profile.json `
-  -OutputPath E:\Packages\opendocviewer__vgr-test__20260525.zip
+  -HostProfilePath <profile-root>\example-host.package-profile.json `
+  -OutputPath <package-output-root>\opendocviewer__example-host__20260525.zip
 ```
 
 The optional host profile is JSON and can provide `targetHostProfile`,
@@ -175,8 +175,8 @@ exceeds the configured timeout.
 .\scripts\omp\test-cmd-wrappers.ps1 -RepositoryName OpenModulePlatform -PerRepositoryTimeoutSeconds 1200
 
 .\scripts\omp\test-cmd-wrappers.ps1 `
-  -WorkspaceRoot "E:\Linus Dunkers\Documents\GitHub" `
-  -RepositoryName Dokumentbibliotek,LogSearch,EArkivChecker `
+  -WorkspaceRoot "<workspace-root>" `
+  -RepositoryName ExampleModuleA,ExampleModuleB,ExampleModuleC `
   -OutputRoot "$env:TEMP\omp-cmd-wrapper-validation\packages" `
   -LogRoot "$env:TEMP\omp-cmd-wrapper-validation\logs" `
   -PerRepositoryTimeoutSeconds 1800
@@ -204,11 +204,11 @@ developer-source refresh, and installer exports produce the same objects:
 
 .\scripts\omp\compare-universal-package-data.ps1 `
   -FirstPackage "$env:TEMP\omp-cmd-wrapper-validation\aggregate-objects" `
-  -SecondPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global"
+  -SecondPackage "<installer-root>\data\global"
 
 .\scripts\omp\compare-universal-package-data.ps1 `
-  -FirstPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\exports\omp-universal__global__20260606.zip" `
-  -SecondPackage "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global"
+  -FirstPackage "<installer-root>\exports\omp-universal__global__20260606.zip" `
+  -SecondPackage "<installer-root>\data\global"
 ```
 
 `merge-universal-package-objects.ps1` extracts many repository-level universal
@@ -227,8 +227,8 @@ To create a universal package from an already validated object root, use:
 
 ```powershell
 .\scripts\omp\export-universal-object-root.ps1 `
-  -ObjectRoot "E:\DevInstaller\OpenModulePlatform\Universal\installer\data\global" `
-  -OutputPath "E:\Packages\omp-universal__global__verified.zip"
+  -ObjectRoot "<installer-root>\data\global" `
+  -OutputPath "<package-output-root>\omp-universal__global__verified.zip"
 ```
 
 That helper is intended for validation and developer packaging. Normal
