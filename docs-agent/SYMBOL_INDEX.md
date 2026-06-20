@@ -81,7 +81,7 @@
 | `readBlobHeadBytes` | function | `src/components/DocumentLoader/DocumentLoader.js:335` |  |
 | `readUint32LittleEndian` | function | `src/components/DocumentLoader/DocumentLoader.js:888` |  |
 | `redactUrlForLog` | function | `src/components/DocumentLoader/DocumentLoader.js:548` |  |
-| `<anonymous>~resolve` | function | `src/components/DocumentLoader/DocumentLoader.js:1582` |  |
+| `<anonymous>~resolve` | function | `src/components/DocumentLoader/DocumentLoader.js:1584` |  |
 | `ResolvedEntry` | typedef | `src/components/DocumentLoader/DocumentLoader.js:102` |  |
 | `resolveDocumentSourceContext` | function | `src/components/DocumentLoader/DocumentLoader.js:951` | Extract multi-document source context from an entry or placeholder input. |
 | `resolveEntries` | function | `src/components/DocumentLoader/DocumentLoader.js:1101` |  |
@@ -99,13 +99,13 @@
 | `toPositiveIntOrUndefined` | function | `src/components/DocumentLoader/DocumentLoader.js:940` |  |
 | `updatePageEstimateStats` | function | `src/components/DocumentLoader/DocumentLoader.js:619` | Update per-extension page-count statistics used by the conservative warning estimator. |
 | `validateFetchedSourceBlob` | function | `src/components/DocumentLoader/DocumentLoader.js:764` | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
-| `fetchAndArrayBuffer` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:119` | Fetch a resource and return its ArrayBuffer. |
+| `fetchAndArrayBuffer` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:170` | Fetch a resource and return its ArrayBuffer. |
 | `FetchOptions` | typedef | `src/components/DocumentLoader/documentLoaderUtils.js:105` | Options for fetchAndArrayBuffer. |
 | `generateDemoList` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:80` | Generate a list of demo document URLs by repeating or mixing sample files. |
 | `generateDocumentList` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:52` | Generate a list of document URLs using a simple pattern: 001..NNN + extension. |
-| `generateThumbnail` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:202` | Create a small thumbnail data URL for a given image URL. |
-| `getTiffMetadata` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:172` | Extract light-weight metadata from a TIFF buffer \(best-effort\). |
-| `getTotalPages` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:140` | Determine total pages for a given document by inspecting its buffer and type. |
+| `generateThumbnail` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:337` | Create a small thumbnail data URL for a given image URL. |
+| `getTiffMetadata` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:307` | Extract light-weight metadata from a TIFF buffer \(best-effort\). |
+| `getTotalPages` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:275` | Determine total pages for a given document by inspecting its buffer and type. |
 | `TRANSPARENT_1x1` | constant | `src/components/DocumentLoader/documentLoaderUtils.js:37` | Tiny transparent PNG as a safe fallback when thumbnails cannot be produced. |
 | `module.exports` | function | `src/components/DocumentLoader/LoadPressureDialog.jsx:35` | Large-load warning dialog shown before / during very heavy loading runs. |
 | `LoadPressureDialogProps` | typedef | `src/components/DocumentLoader/LoadPressureDialog.jsx:21` |  |
@@ -710,36 +710,36 @@
 | `SetString` | typedef | `src/types/jsdoc-types.js:29` | Simple string setter. |
 | `SetStringNullable` | typedef | `src/types/jsdoc-types.js:15` | Setter for string-or-null values. |
 | `ZoomMode` | typedef | `src/types/jsdoc-types.js:79` | Sticky zoom modes used by the viewer. |
-| `countPdfPages` | function | `src/utils/documentLoadingConfig.js:504` | Count PDF pages in a page descriptor list. |
-| `detectBrowserFamily` | function | `src/utils/documentLoadingConfig.js:166` |  |
+| `countPdfPages` | function | `src/utils/documentLoadingConfig.js:506` | Count PDF pages in a page descriptor list. |
+| `detectBrowserFamily` | function | `src/utils/documentLoadingConfig.js:167` |  |
 | `DocumentLoadingAdaptiveMemoryConfig` | typedef | `src/utils/documentLoadingConfig.js:29` |  |
-| `DocumentLoadingAssetStoreConfig` | typedef | `src/utils/documentLoadingConfig.js:70` |  |
-| `DocumentLoadingConfig` | typedef | `src/utils/documentLoadingConfig.js:151` |  |
+| `DocumentLoadingAssetStoreConfig` | typedef | `src/utils/documentLoadingConfig.js:71` |  |
+| `DocumentLoadingConfig` | typedef | `src/utils/documentLoadingConfig.js:152` |  |
 | `DocumentLoadingFetchConfig` | typedef | `src/utils/documentLoadingConfig.js:49` |  |
 | `DocumentLoadingFetchStrategy` | typedef | `src/utils/documentLoadingConfig.js:21` |  |
-| `DocumentLoadingMemoryPressureConfig` | typedef | `src/utils/documentLoadingConfig.js:132` |  |
+| `DocumentLoadingMemoryPressureConfig` | typedef | `src/utils/documentLoadingConfig.js:133` |  |
 | `DocumentLoadingMemoryPressureStage` | typedef | `src/utils/documentLoadingConfig.js:25` |  |
 | `DocumentLoadingMode` | typedef | `src/utils/documentLoadingConfig.js:20` |  |
-| `DocumentLoadingPdfWorkerPagePolicy` | typedef | `src/utils/documentLoadingConfig.js:119` |  |
+| `DocumentLoadingPdfWorkerPagePolicy` | typedef | `src/utils/documentLoadingConfig.js:120` |  |
 | `DocumentLoadingRenderBackend` | typedef | `src/utils/documentLoadingConfig.js:23` |  |
-| `DocumentLoadingRenderConfig` | typedef | `src/utils/documentLoadingConfig.js:86` |  |
+| `DocumentLoadingRenderConfig` | typedef | `src/utils/documentLoadingConfig.js:87` |  |
 | `DocumentLoadingRenderStrategy` | typedef | `src/utils/documentLoadingConfig.js:22` |  |
-| `DocumentLoadingSourceStoreConfig` | typedef | `src/utils/documentLoadingConfig.js:59` |  |
+| `DocumentLoadingSourceStoreConfig` | typedef | `src/utils/documentLoadingConfig.js:60` |  |
 | `DocumentLoadingWarningConfig` | typedef | `src/utils/documentLoadingConfig.js:40` |  |
-| `formatBytes` | function | `src/utils/documentLoadingConfig.js:1006` |  |
-| `formatCount` | function | `src/utils/documentLoadingConfig.js:1024` |  |
-| `getPerformanceWindowPageCount` | function | `src/utils/documentLoadingConfig.js:833` | Return the page-count window where auto mode should still behave like the fast, eager path. |
-| `getReportedCoreCount` | function | `src/utils/documentLoadingConfig.js:180` |  |
+| `formatBytes` | function | `src/utils/documentLoadingConfig.js:1009` |  |
+| `formatCount` | function | `src/utils/documentLoadingConfig.js:1027` |  |
+| `getPerformanceWindowPageCount` | function | `src/utils/documentLoadingConfig.js:835` | Return the page-count window where auto mode should still behave like the fast, eager path. |
+| `getReportedCoreCount` | function | `src/utils/documentLoadingConfig.js:181` |  |
 | `PdfToImageMode` | typedef | `src/utils/documentLoadingConfig.js:24` |  |
-| `resolvePdfRenderConfigForPageCount` | function | `src/utils/documentLoadingConfig.js:588` | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
-| `resolvePdfWorkerPlanForPageCount` | function | `src/utils/documentLoadingConfig.js:524` | Resolve the PDF page-worker policy for the current document size. |
-| `resolveRecommendedRasterWorkerCount` | function | `src/utils/documentLoadingConfig.js:214` |  |
-| `resolveRecommendedWorkerCount` | function | `src/utils/documentLoadingConfig.js:193` |  |
+| `resolvePdfRenderConfigForPageCount` | function | `src/utils/documentLoadingConfig.js:590` | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
+| `resolvePdfWorkerPlanForPageCount` | function | `src/utils/documentLoadingConfig.js:526` | Resolve the PDF page-worker policy for the current document size. |
+| `resolveRecommendedRasterWorkerCount` | function | `src/utils/documentLoadingConfig.js:215` |  |
+| `resolveRecommendedWorkerCount` | function | `src/utils/documentLoadingConfig.js:194` |  |
 | `RuntimeMemoryTier` | typedef | `src/utils/documentLoadingConfig.js:19` |  |
-| `shouldRecommendStopping` | function | `src/utils/documentLoadingConfig.js:1032` |  |
+| `shouldRecommendStopping` | function | `src/utils/documentLoadingConfig.js:1035` |  |
 | `SourceStoreMode` | typedef | `src/utils/documentLoadingConfig.js:15` |  |
 | `SourceStoreProtection` | typedef | `src/utils/documentLoadingConfig.js:16` |  |
-| `StopRecommendationInput` | typedef | `src/utils/documentLoadingConfig.js:144` |  |
+| `StopRecommendationInput` | typedef | `src/utils/documentLoadingConfig.js:145` |  |
 | `ThumbnailLoadingStrategy` | typedef | `src/utils/documentLoadingConfig.js:17` |  |
 | `ThumbnailSourceStrategy` | typedef | `src/utils/documentLoadingConfig.js:18` |  |
 | `buildAliasDetailRow` | function | `src/utils/documentMetadata.js:183` |  |

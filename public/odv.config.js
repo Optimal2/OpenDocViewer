@@ -586,6 +586,11 @@
         // keep the viewer waiting on that spot in the sequence for too long.
         prefetchRequestTimeoutMs: 10000,
 
+        // Refuse unusually large source downloads before or during transfer. Content-Length is
+        // checked when available, and streamed downloads are still capped if the header is absent
+        // or wrong. Increase only when legitimate source files in this deployment need it.
+        maxSourceSizeMiB: 512,
+
         // If the first N source URLs all fail as unavailable (401/403/404/410 or HTML/error
         // payloads) and no source has loaded successfully, treat the host session/tickets as
         // expired and stop the run instead of trying hundreds of doomed URLs.

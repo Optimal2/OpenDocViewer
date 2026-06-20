@@ -14,8 +14,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/DocumentConsumerWrapper.jsx` | 172 | 1 | 2 | high | OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: \[{ url, ext?, fileIn |
 | `src/components/DocumentLoader/batchHandler.js` | 226 | 0 | 7 | high | OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread. |
 | `src/components/DocumentLoader/DemoControls.jsx` | 101 | 0 | 1 | high | OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: &quot;Total pages/files&quot; + JPG/PNG/TIF/PDF buttons + a new &quot;Mix&quot; button. |
-| `src/components/DocumentLoader/DocumentLoader.js` | 2170 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
-| `src/components/DocumentLoader/documentLoaderUtils.js` | 254 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
+| `src/components/DocumentLoader/DocumentLoader.js` | 2172 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
+| `src/components/DocumentLoader/documentLoaderUtils.js` | 389 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | `src/components/DocumentLoader/LoadPressureDialog.jsx` | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
 | `src/components/DocumentLoader/mainThreadRenderer.js` | 509 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
 | `src/components/DocumentLoader/sources/explicitListSource.js` | 231 | 1 | 11 | high | OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically. |
@@ -76,7 +76,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/PerformanceMonitor.jsx` | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | `src/schemas/portableBundle.js` | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
 | `src/types/jsdoc-types.js` | 101 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
-| `src/utils/documentLoadingConfig.js` | 1045 | 12 | 32 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
+| `src/utils/documentLoadingConfig.js` | 1048 | 12 | 32 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | `src/utils/documentMetadata.js` | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
 | `src/utils/idUtils.js` | 64 | 1 | 4 | high | OpenDocViewer — small opaque identifier helpers. |
 | `src/utils/localizedValue.js` | 113 | 6 | 6 | high | Localized string resolver for admin-supplied config values. |
