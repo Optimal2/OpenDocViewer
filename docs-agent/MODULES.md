@@ -17,7 +17,7 @@ File count: 3. Line count: 763. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 13. Line count: 6612. JSDoc symbol count: 82.
+File count: 13. Line count: 6624. JSDoc symbol count: 82.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.

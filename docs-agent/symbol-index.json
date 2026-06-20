@@ -10946,7 +10946,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1804,
+    "line": 1815,
     "description": "",
     "params": [],
     "returns": [
@@ -10964,7 +10964,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1744,
+    "line": 1755,
     "description": "",
     "params": [
       {
@@ -10984,7 +10984,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1777,
+    "line": 1788,
     "description": "",
     "params": [
       {
@@ -11004,7 +11004,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1797,
+    "line": 1808,
     "description": "",
     "params": [
       {
