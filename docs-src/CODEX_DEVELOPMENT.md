@@ -6,7 +6,7 @@ This guide is the compact, agent-friendly entry point for OpenDocViewer developm
 
 OpenDocViewer is a generic browser-based document viewer for PDF, TIFF, and raster image files. It can be used standalone, embedded, or started by a host application through a normalized Portable Document Bundle.
 
-OpenDocViewer should stay host-neutral. IbsPackager manual-review support belongs in the integration contract and in IbsPackager host code unless a generic viewer capability is missing.
+OpenDocViewer should stay host-neutral. Manual-review behavior belongs in the host integration contract and in host application code unless a generic viewer capability is missing.
 
 Use these files as the main map:
 
@@ -36,7 +36,7 @@ Use these files as the main map:
 ## Safe Change Workflow
 
 1. Inspect files before editing. Do not infer payload schemas, runtime config keys, routes, or deployment behavior from names alone.
-2. Keep changes scoped to OpenDocViewer unless the task explicitly requires matching host changes in IbsPackager or OpenModulePlatform.
+2. Keep changes scoped to OpenDocViewer unless the task explicitly requires matching host or platform changes outside this repository.
 3. Preserve the viewer/host boundary: ODV renders documents; host applications own permissions, workflow state, and business commands.
 4. Update docs when bootstrap behavior, bundle shape, runtime config, deployment, or public integration guidance changes.
 5. Run the narrowest useful validation.
@@ -63,10 +63,10 @@ Default local paths and endpoints:
 ```text
 OpenDocViewer repo:      <workspace>\OpenDocViewer
 Optional platform repo:  <workspace>\OpenModulePlatform
-Optional host repo:      <workspace>\IbsPackager
-Runtime root:            E:\OMP
-Portal URL:              http://localhost:8088/
-IbsPackager URL:         http://localhost:8088/ibspackager/
+Optional host repo:      <workspace>\<host-app-repo>
+Runtime root:            <runtime-root>
+Portal URL:              http://localhost:<portal-port>/
+Host app URL:            http://localhost:<portal-port>/<host-app>/
 ```
 
 These are local development defaults. Do not hardcode user-specific paths into reusable scripts unless the task explicitly asks for a local-only script.
@@ -127,11 +127,11 @@ the runtime.
 
 ## Integration Notes
 
-The canonical host contract is Portable Document Bundle v1. For future IbsPackager manual-review integration:
+The canonical host contract is Portable Document Bundle v1. For future manual-review host integrations:
 
-- IbsPackager should provide browser-reachable file URLs and review metadata to ODV.
+- The host application should provide browser-reachable file URLs and review metadata to ODV.
 - ODV should display files and metadata without owning review approval/rejection state.
-- Review commands, authorization, audit rules, and temporary URL issuance should remain in IbsPackager and the platform.
+- Review commands, authorization, audit rules, and temporary URL issuance should remain in the host application and platform.
 - Add generic ODV capabilities only when they are useful beyond one host application.
 
 Read `docs-src/integrations.md` before changing `src/integrations/bootstrapRuntime.js`, `src/integrations/normalizePortableBundle.js`, or `src/components/DocumentLoader/sources/explicitListSource.js`.

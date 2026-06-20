@@ -571,11 +571,11 @@
         strategy: 'sequential',
 
         // Only used when strategy === 'parallel-limited'.
-        // Customer-optimised profile: keep the backend pressure moderate, but fail fast so one
+        // Deployment-tuned profile: keep the backend pressure moderate, but fail fast so one
         // slow source does not make the whole viewer feel stuck.
         prefetchConcurrency: 4,
 
-        // Retries are disabled in this profile. In the observed customer environment, waiting for
+        // Retries are disabled in this profile. In observed production deployments, waiting for
         // another conservative attempt made the thumbnail pane feel slower than surfacing the
         // failed source quickly.
         prefetchRetryCount: 0,
@@ -705,7 +705,7 @@
         thumbnailMaxWidth: 220,
         thumbnailMaxHeight: 310,
 
-        // Customer-optimised thumbnail scheduling: warm the pane in the background while the viewer
+        // Deployment-tuned thumbnail scheduling: warm the pane in the background while the viewer
         // still prioritises full-size page assets.
         thumbnailLoadingStrategy: 'eager',
 
