@@ -72,6 +72,18 @@ function touchLru(map, key, limit) {
   setLru(map, key, value, limit);
 }
 
+function releaseCanvas(canvas) {
+  if (!canvas) return;
+  canvas.width = 0;
+  canvas.height = 0;
+}
+
+function releaseTiffIfdBuffers(ifd) {
+  if (!ifd || typeof ifd !== 'object') return;
+  try { delete ifd.data; } catch {}
+  try { delete ifd.rgba; } catch {}
+}
+
 function partitionContiguous(items, partitionCount) {
   const list = Array.isArray(items) ? items : [];
   const count = Math.max(1, Math.min(list.length || 1, Math.floor(Number(partitionCount) || 1)));
@@ -398,6 +410,9 @@ export class PageAssetRenderer {
       try { await entry.loadingTask?.destroy?.(); } catch {}
     }
     this.pdfCache.clear();
+    for (const entry of this.tiffCache.values()) {
+      try { entry?.dispose?.(); } catch {}
+    }
     this.tiffCache.clear();
     this.bufferCache.clear();
   }
@@ -442,7 +457,17 @@ export class PageAssetRenderer {
     if (!this.tiffCache.has(key)) {
       const buffer = await this.getSourceBuffer(key);
       const ifds = decodeUTIF(buffer);
-      setLru(this.tiffCache, key, { buffer, ifds, dispose() {} }, this.config.maxOpenTiffDocuments);
+      setLru(this.tiffCache, key, {
+        buffer,
+        ifds,
+        dispose() {
+          for (const ifd of Array.isArray(this.ifds) ? this.ifds : []) {
+            releaseTiffIfdBuffers(ifd);
+          }
+          this.ifds = [];
+          this.buffer = null;
+        },
+      }, this.config.maxOpenTiffDocuments);
     }
     touchLru(this.tiffCache, key, this.config.maxOpenTiffDocuments);
     const entry = this.tiffCache.get(key);
@@ -744,6 +769,7 @@ export class PageAssetRenderer {
     const pdf = await this.getPdfDocument(descriptor.sourceKey);
     const pageNumber = Number(descriptor.pageIndex || 0) + 1;
     const page = await pdf.getPage(pageNumber);
+    let canvas = null;
 
     try {
       const baseViewport = page.getViewport({ scale: 1 });
@@ -757,7 +783,7 @@ export class PageAssetRenderer {
         : Math.max(0.5, Number(options.fullPageScale) || Number(this.config.fullPageScale) || 2.0);
       const viewport = page.getViewport({ scale: targetScale });
 
-      const canvas = document.createElement('canvas');
+      canvas = document.createElement('canvas');
       canvas.width = Math.max(1, Math.ceil(viewport.width));
       canvas.height = Math.max(1, Math.ceil(viewport.height));
       const ctx = canvas.getContext('2d', { alpha: false });
@@ -773,6 +799,7 @@ export class PageAssetRenderer {
       };
     } finally {
       try { page.cleanup(); } catch {}
+      releaseCanvas(canvas);
     }
   }
 
@@ -780,80 +807,88 @@ export class PageAssetRenderer {
     const tiff = await this.getTiffDocument(descriptor.sourceKey);
     const ifd = tiff.ifds[Math.max(0, Number(descriptor.pageIndex) || 0)];
     if (!ifd) throw new Error(`Missing TIFF page ${descriptor.pageIndex} for ${descriptor.sourceKey}`);
+    let sourceCanvas = null;
+    let thumbCanvas = null;
 
-    const compressionArr = getTagArray(ifd, 259);
-    const compression = compressionArr && compressionArr.length ? (compressionArr[0] >>> 0) : 0;
-    if (compression === 6) {
-      const jpegBlob = buildOjpegJpeg(tiff.buffer, ifd);
-      if (jpegBlob) {
-        if (options.variant === 'full') {
-          const decoded = await loadBlobForDrawing(jpegBlob);
-          try {
-            return {
-              blob: jpegBlob,
-              width: decoded.width,
-              height: decoded.height,
-              mimeType: 'image/jpeg',
-            };
-          } finally {
-            decoded.close();
+    try {
+      const compressionArr = getTagArray(ifd, 259);
+      const compression = compressionArr && compressionArr.length ? (compressionArr[0] >>> 0) : 0;
+      if (compression === 6) {
+        const jpegBlob = buildOjpegJpeg(tiff.buffer, ifd);
+        if (jpegBlob) {
+          if (options.variant === 'full') {
+            const decoded = await loadBlobForDrawing(jpegBlob);
+            try {
+              return {
+                blob: jpegBlob,
+                width: decoded.width,
+                height: decoded.height,
+                mimeType: 'image/jpeg',
+              };
+            } finally {
+              decoded.close();
+            }
           }
-        }
 
-        const thumb = await scaleBlob(
-          jpegBlob,
-          Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
-          Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
-        );
+          const thumb = await scaleBlob(
+            jpegBlob,
+            Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
+            Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
+          );
+          return {
+            blob: thumb.blob,
+            width: thumb.width,
+            height: thumb.height,
+            mimeType: thumb.blob.type || 'image/png',
+          };
+        }
+      }
+
+      decodeUTIFImage(tiff.buffer, ifd);
+      const rgba = toRGBA8(ifd);
+      sourceCanvas = document.createElement('canvas');
+      sourceCanvas.width = Math.max(1, ifd.width >>> 0);
+      sourceCanvas.height = Math.max(1, ifd.height >>> 0);
+
+      const ctx = sourceCanvas.getContext('2d');
+      if (!ctx) throw new Error('Unable to acquire TIFF render canvas context');
+      const imageData = ctx.createImageData(sourceCanvas.width, sourceCanvas.height);
+      imageData.data.set(rgba);
+      ctx.putImageData(imageData, 0, 0);
+
+      if (options.variant === 'full') {
+        const blob = await canvasToBlob(sourceCanvas, 'image/png');
         return {
-          blob: thumb.blob,
-          width: thumb.width,
-          height: thumb.height,
-          mimeType: thumb.blob.type || 'image/png',
+          blob,
+          width: sourceCanvas.width,
+          height: sourceCanvas.height,
+          mimeType: 'image/png',
         };
       }
-    }
 
-    decodeUTIFImage(tiff.buffer, ifd);
-    const rgba = toRGBA8(ifd);
-    const sourceCanvas = document.createElement('canvas');
-    sourceCanvas.width = Math.max(1, ifd.width >>> 0);
-    sourceCanvas.height = Math.max(1, ifd.height >>> 0);
-
-    const ctx = sourceCanvas.getContext('2d');
-    if (!ctx) throw new Error('Unable to acquire TIFF render canvas context');
-    const imageData = ctx.createImageData(sourceCanvas.width, sourceCanvas.height);
-    imageData.data.set(rgba);
-    ctx.putImageData(imageData, 0, 0);
-
-    if (options.variant === 'full') {
-      const blob = await canvasToBlob(sourceCanvas, 'image/png');
+      const scale = fitScale(
+        sourceCanvas.width,
+        sourceCanvas.height,
+        Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
+        Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
+      );
+      thumbCanvas = document.createElement('canvas');
+      thumbCanvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
+      thumbCanvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
+      const thumbCtx = thumbCanvas.getContext('2d');
+      if (!thumbCtx) throw new Error('Unable to acquire TIFF thumbnail canvas context');
+      thumbCtx.drawImage(sourceCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
+      const thumbBlob = await canvasToBlob(thumbCanvas, 'image/png');
       return {
-        blob,
-        width: sourceCanvas.width,
-        height: sourceCanvas.height,
-        mimeType: 'image/png',
+        blob: thumbBlob,
+        width: thumbCanvas.width,
+        height: thumbCanvas.height,
+        mimeType: thumbBlob.type || 'image/png',
       };
+    } finally {
+      releaseTiffIfdBuffers(ifd);
+      releaseCanvas(thumbCanvas);
+      releaseCanvas(sourceCanvas);
     }
-
-    const scale = fitScale(
-      sourceCanvas.width,
-      sourceCanvas.height,
-      Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
-      Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
-    );
-    const thumbCanvas = document.createElement('canvas');
-    thumbCanvas.width = Math.max(1, Math.round(sourceCanvas.width * scale));
-    thumbCanvas.height = Math.max(1, Math.round(sourceCanvas.height * scale));
-    const thumbCtx = thumbCanvas.getContext('2d');
-    if (!thumbCtx) throw new Error('Unable to acquire TIFF thumbnail canvas context');
-    thumbCtx.drawImage(sourceCanvas, 0, 0, thumbCanvas.width, thumbCanvas.height);
-    const thumbBlob = await canvasToBlob(thumbCanvas, 'image/png');
-    return {
-      blob: thumbBlob,
-      width: thumbCanvas.width,
-      height: thumbCanvas.height,
-      mimeType: thumbBlob.type || 'image/png',
-    };
   }
 }

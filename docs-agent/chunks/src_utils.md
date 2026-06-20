@@ -1,14 +1,14 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 14752. JSDoc symbol count: 564.
+File count: 35. Line count: 14793. JSDoc symbol count: 564.
 
 ## src/utils/documentLoadingConfig.js
 
 OpenDocViewer — runtime helpers for fetch/render/memory policies.
 
-Exports: MAX_RELOAD_CACHE_TTL_MS, resolveRecommendedWorkerCount, DOCUMENT_LOADING_DEFAULTS, cloneDocumentLoadingConfig, countPdfPages, resolvePdfWorkerPlanForPageCount, resolvePdfRenderConfigForPageCount, applyDocumentLoadingMode, applyMemoryPressureStage, getPerformanceWindowPageCount, getDocumentLoadingConfig, isRasterImageExtension, shouldUseFullImagesForThumbnails, shouldKeepAllFullImageAssets, formatBytes, formatCount, shouldRecommendStopping
+Exports: `MAX_RELOAD_CACHE_TTL_MS`, `resolveRecommendedWorkerCount`, `DOCUMENT_LOADING_DEFAULTS`, `cloneDocumentLoadingConfig`, `countPdfPages`, `resolvePdfWorkerPlanForPageCount`, `resolvePdfRenderConfigForPageCount`, `applyDocumentLoadingMode`, `applyMemoryPressureStage`, `getPerformanceWindowPageCount`, `getDocumentLoadingConfig`, `isRasterImageExtension`, `shouldUseFullImagesForThumbnails`, `shouldKeepAllFullImageAssets`, `formatBytes`, `formatCount`, `shouldRecommendStopping`
 
-Local imports: src/utils/runtimeConfig.js, src/utils/memoryProfile.js
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/memoryProfile.js`
 
 Symbols:
 
@@ -27,9 +27,9 @@ Symbols:
 
 ## src/utils/documentMetadata.js
 
-Helpers for resolving document-level metadata from the normalized portable bundle.
+Helpers for resolving document\-level metadata from the normalized portable bundle.
 
-Exports: getBundleDocumentById, documentHasMetadata, bundleDocumentHasMetadata, buildDocumentMetadataView, buildDocumentMetadataMatrixView
+Exports: `getBundleDocumentById`, `documentHasMetadata`, `bundleDocumentHasMetadata`, `buildDocumentMetadataView`, `buildDocumentMetadataMatrixView`
 
 Symbols:
 
@@ -50,7 +50,7 @@ Symbols:
 
 OpenDocViewer — small opaque identifier helpers.
 
-Exports: createOpaqueIdFragment, createOpaqueId
+Exports: `createOpaqueIdFragment`, `createOpaqueId`
 
 Symbols:
 
@@ -61,16 +61,16 @@ Symbols:
 
 ## src/utils/localizedValue.js
 
-Localized string resolver for admin-supplied config values.
+Localized string resolver for admin\-supplied config values.
 
-Exports: resolveLocalizedValue, resolveOptionLabel
+Exports: `resolveLocalizedValue`, `resolveOptionLabel`
 
 Symbols:
 
-- `LocalizedString` (typedef) - Localized string resolver for admin-supplied config values.
+- `LocalizedString` (typedef) - Localized string resolver for admin\-supplied config values.
 - `I18nOptionsLike` (typedef) - A subset of the i18next options object we care about.
 - `I18nLike` (typedef) - Minimal shape of an i18n instance used by this module.
-- `OptionLike` (typedef) - Option-like shape used by the print reason selector.
+- `OptionLike` (typedef) - Option\-like shape used by the print reason selector.
 - `resolveLocalizedValue` (function) - Return the best string for the active language.
 - `resolveOptionLabel` (function) - Resolve a label for a reason option.
 
@@ -78,7 +78,7 @@ Symbols:
 
 OpenDocViewer — Runtime memory profile helpers.
 
-Exports: getRuntimeMemoryProfile
+Exports: `getRuntimeMemoryProfile`
 
 Symbols:
 
@@ -93,25 +93,25 @@ Symbols:
 
 OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer.
 
-Exports: handlePrevPage, handleNextPage, handleFirstPage, handleLastPage
+Exports: `handlePrevPage`, `handleNextPage`, `handleFirstPage`, `handleLastPage`
 
-Local imports: src/logging/systemLogger.js
+Local imports: `src/logging/systemLogger.js`
 
 Symbols:
 
-- `toPositiveInt` (function) - Coerce a value to a positive integer (minimum 1).
-- `isValidTotalPages` (function) - Check whether totalPages looks valid (&gt;= 1).
-- `clampPage` (function) - Clamp a page number into [1, totalPages].
-- `handlePrevPage` (constant) - Navigate to the previous page (no-op if already at page 1).
-- `handleNextPage` (constant) - Navigate to the next page (no-op if already at the last page).
-- `handleFirstPage` (constant) - Navigate to the first page (always sets page to 1).
-- `handleLastPage` (constant) - Navigate to the last page (no-op if totalPages invalid).
+- `toPositiveInt` (function) - Coerce a value to a positive integer \(minimum 1\).
+- `isValidTotalPages` (function) - Check whether totalPages looks valid \(&amp;gt;\= 1\).
+- `clampPage` (function) - Clamp a page number into \[1, totalPages\].
+- `handlePrevPage` (constant) - Navigate to the previous page \(no\-op if already at page 1\).
+- `handleNextPage` (constant) - Navigate to the next page \(no\-op if already at the last page\).
+- `handleFirstPage` (constant) - Navigate to the first page \(always sets page to 1\).
+- `handleLastPage` (constant) - Navigate to the last page \(no\-op if totalPages invalid\).
 
 ## src/utils/objectUrlRegistry.js
 
 Centralized helpers for object/blob URL lifecycle management.
 
-Exports: createTrackedObjectUrl, revokeTrackedObjectUrl, revokeTrackedObjectUrls, isTrackedObjectUrl, getTrackedObjectUrlCount, revokeAllTrackedObjectUrls
+Exports: `createTrackedObjectUrl`, `revokeTrackedObjectUrl`, `revokeTrackedObjectUrls`, `isTrackedObjectUrl`, `getTrackedObjectUrlCount`, `revokeAllTrackedObjectUrls`
 
 Symbols:
 
@@ -124,11 +124,11 @@ Symbols:
 
 ## src/utils/pageAssetRenderer.js
 
-OpenDocViewer — hybrid page-asset renderer.
+OpenDocViewer — hybrid page\-asset renderer.
 
-Exports: createPageAssetRenderer, PageAssetRenderer
+Exports: `createPageAssetRenderer`, `PageAssetRenderer`
 
-Local imports: src/utils/documentLoadingConfig.js, src/utils/pageAssetWorkerPool.js, src/utils/pdfPageWorkerPool.js, src/utils/pdfjsDocumentOptions.js
+Local imports: `src/utils/documentLoadingConfig.js`, `src/utils/pageAssetWorkerPool.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfjsDocumentOptions.js`
 
 Symbols:
 
@@ -140,11 +140,11 @@ Symbols:
 
 ## src/utils/pageAssetStore.js
 
-OpenDocViewer — Browser-side rendered page-asset storage.
+OpenDocViewer — Browser\-side rendered page\-asset storage.
 
-Exports: createPageAssetStore, PageAssetStore
+Exports: `createPageAssetStore`, `PageAssetStore`
 
-Local imports: src/logging/systemLogger.js, src/utils/documentLoadingConfig.js, src/utils/reloadCacheCrypto.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/documentLoadingConfig.js`, `src/utils/reloadCacheCrypto.js`
 
 Symbols:
 
@@ -163,11 +163,11 @@ Symbols:
 
 ## src/utils/pageAssetWorkerPool.js
 
-OpenDocViewer — Page-asset worker pool.
+OpenDocViewer — Page\-asset worker pool.
 
-Exports: createPageAssetWorkerPool, PageAssetWorkerPool
+Exports: `createPageAssetWorkerPool`, `PageAssetWorkerPool`
 
-Local imports: src/logging/systemLogger.js, ../workers/imageWorker.js?worker
+Local imports: `src/logging/systemLogger.js`, `../workers/imageWorker.js?worker`
 
 Symbols:
 
@@ -186,11 +186,11 @@ Symbols:
 
 ## src/utils/pdfBenchmark.js
 
-Opt-in generated-PDF benchmark tooling.
+Opt\-in generated\-PDF benchmark tooling.
 
-Exports: isPdfBenchmarkEnabled, runPdfGenerationBenchmark
+Exports: `isPdfBenchmarkEnabled`, `runPdfGenerationBenchmark`
 
-Local imports: src/logging/systemLogger.js, src/utils/documentLoadingConfig.js, src/utils/printPdf.js, src/utils/pdfWorkerDispatcher.js, src/utils/runtimeConfig.js, src/utils/supportDiagnostics.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/documentLoadingConfig.js`, `src/utils/printPdf.js`, `src/utils/pdfWorkerDispatcher.js`, `src/utils/runtimeConfig.js`, `src/utils/supportDiagnostics.js`
 
 Symbols:
 
@@ -201,30 +201,30 @@ Symbols:
 - `normalizeStrategies` (function) - No description.
 - `normalizeMergeModes` (function) - No description.
 - `normalizeProfile` (function) - No description.
-- `addBatchSizeCandidate` (function) - Keep a batch-size list ordered and unique.
-- `resolveBenchmarkWorkerPolicy` (function) - Resolve the PDF worker count with the same policy as generated-PDF output.
+- `addBatchSizeCandidate` (function) - Keep a batch\-size list ordered and unique.
+- `resolveBenchmarkWorkerPolicy` (function) - Resolve the PDF worker count with the same policy as generated\-PDF output.
 - `describeBenchmarkBatchPlan` (function) - Describe the actual batch plan for one benchmark run.
 - `createScenarioLabel` (function) - No description.
 - `createScenarioKey` (function) - No description.
 
 ## src/utils/pdfjsDocumentOptions.js
 
-Shared pdf.js document-loading options.
+Shared pdf.js document\-loading options.
 
-Exports: withPdfJsDocumentOptions, PDFJS_WASM_BASE_URL
+Exports: `withPdfJsDocumentOptions`, `PDFJS_WASM_BASE_URL`
 
 Symbols:
 
-- `PDFJS_WASM_BASE_URL` (constant) - Shared pdf.js document-loading options.
+- `PDFJS_WASM_BASE_URL` (constant) - Shared pdf.js document\-loading options.
 - `withPdfJsDocumentOptions` (function) - No description.
 
 ## src/utils/pdfPageWorkerPool.js
 
-OpenDocViewer - PDF page-image worker pool.
+OpenDocViewer \- PDF page\-image worker pool.
 
-Exports: createPdfPageWorkerPool, PdfPageWorkerPool
+Exports: `createPdfPageWorkerPool`, `PdfPageWorkerPool`
 
-Local imports: src/logging/systemLogger.js, ../workers/pdfPageWorker.js?worker
+Local imports: `src/logging/systemLogger.js`, `../workers/pdfPageWorker.js?worker`
 
 Symbols:
 
@@ -234,11 +234,11 @@ Symbols:
 
 ## src/utils/pdfPrebuildPlan.js
 
-OpenDocViewer - generated-PDF prebuild planning.
+OpenDocViewer \- generated\-PDF prebuild planning.
 
-Exports: normalizePdfPrebuildAllPagesConfig, getPdfPrebuildAllPagesLanguageDependency, createPdfPrebuildAllPagesVariants, createPdfPrebuildVariantKey
+Exports: `normalizePdfPrebuildAllPagesConfig`, `getPdfPrebuildAllPagesLanguageDependency`, `createPdfPrebuildAllPagesVariants`, `createPdfPrebuildVariantKey`
 
-Local imports: src/utils/localizedValue.js, src/utils/pdfPrintCacheKey.js
+Local imports: `src/utils/localizedValue.js`, `src/utils/pdfPrintCacheKey.js`
 
 Symbols:
 
@@ -257,9 +257,9 @@ Symbols:
 
 ## src/utils/pdfPrintCacheKey.js
 
-Generated-PDF cache key helpers.
+Generated\-PDF cache key helpers.
 
-Exports: normalizePdfPrintCacheLanguageMode, getPdfPrintCacheKeyOptions, isPdfPrintCacheLanguageIgnored, normalizePdfPrintCachePageNumbers, getPdfPrintCacheKey, canReuseGeneratedPdfPrint, isFullSessionPageSequence
+Exports: `normalizePdfPrintCacheLanguageMode`, `getPdfPrintCacheKeyOptions`, `isPdfPrintCacheLanguageIgnored`, `normalizePdfPrintCachePageNumbers`, `getPdfPrintCacheKey`, `canReuseGeneratedPdfPrint`, `isFullSessionPageSequence`
 
 Symbols:
 
@@ -268,114 +268,114 @@ Symbols:
 - `getPdfPrintCacheKeyOptions` (function) - No description.
 - `isPdfPrintCacheLanguageIgnored` (function) - No description.
 - `normalizePdfPrintCachePageNumbers` (function) - No description.
-- `getPdfPrintCacheKey` (function) - Compare the content-affecting print settings that determine whether an existing generated PDF can be reused.
-- `canReuseGeneratedPdfPrint` (function) - Active-page PDF output is based on the current rendered surface, including transient client-side edits such as rotation, brightness and contrast.
+- `getPdfPrintCacheKey` (function) - Compare the content\-affecting print settings that determine whether an existing generated PDF can be reused.
+- `canReuseGeneratedPdfPrint` (function) - Active\-page PDF output is based on the current rendered surface, including transient client\-side edits such as rotation, brightness and contrast.
 - `isFullSessionPageSequence` (function) - No description.
 
 ## src/utils/pdfWorkerDispatcher.js
 
-OpenDocViewer - generated PDF worker dispatcher.
+OpenDocViewer \- generated PDF worker dispatcher.
 
-Exports: resolveAutoPdfWorkerBatchSize, planPdfWorkerBatches, createPdfWithWorkerDispatcher
+Exports: `resolveAutoPdfWorkerBatchSize`, `planPdfWorkerBatches`, `createPdfWithWorkerDispatcher`
 
-Local imports: ../workers/pdfWorker.js?worker
+Local imports: `../workers/pdfWorker.js?worker`
 
 Symbols:
 
 - `PdfWorkerBatch` (typedef) - No description.
 - `PdfWorkerPlan` (typedef) - No description.
 - `clampInteger` (function) - No description.
-- `resolveAutoPdfWorkerBatchSize` (function) - Pick a conservative future batch size from a pages-per-worker target.
+- `resolveAutoPdfWorkerBatchSize` (function) - Pick a conservative future batch size from a pages\-per\-worker target.
 - `planPdfWorkerBatches` (function) - Split pages into worker tasks.
 - `throwIfAborted` (function) - No description.
 - `clampNumber` (function) - No description.
 - `countBatchJobUnits` (function) - No description.
 - `createPdfProgressPlan` (function) - No description.
 - `batchProgressUnitsFromEvent` (function) - Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par...
-- `runLimitedTasks` (function) - Run async work with a small in-process dispatcher.
+- `runLimitedTasks` (function) - Run async work with a small in\-process dispatcher.
 - `runPdfWorkerTask` (function) - No description.
 
 ## src/utils/performanceOverlayFlag.js
 
 Shared runtime toggle helpers for optional diagnostics UI.
 
-Exports: readRuntimeBooleanFlag, isPerformanceOverlayEnabled, default
+Exports: `readRuntimeBooleanFlag`, `isPerformanceOverlayEnabled`, `default`
 
 Symbols:
 
 - `escapeMetaName` (function) - No description.
-- `readRuntimeBooleanFlag` (function) - Resolve a boolean flag from (precedence order): window.
+- `readRuntimeBooleanFlag` (function) - Resolve a boolean flag from \(precedence order\): window.
 - `isPerformanceOverlayEnabled` (function) - Determine whether the diagnostics/performance overlay is enabled.
 
 ## src/utils/printCore.js
 
 Core print coordinator for the frontend.
 
-Exports: handlePrint, handlePrintCurrentComparison, handlePrintAll, handlePrintSequence, handlePrintRange
+Exports: `handlePrint`, `handlePrintCurrentComparison`, `handlePrintAll`, `handlePrintSequence`, `handlePrintRange`
 
-Local imports: src/logging/systemLogger.js, src/utils/printDom.js, src/utils/printTemplate.js, src/utils/printSanitize.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/printDom.js`, `src/utils/printTemplate.js`, `src/utils/printSanitize.js`
 
 Symbols:
 
-- `PrintOptions` (typedef) - Options for single-page printing.
-- `PageRange` (typedef) - A 1-based inclusive page range.
-- `PrintAllOptions` (typedef) - Options for printing multiple pages (all/range/sequence).
-- `PrintCandidate` (typedef) - Internal: candidate node for &quot;largest visible&quot; heuristics.
-- `PrintHeaderCfg` (typedef) - Print header config (runtime) consumed by the print overlay logic.
-- `HiddenIframe` (typedef) - Return type for the hidden-iframe factory.
+- `PrintOptions` (typedef) - Options for single\-page printing.
+- `PageRange` (typedef) - A 1\-based inclusive page range.
+- `PrintAllOptions` (typedef) - Options for printing multiple pages \(all/range/sequence\).
+- `PrintCandidate` (typedef) - Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics.
+- `PrintHeaderCfg` (typedef) - Print header config \(runtime\) consumed by the print overlay logic.
+- `HiddenIframe` (typedef) - Return type for the hidden\-iframe factory.
 - `isVisiblyMeasurable` (function) - Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.
-- `pickLargestVisibleElement` (function) - Best-effort: pick the largest visible or inside a container (or document).
+- `pickLargestVisibleElement` (function) - Best\-effort: pick the largest visible or inside a container \(or document\).
 - `getPrintableDataUrl` (function) - Safely derive a printable data URL from an element that is either a or an .
-- `resolveOrientation` (function) - Compute page orientation from dimensions when options.orientation === 'auto'.
+- `resolveOrientation` (function) - Compute page orientation from dimensions when options.orientation \=\=\= 'auto'.
 - `getODVConfig` (function) - Read runtime configuration from the globals populated by public/odv.config.js .
 - `resolveActiveNode` (function) - Attempt to resolve the currently active visual node to print.
 
 ## src/utils/printDom.js
 
-OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs (no doc.write), wait until images reach a terminal state, then trigger window.print().
+OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).
 
-Exports: renderSingleDocument, renderMultiDocument
+Exports: `renderSingleDocument`, `renderMultiDocument`
 
-Local imports: src/logging/systemLogger.js, src/utils/printTemplate.js, src/utils/printSanitize.js, src/utils/localizedValue.js, src/utils/printWatermark.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/printSanitize.js`, `src/utils/localizedValue.js`, `src/utils/printWatermark.js`
 
 Symbols:
 
-- `PrintOverlayCfg` (typedef) - Print overlay config (runtime) consumed by the print overlay logic.
+- `PrintOverlayCfg` (typedef) - Print overlay config \(runtime\) consumed by the print overlay logic.
 - `TokenContext` (typedef) - Token context used by templates.
 - `tr` (function) - Tiny helper to translate with safe fallback.
-- `normalizeNonNegativeNumber` (function) - Normalize an unknown configuration value to a non-negative number.
+- `normalizeNonNegativeNumber` (function) - Normalize an unknown configuration value to a non\-negative number.
 - `normalizeApplyTo` (function) - Normalize runtime overlay application mode.
 - `shouldApplyOverlay` (function) - No description.
 - `normalizePageOrientation` (function) - No description.
 - `normalizeTrustedExtraCss` (function) - No description.
 - `enabled` (function) - No description.
-- `buildPrintCss` (function) - Build the print-only CSS string (inlined within the print iframe).
+- `buildPrintCss` (function) - Build the print\-only CSS string \(inlined within the print iframe\).
 - `ensureHead` (function) - No description.
 - `ensureBody` (function) - No description.
 
 ## src/utils/printParse.js
 
-OpenDocViewer — Print Sequence Parser Parse a user-entered "Custom pages" string into a sequence of page indices.
+OpenDocViewer — Print Sequence Parser Parse a user\-entered "Custom pages" string into a sequence of page indices.
 
-Exports: parsePrintSequence
+Exports: `parsePrintSequence`
 
 Symbols:
 
 - `ParseResult` (typedef) - Result of parsing a custom pages string.
 - `tr` (function) - Tiny helper to translate with safe fallback.
-- `parsePrintSequence` (function) - Parse &quot;Custom pages&quot; into a sequence.
+- `parsePrintSequence` (function) - Parse &amp;quot;Custom pages&amp;quot; into a sequence.
 
 ## src/utils/printPdf.js
 
 OpenDocViewer — Generated PDF print backend.
 
-Exports: createPrintPdfBlob, downloadPdfBlob, printPdfBlob, collectPrintablePdfSources, createPdfFromDocumentHandle, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison
+Exports: `createPrintPdfBlob`, `downloadPdfBlob`, `printPdfBlob`, `collectPrintablePdfSources`, `createPdfFromDocumentHandle`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`
 
-Local imports: src/logging/systemLogger.js, src/utils/printTemplate.js, src/utils/localizedValue.js, src/utils/printSanitize.js, src/utils/printWatermark.js, src/utils/documentLoadingConfig.js, src/utils/pdfWorkerDispatcher.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/printTemplate.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`, `src/utils/printWatermark.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfWorkerDispatcher.js`
 
 Symbols:
 
-- `escapeRegExp` (function) - Escape regular-expression metacharacters in literal text.
+- `escapeRegExp` (function) - Escape regular\-expression metacharacters in literal text.
 - `PdfPrintOptions` (typedef) - No description.
 - `PdfTextStyleHints` (typedef) - No description.
 - `PdfTemplateCssStyleRule` (typedef) - No description.
@@ -383,7 +383,7 @@ Symbols:
 - `PdfRichColumn` (typedef) - No description.
 - `PdfRichLine` (typedef) - No description.
 - `asNumber` (function) - Convert a value to a finite number for PDF layout calculations.
-- `normalizeQuality` (function) - Normalize canvas/PDF image quality to the browser-supported 0..1 range.
+- `normalizeQuality` (function) - Normalize canvas/PDF image quality to the browser\-supported 0..1 range.
 - `clamp01` (function) - Clamp a numeric value to the inclusive 0..1 range.
 - `createAbortError` (function) - No description.
 - `throwIfAborted` (function) - Stop PDF generation as soon as the caller cancels the operation.
@@ -392,27 +392,27 @@ Symbols:
 
 OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules.
 
-Exports: isSafeImageSrc
+Exports: `isSafeImageSrc`
 
 Symbols:
 
-- `isSafeImageSrc` (function) - Allow-list image sources used for printing.
+- `isSafeImageSrc` (function) - Allow\-list image sources used for printing.
 
 ## src/utils/printTemplate.js
 
-OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.
+OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 
-Exports: escapeHtml, resolveCopyMarkerText, getByPath, makeBaseTokenContext, makePageTokenContext, applyTemplateTokensEscaped
+Exports: `escapeHtml`, `resolveCopyMarkerText`, `getByPath`, `makeBaseTokenContext`, `makePageTokenContext`, `applyTemplateTokensEscaped`
 
 Symbols:
 
 - `escapeHtmlSegment` (function) - Escape raw text characters for HTML text context.
-- `zeroPad2` (function) - Format a non-negative date/time component as at least two digits.
-- `formatDateTokens` (function) - Format the built-in print date tokens.
+- `zeroPad2` (function) - Format a non\-negative date/time component as at least two digits.
+- `formatDateTokens` (function) - Format the built\-in print date tokens.
 - `isPlainObject` (function) - No description.
-- `normalizePositiveInteger` (function) - Normalize page/document counters to a non-negative integer.
-- `hasPrintableValue` (function) - Treat null-like host values as absent so conditional blocks suppress their whole label/value pair.
-- `resolvePriorityObjectValueText` (function) - Resolve the first printable display value from a host-supplied metadata object.
+- `normalizePositiveInteger` (function) - Normalize page/document counters to a non\-negative integer.
+- `hasPrintableValue` (function) - Treat null\-like host values as absent so conditional blocks suppress their whole label/value pair.
+- `resolvePriorityObjectValueText` (function) - Resolve the first printable display value from a host\-supplied metadata object.
 - `valueToText` (function) - No description.
 - `optionalText` (function) - No description.
 - `isPresentText` (function) - Test whether optionalText returned a usable string.
@@ -421,17 +421,17 @@ Symbols:
 
 ## src/utils/printUtils.js
 
-OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.
+OpenDocViewer — Print Utilities Facade Re\-export the stable print API and parser from the internal modules.
 
-Exports: handlePrint, handlePrintAll, handlePrintCurrentComparison, handlePrintRange, handlePrintSequence, parsePrintSequence, handlePdfOutput, handlePdfCurrent, handlePdfCurrentComparison, createPrintPdfBlob, printPdfBlob, downloadPdfBlob, default
+Exports: `handlePrint`, `handlePrintAll`, `handlePrintCurrentComparison`, `handlePrintRange`, `handlePrintSequence`, `parsePrintSequence`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `createPrintPdfBlob`, `printPdfBlob`, `downloadPdfBlob`, `default`
 
-Local imports: src/utils/printCore.js, src/utils/printParse.js, src/utils/printPdf.js
+Local imports: `src/utils/printCore.js`, `src/utils/printParse.js`, `src/utils/printPdf.js`
 
 ## src/utils/printWatermark.js
 
 OpenDocViewer — Print watermark mode helpers.
 
-Exports: normalizeWatermarkMode, resolveWatermarkMode, resolveWatermarkAssetSrc, default
+Exports: `normalizeWatermarkMode`, `resolveWatermarkMode`, `resolveWatermarkAssetSrc`, `default`
 
 Symbols:
 
@@ -445,7 +445,7 @@ Symbols:
 
 Resolve a public asset path against the viewer base URL.
 
-Exports: getPublicAssetUrl, default
+Exports: `getPublicAssetUrl`, `default`
 
 Symbols:
 
@@ -453,21 +453,21 @@ Symbols:
 
 ## src/utils/reloadCacheCrypto.js
 
-Short-lived reload-cache key helpers.
+Short\-lived reload\-cache key helpers.
 
-Exports: getReloadCacheAesKeyStorageState, getReloadCacheAesKey
+Exports: `getReloadCacheAesKeyStorageState`, `getReloadCacheAesKey`
 
 Symbols:
 
-- `STORAGE_PREFIX` (constant) - Short-lived reload-cache key helpers.
+- `STORAGE_PREFIX` (constant) - Short\-lived reload\-cache key helpers.
 - `getReloadCacheAesKeyStorageState` (function) - No description.
 - `getReloadCacheAesKey` (function) - No description.
 
 ## src/utils/reloadCacheIdentity.js
 
-Stable identities for the opt-in reload/document cache.
+Stable identities for the opt\-in reload/document cache.
 
-Exports: stableHash, createReloadCacheSessionId, describeDocumentSourceKey, createDocumentSourceKey, createRenderAssetSignature, createPersistedPageAssetKey
+Exports: `stableHash`, `createReloadCacheSessionId`, `describeDocumentSourceKey`, `createDocumentSourceKey`, `createRenderAssetSignature`, `createPersistedPageAssetKey`
 
 Symbols:
 
@@ -481,11 +481,11 @@ Symbols:
 
 ## src/utils/renderDecodeBenchmark.js
 
-Opt-in render/decode benchmark tooling for the already loaded document session.
+Opt\-in render/decode benchmark tooling for the already loaded document session.
 
-Exports: isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark
+Exports: `isRenderDecodeBenchmarkEnabled`, `runRenderDecodeBenchmark`
 
-Local imports: src/logging/systemLogger.js, src/utils/pageAssetRenderer.js, src/utils/pdfPageWorkerPool.js, src/utils/documentLoadingConfig.js, src/utils/supportDiagnostics.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/pageAssetRenderer.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/documentLoadingConfig.js`, `src/utils/supportDiagnostics.js`
 
 Symbols:
 
@@ -506,18 +506,18 @@ Symbols:
 
 OpenDocViewer — conservative raster surface bounds.
 
-Exports: MAX_RENDER_SURFACE_DIMENSION, MAX_RENDER_SURFACE_PIXELS, clampRenderSurfaceSize
+Exports: `MAX_RENDER_SURFACE_DIMENSION`, `MAX_RENDER_SURFACE_PIXELS`, `clampRenderSurfaceSize`
 
 Symbols:
 
 - `MAX_RENDER_SURFACE_DIMENSION` (constant) - OpenDocViewer — conservative raster surface bounds.
-- `clampRenderSurfaceSize` (function) - Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio.
+- `clampRenderSurfaceSize` (function) - Clamp a requested raster surface into a conservative browser\-safe envelope while preserving its aspect ratio.
 
 ## src/utils/runtimeConfig.js
 
 Runtime configuration helpers.
 
-Exports: getRuntimeConfig, getKeyboardPrintShortcutBehavior, isDocumentMetadataUiEnabled, normalizePrintDefaultMode, normalizeCustomFitWidthFactorPercent, normalizeOptionalCustomFitFactorPercent, normalizeCustomFitSizeLimitPreference, getViewerDefaultZoomMode, getViewerCustomFitWidthFactorPercent, getViewerCustomFitSizeLimits, getPrintDefaultMode, getPrintSelectionWorkspaceConfig, getViewerEdgeScrollPageTurnConfig, getViewerProblemNoticeConfig
+Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`
 
 Symbols:
 
@@ -529,18 +529,18 @@ Symbols:
 - `ViewerEdgeScrollPageTurnConfig` (typedef) - No description.
 - `ViewerProblemNoticeConfig` (typedef) - No description.
 - `getRuntimeConfig` (function) - Read the merged runtime configuration from the browser environment.
-- `getKeyboardPrintShortcutBehavior` (function) - Resolve the configured Ctrl/Cmd+P behavior.
+- `getKeyboardPrintShortcutBehavior` (function) - Resolve the configured Ctrl/Cmd\+P behavior.
 - `isDocumentMetadataUiEnabled` (function) - Resolve whether document metadata UI affordances should be available.
-- `normalizePrintDefaultMode` (function) - Normalize a user-facing print default mode.
-- `normalizeCustomFitWidthFactorPercent` (function) - Normalize a custom fit-width factor.
+- `normalizePrintDefaultMode` (function) - Normalize a user\-facing print default mode.
+- `normalizeCustomFitWidthFactorPercent` (function) - Normalize a custom fit\-width factor.
 
 ## src/utils/sourceTempStore.js
 
-OpenDocViewer — Browser-side temporary source storage.
+OpenDocViewer — Browser\-side temporary source storage.
 
-Exports: createSourceTempStore, SourceTempStore
+Exports: `createSourceTempStore`, `SourceTempStore`
 
-Local imports: src/logging/systemLogger.js, src/utils/documentLoadingConfig.js, src/utils/reloadCacheCrypto.js
+Local imports: `src/logging/systemLogger.js`, `src/utils/documentLoadingConfig.js`, `src/utils/reloadCacheCrypto.js`
 
 Symbols:
 
@@ -559,11 +559,11 @@ Symbols:
 
 ## src/utils/supportDiagnostics.js
 
-Support diagnostics helpers for opt-in troubleshooting tools.
+Support diagnostics helpers for opt\-in troubleshooting tools.
 
-Exports: loadLatestPdfBenchmarkResult, saveLatestPdfBenchmarkResult, loadLatestRenderDecodeBenchmarkResult, saveLatestRenderDecodeBenchmarkResult, collectSupportDiagnostics, downloadJsonFile
+Exports: `loadLatestPdfBenchmarkResult`, `saveLatestPdfBenchmarkResult`, `loadLatestRenderDecodeBenchmarkResult`, `saveLatestRenderDecodeBenchmarkResult`, `collectSupportDiagnostics`, `downloadJsonFile`
 
-Local imports: src/utils/runtimeConfig.js, src/utils/pdfPrebuildPlan.js, src/utils/pdfPrintCacheKey.js
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/pdfPrebuildPlan.js`, `src/utils/pdfPrintCacheKey.js`
 
 Symbols:
 
@@ -584,9 +584,9 @@ Symbols:
 
 Lightweight persisted viewer preferences.
 
-Exports: getViewerPreferences, setViewerPreferences, getThemePreference, setThemePreference, getThemeModePreference, setThemeModePreference, getLanguagePreference, setLanguagePreference, getPrintDefaultModePreference, setPrintDefaultModePreference, clearPrintDefaultModePreference, getDefaultZoomModePreference, setDefaultZoomModePreference, clearDefaultZoomModePreference, getCustomFitWidthFactorPreference, setCustomFitWidthFactorPreference, clearCustomFitWidthFactorPreference, getCustomFitSizeLimitPreference, setCustomFitSizeLimitPreference, clearCustomFitSizeLimitPreference
+Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`
 
-Local imports: src/utils/runtimeConfig.js
+Local imports: `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -594,7 +594,7 @@ Symbols:
 - `ViewerPreferences` (typedef) - No description.
 - `isExplicitTheme` (function) - No description.
 - `isThemeMode` (function) - No description.
-- `normalizeThemeModeValue` (function) - Normalize legacy theme-mode values.
+- `normalizeThemeModeValue` (function) - Normalize legacy theme\-mode values.
 - `normalizeDefaultZoomModePreference` (function) - No description.
 - `normalizePreferences` (function) - No description.
 - `parsePreferences` (function) - No description.
@@ -607,21 +607,21 @@ Symbols:
 
 OpenDocViewer — Zoom utilities.
 
-Exports: calculateFitToScreenZoom, calculateFitToWidthZoom, handleZoomIn, handleZoomOut
+Exports: `calculateFitToScreenZoom`, `calculateFitToWidthZoom`, `handleZoomIn`, `handleZoomOut`
 
-Local imports: src/logging/systemLogger.js
+Local imports: `src/logging/systemLogger.js`
 
 Symbols:
 
-- `MIN_ZOOM` (constant) - Minimum allowed zoom factor (5%).
-- `MAX_ZOOM` (constant) - Maximum allowed zoom factor (800%).
-- `ZOOM_IN_MULTIPLIER` (constant) - Zoom-in multiplier: each click increases zoom by 10% of the current zoom level (1.1x).
-- `ZOOM_OUT_MULTIPLIER` (constant) - Zoom-out multiplier: inverse of +10%, approximately a 9.09% decrease.
+- `MIN_ZOOM` (constant) - Minimum allowed zoom factor \(5%\).
+- `MAX_ZOOM` (constant) - Maximum allowed zoom factor \(800%\).
+- `ZOOM_IN_MULTIPLIER` (constant) - Zoom\-in multiplier: each click increases zoom by 10% of the current zoom level \(1.1x\).
+- `ZOOM_OUT_MULTIPLIER` (constant) - Zoom\-out multiplier: inverse of \+10%, approximately a 9.09% decrease.
 - `ZOOM_CHANGE_THRESHOLD` (constant) - Treat zoom deltas smaller than this as unchanged to avoid redundant React updates.
 - `ZoomCalcOptions` (typedef) - Optional calculation overrides.
-- `clamp` (function) - Clamp a numeric value into the inclusive range [min, max].
+- `clamp` (function) - Clamp a numeric value into the inclusive range \[min, max\].
 - `isPositiveFiniteNumber` (function) - No description.
 - `hasValidDimensions` (function) - No description.
 - `normalizeOptionalFactor` (function) - No description.
-- `getViewport` (function) - Resolve an exact viewport element from either a DOM node or a React-like ref.
+- `getViewport` (function) - Resolve an exact viewport element from either a DOM node or a React\-like ref.
 - `getRenderableSize` (function) - Read the intrinsic size of the active render surface.

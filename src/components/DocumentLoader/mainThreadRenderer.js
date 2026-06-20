@@ -32,6 +32,18 @@ import { createTrackedObjectUrl } from '../../utils/objectUrlRegistry.js';
 /** Upper bound for reconstructed OJPEG entropy-coded scan data. */
 const MAX_OJPEG_SCAN_SIZE_BYTES = 512 * 1024 * 1024;
 
+function releaseCanvas(canvas) {
+  if (!canvas) return;
+  canvas.width = 0;
+  canvas.height = 0;
+}
+
+function releaseTiffIfdBuffers(ifd) {
+  if (!ifd || typeof ifd !== 'object') return;
+  try { delete ifd.data; } catch {}
+  try { delete ifd.rgba; } catch {}
+}
+
 /**
  * Render job passed to the main-thread renderer.
  * @typedef {Object} RenderJob
@@ -90,6 +102,8 @@ function ensurePdfWorker() {
 export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, isMounted) => {
   if (isMounted && isMounted.current === false) return;
 
+  let loadingTask = null;
+  let pdf = null;
   try {
     // Initialize (or reuse) the pdf.js worker (identical in dev/build).
     ensurePdfWorker();
@@ -108,7 +122,8 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       dataBuffer = await resp.arrayBuffer();
     }
 
-    const pdf = await pdfjsLib.getDocument(withPdfJsDocumentOptions({ data: dataBuffer.slice(0) })).promise;
+    loadingTask = pdfjsLib.getDocument(withPdfJsDocumentOptions({ data: dataBuffer.slice(0) }));
+    pdf = await loadingTask.promise;
 
     // pdf.getPage(...) is 1-based; translate (pageStartIndex .. +pagesInvolved-1) → (1..N)
     const first = job.pageStartIndex + 1;
@@ -118,51 +133,57 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       if (isMounted && isMounted.current === false) return;
 
       const page = await pdf.getPage(i);
-      const viewport = page.getViewport({ scale: 1.5 });
+      let canvas = null;
+      try {
+        const viewport = page.getViewport({ scale: 1.5 });
 
-      const canvas = document.createElement('canvas');
-      const ctx = canvas.getContext('2d');
-      if (!ctx) throw new Error('Could not obtain 2D context for PDF canvas');
-      canvas.width = Math.ceil(viewport.width);
-      canvas.height = Math.ceil(viewport.height);
+        canvas = document.createElement('canvas');
+        const ctx = canvas.getContext('2d');
+        if (!ctx) throw new Error('Could not obtain 2D context for PDF canvas');
+        canvas.width = Math.ceil(viewport.width);
+        canvas.height = Math.ceil(viewport.height);
 
-      await page.render({ canvasContext: ctx, viewport }).promise;
+        await page.render({ canvasContext: ctx, viewport }).promise;
 
-      // Yield to the event loop to keep the UI responsive on low-core machines
-      await new Promise((r) => setTimeout(r, 0));
-      if (isMounted && isMounted.current === false) return;
+        // Yield to the event loop to keep the UI responsive on low-core machines
+        await new Promise((r) => setTimeout(r, 0));
+        if (isMounted && isMounted.current === false) return;
 
-      // Convert the rendered canvas to a Blob → object URL
-      const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
-      if (!blob) throw new Error('Failed to create blob from PDF canvas');
+        // Convert the rendered canvas to a Blob → object URL
+        const blob = await new Promise((resolve) => canvas.toBlob(resolve, 'image/png'));
+        if (!blob) throw new Error('Failed to create blob from PDF canvas');
 
-      const url = createTrackedObjectUrl(blob);
+        const url = createTrackedObjectUrl(blob);
 
-      const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
-      const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
+        const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
+        const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
 
-      // INSERT DIRECTLY (tag page with runId for loader-side filtering)
-      insertPageAtIndex(
-        {
-          fullSizeUrl: url,
-          thumbnailUrl: thumbUrl,
-          loaded: true,
-          status: 1,
-          fileExtension: 'pdf',
+        // INSERT DIRECTLY (tag page with runId for loader-side filtering)
+        insertPageAtIndex(
+          {
+            fullSizeUrl: url,
+            thumbnailUrl: thumbUrl,
+            loaded: true,
+            status: 1,
+            fileExtension: 'pdf',
+            fileIndex: job.index,
+            pageIndex: i - 1,
+            allPagesIndex: at,
+            runId: job.runId,
+          },
+          at
+        );
+
+        logger.debug('Main-thread PDF page rasterized', {
+          pdfPage: i,
           fileIndex: job.index,
-          pageIndex: i - 1,
           allPagesIndex: at,
-          runId: job.runId,
-        },
-        at
-      );
-
-      logger.debug('Main-thread PDF page rasterized', {
-        pdfPage: i,
-        fileIndex: job.index,
-        allPagesIndex: at,
-        runId: job.runId
-      });
+          runId: job.runId
+        });
+      } finally {
+        try { page.cleanup(); } catch {}
+        releaseCanvas(canvas);
+      }
     }
   } catch (error) {
     if (isMounted && isMounted.current === false) return;
@@ -191,6 +212,9 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       },
       at
     );
+  } finally {
+    try { await pdf?.destroy?.(); } catch {}
+    try { await loadingTask?.destroy?.(); } catch {}
   }
 };
 
@@ -373,12 +397,13 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
       }
 
       // 2) Standard path — decode the target IFD to RGBA8, paint to canvas, export PNG
+      let canvas = null;
       try {
         decodeUTIFImage(buffer, ifd);
         const rgba = toRGBA8(ifd);
 
         // Paint onto a canvas
-        const canvas = document.createElement('canvas');
+        canvas = document.createElement('canvas');
         canvas.width = ifd.width >>> 0;
         canvas.height = ifd.height >>> 0;
 
@@ -442,6 +467,9 @@ export const renderTIFFInMainThread = async (job, insertPageAtIndex, sameBlob, i
           },
           at
         );
+      } finally {
+        releaseTiffIfdBuffers(ifd);
+        releaseCanvas(canvas);
       }
 
       // Small yields help on low-core machines during long TIFF batches

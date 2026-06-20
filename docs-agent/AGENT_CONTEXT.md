@@ -1,13 +1,13 @@
 # OpenDocViewer Agent Context
 
-Generated: committed-docs
+Generated: committed\-docs
 Source commit: not embedded
 
 ## Project
 
 - Package: opendocviewer
 - Version: 2.6.3
-- Description: Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite, with a token-gated log server and runtime configuration.
+- Description: Fast, lightweight document viewer \(PDF, TIFF, images\) built with React \+ Vite, with a token\-gated log server and runtime configuration.
 
 ## Read Order
 
@@ -24,7 +24,7 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 110
-- Source lines: 48652
+- Source lines: 48742
 - JSDoc symbols: 1275
 - Files with JSDoc: 106
 - Low-confidence summaries: 0
@@ -36,16 +36,16 @@ Source commit: not embedded
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
-- `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.
+- `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
-- `src/index.jsx` - OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).
-- `src/utils/pdfPrintCacheKey.js` - Generated-PDF cache key helpers.
-- `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.
-- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt-in troubleshooting tools.
-- `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists (pattern mode and demo mode) • Fetch as ArrayBuffer (with optional AbortSignal) • Page counting (PDF / TIF
-- `src/utils/documentMetadata.js` - Helpers for resolving document-level metadata from the normalized portable bundle.
+- `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
+- `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
+- `src/utils/printTemplate.js` - OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
+- `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
+- `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
+- `src/utils/documentMetadata.js` - Helpers for resolving document\-level metadata from the normalized portable bundle.
 
 ## Agent Notes
 
-- 4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.
-- Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON.
+- 4 files have no JSDoc doclets; AgentDocMap uses source\-derived summaries for them.
+- Use AGENT\_CONTEXT.md first, then SYMBOL\_INDEX.md by file path to avoid loading the whole symbol JSON.

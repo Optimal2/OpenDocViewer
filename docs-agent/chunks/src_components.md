@@ -4,9 +4,9 @@ File count: 13. Line count: 6612. JSDoc symbol count: 82.
 
 ## src/components/CanvasRenderer.jsx
 
-OpenDocViewer — Absolute-positioned Canvas Renderer Render a <canvas> element for a single page at a specified zoom factor.
+OpenDocViewer — Absolute\-positioned Canvas Renderer Render a &lt;canvas&gt; element for a single page at a specified zoom factor.
 
-Exports: CanvasRenderer
+Exports: `CanvasRenderer`
 
 Symbols:
 
@@ -14,22 +14,22 @@ Symbols:
 
 ## src/components/DocumentConsumerWrapper.jsx
 
-OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: [{ url, ext?, fileIn
+OpenDocViewer — Consumer Wrapper for Loader \+ Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: \{ folder, extension, endNumber \} • Explicit\-list: \{ sourceList: \[\{ url, ext?, fileIn
 
-Exports: DocumentConsumerWrapper
+Exports: `DocumentConsumerWrapper`
 
-Local imports: src/contexts/viewerContext.js, src/logging/systemLogger.js
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`
 
 Symbols:
 
-- `SourceItem` (typedef) - An item for explicit-list mode.
-- `DocumentConsumerWrapper` (function) - DocumentConsumerWrapper Wraps DocumentLoader + DocumentViewer and switches between full viewer and a thumbnail-only presentation on small/mobile layouts.
+- `SourceItem` (typedef) - An item for explicit\-list mode.
+- `DocumentConsumerWrapper` (function) - DocumentConsumerWrapper Wraps DocumentLoader \+ DocumentViewer and switches between full viewer and a thumbnail\-only presentation on small/mobile layouts.
 
 ## src/components/DocumentMetadataMatrixOverlayDialog.jsx
 
-Session-wide document metadata matrix overlay.
+Session\-wide document metadata matrix overlay.
 
-Exports: DocumentMetadataMatrixOverlayDialog
+Exports: `DocumentMetadataMatrixOverlayDialog`
 
 Symbols:
 
@@ -38,9 +38,9 @@ Symbols:
 
 ## src/components/DocumentMetadataOverlayDialog.jsx
 
-Document metadata overlay shown from viewer-owned context menus.
+Document metadata overlay shown from viewer\-owned context menus.
 
-Exports: DocumentMetadataOverlayDialog
+Exports: `DocumentMetadataOverlayDialog`
 
 Symbols:
 
@@ -51,9 +51,9 @@ Symbols:
 
 OpenDocViewer — Active page renderer.
 
-Exports: DocumentRender
+Exports: `DocumentRender`
 
-Local imports: src/contexts/viewerContext.js, src/logging/systemLogger.js, src/components/ImageRenderer.jsx, src/components/CanvasRenderer.jsx, src/components/LoadingMessage.jsx, src/utils/zoomUtils.js, src/utils/documentLoadingConfig.js, src/utils/renderSurfaceBounds.js
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/ImageRenderer.jsx`, `src/components/CanvasRenderer.jsx`, `src/components/LoadingMessage.jsx`, `src/utils/zoomUtils.js`, `src/utils/documentLoadingConfig.js`, `src/utils/renderSurfaceBounds.js`
 
 Symbols:
 
@@ -63,7 +63,7 @@ Symbols:
 - `isBlobAssetUrl` (function) - No description.
 - `DisplayedAsset` (typedef) - No description.
 - `DocumentRender` (constant) - No description.
-- `<anonymous>~resetAssetRetry` (constant) - Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.
+- `<anonymous>~resetAssetRetry` (constant) - Reset the per\-page blob\-URL retry tracker after a successful load or when the target page changes.
 - `<anonymous>~clearLoadingOverlayTimer` (constant) - No description.
 - `<anonymous>~claimAssetRetry` (constant) - No description.
 - `<anonymous>~resolveCustomFitOptions` (constant) - No description.
@@ -72,9 +72,9 @@ Symbols:
 
 ## src/components/DocumentSelectionPanel.jsx
 
-Hierarchical page-selection editor shown inside the thumbnail pane.
+Hierarchical page\-selection editor shown inside the thumbnail pane.
 
-Exports: DocumentSelectionPanel
+Exports: `DocumentSelectionPanel`
 
 Symbols:
 
@@ -85,9 +85,9 @@ Symbols:
 
 OpenDocViewer — Deterministic thumbnail strip.
 
-Exports: DocumentThumbnailList
+Exports: `DocumentThumbnailList`
 
-Local imports: src/contexts/viewerContext.js, src/logging/systemLogger.js, src/components/LoadingSpinner.jsx, src/utils/documentLoadingConfig.js, src/utils/publicAssetUrl.js, src/utils/documentMetadata.js
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`
 
 Symbols:
 
@@ -99,16 +99,16 @@ Symbols:
 - `formatMetricValue` (function) - No description.
 - `getSessionPageIndex` (function) - No description.
 - `isIndexInRange` (function) - No description.
-- `buildCenterOutQueue` (function) - Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.
+- `buildCenterOutQueue` (function) - Build a center\-out thumbnail warm\-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.
 - `getPageDocumentKey` (function) - No description.
 - `getPageDocumentContext` (function) - No description.
 - `getMetricTitles` (function) - No description.
 
 ## src/components/ImageRenderer.jsx
 
-OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor.
+OpenDocViewer — Absolute\-positioned Image Renderer Render a single page image at a specified zoom factor.
 
-Exports: ImageRenderer
+Exports: `ImageRenderer`
 
 Symbols:
 
@@ -119,9 +119,9 @@ Symbols:
 
 OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status.
 
-Exports: LoadingMessage
+Exports: `LoadingMessage`
 
-Local imports: src/utils/publicAssetUrl.js
+Local imports: `src/utils/publicAssetUrl.js`
 
 Symbols:
 
@@ -131,11 +131,11 @@ Symbols:
 
 OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
 
-Exports: LoadingSpinner
+Exports: `LoadingSpinner`
 
 Symbols:
 
-- `srOnlyStyle` (constant) - Inline “visually hidden” style for screen-reader-only text (no CSS dependency).
+- `srOnlyStyle` (constant) - Inline “visually hidden” style for screen\-reader\-only text \(no CSS dependency\).
 - `LoadingSpinner` (function) - LoadingSpinner component.
 - `LoadingSpinner.propTypes.size` (member) - Optional width/height; if omitted, CSS controls dimensions.
 - `LoadingSpinner.propTypes.label` (member) - Accessible label announced by assistive technologies.
@@ -143,11 +143,11 @@ Symbols:
 
 ## src/components/PrintSelectionWorkspace.jsx
 
-Full-window print-selection workspace.
+Full\-window print\-selection workspace.
 
-Exports: PrintSelectionWorkspace
+Exports: `PrintSelectionWorkspace`
 
-Local imports: src/utils/publicAssetUrl.js, src/utils/localizedValue.js, src/utils/printSanitize.js
+Local imports: `src/utils/publicAssetUrl.js`, `src/utils/localizedValue.js`, `src/utils/printSanitize.js`
 
 Symbols:
 
@@ -158,28 +158,28 @@ Symbols:
 
 ## src/components/Resizer.jsx
 
-OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels (e.g., sidebar/content) via mouse drag or keyboard interaction.
+OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
 
-Exports: Resizer
+Exports: `Resizer`
 
 Symbols:
 
 - `ResizeStartHandler` (typedef) - Handler invoked when a resize interaction is initiated.
 - `ResizerProps` (typedef) - Props for .
 - `Resizer` (constant) - Resizer component.
-- `<anonymous>~handleKeyDown` (constant) - Keyboard handler (Enter/Space) to initiate the same flow as mouse down.
-- `Resizer.propTypes.onMouseDown` (member) - Initiates resize in the parent (mouse or keyboard-initiated).
+- `<anonymous>~handleKeyDown` (constant) - Keyboard handler \(Enter/Space\) to initiate the same flow as mouse down.
+- `Resizer.propTypes.onMouseDown` (member) - Initiates resize in the parent \(mouse or keyboard\-initiated\).
 - `Resizer.propTypes.orientation` (member) - Visual/semantic orientation of the separator.
 - `Resizer.propTypes.ariaLabel` (member) - Accessible name for assistive technologies.
 - `Resizer.propTypes.className` (member) - Extra class names to append to the root element.
 
 ## src/components/ViewerProblemNotice.jsx
 
-OpenDocViewer — configurable viewer-level problem notice.
+OpenDocViewer — configurable viewer\-level problem notice.
 
-Exports: ViewerProblemNotice
+Exports: `ViewerProblemNotice`
 
-Local imports: src/utils/runtimeConfig.js, src/utils/localizedValue.js
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/localizedValue.js`
 
 Symbols:
 

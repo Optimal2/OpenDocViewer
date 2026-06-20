@@ -884,8 +884,29 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       }
       if (!changed) return prev;
 
+      const nextPage = { ...current, ...nextPatch };
+      for (const [field, cache] of [
+        ['fullSizeUrl', fullPageCacheRef.current],
+        ['thumbnailUrl', thumbnailCacheRef.current],
+      ]) {
+        const previousUrl = String(current?.[field] || '').trim();
+        const nextUrl = String(nextPage?.[field] || '').trim();
+        if (!previousUrl || previousUrl === nextUrl) continue;
+
+        const stillReferenced = ['fullSizeUrl', 'thumbnailUrl']
+          .some((candidate) => String(nextPage?.[candidate] || '').trim() === previousUrl);
+        if (!stillReferenced && isTrackedObjectUrl(previousUrl)) {
+          revokeTrackedObjectUrl(previousUrl);
+        }
+
+        const cachedUrl = String(cache.get(safeIndex)?.url || '').trim();
+        if (cachedUrl && cachedUrl === previousUrl && cachedUrl !== nextUrl) {
+          cache.delete(safeIndex);
+        }
+      }
+
       const next = prev.slice();
-      next[safeIndex] = { ...current, ...nextPatch };
+      next[safeIndex] = nextPage;
       return next;
     });
   }, [updateAllPages]);
