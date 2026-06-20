@@ -67,10 +67,7 @@ function getDraftChangeRevealIndex(previous, next) {
 }
 
 function getPageImageUrl(page) {
-  const fallbackAsset = page && (page.status === -1 || page.thumbnailStatus === -1)
-    ? 'lost.png'
-    : 'placeholder.png';
-  const fallbackUrl = normalizeWorkspaceImageUrl(getPublicAssetUrl(fallbackAsset));
+  const fallbackUrl = getWorkspaceFallbackImageUrl(page);
   if (!page) return fallbackUrl;
 
   const candidates = [];
@@ -84,6 +81,19 @@ function getPageImageUrl(page) {
   }
 
   return fallbackUrl;
+}
+
+function getWorkspaceFallbackImageUrl(page) {
+  const fallbackAsset = page && (page.status === -1 || page.thumbnailStatus === -1)
+    ? 'lost.png'
+    : 'placeholder.png';
+  return normalizeWorkspaceImageUrl(getPublicAssetUrl(fallbackAsset));
+}
+
+function getRenderableWorkspaceImageUrl(item) {
+  const normalized = normalizeWorkspaceImageUrl(item?.imageUrl);
+  if (isSafeImageSrc(normalized)) return normalized;
+  return getWorkspaceFallbackImageUrl(item?.page);
 }
 
 function normalizeWorkspaceImageUrl(url) {
@@ -901,6 +911,7 @@ const PrintSelectionWorkspace = ({
   const lightboxIndexes = Array.isArray(lightboxState?.indexes) ? lightboxState.indexes : naturalIndexes;
   const lightboxPosition = lightboxIndex == null ? -1 : lightboxIndexes.indexOf(lightboxIndex);
   const lightboxItem = lightboxIndex == null ? null : itemByIndex.get(lightboxIndex) || null;
+  const lightboxImageUrl = getRenderableWorkspaceImageUrl(lightboxItem);
   const lightboxItemIncluded = lightboxIndex != null && draftSet.has(lightboxIndex);
   const lightboxDocumentEntry = lightboxItem ? getDocumentEntry(bundle, lightboxItem.documentId, lightboxItem.documentNumber) : null;
   const lightboxInfoText = lightboxItem
@@ -1816,6 +1827,7 @@ const PrintSelectionWorkspace = ({
     const originalIndex = item.originalIndex;
     const included = draftSet.has(originalIndex);
     const selected = side === 'left' ? leftSelectedSet.has(originalIndex) : rightSelectedSet.has(originalIndex);
+    const safeImageUrl = getRenderableWorkspaceImageUrl(item);
     const disabled = side === 'left' && included;
     const pulsing = pulseIndex === originalIndex;
     const draggingSource = dragState?.side === side && dragState.indexes.includes(originalIndex);
@@ -1944,7 +1956,7 @@ const PrintSelectionWorkspace = ({
               <span className="print-selection-metric-badge-value">{metric.value}</span>
             </span>
           ))}
-          <img src={item.imageUrl} alt="" draggable={false} />
+          <img src={safeImageUrl} alt="" draggable={false} />
           {item.loading ? (
             <span className="print-selection-loading" aria-hidden="true">
               <span className="material-icons">hourglass_empty</span>
@@ -2396,7 +2408,7 @@ const PrintSelectionWorkspace = ({
             </button>
             <div className="print-selection-lightbox-image">
               <div className={`print-selection-lightbox-page ${lightboxSelectionStatusClass}`}>
-                <img src={lightboxItem.imageUrl} alt={t('viewer.pageAlt', { page: lightboxItem.pageNumber, defaultValue: `Page ${lightboxItem.pageNumber}` })} />
+                <img src={lightboxImageUrl} alt={t('viewer.pageAlt', { page: lightboxItem.pageNumber, defaultValue: `Page ${lightboxItem.pageNumber}` })} />
               </div>
             </div>
             <button
