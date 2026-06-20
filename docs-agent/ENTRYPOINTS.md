@@ -39,12 +39,12 @@
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
+- `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
 - `src/utils/documentMetadata.js`: 3 incoming local imports
 - `src/utils/objectUrlRegistry.js`: 3 incoming local imports
 - `src/utils/printPdf.js`: 3 incoming local imports
-- `src/utils/printSanitize.js`: 3 incoming local imports
 - `src/utils/printTemplate.js`: 3 incoming local imports
 - `src/utils/supportDiagnostics.js`: 3 incoming local imports
 - `src/components/common/StatusLed.jsx`: 2 incoming local imports

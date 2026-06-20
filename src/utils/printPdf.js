@@ -71,9 +71,6 @@ const ONE_MINUTE_MS = 60 * 1000;
 // Keep the generated URL alive long enough for slow "save as" flows, then revoke it
 // as a leak-prevention fallback.
 const DOWNLOAD_OBJECT_URL_REVOKE_DELAY_MS = 2 * ONE_MINUTE_MS;
-// Printing through a hidden PDF iframe can keep the blob URL alive while the browser print
-// preview is open. afterprint is preferred, but this long fallback prevents leaked resources.
-const PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS = 10 * ONE_MINUTE_MS;
 // Keep the PDF iframe/blob alive after afterprint because some browsers fire afterprint when
 // the preview UI opens or while it still depends on the blob. Short cleanup can blank pages
 // if the user waits before continuing from the browser print dialog.
@@ -1859,9 +1856,40 @@ export function printPdfBlob(blob) {
     let printed = false;
     let cleaned = false;
     let settled = false;
+    const cleanupRemovers = [];
+    const addCleanupListener = (target, eventName, delayMs = 0, logLabel = eventName) => {
+      if (!target || typeof target.addEventListener !== 'function') return;
+      const handler = () => cleanup(delayMs);
+      try {
+        target.addEventListener(eventName, handler, { once: true });
+        cleanupRemovers.push(() => {
+          try {
+            target.removeEventListener(eventName, handler);
+          } catch (error) {
+            logger.debug(`Generated PDF cleanup listener removal failed for ${logLabel}`, {
+              error: String(error?.message || error),
+            });
+          }
+        });
+      } catch (error) {
+        logger.debug(`Generated PDF cleanup listener setup failed for ${logLabel}`, {
+          error: String(error?.message || error),
+        });
+      }
+    };
     const cleanup = (delayMs = 0) => {
       if (cleaned) return;
       cleaned = true;
+      while (cleanupRemovers.length > 0) {
+        const removeListener = cleanupRemovers.pop();
+        try {
+          removeListener?.();
+        } catch (error) {
+          logger.debug('Generated PDF cleanup listener teardown failed', {
+            error: String(error?.message || error),
+          });
+        }
+      }
       window.setTimeout(() => {
         try {
           frame.remove();
@@ -1886,14 +1914,6 @@ export function printPdfBlob(blob) {
       cleanup(0);
       reject(error);
     };
-    const scheduleFallbackCleanup = () => {
-      // Edge/Chromium may keep the PDF preview dependent on the iframe/blob URL while
-      // the preview dialog is open. Do not remove the iframe shortly after print(); it
-      // can make the PDF preview disappear. afterprint normally cleans it up; this long
-      // fallback avoids leaking the object URL if afterprint is not fired.
-      window.setTimeout(() => cleanup(0), PRINT_IFRAME_FALLBACK_CLEANUP_DELAY_MS);
-    };
-    const afterPrint = () => cleanup(PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS);
     const tryWindowFallback = (reason, originalError = null) => {
       try {
         const fallbackWindow = window.open('about:blank', '_blank');
@@ -1905,6 +1925,9 @@ export function printPdfBlob(blob) {
               error: String(openerError?.message || openerError),
             });
           }
+          addCleanupListener(fallbackWindow, 'afterprint', PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS, 'fallbackWindow.afterprint');
+          addCleanupListener(fallbackWindow, 'beforeunload', 0, 'fallbackWindow.beforeunload');
+          addCleanupListener(fallbackWindow, 'pagehide', 0, 'fallbackWindow.pagehide');
           try {
             fallbackWindow.location.replace(url);
           } catch (navigationError) {
@@ -1921,7 +1944,6 @@ export function printPdfBlob(blob) {
             error: originalError ? String(originalError?.message || originalError) : '',
             fallback: 'window.open',
           });
-          scheduleFallbackCleanup();
           settleResolve();
           return true;
         }
@@ -1939,16 +1961,6 @@ export function printPdfBlob(blob) {
     const invokePrint = () => {
       if (printed) return;
       printed = true;
-      try {
-        frame.contentWindow?.addEventListener?.('afterprint', afterPrint, { once: true });
-      } catch (error) {
-        logger.debug('PDF iframe afterprint listener setup failed', { error: String(error?.message || error) });
-      }
-      try {
-        window.addEventListener('afterprint', afterPrint, { once: true });
-      } catch (error) {
-        logger.debug('Window afterprint listener setup failed', { error: String(error?.message || error) });
-      }
       window.setTimeout(() => {
         const contentWindow = frame.contentWindow;
         if (!contentWindow || typeof contentWindow.print !== 'function') {
@@ -1956,10 +1968,16 @@ export function printPdfBlob(blob) {
           return;
         }
 
+        addCleanupListener(contentWindow, 'afterprint', PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS, 'iframe.afterprint');
+        addCleanupListener(contentWindow, 'beforeunload', 0, 'iframe.beforeunload');
+        addCleanupListener(contentWindow, 'pagehide', 0, 'iframe.pagehide');
+        addCleanupListener(window, 'afterprint', PRINT_IFRAME_AFTERPRINT_CLEANUP_DELAY_MS, 'window.afterprint');
+        addCleanupListener(window, 'beforeunload', 0, 'window.beforeunload');
+        addCleanupListener(window, 'pagehide', 0, 'window.pagehide');
+
         try {
           contentWindow.focus?.();
           contentWindow.print();
-          scheduleFallbackCleanup();
           settleResolve();
         } catch (error) {
           tryWindowFallback('Generated PDF print invocation failed', error);

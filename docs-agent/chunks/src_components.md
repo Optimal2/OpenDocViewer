@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 13. Line count: 6589. JSDoc symbol count: 82.
+File count: 13. Line count: 6612. JSDoc symbol count: 82.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -147,7 +147,7 @@ Full-window print-selection workspace.
 
 Exports: PrintSelectionWorkspace
 
-Local imports: src/utils/publicAssetUrl.js, src/utils/localizedValue.js
+Local imports: src/utils/publicAssetUrl.js, src/utils/localizedValue.js, src/utils/printSanitize.js
 
 Symbols:
 

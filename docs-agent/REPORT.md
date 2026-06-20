@@ -3,7 +3,7 @@
 ## Coverage
 
 - Files: 110
-- Source lines: 48611
+- Source lines: 48652
 - JSDoc symbols: 1275
 - Files without JSDoc doclets: 4
 - Low-confidence summaries: 0
@@ -20,18 +20,18 @@
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
+- `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
 - `src/utils/documentMetadata.js`: 3 incoming local imports
 - `src/utils/objectUrlRegistry.js`: 3 incoming local imports
 - `src/utils/printPdf.js`: 3 incoming local imports
-- `src/utils/printSanitize.js`: 3 incoming local imports
 
 ## Largest Files
 
 - `src/contexts/ViewerProvider.jsx`: 2551 lines
-- `src/components/PrintSelectionWorkspace.jsx`: 2450 lines
-- `src/utils/printPdf.js`: 2268 lines
+- `src/components/PrintSelectionWorkspace.jsx`: 2473 lines
+- `src/utils/printPdf.js`: 2286 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2170 lines
 - `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2150 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1899 lines
