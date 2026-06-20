@@ -17,7 +17,7 @@ File count: 3. Line count: 763. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 13. Line count: 6589. JSDoc symbol count: 82.
+File count: 13. Line count: 6612. JSDoc symbol count: 82.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
@@ -148,12 +148,12 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 35. Line count: 14734. JSDoc symbol count: 564.
+File count: 35. Line count: 14752. JSDoc symbol count: 564.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
-- `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
+- `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/pdfPrintCacheKey.js` - Generated-PDF cache key helpers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates.
 - `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt-in troubleshooting tools.

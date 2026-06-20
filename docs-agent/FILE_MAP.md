@@ -50,7 +50,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/components/ImageRenderer.jsx` | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | `src/components/LoadingMessage.jsx` | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
 | `src/components/LoadingSpinner.jsx` | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
-| `src/components/PrintSelectionWorkspace.jsx` | 2450 | 1 | 4 | high | Full-window print-selection workspace. |
+| `src/components/PrintSelectionWorkspace.jsx` | 2473 | 1 | 4 | high | Full-window print-selection workspace. |
 | `src/components/Resizer.jsx` | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
 | `src/components/ViewerProblemNotice.jsx` | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
 | `src/contexts/themeContext.js` | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
@@ -96,8 +96,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | `src/utils/printCore.js` | 588 | 1 | 20 | high | Core print coordinator for the frontend. |
 | `src/utils/printDom.js` | 473 | 1 | 19 | high | OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\). |
 | `src/utils/printParse.js` | 100 | 1 | 3 | high | OpenDocViewer — Print Sequence Parser Parse a user-entered &quot;Custom pages&quot; string into a sequence of page indices. |
-| `src/utils/printPdf.js` | 2268 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
-| `src/utils/printSanitize.js` | 23 | 3 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
+| `src/utils/printPdf.js` | 2286 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
+| `src/utils/printSanitize.js` | 23 | 4 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
 | `src/utils/printTemplate.js` | 809 | 3 | 34 | high | OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates. |
 | `src/utils/printUtils.js` | 37 | 2 | 0 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
 | `src/utils/printWatermark.js` | 80 | 2 | 5 | high | OpenDocViewer — Print watermark mode helpers. |

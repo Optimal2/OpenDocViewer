@@ -406,10 +406,10 @@
 | `LoadingSpinner` | function | `src/components/LoadingSpinner.jsx:55` | LoadingSpinner component. |
 | `LoadingSpinner.propTypes.size` | member | `src/components/LoadingSpinner.jsx:83` | Optional width/height; if omitted, CSS controls dimensions. |
 | `srOnlyStyle` | constant | `src/components/LoadingSpinner.jsx:33` | Inline “visually hidden” style for screen-reader-only text \(no CSS dependency\). |
-| `<anonymous>~handleDone` | function | `src/components/PrintSelectionWorkspace.jsx:1781` |  |
-| `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1721` |  |
-| `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1754` |  |
-| `<anonymous>~handleMove` | function | `src/components/PrintSelectionWorkspace.jsx:1774` |  |
+| `<anonymous>~handleDone` | function | `src/components/PrintSelectionWorkspace.jsx:1804` |  |
+| `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1744` |  |
+| `<anonymous>~handleKeyDown` | function | `src/components/PrintSelectionWorkspace.jsx:1777` |  |
+| `<anonymous>~handleMove` | function | `src/components/PrintSelectionWorkspace.jsx:1797` |  |
 | `Resizer.propTypes.ariaLabel` | member | `src/components/Resizer.jsx:103` | Accessible name for assistive technologies. |
 | `Resizer.propTypes.className` | member | `src/components/Resizer.jsx:105` | Extra class names to append to the root element. |
 | `<anonymous>~handleKeyDown` | constant | `src/components/Resizer.jsx:70` | Keyboard handler \(Enter/Space\) to initiate the same flow as mouse down. |
@@ -971,98 +971,98 @@
 | `parsePrintSequence` | function | `src/utils/printParse.js:48` | Parse &amp;quot;Custom pages&amp;quot; into a sequence. |
 | `ParseResult` | typedef | `src/utils/printParse.js:15` | Result of parsing a custom pages string. |
 | `tr` | function | `src/utils/printParse.js:30` | Tiny helper to translate with safe fallback. |
-| `addImageWithFallback` | function | `src/utils/printPdf.js:970` |  |
-| `appendRichColumnLine` | function | `src/utils/printPdf.js:594` |  |
-| `appendRichLineBreak` | function | `src/utils/printPdf.js:555` |  |
-| `appendRichText` | function | `src/utils/printPdf.js:565` |  |
-| `asNumber` | function | `src/utils/printPdf.js:219` | Convert a value to a finite number for PDF layout calculations. |
-| `blobToDataUrl` | function | `src/utils/printPdf.js:2206` |  |
-| `buildPdfPagePlans` | function | `src/utils/printPdf.js:1562` |  |
-| `calculateOverlayReserve` | function | `src/utils/printPdf.js:1607` |  |
-| `canvasToBlob` | function | `src/utils/printPdf.js:2191` |  |
-| `canvasToPngDataUrl` | function | `src/utils/printPdf.js:2177` | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
-| `clamp01` | function | `src/utils/printPdf.js:244` | Clamp a numeric value to the inclusive 0..1 range. |
-| `collectPrintablePdfSources` | function | `src/utils/printPdf.js:2099` | Collect printable page image URLs without creating or opening a PDF. |
-| `createAbortError` | function | `src/utils/printPdf.js:251` |  |
-| `createDefaultSegment` | function | `src/utils/printPdf.js:1146` |  |
-| `createJsPdfOptions` | function | `src/utils/printPdf.js:1043` |  |
-| `createPdfFromDocumentHandle` | function | `src/utils/printPdf.js:2123` |  |
-| `createPrintPdfBlob` | function | `src/utils/printPdf.js:1665` | Build a PDF blob from page image URLs and print metadata. |
-| `createPrintPdfBlobInWorker` | function | `src/utils/printPdf.js:1583` |  |
-| `describeImageSource` | function | `src/utils/printPdf.js:799` |  |
-| `describeModuleExports` | function | `src/utils/printPdf.js:1632` |  |
-| `describeValueType` | function | `src/utils/printPdf.js:825` |  |
-| `downloadPdfBlob` | function | `src/utils/printPdf.js:1817` |  |
-| `drawRichSegments` | function | `src/utils/printPdf.js:1362` |  |
-| `drawRichTextBlock` | function | `src/utils/printPdf.js:1385` |  |
-| `drawWatermark` | function | `src/utils/printPdf.js:1417` |  |
-| `drawWatermarkImage` | function | `src/utils/printPdf.js:1464` | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
-| `elementMatchesClassSelectorPart` | function | `src/utils/printPdf.js:361` |  |
-| `ensureWritableRichLine` | function | `src/utils/printPdf.js:547` |  |
+| `addImageWithFallback` | function | `src/utils/printPdf.js:967` |  |
+| `appendRichColumnLine` | function | `src/utils/printPdf.js:591` |  |
+| `appendRichLineBreak` | function | `src/utils/printPdf.js:552` |  |
+| `appendRichText` | function | `src/utils/printPdf.js:562` |  |
+| `asNumber` | function | `src/utils/printPdf.js:216` | Convert a value to a finite number for PDF layout calculations. |
+| `blobToDataUrl` | function | `src/utils/printPdf.js:2224` |  |
+| `buildPdfPagePlans` | function | `src/utils/printPdf.js:1559` |  |
+| `calculateOverlayReserve` | function | `src/utils/printPdf.js:1604` |  |
+| `canvasToBlob` | function | `src/utils/printPdf.js:2209` |  |
+| `canvasToPngDataUrl` | function | `src/utils/printPdf.js:2195` | Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available. |
+| `clamp01` | function | `src/utils/printPdf.js:241` | Clamp a numeric value to the inclusive 0..1 range. |
+| `collectPrintablePdfSources` | function | `src/utils/printPdf.js:2117` | Collect printable page image URLs without creating or opening a PDF. |
+| `createAbortError` | function | `src/utils/printPdf.js:248` |  |
+| `createDefaultSegment` | function | `src/utils/printPdf.js:1143` |  |
+| `createJsPdfOptions` | function | `src/utils/printPdf.js:1040` |  |
+| `createPdfFromDocumentHandle` | function | `src/utils/printPdf.js:2141` |  |
+| `createPrintPdfBlob` | function | `src/utils/printPdf.js:1662` | Build a PDF blob from page image URLs and print metadata. |
+| `createPrintPdfBlobInWorker` | function | `src/utils/printPdf.js:1580` |  |
+| `describeImageSource` | function | `src/utils/printPdf.js:796` |  |
+| `describeModuleExports` | function | `src/utils/printPdf.js:1629` |  |
+| `describeValueType` | function | `src/utils/printPdf.js:822` |  |
+| `downloadPdfBlob` | function | `src/utils/printPdf.js:1814` |  |
+| `drawRichSegments` | function | `src/utils/printPdf.js:1359` |  |
+| `drawRichTextBlock` | function | `src/utils/printPdf.js:1382` |  |
+| `drawWatermark` | function | `src/utils/printPdf.js:1414` |  |
+| `drawWatermarkImage` | function | `src/utils/printPdf.js:1461` | Draw a prepared transparent PNG watermark, scaled to page width and centered. |
+| `elementMatchesClassSelectorPart` | function | `src/utils/printPdf.js:358` |  |
+| `ensureWritableRichLine` | function | `src/utils/printPdf.js:544` |  |
 | `escapeRegExp` | function | `src/utils/printPdf.js:28` | Escape regular-expression metacharacters in literal text. |
-| `executeOutputAction` | function | `src/utils/printPdf.js:2006` |  |
-| `fitRichSegmentsToWidth` | function | `src/utils/printPdf.js:1187` |  |
-| `fitRichSegmentTextToWidth` | function | `src/utils/printPdf.js:1157` |  |
-| `flattenRichLines` | function | `src/utils/printPdf.js:614` |  |
-| `getElementStyleHints` | function | `src/utils/printPdf.js:422` |  |
-| `getImageDimension` | function | `src/utils/printPdf.js:943` |  |
-| `getRichLineColumns` | function | `src/utils/printPdf.js:1076` |  |
-| `getSelectedPrintableDataUrls` | function | `src/utils/printPdf.js:2041` | Read printable page image URLs from the document renderer. |
-| `handlePdfCurrent` | function | `src/utils/printPdf.js:2227` | Generate/print/download a PDF from the currently rendered active page surface. |
-| `handlePdfCurrentComparison` | function | `src/utils/printPdf.js:2250` | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
-| `handlePdfOutput` | function | `src/utils/printPdf.js:2134` |  |
-| `htmlToRichLines` | function | `src/utils/printPdf.js:638` | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
-| `imageExtensionFromUrl` | function | `src/utils/printPdf.js:896` |  |
-| `imageFormatAttempts` | function | `src/utils/printPdf.js:954` |  |
-| `imageToJpegDataUrl` | function | `src/utils/printPdf.js:917` | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
-| `inferImageFormat` | function | `src/utils/printPdf.js:881` |  |
-| `isBlockNode` | function | `src/utils/printPdf.js:438` | Check whether an HTML node name should be treated as block-level in PDF text flow. |
-| `isBoldFontWeight` | function | `src/utils/printPdf.js:295` | Check whether a CSS font-weight value should be treated as bold text. |
-| `layoutRichColumns` | function | `src/utils/printPdf.js:1231` |  |
-| `loadImage` | function | `src/utils/printPdf.js:749` |  |
-| `loadImagesConcurrently` | function | `src/utils/printPdf.js:840` |  |
-| `loadJsPdf` | function | `src/utils/printPdf.js:1645` | Dynamically load the jsPDF constructor used by generated PDF output. |
-| `makeTokenContext` | function | `src/utils/printPdf.js:1498` |  |
-| `measureRichSegment` | function | `src/utils/printPdf.js:1125` |  |
-| `measureRichSegments` | function | `src/utils/printPdf.js:1137` |  |
-| `normalizePdfOrientationMode` | function | `src/utils/printPdf.js:1002` |  |
-| `normalizeQuality` | function | `src/utils/printPdf.js:231` | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
-| `normalizeRichLine` | function | `src/utils/printPdf.js:1100` |  |
-| `normalizeRichSegments` | function | `src/utils/printPdf.js:1059` |  |
-| `pageFormatForImage` | function | `src/utils/printPdf.js:1031` |  |
-| `pageNumberToIndex` | function | `src/utils/printPdf.js:2110` | Convert a 1-based printable page number into the matching 0-based data URL index. |
-| `parseTemplateCssClassSelector` | function | `src/utils/printPdf.js:337` | Parse a supported class-only selector into descendant selector parts. |
-| `parseTemplateCssStyleRules` | function | `src/utils/printPdf.js:400` | Parse only the small CSS subset used by trusted print header/footer templates. |
-| `parseTextStyleDeclarations` | function | `src/utils/printPdf.js:307` |  |
-| `PdfPrintOptions` | typedef | `src/utils/printPdf.js:159` |  |
-| `PdfRichColumn` | typedef | `src/utils/printPdf.js:202` |  |
-| `PdfRichLine` | typedef | `src/utils/printPdf.js:210` |  |
-| `PdfRichSegment` | typedef | `src/utils/printPdf.js:194` |  |
-| `PdfTemplateCssStyleRule` | typedef | `src/utils/printPdf.js:188` |  |
-| `PdfTextStyleHints` | typedef | `src/utils/printPdf.js:178` |  |
-| `printableSourceFromElement` | function | `src/utils/printPdf.js:2150` | Extract a safe printable image source from an already-rendered canvas or image element. |
-| `printPdfBlob` | function | `src/utils/printPdf.js:1837` | Print a generated PDF through a hidden iframe. |
-| `renderOverlayRichLines` | function | `src/utils/printPdf.js:733` |  |
-| `reportProgress` | function | `src/utils/printPdf.js:1513` |  |
-| `resolveJsPdfConstructor` | function | `src/utils/printPdf.js:1619` | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
-| `resolvePdfImageLoadConcurrency` | function | `src/utils/printPdf.js:1526` |  |
-| `resolvePdfOrientationMode` | function | `src/utils/printPdf.js:1012` |  |
-| `resolvePdfWorkerPlan` | function | `src/utils/printPdf.js:1539` | Resolve the generated-PDF worker plan. |
-| `richLineHasText` | function | `src/utils/printPdf.js:516` |  |
-| `richLineIsEmpty` | function | `src/utils/printPdf.js:524` |  |
-| `sanitizeDiagnosticText` | function | `src/utils/printPdf.js:812` |  |
-| `sanitizeParsedTemplateDocument` | function | `src/utils/printPdf.js:501` | Keep only the attributes used by the generated-PDF rich text subset. |
-| `sanitizeTemplateHtmlForPdf` | function | `src/utils/printPdf.js:487` | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
-| `segmentFontStyle` | function | `src/utils/printPdf.js:1112` |  |
-| `selectPageContexts` | function | `src/utils/printPdf.js:1996` |  |
-| `stripDisallowedTemplateElements` | function | `src/utils/printPdf.js:450` | Remove elements that are never meaningful in generated PDF header/footer text. |
-| `swapRichLineBufferContents` | function | `src/utils/printPdf.js:536` | Replace one line buffer with another while preserving the original array object. |
-| `templateCssRuleMatchesElement` | function | `src/utils/printPdf.js:370` |  |
-| `throwIfAborted` | function | `src/utils/printPdf.js:268` | Stop PDF generation as soon as the caller cancels the operation. |
-| `htmlToRichLines~walk` | function | `src/utils/printPdf.js:653` |  |
-| `warnDeprecatedPrintableUrlExportAlias` | function | `src/utils/printPdf.js:2022` |  |
-| `wrapRichLines` | function | `src/utils/printPdf.js:1312` |  |
-| `yieldToBrowser` | function | `src/utils/printPdf.js:278` | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
+| `executeOutputAction` | function | `src/utils/printPdf.js:2024` |  |
+| `fitRichSegmentsToWidth` | function | `src/utils/printPdf.js:1184` |  |
+| `fitRichSegmentTextToWidth` | function | `src/utils/printPdf.js:1154` |  |
+| `flattenRichLines` | function | `src/utils/printPdf.js:611` |  |
+| `getElementStyleHints` | function | `src/utils/printPdf.js:419` |  |
+| `getImageDimension` | function | `src/utils/printPdf.js:940` |  |
+| `getRichLineColumns` | function | `src/utils/printPdf.js:1073` |  |
+| `getSelectedPrintableDataUrls` | function | `src/utils/printPdf.js:2059` | Read printable page image URLs from the document renderer. |
+| `handlePdfCurrent` | function | `src/utils/printPdf.js:2245` | Generate/print/download a PDF from the currently rendered active page surface. |
+| `handlePdfCurrentComparison` | function | `src/utils/printPdf.js:2268` | Generate/print/download a two-page PDF from the currently rendered comparison surfaces. |
+| `handlePdfOutput` | function | `src/utils/printPdf.js:2152` |  |
+| `htmlToRichLines` | function | `src/utils/printPdf.js:635` | Parse a small, print-template-oriented HTML subset into styled text lines for jsPDF. |
+| `imageExtensionFromUrl` | function | `src/utils/printPdf.js:893` |  |
+| `imageFormatAttempts` | function | `src/utils/printPdf.js:951` |  |
+| `imageToJpegDataUrl` | function | `src/utils/printPdf.js:914` | Convert image to a JPEG data URL only as a last-resort fallback when jsPDF cannot consume the original image element/format directly. |
+| `inferImageFormat` | function | `src/utils/printPdf.js:878` |  |
+| `isBlockNode` | function | `src/utils/printPdf.js:435` | Check whether an HTML node name should be treated as block-level in PDF text flow. |
+| `isBoldFontWeight` | function | `src/utils/printPdf.js:292` | Check whether a CSS font-weight value should be treated as bold text. |
+| `layoutRichColumns` | function | `src/utils/printPdf.js:1228` |  |
+| `loadImage` | function | `src/utils/printPdf.js:746` |  |
+| `loadImagesConcurrently` | function | `src/utils/printPdf.js:837` |  |
+| `loadJsPdf` | function | `src/utils/printPdf.js:1642` | Dynamically load the jsPDF constructor used by generated PDF output. |
+| `makeTokenContext` | function | `src/utils/printPdf.js:1495` |  |
+| `measureRichSegment` | function | `src/utils/printPdf.js:1122` |  |
+| `measureRichSegments` | function | `src/utils/printPdf.js:1134` |  |
+| `normalizePdfOrientationMode` | function | `src/utils/printPdf.js:999` |  |
+| `normalizeQuality` | function | `src/utils/printPdf.js:228` | Normalize canvas/PDF image quality to the browser-supported 0..1 range. |
+| `normalizeRichLine` | function | `src/utils/printPdf.js:1097` |  |
+| `normalizeRichSegments` | function | `src/utils/printPdf.js:1056` |  |
+| `pageFormatForImage` | function | `src/utils/printPdf.js:1028` |  |
+| `pageNumberToIndex` | function | `src/utils/printPdf.js:2128` | Convert a 1-based printable page number into the matching 0-based data URL index. |
+| `parseTemplateCssClassSelector` | function | `src/utils/printPdf.js:334` | Parse a supported class-only selector into descendant selector parts. |
+| `parseTemplateCssStyleRules` | function | `src/utils/printPdf.js:397` | Parse only the small CSS subset used by trusted print header/footer templates. |
+| `parseTextStyleDeclarations` | function | `src/utils/printPdf.js:304` |  |
+| `PdfPrintOptions` | typedef | `src/utils/printPdf.js:156` |  |
+| `PdfRichColumn` | typedef | `src/utils/printPdf.js:199` |  |
+| `PdfRichLine` | typedef | `src/utils/printPdf.js:207` |  |
+| `PdfRichSegment` | typedef | `src/utils/printPdf.js:191` |  |
+| `PdfTemplateCssStyleRule` | typedef | `src/utils/printPdf.js:185` |  |
+| `PdfTextStyleHints` | typedef | `src/utils/printPdf.js:175` |  |
+| `printableSourceFromElement` | function | `src/utils/printPdf.js:2168` | Extract a safe printable image source from an already-rendered canvas or image element. |
+| `printPdfBlob` | function | `src/utils/printPdf.js:1834` | Print a generated PDF through a hidden iframe. |
+| `renderOverlayRichLines` | function | `src/utils/printPdf.js:730` |  |
+| `reportProgress` | function | `src/utils/printPdf.js:1510` |  |
+| `resolveJsPdfConstructor` | function | `src/utils/printPdf.js:1616` | Resolve jsPDF from common ESM/CJS export shapes used by bundlers. |
+| `resolvePdfImageLoadConcurrency` | function | `src/utils/printPdf.js:1523` |  |
+| `resolvePdfOrientationMode` | function | `src/utils/printPdf.js:1009` |  |
+| `resolvePdfWorkerPlan` | function | `src/utils/printPdf.js:1536` | Resolve the generated-PDF worker plan. |
+| `richLineHasText` | function | `src/utils/printPdf.js:513` |  |
+| `richLineIsEmpty` | function | `src/utils/printPdf.js:521` |  |
+| `sanitizeDiagnosticText` | function | `src/utils/printPdf.js:809` |  |
+| `sanitizeParsedTemplateDocument` | function | `src/utils/printPdf.js:498` | Keep only the attributes used by the generated-PDF rich text subset. |
+| `sanitizeTemplateHtmlForPdf` | function | `src/utils/printPdf.js:484` | Keep generated-PDF print templates inside the small rich-text subset consumed below. |
+| `segmentFontStyle` | function | `src/utils/printPdf.js:1109` |  |
+| `selectPageContexts` | function | `src/utils/printPdf.js:2014` |  |
+| `stripDisallowedTemplateElements` | function | `src/utils/printPdf.js:447` | Remove elements that are never meaningful in generated PDF header/footer text. |
+| `swapRichLineBufferContents` | function | `src/utils/printPdf.js:533` | Replace one line buffer with another while preserving the original array object. |
+| `templateCssRuleMatchesElement` | function | `src/utils/printPdf.js:367` |  |
+| `throwIfAborted` | function | `src/utils/printPdf.js:265` | Stop PDF generation as soon as the caller cancels the operation. |
+| `htmlToRichLines~walk` | function | `src/utils/printPdf.js:650` |  |
+| `warnDeprecatedPrintableUrlExportAlias` | function | `src/utils/printPdf.js:2040` |  |
+| `wrapRichLines` | function | `src/utils/printPdf.js:1309` |  |
+| `yieldToBrowser` | function | `src/utils/printPdf.js:275` | Yield one browser paint opportunity so progress updates become visible before expensive synchronous jsPDF operations run on the main thread. |
 | `isSafeImageSrc` | function | `src/utils/printSanitize.js:16` | Allow-list image sources used for printing. |
 | `applyBraceTokensEscaped` | function | `src/utils/printTemplate.js:649` |  |
 | `applyConditionalBlocks` | function | `src/utils/printTemplate.js:720` | Resolve conditional blocks of the form \[\[{{path}}, &amp;quot;content&amp;quot;\]\]. |

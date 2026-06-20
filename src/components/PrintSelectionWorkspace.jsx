@@ -11,6 +11,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 import { resolveLocalizedValue } from '../utils/localizedValue.js';
+import { isSafeImageSrc } from '../utils/printSanitize.js';
 
 const MIN_THUMBNAIL_PERCENT = 70;
 const DEFAULT_THUMBNAIL_PERCENT = 120;
@@ -66,12 +67,34 @@ function getDraftChangeRevealIndex(previous, next) {
 }
 
 function getPageImageUrl(page) {
-  if (!page) return getPublicAssetUrl('placeholder.png');
-  if (page.status === -1 || page.thumbnailStatus === -1) return getPublicAssetUrl('lost.png');
-  if (page.thumbnailUsesFullAsset && page.fullSizeStatus === 1 && page.fullSizeUrl) return page.fullSizeUrl;
-  if (page.thumbnailStatus === 1 && page.thumbnailUrl) return page.thumbnailUrl;
-  if (page.fullSizeStatus === 1 && page.fullSizeUrl) return page.fullSizeUrl;
-  return getPublicAssetUrl('placeholder.png');
+  const fallbackAsset = page && (page.status === -1 || page.thumbnailStatus === -1)
+    ? 'lost.png'
+    : 'placeholder.png';
+  const fallbackUrl = normalizeWorkspaceImageUrl(getPublicAssetUrl(fallbackAsset));
+  if (!page) return fallbackUrl;
+
+  const candidates = [];
+  if (page.thumbnailUsesFullAsset && page.fullSizeStatus === 1 && page.fullSizeUrl) candidates.push(page.fullSizeUrl);
+  if (page.thumbnailStatus === 1 && page.thumbnailUrl) candidates.push(page.thumbnailUrl);
+  if (page.fullSizeStatus === 1 && page.fullSizeUrl) candidates.push(page.fullSizeUrl);
+
+  for (const candidate of candidates) {
+    const normalized = normalizeWorkspaceImageUrl(candidate);
+    if (isSafeImageSrc(normalized)) return normalized;
+  }
+
+  return fallbackUrl;
+}
+
+function normalizeWorkspaceImageUrl(url) {
+  const text = String(url || '').trim();
+  if (!text) return '';
+  try {
+    const baseHref = typeof window !== 'undefined' && window.location ? window.location.href : 'http://localhost/';
+    return new URL(text, baseHref).href;
+  } catch {
+    return text;
+  }
 }
 
 function resolvePathValue(source, path) {
