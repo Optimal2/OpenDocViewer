@@ -232,6 +232,8 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:22</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:19</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx:29</code> |  |
+| <code>module:usePrintRangeConfig</code> | module | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:2</code> | Runtime-configuration derivation for PrintRangeDialog. |
+| <code>module:usePrintRangeConfig.usePrintRangeConfig</code> | function | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js:29</code> |  |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:61</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:53</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:80</code> |  |
@@ -247,6 +249,15 @@
 | <code>sanitizeManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:55</code> |  |
 | <code>toText</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:21</code> |  |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx:13</code> | Structured payload returned to the caller on submit. |
+| <code>module:printRangeDialogHelpers.buildSelectedOptionDetails</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:101</code> | Build token-friendly details for the selected option without forcing templates to use list indexes. |
+| <code>module:printRangeDialogHelpers.ensureODVPrintCSS</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:140</code> | Ensure base print CSS is injected once per document. |
+| <code>module:printRangeDialogHelpers.getCfg</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:14</code> | Read the runtime configuration \(merged defaults + site overrides\). |
+| <code>module:printRangeDialogHelpers.hasTextValue</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:34</code> |  |
+| <code>module:printRangeDialogHelpers.normalizePdfOrientationMode</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:87</code> |  |
+| <code>module:printRangeDialogHelpers</code> | module | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:2</code> | Pure helpers and shared constants for the print-range dialog. |
+| <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
+| <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
+| <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:88</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:80</code> |  |
 | <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:104</code> |  |
@@ -261,29 +272,21 @@
 | <code>normalizePdfOrientation</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:51</code> |  |
 | <code>runLimited</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:103</code> | Run async work with bounded concurrency. |
 | <code>throwIfAborted</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:32</code> |  |
-| <code>buildSelectedOptionDetails</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:124</code> | Build token-friendly details for the selected option without forcing templates to use list indexes. |
-| <code>usePrintRangeController~composePrintFormat</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:526</code> |  |
-| <code>usePrintRangeController~composeReason</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:545</code> |  |
-| <code>usePrintRangeController~composeSubmitDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:588</code> | Compose and validate the print payload for the current dialog state. |
-| <code>ensureODVPrintCSS</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:163</code> | Ensure base print CSS is injected once per document. |
-| <code>usePrintRangeController~extras</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:568</code> |  |
-| <code>getCfg</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:37</code> | Read the runtime configuration \(merged defaults + site overrides\). |
-| <code>hasTextValue</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:57</code> |  |
-| <code>usePrintRangeController~makeDescendingSequence</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:440</code> |  |
-| <code>normalizePdfOrientationMode</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:110</code> |  |
-| <code>usePrintRangeController~onDialogKeyDown</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:428</code> |  |
-| <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:15</code> | Structured payload returned to the caller on submit. |
-| <code>resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:73</code> | Resolve the string that should be used on physical print/log output for an option. |
-| <code>resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:96</code> | Resolve a configurable print dialog action. |
-| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:679</code> | Restore the dialog state from the latest successfully prepared print. |
-| <code>safeRegex</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:48</code> | Build a safe RegExp from optional pattern/flags. |
-| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:668</code> |  |
-| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:660</code> |  |
-| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:663</code> |  |
-| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:647</code> |  |
-| <code>usePrintRangeController</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:191</code> | Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog. |
-| <code>usePrintRangeController~validateRange</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:449</code> |  |
-| <code>usePrintRangeController~validateUserFields</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:461</code> |  |
+| <code>usePrintRangeController~composePrintFormat</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:365</code> |  |
+| <code>usePrintRangeController~composeReason</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:384</code> |  |
+| <code>usePrintRangeController~composeSubmitDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:427</code> | Compose and validate the print payload for the current dialog state. |
+| <code>usePrintRangeController~extras</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:407</code> |  |
+| <code>usePrintRangeController~makeDescendingSequence</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:279</code> |  |
+| <code>usePrintRangeController~onDialogKeyDown</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:267</code> |  |
+| <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:27</code> | Structured payload returned to the caller on submit. |
+| <code>usePrintRangeController~restoreFromDetail</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:518</code> | Restore the dialog state from the latest successfully prepared print. |
+| <code>usePrintRangeController~submitPdfDownload</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:507</code> |  |
+| <code>usePrintRangeController~submitPrintDirect</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:499</code> |  |
+| <code>usePrintRangeController~submitPrintPdf</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:502</code> |  |
+| <code>usePrintRangeController~submitWithBackend</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:486</code> |  |
+| <code>usePrintRangeController</code> | function | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:63</code> | Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog. |
+| <code>usePrintRangeController~validateRange</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:288</code> |  |
+| <code>usePrintRangeController~validateUserFields</code> | constant | <code>src/components/DocumentToolbar/usePrintRangeDialog.js:300</code> |  |
 | <code>parsePercentInput</code> | function | <code>src/components/DocumentToolbar/ZoomButtons.jsx:98</code> | Parse a percent-like string safely. |
 | <code>CompareZoomOverlay</code> | function | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx:28</code> | CompareZoomOverlay Presentational-only \(no state\). |
 | <code>&lt;anonymous&gt;~allowNativeContextMenu</code> | function | <code>src/components/DocumentViewer/DocumentViewer.jsx:328</code> |  |
@@ -313,24 +316,24 @@
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:26</code> | React-like numeric/original page setter used by the toolbar adapter. |
 | <code>RefLike</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:13</code> | Ref-like shape used for imperative handles. |
 | <code>SetBooleanState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx:19</code> | State setter that accepts a boolean or an updater callback. |
-| <code>&lt;anonymous&gt;~getScope</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:374</code> |  |
-| <code>&lt;anonymous&gt;~getTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:363</code> |  |
-| <code>module:useViewerEffects~hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:98</code> | Determine whether a modal dialog is currently open. |
-| <code>module:useViewerEffects~isEditableTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:83</code> | Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive. |
-| <code>&lt;anonymous&gt;~isNextRepeatKey</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:384</code> |  |
-| <code>&lt;anonymous&gt;~isPreviousRepeatKey</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:391</code> |  |
-| <code>module:useViewerEffects~KeyboardPrintShortcutBehavior</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:31</code> |  |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:329</code> |  |
-| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:395</code> |  |
-| <code>&lt;anonymous&gt;~onKeyUp</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:508</code> |  |
-| <code>&lt;anonymous&gt;~onVisibilityChange</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:519</code> |  |
-| <code>&lt;anonymous&gt;~onWheelGlobal</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:312</code> |  |
-| <code>&lt;anonymous&gt;~onWindowBlur</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:514</code> |  |
-| <code>module:useViewerEffects~shouldIgnoreViewerShortcut</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:109</code> | Decide whether a keyboard shortcut should be ignored for the viewer. |
-| <code>module:useViewerEffects</code> | module | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:2</code> | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
-| <code>module:useViewerEffects.useViewerEffects</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:121</code> |  |
-| <code>module:useViewerEffects~UseViewerEffectsArgs</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:33</code> | Arguments for useViewerEffects. |
-| <code>module:useViewerEffects~ZoomMode</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:26</code> | Sticky zoom modes used by the viewer. |
+| <code>module:useViewerEffects.hasActiveModalDialog</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:89</code> | Determine whether a modal dialog is currently open. |
+| <code>module:useViewerEffects.isEditableTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:74</code> | Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive. |
+| <code>module:useViewerEffects~KeyboardPrintShortcutBehavior</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:22</code> |  |
+| <code>module:useViewerEffects.shouldIgnoreViewerShortcut</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:100</code> | Decide whether a keyboard shortcut should be ignored for the viewer. |
+| <code>module:useViewerEffects</code> | module | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:2</code> | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects. |
+| <code>module:useViewerEffects.useViewerEffects</code> | function | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:112</code> |  |
+| <code>module:useViewerEffects~UseViewerEffectsArgs</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:24</code> | Arguments for useViewerEffects. |
+| <code>module:useViewerEffects~ZoomMode</code> | typedef | <code>src/components/DocumentViewer/hooks/useViewerEffects.js:17</code> | Sticky zoom modes used by the viewer. |
+| <code>&lt;anonymous&gt;~getScope</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:144</code> |  |
+| <code>&lt;anonymous&gt;~getTarget</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:133</code> |  |
+| <code>&lt;anonymous&gt;~isNextRepeatKey</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:154</code> |  |
+| <code>&lt;anonymous&gt;~isPreviousRepeatKey</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:161</code> |  |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:165</code> |  |
+| <code>&lt;anonymous&gt;~onKeyUp</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:278</code> |  |
+| <code>&lt;anonymous&gt;~onVisibilityChange</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:289</code> |  |
+| <code>&lt;anonymous&gt;~onWindowBlur</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:284</code> |  |
+| <code>module:useViewerKeyboardNavigation</code> | module | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:2</code> | Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer. |
+| <code>module:useViewerKeyboardNavigation.useViewerKeyboardNavigation</code> | function | <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js:15</code> |  |
 | <code>module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomLeft</code> | constant | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:59</code> | Adjust left pane post-zoom by ±0.1 steps. |
 | <code>module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomRight</code> | constant | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:68</code> | Adjust right pane post-zoom by ±0.1 steps. |
 | <code>module:useViewerPostZoom~clamp</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:20</code> | Clamp a numeric value to \[min, max\]. |
@@ -338,6 +341,10 @@
 | <code>module:useViewerPostZoom~round1</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:29</code> | Round to one decimal place \(avoids float drift when stepping by 0.1\). |
 | <code>module:useViewerPostZoom</code> | module | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:2</code> | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
 | <code>module:useViewerPostZoom.useViewerPostZoom</code> | function | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js:45</code> | Hook managing per-pane post-zoom factors for compare mode. |
+| <code>&lt;anonymous&gt;~onKeyDown</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:123</code> |  |
+| <code>&lt;anonymous&gt;~onWheelGlobal</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:106</code> |  |
+| <code>module:useViewerZoomEffects</code> | module | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:2</code> | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
+| <code>module:useViewerZoomEffects.useViewerZoomEffects</code> | function | <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js:15</code> |  |
 | <code>useDocumentViewer~activateComparePane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1509</code> | Open compare mode when needed and make the right pane the default target. |
 | <code>useDocumentViewer~activatePrimaryPane</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1501</code> |  |
 | <code>useDocumentViewer~applyThumbnailWidth</code> | constant | <code>src/components/DocumentViewer/useDocumentViewer.js:1618</code> | Mouse down handler for the thumbnail resizer; listens for mousemove/up on window. |

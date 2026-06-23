@@ -29,23 +29,27 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2150 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 109 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 216 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
+| <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 160 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 154 | 1 | 4 | high | Compact language selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 357 | 1 | 10 | high | Manual overlay that loads simple external HTML fragments from the public help folder. |
 | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 329 | 1 | 0 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
 | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx</code> | 544 | 1 | 1 | high | Unified print dialog with a single print-method selector and shared print-details section. |
+| <code>src/components/DocumentToolbar/printRangeDialogHelpers.js</code> | 149 | 2 | 9 | high | Pure helpers and shared constants for the print-range dialog. |
 | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx</code> | 108 | 2 | 0 | high | Reusable toolbar split-button. |
 | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx</code> | 179 | 1 | 6 | high | Compact theme selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx</code> | 59 | 0 | 0 | high | Small button that toggles between light/dark themes using the ThemeContext. |
 | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js</code> | 362 | 1 | 8 | high | Background prebuild/cache for configured &quot;all pages&quot; generated-PDF variants. |
-| <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 828 | 1 | 23 | high | Hook + helpers for PrintRangeDialog. |
+| <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 667 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 508 | 1 | 1 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 100 | 1 | 1 | high | Per-pane “post-zoom” controls shown in comparison mode. |
 | <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 593 | 0 | 4 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
 | <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1051 | 1 | 17 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
 | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx</code> | 222 | 1 | 1 | high | OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell. |
 | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx</code> | 418 | 1 | 5 | high | Toolbar adapter for the document viewer. |
-| <code>src/components/DocumentViewer/hooks/useViewerEffects.js</code> | 557 | 1 | 18 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res... |
+| <code>src/components/DocumentViewer/hooks/useViewerEffects.js</code> | 123 | 1 | 8 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects. |
+| <code>src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js</code> | 315 | 1 | 10 | high | Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer. |
 | <code>src/components/DocumentViewer/hooks/useViewerPostZoom.js</code> | 86 | 1 | 7 | high | File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &amp;quot;post-zoom&amp;quot; state &amp;amp; handlers used only in compare mode. |
+| <code>src/components/DocumentViewer/hooks/useViewerZoomEffects.js</code> | 161 | 1 | 4 | high | Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer. |
 | <code>src/components/DocumentViewer/useDocumentViewer.js</code> | 1899 | 1 | 60 | high | Primary viewer-state hook. |
 | <code>src/components/ImageRenderer.jsx</code> | 121 | 1 | 2 | high | OpenDocViewer — Absolute-positioned Image Renderer Render a single page image at a specified zoom factor. |
 | <code>src/components/LoadingMessage.jsx</code> | 90 | 1 | 1 | high | OpenDocViewer — Loading / Error Message Simple, accessible message block that reflects the current page load status. |
@@ -79,7 +83,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/documentLoadingConfig.js</code> | 1048 | 12 | 32 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | <code>src/utils/documentMetadata.js</code> | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
 | <code>src/utils/idUtils.js</code> | 64 | 1 | 4 | high | OpenDocViewer — small opaque identifier helpers. |
-| <code>src/utils/localizedValue.js</code> | 113 | 6 | 6 | high | Localized string resolver for admin-supplied config values. |
+| <code>src/utils/localizedValue.js</code> | 113 | 8 | 6 | high | Localized string resolver for admin-supplied config values. |
 | <code>src/utils/memoryProfile.js</code> | 75 | 1 | 6 | high | OpenDocViewer — Runtime memory profile helpers. |
 | <code>src/utils/navigationUtils.js</code> | 172 | 1 | 7 | high | OpenDocViewer — Navigation Utilities Centralized helpers for page navigation in the document viewer. |
 | <code>src/utils/objectUrlRegistry.js</code> | 92 | 3 | 6 | high | Centralized helpers for object/blob URL lifecycle management. |
