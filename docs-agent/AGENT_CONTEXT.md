@@ -23,10 +23,10 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 110
-- Source lines: 48894
-- JSDoc symbols: 1275
-- Files with JSDoc: 106
+- Source files: 114
+- Source lines: 49084
+- JSDoc symbols: 1282
+- Files with JSDoc: 110
 - Low-confidence summaries: 0
 - Parse errors: 0
 
@@ -38,12 +38,12 @@ Source commit: not embedded
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
+- `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 - `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
-- `src/utils/documentMetadata.js` - Helpers for resolving document\-level metadata from the normalized portable bundle.
 
 ## Agent Notes
 

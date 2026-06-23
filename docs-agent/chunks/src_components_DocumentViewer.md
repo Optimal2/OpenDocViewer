@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 8. Line count: 4926. JSDoc symbol count: 113.
+File count: 10. Line count: 4968. JSDoc symbol count: 117.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -80,26 +80,43 @@ Symbols:
 
 ## src/components/DocumentViewer/hooks/useViewerEffects.js
 
-File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...
+File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 
-Exports: `useViewerEffects`
+Exports: `isEditableTarget`, `hasActiveModalDialog`, `shouldIgnoreViewerShortcut`, `useViewerEffects`
 
-Local imports: `src/logging/systemLogger.js`, `src/hooks/usePageTimer.js`
+Local imports: `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js`, `src/components/DocumentViewer/hooks/useViewerZoomEffects.js`
 
 Symbols:
 
-- `module:useViewerEffects` (module) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...
+- `module:useViewerEffects` (module) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `module:useViewerEffects~ZoomMode` (typedef) - Sticky zoom modes used by the viewer.
 - `module:useViewerEffects~KeyboardPrintShortcutBehavior` (typedef) - No description.
 - `module:useViewerEffects~UseViewerEffectsArgs` (typedef) - Arguments for useViewerEffects.
-- `module:useViewerEffects~isEditableTarget` (function) - Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive.
-- `module:useViewerEffects~hasActiveModalDialog` (function) - Determine whether a modal dialog is currently open.
-- `module:useViewerEffects~shouldIgnoreViewerShortcut` (function) - Decide whether a keyboard shortcut should be ignored for the viewer.
+- `module:useViewerEffects.isEditableTarget` (function) - Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive.
+- `module:useViewerEffects.hasActiveModalDialog` (function) - Determine whether a modal dialog is currently open.
+- `module:useViewerEffects.shouldIgnoreViewerShortcut` (function) - Decide whether a keyboard shortcut should be ignored for the viewer.
 - `module:useViewerEffects.useViewerEffects` (function) - No description.
-- `<anonymous>~onWheelGlobal` (function) - No description.
-- `<anonymous>~onKeyDown` (function) - No description.
+
+## src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js
+
+Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
+
+Exports: `useViewerKeyboardNavigation`
+
+Local imports: `src/hooks/usePageTimer.js`
+
+Symbols:
+
+- `module:useViewerKeyboardNavigation` (module) - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
+- `module:useViewerKeyboardNavigation.useViewerKeyboardNavigation` (function) - No description.
 - `<anonymous>~getTarget` (function) - No description.
 - `<anonymous>~getScope` (function) - No description.
+- `<anonymous>~isNextRepeatKey` (function) - No description.
+- `<anonymous>~isPreviousRepeatKey` (function) - No description.
+- `<anonymous>~onKeyDown` (function) - No description.
+- `<anonymous>~onKeyUp` (function) - No description.
+- `<anonymous>~onWindowBlur` (function) - No description.
+- `<anonymous>~onVisibilityChange` (function) - No description.
 
 ## src/components/DocumentViewer/hooks/useViewerPostZoom.js
 
@@ -116,6 +133,21 @@ Symbols:
 - `module:useViewerPostZoom.useViewerPostZoom~resetPostZoom` (constant) - Reset both per\-pane factors to 1.0.
 - `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomLeft` (constant) - Adjust left pane post\-zoom by ±0.1 steps.
 - `module:useViewerPostZoom.useViewerPostZoom~bumpPostZoomRight` (constant) - Adjust right pane post\-zoom by ±0.1 steps.
+
+## src/components/DocumentViewer/hooks/useViewerZoomEffects.js
+
+Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
+
+Exports: `useViewerZoomEffects`
+
+Local imports: `src/logging/systemLogger.js`
+
+Symbols:
+
+- `module:useViewerZoomEffects` (module) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
+- `module:useViewerZoomEffects.useViewerZoomEffects` (function) - No description.
+- `<anonymous>~onWheelGlobal` (function) - No description.
+- `<anonymous>~onKeyDown` (function) - No description.
 
 ## src/components/DocumentViewer/useDocumentViewer.js
 

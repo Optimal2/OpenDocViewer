@@ -13,15 +13,18 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 ### Hooks
 
-- `src/components/DocumentToolbar/usePrintRangeDialog.js` (828 lines) - Hook \+ helpers for PrintRangeDialog.
+- `src/components/DocumentToolbar/usePrintRangeDialog.js` (667 lines) - Hook \+ helpers for PrintRangeDialog.
+- `src/components/DocumentViewer/hooks/useViewerEffects.js` (123 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` (1899 lines) - Primary viewer\-state hook.
 - `src/hooks/useNavigationModifierState.js` (109 lines) - Shared modifier\-key state for navigation and compare\-aware viewer actions.
-- `src/components/DocumentViewer/hooks/useViewerEffects.js` (557 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (362 lines) - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/hooks/usePageTimer.js` (149 lines) - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
+- `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` (315 lines) - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/hooks/useViewerPostZoom.js` (86 lines) - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &amp;quot;post\-zoom&amp;quot; state &amp;amp; handlers used only in compare mode.
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
+- `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (161 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
+- `src/components/DocumentToolbar/hooks/usePrintRangeConfig.js` (160 lines) - Runtime\-configuration derivation for PrintRangeDialog.
 
 ### Workers
 

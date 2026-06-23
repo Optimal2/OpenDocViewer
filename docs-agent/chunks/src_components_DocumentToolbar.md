@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 14. Line count: 6366. JSDoc symbol count: 91.
+File count: 16. Line count: 6514. JSDoc symbol count: 94.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -63,6 +63,19 @@ Symbols:
 - `module.exports` (function) - No description.
 - `<anonymous>~handleEscape` (function) - No description.
 
+## src/components/DocumentToolbar/hooks/usePrintRangeConfig.js
+
+Runtime\-configuration derivation for PrintRangeDialog.
+
+Exports: `usePrintRangeConfig`
+
+Local imports: `src/utils/localizedValue.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentToolbar/printRangeDialogHelpers.js`
+
+Symbols:
+
+- `module:usePrintRangeConfig` (module) - Runtime\-configuration derivation for PrintRangeDialog.
+- `module:usePrintRangeConfig.usePrintRangeConfig` (function) - No description.
+
 ## src/components/DocumentToolbar/LanguageMenuButton.jsx
 
 Compact language selector for the toolbar.
@@ -116,6 +129,26 @@ Local imports: `src/components/DocumentToolbar/usePrintRangeDialog.js`
 Symbols:
 
 - `PrintSubmitDetail` (typedef) - Structured payload returned to the caller on submit.
+
+## src/components/DocumentToolbar/printRangeDialogHelpers.js
+
+Pure helpers and shared constants for the print\-range dialog.
+
+Exports: `getCfg`, `safeRegex`, `hasTextValue`, `resolveOptionPrintText`, `resolvePrintAction`, `normalizePdfOrientationMode`, `buildSelectedOptionDetails`, `ensureODVPrintCSS`
+
+Local imports: `src/utils/localizedValue.js`
+
+Symbols:
+
+- `module:printRangeDialogHelpers` (module) - Pure helpers and shared constants for the print\-range dialog.
+- `module:printRangeDialogHelpers.getCfg` (function) - Read the runtime configuration \(merged defaults \+ site overrides\).
+- `module:printRangeDialogHelpers.safeRegex` (function) - Build a safe RegExp from optional pattern/flags.
+- `module:printRangeDialogHelpers.hasTextValue` (function) - No description.
+- `module:printRangeDialogHelpers.resolveOptionPrintText` (function) - Resolve the string that should be used on physical print/log output for an option.
+- `module:printRangeDialogHelpers.resolvePrintAction` (function) - Resolve a configurable print dialog action.
+- `module:printRangeDialogHelpers.normalizePdfOrientationMode` (function) - No description.
+- `module:printRangeDialogHelpers.buildSelectedOptionDetails` (function) - Build token\-friendly details for the selected option without forcing templates to use list indexes.
+- `module:printRangeDialogHelpers.ensureODVPrintCSS` (function) - Ensure base print CSS is injected once per document.
 
 ## src/components/DocumentToolbar/SplitToolbarButton.jsx
 
@@ -171,24 +204,24 @@ Symbols:
 
 Hook \+ helpers for PrintRangeDialog.
 
-Exports: `getCfg`, `safeRegex`, `ensureODVPrintCSS`, `usePrintRangeController`
+Exports: `ensureODVPrintCSS`, `getCfg`, `safeRegex`, `usePrintRangeController`
 
-Local imports: `src/utils/printUtils.js`, `src/utils/localizedValue.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`
+Local imports: `src/utils/printUtils.js`, `src/utils/localizedValue.js`, `src/components/DocumentToolbar/printRangeDialogHelpers.js`, `src/components/DocumentToolbar/hooks/usePrintRangeConfig.js`
 
 Symbols:
 
 - `PrintSubmitDetail` (typedef) - Structured payload returned to the caller on submit.
-- `getCfg` (function) - Read the runtime configuration \(merged defaults \+ site overrides\).
-- `safeRegex` (function) - Build a safe RegExp from optional pattern/flags.
-- `hasTextValue` (function) - No description.
-- `resolveOptionPrintText` (function) - Resolve the string that should be used on physical print/log output for an option.
-- `resolvePrintAction` (function) - Resolve a configurable print dialog action.
-- `normalizePdfOrientationMode` (function) - No description.
-- `buildSelectedOptionDetails` (function) - Build token\-friendly details for the selected option without forcing templates to use list indexes.
-- `ensureODVPrintCSS` (function) - Ensure base print CSS is injected once per document.
 - `usePrintRangeController` (function) - Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.
 - `usePrintRangeController~onDialogKeyDown` (constant) - No description.
 - `usePrintRangeController~makeDescendingSequence` (constant) - No description.
+- `usePrintRangeController~validateRange` (constant) - No description.
+- `usePrintRangeController~validateUserFields` (constant) - No description.
+- `usePrintRangeController~composePrintFormat` (constant) - No description.
+- `usePrintRangeController~composeReason` (constant) - No description.
+- `usePrintRangeController~extras` (constant) - No description.
+- `usePrintRangeController~composeSubmitDetail` (constant) - Compose and validate the print payload for the current dialog state.
+- `usePrintRangeController~submitWithBackend` (constant) - No description.
+- `usePrintRangeController~submitPrintDirect` (constant) - No description.
 
 ## src/components/DocumentToolbar/ZoomButtons.jsx
 

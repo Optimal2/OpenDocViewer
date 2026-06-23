@@ -78,15 +78,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 110,
-    "sourceLineCount": 48894,
-    "docletCount": 1275,
-    "documentedFileCount": 106,
+    "fileCount": 114,
+    "sourceLineCount": 49084,
+    "docletCount": 1282,
+    "documentedFileCount": 110,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 21,
     "devDependencyCount": 17,
-    "estimatedSourceTokens": 3503
+    "estimatedSourceTokens": 3613
   },
   "recommendations": [
     "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
@@ -95,7 +95,7 @@
   "packageUsage": [
     {
       "packageName": "react",
-      "importCount": 52,
+      "importCount": 53,
       "files": [
         "src/ErrorBoundary.jsx",
         "src/PerformanceMonitor.jsx",
@@ -130,8 +130,9 @@
         "src/components/DocumentViewer/DocumentViewerRender.jsx",
         "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
         "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-        "src/components/DocumentViewer/hooks/useViewerEffects.js",
+        "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
         "src/components/DocumentViewer/hooks/useViewerPostZoom.js",
+        "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
         "src/components/DocumentViewer/useDocumentViewer.js",
         "src/components/ImageRenderer.jsx",
         "src/components/LoadingMessage.jsx",
@@ -413,6 +414,15 @@
       "summaryConfidence": "medium"
     },
     {
+      "path": "src/utils/localizedValue.js",
+      "score": 88,
+      "lines": 113,
+      "incomingLocalImports": 8,
+      "doclets": 6,
+      "summary": "Localized string resolver for admin-supplied config values.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/index.jsx",
       "score": 86,
       "lines": 59,
@@ -467,21 +477,21 @@
       "summaryConfidence": "high"
     },
     {
-      "path": "src/utils/localizedValue.js",
-      "score": 76,
-      "lines": 113,
-      "incomingLocalImports": 6,
-      "doclets": 6,
-      "summary": "Localized string resolver for admin-supplied config values.",
-      "summaryConfidence": "high"
-    },
-    {
       "path": "src/utils/objectUrlRegistry.js",
       "score": 72,
       "lines": 92,
       "incomingLocalImports": 3,
       "doclets": 6,
       "summary": "Centralized helpers for object/blob URL lifecycle management.",
+      "summaryConfidence": "high"
+    },
+    {
+      "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "score": 71,
+      "lines": 149,
+      "incomingLocalImports": 2,
+      "doclets": 9,
+      "summary": "Pure helpers and shared constants for the print-range dialog.",
       "summaryConfidence": "high"
     },
     {
@@ -518,15 +528,6 @@
       "incomingLocalImports": 6,
       "doclets": 1,
       "summary": "Resolve a public asset path against the viewer base URL.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "score": 58,
-      "lines": 828,
-      "incomingLocalImports": 1,
-      "doclets": 23,
-      "summary": "Hook + helpers for PrintRangeDialog.",
       "summaryConfidence": "high"
     },
     {
@@ -575,9 +576,15 @@
         "files": [
           {
             "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-            "score": 58,
-            "lines": 828,
+            "score": 57,
+            "lines": 667,
             "summary": "Hook + helpers for PrintRangeDialog."
+          },
+          {
+            "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
+            "score": 53,
+            "lines": 123,
+            "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects."
           },
           {
             "path": "src/components/DocumentViewer/useDocumentViewer.js",
@@ -592,12 +599,6 @@
             "summary": "Shared modifier-key state for navigation and compare-aware viewer actions."
           },
           {
-            "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-            "score": 41,
-            "lines": 557,
-            "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res..."
-          },
-          {
             "path": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js",
             "score": 40,
             "lines": 362,
@@ -608,6 +609,12 @@
             "score": 40,
             "lines": 149,
             "summary": "OpenDocViewer — Continuous Page Navigation Timer (React hook) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately (leading edge) and then repeatedly after an initia"
+          },
+          {
+            "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+            "score": 39,
+            "lines": 315,
+            "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer."
           },
           {
             "path": "src/components/DocumentViewer/hooks/useViewerPostZoom.js",
@@ -622,10 +629,22 @@
             "summary": "OpenDocViewer — Page Navigation Hook (React) Provide memoized handlers for page navigation (first/prev/next/last) and continuous navigation timers suitable for press-and-hold UI (e.g., mousedown)."
           },
           {
+            "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+            "score": 26,
+            "lines": 161,
+            "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer."
+          },
+          {
             "path": "src/hooks/useAcceleratingHoldRepeat.js",
             "score": 25,
             "lines": 210,
             "summary": "Reusable press-and-hold behavior for toolbar buttons."
+          },
+          {
+            "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+            "score": 20,
+            "lines": 160,
+            "summary": "Runtime-configuration derivation for PrintRangeDialog."
           }
         ]
       },
@@ -956,16 +975,25 @@
     },
     {
       "name": "src/components/DocumentToolbar",
-      "fileCount": 14,
-      "lineCount": 6366,
-      "docletCount": 91,
+      "fileCount": 16,
+      "lineCount": 6514,
+      "docletCount": 94,
       "importantFiles": [
         {
+          "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "score": 71,
+          "lines": 149,
+          "incomingLocalImports": 2,
+          "doclets": 9,
+          "summary": "Pure helpers and shared constants for the print-range dialog.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "score": 58,
-          "lines": 828,
+          "score": 57,
+          "lines": 667,
           "incomingLocalImports": 1,
-          "doclets": 23,
+          "doclets": 15,
           "summary": "Hook + helpers for PrintRangeDialog.",
           "summaryConfidence": "high"
         },
@@ -1022,24 +1050,24 @@
           "doclets": 3,
           "summary": "Small About dialog for version/build/support information.",
           "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
-          "score": 21,
-          "lines": 108,
-          "incomingLocalImports": 2,
-          "doclets": 0,
-          "summary": "Reusable toolbar split-button.",
-          "summaryConfidence": "high"
         }
       ]
     },
     {
       "name": "src/components/DocumentViewer",
-      "fileCount": 8,
-      "lineCount": 4926,
-      "docletCount": 113,
+      "fileCount": 10,
+      "lineCount": 4968,
+      "docletCount": 117,
       "importantFiles": [
+        {
+          "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
+          "score": 53,
+          "lines": 123,
+          "incomingLocalImports": 1,
+          "doclets": 8,
+          "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects.",
+          "summaryConfidence": "high"
+        },
         {
           "path": "src/components/DocumentViewer/useDocumentViewer.js",
           "score": 52,
@@ -1059,12 +1087,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "score": 41,
-          "lines": 557,
+          "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "score": 39,
+          "lines": 315,
           "incomingLocalImports": 1,
-          "doclets": 18,
-          "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+          "doclets": 10,
+          "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
           "summaryConfidence": "high"
         },
         {
@@ -1086,30 +1114,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+          "score": 26,
+          "lines": 161,
+          "incomingLocalImports": 1,
+          "doclets": 4,
+          "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentViewer/DocumentViewer.jsx",
           "score": 21,
           "lines": 593,
           "incomingLocalImports": 0,
           "doclets": 4,
           "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
-          "score": 17,
-          "lines": 222,
-          "incomingLocalImports": 1,
-          "doclets": 1,
-          "summary": "OpenDocViewer — Document Viewer Thumbnails (Wrapper) Provides the deterministic thumbnail list and local width controls for the viewer shell.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-          "score": 16,
-          "lines": 100,
-          "incomingLocalImports": 1,
-          "doclets": 1,
-          "summary": "Per-pane “post-zoom” controls shown in comparison mode.",
           "summaryConfidence": "high"
         }
       ]
@@ -1444,6 +1463,15 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/utils/localizedValue.js",
+          "score": 88,
+          "lines": 113,
+          "incomingLocalImports": 8,
+          "doclets": 6,
+          "summary": "Localized string resolver for admin-supplied config values.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/utils/pdfPrintCacheKey.js",
           "score": 86,
           "lines": 117,
@@ -1468,15 +1496,6 @@
           "incomingLocalImports": 3,
           "doclets": 18,
           "summary": "Support diagnostics helpers for opt-in troubleshooting tools.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/documentMetadata.js",
-          "score": 76,
-          "lines": 404,
-          "incomingLocalImports": 3,
-          "doclets": 18,
-          "summary": "Helpers for resolving document-level metadata from the normalized portable bundle.",
           "summaryConfidence": "high"
         }
       ]
@@ -12018,6 +12037,189 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+      "lines": 160,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Runtime-configuration derivation for PrintRangeDialog.",
+      "imports": [
+        {
+          "source": "../../../utils/localizedValue.js",
+          "specifiers": [
+            "resolveLocalizedValue"
+          ],
+          "line": 8
+        },
+        {
+          "source": "../../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getPrintDefaultMode"
+          ],
+          "line": 9
+        },
+        {
+          "source": "../../../utils/viewerPreferences.js",
+          "specifiers": [
+            "getPrintDefaultModePreference"
+          ],
+          "line": 10
+        },
+        {
+          "source": "../printRangeDialogHelpers.js",
+          "specifiers": [
+            "getCfg",
+            "hasTextValue",
+            "normalizePdfOrientationMode",
+            "resolvePrintAction",
+            "safeRegex"
+          ],
+          "line": 11
+        }
+      ],
+      "exports": [
+        {
+          "name": "usePrintRangeConfig",
+          "kind": "function",
+          "line": 29
+        }
+      ],
+      "declarations": [
+        {
+          "name": "usePrintRangeConfig",
+          "kind": "function",
+          "line": 29
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:usePrintRangeConfig",
+          "name": "usePrintRangeConfig",
+          "longname": "module:usePrintRangeConfig",
+          "kind": "module",
+          "scope": null,
+          "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+          "line": 2,
+          "description": "Runtime-configuration derivation for PrintRangeDialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:usePrintRangeConfig.usePrintRangeConfig",
+          "name": "usePrintRangeConfig",
+          "longname": "module:usePrintRangeConfig.usePrintRangeConfig",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+          "line": 29,
+          "description": "",
+          "params": [
+            {
+              "name": "params",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "params.isDocumentLoading",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "params.hasActiveSelection",
+              "type": "boolean",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "params.selectionSequenceLocked",
+              "type": "boolean",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "params.selectionIncludedCount",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "params.t",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "params.i18n",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentToolbar",
+      "localImports": [
+        {
+          "source": "../../../utils/localizedValue.js",
+          "specifiers": [
+            "resolveLocalizedValue"
+          ],
+          "line": 8,
+          "resolved": "src/utils/localizedValue.js"
+        },
+        {
+          "source": "../../../utils/runtimeConfig.js",
+          "specifiers": [
+            "getPrintDefaultMode"
+          ],
+          "line": 9,
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "../../../utils/viewerPreferences.js",
+          "specifiers": [
+            "getPrintDefaultModePreference"
+          ],
+          "line": 10,
+          "resolved": "src/utils/viewerPreferences.js"
+        },
+        {
+          "source": "../printRangeDialogHelpers.js",
+          "specifiers": [
+            "getCfg",
+            "hasTextValue",
+            "normalizePdfOrientationMode",
+            "resolvePrintAction",
+            "safeRegex"
+          ],
+          "line": 11,
+          "resolved": "src/components/DocumentToolbar/printRangeDialogHelpers.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 20,
+      "summary": "Runtime-configuration derivation for PrintRangeDialog.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
       "path": "src/components/DocumentToolbar/LanguageMenuButton.jsx",
       "lines": 154,
       "extension": ".jsx",
@@ -12917,6 +13119,391 @@
       "summary": "Unified print dialog with a single print-method selector and shared print-details section.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "lines": 149,
+      "extension": ".js",
+      "jsdocBlockCount": 9,
+      "sourceSummary": "Pure helpers and shared constants for the print-range dialog.",
+      "imports": [
+        {
+          "source": "../../utils/localizedValue.js",
+          "specifiers": [
+            "resolveLocalizedValue",
+            "resolveOptionLabel"
+          ],
+          "line": 8
+        }
+      ],
+      "exports": [
+        {
+          "name": "getCfg",
+          "kind": "function",
+          "line": 14
+        },
+        {
+          "name": "safeRegex",
+          "kind": "function",
+          "line": 25
+        },
+        {
+          "name": "hasTextValue",
+          "kind": "function",
+          "line": 34
+        },
+        {
+          "name": "resolveOptionPrintText",
+          "kind": "function",
+          "line": 50
+        },
+        {
+          "name": "resolvePrintAction",
+          "kind": "function",
+          "line": 73
+        },
+        {
+          "name": "normalizePdfOrientationMode",
+          "kind": "function",
+          "line": 87
+        },
+        {
+          "name": "buildSelectedOptionDetails",
+          "kind": "function",
+          "line": 101
+        },
+        {
+          "name": "ensureODVPrintCSS",
+          "kind": "function",
+          "line": 140
+        }
+      ],
+      "declarations": [
+        {
+          "name": "getCfg",
+          "kind": "function",
+          "line": 14
+        },
+        {
+          "name": "safeRegex",
+          "kind": "function",
+          "line": 25
+        },
+        {
+          "name": "hasTextValue",
+          "kind": "function",
+          "line": 34
+        },
+        {
+          "name": "resolveOptionPrintText",
+          "kind": "function",
+          "line": 50
+        },
+        {
+          "name": "resolvePrintAction",
+          "kind": "function",
+          "line": 73
+        },
+        {
+          "name": "normalizePdfOrientationMode",
+          "kind": "function",
+          "line": 87
+        },
+        {
+          "name": "buildSelectedOptionDetails",
+          "kind": "function",
+          "line": 101
+        },
+        {
+          "name": "ensureODVPrintCSS",
+          "kind": "function",
+          "line": 140
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:printRangeDialogHelpers",
+          "name": "printRangeDialogHelpers",
+          "longname": "module:printRangeDialogHelpers",
+          "kind": "module",
+          "scope": null,
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 2,
+          "description": "Pure helpers and shared constants for the print-range dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.getCfg",
+          "name": "getCfg",
+          "longname": "module:printRangeDialogHelpers.getCfg",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 14,
+          "description": "Read the runtime configuration (merged defaults + site overrides).",
+          "params": [],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.safeRegex",
+          "name": "safeRegex",
+          "longname": "module:printRangeDialogHelpers.safeRegex",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 25,
+          "description": "Build a safe RegExp from optional pattern/flags.",
+          "params": [
+            {
+              "name": "pattern",
+              "type": "string|null|undefined",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "flags",
+              "type": "string|null|undefined",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "RegExp|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.hasTextValue",
+          "name": "hasTextValue",
+          "longname": "module:printRangeDialogHelpers.hasTextValue",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 34,
+          "description": "",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.resolveOptionPrintText",
+          "name": "resolveOptionPrintText",
+          "longname": "module:printRangeDialogHelpers.resolveOptionPrintText",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 50,
+          "description": "Resolve the string that should be used on physical print/log output for an option.",
+          "params": [
+            {
+              "name": "option",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "i18n",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "useValueForOutput",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.resolvePrintAction",
+          "name": "resolvePrintAction",
+          "longname": "module:printRangeDialogHelpers.resolvePrintAction",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 73,
+          "description": "Resolve a configurable print dialog action.",
+          "params": [
+            {
+              "name": "actionsCfg",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "name",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "i18n",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "fallback",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.normalizePdfOrientationMode",
+          "name": "normalizePdfOrientationMode",
+          "longname": "module:printRangeDialogHelpers.normalizePdfOrientationMode",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 87,
+          "description": "",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "fallback",
+              "type": "'auto'|'portrait'|'landscape'",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "'auto'|'portrait'|'landscape'",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.buildSelectedOptionDetails",
+          "name": "buildSelectedOptionDetails",
+          "longname": "module:printRangeDialogHelpers.buildSelectedOptionDetails",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 101,
+          "description": "Build token-friendly details for the selected option without forcing templates to use list indexes.",
+          "params": [
+            {
+              "name": "option",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "i18n",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "output",
+              "type": "string",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "extra",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:printRangeDialogHelpers.ensureODVPrintCSS",
+          "name": "ensureODVPrintCSS",
+          "longname": "module:printRangeDialogHelpers.ensureODVPrintCSS",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+          "line": 140,
+          "description": "Ensure base print CSS is injected once per document.",
+          "params": [],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentToolbar",
+      "localImports": [
+        {
+          "source": "../../utils/localizedValue.js",
+          "specifiers": [
+            "resolveLocalizedValue",
+            "resolveOptionLabel"
+          ],
+          "line": 8,
+          "resolved": "src/utils/localizedValue.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 71,
+      "summary": "Pure helpers and shared constants for the print-range dialog.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
     },
     {
       "path": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
@@ -13859,9 +14446,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "lines": 828,
+      "lines": 667,
       "extension": ".js",
-      "jsdocBlockCount": 30,
+      "jsdocBlockCount": 22,
       "sourceSummary": "Hook + helpers for PrintRangeDialog.",
       "imports": [
         {
@@ -13891,112 +14478,79 @@
           "line": 11
         },
         {
-          "source": "../../utils/runtimeConfig.js",
+          "source": "./printRangeDialogHelpers.js",
           "specifiers": [
-            "getPrintDefaultMode"
+            "buildSelectedOptionDetails",
+            "ensureODVPrintCSS",
+            "normalizePdfOrientationMode",
+            "resolveOptionPrintText",
+            "safeRegex"
           ],
           "line": 12
         },
         {
-          "source": "../../utils/viewerPreferences.js",
+          "source": "./hooks/usePrintRangeConfig.js",
           "specifiers": [
-            "getPrintDefaultModePreference"
+            "usePrintRangeConfig"
           ],
-          "line": 13
+          "line": 19
         }
       ],
       "exports": [
         {
+          "name": "ensureODVPrintCSS",
+          "kind": "named",
+          "source": "./printRangeDialogHelpers.js",
+          "line": 21
+        },
+        {
           "name": "getCfg",
-          "kind": "function",
-          "line": 37
+          "kind": "named",
+          "source": "./printRangeDialogHelpers.js",
+          "line": 21
         },
         {
           "name": "safeRegex",
-          "kind": "function",
-          "line": 48
-        },
-        {
-          "name": "ensureODVPrintCSS",
-          "kind": "function",
-          "line": 163
+          "kind": "named",
+          "source": "./printRangeDialogHelpers.js",
+          "line": 21
         },
         {
           "name": "usePrintRangeController",
           "kind": "function",
-          "line": 191
+          "line": 63
         }
       ],
       "declarations": [
         {
-          "name": "getCfg",
-          "kind": "function",
-          "line": 37
-        },
-        {
-          "name": "safeRegex",
-          "kind": "function",
-          "line": 48
-        },
-        {
-          "name": "hasTextValue",
-          "kind": "function",
-          "line": 57
-        },
-        {
-          "name": "resolveOptionPrintText",
-          "kind": "function",
-          "line": 73
-        },
-        {
-          "name": "resolvePrintAction",
-          "kind": "function",
-          "line": 96
-        },
-        {
-          "name": "normalizePdfOrientationMode",
-          "kind": "function",
-          "line": 110
-        },
-        {
-          "name": "buildSelectedOptionDetails",
-          "kind": "function",
-          "line": 124
-        },
-        {
-          "name": "ensureODVPrintCSS",
-          "kind": "function",
-          "line": 163
-        },
-        {
           "name": "usePrintRangeController",
           "kind": "function",
-          "line": 191
+          "line": 63
         },
         {
           "name": "isInside",
           "kind": "function",
-          "line": 392
+          "line": 231
         },
         {
           "name": "isBackdrop",
           "kind": "function",
-          "line": 393
+          "line": 232
         },
         {
           "name": "blockPointer",
           "kind": "function",
-          "line": 394
+          "line": 233
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 411
+          "line": 250
         },
         {
           "name": "common",
           "kind": "object",
-          "line": 597
+          "line": 436
         }
       ],
       "parseError": null,
@@ -14014,256 +14568,10 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 15,
+          "line": 27,
           "description": "Structured payload returned to the caller on submit.",
           "params": [],
           "returns": [],
-          "examples": 0
-        },
-        {
-          "id": "getCfg",
-          "name": "getCfg",
-          "longname": "getCfg",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 37,
-          "description": "Read the runtime configuration (merged defaults + site overrides).",
-          "params": [],
-          "returns": [
-            {
-              "type": "Object",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "safeRegex",
-          "name": "safeRegex",
-          "longname": "safeRegex",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 48,
-          "description": "Build a safe RegExp from optional pattern/flags.",
-          "params": [
-            {
-              "name": "pattern",
-              "type": "string|null|undefined",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "flags",
-              "type": "string|null|undefined",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "RegExp|null",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "hasTextValue",
-          "name": "hasTextValue",
-          "longname": "hasTextValue",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 57,
-          "description": "",
-          "params": [
-            {
-              "name": "value",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "boolean",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "resolveOptionPrintText",
-          "name": "resolveOptionPrintText",
-          "longname": "resolveOptionPrintText",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 73,
-          "description": "Resolve the string that should be used on physical print/log output for an option.",
-          "params": [
-            {
-              "name": "option",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "i18n",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "useValueForOutput",
-              "type": "boolean",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "string",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "resolvePrintAction",
-          "name": "resolvePrintAction",
-          "longname": "resolvePrintAction",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 96,
-          "description": "Resolve a configurable print dialog action.",
-          "params": [
-            {
-              "name": "actionsCfg",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "name",
-              "type": "string",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "i18n",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "fallback",
-              "type": "Object",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Object",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "normalizePdfOrientationMode",
-          "name": "normalizePdfOrientationMode",
-          "longname": "normalizePdfOrientationMode",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 110,
-          "description": "",
-          "params": [
-            {
-              "name": "value",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "fallback",
-              "type": "'auto'|'portrait'|'landscape'",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "'auto'|'portrait'|'landscape'",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "buildSelectedOptionDetails",
-          "name": "buildSelectedOptionDetails",
-          "longname": "buildSelectedOptionDetails",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 124,
-          "description": "Build token-friendly details for the selected option without forcing templates to use list indexes.",
-          "params": [
-            {
-              "name": "option",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "i18n",
-              "type": "*",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "output",
-              "type": "string",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "extra",
-              "type": "Object",
-              "optional": true,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "Object",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
-          "id": "ensureODVPrintCSS",
-          "name": "ensureODVPrintCSS",
-          "longname": "ensureODVPrintCSS",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 163,
-          "description": "Ensure base print CSS is injected once per document.",
-          "params": [],
-          "returns": [
-            {
-              "type": "void",
-              "description": ""
-            }
-          ],
           "examples": 0
         },
         {
@@ -14273,7 +14581,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 191,
+          "line": 63,
           "description": "Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.",
           "params": [
             {
@@ -14371,7 +14679,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 428,
+          "line": 267,
           "description": "",
           "params": [
             {
@@ -14396,7 +14704,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 440,
+          "line": 279,
           "description": "",
           "params": [
             {
@@ -14427,7 +14735,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 449,
+          "line": 288,
           "description": "",
           "params": [],
           "returns": [
@@ -14445,7 +14753,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 461,
+          "line": 300,
           "description": "",
           "params": [],
           "returns": [
@@ -14463,7 +14771,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 526,
+          "line": 365,
           "description": "",
           "params": [],
           "returns": [
@@ -14481,7 +14789,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 545,
+          "line": 384,
           "description": "",
           "params": [],
           "returns": [
@@ -14499,7 +14807,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 568,
+          "line": 407,
           "description": "",
           "params": [],
           "returns": [
@@ -14517,7 +14825,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 588,
+          "line": 427,
           "description": "Compose and validate the print payload for the current dialog state.",
           "params": [
             {
@@ -14542,7 +14850,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 647,
+          "line": 486,
           "description": "",
           "params": [
             {
@@ -14567,7 +14875,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 660,
+          "line": 499,
           "description": "",
           "params": [],
           "returns": [
@@ -14585,7 +14893,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 663,
+          "line": 502,
           "description": "",
           "params": [],
           "returns": [
@@ -14603,7 +14911,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 668,
+          "line": 507,
           "description": "",
           "params": [],
           "returns": [
@@ -14621,7 +14929,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-          "line": 679,
+          "line": 518,
           "description": "Restore the dialog state from the latest successfully prepared print.",
           "params": [
             {
@@ -14660,20 +14968,24 @@
           "resolved": "src/utils/localizedValue.js"
         },
         {
-          "source": "../../utils/runtimeConfig.js",
+          "source": "./printRangeDialogHelpers.js",
           "specifiers": [
-            "getPrintDefaultMode"
+            "buildSelectedOptionDetails",
+            "ensureODVPrintCSS",
+            "normalizePdfOrientationMode",
+            "resolveOptionPrintText",
+            "safeRegex"
           ],
           "line": 12,
-          "resolved": "src/utils/runtimeConfig.js"
+          "resolved": "src/components/DocumentToolbar/printRangeDialogHelpers.js"
         },
         {
-          "source": "../../utils/viewerPreferences.js",
+          "source": "./hooks/usePrintRangeConfig.js",
           "specifiers": [
-            "getPrintDefaultModePreference"
+            "usePrintRangeConfig"
           ],
-          "line": 13,
-          "resolved": "src/utils/viewerPreferences.js"
+          "line": 19,
+          "resolved": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js"
         }
       ],
       "packageImports": [
@@ -14690,7 +15002,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 58,
+      "importanceScore": 57,
       "summary": "Hook + helpers for PrintRangeDialog.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -16724,112 +17036,68 @@
     },
     {
       "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "lines": 557,
+      "lines": 123,
       "extension": ".js",
-      "jsdocBlockCount": 19,
-      "sourceSummary": "Cross-cutting viewer effects: - Sync zoomState.scale from numeric zoom - Sticky Fit recomputation on relevant changes - ResizeObserver to re-fit on container resize - Global Ctrl/Cmd + wheel zoom - Global keyboard naviga",
+      "jsdocBlockCount": 8,
+      "sourceSummary": "Cross-cutting viewer effects.",
       "imports": [
         {
-          "source": "react",
+          "source": "./useViewerKeyboardNavigation.js",
           "specifiers": [
-            "useCallback",
-            "useEffect",
-            "useRef"
+            "useViewerKeyboardNavigation"
           ],
-          "line": 22
+          "line": 14
         },
         {
-          "source": "../../../logging/systemLogger.js",
+          "source": "./useViewerZoomEffects.js",
           "specifiers": [
-            "logger"
+            "useViewerZoomEffects"
           ],
-          "line": 23
-        },
-        {
-          "source": "../../../hooks/usePageTimer.js",
-          "specifiers": [
-            "usePageTimer"
-          ],
-          "line": 24
+          "line": 15
         }
       ],
       "exports": [
         {
+          "name": "isEditableTarget",
+          "kind": "function",
+          "line": 74
+        },
+        {
+          "name": "hasActiveModalDialog",
+          "kind": "function",
+          "line": 89
+        },
+        {
+          "name": "shouldIgnoreViewerShortcut",
+          "kind": "function",
+          "line": 100
+        },
+        {
           "name": "useViewerEffects",
           "kind": "function",
-          "line": 121
+          "line": 112
         }
       ],
       "declarations": [
         {
           "name": "isEditableTarget",
           "kind": "function",
-          "line": 83
+          "line": 74
         },
         {
           "name": "hasActiveModalDialog",
           "kind": "function",
-          "line": 98
+          "line": 89
         },
         {
           "name": "shouldIgnoreViewerShortcut",
           "kind": "function",
-          "line": 109
+          "line": 100
         },
         {
           "name": "useViewerEffects",
           "kind": "function",
-          "line": 121
-        },
-        {
-          "name": "onWheelGlobal",
-          "kind": "function",
-          "line": 312
-        },
-        {
-          "name": "onKeyDown",
-          "kind": "function",
-          "line": 329
-        },
-        {
-          "name": "getTarget",
-          "kind": "function",
-          "line": 363
-        },
-        {
-          "name": "getScope",
-          "kind": "function",
-          "line": 374
-        },
-        {
-          "name": "isNextRepeatKey",
-          "kind": "function",
-          "line": 384
-        },
-        {
-          "name": "isPreviousRepeatKey",
-          "kind": "function",
-          "line": 391
-        },
-        {
-          "name": "onKeyDown",
-          "kind": "function",
-          "line": 395
-        },
-        {
-          "name": "onKeyUp",
-          "kind": "function",
-          "line": 508
-        },
-        {
-          "name": "onWindowBlur",
-          "kind": "function",
-          "line": 514
-        },
-        {
-          "name": "onVisibilityChange",
-          "kind": "function",
-          "line": 519
+          "line": 112
         }
       ],
       "parseError": null,
@@ -16848,7 +17116,7 @@
           "scope": null,
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
           "line": 2,
-          "description": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+          "description": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -16860,7 +17128,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 26,
+          "line": 17,
           "description": "Sticky zoom modes used by the viewer.",
           "params": [],
           "returns": [],
@@ -16873,7 +17141,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 31,
+          "line": 22,
           "description": "",
           "params": [],
           "returns": [],
@@ -16886,20 +17154,20 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 33,
+          "line": 24,
           "description": "Arguments for useViewerEffects.",
           "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "module:useViewerEffects~isEditableTarget",
+          "id": "module:useViewerEffects.isEditableTarget",
           "name": "isEditableTarget",
-          "longname": "module:useViewerEffects~isEditableTarget",
+          "longname": "module:useViewerEffects.isEditableTarget",
           "kind": "function",
-          "scope": "inner",
+          "scope": "static",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 83,
+          "line": 74,
           "description": "Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive.",
           "params": [
             {
@@ -16918,13 +17186,13 @@
           "examples": 0
         },
         {
-          "id": "module:useViewerEffects~hasActiveModalDialog",
+          "id": "module:useViewerEffects.hasActiveModalDialog",
           "name": "hasActiveModalDialog",
-          "longname": "module:useViewerEffects~hasActiveModalDialog",
+          "longname": "module:useViewerEffects.hasActiveModalDialog",
           "kind": "function",
-          "scope": "inner",
+          "scope": "static",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 98,
+          "line": 89,
           "description": "Determine whether a modal dialog is currently open.",
           "params": [],
           "returns": [
@@ -16936,13 +17204,13 @@
           "examples": 0
         },
         {
-          "id": "module:useViewerEffects~shouldIgnoreViewerShortcut",
+          "id": "module:useViewerEffects.shouldIgnoreViewerShortcut",
           "name": "shouldIgnoreViewerShortcut",
-          "longname": "module:useViewerEffects~shouldIgnoreViewerShortcut",
+          "longname": "module:useViewerEffects.shouldIgnoreViewerShortcut",
           "kind": "function",
-          "scope": "inner",
+          "scope": "static",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 109,
+          "line": 100,
           "description": "Decide whether a keyboard shortcut should be ignored for the viewer.",
           "params": [
             {
@@ -16967,7 +17235,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 121,
+          "line": 112,
           "description": "",
           "params": [
             {
@@ -16984,45 +17252,156 @@
             }
           ],
           "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentViewer",
+      "localImports": [
+        {
+          "source": "./useViewerKeyboardNavigation.js",
+          "specifiers": [
+            "useViewerKeyboardNavigation"
+          ],
+          "line": 14,
+          "resolved": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js"
         },
         {
-          "id": "<anonymous>~onWheelGlobal",
-          "name": "onWheelGlobal",
-          "longname": "<anonymous>~onWheelGlobal",
-          "kind": "function",
-          "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 312,
-          "description": "",
-          "params": [
-            {
-              "name": "e",
-              "type": "WheelEvent",
-              "optional": false,
-              "description": ""
-            }
+          "source": "./useViewerZoomEffects.js",
+          "specifiers": [
+            "useViewerZoomEffects"
           ],
+          "line": 15,
+          "resolved": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 53,
+      "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
+      "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "lines": 315,
+      "extension": ".js",
+      "jsdocBlockCount": 10,
+      "sourceSummary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useCallback",
+            "useEffect",
+            "useRef"
+          ],
+          "line": 8
+        },
+        {
+          "source": "../../../hooks/usePageTimer.js",
+          "specifiers": [
+            "usePageTimer"
+          ],
+          "line": 9
+        }
+      ],
+      "exports": [
+        {
+          "name": "useViewerKeyboardNavigation",
+          "kind": "function",
+          "line": 15
+        }
+      ],
+      "declarations": [
+        {
+          "name": "useViewerKeyboardNavigation",
+          "kind": "function",
+          "line": 15
+        },
+        {
+          "name": "getTarget",
+          "kind": "function",
+          "line": 133
+        },
+        {
+          "name": "getScope",
+          "kind": "function",
+          "line": 144
+        },
+        {
+          "name": "isNextRepeatKey",
+          "kind": "function",
+          "line": 154
+        },
+        {
+          "name": "isPreviousRepeatKey",
+          "kind": "function",
+          "line": 161
+        },
+        {
+          "name": "onKeyDown",
+          "kind": "function",
+          "line": 165
+        },
+        {
+          "name": "onKeyUp",
+          "kind": "function",
+          "line": 278
+        },
+        {
+          "name": "onWindowBlur",
+          "kind": "function",
+          "line": 284
+        },
+        {
+          "name": "onVisibilityChange",
+          "kind": "function",
+          "line": 289
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:useViewerKeyboardNavigation",
+          "name": "useViewerKeyboardNavigation",
+          "longname": "module:useViewerKeyboardNavigation",
+          "kind": "module",
+          "scope": null,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 2,
+          "description": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
+          "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "<anonymous>~onKeyDown",
-          "name": "onKeyDown",
-          "longname": "<anonymous>~onKeyDown",
+          "id": "module:useViewerKeyboardNavigation.useViewerKeyboardNavigation",
+          "name": "useViewerKeyboardNavigation",
+          "longname": "module:useViewerKeyboardNavigation.useViewerKeyboardNavigation",
           "kind": "function",
-          "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 329,
+          "scope": "static",
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 15,
           "description": "",
           "params": [
             {
-              "name": "e",
-              "type": "KeyboardEvent",
+              "name": "args",
+              "type": "Object",
               "optional": false,
               "description": ""
             }
           ],
-          "returns": [],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
           "examples": 0
         },
         {
@@ -17031,8 +17410,8 @@
           "longname": "<anonymous>~getTarget",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 363,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 133,
           "description": "",
           "params": [
             {
@@ -17056,8 +17435,8 @@
           "longname": "<anonymous>~getScope",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 374,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 144,
           "description": "",
           "params": [
             {
@@ -17081,8 +17460,8 @@
           "longname": "<anonymous>~isNextRepeatKey",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 384,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 154,
           "description": "",
           "params": [
             {
@@ -17106,8 +17485,8 @@
           "longname": "<anonymous>~isPreviousRepeatKey",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 391,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 161,
           "description": "",
           "params": [
             {
@@ -17131,8 +17510,8 @@
           "longname": "<anonymous>~onKeyDown",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 395,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 165,
           "description": "",
           "params": [
             {
@@ -17151,8 +17530,8 @@
           "longname": "<anonymous>~onKeyUp",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 508,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 278,
           "description": "",
           "params": [
             {
@@ -17171,8 +17550,8 @@
           "longname": "<anonymous>~onWindowBlur",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 514,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 284,
           "description": "",
           "params": [],
           "returns": [
@@ -17189,8 +17568,8 @@
           "longname": "<anonymous>~onVisibilityChange",
           "kind": "function",
           "scope": "inner",
-          "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-          "line": 519,
+          "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+          "line": 289,
           "description": "",
           "params": [],
           "returns": [
@@ -17205,19 +17584,11 @@
       "moduleKey": "src/components/DocumentViewer",
       "localImports": [
         {
-          "source": "../../../logging/systemLogger.js",
-          "specifiers": [
-            "logger"
-          ],
-          "line": 23,
-          "resolved": "src/logging/systemLogger.js"
-        },
-        {
           "source": "../../../hooks/usePageTimer.js",
           "specifiers": [
             "usePageTimer"
           ],
-          "line": 24,
+          "line": 9,
           "resolved": "src/hooks/usePageTimer.js"
         }
       ],
@@ -17229,12 +17600,12 @@
             "useEffect",
             "useRef"
           ],
-          "line": 22
+          "line": 8
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 41,
-      "summary": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+      "importanceScore": 39,
+      "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
@@ -17457,6 +17828,165 @@
       "incomingLocalImports": 1,
       "importanceScore": 34,
       "summary": "File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per-pane &quot;post-zoom&quot; state &amp; handlers used only in compare mode.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
+      "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+      "lines": 161,
+      "extension": ".js",
+      "jsdocBlockCount": 5,
+      "sourceSummary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect"
+          ],
+          "line": 8
+        },
+        {
+          "source": "../../../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 9
+        }
+      ],
+      "exports": [
+        {
+          "name": "useViewerZoomEffects",
+          "kind": "function",
+          "line": 15
+        }
+      ],
+      "declarations": [
+        {
+          "name": "useViewerZoomEffects",
+          "kind": "function",
+          "line": 15
+        },
+        {
+          "name": "onWheelGlobal",
+          "kind": "function",
+          "line": 106
+        },
+        {
+          "name": "onKeyDown",
+          "kind": "function",
+          "line": 123
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "hook"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:useViewerZoomEffects",
+          "name": "useViewerZoomEffects",
+          "longname": "module:useViewerZoomEffects",
+          "kind": "module",
+          "scope": null,
+          "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+          "line": 2,
+          "description": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:useViewerZoomEffects.useViewerZoomEffects",
+          "name": "useViewerZoomEffects",
+          "longname": "module:useViewerZoomEffects.useViewerZoomEffects",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+          "line": 15,
+          "description": "",
+          "params": [
+            {
+              "name": "args",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "<anonymous>~onWheelGlobal",
+          "name": "onWheelGlobal",
+          "longname": "<anonymous>~onWheelGlobal",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+          "line": 106,
+          "description": "",
+          "params": [
+            {
+              "name": "e",
+              "type": "WheelEvent",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "<anonymous>~onKeyDown",
+          "name": "onKeyDown",
+          "longname": "<anonymous>~onKeyDown",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+          "line": 123,
+          "description": "",
+          "params": [
+            {
+              "name": "e",
+              "type": "KeyboardEvent",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentViewer",
+      "localImports": [
+        {
+          "source": "../../../logging/systemLogger.js",
+          "specifiers": [
+            "logger"
+          ],
+          "line": 9,
+          "resolved": "src/logging/systemLogger.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "useEffect"
+          ],
+          "line": 8
+        }
+      ],
+      "incomingLocalImports": 1,
+      "importanceScore": 26,
+      "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
@@ -31879,8 +32409,8 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 6,
-      "importanceScore": 76,
+      "incomingLocalImports": 8,
+      "importanceScore": 88,
       "summary": "Localized string resolver for admin-supplied config values.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -57539,6 +58069,80 @@
       "examples": 0
     },
     {
+      "id": "module:usePrintRangeConfig",
+      "name": "usePrintRangeConfig",
+      "longname": "module:usePrintRangeConfig",
+      "kind": "module",
+      "scope": null,
+      "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+      "line": 2,
+      "description": "Runtime-configuration derivation for PrintRangeDialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:usePrintRangeConfig.usePrintRangeConfig",
+      "name": "usePrintRangeConfig",
+      "longname": "module:usePrintRangeConfig.usePrintRangeConfig",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js",
+      "line": 29,
+      "description": "",
+      "params": [
+        {
+          "name": "params",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "params.isDocumentLoading",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "params.hasActiveSelection",
+          "type": "boolean",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "params.selectionSequenceLocked",
+          "type": "boolean",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "params.selectionIncludedCount",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "params.t",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "params.i18n",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~handleKeyDown",
       "name": "handleKeyDown",
       "longname": "<anonymous>~handleKeyDown",
@@ -57926,6 +58530,265 @@
       "description": "Structured payload returned to the caller on submit.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.buildSelectedOptionDetails",
+      "name": "buildSelectedOptionDetails",
+      "longname": "module:printRangeDialogHelpers.buildSelectedOptionDetails",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 101,
+      "description": "Build token-friendly details for the selected option without forcing templates to use list indexes.",
+      "params": [
+        {
+          "name": "option",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "i18n",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "output",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "extra",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.ensureODVPrintCSS",
+      "name": "ensureODVPrintCSS",
+      "longname": "module:printRangeDialogHelpers.ensureODVPrintCSS",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 140,
+      "description": "Ensure base print CSS is injected once per document.",
+      "params": [],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.getCfg",
+      "name": "getCfg",
+      "longname": "module:printRangeDialogHelpers.getCfg",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 14,
+      "description": "Read the runtime configuration (merged defaults + site overrides).",
+      "params": [],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.hasTextValue",
+      "name": "hasTextValue",
+      "longname": "module:printRangeDialogHelpers.hasTextValue",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 34,
+      "description": "",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.normalizePdfOrientationMode",
+      "name": "normalizePdfOrientationMode",
+      "longname": "module:printRangeDialogHelpers.normalizePdfOrientationMode",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 87,
+      "description": "",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "fallback",
+          "type": "'auto'|'portrait'|'landscape'",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'auto'|'portrait'|'landscape'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers",
+      "name": "printRangeDialogHelpers",
+      "longname": "module:printRangeDialogHelpers",
+      "kind": "module",
+      "scope": null,
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 2,
+      "description": "Pure helpers and shared constants for the print-range dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.resolveOptionPrintText",
+      "name": "resolveOptionPrintText",
+      "longname": "module:printRangeDialogHelpers.resolveOptionPrintText",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 50,
+      "description": "Resolve the string that should be used on physical print/log output for an option.",
+      "params": [
+        {
+          "name": "option",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "i18n",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "useValueForOutput",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.resolvePrintAction",
+      "name": "resolvePrintAction",
+      "longname": "module:printRangeDialogHelpers.resolvePrintAction",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 73,
+      "description": "Resolve a configurable print dialog action.",
+      "params": [
+        {
+          "name": "actionsCfg",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "name",
+          "type": "string",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "i18n",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "fallback",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:printRangeDialogHelpers.safeRegex",
+      "name": "safeRegex",
+      "longname": "module:printRangeDialogHelpers.safeRegex",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
+      "line": 25,
+      "description": "Build a safe RegExp from optional pattern/flags.",
+      "params": [
+        {
+          "name": "pattern",
+          "type": "string|null|undefined",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "flags",
+          "type": "string|null|undefined",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "RegExp|null",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -58348,56 +59211,13 @@
       "examples": 0
     },
     {
-      "id": "buildSelectedOptionDetails",
-      "name": "buildSelectedOptionDetails",
-      "longname": "buildSelectedOptionDetails",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 124,
-      "description": "Build token-friendly details for the selected option without forcing templates to use list indexes.",
-      "params": [
-        {
-          "name": "option",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "i18n",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "output",
-          "type": "string",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "extra",
-          "type": "Object",
-          "optional": true,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Object",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "usePrintRangeController~composePrintFormat",
       "name": "composePrintFormat",
       "longname": "usePrintRangeController~composePrintFormat",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 526,
+      "line": 365,
       "description": "",
       "params": [],
       "returns": [
@@ -58415,7 +59235,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 545,
+      "line": 384,
       "description": "",
       "params": [],
       "returns": [
@@ -58433,7 +59253,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 588,
+      "line": 427,
       "description": "Compose and validate the print payload for the current dialog state.",
       "params": [
         {
@@ -58452,79 +59272,18 @@
       "examples": 0
     },
     {
-      "id": "ensureODVPrintCSS",
-      "name": "ensureODVPrintCSS",
-      "longname": "ensureODVPrintCSS",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 163,
-      "description": "Ensure base print CSS is injected once per document.",
-      "params": [],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "usePrintRangeController~extras",
       "name": "extras",
       "longname": "usePrintRangeController~extras",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 568,
+      "line": 407,
       "description": "",
       "params": [],
       "returns": [
         {
           "type": "Object",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "getCfg",
-      "name": "getCfg",
-      "longname": "getCfg",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 37,
-      "description": "Read the runtime configuration (merged defaults + site overrides).",
-      "params": [],
-      "returns": [
-        {
-          "type": "Object",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "hasTextValue",
-      "name": "hasTextValue",
-      "longname": "hasTextValue",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 57,
-      "description": "",
-      "params": [
-        {
-          "name": "value",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "boolean",
           "description": ""
         }
       ],
@@ -58537,7 +59296,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 440,
+      "line": 279,
       "description": "",
       "params": [
         {
@@ -58562,44 +59321,13 @@
       "examples": 0
     },
     {
-      "id": "normalizePdfOrientationMode",
-      "name": "normalizePdfOrientationMode",
-      "longname": "normalizePdfOrientationMode",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 110,
-      "description": "",
-      "params": [
-        {
-          "name": "value",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "fallback",
-          "type": "'auto'|'portrait'|'landscape'",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "'auto'|'portrait'|'landscape'",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "usePrintRangeController~onDialogKeyDown",
       "name": "onDialogKeyDown",
       "longname": "usePrintRangeController~onDialogKeyDown",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 428,
+      "line": 267,
       "description": "",
       "params": [
         {
@@ -58624,90 +59352,10 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 15,
+      "line": 27,
       "description": "Structured payload returned to the caller on submit.",
       "params": [],
       "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "resolveOptionPrintText",
-      "name": "resolveOptionPrintText",
-      "longname": "resolveOptionPrintText",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 73,
-      "description": "Resolve the string that should be used on physical print/log output for an option.",
-      "params": [
-        {
-          "name": "option",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "i18n",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "useValueForOutput",
-          "type": "boolean",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "string",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "resolvePrintAction",
-      "name": "resolvePrintAction",
-      "longname": "resolvePrintAction",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 96,
-      "description": "Resolve a configurable print dialog action.",
-      "params": [
-        {
-          "name": "actionsCfg",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "name",
-          "type": "string",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "i18n",
-          "type": "*",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "fallback",
-          "type": "Object",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "Object",
-          "description": ""
-        }
-      ],
       "examples": 0
     },
     {
@@ -58717,7 +59365,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 679,
+      "line": 518,
       "description": "Restore the dialog state from the latest successfully prepared print.",
       "params": [
         {
@@ -58736,44 +59384,13 @@
       "examples": 0
     },
     {
-      "id": "safeRegex",
-      "name": "safeRegex",
-      "longname": "safeRegex",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 48,
-      "description": "Build a safe RegExp from optional pattern/flags.",
-      "params": [
-        {
-          "name": "pattern",
-          "type": "string|null|undefined",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "flags",
-          "type": "string|null|undefined",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "RegExp|null",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "usePrintRangeController~submitPdfDownload",
       "name": "submitPdfDownload",
       "longname": "usePrintRangeController~submitPdfDownload",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 668,
+      "line": 507,
       "description": "",
       "params": [],
       "returns": [
@@ -58791,7 +59408,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 660,
+      "line": 499,
       "description": "",
       "params": [],
       "returns": [
@@ -58809,7 +59426,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 663,
+      "line": 502,
       "description": "",
       "params": [],
       "returns": [
@@ -58827,7 +59444,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 647,
+      "line": 486,
       "description": "",
       "params": [
         {
@@ -58852,7 +59469,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 191,
+      "line": 63,
       "description": "Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.",
       "params": [
         {
@@ -58950,7 +59567,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 449,
+      "line": 288,
       "description": "",
       "params": [],
       "returns": [
@@ -58968,7 +59585,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/usePrintRangeDialog.js",
-      "line": 461,
+      "line": 300,
       "description": "",
       "params": [],
       "returns": [
@@ -59990,63 +60607,13 @@
       "examples": 0
     },
     {
-      "id": "<anonymous>~getScope",
-      "name": "getScope",
-      "longname": "<anonymous>~getScope",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 374,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "'page'|'document'",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~getTarget",
-      "name": "getTarget",
-      "longname": "<anonymous>~getTarget",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 363,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "'primary'|'compare'",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:useViewerEffects~hasActiveModalDialog",
+      "id": "module:useViewerEffects.hasActiveModalDialog",
       "name": "hasActiveModalDialog",
-      "longname": "module:useViewerEffects~hasActiveModalDialog",
+      "longname": "module:useViewerEffects.hasActiveModalDialog",
       "kind": "function",
-      "scope": "inner",
+      "scope": "static",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 98,
+      "line": 89,
       "description": "Determine whether a modal dialog is currently open.",
       "params": [],
       "returns": [
@@ -60058,68 +60625,18 @@
       "examples": 0
     },
     {
-      "id": "module:useViewerEffects~isEditableTarget",
+      "id": "module:useViewerEffects.isEditableTarget",
       "name": "isEditableTarget",
-      "longname": "module:useViewerEffects~isEditableTarget",
+      "longname": "module:useViewerEffects.isEditableTarget",
       "kind": "function",
-      "scope": "inner",
+      "scope": "static",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 83,
+      "line": 74,
       "description": "Determine whether the event target is an editable or form control where viewer shortcuts must stay inactive.",
       "params": [
         {
           "name": "target",
           "type": "*",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "boolean",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~isNextRepeatKey",
-      "name": "isNextRepeatKey",
-      "longname": "<anonymous>~isNextRepeatKey",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 384,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "boolean",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~isPreviousRepeatKey",
-      "name": "isPreviousRepeatKey",
-      "longname": "<anonymous>~isPreviousRepeatKey",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 391,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
           "optional": false,
           "description": ""
         }
@@ -60139,136 +60656,20 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 31,
+      "line": 22,
       "description": "",
       "params": [],
       "returns": [],
       "examples": 0
     },
     {
-      "id": "<anonymous>~onKeyDown",
-      "name": "onKeyDown",
-      "longname": "<anonymous>~onKeyDown",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 329,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~onKeyDown",
-      "name": "onKeyDown",
-      "longname": "<anonymous>~onKeyDown",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 395,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~onKeyUp",
-      "name": "onKeyUp",
-      "longname": "<anonymous>~onKeyUp",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 508,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "KeyboardEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~onVisibilityChange",
-      "name": "onVisibilityChange",
-      "longname": "<anonymous>~onVisibilityChange",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 519,
-      "description": "",
-      "params": [],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~onWheelGlobal",
-      "name": "onWheelGlobal",
-      "longname": "<anonymous>~onWheelGlobal",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 312,
-      "description": "",
-      "params": [
-        {
-          "name": "e",
-          "type": "WheelEvent",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [],
-      "examples": 0
-    },
-    {
-      "id": "<anonymous>~onWindowBlur",
-      "name": "onWindowBlur",
-      "longname": "<anonymous>~onWindowBlur",
-      "kind": "function",
-      "scope": "inner",
-      "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 514,
-      "description": "",
-      "params": [],
-      "returns": [
-        {
-          "type": "void",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
-      "id": "module:useViewerEffects~shouldIgnoreViewerShortcut",
+      "id": "module:useViewerEffects.shouldIgnoreViewerShortcut",
       "name": "shouldIgnoreViewerShortcut",
-      "longname": "module:useViewerEffects~shouldIgnoreViewerShortcut",
+      "longname": "module:useViewerEffects.shouldIgnoreViewerShortcut",
       "kind": "function",
-      "scope": "inner",
+      "scope": "static",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 109,
+      "line": 100,
       "description": "Decide whether a keyboard shortcut should be ignored for the viewer.",
       "params": [
         {
@@ -60294,7 +60695,7 @@
       "scope": null,
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
       "line": 2,
-      "description": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...",
+      "description": "File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -60306,7 +60707,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 121,
+      "line": 112,
       "description": "",
       "params": [
         {
@@ -60331,7 +60732,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 33,
+      "line": 24,
       "description": "Arguments for useViewerEffects.",
       "params": [],
       "returns": [],
@@ -60344,10 +60745,224 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerEffects.js",
-      "line": 26,
+      "line": 17,
       "description": "Sticky zoom modes used by the viewer.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~getScope",
+      "name": "getScope",
+      "longname": "<anonymous>~getScope",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 144,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'page'|'document'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~getTarget",
+      "name": "getTarget",
+      "longname": "<anonymous>~getTarget",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 133,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'primary'|'compare'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~isNextRepeatKey",
+      "name": "isNextRepeatKey",
+      "longname": "<anonymous>~isNextRepeatKey",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 154,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~isPreviousRepeatKey",
+      "name": "isPreviousRepeatKey",
+      "longname": "<anonymous>~isPreviousRepeatKey",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 161,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onKeyDown",
+      "name": "onKeyDown",
+      "longname": "<anonymous>~onKeyDown",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 165,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onKeyUp",
+      "name": "onKeyUp",
+      "longname": "<anonymous>~onKeyUp",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 278,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onVisibilityChange",
+      "name": "onVisibilityChange",
+      "longname": "<anonymous>~onVisibilityChange",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 289,
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onWindowBlur",
+      "name": "onWindowBlur",
+      "longname": "<anonymous>~onWindowBlur",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 284,
+      "description": "",
+      "params": [],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:useViewerKeyboardNavigation",
+      "name": "useViewerKeyboardNavigation",
+      "longname": "module:useViewerKeyboardNavigation",
+      "kind": "module",
+      "scope": null,
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 2,
+      "description": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:useViewerKeyboardNavigation.useViewerKeyboardNavigation",
+      "name": "useViewerKeyboardNavigation",
+      "longname": "module:useViewerKeyboardNavigation.useViewerKeyboardNavigation",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
+      "line": 15,
+      "description": "",
+      "params": [
+        {
+          "name": "args",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -60498,6 +61113,84 @@
       "returns": [
         {
           "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onKeyDown",
+      "name": "onKeyDown",
+      "longname": "<anonymous>~onKeyDown",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+      "line": 123,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "KeyboardEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "<anonymous>~onWheelGlobal",
+      "name": "onWheelGlobal",
+      "longname": "<anonymous>~onWheelGlobal",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+      "line": 106,
+      "description": "",
+      "params": [
+        {
+          "name": "e",
+          "type": "WheelEvent",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:useViewerZoomEffects",
+      "name": "useViewerZoomEffects",
+      "longname": "module:useViewerZoomEffects",
+      "kind": "module",
+      "scope": null,
+      "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+      "line": 2,
+      "description": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:useViewerZoomEffects.useViewerZoomEffects",
+      "name": "useViewerZoomEffects",
+      "longname": "module:useViewerZoomEffects.useViewerZoomEffects",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
+      "line": 15,
+      "description": "",
+      "params": [
+        {
+          "name": "args",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
           "description": ""
         }
       ],

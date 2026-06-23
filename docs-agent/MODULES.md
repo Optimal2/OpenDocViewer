@@ -49,8 +49,9 @@ File count: 8. Line count: 4101. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 14. Line count: 6366. JSDoc symbol count: 91.
+File count: 16. Line count: 6514. JSDoc symbol count: 94.
 
+- `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentToolbar/DocumentToolbar.jsx` - Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` - Background prebuild/cache for configured "all pages" generated\-PDF variants.
@@ -58,20 +59,19 @@ File count: 14. Line count: 6366. JSDoc symbol count: 91.
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
 - `src/components/DocumentToolbar/LanguageMenuButton.jsx` - Compact language selector for the toolbar.
 - `src/components/DocumentToolbar/AboutOverlayDialog.jsx` - Small About dialog for version/build/support information.
-- `src/components/DocumentToolbar/SplitToolbarButton.jsx` - Reusable toolbar split\-button.
 
 ## src/components/DocumentViewer
 
-File count: 8. Line count: 4926. JSDoc symbol count: 113.
+File count: 10. Line count: 4968. JSDoc symbol count: 117.
 
+- `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;.
-- `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects: Sync zoomState.scale from numeric zoom Sticky Fit recomputation on relevant changes Res...
+- `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &amp;quot;post\-zoom&amp;quot; state &amp;amp; handlers used only in compare mode.
 - `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
+- `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
-- `src/components/DocumentViewer/DocumentViewerThumbnails.jsx` - OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell.
-- `src/components/DocumentViewer/CompareZoomOverlay.jsx` - Per\-pane “post\-zoom” controls shown in comparison mode.
 
 ## src/contexts
 
@@ -154,10 +154,10 @@ File count: 35. Line count: 14796. JSDoc symbol count: 564.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 - `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
-- `src/utils/documentMetadata.js` - Helpers for resolving document\-level metadata from the normalized portable bundle.
 
 ## src/workers
 

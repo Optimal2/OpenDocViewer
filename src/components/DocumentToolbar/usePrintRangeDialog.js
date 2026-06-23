@@ -9,8 +9,20 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { parsePrintSequence } from '../../utils/printUtils.js';
 import { resolveLocalizedValue, resolveOptionLabel } from '../../utils/localizedValue.js';
-import { getPrintDefaultMode } from '../../utils/runtimeConfig.js';
-import { getPrintDefaultModePreference } from '../../utils/viewerPreferences.js';
+import {
+  buildSelectedOptionDetails,
+  ensureODVPrintCSS,
+  normalizePdfOrientationMode,
+  resolveOptionPrintText,
+  safeRegex,
+} from './printRangeDialogHelpers.js';
+import { usePrintRangeConfig } from './hooks/usePrintRangeConfig.js';
+
+export {
+  ensureODVPrintCSS,
+  getCfg,
+  safeRegex,
+} from './printRangeDialogHelpers.js';
 
 /**
  * Structured payload returned to the caller on submit.
@@ -29,146 +41,6 @@ import { getPrintDefaultModePreference } from '../../utils/viewerPreferences.js'
  * @property {'html'|'pdf'} [printBackend]
  * @property {'print'|'download'} [printAction]
  */
-
-/**
- * Read the runtime configuration (merged defaults + site overrides).
- * @returns {Object}
- */
-export function getCfg() {
-  const w = typeof window !== 'undefined' ? window : {};
-  return (w.__ODV_GET_CONFIG__ ? w.__ODV_GET_CONFIG__() : (w.__ODV_CONFIG__ || {})) || {};
-}
-
-/**
- * Build a safe RegExp from optional pattern/flags.
- * @param {string|null|undefined} pattern
- * @param {string|null|undefined} flags
- * @returns {(RegExp|null)}
- */
-export function safeRegex(pattern, flags) {
-  if (!pattern) return null;
-  try { return new RegExp(pattern, flags || ''); } catch { return null; }
-}
-
-/**
- * @param {*} value
- * @returns {boolean}
- */
-function hasTextValue(value) {
-  if (value === undefined || value === null) return false;
-  const text = String(value).trim();
-  if (!text) return false;
-  const lowered = text.toLowerCase();
-  return lowered !== 'null' && lowered !== 'undefined';
-}
-
-/**
- * Resolve the string that should be used on physical print/log output for an option.
- * `printValue` may be localized and is preferred over legacy value/label behavior.
- * @param {*} option
- * @param {*} i18n
- * @param {boolean} useValueForOutput
- * @returns {string}
- */
-function resolveOptionPrintText(option, i18n, useValueForOutput) {
-  if (!option) return '';
-  if (option.printValue !== undefined) {
-    return resolveLocalizedValue(option.printValue, i18n) || String(option.value ?? '');
-  }
-  if (option.output !== undefined) {
-    return resolveLocalizedValue(option.output, i18n) || String(option.value ?? '');
-  }
-  if (option.printLabel !== undefined) {
-    return resolveLocalizedValue(option.printLabel, i18n) || String(option.value ?? '');
-  }
-  if (useValueForOutput) return String(option.value ?? '');
-  return resolveOptionLabel(option, i18n) || String(option.value ?? '');
-}
-
-/**
- * Resolve a configurable print dialog action.
- * @param {*} actionsCfg
- * @param {string} name
- * @param {*} i18n
- * @param {Object} fallback
- * @returns {{ enabled: boolean, label: string, tooltip: string }}
- */
-function resolvePrintAction(actionsCfg, name, i18n, fallback) {
-  const cfg = actionsCfg?.[name] || {};
-  return {
-    enabled: cfg.enabled !== false,
-    label: resolveLocalizedValue(cfg.label, i18n) || fallback.label,
-    tooltip: resolveLocalizedValue(cfg.tooltip ?? cfg.title, i18n) || fallback.tooltip || fallback.label,
-  };
-}
-
-/**
- * @param {*} value
- * @param {'auto'|'portrait'|'landscape'} fallback
- * @returns {'auto'|'portrait'|'landscape'}
- */
-function normalizePdfOrientationMode(value, fallback = 'auto') {
-  const mode = String(value || '').trim().toLowerCase();
-  if (mode === 'auto' || mode === 'portrait' || mode === 'landscape') return mode;
-  return fallback;
-}
-
-/**
- * Build token-friendly details for the selected option without forcing templates to use list indexes.
- * @param {*} option
- * @param {*} i18n
- * @param {string} output
- * @param {Object=} extra
- * @returns {Object}
- */
-function buildSelectedOptionDetails(option, i18n, output, extra = {}) {
-  const value = option?.value == null ? '' : String(option.value);
-  return {
-    value,
-    label: option?.label ?? value,
-    uiLabel: resolveOptionLabel(option || { value }, i18n) || value,
-    printValue: option?.printValue ?? option?.output ?? option?.printLabel ?? value,
-    output: output || '',
-    selectedText: output || '',
-    option: option || null,
-    ...extra,
-  };
-}
-
-const ODV_PRINT_CSS = `
-@media print {
-  @page { margin: 0; size: A4 portrait; }
-  html, body { margin: 0 !important; padding: 0 !important; }
-  #odv-print-root, [data-odv-print-root] { width: 100vw; height: 100vh; }
-  .odv-print-page, [data-odv-print-page] {
-    page-break-after: always; break-after: page; break-inside: avoid;
-    display: grid; place-items: center;
-    box-sizing: border-box; width: 100vw; height: 100vh; padding: 8mm; overflow: hidden;
-  }
-  .odv-print-page img, .odv-print-page canvas,
-  [data-odv-print-page] img, [data-odv-print-page] canvas {
-    display: block; max-width: 100%; max-height: 100%; object-fit: contain;
-  }
-  img[data-odv-print-page], canvas[data-odv-print-page] {
-    page-break-after: always; break-inside: avoid; display: block; margin: 0 auto;
-    max-width: calc(100% - 10mm); max-height: 95vh; object-fit: contain;
-  }
-}
-`;
-
-/**
- * Ensure base print CSS is injected once per document.
- * @returns {void}
- */
-export function ensureODVPrintCSS() {
-  if (typeof document === 'undefined') return;
-  if (document.getElementById('odv-print-css')) return;
-  const style = document.createElement('style');
-  style.id = 'odv-print-css';
-  style.type = 'text/css';
-  style.appendChild(document.createTextNode(ODV_PRINT_CSS));
-  document.head.appendChild(style);
-}
 
 /**
  * Hook that encapsulates state, derived values, effects and handlers for PrintRangeDialog.
@@ -203,86 +75,53 @@ export function usePrintRangeController({
   t,
   i18n,
 }) {
-  const cfg = getCfg();
-  const userLogCfg = cfg?.userLog || {};
-  const headerCfg = cfg?.printHeader || {};
-  const uiCfg = userLogCfg?.ui || {};
-  const fld = uiCfg?.fields || {};
-
-  const showReasonWhen = uiCfg?.showReasonWhen || 'auto';
-  const showForWhomWhen = uiCfg?.showForWhomWhen || 'auto';
-  const reasonCfg = fld?.reason || {};
-  const forWhomCfg = fld?.forWhom || {};
-  const printFormatCfg = cfg?.print?.format || {};
-  const printActionsCfg = cfg?.print?.actions || {};
-  const pdfPrintCfg = cfg?.print?.pdf || {};
-  const pdfPrintEnabled = pdfPrintCfg?.enabled === true;
-  const pdfOrientationCfg = pdfPrintCfg?.orientation || {};
-  const pdfOrientationFixedMode = normalizePdfOrientationMode(pdfOrientationCfg?.fixedMode || pdfOrientationCfg?.fixed || 'portrait', 'portrait');
-  const pdfOrientationDefaultMode = normalizePdfOrientationMode(
-    pdfOrientationCfg?.mode || pdfPrintCfg?.orientationMode || (pdfOrientationCfg?.defaultAuto === false ? pdfOrientationFixedMode : 'auto'),
-    'auto'
-  );
-  const pdfOrientationDefaultAuto = pdfOrientationDefaultMode === 'auto';
-  const showPdfOrientation = pdfPrintEnabled
-    && pdfOrientationCfg?.enabled === true
-    && pdfOrientationCfg?.showOption !== false;
-  const pdfOrientationLabel = resolveLocalizedValue(
-    pdfOrientationCfg?.checkboxLabel ?? pdfOrientationCfg?.label,
-    i18n
-  ) || t('printDialog.pdfOrientation.checkboxLabel', { defaultValue: 'Automatic page orientation' });
-  const pdfOrientationHint = resolveLocalizedValue(
-    pdfOrientationCfg?.tooltip ?? pdfOrientationCfg?.hint,
-    i18n
-  ) || t('printDialog.pdfOrientation.hint', { defaultValue: 'When selected, each generated page uses portrait or landscape based on the page image.' });
-  const downloadPdfAction = resolvePrintAction(printActionsCfg, 'downloadPdf', i18n, {
-    label: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
-    tooltip: t('printDialog.footer.downloadPdf', { defaultValue: 'Save PDF' }),
+  const {
+    headerCfg,
+    showReason,
+    showForWhom,
+    reasonCfg,
+    forWhomCfg,
+    printFormatCfg,
+    pdfOrientationFixedMode,
+    pdfOrientationDefaultMode,
+    pdfOrientationDefaultAuto,
+    showPdfOrientation,
+    pdfOrientationLabel,
+    pdfOrientationHint,
+    downloadPdfAction,
+    printHtmlAction,
+    printPdfAction,
+    reuseLastPrintSettingsAction,
+    pdfDownloadEnabled,
+    printHtmlEnabled,
+    printPdfEnabled,
+    defaultPrintBackend,
+    printFormatOptions,
+    hasPrintFormatOptions,
+    checkboxPrintFormatOption,
+    showPrintFormatCheckbox,
+    forcePrintFormatActive,
+    defaultPrintFormatChecked,
+    showUserSection,
+    restrictToActivePage,
+    defaultPrintMode,
+    canPrintSelectionScope,
+    sequenceLockedToSelection,
+    reasonRegex,
+    forWhomRegex,
+    reasonMax,
+    forWhomMax,
+    reasonOptions,
+    hasOptions,
+    defaultReason,
+  } = usePrintRangeConfig({
+    isDocumentLoading,
+    hasActiveSelection,
+    selectionSequenceLocked,
+    selectionIncludedCount,
+    t,
+    i18n,
   });
-  const printHtmlAction = resolvePrintAction(printActionsCfg, 'printHtml', i18n, {
-    label: t('printDialog.footer.printHtml', { defaultValue: 'Print via HTML' }),
-    tooltip: t('printDialog.output.direct.info', { defaultValue: 'Direct print uses the browser print preview. The browser orientation setting applies to the whole print job.' }),
-  });
-  const printPdfAction = resolvePrintAction(printActionsCfg, 'printPdf', i18n, {
-    label: t('printDialog.footer.printPdf', { defaultValue: 'Print via PDF' }),
-    tooltip: t('printDialog.output.safe.info', { defaultValue: 'OpenDocViewer generates a PDF. PDF pages use automatic orientation per page before the browser prints the PDF.' }),
-  });
-  const reuseLastPrintSettingsAction = resolvePrintAction({
-    reuseLastPrintSettings: printActionsCfg?.reuseLastPrintSettings ?? printActionsCfg?.repeatLastPrint,
-  }, 'reuseLastPrintSettings', i18n, {
-    label: t('printDialog.reuseLastPrint.label', { defaultValue: 'Reuse latest print settings' }),
-    tooltip: t('printDialog.reuseLastPrint.tooltip', { defaultValue: 'Fill in the dialog with the same choices as the latest print.' }),
-  });
-  const pdfDownloadEnabled = pdfPrintEnabled && pdfPrintCfg?.allowDownload === true && downloadPdfAction.enabled;
-  const printHtmlEnabled = printHtmlAction.enabled;
-  const printPdfEnabled = pdfPrintEnabled && printPdfAction.enabled;
-  const defaultPrintBackend = printPdfEnabled && (!printHtmlEnabled || String(pdfPrintCfg?.defaultMode || 'direct').toLowerCase() === 'safe') ? 'pdf' : 'html';
-  const printFormatOptions = Array.isArray(printFormatCfg?.options) ? printFormatCfg.options : [];
-  const hasPrintFormatOptions = !!printFormatCfg?.enabled && printFormatOptions.length > 0;
-  const nonEmptyPrintFormatOptions = printFormatOptions.filter((option) => hasTextValue(option?.value));
-  const checkboxPrintFormatOption = nonEmptyPrintFormatOptions[0] || null;
-  const watermarkCfg = printFormatCfg?.watermark || {};
-  const watermarkEnabled = watermarkCfg?.enabled !== false;
-  const showPrintFormatCheckbox = !!hasPrintFormatOptions && !!checkboxPrintFormatOption && watermarkEnabled && watermarkCfg?.showOption !== false;
-  const forcePrintFormatActive = !!hasPrintFormatOptions && !!checkboxPrintFormatOption && watermarkEnabled && watermarkCfg?.showOption === false && watermarkCfg?.defaultChecked === true;
-  const defaultPrintFormatChecked = !!checkboxPrintFormatOption && watermarkEnabled && (forcePrintFormatActive || watermarkCfg?.defaultChecked === true);
-  const showReason = showReasonWhen === 'always' || (showReasonWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showForWhom = showForWhomWhen === 'always' || (showForWhomWhen === 'auto' && (userLogCfg.enabled || headerCfg.enabled));
-  const showUserSection = !!(showReason || showForWhom || showPrintFormatCheckbox || showPdfOrientation);
-  const restrictToActivePage = !!isDocumentLoading;
-  const configuredDefaultPrintMode = getPrintDefaultMode(cfg);
-  const userDefaultPrintMode = getPrintDefaultModePreference();
-  const defaultPrintMode = restrictToActivePage ? 'active' : (userDefaultPrintMode || configuredDefaultPrintMode);
-  const canPrintSelectionScope = !!hasActiveSelection && Math.max(0, Number(selectionIncludedCount) || 0) > 0;
-  const sequenceLockedToSelection = !!selectionSequenceLocked && canPrintSelectionScope;
-  const reasonRegex = safeRegex(reasonCfg?.regex, reasonCfg?.regexFlags);
-  const forWhomRegex = safeRegex(forWhomCfg?.regex, forWhomCfg?.regexFlags);
-  const reasonMax = Number.isFinite(reasonCfg?.maxLen) ? reasonCfg.maxLen : 255;
-  const forWhomMax = Number.isFinite(forWhomCfg?.maxLen) ? forWhomCfg.maxLen : 120;
-
-  const reasonOptions = Array.isArray(reasonCfg?.source?.options) ? reasonCfg.source.options : null;
-  const hasOptions = Array.isArray(reasonOptions) && reasonOptions.length > 0;
-  const defaultReason = reasonCfg?.default ?? (hasOptions ? (reasonOptions[0]?.value ?? '') : '');
 
   const [printMode, setPrintMode] = useState(/** @type {'active'|'all'|'range'|'custom'} */ (defaultPrintMode));
   const [activeScope, setActiveScope] = useState(/** @type {'primary'|'compare-both'} */ ('primary'));
