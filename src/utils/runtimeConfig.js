@@ -24,8 +24,11 @@ const DEFAULT_RESET_SESSION_TARGET = 'parent-or-current';
 const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
 const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
+/** Values accepted by KeyboardPrintShortcutBehavior. Keep this list in sync with the typedef. */
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
+/** Values accepted by ResetSessionTarget. The default prefers embedded host recovery. */
 const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
+/** User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. */
 const DEFAULT_ZOOM_MODE_ALIAS_ENTRIES = Object.freeze([
   Object.freeze(['fit-page', 'FIT_PAGE']),
   Object.freeze(['fitpage', 'FIT_PAGE']),
@@ -156,6 +159,8 @@ function normalizeBoolean(value, defaultValue) {
  *
  * Invalid value/min/default inputs fall back to the nearest safe value instead of propagating NaN.
  * The max bound is optional; when it is invalid or lower than min, only the lower bound is applied.
+ * For example, `clampNumber('x', 5, 1, 10)` returns 5, while
+ * `clampNumber(20, 5, 1, 10)` returns 10. If max is lower than min, only min is enforced.
  *
  * @param {*} value
  * @param {*=} defaultValue
@@ -193,7 +198,7 @@ function normalizeInteger(value, defaultValue, min, max) {
   const next = Number.isFinite(numeric)
     ? Math.floor(numeric)
     : undefined;
-  return Math.floor(clampNumber(next, defaultValue, min, max));
+  return clampNumber(next, defaultValue, min, max);
 }
 
 /**
@@ -242,6 +247,7 @@ function normalizeResetSessionTarget(value, defaultTarget) {
  * @returns {string}
  */
 function normalizeZoomModeText(value) {
+  // Empty string is the invalid sentinel for downstream fallback logic.
   return String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
 }
 
