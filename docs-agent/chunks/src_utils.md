@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 14944. JSDoc symbol count: 576.
+File count: 35. Line count: 14949. JSDoc symbol count: 576.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -525,8 +525,8 @@ Symbols:
 - `ViewerDefaultZoomMode` (typedef) - No description.
 - `PrintDefaultMode` (typedef) - No description.
 - `ResetSessionTarget` (typedef) - Session\-reset target for the support/problem notice.
-- `KEYBOARD_PRINT_SHORTCUT_BEHAVIORS` (constant) - Values accepted by KeyboardPrintShortcutBehavior.
-- `RESET_SESSION_TARGETS` (constant) - Values accepted by ResetSessionTarget.
+- `KEYBOARD_PRINT_SHORTCUT_BEHAVIORS` (constant) - Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.
+- `RESET_SESSION_TARGETS` (constant) - Runtime validation values for ResetSessionTarget; the typedef documents the public contract.
 - `DEFAULT_ZOOM_MODE_ALIAS_ENTRIES` (constant) - User\-facing zoom\-mode aliases mapped to ViewerDefaultZoomMode values.
 - `ViewerCustomFitSizeLimits` (typedef) - No description.
 - `PrintSelectionWorkspaceConfig` (typedef) - No description.

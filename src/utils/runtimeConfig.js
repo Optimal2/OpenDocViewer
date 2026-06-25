@@ -23,10 +23,12 @@
 const DEFAULT_RESET_SESSION_TARGET = 'parent-or-current';
 const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
 const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
+// Start custom width below full fit-width so switching to custom mode is visibly distinct
+// while still keeping the document readable on normal desktop viewports.
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
-/** Values accepted by KeyboardPrintShortcutBehavior. Keep this list in sync with the typedef. */
+/** Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. */
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
-/** Values accepted by ResetSessionTarget. The default prefers embedded host recovery. */
+/** Runtime validation values for ResetSessionTarget; the typedef documents the public contract. */
 const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
 /** User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. */
 const DEFAULT_ZOOM_MODE_ALIAS_ENTRIES = Object.freeze([
@@ -143,7 +145,9 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
  *
  * Host configs are optional and can contain values from hand-edited JavaScript, so only real
  * booleans are accepted. A non-boolean default falls back to false to keep callers predictable
- * when a caller accidentally forwards an unvalidated config value as the fallback.
+ * when a caller accidentally forwards an unvalidated config value as the fallback. This treats
+ * non-boolean defaults as configuration mistakes instead of silently coercing strings like
+ * `"false"` to true.
  *
  * @param {*} value
  * @param {*} defaultValue
@@ -161,6 +165,7 @@ function normalizeBoolean(value, defaultValue) {
  * The max bound is optional; when it is invalid or lower than min, only the lower bound is applied.
  * For example, `clampNumber('x', 5, 1, 10)` returns 5, while
  * `clampNumber(20, 5, 1, 10)` returns 10. If max is lower than min, only min is enforced.
+ * For example, `clampNumber(5, 10, 20, 15)` returns 20.
  *
  * @param {*} value
  * @param {*=} defaultValue
