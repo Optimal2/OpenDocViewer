@@ -22,6 +22,7 @@
 
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog']);
 const RESET_SESSION_TARGETS = new Set(['current', 'parent', 'parent-or-current', 'none']);
+const DEFAULT_RESET_SESSION_TARGET = 'parent-or-current';
 const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
 const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
@@ -171,7 +172,7 @@ function clampNumber(value, min, max, defaultValue = min) {
   const fallback = Number.isFinite(defaultNumber) ? defaultNumber : safeMin;
   const valueToClamp = Number.isFinite(numeric) ? numeric : fallback;
   const lowerBounded = Math.max(safeMin, valueToClamp);
-  return safeMax == null ? lowerBounded : Math.min(safeMax, lowerBounded);
+  return safeMax === null ? lowerBounded : Math.min(safeMax, lowerBounded);
 }
 
 /**
@@ -188,11 +189,15 @@ function clampNumber(value, min, max, defaultValue = min) {
  */
 function normalizeInteger(value, defaultValue, min, max) {
   const numeric = Number(value);
+  const minNumber = Number(min);
   const defaultNumber = Number(defaultValue);
+  const fallback = Number.isFinite(defaultNumber)
+    ? Math.floor(defaultNumber)
+    : (Number.isFinite(minNumber) ? Math.floor(minNumber) : 0);
   const next = Number.isFinite(numeric)
     ? Math.floor(numeric)
-    : (Number.isFinite(defaultNumber) ? Math.floor(defaultNumber) : defaultValue);
-  return clampNumber(next, min, max, next);
+    : fallback;
+  return clampNumber(next, min, max, fallback);
 }
 
 /**
@@ -219,7 +224,7 @@ function normalizeFloat(value, defaultValue, min, max) {
 function normalizeResetSessionTarget(value, defaultTarget) {
   const raw = String(value || defaultTarget || '').trim().toLowerCase();
   if (RESET_SESSION_TARGETS.has(raw)) return raw;
-  return 'parent-or-current';
+  return DEFAULT_RESET_SESSION_TARGET;
 }
 
 /**
@@ -278,7 +283,7 @@ export function normalizeCustomFitWidthFactorPercent(value, defaultValue = DEFAU
  * @returns {(number|null)}
  */
 export function normalizeOptionalCustomFitFactorPercent(value, max = 100) {
-  if (value == null || String(value).trim() === '') return null;
+  if (value === null || value === undefined || String(value).trim() === '') return null;
   const numeric = Math.round(Number(value));
   if (!Number.isFinite(numeric)) return null;
   if (numeric <= 0) return null;
