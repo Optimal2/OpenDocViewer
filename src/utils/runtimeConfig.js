@@ -25,7 +25,7 @@ const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
 const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
-const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', DEFAULT_RESET_SESSION_TARGET, 'none']);
+const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
 const DEFAULT_ZOOM_MODE_ALIAS_ENTRIES = Object.freeze([
   Object.freeze(['fit-page', 'FIT_PAGE']),
   Object.freeze(['fitpage', 'FIT_PAGE']),
@@ -157,18 +157,18 @@ function normalizeBoolean(value, defaultValue) {
  * The max bound is optional; when it is invalid or lower than min, only the lower bound is applied.
  *
  * @param {*} value
+ * @param {*=} defaultValue
  * @param {*} min
  * @param {*} max
- * @param {*=} defaultValue
  * @returns {number}
  */
-function clampNumber(value, min, max, defaultValue = min) {
+function clampNumber(value, defaultValue, min, max) {
   const numeric = Number(value);
   const minNumber = Number(min);
   const maxNumber = Number(max);
-  const defaultNumber = Number(defaultValue);
   const safeMin = Number.isFinite(minNumber) ? minNumber : 0;
   const safeMax = Number.isFinite(maxNumber) && maxNumber >= safeMin ? maxNumber : null;
+  const defaultNumber = Number(defaultValue ?? safeMin);
   const fallback = Number.isFinite(defaultNumber) ? defaultNumber : safeMin;
   const valueToClamp = Number.isFinite(numeric) ? numeric : fallback;
   const lowerBounded = Math.max(safeMin, valueToClamp);
@@ -189,15 +189,10 @@ function clampNumber(value, min, max, defaultValue = min) {
  */
 function normalizeInteger(value, defaultValue, min, max) {
   const numeric = Number(value);
-  const minNumber = Number(min);
-  const defaultNumber = Number(defaultValue);
-  const fallback = Number.isFinite(defaultNumber)
-    ? Math.floor(defaultNumber)
-    : (Number.isFinite(minNumber) ? Math.floor(minNumber) : 0);
   const next = Number.isFinite(numeric)
     ? Math.floor(numeric)
-    : fallback;
-  return clampNumber(next, min, max, fallback);
+    : undefined;
+  return Math.floor(clampNumber(next, defaultValue, min, max));
 }
 
 /**
@@ -213,7 +208,7 @@ function normalizeInteger(value, defaultValue, min, max) {
  * @returns {number}
  */
 function normalizeFloat(value, defaultValue, min, max) {
-  return clampNumber(value, min, max, defaultValue);
+  return clampNumber(value, defaultValue, min, max);
 }
 
 /**
