@@ -1154,28 +1154,30 @@
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
 | <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:165</code> | Clamp a numeric config value to a safe range. |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:121</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:375</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:400</code> | Resolve the print-selection workspace configuration. |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:397</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:422</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:98</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:352</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:338</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:325</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:424</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:442</code> | Resolve the configurable viewer-level problem notice. |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:373</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:359</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:346</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:446</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:464</code> | Resolve the configurable viewer-level problem notice. |
 | <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:134</code> | Resolve whether document metadata UI affordances should be available. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
 | <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:148</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:300</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:274</code> | Normalize a custom fit-width factor. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:320</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:294</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:263</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
 | <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:215</code> | Normalize a floating-point config value and clamp it to the supplied range. |
 | <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:190</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:285</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:258</code> | Normalize a user-facing print default mode. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:305</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:278</code> | Normalize a user-facing print default mode. |
 | <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:224</code> |  |
 | <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:239</code> | Normalize a user-facing zoom mode string before alias lookup. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
 | <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:57</code> |  |
 | <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> | Session-reset target for the support/problem notice. |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:249</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
 | <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:50</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
 | <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:64</code> |  |

@@ -29771,7 +29771,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 375,
+    "line": 397,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29796,7 +29796,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 400,
+    "line": 422,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29839,7 +29839,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 352,
+    "line": 373,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29864,7 +29864,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 338,
+    "line": 359,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29889,7 +29889,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 325,
+    "line": 346,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29914,7 +29914,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 424,
+    "line": 446,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29939,7 +29939,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 442,
+    "line": 464,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -30033,7 +30033,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 300,
+    "line": 320,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -30058,7 +30058,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 274,
+    "line": 294,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -30077,6 +30077,37 @@
     "returns": [
       {
         "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "normalizeDefaultZoomMode",
+    "name": "normalizeDefaultZoomMode",
+    "longname": "normalizeDefaultZoomMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 263,
+    "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "defaultMode",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "ViewerDefaultZoomMode",
         "description": ""
       }
     ],
@@ -30175,7 +30206,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 285,
+    "line": 305,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -30206,7 +30237,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 258,
+    "line": 278,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -30323,6 +30354,31 @@
     "description": "Session-reset target for the support/problem notice.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resolveDefaultZoomModeAlias",
+    "name": "resolveDefaultZoomModeAlias",
+    "longname": "resolveDefaultZoomModeAlias",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 249,
+    "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
+    "params": [
+      {
+        "name": "value",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "ViewerDefaultZoomMode|null",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
