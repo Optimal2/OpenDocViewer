@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 14938. JSDoc symbol count: 573.
+File count: 35. Line count: 14944. JSDoc symbol count: 576.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -525,14 +525,14 @@ Symbols:
 - `ViewerDefaultZoomMode` (typedef) - No description.
 - `PrintDefaultMode` (typedef) - No description.
 - `ResetSessionTarget` (typedef) - Session\-reset target for the support/problem notice.
+- `KEYBOARD_PRINT_SHORTCUT_BEHAVIORS` (constant) - Values accepted by KeyboardPrintShortcutBehavior.
+- `RESET_SESSION_TARGETS` (constant) - Values accepted by ResetSessionTarget.
+- `DEFAULT_ZOOM_MODE_ALIAS_ENTRIES` (constant) - User\-facing zoom\-mode aliases mapped to ViewerDefaultZoomMode values.
 - `ViewerCustomFitSizeLimits` (typedef) - No description.
 - `PrintSelectionWorkspaceConfig` (typedef) - No description.
 - `ViewerEdgeScrollPageTurnConfig` (typedef) - No description.
 - `ViewerProblemNoticeConfig` (typedef) - No description.
 - `getRuntimeConfig` (function) - Read the merged runtime configuration from the browser environment.
-- `getKeyboardPrintShortcutBehavior` (function) - Resolve the configured Ctrl/Cmd\+P behavior.
-- `isDocumentMetadataUiEnabled` (function) - Resolve whether document metadata UI affordances should be available.
-- `normalizeBoolean` (function) - Normalize a runtime flag to a boolean.
 
 ## src/utils/sourceTempStore.js
 
