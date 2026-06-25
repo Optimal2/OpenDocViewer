@@ -20,31 +20,31 @@
  * @typedef {'current'|'parent'|'parent-or-current'|'none'} ResetSessionTarget
  */
 
-const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog']);
-const RESET_SESSION_TARGETS = new Set(['current', 'parent', 'parent-or-current', 'none']);
 const DEFAULT_RESET_SESSION_TARGET = 'parent-or-current';
 const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
 const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
 const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
-const DEFAULT_ZOOM_MODE_ALIASES = new Map([
-  ['fit-page', 'FIT_PAGE'],
-  ['fitpage', 'FIT_PAGE'],
-  ['page', 'FIT_PAGE'],
-  ['fit-width', 'FIT_WIDTH'],
-  ['fitwidth', 'FIT_WIDTH'],
-  ['fit-to-width', 'FIT_WIDTH'],
-  ['width', 'FIT_WIDTH'],
-  ['fit-custom', 'FIT_CUSTOM'],
-  ['custom-fit', 'FIT_CUSTOM'],
-  ['custom-fit-width', 'FIT_CUSTOM'],
-  ['fit-width-factor', 'FIT_CUSTOM'],
-  ['user-zoom', 'FIT_CUSTOM'],
-  ['custom-width', 'FIT_CUSTOM'],
-  ['actual-size', 'ACTUAL_SIZE'],
-  ['actualsize', 'ACTUAL_SIZE'],
-  ['actual', 'ACTUAL_SIZE'],
-  ['100%', 'ACTUAL_SIZE'],
-  ['1:1', 'ACTUAL_SIZE'],
+const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
+const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', DEFAULT_RESET_SESSION_TARGET, 'none']);
+const DEFAULT_ZOOM_MODE_ALIAS_ENTRIES = Object.freeze([
+  Object.freeze(['fit-page', 'FIT_PAGE']),
+  Object.freeze(['fitpage', 'FIT_PAGE']),
+  Object.freeze(['page', 'FIT_PAGE']),
+  Object.freeze([DEFAULT_ZOOM_MODE_TEXT, DEFAULT_ZOOM_MODE]),
+  Object.freeze(['fitwidth', DEFAULT_ZOOM_MODE]),
+  Object.freeze(['fit-to-width', DEFAULT_ZOOM_MODE]),
+  Object.freeze(['width', DEFAULT_ZOOM_MODE]),
+  Object.freeze(['fit-custom', 'FIT_CUSTOM']),
+  Object.freeze(['custom-fit', 'FIT_CUSTOM']),
+  Object.freeze(['custom-fit-width', 'FIT_CUSTOM']),
+  Object.freeze(['fit-width-factor', 'FIT_CUSTOM']),
+  Object.freeze(['user-zoom', 'FIT_CUSTOM']),
+  Object.freeze(['custom-width', 'FIT_CUSTOM']),
+  Object.freeze(['actual-size', 'ACTUAL_SIZE']),
+  Object.freeze(['actualsize', 'ACTUAL_SIZE']),
+  Object.freeze(['actual', 'ACTUAL_SIZE']),
+  Object.freeze(['100%', 'ACTUAL_SIZE']),
+  Object.freeze(['1:1', 'ACTUAL_SIZE']),
 ]);
 
 /**
@@ -120,7 +120,7 @@ export function getRuntimeConfig() {
  */
 export function getKeyboardPrintShortcutBehavior(cfg = getRuntimeConfig()) {
   const raw = String(cfg?.shortcuts?.print?.ctrlOrCmdP || 'browser').trim().toLowerCase();
-  return KEYBOARD_PRINT_SHORTCUT_BEHAVIORS.has(raw) ? raw : 'browser';
+  return KEYBOARD_PRINT_SHORTCUT_BEHAVIORS.includes(raw) ? raw : 'browser';
 }
 
 /**
@@ -154,7 +154,7 @@ function normalizeBoolean(value, defaultValue) {
  * Clamp a numeric config value to a safe range.
  *
  * Invalid value/min/default inputs fall back to the nearest safe value instead of propagating NaN.
- * The max bound is optional and ignored when it is not finite or is lower than min.
+ * The max bound is optional; when it is invalid or lower than min, only the lower bound is applied.
  *
  * @param {*} value
  * @param {*} min
@@ -223,7 +223,7 @@ function normalizeFloat(value, defaultValue, min, max) {
  */
 function normalizeResetSessionTarget(value, defaultTarget) {
   const raw = String(value || defaultTarget || '').trim().toLowerCase();
-  if (RESET_SESSION_TARGETS.has(raw)) return raw;
+  if (RESET_SESSION_TARGETS.includes(raw)) return raw;
   return DEFAULT_RESET_SESSION_TARGET;
 }
 
@@ -240,11 +240,31 @@ function normalizeZoomModeText(value) {
   return String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
 }
 
+/**
+ * Resolve a normalized zoom-mode alias to the internal viewer mode.
+ *
+ * @param {string} value
+ * @returns {(ViewerDefaultZoomMode|null)}
+ */
+function resolveDefaultZoomModeAlias(value) {
+  const entry = DEFAULT_ZOOM_MODE_ALIAS_ENTRIES.find(([alias]) => alias === value);
+  return entry ? entry[1] : null;
+}
+
+/**
+ * Normalize a runtime default zoom mode to the internal DocumentViewer mode.
+ *
+ * Unknown host values fall back to defaultMode, and an invalid defaultMode falls back to FIT_WIDTH.
+ *
+ * @param {*} value
+ * @param {*} defaultMode
+ * @returns {ViewerDefaultZoomMode}
+ */
 function normalizeDefaultZoomMode(value, defaultMode = DEFAULT_ZOOM_MODE_TEXT) {
   const defaultRaw = normalizeZoomModeText(defaultMode) || DEFAULT_ZOOM_MODE_TEXT;
-  const defaultResolved = DEFAULT_ZOOM_MODE_ALIASES.get(defaultRaw) || DEFAULT_ZOOM_MODE;
+  const defaultResolved = resolveDefaultZoomModeAlias(defaultRaw) || DEFAULT_ZOOM_MODE;
   const raw = normalizeZoomModeText(value);
-  return raw ? (DEFAULT_ZOOM_MODE_ALIASES.get(raw) || defaultResolved) : defaultResolved;
+  return raw ? (resolveDefaultZoomModeAlias(raw) || defaultResolved) : defaultResolved;
 }
 
 /**
@@ -302,6 +322,7 @@ export function normalizeCustomFitSizeLimitPreference(value) {
     return { widthFactorPercent: null, heightFactorPercent: null, actualSizeFactorPercent: null };
   }
 
+  // The shorter *Percent aliases are kept for backward compatibility with early user preferences.
   return {
     widthFactorPercent: normalizeOptionalCustomFitFactorPercent(value.widthFactorPercent ?? value.widthPercent, 100),
     heightFactorPercent: normalizeOptionalCustomFitFactorPercent(value.heightFactorPercent ?? value.heightPercent, 500),
@@ -350,6 +371,7 @@ export function getViewerCustomFitWidthFactorPercent(cfg = getRuntimeConfig()) {
  * @returns {{ widthFactorPercent: number, heightFactorPercent: (number|null), actualSizeFactorPercent: (number|null) }}
  */
 export function getViewerCustomFitSizeLimits(cfg = getRuntimeConfig()) {
+  // The shorter *Percent aliases are kept for backward compatibility with early site configs.
   return {
     widthFactorPercent: getViewerCustomFitWidthFactorPercent(cfg),
     heightFactorPercent: normalizeOptionalCustomFitFactorPercent(
