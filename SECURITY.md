@@ -2,20 +2,37 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.6.3** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.6.4** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.6.2 and earlier are superseded by v2.6.3 and are no longer supported for production deployments. v2.6.3 refreshes the runtime and development dependency baseline, including updates that address serious security advisories reported by GitHub Dependabot. Operators should upgrade to v2.6.3 before opening new support or security issues.
+OpenDocViewer v2.6.3 and earlier are superseded by v2.6.4 and are no longer supported for production deployments. v2.6.4 keeps the v2.6 dependency baseline current and adds additional document-loading, source-stream, TIFF/OJPEG, print, and cleanup hardening. Operators should upgrade to v2.6.4 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.6.3   | :white_check_mark: | Current recommended patch release and only supported baseline |
-| <= 2.6.2 | :x: | Superseded by v2.6.3 dependency and security updates; upgrade required |
+| 2.6.4   | :white_check_mark: | Current recommended patch release and only supported baseline |
+| <= 2.6.3 | :x: | Superseded by v2.6.4 document-loading, print, and cleanup hardening; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.3 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.4 is supported.
+
+### OpenDocViewer v2.6.4
+Changes since v2.6.3:
+
+- Added configurable source-fetch size limits and streamed download caps so unusually large document sources can be rejected before they exhaust browser memory.
+- Added source-pack frame payload bounds to reject unexpectedly large frames from gateway-style source streams.
+- Hardened TIFF/OJPEG parsing with offset, length, and scan-size checks for both worker and main-thread rendering paths.
+- Improved canvas, PDF, TIFF, and object URL cleanup to reduce memory retention during long sessions, repeated document reloads, and selection workspace use.
+- Hardened generated-PDF printing and download flows, including safer iframe cleanup timing, fallback preview handling, and clearer error reporting when the browser blocks preview creation.
+- Sanitized print header/footer overlay markup with DOMPurify while preserving the supported rich-text subset for configured print templates.
+- Updated DOMPurify from 3.4.10 to 3.4.11.
+- Fixed selection-workspace sequence handling so saved custom page order and included-page masks remain aligned after edits.
+- Hardened selection-workspace image rendering so preview and thumbnail images fall back safely when source URLs are invalid or unsafe.
+- Improved custom zoom limit fallback handling and viewer page/selection validation helpers.
+- Split viewer keyboard and zoom effects into narrower modules without changing the public viewer behavior.
+- Added generated AI-agent documentation and CI validation so source-map documentation stays current for future maintenance.
+- Updated CI and release workflows to build and package the generated agent documentation alongside the standard distribution and JSDoc output.
 
 ### OpenDocViewer v2.6.3
 Changes since v2.6.2:
