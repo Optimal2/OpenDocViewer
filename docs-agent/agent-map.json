@@ -79,8 +79,8 @@
   },
   "stats": {
     "fileCount": 114,
-    "sourceLineCount": 49114,
-    "docletCount": 1283,
+    "sourceLineCount": 49138,
+    "docletCount": 1285,
     "documentedFileCount": 110,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -371,9 +371,9 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 117,
-      "lines": 369,
+      "lines": 393,
       "incomingLocalImports": 13,
-      "doclets": 21,
+      "doclets": 23,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
@@ -1423,8 +1423,8 @@
     {
       "name": "src/utils",
       "fileCount": 35,
-      "lineCount": 14812,
-      "docletCount": 564,
+      "lineCount": 14836,
+      "docletCount": 566,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1438,9 +1438,9 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 117,
-          "lines": 369,
+          "lines": 393,
           "incomingLocalImports": 13,
-          "doclets": 21,
+          "doclets": 23,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
@@ -47323,188 +47323,188 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 369,
+      "lines": 393,
       "extension": ".js",
-      "jsdocBlockCount": 22,
+      "jsdocBlockCount": 24,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 63
+          "line": 94
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 86
+          "line": 117
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 99
+          "line": 130
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 161
+          "line": 185
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 176
+          "line": 200
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 187
+          "line": 211
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 202
+          "line": 226
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 227
+          "line": 251
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 240
+          "line": 264
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 254
+          "line": 278
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 277
+          "line": 301
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 302
+          "line": 326
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 326
+          "line": 350
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 344
+          "line": 368
         }
       ],
       "declarations": [
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 63
+          "line": 94
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 86
+          "line": 117
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 99
+          "line": 130
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 103
+          "line": 134
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 107
+          "line": 138
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 112
+          "line": 145
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 118
+          "line": 151
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 124
+          "line": 162
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 130
+          "line": 168
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 134
+          "line": 172
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 161
+          "line": 185
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 176
+          "line": 200
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 187
+          "line": 211
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 202
+          "line": 226
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 227
+          "line": 251
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 240
+          "line": 264
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 254
+          "line": 278
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 277
+          "line": 301
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 302
+          "line": 326
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 326
+          "line": 350
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 344
+          "line": 368
         }
       ],
       "parseError": null,
@@ -47553,13 +47553,26 @@
           "examples": 0
         },
         {
+          "id": "ResetSessionTarget",
+          "name": "ResetSessionTarget",
+          "longname": "ResetSessionTarget",
+          "kind": "typedef",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 12,
+          "description": "Session-reset target for the support/problem notice.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "ViewerCustomFitSizeLimits",
           "name": "ViewerCustomFitSizeLimits",
           "longname": "ViewerCustomFitSizeLimits",
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 15,
+          "line": 46,
           "description": "",
           "params": [],
           "returns": [],
@@ -47572,7 +47585,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 22,
+          "line": 53,
           "description": "",
           "params": [],
           "returns": [],
@@ -47585,7 +47598,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 29,
+          "line": 60,
           "description": "",
           "params": [],
           "returns": [],
@@ -47598,7 +47611,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 37,
+          "line": 68,
           "description": "",
           "params": [],
           "returns": [],
@@ -47611,7 +47624,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 63,
+          "line": 94,
           "description": "Read the merged runtime configuration from the browser environment.",
           "params": [],
           "returns": [
@@ -47629,7 +47642,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 86,
+          "line": 117,
           "description": "Resolve the configured Ctrl/Cmd+P behavior.",
           "params": [
             {
@@ -47654,7 +47667,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 99,
+          "line": 130,
           "description": "Resolve whether document metadata UI affordances should be available.",
           "params": [
             {
@@ -47673,13 +47686,44 @@
           "examples": 0
         },
         {
+          "id": "normalizeResetSessionTarget",
+          "name": "normalizeResetSessionTarget",
+          "longname": "normalizeResetSessionTarget",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 162,
+          "description": "",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "defaultTarget",
+              "type": "ResetSessionTarget",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "ResetSessionTarget",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "normalizePrintDefaultMode",
           "name": "normalizePrintDefaultMode",
           "longname": "normalizePrintDefaultMode",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 161,
+          "line": 185,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -47710,7 +47754,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 176,
+          "line": 200,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -47741,7 +47785,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 187,
+          "line": 211,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -47772,7 +47816,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 202,
+          "line": 226,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -47797,7 +47841,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 227,
+          "line": 251,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -47822,7 +47866,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 240,
+          "line": 264,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -47847,7 +47891,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 254,
+          "line": 278,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -47872,7 +47916,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 277,
+          "line": 301,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -47897,7 +47941,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 302,
+          "line": 326,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -47922,7 +47966,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 326,
+          "line": 350,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -47947,7 +47991,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 344,
+          "line": 368,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -81556,7 +81600,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 86,
+      "line": 117,
       "description": "Resolve the configured Ctrl/Cmd+P behavior.",
       "params": [
         {
@@ -81581,7 +81625,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 277,
+      "line": 301,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -81606,7 +81650,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 302,
+      "line": 326,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -81631,7 +81675,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 63,
+      "line": 94,
       "description": "Read the merged runtime configuration from the browser environment.",
       "params": [],
       "returns": [
@@ -81649,7 +81693,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 254,
+      "line": 278,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -81674,7 +81718,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 240,
+      "line": 264,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -81699,7 +81743,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 227,
+      "line": 251,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -81724,7 +81768,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 326,
+      "line": 350,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -81749,7 +81793,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 344,
+      "line": 368,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -81774,7 +81818,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 99,
+      "line": 130,
       "description": "Resolve whether document metadata UI affordances should be available.",
       "params": [
         {
@@ -81812,7 +81856,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 202,
+      "line": 226,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -81837,7 +81881,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 176,
+      "line": 200,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -81868,7 +81912,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 187,
+      "line": 211,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -81899,7 +81943,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 161,
+      "line": 185,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -81918,6 +81962,37 @@
       "returns": [
         {
           "type": "PrintDefaultMode",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "normalizeResetSessionTarget",
+      "name": "normalizeResetSessionTarget",
+      "longname": "normalizeResetSessionTarget",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 162,
+      "description": "",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "defaultTarget",
+          "type": "ResetSessionTarget",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "ResetSessionTarget",
           "description": ""
         }
       ],
@@ -81943,8 +82018,21 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 22,
+      "line": 53,
       "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "ResetSessionTarget",
+      "name": "ResetSessionTarget",
+      "longname": "ResetSessionTarget",
+      "kind": "typedef",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 12,
+      "description": "Session-reset target for the support/problem notice.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -81956,7 +82044,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 15,
+      "line": 46,
       "description": "",
       "params": [],
       "returns": [],
@@ -81982,7 +82070,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 29,
+      "line": 60,
       "description": "",
       "params": [],
       "returns": [],
@@ -81995,7 +82083,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 37,
+      "line": 68,
       "description": "",
       "params": [],
       "returns": [],

@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 114
-- Source lines: 49114
-- JSDoc symbols: 1283
+- Source lines: 49138
+- JSDoc symbols: 1285
 - Files with JSDoc: 110
 - Low-confidence summaries: 0
 - Parse errors: 0
