@@ -3,7 +3,7 @@
   "project": {
     "name": "OpenDocViewer",
     "packageName": "opendocviewer",
-    "packageVersion": "2.6.3",
+    "packageVersion": "2.6.4",
     "description": "Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite, with a token-gated log server and runtime configuration.",
     "packageScripts": {
       "dev": "vite",
@@ -79,8 +79,8 @@
   },
   "stats": {
     "fileCount": 114,
-    "sourceLineCount": 49084,
-    "docletCount": 1282,
+    "sourceLineCount": 49114,
+    "docletCount": 1283,
     "documentedFileCount": 110,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -362,7 +362,7 @@
     {
       "path": "src/utils/documentLoadingConfig.js",
       "score": 122,
-      "lines": 1048,
+      "lines": 1062,
       "incomingLocalImports": 12,
       "doclets": 32,
       "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -371,7 +371,7 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 117,
-      "lines": 367,
+      "lines": 369,
       "incomingLocalImports": 13,
       "doclets": 21,
       "summary": "Runtime configuration helpers.",
@@ -613,7 +613,7 @@
           {
             "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
             "score": 39,
-            "lines": 315,
+            "lines": 311,
             "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer."
           },
           {
@@ -631,7 +631,7 @@
           {
             "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
             "score": 26,
-            "lines": 161,
+            "lines": 160,
             "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer."
           },
           {
@@ -799,8 +799,8 @@
     {
       "name": "src/components",
       "fileCount": 13,
-      "lineCount": 6624,
-      "docletCount": 82,
+      "lineCount": 6643,
+      "docletCount": 83,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
@@ -812,21 +812,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/PrintSelectionWorkspace.jsx",
+          "score": 48,
+          "lines": 2504,
+          "incomingLocalImports": 1,
+          "doclets": 5,
+          "summary": "Full-window print-selection workspace.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentRender.jsx",
           "score": 46,
           "lines": 1112,
           "incomingLocalImports": 1,
           "doclets": 24,
           "summary": "OpenDocViewer — Active page renderer.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/PrintSelectionWorkspace.jsx",
-          "score": 45,
-          "lines": 2485,
-          "incomingLocalImports": 1,
-          "doclets": 4,
-          "summary": "Full-window print-selection workspace.",
           "summaryConfidence": "high"
         },
         {
@@ -1056,7 +1056,7 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 10,
-      "lineCount": 4968,
+      "lineCount": 4963,
       "docletCount": 117,
       "importantFiles": [
         {
@@ -1089,7 +1089,7 @@
         {
           "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
           "score": 39,
-          "lines": 315,
+          "lines": 311,
           "incomingLocalImports": 1,
           "doclets": 10,
           "summary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
@@ -1116,7 +1116,7 @@
         {
           "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
           "score": 26,
-          "lines": 161,
+          "lines": 160,
           "incomingLocalImports": 1,
           "doclets": 4,
           "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
@@ -1423,13 +1423,13 @@
     {
       "name": "src/utils",
       "fileCount": 35,
-      "lineCount": 14796,
+      "lineCount": 14812,
       "docletCount": 564,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
           "score": 122,
-          "lines": 1048,
+          "lines": 1062,
           "incomingLocalImports": 12,
           "doclets": 32,
           "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -1438,7 +1438,7 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 117,
-          "lines": 367,
+          "lines": 369,
           "incomingLocalImports": 13,
           "doclets": 21,
           "summary": "Runtime configuration helpers.",
@@ -17282,7 +17282,7 @@
     },
     {
       "path": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "lines": 315,
+      "lines": 311,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": "Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.",
@@ -17320,42 +17320,42 @@
         {
           "name": "getTarget",
           "kind": "function",
-          "line": 133
+          "line": 131
         },
         {
           "name": "getScope",
           "kind": "function",
-          "line": 144
+          "line": 142
         },
         {
           "name": "isNextRepeatKey",
           "kind": "function",
-          "line": 154
+          "line": 152
         },
         {
           "name": "isPreviousRepeatKey",
           "kind": "function",
-          "line": 161
+          "line": 159
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 165
+          "line": 163
         },
         {
           "name": "onKeyUp",
           "kind": "function",
-          "line": 278
+          "line": 276
         },
         {
           "name": "onWindowBlur",
           "kind": "function",
-          "line": 284
+          "line": 282
         },
         {
           "name": "onVisibilityChange",
           "kind": "function",
-          "line": 289
+          "line": 287
         }
       ],
       "parseError": null,
@@ -17411,7 +17411,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 133,
+          "line": 131,
           "description": "",
           "params": [
             {
@@ -17436,7 +17436,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 144,
+          "line": 142,
           "description": "",
           "params": [
             {
@@ -17461,7 +17461,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 154,
+          "line": 152,
           "description": "",
           "params": [
             {
@@ -17486,7 +17486,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 161,
+          "line": 159,
           "description": "",
           "params": [
             {
@@ -17511,7 +17511,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 165,
+          "line": 163,
           "description": "",
           "params": [
             {
@@ -17531,7 +17531,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 278,
+          "line": 276,
           "description": "",
           "params": [
             {
@@ -17551,7 +17551,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 284,
+          "line": 282,
           "description": "",
           "params": [],
           "returns": [
@@ -17569,7 +17569,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-          "line": 289,
+          "line": 287,
           "description": "",
           "params": [],
           "returns": [
@@ -17833,7 +17833,7 @@
     },
     {
       "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-      "lines": 161,
+      "lines": 160,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
@@ -17869,12 +17869,12 @@
         {
           "name": "onWheelGlobal",
           "kind": "function",
-          "line": 106
+          "line": 105
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 123
+          "line": 122
         }
       ],
       "parseError": null,
@@ -17930,7 +17930,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-          "line": 106,
+          "line": 105,
           "description": "",
           "params": [
             {
@@ -17950,7 +17950,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-          "line": 123,
+          "line": 122,
           "description": "",
           "params": [
             {
@@ -20323,9 +20323,9 @@
     },
     {
       "path": "src/components/PrintSelectionWorkspace.jsx",
-      "lines": 2485,
+      "lines": 2504,
       "extension": ".jsx",
-      "jsdocBlockCount": 5,
+      "jsdocBlockCount": 6,
       "sourceSummary": "Full-window print-selection workspace.",
       "imports": [
         {
@@ -20380,7 +20380,7 @@
         {
           "name": "PrintSelectionWorkspace",
           "kind": "default",
-          "line": 2484
+          "line": 2503
         }
       ],
       "declarations": [
@@ -20397,352 +20397,352 @@
         {
           "name": "sequencesEqual",
           "kind": "function",
-          "line": 49
+          "line": 51
         },
         {
           "name": "getDraftChangeRevealIndex",
           "kind": "function",
-          "line": 58
+          "line": 60
         },
         {
           "name": "getPageImageUrl",
           "kind": "function",
-          "line": 69
+          "line": 74
         },
         {
           "name": "getWorkspaceFallbackImageUrl",
           "kind": "function",
-          "line": 86
+          "line": 91
         },
         {
           "name": "getRenderableWorkspaceImageUrl",
           "kind": "function",
-          "line": 93
+          "line": 98
         },
         {
           "name": "normalizeWorkspaceImageUrl",
           "kind": "function",
-          "line": 99
+          "line": 104
         },
         {
           "name": "resolvePathValue",
           "kind": "function",
-          "line": 110
+          "line": 115
         },
         {
           "name": "parseInteger",
           "kind": "function",
-          "line": 128
+          "line": 133
         },
         {
           "name": "zeroPad",
           "kind": "function",
-          "line": 133
+          "line": 138
         },
         {
           "name": "formatDateParts",
           "kind": "function",
-          "line": 137
+          "line": 142
         },
         {
           "name": "replacements",
           "kind": "object",
-          "line": 138
+          "line": 143
         },
         {
           "name": "formatDateValue",
           "kind": "function",
-          "line": 151
+          "line": 156
         },
         {
           "name": "applyTemplateFilter",
           "kind": "function",
-          "line": 182
+          "line": 187
         },
         {
           "name": "applyTemplateFilters",
           "kind": "function",
-          "line": 215
+          "line": 220
         },
         {
           "name": "getDocumentEntry",
           "kind": "function",
-          "line": 223
+          "line": 228
         },
         {
           "name": "applyTemplate",
           "kind": "function",
-          "line": 234
+          "line": 239
         },
         {
           "name": "buildPageTemplateContext",
           "kind": "function",
-          "line": 257
+          "line": 262
         },
         {
           "name": "buildPageItems",
           "kind": "function",
-          "line": 288
+          "line": 293
         },
         {
           "name": "hasReliableDocumentGrouping",
           "kind": "function",
-          "line": 306
+          "line": 311
         },
         {
           "name": "formatMetricValue",
           "kind": "function",
-          "line": 348
+          "line": 356
         },
         {
           "name": "getDocumentPageNumber",
           "kind": "function",
-          "line": 352
+          "line": 360
         },
         {
           "name": "getDocumentPageCount",
           "kind": "function",
-          "line": 356
+          "line": 364
         },
         {
           "name": "formatMetricFraction",
           "kind": "function",
-          "line": 360
+          "line": 368
         },
         {
           "name": "buildDocumentGroups",
           "kind": "function",
-          "line": 366
+          "line": 374
         },
         {
           "name": "context",
           "kind": "object",
-          "line": 389
+          "line": 397
         },
         {
           "name": "buildDraftDocumentGroups",
           "kind": "function",
-          "line": 404
+          "line": 412
         },
         {
           "name": "context",
           "kind": "object",
-          "line": 430
+          "line": 438
         },
         {
           "name": "uniqueOrdered",
           "kind": "function",
-          "line": 445
+          "line": 453
         },
         {
           "name": "unionOrdered",
           "kind": "function",
-          "line": 450
+          "line": 458
         },
         {
           "name": "toggleOrderedIndex",
           "kind": "function",
-          "line": 454
+          "line": 462
         },
         {
           "name": "getRangeSelection",
           "kind": "function",
-          "line": 461
+          "line": 469
         },
         {
           "name": "resolveRangeOrToggleSelection",
           "kind": "function",
-          "line": 470
+          "line": 478
         },
         {
           "name": "sortByOrder",
           "kind": "function",
-          "line": 489
+          "line": 497
         },
         {
           "name": "getDocumentGroupKeyForItem",
           "kind": "function",
-          "line": 495
+          "line": 503
         },
         {
           "name": "getDocumentKeyForIndex",
           "kind": "function",
-          "line": 500
+          "line": 508
         },
         {
           "name": "getIndexesForDocument",
           "kind": "function",
-          "line": 504
+          "line": 512
         },
         {
           "name": "getBestIncreasingDocumentEntryIndexes",
           "kind": "function",
-          "line": 509
+          "line": 528
         },
         {
           "name": "analyzeDraftDocumentOrder",
           "kind": "function",
-          "line": 554
+          "line": 573
         },
         {
           "name": "run",
           "kind": "object",
-          "line": 566
+          "line": 585
         },
         {
           "name": "mergeAdditionsIntoDocumentBlocks",
           "kind": "function",
-          "line": 586
+          "line": 605
         },
         {
           "name": "moveDocumentBlock",
           "kind": "function",
-          "line": 625
+          "line": 644
         },
         {
           "name": "insertDocumentBlock",
           "kind": "function",
-          "line": 646
+          "line": 665
         },
         {
           "name": "rectsIntersect",
           "kind": "function",
-          "line": 663
+          "line": 682
         },
         {
           "name": "normalizeSelectionRect",
           "kind": "function",
-          "line": 670
+          "line": 689
         },
         {
           "name": "insertUnique",
           "kind": "function",
-          "line": 685
+          "line": 704
         },
         {
           "name": "insertByNaturalOrder",
           "kind": "function",
-          "line": 697
+          "line": 716
         },
         {
           "name": "moveWithinSequence",
           "kind": "function",
-          "line": 713
+          "line": 732
         },
         {
           "name": "isActivationKey",
           "kind": "function",
-          "line": 733
+          "line": 752
         },
         {
           "name": "isModifierOnlyKey",
           "kind": "function",
-          "line": 738
+          "line": 757
         },
         {
           "name": "stopSelectionEvent",
           "kind": "function",
-          "line": 743
+          "line": 762
         },
         {
           "name": "getPanelPointerPosition",
           "kind": "function",
-          "line": 752
+          "line": 771
         },
         {
           "name": "getTilePanelRect",
           "kind": "function",
-          "line": 760
+          "line": 779
         },
         {
           "name": "shouldIgnoreModifiedCommandClick",
           "kind": "function",
-          "line": 773
+          "line": 792
         },
         {
           "name": "isAppendSelectionGesture",
           "kind": "function",
-          "line": 780
+          "line": 799
         },
         {
           "name": "isRangeSelectionGesture",
           "kind": "function",
-          "line": 784
+          "line": 803
         },
         {
           "name": "PrintSelectionWorkspace",
           "kind": "component",
-          "line": 788
+          "line": 807
         },
         {
           "name": "reveal",
           "kind": "function",
-          "line": 996
+          "line": 1015
         },
         {
           "name": "keepCurrentDocument",
           "kind": "function",
-          "line": 1191
+          "line": 1210
         },
         {
           "name": "move",
           "kind": "function",
-          "line": 1354
+          "line": 1373
         },
         {
           "name": "done",
           "kind": "function",
-          "line": 1370
+          "line": 1389
         },
         {
           "name": "markerStyleFromRect",
           "kind": "function",
-          "line": 1412
+          "line": 1431
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 1755
+          "line": 1774
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 1788
+          "line": 1807
         },
         {
           "name": "handleMove",
           "kind": "function",
-          "line": 1808
+          "line": 1827
         },
         {
           "name": "handleDone",
           "kind": "function",
-          "line": 1815
+          "line": 1834
         },
         {
           "name": "activateTile",
           "kind": "function",
-          "line": 1889
+          "line": 1908
         },
         {
           "name": "handleTilePointerDown",
           "kind": "function",
-          "line": 1893
+          "line": 1912
         },
         {
           "name": "handleTileClick",
           "kind": "function",
-          "line": 1898
+          "line": 1917
         },
         {
           "name": "handleTileKeyDown",
           "kind": "function",
-          "line": 1902
+          "line": 1921
         },
         {
           "name": "handleTileDoubleClick",
           "kind": "function",
-          "line": 1910
+          "line": 1929
         }
       ],
       "parseError": null,
@@ -20752,13 +20752,38 @@
       },
       "doclets": [
         {
+          "id": "getBestIncreasingDocumentEntryIndexes",
+          "name": "getBestIncreasingDocumentEntryIndexes",
+          "longname": "getBestIncreasingDocumentEntryIndexes",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/PrintSelectionWorkspace.jsx",
+          "line": 528,
+          "description": "Find the document-run entries that best preserve natural page order.",
+          "params": [
+            {
+              "name": "entries",
+              "type": "Array.<{index:number, item:Object}>",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Set.<number>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "<anonymous>~handleKeyDown",
           "name": "handleKeyDown",
           "longname": "<anonymous>~handleKeyDown",
           "kind": "function",
           "scope": "inner",
           "file": "src/components/PrintSelectionWorkspace.jsx",
-          "line": 1755,
+          "line": 1774,
           "description": "",
           "params": [
             {
@@ -20778,7 +20803,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/PrintSelectionWorkspace.jsx",
-          "line": 1788,
+          "line": 1807,
           "description": "",
           "params": [
             {
@@ -20798,7 +20823,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/PrintSelectionWorkspace.jsx",
-          "line": 1808,
+          "line": 1827,
           "description": "",
           "params": [
             {
@@ -20818,7 +20843,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/PrintSelectionWorkspace.jsx",
-          "line": 1815,
+          "line": 1834,
           "description": "",
           "params": [],
           "returns": [
@@ -20886,7 +20911,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 45,
+      "importanceScore": 48,
       "summary": "Full-window print-selection workspace.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -30567,7 +30592,7 @@
     },
     {
       "path": "src/utils/documentLoadingConfig.js",
-      "lines": 1048,
+      "lines": 1062,
       "extension": ".js",
       "jsdocBlockCount": 34,
       "sourceSummary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
@@ -30596,82 +30621,82 @@
         {
           "name": "resolveRecommendedWorkerCount",
           "kind": "function",
-          "line": 194
+          "line": 204
         },
         {
           "name": "DOCUMENT_LOADING_DEFAULTS",
           "kind": "variable",
-          "line": 235
+          "line": 243
         },
         {
           "name": "cloneDocumentLoadingConfig",
           "kind": "function",
-          "line": 484
+          "line": 501
         },
         {
           "name": "countPdfPages",
           "kind": "function",
-          "line": 506
+          "line": 523
         },
         {
           "name": "resolvePdfWorkerPlanForPageCount",
           "kind": "function",
-          "line": 526
+          "line": 543
         },
         {
           "name": "resolvePdfRenderConfigForPageCount",
           "kind": "function",
-          "line": 590
+          "line": 604
         },
         {
           "name": "applyDocumentLoadingMode",
           "kind": "function",
-          "line": 730
+          "line": 744
         },
         {
           "name": "applyMemoryPressureStage",
           "kind": "function",
-          "line": 805
+          "line": 819
         },
         {
           "name": "getPerformanceWindowPageCount",
           "kind": "function",
-          "line": 835
+          "line": 849
         },
         {
           "name": "getDocumentLoadingConfig",
           "kind": "function",
-          "line": 842
+          "line": 856
         },
         {
           "name": "isRasterImageExtension",
           "kind": "function",
-          "line": 973
+          "line": 987
         },
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 986
+          "line": 1000
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 997
+          "line": 1011
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1009
+          "line": 1023
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1027
+          "line": 1041
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1035
+          "line": 1049
         }
       ],
       "declarations": [
@@ -30683,182 +30708,192 @@
         {
           "name": "getReportedCoreCount",
           "kind": "function",
-          "line": 181
+          "line": 186
         },
         {
-          "name": "resolveRecommendedWorkerCount",
+          "name": "clampRecommendedWorkerCount",
           "kind": "function",
           "line": 194
         },
         {
+          "name": "resolveRecommendedWorkerCount",
+          "kind": "function",
+          "line": 204
+        },
+        {
           "name": "resolveRecommendedRasterWorkerCount",
           "kind": "function",
-          "line": 215
+          "line": 224
         },
         {
           "name": "normalizeNumber",
           "kind": "function",
-          "line": 344
+          "line": 352
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 351
+          "line": 359
         },
         {
           "name": "normalizeThreshold",
           "kind": "function",
-          "line": 357
+          "line": 365
         },
         {
           "name": "normalizeMiBThreshold",
           "kind": "function",
-          "line": 365
+          "line": 373
         },
         {
           "name": "normalizeStoreMode",
           "kind": "function",
-          "line": 372
+          "line": 380
         },
         {
           "name": "normalizeProtection",
           "kind": "function",
-          "line": 378
+          "line": 386
         },
         {
           "name": "normalizeThumbnailLoadingStrategy",
           "kind": "function",
-          "line": 384
+          "line": 392
         },
         {
           "name": "normalizeThumbnailSourceStrategy",
           "kind": "function",
-          "line": 390
+          "line": 398
         },
         {
           "name": "normalizeMode",
           "kind": "function",
-          "line": 398
+          "line": 406
         },
         {
           "name": "normalizeFetchStrategy",
           "kind": "function",
-          "line": 404
+          "line": 412
         },
         {
           "name": "normalizeRenderStrategy",
           "kind": "function",
-          "line": 410
+          "line": 418
         },
         {
           "name": "normalizeRenderBackend",
           "kind": "function",
-          "line": 416
+          "line": 424
         },
         {
           "name": "normalizePdfToImageMode",
           "kind": "function",
-          "line": 422
+          "line": 430
         },
         {
           "name": "normalizePdfWorkerPagePolicy",
           "kind": "function",
-          "line": 431
+          "line": 439
+        },
+        {
+          "name": "shouldUseMainThreadForPdf",
+          "kind": "function",
+          "line": 477
         },
         {
           "name": "normalizePdfWorkerWarmupBatchMode",
           "kind": "function",
-          "line": 467
+          "line": 484
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 474
+          "line": 491
         },
         {
           "name": "cloneDocumentLoadingConfig",
           "kind": "function",
-          "line": 484
+          "line": 501
         },
         {
           "name": "countPdfPages",
           "kind": "function",
-          "line": 506
+          "line": 523
         },
         {
           "name": "resolvePdfWorkerPlanForPageCount",
           "kind": "function",
-          "line": 526
+          "line": 543
         },
         {
           "name": "resolvePdfRenderConfigForPageCount",
           "kind": "function",
-          "line": 590
+          "line": 604
         },
         {
           "name": "base",
           "kind": "object",
-          "line": 591
+          "line": 605
         },
         {
           "name": "buildAdaptiveDefaults",
           "kind": "function",
-          "line": 637
+          "line": 651
         },
         {
           "name": "applyDocumentLoadingMode",
           "kind": "function",
-          "line": 730
+          "line": 744
         },
         {
           "name": "applyMemoryPressureStage",
           "kind": "function",
-          "line": 805
+          "line": 819
         },
         {
           "name": "getPerformanceWindowPageCount",
           "kind": "function",
-          "line": 835
+          "line": 849
         },
         {
           "name": "getDocumentLoadingConfig",
           "kind": "function",
-          "line": 842
+          "line": 856
         },
         {
           "name": "normalized",
           "kind": "object",
-          "line": 871
+          "line": 885
         },
         {
           "name": "isRasterImageExtension",
           "kind": "function",
-          "line": 973
+          "line": 987
         },
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 986
+          "line": 1000
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 997
+          "line": 1011
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1009
+          "line": 1023
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1027
+          "line": 1041
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1035
+          "line": 1049
         }
       ],
       "parseError": null,
@@ -31165,8 +31200,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 181,
-          "description": "",
+          "line": 186,
+          "description": "Return the browser-reported logical core count.",
           "params": [],
           "returns": [
             {
@@ -31183,7 +31218,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 194,
+          "line": 204,
           "description": "",
           "params": [
             {
@@ -31214,7 +31249,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 215,
+          "line": 224,
           "description": "",
           "params": [
             {
@@ -31245,7 +31280,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 506,
+          "line": 523,
           "description": "Count PDF pages in a page descriptor list.",
           "params": [
             {
@@ -31270,7 +31305,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 526,
+          "line": 543,
           "description": "Resolve the PDF page-worker policy for the current document size.",
           "params": [
             {
@@ -31301,7 +31336,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 590,
+          "line": 604,
           "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
           "params": [
             {
@@ -31332,7 +31367,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 835,
+          "line": 849,
           "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
           "params": [
             {
@@ -31357,7 +31392,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1009,
+          "line": 1023,
           "description": "",
           "params": [
             {
@@ -31382,7 +31417,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1027,
+          "line": 1041,
           "description": "",
           "params": [
             {
@@ -31407,7 +31442,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1035,
+          "line": 1049,
           "description": "",
           "params": [
             {
@@ -47288,7 +47323,7 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 367,
+      "lines": 369,
       "extension": ".js",
       "jsdocBlockCount": 22,
       "sourceSummary": "Runtime configuration helpers.",
@@ -47297,179 +47332,179 @@
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 60
+          "line": 63
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 83
+          "line": 86
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 97
+          "line": 99
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 159
+          "line": 161
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 174
+          "line": 176
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 185
+          "line": 187
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 200
+          "line": 202
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 225
+          "line": 227
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 238
+          "line": 240
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 252
+          "line": 254
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 275
+          "line": 277
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 300
+          "line": 302
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 324
+          "line": 326
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 342
+          "line": 344
         }
       ],
       "declarations": [
         {
           "name": "getRuntimeConfig",
           "kind": "function",
-          "line": 60
+          "line": 63
         },
         {
           "name": "getKeyboardPrintShortcutBehavior",
           "kind": "function",
-          "line": 83
+          "line": 86
         },
         {
           "name": "isDocumentMetadataUiEnabled",
           "kind": "function",
-          "line": 97
+          "line": 99
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 101
+          "line": 103
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 105
+          "line": 107
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 110
+          "line": 112
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 116
+          "line": 118
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 122
+          "line": 124
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 128
+          "line": 130
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 132
+          "line": 134
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 159
+          "line": 161
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 174
+          "line": 176
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 185
+          "line": 187
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 200
+          "line": 202
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 225
+          "line": 227
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 238
+          "line": 240
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 252
+          "line": 254
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 275
+          "line": 277
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 300
+          "line": 302
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 324
+          "line": 326
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 342
+          "line": 344
         }
       ],
       "parseError": null,
@@ -47524,7 +47559,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 12,
+          "line": 15,
           "description": "",
           "params": [],
           "returns": [],
@@ -47537,7 +47572,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 19,
+          "line": 22,
           "description": "",
           "params": [],
           "returns": [],
@@ -47550,7 +47585,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 26,
+          "line": 29,
           "description": "",
           "params": [],
           "returns": [],
@@ -47563,7 +47598,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 34,
+          "line": 37,
           "description": "",
           "params": [],
           "returns": [],
@@ -47576,7 +47611,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 60,
+          "line": 63,
           "description": "Read the merged runtime configuration from the browser environment.",
           "params": [],
           "returns": [
@@ -47594,7 +47629,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 83,
+          "line": 86,
           "description": "Resolve the configured Ctrl/Cmd+P behavior.",
           "params": [
             {
@@ -47619,7 +47654,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 97,
+          "line": 99,
           "description": "Resolve whether document metadata UI affordances should be available.",
           "params": [
             {
@@ -47644,7 +47679,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 159,
+          "line": 161,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -47675,7 +47710,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 174,
+          "line": 176,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -47706,7 +47741,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 185,
+          "line": 187,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -47737,7 +47772,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 200,
+          "line": 202,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -47762,7 +47797,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 225,
+          "line": 227,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -47787,7 +47822,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 238,
+          "line": 240,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -47812,7 +47847,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 252,
+          "line": 254,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -47837,7 +47872,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 275,
+          "line": 277,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -47862,7 +47897,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 300,
+          "line": 302,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -47887,7 +47922,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 324,
+          "line": 326,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -47912,7 +47947,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 342,
+          "line": 344,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -60758,7 +60793,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 144,
+      "line": 142,
       "description": "",
       "params": [
         {
@@ -60783,7 +60818,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 133,
+      "line": 131,
       "description": "",
       "params": [
         {
@@ -60808,7 +60843,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 154,
+      "line": 152,
       "description": "",
       "params": [
         {
@@ -60833,7 +60868,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 161,
+      "line": 159,
       "description": "",
       "params": [
         {
@@ -60858,7 +60893,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 165,
+      "line": 163,
       "description": "",
       "params": [
         {
@@ -60878,7 +60913,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 278,
+      "line": 276,
       "description": "",
       "params": [
         {
@@ -60898,7 +60933,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 289,
+      "line": 287,
       "description": "",
       "params": [],
       "returns": [
@@ -60916,7 +60951,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-      "line": 284,
+      "line": 282,
       "description": "",
       "params": [],
       "returns": [
@@ -61125,7 +61160,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-      "line": 123,
+      "line": 122,
       "description": "",
       "params": [
         {
@@ -61145,7 +61180,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-      "line": 106,
+      "line": 105,
       "description": "",
       "params": [
         {
@@ -62921,13 +62956,38 @@
       "examples": 0
     },
     {
+      "id": "getBestIncreasingDocumentEntryIndexes",
+      "name": "getBestIncreasingDocumentEntryIndexes",
+      "longname": "getBestIncreasingDocumentEntryIndexes",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/PrintSelectionWorkspace.jsx",
+      "line": 528,
+      "description": "Find the document-run entries that best preserve natural page order.",
+      "params": [
+        {
+          "name": "entries",
+          "type": "Array.<{index:number, item:Object}>",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Set.<number>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~handleDone",
       "name": "handleDone",
       "longname": "<anonymous>~handleDone",
       "kind": "function",
       "scope": "inner",
       "file": "src/components/PrintSelectionWorkspace.jsx",
-      "line": 1815,
+      "line": 1834,
       "description": "",
       "params": [],
       "returns": [
@@ -62945,7 +63005,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/PrintSelectionWorkspace.jsx",
-      "line": 1755,
+      "line": 1774,
       "description": "",
       "params": [
         {
@@ -62965,7 +63025,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/PrintSelectionWorkspace.jsx",
-      "line": 1788,
+      "line": 1807,
       "description": "",
       "params": [
         {
@@ -62985,7 +63045,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/PrintSelectionWorkspace.jsx",
-      "line": 1808,
+      "line": 1827,
       "description": "",
       "params": [
         {
@@ -69494,7 +69554,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 506,
+      "line": 523,
       "description": "Count PDF pages in a page descriptor list.",
       "params": [
         {
@@ -69719,7 +69779,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1009,
+      "line": 1023,
       "description": "",
       "params": [
         {
@@ -69744,7 +69804,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1027,
+      "line": 1041,
       "description": "",
       "params": [
         {
@@ -69769,7 +69829,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 835,
+      "line": 849,
       "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
       "params": [
         {
@@ -69794,8 +69854,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 181,
-      "description": "",
+      "line": 186,
+      "description": "Return the browser-reported logical core count.",
       "params": [],
       "returns": [
         {
@@ -69825,7 +69885,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 590,
+      "line": 604,
       "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
       "params": [
         {
@@ -69856,7 +69916,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 526,
+      "line": 543,
       "description": "Resolve the PDF page-worker policy for the current document size.",
       "params": [
         {
@@ -69887,7 +69947,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 215,
+      "line": 224,
       "description": "",
       "params": [
         {
@@ -69918,7 +69978,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 194,
+      "line": 204,
       "description": "",
       "params": [
         {
@@ -69962,7 +70022,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1035,
+      "line": 1049,
       "description": "",
       "params": [
         {
@@ -81496,7 +81556,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 83,
+      "line": 86,
       "description": "Resolve the configured Ctrl/Cmd+P behavior.",
       "params": [
         {
@@ -81521,7 +81581,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 275,
+      "line": 277,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -81546,7 +81606,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 300,
+      "line": 302,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -81571,7 +81631,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 60,
+      "line": 63,
       "description": "Read the merged runtime configuration from the browser environment.",
       "params": [],
       "returns": [
@@ -81589,7 +81649,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 252,
+      "line": 254,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -81614,7 +81674,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 238,
+      "line": 240,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -81639,7 +81699,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 225,
+      "line": 227,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -81664,7 +81724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 324,
+      "line": 326,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -81689,7 +81749,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 342,
+      "line": 344,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -81714,7 +81774,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 97,
+      "line": 99,
       "description": "Resolve whether document metadata UI affordances should be available.",
       "params": [
         {
@@ -81752,7 +81812,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 200,
+      "line": 202,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -81777,7 +81837,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 174,
+      "line": 176,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -81808,7 +81868,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 185,
+      "line": 187,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -81839,7 +81899,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 159,
+      "line": 161,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -81883,7 +81943,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 19,
+      "line": 22,
       "description": "",
       "params": [],
       "returns": [],
@@ -81896,7 +81956,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 12,
+      "line": 15,
       "description": "",
       "params": [],
       "returns": [],
@@ -81922,7 +81982,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 26,
+      "line": 29,
       "description": "",
       "params": [],
       "returns": [],
@@ -81935,7 +81995,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 34,
+      "line": 37,
       "description": "",
       "params": [],
       "returns": [],

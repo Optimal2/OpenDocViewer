@@ -176,6 +176,11 @@ function detectBrowserFamily() {
 }
 
 /**
+ * Return the browser-reported logical core count.
+ *
+ * A return value of 0 means "unknown/unavailable", not "no CPU cores". Worker recommendation
+ * helpers intentionally treat 0 as a signal to use their conservative runtime fallback.
+ *
  * @returns {number}
  */
 function getReportedCoreCount() {
@@ -184,6 +189,11 @@ function getReportedCoreCount() {
   } catch {
     return 0;
   }
+}
+
+function clampRecommendedWorkerCount(suggested, browserCap, memoryMode = false) {
+  const modeCap = memoryMode ? Math.min(2, browserCap) : browserCap;
+  return Math.max(1, Math.min(modeCap, suggested));
 }
 
 /**
@@ -203,8 +213,7 @@ export function resolveRecommendedWorkerCount(preferred = 0, mode = 'auto') {
   const browserFamily = detectBrowserFamily();
   const browserCap = browserFamily === 'firefox' ? 8 : 32;
 
-  if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
-  return Math.max(1, Math.min(browserCap, suggested));
+  return clampRecommendedWorkerCount(suggested, browserCap, mode === 'memory');
 }
 
 /**
@@ -228,8 +237,7 @@ function resolveRecommendedRasterWorkerCount(preferred = 0, mode = 'auto') {
     if (cores >= 6) suggested = Math.max(8, suggested);
   }
 
-  if (mode === 'memory') return Math.max(1, Math.min(2, browserCap, suggested));
-  return Math.max(1, Math.min(browserCap, suggested));
+  return clampRecommendedWorkerCount(suggested, browserCap, mode === 'memory');
 }
 
 export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
@@ -439,6 +447,8 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
       0,
       1000000
     ),
+    // mainThreadBelowCores is a legacy alias kept for site configs created before the property
+    // was renamed to match navigator.hardwareConcurrency terminology.
     mainThreadBelowHardwareConcurrency: normalizeNumber(
       raw.mainThreadBelowHardwareConcurrency ?? raw.mainThreadBelowCores,
       base.mainThreadBelowHardwareConcurrency ?? 0,
@@ -462,6 +472,13 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
     pagesPerWorker: normalizeNumber(raw.pagesPerWorker, base.pagesPerWorker ?? 1, 1, 1000000),
     maxWorkerCount: normalizeNumber(raw.maxWorkerCount, base.maxWorkerCount ?? 0, 0, 32),
   };
+}
+
+function shouldUseMainThreadForPdf(policy, pageCount, mainThreadLimit, mainThreadHardwareLimit, hardwareConcurrency) {
+  return !policy.enabled
+    || pageCount <= 0
+    || (mainThreadLimit > 0 && pageCount < mainThreadLimit)
+    || (mainThreadHardwareLimit > 0 && hardwareConcurrency < mainThreadHardwareLimit);
 }
 
 function normalizePdfWorkerWarmupBatchMode(value, fallback = DOCUMENT_LOADING_DEFAULTS.render.pdfWorkerWarmupBatchMode) {
@@ -543,11 +560,7 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
 
   const mainThreadLimit = Math.max(0, Math.floor(Number(policy.mainThreadBelowPageCount) || 0));
   const mainThreadHardwareLimit = Math.max(0, Math.floor(Number(policy.mainThreadBelowHardwareConcurrency) || 0));
-  const useMainThread = !policy.enabled
-    || safePageCount <= 0
-    || (mainThreadLimit > 0 && safePageCount < mainThreadLimit)
-    || (mainThreadHardwareLimit > 0 && hardwareConcurrency < mainThreadHardwareLimit);
-  if (useMainThread) {
+  if (shouldUseMainThreadForPdf(policy, safePageCount, mainThreadLimit, mainThreadHardwareLimit, hardwareConcurrency)) {
     return { mode: 'main-thread', workerCount: 0, policy, hardwareCap };
   }
 
@@ -564,6 +577,7 @@ export function resolvePdfWorkerPlanForPageCount(pageCount, renderConfig = DOCUM
   );
   let desiredWorkerCount = fixedWorkerCount;
   if (smallLimit > mainThreadLimit && safePageCount < smallLimit) {
+    // Small PDFs use a deliberately small pool so worker startup and transfer overhead stay low.
     desiredWorkerCount = smallWorkerCount;
   } else if (safePageCount >= fixedLimit) {
     // With the default fixedLimit=0 policy, large PDFs scale from pagesPerWorker immediately.

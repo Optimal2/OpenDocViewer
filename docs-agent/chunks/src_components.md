@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 13. Line count: 6624. JSDoc symbol count: 82.
+File count: 13. Line count: 6643. JSDoc symbol count: 83.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -151,6 +151,7 @@ Local imports: `src/utils/publicAssetUrl.js`, `src/utils/localizedValue.js`, `sr
 
 Symbols:
 
+- `getBestIncreasingDocumentEntryIndexes` (function) - Find the document\-run entries that best preserve natural page order.
 - `<anonymous>~handleKeyDown` (function) - No description.
 - `<anonymous>~handleKeyDown` (function) - No description.
 - `<anonymous>~handleMove` (function) - No description.

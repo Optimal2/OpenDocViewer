@@ -83,7 +83,13 @@
 
   var cfgSrc = scriptEl ? scriptEl.getAttribute('src') : '';
   var abs;
-  try { abs = new URL(cfgSrc, d.baseURI || w.location.href); } catch { abs = null; }
+  try {
+    abs = new URL(cfgSrc, d.baseURI || w.location.href);
+  } catch {
+    // URL parsing is only used to infer the deployment base path. If the host supplies an
+    // unusual script URL during early bootstrap, fall back quietly before diagnostics exist.
+    abs = null;
+  }
   var baseHref = abs && abs.pathname
     ? abs.pathname.replace(/\/odv\.config\.js(?:\?.*)?$/i, '/')
     : (w.location.pathname || '/').replace(/[^/]+$/, '/');
@@ -94,6 +100,8 @@
   var siteOverrides = w.__ODV_SITE_CONFIG__ || {};
 
   // ========================= ACTIVE (mode-less) CONFIG =========================
+  // Convention: for worker/concurrency/batch-size knobs, 0 means "auto" unless the local
+  // option comment explicitly says otherwise. Threshold fields document their own 0 semantics.
   var ACTIVE_CONFIG = {
     // UI & diagnostics
     exposeStackTraces: toBool(existing.exposeStackTraces, false),
@@ -174,7 +182,8 @@
          * - "dialog": cancel the shortcut and open OpenDocViewer's print dialog
          *
          * NOTE: this only affects keyboard interception. Browser menus / native context menus
-         * cannot be reliably overridden by regular web-page code.
+         * cannot be reliably overridden by regular web-page code. Runtime validation lives in
+         * getKeyboardPrintShortcutBehavior(), so unknown host values fall back to "browser".
          * @type {"browser"|"disable"|"dialog"}
          */
         ctrlOrCmdP: "dialog"
@@ -433,7 +442,7 @@
          * "always": force show, "never": force hide.
          * @type {"auto"|"always"|"never"}
          */
-        showReasonWhen:  "auto",
+        showReasonWhen: "auto",
         /** @type {"auto"|"always"|"never"} */
         showForWhomWhen: "auto",
 
@@ -549,10 +558,9 @@
       },
 
       // Runtime memory heuristics. High-memory machines get more eager caching/warm-up,
-      // while lower-memory machines stay conservative.
-      // NOTE: the sample file intentionally shows a more conservative profile (4 GB / 1024 MiB)
-      // as a broadly safe starting point, while these application defaults are more performance-
-      // oriented for stronger desktops (8 GB / 2048 MiB).
+      // while lower-memory machines stay conservative. These application defaults are
+      // performance-oriented for stronger desktops (8 GB / 2048 MiB); site configs can override
+      // them with a more conservative profile such as 4 GB / 1024 MiB when needed.
       adaptiveMemory: {
         enabled: true,
         preferPerformanceWhenDeviceMemoryAtLeastGb: 8,
