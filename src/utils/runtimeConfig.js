@@ -131,11 +131,33 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
   return cfg?.metadata?.enabled !== false;
 }
 
+/**
+ * Normalize a runtime flag to a boolean.
+ *
+ * Host configs are optional and can contain values from hand-edited JavaScript, so only real
+ * booleans are accepted. A non-boolean default falls back to false to keep callers predictable.
+ *
+ * @param {*} value
+ * @param {*} defaultValue
+ * @returns {boolean}
+ */
 function normalizeBoolean(value, defaultValue) {
   if (typeof value === 'boolean') return value;
   return typeof defaultValue === 'boolean' ? defaultValue : false;
 }
 
+/**
+ * Clamp a numeric config value to a safe range.
+ *
+ * Invalid value/min/default inputs fall back to the nearest safe value instead of propagating NaN.
+ * The max bound is optional and ignored when it is not finite or is lower than min.
+ *
+ * @param {*} value
+ * @param {*} min
+ * @param {*} max
+ * @param {*=} defaultValue
+ * @returns {number}
+ */
 function clampNumber(value, min, max, defaultValue = min) {
   const safeMin = Number.isFinite(Number(min)) ? Number(min) : 0;
   const safeMax = Number.isFinite(Number(max)) && Number(max) >= safeMin ? Number(max) : null;
@@ -146,12 +168,36 @@ function clampNumber(value, min, max, defaultValue = min) {
   return safeMax == null ? lowerBounded : Math.min(safeMax, lowerBounded);
 }
 
+/**
+ * Normalize an integer config value and clamp it to the supplied range.
+ *
+ * Use this for counts, pixel thresholds, and millisecond settings where decimals should not be
+ * preserved. Non-finite values use defaultValue before clamping.
+ *
+ * @param {*} value
+ * @param {*} defaultValue
+ * @param {*} min
+ * @param {*} max
+ * @returns {number}
+ */
 function normalizeInteger(value, defaultValue, min, max) {
   const numeric = Number(value);
   const next = Number.isFinite(numeric) ? Math.floor(numeric) : defaultValue;
   return Math.floor(clampNumber(next, min, max, defaultValue));
 }
 
+/**
+ * Normalize a floating-point config value and clamp it to the supplied range.
+ *
+ * Use this for ratios and percentages where fractional values are meaningful. Non-finite values
+ * use defaultValue before clamping.
+ *
+ * @param {*} value
+ * @param {*} defaultValue
+ * @param {*} min
+ * @param {*} max
+ * @returns {number}
+ */
 function normalizeFloat(value, defaultValue, min, max) {
   return clampNumber(value, min, max, defaultValue);
 }
@@ -167,6 +213,15 @@ function normalizeResetSessionTarget(value, defaultTarget) {
   return 'parent-or-current';
 }
 
+/**
+ * Normalize a user-facing zoom mode string before alias lookup.
+ *
+ * The transformation accepts common host config variants by trimming, lowercasing, and converting
+ * underscores/whitespace to hyphen separators.
+ *
+ * @param {*} value
+ * @returns {string}
+ */
 function normalizeZoomModeText(value) {
   return String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
 }
