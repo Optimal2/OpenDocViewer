@@ -196,10 +196,11 @@ function normalizeInteger(value, defaultValue, min, max) {
 }
 
 /**
- * Normalize a floating-point config value and clamp it to the supplied range.
+ * Normalize a floating-point runtime config value and clamp it to the supplied range.
  *
- * Use this for ratios and percentages where fractional values are meaningful. Non-finite values
- * use defaultValue before clamping.
+ * Use this entry point for ratios and percentages where fractional values are meaningful. Unlike
+ * normalizeInteger, this preserves decimals before clamping. Non-finite values use defaultValue
+ * before clamping.
  *
  * @param {*} value
  * @param {*} defaultValue
@@ -212,13 +213,21 @@ function normalizeFloat(value, defaultValue, min, max) {
 }
 
 /**
+ * Normalize the runtime session-reset target.
+ *
+ * Valid values are the ResetSessionTarget literals listed in RESET_SESSION_TARGETS. Missing,
+ * blank, or unrecognized values fall back to defaultTarget when it is valid, otherwise to
+ * DEFAULT_RESET_SESSION_TARGET.
+ *
  * @param {*} value
  * @param {ResetSessionTarget} defaultTarget
  * @returns {ResetSessionTarget}
  */
 function normalizeResetSessionTarget(value, defaultTarget) {
-  const raw = String(value || defaultTarget || '').trim().toLowerCase();
+  const raw = String(value || '').trim().toLowerCase();
   if (RESET_SESSION_TARGETS.includes(raw)) return raw;
+  const fallback = String(defaultTarget || '').trim().toLowerCase();
+  if (RESET_SESSION_TARGETS.includes(fallback)) return fallback;
   return DEFAULT_RESET_SESSION_TARGET;
 }
 
