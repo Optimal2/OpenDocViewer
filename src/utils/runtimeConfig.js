@@ -132,26 +132,28 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
 }
 
 function normalizeBoolean(value, defaultValue) {
-  return typeof value === 'boolean' ? value : defaultValue;
+  if (typeof value === 'boolean') return value;
+  return typeof defaultValue === 'boolean' ? defaultValue : false;
 }
 
 function clampNumber(value, min, max, defaultValue = min) {
+  const safeMin = Number.isFinite(Number(min)) ? Number(min) : 0;
+  const safeMax = Number.isFinite(Number(max)) && Number(max) >= safeMin ? Number(max) : null;
+  const fallback = Number.isFinite(Number(defaultValue)) ? Number(defaultValue) : safeMin;
   const numeric = Number(value);
-  if (!Number.isFinite(numeric)) return defaultValue;
-  const lowerBounded = Math.max(min, numeric);
-  return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
+  const valueToClamp = Number.isFinite(numeric) ? numeric : fallback;
+  const lowerBounded = Math.max(safeMin, valueToClamp);
+  return safeMax == null ? lowerBounded : Math.min(safeMax, lowerBounded);
 }
 
 function normalizeInteger(value, defaultValue, min, max) {
-  const next = Math.floor(Number(value));
-  if (!Number.isFinite(next)) return defaultValue;
-  return clampNumber(next, min, max);
+  const numeric = Number(value);
+  const next = Number.isFinite(numeric) ? Math.floor(numeric) : defaultValue;
+  return Math.floor(clampNumber(next, min, max, defaultValue));
 }
 
 function normalizeFloat(value, defaultValue, min, max) {
-  const next = Number(value);
-  if (!Number.isFinite(next)) return defaultValue;
-  return clampNumber(next, min, max);
+  return clampNumber(value, min, max, defaultValue);
 }
 
 /**
@@ -170,8 +172,10 @@ function normalizeZoomModeText(value) {
 }
 
 function normalizeDefaultZoomMode(value, defaultMode = 'fit-width') {
-  const raw = normalizeZoomModeText(value || defaultMode) || 'fit-width';
-  return DEFAULT_ZOOM_MODE_ALIASES.get(raw) || 'FIT_PAGE';
+  const defaultRaw = normalizeZoomModeText(defaultMode) || 'fit-width';
+  const defaultResolved = DEFAULT_ZOOM_MODE_ALIASES.get(defaultRaw) || 'FIT_WIDTH';
+  const raw = normalizeZoomModeText(value);
+  return raw ? (DEFAULT_ZOOM_MODE_ALIASES.get(raw) || defaultResolved) : defaultResolved;
 }
 
 /**
