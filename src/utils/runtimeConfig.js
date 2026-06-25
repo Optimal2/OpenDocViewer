@@ -22,6 +22,9 @@
 
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog']);
 const RESET_SESSION_TARGETS = new Set(['current', 'parent', 'parent-or-current', 'none']);
+const DEFAULT_ZOOM_MODE_TEXT = 'fit-width';
+const DEFAULT_ZOOM_MODE = 'FIT_WIDTH';
+const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
 const DEFAULT_ZOOM_MODE_ALIASES = new Map([
   ['fit-page', 'FIT_PAGE'],
   ['fitpage', 'FIT_PAGE'],
@@ -159,10 +162,13 @@ function normalizeBoolean(value, defaultValue) {
  * @returns {number}
  */
 function clampNumber(value, min, max, defaultValue = min) {
-  const safeMin = Number.isFinite(Number(min)) ? Number(min) : 0;
-  const safeMax = Number.isFinite(Number(max)) && Number(max) >= safeMin ? Number(max) : null;
-  const fallback = Number.isFinite(Number(defaultValue)) ? Number(defaultValue) : safeMin;
   const numeric = Number(value);
+  const minNumber = Number(min);
+  const maxNumber = Number(max);
+  const defaultNumber = Number(defaultValue);
+  const safeMin = Number.isFinite(minNumber) ? minNumber : 0;
+  const safeMax = Number.isFinite(maxNumber) && maxNumber >= safeMin ? maxNumber : null;
+  const fallback = Number.isFinite(defaultNumber) ? defaultNumber : safeMin;
   const valueToClamp = Number.isFinite(numeric) ? numeric : fallback;
   const lowerBounded = Math.max(safeMin, valueToClamp);
   return safeMax == null ? lowerBounded : Math.min(safeMax, lowerBounded);
@@ -182,8 +188,11 @@ function clampNumber(value, min, max, defaultValue = min) {
  */
 function normalizeInteger(value, defaultValue, min, max) {
   const numeric = Number(value);
-  const next = Number.isFinite(numeric) ? Math.floor(numeric) : defaultValue;
-  return Math.floor(clampNumber(next, min, max, defaultValue));
+  const defaultNumber = Number(defaultValue);
+  const next = Number.isFinite(numeric)
+    ? Math.floor(numeric)
+    : (Number.isFinite(defaultNumber) ? Math.floor(defaultNumber) : defaultValue);
+  return clampNumber(next, min, max, next);
 }
 
 /**
@@ -226,9 +235,9 @@ function normalizeZoomModeText(value) {
   return String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
 }
 
-function normalizeDefaultZoomMode(value, defaultMode = 'fit-width') {
-  const defaultRaw = normalizeZoomModeText(defaultMode) || 'fit-width';
-  const defaultResolved = DEFAULT_ZOOM_MODE_ALIASES.get(defaultRaw) || 'FIT_WIDTH';
+function normalizeDefaultZoomMode(value, defaultMode = DEFAULT_ZOOM_MODE_TEXT) {
+  const defaultRaw = normalizeZoomModeText(defaultMode) || DEFAULT_ZOOM_MODE_TEXT;
+  const defaultResolved = DEFAULT_ZOOM_MODE_ALIASES.get(defaultRaw) || DEFAULT_ZOOM_MODE;
   const raw = normalizeZoomModeText(value);
   return raw ? (DEFAULT_ZOOM_MODE_ALIASES.get(raw) || defaultResolved) : defaultResolved;
 }
@@ -250,13 +259,14 @@ export function normalizePrintDefaultMode(value, defaultMode = 'active') {
 
 /**
  * Normalize a custom fit-width factor. The public config/preference value is an integer percentage
- * of the calculated fit-width zoom, not a direct zoom percentage.
+ * of the calculated fit-width zoom, not a direct zoom percentage. The default 70 means the custom
+ * size starts at 70% of the calculated fit-width zoom when no site or user preference is set.
  *
  * @param {*} value
  * @param {number} defaultValue
  * @returns {number}
  */
-export function normalizeCustomFitWidthFactorPercent(value, defaultValue = 70) {
+export function normalizeCustomFitWidthFactorPercent(value, defaultValue = DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT) {
   return normalizeInteger(value, defaultValue, 1, 100);
 }
 

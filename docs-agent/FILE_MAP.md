@@ -110,7 +110,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 154 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1211 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 1 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 452 | 13 | 28 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 462 | 13 | 28 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/supportDiagnostics.js</code> | 370 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/viewerPreferences.js</code> | 473 | 5 | 33 | high | Lightweight persisted viewer preferences. |
