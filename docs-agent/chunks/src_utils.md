@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 14840. JSDoc symbol count: 566.
+File count: 35. Line count: 14895. JSDoc symbol count: 571.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -532,7 +532,7 @@ Symbols:
 - `getRuntimeConfig` (function) - Read the merged runtime configuration from the browser environment.
 - `getKeyboardPrintShortcutBehavior` (function) - Resolve the configured Ctrl/Cmd\+P behavior.
 - `isDocumentMetadataUiEnabled` (function) - Resolve whether document metadata UI affordances should be available.
-- `normalizeResetSessionTarget` (function) - No description.
+- `normalizeBoolean` (function) - Normalize a runtime flag to a boolean.
 
 ## src/utils/sourceTempStore.js
 
