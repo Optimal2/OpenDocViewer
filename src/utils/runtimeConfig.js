@@ -9,8 +9,39 @@
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 /** @typedef {'active'|'all'} PrintDefaultMode */
+/**
+ * Session-reset target for the support/problem notice.
+ *
+ * - `current`: reload only the current viewer frame/window.
+ * - `parent`: ask the parent window to reload/navigate if the viewer is embedded.
+ * - `parent-or-current`: prefer the parent window, then fall back to current.
+ * - `none`: disable the reset action even if the notice is shown.
+ *
+ * @typedef {'current'|'parent'|'parent-or-current'|'none'} ResetSessionTarget
+ */
 
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog']);
+const RESET_SESSION_TARGETS = new Set(['current', 'parent', 'parent-or-current', 'none']);
+const DEFAULT_ZOOM_MODE_ALIASES = new Map([
+  ['fit-page', 'FIT_PAGE'],
+  ['fitpage', 'FIT_PAGE'],
+  ['page', 'FIT_PAGE'],
+  ['fit-width', 'FIT_WIDTH'],
+  ['fitwidth', 'FIT_WIDTH'],
+  ['fit-to-width', 'FIT_WIDTH'],
+  ['width', 'FIT_WIDTH'],
+  ['fit-custom', 'FIT_CUSTOM'],
+  ['custom-fit', 'FIT_CUSTOM'],
+  ['custom-fit-width', 'FIT_CUSTOM'],
+  ['fit-width-factor', 'FIT_CUSTOM'],
+  ['user-zoom', 'FIT_CUSTOM'],
+  ['custom-width', 'FIT_CUSTOM'],
+  ['actual-size', 'ACTUAL_SIZE'],
+  ['actualsize', 'ACTUAL_SIZE'],
+  ['actual', 'ACTUAL_SIZE'],
+  ['100%', 'ACTUAL_SIZE'],
+  ['1:1', 'ACTUAL_SIZE'],
+]);
 
 /**
  * @typedef {Object} ViewerCustomFitSizeLimits
@@ -52,7 +83,7 @@ const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog
  * @property {*} resetSessionLabel
  * @property {*} closeLabel
  * @property {*} detailsLabel
- * @property {string} resetSessionTarget
+ * @property {ResetSessionTarget} resetSessionTarget
  * @property {string} resetSessionAllowedOrigin
  */
 
@@ -104,8 +135,10 @@ function normalizeBoolean(value, defaultValue) {
   return typeof value === 'boolean' ? value : defaultValue;
 }
 
-function clampNumber(value, min, max) {
-  const lowerBounded = Math.max(min, value);
+function clampNumber(value, min, max, defaultValue = min) {
+  const numeric = Number(value);
+  if (!Number.isFinite(numeric)) return defaultValue;
+  const lowerBounded = Math.max(min, numeric);
   return typeof max === 'number' ? Math.min(max, lowerBounded) : lowerBounded;
 }
 
@@ -121,9 +154,14 @@ function normalizeFloat(value, defaultValue, min, max) {
   return clampNumber(next, min, max);
 }
 
+/**
+ * @param {*} value
+ * @param {ResetSessionTarget} defaultTarget
+ * @returns {ResetSessionTarget}
+ */
 function normalizeResetSessionTarget(value, defaultTarget) {
   const raw = String(value || defaultTarget || '').trim().toLowerCase();
-  if (raw === 'current' || raw === 'parent' || raw === 'none') return raw;
+  if (RESET_SESSION_TARGETS.has(raw)) return raw;
   return 'parent-or-current';
 }
 
@@ -132,22 +170,8 @@ function normalizeZoomModeText(value) {
 }
 
 function normalizeDefaultZoomMode(value, defaultMode = 'fit-width') {
-  const raw = normalizeZoomModeText(value) || normalizeZoomModeText(defaultMode) || 'fit-width';
-  if (raw === 'fit-width' || raw === 'fitwidth' || raw === 'fit-to-width' || raw === 'width') return 'FIT_WIDTH';
-  if (
-    raw === 'fit-custom'
-    || raw === 'custom-fit'
-    || raw === 'custom-fit-width'
-    || raw === 'fit-width-factor'
-    || raw === 'user-zoom'
-    || raw === 'custom-width'
-  ) {
-    return 'FIT_CUSTOM';
-  }
-  if (raw === 'actual-size' || raw === 'actualsize' || raw === 'actual' || raw === '100%' || raw === '1:1') {
-    return 'ACTUAL_SIZE';
-  }
-  return 'FIT_PAGE';
+  const raw = normalizeZoomModeText(value || defaultMode) || 'fit-width';
+  return DEFAULT_ZOOM_MODE_ALIASES.get(raw) || 'FIT_PAGE';
 }
 
 /**

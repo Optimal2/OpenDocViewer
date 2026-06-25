@@ -29703,7 +29703,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 86,
+    "line": 117,
     "description": "Resolve the configured Ctrl/Cmd+P behavior.",
     "params": [
       {
@@ -29728,7 +29728,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 277,
+    "line": 301,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29753,7 +29753,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 302,
+    "line": 326,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29778,7 +29778,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 63,
+    "line": 94,
     "description": "Read the merged runtime configuration from the browser environment.",
     "params": [],
     "returns": [
@@ -29796,7 +29796,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 254,
+    "line": 278,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29821,7 +29821,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 240,
+    "line": 264,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29846,7 +29846,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 227,
+    "line": 251,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29871,7 +29871,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 326,
+    "line": 350,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29896,7 +29896,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 344,
+    "line": 368,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -29921,7 +29921,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 99,
+    "line": 130,
     "description": "Resolve whether document metadata UI affordances should be available.",
     "params": [
       {
@@ -29959,7 +29959,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 202,
+    "line": 226,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -29984,7 +29984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 176,
+    "line": 200,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -30015,7 +30015,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 187,
+    "line": 211,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -30046,7 +30046,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 161,
+    "line": 185,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -30065,6 +30065,37 @@
     "returns": [
       {
         "type": "PrintDefaultMode",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "normalizeResetSessionTarget",
+    "name": "normalizeResetSessionTarget",
+    "longname": "normalizeResetSessionTarget",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 162,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "defaultTarget",
+        "type": "ResetSessionTarget",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "ResetSessionTarget",
         "description": ""
       }
     ],
@@ -30090,8 +30121,21 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 22,
+    "line": 53,
     "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ResetSessionTarget",
+    "name": "ResetSessionTarget",
+    "longname": "ResetSessionTarget",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 12,
+    "description": "Session-reset target for the support/problem notice.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -30103,7 +30147,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 15,
+    "line": 46,
     "description": "",
     "params": [],
     "returns": [],
@@ -30129,7 +30173,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 29,
+    "line": 60,
     "description": "",
     "params": [],
     "returns": [],
@@ -30142,7 +30186,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 37,
+    "line": 68,
     "description": "",
     "params": [],
     "returns": [],

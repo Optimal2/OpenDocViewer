@@ -5,24 +5,24 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Source Estimate
 
 - Source files: 114
-- Source lines: 49114
+- Source lines: 49138
 - Estimated source-map tokens: 3613
 
 ## Generated Output Estimate
 
 - Output files measured: 29 (excluding this budget file)
-- Output lines: 121008
-- Output characters: 3282762
-- Estimated output tokens: 820700
+- Output lines: 121142
+- Output characters: 3286398
+- Estimated output tokens: 821608
 
 ## Largest Output Files
 
 | File | Lines | Characters | Estimated tokens |
 | --- | ---: | ---: | ---: |
-| `agent-map.json` | 84520 | 2224410 | 556103 |
-| `symbol-index.json` | 32666 | 742367 | 185592 |
-| `SYMBOL_INDEX.md` | 1288 | 175110 | 43778 |
-| `chunks/src_utils.md` | 628 | 29489 | 7373 |
+| `agent-map.json` | 84608 | 2226804 | 556701 |
+| `symbol-index.json` | 32710 | 743386 | 185847 |
+| `SYMBOL_INDEX.md` | 1290 | 175363 | 43841 |
+| `chunks/src_utils.md` | 628 | 29459 | 7365 |
 | `FILE_MAP.md` | 125 | 19460 | 4865 |
 | `MODULES.md` | 169 | 12043 | 3011 |
 | `chunks/src_components_DocumentToolbar.md` | 237 | 10028 | 2507 |
