@@ -29703,7 +29703,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 171,
+    "line": 176,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -29746,7 +29746,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 32,
+    "line": 34,
     "description": "User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values.",
     "params": [],
     "returns": [],
@@ -29759,7 +29759,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 124,
+    "line": 126,
     "description": "Resolve the configured Ctrl/Cmd+P behavior.",
     "params": [
       {
@@ -29784,7 +29784,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 409,
+    "line": 414,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29809,7 +29809,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 434,
+    "line": 439,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29834,7 +29834,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 101,
+    "line": 103,
     "description": "Read the merged runtime configuration from the browser environment.",
     "params": [],
     "returns": [
@@ -29852,7 +29852,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 385,
+    "line": 390,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29877,7 +29877,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 371,
+    "line": 376,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29902,7 +29902,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 358,
+    "line": 363,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29927,7 +29927,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 458,
+    "line": 463,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29952,7 +29952,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 476,
+    "line": 481,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -29977,7 +29977,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 137,
+    "line": 139,
     "description": "Resolve whether document metadata UI affordances should be available.",
     "params": [
       {
@@ -30002,8 +30002,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 28,
-    "description": "Values accepted by KeyboardPrintShortcutBehavior.",
+    "line": 30,
+    "description": "Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -30028,7 +30028,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 152,
+    "line": 156,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -30059,7 +30059,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 332,
+    "line": 337,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -30084,7 +30084,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 306,
+    "line": 311,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -30115,7 +30115,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 274,
+    "line": 279,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -30146,7 +30146,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 217,
+    "line": 222,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -30189,7 +30189,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 196,
+    "line": 201,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -30232,7 +30232,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 317,
+    "line": 322,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -30263,7 +30263,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 289,
+    "line": 294,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -30294,7 +30294,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 232,
+    "line": 237,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -30325,7 +30325,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 249,
+    "line": 254,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -30363,7 +30363,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 60,
+    "line": 62,
     "description": "",
     "params": [],
     "returns": [],
@@ -30376,8 +30376,8 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 30,
-    "description": "Values accepted by ResetSessionTarget.",
+    "line": 32,
+    "description": "Runtime validation values for ResetSessionTarget; the typedef documents the public contract.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -30402,7 +30402,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 260,
+    "line": 265,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {
@@ -30427,7 +30427,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 53,
+    "line": 55,
     "description": "",
     "params": [],
     "returns": [],
@@ -30453,7 +30453,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 67,
+    "line": 69,
     "description": "",
     "params": [],
     "returns": [],
@@ -30466,7 +30466,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 75,
+    "line": 77,
     "description": "",
     "params": [],
     "returns": [],
