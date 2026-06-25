@@ -162,7 +162,8 @@ function normalizeBoolean(value, defaultValue) {
  * Clamp a numeric config value to a safe range.
  *
  * Invalid value/min/default inputs fall back to the nearest safe value instead of propagating NaN.
- * The max bound is optional; when it is invalid or lower than min, only the lower bound is applied.
+ * The max bound is optional; when it is invalid or lower than min, max is ignored entirely and
+ * only the lower bound is applied.
  * For example, `clampNumber('x', 5, 1, 10)` returns 5, while
  * `clampNumber(20, 5, 1, 10)` returns 10. If max is lower than min, only min is enforced.
  * For example, `clampNumber(5, 10, 20, 15)` returns 20.
@@ -231,15 +232,24 @@ function normalizeFloat(value, defaultValue, min, max) {
  * DEFAULT_RESET_SESSION_TARGET.
  *
  * @param {*} value
- * @param {ResetSessionTarget} defaultTarget
+ * @param {*} defaultTarget
  * @returns {ResetSessionTarget}
  */
 function normalizeResetSessionTarget(value, defaultTarget) {
   const raw = String(value ?? '').trim().toLowerCase();
   if (RESET_SESSION_TARGETS.includes(raw)) return raw;
+  return normalizeResetSessionFallbackTarget(defaultTarget);
+}
+
+/**
+ * Resolve the configured reset-session fallback target.
+ *
+ * @param {*} defaultTarget
+ * @returns {ResetSessionTarget}
+ */
+function normalizeResetSessionFallbackTarget(defaultTarget) {
   const fallback = String(defaultTarget ?? '').trim().toLowerCase();
-  if (RESET_SESSION_TARGETS.includes(fallback)) return fallback;
-  return DEFAULT_RESET_SESSION_TARGET;
+  return RESET_SESSION_TARGETS.includes(fallback) ? fallback : DEFAULT_RESET_SESSION_TARGET;
 }
 
 /**
