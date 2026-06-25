@@ -29703,7 +29703,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 165,
+    "line": 166,
     "description": "Clamp a numeric config value to a safe range.",
     "params": [
       {
@@ -29727,7 +29727,7 @@
       {
         "name": "max",
         "type": "*",
-        "optional": false,
+        "optional": true,
         "description": ""
       }
     ],
@@ -29771,7 +29771,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 401,
+    "line": 403,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29796,7 +29796,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 426,
+    "line": 428,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29839,7 +29839,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 377,
+    "line": 379,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29864,7 +29864,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 363,
+    "line": 365,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29889,7 +29889,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 350,
+    "line": 352,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29914,7 +29914,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 450,
+    "line": 452,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29939,7 +29939,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 468,
+    "line": 470,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -30002,7 +30002,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 148,
+    "line": 149,
     "description": "Normalize a runtime flag to a boolean.",
     "params": [
       {
@@ -30033,7 +30033,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 324,
+    "line": 326,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -30058,7 +30058,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 298,
+    "line": 300,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -30089,7 +30089,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 267,
+    "line": 268,
     "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
     "params": [
       {
@@ -30120,7 +30120,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 211,
+    "line": 212,
     "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
     "params": [
       {
@@ -30163,7 +30163,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 190,
+    "line": 191,
     "description": "Normalize an integer config value and clamp it to the supplied range.",
     "params": [
       {
@@ -30206,7 +30206,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 309,
+    "line": 311,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -30237,7 +30237,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 282,
+    "line": 283,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -30268,7 +30268,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 226,
+    "line": 227,
     "description": "Normalize the runtime session-reset target.",
     "params": [
       {
@@ -30299,7 +30299,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 243,
+    "line": 244,
     "description": "Normalize a user-facing zoom mode string before alias lookup.",
     "params": [
       {
@@ -30363,7 +30363,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 253,
+    "line": 254,
     "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
     "params": [
       {

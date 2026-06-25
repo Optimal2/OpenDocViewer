@@ -139,7 +139,8 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
  * Normalize a runtime flag to a boolean.
  *
  * Host configs are optional and can contain values from hand-edited JavaScript, so only real
- * booleans are accepted. A non-boolean default falls back to false to keep callers predictable.
+ * booleans are accepted. A non-boolean default falls back to false to keep callers predictable
+ * when a caller accidentally forwards an unvalidated config value as the fallback.
  *
  * @param {*} value
  * @param {*} defaultValue
@@ -159,7 +160,7 @@ function normalizeBoolean(value, defaultValue) {
  * @param {*} value
  * @param {*=} defaultValue
  * @param {*} min
- * @param {*} max
+ * @param {*=} max
  * @returns {number}
  */
 function clampNumber(value, defaultValue, min, max) {
@@ -224,9 +225,9 @@ function normalizeFloat(value, defaultValue, min, max) {
  * @returns {ResetSessionTarget}
  */
 function normalizeResetSessionTarget(value, defaultTarget) {
-  const raw = String(value || '').trim().toLowerCase();
+  const raw = String(value ?? '').trim().toLowerCase();
   if (RESET_SESSION_TARGETS.includes(raw)) return raw;
-  const fallback = String(defaultTarget || '').trim().toLowerCase();
+  const fallback = String(defaultTarget ?? '').trim().toLowerCase();
   if (RESET_SESSION_TARGETS.includes(fallback)) return fallback;
   return DEFAULT_RESET_SESSION_TARGET;
 }
@@ -290,6 +291,7 @@ export function normalizePrintDefaultMode(value, defaultMode = 'active') {
  * Normalize a custom fit-width factor. The public config/preference value is an integer percentage
  * of the calculated fit-width zoom, not a direct zoom percentage. The default 70 means the custom
  * size starts at 70% of the calculated fit-width zoom when no site or user preference is set.
+ * Values outside the supported 1-100 range are clamped to the nearest bound.
  *
  * @param {*} value
  * @param {number} defaultValue
