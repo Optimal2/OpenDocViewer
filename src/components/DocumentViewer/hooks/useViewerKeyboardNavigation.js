@@ -34,9 +34,7 @@ export function useViewerKeyboardNavigation({
   zoomOut,
   rotateLeft,
   rotateRight,
-  printEnabled = true,
   interactionSuspended = false,
-  viewerContainerRef,
   shouldIgnoreViewerShortcut,
 }) {
   const activeKeyboardRepeatKeyRef = useRef(null);
@@ -304,11 +302,9 @@ export function useViewerKeyboardNavigation({
     };
   }, [
     interactionSuspended,
-    printEnabled,
     shouldIgnoreViewerShortcut,
     startKeyboardNextRepeatTimer,
     startKeyboardPreviousRepeatTimer,
     stopKeyboardRepeat,
-    viewerContainerRef,
   ]);
 }

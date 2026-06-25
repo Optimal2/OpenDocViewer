@@ -9,6 +9,9 @@
 /** @typedef {'browser'|'disable'|'dialog'} KeyboardPrintShortcutBehavior */
 /** @typedef {'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'} ViewerDefaultZoomMode */
 /** @typedef {'active'|'all'} PrintDefaultMode */
+
+const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = new Set(['browser', 'disable', 'dialog']);
+
 /**
  * @typedef {Object} ViewerCustomFitSizeLimits
  * @property {number=} widthFactorPercent
@@ -81,9 +84,8 @@ export function getRuntimeConfig() {
  * @returns {KeyboardPrintShortcutBehavior}
  */
 export function getKeyboardPrintShortcutBehavior(cfg = getRuntimeConfig()) {
-  const raw = String(cfg?.shortcuts?.print?.ctrlOrCmdP || 'browser').toLowerCase();
-  if (raw === 'disable' || raw === 'dialog') return raw;
-  return 'browser';
+  const raw = String(cfg?.shortcuts?.print?.ctrlOrCmdP || 'browser').trim().toLowerCase();
+  return KEYBOARD_PRINT_SHORTCUT_BEHAVIORS.has(raw) ? raw : 'browser';
 }
 
 /**

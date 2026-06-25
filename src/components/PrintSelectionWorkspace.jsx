@@ -19,7 +19,7 @@ const MAX_THUMBNAIL_PERCENT = 320;
 // Pages without an explicit source-order position sort after all known pages.
 const DEFAULT_ORDER_POSITION = Number.MAX_SAFE_INTEGER;
 // Matches host/SQL-style date values used by metadata templates:
-// yyyy-MM-dd, optionally followed by a time part separated by T or whitespace.
+// yyyy-MM-dd, yyyy-MM-ddTHH:mm, yyyy-MM-dd HH:mm:ss, and optional millisecond tails.
 const ISO_DATE_PATTERN = /^(\d{4})-(\d{2})-(\d{2})(?:[T\s](\d{2}):(\d{2})(?::(\d{2})(?:\.(\d{1,3})\d*)?)?)?/;
 
 function clampPercent(value, fallback = DEFAULT_THUMBNAIL_PERCENT) {
@@ -42,7 +42,9 @@ function normalizeIndexSequence(sequence, totalPages) {
     }
   }
 
-  if (indexes.length > 0 || total <= 0) return indexes;
+  const hasExplicitValidIndexes = indexes.length > 0;
+  const cannotExpandEmptyInput = total <= 0;
+  if (hasExplicitValidIndexes || cannotExpandEmptyInput) return indexes;
   return Array.from({ length: total }, (_, index) => index);
 }
 
@@ -61,7 +63,10 @@ function getDraftChangeRevealIndex(previous, next) {
   const count = Math.max(before.length, after.length);
   for (let index = 0; index < count; index += 1) {
     if (before[index] === after[index]) continue;
-    return after[index] ?? after[Math.max(0, index - 1)] ?? after[index + 1] ?? null;
+    const changedIndex = after[index];
+    const previousVisibleIndex = after[Math.max(0, index - 1)];
+    const nextVisibleIndex = after[index + 1];
+    return changedIndex ?? previousVisibleIndex ?? nextVisibleIndex ?? null;
   }
   return after[0] ?? null;
 }
@@ -311,7 +316,10 @@ function hasReliableDocumentGrouping(pageItems, bundle) {
   const documentIds = documents
     .map((document) => String(document?.documentId || '').trim())
     .filter(Boolean);
-  if (documentIds.length !== documents.length || new Set(documentIds).size !== documentIds.length) return false;
+  const hasMissingDocumentIds = documentIds.length !== documents.length;
+  if (hasMissingDocumentIds) return false;
+  const hasDuplicateDocumentIds = new Set(documentIds).size !== documentIds.length;
+  if (hasDuplicateDocumentIds) return false;
 
   const expectedTotalDocuments = documents.length;
   const documentCounts = new Map(documentIds.map((documentId) => [documentId, 0]));
@@ -506,6 +514,17 @@ function getIndexesForDocument(indexes, itemByIndex, documentKey) {
     .filter((index) => getDocumentKeyForIndex(index, itemByIndex) === documentKey);
 }
 
+/**
+ * Find the document-run entries that best preserve natural page order.
+ *
+ * The workspace allows manual page rearrangement, so the warning logic keeps the longest
+ * increasing subsequence of document page numbers and marks only the remaining entries as
+ * out-of-order. The sum tie-break prefers earlier/lower page numbers when two subsequences have
+ * the same length, which makes the highlighted warning set more predictable for users.
+ *
+ * @param {Array<{index:number,item:Object}>} entries
+ * @returns {Set<number>}
+ */
 function getBestIncreasingDocumentEntryIndexes(entries) {
   const safeEntries = Array.isArray(entries) ? entries : [];
   const count = safeEntries.length;

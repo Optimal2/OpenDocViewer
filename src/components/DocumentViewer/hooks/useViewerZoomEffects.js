@@ -24,7 +24,6 @@ export function useViewerZoomEffects({
   pageNumber,
   zoomIn,
   zoomOut,
-  fitToCustomWidth,
   onOpenPrintDialog,
   printEnabled = true,
   interactionSuspended = false,
@@ -156,5 +155,5 @@ export function useViewerZoomEffects({
       } catch {}
     }, 0);
     return () => { clearTimeout(t); };
-  }, [documentRenderRef, fitToCustomWidth, zoomState.mode]);
+  }, [documentRenderRef, zoomState.mode]);
 }

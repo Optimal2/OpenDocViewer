@@ -8940,7 +8940,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 144,
+    "line": 142,
     "description": "",
     "params": [
       {
@@ -8965,7 +8965,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 133,
+    "line": 131,
     "description": "",
     "params": [
       {
@@ -8990,7 +8990,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 154,
+    "line": 152,
     "description": "",
     "params": [
       {
@@ -9015,7 +9015,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 161,
+    "line": 159,
     "description": "",
     "params": [
       {
@@ -9040,7 +9040,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 165,
+    "line": 163,
     "description": "",
     "params": [
       {
@@ -9060,7 +9060,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 278,
+    "line": 276,
     "description": "",
     "params": [
       {
@@ -9080,7 +9080,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 289,
+    "line": 287,
     "description": "",
     "params": [],
     "returns": [
@@ -9098,7 +9098,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js",
-    "line": 284,
+    "line": 282,
     "description": "",
     "params": [],
     "returns": [
@@ -9307,7 +9307,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-    "line": 123,
+    "line": 122,
     "description": "",
     "params": [
       {
@@ -9327,7 +9327,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
-    "line": 106,
+    "line": 105,
     "description": "",
     "params": [
       {
@@ -11103,13 +11103,38 @@
     "examples": 0
   },
   {
+    "id": "getBestIncreasingDocumentEntryIndexes",
+    "name": "getBestIncreasingDocumentEntryIndexes",
+    "longname": "getBestIncreasingDocumentEntryIndexes",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/PrintSelectionWorkspace.jsx",
+    "line": 528,
+    "description": "Find the document-run entries that best preserve natural page order.",
+    "params": [
+      {
+        "name": "entries",
+        "type": "Array.<{index:number, item:Object}>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Set.<number>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "<anonymous>~handleDone",
     "name": "handleDone",
     "longname": "<anonymous>~handleDone",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1815,
+    "line": 1834,
     "description": "",
     "params": [],
     "returns": [
@@ -11127,7 +11152,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1755,
+    "line": 1774,
     "description": "",
     "params": [
       {
@@ -11147,7 +11172,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1788,
+    "line": 1807,
     "description": "",
     "params": [
       {
@@ -11167,7 +11192,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/PrintSelectionWorkspace.jsx",
-    "line": 1808,
+    "line": 1827,
     "description": "",
     "params": [
       {
@@ -17676,7 +17701,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 506,
+    "line": 523,
     "description": "Count PDF pages in a page descriptor list.",
     "params": [
       {
@@ -17901,7 +17926,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1009,
+    "line": 1023,
     "description": "",
     "params": [
       {
@@ -17926,7 +17951,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1027,
+    "line": 1041,
     "description": "",
     "params": [
       {
@@ -17951,7 +17976,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 835,
+    "line": 849,
     "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
     "params": [
       {
@@ -17976,8 +18001,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 181,
-    "description": "",
+    "line": 186,
+    "description": "Return the browser-reported logical core count.",
     "params": [],
     "returns": [
       {
@@ -18007,7 +18032,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 590,
+    "line": 604,
     "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
     "params": [
       {
@@ -18038,7 +18063,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 526,
+    "line": 543,
     "description": "Resolve the PDF page-worker policy for the current document size.",
     "params": [
       {
@@ -18069,7 +18094,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 215,
+    "line": 224,
     "description": "",
     "params": [
       {
@@ -18100,7 +18125,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 194,
+    "line": 204,
     "description": "",
     "params": [
       {
@@ -18144,7 +18169,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1035,
+    "line": 1049,
     "description": "",
     "params": [
       {
@@ -29678,7 +29703,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 83,
+    "line": 86,
     "description": "Resolve the configured Ctrl/Cmd+P behavior.",
     "params": [
       {
@@ -29703,7 +29728,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 275,
+    "line": 277,
     "description": "Resolve the default print page mode used when the user has not stored an override.",
     "params": [
       {
@@ -29728,7 +29753,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 300,
+    "line": 302,
     "description": "Resolve the print-selection workspace configuration.",
     "params": [
       {
@@ -29753,7 +29778,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 60,
+    "line": 63,
     "description": "Read the merged runtime configuration from the browser environment.",
     "params": [],
     "returns": [
@@ -29771,7 +29796,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 252,
+    "line": 254,
     "description": "Resolve the configured custom-size limits.",
     "params": [
       {
@@ -29796,7 +29821,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 238,
+    "line": 240,
     "description": "Resolve the custom-size width factor percentage.",
     "params": [
       {
@@ -29821,7 +29846,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 225,
+    "line": 227,
     "description": "Resolve the initial page zoom mode.",
     "params": [
       {
@@ -29846,7 +29871,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 324,
+    "line": 326,
     "description": "Resolve the optional scroll-at-edge page turn gesture.",
     "params": [
       {
@@ -29871,7 +29896,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 342,
+    "line": 344,
     "description": "Resolve the configurable viewer-level problem notice.",
     "params": [
       {
@@ -29896,7 +29921,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 97,
+    "line": 99,
     "description": "Resolve whether document metadata UI affordances should be available.",
     "params": [
       {
@@ -29934,7 +29959,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 200,
+    "line": 202,
     "description": "Normalize the optional user custom-size limits.",
     "params": [
       {
@@ -29959,7 +29984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 174,
+    "line": 176,
     "description": "Normalize a custom fit-width factor.",
     "params": [
       {
@@ -29990,7 +30015,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 185,
+    "line": 187,
     "description": "Normalize an optional custom-size limit percentage.",
     "params": [
       {
@@ -30021,7 +30046,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 159,
+    "line": 161,
     "description": "Normalize a user-facing print default mode.",
     "params": [
       {
@@ -30065,7 +30090,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 19,
+    "line": 22,
     "description": "",
     "params": [],
     "returns": [],
@@ -30078,7 +30103,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 12,
+    "line": 15,
     "description": "",
     "params": [],
     "returns": [],
@@ -30104,7 +30129,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 26,
+    "line": 29,
     "description": "",
     "params": [],
     "returns": [],
@@ -30117,7 +30142,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 34,
+    "line": 37,
     "description": "",
     "params": [],
     "returns": [],
