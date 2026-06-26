@@ -147,7 +147,8 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
  * booleans are accepted. A non-boolean default falls back to false to keep callers predictable
  * when a caller accidentally forwards an unvalidated config value as the fallback. This treats
  * non-boolean defaults as configuration mistakes instead of silently coercing strings like
- * `"false"` to true.
+ * `"false"` to true. Callers must pass an actual boolean default; this helper intentionally does
+ * not log because it is used by normal config resolution paths and should stay side-effect free.
  *
  * @param {*} value
  * @param {*} defaultValue
@@ -229,7 +230,9 @@ function normalizeFloat(value, defaultValue, min, max) {
  *
  * Valid values are the ResetSessionTarget literals listed in RESET_SESSION_TARGETS. Missing,
  * blank, or unrecognized values fall back to defaultTarget when it is valid, otherwise to
- * DEFAULT_RESET_SESSION_TARGET.
+ * DEFAULT_RESET_SESSION_TARGET. The fallback validation is delegated to
+ * normalizeResetSessionFallbackTarget so the primary value path and defaultTarget path stay
+ * explicit.
  *
  * @param {*} value
  * @param {*} defaultTarget
