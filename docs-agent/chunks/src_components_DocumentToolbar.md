@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 16. Line count: 6514. JSDoc symbol count: 94.
+File count: 16. Line count: 6540. JSDoc symbol count: 97.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -118,6 +118,10 @@ Exports: `PageNavigationButtons`
 
 Local imports: `src/hooks/useAcceleratingHoldRepeat.js`
 
+Symbols:
+
+- `clampPage` (function) - Page navigation button group.
+
 ## src/components/DocumentToolbar/PrintRangeDialog.jsx
 
 Unified print dialog with a single print\-method selector and shared print\-details section.
@@ -156,6 +160,10 @@ Reusable toolbar split\-button.
 
 Exports: `SplitToolbarButton`
 
+Symbols:
+
+- `module.exports` (member) - Exported SplitToolbarButton component.
+
 ## src/components/DocumentToolbar/ThemeMenuButton.jsx
 
 Compact theme selector for the toolbar.
@@ -180,6 +188,10 @@ Small button that toggles between light/dark themes using the ThemeContext.
 Exports: `ThemeToggleButton`
 
 Local imports: `src/contexts/themeContext.js`
+
+Symbols:
+
+- `module.exports` (member) - Exported ThemeToggleButton component.
 
 ## src/components/DocumentToolbar/usePdfPrebuildAllPages.js
 

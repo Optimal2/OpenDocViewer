@@ -3,9 +3,9 @@
 ## Coverage
 
 - Files: 114
-- Source lines: 49264
-- JSDoc symbols: 1296
-- Files without JSDoc doclets: 4
+- Source lines: 49363
+- JSDoc symbols: 1313
+- Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
 
@@ -46,13 +46,5 @@
 - `src/utils/pageAssetRenderer.js`: 895 lines
 
 ## Next Iteration Signals
-
-- Files without JSDoc doclets are covered by source-derived summaries only.
-
-Files without JSDoc doclets:
-- `src/components/DocumentToolbar/PageNavigationButtons.jsx`
-- `src/components/DocumentToolbar/SplitToolbarButton.jsx`
-- `src/components/DocumentToolbar/ThemeToggleButton.jsx`
-- `src/utils/printUtils.js`
 
 - Compare this report after each generator change to confirm signal quality improved.

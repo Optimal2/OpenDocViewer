@@ -49,7 +49,7 @@ File count: 8. Line count: 4101. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 16. Line count: 6514. JSDoc symbol count: 94.
+File count: 16. Line count: 6540. JSDoc symbol count: 97.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -148,7 +148,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 35. Line count: 14962. JSDoc symbol count: 577.
+File count: 35. Line count: 15035. JSDoc symbol count: 591.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

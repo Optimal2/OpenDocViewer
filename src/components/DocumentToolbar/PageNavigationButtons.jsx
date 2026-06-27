@@ -6,6 +6,15 @@
  * synthetic click is then consumed so a normal mouse press produces exactly one step instead of
  * two. The group can also expose the currently active navigation target/scope so the toolbar may
  * visually indicate whether actions affect the primary pane, the compare pane, pages, or documents.
+ */
+
+import React, { useRef, useState, useEffect, useCallback, useId, useMemo } from 'react';
+import PropTypes from 'prop-types';
+import { useTranslation } from 'react-i18next';
+import useAcceleratingHoldRepeat from '../../hooks/useAcceleratingHoldRepeat.js';
+
+/**
+ * Page navigation button group.
  *
  * @component
  * @param {Object} props
@@ -33,11 +42,6 @@
  * @param {string} [props.lastButtonTitle]
  * @returns {JSX.Element}
  */
-
-import React, { useRef, useState, useEffect, useCallback, useId, useMemo } from 'react';
-import PropTypes from 'prop-types';
-import { useTranslation } from 'react-i18next';
-import useAcceleratingHoldRepeat from '../../hooks/useAcceleratingHoldRepeat.js';
 
 function clampPage(n, total) {
   const safeTotal = Number.isFinite(total) && total > 0 ? Math.floor(total) : 1;

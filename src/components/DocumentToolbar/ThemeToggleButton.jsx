@@ -1,7 +1,5 @@
 // File: src/components/DocumentToolbar/ThemeToggleButton.jsx
 /**
- * File: src/components/DocumentToolbar/ThemeToggleButton.jsx
- *
  * Small button that toggles between light/dark themes using the ThemeContext.
  *
  * @component
@@ -55,4 +53,8 @@ ThemeToggleButton.propTypes = {
   className: PropTypes.string,
 };
 
+/**
+ * Exported ThemeToggleButton component.
+ * @returns {JSX.Element}
+ */
 export default React.memo(ThemeToggleButton);

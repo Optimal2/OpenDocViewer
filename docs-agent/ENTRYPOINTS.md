@@ -8,6 +8,8 @@
 - `lint`: `eslint "src/**/*.{js,jsx}"`
 - `lint:fix`: `eslint "src/**/*.{js,jsx}" --fix`
 - `format`: `prettier --write "src/**/*.{js,jsx,css,scss,md}"`
+- `test`: `vitest run`
+- `test:watch`: `vitest`
 - `doc`: `jsdoc -c jsdoc.json`
 - `doc:agent`: `node scripts/generate-agent-docs.mjs`
 - `start:system-log`: `node server/system-log-server.js`

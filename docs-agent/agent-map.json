@@ -12,6 +12,8 @@
       "lint": "eslint \"src/**/*.{js,jsx}\"",
       "lint:fix": "eslint \"src/**/*.{js,jsx}\" --fix",
       "format": "prettier --write \"src/**/*.{js,jsx,css,scss,md}\"",
+      "test": "vitest run",
+      "test:watch": "vitest",
       "doc": "jsdoc -c jsdoc.json",
       "doc:agent": "node scripts/generate-agent-docs.mjs",
       "start:system-log": "node server/system-log-server.js",
@@ -66,7 +68,8 @@
       "jsdoc": "^4.0.5",
       "prettier": "^3.8.4",
       "rolldown": "^1.1.1",
-      "vite": "^8.0.16"
+      "vite": "^8.0.16",
+      "vitest": "^3.0.0"
     }
   },
   "generated": {
@@ -79,17 +82,16 @@
   },
   "stats": {
     "fileCount": 114,
-    "sourceLineCount": 49264,
-    "docletCount": 1296,
-    "documentedFileCount": 110,
+    "sourceLineCount": 49363,
+    "docletCount": 1313,
+    "documentedFileCount": 114,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 21,
-    "devDependencyCount": 17,
+    "devDependencyCount": 18,
     "estimatedSourceTokens": 3613
   },
   "recommendations": [
-    "4 files have no JSDoc doclets; AgentDocMap uses source-derived summaries for them.",
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
   ],
   "packageUsage": [
@@ -495,6 +497,15 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/utils/printUtils.js",
+      "score": 70,
+      "lines": 110,
+      "incomingLocalImports": 2,
+      "doclets": 14,
+      "summary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/reloadCacheIdentity.js",
       "score": 68,
       "lines": 154,
@@ -528,15 +539,6 @@
       "incomingLocalImports": 6,
       "doclets": 1,
       "summary": "Resolve a public asset path against the viewer base URL.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/pdfWorkerDispatcher.js",
-      "score": 58,
-      "lines": 451,
-      "incomingLocalImports": 2,
-      "doclets": 18,
-      "summary": "OpenDocViewer - generated PDF worker dispatcher.",
       "summaryConfidence": "high"
     }
   ],
@@ -976,8 +978,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 16,
-      "lineCount": 6514,
-      "docletCount": 94,
+      "lineCount": 6540,
+      "docletCount": 97,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1423,8 +1425,8 @@
     {
       "name": "src/utils",
       "fileCount": 35,
-      "lineCount": 14962,
-      "docletCount": 577,
+      "lineCount": 15035,
+      "docletCount": 591,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -12897,9 +12899,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/PageNavigationButtons.jsx",
-      "lines": 329,
+      "lines": 333,
       "extension": ".jsx",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 2,
       "sourceSummary": "Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.",
       "imports": [
         {
@@ -12913,47 +12915,47 @@
             "useId",
             "useMemo"
           ],
-          "line": 37
+          "line": 11
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 38
+          "line": 12
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 39
+          "line": 13
         },
         {
           "source": "../../hooks/useAcceleratingHoldRepeat.js",
           "specifiers": [
             "useAcceleratingHoldRepeat"
           ],
-          "line": 40
+          "line": 14
         }
       ],
       "exports": [
         {
           "name": "PageNavigationButtons",
           "kind": "default",
-          "line": 328
+          "line": 332
         }
       ],
       "declarations": [
         {
           "name": "clampPage",
           "kind": "function",
-          "line": 42
+          "line": 46
         },
         {
           "name": "PageNavigationButtons",
           "kind": "component",
-          "line": 49
+          "line": 53
         }
       ],
       "parseError": null,
@@ -12961,7 +12963,165 @@
         "roles": [],
         "riskPatterns": []
       },
-      "doclets": [],
+      "doclets": [
+        {
+          "id": "clampPage",
+          "name": "clampPage",
+          "longname": "clampPage",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+          "line": 46,
+          "description": "Page navigation button group.",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.prevPageDisabled",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.nextPageDisabled",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.firstPageDisabled",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.lastPageDisabled",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.handleFirstPage",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.handleLastPage",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.handlePrevPage",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.handleNextPage",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.pageNumber",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.pageNumberDisplay",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.totalPages",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.totalPagesDisplay",
+              "type": "number",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.onGoToPage",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.isDocumentLoading",
+              "type": "boolean",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.pageLoadState",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.navigationTarget",
+              "type": "'primary'|'compare'",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.navigationScope",
+              "type": "'page'|'document'",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.navigationGroupTitle",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.firstButtonTitle",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.previousButtonTitle",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.nextButtonTitle",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.lastButtonTitle",
+              "type": "string",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "JSX.Element",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [
         {
@@ -12969,7 +13129,7 @@
           "specifiers": [
             "useAcceleratingHoldRepeat"
           ],
-          "line": 40,
+          "line": 14,
           "resolved": "src/hooks/useAcceleratingHoldRepeat.js"
         }
       ],
@@ -12985,25 +13145,25 @@
             "useId",
             "useMemo"
           ],
-          "line": 37
+          "line": 11
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 38
+          "line": 12
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 39
+          "line": 13
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 15,
+      "importanceScore": 18,
       "summary": "Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -13507,9 +13667,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
-      "lines": 108,
+      "lines": 128,
       "extension": ".jsx",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 2,
       "sourceSummary": "Reusable toolbar split-button.",
       "imports": [
         {
@@ -13521,43 +13681,43 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 25
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 26
         }
       ],
       "exports": [
         {
           "name": "SplitToolbarButton",
           "kind": "default",
-          "line": 107
+          "line": 127
         }
       ],
       "declarations": [
         {
           "name": "SplitToolbarButton",
           "kind": "component",
-          "line": 12
+          "line": 28
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 32
+          "line": 48
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 37
+          "line": 53
         },
         {
           "name": "closeMenu",
           "kind": "function",
-          "line": 52
+          "line": 68
         }
       ],
       "parseError": null,
@@ -13565,7 +13725,26 @@
         "roles": [],
         "riskPatterns": []
       },
-      "doclets": [],
+      "doclets": [
+        {
+          "id": "module.exports",
+          "name": "exports",
+          "longname": "module.exports",
+          "kind": "member",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
+          "line": 127,
+          "description": "Exported SplitToolbarButton component.",
+          "params": [],
+          "returns": [
+            {
+              "type": "JSX.Element",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [],
       "packageImports": [
@@ -13578,18 +13757,18 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 25
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 26
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 21,
+      "importanceScore": 25,
       "summary": "Reusable toolbar split-button.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -13882,9 +14061,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/ThemeToggleButton.jsx",
-      "lines": 59,
+      "lines": 61,
       "extension": ".jsx",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 2,
       "sourceSummary": "Small button that toggles between light/dark themes using the ThemeContext.",
       "imports": [
         {
@@ -13894,42 +14073,42 @@
             "useContext",
             "useMemo"
           ],
-          "line": 14
+          "line": 12
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 15
+          "line": 13
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 16
+          "line": 14
         },
         {
           "source": "../../contexts/themeContext.js",
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 17
+          "line": 15
         }
       ],
       "exports": [
         {
           "name": "ThemeToggleButton",
           "kind": "default",
-          "line": 58
+          "line": 60
         }
       ],
       "declarations": [
         {
           "name": "ThemeToggleButton",
           "kind": "component",
-          "line": 19
+          "line": 17
         }
       ],
       "parseError": null,
@@ -13937,7 +14116,26 @@
         "roles": [],
         "riskPatterns": []
       },
-      "doclets": [],
+      "doclets": [
+        {
+          "id": "module.exports",
+          "name": "exports",
+          "longname": "module.exports",
+          "kind": "member",
+          "scope": "static",
+          "file": "src/components/DocumentToolbar/ThemeToggleButton.jsx",
+          "line": 60,
+          "description": "Exported ThemeToggleButton component.",
+          "params": [],
+          "returns": [
+            {
+              "type": "JSX.Element",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
       "moduleKey": "src/components/DocumentToolbar",
       "localImports": [
         {
@@ -13945,7 +14143,7 @@
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 17,
+          "line": 15,
           "resolved": "src/contexts/themeContext.js"
         }
       ],
@@ -13957,25 +14155,25 @@
             "useContext",
             "useMemo"
           ],
-          "line": 14
+          "line": 12
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 15
+          "line": 13
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 16
+          "line": 14
         }
       ],
       "incomingLocalImports": 0,
-      "importanceScore": 5,
+      "importanceScore": 8,
       "summary": "Small button that toggles between light/dark themes using the ThemeContext.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -44949,9 +45147,9 @@
     },
     {
       "path": "src/utils/printUtils.js",
-      "lines": 37,
+      "lines": 110,
       "extension": ".js",
-      "jsdocBlockCount": 1,
+      "jsdocBlockCount": 14,
       "sourceSummary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
       "imports": [
         {
@@ -44963,14 +45161,14 @@
             "handlePrintRange",
             "handlePrintSequence"
           ],
-          "line": 17
+          "line": 15
         },
         {
           "source": "./printParse.js",
           "specifiers": [
             "parsePrintSequence"
           ],
-          "line": 18
+          "line": 16
         },
         {
           "source": "./printPdf.js",
@@ -44982,7 +45180,7 @@
             "printPdfBlob",
             "downloadPdfBlob"
           ],
-          "line": 19
+          "line": 17
         }
       ],
       "exports": [
@@ -44990,78 +45188,78 @@
           "name": "handlePrint",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 23
         },
         {
           "name": "handlePrintAll",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 28
         },
         {
           "name": "handlePrintCurrentComparison",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 33
         },
         {
           "name": "handlePrintRange",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 38
         },
         {
           "name": "handlePrintSequence",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 43
         },
         {
           "name": "parsePrintSequence",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 48
         },
         {
           "name": "handlePdfOutput",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 53
         },
         {
           "name": "handlePdfCurrent",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 58
         },
         {
           "name": "handlePdfCurrentComparison",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 63
         },
         {
           "name": "createPrintPdfBlob",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 68
         },
         {
           "name": "printPdfBlob",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 73
         },
         {
           "name": "downloadPdfBlob",
           "kind": "named",
           "source": null,
-          "line": 21
+          "line": 78
         },
         {
           "name": "default",
           "kind": "default",
-          "line": 23
+          "line": 96
         }
       ],
       "declarations": [],
@@ -45070,7 +45268,190 @@
         "roles": [],
         "riskPatterns": []
       },
-      "doclets": [],
+      "doclets": [
+        {
+          "id": "module:printUtils",
+          "name": "printUtils",
+          "longname": "module:printUtils",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 2,
+          "description": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrint",
+          "name": "handlePrint",
+          "longname": "module:handlePrint",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 23,
+          "description": "Print the current selection/range through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrintAll",
+          "name": "handlePrintAll",
+          "longname": "module:handlePrintAll",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 28,
+          "description": "Print all pages through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrintCurrentComparison",
+          "name": "handlePrintCurrentComparison",
+          "longname": "module:handlePrintCurrentComparison",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 33,
+          "description": "Print the current comparison pane through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrintRange",
+          "name": "handlePrintRange",
+          "longname": "module:handlePrintRange",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 38,
+          "description": "Print a specific page range through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePrintSequence",
+          "name": "handlePrintSequence",
+          "longname": "module:handlePrintSequence",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 43,
+          "description": "Print a parsed custom page sequence through the HTML path.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:parsePrintSequence",
+          "name": "parsePrintSequence",
+          "longname": "module:parsePrintSequence",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 48,
+          "description": "Parse a user-entered &quot;Custom pages&quot; string into a page sequence.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePdfOutput",
+          "name": "handlePdfOutput",
+          "longname": "module:handlePdfOutput",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 53,
+          "description": "Generate a PDF for the current selection/range and open the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePdfCurrent",
+          "name": "handlePdfCurrent",
+          "longname": "module:handlePdfCurrent",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 58,
+          "description": "Generate a PDF for the current page and open the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:handlePdfCurrentComparison",
+          "name": "handlePdfCurrentComparison",
+          "longname": "module:handlePdfCurrentComparison",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 63,
+          "description": "Generate a PDF for the current comparison pane and open the print dialog.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:createPrintPdfBlob",
+          "name": "createPrintPdfBlob",
+          "longname": "module:createPrintPdfBlob",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 68,
+          "description": "Create a printable PDF blob from the current print job.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:printPdfBlob",
+          "name": "printPdfBlob",
+          "longname": "module:printPdfBlob",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 73,
+          "description": "Print a generated PDF blob.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:downloadPdfBlob",
+          "name": "downloadPdfBlob",
+          "longname": "module:downloadPdfBlob",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/printUtils.js",
+          "line": 78,
+          "description": "Download a generated PDF blob.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "printUtils.default",
+          "name": "default",
+          "longname": "printUtils.default",
+          "kind": "namespace",
+          "scope": "static",
+          "file": "src/utils/printUtils.js",
+          "line": 80,
+          "description": "Default print utilities namespace.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
       "moduleKey": "src/utils",
       "localImports": [
         {
@@ -45082,7 +45463,7 @@
             "handlePrintRange",
             "handlePrintSequence"
           ],
-          "line": 17,
+          "line": 15,
           "resolved": "src/utils/printCore.js"
         },
         {
@@ -45090,7 +45471,7 @@
           "specifiers": [
             "parsePrintSequence"
           ],
-          "line": 18,
+          "line": 16,
           "resolved": "src/utils/printParse.js"
         },
         {
@@ -45103,16 +45484,16 @@
             "printPdfBlob",
             "downloadPdfBlob"
           ],
-          "line": 19,
+          "line": 17,
           "resolved": "src/utils/printPdf.js"
         }
       ],
       "packageImports": [],
       "incomingLocalImports": 2,
-      "importanceScore": 46,
+      "importanceScore": 70,
       "summary": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
       "summaryConfidence": "high",
-      "summarySource": "leading-jsdoc"
+      "summarySource": "module-doclet"
     },
     {
       "path": "src/utils/printWatermark.js",
@@ -58914,6 +59295,163 @@
       "examples": 0
     },
     {
+      "id": "clampPage",
+      "name": "clampPage",
+      "longname": "clampPage",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+      "line": 46,
+      "description": "Page navigation button group.",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.prevPageDisabled",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.nextPageDisabled",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.firstPageDisabled",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.lastPageDisabled",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.handleFirstPage",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.handleLastPage",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.handlePrevPage",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.handleNextPage",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.pageNumber",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.pageNumberDisplay",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.totalPages",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.totalPagesDisplay",
+          "type": "number",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.onGoToPage",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.isDocumentLoading",
+          "type": "boolean",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.pageLoadState",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.navigationTarget",
+          "type": "'primary'|'compare'",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.navigationScope",
+          "type": "'page'|'document'",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.navigationGroupTitle",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.firstButtonTitle",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.previousButtonTitle",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.nextButtonTitle",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.lastButtonTitle",
+          "type": "string",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "JSX.Element",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PrintSubmitDetail",
       "name": "PrintSubmitDetail",
       "longname": "PrintSubmitDetail",
@@ -59186,6 +59724,24 @@
       "examples": 0
     },
     {
+      "id": "module.exports",
+      "name": "exports",
+      "longname": "module.exports",
+      "kind": "member",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/SplitToolbarButton.jsx",
+      "line": 127,
+      "description": "Exported SplitToolbarButton component.",
+      "params": [],
+      "returns": [
+        {
+          "type": "JSX.Element",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~handleKeyDown",
       "name": "handleKeyDown",
       "longname": "<anonymous>~handleKeyDown",
@@ -59327,6 +59883,24 @@
       "returns": [
         {
           "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module.exports",
+      "name": "exports",
+      "longname": "module.exports",
+      "kind": "member",
+      "scope": "static",
+      "file": "src/components/DocumentToolbar/ThemeToggleButton.jsx",
+      "line": 60,
+      "description": "Exported ThemeToggleButton component.",
+      "params": [],
+      "returns": [
+        {
+          "type": "JSX.Element",
           "description": ""
         }
       ],
@@ -80409,6 +80983,188 @@
           "description": ""
         }
       ],
+      "examples": 0
+    },
+    {
+      "id": "module:createPrintPdfBlob",
+      "name": "createPrintPdfBlob",
+      "longname": "module:createPrintPdfBlob",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 68,
+      "description": "Create a printable PDF blob from the current print job.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "printUtils.default",
+      "name": "default",
+      "longname": "printUtils.default",
+      "kind": "namespace",
+      "scope": "static",
+      "file": "src/utils/printUtils.js",
+      "line": 80,
+      "description": "Default print utilities namespace.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:downloadPdfBlob",
+      "name": "downloadPdfBlob",
+      "longname": "module:downloadPdfBlob",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 78,
+      "description": "Download a generated PDF blob.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePdfCurrent",
+      "name": "handlePdfCurrent",
+      "longname": "module:handlePdfCurrent",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 58,
+      "description": "Generate a PDF for the current page and open the print dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePdfCurrentComparison",
+      "name": "handlePdfCurrentComparison",
+      "longname": "module:handlePdfCurrentComparison",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 63,
+      "description": "Generate a PDF for the current comparison pane and open the print dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePdfOutput",
+      "name": "handlePdfOutput",
+      "longname": "module:handlePdfOutput",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 53,
+      "description": "Generate a PDF for the current selection/range and open the print dialog.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrint",
+      "name": "handlePrint",
+      "longname": "module:handlePrint",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 23,
+      "description": "Print the current selection/range through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrintAll",
+      "name": "handlePrintAll",
+      "longname": "module:handlePrintAll",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 28,
+      "description": "Print all pages through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrintCurrentComparison",
+      "name": "handlePrintCurrentComparison",
+      "longname": "module:handlePrintCurrentComparison",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 33,
+      "description": "Print the current comparison pane through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrintRange",
+      "name": "handlePrintRange",
+      "longname": "module:handlePrintRange",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 38,
+      "description": "Print a specific page range through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:handlePrintSequence",
+      "name": "handlePrintSequence",
+      "longname": "module:handlePrintSequence",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 43,
+      "description": "Print a parsed custom page sequence through the HTML path.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:parsePrintSequence",
+      "name": "parsePrintSequence",
+      "longname": "module:parsePrintSequence",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 48,
+      "description": "Parse a user-entered &quot;Custom pages&quot; string into a page sequence.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:printPdfBlob",
+      "name": "printPdfBlob",
+      "longname": "module:printPdfBlob",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 73,
+      "description": "Print a generated PDF blob.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:printUtils",
+      "name": "printUtils",
+      "longname": "module:printUtils",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/printUtils.js",
+      "line": 2,
+      "description": "OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules.",
+      "params": [],
+      "returns": [],
       "examples": 0
     },
     {
