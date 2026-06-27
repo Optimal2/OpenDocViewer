@@ -49,6 +49,7 @@ This file combines package.json declarations with observed source imports.
 | <code>prettier</code> | <code>^3.8.4</code> | 0 |
 | <code>rolldown</code> | <code>^1.1.1</code> | 0 |
 | <code>vite</code> | <code>^8.0.16</code> | 0 |
+| <code>vitest</code> | <code>^3.0.0</code> | 0 |
 
 ## Imported But Not Declared Directly
 

@@ -8,7 +8,7 @@
       "server"
     ],
     "includePattern": "\\.(js|jsx)$",
-    "excludePattern": "(node_modules/|docs/)"
+    "excludePattern": "(node_modules/|docs/|__tests__/|\\.test\\.)"
   },
   "plugins": [
     "plugins/markdown"

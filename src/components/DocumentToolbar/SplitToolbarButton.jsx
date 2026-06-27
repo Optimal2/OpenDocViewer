@@ -4,6 +4,22 @@
  *
  * The main button performs the primary action. The narrow arrow button opens a compact menu for
  * related settings without changing the primary-action click target.
+ *
+ * @component
+ * @param {Object} props
+ * @param {string} [props.className]       Extra class names for the shell.
+ * @param {string} [props.mainClassName]   Extra class names for the primary button.
+ * @param {string} [props.menuClassName]   Extra class names for the popup menu.
+ * @param {function():void} props.onClick  Primary action handler.
+ * @param {boolean} [props.disabled=false] Disable the primary button.
+ * @param {boolean} [props.menuDisabled=false] Disable the menu arrow button.
+ * @param {string} props.ariaLabel         Accessible label for the primary button.
+ * @param {string} [props.title]           Tooltip/title for the primary button.
+ * @param {string} props.menuLabel         Accessible label for the menu arrow button.
+ * @param {React.ReactNode} props.children Content rendered inside the primary button.
+ * @param {(React.ReactNode|function({closeMenu:function():void}):React.ReactNode)} props.menuChildren
+ *   Content rendered inside the popup menu. May be a render function that receives a closeMenu helper.
+ * @returns {JSX.Element}
  */
 
 import React, { useEffect, useId, useRef, useState } from 'react';
@@ -104,4 +120,8 @@ SplitToolbarButton.propTypes = {
   menuChildren: PropTypes.oneOfType([PropTypes.node, PropTypes.func]).isRequired,
 };
 
+/**
+ * Exported SplitToolbarButton component.
+ * @returns {JSX.Element}
+ */
 export default React.memo(SplitToolbarButton);

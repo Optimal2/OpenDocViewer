@@ -32,12 +32,12 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 160 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx</code> | 154 | 1 | 4 | high | Compact language selector for the toolbar. |
 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code> | 357 | 1 | 10 | high | Manual overlay that loads simple external HTML fragments from the public help folder. |
-| <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 329 | 1 | 0 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
+| <code>src/components/DocumentToolbar/PageNavigationButtons.jsx</code> | 333 | 1 | 1 | high | Page navigation controls with support for single-step clicks and continuous stepping on press-and-hold. |
 | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx</code> | 544 | 1 | 1 | high | Unified print dialog with a single print-method selector and shared print-details section. |
 | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js</code> | 149 | 2 | 9 | high | Pure helpers and shared constants for the print-range dialog. |
-| <code>src/components/DocumentToolbar/SplitToolbarButton.jsx</code> | 108 | 2 | 0 | high | Reusable toolbar split-button. |
+| <code>src/components/DocumentToolbar/SplitToolbarButton.jsx</code> | 128 | 2 | 1 | high | Reusable toolbar split-button. |
 | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx</code> | 179 | 1 | 6 | high | Compact theme selector for the toolbar. |
-| <code>src/components/DocumentToolbar/ThemeToggleButton.jsx</code> | 59 | 0 | 0 | high | Small button that toggles between light/dark themes using the ThemeContext. |
+| <code>src/components/DocumentToolbar/ThemeToggleButton.jsx</code> | 61 | 0 | 1 | high | Small button that toggles between light/dark themes using the ThemeContext. |
 | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js</code> | 362 | 1 | 8 | high | Background prebuild/cache for configured &quot;all pages&quot; generated-PDF variants. |
 | <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 667 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 508 | 1 | 1 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
@@ -103,7 +103,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/printPdf.js</code> | 2286 | 3 | 92 | high | OpenDocViewer — Generated PDF print backend. |
 | <code>src/utils/printSanitize.js</code> | 23 | 4 | 1 | high | OpenDocViewer — Print Sanitization Helpers Small helpers for URL and HTML value safety used by printing modules. |
 | <code>src/utils/printTemplate.js</code> | 809 | 3 | 34 | high | OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML-escaped before insertion into admin-authored print header/footer templates. |
-| <code>src/utils/printUtils.js</code> | 37 | 2 | 0 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
+| <code>src/utils/printUtils.js</code> | 110 | 2 | 14 | high | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
 | <code>src/utils/printWatermark.js</code> | 80 | 2 | 5 | high | OpenDocViewer — Print watermark mode helpers. |
 | <code>src/utils/publicAssetUrl.js</code> | 29 | 6 | 1 | high | Resolve a public asset path against the viewer base URL. |
 | <code>src/utils/reloadCacheCrypto.js</code> | 165 | 2 | 3 | high | Short-lived reload-cache key helpers. |

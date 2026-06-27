@@ -248,6 +248,7 @@
 | <code>rewriteManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:69</code> |  |
 | <code>sanitizeManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:55</code> |  |
 | <code>toText</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:21</code> |  |
+| <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx:13</code> | Structured payload returned to the caller on submit. |
 | <code>module:printRangeDialogHelpers.buildSelectedOptionDetails</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:101</code> | Build token-friendly details for the selected option without forcing templates to use list indexes. |
 | <code>module:printRangeDialogHelpers.ensureODVPrintCSS</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:140</code> | Ensure base print CSS is injected once per document. |
@@ -258,12 +259,14 @@
 | <code>module:printRangeDialogHelpers.resolveOptionPrintText</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:50</code> | Resolve the string that should be used on physical print/log output for an option. |
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
+| <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:88</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:80</code> |  |
 | <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:104</code> |  |
 | <code>resolveSelectedMode</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:46</code> |  |
 | <code>resolveThemeModeIcon</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:34</code> |  |
 | <code>resolveThemeModeLabel</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:23</code> |  |
+| <code>module.exports</code> | member | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx:60</code> | Exported ThemeToggleButton component. |
 | <code>createSessionPageNumbers</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:125</code> |  |
 | <code>createVariantDetail</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:78</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:140</code> |  |
@@ -1106,6 +1109,20 @@
 | <code>tryGetDocumentMetadata</code> | function | <code>src/utils/printTemplate.js:435</code> | Read document metadata from a viewer handle without leaking handle-specific checks into the token-context builder. |
 | <code>valueToText</code> | function | <code>src/utils/printTemplate.js:174</code> |  |
 | <code>zeroPad2</code> | function | <code>src/utils/printTemplate.js:94</code> | Format a non-negative date/time component as at least two digits. |
+| <code>module:createPrintPdfBlob</code> | module | <code>src/utils/printUtils.js:68</code> | Create a printable PDF blob from the current print job. |
+| <code>printUtils.default</code> | namespace | <code>src/utils/printUtils.js:80</code> | Default print utilities namespace. |
+| <code>module:downloadPdfBlob</code> | module | <code>src/utils/printUtils.js:78</code> | Download a generated PDF blob. |
+| <code>module:handlePdfCurrent</code> | module | <code>src/utils/printUtils.js:58</code> | Generate a PDF for the current page and open the print dialog. |
+| <code>module:handlePdfCurrentComparison</code> | module | <code>src/utils/printUtils.js:63</code> | Generate a PDF for the current comparison pane and open the print dialog. |
+| <code>module:handlePdfOutput</code> | module | <code>src/utils/printUtils.js:53</code> | Generate a PDF for the current selection/range and open the print dialog. |
+| <code>module:handlePrint</code> | module | <code>src/utils/printUtils.js:23</code> | Print the current selection/range through the HTML path. |
+| <code>module:handlePrintAll</code> | module | <code>src/utils/printUtils.js:28</code> | Print all pages through the HTML path. |
+| <code>module:handlePrintCurrentComparison</code> | module | <code>src/utils/printUtils.js:33</code> | Print the current comparison pane through the HTML path. |
+| <code>module:handlePrintRange</code> | module | <code>src/utils/printUtils.js:38</code> | Print a specific page range through the HTML path. |
+| <code>module:handlePrintSequence</code> | module | <code>src/utils/printUtils.js:43</code> | Print a parsed custom page sequence through the HTML path. |
+| <code>module:parsePrintSequence</code> | module | <code>src/utils/printUtils.js:48</code> | Parse a user-entered &amp;quot;Custom pages&amp;quot; string into a page sequence. |
+| <code>module:printPdfBlob</code> | module | <code>src/utils/printUtils.js:73</code> | Print a generated PDF blob. |
+| <code>module:printUtils</code> | module | <code>src/utils/printUtils.js:2</code> | OpenDocViewer — Print Utilities Facade Re-export the stable print API and parser from the internal modules. |
 | <code>currentLanguage</code> | function | <code>src/utils/printWatermark.js:13</code> |  |
 | <code>normalizeWatermarkMode</code> | function | <code>src/utils/printWatermark.js:38</code> |  |
 | <code>resolveWatermarkAssetSrc</code> | function | <code>src/utils/printWatermark.js:64</code> | Resolve the image asset for COPY/KOPIA watermark modes. |

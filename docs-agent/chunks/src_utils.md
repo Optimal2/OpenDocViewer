@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 14962. JSDoc symbol count: 577.
+File count: 35. Line count: 15035. JSDoc symbol count: 591.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -426,6 +426,21 @@ OpenDocViewer — Print Utilities Facade Re\-export the stable print API and par
 Exports: `handlePrint`, `handlePrintAll`, `handlePrintCurrentComparison`, `handlePrintRange`, `handlePrintSequence`, `parsePrintSequence`, `handlePdfOutput`, `handlePdfCurrent`, `handlePdfCurrentComparison`, `createPrintPdfBlob`, `printPdfBlob`, `downloadPdfBlob`, `default`
 
 Local imports: `src/utils/printCore.js`, `src/utils/printParse.js`, `src/utils/printPdf.js`
+
+Symbols:
+
+- `module:printUtils` (module) - OpenDocViewer — Print Utilities Facade Re\-export the stable print API and parser from the internal modules.
+- `module:handlePrint` (module) - Print the current selection/range through the HTML path.
+- `module:handlePrintAll` (module) - Print all pages through the HTML path.
+- `module:handlePrintCurrentComparison` (module) - Print the current comparison pane through the HTML path.
+- `module:handlePrintRange` (module) - Print a specific page range through the HTML path.
+- `module:handlePrintSequence` (module) - Print a parsed custom page sequence through the HTML path.
+- `module:parsePrintSequence` (module) - Parse a user\-entered &amp;quot;Custom pages&amp;quot; string into a page sequence.
+- `module:handlePdfOutput` (module) - Generate a PDF for the current selection/range and open the print dialog.
+- `module:handlePdfCurrent` (module) - Generate a PDF for the current page and open the print dialog.
+- `module:handlePdfCurrentComparison` (module) - Generate a PDF for the current comparison pane and open the print dialog.
+- `module:createPrintPdfBlob` (module) - Create a printable PDF blob from the current print job.
+- `module:printPdfBlob` (module) - Print a generated PDF blob.
 
 ## src/utils/printWatermark.js
 

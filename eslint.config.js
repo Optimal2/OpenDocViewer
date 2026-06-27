@@ -11,6 +11,7 @@ export default defineConfig([
   globalIgnores(['dist', 'docs']),
   {
     files: ['src/**/*.{js,jsx}'],
+    ignores: ['src/**/*.test.{js,jsx}'],
     languageOptions: {
       ecmaVersion: 'latest',
       sourceType: 'module',
@@ -32,6 +33,33 @@ export default defineConfig([
       'react-hooks/rules-of-hooks': 'error',
       'react-hooks/exhaustive-deps': 'warn',
       'react-refresh/only-export-components': ['warn', { allowConstantExport: true }],
+      'no-unused-vars': ['warn', {
+        varsIgnorePattern: '^React$|^set[A-Z]|^[A-Z_]+$',
+        argsIgnorePattern: '^_',
+        ignoreRestSiblings: true,
+      }],
+      'no-empty': ['warn', { allowEmptyCatch: true }],
+    },
+  },
+  {
+    files: ['src/**/*.test.{js,jsx}'],
+    languageOptions: {
+      ecmaVersion: 'latest',
+      sourceType: 'module',
+      globals: {
+        ...globals.browser,
+        describe: 'readonly',
+        it: 'readonly',
+        expect: 'readonly',
+        beforeEach: 'readonly',
+        afterEach: 'readonly',
+        beforeAll: 'readonly',
+        afterAll: 'readonly',
+        vi: 'readonly',
+      },
+    },
+    rules: {
+      ...js.configs.recommended.rules,
       'no-unused-vars': ['warn', {
         varsIgnorePattern: '^React$|^set[A-Z]|^[A-Z_]+$',
         argsIgnorePattern: '^_',
