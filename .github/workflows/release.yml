@@ -1,22 +1,40 @@
 name: Release
 
 on:
-  push:
-    tags:
-      - 'v*.*.*'
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Existing Git tag to release (e.g. v2.4.53)'
+        required: true
+        type: string
+      approve_release:
+        description: 'I confirm this is an approved official release'
+        required: true
+        type: boolean
+        default: false
 
 jobs:
   build-and-release:
+    if: github.event.inputs.approve_release == 'true'
     runs-on: ubuntu-latest
 
     permissions:
       contents: write
 
     steps:
+      - name: Validate tag format
+        run: |
+          tag='${{ github.event.inputs.tag }}'
+          if [[ ! "$tag" =~ ^v[0-9]+\.[0-9]+\.[0-9]+$ ]]; then
+            echo "Tag '$tag' does not match the required vX.Y.Z pattern." >&2
+            exit 1
+          fi
+
       - name: Checkout
         uses: actions/checkout@v6
         with:
           fetch-depth: 0
+          ref: ${{ github.event.inputs.tag }}
 
       - name: Check out AgentDocMap
         uses: actions/checkout@v6
@@ -86,12 +104,12 @@ jobs:
         run: npm run doc:agent -- --agentdocmap-root _tools/AgentDocMap
 
       - name: Package dist
-        run: zip -r "OpenDocViewer-dist-${{ github.ref_name }}.zip" dist/
+        run: zip -r "OpenDocViewer-dist-${{ github.event.inputs.tag }}.zip" dist/
 
       - name: Package docs
         run: |
           if [ -d docs ]; then
-            zip -r "OpenDocViewer-docs-${{ github.ref_name }}.zip" docs/
+            zip -r "OpenDocViewer-docs-${{ github.event.inputs.tag }}.zip" docs/
           else
             echo "docs/ folder not found; skipping docs zip."
           fi
@@ -99,7 +117,7 @@ jobs:
       - name: Package agent docs
         run: |
           if [ -d docs-agent ]; then
-            zip -r "OpenDocViewer-agent-docs-${{ github.ref_name }}.zip" docs-agent/
+            zip -r "OpenDocViewer-agent-docs-${{ github.event.inputs.tag }}.zip" docs-agent/
           else
             echo "docs-agent/ folder not found; skipping agent docs zip."
           fi
@@ -107,12 +125,12 @@ jobs:
       - name: Create GitHub Release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ github.ref_name }}
-          name: OpenDocViewer ${{ github.ref_name }}
-          body_path: release-notes/${{ github.ref_name }}.md
+          tag_name: ${{ github.event.inputs.tag }}
+          name: OpenDocViewer ${{ github.event.inputs.tag }}
+          body_path: release-notes/${{ github.event.inputs.tag }}.md
           draft: false
           prerelease: false
           files: |
-            OpenDocViewer-dist-${{ github.ref_name }}.zip
-            OpenDocViewer-docs-${{ github.ref_name }}.zip
-            OpenDocViewer-agent-docs-${{ github.ref_name }}.zip
+            OpenDocViewer-dist-${{ github.event.inputs.tag }}.zip
+            OpenDocViewer-docs-${{ github.event.inputs.tag }}.zip
+            OpenDocViewer-agent-docs-${{ github.event.inputs.tag }}.zip
