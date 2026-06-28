@@ -2,20 +2,30 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.6.5** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.6.6** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.6.4 and earlier are superseded by v2.6.5 and are no longer supported for production deployments. v2.6.5 keeps the v2.6 dependency baseline current and adds runtime-configuration hardening, documentation consistency, and deployment-configuration cleanup on top of the v2.6.4 document-loading, source-stream, TIFF/OJPEG, print, and cleanup hardening. Operators should upgrade to v2.6.5 before opening new support or security issues.
+OpenDocViewer v2.6.5 and earlier are superseded by v2.6.6 and are no longer supported for production deployments. v2.6.6 keeps the v2.6 dependency baseline current and adds runtime-configuration hardening, test coverage, documentation consistency, and deployment-configuration cleanup on top of the v2.6.5 document-loading, source-stream, TIFF/OJPEG, print, and cleanup hardening. Operators should upgrade to v2.6.6 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.6.5   | :white_check_mark: | Current recommended patch release and only supported baseline |
-| <= 2.6.4 | :x: | Superseded by v2.6.5 runtime-config and documentation hardening; upgrade required |
+| 2.6.6   | :white_check_mark: | Current recommended patch release and only supported baseline |
+| <= 2.6.5 | :x: | Superseded by v2.6.6 runtime-config, test, and documentation hardening; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.5 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.6 is supported.
+
+### OpenDocViewer v2.6.6
+Changes since v2.6.5:
+
+- Hardened runtime configuration normalization for null/empty fallback values, integer clamping, and reset-session target resolution.
+- Added unit-test coverage for runtime configuration normalization with Vitest.
+- Clarified JSDoc for print utilities, runtime configuration helpers, and several toolbar components.
+- Regenerated the agent context files for AI-assisted tooling so CI validation sees the committed documentation mapping files as current for v2.6.6.
+- Updated ESLint configuration to support the new test files and kept JSDoc generation from scanning tests.
+- Updated the OMP component manifest so artifact packages carry the post-release source baseline.
 
 ### OpenDocViewer v2.6.5
 Changes since v2.6.4:
