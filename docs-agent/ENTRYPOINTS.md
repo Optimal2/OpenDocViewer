@@ -15,7 +15,7 @@
 - `start:system-log`: `node server/system-log-server.js`
 - `start:user-log`: `node server/user-log-server.js`
 - `start:logs`: `concurrently -n sys,user -c auto "npm run start:system-log" "npm run start:user-log"`
-- `dev:system-log`: `cross-env NODE_ENV=development PORT=3001 LOG_TOKEN=devtoken node server/system-log-server.js`
+- `dev:system-log`: `cross-env NODE_ENV=development PORT=3001 LOG_TOKEN=*** node server/system-log-server.js`
 - `dev:user-log`: `cross-env NODE_ENV=development PORT=3002 node server/user-log-server.js`
 - `dev:logs`: `concurrently -n sys,user -c auto "npm run dev:system-log" "npm run dev:user-log"`
 - `dev:both`: `concurrently -n app,logs -c auto "npm run dev" "npm run dev:logs"`
