@@ -79,5 +79,5 @@ lerna-debug.log*
 *.zip
 public/odv.site.config.js
 
-# Customer-specific local packaging/configuration files.
-VGR/
+# Private local packaging/configuration files.
+private-configs/
