@@ -110,9 +110,11 @@ For AI-operated official releases:
    dependencies, or major module responsibilities changed.
 5. Commit and push the release-prep changes.
 6. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes` from a clean branch that matches
-   `origin/<branch>`.
+   `origin/<branch>` to prepare the release commit/tag locally. To publish the official release,
+   rerun the same command with `-Publish`.
 7. Verify the pushed release commit, the local and remote `vX.Y.Z` tag, and the GitHub Actions
-   release workflow.
+   release workflow. The workflow is triggered manually via `workflow_dispatch` and requires an
+   explicit approval input; it no longer runs on tag push.
 8. If the official release will be delivered through OMP, bump the OMP artifact component version
    after the release helper has updated `package.json`, then export/import the OMP package from
    that post-release commit. This ensures OMP deploys files whose Help -> About version matches

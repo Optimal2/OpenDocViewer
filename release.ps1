@@ -1,11 +1,15 @@
 # File: release.ps1
 <#
 .SYNOPSIS
-Validates OpenDocViewer, creates the npm version commit/tag, and pushes the release.
+Validates OpenDocViewer and creates the npm version commit/tag locally.
 
 .DESCRIPTION
 The helper can run interactively, but every prompt can also be answered through parameters.
 Use -ReleaseType to provide the version bump type and -Yes to skip the confirmation prompt.
+
+By default this script prepares a release locally: it validates, bumps the package version,
+and creates the release commit and Git tag, but it does NOT push to origin. Pushing the release
+requires the explicit -Publish switch, which is the release approval gate for official releases.
 
 The script intentionally does not stage or commit normal application changes. Commit and push
 those changes first, then run this helper from a clean working tree.
@@ -16,6 +20,10 @@ Version bump type passed to the matching npm release script: patch, minor, or ma
 .PARAMETER Yes
 Confirms the release summary without prompting.
 
+.PARAMETER Publish
+Pushes the release commit and tag to origin. This is required to publish an official release.
+Without -Publish the release is prepared locally only.
+
 .PARAMETER SkipValidation
 Skips lint/build/JSDoc/agent-doc validation. Use only when those checks have already been run
 for the exact commit being released.
@@ -23,20 +31,26 @@ for the exact commit being released.
 .EXAMPLE
 .\release.ps1 -ReleaseType minor -Yes
 
-Runs a non-interactive minor release after validation.
+Runs a non-interactive minor release locally (no push).
 
 .EXAMPLE
-.\release.ps1 -ReleaseType patch -Yes -SkipValidation
+.\release.ps1 -ReleaseType minor -Yes -Publish
 
-Runs a non-interactive patch release without repeating validation.
+Runs a non-interactive minor release and publishes the commit/tag to origin.
+
+.EXAMPLE
+.\release.ps1 -ReleaseType patch -Yes -SkipValidation -Publish
+
+Runs a non-interactive patch release without repeating validation and publishes it.
 #>
 # OpenDocViewer release helper (release-only workflow, Windows-friendly)
 #
 # Expected workflow:
 #   1. Make code/documentation changes.
 #   2. Commit and push those changes manually, for example with GitHub Desktop.
-#   3. Run this script to validate, bump package version, create the release commit/tag,
-#      and push the release commit/tag.
+#   3. Run this script to validate, bump package version, and create the release commit/tag.
+#      By default the release is prepared locally and NOT pushed.
+#   4. If this is an approved official release, rerun with -Publish to push the commit/tag.
 #
 # This script intentionally does NOT run `git add`, does NOT commit application changes,
 # and does NOT stash changes. The working tree must be clean and the current branch must
@@ -47,6 +61,8 @@ param(
   [string]$ReleaseType = '',
 
   [switch]$Yes,
+
+  [switch]$Publish,
 
   [switch]$SkipValidation
 )
@@ -195,7 +211,12 @@ Remote HEAD: $remoteHead
 Write-Host "=== OpenDocViewer Release Helper ===`n"
 Write-Host 'Release-only mode: application code must already be committed and pushed.' -ForegroundColor Yellow
 Write-Host 'This script will not run git add, will not commit application changes, and will not stash.' -ForegroundColor Yellow
-Write-Host "It will only validate, run npm version, create the release commit/tag, and push that release commit/tag.`n" -ForegroundColor Yellow
+if ($Publish) {
+  Write-Host 'It will validate, run npm version, create the release commit/tag, and push to origin.' -ForegroundColor Yellow
+} else {
+  Write-Host 'It will validate, run npm version, and create the release commit/tag locally (no push).' -ForegroundColor Yellow
+}
+Write-Host 'Official release publishing requires the -Publish switch.' -ForegroundColor Yellow
 Write-Host 'Note: SECURITY.md is not updated automatically by this script.' -ForegroundColor Yellow
 Write-Host 'Before release, make sure SECURITY.md already matches the version you are about to publish:' -ForegroundColor Yellow
 Write-Host '  - Supported Versions' -ForegroundColor Yellow
@@ -210,7 +231,8 @@ if (@('patch', 'minor', 'major') -notcontains $ReleaseType) {
 }
 
 $currentVersion = Get-PackageVersion $repoRoot
-Write-Host "`nSummary:`n  Repo root:        $repoRoot`n  Branch:           $branch`n  Current version:  $currentVersion`n  Release type:     $ReleaseType`n  Base commit:      $localHead`n"
+$publishFlag = if ($Publish) { 'YES' } else { 'NO (local only)' }
+Write-Host "`nSummary:`n  Repo root:        $repoRoot`n  Branch:           $branch`n  Current version:  $currentVersion`n  Release type:     $ReleaseType`n  Publish:          $publishFlag`n  Base commit:      $localHead`n"
 
 if (-not $Yes) {
   if ((Read-Host 'Proceed? (Y/N)').ToUpperInvariant() -ne 'Y') {
@@ -241,6 +263,13 @@ $null = ExecNpm -NpmArgs @('run', '--silent', "release:$ReleaseType") -Cwd $repo
 
 $newVersion = Get-PackageVersion $repoRoot
 $tagName = "v$newVersion"
+
+if (-not $Publish) {
+  Write-Host "`nDone. Local release commit/tag created for $tagName." -ForegroundColor Green
+  Write-Host 'The release was NOT pushed. To publish this official release, run:' -ForegroundColor Yellow
+  Write-Host "  .\release.ps1 -ReleaseType $ReleaseType -Yes -Publish" -ForegroundColor Yellow
+  exit 0
+}
 
 try {
   Write-Host "`nPushing release commit and tag..." -ForegroundColor Yellow
