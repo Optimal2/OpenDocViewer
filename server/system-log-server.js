@@ -1,6 +1,6 @@
 // File: server/system-log-server.js
 /**
- * System Log Server — Single-file, standalone (ESM)
+ * System Log Server — standalone Express endpoint for structured system logs.
  *
  * Responsibilities:
  *  - Expose POST /log for structured system logs (tiny JSON bodies)

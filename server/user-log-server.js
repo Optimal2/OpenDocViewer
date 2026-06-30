@@ -1,6 +1,6 @@
 // File: server/user-log-server.js
 /**
- * User Action Log Server — Single-file, standalone (ESM)
+ * User Action Log Server — standalone Express endpoint for print/user-action audit events.
  *
  * Endpoint:
  *   POST /userlog/record

@@ -30,6 +30,16 @@ const DEFAULT_CUSTOM_FIT_WIDTH_FACTOR_PERCENT = 70;
 const KEYBOARD_PRINT_SHORTCUT_BEHAVIORS = Object.freeze(['browser', 'disable', 'dialog']);
 /** Runtime validation values for ResetSessionTarget; the typedef documents the public contract. */
 const RESET_SESSION_TARGETS = Object.freeze(['current', 'parent', 'parent-or-current', 'none']);
+/** User-facing print default mode aliases mapped to persisted PrintDefaultMode values. */
+const PRINT_DEFAULT_MODE_ALIASES = Object.freeze({
+  all: 'all',
+  'all-pages': 'all',
+  everything: 'all',
+  active: 'active',
+  'active-page': 'active',
+  current: 'active',
+  'current-page': 'active',
+});
 /** User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. */
 const DEFAULT_ZOOM_MODE_ALIAS_ENTRIES = Object.freeze([
   Object.freeze(['fit-page', 'FIT_PAGE']),
@@ -166,8 +176,9 @@ function normalizeBoolean(value, defaultValue) {
  * The max bound is optional; when it is invalid or lower than min, max is ignored entirely and
  * only the lower bound is applied.
  * For example, `clampNumber('x', 5, 1, 10)` returns 5, while
- * `clampNumber(20, 5, 1, 10)` returns 10. If max is lower than min, only min is enforced.
- * For example, `clampNumber(5, 10, 20, 15)` returns 20.
+ * `clampNumber(20, 5, 1, 10)` returns 10. If max is lower than min, max is ignored:
+ * `clampNumber(5, 10, 20, 15)` returns 20, while `clampNumber(30, 10, 20, 15)`
+ * returns 30 because no upper bound is applied.
  *
  * @param {*} value
  * @param {*=} defaultValue
@@ -306,8 +317,7 @@ function normalizeDefaultZoomMode(value, defaultMode = DEFAULT_ZOOM_MODE_TEXT) {
  */
 export function normalizePrintDefaultMode(value, defaultMode = 'active') {
   const raw = String(value || '').trim().toLowerCase().replace(/[_\s]+/g, '-');
-  if (raw === 'all' || raw === 'all-pages' || raw === 'everything') return 'all';
-  if (raw === 'active' || raw === 'active-page' || raw === 'current' || raw === 'current-page') return 'active';
+  if (Object.hasOwn(PRINT_DEFAULT_MODE_ALIASES, raw)) return PRINT_DEFAULT_MODE_ALIASES[raw];
   return defaultMode === 'all' ? 'all' : 'active';
 }
 
@@ -315,7 +325,8 @@ export function normalizePrintDefaultMode(value, defaultMode = 'active') {
  * Normalize a custom fit-width factor. The public config/preference value is an integer percentage
  * of the calculated fit-width zoom, not a direct zoom percentage. The default 70 means the custom
  * size starts at 70% of the calculated fit-width zoom when no site or user preference is set.
- * Values outside the supported 1-100 range are clamped to the nearest bound.
+ * Fractional values are floored to keep the persisted preference as an integer. Values outside
+ * the supported 1-100 range are clamped to the nearest bound.
  *
  * @param {*} value
  * @param {number} defaultValue
@@ -334,6 +345,9 @@ export function normalizeCustomFitWidthFactorPercent(value, defaultValue = DEFAU
  */
 export function normalizeOptionalCustomFitFactorPercent(value, max = 100) {
   if (value === null || value === undefined || String(value).trim() === '') return null;
+  // Optional size limits come from user-facing sliders/inputs, so nearest-integer rounding keeps
+  // those controls intuitive. normalizeCustomFitWidthFactorPercent floors the base fit-width
+  // factor instead to preserve its older persisted-preference behavior.
   const numeric = Math.round(Number(value));
   if (!Number.isFinite(numeric)) return null;
   if (numeric <= 0) return null;

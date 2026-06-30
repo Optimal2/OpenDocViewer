@@ -1169,40 +1169,41 @@
 | <code>withTimeout</code> | function | <code>src/utils/renderDecodeBenchmark.js:352</code> |  |
 | <code>clampRenderSurfaceSize</code> | function | <code>src/utils/renderSurfaceBounds.js:25</code> | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
-| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:178</code> | Clamp a numeric config value to a safe range. |
-| <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
-| <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:126</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:427</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:452</code> | Resolve the print-selection workspace configuration. |
-| <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:103</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:403</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:389</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:376</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:476</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:494</code> | Resolve the configurable viewer-level problem notice. |
-| <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:139</code> | Resolve whether document metadata UI affordances should be available. |
+| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:189</code> | Clamp a numeric config value to a safe range. |
+| <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:44</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
+| <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:136</code> | Resolve the configured Ctrl/Cmd+P behavior. |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:441</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:466</code> | Resolve the print-selection workspace configuration. |
+| <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:113</code> | Read the merged runtime configuration from the browser environment. |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:417</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:403</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:390</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:490</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:508</code> | Resolve the configurable viewer-level problem notice. |
+| <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:149</code> | Resolve whether document metadata UI affordances should be available. |
 | <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:30</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
-| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:157</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:350</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:324</code> | Normalize a custom fit-width factor. |
-| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:292</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
-| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:224</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
-| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:203</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:335</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:307</code> | Normalize a user-facing print default mode. |
-| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:253</code> | Resolve the configured reset-session fallback target. |
-| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:241</code> | Normalize the runtime session-reset target. |
-| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:267</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:167</code> | Normalize a runtime flag to a boolean. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:364</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:335</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:303</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
+| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:235</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
+| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:214</code> | Normalize an integer config value and clamp it to the supplied range. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:346</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:318</code> | Normalize a user-facing print default mode. |
+| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:264</code> | Resolve the configured reset-session fallback target. |
+| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:252</code> | Normalize the runtime session-reset target. |
+| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:278</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
-| <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:62</code> |  |
+| <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:72</code> |  |
 | <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:32</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
 | <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> | Session-reset target for the support/problem notice. |
-| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:278</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
-| <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:55</code> |  |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:289</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
+| <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:65</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
-| <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:69</code> |  |
-| <code>ViewerProblemNoticeConfig</code> | typedef | <code>src/utils/runtimeConfig.js:77</code> |  |
+| <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:79</code> |  |
+| <code>ViewerProblemNoticeConfig</code> | typedef | <code>src/utils/runtimeConfig.js:87</code> |  |
 | <code>BlobLruCache</code> | class | <code>src/utils/sourceTempStore.js:210</code> |  |
 | <code>SourceTempStore#cleanup</code> | function | <code>src/utils/sourceTempStore.js:586</code> |  |
 | <code>SourceTempStore#cleanupStaleSessions</code> | function | <code>src/utils/sourceTempStore.js:636</code> |  |

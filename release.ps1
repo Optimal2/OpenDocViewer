@@ -41,7 +41,9 @@ Runs a non-interactive minor release and publishes the commit/tag to origin.
 .EXAMPLE
 .\release.ps1 -ReleaseType patch -Yes -SkipValidation -Publish
 
-Runs a non-interactive patch release without repeating validation and publishes it.
+Publishes a patch release without repeating validation. Use this only after lint/build/doc/doc:agent
+have already passed on the exact commit being released; otherwise prefer running without
+-SkipValidation first.
 #>
 # OpenDocViewer release helper (release-only workflow, Windows-friendly)
 #
@@ -72,6 +74,8 @@ $ErrorActionPreference = 'Stop'
 
 function Format-CommandLineArgs($a) {
   if (-not $a) { return '' }
+  # Display-only formatter for log output. Process execution uses ArgumentList below so
+  # PowerShell/.NET perform native argument quoting instead of relying on this summary string.
   return ($a | ForEach-Object {
     if ($_ -match '[\s"|\\]') { '"' + ($_ -replace '(["\\])', '\\$1') + '"' } else { $_ }
   }) -join ' '
@@ -83,7 +87,8 @@ function Exec {
     [string[]]$Args = @(),
     [string]$Cwd = $null,
     [switch]$AllowNonZero,
-    [switch]$Quiet
+    [switch]$Quiet,
+    [int]$TimeoutSeconds = 1800
   )
 
   $as = Format-CommandLineArgs $Args
@@ -94,7 +99,9 @@ function Exec {
 
   $psi = [System.Diagnostics.ProcessStartInfo]::new()
   $psi.FileName = $File
-  $psi.Arguments = $as
+  foreach ($arg in $Args) {
+    [void]$psi.ArgumentList.Add($arg)
+  }
   if ($Cwd) { $psi.WorkingDirectory = $Cwd }
   $psi.RedirectStandardOutput = $true
   $psi.RedirectStandardError = $true
@@ -108,7 +115,12 @@ function Exec {
   # Read asynchronously to avoid stdout/stderr pipe deadlocks on verbose commands.
   $stdoutTask = $p.StandardOutput.ReadToEndAsync()
   $stderrTask = $p.StandardError.ReadToEndAsync()
-  $p.WaitForExit()
+  $timeoutMs = [Math]::Max(1, $TimeoutSeconds) * 1000
+  if (-not $p.WaitForExit($timeoutMs)) {
+    try { $p.Kill($true) } catch {}
+    throw "Command timed out after $TimeoutSeconds second(s): $File $as"
+  }
+
   $o = $stdoutTask.GetAwaiter().GetResult()
   $e = $stderrTask.GetAwaiter().GetResult()
 
@@ -160,6 +172,16 @@ function Get-PackageVersion([string]$RepoRoot) {
   $pkg = Get-Content -Raw -Path $pkgPath | ConvertFrom-Json
   if (-not $pkg.version) { throw 'Missing version field in package.json.' }
   return [string]$pkg.version
+}
+
+function Wait-ForRemoteTag([string]$RepoRoot, [string]$TagName) {
+  for ($i = 1; $i -le 5; $i++) {
+    $result = (Exec 'git' @('ls-remote', '--tags', 'origin', $TagName) -Cwd $RepoRoot -AllowNonZero -Quiet).Out.Trim()
+    if ($result) { return $result }
+    Start-Sleep -Seconds 2
+  }
+
+  return ''
 }
 
 # Resolve repo root from script path; work there regardless of current shell location.
@@ -275,17 +297,23 @@ try {
   Write-Host "`nPushing release commit and tag..." -ForegroundColor Yellow
   $null = Exec 'git' @('push', 'origin', $branch, '--follow-tags') -Cwd $repoRoot
 } catch {
+  $pushError = $_
   Write-Warning "Push failed. Rolling local release commit/tag back to $prevHead."
-  if ($tagName) { $null = Exec 'git' @('tag', '-d', $tagName) -Cwd $repoRoot -AllowNonZero }
-  $null = Exec 'git' @('reset', '--hard', $prevHead) -Cwd $repoRoot -AllowNonZero
-  throw
+  try {
+    if ($tagName) { $null = Exec 'git' @('tag', '-d', $tagName) -Cwd $repoRoot }
+    $null = Exec 'git' @('reset', '--hard', $prevHead) -Cwd $repoRoot
+  } catch {
+    throw "Push failed and automatic rollback also failed. Original push error: $($pushError.Exception.Message) Rollback error: $($_.Exception.Message)"
+  }
+
+  throw $pushError
 }
 
 # Post-push verification.
 $null = Exec 'git' @('fetch', 'origin', '--tags') -Cwd $repoRoot -Quiet
 $localAfter = (Exec 'git' @('rev-parse', 'HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 $remoteAfter = (Exec 'git' @('rev-parse', "origin/$branch") -Cwd $repoRoot -Quiet).Out.Trim()
-$tagRemote = (Exec 'git' @('ls-remote', '--tags', 'origin', $tagName) -Cwd $repoRoot -AllowNonZero -Quiet).Out.Trim()
+$tagRemote = Wait-ForRemoteTag $repoRoot $tagName
 
 if ($localAfter -ne $remoteAfter) {
   Write-Warning "Push verification: local HEAD != origin/$branch. Review with: git log HEAD...origin/$branch --oneline"
