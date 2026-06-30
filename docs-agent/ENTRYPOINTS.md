@@ -26,8 +26,8 @@
 
 ## Runtime Entrypoints
 
-- `server/system-log-server.js` - System Log Server — Single\-file, standalone \(ESM\) Responsibilities: \- Expose POST /log for structured system logs \(tiny JSON bodies\) \- Write NDJSON to daily\-rotated files under ./logs/ \- Keep access, ingestion, and error
-- `server/user-log-server.js` - User Action Log Server — Single\-file, standalone \(ESM\) Endpoint: POST /userlog/record \- Body: application/x\-www\-form\-urlencoded or JSON \- reason: string\|null \- forWhom: string\|null \- Response: 200 OK with body: true \(JSO
+- `server/system-log-server.js` - System Log Server — standalone Express endpoint for structured system logs.
+- `server/user-log-server.js` - User Action Log Server — standalone Express endpoint for print/user\-action audit events.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 
 ## Import Hubs

@@ -4,8 +4,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 
 | File | Lines | In | JSDoc | Confidence | Summary |
 | --- | ---: | ---: | ---: | --- | --- |
-| <code>server/system-log-server.js</code> | 237 | 0 | 5 | high | System Log Server — Single-file, standalone \(ESM\) Responsibilities: - Expose POST /log for structured system logs \(tiny JSON bodies\) - Write NDJSON to daily-rotated files under ./logs/ - Keep access, ingestion, and error |
-| <code>server/user-log-server.js</code> | 271 | 0 | 2 | high | User Action Log Server — Single-file, standalone \(ESM\) Endpoint: POST /userlog/record - Body: application/x-www-form-urlencoded or JSON - reason: string\|null - forWhom: string\|null - Response: 200 OK with body: true \(JSO |
+| <code>server/system-log-server.js</code> | 237 | 0 | 5 | high | System Log Server — standalone Express endpoint for structured system logs. |
+| <code>server/user-log-server.js</code> | 271 | 0 | 2 | high | User Action Log Server — standalone Express endpoint for print/user-action audit events. |
 | <code>src/app/AppBootstrap.jsx</code> | 432 | 1 | 10 | high | Application bootstrap React component. |
 | <code>src/app/bootConfig.js</code> | 138 | 0 | 5 | high | Runtime boot loader that resolves configuration scripts before React starts. |
 | <code>src/app/OpenDocViewer.jsx</code> | 193 | 1 | 5 | high | src/app/OpenDocViewer.jsx Main application shell for the viewer. |
@@ -110,7 +110,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/reloadCacheIdentity.js</code> | 154 | 2 | 7 | high | Stable identities for the opt-in reload/document cache. |
 | <code>src/utils/renderDecodeBenchmark.js</code> | 1211 | 1 | 28 | high | Opt-in render/decode benchmark tooling for the already loaded document session. |
 | <code>src/utils/renderSurfaceBounds.js</code> | 52 | 1 | 2 | high | OpenDocViewer — conservative raster surface bounds. |
-| <code>src/utils/runtimeConfig.js</code> | 519 | 13 | 34 | high | Runtime configuration helpers. |
+| <code>src/utils/runtimeConfig.js</code> | 533 | 13 | 35 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/supportDiagnostics.js</code> | 370 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
 | <code>src/utils/viewerPreferences.js</code> | 473 | 5 | 33 | high | Lightweight persisted viewer preferences. |
