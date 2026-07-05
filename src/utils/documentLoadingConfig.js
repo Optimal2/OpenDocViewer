@@ -383,10 +383,13 @@ function normalizeStoreMode(value, fallback) {
   return 'adaptive';
 }
 
-function normalizeProtection(value, fallback) {
+export function normalizeProtection(value, fallback) {
   const raw = String(value || fallback || '').toLowerCase();
+  if (raw === 'none') return 'none';
   if (raw === 'aes-gcm-session') return 'aes-gcm-session';
-  return 'none';
+  // Invalid/empty/unrecognized → fail closed to the safe default, NOT 'none'.
+  // This prevents silent cryptographic downgrades from typos or bad config.
+  return 'aes-gcm-session';
 }
 
 function normalizeThumbnailLoadingStrategy(value, fallback) {
