@@ -205,14 +205,34 @@ function circularReplacer() {
 }
 
 /**
+ * Detect tokens that are clearly placeholders or left unset.
+ * Treats empty/null/undefined and common placeholder strings as invalid.
+ * @param {*} token
+ * @returns {boolean}
+ */
+export function isPlaceholderToken(token) {
+  const raw = String(token || '').trim();
+  if (!raw) return true;
+  const normalized = raw.toUpperCase();
+  return (
+    normalized === 'REPLACE_WITH_SYSTEM_LOG_TOKEN' ||
+    normalized.includes('REPLACE_WITH') ||
+    normalized.includes('YOUR_TOKEN') ||
+    normalized.includes('PLACEHOLDER') ||
+    normalized.includes('TODO')
+  );
+}
+
+/**
  * LogController — small facade around console + optional HTTP forwarding.
  */
 class LogController {
   constructor() {
     // Backend endpoint + auth token (resolved at construction; you can override later)
     const backendUrl = resolveBackendUrl();
+    const resolvedToken = resolveAuthToken();
     /** @private */ this.backendUrl = backendUrl;
-    /** @private */ this.authToken = resolveAuthToken();
+    /** @private */ this.authToken = resolvedToken;
 
     // Level: development => debug, otherwise warn (tune here if you prefer)
     /** @private */ this.logLevel = (import.meta?.env?.MODE === 'development') ? 'debug' : 'warn';
@@ -221,7 +241,12 @@ class LogController {
     // Whether we should POST logs to the backend
     const enabledOverride = resolveEnabledOverride();
     const enabledByDefault = !!backendUrl;
-    /** @private */ this.logToBackend = !!backendUrl && (enabledOverride ?? enabledByDefault);
+    const placeholderToken = isPlaceholderToken(resolvedToken);
+    const effectiveEnabled = enabledOverride ?? enabledByDefault;
+    if (placeholderToken && effectiveEnabled && enabledOverride !== false) {
+      console.warn('SystemLog backend disabled: token is a placeholder. Set a real token in odv.site.config.js to enable backend logging.');
+    }
+    /** @private */ this.logToBackend = !!backendUrl && effectiveEnabled && (enabledOverride === true || !placeholderToken);
 
     // Retry policy
     /** @private */ this.retryLimit = 3;
