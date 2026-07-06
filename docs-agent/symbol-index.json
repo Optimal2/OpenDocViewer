@@ -15846,7 +15846,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 417,
+    "line": 456,
     "description": "",
     "params": [
       {
@@ -15866,7 +15866,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 365,
+    "line": 404,
     "description": "Disable backend forwarding after a non-recoverable configuration/runtime failure.",
     "params": [
       {
@@ -15891,7 +15891,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 426,
+    "line": 465,
     "description": "",
     "params": [
       {
@@ -15911,7 +15911,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 420,
+    "line": 459,
     "description": "",
     "params": [
       {
@@ -15922,6 +15922,31 @@
       }
     ],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "isPlaceholderToken",
+    "name": "isPlaceholderToken",
+    "longname": "isPlaceholderToken",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/logging/systemLogger.js",
+    "line": 213,
+    "description": "Detect tokens that are clearly placeholders or left unset.",
+    "params": [
+      {
+        "name": "token",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -15962,7 +15987,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 338,
+    "line": 377,
     "description": "Log a message with a given level and optional context.",
     "params": [
       {
@@ -16012,7 +16037,7 @@
     "kind": "class",
     "scope": "global",
     "file": "src/logging/systemLogger.js",
-    "line": 210,
+    "line": 243,
     "description": "LogController — small facade around console + optional HTTP forwarding.",
     "params": [],
     "returns": [],
@@ -16025,7 +16050,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/logging/systemLogger.js",
-    "line": 430,
+    "line": 469,
     "description": "Export a singleton instance (sufficient for app usage).",
     "params": [],
     "returns": [],
@@ -16211,7 +16236,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 383,
+    "line": 422,
     "description": "Attempt to POST the log to the backend, with simple linear retries.",
     "params": [
       {
@@ -16254,7 +16279,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 311,
+    "line": 350,
     "description": "Update/replace the auth token used in 'x-log-token'.",
     "params": [
       {
@@ -16279,7 +16304,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 260,
+    "line": 299,
     "description": "Set the backend ingestion URL (absolute or relative).",
     "params": [
       {
@@ -16304,7 +16329,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 302,
+    "line": 341,
     "description": "Set axios timeout (ms) for backend posts.",
     "params": [
       {
@@ -16329,7 +16354,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 274,
+    "line": 313,
     "description": "Set the current log level.",
     "params": [
       {
@@ -16354,7 +16379,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 247,
+    "line": 286,
     "description": "Enable/disable HTTP forwarding at runtime.",
     "params": [
       {
@@ -16379,7 +16404,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 293,
+    "line": 332,
     "description": "Set retry interval (ms) for backend forwarding.",
     "params": [
       {
@@ -16404,7 +16429,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 284,
+    "line": 323,
     "description": "Set retry limit for backend forwarding.",
     "params": [
       {
@@ -16423,13 +16448,50 @@
     "examples": 0
   },
   {
+    "id": "shouldEnableBackendLogging",
+    "name": "shouldEnableBackendLogging",
+    "longname": "shouldEnableBackendLogging",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/logging/systemLogger.js",
+    "line": 234,
+    "description": "Decide whether backend log forwarding may be enabled.",
+    "params": [
+      {
+        "name": "backendUrl",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "enabledOverride",
+        "type": "boolean|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "token",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "LogController#shouldLog",
     "name": "shouldLog",
     "longname": "LogController#shouldLog",
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 324,
+    "line": 363,
     "description": "Internal: should this level be logged at all (console or backend)?",
     "params": [
       {
@@ -16454,7 +16516,7 @@
     "kind": "member",
     "scope": "instance",
     "file": "src/logging/systemLogger.js",
-    "line": 423,
+    "line": 462,
     "description": "",
     "params": [
       {
@@ -17894,7 +17956,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 523,
+    "line": 526,
     "description": "Count PDF pages in a page descriptor list.",
     "params": [
       {
@@ -18119,7 +18181,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1023,
+    "line": 1026,
     "description": "",
     "params": [
       {
@@ -18144,7 +18206,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1041,
+    "line": 1044,
     "description": "",
     "params": [
       {
@@ -18169,7 +18231,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 849,
+    "line": 852,
     "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
     "params": [
       {
@@ -18225,7 +18287,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 604,
+    "line": 607,
     "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
     "params": [
       {
@@ -18256,7 +18318,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 543,
+    "line": 546,
     "description": "Resolve the PDF page-worker policy for the current document size.",
     "params": [
       {
@@ -18362,7 +18424,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1049,
+    "line": 1052,
     "description": "",
     "params": [
       {

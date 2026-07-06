@@ -6,7 +6,7 @@ Source commit: not embedded
 ## Project
 
 - Package: opendocviewer
-- Version: 2.6.6
+- Version: 2.6.8
 - Description: Fast, lightweight document viewer \(PDF, TIFF, images\) built with React \+ Vite, with a token\-gated log server and runtime configuration.
 
 ## Read Order
@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 114
-- Source lines: 49377
-- JSDoc symbols: 1314
+- Source lines: 49419
+- JSDoc symbols: 1316
 - Files with JSDoc: 114
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -34,9 +34,9 @@ Source commit: not embedded
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
+- `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
-- `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
