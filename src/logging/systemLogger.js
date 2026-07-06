@@ -224,6 +224,20 @@ export function isPlaceholderToken(token) {
 }
 
 /**
+ * Decide whether backend log forwarding may be enabled.
+ * Placeholder or empty tokens always fail closed, even when logging is explicitly enabled.
+ * @param {string} backendUrl
+ * @param {(boolean|null)} enabledOverride
+ * @param {*} token
+ * @returns {boolean}
+ */
+export function shouldEnableBackendLogging(backendUrl, enabledOverride, token) {
+  const enabledByDefault = !!backendUrl;
+  const effectiveEnabled = enabledOverride ?? enabledByDefault;
+  return !!backendUrl && effectiveEnabled && !isPlaceholderToken(token);
+}
+
+/**
  * LogController — small facade around console + optional HTTP forwarding.
  */
 class LogController {
@@ -243,10 +257,10 @@ class LogController {
     const enabledByDefault = !!backendUrl;
     const placeholderToken = isPlaceholderToken(resolvedToken);
     const effectiveEnabled = enabledOverride ?? enabledByDefault;
-    if (placeholderToken && effectiveEnabled && enabledOverride !== false) {
+    if (backendUrl && placeholderToken && effectiveEnabled && enabledOverride !== false) {
       console.warn('SystemLog backend disabled: token is a placeholder. Set a real token in odv.site.config.js to enable backend logging.');
     }
-    /** @private */ this.logToBackend = !!backendUrl && effectiveEnabled && (enabledOverride === true || !placeholderToken);
+    /** @private */ this.logToBackend = shouldEnableBackendLogging(backendUrl, enabledOverride, resolvedToken);
 
     // Retry policy
     /** @private */ this.retryLimit = 3;
