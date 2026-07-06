@@ -1,12 +1,12 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 15049. JSDoc symbol count: 592.
+File count: 35. Line count: 15052. JSDoc symbol count: 592.
 
 ## src/utils/documentLoadingConfig.js
 
 OpenDocViewer — runtime helpers for fetch/render/memory policies.
 
-Exports: `MAX_RELOAD_CACHE_TTL_MS`, `resolveRecommendedWorkerCount`, `DOCUMENT_LOADING_DEFAULTS`, `cloneDocumentLoadingConfig`, `countPdfPages`, `resolvePdfWorkerPlanForPageCount`, `resolvePdfRenderConfigForPageCount`, `applyDocumentLoadingMode`, `applyMemoryPressureStage`, `getPerformanceWindowPageCount`, `getDocumentLoadingConfig`, `isRasterImageExtension`, `shouldUseFullImagesForThumbnails`, `shouldKeepAllFullImageAssets`, `formatBytes`, `formatCount`, `shouldRecommendStopping`
+Exports: `MAX_RELOAD_CACHE_TTL_MS`, `resolveRecommendedWorkerCount`, `DOCUMENT_LOADING_DEFAULTS`, `normalizeProtection`, `cloneDocumentLoadingConfig`, `countPdfPages`, `resolvePdfWorkerPlanForPageCount`, `resolvePdfRenderConfigForPageCount`, `applyDocumentLoadingMode`, `applyMemoryPressureStage`, `getPerformanceWindowPageCount`, `getDocumentLoadingConfig`, `isRasterImageExtension`, `shouldUseFullImagesForThumbnails`, `shouldKeepAllFullImageAssets`, `formatBytes`, `formatCount`, `shouldRecommendStopping`
 
 Local imports: `src/utils/runtimeConfig.js`, `src/utils/memoryProfile.js`
 

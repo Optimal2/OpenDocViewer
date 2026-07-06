@@ -123,7 +123,7 @@ File count: 7. Line count: 2073. JSDoc symbol count: 52.
 
 ## src/logging
 
-File count: 2. Line count: 740. JSDoc symbol count: 46.
+File count: 2. Line count: 779. JSDoc symbol count: 48.
 
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/logging/userLogger.js` - UserLogController — client\-side controller for \*\*user\*\* print logs \(backend\-agnostic\).
@@ -148,7 +148,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 35. Line count: 15049. JSDoc symbol count: 592.
+File count: 35. Line count: 15052. JSDoc symbol count: 592.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

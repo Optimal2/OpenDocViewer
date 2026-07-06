@@ -625,15 +625,16 @@
 | <code>OnceOptions</code> | typedef | <code>src/integrations/viewerEvents.js:37</code> | Options for onceODVEvent. |
 | <code>onODVEvent</code> | function | <code>src/integrations/viewerEvents.js:110</code> | Attach a listener for a given OpenDocViewer event. |
 | <code>circularReplacer</code> | function | <code>src/logging/systemLogger.js:196</code> | Create a JSON replacer that: prevents circular references leaves values otherwise intact |
-| <code>LogController#debug</code> | member | <code>src/logging/systemLogger.js:417</code> |  |
-| <code>LogController#disableBackendLogging</code> | member | <code>src/logging/systemLogger.js:365</code> | Disable backend forwarding after a non-recoverable configuration/runtime failure. |
-| <code>LogController#error</code> | member | <code>src/logging/systemLogger.js:426</code> |  |
-| <code>LogController#info</code> | member | <code>src/logging/systemLogger.js:420</code> |  |
+| <code>LogController#debug</code> | member | <code>src/logging/systemLogger.js:456</code> |  |
+| <code>LogController#disableBackendLogging</code> | member | <code>src/logging/systemLogger.js:404</code> | Disable backend forwarding after a non-recoverable configuration/runtime failure. |
+| <code>LogController#error</code> | member | <code>src/logging/systemLogger.js:465</code> |  |
+| <code>LogController#info</code> | member | <code>src/logging/systemLogger.js:459</code> |  |
+| <code>isPlaceholderToken</code> | function | <code>src/logging/systemLogger.js:213</code> | Detect tokens that are clearly placeholders or left unset. |
 | <code>levelGte</code> | function | <code>src/logging/systemLogger.js:186</code> | Compare two log levels \(is a &amp;gt;= b ?\). |
-| <code>LogController#log</code> | member | <code>src/logging/systemLogger.js:338</code> | Log a message with a given level and optional context. |
+| <code>LogController#log</code> | member | <code>src/logging/systemLogger.js:377</code> | Log a message with a given level and optional context. |
 | <code>LOG_LEVELS</code> | constant | <code>src/logging/systemLogger.js:44</code> | Valid log levels in ascending verbosity. |
-| <code>LogController</code> | class | <code>src/logging/systemLogger.js:210</code> | LogController — small facade around console + optional HTTP forwarding. |
-| <code>logger</code> | constant | <code>src/logging/systemLogger.js:430</code> | Export a singleton instance \(sufficient for app usage\). |
+| <code>LogController</code> | class | <code>src/logging/systemLogger.js:243</code> | LogController — small facade around console + optional HTTP forwarding. |
+| <code>logger</code> | constant | <code>src/logging/systemLogger.js:469</code> | Export a singleton instance \(sufficient for app usage\). |
 | <code>LogLevel</code> | typedef | <code>src/logging/systemLogger.js:41</code> |  |
 | <code>NOOP</code> | function | <code>src/logging/systemLogger.js:47</code> | No-op function used when we want to swallow calls cleanly. |
 | <code>normalizeLevel</code> | function | <code>src/logging/systemLogger.js:175</code> | Normalize and validate a log level. |
@@ -643,16 +644,17 @@
 | <code>resolveAuthToken</code> | function | <code>src/logging/systemLogger.js:146</code> | Resolve the shared auth token used for posting to /log. |
 | <code>resolveBackendUrl</code> | function | <code>src/logging/systemLogger.js:115</code> | Resolve a candidate backend URL using precedence rules and make it absolute relative to document.baseURI \(SSR-safe\). |
 | <code>resolveEnabledOverride</code> | function | <code>src/logging/systemLogger.js:163</code> | Resolve an explicit &amp;quot;enabled&amp;quot; boolean if one exists. |
-| <code>LogController#sendLogToBackend</code> | member | <code>src/logging/systemLogger.js:383</code> | Attempt to POST the log to the backend, with simple linear retries. |
-| <code>LogController#setAuthToken</code> | member | <code>src/logging/systemLogger.js:311</code> | Update/replace the auth token used in &#39;x-log-token&#39;. |
-| <code>LogController#setBackendUrl</code> | member | <code>src/logging/systemLogger.js:260</code> | Set the backend ingestion URL \(absolute or relative\). |
-| <code>LogController#setHttpTimeout</code> | member | <code>src/logging/systemLogger.js:302</code> | Set axios timeout \(ms\) for backend posts. |
-| <code>LogController#setLogLevel</code> | member | <code>src/logging/systemLogger.js:274</code> | Set the current log level. |
-| <code>LogController#setLogToBackend</code> | member | <code>src/logging/systemLogger.js:247</code> | Enable/disable HTTP forwarding at runtime. |
-| <code>LogController#setRetryInterval</code> | member | <code>src/logging/systemLogger.js:293</code> | Set retry interval \(ms\) for backend forwarding. |
-| <code>LogController#setRetryLimit</code> | member | <code>src/logging/systemLogger.js:284</code> | Set retry limit for backend forwarding. |
-| <code>LogController#shouldLog</code> | member | <code>src/logging/systemLogger.js:324</code> | Internal: should this level be logged at all \(console or backend\)? |
-| <code>LogController#warn</code> | member | <code>src/logging/systemLogger.js:423</code> |  |
+| <code>LogController#sendLogToBackend</code> | member | <code>src/logging/systemLogger.js:422</code> | Attempt to POST the log to the backend, with simple linear retries. |
+| <code>LogController#setAuthToken</code> | member | <code>src/logging/systemLogger.js:350</code> | Update/replace the auth token used in &#39;x-log-token&#39;. |
+| <code>LogController#setBackendUrl</code> | member | <code>src/logging/systemLogger.js:299</code> | Set the backend ingestion URL \(absolute or relative\). |
+| <code>LogController#setHttpTimeout</code> | member | <code>src/logging/systemLogger.js:341</code> | Set axios timeout \(ms\) for backend posts. |
+| <code>LogController#setLogLevel</code> | member | <code>src/logging/systemLogger.js:313</code> | Set the current log level. |
+| <code>LogController#setLogToBackend</code> | member | <code>src/logging/systemLogger.js:286</code> | Enable/disable HTTP forwarding at runtime. |
+| <code>LogController#setRetryInterval</code> | member | <code>src/logging/systemLogger.js:332</code> | Set retry interval \(ms\) for backend forwarding. |
+| <code>LogController#setRetryLimit</code> | member | <code>src/logging/systemLogger.js:323</code> | Set retry limit for backend forwarding. |
+| <code>shouldEnableBackendLogging</code> | function | <code>src/logging/systemLogger.js:234</code> | Decide whether backend log forwarding may be enabled. |
+| <code>LogController#shouldLog</code> | member | <code>src/logging/systemLogger.js:363</code> | Internal: should this level be logged at all \(console or backend\)? |
+| <code>LogController#warn</code> | member | <code>src/logging/systemLogger.js:462</code> |  |
 | <code>__DEV__</code> | constant | <code>src/logging/userLogger.js:59</code> | True when running in dev \(for debug logging only\). |
 | <code>UserLogController#_captureCookieFingerprint</code> | function | <code>src/logging/userLogger.js:168</code> | Internal: hash document.cookie once \(non-blocking\). |
 | <code>abToBase64</code> | function | <code>src/logging/userLogger.js:110</code> | Base64 from ArrayBuffer \(for cookie fingerprint\). |
@@ -721,7 +723,7 @@
 | <code>SetString</code> | typedef | <code>src/types/jsdoc-types.js:29</code> | Simple string setter. |
 | <code>SetStringNullable</code> | typedef | <code>src/types/jsdoc-types.js:15</code> | Setter for string-or-null values. |
 | <code>ZoomMode</code> | typedef | <code>src/types/jsdoc-types.js:79</code> | Sticky zoom modes used by the viewer. |
-| <code>countPdfPages</code> | function | <code>src/utils/documentLoadingConfig.js:523</code> | Count PDF pages in a page descriptor list. |
+| <code>countPdfPages</code> | function | <code>src/utils/documentLoadingConfig.js:526</code> | Count PDF pages in a page descriptor list. |
 | <code>detectBrowserFamily</code> | function | <code>src/utils/documentLoadingConfig.js:167</code> |  |
 | <code>DocumentLoadingAdaptiveMemoryConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:29</code> |  |
 | <code>DocumentLoadingAssetStoreConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:71</code> |  |
@@ -737,17 +739,17 @@
 | <code>DocumentLoadingRenderStrategy</code> | typedef | <code>src/utils/documentLoadingConfig.js:22</code> |  |
 | <code>DocumentLoadingSourceStoreConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:60</code> |  |
 | <code>DocumentLoadingWarningConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:40</code> |  |
-| <code>formatBytes</code> | function | <code>src/utils/documentLoadingConfig.js:1023</code> |  |
-| <code>formatCount</code> | function | <code>src/utils/documentLoadingConfig.js:1041</code> |  |
-| <code>getPerformanceWindowPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:849</code> | Return the page-count window where auto mode should still behave like the fast, eager path. |
+| <code>formatBytes</code> | function | <code>src/utils/documentLoadingConfig.js:1026</code> |  |
+| <code>formatCount</code> | function | <code>src/utils/documentLoadingConfig.js:1044</code> |  |
+| <code>getPerformanceWindowPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:852</code> | Return the page-count window where auto mode should still behave like the fast, eager path. |
 | <code>getReportedCoreCount</code> | function | <code>src/utils/documentLoadingConfig.js:186</code> | Return the browser-reported logical core count. |
 | <code>PdfToImageMode</code> | typedef | <code>src/utils/documentLoadingConfig.js:24</code> |  |
-| <code>resolvePdfRenderConfigForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:604</code> | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
-| <code>resolvePdfWorkerPlanForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:543</code> | Resolve the PDF page-worker policy for the current document size. |
+| <code>resolvePdfRenderConfigForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:607</code> | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
+| <code>resolvePdfWorkerPlanForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:546</code> | Resolve the PDF page-worker policy for the current document size. |
 | <code>resolveRecommendedRasterWorkerCount</code> | function | <code>src/utils/documentLoadingConfig.js:224</code> |  |
 | <code>resolveRecommendedWorkerCount</code> | function | <code>src/utils/documentLoadingConfig.js:204</code> |  |
 | <code>RuntimeMemoryTier</code> | typedef | <code>src/utils/documentLoadingConfig.js:19</code> |  |
-| <code>shouldRecommendStopping</code> | function | <code>src/utils/documentLoadingConfig.js:1049</code> |  |
+| <code>shouldRecommendStopping</code> | function | <code>src/utils/documentLoadingConfig.js:1052</code> |  |
 | <code>SourceStoreMode</code> | typedef | <code>src/utils/documentLoadingConfig.js:15</code> |  |
 | <code>SourceStoreProtection</code> | typedef | <code>src/utils/documentLoadingConfig.js:16</code> |  |
 | <code>StopRecommendationInput</code> | typedef | <code>src/utils/documentLoadingConfig.js:145</code> |  |

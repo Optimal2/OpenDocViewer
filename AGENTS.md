@@ -17,8 +17,12 @@ Before making changes:
 - Keep OpenDocViewer generic. Do not bake host-application-specific behavior into viewer code unless the integration contract explicitly supports it as optional metadata.
 - Keep code, comments, scripts, and development documentation in English. Swedish belongs only in application localization/help resources.
 - If a change must be visible in a local hosted runtime, run the matching build/publish/deployment step after the code change.
-- If source structure, JSDoc, dependencies, or module responsibilities change,
-  regenerate `docs-agent/` with `npm run doc:agent`.
+- After any committed source/runtime-config/package change that touches indexed
+  areas such as `src/`, `server/`, `public/odv*.config*.js`, JSDoc/exported
+  APIs, dependencies, or module responsibilities, regenerate `docs-agent/` with
+  `npm run doc:agent` before committing. Include the generated `docs-agent/`
+  diff when it changes; if it stays clean, mention that the command was run.
+  CI validates this with `git diff --exit-code -- docs-agent`.
 - When a task produces repository changes, validate them, commit with a focused message, and push unless the user asks not to or the worktree contains unrelated user changes.
 
 ## Security / Antivirus Compatibility
