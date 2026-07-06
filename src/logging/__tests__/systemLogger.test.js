@@ -7,7 +7,7 @@
  */
 
 import { describe, it, expect } from 'vitest';
-import { isPlaceholderToken } from '../systemLogger.js';
+import { isPlaceholderToken, shouldEnableBackendLogging } from '../systemLogger.js';
 
 describe('systemLogger', () => {
   describe('isPlaceholderToken', () => {
@@ -37,6 +37,20 @@ describe('systemLogger', () => {
       expect(isPlaceholderToken('real-token-abc123')).toBe(false);
       expect(isPlaceholderToken('devtoken')).toBe(false);
       expect(isPlaceholderToken('eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9')).toBe(false);
+    });
+  });
+
+  describe('shouldEnableBackendLogging', () => {
+    it('fails closed for placeholder tokens even when explicitly enabled', () => {
+      expect(shouldEnableBackendLogging('https://logs.example.test/log', true, 'REPLACE_WITH_SYSTEM_LOG_TOKEN')).toBe(false);
+    });
+
+    it('enables backend logging for real tokens when explicitly enabled', () => {
+      expect(shouldEnableBackendLogging('https://logs.example.test/log', true, 'real-token-abc123')).toBe(true);
+    });
+
+    it('stays disabled when there is no backend endpoint', () => {
+      expect(shouldEnableBackendLogging('', true, 'real-token-abc123')).toBe(false);
     });
   });
 });
