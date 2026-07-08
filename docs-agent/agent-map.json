@@ -3,7 +3,7 @@
   "project": {
     "name": "OpenDocViewer",
     "packageName": "opendocviewer",
-    "packageVersion": "2.6.8",
+    "packageVersion": "2.6.9",
     "description": "Fast, lightweight document viewer (PDF, TIFF, images) built with React + Vite, with a token-gated log server and runtime configuration.",
     "packageScripts": {
       "dev": "vite",

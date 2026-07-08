@@ -90,10 +90,12 @@ For production tightening:
 - do not remove `blob:` or `data:` from image/print-related directives while OpenDocViewer still
   renders pages and print output through object URLs and data URLs
 
-`frame-ancestors` is a host/header concern, not a viewer-meta concern. If a deployment wants to
-restrict who may embed OpenDocViewer, emit that directive as an HTTP response header from IIS or
-the reverse proxy. The `<meta http-equiv="Content-Security-Policy">` tag in `index.html` cannot
-enforce `frame-ancestors`.
+`frame-ancestors` is now shipped as a default in `public/web.config` (`frame-ancestors 'self'`).
+This prevents cross-origin embedding by default. If a deployment needs to allow embedding from a
+specific host, override the CSP header in IIS or the reverse proxy with the additional allowed
+origin, e.g. `frame-ancestors 'self' https://allowed-host.example;`. The
+`<meta http-equiv="Content-Security-Policy">` tag in `index.html` cannot enforce `frame-ancestors`
+— this must remain an HTTP response header.
 
 Embedded deployments also need to review the parent page's own CSP. If a host page loads
 OpenDocViewer in an `<iframe>`, the host CSP must allow:
@@ -192,7 +194,7 @@ Main responsibilities of that script:
 - `odv.site.config.js` is not cached when site overrides are used
 - runtime config values are deployment-local and correct
 - CSP reviewed for the target environment; `connect-src` and `img-src` narrowed where possible
-- any `frame-ancestors` policy is emitted from IIS or the reverse proxy, not only the meta tag
+- `frame-ancestors 'self'` is now shipped by default in `public/web.config`; override it in IIS or the reverse proxy if cross-origin embedding is required
 - URL Rewrite module is installed
 
 ### Proxy
