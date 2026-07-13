@@ -1,0 +1,53 @@
+#!/bin/sh
+# Pre-push hook: run the local CI gate.
+# Blocks the push if scripts/local-ci.ps1 fails.
+
+set -e
+
+repo_root=$(cd "$(dirname "$0")/.." && pwd)
+ci_script_unix="$repo_root/scripts/local-ci.ps1"
+
+# Convert the script path to Windows format when running under Git Bash/MSYS2/Cygwin.
+if command -v cygpath >/dev/null 2>&1; then
+    ci_script=$(cygpath -w "$ci_script_unix")
+else
+    ci_script="$ci_script_unix"
+fi
+
+if ! [ -f "$ci_script_unix" ]; then
+    echo "ERROR: Local CI script not found: $ci_script_unix"
+    exit 1
+fi
+
+# Prefer PowerShell Core, fall back to Windows PowerShell.
+if command -v pwsh >/dev/null 2>&1; then
+    POWERSHELL="pwsh"
+elif command -v powershell.exe >/dev/null 2>&1; then
+    POWERSHELL="powershell.exe"
+else
+    echo "ERROR: PowerShell is required for the pre-push hook but was not found."
+    exit 1
+fi
+
+echo "Running local CI gate before push..."
+"$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -Command "& '$ci_script'"
+exit_code=$?
+
+if [ $exit_code -ne 0 ]; then
+    echo ""
+    echo "============================================================"
+    echo "PRE-PUSH GATE FAILED"
+    echo "Fix the failures above and try again."
+    echo "============================================================"
+    exit $exit_code
+fi
+
+echo ""
+echo "============================================================"
+echo "PRE-PUSH GATE PASSED (local)"
+echo "⚠ This does NOT guarantee CI will pass -- environment may differ."
+echo "For PUBLIC repos: verify auto-CI on HEAD after push:"
+echo "  gh run list --branch main"
+echo "============================================================"
+
+exit 0

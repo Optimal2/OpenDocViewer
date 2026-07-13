@@ -200,6 +200,33 @@ Open the local Vite URL, typically `http://localhost:5173`.
 
 ---
 
+## Local pre-push gate
+
+This repository uses tracked Git hooks to run a local CI gate before every
+push. Configure the hooks once after cloning:
+
+```powershell
+.\scripts\setup-hooks.ps1
+```
+
+The configuration points Git at the `.githooks` directory in this repository.
+
+Hooks:
+
+- `pre-commit` — light static checks only (`git diff --cached --check`).
+  Does not build or run tests.
+- `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app and
+  validates OMP component version lockstep.
+
+The push is blocked if the local CI gate fails. Because this is a public
+repository, also verify that GitHub Actions passed on `main` after pushing:
+
+```bash
+gh run list --branch main
+```
+
+---
+
 ## Build, preview, and generated docs
 
 ```bash
