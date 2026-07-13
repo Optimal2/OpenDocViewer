@@ -1,0 +1,17 @@
+#!/bin/sh
+# Pre-commit hook: light static checks only.
+# Does NOT build or run tests.
+
+set -e
+
+# Check for whitespace errors and merge-conflict markers in staged changes.
+if ! git diff --cached --check; then
+    echo ""
+    echo "============================================================"
+    echo "PRE-COMMIT CHECK FAILED"
+    echo "Fix trailing whitespace or conflict markers and try again."
+    echo "============================================================"
+    exit 1
+fi
+
+exit 0
