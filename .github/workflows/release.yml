@@ -94,6 +94,9 @@ jobs:
         working-directory: _tools/AgentDocMap
         run: npm ci --no-audit --fund=false
 
+      - name: Test
+        run: npm test
+
       - name: Build
         run: npm run build
 
