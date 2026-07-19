@@ -18,6 +18,32 @@ version exists so OMP can tell deployable packages apart; the official
 OpenDocViewer version exists so users, support staff, release notes, and the
 Help -> About dialog can identify the application build.
 
+## Version Concepts in This Repository
+
+Several version-looking values live in this repository. They are not the same
+concept, and they are not meant to move together. The only equality requirement
+in the whole set is the two physical copies of `definitionVersion`.
+
+| Concept | Location | Meaning | Relationship to the others |
+| --- | --- | --- | --- |
+| Official application/release version | `package.json` (and Git tags, release notes) | The public OpenDocViewer version shown in Help -> About and release notes. | Independent stream. Bumped only by the official release process. |
+| OMP deployable artifact version | `omp-components.json` `repositoryVersion` and component `opendocviewer-web.version` | The version OMP uses to tell deployable artifact packages apart. | Independent stream; may move faster than the release version and need not match it. |
+| Seed `@ArtifactVersion` | `sql/3-initialize-opendocviewer.sql` (the `DECLARE @ArtifactVersion` near the top) | A bootstrap-placeholder default artifact version used only when the seed script inserts fresh rows or backfills NULL values. | Deliberately decoupled from both streams above; it seeds initial rows only. |
+| `definitionVersion` | `omp-components.json` `moduleDefinitions[].definitionVersion` AND `opendocviewer.module-definition.json` | The OMP module-definition version. | ONE logical version stored in TWO physical copies; the copies MUST be equal. Enforced by `scripts/validate-component-versions.ps1` (Check 8). |
+| `minModuleDefinitionVersion` | `omp-components.json` component entry | The minimum module-definition version an artifact package requires. | A floor/constraint (Check 8b), not a copy; it must be at least the current `definitionVersion`. |
+| `compatibleArtifacts` `minVersion`/`maxVersion` | `opendocviewer.module-definition.json` | The range of component artifact versions the module definition accepts. | A range constraint over the component version (Check 10), not a copy. |
+
+Seed `@ArtifactVersion` invariant: the seed script never overwrites an existing
+choice. An existing non-NULL `omp.AppInstances.ArtifactId` or
+`omp.InstanceTemplateAppInstances.DesiredArtifactId` is never changed by the
+seed script; only NULL values (backfilled via `COALESCE(target, source)`) and
+fresh `WHEN NOT MATCHED` rows receive the seed default. This keeps a re-run or
+package import from resetting an already-chosen desired artifact (for example a
+newer deployable artifact) back to the bootstrap placeholder.
+
+Do not mechanically synchronize the independent streams. The only values that
+must stay equal are the two `definitionVersion` copies.
+
 ## Fields
 
 - `repositoryKey` identifies the source repository.
