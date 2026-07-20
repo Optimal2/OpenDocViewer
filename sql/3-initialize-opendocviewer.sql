@@ -100,14 +100,19 @@ WHERE ModuleId = @OpenDocViewerModuleId
 -- never point at a version that does not exist, and can never re-enable a
 -- disabled artifact row. On a fresh install no row exists yet, so the
 -- resolution yields NULL and the COALESCE guards below keep the artifact
--- pointer NULL until package import sets it.
+-- pointer NULL until package import sets it. The COALESCE guards also mean an
+-- already-set pointer is never overwritten here; superseding a disabled or
+-- outdated artifact is owned by package import, not by this seed.
+-- ArtifactId is the IDENTITY primary key, so ORDER BY ArtifactId DESC is the
+-- only guaranteed-monotonic "newest" ordering (CreatedUtc is datetime2(3)
+-- and can share a tick or be set explicitly by an importer).
 SELECT TOP (1) @OpenDocViewerArtifactId = ArtifactId
 FROM omp.Artifacts
 WHERE AppId = @OpenDocViewerAppId
   AND PackageType = N'web-app'
   AND TargetName = N'opendocviewer'
   AND IsEnabled = 1
-ORDER BY CreatedUtc DESC, ArtifactId DESC;
+ORDER BY ArtifactId DESC;
 
 MERGE omp.ModuleInstances AS target
 USING
