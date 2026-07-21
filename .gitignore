@@ -81,3 +81,6 @@ public/odv.site.config.js
 
 # Private local packaging/configuration files.
 private-configs/
+
+# Claude Code local tool config — never tracked, must not block dep maintenance
+.claude/
