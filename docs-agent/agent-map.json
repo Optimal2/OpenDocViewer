@@ -46,8 +46,8 @@
       "pdf-lib": "^1.17.1",
       "pdfjs-dist": "^6.1.200",
       "prop-types": "^15.8.1",
-      "react": "^19.2.7",
-      "react-dom": "^19.2.7",
+      "react": "^19.2.8",
+      "react-dom": "^19.2.8",
       "react-i18next": "^17.0.10",
       "utif2": "^4.1.0"
     },
