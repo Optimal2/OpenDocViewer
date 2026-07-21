@@ -32,7 +32,7 @@ This file combines package.json declarations with observed source imports.
 
 | Package | Version | Observed source imports |
 | --- | --- | ---: |
-| <code>@babel/core</code> | <code>^8.0.0</code> | 0 |
+| <code>@babel/core</code> | <code>^8.0.1</code> | 0 |
 | <code>@babel/plugin-transform-runtime</code> | <code>^8.0.1</code> | 0 |
 | <code>@babel/runtime</code> | <code>^8.0.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
@@ -46,7 +46,7 @@ This file combines package.json declarations with observed source imports.
 | <code>eslint-plugin-react-refresh</code> | <code>^0.5.3</code> | 0 |
 | <code>globals</code> | <code>^17.7.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
-| <code>prettier</code> | <code>^3.9.5</code> | 0 |
+| <code>prettier</code> | <code>^3.9.6</code> | 0 |
 | <code>rolldown</code> | <code>^1.2.0</code> | 0 |
 | <code>vite</code> | <code>^8.1.5</code> | 0 |
 | <code>vitest</code> | <code>^4.0.0</code> | 0 |
