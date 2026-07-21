@@ -2,7 +2,7 @@
 
 OpenDocViewer is a client-side **React + Vite** document viewer for **PDF**, **TIFF**, and common raster image formats. The project is designed to be deployable as static files, with optional companion log servers for operational tracing and print auditing.
 
-The codebase now has four documentation layers:
+The codebase now has five documentation layers:
 
 - `README.md` — product-level overview, setup, deployment, and developer workflow
 - `CONTRIBUTING.md` — repository conventions, naming rules, and review checklist

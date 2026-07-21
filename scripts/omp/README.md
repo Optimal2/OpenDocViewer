@@ -189,6 +189,12 @@ are below the current user's temp directory.
 
 ## Comparing Package Generation Paths
 
+> Note: the comparison/validation helpers in this section
+> (`merge-universal-package-objects.ps1`, `compare-universal-package-data.ps1`,
+> `compare-artifact-payload-files.ps1`, `export-universal-object-root.ps1`) ship only
+> with the `OpenModulePlatform` repository's `scripts/omp/`. Run them from an
+> OpenModulePlatform checkout; they are not part of this repository.
+
 Universal package validation should compare the import-relevant portable object
 data, not the outer zip bytes. Zip timestamps, compression metadata, and the
 package manifest `createdUtc` value may differ without changing what Portal or
