@@ -12,7 +12,7 @@ Minimal IIS application that only reverse-proxies ODV log endpoints:
 
 ## Deploy
 
-Use the script in `scripts/Setup-IIS-ODVProxy.ps1` to:
+Use the repository-root script `scripts/Setup-IIS-ODVProxy.ps1` (run from the repository root, not from this folder) to:
 - Create the IIS application (default path `/ODVProxy`)
 - Generate `web.config` from `web.config.template`
 - Toggle each proxy rule on/off
@@ -20,4 +20,4 @@ Use the script in `scripts/Setup-IIS-ODVProxy.ps1` to:
 
 ## Test
 
-Run `scripts/Test-ODV-IISProxy.ps1 -BaseUrl https://your-host/ODVProxy/`.
+From the repository root, run `scripts/Test-ODV-IISProxy.ps1 -BaseUrl https://your-host/ODVProxy/`.
