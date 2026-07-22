@@ -7,6 +7,13 @@ Checks that every component listed in omp-components.json has a valid version,
 points to an existing .csproj project, references a declared module definition,
 and that module definition versions stay in sync with the manifest.
 
+Additionally guards owned seed SQL against two silent failure classes:
+  - Unconditional artifact-pointer writes (ArtifactId/DesiredArtifactId assigned
+    directly from source in a MERGE/UPSERT without a NULL-preserving COALESCE
+    guard), which can overwrite correct pointers and cause runtime outages.
+  - Stale embedded SQL: sqlScripts[].content (base64) and its sha256 must match
+    the referenced SQL file on disk byte-for-byte.
+
 This script validates the manifest only. Assembly versions in
 Directory.Build.props are intentionally decoupled from omp-components.json
 component versions: they are statically set to 0.1.0 for all C# projects.
@@ -141,6 +148,42 @@ function Get-Sha256Hex {
     finally {
         $sha256.Dispose()
     }
+}
+
+function Get-Sha256HexFromBytes {
+    param([Parameter(Mandatory = $true)][AllowEmptyCollection()][byte[]]$Bytes)
+
+    $sha256 = [System.Security.Cryptography.SHA256]::Create()
+    try {
+        $hash = $sha256.ComputeHash($Bytes)
+        return ([System.BitConverter]::ToString($hash)).Replace('-', '').ToLowerInvariant()
+    }
+    finally {
+        $sha256.Dispose()
+    }
+}
+
+function Test-BytesEqual {
+    param(
+        [Parameter(Mandatory = $false)][AllowNull()][byte[]]$A,
+        [Parameter(Mandatory = $false)][AllowNull()][byte[]]$B
+    )
+
+    if ($null -eq $A -or $null -eq $B) {
+        return $false
+    }
+
+    if ($A.Length -ne $B.Length) {
+        return $false
+    }
+
+    for ($i = 0; $i -lt $A.Length; $i++) {
+        if ($A[$i] -ne $B[$i]) {
+            return $false
+        }
+    }
+
+    return $true
 }
 
 function Remove-Utf8Bom {
@@ -778,6 +821,165 @@ else {
 }
 
 # ---------------------------------------------------------------------------
+# Checks 11 and 12: Owned seed-SQL guards (HARD ERROR).
+# These guards run unconditionally (no git base ref needed) because they
+# validate the current state of the repository, not a diff.
+#
+# Check 11: Unconditional artifact-pointer overwrite guard.
+# An owned seed SQL script must never assign ArtifactId/DesiredArtifactId
+# directly from source in a MERGE/UPSERT update. On a re-seed, source may
+# resolve to NULL or a stale artifact, silently overwriting a correct pointer
+# set by package import (this caused a real ODV outage). The assignment must
+# preserve an existing non-null pointer, e.g.:
+#   ArtifactId = COALESCE(target.ArtifactId, source.ArtifactId)
+#
+# Check 12: Stale embedded SQL guard.
+# Every sqlScripts[] entry with embedded content must carry a base64-utf8
+# payload that decodes byte-for-byte to the referenced SQL file on disk, and
+# its sha256 field must equal the SHA-256 of those decoded bytes. A drifted
+# embed means the deployed script no longer matches the reviewed file.
+# ---------------------------------------------------------------------------
+$seedGuardFilesChecked = 0
+$embedScriptsChecked = 0
+
+# Direct unconditional assignment: "ArtifactId = source.ArtifactId" (same
+# column on both sides) without any guard expression.
+$seedDirectAssignPattern = '(?i)(?<![A-Za-z0-9_])(DesiredArtifactId|ArtifactId)\s*=\s*source\.(DesiredArtifactId|ArtifactId)(?![A-Za-z0-9_])'
+
+# Reversed COALESCE: "ArtifactId = COALESCE(source.ArtifactId, ...)" prefers
+# the source value and therefore does NOT preserve an existing non-null
+# pointer. The existing target value must come first.
+$seedReversedCoalescePattern = '(?i)(?<![A-Za-z0-9_])(DesiredArtifactId|ArtifactId)\s*=\s*COALESCE\(\s*source\.'
+
+$ownedSeedSqlEntries = [System.Collections.Generic.List[System.Collections.Hashtable]]::new()
+foreach ($manifestDefinition in @($manifest.moduleDefinitions)) {
+    if ($null -eq $manifestDefinition) {
+        continue
+    }
+
+    $moduleKey = [string](Get-OptionalPropertyValue -Object $manifestDefinition -Name 'moduleKey')
+    $relativeDefinitionPath = [string](Get-OptionalPropertyValue -Object $manifestDefinition -Name 'path')
+
+    if ([string]::IsNullOrWhiteSpace($moduleKey) -or [string]::IsNullOrWhiteSpace($relativeDefinitionPath)) {
+        continue
+    }
+
+    $definitionPath = Resolve-RepositoryPath -Path $relativeDefinitionPath -BasePath $repositoryRoot
+    if (-not (Test-Path -LiteralPath $definitionPath -PathType Leaf)) {
+        continue
+    }
+
+    $definitionText = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8
+    $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
+
+    foreach ($script in @($definition.sqlScripts)) {
+        if ($null -eq $script) {
+            continue
+        }
+
+        $sqlPath = [string](Get-OptionalPropertyValue -Object $script -Name 'path')
+        if ([string]::IsNullOrWhiteSpace($sqlPath)) {
+            continue
+        }
+
+        $scriptKey = [string](Get-OptionalPropertyValue -Object $script -Name 'key')
+        $content = Get-OptionalPropertyValue -Object $script -Name 'content'
+        $contentEncoding = [string](Get-OptionalPropertyValue -Object $script -Name 'contentEncoding')
+        $declaredSha256 = [string](Get-OptionalPropertyValue -Object $script -Name 'sha256')
+
+        $alreadyCollected = $false
+        foreach ($entry in $ownedSeedSqlEntries) {
+            if ([string]::Equals($entry.sqlPath, $sqlPath, [StringComparison]::OrdinalIgnoreCase)) {
+                $alreadyCollected = $true
+                break
+            }
+        }
+
+        if (-not $alreadyCollected) {
+            $ownedSeedSqlEntries.Add(@{
+                moduleKey = $moduleKey
+                scriptKey = $scriptKey
+                sqlPath = $sqlPath
+                content = $content
+                contentEncoding = $contentEncoding
+                declaredSha256 = $declaredSha256
+            })
+        }
+    }
+}
+
+foreach ($entry in $ownedSeedSqlEntries) {
+    $moduleKey = $entry.moduleKey
+    $scriptKey = $entry.scriptKey
+    $sqlPath = $entry.sqlPath
+    $fullSqlPath = Resolve-RepositoryPath -Path $sqlPath -BasePath $repositoryRoot
+
+    if (-not (Test-Path -LiteralPath $fullSqlPath -PathType Leaf)) {
+        # Missing files are already reported by Check 8; do not double-report.
+        continue
+    }
+
+    $seedBytes = [System.IO.File]::ReadAllBytes($fullSqlPath)
+    $seedText = Get-Content -LiteralPath $fullSqlPath -Raw -Encoding UTF8
+
+    # -----------------------------------------------------------------------
+    # Check 11: Unconditional artifact-pointer overwrite guard.
+    # -----------------------------------------------------------------------
+    $seedGuardFilesChecked++
+
+    foreach ($match in [System.Text.RegularExpressions.Regex]::Matches($seedText, $seedDirectAssignPattern)) {
+        $column = $match.Groups[1].Value
+        $sourceColumn = $match.Groups[2].Value
+        if (-not [string]::Equals($column, $sourceColumn, [StringComparison]::OrdinalIgnoreCase)) {
+            continue
+        }
+
+        $lineNumber = @([System.Text.RegularExpressions.Regex]::Matches($seedText.Substring(0, $match.Index), "`n")).Count + 1
+        Add-ValidationError -Errors $errors -Message "Owned seed SQL '$sqlPath' (module '$moduleKey') assigns '$column = source.$sourceColumn' unconditionally (line $lineNumber). A re-seed can overwrite a correct non-null artifact pointer and cause a runtime outage. Preserve the existing pointer, e.g. '$column = COALESCE(target.$column, source.$sourceColumn)'."
+    }
+
+    foreach ($match in [System.Text.RegularExpressions.Regex]::Matches($seedText, $seedReversedCoalescePattern)) {
+        $column = $match.Groups[1].Value
+        $lineNumber = @([System.Text.RegularExpressions.Regex]::Matches($seedText.Substring(0, $match.Index), "`n")).Count + 1
+        Add-ValidationError -Errors $errors -Message "Owned seed SQL '$sqlPath' (module '$moduleKey') guards '$column' with COALESCE(source.$column, ...) (line $lineNumber), which prefers the source value and does not preserve an existing non-null pointer. Use '$column = COALESCE(target.$column, source.$column)'."
+    }
+
+    # -----------------------------------------------------------------------
+    # Check 12: Stale embedded SQL guard.
+    # -----------------------------------------------------------------------
+    $content = $entry.content
+    if ($null -eq $content -or [string]::IsNullOrWhiteSpace([string]$content)) {
+        continue
+    }
+
+    $embedScriptsChecked++
+
+    if (-not [string]::Equals($entry.contentEncoding, 'base64-utf8', [StringComparison]::OrdinalIgnoreCase)) {
+        Add-ValidationError -Errors $errors -Message "Embedded SQL content for script '$scriptKey' ('$sqlPath', module '$moduleKey') uses unsupported contentEncoding '$($entry.contentEncoding)'. Expected 'base64-utf8'."
+        continue
+    }
+
+    $embeddedBytes = $null
+    try {
+        $embeddedBytes = [System.Convert]::FromBase64String([string]$content)
+    }
+    catch {
+        Add-ValidationError -Errors $errors -Message "Embedded SQL content for script '$scriptKey' ('$sqlPath', module '$moduleKey') is not valid base64. Re-embed the current file content."
+        continue
+    }
+
+    $embeddedSha256 = Get-Sha256HexFromBytes -Bytes $embeddedBytes
+    if (-not [string]::IsNullOrWhiteSpace($entry.declaredSha256) -and -not [string]::Equals($entry.declaredSha256, $embeddedSha256, [StringComparison]::OrdinalIgnoreCase)) {
+        Add-ValidationError -Errors $errors -Message "Embedded SQL content for script '$scriptKey' ('$sqlPath', module '$moduleKey') has sha256 '$($entry.declaredSha256)' which does not match the decoded content hash '$embeddedSha256'. Re-embed the current file content and update sha256."
+    }
+
+    if (-not (Test-BytesEqual -A $embeddedBytes -B $seedBytes)) {
+        $diskSha256 = Get-Sha256HexFromBytes -Bytes $seedBytes
+        Add-ValidationError -Errors $errors -Message "Embedded SQL content for script '$scriptKey' ('$sqlPath', module '$moduleKey') is stale: the decoded embed does not match the file on disk byte-for-byte (embed sha256 '$embeddedSha256', disk sha256 '$diskSha256'). Re-embed the current file content and update sha256."
+    }
+}
+
+# ---------------------------------------------------------------------------
 # Check 9: Transitive ProjectReference lockstep bumps.
 # If a component's own project or any project it references (directly or
 # through one level of ProjectReference transitivity) changed since the base,
@@ -936,6 +1138,14 @@ if ($sharedProjectCount -gt 0 -and ($cascadeCheckCount -gt 0 -or $cascadeErrorCo
 
 if ($sqlFilesChecked -gt 0) {
     Write-Host "$checkMark $sqlFilesPassed of $sqlFilesChecked owned SQL file(s) passed diff validation ($sqlFilesChanged changed)"
+}
+
+if ($seedGuardFilesChecked -gt 0) {
+    Write-Host "$checkMark $seedGuardFilesChecked owned seed SQL file(s) scanned for unconditional artifact-pointer writes"
+}
+
+if ($embedScriptsChecked -gt 0) {
+    Write-Host "$checkMark $embedScriptsChecked embedded SQL script(s) verified byte-for-byte against disk (content + sha256)"
 }
 
 if ($transitiveCheckCount -gt 0 -or $transitiveErrorCount -gt 0) {

@@ -1,0 +1,5 @@
+# Owned seed SQL is embedded byte-for-byte (base64) in module definitions and
+# validated with a strict byte-for-byte + sha256 check by
+# scripts/validate-component-versions.ps1. Pin LF so git checkouts are
+# deterministic on every platform regardless of core.autocrlf.
+*.sql text eol=lf
