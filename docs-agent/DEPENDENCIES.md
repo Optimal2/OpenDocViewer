@@ -25,7 +25,7 @@ This file combines package.json declarations with observed source imports.
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code> |
 | <code>react</code> | <code>^19.2.8</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code> |
 | <code>react-dom</code> | <code>^19.2.8</code> | 1 | <code>src/index.jsx</code> |
-| <code>react-i18next</code> | <code>^17.0.10</code> | 33 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code> |
+| <code>react-i18next</code> | <code>^17.0.11</code> | 33 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>utif2</code> | <code>^4.1.0</code> | 3 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code> |
 
 ## Development Dependencies
@@ -37,7 +37,7 @@ This file combines package.json declarations with observed source imports.
 | <code>@babel/runtime</code> | <code>^8.0.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.3</code> | 0 |
-| <code>@vitejs/plugin-react</code> | <code>^6.0.3</code> | 0 |
+| <code>@vitejs/plugin-react</code> | <code>^6.0.4</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.3</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
