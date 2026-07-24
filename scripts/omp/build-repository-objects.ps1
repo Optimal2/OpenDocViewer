@@ -536,7 +536,14 @@ function Remove-RuntimeConfigurationFilesFromFolder {
     param([Parameter(Mandatory = $true)][string]$Path)
 
     Get-ChildItem -LiteralPath $Path -File -Recurse | Where-Object {
+        # Mirror OMP's canonical runtime-config list (OpenModulePlatform.Artifacts\RuntimeConfigurationFiles.cs
+        # ExactFileNames + Bootstrapper Program.cs RemoveRuntimeConfigurationFiles): appsettings*.json AND
+        # odv.site.config.js. A developer's gitignored public/odv.site.config.js can leak via Vite's publicDir
+        # (dist -> payload); strip it here so it never lands in the immutable artifact zip (the OMP import
+        # validator ArtifactZipImportService rejects the whole package otherwise). Keep this in sync with the
+        # C# list above; only the '.sample' template file is meant to ship.
         [string]::Equals($_.Name, 'appsettings.json', [StringComparison]::OrdinalIgnoreCase) -or
+        [string]::Equals($_.Name, 'odv.site.config.js', [StringComparison]::OrdinalIgnoreCase) -or
         ($_.Name.StartsWith('appsettings.', [StringComparison]::OrdinalIgnoreCase) -and $_.Name.EndsWith('.json', [StringComparison]::OrdinalIgnoreCase))
     } | Remove-Item -Force
 }
