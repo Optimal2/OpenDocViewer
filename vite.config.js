@@ -24,6 +24,7 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
+import { configDefaults } from 'vitest/config';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
@@ -138,6 +139,14 @@ export default defineConfig(({ mode }) => {
      * - Build: `./` so assets resolve correctly under a virtual directory.
      */
     base: BASE,
+
+    // Vitest: run ONLY OpenDocViewer's own tests. The Release workflow checks out the AgentDocMap
+    // tool into `_tools/` for `doc:agent`; without this exclude, `npm test` (vitest) also ran that
+    // tool's tests, which fail in CI (`spawnSync node ENOENT`) and broke the v2.7.0 release publish.
+    // Keep `_tools/**` out of the ODV test scan. See AGENTS.md ("Release workflow — do not change the trigger").
+    test: {
+      exclude: [...configDefaults.exclude, '_tools/**'],
+    },
 
     plugins: [
       // React + Fast Refresh
