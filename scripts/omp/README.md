@@ -91,6 +91,19 @@ widgets/
 widget-data/
 ```
 
+Runtime configuration files (`appsettings.json`, `appsettings.*.json`,
+`odv.site.config.js`) must never ship inside an artifact payload. The shared
+helper `runtime-configuration-files.ps1` mirrors the canonical C# rule
+(`OpenModulePlatform.Artifacts` `RuntimeConfigurationFiles` in the
+OpenModulePlatform repository) at build time: fresh payload folders are
+stripped before zipping, every produced or reused artifact zip is scanned
+(including the nested `payload/artifact.zip`), and the build fails when a
+runtime configuration file is found. A reused pre-built artifact that predates
+the strip therefore fails loudly instead of being bundled. Run
+`test-runtime-configuration-guard.ps1` to verify the mirror stays in parity
+with the C# list and that the fail-fast guard and exporter wiring work on both
+Windows PowerShell 5.1 and PowerShell 7+.
+
 Use this script when a module repository needs to publish objects for Portal,
 HostAgent import folders, or installer package libraries. Runtime or
 customer-specific configuration should be supplied through command-line

@@ -81,6 +81,8 @@ function Get-ScriptDirectory {
     return Split-Path -Parent $scriptPath
 }
 
+. (Join-Path (Get-ScriptDirectory) 'runtime-configuration-files.ps1')
+
 function Resolve-PathFromBase {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -679,7 +681,20 @@ try {
             -Configuration $Configuration
     }
 
-    $files = Get-UniversalPackageFiles -ObjectRoot $objectRoot
+    # Wrap in @() so a single exported object stays an array; a scalar
+    # PSCustomObject has no Count under strict mode on Windows PowerShell 5.1.
+    $files = @(Get-UniversalPackageFiles -ObjectRoot $objectRoot)
+
+    # Fail-fast guard (same rule as the import-time validator): no assembled
+    # artifact payload may contain runtime configuration files.
+    foreach ($file in $files) {
+        if ($file.Kind.Equals('artifact-package', [StringComparison]::OrdinalIgnoreCase)) {
+            Assert-OmpArtifactPackageHasNoRuntimeConfiguration `
+                -ZipPath $file.FullName `
+                -Description "Universal package object '$($file.Path)'"
+        }
+    }
+
     $manifestItems = @(
         foreach ($file in $files) {
             $item = [ordered]@{
