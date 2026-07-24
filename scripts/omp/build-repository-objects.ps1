@@ -61,6 +61,8 @@ function Get-ScriptDirectory {
     return Split-Path -Parent $scriptPath
 }
 
+. (Join-Path (Get-ScriptDirectory) 'runtime-configuration-files.ps1')
+
 function Resolve-PathFromBase {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
@@ -532,20 +534,20 @@ function Update-OpenDocViewerIndexHtmlIntegrity {
     Write-Host "Injected runtime config SRI hashes into $indexHtmlPath"
 }
 
-function Remove-RuntimeConfigurationFilesFromFolder {
-    param([Parameter(Mandatory = $true)][string]$Path)
+function Copy-ExistingArtifactPackage {
+    param(
+        [Parameter(Mandatory = $true)][string]$SourcePath,
+        [Parameter(Mandatory = $true)][string]$DestinationPath
+    )
 
-    Get-ChildItem -LiteralPath $Path -File -Recurse | Where-Object {
-        # Mirror OMP's canonical runtime-config list (OpenModulePlatform.Artifacts\RuntimeConfigurationFiles.cs
-        # ExactFileNames + Bootstrapper Program.cs RemoveRuntimeConfigurationFiles): appsettings*.json AND
-        # odv.site.config.js. A developer's gitignored public/odv.site.config.js can leak via Vite's publicDir
-        # (dist -> payload); strip it here so it never lands in the immutable artifact zip (the OMP import
-        # validator ArtifactZipImportService rejects the whole package otherwise). Keep this in sync with the
-        # C# list above; only the '.sample' template file is meant to ship.
-        [string]::Equals($_.Name, 'appsettings.json', [StringComparison]::OrdinalIgnoreCase) -or
-        [string]::Equals($_.Name, 'odv.site.config.js', [StringComparison]::OrdinalIgnoreCase) -or
-        ($_.Name.StartsWith('appsettings.', [StringComparison]::OrdinalIgnoreCase) -and $_.Name.EndsWith('.json', [StringComparison]::OrdinalIgnoreCase))
-    } | Remove-Item -Force
+    # A reused artifact must satisfy the same runtime-configuration rule as a
+    # freshly built one. Fail the build instead of silently bundling a stale
+    # artifact that predates the payload strip; clean up or rebuild the
+    # offending artifact and run again.
+    Assert-OmpArtifactPackageHasNoRuntimeConfiguration `
+        -ZipPath $SourcePath `
+        -Description ("Reused artifact package '{0}'" -f (Split-Path -Leaf $SourcePath))
+    Copy-Item -LiteralPath $SourcePath -Destination $DestinationPath -Force
 }
 
 function Copy-PortableObjectFiles {
@@ -810,7 +812,7 @@ try {
         ) | Where-Object { Test-Path -LiteralPath $_ -PathType Leaf } | Select-Object -First 1
 
         if (-not [string]::IsNullOrWhiteSpace($existingPackage) -and -not $BuildArtifacts) {
-            Copy-Item -LiteralPath $existingPackage -Destination (Join-Path $artifactsRoot $packageName) -Force
+            Copy-ExistingArtifactPackage -SourcePath $existingPackage -Destination (Join-Path $artifactsRoot $packageName)
             continue
         }
 
@@ -830,7 +832,7 @@ try {
 
         if ([string]::IsNullOrWhiteSpace($payloadPath)) {
             if (-not [string]::IsNullOrWhiteSpace($existingPackage)) {
-                Copy-Item -LiteralPath $existingPackage -Destination (Join-Path $artifactsRoot $packageName) -Force
+                Copy-ExistingArtifactPackage -SourcePath $existingPackage -Destination (Join-Path $artifactsRoot $packageName)
                 continue
             }
 
@@ -850,7 +852,12 @@ try {
             }
         }
 
-        Remove-RuntimeConfigurationFilesFromFolder -Path $payloadPath
+        # Strip runtime configuration (canonical list: appsettings.json,
+        # appsettings.*.json, odv.site.config.js) from the payload before
+        # zipping. A developer's gitignored public/odv.site.config.js can leak
+        # via Vite's publicDir (dist -> payload); only the '.sample' template
+        # file is meant to ship.
+        Remove-OmpRuntimeConfigurationFilesFromFolder -Path $payloadPath
 
         $configurationFileArgs = @()
         if ($configurationMappings.ContainsKey([string]$component.componentKey)) {
@@ -876,6 +883,10 @@ try {
         if ($LASTEXITCODE -ne 0) {
             throw "Artifact package creation failed for component '$($component.componentKey)'."
         }
+
+        Assert-OmpArtifactPackageHasNoRuntimeConfiguration `
+            -ZipPath (Join-Path $artifactsRoot $packageName) `
+            -Description "Artifact package '$packageName'"
     }
 }
 finally {
