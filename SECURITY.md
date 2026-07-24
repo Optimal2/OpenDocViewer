@@ -2,20 +2,30 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.6.6** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.7.0** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.6.5 and earlier are superseded by v2.6.6 and are no longer supported for production deployments. v2.6.6 keeps the v2.6 dependency baseline current and adds runtime-configuration hardening, test coverage, documentation consistency, and deployment-configuration cleanup on top of the v2.6.5 document-loading, source-stream, TIFF/OJPEG, print, and cleanup hardening. Operators should upgrade to v2.6.6 before opening new support or security issues.
+OpenDocViewer v2.6.6 and earlier are superseded by v2.7.0 and are no longer supported for production deployments. v2.7.0 keeps the v2.6 dependency baseline current and adds a default frame-embedding policy (X-Frame-Options + CSP frame-ancestors), fail-closed system-log token handling, dependency and security-advisory updates, CI/test hardening, and OMP seed/build fixes on top of the v2.6.6 runtime-configuration, test, and documentation hardening. Operators should upgrade to v2.7.0 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.6.6   | :white_check_mark: | Current recommended patch release and only supported baseline |
-| <= 2.6.5 | :x: | Superseded by v2.6.6 runtime-config, test, and documentation hardening; upgrade required |
+| 2.7.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
 ## Recent release context
 
 The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.6 is supported.
+
+### OpenDocViewer v2.7.0
+Changes since v2.6.6:
+
+- Added a default frame-embedding policy (X-Frame-Options and CSP frame-ancestors) so the viewer ships with clickjacking/framing protection enabled by default.
+- Hardened the optional system-log token handling to fail closed and keep placeholder tokens disabled.
+- Updated the dependency baseline and resolved security advisories, including brace-expansion CVE-2026-13149, and moved the test runner to Vitest 4.
+- Ran the Vitest suite in CI and release workflows and added component-version and local-CI validation plus tracked pre-commit and pre-push Git hooks.
+- Hardened the OMP seed SQL and repository-object build so artifact-pointer writes are guarded and runtime site configuration is stripped from artifact payloads.
+- Refreshed source and regenerated agent documentation for CI validation currency.
 
 ### OpenDocViewer v2.6.6
 Changes since v2.6.5:

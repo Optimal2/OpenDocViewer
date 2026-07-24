@@ -25,6 +25,12 @@ Before making changes:
   CI validates this with `git diff --exit-code -- docs-agent`.
 - When a task produces repository changes, validate them, commit with a focused message, and push unless the user asks not to or the worktree contains unrelated user changes.
 
+## Release workflow — do not change the trigger
+
+Official OpenDocViewer releases go through `release.ps1` only. `release.ps1 -Publish` validates, runs `npm version` (creating the release commit and `vX.Y.Z` tag), and pushes; the GitHub Actions **Release** workflow then AUTO-runs on that tag push and publishes the GitHub release (body from `release-notes/<tag>.md`, which must have **no** top `#` heading — GitHub adds the title). **The single approval gate is a maintainer running `release.ps1 -Publish`** — never hand-bump `package.json`/`package-lock.json`, and never push a release tag or publish unasked.
+
+Do NOT change `.github/workflows/release.yml` back to a `workflow_dispatch`-only / `approve_release` gate: an unintended AI change on 2026-06-28 (commit 964fa3f) did that and broke the "release.ps1 does everything" flow; it was reverted 2026-07-24. Update `SECURITY.md` before releasing (the script does not touch it). The OMP-component version (`omp-components.json`) is versioned separately and is bumped AFTER the release, from the post-release commit — never force it to match `package.json`.
+
 ## Security / Antivirus Compatibility
 
 This environment uses Bitdefender on Windows. PowerShell-heavy or suspicious command lines may be blocked.
