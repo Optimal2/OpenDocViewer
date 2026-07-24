@@ -112,9 +112,13 @@ For AI-operated official releases:
 6. Run `.\release.ps1 -ReleaseType <patch|minor|major> -Yes` from a clean branch that matches
    `origin/<branch>` to prepare the release commit/tag locally. To publish the official release,
    rerun the same command with `-Publish`.
-7. Verify the pushed release commit, the local and remote `vX.Y.Z` tag, and the GitHub Actions
-   release workflow. The workflow is triggered manually via `workflow_dispatch` and requires an
-   explicit approval input; it no longer runs on tag push.
+7. `release.ps1 -Publish` pushes the release commit + tag, and that push IS the release: the
+   GitHub Actions **Release** workflow AUTO-runs on the `vX.Y.Z` tag and builds + publishes the
+   GitHub release (body from `release-notes/<tag>.md`). The single approval gate is running
+   `release.ps1 -Publish`. **Do NOT change `.github/workflows/release.yml` back to a
+   `workflow_dispatch`-only / `approve_release` gate** — an AI change on 2026-06-28 (commit 964fa3f)
+   did that and broke the "release.ps1 does everything" flow; it was reverted 2026-07-24. Just
+   verify the pushed commit, the `vX.Y.Z` tag, and the auto-run workflow.
 8. If the official release will be delivered through OMP, bump the OMP artifact component version
    after the release helper has updated `package.json`, then export/import the OMP package from
    that post-release commit. This ensures OMP deploys files whose Help -> About version matches

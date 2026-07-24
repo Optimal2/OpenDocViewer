@@ -53,6 +53,11 @@ have already passed on the exact commit being released; otherwise prefer running
 #   3. Run this script to validate, bump package version, and create the release commit/tag.
 #      By default the release is prepared locally and NOT pushed.
 #   4. If this is an approved official release, rerun with -Publish to push the commit/tag.
+#      Pushing the vX.Y.Z tag AUTO-triggers .github/workflows/release.yml, which builds and
+#      publishes the GitHub release. The single approval gate is running this with -Publish; do
+#      NOT re-add a second workflow_dispatch / approve_release gate (an AI change on 2026-06-28,
+#      commit 964fa3f, did that and broke the flow; reverted 2026-07-24). See AGENTS.md +
+#      docs-src/CODEX_DEVELOPMENT.md ("Release workflow").
 #
 # This script intentionally does NOT run `git add`, does NOT commit application changes,
 # and does NOT stash changes. The working tree must be clean and the current branch must
