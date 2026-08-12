@@ -79,8 +79,8 @@ once the real origins and paths are known.
 
 For production tightening:
 
-- replace `connect-src 'self' http: https: ws: wss:` with the exact viewer, host, document,
-  bundle, source-pack, and log-proxy origins used in that environment
+- replace `connect-src 'self' blob: http: https: ws: wss:` with `'self' blob:` plus the exact
+  viewer, host, document, bundle, source-pack, and log-proxy origins used in that environment
 - replace `img-src 'self' blob: data: http: https:` with `'self' blob: data:` plus only the image
   origins that remain necessary after deployment review
 - remove `ws:` and `wss:` unless the deployment intentionally uses WebSockets outside local Vite
@@ -89,6 +89,10 @@ For production tightening:
   page blobs, and print flows depend on them
 - do not remove `blob:` or `data:` from image/print-related directives while OpenDocViewer still
   renders pages and print output through object URLs and data URLs
+- do not remove `blob:` from `connect-src`: the viewer fetches local-file and parent-page bundle
+  sources through object URLs (`URL.createObjectURL`), and the source prefetch pipeline uses
+  `fetch()` on those `blob:` URLs — without it every blob-sourced document fails with a
+  "documents could not be shown" notice while remote URL documents keep working
 
 `frame-ancestors` is now shipped as a default in `public/web.config` (`frame-ancestors 'self'`).
 This prevents cross-origin embedding by default. If a deployment needs to allow embedding from a
