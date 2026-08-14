@@ -723,7 +723,7 @@
 | <code>SetString</code> | typedef | <code>src/types/jsdoc-types.js:29</code> | Simple string setter. |
 | <code>SetStringNullable</code> | typedef | <code>src/types/jsdoc-types.js:15</code> | Setter for string-or-null values. |
 | <code>ZoomMode</code> | typedef | <code>src/types/jsdoc-types.js:79</code> | Sticky zoom modes used by the viewer. |
-| <code>countPdfPages</code> | function | <code>src/utils/documentLoadingConfig.js:526</code> | Count PDF pages in a page descriptor list. |
+| <code>countPdfPages</code> | function | <code>src/utils/documentLoadingConfig.js:556</code> | Count PDF pages in a page descriptor list. |
 | <code>detectBrowserFamily</code> | function | <code>src/utils/documentLoadingConfig.js:167</code> |  |
 | <code>DocumentLoadingAdaptiveMemoryConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:29</code> |  |
 | <code>DocumentLoadingAssetStoreConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:71</code> |  |
@@ -739,17 +739,19 @@
 | <code>DocumentLoadingRenderStrategy</code> | typedef | <code>src/utils/documentLoadingConfig.js:22</code> |  |
 | <code>DocumentLoadingSourceStoreConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:60</code> |  |
 | <code>DocumentLoadingWarningConfig</code> | typedef | <code>src/utils/documentLoadingConfig.js:40</code> |  |
-| <code>formatBytes</code> | function | <code>src/utils/documentLoadingConfig.js:1026</code> |  |
-| <code>formatCount</code> | function | <code>src/utils/documentLoadingConfig.js:1044</code> |  |
-| <code>getPerformanceWindowPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:852</code> | Return the page-count window where auto mode should still behave like the fast, eager path. |
+| <code>formatBytes</code> | function | <code>src/utils/documentLoadingConfig.js:1056</code> |  |
+| <code>formatCount</code> | function | <code>src/utils/documentLoadingConfig.js:1074</code> |  |
+| <code>getPerformanceWindowPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:882</code> | Return the page-count window where auto mode should still behave like the fast, eager path. |
 | <code>getReportedCoreCount</code> | function | <code>src/utils/documentLoadingConfig.js:186</code> | Return the browser-reported logical core count. |
+| <code>normalizeNumber</code> | function | <code>src/utils/documentLoadingConfig.js:366</code> | Coerce a value to a bounded integer . |
 | <code>PdfToImageMode</code> | typedef | <code>src/utils/documentLoadingConfig.js:24</code> |  |
-| <code>resolvePdfRenderConfigForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:607</code> | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
-| <code>resolvePdfWorkerPlanForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:546</code> | Resolve the PDF page-worker policy for the current document size. |
+| <code>resolvePdfRenderConfigForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:637</code> | Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count. |
+| <code>resolvePdfWorkerPlanForPageCount</code> | function | <code>src/utils/documentLoadingConfig.js:576</code> | Resolve the PDF page-worker policy for the current document size. |
 | <code>resolveRecommendedRasterWorkerCount</code> | function | <code>src/utils/documentLoadingConfig.js:224</code> |  |
 | <code>resolveRecommendedWorkerCount</code> | function | <code>src/utils/documentLoadingConfig.js:204</code> |  |
 | <code>RuntimeMemoryTier</code> | typedef | <code>src/utils/documentLoadingConfig.js:19</code> |  |
-| <code>shouldRecommendStopping</code> | function | <code>src/utils/documentLoadingConfig.js:1052</code> |  |
+| <code>shouldRecommendStopping</code> | function | <code>src/utils/documentLoadingConfig.js:1082</code> |  |
+| <code>shouldUseMainThreadForPdf</code> | function | <code>src/utils/documentLoadingConfig.js:510</code> | Decide whether a PDF should render on the main thread rather than through workers. |
 | <code>SourceStoreMode</code> | typedef | <code>src/utils/documentLoadingConfig.js:15</code> |  |
 | <code>SourceStoreProtection</code> | typedef | <code>src/utils/documentLoadingConfig.js:16</code> |  |
 | <code>StopRecommendationInput</code> | typedef | <code>src/utils/documentLoadingConfig.js:145</code> |  |

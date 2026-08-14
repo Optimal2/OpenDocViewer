@@ -40,8 +40,8 @@ File count: 8. Line count: 4101. JSDoc symbol count: 106.
 
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 - `src/components/DocumentLoader/DocumentLoader.js` - OpenDocViewer — Document loader orchestrator.
-- `src/components/DocumentLoader/mainThreadRenderer.js` - OpenDocViewer — Main\-thread renderers for PDF &amp; TIFF Render multi\-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low\-core devices, or when explicitly configured\).
-- `src/components/DocumentLoader/workerHandler.js` - OpenDocViewer — Worker orchestration &amp; message handling \- Create image workers for off\-main\-thread rasterization/conversion.
+- `src/components/DocumentLoader/mainThreadRenderer.js` - OpenDocViewer — Main\-thread renderers for PDF & TIFF Render multi\-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low\-core devices, or when explicitly configured\).
+- `src/components/DocumentLoader/workerHandler.js` - OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 - `src/components/DocumentLoader/sources/explicitListSource.js` - OpenDocViewer — Explicit Source List Normalizer Convert a PortableDocumentBundle into a flat, ordered list of file entries that the loader can process deterministically.
 - `src/components/DocumentLoader/batchHandler.js` - OpenDocViewer — Minimal, fair worker\-batch scheduler Distribute image\-decoding jobs across a pool of Web Workers without monopolizing the main thread.
 - `src/components/DocumentLoader/LoadPressureDialog.jsx` - Large\-load warning dialog shown before / during very heavy loading runs.
@@ -68,7 +68,7 @@ File count: 10. Line count: 4963. JSDoc symbol count: 117.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;.
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
-- `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &amp;quot;post\-zoom&amp;quot; state &amp;amp; handlers used only in compare mode.
+- `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
 - `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
@@ -138,7 +138,7 @@ File count: 1. Line count: 1346. JSDoc symbol count: 20.
 
 File count: 1. Line count: 363. JSDoc symbol count: 18.
 
-- `src/schemas/portableBundle.js` - OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency\-free helpers to validate and normalize input.
+- `src/schemas/portableBundle.js` - OpenDocViewer — Portable Document Bundle Schema & Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency\-free helpers to validate and normalize input.
 
 ## src/types
 
@@ -148,7 +148,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 35. Line count: 15052. JSDoc symbol count: 592.
+File count: 35. Line count: 15082. JSDoc symbol count: 594.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
@@ -156,7 +156,7 @@ File count: 35. Line count: 15052. JSDoc symbol count: 592.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
-- `src/utils/printTemplate.js` - OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
+- `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 - `src/utils/supportDiagnostics.js` - Support diagnostics helpers for opt\-in troubleshooting tools.
 
 ## src/workers

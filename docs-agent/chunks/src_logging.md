@@ -18,9 +18,9 @@ Symbols:
 - `readRuntimeConfig` (function) - Resolve a runtime config snapshot from runtime globals \(SSR\-safe\).
 - `resolveBackendUrl` (function) - Resolve a candidate backend URL using precedence rules and make it absolute relative to document.baseURI \(SSR\-safe\).
 - `resolveAuthToken` (function) - Resolve the shared auth token used for posting to /log.
-- `resolveEnabledOverride` (function) - Resolve an explicit &amp;quot;enabled&amp;quot; boolean if one exists.
+- `resolveEnabledOverride` (function) - Resolve an explicit &quot;enabled&quot; boolean if one exists.
 - `normalizeLevel` (function) - Normalize and validate a log level.
-- `levelGte` (function) - Compare two log levels \(is a &amp;gt;\= b ?\).
+- `levelGte` (function) - Compare two log levels \(is a &gt;\= b ?\).
 - `circularReplacer` (function) - Create a JSON replacer that: prevents circular references leaves values otherwise intact
 
 ## src/logging/userLogger.js
@@ -39,7 +39,7 @@ Symbols:
 - `getRuntimeConfig` (function) - Safely read runtime config from window.
 - `toAbsoluteUrl` (function) - Make absolute using document.baseURI when available.
 - `isSameOrigin` (function) - Determine if the target URL is same\-origin with current document.
-- `tzOffset` (function) - Return timezone offset as &amp;quot;\+HH:MM&amp;quot; or &amp;quot;\-HH:MM&amp;quot;.
+- `tzOffset` (function) - Return timezone offset as &quot;\+HH:MM&quot; or &quot;\-HH:MM&quot;.
 - `abToBase64` (function) - Base64 from ArrayBuffer \(for cookie fingerprint\).
-- `sha256Base64` (function) - Async SHA\-256 of a string → &amp;quot;sha256\- &amp;quot; \(or null\).
+- `sha256Base64` (function) - Async SHA\-256 of a string → &quot;sha256\- &quot; \(or null\).
 - `UserLogController#setUserResolver` (function) - Optional identity resolver supplied by host app.

@@ -91,7 +91,7 @@ Symbols:
 
 ## src/components/DocumentLoader/mainThreadRenderer.js
 
-OpenDocViewer — Main\-thread renderers for PDF &amp; TIFF Render multi\-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low\-core devices, or when explicitly configured\).
+OpenDocViewer — Main\-thread renderers for PDF & TIFF Render multi\-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low\-core devices, or when explicitly configured\).
 
 Exports: `renderPDFInMainThread`, `renderTIFFInMainThread`
 
@@ -131,7 +131,7 @@ Symbols:
 
 ## src/components/DocumentLoader/workerHandler.js
 
-OpenDocViewer — Worker orchestration &amp; message handling \- Create image workers for off\-main\-thread rasterization/conversion.
+OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
 
 Exports: `createWorker`, `getNumberOfWorkers`, `handleWorkerMessage`
 

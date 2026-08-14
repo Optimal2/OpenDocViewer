@@ -82,8 +82,8 @@
   },
   "stats": {
     "fileCount": 114,
-    "sourceLineCount": 49419,
-    "docletCount": 1316,
+    "sourceLineCount": 49449,
+    "docletCount": 1318,
     "documentedFileCount": 114,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -363,10 +363,10 @@
   "importantFiles": [
     {
       "path": "src/utils/documentLoadingConfig.js",
-      "score": 122,
-      "lines": 1065,
+      "score": 123,
+      "lines": 1095,
       "incomingLocalImports": 12,
-      "doclets": 32,
+      "doclets": 34,
       "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
       "summaryConfidence": "high"
     },
@@ -1425,15 +1425,15 @@
     {
       "name": "src/utils",
       "fileCount": 35,
-      "lineCount": 15052,
-      "docletCount": 592,
+      "lineCount": 15082,
+      "docletCount": 594,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
-          "score": 122,
-          "lines": 1065,
+          "score": 123,
+          "lines": 1095,
           "incomingLocalImports": 12,
-          "doclets": 32,
+          "doclets": 34,
           "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
           "summaryConfidence": "high"
         },
@@ -30872,9 +30872,9 @@
     },
     {
       "path": "src/utils/documentLoadingConfig.js",
-      "lines": 1065,
+      "lines": 1095,
       "extension": ".js",
-      "jsdocBlockCount": 34,
+      "jsdocBlockCount": 36,
       "sourceSummary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
       "imports": [
         {
@@ -30911,77 +30911,77 @@
         {
           "name": "normalizeProtection",
           "kind": "function",
-          "line": 386
+          "line": 400
         },
         {
           "name": "cloneDocumentLoadingConfig",
           "kind": "function",
-          "line": 504
+          "line": 534
         },
         {
           "name": "countPdfPages",
           "kind": "function",
-          "line": 526
+          "line": 556
         },
         {
           "name": "resolvePdfWorkerPlanForPageCount",
           "kind": "function",
-          "line": 546
+          "line": 576
         },
         {
           "name": "resolvePdfRenderConfigForPageCount",
           "kind": "function",
-          "line": 607
+          "line": 637
         },
         {
           "name": "applyDocumentLoadingMode",
           "kind": "function",
-          "line": 747
+          "line": 777
         },
         {
           "name": "applyMemoryPressureStage",
           "kind": "function",
-          "line": 822
+          "line": 852
         },
         {
           "name": "getPerformanceWindowPageCount",
           "kind": "function",
-          "line": 852
+          "line": 882
         },
         {
           "name": "getDocumentLoadingConfig",
           "kind": "function",
-          "line": 859
+          "line": 889
         },
         {
           "name": "isRasterImageExtension",
           "kind": "function",
-          "line": 990
+          "line": 1020
         },
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 1003
+          "line": 1033
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 1014
+          "line": 1044
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1026
+          "line": 1056
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1044
+          "line": 1074
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1052
+          "line": 1082
         }
       ],
       "declarations": [
@@ -31013,172 +31013,172 @@
         {
           "name": "normalizeNumber",
           "kind": "function",
-          "line": 352
+          "line": 366
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 359
+          "line": 373
         },
         {
           "name": "normalizeThreshold",
           "kind": "function",
-          "line": 365
+          "line": 379
         },
         {
           "name": "normalizeMiBThreshold",
           "kind": "function",
-          "line": 373
+          "line": 387
         },
         {
           "name": "normalizeStoreMode",
           "kind": "function",
-          "line": 380
+          "line": 394
         },
         {
           "name": "normalizeProtection",
           "kind": "function",
-          "line": 386
+          "line": 400
         },
         {
           "name": "normalizeThumbnailLoadingStrategy",
           "kind": "function",
-          "line": 395
+          "line": 409
         },
         {
           "name": "normalizeThumbnailSourceStrategy",
           "kind": "function",
-          "line": 401
+          "line": 415
         },
         {
           "name": "normalizeMode",
           "kind": "function",
-          "line": 409
+          "line": 423
         },
         {
           "name": "normalizeFetchStrategy",
           "kind": "function",
-          "line": 415
+          "line": 429
         },
         {
           "name": "normalizeRenderStrategy",
           "kind": "function",
-          "line": 421
+          "line": 435
         },
         {
           "name": "normalizeRenderBackend",
           "kind": "function",
-          "line": 427
+          "line": 441
         },
         {
           "name": "normalizePdfToImageMode",
           "kind": "function",
-          "line": 433
+          "line": 447
         },
         {
           "name": "normalizePdfWorkerPagePolicy",
           "kind": "function",
-          "line": 442
+          "line": 456
         },
         {
           "name": "shouldUseMainThreadForPdf",
           "kind": "function",
-          "line": 480
+          "line": 510
         },
         {
           "name": "normalizePdfWorkerWarmupBatchMode",
           "kind": "function",
-          "line": 487
+          "line": 517
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 494
+          "line": 524
         },
         {
           "name": "cloneDocumentLoadingConfig",
           "kind": "function",
-          "line": 504
+          "line": 534
         },
         {
           "name": "countPdfPages",
           "kind": "function",
-          "line": 526
+          "line": 556
         },
         {
           "name": "resolvePdfWorkerPlanForPageCount",
           "kind": "function",
-          "line": 546
+          "line": 576
         },
         {
           "name": "resolvePdfRenderConfigForPageCount",
           "kind": "function",
-          "line": 607
+          "line": 637
         },
         {
           "name": "base",
           "kind": "object",
-          "line": 608
+          "line": 638
         },
         {
           "name": "buildAdaptiveDefaults",
           "kind": "function",
-          "line": 654
+          "line": 684
         },
         {
           "name": "applyDocumentLoadingMode",
           "kind": "function",
-          "line": 747
+          "line": 777
         },
         {
           "name": "applyMemoryPressureStage",
           "kind": "function",
-          "line": 822
+          "line": 852
         },
         {
           "name": "getPerformanceWindowPageCount",
           "kind": "function",
-          "line": 852
+          "line": 882
         },
         {
           "name": "getDocumentLoadingConfig",
           "kind": "function",
-          "line": 859
+          "line": 889
         },
         {
           "name": "normalized",
           "kind": "object",
-          "line": 888
+          "line": 918
         },
         {
           "name": "isRasterImageExtension",
           "kind": "function",
-          "line": 990
+          "line": 1020
         },
         {
           "name": "shouldUseFullImagesForThumbnails",
           "kind": "function",
-          "line": 1003
+          "line": 1033
         },
         {
           "name": "shouldKeepAllFullImageAssets",
           "kind": "function",
-          "line": 1014
+          "line": 1044
         },
         {
           "name": "formatBytes",
           "kind": "function",
-          "line": 1026
+          "line": 1056
         },
         {
           "name": "formatCount",
           "kind": "function",
-          "line": 1044
+          "line": 1074
         },
         {
           "name": "shouldRecommendStopping",
           "kind": "function",
-          "line": 1052
+          "line": 1082
         }
       ],
       "parseError": null,
@@ -31559,13 +31559,105 @@
           "examples": 0
         },
         {
+          "id": "normalizeNumber",
+          "name": "normalizeNumber",
+          "longname": "normalizeNumber",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/documentLoadingConfig.js",
+          "line": 366,
+          "description": "Coerce a value to a bounded integer .",
+          "params": [
+            {
+              "name": "value",
+              "type": "unknown",
+              "optional": false,
+              "description": "Raw value, typically from configuration."
+            },
+            {
+              "name": "fallback",
+              "type": "number",
+              "optional": false,
+              "description": "Returned when value is not a finite number."
+            },
+            {
+              "name": "min",
+              "type": "number",
+              "optional": false,
+              "description": "Lower bound, applied before flooring."
+            },
+            {
+              "name": "max",
+              "type": "number",
+              "optional": true,
+              "description": "Optional upper bound."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": "An integer in [min, max]."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "shouldUseMainThreadForPdf",
+          "name": "shouldUseMainThreadForPdf",
+          "longname": "shouldUseMainThreadForPdf",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/documentLoadingConfig.js",
+          "line": 510,
+          "description": "Decide whether a PDF should render on the main thread rather than through workers.",
+          "params": [
+            {
+              "name": "policy",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "pageCount",
+              "type": "number",
+              "optional": false,
+              "description": "Zero or negative means empty or not yet known."
+            },
+            {
+              "name": "mainThreadLimit",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "mainThreadHardwareLimit",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "hardwareConcurrency",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "countPdfPages",
           "name": "countPdfPages",
           "longname": "countPdfPages",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 526,
+          "line": 556,
           "description": "Count PDF pages in a page descriptor list.",
           "params": [
             {
@@ -31590,7 +31682,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 546,
+          "line": 576,
           "description": "Resolve the PDF page-worker policy for the current document size.",
           "params": [
             {
@@ -31621,7 +31713,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 607,
+          "line": 637,
           "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
           "params": [
             {
@@ -31652,7 +31744,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 852,
+          "line": 882,
           "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
           "params": [
             {
@@ -31677,7 +31769,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1026,
+          "line": 1056,
           "description": "",
           "params": [
             {
@@ -31702,7 +31794,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1044,
+          "line": 1074,
           "description": "",
           "params": [
             {
@@ -31727,7 +31819,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/documentLoadingConfig.js",
-          "line": 1052,
+          "line": 1082,
           "description": "",
           "params": [
             {
@@ -31767,7 +31859,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 12,
-      "importanceScore": 122,
+      "importanceScore": 123,
       "summary": "OpenDocViewer — runtime helpers for fetch/render/memory policies.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -70649,7 +70741,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 526,
+      "line": 556,
       "description": "Count PDF pages in a page descriptor list.",
       "params": [
         {
@@ -70874,7 +70966,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1026,
+      "line": 1056,
       "description": "",
       "params": [
         {
@@ -70899,7 +70991,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1044,
+      "line": 1074,
       "description": "",
       "params": [
         {
@@ -70924,7 +71016,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 852,
+      "line": 882,
       "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
       "params": [
         {
@@ -70961,6 +71053,49 @@
       "examples": 0
     },
     {
+      "id": "normalizeNumber",
+      "name": "normalizeNumber",
+      "longname": "normalizeNumber",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/documentLoadingConfig.js",
+      "line": 366,
+      "description": "Coerce a value to a bounded integer .",
+      "params": [
+        {
+          "name": "value",
+          "type": "unknown",
+          "optional": false,
+          "description": "Raw value, typically from configuration."
+        },
+        {
+          "name": "fallback",
+          "type": "number",
+          "optional": false,
+          "description": "Returned when value is not a finite number."
+        },
+        {
+          "name": "min",
+          "type": "number",
+          "optional": false,
+          "description": "Lower bound, applied before flooring."
+        },
+        {
+          "name": "max",
+          "type": "number",
+          "optional": true,
+          "description": "Optional upper bound."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "An integer in [min, max]."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PdfToImageMode",
       "name": "PdfToImageMode",
       "longname": "PdfToImageMode",
@@ -70980,7 +71115,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 607,
+      "line": 637,
       "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
       "params": [
         {
@@ -71011,7 +71146,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 546,
+      "line": 576,
       "description": "Resolve the PDF page-worker policy for the current document size.",
       "params": [
         {
@@ -71117,12 +71252,61 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/documentLoadingConfig.js",
-      "line": 1052,
+      "line": 1082,
       "description": "",
       "params": [
         {
           "name": "input",
           "type": "StopRecommendationInput",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "shouldUseMainThreadForPdf",
+      "name": "shouldUseMainThreadForPdf",
+      "longname": "shouldUseMainThreadForPdf",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/documentLoadingConfig.js",
+      "line": 510,
+      "description": "Decide whether a PDF should render on the main thread rather than through workers.",
+      "params": [
+        {
+          "name": "policy",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "pageCount",
+          "type": "number",
+          "optional": false,
+          "description": "Zero or negative means empty or not yet known."
+        },
+        {
+          "name": "mainThreadLimit",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "mainThreadHardwareLimit",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "hardwareConcurrency",
+          "type": "number",
           "optional": false,
           "description": ""
         }
