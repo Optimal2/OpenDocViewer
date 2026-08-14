@@ -84,11 +84,26 @@ describe('documentLoadingConfig', () => {
     });
 
     it('allocates at least one worker for a large document', () => {
-      const plan = resolvePdfWorkerPlanForPageCount(5000);
-      if (plan.mode !== 'main-thread') {
-        expect(plan.workerCount).toBeGreaterThanOrEqual(1);
-        expect(plan.workerCount).toBeLessThanOrEqual(plan.hardwareCap);
-      }
+      // The assertions used to sit inside `if (plan.mode !== 'main-thread')`, so on any
+      // machine that took the main-thread branch the test asserted nothing at all and
+      // still passed. Reported by GitHub code quality. The policy is pinned here instead
+      // of relying on the defaults plus whatever hardwareConcurrency the runner reports,
+      // so the worker branch is reached deterministically.
+      const renderConfig = {
+        ...DOCUMENT_LOADING_DEFAULTS.render,
+        pdfWorkerPagePolicy: {
+          ...DOCUMENT_LOADING_DEFAULTS.render.pdfWorkerPagePolicy,
+          enabled: true,
+          mainThreadBelowPageCount: 1,
+          mainThreadBelowHardwareConcurrency: 0,
+        },
+      };
+
+      const plan = resolvePdfWorkerPlanForPageCount(5000, renderConfig);
+
+      expect(plan.mode).not.toBe('main-thread');
+      expect(plan.workerCount).toBeGreaterThanOrEqual(1);
+      expect(plan.workerCount).toBeLessThanOrEqual(plan.hardwareCap);
     });
 
     it('floors a fractional page count instead of propagating it', () => {
@@ -122,8 +137,11 @@ describe('documentLoadingConfig', () => {
     });
 
     it('falls back to the base mode for an unknown mode', () => {
-      expect(applyDocumentLoadingMode(DOCUMENT_LOADING_DEFAULTS, 'nonsense').mode)
-        .toBe(DOCUMENT_LOADING_DEFAULTS.mode || 'auto');
+      // Asserted against the literal 'auto' rather than against
+      // `DOCUMENT_LOADING_DEFAULTS.mode || 'auto'`, which compared the value to itself and
+      // would have passed for any truthy default. Reported by GitHub code quality.
+      expect(DOCUMENT_LOADING_DEFAULTS.mode).toBe('auto');
+      expect(applyDocumentLoadingMode(DOCUMENT_LOADING_DEFAULTS, 'nonsense').mode).toBe('auto');
     });
   });
 
