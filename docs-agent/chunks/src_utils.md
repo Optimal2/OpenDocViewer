@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 15052. JSDoc symbol count: 592.
+File count: 35. Line count: 15082. JSDoc symbol count: 594.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -100,7 +100,7 @@ Local imports: `src/logging/systemLogger.js`
 Symbols:
 
 - `toPositiveInt` (function) - Coerce a value to a positive integer \(minimum 1\).
-- `isValidTotalPages` (function) - Check whether totalPages looks valid \(&amp;gt;\= 1\).
+- `isValidTotalPages` (function) - Check whether totalPages looks valid \(&gt;\= 1\).
 - `clampPage` (function) - Clamp a page number into \[1, totalPages\].
 - `handlePrevPage` (constant) - Navigate to the previous page \(no\-op if already at page 1\).
 - `handleNextPage` (constant) - Navigate to the next page \(no\-op if already at the last page\).
@@ -320,7 +320,7 @@ Symbols:
 - `PrintOptions` (typedef) - Options for single\-page printing.
 - `PageRange` (typedef) - A 1\-based inclusive page range.
 - `PrintAllOptions` (typedef) - Options for printing multiple pages \(all/range/sequence\).
-- `PrintCandidate` (typedef) - Internal: candidate node for &amp;quot;largest visible&amp;quot; heuristics.
+- `PrintCandidate` (typedef) - Internal: candidate node for &quot;largest visible&quot; heuristics.
 - `PrintHeaderCfg` (typedef) - Print header config \(runtime\) consumed by the print overlay logic.
 - `HiddenIframe` (typedef) - Return type for the hidden\-iframe factory.
 - `isVisiblyMeasurable` (function) - Check whether a candidate element is both present in layout and not hidden by basic CSS visibility.
@@ -363,7 +363,7 @@ Symbols:
 
 - `ParseResult` (typedef) - Result of parsing a custom pages string.
 - `tr` (function) - Tiny helper to translate with safe fallback.
-- `parsePrintSequence` (function) - Parse &amp;quot;Custom pages&amp;quot; into a sequence.
+- `parsePrintSequence` (function) - Parse &quot;Custom pages&quot; into a sequence.
 
 ## src/utils/printPdf.js
 
@@ -400,7 +400,7 @@ Symbols:
 
 ## src/utils/printTemplate.js
 
-OpenDocViewer — Print Templating &amp; Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
+OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 
 Exports: `escapeHtml`, `resolveCopyMarkerText`, `getByPath`, `makeBaseTokenContext`, `makePageTokenContext`, `applyTemplateTokensEscaped`
 
@@ -435,7 +435,7 @@ Symbols:
 - `module:handlePrintCurrentComparison` (module) - Print the current comparison pane through the HTML path.
 - `module:handlePrintRange` (module) - Print a specific page range through the HTML path.
 - `module:handlePrintSequence` (module) - Print a parsed custom page sequence through the HTML path.
-- `module:parsePrintSequence` (module) - Parse a user\-entered &amp;quot;Custom pages&amp;quot; string into a page sequence.
+- `module:parsePrintSequence` (module) - Parse a user\-entered &quot;Custom pages&quot; string into a page sequence.
 - `module:handlePdfOutput` (module) - Generate a PDF for the current selection/range and open the print dialog.
 - `module:handlePdfCurrent` (module) - Generate a PDF for the current page and open the print dialog.
 - `module:handlePdfCurrentComparison` (module) - Generate a PDF for the current comparison pane and open the print dialog.

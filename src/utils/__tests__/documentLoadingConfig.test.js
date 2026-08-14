@@ -128,15 +128,37 @@ describe('documentLoadingConfig', () => {
   });
 
   describe('applyMemoryPressureStage', () => {
-    it('returns a usable config for every stage it accepts', () => {
-      for (const stage of [0, 1, 2, 3]) {
-        expect(applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, stage)).toBeTruthy();
-      }
+    // The stages are the strings 'normal' | 'soft' | 'hard'. An earlier version of this
+    // test looped over [0, 1, 2, 3] and passed while exercising a single branch: 0 is
+    // falsy so it becomes 'normal', and 1/2/3 stringify to values no branch matches, so
+    // they fall through to the same default. It asserted only that the function returns
+    // something. Reported by GitHub code quality against this test file.
+
+    it('returns the base config unchanged under normal pressure', () => {
+      const next = applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 'normal');
+      expect(next.fetch.strategy).toBe(DOCUMENT_LOADING_DEFAULTS.fetch.strategy);
+    });
+
+    it('constrains fetching under soft pressure', () => {
+      const next = applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 'soft');
+      expect(next.fetch.strategy).toBe('sequential');
+      expect(next.fetch.prefetchConcurrency).toBe(1);
+      expect(next.render.maxConcurrentMainThreadRenders).toBe(2);
+    });
+
+    it('falls all the way back to memory mode under hard pressure', () => {
+      const next = applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 'hard');
+      expect(next.mode).toBe('memory');
+    });
+
+    it('treats an unrecognised stage as soft rather than throwing', () => {
+      const next = applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 'nonsense');
+      expect(next.fetch.strategy).toBe('sequential');
     });
 
     it('leaves the source config untouched', () => {
       const snapshot = JSON.stringify(DOCUMENT_LOADING_DEFAULTS);
-      applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 3);
+      applyMemoryPressureStage(DOCUMENT_LOADING_DEFAULTS, 'hard');
       expect(JSON.stringify(DOCUMENT_LOADING_DEFAULTS)).toBe(snapshot);
     });
   });

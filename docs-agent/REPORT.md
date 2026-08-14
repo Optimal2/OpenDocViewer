@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 114
-- Source lines: 49419
-- JSDoc symbols: 1316
+- Source lines: 49449
+- JSDoc symbols: 1318
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -39,7 +39,7 @@
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1211 lines
 - `src/components/DocumentRender.jsx`: 1112 lines
-- `src/utils/documentLoadingConfig.js`: 1065 lines
+- `src/utils/documentLoadingConfig.js`: 1095 lines
 - `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1051 lines
 - `src/utils/pdfBenchmark.js`: 965 lines
 - `src/utils/sourceTempStore.js`: 913 lines

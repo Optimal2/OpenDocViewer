@@ -80,7 +80,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/PerformanceMonitor.jsx</code> | 1346 | 1 | 20 | high | src/PerformanceMonitor.jsx OpenDocViewer — Lightweight Performance HUD - Provide optional, low-impact visibility into runtime performance and viewer state. |
 | <code>src/schemas/portableBundle.js</code> | 363 | 0 | 18 | high | OpenDocViewer — Portable Document Bundle Schema &amp; Helpers \(ESM\) Define the canonical shape for a portable, serializable set of documents and provide minimal, dependency-free helpers to validate and normalize input. |
 | <code>src/types/jsdoc-types.js</code> | 101 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
-| <code>src/utils/documentLoadingConfig.js</code> | 1065 | 12 | 32 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
+| <code>src/utils/documentLoadingConfig.js</code> | 1095 | 12 | 34 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | <code>src/utils/documentMetadata.js</code> | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
 | <code>src/utils/idUtils.js</code> | 64 | 1 | 4 | high | OpenDocViewer — small opaque identifier helpers. |
 | <code>src/utils/localizedValue.js</code> | 113 | 8 | 6 | high | Localized string resolver for admin-supplied config values. |

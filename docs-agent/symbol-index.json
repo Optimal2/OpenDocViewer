@@ -17956,7 +17956,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 526,
+    "line": 556,
     "description": "Count PDF pages in a page descriptor list.",
     "params": [
       {
@@ -18181,7 +18181,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1026,
+    "line": 1056,
     "description": "",
     "params": [
       {
@@ -18206,7 +18206,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1044,
+    "line": 1074,
     "description": "",
     "params": [
       {
@@ -18231,7 +18231,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 852,
+    "line": 882,
     "description": "Return the page-count window where auto mode should still behave like the fast, eager path.",
     "params": [
       {
@@ -18268,6 +18268,49 @@
     "examples": 0
   },
   {
+    "id": "normalizeNumber",
+    "name": "normalizeNumber",
+    "longname": "normalizeNumber",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/documentLoadingConfig.js",
+    "line": 366,
+    "description": "Coerce a value to a bounded integer .",
+    "params": [
+      {
+        "name": "value",
+        "type": "unknown",
+        "optional": false,
+        "description": "Raw value, typically from configuration."
+      },
+      {
+        "name": "fallback",
+        "type": "number",
+        "optional": false,
+        "description": "Returned when value is not a finite number."
+      },
+      {
+        "name": "min",
+        "type": "number",
+        "optional": false,
+        "description": "Lower bound, applied before flooring."
+      },
+      {
+        "name": "max",
+        "type": "number",
+        "optional": true,
+        "description": "Optional upper bound."
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": "An integer in [min, max]."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "PdfToImageMode",
     "name": "PdfToImageMode",
     "longname": "PdfToImageMode",
@@ -18287,7 +18330,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 607,
+    "line": 637,
     "description": "Return a render config with pdfToImageMode and pdfWorkerCount resolved for a known PDF page count.",
     "params": [
       {
@@ -18318,7 +18361,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 546,
+    "line": 576,
     "description": "Resolve the PDF page-worker policy for the current document size.",
     "params": [
       {
@@ -18424,12 +18467,61 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/documentLoadingConfig.js",
-    "line": 1052,
+    "line": 1082,
     "description": "",
     "params": [
       {
         "name": "input",
         "type": "StopRecommendationInput",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "shouldUseMainThreadForPdf",
+    "name": "shouldUseMainThreadForPdf",
+    "longname": "shouldUseMainThreadForPdf",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/documentLoadingConfig.js",
+    "line": 510,
+    "description": "Decide whether a PDF should render on the main thread rather than through workers.",
+    "params": [
+      {
+        "name": "policy",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "pageCount",
+        "type": "number",
+        "optional": false,
+        "description": "Zero or negative means empty or not yet known."
+      },
+      {
+        "name": "mainThreadLimit",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "mainThreadHardwareLimit",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "hardwareConcurrency",
+        "type": "number",
         "optional": false,
         "description": ""
       }
