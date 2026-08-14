@@ -349,6 +349,20 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
   })
 );
 
+/**
+ * Coerce a value to a bounded **integer**.
+ *
+ * The result is always floored, which callers of integer-only settings (worker counts,
+ * page thresholds, batch sizes) rely on. That contract was implicit; it is stated here
+ * because {@link normalizeFloat} is the sibling for values that must keep their fraction,
+ * and picking the wrong one of the two is silent.
+ *
+ * @param {unknown} value Raw value, typically from configuration.
+ * @param {number} fallback Returned when value is not a finite number.
+ * @param {number} min Lower bound, applied before flooring.
+ * @param {number} [max] Optional upper bound.
+ * @returns {number} An integer in [min, max].
+ */
 function normalizeNumber(value, fallback, min, max) {
   const next = Number(value);
   if (!Number.isFinite(next)) return fallback;
@@ -477,6 +491,22 @@ function normalizePdfWorkerPagePolicy(value, fallback = DOCUMENT_LOADING_DEFAULT
   };
 }
 
+/**
+ * Decide whether a PDF should render on the main thread rather than through workers.
+ *
+ * `pageCount <= 0` returning true is deliberate, not an oversight. Callers pass 0 both for
+ * an empty document and for "page count not known yet", and the main thread is the correct
+ * destination for both: an empty document costs nothing there, and an unknown count gives
+ * the worker planner nothing to partition on, so spinning workers up would be a guess. A
+ * caller that later learns the real count simply asks again.
+ *
+ * @param {{enabled: boolean}} policy
+ * @param {number} pageCount Zero or negative means empty or not yet known.
+ * @param {number} mainThreadLimit
+ * @param {number} mainThreadHardwareLimit
+ * @param {number} hardwareConcurrency
+ * @returns {boolean}
+ */
 function shouldUseMainThreadForPdf(policy, pageCount, mainThreadLimit, mainThreadHardwareLimit, hardwareConcurrency) {
   return !policy.enabled
     || pageCount <= 0
