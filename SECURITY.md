@@ -15,7 +15,7 @@ Earlier releases are retained for historical reference only and are **not suppor
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.6.6 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.7.0 is supported.
 
 ### OpenDocViewer v2.7.0
 Changes since v2.6.6:
