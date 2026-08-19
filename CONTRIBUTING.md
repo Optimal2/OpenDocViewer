@@ -71,6 +71,7 @@ Before opening or merging a change, verify at least the following when relevant:
 
 ```bash
 npm run lint
+npm test
 npm run build
 npm run doc
 npm run doc:agent
