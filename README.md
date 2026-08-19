@@ -200,6 +200,22 @@ Open the local Vite URL, typically `http://localhost:5173`.
 
 ---
 
+## Running tests
+
+The test suite uses [Vitest](https://vitest.dev/) and needs nothing beyond
+`npm install`:
+
+```bash
+npm test           # run the suite once
+npm run test:watch # re-run on file changes
+```
+
+Note that the local pre-push gate below does **not** run the tests — run
+them yourself before pushing, and include them when reviewing changes (see
+the review checklist in [CONTRIBUTING.md](CONTRIBUTING.md)).
+
+---
+
 ## Local pre-push gate
 
 This repository uses tracked Git hooks to run a local CI gate before every
