@@ -41,7 +41,7 @@ This file combines package.json declarations with observed source imports.
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
-| <code>eslint</code> | <code>^10.8.1</code> | 0 |
+| <code>eslint</code> | <code>^10.9.0</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
 | <code>eslint-plugin-react-refresh</code> | <code>^0.5.4</code> | 0 |
 | <code>globals</code> | <code>^17.11.0</code> | 0 |
