@@ -2,20 +2,31 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.7.0** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.7.1** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.6.6 and earlier are superseded by v2.7.0 and are no longer supported for production deployments. v2.7.0 keeps the v2.6 dependency baseline current and adds a default frame-embedding policy (X-Frame-Options + CSP frame-ancestors), fail-closed system-log token handling, dependency and security-advisory updates, CI/test hardening, and OMP seed/build fixes on top of the v2.6.6 runtime-configuration, test, and documentation hardening. Operators should upgrade to v2.7.0 before opening new support or security issues.
+OpenDocViewer v2.7.0 and earlier are superseded by v2.7.1 and are no longer supported for production deployments. v2.7.1 keeps the v2.7.0 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes - and adds the six resolved Dependabot advisories, continued dependency upkeep, and a correction to the Content-Security-Policy `connect-src` directive that v2.7.0 shipped too strict: documents opened from a blob URL were blocked. Operators should upgrade to v2.7.1 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.7.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.7.1   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
 | <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.7.0 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.7.1 is supported.
+
+### OpenDocViewer v2.7.1
+Changes since v2.7.0:
+
+- Allowed `blob:` in the CSP `connect-src` directive so documents opened from a blob URL load; the v2.7.0 policy blocked them.
+- Resolved all six open Dependabot advisories and continued routine patch/minor dependency upkeep.
+- Documented and test-covered the configuration coercion contract in `documentLoadingConfig`, where integer-only settings floor and the float sibling does not.
+- Added a build guard that fails OMP package builds when an artifact payload contains runtime configuration files.
+- Removed test paths that could not fail and corrected one that asserted nothing.
+- Documented `npm test` and refreshed the committed agent documentation packet.
 
 ### OpenDocViewer v2.7.0
 Changes since v2.6.6:
