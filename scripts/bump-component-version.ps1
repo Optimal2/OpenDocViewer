@@ -1,12 +1,48 @@
 [CmdletBinding(SupportsShouldProcess)]
 param(
-    [string[]]$ComponentKey = @(),
+[string[]]$ComponentKey = @(),
     [switch]$All,
     [ValidateSet('patch', 'minor', 'major')]
     [string]$Part = 'patch',
     [string]$Version = '',
-    [string]$ManifestPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'omp-components.json')
+    [string]$ManifestPath = (Join-Path (Split-Path -Parent $PSScriptRoot) 'omp-components.json'),
+    [switch]$AllowDeprecated
 )
+
+# ---------------------------------------------------------------------------
+# SPÄRR (2026-08-23). Det här skriptet gör en OFULLSTÄNDIG bump och har valts av
+# misstag flera gånger — dess namn låter mer specifikt än det kanoniska, så den
+# som vill "bumpa en komponent" landar här. En Write-Warning räckte inte: en
+# varning i ett skriptutflöde syns inte för den som läser exit-koden.
+# Nu måste avvikelsen vara ett aktivt val.
+# ---------------------------------------------------------------------------
+if (-not $AllowDeprecated) {
+    throw @"
+DEPRECATED: scripts/bump-component-version.ps1 gör en OFULLSTÄNDIG bump.
+
+ANVÄND I STÄLLET (kanoniskt skript, hela versionsmatrisen):
+
+    .\scripts\omp\bump-version.ps1 -ComponentKey <komponentnyckel>
+    .\scripts\omp\bump-version.ps1 -AllComponents -AllModuleDefinitions -UpdateModuleMinimums
+
+Det kanoniska skriptet uppdaterar ALLT som hänger ihop:
+  - komponentversioner i omp-components.json
+  - definitionVersion i varje berörd module-definition.json
+  - compatibleArtifacts.maxVersion per modul
+  - widgetversioner
+  - repositoryVersion
+
+DET HÄR skriptet bumpar BARA komponentversioner. Resultatet blir ett halvbumpat
+repo som pre-push-grinden avvisar, och om det ändå når en värd avvisar
+HostAgenten importen med "same version, different content".
+
+Behöver du verkligen en komponent-only-bump och tänker själv stämma av
+repositoryVersion och moduldefinitionerna efteråt:
+
+    .\scripts\bump-component-version.ps1 -AllowDeprecated <övriga argument>
+"@
+}
+
 
 Set-StrictMode -Version Latest
 
