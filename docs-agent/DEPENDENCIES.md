@@ -6,7 +6,7 @@ This file combines package.json declarations with observed source imports.
 
 | Package | Version | Imports | Used In |
 | --- | --- | ---: | --- |
-| <code>axios</code> | <code>^1.19.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
+| <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
 | <code>dompurify</code> | <code>^3.4.14</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
@@ -41,13 +41,13 @@ This file combines package.json declarations with observed source imports.
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
-| <code>eslint</code> | <code>^10.9.0</code> | 0 |
+| <code>eslint</code> | <code>^10.9.1</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
-| <code>eslint-plugin-react-refresh</code> | <code>^0.5.4</code> | 0 |
+| <code>eslint-plugin-react-refresh</code> | <code>^0.5.5</code> | 0 |
 | <code>globals</code> | <code>^17.11.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>prettier</code> | <code>^3.9.6</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.4</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.6</code> | 0 |
 | <code>vite</code> | <code>^8.2.2</code> | 0 |
 | <code>vitest</code> | <code>^4.1.11</code> | 0 |
 
