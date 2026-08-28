@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Bumps OMP repository, component, module-definition, and widget versions.
 
@@ -23,7 +23,8 @@ param(
     [string]$Part = 'patch',
     [string]$Version = '',
     [switch]$Interactive,
-    [switch]$Pause
+    [switch]$Pause,
+    [string]$CascadeFrom = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -506,7 +507,17 @@ try {
         throw 'Use either -AllWidgets or -WidgetFile, not both.'
     }
 
-    if (-not $AllComponents -and $ComponentKey.Count -eq 0 -and -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0 -and -not $AllWidgets -and $WidgetFile.Count -eq 0 -and -not $Interactive) {
+    if (-not [string]::IsNullOrWhiteSpace($CascadeFrom)) {
+        if ($AllComponents) {
+            throw '-CascadeFrom cannot be used with -AllComponents.'
+        }
+
+        if ($AllModuleDefinitions) {
+            throw '-CascadeFrom cannot be used with -AllModuleDefinitions.'
+        }
+    }
+
+    if (-not $AllComponents -and $ComponentKey.Count -eq 0 -and -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0 -and -not $AllWidgets -and $WidgetFile.Count -eq 0 -and -not $Interactive -and [string]::IsNullOrWhiteSpace($CascadeFrom)) {
         $AllComponents = $true
     }
 
@@ -552,6 +563,56 @@ try {
         })
     }
 
+    $selectedComponents = [System.Collections.Generic.List[object]]::new($selectedComponents)
+
+    if (-not [string]::IsNullOrWhiteSpace($CascadeFrom)) {
+        $sharedProjects = Get-JsonPropertyValue -Object $manifest -Name 'sharedProjects'
+        if ($null -eq $sharedProjects) {
+            throw "sharedProjects block not found in $manifestPath. -CascadeFrom requires shared project metadata."
+        }
+
+        $matchingSharedProject = @($sharedProjects | Where-Object { [string](Get-JsonPropertyValue -Object $_ -Name 'projectPath') -eq $CascadeFrom })
+        if ($matchingSharedProject.Count -ne 1) {
+            throw "Shared project '$CascadeFrom' was not found in $manifestPath."
+        }
+
+        $consumerKeys = @((Get-JsonPropertyValue -Object $matchingSharedProject[0] -Name 'consumers'))
+        if ($consumerKeys.Count -eq 0) {
+            Write-Host "Cascade from ${CascadeFrom}: no consumers declared."
+        }
+        else {
+            $cascadeComponents = @(foreach ($key in $consumerKeys) {
+                $match = @($components | Where-Object { $_.componentKey -eq $key })
+                if ($match.Count -ne 1) {
+                    throw "Cascade consumer '$key' was not found exactly once in $manifestPath."
+                }
+
+                $match[0]
+            })
+
+            $selectedKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+            foreach ($component in $selectedComponents) {
+                [void]$selectedKeys.Add([string]$component.componentKey)
+            }
+
+            $addedConsumers = [System.Collections.Generic.List[string]]::new()
+            foreach ($component in $cascadeComponents) {
+                $key = [string]$component.componentKey
+                if (-not $selectedKeys.Contains($key)) {
+                    [void]$selectedComponents.Add($component)
+                    [void]$addedConsumers.Add($key)
+                }
+            }
+
+            if ($addedConsumers.Count -gt 0) {
+                Write-Host "Cascade from ${CascadeFrom}: bumping $($addedConsumers -join ', ')"
+            }
+            else {
+                Write-Host "Cascade from ${CascadeFrom}: all consumers already selected, no additional components to bump."
+            }
+        }
+    }
+
     $updates = [System.Collections.Generic.List[object]]::new()
 
     $hasSelectedVersionTargets = $selectedComponents.Count -gt 0 -or $selectedModuleDefinitions.Count -gt 0 -or $selectedWidgets.Count -gt 0
@@ -562,6 +623,22 @@ try {
         }
 
         $nextRepositoryVersion = Get-NextVersion -CurrentVersion $currentRepositoryVersion
+
+        # Guard against a version REGRESSION. -Version is returned verbatim by Get-NextVersion for
+        # EVERY selected target, the repository included, so setting components to an explicit
+        # version silently drags repositoryVersion backwards (observed 2026-07-19: bumping two
+        # example components to 0.3.83 rewrote repositoryVersion 0.3.279 -> 0.3.83). A published
+        # version must never go backwards, so fail loudly instead of corrupting the manifest.
+        $parsedCurrentRepositoryVersion = $null
+        $parsedNextRepositoryVersion = $null
+        if ([System.Version]::TryParse($currentRepositoryVersion, [ref]$parsedCurrentRepositoryVersion) -and
+            [System.Version]::TryParse($nextRepositoryVersion, [ref]$parsedNextRepositoryVersion) -and
+            $parsedNextRepositoryVersion -lt $parsedCurrentRepositoryVersion) {
+            throw ("Refusing to regress repositoryVersion from '{0}' to '{1}'. -Version is applied to every " -f $currentRepositoryVersion, $nextRepositoryVersion) +
+                  'selected target, including the repository. Pass -SkipRepositoryVersion when setting components ' +
+                  'to an explicit version, or bump the repository separately.'
+        }
+
         Set-JsonProperty -Object $manifest -Name 'repositoryVersion' -Value $nextRepositoryVersion
         [void]$updates.Add([pscustomobject]@{
             Item = 'repository'
@@ -570,6 +647,16 @@ try {
             NewVersion = $nextRepositoryVersion
         })
     }
+
+    # Lazy-load module definition JSON documents keyed by moduleKey. This is
+    # used both for the explicit -ModuleKey/-AllModuleDefinitions bump path
+    # Module definitions whose compatibleArtifacts were rewritten by a component bump; their
+    # own definitionVersion has to follow, see the note further down.
+    $touchedModuleKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+    # and for updating compatibleArtifacts.maxVersion when a component bump
+    # touches an appKey declared in the module definition.
+    $definitionJsonByKey = @{}
+    $definitionPathByKey = @{}
 
     foreach ($component in $selectedComponents) {
         $currentVersion = [string]$component.version
@@ -581,6 +668,132 @@ try {
             OldVersion = $currentVersion
             NewVersion = $nextVersion
         })
+
+        # -------------------------------------------------------------------
+        # Keep compatibleArtifacts.maxVersion in sync with the bumped
+        # component. The 2026-08-18 IbsPackager import failure showed that
+        # leaving this step manual let the version matrix drift: the
+        # component was bumped but the module definition still capped the
+        # artifact version, so the host rejected the produced artifact.
+        # -------------------------------------------------------------------
+        $componentAppKey = [string](Get-JsonPropertyValue -Object $component -Name 'appKey')
+        $componentModuleKey = [string](Get-JsonPropertyValue -Object $component -Name 'moduleKey')
+        if ([string]::IsNullOrWhiteSpace($componentAppKey) -or [string]::IsNullOrWhiteSpace($componentModuleKey)) {
+            continue
+        }
+
+        $moduleDefinitionEntry = @($moduleDefinitions | Where-Object { [string](Get-JsonPropertyValue -Object $_ -Name 'moduleKey') -eq $componentModuleKey })
+        if ($moduleDefinitionEntry.Count -ne 1) {
+            continue
+        }
+
+        $relativeDefinitionPath = [string](Get-JsonPropertyValue -Object $moduleDefinitionEntry[0] -Name 'path')
+        if ([string]::IsNullOrWhiteSpace($relativeDefinitionPath)) {
+            continue
+        }
+
+        if (-not $definitionJsonByKey.ContainsKey($componentModuleKey)) {
+            $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot $relativeDefinitionPath)
+            $definitionPathByKey[$componentModuleKey] = $definitionPath
+            if (Test-Path -LiteralPath $definitionPath -PathType Leaf) {
+                $definitionJsonByKey[$componentModuleKey] = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            }
+            else {
+                $definitionJsonByKey[$componentModuleKey] = $null
+            }
+        }
+
+        $definitionJson = $definitionJsonByKey[$componentModuleKey]
+        if ($null -eq $definitionJson) {
+            continue
+        }
+
+        $compatibleArtifacts = Get-JsonPropertyValue -Object $definitionJson -Name 'compatibleArtifacts'
+        if ($null -eq $compatibleArtifacts) {
+            continue
+        }
+
+        foreach ($artifact in @($compatibleArtifacts)) {
+            if ($null -eq $artifact) {
+                continue
+            }
+
+            $artifactAppKey = [string](Get-JsonPropertyValue -Object $artifact -Name 'appKey')
+            if (-not [string]::Equals($artifactAppKey, $componentAppKey, [StringComparison]::OrdinalIgnoreCase)) {
+                continue
+            }
+
+            $currentMaxVersion = [string](Get-JsonPropertyValue -Object $artifact -Name 'maxVersion')
+            $shouldUpdate = $false
+            if ([string]::IsNullOrWhiteSpace($currentMaxVersion)) {
+                $shouldUpdate = $true
+            }
+            else {
+                $parsedCurrentMaxVersion = $null
+                $parsedNextVersion = $null
+                if (-not [System.Version]::TryParse($currentMaxVersion, [ref]$parsedCurrentMaxVersion)) {
+                    throw "Module definition '$componentModuleKey' compatibleArtifacts entry for appKey '$componentAppKey' has non-numeric maxVersion '$currentMaxVersion'. Update it manually before bumping."
+                }
+
+                if (-not [System.Version]::TryParse($nextVersion, [ref]$parsedNextVersion)) {
+                    throw "Component '$($component.componentKey)' was bumped to non-numeric version '$nextVersion'. Cannot compare with compatibleArtifacts.maxVersion '$currentMaxVersion'."
+                }
+
+                if ($parsedNextVersion -gt $parsedCurrentMaxVersion) {
+                    $shouldUpdate = $true
+                }
+            }
+
+            if ($shouldUpdate) {
+                Set-JsonProperty -Object $artifact -Name 'maxVersion' -Value $nextVersion
+                [void]$touchedModuleKeys.Add($componentModuleKey)
+                [void]$updates.Add([pscustomobject]@{
+                    Item = 'module-definition-compatible-artifact'
+                    Key = "$componentModuleKey/$componentAppKey"
+                    OldVersion = if ([string]::IsNullOrWhiteSpace($currentMaxVersion)) { '(unbounded)' } else { $currentMaxVersion }
+                    NewVersion = $nextVersion
+                })
+            }
+        }
+    }
+
+    # A component bump rewrites compatibleArtifacts.maxVersion in the module definition, which
+    # CHANGES the definition -- and HostAgent rejects a re-imported definition that carries the
+    # same definitionVersion with different content. The bump therefore has to carry the
+    # definition's own version with it, or local-ci and the pre-push gate refuse the result and
+    # the user has to discover a second command that nothing mentions
+    # (`-ModuleKey <module> -SkipRepositoryVersion`). Measured twice on 2026-08-23, both times
+    # mid-incident, and repeatedly since.
+    #
+    # Rather than duplicating the bump logic, the touched definitions are added to the normal
+    # selection below, so they go through exactly the same code path as an explicit -ModuleKey.
+    foreach ($moduleKey in $touchedModuleKeys) {
+        if ($selectedModuleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey }) {
+            continue
+        }
+
+        $match = @($moduleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey })
+        if ($match.Count -eq 1) {
+            $selectedModuleDefinitions = @($selectedModuleDefinitions) + $match[0]
+        }
+    }
+
+    # Persist any compatibleArtifacts changes made above.
+    foreach ($entry in $definitionJsonByKey.GetEnumerator()) {
+        $moduleKey = $entry.Key
+        $definitionJson = $entry.Value
+        if ($null -eq $definitionJson) {
+            continue
+        }
+
+        $definitionPath = [string]$definitionPathByKey[$moduleKey]
+        if ([string]::IsNullOrWhiteSpace($definitionPath)) {
+            continue
+        }
+
+        if ($PSCmdlet.ShouldProcess($definitionPath, "Update compatibleArtifacts.maxVersion for module '$moduleKey'")) {
+            Save-JsonFile -Path $definitionPath -Value $definitionJson
+        }
     }
 
     $moduleVersionByKey = @{}
@@ -609,13 +822,22 @@ try {
 
     if ($UpdateModuleMinimums -and $moduleVersionByKey.Count -gt 0) {
         foreach ($component in $components) {
-            $moduleKey = [string]$component.moduleKey
-            if (-not $moduleVersionByKey.ContainsKey($moduleKey)) {
+            # $moduleKey used to be the name here -- and PowerShell variable names are
+            # case-insensitive, so it WAS the [string[]]$ModuleKey parameter. The type
+            # constraint coerced the assignment to a one-element String[], which no
+            # Hashtable string key can ever match, so the loop body was unreachable and
+            # -UpdateModuleMinimums printed a green table while writing nothing. The
+            # documented repair command could not repair (R7-G4). Use
+            # Get-JsonPropertyValue for minModuleDefinitionVersion too: 10 of 13
+            # components do not carry the property, and direct access under
+            # Set-StrictMode would turn the silent no-op into a crash mid-write.
+            $componentModuleKey = [string](Get-JsonPropertyValue -Object $component -Name 'moduleKey')
+            if ([string]::IsNullOrWhiteSpace($componentModuleKey) -or -not $moduleVersionByKey.ContainsKey($componentModuleKey)) {
                 continue
             }
 
-            $oldMinimum = [string]$component.minModuleDefinitionVersion
-            $newMinimum = [string]$moduleVersionByKey[$moduleKey]
+            $oldMinimum = [string](Get-JsonPropertyValue -Object $component -Name 'minModuleDefinitionVersion')
+            $newMinimum = [string]$moduleVersionByKey[$componentModuleKey]
             Set-JsonProperty -Object $component -Name 'minModuleDefinitionVersion' -Value $newMinimum
             [void]$updates.Add([pscustomobject]@{
                 Item = 'component-min-module-definition'
@@ -665,7 +887,7 @@ try {
 }
 catch {
     $exitCode = 1
-    Write-Error $_
+    Write-Error -Message ([string]$_) -ErrorAction Continue
 }
 finally {
     Wait-ForUser -Enabled:$Pause
