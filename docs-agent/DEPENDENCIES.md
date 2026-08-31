@@ -11,7 +11,7 @@ This file combines package.json declarations with observed source imports.
 | <code>dompurify</code> | <code>^3.4.14</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>express-rate-limit</code> | <code>^8.6.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.0.2</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>i18next</code> | <code>^26.4.0</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
@@ -19,9 +19,9 @@ This file combines package.json declarations with observed source imports.
 | <code>i18next-icu</code> | <code>^2.4.4</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 0 |  |
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
-| <code>morgan</code> | <code>^1.11.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>morgan</code> | <code>^1.12.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 0 |  |
-| <code>pdfjs-dist</code> | <code>^6.1.200</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code> |
+| <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code> |
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code> |
 | <code>react</code> | <code>^19.2.8</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code> |
 | <code>react-dom</code> | <code>^19.2.8</code> | 1 | <code>src/index.jsx</code> |
@@ -37,7 +37,7 @@ This file combines package.json declarations with observed source imports.
 | <code>@babel/runtime</code> | <code>^8.0.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.3</code> | 0 |
-| <code>@vitejs/plugin-react</code> | <code>^6.1.0</code> | 0 |
+| <code>@vitejs/plugin-react</code> | <code>^6.1.1</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
