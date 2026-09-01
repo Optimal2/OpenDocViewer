@@ -20,6 +20,14 @@ param(
     [switch]$AllWidgets,
     [switch]$UpdateModuleMinimums,
     [switch]$SkipRepositoryVersion,
+    # Raise repositoryVersion on its own, with no component, module or widget
+    # target. omp-components.json has no Bootstrapper component, and the
+    # installer package takes its identity from repositoryVersion
+    # (package-hostagent-first.ps1), so a Bootstrapper-only change previously
+    # had no canonical way to get a new package identity: the choice was between
+    # hand-editing the manifest and bumping an unrelated artifact. Both are worse
+    # than a flag that says exactly what it does.
+    [switch]$RepositoryOnly,
     [string]$Part = 'patch',
     [string]$Version = '',
     [switch]$Interactive,
@@ -275,16 +283,52 @@ function Format-JsonText {
     return $builder.ToString()
 }
 
+function Get-JsonFileText {
+    <#
+        The exact text Save-JsonFile would write. Broken out so a caller can ask
+        "would writing this change the file?" without writing it -- which is what
+        makes the follow-up-bump invariant structural rather than hopeful.
+    #>
+    param([Parameter(Mandatory = $true)][object]$Value)
+
+    $json = $Value | ConvertTo-Json -Depth 50 -Compress
+    return (Format-JsonText -Json $json) + [Environment]::NewLine
+}
+
+function Test-JsonFileWouldChange {
+    <#
+        True when writing $Value to $Path would produce different bytes than the
+        file already holds. A missing file counts as a change.
+
+        This is the measurement the follow-up bump depends on: the persist loop
+        used to rewrite EVERY loaded definition unconditionally, so a definition
+        that was merely formatted differently on disk -- hand-edited, or written
+        by another generator -- was silently reserialised while its
+        definitionVersion stayed put. HostAgent then rejects the re-imported
+        definition, and the validator goes red on a change nobody made on purpose.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$Path,
+        [Parameter(Mandatory = $true)][object]$Value
+    )
+
+    if (-not (Test-Path -LiteralPath $Path -PathType Leaf)) {
+        return $true
+    }
+
+    $current = [IO.File]::ReadAllText($Path)
+    return ($current -cne (Get-JsonFileText -Value $Value))
+}
+
 function Save-JsonFile {
     param(
         [Parameter(Mandatory = $true)][string]$Path,
         [Parameter(Mandatory = $true)][object]$Value
     )
 
-    $json = $Value | ConvertTo-Json -Depth 50 -Compress
-    $formattedJson = Format-JsonText -Json $json
+    $formattedJson = Get-JsonFileText -Value $Value
     if ($PSCmdlet.ShouldProcess($Path, 'Write JSON file')) {
-        [IO.File]::WriteAllText($Path, $formattedJson + [Environment]::NewLine, [Text.UTF8Encoding]::new($false))
+        [IO.File]::WriteAllText($Path, $formattedJson, [Text.UTF8Encoding]::new($false))
     }
 }
 
@@ -517,7 +561,25 @@ try {
         }
     }
 
-    if (-not $AllComponents -and $ComponentKey.Count -eq 0 -and -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0 -and -not $AllWidgets -and $WidgetFile.Count -eq 0 -and -not $Interactive -and [string]::IsNullOrWhiteSpace($CascadeFrom)) {
+    if ($RepositoryOnly) {
+        # These combinations ask for opposite things. Obeying either silently
+        # would be worse than refusing: -RepositoryOnly with a component target
+        # would bump the artifact the caller said not to touch, and with
+        # -SkipRepositoryVersion it would bump nothing at all while reporting
+        # success.
+        if ($AllComponents -or $ComponentKey.Count -gt 0 -or $AllModuleDefinitions -or $ModuleKey.Count -gt 0 -or
+            $AllWidgets -or $WidgetFile.Count -gt 0 -or $Interactive -or -not [string]::IsNullOrWhiteSpace($CascadeFrom)) {
+            throw '-RepositoryOnly raises repositoryVersion alone and cannot be combined with a component, module, widget, cascade or interactive target. Drop the target, or drop -RepositoryOnly.'
+        }
+
+        if ($SkipRepositoryVersion) {
+            throw '-RepositoryOnly and -SkipRepositoryVersion ask for opposite things: one bumps only the repository version, the other bumps everything except it. Pass at most one.'
+        }
+    }
+    elseif (-not $AllComponents -and $ComponentKey.Count -eq 0 -and -not $AllModuleDefinitions -and $ModuleKey.Count -eq 0 -and -not $AllWidgets -and $WidgetFile.Count -eq 0 -and -not $Interactive -and [string]::IsNullOrWhiteSpace($CascadeFrom)) {
+        # No target given means "everything" -- but NOT when -RepositoryOnly was
+        # asked for, or the flag meant to touch one line would bump every
+        # artifact in the manifest.
         $AllComponents = $true
     }
 
@@ -539,13 +601,19 @@ try {
         $selectedModuleDefinitions = @($moduleDefinitions)
     }
     else {
+        # Deduplicate the requested keys. '-ModuleKey foo,foo' used to select the
+        # same definition twice and therefore bump it twice in one run, which is
+        # never what the caller meant and produces a version nobody can explain.
+        $seenModuleKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $selectedModuleDefinitions = @(foreach ($key in $ModuleKey) {
             $match = @($moduleDefinitions | Where-Object { $_.moduleKey -eq $key })
             if ($match.Count -ne 1) {
                 throw "Module definition '$key' was not found exactly once in $manifestPath."
             }
 
-            $match[0]
+            if ($seenModuleKeys.Add([string]$match[0].moduleKey)) {
+                $match[0]
+            }
         })
     }
 
@@ -616,7 +684,7 @@ try {
     $updates = [System.Collections.Generic.List[object]]::new()
 
     $hasSelectedVersionTargets = $selectedComponents.Count -gt 0 -or $selectedModuleDefinitions.Count -gt 0 -or $selectedWidgets.Count -gt 0
-    if (-not $SkipRepositoryVersion -and $hasSelectedVersionTargets) {
+    if (-not $SkipRepositoryVersion -and ($hasSelectedVersionTargets -or $RepositoryOnly)) {
         $currentRepositoryVersion = [string]$manifest.repositoryVersion
         if ([string]::IsNullOrWhiteSpace($currentRepositoryVersion)) {
             throw 'repositoryVersion is missing. Add it manually or use -SkipRepositoryVersion.'
@@ -765,6 +833,28 @@ try {
     # (`-ModuleKey <module> -SkipRepositoryVersion`). Measured twice on 2026-08-23, both times
     # mid-incident, and repeatedly since.
     #
+    # A definition whose FILE would change must carry a version bump, even when
+    # nothing semantic changed. The persist loop below used to rewrite every loaded
+    # definition unconditionally, so a file that was merely formatted differently on
+    # disk was reserialised while definitionVersion stayed put -- and HostAgent
+    # rejects a re-imported definition that carries the same version with different
+    # content. Deciding this BEFORE the selection makes the invariant structural:
+    # different bytes on disk implies a bump, with no path around it.
+    foreach ($entry in $definitionJsonByKey.GetEnumerator()) {
+        if ($null -eq $entry.Value) {
+            continue
+        }
+
+        $candidatePath = [string]$definitionPathByKey[$entry.Key]
+        if ([string]::IsNullOrWhiteSpace($candidatePath)) {
+            continue
+        }
+
+        if (Test-JsonFileWouldChange -Path $candidatePath -Value $entry.Value) {
+            [void]$touchedModuleKeys.Add($entry.Key)
+        }
+    }
+
     # Rather than duplicating the bump logic, the touched definitions are added to the normal
     # selection below, so they go through exactly the same code path as an explicit -ModuleKey.
     foreach ($moduleKey in $touchedModuleKeys) {
@@ -779,6 +869,12 @@ try {
     }
 
     # Persist any compatibleArtifacts changes made above.
+    #
+    # Definitions that are in the selection are deliberately NOT written here: the
+    # definitionVersion loop below writes them once, with the bumped version, from
+    # the same in-memory object. Writing them twice was its own defect -- the first
+    # write carried the OLD definitionVersion, so an interrupted run left the file
+    # in exactly the half-bumped state this fix exists to eliminate.
     foreach ($entry in $definitionJsonByKey.GetEnumerator()) {
         $moduleKey = $entry.Key
         $definitionJson = $entry.Value
@@ -788,6 +884,15 @@ try {
 
         $definitionPath = [string]$definitionPathByKey[$moduleKey]
         if ([string]::IsNullOrWhiteSpace($definitionPath)) {
+            continue
+        }
+
+        if ($selectedModuleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey }) {
+            continue
+        }
+
+        # Nothing to write: the file already holds exactly these bytes.
+        if (-not (Test-JsonFileWouldChange -Path $definitionPath -Value $definitionJson)) {
             continue
         }
 
@@ -805,7 +910,16 @@ try {
 
         $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$moduleDefinition.path))
         if (Test-Path -LiteralPath $definitionPath -PathType Leaf) {
-            $definitionJson = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            # Prefer the object already in memory. Reloading from disk here used to
+            # discard the compatibleArtifacts.maxVersion change the persist loop had
+            # just written, which is why that loop had to write first -- and that
+            # double write is exactly what left a half-bumped file behind when a run
+            # was interrupted between the two.
+            $definitionKey = [string]$moduleDefinition.moduleKey
+            $definitionJson = $definitionJsonByKey[$definitionKey]
+            if ($null -eq $definitionJson) {
+                $definitionJson = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8 | ConvertFrom-Json
+            }
             Set-JsonProperty -Object $definitionJson -Name 'definitionVersion' -Value $nextVersion
             if ($PSCmdlet.ShouldProcess($definitionPath, "Set definitionVersion to $nextVersion")) {
                 Save-JsonFile -Path $definitionPath -Value $definitionJson
