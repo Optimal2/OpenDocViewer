@@ -192,10 +192,24 @@ function Remove-Utf8Bom {
     Removes a leading UTF-8 BOM from a string so it can be parsed as JSON or SQL.
     Git may preserve BOMs written by some editors/encodings, and ConvertFrom-Json
     treats a BOM as an unexpected character.
+    IMPORTANT: Must use $Text[0] -eq [char]0xFEFF (not StartsWith) because
+    StartsWith([char]) is culture-sensitive in Windows PowerShell 5.1 (.NET Framework)
+    where U+FEFF is an "ignorable" character - it returns true for ANY string,
+    silently stripping the first character. Measured on 5.1.19041.7663:
+    "hello world".StartsWith([char]0xFEFF) returns True.
     #>
-    param([Parameter(Mandatory = $true)][string]$Text)
+    param(
+        [Parameter(Mandatory = $true)]
+        # Without this, a Mandatory [string] parameter rejects an empty string
+        # outright: "Cannot bind argument to parameter 'Text' because it is an
+        # empty string" (measured on 5.1.19041.7663). An empty file is a
+        # perfectly ordinary input here, and a hard binding error is a worse
+        # answer than returning it unchanged.
+        [AllowEmptyString()]
+        [string]$Text
+    )
 
-    if ($Text.StartsWith([char]0xFEFF, [System.StringComparison]::Ordinal)) {
+    if ($Text.Length -gt 0 -and $Text[0] -eq [char]0xFEFF) {
         return $Text.Substring(1)
     }
 
