@@ -1166,6 +1166,31 @@ if ($transitiveCheckCount -gt 0 -or $transitiveErrorCount -gt 0) {
     Write-Host "$checkMark $transitiveCheckCount component(s) passed transitive ProjectReference lockstep validation ($transitiveErrorCount error(s))"
 }
 
+# Check 15: the shared omp scripts must be byte-identical to the canonical copies
+# in OpenModulePlatform. Keeping them identical was a manual act twice, and
+# nothing held them that way: a stale copy looks green locally and only surfaces
+# when a bump behaves differently here than in a neighbouring repository -
+# typically mid-incident. Same neighbour resolution and Strict semantics as
+# Check 14; the guard is CALLED from the platform repository rather than copied
+# here, because a copied guard would be subject to the drift it detects.
+$check15OmpRoot = $env:OpenModulePlatformRoot
+if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
+    $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot '..\OpenModulePlatform'))
+}
+$check15Script = Join-Path $check15OmpRoot 'scripts\omp\validate-shared-scripts.ps1'
+if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
+    & $check15Script -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15OmpRoot -Strict:$Strict
+    if ($LASTEXITCODE -ne 0) {
+        Add-ValidationError -Errors $errors -Message 'Check 15 (shared script drift) failed; see the Check 15 lines above.'
+    }
+}
+elseif ($Strict) {
+    Add-ValidationError -Errors $errors -Message "Check 15: canonical script not found at '$check15Script'; shared script drift could not be checked. Strict mode treats a guard that could not run as an error."
+}
+else {
+    Write-Warning "Check 15: NOT VERIFIED - canonical script not found at '$check15Script'."
+}
+
 if ($warnings.Count -gt 0) {
     Write-Host "$warningSign $($warnings.Count) warning(s):"
     foreach ($warningMessage in $warnings) {
