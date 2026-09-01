@@ -1177,14 +1177,22 @@ $check15OmpRoot = $env:OpenModulePlatformRoot
 if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
     $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot '..\OpenModulePlatform'))
 }
+# This validator has no -Strict parameter (it had no Check 14 wiring to
+# introduce one). Read it defensively rather than assuming: under
+# Set-StrictMode, referencing a variable that was never set is a terminating
+# error, and a guard that kills the validator is worse than no guard.
+$check15Strict = $false
+if (Get-Variable -Name 'Strict' -ErrorAction SilentlyContinue) {
+    $check15Strict = [bool](Get-Variable -Name 'Strict' -ValueOnly)
+}
 $check15Script = Join-Path $check15OmpRoot 'scripts\omp\validate-shared-scripts.ps1'
 if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
-    & $check15Script -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15OmpRoot -Strict:$Strict
+    & $check15Script -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15OmpRoot -Strict:$check15Strict
     if ($LASTEXITCODE -ne 0) {
         Add-ValidationError -Errors $errors -Message 'Check 15 (shared script drift) failed; see the Check 15 lines above.'
     }
 }
-elseif ($Strict) {
+elseif ($check15Strict) {
     Add-ValidationError -Errors $errors -Message "Check 15: canonical script not found at '$check15Script'; shared script drift could not be checked. Strict mode treats a guard that could not run as an error."
 }
 else {
