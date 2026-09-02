@@ -1,7 +1,7 @@
 {
   "formatVersion": 1,
   "moduleKey": "opendocviewer",
-  "definitionVersion": "2.0.13",
+  "definitionVersion": "2.0.14",
   "module": {
     "displayName": "OpenDocViewer",
     "moduleType": "WebAppModule",
