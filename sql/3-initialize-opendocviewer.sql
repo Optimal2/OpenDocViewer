@@ -98,11 +98,12 @@ WHERE ModuleId = @OpenDocViewerModuleId
 -- import, which is the only component that knows the real on-disk version.
 -- Resolving (instead of fabricating) an artifact id guarantees the seed can
 -- never point at a version that does not exist, and can never re-enable a
--- disabled artifact row. On a fresh install no row exists yet, so the
--- resolution yields NULL and the COALESCE guards below keep the artifact
--- pointer NULL until package import sets it. The COALESCE guards also mean an
--- already-set pointer is never overwritten here; superseding a disabled or
--- outdated artifact is owned by package import, not by this seed.
+-- disabled artifact row. Since 2026-09-02 the seed no longer writes the
+-- artifact pointers either (omp.AppInstances.ArtifactId and
+-- omp.InstanceTemplateAppInstances.DesiredArtifactId): they are owned by
+-- artifact auto-apply, which runs after this script and points the rows
+-- created here at the newest hash-bearing artifact. The resolution below is
+-- a read only; nothing in this script writes the resolved value.
 -- ArtifactId is the IDENTITY primary key, so ORDER BY ArtifactId DESC is the
 -- only guaranteed-monotonic "newest" ordering (CreatedUtc is datetime2(3)
 -- and can share a tick or be set explicitly by an importer).
@@ -185,7 +186,9 @@ USING
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
            N'opendocviewer' AS InstallationName,
-           @OpenDocViewerArtifactId AS ArtifactId,
+           -- Kvar som NULL i USING-projektionen: pekaren sätts av
+           -- artefakt-auto-apply efter att den här raden skapats, inte härifrån.
+           CAST(NULL AS int) AS ArtifactId,
            CAST(1 AS bit) AS IsEnabled,
            CAST(1 AS bit) AS IsAllowed,
            CAST(1 AS tinyint) AS DesiredState,
@@ -202,15 +205,15 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               ArtifactId = COALESCE(target.ArtifactId, source.ArtifactId),
+               -- ArtifactId ägs av artefakt-auto-apply och sätts inte härifrån (ägdmodellen).
                IsEnabled = source.IsEnabled,
                IsAllowed = source.IsAllowed,
                DesiredState = source.DesiredState,
                SortOrder = source.SortOrder,
                UpdatedUtc = SYSUTCDATETIME()
 WHEN NOT MATCHED THEN
-    INSERT(AppInstanceId, ModuleInstanceId, HostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, ArtifactId, IsEnabled, IsAllowed, DesiredState, SortOrder)
-    VALUES(NEWID(), source.ModuleInstanceId, source.HostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.ArtifactId, source.IsEnabled, source.IsAllowed, source.DesiredState, source.SortOrder);
+    INSERT(AppInstanceId, ModuleInstanceId, HostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, IsEnabled, IsAllowed, DesiredState, SortOrder)
+    VALUES(NEWID(), source.ModuleInstanceId, source.HostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.IsEnabled, source.IsAllowed, source.DesiredState, source.SortOrder);
 
 MERGE omp.InstanceTemplateAppInstances AS target
 USING
@@ -225,7 +228,9 @@ USING
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
            N'opendocviewer' AS InstallationName,
-           @OpenDocViewerArtifactId AS DesiredArtifactId,
+           -- Kvar som NULL i USING-projektionen: pekaren sätts av
+           -- artefakt-auto-apply efter att den här raden skapats, inte härifrån.
+           CAST(NULL AS int) AS DesiredArtifactId,
            CAST(1 AS tinyint) AS DesiredState,
            CAST(310 AS int) AS SortOrder,
            CAST(1 AS bit) AS IsEnabled
@@ -241,12 +246,12 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               DesiredArtifactId = COALESCE(target.DesiredArtifactId, source.DesiredArtifactId),
+               -- DesiredArtifactId ägs av artefakt-auto-apply och sätts inte härifrån (ägdmodellen).
                DesiredState = source.DesiredState,
                SortOrder = source.SortOrder,
                IsEnabled = source.IsEnabled,
                UpdatedUtc = SYSUTCDATETIME()
 WHEN NOT MATCHED THEN
-    INSERT(InstanceTemplateModuleInstanceId, InstanceTemplateHostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, DesiredArtifactId, DesiredState, SortOrder, IsEnabled)
-    VALUES(source.InstanceTemplateModuleInstanceId, source.InstanceTemplateHostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.DesiredArtifactId, source.DesiredState, source.SortOrder, source.IsEnabled);
+    INSERT(InstanceTemplateModuleInstanceId, InstanceTemplateHostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, DesiredState, SortOrder, IsEnabled)
+    VALUES(source.InstanceTemplateModuleInstanceId, source.InstanceTemplateHostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.DesiredState, source.SortOrder, source.IsEnabled);
 GO
