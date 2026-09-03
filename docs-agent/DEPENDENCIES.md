@@ -15,7 +15,7 @@ This file combines package.json declarations with observed source imports.
 | <code>file-type</code> | <code>^22.0.2</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>i18next</code> | <code>^26.4.1</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
-| <code>i18next-http-backend</code> | <code>^4.0.1</code> | 1 | <code>src/i18n.js</code> |
+| <code>i18next-http-backend</code> | <code>^4.0.2</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.4.4</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 0 |  |
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
@@ -43,11 +43,11 @@ This file combines package.json declarations with observed source imports.
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
 | <code>eslint</code> | <code>^10.9.1</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
-| <code>eslint-plugin-react-refresh</code> | <code>^0.5.5</code> | 0 |
+| <code>eslint-plugin-react-refresh</code> | <code>^0.5.6</code> | 0 |
 | <code>globals</code> | <code>^17.12.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>prettier</code> | <code>^3.9.6</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.6</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.7</code> | 0 |
 | <code>vite</code> | <code>^8.2.2</code> | 0 |
 | <code>vitest</code> | <code>^4.1.11</code> | 0 |
 
