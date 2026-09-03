@@ -1,11 +1,11 @@
 {
   "manifestVersion": 1,
   "repositoryKey": "opendocviewer",
-  "repositoryVersion": "2.4.70",
+  "repositoryVersion": "2.4.71",
   "moduleDefinitions": [
     {
       "moduleKey": "opendocviewer",
-      "definitionVersion": "2.0.17",
+      "definitionVersion": "2.0.18",
       "path": "opendocviewer.module-definition.json"
     }
   ],
@@ -21,7 +21,7 @@
       "projectPath": ".",
       "relativePathTemplate": "opendocviewer/web/{version}",
       "packageFileTemplate": "OpenDocViewer-{version}.zip",
-      "minModuleDefinitionVersion": "2.0.17"
+      "minModuleDefinitionVersion": "2.0.18"
     }
   ]
 }
