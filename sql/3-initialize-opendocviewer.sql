@@ -34,6 +34,9 @@ FROM omp.Instances
 WHERE InstanceKey = N'default'
 ORDER BY CreatedUtc, InstanceId;
 
+-- Error numbers: the OpenDocViewer seed scripts use the 51000-51999 range (user-defined
+-- THROW numbers start at 50001). 51013-51016 belong to this script; each guard has its
+-- own number so a failing installation log points at exactly one lookup.
 IF @InstanceId IS NULL
 BEGIN
     THROW 51013, 'Default OMP instance not found. Run the core SQL setup/init scripts first.', 1;
@@ -139,6 +142,11 @@ FROM omp.ModuleInstances
 WHERE InstanceId = @InstanceId
   AND ModuleInstanceKey = @OpenDocViewerKey;
 
+IF @OpenDocViewerModuleInstanceId IS NULL
+BEGIN
+    THROW 51015, 'The OpenDocViewer module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
+END
+
 MERGE omp.InstanceTemplateModuleInstances AS target
 USING
 (
@@ -167,6 +175,11 @@ SELECT @OpenDocViewerTemplateModuleInstanceId = InstanceTemplateModuleInstanceId
 FROM omp.InstanceTemplateModuleInstances
 WHERE InstanceTemplateId = @InstanceTemplateId
   AND ModuleInstanceKey = @OpenDocViewerKey;
+
+IF @OpenDocViewerTemplateModuleInstanceId IS NULL
+BEGIN
+    THROW 51016, 'The OpenDocViewer template module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
+END
 
 MERGE omp.AppInstances AS target
 USING
