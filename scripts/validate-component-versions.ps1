@@ -289,6 +289,29 @@ function ConvertTo-NormalizedSql {
 $scriptDirectory = Get-ScriptDirectory
 $repositoryRoot = [System.IO.Path]::GetFullPath((Join-Path $scriptDirectory '..'))
 
+function Invoke-GitQuiet {
+    <#
+    .SYNOPSIS
+    Runs git with stderr discarded and returns its stdout lines; the exit code lands in
+    $script:lastGitExitCode. Windows PowerShell 5.1 turns native stderr output into
+    terminating errors under $ErrorActionPreference = 'Stop', so the preference is
+    lowered for the call only. Callers judge success on the exit code, never on text.
+    #>
+    param([Parameter(Mandatory = $true)][string[]]$Arguments)
+
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $lines = @(& git -C $repositoryRoot @Arguments 2>$null)
+        $script:lastGitExitCode = $LASTEXITCODE
+        return $lines
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+}
+
+
 $checkMark = [char]0x2713
 $warningSign = [char]0x26A0
 $crossMark = [char]0x2717
@@ -378,7 +401,7 @@ $minModuleVersionErrorCount = 0
 $cascadeCheckCount = 0
 $cascadeErrorCount = 0
 
-foreach ($component in @($manifest.components)) {
+foreach ($component in @(Get-OptionalPropertyValue -Object $manifest -Name 'components')) {
     if ($null -eq $component) {
         continue
     }
@@ -562,7 +585,7 @@ $baseManifest = $null
 # ContainsKey lookups below never dereference $null.
 $baseComponentsByKey = [System.Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
 if ($baseRefAvailable) {
-    $baseManifestText = Remove-Utf8Bom -Text ((git -C $repositoryRoot show "$baseRef`:omp-components.json" 2>$null) -join "`n")
+    $baseManifestText = Remove-Utf8Bom -Text ((Invoke-GitQuiet -Arguments @('show', "$baseRef`:omp-components.json")) -join "`n")
     if (-not [string]::IsNullOrWhiteSpace($baseManifestText)) {
         $baseManifest = ConvertFrom-JsonDocument -Json $baseManifestText -Depth $jsonDepth
     }
@@ -605,28 +628,6 @@ function Get-ProjectDirectoryPath {
     }
 
     return $Path
-}
-
-function Invoke-GitQuiet {
-    <#
-    .SYNOPSIS
-    Runs git with stderr discarded and returns its stdout lines; the exit code lands in
-    $script:lastGitExitCode. Windows PowerShell 5.1 turns native stderr output into
-    terminating errors under $ErrorActionPreference = 'Stop', so the preference is
-    lowered for the call only. Callers judge success on the exit code, never on text.
-    #>
-    param([Parameter(Mandatory = $true)][string[]]$Arguments)
-
-    $previousPreference = $ErrorActionPreference
-    $ErrorActionPreference = 'Continue'
-    try {
-        $lines = @(& git -C $repositoryRoot @Arguments 2>$null)
-        $script:lastGitExitCode = $LASTEXITCODE
-        return $lines
-    }
-    finally {
-        $ErrorActionPreference = $previousPreference
-    }
 }
 
 function Get-ChangedFilesFromBase {
@@ -713,7 +714,7 @@ if ($null -ne $sharedProjects -and $baseRefAvailable) {
         $unbumpedConsumers = [System.Collections.Generic.List[string]]::new()
         foreach ($consumerKey in $consumers) {
             $currentComponent = $null
-            foreach ($component in @($manifest.components)) {
+            foreach ($component in @(Get-OptionalPropertyValue -Object $manifest -Name 'components')) {
                 if (([string](Get-OptionalPropertyValue -Object $component -Name 'componentKey')) -eq $consumerKey) {
                     $currentComponent = $component
                     break
@@ -871,6 +872,10 @@ else {
 
         $sqlFilesChanged++
 
+        if (-not $moduleDefinitionsByKey.ContainsKey($moduleKey)) {
+            Add-ValidationError -Errors $errors -Message "Module '$moduleKey' owns '$sqlPath' but is no longer declared in omp-components.json; declare it or remove the SQL ownership."
+            continue
+        }
         $headManifestDefinitionVersion = [string](Get-OptionalPropertyValue -Object $moduleDefinitionsByKey[$moduleKey] -Name 'definitionVersion')
         $baseManifestDefinitionVersion = $null
         if ($baseModuleDefinitionsByKey.ContainsKey($moduleKey)) {
@@ -889,7 +894,7 @@ else {
         $headDefinition = ConvertFrom-JsonDocument -Json $headDefinitionText -Depth $jsonDepth
         $headDefinitionVersion = [string](Get-OptionalPropertyValue -Object $headDefinition -Name 'definitionVersion')
 
-        $baseDefinitionTextLines = @(git -C $repositoryRoot show "$baseRef`:$relativeDefinitionPath" 2>$null)
+        $baseDefinitionTextLines = @(Invoke-GitQuiet -Arguments @('show', "$baseRef`:$relativeDefinitionPath"))
         $baseDefinitionText = Remove-Utf8Bom -Text ($baseDefinitionTextLines -join "`n")
         $baseDefinitionVersion = $null
         if (-not [string]::IsNullOrWhiteSpace($baseDefinitionText)) {
@@ -912,7 +917,7 @@ else {
             $newDefinitionVersion = $headManifestDefinitionVersion
             $newDefinitionVersionObj = ConvertTo-VersionOrNull -Value $newDefinitionVersion
 
-            foreach ($component in @($manifest.components)) {
+            foreach ($component in @(Get-OptionalPropertyValue -Object $manifest -Name 'components')) {
                 if ($null -eq $component) {
                     continue
                 }
@@ -942,7 +947,7 @@ else {
                     # be updated to at least the new version, otherwise packages can be imported
                     # into environments with an older definition and fail at runtime due to missing
                     # schema/metadata.
-                    Add-ValidationError -Errors $errors -Message "Component '$componentKey' has minModuleDefinitionVersion '$minModuleDefinitionVersion' which is less than the new definitionVersion '$newDefinitionVersion' for module '$moduleKey'. Update minModuleDefinitionVersion to at least '$newDefinitionVersion'."
+                    Add-ValidationError -Errors $errors -Message "Component '$componentKey' has minModuleDefinitionVersion '$minModuleDefinitionVersion' which must equal the new definitionVersion '$newDefinitionVersion'"
                 }
             }
         }
@@ -1141,7 +1146,7 @@ else {
         }
     }
 
-    foreach ($component in @($manifest.components)) {
+    foreach ($component in @(Get-OptionalPropertyValue -Object $manifest -Name 'components')) {
         if ($null -eq $component) {
             continue
         }
@@ -1241,8 +1246,8 @@ Write-Host ''
 # Summaries.
 # ---------------------------------------------------------------------------
 $componentCount = 0
-if ($null -ne $manifest.components) {
-    $componentCount = @($manifest.components).Count
+if ($null -ne (Get-OptionalPropertyValue -Object $manifest -Name 'components')) {
+    $componentCount = @(Get-OptionalPropertyValue -Object $manifest -Name 'components').Count
 }
 
 $moduleDefinitionCount = 0
