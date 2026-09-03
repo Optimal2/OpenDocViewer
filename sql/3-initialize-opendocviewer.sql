@@ -21,7 +21,6 @@ DECLARE @InstanceId uniqueidentifier;
 DECLARE @InstanceTemplateId int;
 DECLARE @OpenDocViewerModuleId int;
 DECLARE @OpenDocViewerAppId int;
-DECLARE @OpenDocViewerArtifactId int;
 DECLARE @OpenDocViewerModuleInstanceId uniqueidentifier;
 DECLARE @OpenDocViewerTemplateModuleInstanceId int;
 
@@ -96,24 +95,12 @@ WHERE ModuleId = @OpenDocViewerModuleId
 
 -- The seed never writes to omp.Artifacts: artifact rows are owned by package
 -- import, which is the only component that knows the real on-disk version.
--- Resolving (instead of fabricating) an artifact id guarantees the seed can
--- never point at a version that does not exist, and can never re-enable a
--- disabled artifact row. Since 2026-09-02 the seed no longer writes the
--- artifact pointers either (omp.AppInstances.ArtifactId and
--- omp.InstanceTemplateAppInstances.DesiredArtifactId): they are owned by
--- artifact auto-apply, which runs after this script and points the rows
--- created here at the newest hash-bearing artifact. The resolution below is
--- a read only; nothing in this script writes the resolved value.
--- ArtifactId is the IDENTITY primary key, so ORDER BY ArtifactId DESC is the
--- only guaranteed-monotonic "newest" ordering (CreatedUtc is datetime2(3)
--- and can share a tick or be set explicitly by an importer).
-SELECT TOP (1) @OpenDocViewerArtifactId = ArtifactId
-FROM omp.Artifacts
-WHERE AppId = @OpenDocViewerAppId
-  AND PackageType = N'web-app'
-  AND TargetName = N'opendocviewer'
-  AND IsEnabled = 1
-ORDER BY ArtifactId DESC;
+-- Since 2026-09-02 the seed does not write the artifact pointers either
+-- (omp.AppInstances.ArtifactId and omp.InstanceTemplateAppInstances.DesiredArtifactId):
+-- they are owned by artifact auto-apply, which runs after this script and points
+-- the rows created here at the newest hash-bearing artifact. Nothing below reads
+-- or resolves an artifact id, so the seed can never reference a version that does
+-- not exist or re-enable a disabled artifact row.
 
 MERGE omp.ModuleInstances AS target
 USING
@@ -186,8 +173,8 @@ USING
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
            N'opendocviewer' AS InstallationName,
-           -- Kvar som NULL i USING-projektionen: pekaren sätts av
-           -- artefakt-auto-apply efter att den här raden skapats, inte härifrån.
+           -- Left NULL in the USING projection: the pointer is set by
+           -- artifact auto-apply after this row exists, never from here.
            CAST(NULL AS int) AS ArtifactId,
            CAST(1 AS bit) AS IsEnabled,
            CAST(1 AS bit) AS IsAllowed,
@@ -205,7 +192,7 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               -- ArtifactId ägs av artefakt-auto-apply och sätts inte härifrån (ägdmodellen).
+               -- ArtifactId is owned by artifact auto-apply and is never set from here (ownership model).
                IsEnabled = source.IsEnabled,
                IsAllowed = source.IsAllowed,
                DesiredState = source.DesiredState,
@@ -228,8 +215,8 @@ USING
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
            N'opendocviewer' AS InstallationName,
-           -- Kvar som NULL i USING-projektionen: pekaren sätts av
-           -- artefakt-auto-apply efter att den här raden skapats, inte härifrån.
+           -- Left NULL in the USING projection: the pointer is set by
+           -- artifact auto-apply after this row exists, never from here.
            CAST(NULL AS int) AS DesiredArtifactId,
            CAST(1 AS tinyint) AS DesiredState,
            CAST(310 AS int) AS SortOrder,
@@ -246,7 +233,7 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               -- DesiredArtifactId ägs av artefakt-auto-apply och sätts inte härifrån (ägdmodellen).
+               -- DesiredArtifactId is owned by artifact auto-apply and is never set from here (ownership model).
                DesiredState = source.DesiredState,
                SortOrder = source.SortOrder,
                IsEnabled = source.IsEnabled,
