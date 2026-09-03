@@ -13,7 +13,10 @@ END
 GO
 
 DECLARE @OpenDocViewerDisplayName nvarchar(150) = N'OpenDocViewer';
-DECLARE @OpenDocViewerRoutePath nvarchar(256) = N'opendocviewer';
+-- Single source for the module/instance key so the MERGE and lookup statements below
+-- cannot drift apart if the key is ever renamed.
+DECLARE @OpenDocViewerKey nvarchar(128) = N'opendocviewer';
+DECLARE @OpenDocViewerRoutePath nvarchar(256) = @OpenDocViewerKey;
 DECLARE @OpenDocViewerPublicUrl nvarchar(500) = NULL;
 DECLARE @OpenDocViewerInstallPath nvarchar(500) = NULL;
 
@@ -36,10 +39,15 @@ BEGIN
     THROW 51013, 'Default OMP instance not found. Run the core SQL setup/init scripts first.', 1;
 END
 
+IF @InstanceTemplateId IS NULL
+BEGIN
+    THROW 51014, 'Default OMP instance has no instance template. The template MERGE statements below would otherwise write NULL template ids.', 1;
+END
+
 MERGE omp.Modules AS target
 USING
 (
-    SELECT N'opendocviewer' AS ModuleKey,
+    SELECT @OpenDocViewerKey AS ModuleKey,
            N'OpenDocViewer' AS DisplayName,
            N'WebAppModule' AS ModuleType,
            N'omp_opendocviewer' AS SchemaName,
@@ -62,7 +70,7 @@ WHEN NOT MATCHED THEN
 
 SELECT @OpenDocViewerModuleId = ModuleId
 FROM omp.Modules
-WHERE ModuleKey = N'opendocviewer';
+WHERE ModuleKey = @OpenDocViewerKey;
 
 MERGE omp.Apps AS target
 USING
@@ -107,7 +115,7 @@ USING
 (
     SELECT @InstanceId AS InstanceId,
            @OpenDocViewerModuleId AS ModuleId,
-           N'opendocviewer' AS ModuleInstanceKey,
+           @OpenDocViewerKey AS ModuleInstanceKey,
            N'OpenDocViewer' AS DisplayName,
            N'OpenDocViewer module instance for the default OMP instance' AS Description,
            CAST(1 AS bit) AS IsEnabled,
@@ -129,14 +137,14 @@ WHEN NOT MATCHED THEN
 SELECT @OpenDocViewerModuleInstanceId = ModuleInstanceId
 FROM omp.ModuleInstances
 WHERE InstanceId = @InstanceId
-  AND ModuleInstanceKey = N'opendocviewer';
+  AND ModuleInstanceKey = @OpenDocViewerKey;
 
 MERGE omp.InstanceTemplateModuleInstances AS target
 USING
 (
     SELECT @InstanceTemplateId AS InstanceTemplateId,
            @OpenDocViewerModuleId AS ModuleId,
-           N'opendocviewer' AS ModuleInstanceKey,
+           @OpenDocViewerKey AS ModuleInstanceKey,
            N'OpenDocViewer' AS DisplayName,
            N'OpenDocViewer module instance in the default template' AS Description,
            CAST(310 AS int) AS SortOrder,
@@ -158,7 +166,7 @@ WHEN NOT MATCHED THEN
 SELECT @OpenDocViewerTemplateModuleInstanceId = InstanceTemplateModuleInstanceId
 FROM omp.InstanceTemplateModuleInstances
 WHERE InstanceTemplateId = @InstanceTemplateId
-  AND ModuleInstanceKey = N'opendocviewer';
+  AND ModuleInstanceKey = @OpenDocViewerKey;
 
 MERGE omp.AppInstances AS target
 USING
@@ -172,7 +180,7 @@ USING
            @OpenDocViewerRoutePath AS RoutePath,
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
-           N'opendocviewer' AS InstallationName,
+           @OpenDocViewerKey AS InstallationName,
            -- Left NULL in the USING projection: the pointer is set by
            -- artifact auto-apply after this row exists, never from here.
            CAST(NULL AS int) AS ArtifactId,
@@ -214,7 +222,7 @@ USING
            @OpenDocViewerRoutePath AS RoutePath,
            @OpenDocViewerPublicUrl AS PublicUrl,
            @OpenDocViewerInstallPath AS InstallPath,
-           N'opendocviewer' AS InstallationName,
+           @OpenDocViewerKey AS InstallationName,
            -- Left NULL in the USING projection: the pointer is set by
            -- artifact auto-apply after this row exists, never from here.
            CAST(NULL AS int) AS DesiredArtifactId,
