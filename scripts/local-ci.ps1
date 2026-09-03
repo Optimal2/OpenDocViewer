@@ -10,6 +10,8 @@
     Steps:
       1. Build the web application: npm run build
       2. Validate version lockstep: scripts/validate-component-versions.ps1
+      3. Verify generated agent documentation is fresh: npm run doc:agent,
+         then fail if docs-agent differs from the committed output
 
     Exit code 0 if all steps pass, 1 if any fail.
 #>
@@ -47,7 +49,7 @@ try {
     # --- Step 1: Build web app -------------------------------------------------
     $buildPassed = $false
     try {
-        Write-Host "[1/2] Building web application: npm run build" -ForegroundColor Cyan
+        Write-Host "[1/3] Building web application: npm run build" -ForegroundColor Cyan
         Push-Location $RepoRoot
         & npm run build
         Pop-Location
@@ -66,7 +68,7 @@ try {
     # --- Step 2: Validate component versions -----------------------------------
     $validatePassed = $false
     try {
-        Write-Host "[2/2] Validating component version lockstep" -ForegroundColor Cyan
+        Write-Host "[2/3] Validating component version lockstep" -ForegroundColor Cyan
         if (-not (Test-Path $Validator)) {
             throw "Validator script not found: $Validator"
         }
@@ -81,6 +83,39 @@ try {
     }
     Write-StepResult -StepName "Validate component versions" -Passed $validatePassed
     if (-not $validatePassed) { $overallSuccess = $false }
+    Write-Host ""
+
+    # --- Step 3: Agent documentation freshness ---------------------------------
+    # Regenerates docs-agent with AgentDocMap and fails if the committed output
+    # drifts from what the generator produces (mirrors the agent-docs.yml
+    # workflow). Requires the AgentDocMap repository next to OpenDocViewer.
+    $agentDocsPassed = $false
+    try {
+        Write-Host "[3/3] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
+        Push-Location $RepoRoot
+        try {
+            & npm run doc:agent
+            if ($LASTEXITCODE -ne 0) {
+                throw "npm run doc:agent exited with code $LASTEXITCODE"
+            }
+            & git diff --exit-code -- docs-agent
+            if ($LASTEXITCODE -eq 0) {
+                $agentDocsPassed = $true
+            }
+            else {
+                Write-Host "docs-agent is stale: regenerated output differs from the committed files. Run 'npm run doc:agent' and commit the result." -ForegroundColor Red
+            }
+        }
+        finally {
+            Pop-Location
+        }
+    }
+    catch {
+        Write-Host "Agent documentation freshness step threw an exception: $_" -ForegroundColor Red
+        $agentDocsPassed = $false
+    }
+    Write-StepResult -StepName "Agent documentation freshness" -Passed $agentDocsPassed
+    if (-not $agentDocsPassed) { $overallSuccess = $false }
     Write-Host ""
 
     # --- Summary ---------------------------------------------------------------
