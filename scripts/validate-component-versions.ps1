@@ -558,7 +558,9 @@ else {
 }
 
 $baseManifest = $null
-$baseComponentsByKey = $null
+# Always a dictionary: with no manifest at the base ref it is simply empty, so the
+# ContainsKey lookups below never dereference $null.
+$baseComponentsByKey = [System.Collections.Generic.Dictionary[string, object]]::new([StringComparer]::Ordinal)
 if ($baseRefAvailable) {
     $baseManifestText = Remove-Utf8Bom -Text ((git -C $repositoryRoot show "$baseRef`:omp-components.json" 2>$null) -join "`n")
     if (-not [string]::IsNullOrWhiteSpace($baseManifestText)) {
@@ -589,6 +591,21 @@ $script:changedFilesFromBase = $null
 # Parsed <ProjectReference> directories per csproj path; Check 9 asks for the same
 # files repeatedly for direct and transitive references.
 $script:projectReferenceCache = @{}
+
+function Get-ProjectDirectoryPath {
+    <#
+    .SYNOPSIS
+    The directory a shared-project entry refers to: the parent of a .csproj path, or the
+    path itself when it already names a directory. Checks 7 and 9 share this rule.
+    #>
+    param([Parameter(Mandatory = $true)][string]$Path)
+
+    if ($Path -like '*.csproj') {
+        return (Split-Path -Parent $Path)
+    }
+
+    return $Path
+}
 
 function Get-ChangedFilesFromBase {
     if ($null -eq $script:changedFilesFromBase) {
@@ -653,17 +670,17 @@ if ($null -ne $sharedProjects -and $baseRefAvailable) {
             continue
         }
 
-        $diffPath = $projectPath
-        if ($projectPath -like '*.csproj') {
-            $diffPath = Split-Path -Parent $projectPath
-        }
+        $diffPath = Get-ProjectDirectoryPath -Path $projectPath
 
         $changedFiles = Get-ChangedFilesUnder -RelativePath $diffPath
         if ([string]::IsNullOrWhiteSpace($changedFiles)) {
             continue
         }
 
-        $consumers = @(Get-OptionalPropertyValue -Object $sharedProject -Name 'consumers')
+        # A single string, an array or a missing property all become a clean string list.
+        $consumers = @(@(Get-OptionalPropertyValue -Object $sharedProject -Name 'consumers') |
+            ForEach-Object { [string]$_ } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
         if ($consumers.Count -eq 0) {
             continue
         }
@@ -756,12 +773,12 @@ else {
         $definitionText = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8
         $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
 
-        foreach ($script in @($definition.sqlScripts)) {
-            if ($null -eq $script) {
+        foreach ($sqlScript in @($definition.sqlScripts)) {
+            if ($null -eq $sqlScript) {
                 continue
             }
 
-            $sqlPath = [string](Get-OptionalPropertyValue -Object $script -Name 'path')
+            $sqlPath = [string](Get-OptionalPropertyValue -Object $sqlScript -Name 'path')
             if ([string]::IsNullOrWhiteSpace($sqlPath)) {
                 continue
             }
@@ -959,20 +976,20 @@ foreach ($manifestDefinition in @($manifest.moduleDefinitions)) {
     $definitionText = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8
     $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
 
-    foreach ($script in @($definition.sqlScripts)) {
-        if ($null -eq $script) {
+    foreach ($sqlScript in @($definition.sqlScripts)) {
+        if ($null -eq $sqlScript) {
             continue
         }
 
-        $sqlPath = [string](Get-OptionalPropertyValue -Object $script -Name 'path')
+        $sqlPath = [string](Get-OptionalPropertyValue -Object $sqlScript -Name 'path')
         if ([string]::IsNullOrWhiteSpace($sqlPath)) {
             continue
         }
 
-        $scriptKey = [string](Get-OptionalPropertyValue -Object $script -Name 'key')
-        $content = Get-OptionalPropertyValue -Object $script -Name 'content'
-        $contentEncoding = [string](Get-OptionalPropertyValue -Object $script -Name 'contentEncoding')
-        $declaredSha256 = [string](Get-OptionalPropertyValue -Object $script -Name 'sha256')
+        $scriptKey = [string](Get-OptionalPropertyValue -Object $sqlScript -Name 'key')
+        $content = Get-OptionalPropertyValue -Object $sqlScript -Name 'content'
+        $contentEncoding = [string](Get-OptionalPropertyValue -Object $sqlScript -Name 'contentEncoding')
+        $declaredSha256 = [string](Get-OptionalPropertyValue -Object $sqlScript -Name 'sha256')
 
         $alreadyCollected = $false
         foreach ($entry in $ownedSeedSqlEntries) {
@@ -1092,10 +1109,7 @@ else {
         }
 
         $fullSharedProjectPath = Resolve-RepositoryPath -Path $sharedProjectPath -BasePath $repositoryRoot
-        $sharedProjectDir = $fullSharedProjectPath
-        if ($fullSharedProjectPath -like '*.csproj') {
-            $sharedProjectDir = Split-Path -Parent $fullSharedProjectPath
-        }
+        $sharedProjectDir = Get-ProjectDirectoryPath -Path $fullSharedProjectPath
 
         if (Test-Path -LiteralPath $sharedProjectDir -PathType Container) {
             [void]$sharedProjectDirs.Add([System.IO.Path]::GetFullPath($sharedProjectDir))

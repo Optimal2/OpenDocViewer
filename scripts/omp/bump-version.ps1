@@ -82,6 +82,26 @@ function Test-VersionText {
     }
 }
 
+function ConvertTo-ComparableVersion {
+    <#
+    .SYNOPSIS
+    The numeric major.minor.patch core of a Test-VersionText-shaped string as [System.Version].
+    Prerelease and build metadata ('1.2.3-beta.1', '1.2.3+build.5') are accepted by
+    Test-VersionText but rejected by System.Version.TryParse, so every ordering comparison
+    in this script goes through here instead. Anything without a numeric core throws:
+    a comparison that silently does not happen is how a regression slips through.
+    #>
+    param([Parameter(Mandatory = $true)][string]$Value)
+
+    $core = ($Value.Trim() -split '[-+]', 2)[0]
+    $parsed = $null
+    if (-not [System.Version]::TryParse($core, [ref]$parsed)) {
+        throw "Version '$Value' has no numeric major.minor.patch core to compare."
+    }
+
+    return $parsed
+}
+
 function ConvertTo-VersionPart {
     param([Parameter(Mandatory = $true)][string]$Value)
 
@@ -697,11 +717,11 @@ try {
         # version silently drags repositoryVersion backwards (observed 2026-07-19: bumping two
         # example components to 0.3.83 rewrote repositoryVersion 0.3.279 -> 0.3.83). A published
         # version must never go backwards, so fail loudly instead of corrupting the manifest.
-        $parsedCurrentRepositoryVersion = $null
-        $parsedNextRepositoryVersion = $null
-        if ([System.Version]::TryParse($currentRepositoryVersion, [ref]$parsedCurrentRepositoryVersion) -and
-            [System.Version]::TryParse($nextRepositoryVersion, [ref]$parsedNextRepositoryVersion) -and
-            $parsedNextRepositoryVersion -lt $parsedCurrentRepositoryVersion) {
+        # ConvertTo-ComparableVersion throws on anything it cannot order, so the guard can
+        # never be skipped for a prerelease or build-suffixed version. Only a manifest that
+        # has no repositoryVersion yet has nothing to regress from.
+        if (-not [string]::IsNullOrWhiteSpace($currentRepositoryVersion) -and
+            (ConvertTo-ComparableVersion -Value $nextRepositoryVersion) -lt (ConvertTo-ComparableVersion -Value $currentRepositoryVersion)) {
             throw ("Refusing to regress repositoryVersion from '{0}' to '{1}'. -Version is applied to every " -f $currentRepositoryVersion, $nextRepositoryVersion) +
                   'selected target, including the repository. Pass -SkipRepositoryVersion when setting components ' +
                   'to an explicit version, or bump the repository separately.'
@@ -716,11 +736,12 @@ try {
         })
     }
 
-    # Lazy-load module definition JSON documents keyed by moduleKey. This is
-    # used both for the explicit -ModuleKey/-AllModuleDefinitions bump path
     # Module definitions whose compatibleArtifacts were rewritten by a component bump; their
     # own definitionVersion has to follow, see the note further down.
     $touchedModuleKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
+
+    # Lazy-load module definition JSON documents keyed by moduleKey. This is
+    # used both for the explicit -ModuleKey/-AllModuleDefinitions bump path
     # and for updating compatibleArtifacts.maxVersion when a component bump
     # touches an appKey declared in the module definition.
     $definitionJsonByKey = @{}
@@ -797,13 +818,19 @@ try {
                 $shouldUpdate = $true
             }
             else {
-                $parsedCurrentMaxVersion = $null
-                $parsedNextVersion = $null
-                if (-not [System.Version]::TryParse($currentMaxVersion, [ref]$parsedCurrentMaxVersion)) {
+                # Same comparable-core rule as the repository guard: a prerelease suffix is
+                # legal version text and must not abort the bump.
+                try {
+                    $parsedCurrentMaxVersion = ConvertTo-ComparableVersion -Value $currentMaxVersion
+                }
+                catch {
                     throw "Module definition '$componentModuleKey' compatibleArtifacts entry for appKey '$componentAppKey' has non-numeric maxVersion '$currentMaxVersion'. Update it manually before bumping."
                 }
 
-                if (-not [System.Version]::TryParse($nextVersion, [ref]$parsedNextVersion)) {
+                try {
+                    $parsedNextVersion = ConvertTo-ComparableVersion -Value $nextVersion
+                }
+                catch {
                     throw "Component '$($component.componentKey)' was bumped to non-numeric version '$nextVersion'. Cannot compare with compatibleArtifacts.maxVersion '$currentMaxVersion'."
                 }
 

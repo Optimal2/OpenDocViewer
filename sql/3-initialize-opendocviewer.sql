@@ -17,6 +17,7 @@ DECLARE @OpenDocViewerDisplayName nvarchar(150) = N'OpenDocViewer';
 -- cannot drift apart if the key is ever renamed.
 DECLARE @OpenDocViewerKey nvarchar(128) = N'opendocviewer';
 DECLARE @OpenDocViewerRoutePath nvarchar(256) = @OpenDocViewerKey;
+DECLARE @OpenDocViewerAppKey nvarchar(128) = N'opendocviewer_webapp';
 DECLARE @OpenDocViewerPublicUrl nvarchar(500) = NULL;
 DECLARE @OpenDocViewerInstallPath nvarchar(500) = NULL;
 
@@ -35,7 +36,7 @@ WHERE InstanceKey = N'default'
 ORDER BY CreatedUtc, InstanceId;
 
 -- Error numbers: the OpenDocViewer seed scripts use the 51000-51999 range (user-defined
--- THROW numbers start at 50001). 51013-51016 belong to this script; each guard has its
+-- THROW numbers start at 50001). 51013-51018 belong to this script; each guard has its
 -- own number so a failing installation log points at exactly one lookup.
 IF @InstanceId IS NULL
 BEGIN
@@ -73,13 +74,19 @@ WHEN NOT MATCHED THEN
 
 SELECT @OpenDocViewerModuleId = ModuleId
 FROM omp.Modules
-WHERE ModuleKey = @OpenDocViewerKey;
+WHERE ModuleKey = @OpenDocViewerKey
+  AND SchemaName = N'omp_opendocviewer';
+
+IF @OpenDocViewerModuleId IS NULL
+BEGIN
+    THROW 51017, 'The OpenDocViewer module row was not found after the MERGE above; the statements that follow would write a NULL module id.', 1;
+END
 
 MERGE omp.Apps AS target
 USING
 (
     SELECT @OpenDocViewerModuleId AS ModuleId,
-           N'opendocviewer_webapp' AS AppKey,
+           @OpenDocViewerAppKey AS AppKey,
            @OpenDocViewerDisplayName AS DisplayName,
            N'WebApp' AS AppType,
            N'Static web application definition for OpenDocViewer' AS Description,
@@ -102,7 +109,12 @@ WHEN NOT MATCHED THEN
 SELECT @OpenDocViewerAppId = AppId
 FROM omp.Apps
 WHERE ModuleId = @OpenDocViewerModuleId
-  AND AppKey = N'opendocviewer_webapp';
+  AND AppKey = @OpenDocViewerAppKey;
+
+IF @OpenDocViewerAppId IS NULL
+BEGIN
+    THROW 51018, 'The OpenDocViewer app row was not found after the MERGE above; the statements that follow would write a NULL app id.', 1;
+END
 
 -- The seed never writes to omp.Artifacts: artifact rows are owned by package
 -- import, which is the only component that knows the real on-disk version.
@@ -187,7 +199,7 @@ USING
     SELECT @OpenDocViewerModuleInstanceId AS ModuleInstanceId,
            CAST(NULL AS uniqueidentifier) AS HostId,
            @OpenDocViewerAppId AS AppId,
-           N'opendocviewer_webapp' AS AppInstanceKey,
+           @OpenDocViewerAppKey AS AppInstanceKey,
            @OpenDocViewerDisplayName AS DisplayName,
            N'OpenDocViewer static web app managed by OMP HostAgent' AS Description,
            @OpenDocViewerRoutePath AS RoutePath,
@@ -229,7 +241,7 @@ USING
     SELECT @OpenDocViewerTemplateModuleInstanceId AS InstanceTemplateModuleInstanceId,
            CAST(NULL AS int) AS InstanceTemplateHostId,
            @OpenDocViewerAppId AS AppId,
-           N'opendocviewer_webapp' AS AppInstanceKey,
+           @OpenDocViewerAppKey AS AppInstanceKey,
            @OpenDocViewerDisplayName AS DisplayName,
            N'OpenDocViewer static web app managed by OMP HostAgent' AS Description,
            @OpenDocViewerRoutePath AS RoutePath,
