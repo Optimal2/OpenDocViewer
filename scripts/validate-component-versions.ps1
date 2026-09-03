@@ -607,9 +607,34 @@ function Get-ProjectDirectoryPath {
     return $Path
 }
 
+function Invoke-GitQuiet {
+    <#
+    .SYNOPSIS
+    Runs git with stderr discarded and returns its stdout lines; the exit code lands in
+    $script:lastGitExitCode. Windows PowerShell 5.1 turns native stderr output into
+    terminating errors under $ErrorActionPreference = 'Stop', so the preference is
+    lowered for the call only. Callers judge success on the exit code, never on text.
+    #>
+    param([Parameter(Mandatory = $true)][string[]]$Arguments)
+
+    $previousPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $lines = @(& git -C $repositoryRoot @Arguments 2>$null)
+        $script:lastGitExitCode = $LASTEXITCODE
+        return $lines
+    }
+    finally {
+        $ErrorActionPreference = $previousPreference
+    }
+}
+
 function Get-ChangedFilesFromBase {
     if ($null -eq $script:changedFilesFromBase) {
-        $listing = @(git -C $repositoryRoot diff --name-only "$baseRef...HEAD" 2>$null)
+        $listing = @(Invoke-GitQuiet -Arguments @('diff', '--name-only', "$baseRef...HEAD"))
+        if ($script:lastGitExitCode -ne 0) {
+            Write-Warning "Could not list changes against '$baseRef' (git exit $($script:lastGitExitCode)); change-based checks see an empty set."
+        }
         $script:changedFilesFromBase = @($listing |
             ForEach-Object { ([string]$_).Trim().Replace('\', '/') } |
             Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
@@ -824,11 +849,11 @@ else {
 
         # Existence at the base commit is what makes a file new; an empty file that
         # existed there is a change to an existing script, not a new one.
-        git -C $repositoryRoot cat-file -e "$baseRef`:$sqlPath" 2>$null
-        $existedAtBase = ($LASTEXITCODE -eq 0)
+        [void](Invoke-GitQuiet -Arguments @('cat-file', '-e', "$baseRef`:$sqlPath"))
+        $existedAtBase = ($script:lastGitExitCode -eq 0)
         $baseText = ''
         if ($existedAtBase) {
-            $baseTextLines = @(git -C $repositoryRoot show "$baseRef`:$sqlPath" 2>$null)
+            $baseTextLines = @(Invoke-GitQuiet -Arguments @('show', "$baseRef`:$sqlPath"))
             $baseText = Remove-Utf8Bom -Text ($baseTextLines -join "`n")
         }
         $isNewFile = -not $existedAtBase
