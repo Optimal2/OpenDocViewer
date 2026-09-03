@@ -226,6 +226,13 @@ function Get-ProjectReferences {
         [Parameter(Mandatory = $true)][string]$CsprojPath
     )
 
+    if ($null -eq $script:projectReferenceCache) {
+        $script:projectReferenceCache = @{}
+    }
+    if ($script:projectReferenceCache.ContainsKey($CsprojPath)) {
+        return $script:projectReferenceCache[$CsprojPath]
+    }
+
     $resolvedCsproj = $CsprojPath
     if (Test-Path -LiteralPath $CsprojPath -PathType Container) {
         $csprojFiles = @(Get-ChildItem -LiteralPath $CsprojPath -Filter '*.csproj' -File -ErrorAction SilentlyContinue)
@@ -255,7 +262,9 @@ function Get-ProjectReferences {
         }
     }
 
-    return $referencedDirs.ToArray()
+    $result = $referencedDirs.ToArray()
+    $script:projectReferenceCache[$CsprojPath] = $result
+    return $result
 }
 
 function ConvertTo-NormalizedSql {
@@ -575,6 +584,61 @@ if ($baseRefAvailable) {
 }
 
 # ---------------------------------------------------------------------------
+# One changed-file listing for the whole run. Checks 7, 8 and 9 used to spawn a
+# git diff per shared project, per SQL file and per referenced directory; the
+# set is computed once here and filtered in memory instead.
+# ---------------------------------------------------------------------------
+$script:changedFilesFromBase = $null
+
+function Get-ChangedFilesFromBase {
+    if ($null -eq $script:changedFilesFromBase) {
+        $listing = @(git -C $repositoryRoot diff --name-only "$baseRef...HEAD" 2>$null)
+        $script:changedFilesFromBase = @($listing |
+            ForEach-Object { ([string]$_).Trim().Replace('\', '/') } |
+            Where-Object { -not [string]::IsNullOrWhiteSpace($_) })
+    }
+    return $script:changedFilesFromBase
+}
+
+function Get-ChangedFilesUnder {
+    <#
+    .SYNOPSIS
+    Returns the changed files (base...HEAD) that equal RelativePath or live under it,
+    joined by newlines, or an empty string. Same contract as the per-path git diff it replaces.
+    #>
+    param([Parameter(Mandatory = $true)][string]$RelativePath)
+
+    $prefix = $RelativePath.Trim().Replace('\', '/').TrimStart('/').TrimEnd('/')
+    if ([string]::IsNullOrWhiteSpace($prefix)) {
+        return ''
+    }
+
+    $hits = @(Get-ChangedFilesFromBase | Where-Object {
+        [string]::Equals($_, $prefix, [StringComparison]::OrdinalIgnoreCase) -or
+        $_.StartsWith($prefix + '/', [StringComparison]::OrdinalIgnoreCase)
+    })
+    return ($hits -join "`n")
+}
+
+function Get-RepositoryRelativePath {
+    <#
+    .SYNOPSIS
+    Repository-relative form of FullPath, or $null when the path is not inside the
+    repository root. Compares normalized, separator-terminated roots so a sibling
+    directory sharing the root's name prefix can never be mistaken for a child.
+    #>
+    param([Parameter(Mandatory = $true)][string]$FullPath)
+
+    $root = [System.IO.Path]::GetFullPath($repositoryRoot).TrimEnd('\', '/') + [System.IO.Path]::DirectorySeparatorChar
+    $full = [System.IO.Path]::GetFullPath($FullPath)
+    if (-not $full.StartsWith($root, [StringComparison]::OrdinalIgnoreCase)) {
+        return $null
+    }
+
+    return $full.Substring($root.Length).TrimStart('\', '/')
+}
+
+# ---------------------------------------------------------------------------
 # Check 7: Shared project cascade version bumps.
 # ---------------------------------------------------------------------------
 $sharedProjects = Get-OptionalPropertyValue -Object $manifest -Name 'sharedProjects'
@@ -594,7 +658,7 @@ if ($null -ne $sharedProjects -and $baseRefAvailable) {
             $diffPath = Split-Path -Parent $projectPath
         }
 
-        $changedFiles = [string](git -C $repositoryRoot diff --name-only "$baseRef...HEAD" -- $diffPath 2>$null)
+        $changedFiles = Get-ChangedFilesUnder -RelativePath $diffPath
         if ([string]::IsNullOrWhiteSpace($changedFiles)) {
             continue
         }
@@ -733,7 +797,7 @@ else {
             continue
         }
 
-        $changedFiles = [string](git -C $repositoryRoot diff --name-only "$baseRef...HEAD" -- $sqlPath 2>$null)
+        $changedFiles = Get-ChangedFilesUnder -RelativePath $sqlPath
         if ([string]::IsNullOrWhiteSpace($changedFiles)) {
             $sqlFilesPassed++
             continue
@@ -741,9 +805,16 @@ else {
 
         $headText = Get-Content -LiteralPath $fullSqlPath -Raw -Encoding UTF8
 
-        $baseTextLines = @(git -C $repositoryRoot show "$baseRef`:$sqlPath" 2>$null)
-        $baseText = Remove-Utf8Bom -Text ($baseTextLines -join "`n")
-        $isNewFile = [string]::IsNullOrWhiteSpace($baseText)
+        # Existence at the base commit is what makes a file new; an empty file that
+        # existed there is a change to an existing script, not a new one.
+        git -C $repositoryRoot cat-file -e "$baseRef`:$sqlPath" 2>$null
+        $existedAtBase = ($LASTEXITCODE -eq 0)
+        $baseText = ''
+        if ($existedAtBase) {
+            $baseTextLines = @(git -C $repositoryRoot show "$baseRef`:$sqlPath" 2>$null)
+            $baseText = Remove-Utf8Bom -Text ($baseTextLines -join "`n")
+        }
+        $isNewFile = -not $existedAtBase
 
         $headNormalized = ConvertTo-NormalizedSql -SqlText $headText
         $baseNormalized = ConvertTo-NormalizedSql -SqlText $baseText
@@ -815,13 +886,15 @@ else {
                 }
 
                 $minVersionObj = ConvertTo-VersionOrNull -Value $minModuleDefinitionVersion
-                if ($null -ne $minVersionObj -and $null -ne $newDefinitionVersionObj -and $minVersionObj -lt $newDefinitionVersionObj) {
+                if ($null -ne $minVersionObj -and $null -ne $newDefinitionVersionObj -and $minVersionObj -ne $newDefinitionVersionObj) {
                     $componentKey = [string](Get-OptionalPropertyValue -Object $component -Name 'componentKey')
                     if ([string]::IsNullOrWhiteSpace($componentKey)) {
                         $componentKey = '<unknown>'
                     }
 
-                    # Check 8b: minModuleDefinitionVersion lags a bumped definitionVersion — HARD ERROR.
+                    # Check 8b: minModuleDefinitionVersion must EQUAL a bumped definitionVersion — HARD ERROR.
+                    # Check 6 rejects a minimum above the module's version; this rejects one below it
+                    # (or otherwise different), so the two checks together pin min == definitionVersion.
                     # The module's SQL contract changed and the definitionVersion was raised. Any
                     # component that exposes a minModuleDefinitionVersion for the same module must
                     # be updated to at least the new version, otherwise packages can be imported
@@ -1082,8 +1155,12 @@ else {
                 continue
             }
 
-            $relRefDir = $refDir.Substring($repositoryRoot.Length).TrimStart('\', '/')
-            $changedFiles = [string](git -C $repositoryRoot diff --name-only "$baseRef...HEAD" -- $relRefDir 2>$null)
+            $relRefDir = Get-RepositoryRelativePath -FullPath $refDir
+            if ($null -eq $relRefDir) {
+                Write-Warning "Check 9: referenced project directory '$refDir' is outside the repository root; skipped."
+                continue
+            }
+            $changedFiles = Get-ChangedFilesUnder -RelativePath $relRefDir
             if (-not [string]::IsNullOrWhiteSpace($changedFiles)) {
                 [void]$changedRefDirs.Add($relRefDir)
             }
