@@ -226,9 +226,6 @@ function Get-ProjectReferences {
         [Parameter(Mandatory = $true)][string]$CsprojPath
     )
 
-    if ($null -eq $script:projectReferenceCache) {
-        $script:projectReferenceCache = @{}
-    }
     if ($script:projectReferenceCache.ContainsKey($CsprojPath)) {
         return $script:projectReferenceCache[$CsprojPath]
     }
@@ -589,6 +586,9 @@ if ($baseRefAvailable) {
 # set is computed once here and filtered in memory instead.
 # ---------------------------------------------------------------------------
 $script:changedFilesFromBase = $null
+# Parsed <ProjectReference> directories per csproj path; Check 9 asks for the same
+# files repeatedly for direct and transitive references.
+$script:projectReferenceCache = @{}
 
 function Get-ChangedFilesFromBase {
     if ($null -eq $script:changedFilesFromBase) {
