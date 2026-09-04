@@ -14,7 +14,7 @@ This file combines package.json declarations with observed source imports.
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.0.2</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>i18next</code> | <code>^26.4.1</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
+| <code>i18next</code> | <code>^26.4.2</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>i18next-http-backend</code> | <code>^4.0.2</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.4.4</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 0 |  |
