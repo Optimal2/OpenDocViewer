@@ -14,7 +14,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentConsumerWrapper.jsx</code> | 172 | 1 | 2 | high | OpenDocViewer — Consumer Wrapper for Loader + Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: { folder, extension, endNumber } • Explicit-list: { sourceList: \[{ url, ext?, fileIn |
 | <code>src/components/DocumentLoader/batchHandler.js</code> | 226 | 0 | 7 | high | OpenDocViewer — Minimal, fair worker-batch scheduler Distribute image-decoding jobs across a pool of Web Workers without monopolizing the main thread. |
 | <code>src/components/DocumentLoader/DemoControls.jsx</code> | 101 | 0 | 1 | high | OpenDocViewer — Demo Controls for “one-file-per-format” demo mode - Provide a simple control bar: &quot;Total pages/files&quot; + JPG/PNG/TIF/PDF buttons + a new &quot;Mix&quot; button. |
-| <code>src/components/DocumentLoader/DocumentLoader.js</code> | 2172 | 1 | 58 | high | OpenDocViewer — Document loader orchestrator. |
+| <code>src/components/DocumentLoader/DocumentLoader.js</code> | 2172 | 2 | 58 | high | OpenDocViewer — Document loader orchestrator. |
 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code> | 389 | 3 | 8 | high | OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF |
 | <code>src/components/DocumentLoader/LoadPressureDialog.jsx</code> | 172 | 1 | 4 | medium | Large-load warning dialog shown before / during very heavy loading runs. |
 | <code>src/components/DocumentLoader/mainThreadRenderer.js</code> | 509 | 1 | 9 | high | OpenDocViewer — Main-thread renderers for PDF &amp; TIFF Render multi-page formats \(PDF/TIFF\) on the main thread when necessary \(e.g., worker fallback, low-core devices, or when explicitly configured\). |
@@ -24,7 +24,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
 | <code>src/components/DocumentRender.jsx</code> | 1112 | 1 | 24 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
-| <code>src/components/DocumentThumbnailList.jsx</code> | 1370 | 1 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
+| <code>src/components/DocumentThumbnailList.jsx</code> | 1370 | 2 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
 | <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2150 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 109 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
@@ -42,7 +42,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/usePrintRangeDialog.js</code> | 667 | 1 | 15 | high | Hook + helpers for PrintRangeDialog. |
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 508 | 1 | 1 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 100 | 1 | 1 | high | Per-pane “post-zoom” controls shown in comparison mode. |
-| <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 593 | 0 | 4 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
+| <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 593 | 1 | 4 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
 | <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1051 | 1 | 17 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
 | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx</code> | 222 | 1 | 1 | high | OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell. |
 | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx</code> | 418 | 1 | 5 | high | Toolbar adapter for the document viewer. |

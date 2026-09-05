@@ -98,6 +98,7 @@
     {
       "packageName": "react",
       "importCount": 53,
+      "dynamicImportCount": 0,
       "files": [
         "src/ErrorBoundary.jsx",
         "src/PerformanceMonitor.jsx",
@@ -157,6 +158,7 @@
     {
       "packageName": "react-i18next",
       "importCount": 33,
+      "dynamicImportCount": 0,
       "files": [
         "src/PerformanceMonitor.jsx",
         "src/app/AppBootstrap.jsx",
@@ -196,6 +198,7 @@
     {
       "packageName": "prop-types",
       "importCount": 32,
+      "dynamicImportCount": 0,
       "files": [
         "src/PerformanceMonitor.jsx",
         "src/app/OpenDocViewer.jsx",
@@ -234,6 +237,7 @@
     {
       "packageName": "pdfjs-dist",
       "importCount": 8,
+      "dynamicImportCount": 0,
       "files": [
         "src/components/DocumentLoader/documentLoaderUtils.js",
         "src/components/DocumentLoader/mainThreadRenderer.js",
@@ -244,6 +248,7 @@
     {
       "packageName": "i18next",
       "importCount": 5,
+      "dynamicImportCount": 0,
       "files": [
         "src/ErrorBoundary.jsx",
         "src/i18n.js",
@@ -253,8 +258,20 @@
       ]
     },
     {
+      "packageName": "utif2",
+      "importCount": 4,
+      "dynamicImportCount": 1,
+      "files": [
+        "src/components/DocumentLoader/documentLoaderUtils.js",
+        "src/components/DocumentLoader/mainThreadRenderer.js",
+        "src/utils/pageAssetRenderer.js",
+        "src/workers/imageWorker.js"
+      ]
+    },
+    {
       "packageName": "dompurify",
       "importCount": 3,
+      "dynamicImportCount": 0,
       "files": [
         "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
         "src/utils/printDom.js",
@@ -262,17 +279,9 @@
       ]
     },
     {
-      "packageName": "utif2",
-      "importCount": 3,
-      "files": [
-        "src/components/DocumentLoader/documentLoaderUtils.js",
-        "src/components/DocumentLoader/mainThreadRenderer.js",
-        "src/utils/pageAssetRenderer.js"
-      ]
-    },
-    {
       "packageName": "dotenv",
       "importCount": 2,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js",
         "server/user-log-server.js"
@@ -281,6 +290,7 @@
     {
       "packageName": "express",
       "importCount": 2,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js",
         "server/user-log-server.js"
@@ -289,6 +299,7 @@
     {
       "packageName": "express-rate-limit",
       "importCount": 2,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js",
         "server/user-log-server.js"
@@ -297,14 +308,25 @@
     {
       "packageName": "helmet",
       "importCount": 2,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js",
         "server/user-log-server.js"
       ]
     },
     {
+      "packageName": "jspdf",
+      "importCount": 2,
+      "dynamicImportCount": 2,
+      "files": [
+        "src/utils/printPdf.js",
+        "src/workers/pdfWorker.js"
+      ]
+    },
+    {
       "packageName": "morgan",
       "importCount": 2,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js",
         "server/user-log-server.js"
@@ -313,6 +335,7 @@
     {
       "packageName": "axios",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/logging/systemLogger.js"
       ]
@@ -320,6 +343,7 @@
     {
       "packageName": "cors",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "server/system-log-server.js"
       ]
@@ -327,6 +351,7 @@
     {
       "packageName": "file-type",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/components/DocumentLoader/DocumentLoader.js"
       ]
@@ -334,6 +359,7 @@
     {
       "packageName": "i18next-http-backend",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/i18n.js"
       ]
@@ -341,6 +367,7 @@
     {
       "packageName": "i18next-icu",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/i18n.js"
       ]
@@ -348,13 +375,23 @@
     {
       "packageName": "material-icons",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/index.jsx"
       ]
     },
     {
+      "packageName": "pdf-lib",
+      "importCount": 1,
+      "dynamicImportCount": 1,
+      "files": [
+        "src/utils/pdfWorkerDispatcher.js"
+      ]
+    },
+    {
       "packageName": "react-dom",
       "importCount": 1,
+      "dynamicImportCount": 0,
       "files": [
         "src/index.jsx"
       ]
@@ -515,6 +552,15 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/components/DocumentLoader/DocumentLoader.js",
+      "score": 63,
+      "lines": 2172,
+      "incomingLocalImports": 2,
+      "doclets": 58,
+      "summary": "OpenDocViewer — Document loader orchestrator.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/utils/pdfPrebuildPlan.js",
       "score": 62,
       "lines": 343,
@@ -530,15 +576,6 @@
       "incomingLocalImports": 1,
       "doclets": 20,
       "summary": "Core print coordinator for the frontend.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/publicAssetUrl.js",
-      "score": 61,
-      "lines": 29,
-      "incomingLocalImports": 6,
-      "doclets": 1,
-      "summary": "Resolve a public asset path against the viewer base URL.",
       "summaryConfidence": "high"
     }
   ],
@@ -806,9 +843,9 @@
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
-          "score": 48,
+          "score": 56,
           "lines": 1370,
-          "incomingLocalImports": 1,
+          "incomingLocalImports": 2,
           "doclets": 25,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
           "summaryConfidence": "high"
@@ -912,9 +949,9 @@
         },
         {
           "path": "src/components/DocumentLoader/DocumentLoader.js",
-          "score": 55,
+          "score": 63,
           "lines": 2172,
-          "incomingLocalImports": 1,
+          "incomingLocalImports": 2,
           "doclets": 58,
           "summary": "OpenDocViewer — Document loader orchestrator.",
           "summaryConfidence": "high"
@@ -1116,21 +1153,21 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/components/DocumentViewer/DocumentViewer.jsx",
+          "score": 29,
+          "lines": 593,
+          "incomingLocalImports": 1,
+          "doclets": 4,
+          "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js",
           "score": 26,
           "lines": 160,
           "incomingLocalImports": 1,
           "doclets": 4,
           "summary": "Zoom, resize, wheel, print-shortcut, and initial-fit effects for DocumentViewer.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/components/DocumentViewer/DocumentViewer.jsx",
-          "score": 21,
-          "lines": 593,
-          "incomingLocalImports": 0,
-          "doclets": 4,
-          "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
           "summaryConfidence": "high"
         }
       ]
@@ -1551,70 +1588,80 @@
           "specifiers": [
             "fs"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "node:fs",
           "specifiers": [
             "fsp"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "node:path",
           "specifiers": [
             "path"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "node:url",
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "express",
           "specifiers": [
             "express"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "cors",
           "specifiers": [
             "cors"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "helmet",
           "specifiers": [
             "helmet"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "dotenv",
           "specifiers": [
             "dotenv"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "express-rate-limit",
           "specifiers": [
             "rateLimit"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "morgan",
           "specifiers": [
             "morgan"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -1760,70 +1807,80 @@
           "specifiers": [
             "fs"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "node:fs",
           "specifiers": [
             "fsp"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "node:path",
           "specifiers": [
             "path"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "node:url",
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "express",
           "specifiers": [
             "express"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "cors",
           "specifiers": [
             "cors"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "helmet",
           "specifiers": [
             "helmet"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "dotenv",
           "specifiers": [
             "dotenv"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "express-rate-limit",
           "specifiers": [
             "rateLimit"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "morgan",
           "specifiers": [
             "morgan"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -1844,63 +1901,72 @@
           "specifiers": [
             "fs"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "node:fs",
           "specifiers": [
             "fsp"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "node:path",
           "specifiers": [
             "path"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "node:url",
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "express",
           "specifiers": [
             "express"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "helmet",
           "specifiers": [
             "helmet"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "dotenv",
           "specifiers": [
             "dotenv"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "morgan",
           "specifiers": [
             "morgan"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         },
         {
           "source": "express-rate-limit",
           "specifiers": [
             "rateLimit"
           ],
-          "line": 35
+          "line": 35,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -2017,63 +2083,72 @@
           "specifiers": [
             "fs"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "node:fs",
           "specifiers": [
             "fsp"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "node:path",
           "specifiers": [
             "path"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "node:url",
           "specifiers": [
             "fileURLToPath"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "express",
           "specifiers": [
             "express"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "helmet",
           "specifiers": [
             "helmet"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "dotenv",
           "specifiers": [
             "dotenv"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "morgan",
           "specifiers": [
             "morgan"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         },
         {
           "source": "express-rate-limit",
           "specifiers": [
             "rateLimit"
           ],
-          "line": 35
+          "line": 35,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -2098,40 +2173,46 @@
             "useState",
             "useCallback"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "../i18n.js",
           "specifiers": [],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "../ErrorBoundary.jsx",
           "specifiers": [
             "ErrorBoundary"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./OpenDocViewer.jsx",
           "specifiers": [
             "OpenDocViewer"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "../integrations/bootstrapRuntime.js",
@@ -2139,21 +2220,24 @@
             "bootstrapDetect",
             "ODV_BOOTSTRAP_MODES"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "../components/DocumentLoader/sources/explicitListSource.js",
           "specifiers": [
             "makeExplicitSource"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../utils/performanceOverlayFlag.js",
           "specifiers": [
             "isPerformanceOverlayEnabled"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -2367,6 +2451,7 @@
           "source": "../i18n.js",
           "specifiers": [],
           "line": 23,
+          "kind": "static",
           "resolved": "src/i18n.js"
         },
         {
@@ -2375,6 +2460,7 @@
             "logger"
           ],
           "line": 24,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -2383,6 +2469,7 @@
             "ErrorBoundary"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/ErrorBoundary.jsx"
         },
         {
@@ -2391,6 +2478,7 @@
             "OpenDocViewer"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/app/OpenDocViewer.jsx"
         },
         {
@@ -2400,6 +2488,7 @@
             "ODV_BOOTSTRAP_MODES"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/integrations/bootstrapRuntime.js"
         },
         {
@@ -2408,6 +2497,7 @@
             "makeExplicitSource"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/sources/explicitListSource.js"
         },
         {
@@ -2416,6 +2506,7 @@
             "isPerformanceOverlayEnabled"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/utils/performanceOverlayFlag.js"
         }
       ],
@@ -2429,14 +2520,16 @@
             "useState",
             "useCallback"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -2451,7 +2544,14 @@
       "extension": ".js",
       "jsdocBlockCount": 6,
       "sourceSummary": "Runtime boot loader that resolves configuration scripts before React starts.",
-      "imports": [],
+      "imports": [
+        {
+          "source": "/src/index.jsx",
+          "specifiers": [],
+          "line": 136,
+          "kind": "dynamic"
+        }
+      ],
       "exports": [],
       "declarations": [
         {
@@ -2574,7 +2674,14 @@
       ],
       "moduleKey": "src/app",
       "localImports": [],
-      "packageImports": [],
+      "packageImports": [
+        {
+          "source": "/src/index.jsx",
+          "specifiers": [],
+          "line": 136,
+          "kind": "dynamic"
+        }
+      ],
       "incomingLocalImports": 0,
       "importanceScore": 16,
       "summary": "Runtime boot loader that resolves configuration scripts before React starts.",
@@ -2598,49 +2705,56 @@
             "useRef",
             "useMemo"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "../contexts/ViewerProvider.jsx",
           "specifiers": [
             "ViewerProvider"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "../PerformanceMonitor.jsx",
           "specifiers": [
             "PerformanceMonitor"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "../components/DocumentConsumerWrapper.jsx",
           "specifiers": [
             "DocumentConsumerWrapper"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "../utils/performanceOverlayFlag.js",
           "specifiers": [
             "isPerformanceOverlayEnabled"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -2815,6 +2929,7 @@
             "logger"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -2823,6 +2938,7 @@
             "ViewerProvider"
           ],
           "line": 20,
+          "kind": "static",
           "resolved": "src/contexts/ViewerProvider.jsx"
         },
         {
@@ -2831,6 +2947,7 @@
             "PerformanceMonitor"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/PerformanceMonitor.jsx"
         },
         {
@@ -2839,6 +2956,7 @@
             "DocumentConsumerWrapper"
           ],
           "line": 22,
+          "kind": "static",
           "resolved": "src/components/DocumentConsumerWrapper.jsx"
         },
         {
@@ -2847,6 +2965,7 @@
             "isPerformanceOverlayEnabled"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/utils/performanceOverlayFlag.js"
         }
       ],
@@ -2861,14 +2980,16 @@
             "useRef",
             "useMemo"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -2890,14 +3011,16 @@
             "React",
             "useMemo"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -2979,14 +3102,16 @@
             "React",
             "useMemo"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -3007,14 +3132,16 @@
           "specifiers": [
             "React"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -3095,14 +3222,16 @@
           "specifiers": [
             "React"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -3128,35 +3257,58 @@
             "lazy",
             "Suspense"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
+        },
+        {
+          "source": "./DocumentViewer/DocumentViewer",
+          "specifiers": [],
+          "line": 33,
+          "kind": "dynamic"
+        },
+        {
+          "source": "./DocumentLoader/DocumentLoader",
+          "specifiers": [],
+          "line": 34,
+          "kind": "dynamic"
+        },
+        {
+          "source": "./DocumentThumbnailList",
+          "specifiers": [],
+          "line": 35,
+          "kind": "dynamic"
         }
       ],
       "exports": [
@@ -3292,6 +3444,7 @@
             "ViewerContext"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -3300,7 +3453,29 @@
             "logger"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
+        },
+        {
+          "source": "./DocumentViewer/DocumentViewer",
+          "specifiers": [],
+          "line": 33,
+          "kind": "dynamic",
+          "resolved": "src/components/DocumentViewer/DocumentViewer.jsx"
+        },
+        {
+          "source": "./DocumentLoader/DocumentLoader",
+          "specifiers": [],
+          "line": 34,
+          "kind": "dynamic",
+          "resolved": "src/components/DocumentLoader/DocumentLoader.js"
+        },
+        {
+          "source": "./DocumentThumbnailList",
+          "specifiers": [],
+          "line": 35,
+          "kind": "dynamic",
+          "resolved": "src/components/DocumentThumbnailList.jsx"
         }
       ],
       "packageImports": [
@@ -3314,21 +3489,24 @@
             "lazy",
             "Suspense"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -3349,7 +3527,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -3616,6 +3795,7 @@
             "logger"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -3640,21 +3820,24 @@
             "useMemo",
             "useState"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./DocumentLoader",
           "specifiers": [
             "DocumentLoader"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -3722,6 +3905,7 @@
             "DocumentLoader"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/DocumentLoader.js"
         }
       ],
@@ -3733,14 +3917,16 @@
             "useMemo",
             "useState"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -3766,35 +3952,40 @@
             "useState",
             "useCallback"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "file-type",
           "specifiers": [
             "fileTypeFromBlob"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./documentLoaderUtils.js",
@@ -3804,7 +3995,8 @@
             "generateDemoList",
             "getTotalPages"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "../../utils/documentLoadingConfig.js",
@@ -3812,21 +4004,24 @@
             "getDocumentLoadingConfig",
             "shouldRecommendStopping"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "./LoadPressureDialog.jsx",
           "specifiers": [
             "LoadPressureDialog"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "../../utils/reloadCacheIdentity.js",
@@ -3834,7 +4029,8 @@
             "createReloadCacheSessionId",
             "describeDocumentSourceKey"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -5781,6 +5977,7 @@
             "ViewerContext"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -5789,6 +5986,7 @@
             "logger"
           ],
           "line": 22,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -5800,6 +5998,7 @@
             "getTotalPages"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/documentLoaderUtils.js"
         },
         {
@@ -5809,6 +6008,7 @@
             "shouldRecommendStopping"
           ],
           "line": 24,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -5817,6 +6017,7 @@
             "LoadPressureDialog"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/LoadPressureDialog.jsx"
         },
         {
@@ -5825,6 +6026,7 @@
             "getPublicAssetUrl"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
         {
@@ -5834,6 +6036,7 @@
             "describeDocumentSourceKey"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/utils/reloadCacheIdentity.js"
         }
       ],
@@ -5848,25 +6051,28 @@
             "useState",
             "useCallback"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "file-type",
           "specifiers": [
             "fileTypeFromBlob"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         }
       ],
-      "incomingLocalImports": 1,
-      "importanceScore": 55,
+      "incomingLocalImports": 2,
+      "importanceScore": 63,
       "summary": "OpenDocViewer — Document loader orchestrator.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -5883,35 +6089,40 @@
           "specifiers": [
             "logger"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "utif2",
           "specifiers": [
             "decodeUTIF"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfjsDocumentOptions.js",
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -6258,6 +6469,7 @@
             "logger"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -6266,6 +6478,7 @@
             "withPdfJsDocumentOptions"
           ],
           "line": 22,
+          "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         }
       ],
@@ -6275,21 +6488,24 @@
           "specifiers": [
             "decodeUTIF"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 3,
@@ -6312,21 +6528,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 3
+          "line": 3,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 4
+          "line": 4,
+          "kind": "static"
         },
         {
           "source": "../../utils/documentLoadingConfig.js",
@@ -6334,7 +6553,8 @@
             "formatBytes",
             "formatCount"
           ],
-          "line": 5
+          "line": 5,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -6459,6 +6679,7 @@
             "formatCount"
           ],
           "line": 5,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         }
       ],
@@ -6470,21 +6691,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 3
+          "line": 3,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 4
+          "line": 4,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -6505,7 +6729,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "utif2",
@@ -6514,49 +6739,56 @@
             "decodeUTIFImage",
             "toRGBA8"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./documentLoaderUtils.js",
           "specifiers": [
             "generateThumbnail"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerJsUrl"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "../../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfjsDocumentOptions.js",
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "../../utils/objectUrlRegistry.js",
           "specifiers": [
             "createTrackedObjectUrl"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -6841,6 +7073,7 @@
             "logger"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -6849,6 +7082,7 @@
             "generateThumbnail"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/documentLoaderUtils.js"
         },
         {
@@ -6857,6 +7091,7 @@
             "getPublicAssetUrl"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
         {
@@ -6865,6 +7100,7 @@
             "withPdfJsDocumentOptions"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         },
         {
@@ -6873,6 +7109,7 @@
             "createTrackedObjectUrl"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/utils/objectUrlRegistry.js"
         }
       ],
@@ -6884,21 +7121,24 @@
             "decodeUTIFImage",
             "toRGBA8"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerJsUrl"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -7231,7 +7471,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./mainThreadRenderer.js",
@@ -7239,35 +7480,40 @@
             "importedRenderTIFFInMainThread",
             "importedRenderPDFInMainThread"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "./documentLoaderUtils.js",
           "specifiers": [
             "generateThumbnail"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "../../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "../../utils/objectUrlRegistry.js",
           "specifiers": [
             "createTrackedObjectUrl"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "../../workers/imageWorker.js?worker",
           "specifiers": [
             "ImageWorker"
           ],
-          "line": 40
+          "line": 40,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -7562,6 +7808,7 @@
             "logger"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -7571,6 +7818,7 @@
             "importedRenderPDFInMainThread"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/mainThreadRenderer.js"
         },
         {
@@ -7579,6 +7827,7 @@
             "generateThumbnail"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/components/DocumentLoader/documentLoaderUtils.js"
         },
         {
@@ -7587,6 +7836,7 @@
             "getPublicAssetUrl"
           ],
           "line": 31,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
         {
@@ -7595,6 +7845,7 @@
             "createTrackedObjectUrl"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/utils/objectUrlRegistry.js"
         },
         {
@@ -7603,6 +7854,7 @@
             "ImageWorker"
           ],
           "line": 40,
+          "kind": "static",
           "resolved": null
         }
       ],
@@ -7627,21 +7879,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -7743,21 +7998,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -7780,21 +8038,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -7920,21 +8181,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -7963,49 +8227,56 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "./ImageRenderer.jsx",
           "specifiers": [
             "ImageRenderer"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "./CanvasRenderer.jsx",
           "specifiers": [
             "CanvasRenderer"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "./LoadingMessage.jsx",
           "specifiers": [
             "LoadingMessage"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "../utils/zoomUtils.js",
@@ -8015,21 +8286,24 @@
             "handleZoomIn",
             "handleZoomOut"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "../utils/documentLoadingConfig.js",
           "specifiers": [
             "getDocumentLoadingConfig"
           ],
-          "line": 36
+          "line": 36,
+          "kind": "static"
         },
         {
           "source": "../utils/renderSurfaceBounds.js",
           "specifiers": [
             "clampRenderSurfaceSize"
           ],
-          "line": 37
+          "line": 37,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -8765,6 +9039,7 @@
             "ViewerContext"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -8773,6 +9048,7 @@
             "logger"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -8781,6 +9057,7 @@
             "ImageRenderer"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/components/ImageRenderer.jsx"
         },
         {
@@ -8789,6 +9066,7 @@
             "CanvasRenderer"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/components/CanvasRenderer.jsx"
         },
         {
@@ -8797,6 +9075,7 @@
             "LoadingMessage"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/components/LoadingMessage.jsx"
         },
         {
@@ -8808,6 +9087,7 @@
             "handleZoomOut"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/utils/zoomUtils.js"
         },
         {
@@ -8816,6 +9096,7 @@
             "getDocumentLoadingConfig"
           ],
           "line": 36,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -8824,6 +9105,7 @@
             "clampRenderSurfaceSize"
           ],
           "line": 37,
+          "kind": "static",
           "resolved": "src/utils/renderSurfaceBounds.js"
         }
       ],
@@ -8841,14 +9123,16 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -8874,21 +9158,24 @@
             "useRef",
             "useState"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -9117,21 +9404,24 @@
             "useRef",
             "useState"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -9159,42 +9449,48 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "./LoadingSpinner.jsx",
           "specifiers": [
             "LoadingSpinner"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "../utils/documentLoadingConfig.js",
@@ -9202,21 +9498,24 @@
             "getDocumentLoadingConfig",
             "shouldUseFullImagesForThumbnails"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "../utils/documentMetadata.js",
           "specifiers": [
             "bundleDocumentHasMetadata"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -10210,6 +10509,7 @@
             "ViewerContext"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -10218,6 +10518,7 @@
             "logger"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -10226,6 +10527,7 @@
             "LoadingSpinner"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/components/LoadingSpinner.jsx"
         },
         {
@@ -10235,6 +10537,7 @@
             "shouldUseFullImagesForThumbnails"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -10243,6 +10546,7 @@
             "getPublicAssetUrl"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
         {
@@ -10251,6 +10555,7 @@
             "bundleDocumentHasMetadata"
           ],
           "line": 33,
+          "kind": "static",
           "resolved": "src/utils/documentMetadata.js"
         }
       ],
@@ -10267,25 +10572,28 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         }
       ],
-      "incomingLocalImports": 1,
-      "importanceScore": 48,
+      "incomingLocalImports": 2,
+      "importanceScore": 56,
       "summary": "OpenDocViewer — Deterministic thumbnail strip.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -10307,28 +10615,32 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../../utils/supportDiagnostics.js",
@@ -10338,7 +10650,8 @@
             "loadLatestPdfBenchmarkResult",
             "loadLatestRenderDecodeBenchmarkResult"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -10479,6 +10792,7 @@
             "getRuntimeConfig"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -10490,6 +10804,7 @@
             "loadLatestRenderDecodeBenchmarkResult"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/supportDiagnostics.js"
         }
       ],
@@ -10504,21 +10819,24 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -10545,70 +10863,80 @@
             "useState",
             "useContext"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "../../logging/userLogger.js",
           "specifiers": [
             "userLog"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "./PageNavigationButtons.jsx",
           "specifiers": [
             "PageNavigationButtons"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./ZoomButtons.jsx",
           "specifiers": [
             "ZoomButtons"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "./SplitToolbarButton.jsx",
           "specifiers": [
             "SplitToolbarButton"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "./LanguageMenuButton.jsx",
           "specifiers": [
             "LanguageMenuButton"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./ThemeMenuButton.jsx",
           "specifiers": [
             "ThemeMenuButton"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "../../utils/printUtils.js",
@@ -10624,49 +10952,56 @@
             "downloadPdfBlob",
             "printPdfBlob"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "./PrintRangeDialog.jsx",
           "specifiers": [
             "PrintRangeDialog"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "./HelpMenuButton.jsx",
           "specifiers": [
             "HelpMenuButton"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "./ManualOverlayDialog.jsx",
           "specifiers": [
             "ManualOverlayDialog"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "./AboutOverlayDialog.jsx",
           "specifiers": [
             "AboutOverlayDialog"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "./usePdfPrebuildAllPages.js",
           "specifiers": [
             "usePdfPrebuildAllPages"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "../../utils/viewerPreferences.js",
@@ -10675,21 +11010,24 @@
             "getPrintDefaultModePreference",
             "setPrintDefaultModePreference"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         },
         {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         },
         {
           "source": "../common/StatusLed.jsx",
           "specifiers": [
             "StatusLed"
           ],
-          "line": 40
+          "line": 40,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfBenchmark.js",
@@ -10697,7 +11035,8 @@
             "isPdfBenchmarkEnabled",
             "runPdfGenerationBenchmark"
           ],
-          "line": 41
+          "line": 41,
+          "kind": "static"
         },
         {
           "source": "../../utils/renderDecodeBenchmark.js",
@@ -10705,7 +11044,8 @@
             "isRenderDecodeBenchmarkEnabled",
             "runRenderDecodeBenchmark"
           ],
-          "line": 42
+          "line": 42,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfPrintCacheKey.js",
@@ -10714,7 +11054,8 @@
             "getPdfPrintCacheKey",
             "getPdfPrintCacheKeyOptions"
           ],
-          "line": 43
+          "line": 43,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -11521,6 +11862,7 @@
             "userLog"
           ],
           "line": 20,
+          "kind": "static",
           "resolved": "src/logging/userLogger.js"
         },
         {
@@ -11529,6 +11871,7 @@
             "logger"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -11537,6 +11880,7 @@
             "PageNavigationButtons"
           ],
           "line": 22,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/PageNavigationButtons.jsx"
         },
         {
@@ -11545,6 +11889,7 @@
             "ZoomButtons"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/ZoomButtons.jsx"
         },
         {
@@ -11553,6 +11898,7 @@
             "SplitToolbarButton"
           ],
           "line": 24,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/SplitToolbarButton.jsx"
         },
         {
@@ -11561,6 +11907,7 @@
             "LanguageMenuButton"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/LanguageMenuButton.jsx"
         },
         {
@@ -11569,6 +11916,7 @@
             "ThemeMenuButton"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/ThemeMenuButton.jsx"
         },
         {
@@ -11586,6 +11934,7 @@
             "printPdfBlob"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/utils/printUtils.js"
         },
         {
@@ -11594,6 +11943,7 @@
             "PrintRangeDialog"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/PrintRangeDialog.jsx"
         },
         {
@@ -11602,6 +11952,7 @@
             "HelpMenuButton"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/HelpMenuButton.jsx"
         },
         {
@@ -11610,6 +11961,7 @@
             "ManualOverlayDialog"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/ManualOverlayDialog.jsx"
         },
         {
@@ -11618,6 +11970,7 @@
             "AboutOverlayDialog"
           ],
           "line": 31,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/AboutOverlayDialog.jsx"
         },
         {
@@ -11626,6 +11979,7 @@
             "usePdfPrebuildAllPages"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/usePdfPrebuildAllPages.js"
         },
         {
@@ -11634,6 +11988,7 @@
             "getRuntimeConfig"
           ],
           "line": 33,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -11644,6 +11999,7 @@
             "setPrintDefaultModePreference"
           ],
           "line": 34,
+          "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
         {
@@ -11652,6 +12008,7 @@
             "ViewerContext"
           ],
           "line": 39,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -11660,6 +12017,7 @@
             "StatusLed"
           ],
           "line": 40,
+          "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         },
         {
@@ -11669,6 +12027,7 @@
             "runPdfGenerationBenchmark"
           ],
           "line": 41,
+          "kind": "static",
           "resolved": "src/utils/pdfBenchmark.js"
         },
         {
@@ -11678,6 +12037,7 @@
             "runRenderDecodeBenchmark"
           ],
           "line": 42,
+          "kind": "static",
           "resolved": "src/utils/renderDecodeBenchmark.js"
         },
         {
@@ -11688,6 +12048,7 @@
             "getPdfPrintCacheKeyOptions"
           ],
           "line": 43,
+          "kind": "static",
           "resolved": "src/utils/pdfPrintCacheKey.js"
         }
       ],
@@ -11703,21 +12064,24 @@
             "useState",
             "useContext"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -11742,28 +12106,32 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../common/StatusLed.jsx",
           "specifiers": [
             "StatusLed"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -11855,6 +12223,7 @@
             "StatusLed"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/components/common/StatusLed.jsx"
         }
       ],
@@ -11868,21 +12237,24 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -11905,21 +12277,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -12015,21 +12390,24 @@
             "useEffect",
             "useRef"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -12050,21 +12428,24 @@
           "specifiers": [
             "resolveLocalizedValue"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../../../utils/runtimeConfig.js",
           "specifiers": [
             "getPrintDefaultMode"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../../../utils/viewerPreferences.js",
           "specifiers": [
             "getPrintDefaultModePreference"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "../printRangeDialogHelpers.js",
@@ -12075,7 +12456,8 @@
             "resolvePrintAction",
             "safeRegex"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -12183,6 +12565,7 @@
             "resolveLocalizedValue"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -12191,6 +12574,7 @@
             "getPrintDefaultMode"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -12199,6 +12583,7 @@
             "getPrintDefaultModePreference"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
         {
@@ -12211,6 +12596,7 @@
             "safeRegex"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/printRangeDialogHelpers.js"
         }
       ],
@@ -12238,21 +12624,24 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -12405,21 +12794,24 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -12445,35 +12837,40 @@
             "useRef",
             "useState"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -12853,6 +13250,7 @@
             "getRuntimeConfig"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
       ],
@@ -12867,28 +13265,32 @@
             "useRef",
             "useState"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -12915,28 +13317,32 @@
             "useId",
             "useMemo"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "../../hooks/useAcceleratingHoldRepeat.js",
           "specifiers": [
             "useAcceleratingHoldRepeat"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -13130,6 +13536,7 @@
             "useAcceleratingHoldRepeat"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/hooks/useAcceleratingHoldRepeat.js"
         }
       ],
@@ -13145,21 +13552,24 @@
             "useId",
             "useMemo"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -13181,28 +13591,32 @@
             "React",
             "useMemo"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "./usePrintRangeDialog.js",
           "specifiers": [
             "usePrintRangeController"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -13247,6 +13661,7 @@
             "usePrintRangeController"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/usePrintRangeDialog.js"
         }
       ],
@@ -13257,21 +13672,24 @@
             "React",
             "useMemo"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -13293,7 +13711,8 @@
             "resolveLocalizedValue",
             "resolveOptionLabel"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -13655,6 +14074,7 @@
             "resolveOptionLabel"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         }
       ],
@@ -13681,14 +14101,16 @@
             "useRef",
             "useState"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -13757,14 +14179,16 @@
             "useRef",
             "useState"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -13791,28 +14215,32 @@
             "useRef",
             "useState"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "../../contexts/themeContext.js",
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -14021,6 +14449,7 @@
             "ThemeContext"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/contexts/themeContext.js"
         }
       ],
@@ -14036,21 +14465,24 @@
             "useRef",
             "useState"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -14073,28 +14505,32 @@
             "useContext",
             "useMemo"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "../../contexts/themeContext.js",
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -14144,6 +14580,7 @@
             "ThemeContext"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/contexts/themeContext.js"
         }
       ],
@@ -14155,21 +14592,24 @@
             "useContext",
             "useMemo"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -14194,21 +14634,24 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../../utils/printPdf.js",
@@ -14216,7 +14659,8 @@
             "collectPrintablePdfSources",
             "createPrintPdfBlob"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfPrebuildPlan.js",
@@ -14224,7 +14668,8 @@
             "createPdfPrebuildAllPagesVariants",
             "getPdfPrebuildAllPagesLanguageDependency"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "../../utils/pdfPrintCacheKey.js",
@@ -14233,7 +14678,8 @@
             "getPdfPrintCacheKeyOptions",
             "isFullSessionPageSequence"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -14584,6 +15030,7 @@
             "logger"
           ],
           "line": 7,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -14592,6 +15039,7 @@
             "getRuntimeConfig"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -14601,6 +15049,7 @@
             "createPrintPdfBlob"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/utils/printPdf.js"
         },
         {
@@ -14610,6 +15059,7 @@
             "getPdfPrebuildAllPagesLanguageDependency"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/pdfPrebuildPlan.js"
         },
         {
@@ -14620,6 +15070,7 @@
             "isFullSessionPageSequence"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/utils/pdfPrintCacheKey.js"
         }
       ],
@@ -14633,7 +15084,8 @@
             "useRef",
             "useState"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -14658,14 +15110,16 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../../utils/printUtils.js",
           "specifiers": [
             "parsePrintSequence"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "../../utils/localizedValue.js",
@@ -14673,7 +15127,8 @@
             "resolveLocalizedValue",
             "resolveOptionLabel"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "./printRangeDialogHelpers.js",
@@ -14684,14 +15139,16 @@
             "resolveOptionPrintText",
             "safeRegex"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "./hooks/usePrintRangeConfig.js",
           "specifiers": [
             "usePrintRangeConfig"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -15154,6 +15611,7 @@
             "parsePrintSequence"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/printUtils.js"
         },
         {
@@ -15163,6 +15621,7 @@
             "resolveOptionLabel"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -15175,6 +15634,7 @@
             "safeRegex"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/printRangeDialogHelpers.js"
         },
         {
@@ -15183,6 +15643,7 @@
             "usePrintRangeConfig"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/hooks/usePrintRangeConfig.js"
         }
       ],
@@ -15196,7 +15657,8 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -15220,35 +15682,40 @@
             "useState",
             "useRef"
           ],
-          "line": 37
+          "line": 37,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 38
+          "line": 38,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         },
         {
           "source": "../../hooks/useAcceleratingHoldRepeat.js",
           "specifiers": [
             "useAcceleratingHoldRepeat"
           ],
-          "line": 40
+          "line": 40,
+          "kind": "static"
         },
         {
           "source": "./SplitToolbarButton.jsx",
           "specifiers": [
             "SplitToolbarButton"
           ],
-          "line": 41
+          "line": 41,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -15368,6 +15835,7 @@
             "useAcceleratingHoldRepeat"
           ],
           "line": 40,
+          "kind": "static",
           "resolved": "src/hooks/useAcceleratingHoldRepeat.js"
         },
         {
@@ -15376,6 +15844,7 @@
             "SplitToolbarButton"
           ],
           "line": 41,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/SplitToolbarButton.jsx"
         }
       ],
@@ -15388,21 +15857,24 @@
             "useState",
             "useRef"
           ],
-          "line": 37
+          "line": 37,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 38
+          "line": 38,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -15423,21 +15895,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -15487,21 +15962,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -15527,98 +16005,112 @@
             "useMemo",
             "useState"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "./DocumentViewerToolbar.jsx",
           "specifiers": [
             "DocumentViewerToolbar"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "./DocumentViewerThumbnails.jsx",
           "specifiers": [
             "DocumentViewerThumbnails"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./DocumentViewerRender.jsx",
           "specifiers": [
             "DocumentViewerRender"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "../PrintSelectionWorkspace.jsx",
           "specifiers": [
             "PrintSelectionWorkspace"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "../Resizer.jsx",
           "specifiers": [
             "Resizer"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "./useDocumentViewer.js",
           "specifiers": [
             "useDocumentViewer"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "../../hooks/useNavigationModifierState.js",
           "specifiers": [
             "useNavigationModifierState"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "../DocumentMetadataOverlayDialog.jsx",
           "specifiers": [
             "DocumentMetadataOverlayDialog"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         },
         {
           "source": "../DocumentMetadataMatrixOverlayDialog.jsx",
           "specifiers": [
             "DocumentMetadataMatrixOverlayDialog"
           ],
-          "line": 34
+          "line": 34,
+          "kind": "static"
         },
         {
           "source": "../ViewerProblemNotice.jsx",
           "specifiers": [
             "ViewerProblemNotice"
           ],
-          "line": 35
+          "line": 35,
+          "kind": "static"
         },
         {
           "source": "../../utils/documentMetadata.js",
@@ -15626,7 +16118,8 @@
             "buildDocumentMetadataMatrixView",
             "buildDocumentMetadataView"
           ],
-          "line": 36
+          "line": 36,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
@@ -15636,7 +16129,8 @@
             "getViewerEdgeScrollPageTurnConfig",
             "isDocumentMetadataUiEnabled"
           ],
-          "line": 37
+          "line": 37,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -15771,6 +16265,7 @@
             "DocumentViewerToolbar"
           ],
           "line": 24,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/DocumentViewerToolbar.jsx"
         },
         {
@@ -15779,6 +16274,7 @@
             "DocumentViewerThumbnails"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/DocumentViewerThumbnails.jsx"
         },
         {
@@ -15787,6 +16283,7 @@
             "DocumentViewerRender"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/DocumentViewerRender.jsx"
         },
         {
@@ -15795,6 +16292,7 @@
             "PrintSelectionWorkspace"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/components/PrintSelectionWorkspace.jsx"
         },
         {
@@ -15803,6 +16301,7 @@
             "Resizer"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/components/Resizer.jsx"
         },
         {
@@ -15811,6 +16310,7 @@
             "logger"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -15819,6 +16319,7 @@
             "ViewerContext"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -15827,6 +16328,7 @@
             "useDocumentViewer"
           ],
           "line": 31,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/useDocumentViewer.js"
         },
         {
@@ -15835,6 +16337,7 @@
             "useNavigationModifierState"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/hooks/useNavigationModifierState.js"
         },
         {
@@ -15843,6 +16346,7 @@
             "DocumentMetadataOverlayDialog"
           ],
           "line": 33,
+          "kind": "static",
           "resolved": "src/components/DocumentMetadataOverlayDialog.jsx"
         },
         {
@@ -15851,6 +16355,7 @@
             "DocumentMetadataMatrixOverlayDialog"
           ],
           "line": 34,
+          "kind": "static",
           "resolved": "src/components/DocumentMetadataMatrixOverlayDialog.jsx"
         },
         {
@@ -15859,6 +16364,7 @@
             "ViewerProblemNotice"
           ],
           "line": 35,
+          "kind": "static",
           "resolved": "src/components/ViewerProblemNotice.jsx"
         },
         {
@@ -15868,6 +16374,7 @@
             "buildDocumentMetadataView"
           ],
           "line": 36,
+          "kind": "static",
           "resolved": "src/utils/documentMetadata.js"
         },
         {
@@ -15879,6 +16386,7 @@
             "isDocumentMetadataUiEnabled"
           ],
           "line": 37,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
       ],
@@ -15893,18 +16401,20 @@
             "useMemo",
             "useState"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         }
       ],
-      "incomingLocalImports": 0,
-      "importanceScore": 21,
+      "incomingLocalImports": 1,
+      "importanceScore": 29,
       "summary": "OpenDocViewer — Document Viewer (Container) Tie together: • Toolbar (actions, zoom, adjustments) • Thumbnails (navigation + selection reset) • Main renderer (canvas/img) This component wires ViewerContext state into the",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -15926,49 +16436,56 @@
             "useRef",
             "useState"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../DocumentRender.jsx",
           "specifiers": [
             "DocumentRender"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "./CompareZoomOverlay.jsx",
           "specifiers": [
             "CompareZoomOverlay"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "../../utils/documentMetadata.js",
           "specifiers": [
             "bundleDocumentHasMetadata"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -16709,6 +17226,7 @@
             "DocumentRender"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/components/DocumentRender.jsx"
         },
         {
@@ -16717,6 +17235,7 @@
             "CompareZoomOverlay"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/CompareZoomOverlay.jsx"
         },
         {
@@ -16725,6 +17244,7 @@
             "ViewerContext"
           ],
           "line": 31,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -16733,6 +17253,7 @@
             "bundleDocumentHasMetadata"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/utils/documentMetadata.js"
         }
       ],
@@ -16747,21 +17268,24 @@
             "useRef",
             "useState"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -16782,28 +17306,32 @@
           "specifiers": [
             "React"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../DocumentThumbnailList.jsx",
           "specifiers": [
             "DocumentThumbnailList"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -17016,6 +17544,7 @@
             "DocumentThumbnailList"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/components/DocumentThumbnailList.jsx"
         }
       ],
@@ -17025,21 +17554,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -17060,21 +17592,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "../DocumentToolbar/DocumentToolbar.jsx",
           "specifiers": [
             "DocumentToolbar"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -17207,6 +17742,7 @@
             "DocumentToolbar"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/components/DocumentToolbar/DocumentToolbar.jsx"
         }
       ],
@@ -17216,14 +17752,16 @@
           "specifiers": [
             "React"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -17244,14 +17782,16 @@
           "specifiers": [
             "useViewerKeyboardNavigation"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "./useViewerZoomEffects.js",
           "specifiers": [
             "useViewerZoomEffects"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -17460,6 +18000,7 @@
             "useViewerKeyboardNavigation"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js"
         },
         {
@@ -17468,6 +18009,7 @@
             "useViewerZoomEffects"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerZoomEffects.js"
         }
       ],
@@ -17492,14 +18034,16 @@
             "useEffect",
             "useRef"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../../../hooks/usePageTimer.js",
           "specifiers": [
             "usePageTimer"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -17787,6 +18331,7 @@
             "usePageTimer"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/hooks/usePageTimer.js"
         }
       ],
@@ -17798,7 +18343,8 @@
             "useEffect",
             "useRef"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -17821,7 +18367,8 @@
             "useEffect",
             "useState"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -18020,7 +18567,8 @@
             "useEffect",
             "useState"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -18041,14 +18589,16 @@
           "specifiers": [
             "useEffect"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -18170,6 +18720,7 @@
             "logger"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -18179,7 +18730,8 @@
           "specifiers": [
             "useEffect"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -18205,21 +18757,24 @@
             "useCallback",
             "useContext"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "../../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "../../contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "../../utils/runtimeConfig.js",
@@ -18231,7 +18786,8 @@
             "normalizeCustomFitSizeLimitPreference",
             "normalizeCustomFitWidthFactorPercent"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "../../utils/viewerPreferences.js",
@@ -18244,21 +18800,24 @@
             "setCustomFitWidthFactorPreference",
             "setDefaultZoomModePreference"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "./hooks/useViewerPostZoom.js",
           "specifiers": [
             "useViewerPostZoom"
           ],
-          "line": 36
+          "line": 36,
+          "kind": "static"
         },
         {
           "source": "./hooks/useViewerEffects.js",
           "specifiers": [
             "useViewerEffects"
           ],
-          "line": 37
+          "line": 37,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -19910,6 +20469,7 @@
             "logger"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -19918,6 +20478,7 @@
             "ViewerContext"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -19931,6 +20492,7 @@
             "normalizeCustomFitWidthFactorPercent"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -19945,6 +20507,7 @@
             "setDefaultZoomModePreference"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         },
         {
@@ -19953,6 +20516,7 @@
             "useViewerPostZoom"
           ],
           "line": 36,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerPostZoom.js"
         },
         {
@@ -19961,6 +20525,7 @@
             "useViewerEffects"
           ],
           "line": 37,
+          "kind": "static",
           "resolved": "src/components/DocumentViewer/hooks/useViewerEffects.js"
         }
       ],
@@ -19975,7 +20540,8 @@
             "useCallback",
             "useContext"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -19996,21 +20562,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -20157,21 +20726,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -20192,28 +20764,32 @@
           "specifiers": [
             "React"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -20306,6 +20882,7 @@
             "getPublicAssetUrl"
           ],
           "line": 29,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         }
       ],
@@ -20315,21 +20892,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -20350,21 +20930,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -20496,21 +21079,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -20536,42 +21122,48 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "../utils/publicAssetUrl.js",
           "specifiers": [
             "getPublicAssetUrl"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "../utils/localizedValue.js",
           "specifiers": [
             "resolveLocalizedValue"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "../utils/printSanitize.js",
           "specifiers": [
             "isSafeImageSrc"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -21061,6 +21653,7 @@
             "getPublicAssetUrl"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/publicAssetUrl.js"
         },
         {
@@ -21069,6 +21662,7 @@
             "resolveLocalizedValue"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -21077,6 +21671,7 @@
             "isSafeImageSrc"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/utils/printSanitize.js"
         }
       ],
@@ -21091,21 +21686,24 @@
             "useRef",
             "useState"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -21127,21 +21725,24 @@
             "React",
             "useCallback"
           ],
-          "line": 52
+          "line": 52,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 53
+          "line": 53,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 54
+          "line": 54,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -21314,21 +21915,24 @@
             "React",
             "useCallback"
           ],
-          "line": 52
+          "line": 52,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 53
+          "line": 53,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 54
+          "line": 54,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -21352,21 +21956,24 @@
             "useMemo",
             "useState"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "../utils/runtimeConfig.js",
@@ -21374,14 +21981,16 @@
             "getRuntimeConfig",
             "getViewerProblemNoticeConfig"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "../utils/localizedValue.js",
           "specifiers": [
             "resolveLocalizedValue"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -21600,6 +22209,7 @@
             "getViewerProblemNoticeConfig"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -21608,6 +22218,7 @@
             "resolveLocalizedValue"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         }
       ],
@@ -21620,21 +22231,24 @@
             "useMemo",
             "useState"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -21655,7 +22269,8 @@
           "specifiers": [
             "createContext"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -21722,7 +22337,8 @@
           "specifiers": [
             "createContext"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 3,
@@ -21747,21 +22363,24 @@
             "useCallback",
             "useRef"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "./themeContext.js",
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "../utils/viewerPreferences.js",
@@ -21769,7 +22388,8 @@
             "getThemeModePreference",
             "setThemeModePreference"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -22059,6 +22679,7 @@
             "logger"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -22067,6 +22688,7 @@
             "ThemeContext"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/contexts/themeContext.js"
         },
         {
@@ -22076,6 +22698,7 @@
             "setThemeModePreference"
           ],
           "line": 20,
+          "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
       ],
@@ -22089,7 +22712,8 @@
             "useCallback",
             "useRef"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -22110,7 +22734,8 @@
           "specifiers": [
             "createContext"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -22255,7 +22880,8 @@
           "specifiers": [
             "createContext"
           ],
-          "line": 2
+          "line": 2,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 10,
@@ -22280,21 +22906,24 @@
             "useRef",
             "useEffect"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "./viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "../utils/documentLoadingConfig.js",
@@ -22308,28 +22937,32 @@
             "shouldKeepAllFullImageAssets",
             "shouldUseFullImagesForThumbnails"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "../utils/sourceTempStore.js",
           "specifiers": [
             "createSourceTempStore"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "../utils/pageAssetStore.js",
           "specifiers": [
             "createPageAssetStore"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "../utils/pageAssetRenderer.js",
           "specifiers": [
             "createPageAssetRenderer"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "../utils/reloadCacheIdentity.js",
@@ -22337,7 +22970,8 @@
             "createPersistedPageAssetKey",
             "createRenderAssetSignature"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         },
         {
           "source": "../utils/objectUrlRegistry.js",
@@ -22348,7 +22982,8 @@
             "revokeTrackedObjectUrls",
             "getTrackedObjectUrlCount"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -24048,6 +24683,7 @@
             "logger"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -24056,6 +24692,7 @@
             "ViewerContext"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -24071,6 +24708,7 @@
             "shouldUseFullImagesForThumbnails"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -24079,6 +24717,7 @@
             "createSourceTempStore"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/utils/sourceTempStore.js"
         },
         {
@@ -24087,6 +24726,7 @@
             "createPageAssetStore"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/utils/pageAssetStore.js"
         },
         {
@@ -24095,6 +24735,7 @@
             "createPageAssetRenderer"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/utils/pageAssetRenderer.js"
         },
         {
@@ -24104,6 +24745,7 @@
             "createRenderAssetSignature"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/utils/reloadCacheIdentity.js"
         },
         {
@@ -24116,6 +24758,7 @@
             "getTrackedObjectUrlCount"
           ],
           "line": 32,
+          "kind": "static",
           "resolved": "src/utils/objectUrlRegistry.js"
         }
       ],
@@ -24129,7 +24772,8 @@
             "useRef",
             "useEffect"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -24150,21 +24794,24 @@
           "specifiers": [
             "React"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "i18next",
           "specifiers": [
             "i18next"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         },
         {
           "source": "./logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 28
+          "line": 28,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -24499,6 +25146,7 @@
             "logger"
           ],
           "line": 28,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -24508,14 +25156,16 @@
           "specifiers": [
             "React"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "i18next",
           "specifiers": [
             "i18next"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -24538,14 +25188,16 @@
             "useEffect",
             "useRef"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -24655,6 +25307,7 @@
             "logger"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -24666,7 +25319,8 @@
             "useEffect",
             "useRef"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -24689,7 +25343,8 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -24925,7 +25580,8 @@
             "useRef",
             "useState"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -24946,21 +25602,24 @@
           "specifiers": [
             "useCallback"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 40
+          "line": 40,
+          "kind": "static"
         },
         {
           "source": "./usePageTimer",
           "specifiers": [
             "usePageTimer"
           ],
-          "line": 41
+          "line": 41,
+          "kind": "static"
         },
         {
           "source": "../utils/navigationUtils",
@@ -24970,7 +25629,8 @@
             "handleFirstPage",
             "handleLastPage"
           ],
-          "line": 42
+          "line": 42,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -25146,6 +25806,7 @@
             "logger"
           ],
           "line": 40,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -25154,6 +25815,7 @@
             "usePageTimer"
           ],
           "line": 41,
+          "kind": "static",
           "resolved": "src/hooks/usePageTimer.js"
         },
         {
@@ -25165,6 +25827,7 @@
             "handleLastPage"
           ],
           "line": 42,
+          "kind": "static",
           "resolved": "src/utils/navigationUtils.js"
         }
       ],
@@ -25174,7 +25837,8 @@
           "specifiers": [
             "useCallback"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -25197,14 +25861,16 @@
             "useEffect",
             "useCallback"
           ],
-          "line": 35
+          "line": 35,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 36
+          "line": 36,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -25351,6 +26017,7 @@
             "logger"
           ],
           "line": 36,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -25362,7 +26029,8 @@
             "useEffect",
             "useCallback"
           ],
-          "line": 35
+          "line": 35,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -25383,28 +26051,32 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "initReactI18next"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "i18next-icu",
           "specifiers": [
             "ICU"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "i18next-http-backend",
           "specifiers": [
             "HttpBackend"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         },
         {
           "source": "./utils/viewerPreferences.js",
@@ -25412,7 +26084,8 @@
             "getLanguagePreference",
             "setLanguagePreference"
           ],
-          "line": 33
+          "line": 33,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -25967,6 +26640,7 @@
             "setLanguagePreference"
           ],
           "line": 33,
+          "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
         }
       ],
@@ -25976,28 +26650,32 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 29
+          "line": 29,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "initReactI18next"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         },
         {
           "source": "i18next-icu",
           "specifiers": [
             "ICU"
           ],
-          "line": 31
+          "line": 31,
+          "kind": "static"
         },
         {
           "source": "i18next-http-backend",
           "specifiers": [
             "HttpBackend"
           ],
-          "line": 32
+          "line": 32,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -26018,50 +26696,58 @@
           "specifiers": [
             "React"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "react-dom/client",
           "specifiers": [
             "createRoot"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "material-icons/iconfont/filled.css",
           "specifiers": [],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./styles.css",
           "specifiers": [],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "./i18n",
           "specifiers": [],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         },
         {
           "source": "./logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 25
+          "line": 25,
+          "kind": "static"
         },
         {
           "source": "./app/AppBootstrap.jsx",
           "specifiers": [
             "AppBootstrap"
           ],
-          "line": 26
+          "line": 26,
+          "kind": "static"
         },
         {
           "source": "./contexts/ThemeProvider.jsx",
           "specifiers": [
             "ThemeProvider"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -26105,12 +26791,14 @@
           "source": "./styles.css",
           "specifiers": [],
           "line": 23,
+          "kind": "static",
           "resolved": null
         },
         {
           "source": "./i18n",
           "specifiers": [],
           "line": 24,
+          "kind": "static",
           "resolved": "src/i18n.js"
         },
         {
@@ -26119,6 +26807,7 @@
             "logger"
           ],
           "line": 25,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -26127,6 +26816,7 @@
             "AppBootstrap"
           ],
           "line": 26,
+          "kind": "static",
           "resolved": "src/app/AppBootstrap.jsx"
         },
         {
@@ -26135,6 +26825,7 @@
             "ThemeProvider"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/contexts/ThemeProvider.jsx"
         }
       ],
@@ -26144,19 +26835,22 @@
           "specifiers": [
             "React"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "react-dom/client",
           "specifiers": [
             "createRoot"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "material-icons/iconfont/filled.css",
           "specifiers": [],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -26177,14 +26871,16 @@
           "specifiers": [
             "readFromRelatedWindow"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "./sessionToken.js",
           "specifiers": [
             "readFromSessionToken"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "./sessionUrl.js",
@@ -26192,21 +26888,24 @@
             "hasSessionUrlParameter",
             "readFromSessionUrl"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "./urlParams.js",
           "specifiers": [
             "readFromUrlParams"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "./normalizePortableBundle.js",
           "specifiers": [
             "normalizeToPortableBundle"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -26556,6 +27255,7 @@
             "readFromRelatedWindow"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/integrations/parentBridge.js"
         },
         {
@@ -26564,6 +27264,7 @@
             "readFromSessionToken"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/integrations/sessionToken.js"
         },
         {
@@ -26573,6 +27274,7 @@
             "readFromSessionUrl"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/integrations/sessionUrl.js"
         },
         {
@@ -26581,6 +27283,7 @@
             "readFromUrlParams"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/integrations/urlParams.js"
         },
         {
@@ -26589,6 +27292,7 @@
             "normalizeToPortableBundle"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/integrations/normalizePortableBundle.js"
         }
       ],
@@ -26611,14 +27315,16 @@
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "../utils/idUtils.js",
           "specifiers": [
             "createOpaqueId"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -27062,6 +27768,7 @@
             "getRuntimeConfig"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -27070,6 +27777,7 @@
             "createOpaqueId"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/utils/idUtils.js"
         }
       ],
@@ -27643,7 +28351,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 30
+          "line": 30,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -27790,6 +28499,7 @@
             "logger"
           ],
           "line": 30,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -27812,7 +28522,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 27
+          "line": 27,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -28096,6 +28807,7 @@
             "logger"
           ],
           "line": 27,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -28118,7 +28830,8 @@
           "specifiers": [
             "axios"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -28928,7 +29641,8 @@
           "specifiers": [
             "axios"
           ],
-          "line": 39
+          "line": 39,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 35,
@@ -29286,35 +30000,40 @@
             "useContext",
             "useMemo"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./contexts/viewerContext.js",
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         },
         {
           "source": "./utils/documentLoadingConfig.js",
           "specifiers": [
             "formatBytes"
           ],
-          "line": 24
+          "line": 24,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -29998,6 +30717,7 @@
             "ViewerContext"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
         {
@@ -30006,6 +30726,7 @@
             "formatBytes"
           ],
           "line": 24,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         }
       ],
@@ -30021,21 +30742,24 @@
             "useContext",
             "useMemo"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "prop-types",
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "react-i18next",
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -30882,14 +31606,16 @@
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "./memoryProfile.js",
           "specifiers": [
             "getRuntimeMemoryProfile"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -31846,6 +32572,7 @@
             "getRuntimeConfig"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -31854,6 +32581,7 @@
             "getRuntimeMemoryProfile"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/utils/memoryProfile.js"
         }
       ],
@@ -33002,7 +33730,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -33278,6 +34007,7 @@
             "logger"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -33535,21 +34265,24 @@
             "decodeUTIFImage",
             "toRGBA8"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
@@ -33557,28 +34290,32 @@
             "getDocumentLoadingConfig",
             "resolvePdfRenderConfigForPageCount"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "./pageAssetWorkerPool.js",
           "specifiers": [
             "createPageAssetWorkerPool"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "./pdfPageWorkerPool.js",
           "specifiers": [
             "createPdfPageWorkerPool"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "./pdfjsDocumentOptions.js",
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -33792,6 +34529,7 @@
             "resolvePdfRenderConfigForPageCount"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -33800,6 +34538,7 @@
             "createPageAssetWorkerPool"
           ],
           "line": 14,
+          "kind": "static",
           "resolved": "src/utils/pageAssetWorkerPool.js"
         },
         {
@@ -33808,6 +34547,7 @@
             "createPdfPageWorkerPool"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/utils/pdfPageWorkerPool.js"
         },
         {
@@ -33816,6 +34556,7 @@
             "withPdfJsDocumentOptions"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         }
       ],
@@ -33827,21 +34568,24 @@
             "decodeUTIFImage",
             "toRGBA8"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf",
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 2,
@@ -33862,14 +34606,16 @@
           "specifiers": [
             "logger"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
           "specifiers": [
             "getDocumentLoadingConfig"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "./reloadCacheCrypto.js",
@@ -33877,7 +34623,8 @@
             "getReloadCacheAesKey",
             "getReloadCacheAesKeyStorageState"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -34693,6 +35440,7 @@
             "logger"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -34701,6 +35449,7 @@
             "getDocumentLoadingConfig"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -34710,6 +35459,7 @@
             "getReloadCacheAesKeyStorageState"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/reloadCacheCrypto.js"
         }
       ],
@@ -34732,14 +35482,16 @@
           "specifiers": [
             "logger"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "../workers/imageWorker.js?worker",
           "specifiers": [
             "ImageWorker"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -35105,6 +35857,7 @@
             "logger"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -35113,6 +35866,7 @@
             "ImageWorker"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": null
         }
       ],
@@ -35135,14 +35889,16 @@
           "specifiers": [
             "logger"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
           "specifiers": [
             "resolveRecommendedWorkerCount"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "./printPdf.js",
@@ -35150,7 +35906,8 @@
             "collectPrintablePdfSources",
             "createPrintPdfBlob"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         },
         {
           "source": "./pdfWorkerDispatcher.js",
@@ -35158,14 +35915,16 @@
             "planPdfWorkerBatches",
             "resolveAutoPdfWorkerBatchSize"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "./runtimeConfig.js",
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "./supportDiagnostics.js",
@@ -35173,7 +35932,8 @@
             "collectSupportDiagnostics",
             "saveLatestPdfBenchmarkResult"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -36526,6 +37286,7 @@
             "logger"
           ],
           "line": 6,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -36534,6 +37295,7 @@
             "resolveRecommendedWorkerCount"
           ],
           "line": 7,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -36543,6 +37305,7 @@
             "createPrintPdfBlob"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/utils/printPdf.js"
         },
         {
@@ -36552,6 +37315,7 @@
             "resolveAutoPdfWorkerBatchSize"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/utils/pdfWorkerDispatcher.js"
         },
         {
@@ -36560,6 +37324,7 @@
             "getRuntimeConfig"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -36569,6 +37334,7 @@
             "saveLatestPdfBenchmarkResult"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/utils/supportDiagnostics.js"
         }
       ],
@@ -36677,14 +37443,16 @@
           "specifiers": [
             "logger"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
         },
         {
           "source": "../workers/pdfPageWorker.js?worker",
           "specifiers": [
             "PdfPageWorker"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -36809,6 +37577,7 @@
             "logger"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -36817,6 +37586,7 @@
             "PdfPageWorker"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": null
         }
       ],
@@ -36840,14 +37610,16 @@
             "resolveLocalizedValue",
             "resolveOptionLabel"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "./pdfPrintCacheKey.js",
           "specifiers": [
             "isPdfPrintCacheLanguageIgnored"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -37496,6 +38268,7 @@
             "resolveOptionLabel"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -37504,6 +38277,7 @@
             "isPdfPrintCacheLanguageIgnored"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/utils/pdfPrintCacheKey.js"
         }
       ],
@@ -37846,7 +38620,14 @@
           "specifiers": [
             "PdfWorker"
           ],
-          "line": 9
+          "line": 9,
+          "kind": "static"
+        },
+        {
+          "source": "pdf-lib",
+          "specifiers": [],
+          "line": 336,
+          "kind": "dynamic"
         }
       ],
       "exports": [
@@ -38618,10 +39399,18 @@
             "PdfWorker"
           ],
           "line": 9,
+          "kind": "static",
           "resolved": null
         }
       ],
-      "packageImports": [],
+      "packageImports": [
+        {
+          "source": "pdf-lib",
+          "specifiers": [],
+          "line": 336,
+          "kind": "dynamic"
+        }
+      ],
       "incomingLocalImports": 2,
       "importanceScore": 58,
       "summary": "OpenDocViewer - generated PDF worker dispatcher.",
@@ -38783,7 +39572,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "./printDom.js",
@@ -38791,21 +39581,24 @@
             "renderSingleDocument",
             "renderMultiDocument"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "./printTemplate.js",
           "specifiers": [
             "makeBaseTokenContext"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "./printSanitize.js",
           "specifiers": [
             "isSafeImageSrc"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -39436,6 +40229,7 @@
             "logger"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -39445,6 +40239,7 @@
             "renderMultiDocument"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/utils/printDom.js"
         },
         {
@@ -39453,6 +40248,7 @@
             "makeBaseTokenContext"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/utils/printTemplate.js"
         },
         {
@@ -39461,6 +40257,7 @@
             "isSafeImageSrc"
           ],
           "line": 20,
+          "kind": "static",
           "resolved": "src/utils/printSanitize.js"
         }
       ],
@@ -39483,21 +40280,24 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "./printTemplate.js",
@@ -39506,28 +40306,32 @@
             "makePageTokenContext",
             "resolveCopyMarkerText"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "./printSanitize.js",
           "specifiers": [
             "isSafeImageSrc"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "./localizedValue.js",
           "specifiers": [
             "resolveLocalizedValue"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "./printWatermark.js",
           "specifiers": [
             "resolveWatermarkAssetSrc"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -40348,6 +41152,7 @@
             "logger"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -40358,6 +41163,7 @@
             "resolveCopyMarkerText"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/utils/printTemplate.js"
         },
         {
@@ -40366,6 +41172,7 @@
             "isSafeImageSrc"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/utils/printSanitize.js"
         },
         {
@@ -40374,6 +41181,7 @@
             "resolveLocalizedValue"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -40382,6 +41190,7 @@
             "resolveWatermarkAssetSrc"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/utils/printWatermark.js"
         }
       ],
@@ -40391,14 +41200,16 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -40419,7 +41230,8 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -40537,7 +41349,8 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
@@ -40558,21 +41371,24 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
         },
         {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "./printTemplate.js",
@@ -40582,35 +41398,40 @@
             "makePageTokenContext",
             "resolveCopyMarkerText"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "./localizedValue.js",
           "specifiers": [
             "resolveLocalizedValue"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         },
         {
           "source": "./printSanitize.js",
           "specifiers": [
             "isSafeImageSrc"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         },
         {
           "source": "./printWatermark.js",
           "specifiers": [
             "resolveWatermarkAssetSrc"
           ],
-          "line": 19
+          "line": 19,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
           "specifiers": [
             "resolveRecommendedWorkerCount"
           ],
-          "line": 20
+          "line": 20,
+          "kind": "static"
         },
         {
           "source": "./pdfWorkerDispatcher.js",
@@ -40618,7 +41439,14 @@
             "createPdfWithWorkerDispatcher",
             "resolveAutoPdfWorkerBatchSize"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
+        },
+        {
+          "source": "jspdf",
+          "specifiers": [],
+          "line": 1644,
+          "kind": "dynamic"
         }
       ],
       "exports": [
@@ -43960,6 +44788,7 @@
             "logger"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -43971,6 +44800,7 @@
             "resolveCopyMarkerText"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/utils/printTemplate.js"
         },
         {
@@ -43979,6 +44809,7 @@
             "resolveLocalizedValue"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/utils/localizedValue.js"
         },
         {
@@ -43987,6 +44818,7 @@
             "isSafeImageSrc"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/utils/printSanitize.js"
         },
         {
@@ -43995,6 +44827,7 @@
             "resolveWatermarkAssetSrc"
           ],
           "line": 19,
+          "kind": "static",
           "resolved": "src/utils/printWatermark.js"
         },
         {
@@ -44003,6 +44836,7 @@
             "resolveRecommendedWorkerCount"
           ],
           "line": 20,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -44012,6 +44846,7 @@
             "resolveAutoPdfWorkerBatchSize"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/utils/pdfWorkerDispatcher.js"
         }
       ],
@@ -44021,14 +44856,22 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "dompurify",
           "specifiers": [
             "DOMPurify"
           ],
-          "line": 14
+          "line": 14,
+          "kind": "static"
+        },
+        {
+          "source": "jspdf",
+          "specifiers": [],
+          "line": 1644,
+          "kind": "dynamic"
         }
       ],
       "incomingLocalImports": 3,
@@ -45340,14 +46183,16 @@
             "handlePrintRange",
             "handlePrintSequence"
           ],
-          "line": 15
+          "line": 15,
+          "kind": "static"
         },
         {
           "source": "./printParse.js",
           "specifiers": [
             "parsePrintSequence"
           ],
-          "line": 16
+          "line": 16,
+          "kind": "static"
         },
         {
           "source": "./printPdf.js",
@@ -45359,7 +46204,8 @@
             "printPdfBlob",
             "downloadPdfBlob"
           ],
-          "line": 17
+          "line": 17,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -45643,6 +46489,7 @@
             "handlePrintSequence"
           ],
           "line": 15,
+          "kind": "static",
           "resolved": "src/utils/printCore.js"
         },
         {
@@ -45651,6 +46498,7 @@
             "parsePrintSequence"
           ],
           "line": 16,
+          "kind": "static",
           "resolved": "src/utils/printParse.js"
         },
         {
@@ -45664,6 +46512,7 @@
             "downloadPdfBlob"
           ],
           "line": 17,
+          "kind": "static",
           "resolved": "src/utils/printPdf.js"
         }
       ],
@@ -46443,21 +47292,24 @@
           "specifiers": [
             "logger"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "./pageAssetRenderer.js",
           "specifiers": [
             "createPageAssetRenderer"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "./pdfPageWorkerPool.js",
           "specifiers": [
             "createPdfPageWorkerPool"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
@@ -46466,7 +47318,8 @@
             "resolvePdfRenderConfigForPageCount",
             "resolveRecommendedWorkerCount"
           ],
-          "line": 13
+          "line": 13,
+          "kind": "static"
         },
         {
           "source": "./supportDiagnostics.js",
@@ -46474,7 +47327,8 @@
             "collectSupportDiagnostics",
             "saveLatestRenderDecodeBenchmarkResult"
           ],
-          "line": 18
+          "line": 18,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -47740,6 +48594,7 @@
             "logger"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -47748,6 +48603,7 @@
             "createPageAssetRenderer"
           ],
           "line": 11,
+          "kind": "static",
           "resolved": "src/utils/pageAssetRenderer.js"
         },
         {
@@ -47756,6 +48612,7 @@
             "createPdfPageWorkerPool"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/pdfPageWorkerPool.js"
         },
         {
@@ -47766,6 +48623,7 @@
             "resolveRecommendedWorkerCount"
           ],
           "line": 13,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -47775,6 +48633,7 @@
             "saveLatestRenderDecodeBenchmarkResult"
           ],
           "line": 18,
+          "kind": "static",
           "resolved": "src/utils/supportDiagnostics.js"
         }
       ],
@@ -48919,7 +49778,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 21
+          "line": 21,
+          "kind": "static"
         },
         {
           "source": "./documentLoadingConfig.js",
@@ -48927,7 +49787,8 @@
             "getDocumentLoadingConfig",
             "MAX_RELOAD_CACHE_TTL_MS"
           ],
-          "line": 22
+          "line": 22,
+          "kind": "static"
         },
         {
           "source": "./reloadCacheCrypto.js",
@@ -48935,7 +49796,8 @@
             "getReloadCacheAesKey",
             "getReloadCacheAesKeyStorageState"
           ],
-          "line": 23
+          "line": 23,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -49958,6 +50820,7 @@
             "logger"
           ],
           "line": 21,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
         {
@@ -49967,6 +50830,7 @@
             "MAX_RELOAD_CACHE_TTL_MS"
           ],
           "line": 22,
+          "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
         {
@@ -49976,6 +50840,7 @@
             "getReloadCacheAesKeyStorageState"
           ],
           "line": 23,
+          "kind": "static",
           "resolved": "src/utils/reloadCacheCrypto.js"
         }
       ],
@@ -49998,21 +50863,24 @@
           "specifiers": [
             "getRuntimeConfig"
           ],
-          "line": 6
+          "line": 6,
+          "kind": "static"
         },
         {
           "source": "./pdfPrebuildPlan.js",
           "specifiers": [
             "createPdfPrebuildAllPagesVariants"
           ],
-          "line": 7
+          "line": 7,
+          "kind": "static"
         },
         {
           "source": "./pdfPrintCacheKey.js",
           "specifiers": [
             "getPdfPrintCacheKeyOptions"
           ],
-          "line": 8
+          "line": 8,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -50553,6 +51421,7 @@
             "getRuntimeConfig"
           ],
           "line": 6,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         },
         {
@@ -50561,6 +51430,7 @@
             "createPdfPrebuildAllPagesVariants"
           ],
           "line": 7,
+          "kind": "static",
           "resolved": "src/utils/pdfPrebuildPlan.js"
         },
         {
@@ -50569,6 +51439,7 @@
             "getPdfPrintCacheKeyOptions"
           ],
           "line": 8,
+          "kind": "static",
           "resolved": "src/utils/pdfPrintCacheKey.js"
         }
       ],
@@ -50594,7 +51465,8 @@
             "normalizeOptionalCustomFitFactorPercent",
             "normalizePrintDefaultMode"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -51612,6 +52484,7 @@
             "normalizePrintDefaultMode"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
       ],
@@ -51634,7 +52507,8 @@
           "specifiers": [
             "logger"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         }
       ],
       "exports": [
@@ -52186,6 +53060,7 @@
             "logger"
           ],
           "line": 10,
+          "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         }
       ],
@@ -52202,7 +53077,14 @@
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "OpenDocViewer — image / TIFF worker.",
-      "imports": [],
+      "imports": [
+        {
+          "source": "utif2",
+          "specifiers": [],
+          "line": 105,
+          "kind": "dynamic"
+        }
+      ],
       "exports": [],
       "declarations": [
         {
@@ -52347,7 +53229,14 @@
       ],
       "moduleKey": "src/workers",
       "localImports": [],
-      "packageImports": [],
+      "packageImports": [
+        {
+          "source": "utif2",
+          "specifiers": [],
+          "line": 105,
+          "kind": "dynamic"
+        }
+      ],
       "incomingLocalImports": 0,
       "importanceScore": 7,
       "summary": "OpenDocViewer — image / TIFF worker.",
@@ -52366,21 +53255,24 @@
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         },
         {
           "source": "../utils/pdfjsDocumentOptions.js",
           "specifiers": [
             "withPdfJsDocumentOptions"
           ],
-          "line": 12
+          "line": 12,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -52526,6 +53418,7 @@
             "withPdfJsDocumentOptions"
           ],
           "line": 12,
+          "kind": "static",
           "resolved": "src/utils/pdfjsDocumentOptions.js"
         }
       ],
@@ -52535,14 +53428,16 @@
           "specifiers": [
             "pdfjsLib"
           ],
-          "line": 10
+          "line": 10,
+          "kind": "static"
         },
         {
           "source": "pdfjs-dist/legacy/build/pdf.worker.min.mjs?url",
           "specifiers": [
             "pdfWorkerUrl"
           ],
-          "line": 11
+          "line": 11,
+          "kind": "static"
         }
       ],
       "incomingLocalImports": 0,
@@ -52557,7 +53452,14 @@
       "extension": ".js",
       "jsdocBlockCount": 1,
       "sourceSummary": "OpenDocViewer - generated PDF worker.",
-      "imports": [],
+      "imports": [
+        {
+          "source": "jspdf",
+          "specifiers": [],
+          "line": 64,
+          "kind": "dynamic"
+        }
+      ],
       "exports": [],
       "declarations": [
         {
@@ -52775,7 +53677,14 @@
       ],
       "moduleKey": "src/workers",
       "localImports": [],
-      "packageImports": [],
+      "packageImports": [
+        {
+          "source": "jspdf",
+          "specifiers": [],
+          "line": 64,
+          "kind": "dynamic"
+        }
+      ],
       "incomingLocalImports": 0,
       "importanceScore": 8,
       "summary": "OpenDocViewer - generated PDF worker.",

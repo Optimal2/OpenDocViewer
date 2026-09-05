@@ -70,8 +70,8 @@ File count: 10. Line count: 4963. JSDoc symbol count: 117.
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
 - `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
-- `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
+- `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 
 ## src/contexts
 

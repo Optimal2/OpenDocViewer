@@ -50,5 +50,5 @@
 - `src/utils/printTemplate.js`: 3 incoming local imports
 - `src/utils/supportDiagnostics.js`: 3 incoming local imports
 - `src/components/common/StatusLed.jsx`: 2 incoming local imports
-- `src/components/DocumentToolbar/printRangeDialogHelpers.js`: 2 incoming local imports
-- `src/components/DocumentToolbar/SplitToolbarButton.jsx`: 2 incoming local imports
+- `src/components/DocumentLoader/DocumentLoader.js`: 2 incoming local imports
+- `src/components/DocumentThumbnailList.jsx`: 2 incoming local imports

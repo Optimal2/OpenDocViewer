@@ -18,7 +18,7 @@ OpenDocViewer — Consumer Wrapper for Loader \+ Viewer Orchestrates the documen
 
 Exports: `DocumentConsumerWrapper`
 
-Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/DocumentViewer/DocumentViewer.jsx`, `src/components/DocumentLoader/DocumentLoader.js`, `src/components/DocumentThumbnailList.jsx`
 
 Symbols:
 
