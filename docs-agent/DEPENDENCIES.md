@@ -44,7 +44,7 @@ the Used In column lists at most 5 files and states how many more exist;
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
-| <code>eslint</code> | <code>^10.9.1</code> | 0 |
+| <code>eslint</code> | <code>^10.10.0</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
 | <code>eslint-plugin-react-refresh</code> | <code>^0.5.6</code> | 0 |
 | <code>globals</code> | <code>^17.12.0</code> | 0 |
