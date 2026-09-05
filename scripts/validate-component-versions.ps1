@@ -19,11 +19,23 @@ Directory.Build.props are intentionally decoupled from omp-components.json
 component versions: they are statically set to 0.1.0 for all C# projects.
 OMP artifact identity is determined by the component manifest version plus
 SHA-256 content hash, not by assembly version.
+
+.PARAMETER BaseCommit
+Git ref to diff against. Defaults to origin/main (or the empty tree when the
+repository has no commits yet).
+
+.PARAMETER Strict
+Treat a guard that could not run as an error. Without it, Check 15 (shared
+script drift) reports "not verified" as a warning when the canonical
+OpenModulePlatform script cannot be found.
 #>
 [CmdletBinding()]
 param(
     [Parameter(Mandatory = $false)]
-    [string]$BaseCommit = ''
+    [string]$BaseCommit = '',
+
+    [Parameter(Mandatory = $false)]
+    [switch]$Strict
 )
 
 $ErrorActionPreference = 'Stop'
@@ -1349,17 +1361,15 @@ if ($transitiveCheckCount -gt 0 -or $transitiveErrorCount -gt 0) {
 # the same thing in every validator's output.
 $check15OmpRoot = $env:OpenModulePlatformRoot
 if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
-    $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot '..\OpenModulePlatform'))
+    # Built from separate segments (nested Join-Path, because Windows
+    # PowerShell 5.1 has no multi-segment Join-Path) so the fallback resolves
+    # under PowerShell Core on Linux/macOS as well as on Windows.
+    $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path (Join-Path $repositoryRoot '..') 'OpenModulePlatform'))
 }
-# This validator has no -Strict parameter (it had no Check 14 wiring to
-# introduce one). Read it defensively rather than assuming: under
-# Set-StrictMode, referencing a variable that was never set is a terminating
-# error, and a guard that kills the validator is worse than no guard.
-$check15Strict = $false
-if (Get-Variable -Name 'Strict' -ErrorAction SilentlyContinue) {
-    $check15Strict = [bool](Get-Variable -Name 'Strict' -ValueOnly)
-}
-$check15Script = Join-Path $check15OmpRoot 'scripts\omp\validate-shared-scripts.ps1'
+# Strictness comes from this script's own -Strict switch (declared in the
+# param block), never from an ambient variable in the caller's scope.
+$check15Strict = [bool]$Strict
+$check15Script = Join-Path $check15OmpRoot (Join-Path 'scripts' (Join-Path 'omp' 'validate-shared-scripts.ps1'))
 if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
     # validate-shared-scripts.ps1 ends every path with an explicit exit code,
     # but $LASTEXITCODE is process-wide and the git calls above already wrote

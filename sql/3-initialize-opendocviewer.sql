@@ -227,7 +227,12 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               -- ArtifactId is owned by artifact auto-apply and is never set from here (ownership model).
+               -- ArtifactId is owned by artifact auto-apply and is never overwritten from here (ownership model).
+               -- source.ArtifactId is always NULL, so this keeps the existing pointer; the
+               -- COALESCE(target., source.) form is the one Check 11 in
+               -- scripts/validate-component-versions.ps1 accepts, so the intent is enforced in
+               -- SQL rather than only documented here.
+               ArtifactId = COALESCE(target.ArtifactId, source.ArtifactId),
                IsEnabled = source.IsEnabled,
                IsAllowed = source.IsAllowed,
                DesiredState = source.DesiredState,
@@ -268,7 +273,12 @@ WHEN MATCHED THEN
                PublicUrl = source.PublicUrl,
                InstallPath = source.InstallPath,
                InstallationName = source.InstallationName,
-               -- DesiredArtifactId is owned by artifact auto-apply and is never set from here (ownership model).
+               -- DesiredArtifactId is owned by artifact auto-apply and is never overwritten from here (ownership model).
+               -- source.DesiredArtifactId is always NULL, so this keeps the existing pointer; the
+               -- COALESCE(target., source.) form is the one Check 11 in
+               -- scripts/validate-component-versions.ps1 accepts, so the intent is enforced in
+               -- SQL rather than only documented here.
+               DesiredArtifactId = COALESCE(target.DesiredArtifactId, source.DesiredArtifactId),
                DesiredState = source.DesiredState,
                SortOrder = source.SortOrder,
                IsEnabled = source.IsEnabled,
