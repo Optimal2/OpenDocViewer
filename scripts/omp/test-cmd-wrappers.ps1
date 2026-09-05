@@ -1063,7 +1063,10 @@ function Add-TaskOutputOrDiagnostic {
     synchronization context is required for their completion.
     #>
     param(
-        [Parameter(Mandatory = $true)][System.Collections.Generic.List[string]]$Output,
+        # AllowEmptyCollection: the success path hands over a still-empty list, and a
+        # mandatory parameter rejects an empty collection on every host, which turned
+        # every completed taskkill.exe run into the execution-exception sentinel.
+        [Parameter(Mandatory = $true)][AllowEmptyCollection()][System.Collections.Generic.List[string]]$Output,
         [Parameter(Mandatory = $true)][object]$Task,
         [Parameter(Mandatory = $true)][string]$StreamName
     )
@@ -1139,12 +1142,15 @@ function Invoke-TaskKillTree {
     $startInfo.CreateNoWindow = $true
     $startInfo.RedirectStandardOutput = $true
     $startInfo.RedirectStandardError = $true
-    # Add arguments one by one: ProcessStartInfo.ArgumentList is not guaranteed
-    # to expose AddRange across the Windows PowerShell/.NET versions we support.
+    # ProcessStartInfo.ArgumentList does not exist on .NET Framework 4.8, so under
+    # Windows PowerShell 5.1 adding to it throws before taskkill.exe ever
+    # starts, the catch below returns the execution-exception sentinel and only the
+    # wrapper cmd.exe gets killed directly (the process tree survives). The switches
+    # are constants and the PID is validated integer text, so a plain space-join is a
+    # correctly formed command line on every supported host, in the same order as the
+    # diagnostic command text.
     $taskKillArguments = @($TaskKillProcessIdSwitch, $processIdArgument, $TaskKillTerminateTreeSwitch, $TaskKillForceSwitch)
-    foreach ($argument in $taskKillArguments) {
-        $startInfo.ArgumentList.Add($argument)
-    }
+    $startInfo.Arguments = $taskKillArguments -join ' '
 
     $taskKillProcess = $null
     try {
