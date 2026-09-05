@@ -2,7 +2,8 @@
 
 This file combines package.json declarations with observed source imports.
 Import counts include static `import` declarations and constant-specifier dynamic `import()` calls;
-the Used In column lists at most 5 files and states how many more exist.
+the Used In column lists at most 5 files and states how many more exist;
+— means no import of the package was observed at all.
 
 ## Runtime Dependencies
 

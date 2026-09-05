@@ -239,7 +239,9 @@ WHEN MATCHED THEN
                SortOrder = source.SortOrder,
                UpdatedUtc = SYSUTCDATETIME()
 WHEN NOT MATCHED THEN
-    INSERT(AppInstanceId, ModuleInstanceId, HostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, IsEnabled, IsAllowed, DesiredState, SortOrder)
+    -- Do NOT add ArtifactId to this column list: the new row must start with ArtifactId NULL
+    -- so that artifact auto-apply, which owns the pointer, is the only writer of it (ownership model).
+    INSERT(AppInstanceId, ModuleInstanceId, HostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, IsEnabled, IsAllowed, DesiredState, SortOrder) -- ArtifactId intentionally absent
     VALUES(NEWID(), source.ModuleInstanceId, source.HostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.IsEnabled, source.IsAllowed, source.DesiredState, source.SortOrder);
 
 MERGE omp.InstanceTemplateAppInstances AS target
@@ -284,6 +286,8 @@ WHEN MATCHED THEN
                IsEnabled = source.IsEnabled,
                UpdatedUtc = SYSUTCDATETIME()
 WHEN NOT MATCHED THEN
-    INSERT(InstanceTemplateModuleInstanceId, InstanceTemplateHostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, DesiredState, SortOrder, IsEnabled)
+    -- Do NOT add DesiredArtifactId to this column list: the new row must start with DesiredArtifactId NULL
+    -- so that artifact auto-apply, which owns the pointer, is the only writer of it (ownership model).
+    INSERT(InstanceTemplateModuleInstanceId, InstanceTemplateHostId, AppId, AppInstanceKey, DisplayName, Description, RoutePath, PublicUrl, InstallPath, InstallationName, DesiredState, SortOrder, IsEnabled) -- DesiredArtifactId intentionally absent
     VALUES(source.InstanceTemplateModuleInstanceId, source.InstanceTemplateHostId, source.AppId, source.AppInstanceKey, source.DisplayName, source.Description, source.RoutePath, source.PublicUrl, source.InstallPath, source.InstallationName, source.DesiredState, source.SortOrder, source.IsEnabled);
 GO
