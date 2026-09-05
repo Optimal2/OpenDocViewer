@@ -14,9 +14,16 @@
          then fail if docs-agent differs from the committed output
 
     Exit code 0 if all steps pass, 1 if any fail.
+
+.PARAMETER BaseCommit
+    Git ref the version validator diffs against. Defaults to origin/main;
+    pass another ref when the default branch is named differently or the
+    remote-tracking ref is stale and you want to compare against a fresh one.
 #>
 [CmdletBinding()]
-param()
+param(
+    [string]$BaseCommit = 'origin/main'
+)
 
 Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
@@ -51,10 +58,14 @@ try {
     try {
         Write-Host "[1/3] Building web application: npm run build" -ForegroundColor Cyan
         Push-Location $RepoRoot
-        & npm run build
-        Pop-Location
-        if ($LASTEXITCODE -eq 0) {
-            $buildPassed = $true
+        try {
+            & npm run build
+            if ($LASTEXITCODE -eq 0) {
+                $buildPassed = $true
+            }
+        }
+        finally {
+            Pop-Location
         }
     }
     catch {
@@ -72,7 +83,12 @@ try {
         if (-not (Test-Path $Validator)) {
             throw "Validator script not found: $Validator"
         }
-        & $Validator -BaseCommit 'origin/main'
+        # The validator ends with an explicit 'exit 0' / 'exit 1', so
+        # $LASTEXITCODE reflects its verdict rather than that of the last
+        # native git call it made internally. Reset it first so a stale value
+        # from Step 1 can never be mistaken for a validator result.
+        $global:LASTEXITCODE = 0
+        & $Validator -BaseCommit $BaseCommit
         if ($LASTEXITCODE -eq 0) {
             $validatePassed = $true
         }

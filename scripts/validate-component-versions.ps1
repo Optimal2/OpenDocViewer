@@ -163,6 +163,47 @@ function Get-Sha256HexFromBytes {
     }
 }
 
+function Get-NewlineOffsets {
+    # Returns the sorted character offsets of every LF in $Text, computed once
+    # per file so line numbers for many regex matches do not require re-scanning
+    # the file prefix for each match (quadratic on large seed scripts).
+    param([Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text)
+
+    $offsets = [System.Collections.Generic.List[int]]::new()
+    $index = $Text.IndexOf("`n")
+    while ($index -ge 0) {
+        $offsets.Add($index)
+        $index = $Text.IndexOf("`n", $index + 1)
+    }
+
+    # The unary comma keeps an empty array from unrolling to $null on the
+    # pipeline (a single-line file has no LF at all).
+    return ,$offsets.ToArray()
+}
+
+function Get-LineNumberAtIndex {
+    # 1-based line number of character position $Index, given the offsets from
+    # Get-NewlineOffsets. The line number is one more than the count of LFs
+    # strictly before $Index; BinarySearch yields that count directly, either
+    # as the found index (an LF exactly at $Index still precedes nothing on its
+    # own line) or as the complement of the insertion point.
+    param(
+        [Parameter(Mandatory = $true)][AllowNull()][AllowEmptyCollection()][int[]]$NewlineOffsets,
+        [Parameter(Mandatory = $true)][int]$Index
+    )
+
+    if ($null -eq $NewlineOffsets -or $NewlineOffsets.Length -eq 0) {
+        return 1
+    }
+
+    $position = [System.Array]::BinarySearch($NewlineOffsets, $Index)
+    if ($position -lt 0) {
+        $position = -bnot $position
+    }
+
+    return $position + 1
+}
+
 function Test-BytesEqual {
     param(
         [Parameter(Mandatory = $false)][AllowNull()][byte[]]$A,
@@ -1061,6 +1102,11 @@ foreach ($entry in $ownedSeedSqlEntries) {
     # -----------------------------------------------------------------------
     $seedGuardFilesChecked++
 
+    # Newline offsets are collected once per file so each match below can map
+    # its index to a line number with a binary search instead of re-scanning
+    # the file prefix per match.
+    $seedNewlineOffsets = Get-NewlineOffsets -Text $seedText
+
     foreach ($match in [System.Text.RegularExpressions.Regex]::Matches($seedText, $seedDirectAssignPattern)) {
         $column = $match.Groups[1].Value
         $sourceColumn = $match.Groups[2].Value
@@ -1068,13 +1114,13 @@ foreach ($entry in $ownedSeedSqlEntries) {
             continue
         }
 
-        $lineNumber = @([System.Text.RegularExpressions.Regex]::Matches($seedText.Substring(0, $match.Index), "`n")).Count + 1
+        $lineNumber = Get-LineNumberAtIndex -NewlineOffsets $seedNewlineOffsets -Index $match.Index
         Add-ValidationError -Errors $errors -Message "Owned seed SQL '$sqlPath' (module '$moduleKey') assigns '$column = source.$sourceColumn' unconditionally (line $lineNumber). A re-seed can overwrite a correct non-null artifact pointer and cause a runtime outage. Preserve the existing pointer, e.g. '$column = COALESCE(target.$column, source.$sourceColumn)'."
     }
 
     foreach ($match in [System.Text.RegularExpressions.Regex]::Matches($seedText, $seedReversedCoalescePattern)) {
         $column = $match.Groups[1].Value
-        $lineNumber = @([System.Text.RegularExpressions.Regex]::Matches($seedText.Substring(0, $match.Index), "`n")).Count + 1
+        $lineNumber = Get-LineNumberAtIndex -NewlineOffsets $seedNewlineOffsets -Index $match.Index
         Add-ValidationError -Errors $errors -Message "Owned seed SQL '$sqlPath' (module '$moduleKey') guards '$column' with COALESCE(source.$column, ...) (line $lineNumber), which prefers the source value and does not preserve an existing non-null pointer. Use '$column = COALESCE(target.$column, source.$column)'."
     }
 
@@ -1294,6 +1340,13 @@ if ($transitiveCheckCount -gt 0 -or $transitiveErrorCount -gt 0) {
 # typically mid-incident. Same neighbour resolution and Strict semantics as
 # Check 14; the guard is CALLED from the platform repository rather than copied
 # here, because a copied guard would be subject to the drift it detects.
+#
+# Numbering note: this file has no Check 13 or Check 14. Check 14 (the
+# cross-repository shared project cascade) lives in the validators of the
+# consumer repositories that reference OpenModulePlatform's shared projects;
+# OpenDocViewer references none, so it is not implemented here. The numbers are
+# kept aligned across the OMP-compatible repositories so that "Check N" means
+# the same thing in every validator's output.
 $check15OmpRoot = $env:OpenModulePlatformRoot
 if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
     $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path $repositoryRoot '..\OpenModulePlatform'))
@@ -1308,8 +1361,15 @@ if (Get-Variable -Name 'Strict' -ErrorAction SilentlyContinue) {
 }
 $check15Script = Join-Path $check15OmpRoot 'scripts\omp\validate-shared-scripts.ps1'
 if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
+    # validate-shared-scripts.ps1 ends every path with an explicit exit code,
+    # but $LASTEXITCODE is process-wide and the git calls above already wrote
+    # to it. Reset it before the call so a stale value can never pass for the
+    # guard's verdict, and also honour $? so a guard that terminated without
+    # reaching its exit statement counts as a failure rather than a pass.
+    $global:LASTEXITCODE = 0
     & $check15Script -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15OmpRoot -Strict:$check15Strict
-    if ($LASTEXITCODE -ne 0) {
+    $check15Completed = $?
+    if (-not $check15Completed -or $LASTEXITCODE -ne 0) {
         Add-ValidationError -Errors $errors -Message 'Check 15 (shared script drift) failed; see the Check 15 lines above.'
     }
 }

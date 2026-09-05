@@ -37,7 +37,9 @@ ORDER BY CreatedUtc, InstanceId;
 
 -- Error numbers: the OpenDocViewer seed scripts use the 51000-51999 range (user-defined
 -- THROW numbers start at 50001). 51013-51018 belong to this script; each guard has its
--- own number so a failing installation log points at exactly one lookup.
+-- own number so a failing installation log points at exactly one lookup, and the
+-- numbers ascend in the order the guards appear so a number can be traced to its
+-- position in the file.
 IF @InstanceId IS NULL
 BEGIN
     THROW 51013, 'Default OMP instance not found. Run the core SQL setup/init scripts first.', 1;
@@ -79,7 +81,7 @@ WHERE ModuleKey = @OpenDocViewerKey
 
 IF @OpenDocViewerModuleId IS NULL
 BEGIN
-    THROW 51017, 'The OpenDocViewer module row was not found after the MERGE above; the statements that follow would write a NULL module id.', 1;
+    THROW 51015, 'The OpenDocViewer module row was not found after the MERGE above; the statements that follow would write a NULL module id.', 1;
 END
 
 MERGE omp.Apps AS target
@@ -113,7 +115,7 @@ WHERE ModuleId = @OpenDocViewerModuleId
 
 IF @OpenDocViewerAppId IS NULL
 BEGIN
-    THROW 51018, 'The OpenDocViewer app row was not found after the MERGE above; the statements that follow would write a NULL app id.', 1;
+    THROW 51016, 'The OpenDocViewer app row was not found after the MERGE above; the statements that follow would write a NULL app id.', 1;
 END
 
 -- The seed never writes to omp.Artifacts: artifact rows are owned by package
@@ -156,7 +158,7 @@ WHERE InstanceId = @InstanceId
 
 IF @OpenDocViewerModuleInstanceId IS NULL
 BEGIN
-    THROW 51015, 'The OpenDocViewer module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
+    THROW 51017, 'The OpenDocViewer module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
 END
 
 MERGE omp.InstanceTemplateModuleInstances AS target
@@ -190,7 +192,7 @@ WHERE InstanceTemplateId = @InstanceTemplateId
 
 IF @OpenDocViewerTemplateModuleInstanceId IS NULL
 BEGIN
-    THROW 51016, 'The OpenDocViewer template module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
+    THROW 51018, 'The OpenDocViewer template module instance was not found after the MERGE above; the statements that follow would write NULL ids.', 1;
 END
 
 MERGE omp.AppInstances AS target
