@@ -40,8 +40,11 @@ fi
 unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
 
 echo "Running local CI gate before push..."
-"$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -Command "& '$ci_script'"
-exit_code=$?
+# Under `set -e` a plain call would abort the hook the moment the gate returns
+# non-zero, before the failure banner below could be printed. Capturing the
+# exit code on the `||` branch keeps the failure path reachable.
+exit_code=0
+"$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -Command "& '$ci_script'" || exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
     echo ""

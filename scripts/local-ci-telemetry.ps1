@@ -5,7 +5,7 @@
     and a per-repo JSONL writer.
 
 .DESCRIPTION
-    Campaign local-ci-telemetri-30-dagarstrend. Every repository's
+    Campaign local-ci-telemetry-30-day-trend. Every repository's
     scripts/local-ci.ps1 appends one compact schema_version=1 JSON line per run
     to %APPDATA%\@private\ai-orchestrator\local-ci-telemetry\<repo>.jsonl.
     One file per repo, so writers in different repositories never collide; the
@@ -23,6 +23,10 @@
     Records contain no raw stdout, no absolute paths and no machine or user
     identity: only repo name, commit SHA, shell version, statuses and counters.
 #>
+
+# One telemetry record is one JSON line of at most this many UTF-8 bytes; the
+# DEV reader relies on the line contract, so the writer enforces it here.
+$MaxTelemetryRecordBytes = 4096
 
 function Get-LocalCiTrxCounters {
     [CmdletBinding()]
@@ -193,13 +197,13 @@ function Write-LocalCiTelemetry {
     }
     $json = ConvertTo-Json -InputObject $record -Compress -Depth 8
     $utf8NoBom = New-Object System.Text.UTF8Encoding($false)
-    if ($utf8NoBom.GetByteCount($json) -gt 4096) {
-        # Compact records only: drop the per-suite detail first - the 4 KiB
-        # line contract outranks suite counters.
+    if ($utf8NoBom.GetByteCount($json) -gt $MaxTelemetryRecordBytes) {
+        # Compact records only: drop the per-suite detail first - the line
+        # size contract outranks suite counters.
         $record.suites = @()
         $json = ConvertTo-Json -InputObject $record -Compress -Depth 8
-        if ($utf8NoBom.GetByteCount($json) -gt 4096) {
-            throw 'Telemetry record exceeds 4096 UTF-8 bytes even without per-suite detail.'
+        if ($utf8NoBom.GetByteCount($json) -gt $MaxTelemetryRecordBytes) {
+            throw "Telemetry record exceeds $MaxTelemetryRecordBytes UTF-8 bytes even without per-suite detail."
         }
     }
     # Open, write one whole UTF-8 line, close. One file per repo, so no
