@@ -9,7 +9,7 @@
 
     Steps:
       1. Build the web application: npm run build
-      2. Validate version lockstep: scripts/validate-component-versions.ps1
+      2. Validate version lockstep: scripts/omp/validate-component-versions.ps1
       3. Verify generated agent documentation is fresh: npm run doc:agent,
          then fail if docs-agent differs from the committed output
 
@@ -29,7 +29,7 @@ Set-StrictMode -Version Latest
 $ErrorActionPreference = 'Stop'
 
 $RepoRoot = Split-Path -Parent $PSScriptRoot
-$Validator = Join-Path (Join-Path $RepoRoot 'scripts') 'validate-component-versions.ps1'
+$Validator = Join-Path (Join-Path (Join-Path $RepoRoot 'scripts') 'omp') 'validate-component-versions.ps1'
 
 # --- Local-ci telemetry (best-effort; never changes the gate's exit code) ----
 # One compact JSONL line per run under
