@@ -31,6 +31,28 @@ $ErrorActionPreference = 'Stop'
 $RepoRoot = Split-Path -Parent $PSScriptRoot
 $Validator = Join-Path (Join-Path $RepoRoot 'scripts') 'validate-component-versions.ps1'
 
+# --- Local-ci telemetry (best-effort; never changes the gate's exit code) ----
+# One compact JSONL line per run under
+# %APPDATA%\@private\ai-orchestrator\local-ci-telemetry\OpenDocViewer.jsonl.
+# This gate has NO test step (npm build only): test_count is explicitly null
+# with a reason, never zero.
+$localCiTimer = [System.Diagnostics.Stopwatch]::StartNew()
+$buildDurationMs = $null
+$telemetryTestStatus = 'not-run'
+$telemetrySkipReason = 'no test step in local CI (npm build only)'
+$telemetryHelperPath = Join-Path (Join-Path $RepoRoot 'scripts') 'local-ci-telemetry.ps1'
+if (Test-Path -LiteralPath $telemetryHelperPath -PathType Leaf) {
+    try {
+        . $telemetryHelperPath
+    }
+    catch {
+        Write-Warning "Local-ci telemetry helper for OpenDocViewer could not be loaded: $($_.Exception.Message)"
+    }
+}
+else {
+    Write-Warning 'Local-ci telemetry helper not found (scripts\local-ci-telemetry.ps1); this run writes no telemetry.'
+}
+
 $overallSuccess = $true
 
 function Write-StepResult {
@@ -55,6 +77,7 @@ try {
 
     # --- Step 1: Build web app -------------------------------------------------
     $buildPassed = $false
+    $buildStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     try {
         Write-Host "[1/3] Building web application: npm run build" -ForegroundColor Cyan
         Push-Location $RepoRoot
@@ -72,6 +95,8 @@ try {
         Write-Host "Build step threw an exception: $_" -ForegroundColor Red
         $buildPassed = $false
     }
+    $buildStopwatch.Stop()
+    $buildDurationMs = $buildStopwatch.ElapsedMilliseconds
     Write-StepResult -StepName "Build" -Passed $buildPassed
     if (-not $buildPassed) { $overallSuccess = $false }
     Write-Host ""
@@ -133,6 +158,24 @@ try {
     Write-StepResult -StepName "Agent documentation freshness" -Passed $agentDocsPassed
     if (-not $agentDocsPassed) { $overallSuccess = $false }
     Write-Host ""
+
+    # --- Telemetry: one compact JSONL line per run. Written AFTER the gate
+    # result is decided, in its own try/catch: a failure here is a visible
+    # Write-Warning and can never change the exit code. ---
+    $localCiTimer.Stop()
+    $telemetryStatus = if ($overallSuccess) { 'pass' } else { 'fail' }
+    try {
+        if (Get-Command Write-LocalCiTelemetry -ErrorAction SilentlyContinue) {
+            Write-LocalCiTelemetry -Repo 'OpenDocViewer' -RepositoryRoot $RepoRoot -Status $telemetryStatus -DurationMs $localCiTimer.ElapsedMilliseconds -BuildDurationMs $buildDurationMs -TestStatus $telemetryTestStatus -TestSkipReason $telemetrySkipReason
+        }
+    }
+    catch {
+        $telemetryTarget = '(unknown: APPDATA not set)'
+        if (-not [string]::IsNullOrWhiteSpace($env:APPDATA)) {
+            $telemetryTarget = Join-Path $env:APPDATA '@private\ai-orchestrator\local-ci-telemetry\OpenDocViewer.jsonl'
+        }
+        Write-Warning "Local-ci telemetry failed for OpenDocViewer (target: $telemetryTarget): $($_.Exception.Message)"
+    }
 
     # --- Summary ---------------------------------------------------------------
     Write-Host "========================================" -ForegroundColor Cyan
