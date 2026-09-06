@@ -35,7 +35,8 @@ $Validator = Join-Path (Join-Path $RepoRoot 'scripts') 'validate-component-versi
 # One compact JSONL line per run under
 # %APPDATA%\@private\ai-orchestrator\local-ci-telemetry\OpenDocViewer.jsonl.
 # This gate has NO test step (npm build only): test_count is explicitly null
-# with a reason, never zero.
+# with a reason, never zero. No TRX file is ever produced or parsed here, so
+# the helper's TRX counter path and the 'unreadable-trx' status do not apply.
 $localCiTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $buildDurationMs = $null
 $telemetryTestStatus = 'not-run'
@@ -82,6 +83,10 @@ try {
         Write-Host "[1/3] Building web application: npm run build" -ForegroundColor Cyan
         Push-Location $RepoRoot
         try {
+            # npm.cmd sets $LASTEXITCODE, but reset it first so a stale value
+            # from an earlier native call can never be mistaken for the build
+            # verdict if npm itself fails to launch.
+            $global:LASTEXITCODE = 0
             & npm run build
             if ($LASTEXITCODE -eq 0) {
                 $buildPassed = $true
@@ -166,6 +171,8 @@ try {
     $telemetryStatus = if ($overallSuccess) { 'pass' } else { 'fail' }
     try {
         if (Get-Command Write-LocalCiTelemetry -ErrorAction SilentlyContinue) {
+            # -TestCount is deliberately omitted: it stays $null (unmeasured),
+            # never 0, because this gate runs no tests.
             Write-LocalCiTelemetry -Repo 'OpenDocViewer' -RepositoryRoot $RepoRoot -Status $telemetryStatus -DurationMs $localCiTimer.ElapsedMilliseconds -BuildDurationMs $buildDurationMs -TestStatus $telemetryTestStatus -TestSkipReason $telemetrySkipReason
         }
     }

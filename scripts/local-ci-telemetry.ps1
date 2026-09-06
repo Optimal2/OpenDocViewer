@@ -16,8 +16,9 @@
     Telemetry is best-effort but NEVER silent and NEVER gate-breaking: callers
     dot-source this file in a guarded way, invoke Write-LocalCiTelemetry inside
     their own try/catch AFTER the gate result is decided, Write-Warning on
-    failure, and keep the run's exit code untouched. A test step that did not
-    run records test_count=null with an explicit reason - never zero.
+    failure, and keep the run's exit code untouched. A test count that was not
+    measured - no test step, no TRX file, or a malformed/unreadable TRX file -
+    is recorded as test_count=null with an explicit reason - never zero.
 
     Records contain no raw stdout, no absolute paths and no machine or user
     identity: only repo name, commit SHA, shell version, statuses and counters.
@@ -37,7 +38,15 @@ function Get-LocalCiTrxCounters {
     # as the shared zero-execution gate: exactly one Counters node under
     # ResultSummary at the document root). Returns $null when no .trx file
     # exists at all - the caller then records an explicit null, never a zero.
-    # Malformed/truncated files are counted, never blended into the sums.
+    # Malformed/truncated files are counted in malformed_files and NEVER blended
+    # into the sums: every counter of a file is parsed into a local table first
+    # and the file is added to the suite atomically, or not at all. A file whose
+    # Counters node lacks total/executed, or carries a non-integer counter, is
+    # malformed. A suite with malformed_files > 0 is therefore only partially
+    # measured: the caller must record test_count = null with a reason for it,
+    # never the partial sum and never zero.
+    $requiredAttributes = @('total', 'executed')
+    $counterAttributes = @('total', 'executed', 'passed', 'failed', 'notExecuted')
     $suite = [ordered]@{
         name            = $SuiteName
         total           = 0
@@ -66,10 +75,32 @@ function Get-LocalCiTrxCounters {
                 $suite.malformed_files++
                 continue
             }
-            foreach ($attribute in @('total', 'executed', 'passed', 'failed', 'notExecuted')) {
-                if ($counters.HasAttribute($attribute)) {
-                    $suite[$attribute] = [int]$suite[$attribute] + [int]$counters.GetAttribute($attribute)
+            # Parse first, add later: a counter that fails to parse half-way
+            # through the loop must not leave the counters before it in the sums.
+            $fileCounters = @{}
+            $fileIsReadable = $true
+            foreach ($attribute in $counterAttributes) {
+                if (-not $counters.HasAttribute($attribute)) {
+                    if ($requiredAttributes -contains $attribute) {
+                        $fileIsReadable = $false
+                        break
+                    }
+                    $fileCounters[$attribute] = 0
+                    continue
                 }
+                $parsed = 0
+                if (-not [int]::TryParse([string]$counters.GetAttribute($attribute), [ref]$parsed)) {
+                    $fileIsReadable = $false
+                    break
+                }
+                $fileCounters[$attribute] = $parsed
+            }
+            if (-not $fileIsReadable) {
+                $suite.malformed_files++
+                continue
+            }
+            foreach ($attribute in $counterAttributes) {
+                $suite[$attribute] = [int]$suite[$attribute] + [int]$fileCounters[$attribute]
             }
         }
         catch {
@@ -100,14 +131,20 @@ function Write-LocalCiTelemetry {
         [Parameter(Mandatory = $false)]
         [Nullable[long]]$BuildDurationMs,
 
+        # 'unreadable-trx': the test step ran, but at least one TRX file it
+        # produced was malformed or unreadable, so the count is unmeasured.
         [Parameter(Mandatory = $false)]
-        [ValidateSet('passed', 'failed', 'not-run', 'skipped')]
+        [ValidateSet('passed', 'failed', 'not-run', 'skipped', 'unreadable-trx')]
         [string]$TestStatus = 'not-run',
 
-        # $null when no test step ran - never 0.
+        # $null whenever the count was not measured: no test step ran, no TRX
+        # file was written, or a TRX file was malformed/unreadable - never 0.
+        # 0 is only ever the value a readable TRX file actually reports.
         [Parameter(Mandatory = $false)]
         [Nullable[int]]$TestCount,
 
+        # The explicit reason whenever TestCount is $null (skip, no TRX,
+        # unreadable TRX, ...); empty when the count was measured.
         [Parameter(Mandatory = $false)]
         [string]$TestSkipReason = '',
 
@@ -117,6 +154,10 @@ function Write-LocalCiTelemetry {
 
     # Throws on failure; the caller's try/catch turns that into a visible
     # Write-Warning while the gate's exit code stays untouched.
+    if ($TestStatus -eq 'unreadable-trx' -and $null -ne $TestCount) {
+        # "null, never zero": an unreadable TRX must not be recorded as a count.
+        throw "TestCount must be null when TestStatus is 'unreadable-trx' (got $TestCount)."
+    }
     $appData = $env:APPDATA
     if ([string]::IsNullOrWhiteSpace($appData)) {
         throw 'APPDATA is not set; the telemetry directory cannot be resolved.'
