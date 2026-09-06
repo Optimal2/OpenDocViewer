@@ -109,6 +109,7 @@ function Get-LocalCiTrxCounters {
             }
         }
         catch {
+            Write-Verbose "Could not read TRX counters: $($_.Exception.Message)"
             $suite.malformed_files++
         }
     }
@@ -159,6 +160,9 @@ function Write-LocalCiTelemetry {
 
     # Throws on failure; the caller's try/catch turns that into a visible
     # Write-Warning while the gate's exit code stays untouched.
+    if ($Repo -notmatch '\A[A-Za-z0-9_.-]+\z') {
+        throw 'Repo must contain only ASCII letters, digits, underscores, dots or hyphens.'
+    }
     if ($TestStatus -eq 'unreadable-trx' -and $null -ne $TestCount) {
         # "null, never zero": an unreadable TRX must not be recorded as a count.
         throw "TestCount must be null when TestStatus is 'unreadable-trx' (got $TestCount)."
@@ -168,8 +172,11 @@ function Write-LocalCiTelemetry {
         throw 'APPDATA is not set; the telemetry directory cannot be resolved.'
     }
     $telemetryDirectory = Join-Path $appData '@private\ai-orchestrator\local-ci-telemetry'
-    if (-not (Test-Path -LiteralPath $telemetryDirectory -PathType Container)) {
-        $null = New-Item -ItemType Directory -Path $telemetryDirectory -Force
+    try {
+        $null = New-Item -ItemType Directory -Path $telemetryDirectory -Force -ErrorAction Stop
+    }
+    catch {
+        throw "Could not create telemetry directory: $($_.Exception.Message)"
     }
     $targetFile = Join-Path $telemetryDirectory ($Repo + '.jsonl')
 
@@ -180,7 +187,9 @@ function Write-LocalCiTelemetry {
             $commitSha = ([string]$sha).Trim()
         }
     }
-    catch { <# no git or no repo: 'unknown' is the honest value #> }
+    catch {
+        Write-Verbose "Could not read commit SHA; recording 'unknown': $($_.Exception.Message)"
+    }
 
     $record = [ordered]@{
         schema_version    = 1
@@ -207,7 +216,25 @@ function Write-LocalCiTelemetry {
             throw "Telemetry record exceeds $MaxTelemetryRecordBytes UTF-8 bytes even without per-suite detail."
         }
     }
-    # Open, write one whole UTF-8 line, close. One file per repo, so no
-    # cross-repository writer can ever interleave inside this file.
-    [System.IO.File]::AppendAllText($targetFile, $json + "`n", $utf8NoBom)
+    # Concurrent runs of the same repo must append whole records exclusively.
+    # Retry only opening the file: retrying a partial write could duplicate data.
+    $stream = $null
+    for ($attempt = 0; $attempt -lt 5; $attempt++) {
+        try {
+            $stream = [System.IO.File]::Open($targetFile, [System.IO.FileMode]::Append,
+                [System.IO.FileAccess]::Write, [System.IO.FileShare]::None)
+            break
+        }
+        catch [System.IO.IOException] {
+            if ($attempt -eq 4) { throw }
+            Start-Sleep -Milliseconds 50
+        }
+    }
+    try {
+        $bytes = $utf8NoBom.GetBytes($json + "`n")
+        $stream.Write($bytes, 0, $bytes.Length)
+    }
+    finally {
+        if ($null -ne $stream) { $stream.Dispose() }
+    }
 }

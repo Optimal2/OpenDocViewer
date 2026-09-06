@@ -43,8 +43,13 @@ echo "Running local CI gate before push..."
 # Under `set -e` a plain call would abort the hook the moment the gate returns
 # non-zero, before the failure banner below could be printed. Capturing the
 # exit code on the `||` branch keeps the failure path reachable.
+# The script path is passed with -File rather than interpolated into a
+# -Command string: -File takes the path verbatim as one argument, so a
+# checkout under a directory whose name contains a quote cannot break out of
+# the command text, and the gate's own `exit` code is still what PowerShell
+# returns.
 exit_code=0
-"$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -Command "& '$ci_script'" || exit_code=$?
+"$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -File "$ci_script" || exit_code=$?
 
 if [ $exit_code -ne 0 ]; then
     echo ""
