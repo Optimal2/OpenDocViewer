@@ -5,7 +5,8 @@
     and a per-repo JSONL writer.
 
 .DESCRIPTION
-    Campaign local-ci-telemetry-30-day-trend. Every repository's
+    Campaign local-ci-telemetri-30-dagarstrend (the campaign identifier is
+    a Swedish proper name; do not translate it). Every repository's
     scripts/local-ci.ps1 appends one compact schema_version=1 JSON line per run
     to %APPDATA%\@private\ai-orchestrator\local-ci-telemetry\<repo>.jsonl.
     One file per repo, so writers in different repositories never collide; the
