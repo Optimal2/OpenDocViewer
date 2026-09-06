@@ -29,6 +29,16 @@ else
     exit 1
 fi
 
+# Git exports its own location to hooks (GIT_DIR, GIT_INDEX_FILE, ...), and from a linked
+# worktree GIT_DIR is an absolute path. Every nested `git -C <other directory>` in the gate
+# then acts on THIS repository instead: the validator's `git -C <temp> init/commit` self-test
+# can stack a foreign "baseline" commit on top of the worktree's HEAD, and any check that
+# reads a neighbour repository through git resolves against this repository instead.
+# Drop the inherited variables so the gate's child processes discover repositories from
+# their own cwd, as a plain shell would. Same fix as the OpenModulePlatform pre-push hook.
+# repo_root above was resolved from the hook's own location and is unaffected.
+unset GIT_DIR GIT_WORK_TREE GIT_INDEX_FILE GIT_COMMON_DIR GIT_OBJECT_DIRECTORY GIT_PREFIX
+
 echo "Running local CI gate before push..."
 "$POWERSHELL" -NoProfile -ExecutionPolicy RemoteSigned -Command "& '$ci_script'"
 exit_code=$?
