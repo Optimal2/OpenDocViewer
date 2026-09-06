@@ -28,18 +28,23 @@ in the whole set is the two physical copies of `definitionVersion`.
 | --- | --- | --- | --- |
 | Official application/release version | `package.json` (and Git tags, release notes) | The public OpenDocViewer version shown in Help -> About and release notes. | Independent stream. Bumped only by the official release process. |
 | OMP deployable artifact version | `omp-components.json` `repositoryVersion` and component `opendocviewer-web.version` | The version OMP uses to tell deployable artifact packages apart. | Independent stream; may move faster than the release version and need not match it. |
-| Seed `@ArtifactVersion` | `sql/3-initialize-opendocviewer.sql` (the `DECLARE @ArtifactVersion` near the top) | A bootstrap-placeholder default artifact version used only when the seed script inserts fresh rows or backfills NULL values. | Deliberately decoupled from both streams above; it seeds initial rows only. |
+| Artifact pointers (`ArtifactId`, `DesiredArtifactId`) | `omp.AppInstances` / `omp.InstanceTemplateAppInstances` (platform-owned tables) | Which deployable artifact an app instance (or template) currently points at. | Not a version stream of this repository at all. The seed script never writes them (platform rule `OMP-MODULE-SQL-CONFIG-OWNERSHIP`); rows it inserts start with `NULL` and the platform's artifact auto-apply is the only writer. |
 | `definitionVersion` | `omp-components.json` `moduleDefinitions[].definitionVersion` AND `opendocviewer.module-definition.json` | The OMP module-definition version. | ONE logical version stored in TWO physical copies; the copies MUST be equal. Enforced by `scripts/validate-component-versions.ps1` (Check 8). |
 | `minModuleDefinitionVersion` | `omp-components.json` component entry | The minimum module-definition version an artifact package requires. | A floor/constraint (Check 8b), not a copy; it must be at least the current `definitionVersion`. |
 | `compatibleArtifacts` `minVersion`/`maxVersion` | `opendocviewer.module-definition.json` | The range of component artifact versions the module definition accepts. | A range constraint over the component version (Check 10), not a copy. |
 
-Seed `@ArtifactVersion` invariant: the seed script never overwrites an existing
-choice. An existing non-NULL `omp.AppInstances.ArtifactId` or
-`omp.InstanceTemplateAppInstances.DesiredArtifactId` is never changed by the
-seed script; only NULL values (backfilled via `COALESCE(target, source)`) and
-fresh `WHEN NOT MATCHED` rows receive the seed default. This keeps a re-run or
-package import from resetting an already-chosen desired artifact (for example a
-newer deployable artifact) back to the bootstrap placeholder.
+Artifact-pointer invariant: the seed script never writes
+`omp.AppInstances.ArtifactId` or
+`omp.InstanceTemplateAppInstances.DesiredArtifactId` at all. Both `MERGE`
+statements leave the pointer out of `WHEN MATCHED ... UPDATE SET` and out of the
+`WHEN NOT MATCHED ... INSERT` column list, so an existing choice is never
+touched and a fresh row starts with `NULL` until the platform's artifact
+auto-apply fills it. This is the platform ownership rule
+`OMP-MODULE-SQL-CONFIG-OWNERSHIP` (module SQL must not touch the platform's
+configuration layer); the HostAgent import gate and the `ModuleSqlGuard` check in
+the platform's packaging reject a definition whose SQL violates it. Earlier
+versions seeded a bootstrap `@ArtifactVersion` and backfilled `NULL` pointers via
+`COALESCE(target, source)`; that mechanism is gone.
 
 Do not mechanically synchronize the independent streams. The only values that
 must stay equal are the two `definitionVersion` copies.
