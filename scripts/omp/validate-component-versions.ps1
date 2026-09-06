@@ -943,10 +943,15 @@ else {
 # projectPath is the repository root, so "own project source" is narrowed to
 # the inputs of the published artifact - the 'dist' bundle produced by
 # 'npm run build' (scripts/omp/build-repository-objects.ps1). Only the vite
-# entry/config files, the npm manifest and lockfile, and the src/public trees
-# count. Repository tooling (scripts/, including this validator), module SQL
-# (guarded by Checks 8 and 16), CI/hooks and documentation never reach the
-# payload and must not force an artifact version bump.
+# entry/config files, the npm manifest and lockfile, .npmrc, the src/public
+# trees and the payload-shaping build tooling count. Most repository tooling
+# (scripts/, including this validator), module SQL (guarded by Checks 8 and
+# 16), CI/hooks and documentation never reach the payload and must not force
+# an artifact version bump. Two scripts are the deliberate exception:
+# build-repository-objects.ps1 writes SRI attributes into the payload
+# index.html and runtime-configuration-files.ps1 deletes files from the
+# payload, so they deterministically shape the payload BYTES even though the
+# script files themselves are not shipped.
 # ---------------------------------------------------------------------------
 $lockstepCheckCount = 0
 $lockstepErrorCount = 0
@@ -996,7 +1001,7 @@ else {
         $packageType = [string](Get-OptionalPropertyValue -Object $component -Name 'packageType')
         if ([string]::Equals($packageType, 'web-app', [StringComparison]::OrdinalIgnoreCase)) {
             $payloadPrefixes = @('src/', 'public/')
-            $payloadFiles = @('index.html', 'vite.config.js', 'package.json', 'package-lock.json')
+            $payloadFiles = @('index.html', 'vite.config.js', 'package.json', 'package-lock.json', '.npmrc', 'scripts/omp/build-repository-objects.ps1', 'scripts/omp/runtime-configuration-files.ps1')
             $changedFiles = @($changedFiles | Where-Object {
                 $changedFile = $_.Trim().Replace('\', '/')
                 $isPayloadInput = $false
