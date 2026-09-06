@@ -11,9 +11,9 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Generated Output Estimate
 
 - Output files measured: 29 (excluding this budget file)
-- Output lines: 124690
-- Output characters: 3385621
-- Estimated output tokens: 846416
+- Output lines: 124691
+- Output characters: 3385753
+- Estimated output tokens: 846449
 
 ## Largest Output Files
 
@@ -30,7 +30,7 @@ Token counts are rough estimates using one token per four characters. Use this f
 | `chunks/src_components_DocumentLoader.md` | 150 | 8495 | 2124 |
 | `chunks/src_components.md` | 191 | 7434 | 1859 |
 | `chunks/src_integrations.md` | 127 | 6752 | 1688 |
-| `DEPENDENCIES.md` | 60 | 5229 | 1308 |
+| `DEPENDENCIES.md` | 61 | 5361 | 1341 |
 | `CROSS_CUTTING.md` | 53 | 4255 | 1064 |
 | `chunks/src_contexts.md` | 79 | 3488 | 872 |
 | `chunks/src_hooks.md` | 69 | 2939 | 735 |

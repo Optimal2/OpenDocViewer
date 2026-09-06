@@ -8,6 +8,12 @@ the target from HostAgent:WebAppsRoot and the app RoutePath.
 */
 IF NOT EXISTS (SELECT 1 FROM sys.schemas WHERE name = N'omp_opendocviewer')
 BEGIN
+    -- The schema name is spelled out here instead of being read from
+    -- @OpenDocViewerSchemaName (declared in the next batch): CREATE SCHEMA has to
+    -- run through EXEC with a literal string, because the platform's module SQL
+    -- guard (the HostAgent import gate) rejects dynamic SQL assembled from
+    -- variables, and a variable cannot cross the GO batch boundary anyway. Keep
+    -- this literal and the variable below in sync.
     EXEC(N'CREATE SCHEMA [omp_opendocviewer]');
 END
 GO
@@ -16,6 +22,14 @@ DECLARE @OpenDocViewerDisplayName nvarchar(150) = N'OpenDocViewer';
 -- Single source for the module/instance key so the MERGE and lookup statements below
 -- cannot drift apart if the key is ever renamed.
 DECLARE @OpenDocViewerKey nvarchar(128) = N'opendocviewer';
+-- Single source for the registered schema name: the omp.Modules MERGE source and
+-- the module lookup below both read this variable, so they cannot drift apart. It
+-- must match the CREATE SCHEMA literal in the first batch (see the note there).
+DECLARE @OpenDocViewerSchemaName sysname = N'omp_opendocviewer';
+-- Key of the OMP instance this script registers the module into. The platform
+-- seeds exactly one instance with this key; it is declared like every other key
+-- in this file instead of being spelled out inline in the lookup below.
+DECLARE @DefaultInstanceKey nvarchar(128) = N'default';
 DECLARE @OpenDocViewerRoutePath nvarchar(256) = @OpenDocViewerKey;
 DECLARE @OpenDocViewerAppKey nvarchar(128) = N'opendocviewer_webapp';
 DECLARE @OpenDocViewerPublicUrl nvarchar(500) = NULL;
@@ -32,7 +46,7 @@ SELECT TOP (1)
        @InstanceId = InstanceId,
        @InstanceTemplateId = InstanceTemplateId
 FROM omp.Instances
-WHERE InstanceKey = N'default'
+WHERE InstanceKey = @DefaultInstanceKey
 ORDER BY CreatedUtc, InstanceId;
 
 -- Error numbers: the OpenDocViewer seed scripts use the 51000-51999 range (user-defined
@@ -56,7 +70,7 @@ USING
     SELECT @OpenDocViewerKey AS ModuleKey,
            N'OpenDocViewer' AS DisplayName,
            N'WebAppModule' AS ModuleType,
-           N'omp_opendocviewer' AS SchemaName,
+           @OpenDocViewerSchemaName AS SchemaName,
            N'First-party OMP registration for the OpenDocViewer static web application' AS Description,
            CAST(1 AS bit) AS IsEnabled,
            CAST(310 AS int) AS SortOrder
@@ -77,7 +91,7 @@ WHEN NOT MATCHED THEN
 SELECT @OpenDocViewerModuleId = ModuleId
 FROM omp.Modules
 WHERE ModuleKey = @OpenDocViewerKey
-  AND SchemaName = N'omp_opendocviewer';
+  AND SchemaName = @OpenDocViewerSchemaName;
 
 IF @OpenDocViewerModuleId IS NULL
 BEGIN

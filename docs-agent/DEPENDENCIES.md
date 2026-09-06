@@ -2,7 +2,8 @@
 
 This file combines package.json declarations with observed source imports.
 Import counts include static `import` declarations and constant-specifier dynamic `import()` calls;
-the Used In column lists at most 5 files and states how many more exist;
+the Used In column lists at most 5 files and states the file total whenever it cannot be read off the cell
+(more files than listed, or an import count that differs from the file count);
 — means no import of the package was observed at all.
 
 ## Runtime Dependencies
@@ -24,7 +25,7 @@ the Used In column lists at most 5 files and states how many more exist;
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
 | <code>morgan</code> | <code>^1.12.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 1 (dynamic) | <code>src/utils/pdfWorkerDispatcher.js</code> |
-| <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code> |
+| <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+27 more, 32 files total) |
 | <code>react</code> | <code>^19.2.8</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+48 more, 53 files total) |
 | <code>react-dom</code> | <code>^19.2.8</code> | 1 | <code>src/index.jsx</code> |
