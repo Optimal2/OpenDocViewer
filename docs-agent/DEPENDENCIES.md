@@ -40,7 +40,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>@babel/plugin-transform-runtime</code> | <code>^8.0.1</code> | 0 |
 | <code>@babel/runtime</code> | <code>^8.0.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
-| <code>@rolldown/plugin-babel</code> | <code>^0.2.3</code> | 0 |
+| <code>@rolldown/plugin-babel</code> | <code>^0.2.4</code> | 0 |
 | <code>@vitejs/plugin-react</code> | <code>^6.1.1</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
