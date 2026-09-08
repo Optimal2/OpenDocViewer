@@ -53,7 +53,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>prettier</code> | <code>^3.9.6</code> | 0 |
 | <code>rolldown</code> | <code>^1.2.7</code> | 0 |
 | <code>vite</code> | <code>^8.2.2</code> | 0 |
-| <code>vitest</code> | <code>^4.1.11</code> | 0 |
+| <code>vitest</code> | <code>^5.0.0</code> | 0 |
 
 ## Imported But Not Declared Directly
 
