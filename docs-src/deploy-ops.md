@@ -2,6 +2,33 @@
 
 This document collects operational notes that were previously spread across `README.md`, `public/web.config`, `IIS-ODVProxyApp/`, and the PowerShell scripts.
 
+## When site overrides do not take effect
+
+Keep `odv.site.config.js` beside `odv.config.js` at the application base, including virtual-directory
+deployments. There is deliberately no site-root fallback for the optional override file.
+
+Read `window.__ODV_SITE_CONFIG_STATUS__` in the browser console after loading the viewer:
+
+- `ok`: the script loaded; check `window.__ODV_SITE_CONFIG_KEYS__` for the top-level keys merged.
+- `not-found`: inspect the requested URL and HTTP result (including failed/blocked probes).
+- `wrong-content-type`: check IIS `.js` MIME mapping for `application/javascript` or
+  `text/javascript`. A rewrite to the SPA HTML shell can also produce this result with HTTP 200.
+- `script-error-or-integrity`: inspect script errors, CSP and integrity failures. If the bootstrap
+  carries `data-odv-site-config-integrity`, an edited site file needs its matching SRI hash updated
+  through the packaging procedure. Refresh the shell and the script together after packaging.
+
+The last two failures also issue a console warning. The HEAD/GET probes use `cache: 'no-store'`
+and cache-busting URLs; serve the runtime configuration and shell with no-store as well so the
+subsequent script request and an older packaged shell cannot retain mismatched content/hashes.
+Do not disable integrity checking to hide a deployment mismatch. The support diagnostics export
+contains the status and merged top-level keys, plus the effective PDF resolution policy.
+
+For an operator-run acceptance check in the target test environment, open a mixed A5/A3 PDF,
+select fit-width, compare text/line sharpness and try resolution boost. Export diagnostics and
+check the latest scale, DPR and viewer CSS width. Repeat with a site-only `fullPageScale: 4` override;
+confirm status `ok` and a normalized floor of 4, subject to documented safety caps. Resize the
+viewer and confirm existing rasters stay stable until an explicit boost or a fresh session.
+
 ## Deployment shape
 
 The recommended production topology is:

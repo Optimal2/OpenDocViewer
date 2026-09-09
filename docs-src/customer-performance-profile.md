@@ -8,6 +8,15 @@ This build now supports three explicit document-loading modes instead of one fix
 
 ## Recommended default
 
+PDF display resolution also defaults to `documentLoading.render.pdfResolution.mode = 'auto'`.
+This is independent of the document-loading mode below: each page uses viewer content width,
+capped DPR and headroom instead of a fixed PDF-point multiplier. A4 at 1500 CSS pixels and DPR 1
+uses about 3.151; smaller pages can use a higher factor. Larger rasters cost more memory and render
+time. The 40 MP per-page cap is halved on the low memory tier, but is not a session-wide memory
+limit. Use `mode: 'fixed'` with `fixedScale: 2` for the previous fixed-resolution policy on ordinary
+pages. See [PDF display resolution](runtime-configuration.md#pdf-display-resolution) for bounds,
+legacy override precedence, cache identities and the explicit one-shot boost after resizing.
+
 Use `documentLoading.mode = 'auto'` unless a specific customer explicitly wants one extreme.
 
 `auto` starts close to the old fast-feeling eager pipeline:

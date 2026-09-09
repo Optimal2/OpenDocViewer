@@ -27,6 +27,13 @@ Although the optional site file is fetched first, `odv.config.js` owns the defau
 
 ## Why scripts are probed before injection
 
+The outcome is published as `window.__ODV_SITE_CONFIG_STATUS__` with `attempted`, `url`, `loaded`
+and `reason` (`not-found`, `wrong-content-type`, `script-error-or-integrity`, or `ok`). A present
+but rejected file also emits a console warning with the reason. `not-found` includes failed probes
+and HTTP failures; inspect the Network panel to distinguish a missing file from a blocked request.
+`window.__ODV_SITE_CONFIG_KEYS__` lists the top-level override keys consumed by the default script.
+Both are included in the support diagnostics export.
+
 The boot loader uses a fetch probe before adding script tags so it can reject cases where the server returns:
 
 - HTML instead of JavaScript
@@ -34,6 +41,50 @@ The boot loader uses a fetch probe before adding script tags so it can reject ca
 - an SPA fallback page for a missing config script
 
 Without that probe, config failures are harder to diagnose in production.
+
+## PDF display resolution
+
+`documentLoading.render.pdfResolution` defaults to:
+
+```js
+{ mode: 'auto', fixedScale: 2, minScale: 1.5, maxScale: 6,
+  headroom: 1.25, maxPixels: 40000000, dprCap: 2 }
+```
+
+Auto resolves each page independently: `viewerWidthCss * min(DPR, dprCap) * headroom / pageWidthPt`.
+The measured render viewport excludes the thumbnail pane; `window.innerWidth` is the fallback
+before it is measurable. PDF.js rotation is already included in the scale-one viewport, so a
+rotated page uses its displayed width exactly once. A small page gets a larger factor than a large
+page in the same document. At 1500 CSS pixels and DPR 1, portrait A4 resolves to about 3.151 instead
+of 2. A 1920-pixel-wide screen does not imply 1920 pixels of viewer content.
+Run `node scripts/measure-pdf-resolution.mjs` for the fixed/auto A5/A4/A3 comparison table.
+
+`fullPageScale` remains a legacy alias for `fixedScale`, and a floor in auto mode together with
+`minScale`. A site containing only `fullPageScale: 4` therefore keeps a floor of 4. If a site sets
+both aliases explicitly, auto honors the higher floor; in fixed mode `pdfResolution.fixedScale`
+wins. To preserve the old fixed policy, set
+`mode: 'fixed'`; ordinary safe pages keep the same scale and integer raster dimensions. The older
+fallback renderer's separate hardcoded factor has been removed.
+
+Normalization accepts finite numbers/numeric strings, clamps scale fields to 0.5–6, headroom to
+1–3, DPR cap to 1–4, and maxPixels to 1–268435456. Invalid values use defaults; maxScale is raised
+to minScale when bounds are inverted. Pixel and browser surface limits take precedence over the
+floor, including fixed mode. The low runtime memory tier halves the pixel budget to 20 MP by
+default. The limit includes rounding to integer canvas dimensions. It is a per-page limit, not a
+total session-memory budget; an RGBA raster alone uses roughly four bytes per pixel.
+
+Effective scales are part of persisted page-asset keys. Reload restoration checks page geometry
+against the current policy before accepting an asset. This can require opening the PDF to read
+geometry even when the actual page raster is restored. Existing in-session pages retain their
+effective scale on resize; resizing does **not** automatically rasterize again. The one-shot
+resolution boost requests twice the current effective factor within the same caps, replaces the
+visible asset URL, and marks the page done when no higher factor is available. Boosted rasters are
+session-local and do not overwrite the ordinary persisted raster.
+
+The diagnostics export includes the normalized policy, latest effective factor, DPR, viewer CSS
+width, memory tier, reason and pixel count under `config.documentLoading.pdfResolution`.
+Print rendering and dedicated thumbnail fit rules are separate. TIFF and raster sources are not
+upscaled by these PDF settings. A thumbnail that reuses the full image naturally shares its raster.
 
 ## Trust boundary and integrity
 
