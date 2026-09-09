@@ -1,6 +1,6 @@
 # OpenDocViewer / src/contexts
 
-File count: 4. Line count: 3018. JSDoc symbol count: 81.
+File count: 4. Line count: 3048. JSDoc symbol count: 81.
 
 ## src/contexts/themeContext.js
 
@@ -60,7 +60,7 @@ OpenDocViewer — Viewer state provider.
 
 Exports: `ViewerProvider`
 
-Local imports: `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/documentLoadingConfig.js`, `src/utils/sourceTempStore.js`, `src/utils/pageAssetStore.js`, `src/utils/pageAssetRenderer.js`, `src/utils/reloadCacheIdentity.js`, `src/utils/objectUrlRegistry.js`
+Local imports: `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/documentLoadingConfig.js`, `src/utils/sourceTempStore.js`, `src/utils/pageAssetStore.js`, `src/utils/pageAssetRenderer.js`, `src/utils/pdfResolution.js`, `src/utils/pdfResolutionRuntime.js`, `src/utils/reloadCacheIdentity.js`, `src/utils/objectUrlRegistry.js`
 
 Symbols:
 

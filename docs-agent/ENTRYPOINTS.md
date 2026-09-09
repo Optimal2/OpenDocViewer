@@ -33,10 +33,12 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
+- `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/utils/runtimeConfig.js`: 13 incoming local imports
-- `src/utils/documentLoadingConfig.js`: 12 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
+- `src/utils/pdfResolution.js`: 6 incoming local imports
+- `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
@@ -50,5 +52,3 @@
 - `src/utils/printTemplate.js`: 3 incoming local imports
 - `src/utils/supportDiagnostics.js`: 3 incoming local imports
 - `src/components/common/StatusLed.jsx`: 2 incoming local imports
-- `src/components/DocumentLoader/DocumentLoader.js`: 2 incoming local imports
-- `src/components/DocumentThumbnailList.jsx`: 2 incoming local imports

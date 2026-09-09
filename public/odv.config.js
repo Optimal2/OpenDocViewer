@@ -707,6 +707,18 @@
         warmupBatchSize: 48,
         loadingOverlayDelayMs: 90,
         fullPageScale: 2.0,
+        // PDF display resolution per page. Auto uses measured viewer CSS width (or innerWidth),
+        // capped DPR and headroom. fullPageScale remains an alias for fixedScale and an auto floor.
+        // Safety caps can lower that floor. A later resize does not rerasterize; use resolution boost.
+        pdfResolution: {
+          mode: 'auto', // 'fixed' preserves the configured scale for ordinary, safely sized pages.
+          fixedScale: 2.0,
+          minScale: 1.5,
+          maxScale: 6.0,
+          headroom: 1.25,
+          maxPixels: 40000000, // Halved on the low runtime memory tier.
+          dprCap: 2
+        },
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
         // Real thumbnail raster size. The pane can still scale the image to fit the available width.
@@ -799,6 +811,13 @@
 
   // Merge site overrides on top of defaults, then freeze & publish.
   var merged = deepMerge(ACTIVE_CONFIG, siteOverrides);
+  // Defaults must not mask a legacy site-only fullPageScale override.
+  var siteRender = siteOverrides.documentLoading && siteOverrides.documentLoading.render;
+  if (siteRender && siteRender.fullPageScale !== undefined &&
+      !(siteRender.pdfResolution && siteRender.pdfResolution.fixedScale !== undefined)) {
+    merged.documentLoading.render.pdfResolution.fixedScale = siteRender.fullPageScale;
+  }
+  w.__ODV_SITE_CONFIG_KEYS__ = Object.freeze(Object.keys(siteOverrides));
   var cfg = Object.freeze(merged);
   w.__ODV_CONFIG__ = cfg;
   Object.defineProperty(w, "__ODV_GET_CONFIG__", {

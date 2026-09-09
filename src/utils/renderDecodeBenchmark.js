@@ -10,6 +10,7 @@
 import logger from '../logging/systemLogger.js';
 import { createPageAssetRenderer } from './pageAssetRenderer.js';
 import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
+import { getPdfResolutionInputs } from './pdfResolutionRuntime.js';
 import {
   getDocumentLoadingConfig,
   resolvePdfRenderConfigForPageCount,
@@ -779,7 +780,7 @@ async function runPartitionedPdfWorkerScenario(args) {
           variant: scenario.variant,
           thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
           thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
-          fullPageScale: Number(effectiveRenderConfig.fullPageScale) || 2.0,
+          pdfResolutionInput: getPdfResolutionInputs(effectiveRenderConfig),
           maxOpenPdfDocuments: Number(effectiveRenderConfig.maxOpenPdfDocuments) || 16,
         },
       });

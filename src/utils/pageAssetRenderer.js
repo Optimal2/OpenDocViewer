@@ -14,6 +14,8 @@ import { getDocumentLoadingConfig, resolvePdfRenderConfigForPageCount } from './
 import { createPageAssetWorkerPool } from './pageAssetWorkerPool.js';
 import { createPdfPageWorkerPool } from './pdfPageWorkerPool.js';
 import { withPdfJsDocumentOptions } from './pdfjsDocumentOptions.js';
+import { normalizePdfResolution, resolvePdfViewportResolution } from './pdfResolution.js';
+import { getPdfResolutionInputs, recordPdfResolution } from './pdfResolutionRuntime.js';
 
 const MAX_FALLBACK_REASON_SAMPLES = 12;
 
@@ -262,6 +264,11 @@ export class PageAssetRenderer {
     this.config = {
       ...normalized.render,
       ...(config || {}),
+      pdfResolution: normalizePdfResolution({
+        ...normalized.render,
+        ...config,
+        pdfResolution: config?.pdfResolution ?? (config?.fullPageScale == null ? normalized.render.pdfResolution : undefined),
+      }),
     };
 
     this.bufferCache = new Map();
@@ -574,7 +581,7 @@ export class PageAssetRenderer {
           variant,
           thumbnailMaxWidth: options?.thumbnailMaxWidth,
           thumbnailMaxHeight: options?.thumbnailMaxHeight,
-          fullPageScale: Number(options?.fullPageScale) || Number(this.config.fullPageScale) || 2.0,
+          pdfResolutionInput: getPdfResolutionInputs(this.config, options),
           maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
         },
       });
@@ -595,6 +602,7 @@ export class PageAssetRenderer {
             width: Math.max(1, Number(result.width) || 1),
             height: Math.max(1, Number(result.height) || 1),
             mimeType: String(result.mimeType || result.blob?.type || 'image/png'),
+            pdfResolution: result.pdfResolution,
             durationMs: Math.max(0, Number(result.durationMs) || 0),
             workerSlot: Number(slot),
           }
@@ -610,6 +618,7 @@ export class PageAssetRenderer {
           };
       results[itemId] = normalized;
       if (normalized.ok) {
+        recordPdfResolution(normalized.pdfResolution);
         this.renderStats.pdfWorkerCount += 1;
       } else {
         this.renderStats.pdfWorkerFallbackCount += 1;
@@ -695,10 +704,11 @@ export class PageAssetRenderer {
               variant,
               thumbnailMaxWidth: options?.thumbnailMaxWidth,
               thumbnailMaxHeight: options?.thumbnailMaxHeight,
-              fullPageScale: Number(options?.fullPageScale) || Number(this.config.fullPageScale) || 2.0,
+              pdfResolutionInput: getPdfResolutionInputs(this.config, options),
               maxOpenPdfDocuments: Number(this.config.maxOpenPdfDocuments) || 16,
             }).then((result) => {
               this.renderStats.pdfWorkerCount += 1;
+              recordPdfResolution(result.pdfResolution);
               return result;
             });
           }
@@ -711,6 +721,7 @@ export class PageAssetRenderer {
       }
       this.renderStats.mainPdfCount += 1;
       return this.renderPdfPage(descriptor, {
+        ...options,
         variant,
         thumbnailMaxWidth: options?.thumbnailMaxWidth,
         thumbnailMaxHeight: options?.thumbnailMaxHeight,
@@ -765,6 +776,14 @@ export class PageAssetRenderer {
     };
   }
 
+  /** Read page geometry only when a persisted asset needs an exact resolution identity. */
+  async resolvePdfPageResolution(descriptor, options = {}) {
+    const pdf = await this.getPdfDocument(descriptor.sourceKey);
+    const page = await pdf.getPage(Number(descriptor.pageIndex || 0) + 1);
+    // Do not cleanup here: another render may share this PDF.js page proxy.
+    return resolvePdfViewportResolution(page.getViewport({ scale: 1 }), getPdfResolutionInputs(this.config, options));
+  }
+
   async renderPdfPage(descriptor, options) {
     const pdf = await this.getPdfDocument(descriptor.sourceKey);
     const pageNumber = Number(descriptor.pageIndex || 0) + 1;
@@ -773,6 +792,8 @@ export class PageAssetRenderer {
 
     try {
       const baseViewport = page.getViewport({ scale: 1 });
+      const pdfResolution = options.variant === 'thumbnail' ? null
+        : resolvePdfViewportResolution(baseViewport, getPdfResolutionInputs(this.config, options));
       const targetScale = options.variant === 'thumbnail'
         ? fitScale(
             baseViewport.width,
@@ -780,7 +801,7 @@ export class PageAssetRenderer {
             Math.max(24, Number(options.thumbnailMaxWidth) || this.config.thumbnailMaxWidth),
             Math.max(24, Number(options.thumbnailMaxHeight) || this.config.thumbnailMaxHeight)
           )
-        : Math.max(0.5, Number(options.fullPageScale) || Number(this.config.fullPageScale) || 2.0);
+        : pdfResolution.scale;
       const viewport = page.getViewport({ scale: targetScale });
 
       canvas = document.createElement('canvas');
@@ -791,8 +812,10 @@ export class PageAssetRenderer {
 
       await page.render({ canvasContext: ctx, viewport }).promise;
       const blob = await canvasToBlob(canvas, 'image/png');
+      recordPdfResolution(pdfResolution);
       return {
         blob,
+        pdfResolution,
         width: canvas.width,
         height: canvas.height,
         mimeType: 'image/png',

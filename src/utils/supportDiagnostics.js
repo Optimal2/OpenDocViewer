@@ -4,6 +4,8 @@
  */
 
 import { getRuntimeConfig } from './runtimeConfig.js';
+import { getDocumentLoadingConfig } from './documentLoadingConfig.js';
+import { getPdfResolutionDiagnostics } from './pdfResolutionRuntime.js';
 import { createPdfPrebuildAllPagesVariants } from './pdfPrebuildPlan.js';
 import { getPdfPrintCacheKeyOptions } from './pdfPrintCacheKey.js';
 
@@ -182,6 +184,9 @@ function collectConfigDiagnostics() {
       },
     },
     documentLoading: {
+      pdfResolution: getPdfResolutionDiagnostics(getDocumentLoadingConfig(cfg).render),
+      siteConfigStatus: typeof window === 'undefined' ? null : window.__ODV_SITE_CONFIG_STATUS__ || null,
+      siteConfigKeys: typeof window === 'undefined' ? [] : window.__ODV_SITE_CONFIG_KEYS__ || [],
       mode: String(loading.mode || ''),
       renderStrategy: String(render.strategy || ''),
       renderBackend: String(render.backend || ''),

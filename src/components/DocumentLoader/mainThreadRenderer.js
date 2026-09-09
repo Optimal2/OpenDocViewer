@@ -28,6 +28,9 @@ import pdfWorkerJsUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { getPublicAssetUrl } from '../../utils/publicAssetUrl.js';
 import { withPdfJsDocumentOptions } from '../../utils/pdfjsDocumentOptions.js';
 import { createTrackedObjectUrl } from '../../utils/objectUrlRegistry.js';
+import { getDocumentLoadingConfig } from '../../utils/documentLoadingConfig.js';
+import { resolvePdfViewportResolution } from '../../utils/pdfResolution.js';
+import { getPdfResolutionInputs, recordPdfResolution } from '../../utils/pdfResolutionRuntime.js';
 
 /** Upper bound for reconstructed OJPEG entropy-coded scan data. */
 const MAX_OJPEG_SCAN_SIZE_BYTES = 512 * 1024 * 1024;
@@ -135,7 +138,10 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
       const page = await pdf.getPage(i);
       let canvas = null;
       try {
-        const viewport = page.getViewport({ scale: 1.5 });
+        const pdfResolution = resolvePdfViewportResolution(
+          page.getViewport({ scale: 1 }), getPdfResolutionInputs(getDocumentLoadingConfig().render)
+        );
+        const viewport = page.getViewport({ scale: pdfResolution.scale });
 
         canvas = document.createElement('canvas');
         const ctx = canvas.getContext('2d');
@@ -154,6 +160,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
         if (!blob) throw new Error('Failed to create blob from PDF canvas');
 
         const url = createTrackedObjectUrl(blob);
+        recordPdfResolution(pdfResolution);
 
         const at = job.allPagesStartingIndex + (i - 1 - job.pageStartIndex);
         const thumbUrl = sameBlob ? url : await generateThumbnail(url, 200, 200);
@@ -162,6 +169,7 @@ export const renderPDFInMainThread = async (job, insertPageAtIndex, sameBlob, is
         insertPageAtIndex(
           {
             fullSizeUrl: url,
+            pdfResolution,
             thumbnailUrl: thumbUrl,
             loaded: true,
             status: 1,

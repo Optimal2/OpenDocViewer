@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 4963. JSDoc symbol count: 117.
+File count: 10. Line count: 4969. JSDoc symbol count: 117.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -155,7 +155,7 @@ Primary viewer\-state hook.
 
 Exports: `useDocumentViewer`
 
-Local imports: `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentViewer/hooks/useViewerPostZoom.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
+Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/components/DocumentViewer/hooks/useViewerPostZoom.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 

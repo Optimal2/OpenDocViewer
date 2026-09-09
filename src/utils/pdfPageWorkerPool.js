@@ -304,6 +304,7 @@ export class PdfPageWorkerPool {
         width: Math.max(1, Number(data.width) || 1),
         height: Math.max(1, Number(data.height) || 1),
         mimeType: String(data.mimeType || data.blob?.type || 'image/png'),
+        pdfResolution: data.pdfResolution,
       });
     } else {
       const details = data?.errorDetails && typeof data.errorDetails === 'object'
@@ -344,6 +345,7 @@ export class PdfPageWorkerPool {
           width: Math.max(1, Number(data.width) || 1),
           height: Math.max(1, Number(data.height) || 1),
           mimeType: String(data.mimeType || data.blob?.type || 'image/png'),
+          pdfResolution: data.pdfResolution,
           durationMs: Math.max(0, Number(data.durationMs) || 0),
         }
       : {

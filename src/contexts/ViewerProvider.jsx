@@ -25,6 +25,8 @@ import {
 import { createSourceTempStore } from '../utils/sourceTempStore.js';
 import { createPageAssetStore } from '../utils/pageAssetStore.js';
 import { createPageAssetRenderer } from '../utils/pageAssetRenderer.js';
+import { resolvePdfResolutionBoost } from '../utils/pdfResolution.js';
+import { getPdfResolutionInputs, recordPdfResolution } from '../utils/pdfResolutionRuntime.js';
 import {
   createPersistedPageAssetKey,
   createRenderAssetSignature,
@@ -113,9 +115,10 @@ function isPdfPageEntry(page) {
  * @param {*} page
  * @param {('full'|'thumbnail')} variant
  * @param {*} renderConfig
+ * @param {Object=} pdfResolution Effective per-page PDF resolution metadata.
  * @returns {string}
  */
-function makePersistedAssetKey(page, variant, renderConfig) {
+function makePersistedAssetKey(page, variant, renderConfig, pdfResolution = page?.pdfResolution) {
   const sourceKey = String(page?.sourceKey || '');
   const pageIndex = Math.max(0, Number(page?.pageIndex) || 0);
   const renderSignature = createRenderAssetSignature(renderConfig);
@@ -124,6 +127,7 @@ function makePersistedAssetKey(page, variant, renderConfig) {
     pageIndex,
     variant,
     renderSignature,
+    effectiveScale: variant === 'full' && isPdfPageEntry(page) ? pdfResolution?.scale : undefined,
   });
 }
 
@@ -1307,8 +1311,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const page = getPageAt(allPagesRef.current, pageIndex);
     if (!page || !page.sourceKey) return;
 
+    if (variant === 'full' && pdfResolutionBoostedKeysRef.current.has(makePdfResolutionPageKey(page))) return;
     await store.putAsset({
-      assetKey: makePersistedAssetKey(page, variant, sessionConfigRef.current.render),
+      assetKey: makePersistedAssetKey(page, variant, sessionConfigRef.current.render, rendered.pdfResolution),
       sourceKey: page.sourceKey,
       pageIndex: Math.max(0, Number(page.pageIndex) || 0),
       variant,
@@ -1552,11 +1557,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const page = getPageAt(allPagesRef.current, pageIndex);
     if (!page || !page.sourceKey) return null;
 
+    const pdfResolution = variant === 'full' && isPdfPageEntry(page)
+      ? page.pdfResolution || await pageRendererRef.current.resolvePdfPageResolution(page, options)
+      : null;
     const stats = assetPipelineStatsRef.current;
     const startedAt = nowMs();
     stats.restoreAttemptCount += 1;
     const stored = await store.getAsset(
-      makePersistedAssetKey(page, variant, sessionConfigRef.current.render)
+      makePersistedAssetKey(page, variant, sessionConfigRef.current.render, pdfResolution)
     );
     stats.restoreTotalMs += Math.max(0, nowMs() - startedAt);
     if (!stored?.blob || !stored?.meta) {
@@ -1564,6 +1572,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       return null;
     }
     stats.restoreHitCount += 1;
+    recordPdfResolution(pdfResolution);
 
     const cache = getVariantCache(variant);
     const url = createTrackedObjectUrl(stored.blob);
@@ -1593,6 +1602,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           realWidth: stored.meta.width,
           realHeight: stored.meta.height,
           status: 1,
+          pdfResolution,
           ...(reuseThumbnail
             ? {
                 thumbnailUsesFullAsset: true,
@@ -1634,6 +1644,10 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       thumbnailMaxWidth: sessionConfigRef.current.render.thumbnailMaxWidth,
       thumbnailMaxHeight: sessionConfigRef.current.render.thumbnailMaxHeight,
       fullPageScale: renderOptions.fullPageScale,
+      pdfResolutionInput: getPdfResolutionInputs(sessionConfigRef.current.render, {
+        ...renderOptions,
+        fullPageScale: renderOptions.fullPageScale ?? page.pdfResolution?.scale,
+      }),
     });
 
     if (pageRendererRef.current?.canRenderInWorker?.(source.fileExtension, variant)) {
@@ -1649,6 +1663,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [pdfWorkerRenderWithLimit, renderWithLimit, syncRendererPdfPageCount]);
 
   const commitRenderedPageAsset = useCallback((pageIndex, variant, rendered, options = {}) => {
+    recordPdfResolution(rendered.pdfResolution);
     const safeIndex = Math.max(0, Number(pageIndex) || 0);
     const cache = getVariantCache(variant);
     const url = createTrackedObjectUrl(rendered.blob);
@@ -1678,6 +1693,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           realWidth: rendered.width,
           realHeight: rendered.height,
           status: 1,
+          pdfResolution: rendered.pdfResolution,
           ...(reuseThumbnail
             ? {
                 thumbnailUsesFullAsset: true,
@@ -1709,7 +1725,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const urlField = variant === 'thumbnail' ? 'thumbnailUrl' : 'fullSizeUrl';
     const statusField = variant === 'thumbnail' ? 'thumbnailStatus' : 'fullSizeStatus';
 
-    if (options.forceRefresh === true) {
+    const requestedScale = Number(options.fullPageScale);
+    const resolutionChanged = variant === 'full' && isPdfPageEntry(workingPage)
+      && Number.isFinite(requestedScale) && requestedScale > 0
+      && requestedScale !== workingPage.pdfResolution?.scale;
+    if (options.forceRefresh === true || resolutionChanged) {
       clearPageAssetReference(safeIndex, variant);
       workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
     }
@@ -1781,7 +1801,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const promise = (async () => {
       try {
-        const skipPersistedRestore = options.forceRefresh === true
+        const skipPersistedRestore = (options.forceRefresh === true || resolutionChanged)
           && Number.isFinite(Number(options.fullPageScale))
           && Number(options.fullPageScale) > 0;
         const restoreBeforeRender = sessionConfigRef.current.assetStore.restoreBeforeRender !== false;
@@ -1852,7 +1872,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
-   * Render one PDF page again at twice the configured full-page PDF scale.
+   * Render one PDF page again at twice its effective PDF scale, within the same safety caps.
    * The boost is intentionally session-local and one-shot per PDF page; it replaces the visible
    * object URL without changing the persisted normal-resolution cache entry.
    *
@@ -1873,13 +1893,22 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pdfResolutionPendingKeysRef.current.add(pageKey);
     publishPdfResolutionBoostState();
 
-    const baseScale = Math.max(0.5, Number(sessionConfigRef.current?.render?.fullPageScale) || 2.0);
     const previousUrl = String(page.fullSizeUrl || '').trim();
     try {
+      const current = page.pdfResolution || await pageRendererRef.current.resolvePdfPageResolution(page);
+      const baseScale = current.scale;
+      const boosted = resolvePdfResolutionBoost({
+        ...current,
+        ...getPdfResolutionInputs(sessionConfigRef.current.render),
+      }, baseScale);
+      if (!boosted.available) {
+        pdfResolutionBoostedKeysRef.current.add(pageKey);
+        return false;
+      }
       const url = await ensurePageAsset(safeIndex, 'full', {
         forceRefresh: true,
         priority: 'critical',
-        fullPageScale: baseScale * 2,
+        fullPageScale: boosted.scale,
         persist: false,
       });
       if (url) {
@@ -1891,7 +1920,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
           logger.warn('PDF page resolution boost rendered without replacing the visible asset URL', {
             pageIndex: safeIndex,
             sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
-            scale: baseScale * 2,
+            scale: boosted.scale,
           });
           return false;
         }
@@ -1900,7 +1929,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         logger.info('Enhanced PDF page resolution for current session', {
           pageIndex: safeIndex,
           sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
-          scale: baseScale * 2,
+          scale: boosted.scale,
         });
         return true;
       }
@@ -2045,6 +2074,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
         const rendered = {
           blob: result.blob,
+          pdfResolution: result.pdfResolution,
           width: Math.max(1, Number(result.width) || 1),
           height: Math.max(1, Number(result.height) || 1),
           mimeType: String(result.mimeType || result.blob.type || 'image/png'),
@@ -2067,7 +2097,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     try {
       await pageRendererRef.current.renderPdfPageAssetBatch(descriptors, {
         variant: 'full',
-        fullPageScale: renderConfig.fullPageScale,
+        pdfResolutionInput: getPdfResolutionInputs(renderConfig),
         thumbnailMaxWidth: renderConfig.thumbnailMaxWidth,
         thumbnailMaxHeight: renderConfig.thumbnailMaxHeight,
         rendersPerWorker,

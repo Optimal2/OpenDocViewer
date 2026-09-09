@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 35. Line count: 15082. JSDoc symbol count: 594.
+File count: 37. Line count: 15257. JSDoc symbol count: 603.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -8,7 +8,7 @@ OpenDocViewer — runtime helpers for fetch/render/memory policies.
 
 Exports: `MAX_RELOAD_CACHE_TTL_MS`, `resolveRecommendedWorkerCount`, `DOCUMENT_LOADING_DEFAULTS`, `normalizeProtection`, `cloneDocumentLoadingConfig`, `countPdfPages`, `resolvePdfWorkerPlanForPageCount`, `resolvePdfRenderConfigForPageCount`, `applyDocumentLoadingMode`, `applyMemoryPressureStage`, `getPerformanceWindowPageCount`, `getDocumentLoadingConfig`, `isRasterImageExtension`, `shouldUseFullImagesForThumbnails`, `shouldKeepAllFullImageAssets`, `formatBytes`, `formatCount`, `shouldRecommendStopping`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/utils/memoryProfile.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/memoryProfile.js`, `src/utils/pdfResolution.js`
 
 Symbols:
 
@@ -128,7 +128,7 @@ OpenDocViewer — hybrid page\-asset renderer.
 
 Exports: `createPageAssetRenderer`, `PageAssetRenderer`
 
-Local imports: `src/utils/documentLoadingConfig.js`, `src/utils/pageAssetWorkerPool.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfjsDocumentOptions.js`
+Local imports: `src/utils/documentLoadingConfig.js`, `src/utils/pageAssetWorkerPool.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/pdfResolution.js`, `src/utils/pdfResolutionRuntime.js`
 
 Symbols:
 
@@ -137,6 +137,7 @@ Symbols:
 - `RenderPageAssetOptions` (typedef) - No description.
 - `PageAssetRenderer#renderPdfPageAssetBatch` (function) - Render a PDF page set through the PDF worker pool as one partitioned batch.
 - `PageAssetRenderer#renderPageAsset` (function) - Render one requested page asset.
+- `PageAssetRenderer#resolvePdfPageResolution` (function) - Read page geometry only when a persisted asset needs an exact resolution identity.
 
 ## src/utils/pageAssetStore.js
 
@@ -271,6 +272,36 @@ Symbols:
 - `getPdfPrintCacheKey` (function) - Compare the content\-affecting print settings that determine whether an existing generated PDF can be reused.
 - `canReuseGeneratedPdfPrint` (function) - Active\-page PDF output is based on the current rendered surface, including transient client\-side edits such as rotation, brightness and contrast.
 - `isFullSessionPageSequence` (function) - No description.
+
+## src/utils/pdfResolution.js
+
+Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
+
+Exports: `PDF_RESOLUTION_DEFAULTS`, `normalizePdfResolution`, `resolvePdfRenderScale`, `resolvePdfResolutionBoost`, `resolvePdfViewportResolution`
+
+Local imports: `src/utils/renderSurfaceBounds.js`
+
+Symbols:
+
+- `normalizePdfResolution` (function) - Normalize a render config, including the legacy fullPageScale alias.
+- `resolvePdfRenderScale` (function) - Resolve an effective scale without reading browser globals.
+- `resolvePdfResolutionBoost` (function) - Double the current effective scale within the same page, memory and surface limits.
+- `resolvePdfViewportResolution` (function) - Resolve a scale\-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.
+
+## src/utils/pdfResolutionRuntime.js
+
+Browser measurements and diagnostic state kept outside the pure PDF resolution policy.
+
+Exports: `registerPdfViewerWidth`, `getPdfResolutionInputs`, `recordPdfResolution`, `getPdfResolutionDiagnostics`
+
+Local imports: `src/utils/pdfResolution.js`, `src/utils/memoryProfile.js`
+
+Symbols:
+
+- `registerPdfViewerWidth` (function) - Register a live content\-width measurement without triggering renders on resize.
+- `getPdfResolutionInputs` (function) - Capture serializable browser inputs before sending a render request to a window\-less worker.
+- `recordPdfResolution` (function) - Record successful rendering/restoration only; never collect document identifiers.
+- `getPdfResolutionDiagnostics` (function) - Effective PDF display diagnostics, with null scale until a page has been rendered.
 
 ## src/utils/pdfWorkerDispatcher.js
 
@@ -500,7 +531,7 @@ Opt\-in render/decode benchmark tooling for the already loaded document session.
 
 Exports: `isRenderDecodeBenchmarkEnabled`, `runRenderDecodeBenchmark`
 
-Local imports: `src/logging/systemLogger.js`, `src/utils/pageAssetRenderer.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/documentLoadingConfig.js`, `src/utils/supportDiagnostics.js`
+Local imports: `src/logging/systemLogger.js`, `src/utils/pageAssetRenderer.js`, `src/utils/pdfPageWorkerPool.js`, `src/utils/pdfResolutionRuntime.js`, `src/utils/documentLoadingConfig.js`, `src/utils/supportDiagnostics.js`
 
 Symbols:
 
@@ -578,7 +609,7 @@ Support diagnostics helpers for opt\-in troubleshooting tools.
 
 Exports: `loadLatestPdfBenchmarkResult`, `saveLatestPdfBenchmarkResult`, `loadLatestRenderDecodeBenchmarkResult`, `saveLatestRenderDecodeBenchmarkResult`, `collectSupportDiagnostics`, `downloadJsonFile`
 
-Local imports: `src/utils/runtimeConfig.js`, `src/utils/pdfPrebuildPlan.js`, `src/utils/pdfPrintCacheKey.js`
+Local imports: `src/utils/runtimeConfig.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfResolutionRuntime.js`, `src/utils/pdfPrebuildPlan.js`, `src/utils/pdfPrintCacheKey.js`
 
 Symbols:
 

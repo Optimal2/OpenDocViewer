@@ -1,0 +1,102 @@
+import { beforeEach, describe, expect, it, vi } from 'vitest';
+const harness = vi.hoisted(() => ({ states: [], assets: new Map(), renderer: null }));
+// Execute provider callbacks with deterministic state/ref updates. DOM layout and React scheduling
+// remain operator checks; these tests exercise the actual cache/boost callback implementation.
+vi.mock('react', async (original) => ({
+  ...await original(),
+  useState: (initial) => {
+    const slot = harness.states.length;
+    harness.states.push(typeof initial === 'function' ? initial() : initial);
+    return [harness.states[slot], (next) => { harness.states[slot] = typeof next === 'function' ? next(harness.states[slot]) : next; }];
+  },
+  useRef: (current) => ({ current }), useCallback: (fn) => fn, useMemo: (fn) => fn(), useEffect: () => {},
+}));
+vi.mock('../utils/pageAssetRenderer.js', () => ({ createPageAssetRenderer: () => harness.renderer }));
+vi.mock('../utils/sourceTempStore.js', () => ({ createSourceTempStore: () => ({ ready: async () => {}, dispose: async () => {}, getStats: () => ({}) }) }));
+vi.mock('../utils/pageAssetStore.js', () => ({ createPageAssetStore: () => ({
+  ready: async () => {}, dispose: async () => {}, getStats: () => ({}),
+  getAsset: async (key) => harness.assets.get(key) || null,
+  putAsset: async (entry) => { harness.assets.set(entry.assetKey, { blob: entry.blob, meta: entry }); },
+}) }));
+import { ViewerProvider } from './ViewerProvider.jsx';
+import { getDocumentLoadingConfig } from '../utils/documentLoadingConfig.js';
+import { resolvePdfViewportResolution } from '../utils/pdfResolution.js';
+import { getPdfResolutionInputs } from '../utils/pdfResolutionRuntime.js';
+import { revokeTrackedObjectUrl } from '../utils/objectUrlRegistry.js';
+
+beforeEach(() => { harness.states = []; harness.assets.clear(); });
+async function setup(scale = 2) {
+  const config = getDocumentLoadingConfig({ documentLoading: {
+    render: { pdfResolution: { mode: 'fixed', fixedScale: scale }, thumbnailSourceStrategy: 'dedicated' },
+    assetStore: { persistFullPagesInBackground: false },
+  } });
+  const viewport = { width: 595, height: 842 };
+  harness.renderer = {
+    updateConfig: vi.fn(), dispose: async () => {},
+    resolvePdfPageResolution: async (_page, options) => resolvePdfViewportResolution(viewport, getPdfResolutionInputs(config.render, options)),
+    renderPageAsset: vi.fn(async (_page, options) => {
+      const pdfResolution = resolvePdfViewportResolution(viewport, getPdfResolutionInputs(config.render, options));
+      return { blob: new Blob(['raster']), width: Math.ceil(595 * pdfResolution.scale), height: Math.ceil(842 * pdfResolution.scale), pdfResolution };
+    }),
+  };
+  const api = ViewerProvider({ children: null }).props.value;
+  await api.initializeDocumentSession({ config });
+  api.registerSourceDescriptor({ sourceKey: 'pdf', fileExtension: 'pdf', fileIndex: 0 });
+  api.insertPageAtIndex({ sourceKey: 'pdf', pageIndex: 0, fileExtension: 'pdf', status: 0 }, 0);
+  return api;
+}
+
+describe('provider PDF resolution and asset replacement', () => {
+  it('doubles the actual factor, replaces the visible URL and keeps the boosted URL cached', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    expect(original).toMatch(/^blob:/);
+    expect(await api.enhancePdfPageResolution(0)).toBe(true);
+    const boosted = await api.ensurePageAsset(0, 'full');
+    expect(boosted).not.toBe(original);
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
+    expect(harness.renderer.renderPageAsset.mock.calls[1][1].pdfResolutionInput.config.pdfResolution.fixedScale).toBe(4);
+    expect(await api.enhancePdfPageResolution(0)).toBe(false);
+    expect(harness.states.find((state) => state?.boostedKeys)?.boostedKeys).toEqual(['pdf:0']);
+    expect([...harness.assets.keys()]).toHaveLength(1);
+    expect([...harness.assets.keys()][0]).toMatch(/:2$/);
+    revokeTrackedObjectUrl(boosted);
+    const recovered = await api.ensurePageAsset(0, 'full');
+    expect(recovered).not.toBe(boosted);
+    expect(harness.renderer.renderPageAsset.mock.calls[2][1].pdfResolutionInput.config.pdfResolution.fixedScale).toBe(4);
+    expect([...harness.assets.keys()]).toHaveLength(1);
+    await api.disposeDocumentSession();
+  });
+  it('marks a capped page done without discarding or rerendering its asset', async () => {
+    const api = await setup(6);
+    const original = await api.ensurePageAsset(0, 'full');
+    expect(await api.enhancePdfPageResolution(0)).toBe(false);
+    expect(await api.ensurePageAsset(0, 'full')).toBe(original);
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(1);
+    expect(harness.states.find((state) => state?.boostedKeys)?.boostedKeys).toEqual(['pdf:0']);
+    await api.disposeDocumentSession();
+  });
+  it('restores the matching factor and cannot restore another resolution on a fresh page', async () => {
+    const api = await setup(2);
+    await api.ensurePageAsset(0, 'full');
+    api.insertPageAtIndex({ sourceKey: 'pdf', pageIndex: 0, fileExtension: 'pdf', status: 0 }, 1);
+    await api.ensurePageAsset(1, 'full');
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(1);
+    // A stale bitmap under another effective factor must be a cache miss.
+    const [key, asset] = [...harness.assets.entries()][0];
+    harness.assets.clear();
+    harness.assets.set(key.replace(/:2$/, ':4'), asset);
+    api.insertPageAtIndex({ sourceKey: 'pdf', pageIndex: 0, fileExtension: 'pdf', status: 0 }, 2);
+    await api.ensurePageAsset(2, 'full');
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
+    await api.disposeDocumentSession();
+  });
+  it('does not serve the previous factor when an explicit scale is requested without forceRefresh', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    const replacement = await api.ensurePageAsset(0, 'full', { fullPageScale: 4 });
+    expect(replacement).not.toBe(original);
+    expect([...harness.assets.keys()].map((key) => key.slice(-2)).sort()).toEqual([':2', ':4']);
+    await api.disposeDocumentSession();
+  });
+});

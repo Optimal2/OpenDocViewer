@@ -14,6 +14,7 @@
  */
 
 import { useState, useRef, useMemo, useEffect, useCallback, useContext } from 'react';
+import { registerPdfViewerWidth } from '../../utils/pdfResolutionRuntime.js';
 import logger from '../../logging/systemLogger.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import {
@@ -859,6 +860,11 @@ export function useDocumentViewer() {
 
   // Refs shared with the renderer layer and the effect helpers.
   /** @type {{ current: any }} */ const viewerContainerRef = useRef(null);
+  // Read the raster viewport, excluding thumbnails/toolbars. Width changes affect future renders;
+  // existing page assets stay stable until an explicit resolution boost or a new session.
+  useEffect(() => registerPdfViewerWidth(() =>
+    viewerContainerRef.current?.querySelector('.document-render-viewport')?.clientWidth || 0
+  ), []);
   /** @type {{ current: any }} */ const thumbnailsContainerRef = useRef(null);
   /** @type {{ current: any }} */ const documentRenderRef = useRef(null);
   /** @type {{ current: any }} */ const compareRef = useRef(null);

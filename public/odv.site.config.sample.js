@@ -792,6 +792,19 @@
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.
         fullPageScale: 2.0,
+        // Legacy alias: auto honors the higher floor; in fixed mode pdfResolution.fixedScale wins.
+        // Auto uses each page's width, the measured viewer width, DPR and headroom.
+        pdfResolution: {
+          mode: 'auto',
+          fixedScale: 2.0,
+          minScale: 1.5,
+          maxScale: 6.0,
+          headroom: 1.25,
+          maxPixels: 40000000, // Halved on the low memory tier; safety caps override the floor.
+          dprCap: 2
+        },
+        // Resizing does not rerasterize existing assets. Use the one-shot resolution boost.
+        // These settings do not upscale TIFF/raster sources or change print/dedicated thumbnail rules.
 
         // Real thumbnail raster size. The thumbnail pane may still scale the image to fit
         // the currently available width.

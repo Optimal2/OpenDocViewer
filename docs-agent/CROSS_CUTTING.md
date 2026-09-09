@@ -7,7 +7,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 ### React Contexts
 
 - `src/contexts/viewerContext.js` (207 lines) - Exports ViewerContext.
-- `src/contexts/ViewerProvider.jsx` (2572 lines) - OpenDocViewer — Viewer state provider.
+- `src/contexts/ViewerProvider.jsx` (2602 lines) - OpenDocViewer — Viewer state provider.
 - `src/contexts/themeContext.js` (37 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 - `src/contexts/ThemeProvider.jsx` (202 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 
@@ -15,7 +15,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` (667 lines) - Hook \+ helpers for PrintRangeDialog.
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` (123 lines) - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
-- `src/components/DocumentViewer/useDocumentViewer.js` (1899 lines) - Primary viewer\-state hook.
+- `src/components/DocumentViewer/useDocumentViewer.js` (1905 lines) - Primary viewer\-state hook.
 - `src/hooks/useNavigationModifierState.js` (109 lines) - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/components/DocumentToolbar/usePdfPrebuildAllPages.js` (362 lines) - Background prebuild/cache for configured "all pages" generated\-PDF variants.
 - `src/hooks/usePageTimer.js` (149 lines) - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
@@ -31,10 +31,10 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/utils/pdfWorkerDispatcher.js` (451 lines) - OpenDocViewer \- generated PDF worker dispatcher.
 - `src/utils/pageAssetWorkerPool.js` (320 lines) - OpenDocViewer — Page\-asset worker pool.
 - `src/components/DocumentLoader/workerHandler.js` (301 lines) - OpenDocViewer — Worker orchestration & message handling \- Create image workers for off\-main\-thread rasterization/conversion.
-- `src/utils/pdfPageWorkerPool.js` (477 lines) - OpenDocViewer \- PDF page\-image worker pool.
+- `src/utils/pdfPageWorkerPool.js` (479 lines) - OpenDocViewer \- PDF page\-image worker pool.
 - `src/workers/pdfWorker.js` (628 lines) - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` (500 lines) - OpenDocViewer — image / TIFF worker.
-- `src/workers/pdfPageWorker.js` (433 lines) - OpenDocViewer \- PDF page image worker.
+- `src/workers/pdfPageWorker.js` (441 lines) - OpenDocViewer \- PDF page image worker.
 
 ## Risky Source Patterns
 

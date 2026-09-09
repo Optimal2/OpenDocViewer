@@ -11,6 +11,7 @@
 
 import { getRuntimeConfig } from './runtimeConfig.js';
 import { getRuntimeMemoryProfile } from './memoryProfile.js';
+import { normalizePdfResolution, PDF_RESOLUTION_DEFAULTS } from './pdfResolution.js';
 
 /** @typedef {'memory'|'indexeddb'|'adaptive'} SourceStoreMode */
 /** @typedef {'none'|'aes-gcm-session'} SourceStoreProtection */
@@ -103,6 +104,7 @@ export const MAX_RELOAD_CACHE_TTL_MS = 24 * 60 * 60 * 1000;
  * @property {number} warmupBatchSize
  * @property {number} loadingOverlayDelayMs
  * @property {number} fullPageScale
+ * @property {Object} pdfResolution Normalized per-page PDF display resolution policy.
  * @property {number} thumbnailMaxWidth
  * @property {number} thumbnailMaxHeight
  * @property {ThumbnailLoadingStrategy} thumbnailLoadingStrategy
@@ -323,6 +325,7 @@ export const DOCUMENT_LOADING_DEFAULTS = Object.freeze(
       warmupBatchSize: 48,
       loadingOverlayDelayMs: 90,
       fullPageScale: 2.0,
+      pdfResolution: { ...PDF_RESOLUTION_DEFAULTS },
       thumbnailMaxWidth: 220,
       thumbnailMaxHeight: 310,
       thumbnailLoadingStrategy: 'adaptive',
@@ -988,7 +991,8 @@ export function getDocumentLoadingConfig(runtimeConfig = getRuntimeConfig()) {
       maxConcurrentAssetRenders: normalizeNumber(raw?.render?.maxConcurrentAssetRenders, adaptiveDefaults.render.maxConcurrentAssetRenders, 1, 8),
       warmupBatchSize: normalizeNumber(raw?.render?.warmupBatchSize, adaptiveDefaults.render.warmupBatchSize, 1, 512),
       loadingOverlayDelayMs: normalizeNumber(raw?.render?.loadingOverlayDelayMs, adaptiveDefaults.render.loadingOverlayDelayMs, 0, 5000),
-      fullPageScale: normalizeFloat(raw?.render?.fullPageScale, adaptiveDefaults.render.fullPageScale, 0.5, 4),
+      fullPageScale: normalizePdfResolution(raw?.render).fixedScale,
+      pdfResolution: normalizePdfResolution(raw?.render),
       thumbnailMaxWidth: normalizeNumber(raw?.render?.thumbnailMaxWidth, adaptiveDefaults.render.thumbnailMaxWidth, 32, 4096),
       thumbnailMaxHeight: normalizeNumber(raw?.render?.thumbnailMaxHeight, adaptiveDefaults.render.thumbnailMaxHeight, 32, 4096),
       thumbnailLoadingStrategy: normalizeThumbnailLoadingStrategy(raw?.render?.thumbnailLoadingStrategy, adaptiveDefaults.render.thumbnailLoadingStrategy),

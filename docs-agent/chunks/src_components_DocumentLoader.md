@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentLoader
 
-File count: 8. Line count: 4101. JSDoc symbol count: 106.
+File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentLoader/batchHandler.js
 
@@ -95,7 +95,7 @@ OpenDocViewer — Main\-thread renderers for PDF & TIFF Render multi\-page forma
 
 Exports: `renderPDFInMainThread`, `renderTIFFInMainThread`
 
-Local imports: `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/publicAssetUrl.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/objectUrlRegistry.js`
+Local imports: `src/logging/systemLogger.js`, `src/components/DocumentLoader/documentLoaderUtils.js`, `src/utils/publicAssetUrl.js`, `src/utils/pdfjsDocumentOptions.js`, `src/utils/objectUrlRegistry.js`, `src/utils/documentLoadingConfig.js`, `src/utils/pdfResolution.js`, `src/utils/pdfResolutionRuntime.js`
 
 Symbols:
 

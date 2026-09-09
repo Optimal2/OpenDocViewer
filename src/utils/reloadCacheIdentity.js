@@ -122,8 +122,9 @@ export function createDocumentSourceKey(entry, orderIndex = 0) {
  */
 export function createRenderAssetSignature(renderConfig = {}) {
   return `render_${stableHash([
-    'render-asset-v1',
+    'render-asset-v2',
     Number(renderConfig?.fullPageScale || 0) || '',
+    JSON.stringify(renderConfig?.pdfResolution || {}),
     Number(renderConfig?.thumbnailMaxWidth || 0) || '',
     Number(renderConfig?.thumbnailMaxHeight || 0) || '',
     part(renderConfig?.pdfToImageMode),
@@ -136,6 +137,7 @@ export function createRenderAssetSignature(renderConfig = {}) {
  * @param {number} input.pageIndex
  * @param {'full'|'thumbnail'} input.variant
  * @param {string} input.renderSignature
+ * @param {number=} input.effectiveScale Effective PDF factor; different factors never share a key.
  * @returns {string}
  */
 export function createPersistedPageAssetKey({
@@ -143,11 +145,13 @@ export function createPersistedPageAssetKey({
   pageIndex,
   variant,
   renderSignature,
+  effectiveScale,
 }) {
   return [
     part(sourceKey),
     Math.max(0, Number(pageIndex) || 0),
     String(variant || 'full').toLowerCase() === 'thumbnail' ? 'thumbnail' : 'full',
     part(renderSignature),
+    part(effectiveScale),
   ].join(':');
 }

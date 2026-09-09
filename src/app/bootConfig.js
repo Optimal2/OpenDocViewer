@@ -43,14 +43,14 @@ async function probeScriptUrl(url) {
   try {
     const r = await fetch(url, { method: 'HEAD', cache: 'no-store' });
     if (r.ok && isJsContentType(r.headers.get('content-type'))) return { ok: true, url };
-    if (r.ok) return { ok: false, url }; // 200 but wrong type (likely HTML SPA)
+    if (r.ok) return { ok: false, url, reason: 'wrong-content-type' };
   } catch { /* fall through to GET */ }
   try {
     const r = await fetch(url, { method: 'GET', cache: 'no-store' });
     if (r.ok && isJsContentType(r.headers.get('content-type'))) return { ok: true, url };
-    return { ok: false, url };
+    return { ok: false, url, reason: r.ok ? 'wrong-content-type' : 'not-found' };
   } catch {
-    return { ok: false, url };
+    return { ok: false, url, reason: 'not-found' };
   }
 }
 
@@ -63,8 +63,17 @@ function loadClassicScript(src, { nonce = '', integrity = '' } = {}) {
     s.defer = false;  // execute ASAP after insertion
     if (nonce) s.nonce = nonce;
     if (integrity) s.integrity = integrity;
-    s.onload = () => resolve({ ok: true, src });
-    s.onerror = () => resolve({ ok: false, src });
+    let executionFailed = false;
+    const onExecutionError = (event) => {
+      if (event.filename === s.src) executionFailed = true;
+    };
+    const finish = (ok) => {
+      window.removeEventListener('error', onExecutionError);
+      resolve({ ok, src });
+    };
+    window.addEventListener('error', onExecutionError);
+    s.onload = () => finish(!executionFailed);
+    s.onerror = () => finish(false);
     document.head.appendChild(s);
   });
 }
@@ -99,12 +108,22 @@ function getBootstrapScriptIntegrityValue(name) {
 /** Try multiple candidate URLs (in order) until one probes as JS, then load it. */
 async function loadFromCandidates(name, candidates, { optional = false, nonce = '', integrity = '' } = {}) {
   for (const url of candidates) {
+    const isSite = name === 'odv.site.config.js';
+    const status = { attempted: true, url, loaded: false, reason: 'not-found' };
+    if (isSite) window.__ODV_SITE_CONFIG_STATUS__ = status;
     const probe = await probeScriptUrl(url);
+    status.reason = probe.reason || 'not-found';
     if (probe.ok) {
       const res = await loadClassicScript(url, { nonce, integrity });
+      status.loaded = res.ok;
+      status.reason = res.ok ? 'ok' : 'script-error-or-integrity';
       if (res.ok) return { ok: true, url };
       // If injecting failed, try next candidate
     }
+    if (isSite && status.reason !== 'not-found') {
+      console.warn(`[ODV] Site config not loaded: ${status.reason}`, url);
+    }
+    if (isSite && !status.loaded) delete window.__ODV_SITE_CONFIG__;
   }
   if (!optional) console.error('[ODV] Failed to load', name, 'from any of:', candidates);
   return { ok: !!optional, url: null };

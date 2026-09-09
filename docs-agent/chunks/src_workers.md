@@ -1,6 +1,6 @@
 # OpenDocViewer / src/workers
 
-File count: 3. Line count: 1561. JSDoc symbol count: 3.
+File count: 3. Line count: 1569. JSDoc symbol count: 3.
 
 ## src/workers/imageWorker.js
 
@@ -14,7 +14,7 @@ Symbols:
 
 OpenDocViewer \- PDF page image worker.
 
-Local imports: `src/utils/pdfjsDocumentOptions.js`
+Local imports: `src/utils/pdfjsDocumentOptions.js`, `src/utils/pdfResolution.js`
 
 Symbols:
 

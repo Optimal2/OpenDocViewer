@@ -10,6 +10,7 @@
 import * as pdfjsLib from 'pdfjs-dist/legacy/build/pdf';
 import pdfWorkerUrl from 'pdfjs-dist/legacy/build/pdf.worker.min.mjs?url';
 import { withPdfJsDocumentOptions } from '../utils/pdfjsDocumentOptions.js';
+import { resolvePdfViewportResolution } from '../utils/pdfResolution.js';
 
 const workerScope = self;
 const MIN_THUMBNAIL_DIMENSION = 24;
@@ -283,6 +284,10 @@ async function renderPdfPageAsset(payload) {
   try {
     page = await pdf.getPage(pageNumber);
     const baseViewport = page.getViewport({ scale: 1 });
+    const pdfResolution = variant === 'thumbnail' ? null
+      : resolvePdfViewportResolution(baseViewport, payload.pdfResolutionInput || {
+          config: { fullPageScale: payload.fullPageScale, pdfResolution: { mode: 'fixed' } },
+        });
     const targetScale = variant === 'thumbnail'
       ? fitScale(
           baseViewport.width,
@@ -290,7 +295,7 @@ async function renderPdfPageAsset(payload) {
           normalizeThumbnailBound(payload?.thumbnailMaxWidth, DEFAULT_THUMBNAIL_WIDTH),
           normalizeThumbnailBound(payload?.thumbnailMaxHeight, DEFAULT_THUMBNAIL_HEIGHT)
         )
-      : Math.max(0.5, Number(payload?.fullPageScale) || 2.0);
+      : pdfResolution.scale;
     const viewport = page.getViewport({ scale: targetScale });
     const width = Math.max(1, Math.ceil(viewport.width));
     const height = Math.max(1, Math.ceil(viewport.height));
@@ -315,6 +320,7 @@ async function renderPdfPageAsset(payload) {
     const blob = await canvasToBlob(canvas);
     return {
       blob,
+      pdfResolution,
       width,
       height,
       mimeType: blob.type || 'image/png',
@@ -355,6 +361,7 @@ async function renderPdfPageAssetBatch(payload, postItemResult) {
         width: rendered.width,
         height: rendered.height,
         mimeType: rendered.mimeType,
+        pdfResolution: rendered.pdfResolution,
         durationMs: Math.max(0, Math.round(performance.now() - taskStartedAt)),
       };
       successCount += 1;
@@ -417,6 +424,7 @@ workerScope.onmessage = async (event) => {
       width: rendered.width,
       height: rendered.height,
       mimeType: rendered.mimeType,
+      pdfResolution: rendered.pdfResolution,
     });
   } catch (error) {
     workerScope.postMessage({
