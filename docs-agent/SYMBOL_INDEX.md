@@ -143,30 +143,31 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx:30</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:21</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentMetadataOverlayDialog.jsx:38</code> |  |
-| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:465</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
-| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:488</code> |  |
-| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:215</code> |  |
-| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:203</code> |  |
+| <code>&lt;anonymous&gt;~applyFitZoomForKnownSize</code> | constant | <code>src/components/DocumentRender.jsx:467</code> | Apply sticky fit modes before a newly loaded page becomes visible. |
+| <code>&lt;anonymous&gt;~applyInitialZoomMode</code> | constant | <code>src/components/DocumentRender.jsx:490</code> |  |
+| <code>&lt;anonymous&gt;~claimAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:217</code> |  |
+| <code>&lt;anonymous&gt;~clearLoadingOverlayTimer</code> | constant | <code>src/components/DocumentRender.jsx:205</code> |  |
 | <code>DisplayedAsset</code> | typedef | <code>src/components/DocumentRender.jsx:76</code> |  |
 | <code>DocumentRender</code> | constant | <code>src/components/DocumentRender.jsx:100</code> |  |
-| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:374</code> |  |
-| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:709</code> |  |
-| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:452</code> |  |
-| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:433</code> |  |
-| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:442</code> |  |
-| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:420</code> | Returns the surface whose intrinsic size should drive fit calculations. |
+| <code>&lt;anonymous&gt;~drawImageOnCanvas</code> | constant | <code>src/components/DocumentRender.jsx:376</code> |  |
+| <code>&lt;anonymous&gt;~finalizeDisplayedAsset</code> | constant | <code>src/components/DocumentRender.jsx:712</code> |  |
+| <code>&lt;anonymous&gt;~fitToCustomWidth</code> | constant | <code>src/components/DocumentRender.jsx:454</code> |  |
+| <code>&lt;anonymous&gt;~fitToScreen</code> | constant | <code>src/components/DocumentRender.jsx:435</code> |  |
+| <code>&lt;anonymous&gt;~fitToWidth</code> | constant | <code>src/components/DocumentRender.jsx:444</code> |  |
+| <code>&lt;anonymous&gt;~getActiveRenderSurface</code> | constant | <code>src/components/DocumentRender.jsx:422</code> | Returns the surface whose intrinsic size should drive fit calculations. |
 | <code>getCurrentPage</code> | function | <code>src/components/DocumentRender.jsx:44</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:893</code> |  |
-| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:826</code> |  |
-| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:511</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:921</code> |  |
-| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:769</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageError</code> | constant | <code>src/components/DocumentRender.jsx:916</code> |  |
+| <code>&lt;anonymous&gt;~handlePendingImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:849</code> |  |
+| <code>&lt;anonymous&gt;~handleViewportDoubleClick</code> | constant | <code>src/components/DocumentRender.jsx:513</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageError</code> | constant | <code>src/components/DocumentRender.jsx:944</code> |  |
+| <code>&lt;anonymous&gt;~handleVisibleImageLoad</code> | constant | <code>src/components/DocumentRender.jsx:792</code> |  |
 | <code>hasUsableSize</code> | function | <code>src/components/DocumentRender.jsx:64</code> |  |
 | <code>isBlobAssetUrl</code> | function | <code>src/components/DocumentRender.jsx:72</code> |  |
+| <code>&lt;anonymous&gt;~lastNaturalSizeRef</code> | constant | <code>src/components/DocumentRender.jsx:143</code> | Natural size of the last finalized asset, per page index, for boost zoom compensation. |
 | <code>normalizeSize</code> | function | <code>src/components/DocumentRender.jsx:53</code> |  |
-| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:852</code> |  |
-| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:196</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
-| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:255</code> |  |
+| <code>&lt;anonymous&gt;~recoverPageAsset</code> | constant | <code>src/components/DocumentRender.jsx:875</code> |  |
+| <code>&lt;anonymous&gt;~resetAssetRetry</code> | constant | <code>src/components/DocumentRender.jsx:198</code> | Reset the per-page blob-URL retry tracker after a successful load or when the target page changes. |
+| <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:257</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentSelectionPanel.jsx:89</code> |  |
 | <code>SelectionCheckboxRow</code> | function | <code>src/components/DocumentSelectionPanel.jsx:30</code> |  |
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:150</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
@@ -469,11 +470,11 @@
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:49</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:43</code> |  |
 | <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1500</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1889</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1907</code> | Render one PDF page again at twice its effective PDF scale. |
 | <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1722</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:64</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:139</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2286</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2304</code> |  |
 | <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1380</code> |  |
 | <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1476</code> |  |
 | <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:977</code> |  |
@@ -495,23 +496,23 @@
 | <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:878</code> |  |
 | <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1311</code> |  |
 | <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1454</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2152</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2170</code> | Drain background eager-render work without blocking the UI thread. |
 | <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1235</code> |  |
 | <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1244</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1971</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1989</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1192</code> |  |
 | <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1630</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:679</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:149</code> |  |
 | <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1558</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:657</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2243</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2261</code> | Enqueue eager page rendering for a newly discovered source range. |
 | <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1545</code> |  |
 | <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1211</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:54</code> |  |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:162</code> |  |
 | <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1389</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:1993</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2011</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
 | <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1465</code> |  |
 | <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:479</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:328</code> |  |

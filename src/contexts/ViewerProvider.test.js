@@ -67,6 +67,31 @@ describe('provider PDF resolution and asset replacement', () => {
     expect([...harness.assets.keys()]).toHaveLength(1);
     await api.disposeDocumentSession();
   });
+  it('keeps the visible asset during a boost and lets a concurrent ordinary request join it', async () => {
+    const api = await setup(2);
+    const original = await api.ensurePageAsset(0, 'full');
+    let resolveRender;
+    const gate = new Promise((resolve) => { resolveRender = resolve; });
+    const realRender = harness.renderer.renderPageAsset.getMockImplementation();
+    harness.renderer.renderPageAsset.mockImplementationOnce(async (page, options) => { await gate; return realRender(page, options); });
+
+    const boost = api.enhancePdfPageResolution(0);
+    await Promise.resolve();
+    // The page is still showing the original asset while the boost renders: no blanking, no reload.
+    const during = harness.states.find((state) => Array.isArray(state) && state[0]?.fullSizeUrl !== undefined);
+    expect(during?.[0]?.fullSizeUrl).toBe(original);
+    expect(during?.[0]?.fullSizeStatus).toBe(1);
+    // An ordinary request from the viewer during the boost gets the still-visible asset back and
+    // starts no second render (that second render used to land last and undo the boost).
+    expect(await api.ensurePageAsset(0, 'full', { priority: 'critical' })).toBe(original);
+    resolveRender();
+    expect(await boost).toBe(true);
+    const boostedUrl = await api.ensurePageAsset(0, 'full');
+    expect(boostedUrl).not.toBe(original);
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
+    expect(harness.renderer.renderPageAsset.mock.calls[1][1].pdfResolutionInput.config.pdfResolution.fixedScale).toBe(4);
+    await api.disposeDocumentSession();
+  });
   it('boosts a page that already sits at the policy ceiling (maxScale)', async () => {
     const api = await setup(6);
     const original = await api.ensurePageAsset(0, 'full');

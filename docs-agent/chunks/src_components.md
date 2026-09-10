@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 13. Line count: 6643. JSDoc symbol count: 83.
+File count: 13. Line count: 6666. JSDoc symbol count: 84.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -63,12 +63,12 @@ Symbols:
 - `isBlobAssetUrl` (function) - No description.
 - `DisplayedAsset` (typedef) - No description.
 - `DocumentRender` (constant) - No description.
+- `<anonymous>~lastNaturalSizeRef` (constant) - Natural size of the last finalized asset, per page index, for boost zoom compensation.
 - `<anonymous>~resetAssetRetry` (constant) - Reset the per\-page blob\-URL retry tracker after a successful load or when the target page changes.
 - `<anonymous>~clearLoadingOverlayTimer` (constant) - No description.
 - `<anonymous>~claimAssetRetry` (constant) - No description.
 - `<anonymous>~resolveCustomFitOptions` (constant) - No description.
 - `<anonymous>~drawImageOnCanvas` (constant) - No description.
-- `<anonymous>~getActiveRenderSurface` (constant) - Returns the surface whose intrinsic size should drive fit calculations.
 
 ## src/components/DocumentSelectionPanel.jsx
 

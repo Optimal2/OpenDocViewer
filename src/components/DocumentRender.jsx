@@ -139,6 +139,8 @@ const DocumentRender = React.forwardRef(function DocumentRender(
   const renderViewportRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const requestSeqRef = useRef(0);
   const initialRenderRef = useRef(false);
+  /** Natural size of the last finalized asset, per page index, for boost zoom compensation. */
+  const lastNaturalSizeRef = useRef({ pageIndex: -1, width: 0, height: 0 });
   const initialFitPendingRef = useRef(true);
   const displayedAssetRef = useRef(/** @type {DisplayedAsset} */ ({ url: '', pageIndex: -1, pageNumber: 0 }));
   const pendingAssetRef = useRef(/** @type {(DisplayedAsset|null)} */ (null));
@@ -570,6 +572,7 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       setDisplayedAsset({ url: '', pageIndex: -1, pageNumber: 0 });
       setImageLoaded(false);
       setNaturalSize({ width: 0, height: 0, pageIndex: -1, url: '' });
+      lastNaturalSizeRef.current = { pageIndex: -1, width: 0, height: 0 };
       return () => {
         cancelled = true;
         clearLoadingOverlayTimer();
@@ -716,6 +719,23 @@ const DocumentRender = React.forwardRef(function DocumentRender(
       : nextSize;
 
     clearLoadingOverlayTimer();
+    // A resolution boost replaces the raster of the SAME page with a larger one. In the free CUSTOM
+    // zoom mode the zoom factor is relative to raster pixels, so keep the on-screen size by scaling
+    // the zoom down in the same ratio; the page then gets sharper instead of larger. Fit modes are
+    // recomputed just below, and ACTUAL_SIZE means raster pixels by definition.
+    const previousNatural = lastNaturalSizeRef.current;
+    if (
+      zoomMode === 'CUSTOM'
+      && previousNatural.pageIndex === target.pageIndex
+      && previousNatural.width > 0
+      && nextSize.width > 0
+      && Math.abs(previousNatural.width - nextSize.width) > 1
+    ) {
+      const ratio = previousNatural.width / nextSize.width;
+      const currentZoom = Number(zoom) || 0;
+      if (currentZoom > 0 && Number.isFinite(ratio) && ratio > 0) setZoom(currentZoom * ratio);
+    }
+    lastNaturalSizeRef.current = { pageIndex: target.pageIndex, width: nextSize.width, height: nextSize.height };
     applyFitZoomForKnownSize(nextLayoutSize);
     setDisplayedAsset({
       url: String(image?.currentSrc || image?.src || ''),
@@ -760,6 +780,9 @@ const DocumentRender = React.forwardRef(function DocumentRender(
     applyFitZoomForKnownSize,
     touchPageAsset,
     resetAssetRetry,
+    setZoom,
+    zoom,
+    zoomMode,
   ]);
 
   /**

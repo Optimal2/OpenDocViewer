@@ -3668,7 +3668,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 465,
+    "line": 467,
     "description": "Apply sticky fit modes before a newly loaded page becomes visible.",
     "params": [
       {
@@ -3693,7 +3693,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 488,
+    "line": 490,
     "description": "",
     "params": [],
     "returns": [
@@ -3711,7 +3711,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 215,
+    "line": 217,
     "description": "",
     "params": [
       {
@@ -3742,7 +3742,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 203,
+    "line": 205,
     "description": "",
     "params": [],
     "returns": [
@@ -3876,7 +3876,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 374,
+    "line": 376,
     "description": "",
     "params": [
       {
@@ -3901,7 +3901,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 709,
+    "line": 712,
     "description": "",
     "params": [
       {
@@ -3932,7 +3932,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 452,
+    "line": 454,
     "description": "",
     "params": [
       {
@@ -3957,7 +3957,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 433,
+    "line": 435,
     "description": "",
     "params": [],
     "returns": [
@@ -3975,7 +3975,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 442,
+    "line": 444,
     "description": "",
     "params": [],
     "returns": [
@@ -3993,7 +3993,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 420,
+    "line": 422,
     "description": "Returns the surface whose intrinsic size should drive fit calculations.",
     "params": [],
     "returns": [
@@ -4042,7 +4042,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 893,
+    "line": 916,
     "description": "",
     "params": [
       {
@@ -4073,7 +4073,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 826,
+    "line": 849,
     "description": "",
     "params": [
       {
@@ -4104,7 +4104,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 511,
+    "line": 513,
     "description": "",
     "params": [
       {
@@ -4129,7 +4129,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 921,
+    "line": 944,
     "description": "",
     "params": [],
     "returns": [
@@ -4147,7 +4147,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 769,
+    "line": 792,
     "description": "",
     "params": [
       {
@@ -4216,6 +4216,19 @@
     "examples": 0
   },
   {
+    "id": "<anonymous>~lastNaturalSizeRef",
+    "name": "lastNaturalSizeRef",
+    "longname": "<anonymous>~lastNaturalSizeRef",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentRender.jsx",
+    "line": 143,
+    "description": "Natural size of the last finalized asset, per page index, for boost zoom compensation.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "normalizeSize",
     "name": "normalizeSize",
     "longname": "normalizeSize",
@@ -4247,7 +4260,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 852,
+    "line": 875,
     "description": "",
     "params": [
       {
@@ -4284,7 +4297,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 196,
+    "line": 198,
     "description": "Reset the per-page blob-URL retry tracker after a successful load or when the target page changes.",
     "params": [],
     "returns": [
@@ -4302,7 +4315,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentRender.jsx",
-    "line": 255,
+    "line": 257,
     "description": "",
     "params": [
       {
@@ -12372,7 +12385,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1889,
+    "line": 1907,
     "description": "Render one PDF page again at twice its effective PDF scale.",
     "params": [
       {
@@ -12478,7 +12491,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2286,
+    "line": 2304,
     "description": "",
     "params": [
       {
@@ -13100,7 +13113,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2152,
+    "line": 2170,
     "description": "Drain background eager-render work without blocking the UI thread.",
     "params": [],
     "returns": [
@@ -13168,7 +13181,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1971,
+    "line": 1989,
     "description": "",
     "params": [
       {
@@ -13365,7 +13378,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 2243,
+    "line": 2261,
     "description": "Enqueue eager page rendering for a newly discovered source range.",
     "params": [
       {
@@ -13521,7 +13534,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ViewerProvider.jsx",
-    "line": 1993,
+    "line": 2011,
     "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
     "params": [
       {

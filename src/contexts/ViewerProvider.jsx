@@ -1731,10 +1731,16 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     const statusField = variant === 'thumbnail' ? 'thumbnailStatus' : 'fullSizeStatus';
 
     const requestedScale = Number(options.fullPageScale);
-    const resolutionChanged = variant === 'full' && isPdfPageEntry(workingPage)
-      && Number.isFinite(requestedScale) && requestedScale > 0
-      && requestedScale !== workingPage.pdfResolution?.scale;
-    if (options.forceRefresh === true || resolutionChanged) {
+    const isScaleOverride = variant === 'full' && isPdfPageEntry(workingPage)
+      && Number.isFinite(requestedScale) && requestedScale > 0;
+    const resolutionChanged = isScaleOverride && requestedScale !== workingPage.pdfResolution?.scale;
+    // A scale override (the resolution boost) keeps the current asset visible and its status
+    // untouched until the boosted raster is committed. Clearing it up front made the viewer see
+    // an empty page and request an ordinary render that raced the boost; the ordinary raster
+    // landed last and silently won (measured 2026-09-10). The previous URL is revoked on commit.
+    const replaceVisibleOnCommit = isScaleOverride && (options.forceRefresh === true || resolutionChanged);
+    const previousVisibleUrl = replaceVisibleOnCommit ? String(workingPage[urlField] || '').trim() : '';
+    if ((options.forceRefresh === true || resolutionChanged) && !replaceVisibleOnCommit) {
       clearPageAssetReference(safeIndex, variant);
       workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
     }
@@ -1766,8 +1772,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     }
 
     workingPage = getPageAt(allPagesRef.current, safeIndex) || workingPage;
-    const existingUrl = String(workingPage[urlField] || '').trim();
-    const cacheEntry = cache.get(safeIndex);
+    const existingUrl = replaceVisibleOnCommit ? '' : String(workingPage[urlField] || '').trim();
+    const cacheEntry = replaceVisibleOnCommit ? null : cache.get(safeIndex);
     if (cacheEntry?.url) {
       const cachedUrl = String(cacheEntry.url || '').trim();
       if (isReusableAssetUrl(cachedUrl)) {
@@ -1800,9 +1806,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     if (pendingAssetPromisesRef.current.has(pendingKey)) {
       return pendingAssetPromisesRef.current.get(pendingKey);
     }
+    const plainPendingKey = makeAssetKey(variant, safeIndex);
+    if (replaceVisibleOnCommit && pendingAssetPromisesRef.current.has(plainPendingKey)) {
+      // An ordinary render is already in flight; let it land first, the boost retries afterwards.
+      await pendingAssetPromisesRef.current.get(plainPendingKey);
+    }
 
     const sessionEpoch = sessionEpochRef.current;
-    patchPageAtIndex(safeIndex, { [statusField]: 0 });
+    if (!replaceVisibleOnCommit) patchPageAtIndex(safeIndex, { [statusField]: 0 });
 
     const promise = (async () => {
       try {
@@ -1848,6 +1859,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         }
 
         const url = commitRenderedPageAsset(safeIndex, variant, rendered, options);
+        if (replaceVisibleOnCommit && previousVisibleUrl && previousVisibleUrl !== url) {
+          revokeTrackedObjectUrls(new Set([previousVisibleUrl]));
+        }
 
         if (options.persist !== false && persistFullInBackground) {
           persistRenderedAssetInBackground(safeIndex, variant, rendered, sessionEpoch);
@@ -1869,10 +1883,14 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         return null;
       } finally {
         pendingAssetPromisesRef.current.delete(pendingKey);
+        if (replaceVisibleOnCommit && pendingAssetPromisesRef.current.get(plainPendingKey) === promise) {
+          pendingAssetPromisesRef.current.delete(plainPendingKey);
+        }
       }
     })();
 
     pendingAssetPromisesRef.current.set(pendingKey, promise);
+    if (replaceVisibleOnCommit) pendingAssetPromisesRef.current.set(plainPendingKey, promise);
     return promise;
   }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 

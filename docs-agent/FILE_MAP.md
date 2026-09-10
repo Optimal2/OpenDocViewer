@@ -22,7 +22,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentLoader/workerHandler.js</code> | 301 | 0 | 8 | high | OpenDocViewer — Worker orchestration &amp; message handling - Create image workers for off-main-thread rasterization/conversion. |
 | <code>src/components/DocumentMetadataMatrixOverlayDialog.jsx</code> | 177 | 1 | 2 | high | Session-wide document metadata matrix overlay. |
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
-| <code>src/components/DocumentRender.jsx</code> | 1112 | 1 | 24 | high | OpenDocViewer — Active page renderer. |
+| <code>src/components/DocumentRender.jsx</code> | 1135 | 1 | 25 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1370 | 2 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
@@ -60,7 +60,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/themeContext.js</code> | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 202 | 1 | 11 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | <code>src/contexts/viewerContext.js</code> | 207 | 10 | 9 | medium | Exports ViewerContext. |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2619 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2637 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
