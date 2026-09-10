@@ -47,17 +47,19 @@ Without that probe, config failures are harder to diagnose in production.
 `documentLoading.render.pdfResolution` defaults to:
 
 ```js
-{ mode: 'auto', fixedScale: 2, minScale: 1.5, maxScale: 6,
-  headroom: 1.25, maxPixels: 40000000, dprCap: 2 }
+{ mode: 'auto', targetDpi: 300, fixedScale: 2, minScale: 1.5, maxScale: 6,
+  maxPixels: 40000000 }
 ```
 
-Auto resolves each page independently: `viewerWidthCss * min(DPR, dprCap) * headroom / pageWidthPt`.
-The measured render viewport excludes the thumbnail pane; `window.innerWidth` is the fallback
-before it is measurable. PDF.js rotation is already included in the scale-one viewport, so a
-rotated page uses its displayed width exactly once. A small page gets a larger factor than a large
-page in the same document. At 1500 CSS pixels and DPR 1, portrait A4 resolves to about 3.151 instead
-of 2. A 1920-pixel-wide screen does not imply 1920 pixels of viewer content.
-Run `node scripts/measure-pdf-resolution.mjs` for the fixed/auto A5/A4/A3 comparison table.
+Auto targets a physical resolution: the factor is `targetDpi / 72` (PDF user space is 72 points per
+inch), so 300 dpi gives 4.1667 and an A4 page becomes 2480 × 3508 pixels, the same on a small
+laptop screen, a large monitor and on paper. The page rasters are also what the viewer prints, so
+the screen deliberately does not influence the factor; a user on a small screen gets the same print
+quality as everyone else. The page size only matters downwards: for very large pages the pixel
+budget and the browser render-surface limits lower the factor. `headroom` and `dprCap` from earlier
+versions are accepted but no longer used; `viewerWidthCss` and `devicePixelRatio` are still shown in
+the diagnostics for reference. Run `node scripts/measure-pdf-resolution.mjs` for the fixed/auto
+A5/A4/A3 comparison table.
 
 `fullPageScale` remains a legacy alias for `fixedScale`, and a floor in auto mode together with
 `minScale`. A site containing only `fullPageScale: 4` therefore keeps a floor of 4. If a site sets
@@ -66,8 +68,9 @@ wins. To preserve the old fixed policy, set
 `mode: 'fixed'`; ordinary safe pages keep the same scale and integer raster dimensions. The older
 fallback renderer's separate hardcoded factor has been removed.
 
-Normalization accepts finite numbers/numeric strings, clamps minScale to 0.5–6, fixedScale and
-maxScale to 0.5–12, headroom to 1–3, DPR cap to 1–4, and maxPixels to 1–268435456. Invalid values use defaults; maxScale is raised
+Normalization accepts finite numbers/numeric strings, clamps targetDpi to 72–1200, minScale to
+0.5–6, fixedScale and maxScale to 0.5–12, headroom to 1–3, DPR cap to 1–4, and maxPixels to
+1–268435456. Invalid values use defaults; maxScale is raised
 to minScale when bounds are inverted. Pixel and browser surface limits take precedence over the
 floor, including fixed mode. The low runtime memory tier halves the pixel budget to 20 MP by
 default. The limit includes rounding to integer canvas dimensions. It is a per-page limit, not a

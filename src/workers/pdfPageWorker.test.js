@@ -26,8 +26,8 @@ it('renders single and batch requests in a window-less worker with the shared po
   };
   await worker.onmessage({ data: { type: 'renderPdfPageAsset', taskId: 1, payload } });
   const single = worker.postMessage.mock.calls.find(([value]) => value.taskId === 1)[0];
-  expect(single).toMatchObject({ ok: true, width: 1875, height: 2654 });
-  expect(single.pdfResolution.scale).toBeCloseTo(3.1512605);
+  expect(single).toMatchObject({ ok: true, width: 2480, height: 3509 });
+  expect(single.pdfResolution.scale).toBeCloseTo(300 / 72);
   await worker.onmessage({ data: { type: 'renderPdfPageAssetBatch', taskId: 2, payload: { items: [{ itemId: 0, payload }] } } });
   const batch = worker.postMessage.mock.calls.find(([value]) => value.type === 'renderPdfPageAssetBatchItem')[0];
   expect(batch).toMatchObject({ ok: true, width: single.width, height: single.height, pdfResolution: single.pdfResolution });

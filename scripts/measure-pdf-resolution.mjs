@@ -1,7 +1,7 @@
 /** Print reproducible PDF display raster measurements; no browser or document fetch required. */
 import { resolvePdfRenderScale } from '../src/utils/pdfResolution.js';
 
-const viewerWidthCss = 1500; // Representative content width on a 1920-pixel-wide display.
+const viewerWidthCss = 1500; // Kept for the legacy columns; auto no longer depends on it (300 dpi target).
 const pages = [['A5', 420, 595], ['A4', 595, 842], ['A3', 842, 1191]];
 console.log(`Viewer width: ${viewerWidthCss} CSS pixels; normal memory tier.`);
 console.log('| Page | Policy | DPR | Scale | Bitmap pixels | MP |');

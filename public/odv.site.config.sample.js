@@ -793,15 +793,16 @@
         // Raster images and TIFF pages are not upscaled by this setting.
         fullPageScale: 2.0,
         // Legacy alias: auto honors the higher floor; in fixed mode pdfResolution.fixedScale wins.
-        // Auto uses each page's width, the measured viewer width, DPR and headroom.
+        // Auto targets a physical resolution (targetDpi) independent of screen and window, so the
+        // raster is good for printing too. Raise targetDpi for sharper zooming and printing; the
+        // safety caps still apply. headroom/dprCap are accepted but no longer used.
         pdfResolution: {
           mode: 'auto',
+          targetDpi: 300,
           fixedScale: 2.0,
           minScale: 1.5,
           maxScale: 6.0,
-          headroom: 1.25,
-          maxPixels: 40000000, // Halved on the low memory tier; safety caps override the floor.
-          dprCap: 2
+          maxPixels: 40000000 // Halved on the low memory tier; safety caps override the floor.
         },
         // Resizing does not rerasterize existing assets. Use the one-shot resolution boost.
         // These settings do not upscale TIFF/raster sources or change print/dedicated thumbnail rules.

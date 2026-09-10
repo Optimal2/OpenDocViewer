@@ -927,11 +927,12 @@
 | <code>normalizePdfPrintCacheLanguageMode</code> | function | <code>src/utils/pdfPrintCacheKey.js:21</code> |  |
 | <code>normalizePdfPrintCachePageNumbers</code> | function | <code>src/utils/pdfPrintCacheKey.js:60</code> |  |
 | <code>stablePrintText</code> | function | <code>src/utils/pdfPrintCacheKey.js:13</code> |  |
-| <code>normalizePdfResolution</code> | function | <code>src/utils/pdfResolution.js:22</code> | Normalize a render config, including the legacy fullPageScale alias. |
-| <code>PDF_RESOLUTION_SCALE_LIMIT</code> | constant | <code>src/utils/pdfResolution.js:14</code> | Upper bound for configured scale factors. |
-| <code>resolvePdfRenderScale</code> | function | <code>src/utils/pdfResolution.js:47</code> | Resolve an effective scale without reading browser globals. |
-| <code>resolvePdfResolutionBoost</code> | function | <code>src/utils/pdfResolution.js:87</code> | Double the current effective scale for a one-shot boost. |
-| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:98</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
+| <code>normalizePdfResolution</code> | function | <code>src/utils/pdfResolution.js:29</code> | Normalize a render config, including the legacy fullPageScale alias. |
+| <code>PDF_POINTS_PER_INCH</code> | constant | <code>src/utils/pdfResolution.js:10</code> | PDF user space is 72 points per inch; a scale factor is therefore dpi / 72. |
+| <code>PDF_RESOLUTION_SCALE_LIMIT</code> | constant | <code>src/utils/pdfResolution.js:17</code> | Upper bound for configured scale factors. |
+| <code>resolvePdfRenderScale</code> | function | <code>src/utils/pdfResolution.js:62</code> | Resolve an effective scale without reading browser globals. |
+| <code>resolvePdfResolutionBoost</code> | function | <code>src/utils/pdfResolution.js:100</code> | Double the current effective scale for a one-shot boost. |
+| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:111</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
 | <code>getPdfResolutionDiagnostics</code> | function | <code>src/utils/pdfResolutionRuntime.js:39</code> | Effective PDF display diagnostics, with null scale until a page has been rendered. |
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |

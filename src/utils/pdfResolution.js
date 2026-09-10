@@ -2,9 +2,12 @@
 import { clampRenderSurfaceSize } from './renderSurfaceBounds.js';
 
 export const PDF_RESOLUTION_DEFAULTS = Object.freeze({
-  mode: 'auto', fixedScale: 2, minScale: 1.5, maxScale: 6,
+  mode: 'auto', targetDpi: 300, fixedScale: 2, minScale: 1.5, maxScale: 6,
   headroom: 1.25, dprCap: 2, maxPixels: 40e6,
 });
+
+/** PDF user space is 72 points per inch; a scale factor is therefore dpi / 72. */
+export const PDF_POINTS_PER_INCH = 72;
 
 /**
  * Upper bound for configured scale factors. The policy ceiling (maxScale) defaults to 6; the
@@ -18,16 +21,22 @@ function bounded(value, fallback, min, max) {
   return Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback;
 }
 
-/** Normalize a render config, including the legacy fullPageScale alias. */
+/**
+ * Normalize a render config, including the legacy fullPageScale alias.
+ * `headroom` and `dprCap` are accepted for compatibility but no longer influence the factor:
+ * auto mode targets a physical resolution (`targetDpi`) that is independent of the screen.
+ */
 export function normalizePdfResolution(render = {}) {
   const raw = render?.pdfResolution || {};
   const defaults = PDF_RESOLUTION_DEFAULTS;
   const limit = PDF_RESOLUTION_SCALE_LIMIT;
+  const targetDpi = bounded(raw.targetDpi, defaults.targetDpi, 72, 1200);
   const minScale = bounded(raw.minScale, defaults.minScale, 0.5, 6);
   const mode = raw.mode === 'fixed' ? 'fixed' : 'auto';
   const fixedScale = bounded(raw.fixedScale ?? render?.fullPageScale, defaults.fixedScale, 0.5, limit);
   return {
     mode,
+    targetDpi,
     fixedScale: mode === 'auto' ? Math.max(fixedScale, bounded(render?.fullPageScale, 0.5, 0.5, limit)) : fixedScale,
     minScale,
     maxScale: Math.max(minScale, bounded(raw.maxScale, defaults.maxScale, 0.5, limit)),
@@ -40,20 +49,24 @@ export function normalizePdfResolution(render = {}) {
 /**
  * Resolve an effective scale without reading browser globals. Dimensions are unrotated PDF points;
  * when passing an already rotated scale-one PDF.js viewport, leave rotation at zero.
- * Safety limits take precedence over the configured floor, including in fixed mode.
+ *
+ * Auto mode targets a physical resolution, `targetDpi` (default 300, print quality), so the raster
+ * is the same on a small laptop screen, a large monitor and on paper. The page size only matters
+ * downwards: the pixel budget and the browser render-surface limits can lower the factor for very
+ * large pages. Safety limits take precedence over the configured floor, including in fixed mode.
+ * `viewerWidthCss` and `devicePixelRatio` are accepted for compatibility and diagnostics but do not
+ * influence the factor.
  * @param {Object} input
  * @returns {{scale:number, reason:string, clamped:boolean, pixels:number}}
  */
-export function resolvePdfRenderScale({ pageWidthPt, pageHeightPt, rotation = 0, viewerWidthCss, devicePixelRatio, config, memoryTier } = {}) {
+export function resolvePdfRenderScale({ pageWidthPt, pageHeightPt, rotation = 0, config, memoryTier } = {}) {
   const policy = normalizePdfResolution(config);
   let width = bounded(pageWidthPt, 1, 1, Number.MAX_SAFE_INTEGER);
   let height = bounded(pageHeightPt, 1, 1, Number.MAX_SAFE_INTEGER);
   if (Math.abs(Number(rotation) % 180) === 90) [width, height] = [height, width];
-  const cssWidth = bounded(viewerWidthCss, width, 1, Number.MAX_SAFE_INTEGER);
-  const dpr = bounded(devicePixelRatio, 1, 0.1, policy.dprCap);
   const requested = policy.mode === 'fixed'
     ? policy.fixedScale
-    : cssWidth * dpr * policy.headroom / width;
+    : policy.targetDpi / PDF_POINTS_PER_INCH;
   const floor = policy.mode === 'fixed' ? 0 : Math.max(policy.minScale, policy.fixedScale);
   let scale = Math.min(policy.maxScale, Math.max(floor, requested));
   let reason = policy.mode === 'fixed' ? 'fixed' : 'auto';

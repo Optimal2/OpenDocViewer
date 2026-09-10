@@ -47,10 +47,10 @@ describe('PDF render input propagation', () => {
     }) });
     vi.stubGlobal('document', { createElement: () => ({ width: 0, height: 0, getContext: () => ({}), toBlob: (done) => done(new Blob()) }) });
     const result = await renderer.renderPdfPage(descriptor, { variant: 'full', viewerWidthCss: 1500, devicePixelRatio: 1 });
-    expect(result.pdfResolution.scale).toBeCloseTo(3.1512605);
-    expect(result.width).toBe(1875);
-    expect(result.height).toBe(2654);
-    expect(render.mock.calls[0][0].viewport.width).toBe(1875);
+    expect(result.pdfResolution.scale).toBeCloseTo(300 / 72);
+    expect(result.width).toBe(2480);
+    expect(result.height).toBe(3509);
+    expect(render.mock.calls[0][0].viewport.width).toBeCloseTo(595 * 300 / 72, 6);
     const thumbnail = await renderer.renderPdfPage(descriptor, { variant: 'thumbnail', viewerWidthCss: 20000, devicePixelRatio: 4 });
     expect(thumbnail.pdfResolution).toBeNull();
     expect(thumbnail.width).toBeLessThanOrEqual(220);
@@ -66,6 +66,6 @@ describe('PDF render input propagation', () => {
     const insert = vi.fn();
     await renderPDFInMainThread({ arrayBuffer: new ArrayBuffer(8), index: 0, pageStartIndex: 0, pagesInvolved: 1, allPagesStartingIndex: 0 }, insert, true);
     expect(insert).toHaveBeenCalledTimes(1);
-    expect(insert.mock.calls[0][0].pdfResolution.scale).toBeCloseTo(3.1512605);
+    expect(insert.mock.calls[0][0].pdfResolution.scale).toBeCloseTo(300 / 72);
   });
 });

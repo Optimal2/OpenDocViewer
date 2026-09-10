@@ -83,8 +83,8 @@
   },
   "stats": {
     "fileCount": 116,
-    "sourceLineCount": 49833,
-    "docletCount": 1331,
+    "sourceLineCount": 49846,
+    "docletCount": 1332,
     "documentedFileCount": 116,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -446,10 +446,10 @@
     },
     {
       "path": "src/utils/pdfResolution.js",
-      "score": 93,
-      "lines": 102,
+      "score": 96,
+      "lines": 115,
       "incomingLocalImports": 6,
-      "doclets": 5,
+      "doclets": 6,
       "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "summaryConfidence": "high"
     },
@@ -1463,8 +1463,8 @@
     {
       "name": "src/utils",
       "fileCount": 37,
-      "lineCount": 15274,
-      "docletCount": 604,
+      "lineCount": 15287,
+      "docletCount": 605,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1504,10 +1504,10 @@
         },
         {
           "path": "src/utils/pdfResolution.js",
-          "score": 93,
-          "lines": 102,
+          "score": 96,
+          "lines": 115,
           "incomingLocalImports": 6,
-          "doclets": 5,
+          "doclets": 6,
           "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
           "summaryConfidence": "high"
         },
@@ -38881,9 +38881,9 @@
     },
     {
       "path": "src/utils/pdfResolution.js",
-      "lines": 102,
+      "lines": 115,
       "extension": ".js",
-      "jsdocBlockCount": 6,
+      "jsdocBlockCount": 7,
       "sourceSummary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "imports": [
         {
@@ -38902,66 +38902,71 @@
           "line": 4
         },
         {
+          "name": "PDF_POINTS_PER_INCH",
+          "kind": "variable",
+          "line": 10
+        },
+        {
           "name": "PDF_RESOLUTION_SCALE_LIMIT",
           "kind": "variable",
-          "line": 14
+          "line": 17
         },
         {
           "name": "normalizePdfResolution",
           "kind": "function",
-          "line": 22
+          "line": 29
         },
         {
           "name": "resolvePdfRenderScale",
           "kind": "function",
-          "line": 47
+          "line": 62
         },
         {
           "name": "resolvePdfResolutionBoost",
           "kind": "function",
-          "line": 87
+          "line": 100
         },
         {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 98
+          "line": 111
         }
       ],
       "declarations": [
         {
           "name": "bounded",
           "kind": "function",
-          "line": 16
+          "line": 19
         },
         {
           "name": "normalizePdfResolution",
           "kind": "function",
-          "line": 22
+          "line": 29
         },
         {
           "name": "resolvePdfRenderScale",
           "kind": "function",
-          "line": 47
+          "line": 62
         },
         {
           "name": "pixelsAt",
           "kind": "function",
-          "line": 63
+          "line": 76
         },
         {
           "name": "resolvePdfResolutionBoost",
           "kind": "function",
-          "line": 87
+          "line": 100
         },
         {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 98
+          "line": 111
         },
         {
           "name": "dimensions",
           "kind": "object",
-          "line": 99
+          "line": 112
         }
       ],
       "parseError": null,
@@ -38971,13 +38976,26 @@
       },
       "doclets": [
         {
+          "id": "PDF_POINTS_PER_INCH",
+          "name": "PDF_POINTS_PER_INCH",
+          "longname": "PDF_POINTS_PER_INCH",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/pdfResolution.js",
+          "line": 10,
+          "description": "PDF user space is 72 points per inch; a scale factor is therefore dpi / 72.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "PDF_RESOLUTION_SCALE_LIMIT",
           "name": "PDF_RESOLUTION_SCALE_LIMIT",
           "longname": "PDF_RESOLUTION_SCALE_LIMIT",
           "kind": "constant",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 14,
+          "line": 17,
           "description": "Upper bound for configured scale factors.",
           "params": [],
           "returns": [],
@@ -38990,7 +39008,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 22,
+          "line": 29,
           "description": "Normalize a render config, including the legacy fullPageScale alias.",
           "params": [],
           "returns": [],
@@ -39003,7 +39021,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 47,
+          "line": 62,
           "description": "Resolve an effective scale without reading browser globals.",
           "params": [
             {
@@ -39028,7 +39046,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 87,
+          "line": 100,
           "description": "Double the current effective scale for a one-shot boost.",
           "params": [],
           "returns": [],
@@ -39041,7 +39059,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 98,
+          "line": 111,
           "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
           "params": [],
           "returns": [],
@@ -39062,7 +39080,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 6,
-      "importanceScore": 93,
+      "importanceScore": 96,
       "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -77299,8 +77317,21 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 22,
+      "line": 29,
       "description": "Normalize a render config, including the legacy fullPageScale alias.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PDF_POINTS_PER_INCH",
+      "name": "PDF_POINTS_PER_INCH",
+      "longname": "PDF_POINTS_PER_INCH",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/pdfResolution.js",
+      "line": 10,
+      "description": "PDF user space is 72 points per inch; a scale factor is therefore dpi / 72.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -77312,7 +77343,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 14,
+      "line": 17,
       "description": "Upper bound for configured scale factors.",
       "params": [],
       "returns": [],
@@ -77325,7 +77356,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 47,
+      "line": 62,
       "description": "Resolve an effective scale without reading browser globals.",
       "params": [
         {
@@ -77350,7 +77381,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 87,
+      "line": 100,
       "description": "Double the current effective scale for a one-shot boost.",
       "params": [],
       "returns": [],
@@ -77363,7 +77394,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 98,
+      "line": 111,
       "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
       "params": [],
       "returns": [],

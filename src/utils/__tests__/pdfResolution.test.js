@@ -4,34 +4,45 @@ import { createPersistedPageAssetKey } from '../reloadCacheIdentity.js';
 import { getDocumentLoadingConfig } from '../documentLoadingConfig.js';
 
 const sizes = { A5: [420, 595], A4: [595, 842], A3: [842, 1191] };
-// Format, CSS width, DPR, expected scale (rounded only in this table).
+const PRINT_SCALE = 300 / 72; // 4.1666…: auto targets 300 dpi regardless of the screen.
+// Format, CSS width, DPR: the screen must not change the factor (rasters are also printed).
 const cases = [
-  ['A5', 1280, 1, 3.809524], ['A5', 1280, 2, 6],
-  ['A5', 1920, 1, 5.714286], ['A5', 1920, 2, 6],
-  ['A4', 1280, 1, 2.689076], ['A4', 1280, 2, 5.378151],
-  ['A4', 1920, 1, 4.033613], ['A4', 1920, 2, 6],
-  ['A3', 1280, 1, 2], ['A3', 1280, 2, 3.800475],
-  ['A3', 1920, 1, 2.850356], ['A3', 1920, 2, 5.700713],
+  ['A5', 1280, 1], ['A5', 1920, 2],
+  ['A4', 1280, 1], ['A4', 1920, 2],
+  ['A3', 1280, 1], ['A3', 1920, 2],
 ];
 const input = { pageWidthPt: 595, pageHeightPt: 842, viewerWidthCss: 1500, devicePixelRatio: 1 };
 
 describe('PDF resolution policy', () => {
-  it.each(cases)('%s at width %s and DPR %s resolves to %s', (format, viewerWidthCss, devicePixelRatio, expected) => {
+  it.each(cases)('%s at width %s and DPR %s resolves to 300 dpi', (format, viewerWidthCss, devicePixelRatio) => {
     const [pageWidthPt, pageHeightPt] = sizes[format];
     const result = resolvePdfRenderScale({ pageWidthPt, pageHeightPt, viewerWidthCss, devicePixelRatio });
-    expect(result.scale).toBeCloseTo(expected, 5);
+    expect(result.scale).toBeCloseTo(PRINT_SCALE, 5);
+    expect(result.reason).toBe('auto');
     expect(result.pixels).toBe(Math.ceil(pageWidthPt * result.scale) * Math.ceil(pageHeightPt * result.scale));
   });
-  it('renders A4 above 3 at a measured 1500 CSS pixels', () => {
-    expect(resolvePdfRenderScale(input).scale).toBeCloseTo(3.1512605);
+  it('gives A4 a print-quality raster of 2480 x 3509 pixels', () => {
+    const result = resolvePdfRenderScale(input);
+    expect(result.scale).toBeCloseTo(PRINT_SCALE);
+    expect(Math.ceil(595 * result.scale)).toBe(2480);
+    expect(Math.ceil(842 * result.scale)).toBe(3509);
   });
-  it('uses the rotated width once', () => {
-    expect(resolvePdfRenderScale({ ...input, rotation: 90 }).scale).toBeCloseTo(1500 * 1.25 / 842);
-    expect(resolvePdfRenderScale({ ...input, rotation: 270 }).scale).toBeCloseTo(1500 * 1.25 / 842);
+  it('honors targetDpi within its bounds and the policy ceiling', () => {
+    expect(resolvePdfRenderScale({ ...input, config: { pdfResolution: { targetDpi: 200 } } }).scale).toBeCloseTo(200 / 72);
+    expect(resolvePdfRenderScale({ ...input, config: { pdfResolution: { targetDpi: 600 } } })).toMatchObject({ scale: 6, reason: 'max-scale' });
+    expect(normalizePdfResolution({ pdfResolution: { targetDpi: 10 } }).targetDpi).toBe(72);
+    expect(normalizePdfResolution({ pdfResolution: { targetDpi: 'junk' } }).targetDpi).toBe(300);
   });
-  it('honors the legacy floor and caps DPR', () => {
-    expect(resolvePdfRenderScale({ ...input, config: { fullPageScale: 4 } }).scale).toBe(4);
-    expect(resolvePdfRenderScale({ ...input, devicePixelRatio: 8 })).toEqual(resolvePdfRenderScale({ ...input, devicePixelRatio: 2 }));
+  it('ignores rotation, viewer width, DPR and headroom for the factor', () => {
+    const base = resolvePdfRenderScale(input);
+    expect(resolvePdfRenderScale({ ...input, rotation: 90 }).scale).toBeCloseTo(base.scale);
+    expect(resolvePdfRenderScale({ ...input, viewerWidthCss: 400, devicePixelRatio: 1 }).scale).toBeCloseTo(base.scale);
+    expect(resolvePdfRenderScale({ ...input, viewerWidthCss: 4000, devicePixelRatio: 3 }).scale).toBeCloseTo(base.scale);
+    expect(resolvePdfRenderScale({ ...input, config: { pdfResolution: { headroom: 3, dprCap: 4 } } }).scale).toBeCloseTo(base.scale);
+  });
+  it('honors the legacy floor when it is above the print target', () => {
+    expect(resolvePdfRenderScale({ ...input, config: { fullPageScale: 5 } })).toMatchObject({ scale: 5, reason: 'floor' });
+    expect(resolvePdfRenderScale({ ...input, config: { fullPageScale: 3 } }).scale).toBeCloseTo(PRINT_SCALE);
   });
   it.each([0.5, 1.5, 2, 4])('preserves safe fixed raster dimensions at %s', (fixedScale) => {
     const result = resolvePdfRenderScale({ ...input, config: { pdfResolution: { mode: 'fixed', fixedScale } } });
@@ -46,7 +57,7 @@ describe('PDF resolution policy', () => {
     expect(low.pixels).toBeLessThanOrEqual(20e6);
     expect(low.scale).toBeLessThan(normal.scale);
     expect(low.clamped).toBe(true);
-    expect(resolvePdfRenderScale({ ...input, viewerWidthCss: 20000 }).scale).toBe(6);
+    expect(resolvePdfRenderScale({ ...input, config: { pdfResolution: { targetDpi: 1200 } } }).scale).toBe(6);
     const narrow = resolvePdfRenderScale({ ...large, pageWidthPt: 1e6, pageHeightPt: 1 });
     expect(Math.ceil(narrow.scale * 1e6)).toBeLessThanOrEqual(32767);
   });

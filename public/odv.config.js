@@ -707,19 +707,20 @@
         warmupBatchSize: 48,
         loadingOverlayDelayMs: 90,
         fullPageScale: 2.0,
-        // PDF display resolution per page. Auto uses measured viewer CSS width (or innerWidth),
-        // capped DPR and headroom. fullPageScale remains an alias for fixedScale and an auto floor.
-        // Safety caps can lower that floor. A later resize does not rerasterize; use resolution boost.
-        // The boost doubles the effective factor past maxScale (up to 12); only maxPixels and the
-        // browser render surface bound it.
+        // PDF display resolution per page. Auto targets a physical resolution (targetDpi, default
+        // 300 = print quality: A4 becomes 2480 x 3508 px) that does not depend on the screen or the
+        // window; the same raster serves small screens, large screens and printing. fullPageScale
+        // remains an alias for fixedScale and an auto floor. Only the safety caps (maxPixels, the
+        // browser render surface) can lower the factor, for very large pages. The resolution boost
+        // doubles the effective factor past maxScale (up to 12) within the same safety caps.
+        // headroom and dprCap are accepted for compatibility but no longer used.
         pdfResolution: {
           mode: 'auto', // 'fixed' preserves the configured scale for ordinary, safely sized pages.
+          targetDpi: 300,
           fixedScale: 2.0,
           minScale: 1.5,
           maxScale: 6.0,
-          headroom: 1.25,
-          maxPixels: 40000000, // Halved on the low runtime memory tier.
-          dprCap: 2
+          maxPixels: 40000000 // Halved on the low runtime memory tier.
         },
         // Full-page scale applies to PDF rendering in the current lazy page-asset pipeline.
         // Raster images and TIFF pages are not upscaled by this setting.

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 37. Line count: 15274. JSDoc symbol count: 604.
+File count: 37. Line count: 15287. JSDoc symbol count: 605.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -277,12 +277,13 @@ Symbols:
 
 Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 
-Exports: `PDF_RESOLUTION_DEFAULTS`, `PDF_RESOLUTION_SCALE_LIMIT`, `normalizePdfResolution`, `resolvePdfRenderScale`, `resolvePdfResolutionBoost`, `resolvePdfViewportResolution`
+Exports: `PDF_RESOLUTION_DEFAULTS`, `PDF_POINTS_PER_INCH`, `PDF_RESOLUTION_SCALE_LIMIT`, `normalizePdfResolution`, `resolvePdfRenderScale`, `resolvePdfResolutionBoost`, `resolvePdfViewportResolution`
 
 Local imports: `src/utils/renderSurfaceBounds.js`
 
 Symbols:
 
+- `PDF_POINTS_PER_INCH` (constant) - PDF user space is 72 points per inch; a scale factor is therefore dpi / 72.
 - `PDF_RESOLUTION_SCALE_LIMIT` (constant) - Upper bound for configured scale factors.
 - `normalizePdfResolution` (function) - Normalize a render config, including the legacy fullPageScale alias.
 - `resolvePdfRenderScale` (function) - Resolve an effective scale without reading browser globals.
