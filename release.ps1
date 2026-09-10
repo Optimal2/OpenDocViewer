@@ -158,8 +158,17 @@ function ReadNonEmpty([string]$Prompt) {
 }
 
 function Assert-CleanWorkingTree([string]$RepoRoot, [string]$Context) {
-  $porcelain = (Exec 'git' @('status', '--porcelain') -Cwd $RepoRoot -Quiet).Out
-  if (-not [string]::IsNullOrWhiteSpace($porcelain)) {
+  # Content-based, not stat-based: core.autocrlf=true checks files out with CRLF while the
+  # docs-agent generator (run by the pre-push gate and by the validation ladder) writes LF, so
+  # the worktree file is smaller than the size git cached at checkout. git status reports such
+  # a file as modified without comparing content, although `git diff` is empty. The tree is
+  # dirty only when content differs from HEAD (unstaged or staged) or untracked files exist.
+  $unstaged  = (Exec 'git' @('diff', '--name-only') -Cwd $RepoRoot -Quiet).Out
+  $staged    = (Exec 'git' @('diff', '--cached', '--name-only') -Cwd $RepoRoot -Quiet).Out
+  $untracked = (Exec 'git' @('ls-files', '--others', '--exclude-standard') -Cwd $RepoRoot -Quiet).Out
+  $dirty = -not ([string]::IsNullOrWhiteSpace($unstaged) -and [string]::IsNullOrWhiteSpace($staged) -and [string]::IsNullOrWhiteSpace($untracked))
+  if ($dirty) {
+    $porcelain = (Exec 'git' @('status', '--porcelain') -Cwd $RepoRoot -Quiet).Out
     throw @"
 Working tree is not clean $Context.
 
@@ -276,13 +285,6 @@ if (-not $SkipValidation) {
   # doc:agent regenerates the committed docs-agent packet; the clean-tree
   # assertion below intentionally fails if release prep forgot to commit it.
   $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
-  # The generator writes LF while core.autocrlf=true checks the packet out with CRLF, so the
-  # regenerated files are smaller than the size git cached at checkout. git treats a size
-  # mismatch as a definite modification without comparing content, and `git status` then
-  # reports an identical packet as modified (`git diff` is empty). Re-adding the packet only
-  # refreshes the stat cache when the content is unchanged; a real change is staged and still
-  # fails the assertion below, as intended.
-  $null = Exec 'git' @('add', '--', 'docs-agent') -Cwd $repoRoot
   Write-Host 'Validation passed.' -ForegroundColor Green
   Assert-CleanWorkingTree $repoRoot 'after validation'
 } else {
