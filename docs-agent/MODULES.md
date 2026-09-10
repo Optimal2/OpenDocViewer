@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 16. Line count: 6540. JSDoc symbol count: 97.
+File count: 16. Line count: 6582. JSDoc symbol count: 99.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -58,7 +58,7 @@ File count: 16. Line count: 6540. JSDoc symbol count: 97.
 - `src/components/DocumentToolbar/ManualOverlayDialog.jsx` - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/components/DocumentToolbar/ThemeMenuButton.jsx` - Compact theme selector for the toolbar.
 - `src/components/DocumentToolbar/LanguageMenuButton.jsx` - Compact language selector for the toolbar.
-- `src/components/DocumentToolbar/AboutOverlayDialog.jsx` - Small About dialog for version/build/support information.
+- `src/components/DocumentToolbar/ZoomButtons.jsx` - Zoom control cluster: \[ \- \] \[ % editable \] \[ \+ \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] \- When the field is NOT focused, it renders like “100%”.
 
 ## src/components/DocumentViewer
 

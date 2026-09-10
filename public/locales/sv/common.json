@@ -21,7 +21,8 @@
       "emptyHint": "Lämna tomt för att använda standardvärden.",
       "widthLabel": "Fönsterbredd",
       "heightLabel": "Fönsterhöjd",
-      "actualSizeLabel": "Faktisk storlek"
+      "actualSizeLabel": "Faktisk storlek",
+      "advancedLabel": "Avancerat"
     },
     "zoomDefault": {
       "title": "Standard zoom/storlek",

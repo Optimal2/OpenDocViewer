@@ -47,6 +47,7 @@ const CUSTOM_SIZE_FIELDS = Object.freeze([
     max: 100,
     labelKey: 'toolbar.fitCustomWidthFactor.widthLabel',
     defaultLabel: 'Window width',
+    advanced: false,
   },
   {
     key: 'heightFactorPercent',
@@ -54,6 +55,7 @@ const CUSTOM_SIZE_FIELDS = Object.freeze([
     max: 500,
     labelKey: 'toolbar.fitCustomWidthFactor.heightLabel',
     defaultLabel: 'Window height',
+    advanced: true,
   },
   {
     key: 'actualSizeFactorPercent',
@@ -61,8 +63,25 @@ const CUSTOM_SIZE_FIELDS = Object.freeze([
     max: 200,
     labelKey: 'toolbar.fitCustomWidthFactor.actualSizeLabel',
     defaultLabel: 'Actual size',
+    advanced: true,
   },
 ]);
+
+/** Fields shown by default (window width) vs. behind the "Advanced" disclosure (height, actual size). */
+const BASIC_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field) => !field.advanced));
+const ADVANCED_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field) => field.advanced));
+const ADVANCED_CUSTOM_SIZE_PANEL_ID = 'odv-custom-fit-advanced-fields';
+
+/**
+ * True when the user has a stored value in any advanced field. The disclosure then starts
+ * expanded so a configured limit is never hidden behind the link.
+ * @param {Object|null} limits
+ * @returns {boolean}
+ */
+function hasAdvancedCustomSizeValue(limits) {
+  if (!limits) return false;
+  return ADVANCED_CUSTOM_SIZE_FIELDS.some((field) => clampFactorPercent(limits[field.key], field.max) != null);
+}
 
 function getCustomSizeField(key) {
   return CUSTOM_SIZE_FIELDS.find((field) => field.key === key) || CUSTOM_SIZE_FIELDS[0];
@@ -153,6 +172,9 @@ const ZoomButtons = ({
     actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
   }));
   const [customSizeFocusedField, setCustomSizeFocusedField] = useState(null);
+  const [advancedCustomSizeOpen, setAdvancedCustomSizeOpen] = useState(() =>
+    hasAdvancedCustomSizeValue(userCustomFitSizeLimits),
+  );
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
@@ -416,16 +438,8 @@ const ZoomButtons = ({
         className={fitCustomActive ? 'is-active' : ''}
         mainClassName={fitCustomActive ? 'is-active' : ''}
         disabled={disableFitCustom}
-        menuChildren={({ closeMenu }) => (
-          <>
-            <div className="toolbar-split-menu-section">
-              <div className="toolbar-split-menu-title">
-                {t('toolbar.fitCustomWidthFactor.label', { defaultValue: 'Custom size (max % of)' })}
-              </div>
-              <div className="toolbar-split-menu-description">
-                {t('toolbar.fitCustomWidthFactor.emptyHint', { defaultValue: 'Leave empty to use default values.' })}
-              </div>
-              {CUSTOM_SIZE_FIELDS.map((field) => (
+        menuChildren={({ closeMenu }) => {
+          const renderCustomSizeField = (field) => (
                 <div className="toolbar-split-menu-form toolbar-split-menu-form--inline" key={field.key}>
                   <label htmlFor={field.id}>{t(field.labelKey, { defaultValue: field.defaultLabel })}</label>
                   <input
@@ -459,7 +473,34 @@ const ZoomButtons = ({
                     }}
                   />
                 </div>
-              ))}
+          );
+          return (
+          <>
+            <div className="toolbar-split-menu-section">
+              <div className="toolbar-split-menu-title">
+                {t('toolbar.fitCustomWidthFactor.label', { defaultValue: 'Custom size (max % of)' })}
+              </div>
+              <div className="toolbar-split-menu-description">
+                {t('toolbar.fitCustomWidthFactor.emptyHint', { defaultValue: 'Leave empty to use default values.' })}
+              </div>
+              {BASIC_CUSTOM_SIZE_FIELDS.map(renderCustomSizeField)}
+              <button
+                type="button"
+                className="toolbar-split-menu-disclosure"
+                aria-expanded={advancedCustomSizeOpen}
+                aria-controls={ADVANCED_CUSTOM_SIZE_PANEL_ID}
+                onClick={() => setAdvancedCustomSizeOpen((current) => !current)}
+              >
+                <span className="material-icons" aria-hidden="true">
+                  {advancedCustomSizeOpen ? 'expand_less' : 'expand_more'}
+                </span>
+                {t('toolbar.fitCustomWidthFactor.advancedLabel', { defaultValue: 'Advanced' })}
+              </button>
+              {advancedCustomSizeOpen ? (
+                <div id={ADVANCED_CUSTOM_SIZE_PANEL_ID} className="toolbar-split-menu-advanced">
+                  {ADVANCED_CUSTOM_SIZE_FIELDS.map(renderCustomSizeField)}
+                </div>
+              ) : null}
             </div>
             <div className="toolbar-split-menu-section">
               <div className="toolbar-split-menu-title">
@@ -471,7 +512,8 @@ const ZoomButtons = ({
               {['ACTUAL_SIZE', 'FIT_PAGE', 'FIT_CUSTOM', 'FIT_WIDTH'].map((mode) => renderDefaultZoomModeRow(mode, closeMenu))}
             </div>
           </>
-        )}
+          );
+        }}
       >
         <span className="toolbar-ratio-mark" aria-hidden="true">1:X</span>
       </SplitToolbarButton>

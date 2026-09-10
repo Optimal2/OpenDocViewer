@@ -21,7 +21,8 @@
       "emptyHint": "Leave empty to use default values.",
       "widthLabel": "Window width",
       "heightLabel": "Window height",
-      "actualSizeLabel": "Actual size"
+      "actualSizeLabel": "Actual size",
+      "advancedLabel": "Advanced"
     },
     "zoomDefault": {
       "title": "Default zoom/size",
