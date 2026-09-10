@@ -2,21 +2,30 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.7.1** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.8.0** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.7.0 and earlier are superseded by v2.7.1 and are no longer supported for production deployments. v2.7.1 keeps the v2.7.0 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes - and adds the six resolved Dependabot advisories, continued dependency upkeep, and a correction to the Content-Security-Policy `connect-src` directive that v2.7.0 shipped too strict: documents opened from a blob URL were blocked. Operators should upgrade to v2.7.1 before opening new support or security issues.
+OpenDocViewer v2.7.1 and earlier are superseded by v2.8.0 and are no longer supported for production deployments. v2.8.0 keeps the v2.7 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive - and adds the four resolved Dependabot advisories (browserslist, qs, @humanfs/node, fflate), the refreshed dependency baseline (React 19.3, Vite 8.3, Vitest 5, pdf.js 6.3), memory-capped print-quality PDF rasterization, and visible site-configuration load status so a silently ignored override can no longer hide a weaker policy. Operators should upgrade to v2.8.0 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.7.1   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.8.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.7.1   | :x: | Superseded by v2.8.0 advisory fixes and dependency baseline; upgrade required |
 | 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
 | <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.7.1 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.8.0 is supported.
+
+### OpenDocViewer v2.8.0
+Changes since v2.7.1:
+
+- Resolved the four open Dependabot advisories (browserslist, qs, @humanfs/node, fflate) and refreshed the dependency baseline: React 19.3, Vite 8.3, rolldown 1.2.8, Vitest 5, pdf.js 6.3.289, express-rate-limit 8.7, morgan 1.12; `npm audit` reports no advisories.
+- PDF pages rasterize at a print target (300 dpi) by default, bounded by per-page pixel and render-surface caps that are halved on the low memory tier, so larger rasters cannot exhaust the browser; the one-shot boost honours the same caps and reports a capped page instead of pretending.
+- The viewer reports when `odv.site.config.js` was found but not loaded (`window.__ODV_SITE_CONFIG_STATUS__`, console warning, support diagnostics), so a site override that carries security-relevant settings can no longer be skipped silently.
+- The module seed SQL no longer registers artifacts or seeds platform-owned artifact pointers; the component-version validator and pre-push local CI gate guard lockstep, payload tooling and shared-script drift.
 
 ### OpenDocViewer v2.7.1
 Changes since v2.7.0:
