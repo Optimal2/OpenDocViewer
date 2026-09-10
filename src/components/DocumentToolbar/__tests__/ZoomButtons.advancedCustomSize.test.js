@@ -123,6 +123,21 @@ describe('ZoomButtons custom-size advanced disclosure', () => {
     expect(container.querySelector('#odv-custom-fit-width-factor').closest('.toolbar-split-menu-form--advanced')).toBeNull();
   });
 
+  it('is collapsed again after the menu is closed and reopened', () => {
+    mount();
+    openMenu();
+    act(() => {
+      disclosure().dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    expect(disclosure().getAttribute('aria-expanded')).toBe('true');
+
+    openMenu(); // the split arrow toggles: this closes the menu
+    expect(disclosure()).toBeNull();
+    openMenu(); // ...and this reopens it
+    expect(disclosure().getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('#odv-custom-fit-height-factor')).toBeNull();
+  });
+
   it('stays collapsed when only the basic width value is set', () => {
     mount({
       userCustomFitSizeLimits: { widthFactorPercent: 50, heightFactorPercent: null, actualSizeFactorPercent: null },

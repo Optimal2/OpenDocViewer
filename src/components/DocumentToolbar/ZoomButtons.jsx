@@ -72,6 +72,46 @@ const BASIC_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field)
 const ADVANCED_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field) => field.advanced));
 const ADVANCED_CUSTOM_SIZE_PANEL_ID = 'odv-custom-fit-advanced-fields';
 
+/**
+ * "Advanced" disclosure for the secondary custom-size fields (window height, actual size).
+ * Its open/closed state lives here, inside the popup content, so it is collapsed again every time
+ * the menu opens: SplitToolbarButton unmounts the menu content on close.
+ *
+ * @param {Object} props
+ * @param {string} props.label            Visible link text.
+ * @param {function(Object):JSX.Element} props.renderField  Renders one custom-size field row.
+ * @returns {JSX.Element}
+ */
+function AdvancedCustomSizeDisclosure({ label, renderField }) {
+  const [open, setOpen] = useState(false);
+  return (
+    <>
+      <button
+        type="button"
+        className="toolbar-split-menu-disclosure"
+        aria-expanded={open}
+        aria-controls={ADVANCED_CUSTOM_SIZE_PANEL_ID}
+        onClick={() => setOpen((current) => !current)}
+      >
+        <span className="material-icons" aria-hidden="true">
+          {open ? 'expand_less' : 'expand_more'}
+        </span>
+        {label}
+      </button>
+      {open ? (
+        <div id={ADVANCED_CUSTOM_SIZE_PANEL_ID} className="toolbar-split-menu-advanced">
+          {ADVANCED_CUSTOM_SIZE_FIELDS.map(renderField)}
+        </div>
+      ) : null}
+    </>
+  );
+}
+
+AdvancedCustomSizeDisclosure.propTypes = {
+  label: PropTypes.string.isRequired,
+  renderField: PropTypes.func.isRequired,
+};
+
 function getCustomSizeField(key) {
   return CUSTOM_SIZE_FIELDS.find((field) => field.key === key) || CUSTOM_SIZE_FIELDS[0];
 }
@@ -161,8 +201,6 @@ const ZoomButtons = ({
     actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
   }));
   const [customSizeFocusedField, setCustomSizeFocusedField] = useState(null);
-  // Always collapsed when the menu opens; the advanced fields are shown only on request.
-  const [advancedCustomSizeOpen, setAdvancedCustomSizeOpen] = useState(false);
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
@@ -475,23 +513,10 @@ const ZoomButtons = ({
                 {t('toolbar.fitCustomWidthFactor.emptyHint', { defaultValue: 'Leave empty to use default values.' })}
               </div>
               {BASIC_CUSTOM_SIZE_FIELDS.map(renderCustomSizeField)}
-              <button
-                type="button"
-                className="toolbar-split-menu-disclosure"
-                aria-expanded={advancedCustomSizeOpen}
-                aria-controls={ADVANCED_CUSTOM_SIZE_PANEL_ID}
-                onClick={() => setAdvancedCustomSizeOpen((current) => !current)}
-              >
-                <span className="material-icons" aria-hidden="true">
-                  {advancedCustomSizeOpen ? 'expand_less' : 'expand_more'}
-                </span>
-                {t('toolbar.fitCustomWidthFactor.advancedLabel', { defaultValue: 'Advanced' })}
-              </button>
-              {advancedCustomSizeOpen ? (
-                <div id={ADVANCED_CUSTOM_SIZE_PANEL_ID} className="toolbar-split-menu-advanced">
-                  {ADVANCED_CUSTOM_SIZE_FIELDS.map(renderCustomSizeField)}
-                </div>
-              ) : null}
+              <AdvancedCustomSizeDisclosure
+                label={t('toolbar.fitCustomWidthFactor.advancedLabel', { defaultValue: 'Advanced' })}
+                renderField={renderCustomSizeField}
+              />
             </div>
             <div className="toolbar-split-menu-section">
               <div className="toolbar-split-menu-title">

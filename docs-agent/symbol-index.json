@@ -7972,6 +7972,43 @@
     "examples": 0
   },
   {
+    "id": "AdvancedCustomSizeDisclosure",
+    "name": "AdvancedCustomSizeDisclosure",
+    "longname": "AdvancedCustomSizeDisclosure",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
+    "line": 85,
+    "description": "&quot;Advanced&quot; disclosure for the secondary custom-size fields (window height, actual size).",
+    "params": [
+      {
+        "name": "props",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "props.label",
+        "type": "string",
+        "optional": false,
+        "description": "Visible link text."
+      },
+      {
+        "name": "props.renderField",
+        "type": "function",
+        "optional": false,
+        "description": "Renders one custom-size field row."
+      }
+    ],
+    "returns": [
+      {
+        "type": "JSX.Element",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "BASIC_CUSTOM_SIZE_FIELDS",
     "name": "BASIC_CUSTOM_SIZE_FIELDS",
     "longname": "BASIC_CUSTOM_SIZE_FIELDS",
@@ -7991,7 +8028,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-    "line": 106,
+    "line": 146,
     "description": "Parse a percent-like string safely.",
     "params": [],
     "returns": [],
