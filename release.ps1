@@ -308,8 +308,12 @@ Write-Host "Regenerating the agent documentation packet for $newVersion..." -For
 $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
 
 Write-Host 'Bumping the OMP component version so the release commit passes the lockstep gate...' -ForegroundColor Yellow
+# A PowerShell script invoked with & sets $LASTEXITCODE only when it calls exit, so under
+# Set-StrictMode the variable may not exist after a successful run. Seed it first and also
+# honour $? (false after a terminating error inside the script).
+$global:LASTEXITCODE = 0
 & (Join-Path $repoRoot 'scripts/omp/bump-version.ps1') -ComponentKey 'opendocviewer-web'
-if ($LASTEXITCODE -ne 0) { throw "scripts/omp/bump-version.ps1 failed with exit code $LASTEXITCODE" }
+if (-not $? -or $LASTEXITCODE -ne 0) { throw "scripts/omp/bump-version.ps1 failed (exit code $LASTEXITCODE)" }
 
 Write-Host "Creating release commit and tag $tagName..." -ForegroundColor Yellow
 $null = Exec 'git' @('add', '--all') -Cwd $repoRoot
