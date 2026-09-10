@@ -27,8 +27,8 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 1 (dynamic) | <code>src/utils/pdfWorkerDispatcher.js</code> |
 | <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+27 more, 32 files total) |
-| <code>react</code> | <code>^19.2.8</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+48 more, 53 files total) |
-| <code>react-dom</code> | <code>^19.2.8</code> | 1 | <code>src/index.jsx</code> |
+| <code>react</code> | <code>^19.3.0</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+48 more, 53 files total) |
+| <code>react-dom</code> | <code>^19.3.0</code> | 1 | <code>src/index.jsx</code> |
 | <code>react-i18next</code> | <code>^17.0.13</code> | 33 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+28 more, 33 files total) |
 | <code>utif2</code> | <code>^4.1.0</code> | 4 (1 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/imageWorker.js</code> |
 
@@ -52,8 +52,8 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>29.1.1</code> | 0 |
 | <code>prettier</code> | <code>^3.9.6</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.7</code> | 0 |
-| <code>vite</code> | <code>^8.2.2</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.8</code> | 0 |
+| <code>vite</code> | <code>^8.3.0</code> | 0 |
 | <code>vitest</code> | <code>^5.0.0</code> | 0 |
 
 ## Imported But Not Declared Directly
