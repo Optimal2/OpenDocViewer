@@ -66,8 +66,8 @@ wins. To preserve the old fixed policy, set
 `mode: 'fixed'`; ordinary safe pages keep the same scale and integer raster dimensions. The older
 fallback renderer's separate hardcoded factor has been removed.
 
-Normalization accepts finite numbers/numeric strings, clamps scale fields to 0.5–6, headroom to
-1–3, DPR cap to 1–4, and maxPixels to 1–268435456. Invalid values use defaults; maxScale is raised
+Normalization accepts finite numbers/numeric strings, clamps minScale to 0.5–6, fixedScale and
+maxScale to 0.5–12, headroom to 1–3, DPR cap to 1–4, and maxPixels to 1–268435456. Invalid values use defaults; maxScale is raised
 to minScale when bounds are inverted. Pixel and browser surface limits take precedence over the
 floor, including fixed mode. The low runtime memory tier halves the pixel budget to 20 MP by
 default. The limit includes rounding to integer canvas dimensions. It is a per-page limit, not a
@@ -77,9 +77,13 @@ Effective scales are part of persisted page-asset keys. Reload restoration check
 against the current policy before accepting an asset. This can require opening the PDF to read
 geometry even when the actual page raster is restored. Existing in-session pages retain their
 effective scale on resize; resizing does **not** automatically rasterize again. The one-shot
-resolution boost requests twice the current effective factor within the same caps, replaces the
-visible asset URL, and marks the page done when no higher factor is available. Boosted rasters are
-session-local and do not overwrite the ordinary persisted raster.
+resolution boost requests twice the current effective factor. The policy ceiling (maxScale) does
+not limit the boost, because the auto policy already sits at that ceiling on wide or high-DPI
+viewers; only the hard caps do (maxPixels, the browser render surface and the scale limit of 12).
+The boost replaces the visible asset URL and marks the page boosted. When the hard caps already
+bind, the page is marked "maxed" instead: the button is disabled with a distinct tooltip and
+nothing is rendered again. Boosted rasters are session-local and do not overwrite the ordinary
+persisted raster.
 
 The diagnostics export includes the normalized policy, latest effective factor, DPR, viewer CSS
 width, memory tier, reason and pixel count under `config.documentLoading.pdfResolution`.

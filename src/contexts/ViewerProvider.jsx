@@ -334,7 +334,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const [messageQueue, setMessageQueue] = useState([]);
   const [documentLoadingConfig, setDocumentLoadingConfig] = useState(getDocumentLoadingConfig());
   const [memoryPressureStage, setMemoryPressureStage] = useState('normal');
-  const [pdfResolutionBoostState, setPdfResolutionBoostState] = useState({ boostedKeys: [], pendingKeys: [] });
+  const [pdfResolutionBoostState, setPdfResolutionBoostState] = useState({ boostedKeys: [], pendingKeys: [], maxedKeys: [] });
   const [runtimeDiagnostics, setRuntimeDiagnostics] = useState({
     sessionStartedAtMs: 0,
     loadRunStartedAtMs: 0,
@@ -446,6 +446,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   const knownThumbnailAssetPagesRef = useRef(new Set());
   const pdfResolutionBoostedKeysRef = useRef(new Set());
   const pdfResolutionPendingKeysRef = useRef(new Set());
+  // Pages whose boost could not raise the factor because the hard caps already bind.
+  const pdfResolutionMaxedKeysRef = useRef(new Set());
   const pdfPageCountRef = useRef(0);
   const assetPipelineStatsRef = useRef(createAssetPipelineStats());
   const loaderPhaseStatsRef = useRef(createLoaderPhaseStats());
@@ -466,6 +468,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     setPdfResolutionBoostState({
       boostedKeys: Array.from(pdfResolutionBoostedKeysRef.current),
       pendingKeys: Array.from(pdfResolutionPendingKeysRef.current),
+      maxedKeys: Array.from(pdfResolutionMaxedKeysRef.current),
     });
   }, []);
 
@@ -686,8 +689,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     knownThumbnailAssetPagesRef.current.clear();
     pdfResolutionBoostedKeysRef.current.clear();
     pdfResolutionPendingKeysRef.current.clear();
+    pdfResolutionMaxedKeysRef.current.clear();
     loaderPhaseStatsRef.current = createLoaderPhaseStats();
-    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
+    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [], maxedKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -1046,8 +1050,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     knownThumbnailAssetPagesRef.current.clear();
     pdfResolutionBoostedKeysRef.current.clear();
     pdfResolutionPendingKeysRef.current.clear();
+    pdfResolutionMaxedKeysRef.current.clear();
     loaderPhaseStatsRef.current = createLoaderPhaseStats();
-    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [] });
+    setPdfResolutionBoostState({ boostedKeys: [], pendingKeys: [], maxedKeys: [] });
     warmupQueueRef.current = [];
     warmupRunningRef.current = false;
     if (memoryMonitorTimerRef.current) {
@@ -1872,9 +1877,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [clearPageAssetReference, commitRenderedPageAsset, getVariantCache, noteThumbnailAssetReady, patchPageAtIndex, persistRenderedAsset, persistRenderedAssetInBackground, renderPageBlob, restorePersistedAsset, shouldReuseFullAssetForThumbnail, touchPageAsset]);
 
   /**
-   * Render one PDF page again at twice its effective PDF scale, within the same safety caps.
-   * The boost is intentionally session-local and one-shot per PDF page; it replaces the visible
-   * object URL without changing the persisted normal-resolution cache entry.
+   * Render one PDF page again at twice its effective PDF scale. The policy ceiling does not apply
+   * to the boost, only the hard safety caps (maxPixels, render surface, scale limit); a page that
+   * cannot be raised is reported as maxed instead of boosted. The boost is session-local and
+   * one-shot per PDF page; it replaces the visible object URL without changing the persisted
+   * normal-resolution cache entry.
    *
    * @param {number} pageIndex
    * @returns {Promise<boolean>}
@@ -1886,7 +1893,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
     const pageKey = makePdfResolutionPageKey(page);
     if (!pageKey) return false;
-    if (pdfResolutionBoostedKeysRef.current.has(pageKey) || pdfResolutionPendingKeysRef.current.has(pageKey)) {
+    if (
+      pdfResolutionBoostedKeysRef.current.has(pageKey)
+      || pdfResolutionPendingKeysRef.current.has(pageKey)
+      || pdfResolutionMaxedKeysRef.current.has(pageKey)
+    ) {
       return false;
     }
 
@@ -1902,7 +1913,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
         ...getPdfResolutionInputs(sessionConfigRef.current.render),
       }, baseScale);
       if (!boosted.available) {
-        pdfResolutionBoostedKeysRef.current.add(pageKey);
+        pdfResolutionMaxedKeysRef.current.add(pageKey);
+        logger.info('PDF page already renders at the maximum safe resolution; boost not available', {
+          pageIndex: safeIndex,
+          sourcePageIndex: Math.max(0, Number(page.pageIndex) || 0),
+          scale: baseScale,
+          reason: boosted.reason,
+        });
         return false;
       }
       const url = await ensurePageAsset(safeIndex, 'full', {

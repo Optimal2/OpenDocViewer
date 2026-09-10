@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 16. Line count: 6598. JSDoc symbol count: 99.
+File count: 16. Line count: 6603. JSDoc symbol count: 99.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -75,7 +75,7 @@ File count: 10. Line count: 4969. JSDoc symbol count: 117.
 
 ## src/contexts
 
-File count: 4. Line count: 3048. JSDoc symbol count: 81.
+File count: 4. Line count: 3065. JSDoc symbol count: 81.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -148,15 +148,15 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 37. Line count: 15257. JSDoc symbol count: 603.
+File count: 37. Line count: 15274. JSDoc symbol count: 604.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
-- `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 
 ## src/workers

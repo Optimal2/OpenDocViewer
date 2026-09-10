@@ -6,6 +6,13 @@ export const PDF_RESOLUTION_DEFAULTS = Object.freeze({
   headroom: 1.25, dprCap: 2, maxPixels: 40e6,
 });
 
+/**
+ * Upper bound for configured scale factors. The policy ceiling (maxScale) defaults to 6; the
+ * one-shot resolution boost may go to twice that. Memory is protected by maxPixels and the
+ * browser render-surface limits, not by this number.
+ */
+export const PDF_RESOLUTION_SCALE_LIMIT = 12;
+
 function bounded(value, fallback, min, max) {
   const number = typeof value === 'number' || (typeof value === 'string' && value.trim()) ? Number(value) : NaN;
   return Number.isFinite(number) ? Math.max(min, Math.min(max, number)) : fallback;
@@ -15,14 +22,15 @@ function bounded(value, fallback, min, max) {
 export function normalizePdfResolution(render = {}) {
   const raw = render?.pdfResolution || {};
   const defaults = PDF_RESOLUTION_DEFAULTS;
+  const limit = PDF_RESOLUTION_SCALE_LIMIT;
   const minScale = bounded(raw.minScale, defaults.minScale, 0.5, 6);
   const mode = raw.mode === 'fixed' ? 'fixed' : 'auto';
-  const fixedScale = bounded(raw.fixedScale ?? render?.fullPageScale, defaults.fixedScale, 0.5, 6);
+  const fixedScale = bounded(raw.fixedScale ?? render?.fullPageScale, defaults.fixedScale, 0.5, limit);
   return {
     mode,
-    fixedScale: mode === 'auto' ? Math.max(fixedScale, bounded(render?.fullPageScale, 0.5, 0.5, 6)) : fixedScale,
+    fixedScale: mode === 'auto' ? Math.max(fixedScale, bounded(render?.fullPageScale, 0.5, 0.5, limit)) : fixedScale,
     minScale,
-    maxScale: Math.max(minScale, bounded(raw.maxScale, defaults.maxScale, 0.5, 6)),
+    maxScale: Math.max(minScale, bounded(raw.maxScale, defaults.maxScale, 0.5, limit)),
     headroom: bounded(raw.headroom, defaults.headroom, 1, 3),
     dprCap: bounded(raw.dprCap, defaults.dprCap, 1, 4),
     maxPixels: bounded(raw.maxPixels, defaults.maxPixels, 1, 268435456),
@@ -69,12 +77,19 @@ export function resolvePdfRenderScale({ pageWidthPt, pageHeightPt, rotation = 0,
   return { scale, reason, clamped: scale !== requested, pixels: pixelsAt(scale) };
 }
 
-/** Double the current effective scale within the same page, memory and surface limits. */
+/**
+ * Double the current effective scale for a one-shot boost. The policy ceiling (maxScale) does not
+ * apply: on high-DPI or wide viewers the auto policy already sits at that ceiling, and a boost
+ * "within the same ceiling" could never do anything. Only the hard safety caps (maxPixels, the
+ * browser render surface and the scale limit) bound the boost; when they already bind, the page
+ * is reported as not boostable (`available: false`).
+ */
 export function resolvePdfResolutionBoost(input, currentScale) {
   const policy = normalizePdfResolution(input?.config);
+  const target = Math.min(PDF_RESOLUTION_SCALE_LIMIT, currentScale * 2);
   const result = resolvePdfRenderScale({
     ...input,
-    config: { pdfResolution: { ...policy, mode: 'fixed', fixedScale: currentScale * 2 } },
+    config: { pdfResolution: { ...policy, mode: 'fixed', fixedScale: target, maxScale: Math.max(policy.maxScale, target) } },
   });
   return { ...result, available: result.scale > currentScale * (1 + 1e-9) };
 }

@@ -83,8 +83,8 @@
   },
   "stats": {
     "fileCount": 116,
-    "sourceLineCount": 49753,
-    "docletCount": 1329,
+    "sourceLineCount": 49792,
+    "docletCount": 1330,
     "documentedFileCount": 116,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -445,6 +445,15 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/utils/pdfResolution.js",
+      "score": 93,
+      "lines": 102,
+      "incomingLocalImports": 6,
+      "doclets": 5,
+      "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/contexts/viewerContext.js",
       "score": 90,
       "lines": 207,
@@ -481,15 +490,6 @@
       "summaryConfidence": "high"
     },
     {
-      "path": "src/utils/pdfResolution.js",
-      "score": 85,
-      "lines": 87,
-      "incomingLocalImports": 6,
-      "doclets": 4,
-      "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
-      "summaryConfidence": "high"
-    },
-    {
       "path": "src/utils/printTemplate.js",
       "score": 84,
       "lines": 809,
@@ -519,7 +519,7 @@
     {
       "path": "src/utils/pdfResolutionRuntime.js",
       "score": 80,
-      "lines": 49,
+      "lines": 51,
       "incomingLocalImports": 6,
       "doclets": 4,
       "summary": "Browser measurements and diagnostic state kept outside the pure PDF resolution policy.",
@@ -594,7 +594,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2602,
+            "lines": 2619,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1016,7 +1016,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 16,
-      "lineCount": 6598,
+      "lineCount": 6603,
       "docletCount": 99,
       "importantFiles": [
         {
@@ -1040,7 +1040,7 @@
         {
           "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
           "score": 54,
-          "lines": 2150,
+          "lines": 2155,
           "incomingLocalImports": 1,
           "doclets": 31,
           "summary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -1176,7 +1176,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3048,
+      "lineCount": 3065,
       "docletCount": 81,
       "importantFiles": [
         {
@@ -1191,7 +1191,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2602,
+          "lines": 2619,
           "incomingLocalImports": 1,
           "doclets": 58,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1463,8 +1463,8 @@
     {
       "name": "src/utils",
       "fileCount": 37,
-      "lineCount": 15257,
-      "docletCount": 603,
+      "lineCount": 15274,
+      "docletCount": 604,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1503,6 +1503,15 @@
           "summaryConfidence": "high"
         },
         {
+          "path": "src/utils/pdfResolution.js",
+          "score": 93,
+          "lines": 102,
+          "incomingLocalImports": 6,
+          "doclets": 5,
+          "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
+          "summaryConfidence": "high"
+        },
+        {
           "path": "src/utils/localizedValue.js",
           "score": 88,
           "lines": 113,
@@ -1518,15 +1527,6 @@
           "incomingLocalImports": 4,
           "doclets": 8,
           "summary": "Generated-PDF cache key helpers.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/pdfResolution.js",
-          "score": 85,
-          "lines": 87,
-          "incomingLocalImports": 6,
-          "doclets": 4,
-          "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
           "summaryConfidence": "high"
         },
         {
@@ -10916,7 +10916,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "lines": 2150,
+      "lines": 2155,
       "extension": ".jsx",
       "jsdocBlockCount": 43,
       "sourceSummary": "Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry.",
@@ -11131,7 +11131,7 @@
         {
           "name": "DocumentToolbar",
           "kind": "default",
-          "line": 2149
+          "line": 2154
         }
       ],
       "declarations": [
@@ -11193,22 +11193,22 @@
         {
           "name": "settingsDetail",
           "kind": "object",
-          "line": 932
+          "line": 937
         },
         {
           "name": "onKeyDown",
           "kind": "function",
-          "line": 1095
+          "line": 1100
         },
         {
           "name": "pdfOpts",
           "kind": "object",
-          "line": 1158
+          "line": 1163
         },
         {
           "name": "detail",
           "kind": "object",
-          "line": 1298
+          "line": 1303
         }
       ],
       "parseError": null,
@@ -11573,7 +11573,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 681,
+          "line": 684,
           "description": "Handle brightness slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11598,7 +11598,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 695,
+          "line": 698,
           "description": "Handle contrast slider changes with neutral snapping at 100.",
           "params": [
             {
@@ -11623,7 +11623,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 709,
+          "line": 712,
           "description": "",
           "params": [
             {
@@ -11654,7 +11654,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 717,
+          "line": 720,
           "description": "",
           "params": [
             {
@@ -11679,7 +11679,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 730,
+          "line": 733,
           "description": "",
           "params": [
             {
@@ -11704,7 +11704,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 739,
+          "line": 742,
           "description": "",
           "params": [
             {
@@ -11729,7 +11729,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 766,
+          "line": 771,
           "description": "Build a compact &quot;pages&quot; descriptor for logging.",
           "params": [
             {
@@ -11754,7 +11754,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 786,
+          "line": 791,
           "description": "Estimate the number of pages the user is about to print.",
           "params": [
             {
@@ -11779,7 +11779,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 808,
+          "line": 813,
           "description": "Resolve page metadata objects aligned with the printed page sequence.",
           "params": [
             {
@@ -11804,7 +11804,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 822,
+          "line": 827,
           "description": "",
           "params": [
             {
@@ -11829,7 +11829,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 858,
+          "line": 863,
           "description": "",
           "params": [
             {
@@ -11854,7 +11854,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 886,
+          "line": 891,
           "description": "Fire-and-forget user print log.",
           "params": [
             {
@@ -11879,7 +11879,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1119,
+          "line": 1124,
           "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
           "params": [
             {
@@ -11904,7 +11904,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-          "line": 1287,
+          "line": 1292,
           "description": "Handle the dialog submit event and dispatch the correct print action.",
           "params": [
             {
@@ -23038,7 +23038,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2602,
+      "lines": 2619,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -23265,52 +23265,52 @@
         {
           "name": "next",
           "kind": "object",
-          "line": 564
+          "line": 567
         },
         {
           "name": "nextPage",
           "kind": "object",
-          "line": 891
+          "line": 895
         },
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1637
+          "line": 1642
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2014
+          "line": 2031
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2028
+          "line": 2045
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2042
+          "line": 2059
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2075
+          "line": 2092
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2245
+          "line": 2262
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2336
+          "line": 2353
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2338
+          "line": 2355
         }
       ],
       "parseError": null,
@@ -23822,7 +23822,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 476,
+          "line": 479,
           "description": "",
           "params": [
             {
@@ -23847,7 +23847,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 500,
+          "line": 503,
           "description": "Record that a page now has a reusable full-size asset available.",
           "params": [
             {
@@ -23872,7 +23872,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 510,
+          "line": 513,
           "description": "Record that a page now has a reusable thumbnail asset available.",
           "params": [
             {
@@ -23897,7 +23897,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 523,
+          "line": 526,
           "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
           "params": [],
           "returns": [
@@ -23915,7 +23915,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 654,
+          "line": 657,
           "description": "",
           "params": [],
           "returns": [
@@ -23933,7 +23933,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 676,
+          "line": 679,
           "description": "",
           "params": [],
           "returns": [
@@ -23951,7 +23951,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 836,
+          "line": 840,
           "description": "",
           "params": [
             {
@@ -23982,7 +23982,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 853,
+          "line": 857,
           "description": "",
           "params": [
             {
@@ -24013,7 +24013,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 874,
+          "line": 878,
           "description": "",
           "params": [
             {
@@ -24044,7 +24044,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 922,
+          "line": 926,
           "description": "",
           "params": [
             {
@@ -24069,7 +24069,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 937,
+          "line": 941,
           "description": "",
           "params": [
             {
@@ -24106,7 +24106,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 964,
+          "line": 968,
           "description": "",
           "params": [],
           "returns": [
@@ -24124,7 +24124,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 973,
+          "line": 977,
           "description": "",
           "params": [
             {
@@ -24149,7 +24149,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1036,
+          "line": 1040,
           "description": "",
           "params": [
             {
@@ -24174,7 +24174,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1187,
+          "line": 1192,
           "description": "",
           "params": [
             {
@@ -24199,7 +24199,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1206,
+          "line": 1211,
           "description": "",
           "params": [
             {
@@ -24224,7 +24224,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1230,
+          "line": 1235,
           "description": "",
           "params": [
             {
@@ -24249,7 +24249,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1239,
+          "line": 1244,
           "description": "",
           "params": [
             {
@@ -24274,7 +24274,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1247,
+          "line": 1252,
           "description": "",
           "params": [],
           "returns": [
@@ -24292,7 +24292,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1259,
+          "line": 1264,
           "description": "",
           "params": [
             {
@@ -24317,7 +24317,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1306,
+          "line": 1311,
           "description": "",
           "params": [
             {
@@ -24354,7 +24354,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1375,
+          "line": 1380,
           "description": "",
           "params": [
             {
@@ -24379,7 +24379,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1384,
+          "line": 1389,
           "description": "",
           "params": [
             {
@@ -24410,7 +24410,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1397,
+          "line": 1402,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -24447,7 +24447,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1449,
+          "line": 1454,
           "description": "",
           "params": [
             {
@@ -24478,7 +24478,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1460,
+          "line": 1465,
           "description": "",
           "params": [
             {
@@ -24509,7 +24509,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1471,
+          "line": 1476,
           "description": "",
           "params": [
             {
@@ -24534,7 +24534,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1495,
+          "line": 1500,
           "description": "",
           "params": [
             {
@@ -24559,7 +24559,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1540,
+          "line": 1545,
           "description": "",
           "params": [
             {
@@ -24584,7 +24584,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1553,
+          "line": 1558,
           "description": "",
           "params": [
             {
@@ -24621,7 +24621,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1625,
+          "line": 1630,
           "description": "",
           "params": [
             {
@@ -24658,7 +24658,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1717,
+          "line": 1722,
           "description": "",
           "params": [
             {
@@ -24695,8 +24695,8 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1882,
-          "description": "Render one PDF page again at twice its effective PDF scale, within the same safety caps.",
+          "line": 1889,
+          "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
               "name": "pageIndex",
@@ -24720,7 +24720,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1954,
+          "line": 1971,
           "description": "",
           "params": [
             {
@@ -24751,7 +24751,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1976,
+          "line": 1993,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -24776,7 +24776,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2135,
+          "line": 2152,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -24794,7 +24794,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2226,
+          "line": 2243,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -24825,7 +24825,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2269,
+          "line": 2286,
           "description": "",
           "params": [
             {
@@ -38868,9 +38868,9 @@
     },
     {
       "path": "src/utils/pdfResolution.js",
-      "lines": 87,
+      "lines": 102,
       "extension": ".js",
-      "jsdocBlockCount": 5,
+      "jsdocBlockCount": 6,
       "sourceSummary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "imports": [
         {
@@ -38889,61 +38889,66 @@
           "line": 4
         },
         {
+          "name": "PDF_RESOLUTION_SCALE_LIMIT",
+          "kind": "variable",
+          "line": 14
+        },
+        {
           "name": "normalizePdfResolution",
           "kind": "function",
-          "line": 15
+          "line": 22
         },
         {
           "name": "resolvePdfRenderScale",
           "kind": "function",
-          "line": 39
+          "line": 47
         },
         {
           "name": "resolvePdfResolutionBoost",
           "kind": "function",
-          "line": 73
+          "line": 87
         },
         {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 83
+          "line": 98
         }
       ],
       "declarations": [
         {
           "name": "bounded",
           "kind": "function",
-          "line": 9
+          "line": 16
         },
         {
           "name": "normalizePdfResolution",
           "kind": "function",
-          "line": 15
+          "line": 22
         },
         {
           "name": "resolvePdfRenderScale",
           "kind": "function",
-          "line": 39
+          "line": 47
         },
         {
           "name": "pixelsAt",
           "kind": "function",
-          "line": 55
+          "line": 63
         },
         {
           "name": "resolvePdfResolutionBoost",
           "kind": "function",
-          "line": 73
+          "line": 87
         },
         {
           "name": "resolvePdfViewportResolution",
           "kind": "function",
-          "line": 83
+          "line": 98
         },
         {
           "name": "dimensions",
           "kind": "object",
-          "line": 84
+          "line": 99
         }
       ],
       "parseError": null,
@@ -38953,13 +38958,26 @@
       },
       "doclets": [
         {
+          "id": "PDF_RESOLUTION_SCALE_LIMIT",
+          "name": "PDF_RESOLUTION_SCALE_LIMIT",
+          "longname": "PDF_RESOLUTION_SCALE_LIMIT",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/utils/pdfResolution.js",
+          "line": 14,
+          "description": "Upper bound for configured scale factors.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "normalizePdfResolution",
           "name": "normalizePdfResolution",
           "longname": "normalizePdfResolution",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 15,
+          "line": 22,
           "description": "Normalize a render config, including the legacy fullPageScale alias.",
           "params": [],
           "returns": [],
@@ -38972,7 +38990,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 39,
+          "line": 47,
           "description": "Resolve an effective scale without reading browser globals.",
           "params": [
             {
@@ -38997,8 +39015,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 73,
-          "description": "Double the current effective scale within the same page, memory and surface limits.",
+          "line": 87,
+          "description": "Double the current effective scale for a one-shot boost.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -39010,7 +39028,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolution.js",
-          "line": 83,
+          "line": 98,
           "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
           "params": [],
           "returns": [],
@@ -39031,14 +39049,14 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 6,
-      "importanceScore": 85,
+      "importanceScore": 93,
       "summary": "Pure, per-page PDF display resolution policy shared by browser and worker renderers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
     {
       "path": "src/utils/pdfResolutionRuntime.js",
-      "lines": 49,
+      "lines": 51,
       "extension": ".js",
       "jsdocBlockCount": 5,
       "sourceSummary": "Browser measurements and diagnostic state kept outside the pure PDF resolution policy.",
@@ -39074,12 +39092,12 @@
         {
           "name": "recordPdfResolution",
           "kind": "function",
-          "line": 32
+          "line": 34
         },
         {
           "name": "getPdfResolutionDiagnostics",
           "kind": "function",
-          "line": 37
+          "line": 39
         }
       ],
       "declarations": [
@@ -39096,12 +39114,12 @@
         {
           "name": "recordPdfResolution",
           "kind": "function",
-          "line": 32
+          "line": 34
         },
         {
           "name": "getPdfResolutionDiagnostics",
           "kind": "function",
-          "line": 37
+          "line": 39
         }
       ],
       "parseError": null,
@@ -39143,7 +39161,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolutionRuntime.js",
-          "line": 32,
+          "line": 34,
           "description": "Record successful rendering/restoration only; never collect document identifiers.",
           "params": [],
           "returns": [],
@@ -39156,7 +39174,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/pdfResolutionRuntime.js",
-          "line": 37,
+          "line": 39,
           "description": "Effective PDF display diagnostics, with null scale until a page has been rendered.",
           "params": [],
           "returns": [],
@@ -59819,7 +59837,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1119,
+      "line": 1124,
       "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
       "params": [
         {
@@ -59938,7 +59956,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 681,
+      "line": 684,
       "description": "Handle brightness slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -59963,7 +59981,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 695,
+      "line": 698,
       "description": "Handle contrast slider changes with neutral snapping at 100.",
       "params": [
         {
@@ -59988,7 +60006,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 717,
+      "line": 720,
       "description": "",
       "params": [
         {
@@ -60053,7 +60071,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 1287,
+      "line": 1292,
       "description": "Handle the dialog submit event and dispatch the correct print action.",
       "params": [
         {
@@ -60078,7 +60096,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 730,
+      "line": 733,
       "description": "",
       "params": [
         {
@@ -60103,7 +60121,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 709,
+      "line": 712,
       "description": "",
       "params": [
         {
@@ -60222,7 +60240,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 858,
+      "line": 863,
       "description": "",
       "params": [
         {
@@ -60335,7 +60353,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 808,
+      "line": 813,
       "description": "Resolve page metadata objects aligned with the printed page sequence.",
       "params": [
         {
@@ -60360,7 +60378,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 786,
+      "line": 791,
       "description": "Estimate the number of pages the user is about to print.",
       "params": [
         {
@@ -60385,7 +60403,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 822,
+      "line": 827,
       "description": "",
       "params": [
         {
@@ -60423,7 +60441,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 886,
+      "line": 891,
       "description": "Fire-and-forget user print log.",
       "params": [
         {
@@ -60448,7 +60466,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 739,
+      "line": 742,
       "description": "",
       "params": [
         {
@@ -60473,7 +60491,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-      "line": 766,
+      "line": 771,
       "description": "Build a compact &quot;pages&quot; descriptor for logging.",
       "params": [
         {
@@ -66469,7 +66487,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 922,
+      "line": 926,
       "description": "",
       "params": [
         {
@@ -66494,7 +66512,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1247,
+      "line": 1252,
       "description": "",
       "params": [],
       "returns": [
@@ -66512,7 +66530,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 937,
+      "line": 941,
       "description": "",
       "params": [
         {
@@ -66549,7 +66567,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1397,
+      "line": 1402,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -66586,7 +66604,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 964,
+      "line": 968,
       "description": "",
       "params": [],
       "returns": [
@@ -66604,7 +66622,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 523,
+      "line": 526,
       "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
       "params": [],
       "returns": [
@@ -66647,7 +66665,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1036,
+      "line": 1040,
       "description": "",
       "params": [
         {
@@ -66698,7 +66716,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1495,
+      "line": 1500,
       "description": "",
       "params": [
         {
@@ -66723,8 +66741,8 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1882,
-      "description": "Render one PDF page again at twice its effective PDF scale, within the same safety caps.",
+      "line": 1889,
+      "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
           "name": "pageIndex",
@@ -66748,7 +66766,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1717,
+      "line": 1722,
       "description": "",
       "params": [
         {
@@ -66829,7 +66847,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2269,
+      "line": 2286,
       "description": "",
       "params": [
         {
@@ -66854,7 +66872,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1375,
+      "line": 1380,
       "description": "",
       "params": [
         {
@@ -66879,7 +66897,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1471,
+      "line": 1476,
       "description": "",
       "params": [
         {
@@ -66904,7 +66922,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 973,
+      "line": 977,
       "description": "",
       "params": [
         {
@@ -66929,7 +66947,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 836,
+      "line": 840,
       "description": "",
       "params": [
         {
@@ -66960,7 +66978,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 853,
+      "line": 857,
       "description": "",
       "params": [
         {
@@ -67252,7 +67270,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1259,
+      "line": 1264,
       "description": "",
       "params": [
         {
@@ -67302,7 +67320,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 500,
+      "line": 503,
       "description": "Record that a page now has a reusable full-size asset available.",
       "params": [
         {
@@ -67327,7 +67345,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 510,
+      "line": 513,
       "description": "Record that a page now has a reusable thumbnail asset available.",
       "params": [
         {
@@ -67352,7 +67370,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 874,
+      "line": 878,
       "description": "",
       "params": [
         {
@@ -67383,7 +67401,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1306,
+      "line": 1311,
       "description": "",
       "params": [
         {
@@ -67420,7 +67438,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1449,
+      "line": 1454,
       "description": "",
       "params": [
         {
@@ -67451,7 +67469,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2135,
+      "line": 2152,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -67469,7 +67487,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1230,
+      "line": 1235,
       "description": "",
       "params": [
         {
@@ -67494,7 +67512,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1239,
+      "line": 1244,
       "description": "",
       "params": [
         {
@@ -67519,7 +67537,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1954,
+      "line": 1971,
       "description": "",
       "params": [
         {
@@ -67550,7 +67568,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1187,
+      "line": 1192,
       "description": "",
       "params": [
         {
@@ -67575,7 +67593,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1625,
+      "line": 1630,
       "description": "",
       "params": [
         {
@@ -67612,7 +67630,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 676,
+      "line": 679,
       "description": "",
       "params": [],
       "returns": [
@@ -67661,7 +67679,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1553,
+      "line": 1558,
       "description": "",
       "params": [
         {
@@ -67698,7 +67716,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 654,
+      "line": 657,
       "description": "",
       "params": [],
       "returns": [
@@ -67716,7 +67734,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2226,
+      "line": 2243,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -67747,7 +67765,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1540,
+      "line": 1545,
       "description": "",
       "params": [
         {
@@ -67772,7 +67790,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1206,
+      "line": 1211,
       "description": "",
       "params": [
         {
@@ -67841,7 +67859,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1384,
+      "line": 1389,
       "description": "",
       "params": [
         {
@@ -67872,7 +67890,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1976,
+      "line": 1993,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -67897,7 +67915,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1460,
+      "line": 1465,
       "description": "",
       "params": [
         {
@@ -67928,7 +67946,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 476,
+      "line": 479,
       "description": "",
       "params": [
         {
@@ -77255,8 +77273,21 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 15,
+      "line": 22,
       "description": "Normalize a render config, including the legacy fullPageScale alias.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "PDF_RESOLUTION_SCALE_LIMIT",
+      "name": "PDF_RESOLUTION_SCALE_LIMIT",
+      "longname": "PDF_RESOLUTION_SCALE_LIMIT",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/utils/pdfResolution.js",
+      "line": 14,
+      "description": "Upper bound for configured scale factors.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -77268,7 +77299,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 39,
+      "line": 47,
       "description": "Resolve an effective scale without reading browser globals.",
       "params": [
         {
@@ -77293,8 +77324,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 73,
-      "description": "Double the current effective scale within the same page, memory and surface limits.",
+      "line": 87,
+      "description": "Double the current effective scale for a one-shot boost.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -77306,7 +77337,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolution.js",
-      "line": 83,
+      "line": 98,
       "description": "Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks.",
       "params": [],
       "returns": [],
@@ -77319,7 +77350,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolutionRuntime.js",
-      "line": 37,
+      "line": 39,
       "description": "Effective PDF display diagnostics, with null scale until a page has been rendered.",
       "params": [],
       "returns": [],
@@ -77345,7 +77376,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/pdfResolutionRuntime.js",
-      "line": 32,
+      "line": 34,
       "description": "Record successful rendering/restoration only; never collect document identifiers.",
       "params": [],
       "returns": [],

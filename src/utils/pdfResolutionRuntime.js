@@ -16,8 +16,10 @@ export function getPdfResolutionInputs(config, options = {}) {
   if (options.pdfResolutionInput) return options.pdfResolutionInput;
   const policy = normalizePdfResolution(config);
   const override = Number(options.fullPageScale);
+  // An explicit per-render override (the resolution boost) may exceed the policy ceiling; the
+  // safety caps inside resolvePdfRenderScale still apply.
   const effectivePolicy = Number.isFinite(override) && override > 0
-    ? { ...policy, mode: 'fixed', fixedScale: override }
+    ? { ...policy, mode: 'fixed', fixedScale: override, maxScale: Math.max(policy.maxScale, override) }
     : policy;
   const win = typeof window === 'undefined' ? null : window;
   return {

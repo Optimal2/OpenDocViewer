@@ -63,6 +63,7 @@
     "enhancePdfResolutionUnavailable": "Upplösningshöjning är bara tillgänglig för PDF-sidor",
     "enhancePdfResolutionPending": "Ökar PDF-sidans upplösning…",
     "enhancePdfResolutionDone": "Upplösningshöjning har redan gjorts för denna PDF-sida",
+    "enhancePdfResolutionMaxed": "PDF-sidan renderas redan i högsta säkra upplösning",
     "brightness": "Ljusstyrka",
     "contrast": "Kontrast",
     "adjustBrightness": "Justera ljusstyrka",

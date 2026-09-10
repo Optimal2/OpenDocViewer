@@ -24,8 +24,8 @@ Source commit: not embedded
 ## Stats
 
 - Source files: 116
-- Source lines: 49753
-- JSDoc symbols: 1329
+- Source lines: 49792
+- JSDoc symbols: 1330
 - Files with JSDoc: 116
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -37,11 +37,11 @@ Source commit: not embedded
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
-- `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 

@@ -25,9 +25,9 @@ import { getPdfResolutionInputs } from '../utils/pdfResolutionRuntime.js';
 import { revokeTrackedObjectUrl } from '../utils/objectUrlRegistry.js';
 
 beforeEach(() => { harness.states = []; harness.assets.clear(); });
-async function setup(scale = 2) {
+async function setup(scale = 2, pdfResolutionOverrides = {}) {
   const config = getDocumentLoadingConfig({ documentLoading: {
-    render: { pdfResolution: { mode: 'fixed', fixedScale: scale }, thumbnailSourceStrategy: 'dedicated' },
+    render: { pdfResolution: { mode: 'fixed', fixedScale: scale, ...pdfResolutionOverrides }, thumbnailSourceStrategy: 'dedicated' },
     assetStore: { persistFullPagesInBackground: false },
   } });
   const viewport = { width: 595, height: 842 };
@@ -67,13 +67,33 @@ describe('provider PDF resolution and asset replacement', () => {
     expect([...harness.assets.keys()]).toHaveLength(1);
     await api.disposeDocumentSession();
   });
-  it('marks a capped page done without discarding or rerendering its asset', async () => {
+  it('boosts a page that already sits at the policy ceiling (maxScale)', async () => {
     const api = await setup(6);
+    const original = await api.ensurePageAsset(0, 'full');
+    expect(await api.enhancePdfPageResolution(0)).toBe(true);
+    expect(await api.ensurePageAsset(0, 'full')).not.toBe(original);
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(2);
+    const boostedInput = harness.renderer.renderPageAsset.mock.calls[1][1].pdfResolutionInput.config.pdfResolution;
+    expect(boostedInput.fixedScale).toBeGreaterThan(6);
+    expect(boostedInput.maxScale).toBeGreaterThanOrEqual(boostedInput.fixedScale);
+    const state = harness.states.find((s) => s?.boostedKeys);
+    expect(state.boostedKeys).toEqual(['pdf:0']);
+    expect(state.maxedKeys).toEqual([]);
+    await api.disposeDocumentSession();
+  });
+  it('marks a page maxed, not boosted, when the hard caps already bind', async () => {
+    // maxPixels just above the raster at factor 6: no higher factor fits, so the boost is unavailable.
+    const api = await setup(6, { maxPixels: Math.ceil(595 * 6) * Math.ceil(842 * 6) + 1 });
     const original = await api.ensurePageAsset(0, 'full');
     expect(await api.enhancePdfPageResolution(0)).toBe(false);
     expect(await api.ensurePageAsset(0, 'full')).toBe(original);
     expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(1);
-    expect(harness.states.find((state) => state?.boostedKeys)?.boostedKeys).toEqual(['pdf:0']);
+    const state = harness.states.find((s) => s?.boostedKeys);
+    expect(state.boostedKeys).toEqual([]);
+    expect(state.maxedKeys).toEqual(['pdf:0']);
+    // A maxed page is not retried.
+    expect(await api.enhancePdfPageResolution(0)).toBe(false);
+    expect(harness.renderer.renderPageAsset).toHaveBeenCalledTimes(1);
     await api.disposeDocumentSession();
   });
   it('restores the matching factor and cannot restore another resolution on a fresh page', async () => {

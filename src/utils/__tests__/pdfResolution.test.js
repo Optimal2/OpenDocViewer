@@ -61,10 +61,18 @@ describe('PDF resolution policy', () => {
     expect(bounded.maxScale).toBeLessThanOrEqual(6);
     expect(bounded.dprCap).toBeLessThanOrEqual(4);
   });
-  it('doubles the effective factor and reports when the maximum is already reached', () => {
+  it('doubles the effective factor past the policy ceiling and stops only at the hard caps', () => {
     expect(resolvePdfResolutionBoost(input, 2)).toMatchObject({ scale: 4, available: true });
-    expect(resolvePdfResolutionBoost(input, 4)).toMatchObject({ scale: 6, available: true });
-    expect(resolvePdfResolutionBoost(input, 6)).toMatchObject({ scale: 6, available: false });
+    // The auto policy already sits at maxScale (6) on a wide or high-DPI viewer. The boost must
+    // still raise the factor: it is bounded by maxPixels/surface/scale limit, not by maxScale.
+    const atCeiling = resolvePdfResolutionBoost(input, 6);
+    expect(atCeiling.available).toBe(true);
+    expect(atCeiling.scale).toBeGreaterThan(6);
+    expect(atCeiling.scale).toBeLessThanOrEqual(12);
+    expect(atCeiling.pixels).toBeLessThanOrEqual(40e6);
+    // Twice the scale limit is never requested.
+    expect(resolvePdfResolutionBoost(input, 12).available).toBe(false);
+    // A page that already hits the pixel/surface caps cannot be boosted.
     const large = { ...input, pageWidthPt: 4000, pageHeightPt: 6000 };
     const capped = resolvePdfRenderScale(large);
     expect(resolvePdfResolutionBoost(large, capped.scale).available).toBe(false);

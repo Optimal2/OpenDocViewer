@@ -179,7 +179,7 @@ import { createContext } from 'react';
  * @property {function(string, number): void} recordLoaderPhaseTiming
  * @property {function(number, ('full'|'thumbnail'), (EnsurePageAssetOptions|undefined)=): Promise<(string|null)>} ensurePageAsset
  * @property {function(number): Promise<boolean>} enhancePdfPageResolution
- * @property {{ boostedKeys:Array<string>, pendingKeys:Array<string> }} pdfResolutionBoostState
+ * @property {{ boostedKeys:Array<string>, pendingKeys:Array<string>, maxedKeys:Array<string> }} pdfResolutionBoostState
  * @property {function(number, ('full'|'thumbnail')): void} touchPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} pinPageAsset
  * @property {function(number, ('full'|'thumbnail')): void} unpinPageAsset

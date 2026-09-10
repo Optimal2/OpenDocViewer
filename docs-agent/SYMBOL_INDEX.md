@@ -198,35 +198,35 @@
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:70</code> |  |
 | <code>resolveAboutInfo</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:17</code> |  |
 | <code>AnyRef</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:108</code> | Mutable ref-like object used by the toolbar. |
-| <code>DocumentToolbar~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1119</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
+| <code>DocumentToolbar~dispatchPrintRequest</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1124</code> | Execute the actual print helper after the dialog has resolved the user&#39;s choices. |
 | <code>DocumentToolbar</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:285</code> | Toolbar shell for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>DocumentToolbarProps</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:136</code> | Props for {@link DocumentToolbar}. |
 | <code>formatPdfProgressBody</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:64</code> |  |
 | <code>getPdfProgressPercent</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:81</code> |  |
-| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:681</code> | Handle brightness slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:695</code> | Handle contrast slider changes with neutral snapping at 100. |
-| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:717</code> |  |
+| <code>DocumentToolbar~handleBrightnessSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:684</code> | Handle brightness slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleContrastSliderChange</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:698</code> | Handle contrast slider changes with neutral snapping at 100. |
+| <code>DocumentToolbar~handleEnhancePdfResolutionClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:720</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:407</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:399</code> |  |
-| <code>DocumentToolbar~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1287</code> | Handle the dialog submit event and dispatch the correct print action. |
-| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:730</code> |  |
-| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:709</code> |  |
+| <code>DocumentToolbar~handlePrintSubmit</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:1292</code> | Handle the dialog submit event and dispatch the correct print action. |
+| <code>DocumentToolbar~handleResetAdjustmentsClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:733</code> |  |
+| <code>DocumentToolbar~handleRotationButtonClick</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:712</code> |  |
 | <code>ImageProperties</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:114</code> | Editable image state shown by the toolbar. |
 | <code>isPdfAbortError</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:55</code> |  |
 | <code>isPdfPage</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:272</code> |  |
 | <code>makePdfResolutionPageKey</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:262</code> |  |
-| <code>DocumentToolbar~makePrintOptions</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:858</code> |  |
+| <code>DocumentToolbar~makePrintOptions</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:863</code> |  |
 | <code>normalizeToolbarPageNumber</code> | function | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:250</code> | Clamp a page number into the valid viewer range while preserving a safe fallback. |
 | <code>ONE_TO_ONE_EPS</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:219</code> | Epsilon for considering zoom ≈ 100% \(0.5%\). |
 | <code>PageNumberSetter</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:122</code> | React-like numeric page setter used by the toolbar. |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:88</code> | Detail payload emitted by the print dialog. |
-| <code>DocumentToolbar~resolvePrintPageContexts</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:808</code> | Resolve page metadata objects aligned with the printed page sequence. |
-| <code>DocumentToolbar~resolvePrintPageCount</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:786</code> | Estimate the number of pages the user is about to print. |
-| <code>DocumentToolbar~resolvePrintPageNumbers</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:822</code> |  |
+| <code>DocumentToolbar~resolvePrintPageContexts</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:813</code> | Resolve page metadata objects aligned with the printed page sequence. |
+| <code>DocumentToolbar~resolvePrintPageCount</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:791</code> | Estimate the number of pages the user is about to print. |
+| <code>DocumentToolbar~resolvePrintPageNumbers</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:827</code> |  |
 | <code>SLIDER_CENTER_RANGE</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:217</code> | Range \(±\) around 100% where sliders snap back to the neutral value. |
-| <code>DocumentToolbar~submitUserPrintLog</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:886</code> | Fire-and-forget user print log. |
-| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:739</code> |  |
-| <code>DocumentToolbar~toPagesString</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:766</code> | Build a compact &amp;quot;pages&amp;quot; descriptor for logging. |
+| <code>DocumentToolbar~submitUserPrintLog</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:891</code> | Fire-and-forget user print log. |
+| <code>DocumentToolbar~toggleAdjustmentMenu</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:742</code> |  |
+| <code>DocumentToolbar~toPagesString</code> | constant | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:771</code> | Build a compact &amp;quot;pages&amp;quot; descriptor for logging. |
 | <code>ZoomState</code> | typedef | <code>src/components/DocumentToolbar/DocumentToolbar.jsx:129</code> | Zoom display state used by the newer toolbar UX paths. |
 | <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:30</code> |  |
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/HelpMenuButton.jsx:22</code> |  |
@@ -458,27 +458,27 @@
 | <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:155</code> |  |
 | <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:78</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
-| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:922</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1247</code> |  |
-| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:937</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1397</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
-| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:964</code> |  |
-| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:523</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
+| <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:926</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1252</code> |  |
+| <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:941</code> |  |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1402</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:968</code> |  |
+| <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:526</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:207</code> |  |
-| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1036</code> |  |
+| <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1040</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:49</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:43</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1495</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1882</code> | Render one PDF page again at twice its effective PDF scale, within the same safety caps. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1717</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1500</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1889</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1722</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:64</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:139</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2269</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1375</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1471</code> |  |
-| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:973</code> |  |
-| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:836</code> |  |
-| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:853</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2286</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1380</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1476</code> |  |
+| <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:977</code> |  |
+| <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:840</code> |  |
+| <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:857</code> |  |
 | <code>isBlobObjectUrl</code> | function | <code>src/contexts/ViewerProvider.jsx:173</code> |  |
 | <code>isPageFailedForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:199</code> |  |
 | <code>isPageReadyForSession</code> | function | <code>src/contexts/ViewerProvider.jsx:191</code> |  |
@@ -488,32 +488,32 @@
 | <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:100</code> |  |
 | <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:89</code> |  |
 | <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:121</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1259</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1264</code> |  |
 | <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:218</code> |  |
-| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:500</code> | Record that a page now has a reusable full-size asset available. |
-| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:510</code> | Record that a page now has a reusable thumbnail asset available. |
-| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:874</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1306</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1449</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2135</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1230</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1239</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1954</code> |  |
-| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1187</code> |  |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1625</code> |  |
-| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:676</code> |  |
+| <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:503</code> | Record that a page now has a reusable full-size asset available. |
+| <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:513</code> | Record that a page now has a reusable thumbnail asset available. |
+| <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:878</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1311</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1454</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2152</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1235</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1244</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1971</code> |  |
+| <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1192</code> |  |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1630</code> |  |
+| <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:679</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:149</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1553</code> |  |
-| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:654</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2226</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1540</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1206</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1558</code> |  |
+| <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:657</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2243</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1545</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1211</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:54</code> |  |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:162</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1384</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:1976</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1460</code> |  |
-| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:476</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1389</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:1993</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1465</code> |  |
+| <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:479</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:328</code> |  |
 | <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:317</code> |  |
 | <code>componentDidCatch</code> | function | <code>src/ErrorBoundary.jsx:152</code> | Log error details for diagnostics. |
@@ -926,13 +926,14 @@
 | <code>normalizePdfPrintCacheLanguageMode</code> | function | <code>src/utils/pdfPrintCacheKey.js:21</code> |  |
 | <code>normalizePdfPrintCachePageNumbers</code> | function | <code>src/utils/pdfPrintCacheKey.js:60</code> |  |
 | <code>stablePrintText</code> | function | <code>src/utils/pdfPrintCacheKey.js:13</code> |  |
-| <code>normalizePdfResolution</code> | function | <code>src/utils/pdfResolution.js:15</code> | Normalize a render config, including the legacy fullPageScale alias. |
-| <code>resolvePdfRenderScale</code> | function | <code>src/utils/pdfResolution.js:39</code> | Resolve an effective scale without reading browser globals. |
-| <code>resolvePdfResolutionBoost</code> | function | <code>src/utils/pdfResolution.js:73</code> | Double the current effective scale within the same page, memory and surface limits. |
-| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:83</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
-| <code>getPdfResolutionDiagnostics</code> | function | <code>src/utils/pdfResolutionRuntime.js:37</code> | Effective PDF display diagnostics, with null scale until a page has been rendered. |
+| <code>normalizePdfResolution</code> | function | <code>src/utils/pdfResolution.js:22</code> | Normalize a render config, including the legacy fullPageScale alias. |
+| <code>PDF_RESOLUTION_SCALE_LIMIT</code> | constant | <code>src/utils/pdfResolution.js:14</code> | Upper bound for configured scale factors. |
+| <code>resolvePdfRenderScale</code> | function | <code>src/utils/pdfResolution.js:47</code> | Resolve an effective scale without reading browser globals. |
+| <code>resolvePdfResolutionBoost</code> | function | <code>src/utils/pdfResolution.js:87</code> | Double the current effective scale for a one-shot boost. |
+| <code>resolvePdfViewportResolution</code> | function | <code>src/utils/pdfResolution.js:98</code> | Resolve a scale-one, already rotated PDF.js viewport and retain inputs for cache/boost checks. |
+| <code>getPdfResolutionDiagnostics</code> | function | <code>src/utils/pdfResolutionRuntime.js:39</code> | Effective PDF display diagnostics, with null scale until a page has been rendered. |
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
-| <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:32</code> | Record successful rendering/restoration only; never collect document identifiers. |
+| <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
 | <code>batchProgressUnitsFromEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:156</code> | Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par... |
 | <code>clampInteger</code> | function | <code>src/utils/pdfWorkerDispatcher.js:41</code> |  |

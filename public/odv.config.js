@@ -710,6 +710,8 @@
         // PDF display resolution per page. Auto uses measured viewer CSS width (or innerWidth),
         // capped DPR and headroom. fullPageScale remains an alias for fixedScale and an auto floor.
         // Safety caps can lower that floor. A later resize does not rerasterize; use resolution boost.
+        // The boost doubles the effective factor past maxScale (up to 12); only maxPixels and the
+        // browser render surface bound it.
         pdfResolution: {
           mode: 'auto', // 'fixed' preserves the configured scale for ordinary, safely sized pages.
           fixedScale: 2.0,

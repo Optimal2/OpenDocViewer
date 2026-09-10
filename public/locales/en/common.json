@@ -63,6 +63,7 @@
     "enhancePdfResolutionUnavailable": "Resolution boost is available only for PDF pages",
     "enhancePdfResolutionPending": "Increasing PDF page resolution…",
     "enhancePdfResolutionDone": "Resolution boost already applied to this PDF page",
+    "enhancePdfResolutionMaxed": "This PDF page already renders at the maximum safe resolution",
     "brightness": "Brightness",
     "contrast": "Contrast",
     "adjustBrightness": "Adjust brightness",

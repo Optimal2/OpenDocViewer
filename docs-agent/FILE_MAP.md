@@ -26,7 +26,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
 | <code>src/components/DocumentThumbnailList.jsx</code> | 1370 | 2 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
-| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2150 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
+| <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2155 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 109 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
 | <code>src/components/DocumentToolbar/HelpOverlayDialog.jsx</code> | 216 | 0 | 2 | high | Full-screen help overlay for OpenDocViewer. |
 | <code>src/components/DocumentToolbar/hooks/usePrintRangeConfig.js</code> | 160 | 1 | 2 | high | Runtime-configuration derivation for PrintRangeDialog. |
@@ -60,7 +60,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/contexts/themeContext.js</code> | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 202 | 1 | 11 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
 | <code>src/contexts/viewerContext.js</code> | 207 | 10 | 9 | medium | Exports ViewerContext. |
-| <code>src/contexts/ViewerProvider.jsx</code> | 2602 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
+| <code>src/contexts/ViewerProvider.jsx</code> | 2619 | 1 | 58 | high | OpenDocViewer — Viewer state provider. |
 | <code>src/ErrorBoundary.jsx</code> | 297 | 1 | 12 | high | OpenDocViewer — React Error Boundary - Catch unexpected render/runtime errors in descendant components. |
 | <code>src/hooks/useAcceleratingHoldRepeat.js</code> | 210 | 2 | 1 | high | Reusable press-and-hold behavior for toolbar buttons. |
 | <code>src/hooks/useNavigationModifierState.js</code> | 109 | 1 | 8 | high | Shared modifier-key state for navigation and compare-aware viewer actions. |
@@ -95,8 +95,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfPageWorkerPool.js</code> | 479 | 2 | 3 | high | OpenDocViewer - PDF page-image worker pool. |
 | <code>src/utils/pdfPrebuildPlan.js</code> | 343 | 2 | 17 | high | OpenDocViewer - generated-PDF prebuild planning. |
 | <code>src/utils/pdfPrintCacheKey.js</code> | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
-| <code>src/utils/pdfResolution.js</code> | 87 | 6 | 4 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
-| <code>src/utils/pdfResolutionRuntime.js</code> | 49 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
+| <code>src/utils/pdfResolution.js</code> | 102 | 6 | 5 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
+| <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | <code>src/utils/printCore.js</code> | 588 | 1 | 20 | high | Core print coordinator for the frontend. |

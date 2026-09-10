@@ -596,12 +596,15 @@ const DocumentToolbar = ({
   const editingPageResolutionKey = makePdfResolutionPageKey(editingPage);
   const pdfResolutionBoostedKeys = viewerContext?.pdfResolutionBoostState?.boostedKeys || [];
   const pdfResolutionPendingKeys = viewerContext?.pdfResolutionBoostState?.pendingKeys || [];
+  const pdfResolutionMaxedKeys = viewerContext?.pdfResolutionBoostState?.maxedKeys || [];
   const isEditingPdfPage = isPdfPage(editingPage);
   const isPdfResolutionBoosted = !!editingPageResolutionKey && pdfResolutionBoostedKeys.includes(editingPageResolutionKey);
   const isPdfResolutionPending = !!editingPageResolutionKey && pdfResolutionPendingKeys.includes(editingPageResolutionKey);
+  const isPdfResolutionMaxed = !!editingPageResolutionKey && pdfResolutionMaxedKeys.includes(editingPageResolutionKey);
   const canBoostPdfResolution = isEditingPdfPage
     && !isPdfResolutionBoosted
     && !isPdfResolutionPending
+    && !isPdfResolutionMaxed
     && typeof viewerContext?.enhancePdfPageResolution === 'function';
   const editingGroupTitle = editingTargetMode === 'compare'
     ? t('toolbar.editingTargetCompare', { defaultValue: 'Editing the right compare page' })
@@ -754,6 +757,8 @@ const DocumentToolbar = ({
     ? t('toolbar.enhancePdfResolutionPending', { defaultValue: 'Increasing PDF page resolution…' })
     : isPdfResolutionBoosted
       ? t('toolbar.enhancePdfResolutionDone', { defaultValue: 'Resolution boost already applied to this PDF page' })
+      : isPdfResolutionMaxed
+        ? t('toolbar.enhancePdfResolutionMaxed', { defaultValue: 'This PDF page already renders at the maximum safe resolution' })
       : isEditingPdfPage
         ? t('toolbar.enhancePdfResolution', { defaultValue: 'Increase PDF page resolution' })
         : t('toolbar.enhancePdfResolutionUnavailable', { defaultValue: 'Resolution boost is available only for PDF pages' });
