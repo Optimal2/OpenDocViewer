@@ -276,6 +276,13 @@ if (-not $SkipValidation) {
   # doc:agent regenerates the committed docs-agent packet; the clean-tree
   # assertion below intentionally fails if release prep forgot to commit it.
   $null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
+  # The generator writes LF while core.autocrlf=true checks the packet out with CRLF, so the
+  # regenerated files are smaller than the size git cached at checkout. git treats a size
+  # mismatch as a definite modification without comparing content, and `git status` then
+  # reports an identical packet as modified (`git diff` is empty). Re-adding the packet only
+  # refreshes the stat cache when the content is unchanged; a real change is staged and still
+  # fails the assertion below, as intended.
+  $null = Exec 'git' @('add', '--', 'docs-agent') -Cwd $repoRoot
   Write-Host 'Validation passed.' -ForegroundColor Green
   Assert-CleanWorkingTree $repoRoot 'after validation'
 } else {
