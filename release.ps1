@@ -284,12 +284,30 @@ if (-not $SkipValidation) {
 
 $prevHead = (Exec 'git' @('rev-parse', 'HEAD') -Cwd $repoRoot -Quiet).Out.Trim()
 
-# Version bump via package.json scripts. This creates the release commit and tag through npm version.
-Write-Host "`nCreating release commit and tag via npm run release:$ReleaseType..." -ForegroundColor Yellow
-$null = ExecNpm -NpmArgs @('run', '--silent', "release:$ReleaseType") -Cwd $repoRoot
+# Version bump without commit/tag, then everything the pre-push gate expects to travel WITH a
+# package.json change lands in the same release commit:
+#   - docs-agent regenerated for the NEW version (the agent-documentation freshness check
+#     rejects a packet generated before the bump),
+#   - the OMP component bump (the canonical LOCKSTEP check rejects a change under a component's
+#     project files without a bump of omp-components.json + repositoryVersion + module definition).
+# A single `npm version` commit could satisfy neither, which blocked the push in practice.
+Write-Host "`nBumping the package version ($ReleaseType) without a commit..." -ForegroundColor Yellow
+$null = ExecNpm -NpmArgs @('version', $ReleaseType, '--no-git-tag-version') -Cwd $repoRoot
 
 $newVersion = Get-PackageVersion $repoRoot
 $tagName = "v$newVersion"
+
+Write-Host "Regenerating the agent documentation packet for $newVersion..." -ForegroundColor Yellow
+$null = ExecNpm -NpmArgs @('run', 'doc:agent') -Cwd $repoRoot
+
+Write-Host 'Bumping the OMP component version so the release commit passes the lockstep gate...' -ForegroundColor Yellow
+& (Join-Path $repoRoot 'scripts/omp/bump-version.ps1') -ComponentKey 'opendocviewer-web'
+if ($LASTEXITCODE -ne 0) { throw "scripts/omp/bump-version.ps1 failed with exit code $LASTEXITCODE" }
+
+Write-Host "Creating release commit and tag $tagName..." -ForegroundColor Yellow
+$null = Exec 'git' @('add', '--all') -Cwd $repoRoot
+$null = Exec 'git' @('commit', '-m', "chore(release): $newVersion") -Cwd $repoRoot
+$null = Exec 'git' @('tag', '-a', $tagName, '-m', "chore(release): $newVersion") -Cwd $repoRoot
 
 if (-not $Publish) {
   Write-Host "`nDone. Local release commit/tag created for $tagName." -ForegroundColor Green
