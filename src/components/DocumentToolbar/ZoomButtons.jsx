@@ -72,17 +72,6 @@ const BASIC_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field)
 const ADVANCED_CUSTOM_SIZE_FIELDS = Object.freeze(CUSTOM_SIZE_FIELDS.filter((field) => field.advanced));
 const ADVANCED_CUSTOM_SIZE_PANEL_ID = 'odv-custom-fit-advanced-fields';
 
-/**
- * True when the user has a stored value in any advanced field. The disclosure then starts
- * expanded so a configured limit is never hidden behind the link.
- * @param {Object|null} limits
- * @returns {boolean}
- */
-function hasAdvancedCustomSizeValue(limits) {
-  if (!limits) return false;
-  return ADVANCED_CUSTOM_SIZE_FIELDS.some((field) => clampFactorPercent(limits[field.key], field.max) != null);
-}
-
 function getCustomSizeField(key) {
   return CUSTOM_SIZE_FIELDS.find((field) => field.key === key) || CUSTOM_SIZE_FIELDS[0];
 }
@@ -172,9 +161,8 @@ const ZoomButtons = ({
     actualSizeFactorPercent: getOptionalFactorDraft(userCustomFitSizeLimits?.actualSizeFactorPercent, 200),
   }));
   const [customSizeFocusedField, setCustomSizeFocusedField] = useState(null);
-  const [advancedCustomSizeOpen, setAdvancedCustomSizeOpen] = useState(() =>
-    hasAdvancedCustomSizeValue(userCustomFitSizeLimits),
-  );
+  // Always collapsed when the menu opens; the advanced fields are shown only on request.
+  const [advancedCustomSizeOpen, setAdvancedCustomSizeOpen] = useState(false);
   const inputRef = useRef(null);
 
   // Keep draft in sync when zoomPercent prop changes (and input is not focused)
@@ -440,7 +428,10 @@ const ZoomButtons = ({
         disabled={disableFitCustom}
         menuChildren={({ closeMenu }) => {
           const renderCustomSizeField = (field) => (
-                <div className="toolbar-split-menu-form toolbar-split-menu-form--inline" key={field.key}>
+                <div
+                  className={`toolbar-split-menu-form toolbar-split-menu-form--inline${field.advanced ? ' toolbar-split-menu-form--advanced' : ''}`}
+                  key={field.key}
+                >
                   <label htmlFor={field.id}>{t(field.labelKey, { defaultValue: field.defaultLabel })}</label>
                   <input
                     id={field.id}

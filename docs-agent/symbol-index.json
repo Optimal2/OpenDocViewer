@@ -7985,38 +7985,13 @@
     "examples": 0
   },
   {
-    "id": "hasAdvancedCustomSizeValue",
-    "name": "hasAdvancedCustomSizeValue",
-    "longname": "hasAdvancedCustomSizeValue",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-    "line": 81,
-    "description": "True when the user has a stored value in any advanced field.",
-    "params": [
-      {
-        "name": "limits",
-        "type": "Object|null",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "boolean",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "parsePercentInput",
     "name": "parsePercentInput",
     "longname": "parsePercentInput",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-    "line": 117,
+    "line": 106,
     "description": "Parse a percent-like string safely.",
     "params": [],
     "returns": [],

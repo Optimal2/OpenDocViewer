@@ -83,8 +83,8 @@
   },
   "stats": {
     "fileCount": 116,
-    "sourceLineCount": 49737,
-    "docletCount": 1329,
+    "sourceLineCount": 49728,
+    "docletCount": 1328,
     "documentedFileCount": 116,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -1016,8 +1016,8 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 16,
-      "lineCount": 6582,
-      "docletCount": 99,
+      "lineCount": 6573,
+      "docletCount": 98,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -1083,12 +1083,12 @@
           "summaryConfidence": "high"
         },
         {
-          "path": "src/components/DocumentToolbar/ZoomButtons.jsx",
-          "score": 26,
-          "lines": 550,
+          "path": "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
+          "score": 25,
+          "lines": 463,
           "incomingLocalImports": 1,
           "doclets": 3,
-          "summary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
+          "summary": "Small About dialog for version/build/support information.",
           "summaryConfidence": "high"
         }
       ]
@@ -15738,9 +15738,9 @@
     },
     {
       "path": "src/components/DocumentToolbar/ZoomButtons.jsx",
-      "lines": 550,
+      "lines": 541,
       "extension": ".jsx",
-      "jsdocBlockCount": 4,
+      "jsdocBlockCount": 3,
       "sourceSummary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
       "imports": [
         {
@@ -15791,99 +15791,94 @@
         {
           "name": "ZoomButtons",
           "kind": "default",
-          "line": 549
+          "line": 540
         }
       ],
       "declarations": [
         {
-          "name": "hasAdvancedCustomSizeValue",
-          "kind": "function",
-          "line": 81
-        },
-        {
           "name": "getCustomSizeField",
           "kind": "function",
-          "line": 86
+          "line": 75
         },
         {
           "name": "clampPercent",
           "kind": "function",
-          "line": 90
+          "line": 79
         },
         {
           "name": "clampFactorPercent",
           "kind": "function",
-          "line": 96
+          "line": 85
         },
         {
           "name": "getOptionalFactorDraft",
           "kind": "function",
-          "line": 104
+          "line": 93
         },
         {
           "name": "parsePercentInput",
           "kind": "function",
-          "line": 117
+          "line": 106
         },
         {
           "name": "ZoomButtons",
           "kind": "component",
-          "line": 138
+          "line": 127
         },
         {
           "name": "applyDraft",
           "kind": "function",
-          "line": 201
+          "line": 189
         },
         {
           "name": "cancelDraft",
           "kind": "function",
-          "line": 216
+          "line": 204
         },
         {
           "name": "updateCustomSizeDraft",
           "kind": "function",
-          "line": 224
+          "line": 212
         },
         {
           "name": "getCustomSizeDisplayValue",
           "kind": "function",
-          "line": 228
+          "line": 216
         },
         {
           "name": "parseCustomSizeFieldDraft",
           "kind": "function",
-          "line": 234
+          "line": 222
         },
         {
           "name": "applyCustomSizeDraft",
           "kind": "function",
-          "line": 239
+          "line": 227
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 240
+          "line": 228
         },
         {
           "name": "cancelCustomSizeDraft",
           "kind": "function",
-          "line": 260
+          "line": 248
         },
         {
           "name": "getZoomModeLabel",
           "kind": "function",
-          "line": 269
+          "line": 257
         },
         {
           "name": "renderDefaultZoomModeRow",
           "kind": "component",
-          "line": 276
+          "line": 264
         },
         {
           "name": "renderCustomSizeField",
           "kind": "component",
-          "line": 442
+          "line": 430
         }
       ],
       "parseError": null,
@@ -15906,38 +15901,13 @@
           "examples": 0
         },
         {
-          "id": "hasAdvancedCustomSizeValue",
-          "name": "hasAdvancedCustomSizeValue",
-          "longname": "hasAdvancedCustomSizeValue",
-          "kind": "function",
-          "scope": "global",
-          "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-          "line": 81,
-          "description": "True when the user has a stored value in any advanced field.",
-          "params": [
-            {
-              "name": "limits",
-              "type": "Object|null",
-              "optional": false,
-              "description": ""
-            }
-          ],
-          "returns": [
-            {
-              "type": "boolean",
-              "description": ""
-            }
-          ],
-          "examples": 0
-        },
-        {
           "id": "parsePercentInput",
           "name": "parsePercentInput",
           "longname": "parsePercentInput",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-          "line": 117,
+          "line": 106,
           "description": "Parse a percent-like string safely.",
           "params": [],
           "returns": [],
@@ -15995,7 +15965,7 @@
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 26,
+      "importanceScore": 23,
       "summary": "Zoom control cluster: [ - ] [ % editable ] [ + ] | [ 1:1 ] [ Fit Page ] [ Fit Width ] [ Custom Fit ] - When the field is NOT focused, it renders like “100%”.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -62324,38 +62294,13 @@
       "examples": 0
     },
     {
-      "id": "hasAdvancedCustomSizeValue",
-      "name": "hasAdvancedCustomSizeValue",
-      "longname": "hasAdvancedCustomSizeValue",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-      "line": 81,
-      "description": "True when the user has a stored value in any advanced field.",
-      "params": [
-        {
-          "name": "limits",
-          "type": "Object|null",
-          "optional": false,
-          "description": ""
-        }
-      ],
-      "returns": [
-        {
-          "type": "boolean",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "parsePercentInput",
       "name": "parsePercentInput",
       "longname": "parsePercentInput",
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ZoomButtons.jsx",
-      "line": 117,
+      "line": 106,
       "description": "Parse a percent-like string safely.",
       "params": [],
       "returns": [],

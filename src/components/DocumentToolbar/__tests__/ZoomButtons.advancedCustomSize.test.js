@@ -4,8 +4,8 @@
  *
  * The custom-size menu shows only the window-width factor by default. The window-height and
  * actual-size factors sit behind an "Advanced" disclosure link and are rendered only while it is
- * expanded, except when the user already has a value in one of them (then it starts expanded so
- * a configured limit is never hidden).
+ * expanded. The disclosure always starts collapsed, also when the user has stored values in the
+ * advanced fields (operator decision 2026-09-10).
  */
 
 import React from 'react';
@@ -105,15 +105,22 @@ describe('ZoomButtons custom-size advanced disclosure', () => {
     expect(container.querySelector('#odv-custom-fit-actual-size-factor')).toBeNull();
   });
 
-  it('starts expanded when the user already has an advanced value', () => {
+  it('stays collapsed even when the user already has an advanced value, and shows it once expanded', () => {
     mount({
       userCustomFitSizeLimits: { widthFactorPercent: null, heightFactorPercent: 150, actualSizeFactorPercent: null },
     });
     openMenu();
 
-    expect(disclosure().getAttribute('aria-expanded')).toBe('true');
-    expect(container.querySelector('#odv-custom-fit-height-factor').value).toBe('150%');
-    expect(container.querySelector('#odv-custom-fit-actual-size-factor')).not.toBeNull();
+    expect(disclosure().getAttribute('aria-expanded')).toBe('false');
+    expect(container.querySelector('#odv-custom-fit-height-factor')).toBeNull();
+
+    act(() => {
+      disclosure().dispatchEvent(new MouseEvent('click', { bubbles: true }));
+    });
+    const height = container.querySelector('#odv-custom-fit-height-factor');
+    expect(height.value).toBe('150%');
+    expect(height.closest('.toolbar-split-menu-form--advanced')).not.toBeNull();
+    expect(container.querySelector('#odv-custom-fit-width-factor').closest('.toolbar-split-menu-form--advanced')).toBeNull();
   });
 
   it('stays collapsed when only the basic width value is set', () => {

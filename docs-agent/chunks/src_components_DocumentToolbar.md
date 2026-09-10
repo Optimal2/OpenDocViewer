@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 16. Line count: 6582. JSDoc symbol count: 99.
+File count: 16. Line count: 6573. JSDoc symbol count: 98.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -246,5 +246,4 @@ Local imports: `src/hooks/useAcceleratingHoldRepeat.js`, `src/components/Documen
 Symbols:
 
 - `BASIC_CUSTOM_SIZE_FIELDS` (constant) - Fields shown by default \(window width\) vs.
-- `hasAdvancedCustomSizeValue` (function) - True when the user has a stored value in any advanced field.
 - `parsePercentInput` (function) - Parse a percent\-like string safely.
