@@ -16,14 +16,14 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>file-type</code> | <code>^22.0.2</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
+| <code>file-type</code> | <code>^22.1.0</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>i18next</code> | <code>^26.4.2</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>i18next-http-backend</code> | <code>^4.0.2</code> | 1 | <code>src/i18n.js</code> |
 | <code>i18next-icu</code> | <code>^2.4.4</code> | 1 | <code>src/i18n.js</code> |
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
-| <code>morgan</code> | <code>^1.12.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>morgan</code> | <code>^1.12.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 1 (dynamic) | <code>src/utils/pdfWorkerDispatcher.js</code> |
 | <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+27 more, 32 files total) |
