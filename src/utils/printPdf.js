@@ -1967,7 +1967,7 @@ export function printPdfBlob(blob) {
         // not just on the print() call — an uncaught throw here left the print
         // flow hung at "Förbereder utskrift 100 %" with no fallback and no error
         // (measured against ODVGateway's default CSP, 2026-09-15).
-        let contentWindow = null;
+        let contentWindow;
         try {
           contentWindow = frame.contentWindow;
           if (!contentWindow || typeof contentWindow.print !== 'function') {
