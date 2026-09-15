@@ -25213,7 +25213,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2224,
+    "line": 2235,
     "description": "",
     "params": [
       {
@@ -25312,7 +25312,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2209,
+    "line": 2220,
     "description": "",
     "params": [
       {
@@ -25343,7 +25343,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2195,
+    "line": 2206,
     "description": "Convert a canvas to a PNG data URL without using synchronous toDataURL when browser support for async toBlob is available.",
     "params": [
       {
@@ -25393,7 +25393,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2117,
+    "line": 2128,
     "description": "Collect printable page image URLs without creating or opening a PDF.",
     "params": [
       {
@@ -25510,7 +25510,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2141,
+    "line": 2152,
     "description": "",
     "params": [
       {
@@ -26004,7 +26004,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2024,
+    "line": 2035,
     "description": "",
     "params": [
       {
@@ -26239,7 +26239,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2059,
+    "line": 2070,
     "description": "Read printable page image URLs from the document renderer.",
     "params": [
       {
@@ -26276,7 +26276,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2245,
+    "line": 2256,
     "description": "Generate/print/download a PDF from the currently rendered active page surface.",
     "params": [
       {
@@ -26307,7 +26307,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2268,
+    "line": 2279,
     "description": "Generate/print/download a two-page PDF from the currently rendered comparison surfaces.",
     "params": [
       {
@@ -26344,7 +26344,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2152,
+    "line": 2163,
     "description": "",
     "params": [
       {
@@ -26957,7 +26957,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2128,
+    "line": 2139,
     "description": "Convert a 1-based printable page number into the matching 0-based data URL index.",
     "params": [
       {
@@ -27141,7 +27141,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2168,
+    "line": 2179,
     "description": "Extract a safe printable image source from an already-rendered canvas or image element.",
     "params": [
       {
@@ -27521,7 +27521,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2014,
+    "line": 2025,
     "description": "",
     "params": [
       {
@@ -27695,7 +27695,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/printPdf.js",
-    "line": 2040,
+    "line": 2051,
     "description": "",
     "params": [
       {
