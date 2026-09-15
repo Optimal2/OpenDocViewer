@@ -1962,9 +1962,20 @@ export function printPdfBlob(blob) {
       if (printed) return;
       printed = true;
       window.setTimeout(() => {
-        const contentWindow = frame.contentWindow;
-        if (!contentWindow || typeof contentWindow.print !== 'function') {
-          tryWindowFallback('Generated PDF iframe was not ready for printing');
+        // Probing a frame the CSP refused to load (frame-src/default-src without
+        // blob:) throws a cross-origin SecurityError on the property read itself,
+        // not just on the print() call — an uncaught throw here left the print
+        // flow hung at "Förbereder utskrift 100 %" with no fallback and no error
+        // (measured against ODVGateway's default CSP, 2026-09-15).
+        let contentWindow = null;
+        try {
+          contentWindow = frame.contentWindow;
+          if (!contentWindow || typeof contentWindow.print !== 'function') {
+            tryWindowFallback('Generated PDF iframe was not ready for printing');
+            return;
+          }
+        } catch (error) {
+          tryWindowFallback('Generated PDF iframe is cross-origin — blocked by CSP?', error);
           return;
         }
 
