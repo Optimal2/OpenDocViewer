@@ -10316,8 +10316,8 @@
             {
               "name": "props.navigationModifierState",
               "type": "Object",
-              "optional": false,
-              "description": ""
+              "optional": true,
+              "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
             },
             {
               "name": "props.selectionPanelEnabled",
@@ -59062,8 +59062,8 @@
         {
           "name": "props.navigationModifierState",
           "type": "Object",
-          "optional": false,
-          "description": ""
+          "optional": true,
+          "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
         },
         {
           "name": "props.selectionPanelEnabled",

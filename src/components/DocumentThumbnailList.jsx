@@ -525,7 +525,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {boolean=} props.isComparing
  * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
  * @param {'primary'|'compare'=} props.activePane
- * @param {{ shift:boolean, ctrl:boolean }} props.navigationModifierState
+ * @param {{ shift:boolean, ctrl:boolean }=} props.navigationModifierState - Omitted in the compact thumbnail-only view; defaults to no modifier pressed.
  * @param {boolean=} props.selectionPanelEnabled
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
@@ -542,7 +542,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   isComparing = false,
   comparePageNumber = null,
   activePane = 'primary',
-  navigationModifierState,
+  navigationModifierState = { shift: false, ctrl: false },
   selectionPanelEnabled = false,
   onHidePageFromSelection,
   onHideDocumentFromSelection,
@@ -1359,7 +1359,7 @@ DocumentThumbnailList.propTypes = {
   navigationModifierState: PropTypes.shape({
     shift: PropTypes.bool.isRequired,
     ctrl: PropTypes.bool.isRequired,
-  }).isRequired,
+  }),
   selectionPanelEnabled: PropTypes.bool,
   onHidePageFromSelection: PropTypes.func,
   onHideDocumentFromSelection: PropTypes.func,
