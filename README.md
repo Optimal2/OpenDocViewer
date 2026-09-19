@@ -209,9 +209,9 @@ npm test           # run the suite once
 npm run test:watch # re-run on file changes
 ```
 
-Note that the local pre-push gate below does **not** run the tests — run
-them yourself before pushing, and include them when reviewing changes (see
-the review checklist in [CONTRIBUTING.md](CONTRIBUTING.md)).
+The local pre-push gate below runs the suite as well. Still run it while
+working, and include the results when reviewing changes (see the review
+checklist in [CONTRIBUTING.md](CONTRIBUTING.md)).
 
 ---
 
