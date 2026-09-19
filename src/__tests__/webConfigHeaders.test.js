@@ -2,7 +2,9 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync } from 'fs';
 import { resolve } from 'path';
 
-const webConfigPath = resolve(import.meta.dirname, '..', 'web.config');
+// public/web.config is deployed verbatim with the SPA; this test lives outside public/ so it is
+// never copied into dist/ and shipped to a server.
+const webConfigPath = resolve(import.meta.dirname, '..', '..', 'public', 'web.config');
 const config = readFileSync(webConfigPath, 'utf8');
 
 const indexLocationMatch = config.match(
