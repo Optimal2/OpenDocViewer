@@ -5,12 +5,14 @@
 
 .DESCRIPTION
     This is a public repository; CI runs automatically on push, but still run
-    locally before pushing to catch build breaks and version lockstep issues.
+    locally before pushing to catch build breaks, test failures and version
+    lockstep issues.
 
     Steps:
       1. Build the web application: npm run build
-      2. Validate version lockstep: scripts/omp/validate-component-versions.ps1
-      3. Verify generated agent documentation is fresh: npm run doc:agent,
+      2. Run the Vitest suite: npx vitest run (with a JSON report for the count)
+      3. Validate version lockstep: scripts/omp/validate-component-versions.ps1
+      4. Verify generated agent documentation is fresh: npm run doc:agent,
          then fail if docs-agent differs from the committed output
 
     Exit code 0 if all steps pass, 1 if any fail.
@@ -34,13 +36,15 @@ $Validator = Join-Path (Join-Path (Join-Path $RepoRoot 'scripts') 'omp') 'valida
 # --- Local-ci telemetry (best-effort; never changes the gate's exit code) ----
 # One compact JSONL line per run under
 # %APPDATA%\@private\ai-orchestrator\local-ci-telemetry\OpenDocViewer.jsonl.
-# This gate has NO test step (npm build only): test_count is explicitly null
-# with a reason, never zero. No TRX file is ever produced or parsed here, so
-# the helper's TRX counter path and the 'unreadable-trx' status do not apply.
+# The test count comes from Vitest's JSON reporter (numTotalTests). When that
+# report is missing or unreadable the count stays $null with an explicit
+# reason, never 0. No TRX file is produced here, so the helper's TRX counter
+# path and the 'unreadable-trx' status do not apply.
 $localCiTimer = [System.Diagnostics.Stopwatch]::StartNew()
 $buildDurationMs = $null
 $telemetryTestStatus = 'not-run'
-$telemetrySkipReason = 'no test step in local CI (npm build only)'
+$telemetryTestCount = $null
+$telemetrySkipReason = 'test step did not run'
 $telemetryHelperPath = Join-Path (Join-Path $RepoRoot 'scripts') 'local-ci-telemetry.ps1'
 if (Test-Path -LiteralPath $telemetryHelperPath -PathType Leaf) {
     try {
@@ -80,7 +84,7 @@ try {
     $buildPassed = $false
     $buildStopwatch = [System.Diagnostics.Stopwatch]::StartNew()
     try {
-        Write-Host "[1/3] Building web application: npm run build" -ForegroundColor Cyan
+        Write-Host "[1/4] Building web application: npm run build" -ForegroundColor Cyan
         Push-Location $RepoRoot
         try {
             # npm.cmd sets $LASTEXITCODE, but reset it first so a stale value
@@ -106,17 +110,73 @@ try {
     if (-not $buildPassed) { $overallSuccess = $false }
     Write-Host ""
 
-    # --- Step 2: Validate component versions -----------------------------------
+    # --- Step 2: Unit tests ----------------------------------------------------
+    # Mirrors the CI "Test" step. The JSON reporter runs alongside the default
+    # reporter only to read numTotalTests for telemetry; the verdict is the
+    # process exit code, exactly as in CI.
+    $testPassed = $false
+    $testReportPath = Join-Path ([System.IO.Path]::GetTempPath()) ("odv-local-ci-vitest-{0}.json" -f ([guid]::NewGuid().ToString('N')))
+    try {
+        Write-Host "[2/4] Running unit tests: npx vitest run" -ForegroundColor Cyan
+        Push-Location $RepoRoot
+        try {
+            $global:LASTEXITCODE = 0
+            & npx vitest run --reporter=default --reporter=json --outputFile="$testReportPath"
+            if ($LASTEXITCODE -eq 0) {
+                $testPassed = $true
+            }
+        }
+        finally {
+            Pop-Location
+        }
+        $telemetryTestStatus = if ($testPassed) { 'passed' } else { 'failed' }
+
+        if (Test-Path -LiteralPath $testReportPath -PathType Leaf) {
+            try {
+                $testReport = Get-Content -LiteralPath $testReportPath -Raw | ConvertFrom-Json
+                $reportedTotal = [int]$testReport.numTotalTests
+                if ($reportedTotal -gt 0) {
+                    $telemetryTestCount = $reportedTotal
+                    $telemetrySkipReason = ''
+                }
+                else {
+                    $telemetrySkipReason = 'vitest JSON report contained no tests'
+                }
+            }
+            catch {
+                $telemetrySkipReason = "vitest JSON report unreadable: $($_.Exception.Message)"
+            }
+        }
+        else {
+            $telemetrySkipReason = 'vitest JSON report was not written'
+        }
+    }
+    catch {
+        Write-Host "Test step threw an exception: $_" -ForegroundColor Red
+        $testPassed = $false
+        $telemetryTestStatus = 'failed'
+        $telemetrySkipReason = "test step threw: $($_.Exception.Message)"
+    }
+    finally {
+        if (Test-Path -LiteralPath $testReportPath -PathType Leaf) {
+            Remove-Item -LiteralPath $testReportPath -Force -ErrorAction SilentlyContinue
+        }
+    }
+    Write-StepResult -StepName "Unit tests" -Passed $testPassed
+    if (-not $testPassed) { $overallSuccess = $false }
+    Write-Host ""
+
+    # --- Step 3: Validate component versions -----------------------------------
     $validatePassed = $false
     try {
-        Write-Host "[2/3] Validating component version lockstep" -ForegroundColor Cyan
+        Write-Host "[3/4] Validating component version lockstep" -ForegroundColor Cyan
         if (-not (Test-Path $Validator)) {
             throw "Validator script not found: $Validator"
         }
         # The validator ends with an explicit 'exit 0' / 'exit 1', so
         # $LASTEXITCODE reflects its verdict rather than that of the last
         # native git call it made internally. Reset it first so a stale value
-        # from Step 1 can never be mistaken for a validator result.
+        # from an earlier step can never be mistaken for a validator result.
         $global:LASTEXITCODE = 0
         & $Validator -BaseCommit $BaseCommit
         if ($LASTEXITCODE -eq 0) {
@@ -131,13 +191,13 @@ try {
     if (-not $validatePassed) { $overallSuccess = $false }
     Write-Host ""
 
-    # --- Step 3: Agent documentation freshness ---------------------------------
+    # --- Step 4: Agent documentation freshness ---------------------------------
     # Regenerates docs-agent with AgentDocMap and fails if the committed output
     # drifts from what the generator produces (mirrors the agent-docs.yml
     # workflow). Requires the AgentDocMap repository next to OpenDocViewer.
     $agentDocsPassed = $false
     try {
-        Write-Host "[3/3] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
+        Write-Host "[4/4] Verifying generated agent documentation is fresh" -ForegroundColor Cyan
         Push-Location $RepoRoot
         try {
             & npm run doc:agent
@@ -171,9 +231,7 @@ try {
     $telemetryStatus = if ($overallSuccess) { 'pass' } else { 'fail' }
     try {
         if (Get-Command Write-LocalCiTelemetry -ErrorAction SilentlyContinue) {
-            # -TestCount is deliberately omitted: it stays $null (unmeasured),
-            # never 0, because this gate runs no tests.
-            Write-LocalCiTelemetry -Repo 'OpenDocViewer' -RepositoryRoot $RepoRoot -Status $telemetryStatus -DurationMs $localCiTimer.ElapsedMilliseconds -BuildDurationMs $buildDurationMs -TestStatus $telemetryTestStatus -TestSkipReason $telemetrySkipReason
+            Write-LocalCiTelemetry -Repo 'OpenDocViewer' -RepositoryRoot $RepoRoot -Status $telemetryStatus -DurationMs $localCiTimer.ElapsedMilliseconds -BuildDurationMs $buildDurationMs -TestStatus $telemetryTestStatus -TestCount $telemetryTestCount -TestSkipReason $telemetrySkipReason
         }
     }
     catch {

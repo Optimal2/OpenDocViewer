@@ -7,7 +7,6 @@
 # For staging/previews, see the STAGING BLOCK section further down.
 #
 # Reference: https://www.robotstxt.org/robotstxt.html
-# Provenance: :contentReference[oaicite:0]{index=0}
 # ------------------------------------------------------------------------------
 
 # ------------------------------------------------------------------------------ 

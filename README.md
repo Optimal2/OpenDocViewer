@@ -149,7 +149,6 @@ At a high level the application is split into five layers:
 5. **Operational support**
    - `src/logging/*`
    - `server/*`
-   - `public/odv-admin.html`
 
 For a deeper walkthrough, see `docs-src/architecture.md`.
 
@@ -231,8 +230,9 @@ Hooks:
 
 - `pre-commit` — light static checks only (`git diff --cached --check`).
   Does not build or run tests.
-- `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app and
-  validates OMP component version lockstep.
+- `pre-push` — runs `scripts\local-ci.ps1`, which builds the web app, runs
+  the Vitest suite, validates OMP component version lockstep, and checks that
+  the generated agent documentation is fresh.
 
 The push is blocked if the local CI gate fails. Because this is a public
 repository, also verify that GitHub Actions passed on `main` after pushing:

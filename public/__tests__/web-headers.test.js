@@ -23,6 +23,13 @@ describe('public/web.config security headers', () => {
     expect(config).toMatch(/<add\s+name="Permissions-Policy"/);
   });
 
+  it('keeps site-managed help content out of the immutable cache policy', () => {
+    const helpLocationMatch = config.match(/<location path="help">[\s\S]*?<\/location>/);
+    const helpLocation = helpLocationMatch ? helpLocationMatch[0] : '';
+    expect(helpLocation).toMatch(/<add\s+name="Cache-Control"\s+value="no-cache, must-revalidate"\s*\/>/);
+    expect(helpLocation).not.toMatch(/immutable/);
+  });
+
   it('keeps X-Content-Type-Options header', () => {
     expect(config).toMatch(/<add\s+name="X-Content-Type-Options"/);
   });

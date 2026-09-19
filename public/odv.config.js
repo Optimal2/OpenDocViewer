@@ -421,10 +421,7 @@
       },
       about: {
         githubUrl: 'https://github.com/Optimal2/OpenDocViewer',
-        contactEmail: 'dev@optimal2.se',
-        diagnostics: {
-          enabled: false
-        }
+        contactEmail: 'dev@optimal2.se'
       }
     },
 

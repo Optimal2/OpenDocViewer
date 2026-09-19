@@ -31,6 +31,5 @@
   "dir": "ltr",
   "orientation": "any",
   "prefer_related_applications": false,
-  "_comment": "Keep index.html and odv.config.js uncached (no-store). Manifest itself may be cached with normal policy.",
-  "_source": ":contentReference[oaicite:0]{index=0}"
+  "_comment": "Keep index.html and odv.config.js uncached (no-store). Manifest itself may be cached with normal policy."
 }

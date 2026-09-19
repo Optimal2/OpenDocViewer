@@ -52,7 +52,7 @@ and deprecated imports. Literal document-loading strategy values named
 ## Validation and rollback
 
 Run `npm test`, `npm run lint`, `npm run build`, `npm run doc:agent`, and
-`scripts/local-ci.ps1`. The local CI script checks build, component versions,
+`scripts/local-ci.ps1`. The local CI script checks build, tests, component versions,
 and generated documentation; it does not run tests. GitHub CI independently
 runs tests, lint, build, and JSDoc after a clean npm install.
 

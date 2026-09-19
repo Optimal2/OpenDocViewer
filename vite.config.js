@@ -145,7 +145,9 @@ export default defineConfig(({ mode }) => {
     // tool's tests, which fail in CI (`spawnSync node ENOENT`) and broke the v2.7.0 release publish.
     // Keep `_tools/**` out of the ODV test scan. See AGENTS.md ("Release workflow — do not change the trigger").
     test: {
-      exclude: [...configDefaults.exclude, '_tools/**'],
+      // `dist/**` copies `public/__tests__` on every build; without this exclude the same test
+      // file runs twice locally and the reported file count differs from CI.
+      exclude: [...configDefaults.exclude, '_tools/**', 'dist/**'],
     },
 
     plugins: [

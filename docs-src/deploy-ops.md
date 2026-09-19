@@ -60,12 +60,14 @@ If a deployment must be validated formally, test Edge and Chrome first. Treat Fi
 - `index.html`: `no-store, no-cache, must-revalidate`
 - `odv.config.js`: `no-store, no-cache, must-revalidate`
 - `odv.site.config.js`: `no-store, no-cache, must-revalidate`
-- hashed static assets: `public, max-age=31536000, immutable`
+- `help/` (site-managed manual fragments and their assets): `no-cache, must-revalidate`
+- everything else, including hashed assets: `public, max-age=31536000, immutable`
 
 That split is important:
 
 - the shell HTML and runtime config must reflect the newest deployment immediately
-- hashed JS/CSS assets are safe to long-cache
+- site-managed help content is replaced in place without a new build, so browsers must revalidate it
+- hashed JS/CSS assets are safe to long-cache; locale files carry `?v=<build id>` and are therefore safe too
 
 ### CSP and runtime-config trust
 
