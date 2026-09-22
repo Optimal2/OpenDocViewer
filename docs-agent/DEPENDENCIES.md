@@ -16,7 +16,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>file-type</code> | <code>^22.1.0</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
+| <code>file-type</code> | <code>^22.1.1</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
 | <code>helmet</code> | <code>^8.3.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>i18next</code> | <code>^26.4.2</code> | 5 | <code>src/ErrorBoundary.jsx</code><br><code>src/i18n.js</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printParse.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>i18next-http-backend</code> | <code>^4.0.2</code> | 1 | <code>src/i18n.js</code> |
@@ -29,7 +29,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+27 more, 32 files total) |
 | <code>react</code> | <code>^19.3.0</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+48 more, 53 files total) |
 | <code>react-dom</code> | <code>^19.3.0</code> | 1 | <code>src/index.jsx</code> |
-| <code>react-i18next</code> | <code>^17.0.13</code> | 33 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+28 more, 33 files total) |
+| <code>react-i18next</code> | <code>^17.0.15</code> | 33 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+28 more, 33 files total) |
 | <code>utif2</code> | <code>^4.1.0</code> | 4 (1 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/imageWorker.js</code> |
 
 ## Development Dependencies
@@ -37,7 +37,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | Package | Version | Observed source imports |
 | --- | --- | ---: |
 | <code>@babel/core</code> | <code>^8.0.1</code> | 0 |
-| <code>@babel/plugin-transform-runtime</code> | <code>^8.0.1</code> | 0 |
+| <code>@babel/plugin-transform-runtime</code> | <code>^8.0.6</code> | 0 |
 | <code>@babel/runtime</code> | <code>^8.0.0</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.4</code> | 0 |
@@ -45,16 +45,16 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
-| <code>eslint</code> | <code>^10.10.0</code> | 0 |
+| <code>eslint</code> | <code>^10.11.0</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
-| <code>eslint-plugin-react-refresh</code> | <code>^0.5.6</code> | 0 |
+| <code>eslint-plugin-react-refresh</code> | <code>^0.5.7</code> | 0 |
 | <code>globals</code> | <code>^17.12.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>29.1.1</code> | 0 |
-| <code>prettier</code> | <code>^3.9.6</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.8</code> | 0 |
+| <code>prettier</code> | <code>^3.9.8</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.9</code> | 0 |
 | <code>vite</code> | <code>^8.3.0</code> | 0 |
-| <code>vitest</code> | <code>^5.0.0</code> | 0 |
+| <code>vitest</code> | <code>^5.0.1</code> | 0 |
 
 ## Imported But Not Declared Directly
 
