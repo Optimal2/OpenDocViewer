@@ -760,7 +760,7 @@ try {
 
         # -------------------------------------------------------------------
         # Keep compatibleArtifacts.maxVersion in sync with the bumped
-        # component. The 2026-08-18 consumer module import failure showed that
+        # component. The 2026-08-18 module import failure showed that
         # leaving this step manual let the version matrix drift: the
         # component was bumped but the module definition still capped the
         # artifact version, so the host rejected the produced artifact.
