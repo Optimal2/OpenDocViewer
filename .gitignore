@@ -41,7 +41,10 @@ logs/
 # Generated documentation (JSDoc)
 # By default we generate docs/ locally. If you publish docs via GitHub Pages,
 # consider using a dedicated branch or an explicit workflow instead of committing here.
-docs/
+# docs/img/ is the exception: it holds the screenshots referenced by README.md and
+# is tracked (docs/* rather than docs/ so the negation below can take effect).
+docs/*
+!docs/img/
 
 # Generated AI-agent documentation from AgentDocMap is intentionally tracked in
 # docs-agent/ so agents can orient before running local tooling.
