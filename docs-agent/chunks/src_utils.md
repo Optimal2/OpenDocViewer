@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 37. Line count: 15298. JSDoc symbol count: 605.
+File count: 38. Line count: 15406. JSDoc symbol count: 612.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -73,6 +73,22 @@ Symbols:
 - `OptionLike` (typedef) - Option\-like shape used by the print reason selector.
 - `resolveLocalizedValue` (function) - Return the best string for the active language.
 - `resolveOptionLabel` (function) - Resolve a label for a reason option.
+
+## src/utils/manualSources.js
+
+Resolves which manual HTML file the help dialog shows.
+
+Exports: `DEFAULT_SITE_MANUAL_TEMPLATE`, `DEFAULT_FALLBACK_MANUAL_TEMPLATE`, `interpolateManualTemplate`, `buildManualCandidates`, `isApplicationShellHtml`, `resolveManualSource`
+
+Symbols:
+
+- `DEFAULT_SITE_MANUAL_TEMPLATE` (constant) - Resolves which manual HTML file the help dialog shows.
+- `toText` (function) - No description.
+- `interpolateManualTemplate` (function) - No description.
+- `buildManualCandidates` (function) - Candidate manual URLs in priority order: site before default, UI language before fallback language.
+- `isApplicationShellHtml` (function) - True when the HTML is OpenDocViewer's own application shell rather than a manual.
+- `ManualCandidateResponse` (typedef) - No description.
+- `resolveManualSource` (function) - Fetch candidates in order and return the first one the server delivers as a manual.
 
 ## src/utils/memoryProfile.js
 

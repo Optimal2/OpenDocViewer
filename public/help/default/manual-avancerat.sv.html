@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Fler funktioner – OpenDocViewer</title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- CSS ligger i body: ODV:s manualfönster behåller bara body-innehållet (en inledande <style> i head försvinner). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Ljuslåda utan skript: bilden länkar till #lb-NAMN och .lb:target visas över hela fönstret. Ett klick var som helst leder till #lb-stang (finns inte) och stänger. OBS: inget mindre-än-tecken i CSS:en, då tömmer ODV:s sanering hela style-blocket. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Inbakade guider längst ned: fälls ut på samma sida */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – fäll ut"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – fäll ihop"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>Fler funktioner i OpenDocViewer</h1>
+  <p class="lead">Det här är fortsättningen på <a href="manual.sv.html">Kom igång-guiden</a>: funktioner som inte alla behöver varje dag, men som är bra att känna till. Läs det avsnitt du behöver.</p>
+  <p class="small">Bilderna visar ett påhittat testdokument. <a href="manual-avancerat.sv.pdf">Ladda ned guiden som PDF</a>.</p>
+</section>
+
+<nav class="toc" aria-label="Innehåll">
+  <a href="#jamforelse">Jämför två sidor</a>
+  <a href="#metadata">Dokumentets metadata</a>
+  <a href="#hq">Skarpare PDF-sidor</a>
+  <a href="#egen">Egen storlek och standardzoom</a>
+  <a href="#tangentbord">Alla kortkommandon</a>
+  <a href="#verktygsfalt">Verktygsfältet knapp för knapp</a>
+  <a href="#tema">Mörkt tema</a>
+  <a href="#support">Supportinformation</a>
+  <a href="#nytt">Nytt i version 2.8</a>
+</nav>
+
+<h2 id="jamforelse">Jämför två sidor</h2>
+<p>Klicka på <strong>jämförelseknappen</strong> i verktygsfältet. Sidan du tittar på hamnar till vänster med <span class="blue">blå ram</span>, och en andra sida visas till höger med <span class="orange">orange ram</span>. Vill du byta ut den högra sidan: högerklicka på en miniatyr och välj <em>Visa till höger</em>.</p>
+<figure class="wide">
+  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Jämförelseläget med två sidor bredvid varandra"></a>
+  <figcaption><strong>Jämförelseläget.</strong> Varje sida har egna zoomknappar i överkanten. I panelen märks vänster sida <span class="blue">V</span> och höger sida <span class="orange">H</span>.</figcaption>
+</figure>
+<p>En av sidorna är alltid <strong>aktiv</strong> – den du senast klickade i. Verktygsfältet och tangentbordet styr den aktiva sidan, och ramarna runt knapparna visar vilken: blå för vänster, orange för höger.</p>
+<p>Skriver du ut med metoden <strong>Aktiv sida</strong> medan du jämför kan du välja att ta med bara den aktiva sidan eller båda. Sidorna skrivs ut precis som du ser dem – rotation, ljusstyrka och kontrast följer med, på samma sätt som när du tittar på en enda sida. Med alla andra utskriftsmetoder skrivs sidorna ut som de är i arkivet.</p>
+<details>
+  <summary>Styra den andra sidan utan att byta</summary>
+  <p>Håll <kbd>Shift</kbd> nedtryckt medan du klickar på en knapp eller använder tangentbordet, så gäller kommandot den sida som <em>inte</em> är aktiv. Ramarna byter färg medan du håller Shift, så du ser vad som kommer att hända.</p>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="Verktygsfältet med Shift nedtryckt och orange ramar"></a>
+    <figcaption><strong>Shift nedtryckt.</strong> Orange ramar = knapparna styr höger sida just nu.</figcaption>
+  </figure>
+  <p><kbd>Pil vänster</kbd> och <kbd>Pil höger</kbd> byter aktiv sida. <kbd>Pil vänster</kbd> när vänster redan är aktiv avslutar jämförelsen – det gör också jämförelseknappen, eller <em>Avsluta jämförelse</em> i högerklicksmenyn på den högra sidan.</p>
+  <figure class="menu">
+    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="Högerklicksmenyn på höger sida i jämförelseläget"></a>
+    <figcaption><strong>Högerklick på höger sida.</strong> Samma val som vanligt, plus <em>Avsluta jämförelse</em>.</figcaption>
+  </figure>
+</details>
+
+<h2 id="metadata">Dokumentets metadata</h2>
+<p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
+<figure class="wide">
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="Dialogen Dokumentmetadata"></a>
+  <figcaption><strong>Dokumentmetadata</strong> för ett dokument.</figcaption>
+</figure>
+<details>
+  <summary>Alla dokument i en tabell</summary>
+  <p>Knappen <em>Metadata-tabell</em> i metadatadialogen visar hela sessionen som en tabell – ett dokument per rad. Praktiskt när du snabbt vill se vilka avdelningar och datum som ingår.</p>
+  <figure class="wide">
+    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="Metadataöversikten med alla dokument i sessionen"></a>
+    <figcaption><strong>Metadataöversikt.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="hq">Skarpare PDF-sidor</h2>
+<p>PDF-sidor visas redan i utskriftskvalitet. Behöver du se en detalj ännu skarpare: klicka på <strong>HQ</strong> i verktygsfältet. Sidan ritas om med dubbel upplösning och knappen blir röd. Det gäller bara den sidan.</p>
+<div class="figure-grid narrow">
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="HQ-knappen före"></a><figcaption><strong>Före.</strong></figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="HQ-knappen efter, röd"></a><figcaption><strong>Efter.</strong> Röd = skärpan är höjd.</figcaption></figure>
+</div>
+<p class="small">HQ är grå för skannade sidor (TIFF/JPEG), eftersom de redan visas exakt så skarpa som de skannades. Håll muspekaren över knappen så står det varför.</p>
+
+<h2 id="egen">Egen storlek och standardzoom</h2>
+<p>Knappen <strong>1:X</strong> visar sidan i en storlek du själv bestämt – en andel av fönstrets bredd. Pilen bredvid öppnar inställningarna. Där väljer du också vilken zoom varje ny session ska börja med (<em>Standard zoom/storlek</em>); förvalet bestäms av din organisation. ODV kommer ihåg dina val.</p>
+<div class="figure-grid">
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="Menyn för egen storlek"></a><figcaption><strong>Egen storlek.</strong> Andel av fönsterbredden och standardzoom.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="Menyn med Avancerat utfällt"></a><figcaption><strong>Avancerat.</strong> Gränser för fönsterhöjd och verklig storlek.</figcaption></figure>
+</div>
+
+<h2 id="tangentbord">Alla kortkommandon</h2>
+<table>
+  <thead><tr><th>Tangent</th><th>Gör detta</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Pil upp</kbd> / <kbd>Pil ned</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Föregående eller nästa sida. Håll inne för snabb bläddring.</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>Första eller sista sidan.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + någon av ovanstående</td><td>Samma sak, men dokument för dokument i stället för sida för sida.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zooma in eller ut.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>Rotera sidan.</td></tr>
+    <tr><td><kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>I jämförelseläget: byt aktiv sida. Pil vänster när vänster redan är aktiv avslutar jämförelsen.</td></tr>
+    <tr><td><kbd>Shift</kbd> + kommando</td><td>I jämförelseläget: styr den sida som inte är aktiv.</td></tr>
+    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Dölj sidan / dölj hela dokumentet (urval).</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppna ODV:s utskriftsdialog.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="verktygsfalt">Verktygsfältet knapp för knapp</h2>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="Vänstra delen av verktygsfältet"></a>
+  <figcaption><strong>Vänster:</strong> skrivare med pil för förval, urval, sidnavigering, zoom ut/in med procentfält, 1:1, anpassa till skärm, anpassa till bredd.</figcaption>
+</figure>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="Högra delen av verktygsfältet"></a>
+  <figcaption><strong>Höger:</strong> 1:X egen storlek med pil, jämförelse, rotera vänster/höger, HQ, ljusstyrka, kontrast, återställ, samt tema, språk och hjälp.</figcaption>
+</figure>
+<ul>
+  <li><strong>Skrivare</strong> öppnar utskriften. Pilen bredvid sätter förvalet <em>Aktiv sida</em> eller <em>Alla sidor</em>.</li>
+  <li><strong>Urval</strong> öppnar urvalsarbetsytan. Röd när ett urval är aktivt.</li>
+  <li><strong>Sidnavigering</strong>: första, föregående, nästa, sista, och ett fält för sidnummer.</li>
+  <li><strong>Zoom</strong>: ut, in, procentfält, 1:1, anpassa till skärm, anpassa till bredd.</li>
+  <li><strong>1:X</strong>: egen storlek. <strong>Jämförelse</strong>: två sidor bredvid varandra. <strong>Rotera</strong>: ett kvarts varv.</li>
+  <li><strong>HQ</strong>: skarpare PDF-sida. <strong>Ljusstyrka</strong>, <strong>kontrast</strong> och <strong>återställ</strong>.</li>
+  <li><strong>Tema</strong>, <strong>språk</strong>, <strong>hjälp</strong>. Lampan på hjälpknappen: grön = allt väl, gul = datorn har lite minne, röd = fel.</li>
+</ul>
+
+<h2 id="tema">Mörkt tema</h2>
+<p>Temamenyn längst till höger har <em>Normal</em>, <em>Ljust</em> och <em>Mörkt</em>. I mörkt tema blir gränssnittet mörkt medan dokumentsidan visas som vanligt.</p>
+<figure class="wide">
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer i mörkt tema"></a>
+  <figcaption><strong>Mörkt tema.</strong></figcaption>
+</figure>
+
+<h2 id="support">Supportinformation</h2>
+<p>Vänd dig först till <strong>din lokala support</strong> – de känner till hur ODV är installerat och inställt hos er, och kan föra ärendet vidare till leverantören. Två saker gör det mycket lättare att hjälpa dig: <strong>versionen</strong> och <strong>diagnostikfilen</strong>. Båda finns under hjälpmenyn → <em>Om OpenDocViewer</em>.</p>
+<p>Det här är bra att ta med i ärendet:</p>
+<ul>
+  <li><strong>Version och build-id</strong> från <em>Om OpenDocViewer</em>.</li>
+  <li><strong>Diagnostikfilen</strong> (<em>Ladda ned diagnostik som JSON</em>). Den innehåller tekniska uppgifter om ODV och webbläsaren – inga dokument.</li>
+  <li><strong>När</strong> det hände (datum och klockslag), <strong>vad du gjorde</strong> och vilken <strong>webbläsare</strong> du använde.</li>
+  <li>Texten under <em>Tekniska detaljer</em> om en felruta visades.</li>
+</ul>
+<div class="warning"><p><strong>Skicka inga personuppgifter.</strong> Bifoga inte skärmdumpar eller utskrifter som visar verkliga dokument, namn eller id-nummer, om inte din organisation uttryckligen har bett om det.</p></div>
+<div class="figure-grid">
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="Om OpenDocViewer"></a><figcaption><strong>Om OpenDocViewer.</strong> Version, build-id och kontaktuppgifter. <em>Ladda om resursfiler</em> hämtar om översättningar och inställningar utan att starta om.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="Diagnostiksektionen i Om OpenDocViewer"></a><figcaption><strong>Diagnostik.</strong> <em>Ladda ned diagnostik som JSON</em> ger en fil att bifoga ärendet. Den innehåller tekniska uppgifter – inga dokument.</figcaption></figure>
+</div>
+<details>
+  <summary>När sessionen gått ut</summary>
+  <p>Rutan <em>Dokumenten kunde inte visas korrekt</em> har en länk <em>Tekniska detaljer</em>. Fäll ut den så ser du vilka sidor som inte kunde hämtas och varför. Ta med det i ärendet.</p>
+  <div class="figure-grid">
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV med utgången session och sidor som varningstrianglar"></a><figcaption><strong>Utgången session.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Tekniska detaljer utfällda"></a><figcaption><strong>Tekniska detaljer.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="nytt">Nytt i version 2.8</h2>
+<ul>
+  <li><strong>Urvalsarbetsytan</strong> ersätter den gamla urvalsfliken – se guiden <a href="manual-urval.sv.html">Urval</a>.</li>
+  <li><strong>Utskriftsknappen har en pil</strong> för förvalt omfång, och dialogen har en ny layout.</li>
+  <li><strong>Egen storlek (1:X)</strong> och val av standardzoom.</li>
+  <li><strong>PDF-sidor i utskriftskvalitet</strong>, med <strong>HQ</strong> för ännu skarpare visning.</li>
+  <li><strong>Metadata</strong> från högerklicksmenyn.</li>
+  <li><strong>Sidbyte vid rullning</strong> med mushjulet.</li>
+  <li><strong>Starta om sessionen</strong> när dokumentlänkarna gått ut.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>P</kbd> öppnar ODV:s utskrift. Rotation ligger på <kbd>Ctrl</kbd>+pil vänster/höger.</li>
+</ul>
+<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.8. Uppdaterad 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-shift.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadata.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadataoversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-fore.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-efter.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/egen-storlek.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-egen-storlek-avancerat"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/egen-storlek-avancerat.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-vanster"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-vanster.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-hoger"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-hoger.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-morkt-tema"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/morkt-tema.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-om-odv"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/om-odv.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-diagnostik"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/diagnostik.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-problemnotis"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/problemnotis.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-problemnotis-detaljer"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/problemnotis-detaljer.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>

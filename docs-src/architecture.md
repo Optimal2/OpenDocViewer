@@ -176,7 +176,9 @@ the archived page image without adjustments.
 
 - `HelpOverlayDialog.jsx` is the built-in text-only quick help
 - `ManualOverlayDialog.jsx` loads the site-local or bundled manual HTML fragment with
-  `cache: 'no-store'` and sanitizes it with DOMPurify before insertion
+  `cache: 'no-store'` and sanitizes it with DOMPurify before insertion; the candidate order
+  (`help/site/` before `help/default/`, skipping an SPA-fallback app shell) lives in
+  `src/utils/manualSources.js`
 - `AboutOverlayDialog.jsx` shows version and build id and offers the support diagnostics download
   (`src/utils/supportDiagnostics.js`); the benchmark tools are separate opt-in flags
 - `ViewerProblemNotice.jsx` shows configurable problem notices and can request a session reset

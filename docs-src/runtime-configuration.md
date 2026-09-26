@@ -556,10 +556,19 @@ help: {
 }
 ```
 
-Behavior:
+Behavior (manual order: **site before default**):
 
 - the manual dialog first tries the site-local HTML fragment under `help/site/`
 - if no site-local file exists for the current language, it falls back to the bundled default under `help/default/`
+- the order per language is `help/site/manual.<lng>.html`, `help/default/manual.<lng>.html`, then the
+  same two for `fallbackLanguage`
+- `*.sample.html` files in `help/site/` are templates only and never count as a site manual; a fresh
+  installation therefore shows the bundled default manual until the deployment adds its own
+  `help/site/manual.<lng>.html`
+- a candidate only counts when the server returns the manual itself: a response that is the
+  application shell (hosts with an SPA fallback answer a missing file with `index.html` and status 200)
+  is skipped, and `public/web.config` keeps missing files under `help/` out of the SPA rewrite so they
+  answer 404
 - site-local manuals can therefore be upgraded independently of the app bundle as long as the deployment keeps `help/site/manual.<lng>.html` outside the tracked repo
 - the manual dialog has a reload button that bypasses browser/server caches with a unique cache-busting URL when a site-local manual has been replaced during an active support session
 - relative links inside the loaded HTML are rewritten against the resolved file URL so images, PDFs, and other local help assets can live alongside the manual fragment
@@ -567,10 +576,17 @@ Behavior:
 
 Shipped public files:
 
-- `public/help/default/manual.en.html`
-- `public/help/default/manual.sv.html`
+- `public/help/default/` – the bundled user manual in English and Swedish: `manual.<lng>.html`
+  (getting started; the two other guides are embedded at the bottom), `manual-urval.<lng>.html`
+  (selection), `manual-avancerat.<lng>.html` (more features), a PDF of each guide, and the
+  screenshots in `img/`. The content is customer-neutral and uses a made-up test document.
 - `public/help/site/manual.en.sample.html`
 - `public/help/site/manual.sv.sample.html`
+
+A site manual that links to other files (images, PDFs, further guides) should use relative links;
+they resolve against the folder the manual was loaded from, so the same HTML works under both
+`help/site/` and `help/default/`. The manual window runs the HTML through DOMPurify and keeps only
+the body: put any `<style>` inside `<body>`, and do not use scripts.
 
 ## Print shortcut policy
 

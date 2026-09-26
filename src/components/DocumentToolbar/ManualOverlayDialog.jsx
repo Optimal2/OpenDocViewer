@@ -10,29 +10,9 @@ import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
+import { buildManualCandidates, resolveManualSource } from '../../utils/manualSources.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
-
-/**
- * @param {*} value
- * @param {string} fallback
- * @returns {string}
- */
-function toText(value, fallback = '') {
-  const text = String(value || '').trim();
-  return text || fallback;
-}
-
-/**
- * @param {string} template
- * @param {string} language
- * @returns {string}
- */
-function interpolateTemplate(template, language) {
-  return String(template || '')
-    .replace(/\{\{lng\}\}/g, language)
-    .replace(/\{\{lang\}\}/g, language);
-}
 
 /**
  * @param {string} value
@@ -137,34 +117,6 @@ function removeManualRefreshToken(url) {
 }
 
 /**
- * @param {string} language
- * @returns {Array<string>}
- */
-function buildManualCandidates(language) {
-  const cfg = getRuntimeConfig();
-  const fallbackLanguage = toText(cfg?.help?.manual?.fallbackLanguage, 'en').toLowerCase();
-  const siteTemplate = toText(cfg?.help?.manual?.sitePathTemplate, 'help/site/manual.{{lng}}.html');
-  const fallbackTemplate = toText(cfg?.help?.manual?.fallbackPathTemplate, 'help/default/manual.{{lng}}.html');
-  const normalizedLanguage = toText(language, 'en').toLowerCase();
-  const variants = [];
-  [normalizedLanguage, fallbackLanguage].forEach((entry) => {
-    if (!entry || variants.includes(entry)) return;
-    variants.push(entry);
-  });
-
-  const candidates = [];
-  variants.forEach((lng) => {
-    [siteTemplate, fallbackTemplate].forEach((template) => {
-      const interpolated = interpolateTemplate(template, lng);
-      if (!interpolated || candidates.includes(interpolated)) return;
-      candidates.push(interpolated);
-    });
-  });
-
-  return candidates;
-}
-
-/**
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
@@ -212,42 +164,35 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     setManualState({ loading: true, error: '', html: '', resolvedUrl: '' });
 
     const load = async () => {
-      const candidates = buildManualCandidates(language);
-      for (const candidate of candidates) {
-        try {
-          const requestUrl = appendManualRefreshToken(candidate, refreshToken);
-          const response = await fetch(requestUrl, {
-            cache: refreshToken ? 'reload' : 'no-store',
-            credentials: 'same-origin',
-            signal: controller?.signal,
-            headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
-          });
-          if (!response.ok) continue;
-          const html = await response.text();
-          if (cancelled) return;
-          const resolvedUrl = removeManualRefreshToken(response.url || requestUrl);
-          setManualState({
-            loading: false,
-            error: '',
-            html: rewriteManualHtml(html, resolvedUrl || candidate),
-            resolvedUrl: resolvedUrl || candidate,
-          });
-          return;
-        } catch (error) {
-          if (controller?.signal?.aborted) return;
-          if (cancelled) return;
-          if (String(error?.name || '') === 'AbortError') return;
-        }
-      }
+      const candidates = buildManualCandidates(language, getRuntimeConfig()?.help?.manual);
+      const fetchCandidate = (candidate) => fetch(appendManualRefreshToken(candidate, refreshToken), {
+        cache: refreshToken ? 'reload' : 'no-store',
+        credentials: 'same-origin',
+        signal: controller?.signal,
+        headers: { Accept: 'text/html, text/plain;q=0.9, */*;q=0.1' },
+      });
 
-      if (!cancelled) {
+      const source = await resolveManualSource(candidates, fetchCandidate).catch(() => undefined);
+      // undefined = aborted (the dialog closed or the language changed)
+      if (cancelled || source === undefined) return;
+
+      if (source) {
+        const resolvedUrl = removeManualRefreshToken(source.url) || source.candidate;
         setManualState({
           loading: false,
-          error: t('help.manualNotAvailable', { defaultValue: 'No manual file could be loaded for this language.' }),
-          html: '',
-          resolvedUrl: '',
+          error: '',
+          html: rewriteManualHtml(source.html, resolvedUrl),
+          resolvedUrl,
         });
+        return;
       }
+
+      setManualState({
+        loading: false,
+        error: t('help.manualNotAvailable', { defaultValue: 'No manual file could be loaded for this language.' }),
+        html: '',
+        resolvedUrl: '',
+      });
     };
 
     void load();

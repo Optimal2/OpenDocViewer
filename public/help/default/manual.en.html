@@ -1,116 +1,645 @@
-<h1>OpenDocViewer manual</h1>
-<p>OpenDocViewer is used to open, review, compare, select, and print documents in a web browser. This manual describes the standard features. A deployment may have its own fields, print reasons, help text, and rules.</p>
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Getting started with OpenDocViewer </title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- The CSS lives in body: ODV's manual window keeps only the body content (a leading <style> in head disappears). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Lightbox without scripts: the image links to #lb-NAME and .lb:target is shown over the whole window. A click anywhere leads to #lb-stang (does not exist) and closes it. NOTE: no less-than character in the CSS, or ODV's sanitizer empties the whole style block. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Embedded guides at the bottom: expand on the same page */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – expand"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – collapse"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>Getting started with OpenDocViewer</h1>
+  <p class="lead">OpenDocViewer (ODV) is the window where you read documents when you open them from your organization's portal or archive system. This guide shows what you need day to day: finding the right page, zooming, and printing. It takes a few minutes to read.</p>
+  <p class="small">Want to do more – select pages, compare two pages, or see every keyboard shortcut? Two more guides cover that, and you can expand them at the bottom of this page. The pictures show a made-up test document with no real data. The screenshots show the Swedish interface; choose <em>English</em> in the <strong>Language</strong> menu to get the button names used in this guide. Click an image to see it larger – click again to close. <a href="manual.en.pdf">Download the guide as PDF</a>.</p>
+</section>
 
-<h2>Basic workflow</h2>
-<ol>
-  <li>Wait until the documents have finished loading. Printing and some document actions are disabled while loading is in progress.</li>
-  <li>Use the thumbnail page list to move between pages.</li>
-  <li>Use the toolbar for zoom, fitting, rotation, comparison, selection, metadata, and printing.</li>
-  <li>Always verify that the correct document and pages are selected before printing or saving a PDF.</li>
+<nav class="toc" aria-label="Contents">
+  <a href="#overview">1. What it looks like</a>
+  <a href="#loading">2. Wait until everything has loaded</a>
+  <a href="#page">3. Find the right page</a>
+  <a href="#zoom">4. Zoom and fit</a>
+  <a href="#image">5. Rotate, lighter or darker</a>
+  <a href="#thumbnails">6. The thumbnail pane</a>
+  <a href="#printing">7. Printing</a>
+  <a href="#settings">8. Theme, language and help</a>
+  <a href="#problems">9. If something goes wrong</a>
+  <a href="#more">10. Want to know more?</a>
+</nav>
+
+<h2 id="overview">1. What it looks like</h2>
+<p>ODV has three parts: the <strong>toolbar</strong> at the top, the <strong>thumbnail pane</strong> on the left and the <strong>document</strong> in the middle. The page you are looking at has a blue frame.</p>
+<figure class="wide">
+  <a href="#lb-oversikt"><img src="img/oversikt.png" alt="OpenDocViewer with the toolbar at the top, thumbnails on the left and the document in the middle"></a>
+  <figcaption><strong>Overview.</strong> Toolbar at the top, thumbnails on the left, document in the middle.</figcaption>
+</figure>
+<p>Three words you will see again: a <strong>document</strong> is a file with one or more pages. A <strong>session</strong> is all the documents you opened together from the portal or archive system. The thumbnails are grouped by document (<em>DOK 1</em>, <em>DOK 2</em> … in the Swedish interface).</p>
+<details>
+  <summary>Back to the portal</summary>
+  <p>ODV is opened from another system – a portal, an archive or a business application. You get back there with that system's own buttons or by closing the ODV tab. What it looks like depends on your organization.</p>
+</details>
+
+<h2 id="loading">2. Wait until everything has loaded</h2>
+<p>When you have opened the documents, ODV fetches the pages. Meanwhile the page counter is striped and the print and selection buttons are grey. When the stripes disappear, everything is ready.</p>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-laddar"><img src="img/verktygsfalt-laddar.png" alt="The toolbar while pages are loading, with a striped page counter"></a>
+    <figcaption><strong>Loading.</strong> Striped page counter, grey buttons – wait.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-redo"><img src="img/verktygsfalt-redo.png" alt="The toolbar when everything has loaded"></a>
+    <figcaption><strong>Ready.</strong> The page counter is calm and every button can be used.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Why is the light by the print button off?</summary>
+  <p>The small light by the print button belongs to a quick-print feature that your organization may have turned off. If it is off, that is normal. The light on the <em>help button</em> to the right, on the other hand, shows how ODV is doing: green is good, yellow means the computer is low on memory, red means an error.</p>
+</details>
+
+<h2 id="page">3. Find the right page</h2>
+<p>There are four simple ways, and you can mix them as you like.</p>
+<ol class="steps">
+  <li><strong>The arrow buttons</strong> in the toolbar: first, previous, next and last page.</li>
+  <li><strong>Type the page number</strong> in the box between the arrows and press <kbd>Enter</kbd>.</li>
+  <li><strong>Click a thumbnail</strong> in the left pane.</li>
+  <li><strong>Scroll with the mouse wheel.</strong> When you reach the bottom edge of the page and keep scrolling, a small gauge fills up – and the next page is shown. The same works upwards.</li>
 </ol>
+<details>
+  <summary>More ways to browse</summary>
+  <ul>
+    <li><kbd>Arrow Down</kbd> / <kbd>Arrow Up</kbd> or <kbd>Page Down</kbd> / <kbd>Page Up</kbd> change page. Hold the key down to browse quickly.</li>
+    <li><kbd>Home</kbd> and <kbd>End</kbd> go to the first and last page.</li>
+    <li>Hold down the <em>previous</em> or <em>next</em> button in the toolbar to browse quickly.</li>
+    <li>Hold <kbd>Ctrl</kbd> and the arrow buttons jump a whole <em>document</em> instead of one page. You can tell because the page navigation gets a dashed frame.</li>
+  </ul>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-ctrl"><img src="img/verktygsfalt-ctrl.png" alt="The toolbar with Ctrl held down and a dashed frame around the page navigation"></a>
+    <figcaption><strong>Ctrl held down.</strong> Dashed frame = the arrows change document, not page.</figcaption>
+  </figure>
+</details>
 
-<h2>Navigation</h2>
-<p>You can change page using the toolbar page controls, thumbnails, the mouse wheel, and the keyboard. The page counter shows the current page in the loaded session.</p>
+<h2 id="zoom">4. Zoom and fit</h2>
+<p>The zoom buttons are in the middle of the toolbar.</p>
 <ul>
-  <li><strong>Previous/next page:</strong> use the toolbar arrow buttons, Arrow Up/Arrow Down, or Page Up/Page Down.</li>
-  <li><strong>Whole-document navigation:</strong> hold Ctrl with the page navigation keys when multiple documents are loaded.</li>
-  <li><strong>Home/End:</strong> can be used to move to the beginning or end if the browser gives focus to the viewer area.</li>
-  <li><strong>Thumbnails:</strong> click a thumbnail to open the corresponding page.</li>
+  <li><strong>The magnifying glasses</strong> (<em>Zoom out</em>, <em>Zoom in</em>) zoom out and in. You can also type a percentage in the box between them.</li>
+  <li><strong>1:1</strong> shows the page at its actual size.</li>
+  <li><strong>Fit to screen</strong> shows the whole page at once.</li>
+  <li><strong>Fit to width</strong> fills the width – it suits most documents. The button is red when it is selected.</li>
 </ul>
-<p>Keyboard shortcuts are ignored in text fields, lists, and other input fields so that typing does not accidentally control the viewer.</p>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="The left part of the toolbar with print, selection, page navigation and zoom buttons"></a>
+  <figcaption><strong>The left part of the toolbar.</strong> From the left: print, selection, page navigation, zoom out/in, 1:1, fit to screen and fit to width (red = selected).</figcaption>
+</figure>
+<details>
+  <summary>More ways to zoom</summary>
+  <ul>
+    <li><kbd>+</kbd> and <kbd>-</kbd> on the keyboard zoom in and out.</li>
+    <li>The <strong>1:X</strong> button shows the page at a size you have chosen yourself, and <strong>HQ</strong> makes a PDF page even sharper. Both are described in the guide <a href="#guide-fler-start">More features</a> at the bottom of the page.</li>
+  </ul>
+</details>
 
-<h2>Zoom and viewing</h2>
-<p>The toolbar contains common zoom and fitting modes. Exact names may differ slightly between deployments.</p>
+<h2 id="image">5. Rotate, lighter or darker</h2>
+<p>Is the page sideways, or is a scanned page too dark or too faint? The buttons on the right of the toolbar help you.</p>
 <ul>
-  <li><strong>Fit to page:</strong> shows the whole page in the available area.</li>
-  <li><strong>Fit to width:</strong> makes the page as wide as the viewer area.</li>
-  <li><strong>Actual size:</strong> shows the page without fit scaling.</li>
-  <li><strong>Zoom in/out:</strong> changes the viewing scale step by step.</li>
+  <li><strong>Rotate left 90°</strong> and <strong>Rotate right 90°</strong> turn the page a quarter turn.</li>
+  <li><strong>Brightness</strong> and <strong>Contrast</strong> each open a slider. Drag it, or click on the scale.</li>
+  <li><strong>Reset adjustments</strong>, next to the sliders, brings brightness and contrast back to normal.</li>
 </ul>
-<p>Zoom affects how the page is displayed in OpenDocViewer. Normal printing uses the print flow, not the exact current zoom level.</p>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="The right part of the toolbar with rotate, brightness, contrast and reset"></a>
+  <figcaption><strong>The right part of the toolbar.</strong> Rotate left/right, brightness, contrast and reset.</figcaption>
+</figure>
+<div class="figure-grid narrow">
+  <figure class="compact">
+    <a href="#lb-ljusstyrka"><img src="img/ljusstyrka.png" alt="The brightness slider"></a>
+    <figcaption><strong>Brightness.</strong></figcaption>
+  </figure>
+  <figure class="compact">
+    <a href="#lb-kontrast"><img src="img/kontrast.png" alt="The contrast slider"></a>
+    <figcaption><strong>Contrast.</strong></figcaption>
+  </figure>
+</div>
+<div class="warning">
+  <p><strong>The changes are temporary.</strong> Rotation, brightness and contrast only change how the page is shown to you right now. Nothing is saved in the archive, and the next time the document is opened it looks as usual again.</p>
+  <p><strong>On the printout</strong> the changes are included <em>only</em> if you choose the print method <strong>Active page</strong> – both when you are looking at one page and when you compare two. Every other print method (All pages, Simple range, Custom pages and printing a selection) prints the pages as they are in the archive, without your changes.</p>
+</div>
+<details>
+  <summary>Rotate with the keyboard</summary>
+  <p><kbd>Ctrl</kbd>+<kbd>Arrow Left</kbd> and <kbd>Ctrl</kbd>+<kbd>Arrow Right</kbd> rotate the page a quarter turn, just like the buttons.</p>
+</details>
 
-<h2>Thumbnails and page list</h2>
-<p>The thumbnail panel shows the pages in the session. If multiple documents are included, the page list may show document boundaries or document information depending on deployment configuration.</p>
+<h2 id="thumbnails">6. The thumbnail pane</h2>
+<p>The pane on the left shows every page as a small picture, grouped by document. Click a thumbnail to go there. The buttons at the top of the pane make it wider or narrower, and the crossed-out eye hides it completely.</p>
+<figure class="tiny">
+  <a href="#lb-panelkontroller"><img src="img/panelkontroller.png" alt="The buttons at the top of the thumbnail pane"></a>
+  <figcaption><strong>The pane buttons.</strong> The arrows change the width, the middle button resets it, the eye hides the pane.</figcaption>
+</figure>
+<p>Every thumbnail has small badges in its corners (the letters come from the Swedish interface):</p>
+<div class="badge-row">
+  <span class="badge">T – the page's place in the whole session</span>
+  <span class="badge">D – the document number</span>
+  <span class="badge">S – the page number within the document</span>
+</div>
+<details>
+  <summary>Right-clicking a thumbnail</summary>
+  <p>Right-click a thumbnail to get a small menu: show the document's <em>metadata</em> (for example ID, department and date – which fields exist depends on the system that opened the documents), <em>hide</em> the page or the whole document, or show the page on the right in compare mode. Hiding pages is called <em>selection</em> and has its own guide: <a href="#guide-urval-start">Selection – choose the pages that are shown and printed</a>.</p>
+  <figure class="menu">
+    <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail"></a>
+    <figcaption><strong>The right-click menu.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="printing">7. Printing</h2>
+<p>This is how you print the page you are looking at, or all pages.</p>
+<ol class="steps">
+  <li>Click the <strong>print button</strong> at the far left of the toolbar (or press <kbd>Ctrl</kbd>+<kbd>P</kbd>).</li>
+  <li>Choose <strong>Active page</strong> or <strong>All pages</strong> under <em>Print method</em>. Have you rotated the page or changed brightness and contrast? Then only <em>Active page</em> puts that on paper.</li>
+  <li>Fill in <strong>Reason</strong> and <em>Recipient</em> if the dialog asks for them. Your organization decides which fields exist and which are required.</li>
+  <li>If the <strong>Add copy watermark</strong> option is there, leave it ticked if the printout is not an original.</li>
+  <li>Click <strong>Print</strong>. ODV prepares the pages and then opens the browser's print window, where you choose a printer as usual.</li>
+</ol>
+<div class="figure-grid">
+  <figure class="print">
+    <a href="#lb-utskrift-aktiv-sida"><img src="img/utskrift-aktiv-sida.png" alt="The print dialog with Active page selected"></a>
+    <figcaption><strong>The print dialog.</strong> Method at the top, then the details.</figcaption>
+  </figure>
+  <figure class="print">
+    <a href="#lb-utskrift-uppgifter"><img src="img/utskrift-uppgifter.png" alt="Print details with reason and recipient filled in"></a>
+    <figcaption><strong>Print details.</strong> Here: reason and recipient. The fields may look different for you.</figcaption>
+  </figure>
+</div>
+<figure class="wide">
+  <a href="#lb-utskrift-forbereds"><img src="img/utskrift-forbereds.png" alt="The Preparing print box with a progress bar"></a>
+  <figcaption><strong>Preparing print.</strong> Wait until it is done – the print window opens by itself. <em>Cancel</em> stops it.</figcaption>
+</figure>
+<div class="tip"><p><strong>Active page</strong> prints the page exactly as you see it – with rotation, brightness and contrast if you changed them. <strong>All pages</strong> and the other methods print the pages as they are in the archive, without such changes.</p></div>
+<p>The printout can automatically get a header and a footer with information your organization has chosen – for example date, user, document ID, reason and page number – and a watermark if you left it ticked.</p>
+<figure class="print">
+  <a href="#lb-utskrift-resultat"><img src="img/utskrift-resultat.png" alt="Example of a printed page with header, copy watermark and footer"></a>
+  <figcaption><strong>Example of a printout.</strong> Header, footer and watermark are set up by your organization.</figcaption>
+</figure>
+<details>
+  <summary>More print options</summary>
+  <ul>
+    <li><strong>The arrow next to the print button</strong> decides whether the dialog opens with <em>Active page</em> or <em>All pages</em> preselected. ODV remembers your choice.</li>
+    <li><strong>Simple range</strong> prints from one page to another, for example 2–10. <strong>Custom pages</strong> takes a list, for example <em>1-3, 7, 9-5</em>. The order you type is the order they are printed in.</li>
+    <li><strong>Automatic page orientation</strong> lets ODV choose portrait or landscape per page. Untick it if everything should be portrait.</li>
+    <li><strong>Continue working</strong> moves the preparation box to the bottom so you can keep reading. When it is ready, click <em>Open print</em>.</li>
+    <li>After your first printout, the <strong>Reuse latest print settings</strong> button appears at the top right of the dialog. It fills in the same choices as last time.</li>
+    <li>Want to print only some pages from several documents? Then make a <em>selection</em> first – see the guide <a href="#guide-urval-start">Selection</a> at the bottom of the page.</li>
+  </ul>
+  <figure class="compact">
+    <a href="#lb-utskriftsstandard"><img src="img/utskriftsstandard.png" alt="The menu under the arrow next to the print button"></a>
+    <figcaption><strong>The arrow next to the print button.</strong> Sets the default.</figcaption>
+  </figure>
+</details>
+
+<h2 id="settings">8. Theme, language and help</h2>
+<p>At the far right of the toolbar there are three menus. <strong>Theme</strong> chooses a light or dark look, <strong>Language</strong> switches between Swedish and English, and <strong>Help</strong> opens this guide. ODV remembers your choices until next time.</p>
+<div class="figure-grid narrow">
+  <figure class="compact"><a href="#lb-tema"><img src="img/tema.png" alt="The theme menu"></a><figcaption><strong>Theme.</strong></figcaption></figure>
+  <figure class="compact"><a href="#lb-sprak"><img src="img/sprak.png" alt="The language menu"></a><figcaption><strong>Language.</strong></figcaption></figure>
+  <figure class="compact"><a href="#lb-hjalp"><img src="img/hjalp.png" alt="The help menu"></a><figcaption><strong>Help.</strong> The guide and <em>About OpenDocViewer</em>.</figcaption></figure>
+</div>
+
+<h2 id="problems">9. If something goes wrong</h2>
+<h3>The pages are shown as warning triangles</h3>
+<p>The document links from the portal or archive system may be valid for a limited time. If you have had ODV open for a long time, the pages may stop showing and a box appears at the top. Click <strong>Reset session</strong> and the documents are fetched again. You do not need to reload the browser.</p>
+<figure class="wide">
+  <a href="#lb-problemnotis-ruta"><img src="img/problemnotis-ruta.png" alt="The box The documents could not be shown correctly, with the Reset session button"></a>
+  <figcaption><strong>Click Reset session.</strong></figcaption>
+</figure>
+<h3>Other common situations</h3>
 <ul>
-  <li>Select a page by clicking its thumbnail.</li>
-  <li>Use thumbnails for a quick overview of longer sessions.</li>
-  <li>For very large sessions, some thumbnails may load only when needed.</li>
+  <li><strong>The print button is grey.</strong> The pages are still loading – wait until the page counter is no longer striped.</li>
+  <li><strong>Pages are missing from the thumbnail pane.</strong> A selection is active (the selection button in the toolbar is red). Click the red button at the top of the pane to show all pages again.</li>
+  <li><strong>The page is blurry.</strong> If it is a PDF page, the <strong>HQ</strong> button can make it sharper. Scanned pages are already shown as sharp as they are.</li>
 </ul>
+<details>
+  <summary>If you need to contact support</summary>
+  <p>Contact your local support, as usual in your organization. Open the help menu and choose <em>About OpenDocViewer</em>. It shows the version, and under <em>Diagnostics</em> you can download a file to attach to the ticket. The file contains technical information about ODV – no documents. If the expired-session box is shown, you can expand <em>Technical details</em> there too. More about this in <a href="#guide-fler-start">More features</a>.</p>
+</details>
 
-<h2>Documents and metadata</h2>
-<p>OpenDocViewer can display metadata from the documents in the session. Examples may include patient ID, name, unit, document date, page count, or document ID. The available metadata depends on the system that opens OpenDocViewer.</p>
+<h2 id="more">10. Want to know more?</h2>
+<p>That was the everyday part. Two more guides cover the rest. Expand them below – they open on this page – or download them as separate documents.</p>
+<div class="guides">
+  <a href="manual-urval.en.pdf"><strong>Selection – as PDF</strong>Choose the pages that are shown and printed. Opens as a separate document.</a>
+  <a href="manual-avancerat.en.pdf"><strong>More features – as PDF</strong>Comparison, metadata, sharper PDF pages, keyboard shortcuts and more. Opens as a separate document.</a>
+</div>
+<details class="embedded" id="guide-urval">
+  <summary id="guide-urval-rubrik">Selection – choose the pages that are shown and printed</summary>
+  <span class="anchor" id="guide-urval-start"></span>
+  <!-- EMBED-START manual-urval.en -->
+<div class="warning"><p><strong>Important:</strong> a selection hides pages in ODV and controls what is printed. The original documents in the archive are never affected.</p></div>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#urval-open">1. Open the selection workspace</a>
+  <a href="#urval-remove">2. Remove pages</a>
+  <a href="#urval-add">3. Add pages back</a>
+  <a href="#urval-order">4. Change the order</a>
+  <a href="#urval-preview">5. Take a closer look at a page</a>
+  <a href="#urval-save">6. Save or leave</a>
+  <a href="#urval-active">7. How to tell that a selection is active</a>
+  <a href="#urval-print">8. Print the selection</a>
+  <a href="#urval-reset">9. Remove the selection</a>
+</nav>
+
+<h2 id="urval-open">1. Open the selection workspace</h2>
+<p>Click the <strong>selection button</strong> in the toolbar – the one with a list and a tick, directly to the right of the print button (tooltip: <em>Manage the pages shown and printed</em>). The <em>Manage selection</em> workspace opens over the whole window.</p>
+<figure class="wide">
+  <a href="#lb-urval-oversikt"><img src="img/urval-oversikt.png" alt="The selection workspace with available pages on the left and selected pages on the right"></a>
+  <figcaption><strong>The selection workspace.</strong> On the left, <em>Available pages</em>: every page there is. On the right, <em>Selected pages</em>: the pages included in the selection. A tick on a page on the left means it is included.</figcaption>
+</figure>
+<figure class="strip">
+  <a href="#lb-urval-verktygsfalt"><img src="img/urval-verktygsfalt.png" alt="The toolbar of the selection workspace"></a>
+  <figcaption><strong>The workspace toolbar.</strong> Mode (Documents or Pages), panel layout, thumbnail size, undo/redo, reset, <em>Save</em> and <em>Leave</em>.</figcaption>
+</figure>
+<details>
+  <summary>Two modes: Documents and Pages</summary>
+  <ul>
+    <li><strong>Documents</strong> is the default. Pages are kept together per document. You can remove and add pages and move them within their document.</li>
+    <li><strong>Pages</strong> drops the grouping. Pages from different documents can be mixed in any order you like – for example before printing in a particular order.</li>
+  </ul>
+</details>
+
+<h2 id="urval-remove">2. Remove pages</h2>
+<ol class="steps">
+  <li><strong>Mark</strong> the pages in the right panel that should not be included. Click one page at a time.</li>
+  <li>Click <strong>Remove selected</strong> – the arrow <em>‹</em> between the panels. The pages lose their tick in the left panel.</li>
+  <li>To remove everything and start from scratch: click <strong>Remove all</strong> (<em>«</em>).</li>
+</ol>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-urval-markerade"><img src="img/urval-markerade.png" alt="Three pages marked in the right panel"></a>
+    <figcaption><strong>Marked pages</strong> get a grey frame.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-borttagna"><img src="img/urval-borttagna.png" alt="The selection after three pages were removed"></a>
+    <figcaption><strong>After Remove selected.</strong> Document 1 now has one page left and the counter shows 21 selected. The Save button has turned green.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Faster ways to mark and remove</summary>
+  <ul>
+    <li><kbd>Shift</kbd>+click marks every page between two clicks. <kbd>Ctrl</kbd>+click adds or removes a single page from the marking.</li>
+    <li>Drag a <strong>rectangle</strong> over several pages to mark them all at once.</li>
+    <li><strong>Double-click</strong> a page in the left panel to add or remove it directly.</li>
+    <li>You do not need to open the workspace at all for single pages: <strong>right-click</strong> a thumbnail or the page in the main view and choose <em>Hide this page</em> or <em>Hide document</em>. The <kbd>Delete</kbd> key hides the page you are looking at, <kbd>Ctrl</kbd>+<kbd>Delete</kbd> the whole document.</li>
+  </ul>
+  <div class="figure-grid">
+    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail"></a><figcaption><strong>Right-clicking a thumbnail.</strong></figcaption></figure>
+    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="The right-click menu on the page in the main view"></a><figcaption><strong>Right-clicking the page.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="urval-add">3. Add pages back</h2>
+<p>Changed your mind? Mark the pages in the <strong>left</strong> panel and click <strong>Add selected</strong> (<em>›</em>), or <strong>Add all</strong> (<em>»</em>) to get everything back. The <em>Undo</em> and <em>Redo</em> buttons in the toolbar take back one step at a time.</p>
+
+<h2 id="urval-order">4. Change the order</h2>
+<p>Drag a page in the right panel to a new place. In <em>Documents</em> mode you can move pages within their document; in <em>Pages</em> mode you can mix freely. The order in the selection becomes the order of the printout.</p>
+
+<h2 id="urval-preview">5. Take a closer look at a page</h2>
+<p>Hover over a page and click the <strong>eye</strong>. The page is shown large, with arrows to browse to the next one. A green edge means the page is included in the selection, and the button at the top adds or removes the page directly. <kbd>Esc</kbd> closes.</p>
+<figure class="wide">
+  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Preview of a page in the selection workspace"></a>
+  <figcaption><strong>Preview.</strong> The page's place, document and metadata are shown at the top left.</figcaption>
+</figure>
+
+<h2 id="urval-save">6. Save or leave</h2>
+<p>The <strong>Save</strong> button turns green as soon as you have changed something. Click it when you are done, and then <strong>Leave</strong> to get back to the document. If you leave without saving, you get a question.</p>
+<div class="figure-grid">
+  <figure class="strip">
+    <a href="#lb-urval-verktygsfalt-osparat"><img src="img/urval-verktygsfalt-osparat.png" alt="The toolbar with unsaved changes"></a>
+    <figcaption><strong>Unsaved changes.</strong> The green button saves, the orange button discards the changes.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="The Unsaved changes dialog"></a>
+    <figcaption><strong>Leaving without saving.</strong> Save, discard, or <em>Continue editing</em>.</figcaption>
+  </figure>
+</div>
+
+<h2 id="urval-active">7. How to tell that a selection is active</h2>
+<p>Back in the document, the <strong>selection button is red</strong>, the page counter only counts the selection's pages, and the thumbnail pane only shows the pages that are included. At the top of the pane there is a <strong>red reset button</strong>.</p>
+<figure class="wide">
+  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="The main view with an active selection: red selection button and fewer thumbnails"></a>
+  <figcaption><strong>Active selection.</strong> The page counter shows 1 / 21, the selection button is red, the pane only shows the selection.</figcaption>
+</figure>
+
+<h2 id="urval-print">8. Print the selection</h2>
+<p>Open printing with the print button and choose <strong>All pages</strong>. When a selection is active, you can choose between <strong>Current selection</strong> – only the pages in the selection, preselected – and <strong>Entire session</strong>, which prints everything and ignores the selection.</p>
+<figure class="print">
+  <a href="#lb-utskrift-alla-sidor-urval"><img src="img/utskrift-alla-sidor-urval.png" alt="The print dialog with All pages and the Current selection option"></a>
+  <figcaption><strong>All pages with a selection.</strong> <em>Current selection (21 pages)</em> is preselected.</figcaption>
+</figure>
+<p class="small">The <em>Simple range</em> and <em>Custom pages</em> options are not available when a selection is active – the selection then decides what is printed. The rest of printing (reason, recipient, watermark) works as in the <a href="#printing">Getting started guide</a>.</p>
+<div class="tip"><p><strong>Good to know:</strong> printing a selection prints the pages as they are in the archive. If you have rotated a page or changed brightness and contrast, that is not included here – it only is with the <em>Active page</em> print method.</p></div>
+
+<h2 id="urval-reset">9. Remove the selection</h2>
+<p>Click the <strong>red button at the top of the thumbnail pane</strong>. All pages come back. You can also open the workspace, choose <em>Add all</em>, <em>Save</em> and <em>Leave</em>.</p>
+<figure class="menu">
+  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="The thumbnail pane with the red reset button"></a>
+  <figcaption><strong>The reset button</strong> at the top right of the pane.</figcaption>
+</figure>
+
+<h3>Short checklist</h3>
+<ul class="checklist">
+  <li>A green Save button means you have unsaved changes.</li>
+  <li>A red selection button in the toolbar means pages are hidden.</li>
+  <li><em>Current selection</em> prints what you chose, <em>Entire session</em> prints everything.</li>
+</ul>
+  <!-- EMBED-END manual-urval.en --></details>
+<details class="embedded" id="guide-fler">
+  <summary id="guide-fler-rubrik">More features in OpenDocViewer</summary>
+  <span class="anchor" id="guide-fler-start"></span>
+  <!-- EMBED-START manual-avancerat.en -->
+<nav class="toc" aria-label="Contents">
+  <a href="#fler-compare">Compare two pages</a>
+  <a href="#fler-metadata">Document metadata</a>
+  <a href="#fler-hq">Sharper PDF pages</a>
+  <a href="#fler-custom">Custom size and default zoom</a>
+  <a href="#fler-keyboard">All keyboard shortcuts</a>
+  <a href="#fler-toolbar">The toolbar button by button</a>
+  <a href="#fler-theme">Dark theme</a>
+  <a href="#fler-support">Support information</a>
+  <a href="#fler-new">New in version 2.8</a>
+</nav>
+
+<h2 id="fler-compare">Compare two pages</h2>
+<p>Click the <strong>compare button</strong> in the toolbar (<em>Enable compare mode</em>). The page you are looking at moves to the left with a <span class="blue">blue frame</span>, and a second page is shown on the right with an <span class="orange">orange frame</span>. To swap the right-hand page: right-click a thumbnail and choose <em>Show to right</em>.</p>
+<figure class="wide">
+  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Compare mode with two pages side by side"></a>
+  <figcaption><strong>Compare mode.</strong> Each page has its own zoom buttons along the top. In the pane, the left page is marked <span class="blue">V</span> and the right page <span class="orange">H</span> (Swedish for left and right).</figcaption>
+</figure>
+<p>One of the pages is always <strong>active</strong> – the one you last clicked in. The toolbar and the keyboard control the active page, and the frames around the buttons show which one: blue for left, orange for right.</p>
+<p>If you print with the <strong>Active page</strong> method while comparing, you can choose to include only the active page or <em>Both compare pages</em>. The pages are printed exactly as you see them – rotation, brightness and contrast are included, just as when you look at a single page. With every other print method, the pages are printed as they are in the archive.</p>
+<details>
+  <summary>Controlling the other page without switching</summary>
+  <p>Hold <kbd>Shift</kbd> while you click a button or use the keyboard, and the command applies to the page that is <em>not</em> active. The frames change colour while you hold Shift, so you can see what will happen.</p>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="The toolbar with Shift held down and orange frames"></a>
+    <figcaption><strong>Shift held down.</strong> Orange frames = the buttons control the right page right now.</figcaption>
+  </figure>
+  <p><kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd> switch the active page. <kbd>Arrow Left</kbd> when the left page is already active ends the comparison – so does the compare button, or <em>Close comparison</em> in the right-click menu on the right-hand page.</p>
+  <figure class="menu">
+    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="The right-click menu on the right page in compare mode"></a>
+    <figcaption><strong>Right-clicking the right page.</strong> The usual options, plus <em>Close comparison</em>.</figcaption>
+  </figure>
+</details>
+
+<h2 id="fler-metadata">Document metadata</h2>
+<p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
+<figure class="wide">
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="The Document metadata dialog"></a>
+  <figcaption><strong>Document metadata</strong> for one document.</figcaption>
+</figure>
+<details>
+  <summary>All documents in one table</summary>
+  <p>The <em>Metadata table</em> button in the metadata dialog shows the whole session as a table – one document per row. Handy when you want to see at a glance which departments and dates are included.</p>
+  <figure class="wide">
+    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="The metadata overview with every document in the session"></a>
+    <figcaption><strong>Document metadata overview.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="fler-hq">Sharper PDF pages</h2>
+<p>PDF pages are already shown in print quality. If you need to see a detail even more sharply: click <strong>HQ</strong> in the toolbar (<em>Increase PDF page resolution</em>). The page is redrawn at double resolution and the button turns red. It applies only to that page.</p>
+<div class="figure-grid narrow">
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="The HQ button before"></a><figcaption><strong>Before.</strong></figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="The HQ button after, red"></a><figcaption><strong>After.</strong> Red = the sharpness has been increased.</figcaption></figure>
+</div>
+<p class="small">HQ is grey for scanned pages (TIFF/JPEG), because they are already shown exactly as sharp as they were scanned. Hover over the button to see why.</p>
+
+<h2 id="fler-custom">Custom size and default zoom</h2>
+<p>The <strong>1:X</strong> button (<em>Custom size</em>) shows the page at a size you choose yourself – a share of the window width. The arrow next to it opens the settings. There you also choose which zoom every new session should start with (<em>Default zoom/size</em>); your organization decides the default. ODV remembers your choices.</p>
+<div class="figure-grid">
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="The custom size menu"></a><figcaption><strong>Custom size.</strong> Share of the window width and default zoom.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="The menu with Advanced expanded"></a><figcaption><strong>Advanced.</strong> Limits for window height and actual size.</figcaption></figure>
+</div>
+
+<h2 id="fler-keyboard">All keyboard shortcuts</h2>
+<table>
+  <thead><tr><th>Key</th><th>Does this</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Previous or next page. Hold down to browse quickly.</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>First or last page.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + any of the above</td><td>The same, but document by document instead of page by page.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zoom in or out.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Rotate the page.</td></tr>
+    <tr><td><kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>In compare mode: switch the active page. Arrow Left when the left page is already active ends the comparison.</td></tr>
+    <tr><td><kbd>Shift</kbd> + command</td><td>In compare mode: control the page that is not active.</td></tr>
+    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Hide the page / hide the whole document (selection).</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Open ODV's print dialog.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Close menus, dialogs and the preview.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="fler-toolbar">The toolbar button by button</h2>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="The left part of the toolbar"></a>
+  <figcaption><strong>Left:</strong> print with an arrow for the default, selection, page navigation, zoom out/in with a percentage box, 1:1, fit to screen, fit to width.</figcaption>
+</figure>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="The right part of the toolbar"></a>
+  <figcaption><strong>Right:</strong> 1:X custom size with an arrow, compare, rotate left/right, HQ, brightness, contrast, reset, and theme, language and help.</figcaption>
+</figure>
 <ul>
-  <li><strong>Page metadata:</strong> shows metadata for a specific page or document part.</li>
-  <li><strong>Metadata matrix:</strong> shows metadata for multiple documents in the same session.</li>
-  <li><strong>Print metadata:</strong> some metadata can also be used in print headers and footers.</li>
+  <li><strong>Print</strong> opens printing. The arrow next to it sets the default, <em>Active page</em> or <em>All pages</em>.</li>
+  <li><strong>Selection</strong> opens the selection workspace. Red when a selection is active.</li>
+  <li><strong>Page navigation</strong>: first, previous, next, last, and a box for the page number.</li>
+  <li><strong>Zoom</strong>: out, in, percentage box, 1:1, fit to screen, fit to width.</li>
+  <li><strong>1:X</strong>: custom size. <strong>Compare</strong>: two pages side by side. <strong>Rotate</strong>: a quarter turn.</li>
+  <li><strong>HQ</strong>: sharper PDF page. <strong>Brightness</strong>, <strong>contrast</strong> and <strong>reset</strong>.</li>
+  <li><strong>Theme</strong>, <strong>language</strong>, <strong>help</strong>. The light on the help button: green = all is well, yellow = the computer is low on memory, red = error.</li>
 </ul>
-<p>If a field is missing, it is normally not shown in the printout when the template is configured with conditional fields.</p>
 
-<h2>Selection</h2>
-<p>If document selection is enabled, you can choose which documents or pages should be included in workflows that support selection. Selection can affect printing of selected pages.</p>
+<h2 id="fler-theme">Dark theme</h2>
+<p>The theme menu at the far right has <em>Normal</em>, <em>Light</em> and <em>Dark</em>. In the dark theme the interface turns dark while the document page is shown as usual.</p>
+<figure class="wide">
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer in the dark theme"></a>
+  <figcaption><strong>Dark theme.</strong></figcaption>
+</figure>
+
+<h2 id="fler-support">Support information</h2>
+<p>Turn to <strong>your local support</strong> first – they know how ODV is installed and set up in your organization, and can pass the case on to the supplier. Two things make it much easier to help you: the <strong>version</strong> and the <strong>diagnostics file</strong>. Both are under the help menu → <em>About OpenDocViewer</em>.</p>
+<p>Good to include in the ticket:</p>
 <ul>
-  <li>Verify the selection before printing.</li>
-  <li>Selection may be document-based or page-based depending on deployment.</li>
-  <li>If no specific selection is used, the whole session or the print dialog choice normally applies.</li>
+  <li><strong>Version and build ID</strong> from <em>About OpenDocViewer</em>.</li>
+  <li><strong>The diagnostics file</strong> (<em>Download diagnostics JSON</em>). It contains technical information about ODV and the browser – no documents.</li>
+  <li><strong>When</strong> it happened (date and time), <strong>what you did</strong> and which <strong>browser</strong> you used.</li>
+  <li>The text under <em>Technical details</em> if an error box was shown.</li>
 </ul>
+<div class="warning"><p><strong>Do not send personal data.</strong> Do not attach screenshots or printouts that show real documents, names or ID numbers, unless your organization has explicitly asked for them.</p></div>
+<div class="figure-grid">
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="About OpenDocViewer"></a><figcaption><strong>About OpenDocViewer.</strong> Version, build ID and contact details. <em>Reload resource files</em> fetches translations and settings again without restarting.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="The Diagnostics section in About OpenDocViewer"></a><figcaption><strong>Diagnostics.</strong> <em>Download diagnostics JSON</em> gives you a file to attach to the ticket. It contains technical information – no documents.</figcaption></figure>
+</div>
+<details>
+  <summary>When the session has expired</summary>
+  <p>The box <em>The documents could not be shown correctly</em> has a <em>Technical details</em> link. Expand it to see which pages could not be fetched and why. Include that in the ticket.</p>
+  <div class="figure-grid">
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV with an expired session and pages shown as warning triangles"></a><figcaption><strong>Expired session.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Technical details expanded"></a><figcaption><strong>Technical details.</strong></figcaption></figure>
+  </div>
+</details>
 
-<h2>Comparison</h2>
-<p>Comparison mode is used to show two pages or document parts side by side. It can be useful for manual review of versions, copies, or related documents.</p>
+<h2 id="fler-new">New in version 2.8</h2>
 <ul>
-  <li>Enable comparison from the toolbar if the feature is available.</li>
-  <li>Select the primary page and the comparison page.</li>
-  <li>Printing an active comparison may be handled differently from printing all pages.</li>
+  <li><strong>The selection workspace</strong> replaces the old selection tab – see the guide <a href="#guide-urval-start">Selection</a>.</li>
+  <li><strong>The print button has an arrow</strong> for the default scope, and the dialog has a new layout.</li>
+  <li><strong>Custom size (1:X)</strong> and a choice of default zoom.</li>
+  <li><strong>PDF pages in print quality</strong>, with <strong>HQ</strong> for an even sharper view.</li>
+  <li><strong>Metadata</strong> from the right-click menu.</li>
+  <li><strong>Page change when scrolling</strong> with the mouse wheel.</li>
+  <li><strong>Reset session</strong> when the document links have expired.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>P</kbd> opens ODV's printing. Rotation is on <kbd>Ctrl</kbd>+Arrow Left/Right.</li>
 </ul>
-
-<h2>Image adjustments and active page</h2>
-<p>Some deployments may allow visual adjustment of an active page, such as rotation or other viewing adjustments. Such adjustments normally belong to the active-page flow and should be checked carefully before printing.</p>
-<p>Printing the <strong>active page</strong> may therefore differ from printing all pages, because the active page may need to use the current visual surface instead of the original image.</p>
-
-<h2>Printing</h2>
-<p>Open the print dialog from the toolbar print button. The dialog may contain fields for print reason, recipient/for whom, watermark, and page choice depending on deployment.</p>
-
-<h3>Page choice</h3>
-<ul>
-  <li><strong>Active page:</strong> prints the page currently active in the viewer. This is best when the current page has special visual handling.</li>
-  <li><strong>All pages:</strong> prints the whole session or the current selection.</li>
-  <li><strong>Simple range:</strong> prints one continuous page range.</li>
-  <li><strong>Custom pages:</strong> prints a specified list, for example <code>1,3,5-8</code>.</li>
+  <!-- EMBED-END manual-avancerat.en --></details>
+<h3>Short checklist</h3>
+<ul class="checklist">
+  <li>Wait until the page counter is no longer striped before you print.</li>
+  <li>Check the reason and the scope in the print dialog before you click Print.</li>
+  <li>If you get the expired-session box: click <em>Reset session</em>.</li>
 </ul>
-
-<h3>Direct print via HTML</h3>
-<p><strong>Print via HTML</strong> uses the browser's normal print flow for OpenDocViewer's prepared print view. The browser's portrait or landscape choice normally applies to the whole print job.</p>
-<p>This mode is simple and direct, but the browser print preview can be slow for many large image pages.</p>
-
-<h3>Print via PDF</h3>
-<p><strong>Print via PDF</strong> makes OpenDocViewer create a PDF file from the print job first and then sends that PDF to the browser for printing. During PDF generation, progress shows how many pages are done.</p>
-<p>In PDF mode, each page can automatically get portrait or landscape format based on the page image. This can therefore differ from direct print where the browser's format choice applies more generally.</p>
-
-<h3>Save PDF</h3>
-<p>If the deployment allows it, the <strong>Save PDF</strong> button is shown. It creates the same type of PDF as PDF printing, but downloads the file instead of opening print.</p>
-
-<h3>Copy watermark</h3>
-<p>If the deployment allows it, you can select <strong>Add copy watermark</strong>. A clear but transparent marker is then added to the printout. The deployment controls the exact text, language, and appearance.</p>
-
-<h2>Header and footer</h2>
-<p>Printouts can have a header and footer. These may contain date, time, print reason, user, page number, document ID, and metadata. Fields without values can be hidden automatically when the template is configured that way.</p>
-<p>The page number in the print header normally means the page's position in the print job. The document's own page number can be shown separately in the footer.</p>
-
-<h2>Performance and large documents</h2>
-<p>OpenDocViewer tries to balance performance and memory use. On powerful computers, more pages and thumbnails can be prepared in advance. On computers with less memory, the viewer may be more conservative.</p>
-<ul>
-  <li>Wait until loading is complete before starting large print jobs.</li>
-  <li>PDF printing can provide clearer progress feedback for large print jobs.</li>
-  <li>The browser's own print preview can still take time, especially in Edge/Chromium.</li>
-</ul>
-
-<h2>Troubleshooting</h2>
-<ul>
-  <li><strong>The print button is disabled:</strong> wait until the documents have finished loading.</li>
-  <li><strong>The print preview is slow:</strong> try PDF printing if the feature is available.</li>
-  <li><strong>The wrong pages are printed:</strong> check page choice, range, and selection in the dialog.</li>
-  <li><strong>Metadata is missing in print:</strong> verify that the metadata exists in the session and that the deployment template uses the correct field.</li>
-  <li><strong>The manual lacks local information:</strong> the deployment can add its own manual file under <code>help/site/</code>.</li>
-</ul>
-
-<h2>Local customization</h2>
-<p>This default manual can be replaced per deployment without rebuilding OpenDocViewer. Place a local manual under <code>help/site/manual.en.html</code> and the corresponding Swedish version under <code>help/site/manual.sv.html</code>.</p>
+<p class="small">This guide covers OpenDocViewer 2.8. Your organization may have set up some features differently. Updated 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-oversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/oversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-laddar"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-laddar.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-redo"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-redo.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-ctrl"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-ctrl.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-vanster"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-vanster.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-hoger"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-hoger.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-ljusstyrka"><a href="#lb-stang" aria-label="Close the image"><img src="img/ljusstyrka.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-kontrast"><a href="#lb-stang" aria-label="Close the image"><img src="img/kontrast.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-panelkontroller"><a href="#lb-stang" aria-label="Close the image"><img src="img/panelkontroller.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/miniatyr-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-aktiv-sida"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-aktiv-sida.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-uppgifter"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-uppgifter.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-forbereds"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-forbereds.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-resultat"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-resultat.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskriftsstandard"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskriftsstandard.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-tema"><a href="#lb-stang" aria-label="Close the image"><img src="img/tema.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-sprak"><a href="#lb-stang" aria-label="Close the image"><img src="img/sprak.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-hjalp"><a href="#lb-stang" aria-label="Close the image"><img src="img/hjalp.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-problemnotis-ruta"><a href="#lb-stang" aria-label="Close the image"><img src="img/problemnotis-ruta.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-oversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-oversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-verktygsfalt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-markerade"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-markerade.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-borttagna"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-borttagna.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-sida-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/sida-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-forhandsvisning"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-forhandsvisning.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt-osparat"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-verktygsfalt-osparat.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-lamna-dialog"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-lamna-dialog.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-huvudvy-efter-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/huvudvy-efter-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-alla-sidor-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-alla-sidor-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-panel-efter-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/panel-efter-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-shift.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadata.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadataoversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-fore.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-efter.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Close the image"><img src="img/egen-storlek.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-egen-storlek-avancerat"><a href="#lb-stang" aria-label="Close the image"><img src="img/egen-storlek-avancerat.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-morkt-tema"><a href="#lb-stang" aria-label="Close the image"><img src="img/morkt-tema.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-om-odv"><a href="#lb-stang" aria-label="Close the image"><img src="img/om-odv.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-diagnostik"><a href="#lb-stang" aria-label="Close the image"><img src="img/diagnostik.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-problemnotis"><a href="#lb-stang" aria-label="Close the image"><img src="img/problemnotis.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-problemnotis-detaljer"><a href="#lb-stang" aria-label="Close the image"><img src="img/problemnotis-detaljer.png" alt=""><span>Click anywhere to close</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>

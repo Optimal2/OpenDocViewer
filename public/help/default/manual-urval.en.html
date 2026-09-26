@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>Selection – choose the pages that are shown and printed – OpenDocViewer</title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- The CSS lives in body: ODV's manual window keeps only the body content (a leading <style> in head disappears). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Lightbox without scripts: the image links to #lb-NAME and .lb:target is shown over the whole window. A click anywhere leads to #lb-stang (does not exist) and closes it. NOTE: no less-than character in the CSS, or ODV's sanitizer empties the whole style block. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Embedded guides at the bottom: expand on the same page */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – expand"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – collapse"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>Selection – choose the pages that are shown and printed</h1>
+  <p class="lead">With a <strong>selection</strong> you decide which pages ODV shows and prints. You always start with all pages and remove the ones you do not want. It is handy when a session contains many documents but you only need a few pages.</p>
+  <p class="small">This guide belongs with <a href="manual.en.html">Getting started with OpenDocViewer</a>. The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-urval.en.pdf">Download the guide as PDF</a>.</p>
+</section>
+<div class="warning"><p><strong>Important:</strong> a selection hides pages in ODV and controls what is printed. The original documents in the archive are never affected.</p></div>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#open">1. Open the selection workspace</a>
+  <a href="#remove">2. Remove pages</a>
+  <a href="#add">3. Add pages back</a>
+  <a href="#order">4. Change the order</a>
+  <a href="#preview">5. Take a closer look at a page</a>
+  <a href="#save">6. Save or leave</a>
+  <a href="#active">7. How to tell that a selection is active</a>
+  <a href="#print">8. Print the selection</a>
+  <a href="#reset">9. Remove the selection</a>
+</nav>
+
+<h2 id="open">1. Open the selection workspace</h2>
+<p>Click the <strong>selection button</strong> in the toolbar – the one with a list and a tick, directly to the right of the print button (tooltip: <em>Manage the pages shown and printed</em>). The <em>Manage selection</em> workspace opens over the whole window.</p>
+<figure class="wide">
+  <a href="#lb-urval-oversikt"><img src="img/urval-oversikt.png" alt="The selection workspace with available pages on the left and selected pages on the right"></a>
+  <figcaption><strong>The selection workspace.</strong> On the left, <em>Available pages</em>: every page there is. On the right, <em>Selected pages</em>: the pages included in the selection. A tick on a page on the left means it is included.</figcaption>
+</figure>
+<figure class="strip">
+  <a href="#lb-urval-verktygsfalt"><img src="img/urval-verktygsfalt.png" alt="The toolbar of the selection workspace"></a>
+  <figcaption><strong>The workspace toolbar.</strong> Mode (Documents or Pages), panel layout, thumbnail size, undo/redo, reset, <em>Save</em> and <em>Leave</em>.</figcaption>
+</figure>
+<details>
+  <summary>Two modes: Documents and Pages</summary>
+  <ul>
+    <li><strong>Documents</strong> is the default. Pages are kept together per document. You can remove and add pages and move them within their document.</li>
+    <li><strong>Pages</strong> drops the grouping. Pages from different documents can be mixed in any order you like – for example before printing in a particular order.</li>
+  </ul>
+</details>
+
+<h2 id="remove">2. Remove pages</h2>
+<ol class="steps">
+  <li><strong>Mark</strong> the pages in the right panel that should not be included. Click one page at a time.</li>
+  <li>Click <strong>Remove selected</strong> – the arrow <em>‹</em> between the panels. The pages lose their tick in the left panel.</li>
+  <li>To remove everything and start from scratch: click <strong>Remove all</strong> (<em>«</em>).</li>
+</ol>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-urval-markerade"><img src="img/urval-markerade.png" alt="Three pages marked in the right panel"></a>
+    <figcaption><strong>Marked pages</strong> get a grey frame.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-borttagna"><img src="img/urval-borttagna.png" alt="The selection after three pages were removed"></a>
+    <figcaption><strong>After Remove selected.</strong> Document 1 now has one page left and the counter shows 21 selected. The Save button has turned green.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Faster ways to mark and remove</summary>
+  <ul>
+    <li><kbd>Shift</kbd>+click marks every page between two clicks. <kbd>Ctrl</kbd>+click adds or removes a single page from the marking.</li>
+    <li>Drag a <strong>rectangle</strong> over several pages to mark them all at once.</li>
+    <li><strong>Double-click</strong> a page in the left panel to add or remove it directly.</li>
+    <li>You do not need to open the workspace at all for single pages: <strong>right-click</strong> a thumbnail or the page in the main view and choose <em>Hide this page</em> or <em>Hide document</em>. The <kbd>Delete</kbd> key hides the page you are looking at, <kbd>Ctrl</kbd>+<kbd>Delete</kbd> the whole document.</li>
+  </ul>
+  <div class="figure-grid">
+    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="The right-click menu on a thumbnail"></a><figcaption><strong>Right-clicking a thumbnail.</strong></figcaption></figure>
+    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="The right-click menu on the page in the main view"></a><figcaption><strong>Right-clicking the page.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="add">3. Add pages back</h2>
+<p>Changed your mind? Mark the pages in the <strong>left</strong> panel and click <strong>Add selected</strong> (<em>›</em>), or <strong>Add all</strong> (<em>»</em>) to get everything back. The <em>Undo</em> and <em>Redo</em> buttons in the toolbar take back one step at a time.</p>
+
+<h2 id="order">4. Change the order</h2>
+<p>Drag a page in the right panel to a new place. In <em>Documents</em> mode you can move pages within their document; in <em>Pages</em> mode you can mix freely. The order in the selection becomes the order of the printout.</p>
+
+<h2 id="preview">5. Take a closer look at a page</h2>
+<p>Hover over a page and click the <strong>eye</strong>. The page is shown large, with arrows to browse to the next one. A green edge means the page is included in the selection, and the button at the top adds or removes the page directly. <kbd>Esc</kbd> closes.</p>
+<figure class="wide">
+  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Preview of a page in the selection workspace"></a>
+  <figcaption><strong>Preview.</strong> The page's place, document and metadata are shown at the top left.</figcaption>
+</figure>
+
+<h2 id="save">6. Save or leave</h2>
+<p>The <strong>Save</strong> button turns green as soon as you have changed something. Click it when you are done, and then <strong>Leave</strong> to get back to the document. If you leave without saving, you get a question.</p>
+<div class="figure-grid">
+  <figure class="strip">
+    <a href="#lb-urval-verktygsfalt-osparat"><img src="img/urval-verktygsfalt-osparat.png" alt="The toolbar with unsaved changes"></a>
+    <figcaption><strong>Unsaved changes.</strong> The green button saves, the orange button discards the changes.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="The Unsaved changes dialog"></a>
+    <figcaption><strong>Leaving without saving.</strong> Save, discard, or <em>Continue editing</em>.</figcaption>
+  </figure>
+</div>
+
+<h2 id="active">7. How to tell that a selection is active</h2>
+<p>Back in the document, the <strong>selection button is red</strong>, the page counter only counts the selection's pages, and the thumbnail pane only shows the pages that are included. At the top of the pane there is a <strong>red reset button</strong>.</p>
+<figure class="wide">
+  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="The main view with an active selection: red selection button and fewer thumbnails"></a>
+  <figcaption><strong>Active selection.</strong> The page counter shows 1 / 21, the selection button is red, the pane only shows the selection.</figcaption>
+</figure>
+
+<h2 id="print">8. Print the selection</h2>
+<p>Open printing with the print button and choose <strong>All pages</strong>. When a selection is active, you can choose between <strong>Current selection</strong> – only the pages in the selection, preselected – and <strong>Entire session</strong>, which prints everything and ignores the selection.</p>
+<figure class="print">
+  <a href="#lb-utskrift-alla-sidor-urval"><img src="img/utskrift-alla-sidor-urval.png" alt="The print dialog with All pages and the Current selection option"></a>
+  <figcaption><strong>All pages with a selection.</strong> <em>Current selection (21 pages)</em> is preselected.</figcaption>
+</figure>
+<p class="small">The <em>Simple range</em> and <em>Custom pages</em> options are not available when a selection is active – the selection then decides what is printed. The rest of printing (reason, recipient, watermark) works as in the <a href="manual.en.html#printing">Getting started guide</a>.</p>
+<div class="tip"><p><strong>Good to know:</strong> printing a selection prints the pages as they are in the archive. If you have rotated a page or changed brightness and contrast, that is not included here – it only is with the <em>Active page</em> print method.</p></div>
+
+<h2 id="reset">9. Remove the selection</h2>
+<p>Click the <strong>red button at the top of the thumbnail pane</strong>. All pages come back. You can also open the workspace, choose <em>Add all</em>, <em>Save</em> and <em>Leave</em>.</p>
+<figure class="menu">
+  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="The thumbnail pane with the red reset button"></a>
+  <figcaption><strong>The reset button</strong> at the top right of the pane.</figcaption>
+</figure>
+
+<h3>Short checklist</h3>
+<ul class="checklist">
+  <li>A green Save button means you have unsaved changes.</li>
+  <li>A red selection button in the toolbar means pages are hidden.</li>
+  <li><em>Current selection</em> prints what you chose, <em>Entire session</em> prints everything.</li>
+</ul>
+<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.8. Updated 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-urval-oversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-oversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-verktygsfalt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-markerade"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-markerade.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-borttagna"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-borttagna.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/miniatyr-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-sida-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/sida-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-forhandsvisning"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-forhandsvisning.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt-osparat"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-verktygsfalt-osparat.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-urval-lamna-dialog"><a href="#lb-stang" aria-label="Close the image"><img src="img/urval-lamna-dialog.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-huvudvy-efter-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/huvudvy-efter-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-utskrift-alla-sidor-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/utskrift-alla-sidor-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-panel-efter-urval"><a href="#lb-stang" aria-label="Close the image"><img src="img/panel-efter-urval.png" alt=""><span>Click anywhere to close</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>

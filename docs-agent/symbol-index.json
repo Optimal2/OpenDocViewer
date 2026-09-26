@@ -6440,7 +6440,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 111,
+    "line": 91,
     "description": "",
     "params": [
       {
@@ -6465,38 +6465,13 @@
     "examples": 0
   },
   {
-    "id": "buildManualCandidates",
-    "name": "buildManualCandidates",
-    "longname": "buildManualCandidates",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 143,
-    "description": "",
-    "params": [
-      {
-        "name": "language",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "Array.<string>",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "module.exports",
     "name": "exports",
     "longname": "module.exports",
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 173,
+    "line": 125,
     "description": "",
     "params": [
       {
@@ -6533,7 +6508,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 193,
+    "line": 145,
     "description": "",
     "params": [
       {
@@ -6547,44 +6522,13 @@
     "examples": 0
   },
   {
-    "id": "interpolateTemplate",
-    "name": "interpolateTemplate",
-    "longname": "interpolateTemplate",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 31,
-    "description": "",
-    "params": [
-      {
-        "name": "template",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "language",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
     "id": "isRewritableRelativeUrl",
     "name": "isRewritableRelativeUrl",
     "longname": "isRewritableRelativeUrl",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 41,
+    "line": 21,
     "description": "",
     "params": [
       {
@@ -6609,7 +6553,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 127,
+    "line": 107,
     "description": "",
     "params": [
       {
@@ -6634,7 +6578,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 69,
+    "line": 49,
     "description": "",
     "params": [
       {
@@ -6665,42 +6609,11 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 55,
+    "line": 35,
     "description": "",
     "params": [
       {
         "name": "html",
-        "type": "string",
-        "optional": false,
-        "description": ""
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
-    "examples": 0
-  },
-  {
-    "id": "toText",
-    "name": "toText",
-    "longname": "toText",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 21,
-    "description": "",
-    "params": [
-      {
-        "name": "value",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "fallback",
         "type": "string",
         "optional": false,
         "description": ""
@@ -19364,6 +19277,181 @@
         "name": "i18n",
         "type": "I18nLike",
         "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "buildManualCandidates",
+    "name": "buildManualCandidates",
+    "longname": "buildManualCandidates",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 45,
+    "description": "Candidate manual URLs in priority order: site before default, UI language before fallback language.",
+    "params": [
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "UI language, e.g. sv ."
+      },
+      {
+        "name": "manualConfig",
+        "type": "Object",
+        "optional": true,
+        "description": "Runtime config help.manual block."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "DEFAULT_SITE_MANUAL_TEMPLATE",
+    "name": "DEFAULT_SITE_MANUAL_TEMPLATE",
+    "longname": "DEFAULT_SITE_MANUAL_TEMPLATE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 14,
+    "description": "Resolves which manual HTML file the help dialog shows.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "interpolateManualTemplate",
+    "name": "interpolateManualTemplate",
+    "longname": "interpolateManualTemplate",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 32,
+    "description": "",
+    "params": [
+      {
+        "name": "template",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isApplicationShellHtml",
+    "name": "isApplicationShellHtml",
+    "longname": "isApplicationShellHtml",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 76,
+    "description": "True when the HTML is OpenDocViewer's own application shell rather than a manual.",
+    "params": [
+      {
+        "name": "html",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "ManualCandidateResponse",
+    "name": "ManualCandidateResponse",
+    "longname": "ManualCandidateResponse",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 80,
+    "description": "",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "resolveManualSource",
+    "name": "resolveManualSource",
+    "longname": "resolveManualSource",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 94,
+    "description": "Fetch candidates in order and return the first one the server delivers as a manual.",
+    "params": [
+      {
+        "name": "candidates",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fetchCandidate",
+        "type": "function",
+        "optional": false,
+        "description": "Usually fetch ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Promise.<({candidate: string, url: string, html: string}|null)>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "toText",
+    "name": "toText",
+    "longname": "toText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/manualSources.js",
+    "line": 22,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fallback",
+        "type": "string",
+        "optional": false,
         "description": ""
       }
     ],

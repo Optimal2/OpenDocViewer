@@ -1,0 +1,272 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<title>More features – OpenDocViewer</title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- The CSS lives in body: ODV's manual window keeps only the body content (a leading <style> in head disappears). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Lightbox without scripts: the image links to #lb-NAME and .lb:target is shown over the whole window. A click anywhere leads to #lb-stang (does not exist) and closes it. NOTE: no less-than character in the CSS, or ODV's sanitizer empties the whole style block. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Embedded guides at the bottom: expand on the same page */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – expand"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – collapse"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>More features in OpenDocViewer</h1>
+  <p class="lead">This continues the <a href="manual.en.html">Getting started guide</a>: features that not everyone needs every day, but that are good to know about. Read the section you need.</p>
+  <p class="small">The pictures show a made-up test document, in the Swedish interface; the button names here are the English ones. <a href="manual-avancerat.en.pdf">Download the guide as PDF</a>.</p>
+</section>
+
+<nav class="toc" aria-label="Contents">
+  <a href="#compare">Compare two pages</a>
+  <a href="#metadata">Document metadata</a>
+  <a href="#hq">Sharper PDF pages</a>
+  <a href="#custom">Custom size and default zoom</a>
+  <a href="#keyboard">All keyboard shortcuts</a>
+  <a href="#toolbar">The toolbar button by button</a>
+  <a href="#theme">Dark theme</a>
+  <a href="#support">Support information</a>
+  <a href="#new">New in version 2.8</a>
+</nav>
+
+<h2 id="compare">Compare two pages</h2>
+<p>Click the <strong>compare button</strong> in the toolbar (<em>Enable compare mode</em>). The page you are looking at moves to the left with a <span class="blue">blue frame</span>, and a second page is shown on the right with an <span class="orange">orange frame</span>. To swap the right-hand page: right-click a thumbnail and choose <em>Show to right</em>.</p>
+<figure class="wide">
+  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Compare mode with two pages side by side"></a>
+  <figcaption><strong>Compare mode.</strong> Each page has its own zoom buttons along the top. In the pane, the left page is marked <span class="blue">V</span> and the right page <span class="orange">H</span> (Swedish for left and right).</figcaption>
+</figure>
+<p>One of the pages is always <strong>active</strong> – the one you last clicked in. The toolbar and the keyboard control the active page, and the frames around the buttons show which one: blue for left, orange for right.</p>
+<p>If you print with the <strong>Active page</strong> method while comparing, you can choose to include only the active page or <em>Both compare pages</em>. The pages are printed exactly as you see them – rotation, brightness and contrast are included, just as when you look at a single page. With every other print method, the pages are printed as they are in the archive.</p>
+<details>
+  <summary>Controlling the other page without switching</summary>
+  <p>Hold <kbd>Shift</kbd> while you click a button or use the keyboard, and the command applies to the page that is <em>not</em> active. The frames change colour while you hold Shift, so you can see what will happen.</p>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="The toolbar with Shift held down and orange frames"></a>
+    <figcaption><strong>Shift held down.</strong> Orange frames = the buttons control the right page right now.</figcaption>
+  </figure>
+  <p><kbd>Arrow Left</kbd> and <kbd>Arrow Right</kbd> switch the active page. <kbd>Arrow Left</kbd> when the left page is already active ends the comparison – so does the compare button, or <em>Close comparison</em> in the right-click menu on the right-hand page.</p>
+  <figure class="menu">
+    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="The right-click menu on the right page in compare mode"></a>
+    <figcaption><strong>Right-clicking the right page.</strong> The usual options, plus <em>Close comparison</em>.</figcaption>
+  </figure>
+</details>
+
+<h2 id="metadata">Document metadata</h2>
+<p>Right-click a thumbnail or the page and choose <strong>Show document metadata</strong>. You see the information the system that opened ODV sent with the document – for example ID, name, department, date, number of pages and document ID. Which fields exist depends on that system. The information is for display only and cannot be changed in ODV.</p>
+<figure class="wide">
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="The Document metadata dialog"></a>
+  <figcaption><strong>Document metadata</strong> for one document.</figcaption>
+</figure>
+<details>
+  <summary>All documents in one table</summary>
+  <p>The <em>Metadata table</em> button in the metadata dialog shows the whole session as a table – one document per row. Handy when you want to see at a glance which departments and dates are included.</p>
+  <figure class="wide">
+    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="The metadata overview with every document in the session"></a>
+    <figcaption><strong>Document metadata overview.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="hq">Sharper PDF pages</h2>
+<p>PDF pages are already shown in print quality. If you need to see a detail even more sharply: click <strong>HQ</strong> in the toolbar (<em>Increase PDF page resolution</em>). The page is redrawn at double resolution and the button turns red. It applies only to that page.</p>
+<div class="figure-grid narrow">
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="The HQ button before"></a><figcaption><strong>Before.</strong></figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="The HQ button after, red"></a><figcaption><strong>After.</strong> Red = the sharpness has been increased.</figcaption></figure>
+</div>
+<p class="small">HQ is grey for scanned pages (TIFF/JPEG), because they are already shown exactly as sharp as they were scanned. Hover over the button to see why.</p>
+
+<h2 id="custom">Custom size and default zoom</h2>
+<p>The <strong>1:X</strong> button (<em>Custom size</em>) shows the page at a size you choose yourself – a share of the window width. The arrow next to it opens the settings. There you also choose which zoom every new session should start with (<em>Default zoom/size</em>); your organization decides the default. ODV remembers your choices.</p>
+<div class="figure-grid">
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="The custom size menu"></a><figcaption><strong>Custom size.</strong> Share of the window width and default zoom.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="The menu with Advanced expanded"></a><figcaption><strong>Advanced.</strong> Limits for window height and actual size.</figcaption></figure>
+</div>
+
+<h2 id="keyboard">All keyboard shortcuts</h2>
+<table>
+  <thead><tr><th>Key</th><th>Does this</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Arrow Up</kbd> / <kbd>Arrow Down</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Previous or next page. Hold down to browse quickly.</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>First or last page.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + any of the above</td><td>The same, but document by document instead of page by page.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zoom in or out.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>Rotate the page.</td></tr>
+    <tr><td><kbd>Arrow Left</kbd> / <kbd>Arrow Right</kbd></td><td>In compare mode: switch the active page. Arrow Left when the left page is already active ends the comparison.</td></tr>
+    <tr><td><kbd>Shift</kbd> + command</td><td>In compare mode: control the page that is not active.</td></tr>
+    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Hide the page / hide the whole document (selection).</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Open ODV's print dialog.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Close menus, dialogs and the preview.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="toolbar">The toolbar button by button</h2>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="The left part of the toolbar"></a>
+  <figcaption><strong>Left:</strong> print with an arrow for the default, selection, page navigation, zoom out/in with a percentage box, 1:1, fit to screen, fit to width.</figcaption>
+</figure>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="The right part of the toolbar"></a>
+  <figcaption><strong>Right:</strong> 1:X custom size with an arrow, compare, rotate left/right, HQ, brightness, contrast, reset, and theme, language and help.</figcaption>
+</figure>
+<ul>
+  <li><strong>Print</strong> opens printing. The arrow next to it sets the default, <em>Active page</em> or <em>All pages</em>.</li>
+  <li><strong>Selection</strong> opens the selection workspace. Red when a selection is active.</li>
+  <li><strong>Page navigation</strong>: first, previous, next, last, and a box for the page number.</li>
+  <li><strong>Zoom</strong>: out, in, percentage box, 1:1, fit to screen, fit to width.</li>
+  <li><strong>1:X</strong>: custom size. <strong>Compare</strong>: two pages side by side. <strong>Rotate</strong>: a quarter turn.</li>
+  <li><strong>HQ</strong>: sharper PDF page. <strong>Brightness</strong>, <strong>contrast</strong> and <strong>reset</strong>.</li>
+  <li><strong>Theme</strong>, <strong>language</strong>, <strong>help</strong>. The light on the help button: green = all is well, yellow = the computer is low on memory, red = error.</li>
+</ul>
+
+<h2 id="theme">Dark theme</h2>
+<p>The theme menu at the far right has <em>Normal</em>, <em>Light</em> and <em>Dark</em>. In the dark theme the interface turns dark while the document page is shown as usual.</p>
+<figure class="wide">
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer in the dark theme"></a>
+  <figcaption><strong>Dark theme.</strong></figcaption>
+</figure>
+
+<h2 id="support">Support information</h2>
+<p>Turn to <strong>your local support</strong> first – they know how ODV is installed and set up in your organization, and can pass the case on to the supplier. Two things make it much easier to help you: the <strong>version</strong> and the <strong>diagnostics file</strong>. Both are under the help menu → <em>About OpenDocViewer</em>.</p>
+<p>Good to include in the ticket:</p>
+<ul>
+  <li><strong>Version and build ID</strong> from <em>About OpenDocViewer</em>.</li>
+  <li><strong>The diagnostics file</strong> (<em>Download diagnostics JSON</em>). It contains technical information about ODV and the browser – no documents.</li>
+  <li><strong>When</strong> it happened (date and time), <strong>what you did</strong> and which <strong>browser</strong> you used.</li>
+  <li>The text under <em>Technical details</em> if an error box was shown.</li>
+</ul>
+<div class="warning"><p><strong>Do not send personal data.</strong> Do not attach screenshots or printouts that show real documents, names or ID numbers, unless your organization has explicitly asked for them.</p></div>
+<div class="figure-grid">
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="About OpenDocViewer"></a><figcaption><strong>About OpenDocViewer.</strong> Version, build ID and contact details. <em>Reload resource files</em> fetches translations and settings again without restarting.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="The Diagnostics section in About OpenDocViewer"></a><figcaption><strong>Diagnostics.</strong> <em>Download diagnostics JSON</em> gives you a file to attach to the ticket. It contains technical information – no documents.</figcaption></figure>
+</div>
+<details>
+  <summary>When the session has expired</summary>
+  <p>The box <em>The documents could not be shown correctly</em> has a <em>Technical details</em> link. Expand it to see which pages could not be fetched and why. Include that in the ticket.</p>
+  <div class="figure-grid">
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV with an expired session and pages shown as warning triangles"></a><figcaption><strong>Expired session.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Technical details expanded"></a><figcaption><strong>Technical details.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="new">New in version 2.8</h2>
+<ul>
+  <li><strong>The selection workspace</strong> replaces the old selection tab – see the guide <a href="manual-urval.en.html">Selection</a>.</li>
+  <li><strong>The print button has an arrow</strong> for the default scope, and the dialog has a new layout.</li>
+  <li><strong>Custom size (1:X)</strong> and a choice of default zoom.</li>
+  <li><strong>PDF pages in print quality</strong>, with <strong>HQ</strong> for an even sharper view.</li>
+  <li><strong>Metadata</strong> from the right-click menu.</li>
+  <li><strong>Page change when scrolling</strong> with the mouse wheel.</li>
+  <li><strong>Reset session</strong> when the document links have expired.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>P</kbd> opens ODV's printing. Rotation is on <kbd>Ctrl</kbd>+Arrow Left/Right.</li>
+</ul>
+<p class="small">Back to <a href="manual.en.html">Getting started with OpenDocViewer</a>. This guide covers OpenDocViewer 2.8. Updated 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-shift.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Close the image"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadata.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Close the image"><img src="img/metadataoversikt.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-fore.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Close the image"><img src="img/boost-efter.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Close the image"><img src="img/egen-storlek.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-egen-storlek-avancerat"><a href="#lb-stang" aria-label="Close the image"><img src="img/egen-storlek-avancerat.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-vanster"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-vanster.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-verktygsfalt-hoger"><a href="#lb-stang" aria-label="Close the image"><img src="img/verktygsfalt-hoger.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-morkt-tema"><a href="#lb-stang" aria-label="Close the image"><img src="img/morkt-tema.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-om-odv"><a href="#lb-stang" aria-label="Close the image"><img src="img/om-odv.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-diagnostik"><a href="#lb-stang" aria-label="Close the image"><img src="img/diagnostik.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-problemnotis"><a href="#lb-stang" aria-label="Close the image"><img src="img/problemnotis.png" alt=""><span>Click anywhere to close</span></a></div>
+<div class="lb" id="lb-problemnotis-detaljer"><a href="#lb-stang" aria-label="Close the image"><img src="img/problemnotis-detaljer.png" alt=""><span>Click anywhere to close</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>

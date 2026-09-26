@@ -63,6 +63,10 @@ If a deployment must be validated formally, test Edge and Chrome first. Treat Fi
 - `help/` (site-managed manual fragments and their assets): `no-cache, must-revalidate`
 - everything else, including hashed assets: `public, max-age=31536000, immutable`
 
+The SPA fallback rewrite (missing file → `index.html`) excludes `help/`: a missing
+`help/site/manual.<lng>.html` must answer 404 so the manual dialog falls back to the bundled
+`help/default/` manual.
+
 That split is important:
 
 - the shell HTML and runtime config must reflect the newest deployment immediately

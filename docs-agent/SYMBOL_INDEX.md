@@ -239,16 +239,13 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:53</code> |  |
 | <code>LanguageMenuButton~handleSelectLanguage</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:80</code> |  |
 | <code>resolveLanguageLabel</code> | function | <code>src/components/DocumentToolbar/LanguageMenuButton.jsx:18</code> |  |
-| <code>appendManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:111</code> |  |
-| <code>buildManualCandidates</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:143</code> |  |
-| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:173</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:193</code> |  |
-| <code>interpolateTemplate</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:31</code> |  |
-| <code>isRewritableRelativeUrl</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:41</code> |  |
-| <code>removeManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:127</code> |  |
-| <code>rewriteManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:69</code> |  |
-| <code>sanitizeManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:55</code> |  |
-| <code>toText</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:21</code> |  |
+| <code>appendManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:91</code> |  |
+| <code>module.exports</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:125</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:145</code> |  |
+| <code>isRewritableRelativeUrl</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:21</code> |  |
+| <code>removeManualRefreshToken</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:107</code> |  |
+| <code>rewriteManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:49</code> |  |
+| <code>sanitizeManualHtml</code> | function | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx:35</code> |  |
 | <code>clampPage</code> | function | <code>src/components/DocumentToolbar/PageNavigationButtons.jsx:46</code> | Page navigation button group. |
 | <code>PrintSubmitDetail</code> | typedef | <code>src/components/DocumentToolbar/PrintRangeDialog.jsx:13</code> | Structured payload returned to the caller on submit. |
 | <code>module:printRangeDialogHelpers.buildSelectedOptionDetails</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:101</code> | Build token-friendly details for the selected option without forcing templates to use list indexes. |
@@ -788,6 +785,13 @@
 | <code>OptionLike</code> | typedef | <code>src/utils/localizedValue.js:24</code> | Option-like shape used by the print reason selector. |
 | <code>resolveLocalizedValue</code> | function | <code>src/utils/localizedValue.js:41</code> | Return the best string for the active language. |
 | <code>resolveOptionLabel</code> | function | <code>src/utils/localizedValue.js:109</code> | Resolve a label for a reason option. |
+| <code>buildManualCandidates</code> | function | <code>src/utils/manualSources.js:45</code> | Candidate manual URLs in priority order: site before default, UI language before fallback language. |
+| <code>DEFAULT_SITE_MANUAL_TEMPLATE</code> | constant | <code>src/utils/manualSources.js:14</code> | Resolves which manual HTML file the help dialog shows. |
+| <code>interpolateManualTemplate</code> | function | <code>src/utils/manualSources.js:32</code> |  |
+| <code>isApplicationShellHtml</code> | function | <code>src/utils/manualSources.js:76</code> | True when the HTML is OpenDocViewer&#39;s own application shell rather than a manual. |
+| <code>ManualCandidateResponse</code> | typedef | <code>src/utils/manualSources.js:80</code> |  |
+| <code>resolveManualSource</code> | function | <code>src/utils/manualSources.js:94</code> | Fetch candidates in order and return the first one the server delivers as a manual. |
+| <code>toText</code> | function | <code>src/utils/manualSources.js:22</code> |  |
 | <code>getRuntimeMemoryProfile</code> | function | <code>src/utils/memoryProfile.js:63</code> |  |
 | <code>readDeviceMemoryGb</code> | function | <code>src/utils/memoryProfile.js:24</code> |  |
 | <code>readJsHeapLimitMiB</code> | function | <code>src/utils/memoryProfile.js:37</code> |  |

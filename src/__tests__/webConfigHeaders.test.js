@@ -32,6 +32,14 @@ describe('public/web.config security headers', () => {
     expect(helpLocation).not.toMatch(/immutable/);
   });
 
+  it('keeps missing help files out of the SPA fallback so the manual can fall back to help/default/', () => {
+    // A missing help/site/manual.<lng>.html must answer 404, not index.html with 200; otherwise the
+    // manual dialog shows the application shell instead of the bundled default manual.
+    const spaRuleMatch = config.match(/<rule name="SPA fallback"[\s\S]*?<\/rule>/);
+    const spaRule = spaRuleMatch ? spaRuleMatch[0] : '';
+    expect(spaRule).toMatch(/<add\s+input="\{REQUEST_URI\}"\s+pattern="[^"]*help\/[^"]*"\s+negate="true"\s*\/>/);
+  });
+
   it('keeps X-Content-Type-Options header', () => {
     expect(config).toMatch(/<add\s+name="X-Content-Type-Options"/);
   });

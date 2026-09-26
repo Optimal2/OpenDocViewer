@@ -1,0 +1,243 @@
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Urval – välj sidor som visas och skrivs ut – OpenDocViewer</title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- CSS ligger i body: ODV:s manualfönster behåller bara body-innehållet (en inledande <style> i head försvinner). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Ljuslåda utan skript: bilden länkar till #lb-NAMN och .lb:target visas över hela fönstret. Ett klick var som helst leder till #lb-stang (finns inte) och stänger. OBS: inget mindre-än-tecken i CSS:en, då tömmer ODV:s sanering hela style-blocket. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Inbakade guider längst ned: fälls ut på samma sida */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – fäll ut"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – fäll ihop"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>Urval – välj sidor som visas och skrivs ut</h1>
+  <p class="lead">Med ett <strong>urval</strong> bestämmer du vilka sidor ODV visar och skriver ut. Du börjar alltid med alla sidor och tar bort dem du inte vill ha med. Det är praktiskt när en session innehåller många dokument men du bara behöver några sidor.</p>
+  <p class="small">Den här guiden hör ihop med <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Bilderna visar ett påhittat testdokument. <a href="manual-urval.sv.pdf">Ladda ned guiden som PDF</a>.</p>
+</section>
+<div class="warning"><p><strong>Viktigt:</strong> ett urval döljer sidor i ODV och styr vad som skrivs ut. Originaldokumenten i arkivet påverkas aldrig.</p></div>
+
+<nav class="toc" aria-label="Innehåll">
+  <a href="#oppna">1. Öppna urvalsarbetsytan</a>
+  <a href="#tabort">2. Ta bort sidor</a>
+  <a href="#laggtill">3. Lägg tillbaka sidor</a>
+  <a href="#ordning">4. Ändra ordning</a>
+  <a href="#forhandsvisa">5. Titta närmare på en sida</a>
+  <a href="#spara">6. Spara eller lämna</a>
+  <a href="#aktivt">7. Så ser du att ett urval är aktivt</a>
+  <a href="#skrivut">8. Skriva ut urvalet</a>
+  <a href="#aterstall">9. Ta bort urvalet</a>
+</nav>
+
+<h2 id="oppna">1. Öppna urvalsarbetsytan</h2>
+<p>Klicka på <strong>urvalsknappen</strong> i verktygsfältet – den med en lista och en bock, direkt till höger om skrivarknappen. Urvalsarbetsytan öppnas över hela fönstret.</p>
+<figure class="wide">
+  <a href="#lb-urval-oversikt"><img src="img/urval-oversikt.png" alt="Urvalsarbetsytan med tillgängliga sidor till vänster och valda sidor till höger"></a>
+  <figcaption><strong>Urvalsarbetsytan.</strong> Till vänster alla sidor som finns. Till höger de sidor som ingår i urvalet. En bock på en sida till vänster betyder att den är med.</figcaption>
+</figure>
+<figure class="strip">
+  <a href="#lb-urval-verktygsfalt"><img src="img/urval-verktygsfalt.png" alt="Urvalsarbetsytans verktygsfält"></a>
+  <figcaption><strong>Verktygsfältet i arbetsytan.</strong> Läge (Dokument eller Sidor), panelvisning, miniatyrstorlek, ångra/gör om, återställ, <em>Spara</em> och <em>Lämna</em>.</figcaption>
+</figure>
+<details>
+  <summary>Två lägen: Dokument och Sidor</summary>
+  <ul>
+    <li><strong>Dokument</strong> är förvalt. Sidorna hålls ihop per dokument. Du kan ta bort och lägga till sidor och flytta dem inom sitt dokument.</li>
+    <li><strong>Sidor</strong> släpper grupperingen. Sidor från olika dokument kan blandas i vilken ordning du vill – till exempel inför en utskrift i en viss ordning.</li>
+  </ul>
+</details>
+
+<h2 id="tabort">2. Ta bort sidor</h2>
+<ol class="steps">
+  <li><strong>Markera</strong> de sidor i höger panel som inte ska vara med. Klicka på en sida i taget.</li>
+  <li>Klicka på <strong>Ta bort valda</strong> – pilen <em>‹</em> mitt emellan panelerna. Sidorna tappar sin bock i vänster panel.</li>
+  <li>Vill du ta bort allt och börja från noll: klicka <strong>Ta bort alla</strong> (<em>«</em>).</li>
+</ol>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-urval-markerade"><img src="img/urval-markerade.png" alt="Tre sidor markerade i höger panel"></a>
+    <figcaption><strong>Markerade sidor</strong> får en grå ram.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-borttagna"><img src="img/urval-borttagna.png" alt="Urvalet efter att tre sidor tagits bort"></a>
+    <figcaption><strong>Efter Ta bort valda.</strong> Dokument 1 har nu en sida kvar och räknaren visar 21 valda. Spara-knappen har blivit grön.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Snabbare sätt att markera och ta bort</summary>
+  <ul>
+    <li><kbd>Shift</kbd>+klick markerar alla sidor mellan två klick. <kbd>Ctrl</kbd>+klick lägger till eller tar bort en enskild sida i markeringen.</li>
+    <li>Dra en <strong>rektangel</strong> över flera sidor för att markera dem på en gång.</li>
+    <li><strong>Dubbelklicka</strong> på en sida i vänster panel för att lägga till eller ta bort den direkt.</li>
+    <li>Du behöver inte öppna arbetsytan alls för enstaka sidor: <strong>högerklicka</strong> på en miniatyr eller på sidan i huvudvyn och välj <em>Dölj sidan</em> eller <em>Dölj dokumentet</em>. Tangenten <kbd>Delete</kbd> döljer sidan du tittar på, <kbd>Ctrl</kbd>+<kbd>Delete</kbd> hela dokumentet.</li>
+  </ul>
+  <div class="figure-grid">
+    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr"></a><figcaption><strong>Högerklick på en miniatyr.</strong></figcaption></figure>
+    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="Högerklicksmenyn på sidan i huvudvyn"></a><figcaption><strong>Högerklick på sidan.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="laggtill">3. Lägg tillbaka sidor</h2>
+<p>Ångrade du dig? Markera sidorna i <strong>vänster</strong> panel och klicka <strong>Lägg till valda</strong> (<em>›</em>), eller <strong>Lägg till alla</strong> (<em>»</em>) för att få tillbaka allt. Knapparna <em>Ångra</em> och <em>Gör om</em> i verktygsfältet tar tillbaka ett steg i taget.</p>
+
+<h2 id="ordning">4. Ändra ordning</h2>
+<p>Dra en sida i höger panel till en ny plats. I läget <em>Dokument</em> kan du flytta sidor inom sitt dokument; i läget <em>Sidor</em> kan du blanda fritt. Ordningen i urvalet blir ordningen på utskriften.</p>
+
+<h2 id="forhandsvisa">5. Titta närmare på en sida</h2>
+<p>Håll muspekaren över en sida och klicka på <strong>ögat</strong>. Sidan visas stor, med pilar för att bläddra till nästa. Grön kant betyder att sidan ingår i urvalet, och knappen högst upp lägger till eller tar bort sidan direkt. <kbd>Esc</kbd> stänger.</p>
+<figure class="wide">
+  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Förhandsvisning av en sida i urvalsarbetsytan"></a>
+  <figcaption><strong>Förhandsvisning.</strong> Uppe till vänster syns sidans plats, dokument och metadata.</figcaption>
+</figure>
+
+<h2 id="spara">6. Spara eller lämna</h2>
+<p>Knappen <strong>Spara</strong> blir grön så snart du ändrat något. Klicka på den när du är klar, och sedan på <strong>Lämna</strong> för att komma tillbaka till dokumentet. Lämnar du utan att spara får du en fråga.</p>
+<div class="figure-grid">
+  <figure class="strip">
+    <a href="#lb-urval-verktygsfalt-osparat"><img src="img/urval-verktygsfalt-osparat.png" alt="Verktygsfältet med osparade ändringar"></a>
+    <figcaption><strong>Osparade ändringar.</strong> Grön knapp sparar, orange knapp kastar ändringarna.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="Dialogen Osparade ändringar"></a>
+    <figcaption><strong>Lämna utan att ha sparat.</strong> Spara, kasta, eller fortsätt redigera.</figcaption>
+  </figure>
+</div>
+
+<h2 id="aktivt">7. Så ser du att ett urval är aktivt</h2>
+<p>Tillbaka i dokumentet är <strong>urvalsknappen röd</strong>, sidräknaren räknar bara urvalets sidor, och miniatyrpanelen visar bara de sidor som är med. Högst upp i panelen finns en <strong>röd återställningsknapp</strong>.</p>
+<figure class="wide">
+  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="Huvudvyn med aktivt urval: röd urvalsknapp och färre miniatyrer"></a>
+  <figcaption><strong>Aktivt urval.</strong> Sidräknaren visar 1 / 21, urvalsknappen är röd, panelen visar bara urvalet.</figcaption>
+</figure>
+
+<h2 id="skrivut">8. Skriva ut urvalet</h2>
+<p>Öppna utskriften med skrivarknappen och välj <strong>Alla sidor</strong>. När ett urval är aktivt får du välja mellan <strong>Aktuellt urval</strong> – bara sidorna i urvalet, förvalt – och <strong>Hela sessionen</strong>, som skriver ut allt och struntar i urvalet.</p>
+<figure class="print">
+  <a href="#lb-utskrift-alla-sidor-urval"><img src="img/utskrift-alla-sidor-urval.png" alt="Utskriftsdialogen med Alla sidor och valet Aktuellt urval"></a>
+  <figcaption><strong>Alla sidor med urval.</strong> <em>Aktuellt urval (21 sidor)</em> är förvalt.</figcaption>
+</figure>
+<p class="small">Valen <em>Enkelt intervall</em> och <em>Anpassade sidor</em> finns inte när ett urval är aktivt – då styr urvalet vad som skrivs ut. Resten av utskriften (orsak, mottagare, vattenstämpel) fungerar som i <a href="manual.sv.html#utskrift">Kom igång-guiden</a>.</p>
+<div class="tip"><p><strong>Bra att veta:</strong> utskrift av ett urval tar med sidorna som de är i arkivet. Har du roterat en sida eller ändrat ljusstyrka och kontrast följer det inte med här – det gör det bara med utskriftsmetoden <em>Aktiv sida</em>.</p></div>
+
+<h2 id="aterstall">9. Ta bort urvalet</h2>
+<p>Klicka på den <strong>röda knappen högst upp i miniatyrpanelen</strong>. Alla sidor kommer tillbaka. Du kan också öppna arbetsytan, välja <em>Lägg till alla</em>, <em>Spara</em> och <em>Lämna</em>.</p>
+<figure class="menu">
+  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="Miniatyrpanelen med den röda återställningsknappen"></a>
+  <figcaption><strong>Återställningsknappen</strong> uppe till höger i panelen.</figcaption>
+</figure>
+
+<h3>Kort kontrollista</h3>
+<ul class="checklist">
+  <li>Grön Spara-knapp betyder att du har osparade ändringar.</li>
+  <li>Röd urvalsknapp i verktygsfältet betyder att sidor är dolda.</li>
+  <li><em>Aktuellt urval</em> skriver ut det du valt, <em>Hela sessionen</em> skriver ut allt.</li>
+</ul>
+<p class="small">Tillbaka till <a href="manual.sv.html">Kom igång med OpenDocViewer</a>. Guiden gäller OpenDocViewer 2.8. Uppdaterad 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-urval-oversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-oversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-verktygsfalt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-markerade"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-markerade.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-borttagna"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-borttagna.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/miniatyr-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-sida-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/sida-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-forhandsvisning"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-forhandsvisning.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt-osparat"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-verktygsfalt-osparat.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-lamna-dialog"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-lamna-dialog.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-huvudvy-efter-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/huvudvy-efter-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-alla-sidor-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-alla-sidor-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-panel-efter-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/panel-efter-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>

@@ -1,116 +1,645 @@
-<h1>OpenDocViewer manual</h1>
-<p>OpenDocViewer används för att öppna, granska, jämföra, välja och skriva ut dokument i en webbläsare. Manualen beskriver standardfunktionerna. En installation kan ha egna fält, egna utskriftsorsaker, egna hjälptexter och egna regler.</p>
+<!doctype html>
+<html lang="sv">
+<head>
+<meta charset="utf-8">
+<title>Kom igång med OpenDocViewer </title>
+</head>
+<body>
+<div class="odv-manual" id="top">
+<!-- CSS ligger i body: ODV:s manualfönster behåller bara body-innehållet (en inledande <style> i head försvinner). -->
+<style>
+.odv-manual {
+  --manual-text: var(--odv-text, #1f2933);
+  --manual-heading: var(--odv-text-strong, #111827);
+  --manual-muted: var(--odv-muted-text, #5f6b7a);
+  --manual-border: var(--odv-border, #d7dde6);
+  --manual-surface: var(--odv-surface, #ffffff);
+  --manual-soft: var(--odv-surface-elevated, #f7f9fc);
+  --manual-blue: var(--thumbnail-primary-color, #1f6fd1);
+  --manual-orange: var(--thumbnail-compare-color, #b25d00);
+  --manual-warning: #fff7e6;
+  --manual-tip: #eef8f0;
+  color: var(--manual-text); font-size: 15px; line-height: 1.7; max-width: 900px; margin: 0 auto; padding: 0 0.1rem 2rem;
+}
+.odv-manual * { box-sizing: border-box; }
+.odv-manual h1, .odv-manual h2, .odv-manual h3 { color: var(--manual-heading); line-height: 1.25; }
+.odv-manual h1 { margin: 0 0 0.5rem; font-size: clamp(1.8rem, 3.5vw, 2.4rem); }
+.odv-manual h2 { margin: 3rem 0 0.9rem; padding-top: 1rem; border-top: 1px solid var(--manual-border); font-size: clamp(1.3rem, 2.5vw, 1.6rem); }
+.odv-manual h3 { margin: 1.6rem 0 0.5rem; font-size: 1.1rem; }
+.odv-manual p { margin: 0.5rem 0 1rem; max-width: 72ch; }
+.odv-manual ul, .odv-manual ol { margin: 0.5rem 0 1.1rem 1.4rem; padding: 0; max-width: 72ch; }
+.odv-manual li { margin: 0.35rem 0; }
+.odv-manual a { color: var(--manual-blue); text-underline-offset: 2px; }
+.odv-manual kbd { display: inline-block; padding: 0.05rem 0.4rem; border: 1px solid #aeb8c7; border-bottom-width: 2px; border-radius: 0.35rem; background: #f4f6fa; font-family: ui-monospace, Consolas, monospace; font-size: 0.9em; white-space: nowrap; }
+.odv-manual .lead { font-size: 1.08rem; }
+.odv-manual .small { color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual .hero, .odv-manual .tip, .odv-manual .warning { border: 1px solid var(--manual-border); border-radius: 14px; padding: 1rem 1.2rem; background: var(--manual-soft); margin: 0 0 1.2rem; }
+.odv-manual .tip { background: var(--manual-tip); }
+.odv-manual .warning { background: var(--manual-warning); }
+.odv-manual .hero p:last-child, .odv-manual .tip p:last-child, .odv-manual .warning p:last-child { margin-bottom: 0; }
+.odv-manual .toc { display: grid; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); gap: 0.5rem; margin: 0.8rem 0 1.4rem; }
+.odv-manual .toc a { display: block; padding: 0.6rem 0.75rem; border: 1px solid var(--manual-border); border-radius: 10px; background: var(--manual-surface); text-decoration: none; font-weight: 650; }
+.odv-manual .toc a:hover { border-color: var(--manual-blue); }
+.odv-manual .steps { list-style: none; margin-left: 0; counter-reset: steg; }
+.odv-manual .steps li { position: relative; padding-left: 2.4rem; margin: 0.7rem 0; counter-increment: steg; }
+.odv-manual .steps li::before { content: counter(steg); position: absolute; left: 0; top: 0.05rem; width: 1.7rem; height: 1.7rem; border-radius: 50%; background: var(--manual-blue); color: #fff; font-weight: 700; text-align: center; line-height: 1.7rem; font-size: 0.9rem; }
+.odv-manual figure { margin: 1.1rem 0 1.4rem; padding: 0.7rem; border: 1px solid var(--manual-border); border-radius: 14px; background: var(--manual-surface); box-shadow: 0 1px 2px rgba(15, 23, 42, 0.06); }
+.odv-manual figure a { display: block; cursor: zoom-in; }
+.odv-manual figure img { display: block; width: 100%; max-width: 100%; height: auto; margin: 0 auto; border: 1px solid var(--manual-border); border-radius: 9px; background: #fff; }
+.odv-manual figure.compact img { width: auto; max-height: 265px; }
+.odv-manual figure.tiny img { width: auto; max-height: 130px; }
+.odv-manual figure.menu img { width: auto; max-height: 430px; }
+.odv-manual figure.wide img { max-height: 560px; object-fit: contain; }
+.odv-manual figure.print img { max-height: 650px; object-fit: contain; }
+.odv-manual figure.strip img { max-height: 70px; width: auto; }
+.odv-manual figcaption { margin-top: 0.55rem; color: var(--manual-muted); font-size: 0.92em; }
+.odv-manual figcaption strong { color: var(--manual-heading); }
+.odv-manual .figure-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; align-items: start; margin: 0.9rem 0; }
+.odv-manual .figure-grid.narrow { grid-template-columns: repeat(auto-fit, minmax(155px, 1fr)); }
+.odv-manual .figure-grid figure { margin: 0; height: 100%; }
+.odv-manual .badge-row { display: flex; flex-wrap: wrap; gap: 0.45rem; margin: 0.5rem 0 1rem; }
+.odv-manual .badge { display: inline-block; border: 1px solid var(--manual-border); border-radius: 999px; padding: 0.15rem 0.6rem; background: var(--manual-surface); font-weight: 650; font-size: 0.9rem; }
+.odv-manual .blue { color: var(--manual-blue); font-weight: 700; }
+.odv-manual .orange { color: var(--manual-orange); font-weight: 700; }
+.odv-manual .checklist { list-style: none; margin-left: 0; }
+.odv-manual .checklist li { position: relative; padding-left: 1.4rem; }
+.odv-manual .checklist li::before { content: "✓"; position: absolute; left: 0; color: var(--manual-blue); font-weight: 800; }
+.odv-manual details { margin: 0.9rem 0 1.2rem; border: 1px dashed var(--manual-border); border-radius: 12px; background: var(--manual-surface); }
+.odv-manual details > summary { cursor: pointer; padding: 0.7rem 1rem; font-weight: 650; color: var(--manual-blue); list-style: none; }
+.odv-manual details > summary::-webkit-details-marker { display: none; }
+.odv-manual details > summary::before { content: "▸ "; }
+.odv-manual details[open] > summary::before { content: "▾ "; }
+.odv-manual details[open] > summary { border-bottom: 1px dashed var(--manual-border); }
+.odv-manual details > :not(summary) { margin-left: 1rem; margin-right: 1rem; }
+.odv-manual details > :nth-child(2) { margin-top: 0.8rem; }
+.odv-manual details > :last-child { margin-bottom: 0.9rem; }
+.odv-manual .guides { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 0.8rem; margin: 1rem 0 1.4rem; }
+.odv-manual .guides a { display: block; padding: 0.9rem 1rem; border: 1px solid var(--manual-border); border-radius: 12px; background: var(--manual-surface); text-decoration: none; color: var(--manual-text); }
+.odv-manual .guides a strong { display: block; color: var(--manual-blue); margin-bottom: 0.2rem; }
+.odv-manual .guides a:hover { border-color: var(--manual-blue); }
+.odv-manual table { width: 100%; border-collapse: collapse; margin: 0.8rem 0 1.2rem; font-size: 0.95em; }
+.odv-manual th, .odv-manual td { border: 1px solid var(--manual-border); padding: 0.5rem 0.6rem; vertical-align: top; }
+.odv-manual th { background: var(--manual-soft); text-align: left; }
+/* Ljuslåda utan skript: bilden länkar till #lb-NAMN och .lb:target visas över hela fönstret. Ett klick var som helst leder till #lb-stang (finns inte) och stänger. OBS: inget mindre-än-tecken i CSS:en, då tömmer ODV:s sanering hela style-blocket. */
+.odv-manual .lb { display: none; position: fixed; inset: 0; z-index: 2147483000; background: rgba(15, 23, 42, 0.88); }
+.odv-manual .lb:target { display: block; }
+.odv-manual .lb > a { position: absolute; inset: 0; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 1.5rem; cursor: zoom-out; text-decoration: none; color: #e5e7eb; }
+.odv-manual .lb img { display: block; max-width: 100%; max-height: calc(100vh - 5.5rem); width: auto; height: auto; border-radius: 8px; background: #fff; box-shadow: 0 12px 40px rgba(0, 0, 0, 0.5); }
+.odv-manual .lb span { margin-top: 0.7rem; font-size: 0.9rem; }
+/* Inbakade guider längst ned: fälls ut på samma sida */
+.odv-manual details.embedded { border-style: solid; border-width: 2px; border-color: var(--manual-blue); }
+.odv-manual details.embedded > summary { font-size: 1.15rem; padding: 0.9rem 1.1rem; }
+.odv-manual details.embedded > summary::after { content: " – fäll ut"; font-weight: 400; color: var(--manual-muted); font-size: 0.85em; }
+.odv-manual details.embedded[open] > summary::after { content: " – fäll ihop"; }
+.odv-manual details.embedded .hero { display: none; }
+.odv-manual .anchor { display: block; height: 0; scroll-margin-top: 4.5rem; }
+@media print { .odv-manual .lb { display: none !important; } }
+@media (max-width: 720px) {
+  .odv-manual { font-size: 14px; }
+  .odv-manual .toc { grid-template-columns: 1fr; }
+  .odv-manual figure { padding: 0.45rem; }
+  .odv-manual table { display: block; overflow-x: auto; }
+}
+</style>
+<section class="hero">
+  <h1>Kom igång med OpenDocViewer</h1>
+  <p class="lead">OpenDocViewer (ODV) är fönstret där du läser dokument när du öppnar dem från din organisations portal eller arkivsystem. Den här guiden visar det du behöver till vardags: hitta rätt sida, zooma, och skriva ut. Den tar några minuter att läsa.</p>
+  <p class="small">Vill du göra mer – välja ut sidor, jämföra två sidor, eller se alla kortkommandon – finns det i två guider till, som du kan fälla ut längst ned på den här sidan. Bilderna visar ett påhittat testdokument utan riktiga uppgifter. Klicka på en bild för att se den större – klicka igen för att stänga. <a href="manual.sv.pdf">Ladda ned guiden som PDF</a>.</p>
+</section>
 
-<h2>Grundläggande arbetssätt</h2>
-<ol>
-  <li>Vänta tills dokumenten har laddats klart. Utskrift och vissa dokumentåtgärder är inaktiva medan laddningen pågår.</li>
-  <li>Använd sidlistan med miniatyrer för att hoppa mellan sidor.</li>
-  <li>Använd verktygsfältet för zoom, passning, rotation, jämförelse, urval, metadata och utskrift.</li>
-  <li>Kontrollera alltid att rätt dokument och rätt sidor är valda innan du skriver ut eller sparar PDF.</li>
+<nav class="toc" aria-label="Innehåll">
+  <a href="#utseende">1. Så här ser det ut</a>
+  <a href="#laddning">2. Vänta tills allt är laddat</a>
+  <a href="#sida">3. Hitta rätt sida</a>
+  <a href="#zoom">4. Zooma och anpassa</a>
+  <a href="#bild">5. Rotera, ljusare eller mörkare</a>
+  <a href="#miniatyrer">6. Miniatyrpanelen</a>
+  <a href="#utskrift">7. Skriva ut</a>
+  <a href="#installningar">8. Tema, språk och hjälp</a>
+  <a href="#problem">9. Om något går fel</a>
+  <a href="#mer">10. Vill du veta mer?</a>
+</nav>
+
+<h2 id="utseende">1. Så här ser det ut</h2>
+<p>ODV har tre delar: <strong>verktygsfältet</strong> överst, <strong>miniatyrpanelen</strong> till vänster och <strong>dokumentet</strong> i mitten. Sidan du tittar på har en blå ram.</p>
+<figure class="wide">
+  <a href="#lb-oversikt"><img src="img/oversikt.png" alt="OpenDocViewer med verktygsfält överst, miniatyrer till vänster och dokumentet i mitten"></a>
+  <figcaption><strong>Översikt.</strong> Verktygsfältet överst, miniatyrerna till vänster, dokumentet i mitten.</figcaption>
+</figure>
+<p>Tre ord som återkommer: ett <strong>dokument</strong> är en handling med en eller flera sidor. En <strong>session</strong> är alla dokument du öppnade tillsammans från portalen eller arkivsystemet. Miniatyrerna grupperas per dokument (<em>DOK 1</em>, <em>DOK 2</em> …).</p>
+<details>
+  <summary>Tillbaka till portalen</summary>
+  <p>ODV öppnas från ett annat system – en portal, ett arkiv eller ett verksamhetssystem. Du kommer tillbaka dit med det systemets egna knappar eller genom att stänga fliken med ODV. Hur det ser ut beror på din organisation.</p>
+</details>
+
+<h2 id="laddning">2. Vänta tills allt är laddat</h2>
+<p>När du öppnat dokumenten hämtar ODV sidorna. Under tiden är sidräknaren randig och knapparna för utskrift och urval är gråa. När randningen försvinner är allt klart.</p>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-laddar"><img src="img/verktygsfalt-laddar.png" alt="Verktygsfältet medan sidor laddas, med randig sidräknare"></a>
+    <figcaption><strong>Laddar.</strong> Randig sidräknare, gråa knappar – vänta.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-redo"><img src="img/verktygsfalt-redo.png" alt="Verktygsfältet när allt är laddat"></a>
+    <figcaption><strong>Klart.</strong> Sidräknaren är lugn och alla knappar går att använda.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Varför lyser inte lampan vid skrivarknappen?</summary>
+  <p>Den lilla lampan vid skrivarknappen hör till en snabbutskriftsfunktion som din organisation kan ha stängt av. Är den släckt är det normalt. Lampan på <em>hjälpknappen</em> till höger visar däremot hur ODV mår: grön är bra, gul betyder att datorn har lite minne, röd betyder fel.</p>
+</details>
+
+<h2 id="sida">3. Hitta rätt sida</h2>
+<p>Det finns fyra enkla sätt, och du kan blanda dem som du vill.</p>
+<ol class="steps">
+  <li><strong>Pilknapparna</strong> i verktygsfältet: första, föregående, nästa och sista sidan.</li>
+  <li><strong>Skriv sidnumret</strong> i rutan mellan pilarna och tryck <kbd>Enter</kbd>.</li>
+  <li><strong>Klicka på en miniatyr</strong> i vänsterpanelen.</li>
+  <li><strong>Rulla med mushjulet.</strong> När du nått sidans underkant och fortsätter rulla fylls en liten mätare – och nästa sida visas. Samma sak uppåt.</li>
 </ol>
+<details>
+  <summary>Fler sätt att bläddra</summary>
+  <ul>
+    <li><kbd>Pil ned</kbd> / <kbd>Pil upp</kbd> eller <kbd>Page Down</kbd> / <kbd>Page Up</kbd> byter sida. Håll inne för att bläddra snabbt.</li>
+    <li><kbd>Home</kbd> och <kbd>End</kbd> går till första respektive sista sidan.</li>
+    <li>Håll inne <em>föregående</em>- eller <em>nästa</em>-knappen i verktygsfältet för att bläddra snabbt.</li>
+    <li>Håll <kbd>Ctrl</kbd> nedtryckt så hoppar pilknapparna ett helt <em>dokument</em> i stället för en sida. Du ser det på att sidnavigeringen får en streckad ram.</li>
+  </ul>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-ctrl"><img src="img/verktygsfalt-ctrl.png" alt="Verktygsfältet med Ctrl nedtryckt och streckad ram runt sidnavigeringen"></a>
+    <figcaption><strong>Ctrl nedtryckt.</strong> Streckad ram = pilarna byter dokument, inte sida.</figcaption>
+  </figure>
+</details>
 
-<h2>Navigering</h2>
-<p>Du kan byta sida med verktygsfältets sidkontroller, miniatyrerna, musens rullhjul och tangentbordet. Sidräknaren visar aktuell sida i den laddade sessionen.</p>
+<h2 id="zoom">4. Zooma och anpassa</h2>
+<p>Knapparna för zoom sitter i mitten av verktygsfältet.</p>
 <ul>
-  <li><strong>Föregående/nästa sida:</strong> använd pilknapparna i verktygsfältet, pil upp/pil ned eller Page Up/Page Down.</li>
-  <li><strong>Navigering per dokument:</strong> håll ned Ctrl med sidnavigeringstangenterna när flera dokument är laddade.</li>
-  <li><strong>Home/End:</strong> kan användas för att gå till början eller slutet om webbläsaren ger fokus till visningsytan.</li>
-  <li><strong>Miniatyrer:</strong> klicka på en miniatyr för att öppna motsvarande sida.</li>
+  <li><strong>Förstoringsglasen</strong> zoomar ut och in. Du kan också skriva ett procenttal i rutan mellan dem.</li>
+  <li><strong>1:1</strong> visar sidan i verklig storlek.</li>
+  <li><strong>Anpassa till skärm</strong> visar hela sidan på en gång.</li>
+  <li><strong>Anpassa till bredd</strong> fyller ut bredden – det passar de flesta dokument. Knappen är röd när den är vald.</li>
 </ul>
-<p>Tangentbordsgenvägar ignoreras i textfält, listor och andra inmatningsfält så att du kan skriva utan att råka styra visaren.</p>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="Vänstra delen av verktygsfältet med skrivare, urval, sidnavigering och zoomknappar"></a>
+  <figcaption><strong>Vänstra delen av verktygsfältet.</strong> Från vänster: skrivare, urval, sidnavigering, zoom ut/in, 1:1, anpassa till skärm och anpassa till bredd (röd = vald).</figcaption>
+</figure>
+<details>
+  <summary>Fler sätt att zooma</summary>
+  <ul>
+    <li><kbd>+</kbd> och <kbd>-</kbd> på tangentbordet zoomar in och ut.</li>
+    <li>Knappen <strong>1:X</strong> visar sidan i en storlek du själv bestämt, och <strong>HQ</strong> gör en PDF-sida ännu skarpare. Båda beskrivs i guiden <a href="#guide-fler-start">Fler funktioner</a> längst ned på sidan.</li>
+  </ul>
+</details>
 
-<h2>Zoom och visning</h2>
-<p>Verktygsfältet innehåller vanliga zoom- och passningslägen. Exakta namn kan skilja något mellan installationer.</p>
+<h2 id="bild">5. Rotera, ljusare eller mörkare</h2>
+<p>Ligger sidan på sned, eller är en skannad sida för mörk eller blek? Knapparna till höger i verktygsfältet hjälper dig.</p>
 <ul>
-  <li><strong>Anpassa till sida:</strong> visar hela sidan i tillgängligt utrymme.</li>
-  <li><strong>Anpassa till bredd:</strong> gör sidan lika bred som visningsytan.</li>
-  <li><strong>Faktisk storlek:</strong> visar sidan utan passningsskalning.</li>
-  <li><strong>Zooma in/ut:</strong> ändrar visningsskalan stegvis.</li>
+  <li><strong>Rotera</strong> vrider sidan ett kvarts varv åt vänster eller höger.</li>
+  <li><strong>Ljusstyrka</strong> och <strong>kontrast</strong> öppnar var sitt reglage. Dra i det, eller klicka på skalan.</li>
+  <li><strong>Återställ</strong> bredvid reglagen tar tillbaka ljusstyrka och kontrast till normalläget.</li>
 </ul>
-<p>Zoom påverkar hur sidan visas i OpenDocViewer. Normal utskrift bygger på utskriftsflödet, inte på exakt aktuell zoomnivå.</p>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="Högra delen av verktygsfältet med rotera, ljusstyrka, kontrast och återställ"></a>
+  <figcaption><strong>Högra delen av verktygsfältet.</strong> Här finns rotera vänster/höger, ljusstyrka, kontrast och återställ.</figcaption>
+</figure>
+<div class="figure-grid narrow">
+  <figure class="compact">
+    <a href="#lb-ljusstyrka"><img src="img/ljusstyrka.png" alt="Reglaget för ljusstyrka"></a>
+    <figcaption><strong>Ljusstyrka.</strong></figcaption>
+  </figure>
+  <figure class="compact">
+    <a href="#lb-kontrast"><img src="img/kontrast.png" alt="Reglaget för kontrast"></a>
+    <figcaption><strong>Kontrast.</strong></figcaption>
+  </figure>
+</div>
+<div class="warning">
+  <p><strong>Ändringarna är tillfälliga.</strong> Rotation, ljusstyrka och kontrast ändrar bara hur sidan visas för dig just nu. Ingenting sparas i arkivet, och nästa gång dokumentet öppnas ser det ut som vanligt igen.</p>
+  <p><strong>På utskriften</strong> kommer ändringarna med <em>bara</em> om du väljer utskriftsmetoden <strong>Aktiv sida</strong> – det gäller både när du tittar på en sida och när du jämför två. Alla andra utskriftsmetoder (Alla sidor, Enkelt intervall, Anpassade sidor och utskrift av ett urval) skriver ut sidorna som de är i arkivet, utan dina ändringar.</p>
+</div>
+<details>
+  <summary>Rotera med tangentbordet</summary>
+  <p><kbd>Ctrl</kbd>+<kbd>Pil vänster</kbd> och <kbd>Ctrl</kbd>+<kbd>Pil höger</kbd> roterar sidan ett kvarts varv, precis som knapparna.</p>
+</details>
 
-<h2>Miniatyrer och sidlista</h2>
-<p>Miniatyrpanelen visar sidorna i sessionen. Om flera dokument ingår kan sidlistan visa dokumentgränser eller dokumentinformation beroende på installationens konfiguration.</p>
+<h2 id="miniatyrer">6. Miniatyrpanelen</h2>
+<p>Panelen till vänster visar alla sidor som små bilder, ordnade per dokument. Klicka på en miniatyr för att gå dit. Knapparna överst i panelen gör den bredare eller smalare, och det överstrukna ögat döljer den helt.</p>
+<figure class="tiny">
+  <a href="#lb-panelkontroller"><img src="img/panelkontroller.png" alt="Knapparna överst i miniatyrpanelen"></a>
+  <figcaption><strong>Panelens knappar.</strong> Pilarna ändrar bredden, mittknappen återställer den, ögat döljer panelen.</figcaption>
+</figure>
+<p>Varje miniatyr har små märken i hörnen:</p>
+<div class="badge-row">
+  <span class="badge">T – sidans plats i hela sessionen</span>
+  <span class="badge">D – dokumentets nummer</span>
+  <span class="badge">S – sidans nummer i dokumentet</span>
+</div>
+<details>
+  <summary>Högerklick på en miniatyr</summary>
+  <p>Högerklickar du på en miniatyr får du en liten meny: visa dokumentets <em>metadata</em> (till exempel id, avdelning och datum – vilka uppgifter som finns beror på systemet som öppnade dokumenten), <em>dölja</em> sidan eller hela dokumentet, eller visa sidan till höger i jämförelseläget. Att dölja sidor kallas <em>urval</em> och har en egen guide: <a href="#guide-urval-start">Urval – välj sidor som visas och skrivs ut</a>.</p>
+  <figure class="menu">
+    <a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr"></a>
+    <figcaption><strong>Högerklicksmenyn.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="utskrift">7. Skriva ut</h2>
+<p>Så här skriver du ut den sida du tittar på, eller alla sidor.</p>
+<ol class="steps">
+  <li>Klicka på <strong>skrivarknappen</strong> längst till vänster i verktygsfältet (eller tryck <kbd>Ctrl</kbd>+<kbd>P</kbd>).</li>
+  <li>Välj <strong>Aktiv sida</strong> eller <strong>Alla sidor</strong> under <em>Utskriftsmetod</em>. Har du roterat sidan eller ändrat ljus och kontrast? Då är det bara <em>Aktiv sida</em> som tar med det på papperet.</li>
+  <li>Fyll i <strong>Orsak</strong> och <em>Mottagare</em> om dialogen frågar efter dem. Vilka fält som finns, och vilka som är obligatoriska, bestämmer din organisation.</li>
+  <li>Finns valet <strong>vattenstämpel</strong> (till exempel KOPIA): låt det vara ikryssat om utskriften inte är ett original.</li>
+  <li>Klicka på <strong>Skriv ut</strong>. ODV förbereder sidorna och öppnar sedan webbläsarens utskriftsfönster, där du väljer skrivare som vanligt.</li>
+</ol>
+<div class="figure-grid">
+  <figure class="print">
+    <a href="#lb-utskrift-aktiv-sida"><img src="img/utskrift-aktiv-sida.png" alt="Utskriftsdialogen med Aktiv sida vald"></a>
+    <figcaption><strong>Utskriftsdialogen.</strong> Metod överst, sedan uppgifterna.</figcaption>
+  </figure>
+  <figure class="print">
+    <a href="#lb-utskrift-uppgifter"><img src="img/utskrift-uppgifter.png" alt="Utskriftsuppgifter med orsak och mottagare ifyllda"></a>
+    <figcaption><strong>Utskriftsuppgifter.</strong> Här: orsak och mottagare. Fälten kan se annorlunda ut hos dig.</figcaption>
+  </figure>
+</div>
+<figure class="wide">
+  <a href="#lb-utskrift-forbereds"><img src="img/utskrift-forbereds.png" alt="Rutan Förbereder utskrift med förloppsindikator"></a>
+  <figcaption><strong>Förbereder utskrift.</strong> Vänta tills det är klart – utskriftsfönstret öppnas av sig självt. <em>Avbryt</em> stoppar.</figcaption>
+</figure>
+<div class="tip"><p><strong>Aktiv sida</strong> skriver ut sidan precis som du ser den – med rotation, ljusstyrka och kontrast om du ändrat dem. <strong>Alla sidor</strong> och de andra metoderna skriver ut sidorna som de är i arkivet, utan sådana ändringar.</p></div>
+<p>Utskriften kan automatiskt få ett sidhuvud och en sidfot med uppgifter som din organisation valt – till exempel datum, användare, dokument-id, orsak och sidnummer – och en vattenstämpel om du lät den vara ikryssad.</p>
+<figure class="print">
+  <a href="#lb-utskrift-resultat"><img src="img/utskrift-resultat.png" alt="Exempel på utskriven sida med sidhuvud, KOPIA-vattenstämpel och sidfot"></a>
+  <figcaption><strong>Exempel på en utskrift.</strong> Sidhuvud, sidfot och vattenstämpel ställs in av din organisation.</figcaption>
+</figure>
+<details>
+  <summary>Fler utskriftsval</summary>
+  <ul>
+    <li><strong>Pilen bredvid skrivarknappen</strong> bestämmer om dialogen ska öppnas med <em>Aktiv sida</em> eller <em>Alla sidor</em> förvalt. ODV kommer ihåg ditt val.</li>
+    <li><strong>Enkelt intervall</strong> skriver ut från en sida till en annan, till exempel 2–10. <strong>Anpassade sidor</strong> tar en lista, till exempel <em>1-3, 7, 9-5</em>. Ordningen du skriver är ordningen de skrivs ut i.</li>
+    <li><strong>Automatisk sidorientering</strong> låter ODV välja stående eller liggande per sida. Kryssa ur om allt ska vara stående.</li>
+    <li><strong>Fortsätt jobba</strong> flyttar förberedelserutan längst ned så att du kan läsa vidare. När den är klar klickar du <em>Öppna utskrift</em>.</li>
+    <li>Efter din första utskrift visas knappen <strong>Återanvänd senaste utskriftsval</strong> uppe till höger i dialogen. Den fyller i samma val som förra gången.</li>
+    <li>Vill du skriva ut bara vissa sidor ur flera dokument? Då gör du ett <em>urval</em> först – se guiden <a href="#guide-urval-start">Urval</a> längst ned på sidan.</li>
+  </ul>
+  <figure class="compact">
+    <a href="#lb-utskriftsstandard"><img src="img/utskriftsstandard.png" alt="Menyn under pilen bredvid skrivarknappen"></a>
+    <figcaption><strong>Pilen bredvid skrivarknappen.</strong> Sätter förvalet.</figcaption>
+  </figure>
+</details>
+
+<h2 id="installningar">8. Tema, språk och hjälp</h2>
+<p>Längst till höger i verktygsfältet finns tre menyer. <strong>Tema</strong> väljer ljust eller mörkt utseende, <strong>Språk</strong> växlar mellan svenska och engelska, och <strong>Hjälp</strong> öppnar den här guiden. ODV kommer ihåg dina val till nästa gång.</p>
+<div class="figure-grid narrow">
+  <figure class="compact"><a href="#lb-tema"><img src="img/tema.png" alt="Temamenyn"></a><figcaption><strong>Tema.</strong></figcaption></figure>
+  <figure class="compact"><a href="#lb-sprak"><img src="img/sprak.png" alt="Språkmenyn"></a><figcaption><strong>Språk.</strong></figcaption></figure>
+  <figure class="compact"><a href="#lb-hjalp"><img src="img/hjalp.png" alt="Hjälpmenyn"></a><figcaption><strong>Hjälp.</strong> Guiden och <em>Om OpenDocViewer</em>.</figcaption></figure>
+</div>
+
+<h2 id="problem">9. Om något går fel</h2>
+<h3>Sidorna visas som varningstrianglar</h3>
+<p>Dokumentlänkarna från portalen eller arkivsystemet kan gälla en begränsad tid. Har du haft ODV öppet länge kan sidorna sluta visas och en ruta dyker upp högst upp. Klicka på <strong>Starta om sessionen</strong> så hämtas dokumenten på nytt. Du behöver inte ladda om webbläsaren.</p>
+<figure class="wide">
+  <a href="#lb-problemnotis-ruta"><img src="img/problemnotis-ruta.png" alt="Rutan Dokumenten kunde inte visas korrekt med knappen Starta om sessionen"></a>
+  <figcaption><strong>Klicka på Starta om sessionen.</strong></figcaption>
+</figure>
+<h3>Andra vanliga situationer</h3>
 <ul>
-  <li>Markera en sida genom att klicka på miniatyren.</li>
-  <li>Använd miniatyrerna för snabb översikt över längre sessioner.</li>
-  <li>Vid mycket stora sessioner kan vissa miniatyrer laddas först när de behövs.</li>
+  <li><strong>Skrivarknappen är grå.</strong> Sidorna laddas fortfarande – vänta tills sidräknaren slutat vara randig.</li>
+  <li><strong>Sidor saknas i miniatyrpanelen.</strong> Ett urval är aktivt (urvalsknappen i verktygsfältet är röd). Klicka på den röda knappen högst upp i panelen för att visa alla sidor igen.</li>
+  <li><strong>Sidan är suddig.</strong> Är det en PDF-sida kan knappen <strong>HQ</strong> göra den skarpare. Skannade sidor visas redan så skarpa som de är.</li>
 </ul>
+<details>
+  <summary>Om du behöver kontakta support</summary>
+  <p>Kontakta din lokala support, som vanligt i din organisation. Öppna hjälpmenyn och välj <em>Om OpenDocViewer</em>. Där står versionen, och under <em>Diagnostik</em> kan du ladda ned en fil att bifoga i ärendet. Filen innehåller tekniska uppgifter om ODV – inga dokument. Visas rutan om utgången session kan du fälla ut <em>Tekniska detaljer</em> där också. Mer om detta i <a href="#guide-fler-start">Fler funktioner</a>.</p>
+</details>
 
-<h2>Dokument och metadata</h2>
-<p>OpenDocViewer kan visa metadata från de dokument som ingår i sessionen. Exempel kan vara patient-id, namn, enhet, dokumentdatum, sidantal eller dokument-id. Vilka metadata som finns beror på systemet som öppnar OpenDocViewer.</p>
+<h2 id="mer">10. Vill du veta mer?</h2>
+<p>Det här var det vardagliga. Två guider till tar upp resten. Fäll ut dem här nedanför – de öppnas på samma sida – eller hämta dem som egna dokument.</p>
+<div class="guides">
+  <a href="manual-urval.sv.pdf"><strong>Urval – som PDF</strong>Välj sidor som visas och skrivs ut. Öppnas som eget dokument.</a>
+  <a href="manual-avancerat.sv.pdf"><strong>Fler funktioner – som PDF</strong>Jämförelse, metadata, skarpare PDF-sidor, kortkommandon med mera. Öppnas som eget dokument.</a>
+</div>
+<details class="embedded" id="guide-urval">
+  <summary id="guide-urval-rubrik">Urval – välj sidor som visas och skrivs ut</summary>
+  <span class="anchor" id="guide-urval-start"></span>
+  <!-- EMBED-START manual-urval.sv -->
+<div class="warning"><p><strong>Viktigt:</strong> ett urval döljer sidor i ODV och styr vad som skrivs ut. Originaldokumenten i arkivet påverkas aldrig.</p></div>
+
+<nav class="toc" aria-label="Innehåll">
+  <a href="#urval-oppna">1. Öppna urvalsarbetsytan</a>
+  <a href="#urval-tabort">2. Ta bort sidor</a>
+  <a href="#urval-laggtill">3. Lägg tillbaka sidor</a>
+  <a href="#urval-ordning">4. Ändra ordning</a>
+  <a href="#urval-forhandsvisa">5. Titta närmare på en sida</a>
+  <a href="#urval-spara">6. Spara eller lämna</a>
+  <a href="#urval-aktivt">7. Så ser du att ett urval är aktivt</a>
+  <a href="#urval-skrivut">8. Skriva ut urvalet</a>
+  <a href="#urval-aterstall">9. Ta bort urvalet</a>
+</nav>
+
+<h2 id="urval-oppna">1. Öppna urvalsarbetsytan</h2>
+<p>Klicka på <strong>urvalsknappen</strong> i verktygsfältet – den med en lista och en bock, direkt till höger om skrivarknappen. Urvalsarbetsytan öppnas över hela fönstret.</p>
+<figure class="wide">
+  <a href="#lb-urval-oversikt"><img src="img/urval-oversikt.png" alt="Urvalsarbetsytan med tillgängliga sidor till vänster och valda sidor till höger"></a>
+  <figcaption><strong>Urvalsarbetsytan.</strong> Till vänster alla sidor som finns. Till höger de sidor som ingår i urvalet. En bock på en sida till vänster betyder att den är med.</figcaption>
+</figure>
+<figure class="strip">
+  <a href="#lb-urval-verktygsfalt"><img src="img/urval-verktygsfalt.png" alt="Urvalsarbetsytans verktygsfält"></a>
+  <figcaption><strong>Verktygsfältet i arbetsytan.</strong> Läge (Dokument eller Sidor), panelvisning, miniatyrstorlek, ångra/gör om, återställ, <em>Spara</em> och <em>Lämna</em>.</figcaption>
+</figure>
+<details>
+  <summary>Två lägen: Dokument och Sidor</summary>
+  <ul>
+    <li><strong>Dokument</strong> är förvalt. Sidorna hålls ihop per dokument. Du kan ta bort och lägga till sidor och flytta dem inom sitt dokument.</li>
+    <li><strong>Sidor</strong> släpper grupperingen. Sidor från olika dokument kan blandas i vilken ordning du vill – till exempel inför en utskrift i en viss ordning.</li>
+  </ul>
+</details>
+
+<h2 id="urval-tabort">2. Ta bort sidor</h2>
+<ol class="steps">
+  <li><strong>Markera</strong> de sidor i höger panel som inte ska vara med. Klicka på en sida i taget.</li>
+  <li>Klicka på <strong>Ta bort valda</strong> – pilen <em>‹</em> mitt emellan panelerna. Sidorna tappar sin bock i vänster panel.</li>
+  <li>Vill du ta bort allt och börja från noll: klicka <strong>Ta bort alla</strong> (<em>«</em>).</li>
+</ol>
+<div class="figure-grid">
+  <figure class="wide">
+    <a href="#lb-urval-markerade"><img src="img/urval-markerade.png" alt="Tre sidor markerade i höger panel"></a>
+    <figcaption><strong>Markerade sidor</strong> får en grå ram.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-borttagna"><img src="img/urval-borttagna.png" alt="Urvalet efter att tre sidor tagits bort"></a>
+    <figcaption><strong>Efter Ta bort valda.</strong> Dokument 1 har nu en sida kvar och räknaren visar 21 valda. Spara-knappen har blivit grön.</figcaption>
+  </figure>
+</div>
+<details>
+  <summary>Snabbare sätt att markera och ta bort</summary>
+  <ul>
+    <li><kbd>Shift</kbd>+klick markerar alla sidor mellan två klick. <kbd>Ctrl</kbd>+klick lägger till eller tar bort en enskild sida i markeringen.</li>
+    <li>Dra en <strong>rektangel</strong> över flera sidor för att markera dem på en gång.</li>
+    <li><strong>Dubbelklicka</strong> på en sida i vänster panel för att lägga till eller ta bort den direkt.</li>
+    <li>Du behöver inte öppna arbetsytan alls för enstaka sidor: <strong>högerklicka</strong> på en miniatyr eller på sidan i huvudvyn och välj <em>Dölj sidan</em> eller <em>Dölj dokumentet</em>. Tangenten <kbd>Delete</kbd> döljer sidan du tittar på, <kbd>Ctrl</kbd>+<kbd>Delete</kbd> hela dokumentet.</li>
+  </ul>
+  <div class="figure-grid">
+    <figure class="menu"><a href="#lb-miniatyr-hogerklick"><img src="img/miniatyr-hogerklick.png" alt="Högerklicksmenyn på en miniatyr"></a><figcaption><strong>Högerklick på en miniatyr.</strong></figcaption></figure>
+    <figure class="menu"><a href="#lb-sida-hogerklick"><img src="img/sida-hogerklick.png" alt="Högerklicksmenyn på sidan i huvudvyn"></a><figcaption><strong>Högerklick på sidan.</strong></figcaption></figure>
+  </div>
+</details>
+
+<h2 id="urval-laggtill">3. Lägg tillbaka sidor</h2>
+<p>Ångrade du dig? Markera sidorna i <strong>vänster</strong> panel och klicka <strong>Lägg till valda</strong> (<em>›</em>), eller <strong>Lägg till alla</strong> (<em>»</em>) för att få tillbaka allt. Knapparna <em>Ångra</em> och <em>Gör om</em> i verktygsfältet tar tillbaka ett steg i taget.</p>
+
+<h2 id="urval-ordning">4. Ändra ordning</h2>
+<p>Dra en sida i höger panel till en ny plats. I läget <em>Dokument</em> kan du flytta sidor inom sitt dokument; i läget <em>Sidor</em> kan du blanda fritt. Ordningen i urvalet blir ordningen på utskriften.</p>
+
+<h2 id="urval-forhandsvisa">5. Titta närmare på en sida</h2>
+<p>Håll muspekaren över en sida och klicka på <strong>ögat</strong>. Sidan visas stor, med pilar för att bläddra till nästa. Grön kant betyder att sidan ingår i urvalet, och knappen högst upp lägger till eller tar bort sidan direkt. <kbd>Esc</kbd> stänger.</p>
+<figure class="wide">
+  <a href="#lb-urval-forhandsvisning"><img src="img/urval-forhandsvisning.png" alt="Förhandsvisning av en sida i urvalsarbetsytan"></a>
+  <figcaption><strong>Förhandsvisning.</strong> Uppe till vänster syns sidans plats, dokument och metadata.</figcaption>
+</figure>
+
+<h2 id="urval-spara">6. Spara eller lämna</h2>
+<p>Knappen <strong>Spara</strong> blir grön så snart du ändrat något. Klicka på den när du är klar, och sedan på <strong>Lämna</strong> för att komma tillbaka till dokumentet. Lämnar du utan att spara får du en fråga.</p>
+<div class="figure-grid">
+  <figure class="strip">
+    <a href="#lb-urval-verktygsfalt-osparat"><img src="img/urval-verktygsfalt-osparat.png" alt="Verktygsfältet med osparade ändringar"></a>
+    <figcaption><strong>Osparade ändringar.</strong> Grön knapp sparar, orange knapp kastar ändringarna.</figcaption>
+  </figure>
+  <figure class="wide">
+    <a href="#lb-urval-lamna-dialog"><img src="img/urval-lamna-dialog.png" alt="Dialogen Osparade ändringar"></a>
+    <figcaption><strong>Lämna utan att ha sparat.</strong> Spara, kasta, eller fortsätt redigera.</figcaption>
+  </figure>
+</div>
+
+<h2 id="urval-aktivt">7. Så ser du att ett urval är aktivt</h2>
+<p>Tillbaka i dokumentet är <strong>urvalsknappen röd</strong>, sidräknaren räknar bara urvalets sidor, och miniatyrpanelen visar bara de sidor som är med. Högst upp i panelen finns en <strong>röd återställningsknapp</strong>.</p>
+<figure class="wide">
+  <a href="#lb-huvudvy-efter-urval"><img src="img/huvudvy-efter-urval.png" alt="Huvudvyn med aktivt urval: röd urvalsknapp och färre miniatyrer"></a>
+  <figcaption><strong>Aktivt urval.</strong> Sidräknaren visar 1 / 21, urvalsknappen är röd, panelen visar bara urvalet.</figcaption>
+</figure>
+
+<h2 id="urval-skrivut">8. Skriva ut urvalet</h2>
+<p>Öppna utskriften med skrivarknappen och välj <strong>Alla sidor</strong>. När ett urval är aktivt får du välja mellan <strong>Aktuellt urval</strong> – bara sidorna i urvalet, förvalt – och <strong>Hela sessionen</strong>, som skriver ut allt och struntar i urvalet.</p>
+<figure class="print">
+  <a href="#lb-utskrift-alla-sidor-urval"><img src="img/utskrift-alla-sidor-urval.png" alt="Utskriftsdialogen med Alla sidor och valet Aktuellt urval"></a>
+  <figcaption><strong>Alla sidor med urval.</strong> <em>Aktuellt urval (21 sidor)</em> är förvalt.</figcaption>
+</figure>
+<p class="small">Valen <em>Enkelt intervall</em> och <em>Anpassade sidor</em> finns inte när ett urval är aktivt – då styr urvalet vad som skrivs ut. Resten av utskriften (orsak, mottagare, vattenstämpel) fungerar som i <a href="#utskrift">Kom igång-guiden</a>.</p>
+<div class="tip"><p><strong>Bra att veta:</strong> utskrift av ett urval tar med sidorna som de är i arkivet. Har du roterat en sida eller ändrat ljusstyrka och kontrast följer det inte med här – det gör det bara med utskriftsmetoden <em>Aktiv sida</em>.</p></div>
+
+<h2 id="urval-aterstall">9. Ta bort urvalet</h2>
+<p>Klicka på den <strong>röda knappen högst upp i miniatyrpanelen</strong>. Alla sidor kommer tillbaka. Du kan också öppna arbetsytan, välja <em>Lägg till alla</em>, <em>Spara</em> och <em>Lämna</em>.</p>
+<figure class="menu">
+  <a href="#lb-panel-efter-urval"><img src="img/panel-efter-urval.png" alt="Miniatyrpanelen med den röda återställningsknappen"></a>
+  <figcaption><strong>Återställningsknappen</strong> uppe till höger i panelen.</figcaption>
+</figure>
+
+<h3>Kort kontrollista</h3>
+<ul class="checklist">
+  <li>Grön Spara-knapp betyder att du har osparade ändringar.</li>
+  <li>Röd urvalsknapp i verktygsfältet betyder att sidor är dolda.</li>
+  <li><em>Aktuellt urval</em> skriver ut det du valt, <em>Hela sessionen</em> skriver ut allt.</li>
+</ul>
+  <!-- EMBED-END manual-urval.sv --></details>
+<details class="embedded" id="guide-fler">
+  <summary id="guide-fler-rubrik">Fler funktioner i OpenDocViewer</summary>
+  <span class="anchor" id="guide-fler-start"></span>
+  <!-- EMBED-START manual-avancerat.sv -->
+<nav class="toc" aria-label="Innehåll">
+  <a href="#fler-jamforelse">Jämför två sidor</a>
+  <a href="#fler-metadata">Dokumentets metadata</a>
+  <a href="#fler-hq">Skarpare PDF-sidor</a>
+  <a href="#fler-egen">Egen storlek och standardzoom</a>
+  <a href="#fler-tangentbord">Alla kortkommandon</a>
+  <a href="#fler-verktygsfalt">Verktygsfältet knapp för knapp</a>
+  <a href="#fler-tema">Mörkt tema</a>
+  <a href="#fler-support">Supportinformation</a>
+  <a href="#fler-nytt">Nytt i version 2.8</a>
+</nav>
+
+<h2 id="fler-jamforelse">Jämför två sidor</h2>
+<p>Klicka på <strong>jämförelseknappen</strong> i verktygsfältet. Sidan du tittar på hamnar till vänster med <span class="blue">blå ram</span>, och en andra sida visas till höger med <span class="orange">orange ram</span>. Vill du byta ut den högra sidan: högerklicka på en miniatyr och välj <em>Visa till höger</em>.</p>
+<figure class="wide">
+  <a href="#lb-jamforelse"><img src="img/jamforelse.png" alt="Jämförelseläget med två sidor bredvid varandra"></a>
+  <figcaption><strong>Jämförelseläget.</strong> Varje sida har egna zoomknappar i överkanten. I panelen märks vänster sida <span class="blue">V</span> och höger sida <span class="orange">H</span>.</figcaption>
+</figure>
+<p>En av sidorna är alltid <strong>aktiv</strong> – den du senast klickade i. Verktygsfältet och tangentbordet styr den aktiva sidan, och ramarna runt knapparna visar vilken: blå för vänster, orange för höger.</p>
+<p>Skriver du ut med metoden <strong>Aktiv sida</strong> medan du jämför kan du välja att ta med bara den aktiva sidan eller båda. Sidorna skrivs ut precis som du ser dem – rotation, ljusstyrka och kontrast följer med, på samma sätt som när du tittar på en enda sida. Med alla andra utskriftsmetoder skrivs sidorna ut som de är i arkivet.</p>
+<details>
+  <summary>Styra den andra sidan utan att byta</summary>
+  <p>Håll <kbd>Shift</kbd> nedtryckt medan du klickar på en knapp eller använder tangentbordet, så gäller kommandot den sida som <em>inte</em> är aktiv. Ramarna byter färg medan du håller Shift, så du ser vad som kommer att hända.</p>
+  <figure class="wide">
+    <a href="#lb-verktygsfalt-shift"><img src="img/verktygsfalt-shift.png" alt="Verktygsfältet med Shift nedtryckt och orange ramar"></a>
+    <figcaption><strong>Shift nedtryckt.</strong> Orange ramar = knapparna styr höger sida just nu.</figcaption>
+  </figure>
+  <p><kbd>Pil vänster</kbd> och <kbd>Pil höger</kbd> byter aktiv sida. <kbd>Pil vänster</kbd> när vänster redan är aktiv avslutar jämförelsen – det gör också jämförelseknappen, eller <em>Avsluta jämförelse</em> i högerklicksmenyn på den högra sidan.</p>
+  <figure class="menu">
+    <a href="#lb-jamforelse-hoger-hogerklick"><img src="img/jamforelse-hoger-hogerklick.png" alt="Högerklicksmenyn på höger sida i jämförelseläget"></a>
+    <figcaption><strong>Högerklick på höger sida.</strong> Samma val som vanligt, plus <em>Avsluta jämförelse</em>.</figcaption>
+  </figure>
+</details>
+
+<h2 id="fler-metadata">Dokumentets metadata</h2>
+<p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
+<figure class="wide">
+  <a href="#lb-metadata"><img src="img/metadata.png" alt="Dialogen Dokumentmetadata"></a>
+  <figcaption><strong>Dokumentmetadata</strong> för ett dokument.</figcaption>
+</figure>
+<details>
+  <summary>Alla dokument i en tabell</summary>
+  <p>Knappen <em>Metadata-tabell</em> i metadatadialogen visar hela sessionen som en tabell – ett dokument per rad. Praktiskt när du snabbt vill se vilka avdelningar och datum som ingår.</p>
+  <figure class="wide">
+    <a href="#lb-metadataoversikt"><img src="img/metadataoversikt.png" alt="Metadataöversikten med alla dokument i sessionen"></a>
+    <figcaption><strong>Metadataöversikt.</strong></figcaption>
+  </figure>
+</details>
+
+<h2 id="fler-hq">Skarpare PDF-sidor</h2>
+<p>PDF-sidor visas redan i utskriftskvalitet. Behöver du se en detalj ännu skarpare: klicka på <strong>HQ</strong> i verktygsfältet. Sidan ritas om med dubbel upplösning och knappen blir röd. Det gäller bara den sidan.</p>
+<div class="figure-grid narrow">
+  <figure class="tiny"><a href="#lb-boost-fore"><img src="img/boost-fore.png" alt="HQ-knappen före"></a><figcaption><strong>Före.</strong></figcaption></figure>
+  <figure class="tiny"><a href="#lb-boost-efter"><img src="img/boost-efter.png" alt="HQ-knappen efter, röd"></a><figcaption><strong>Efter.</strong> Röd = skärpan är höjd.</figcaption></figure>
+</div>
+<p class="small">HQ är grå för skannade sidor (TIFF/JPEG), eftersom de redan visas exakt så skarpa som de skannades. Håll muspekaren över knappen så står det varför.</p>
+
+<h2 id="fler-egen">Egen storlek och standardzoom</h2>
+<p>Knappen <strong>1:X</strong> visar sidan i en storlek du själv bestämt – en andel av fönstrets bredd. Pilen bredvid öppnar inställningarna. Där väljer du också vilken zoom varje ny session ska börja med (<em>Standard zoom/storlek</em>); förvalet bestäms av din organisation. ODV kommer ihåg dina val.</p>
+<div class="figure-grid">
+  <figure class="menu"><a href="#lb-egen-storlek"><img src="img/egen-storlek.png" alt="Menyn för egen storlek"></a><figcaption><strong>Egen storlek.</strong> Andel av fönsterbredden och standardzoom.</figcaption></figure>
+  <figure class="menu"><a href="#lb-egen-storlek-avancerat"><img src="img/egen-storlek-avancerat.png" alt="Menyn med Avancerat utfällt"></a><figcaption><strong>Avancerat.</strong> Gränser för fönsterhöjd och verklig storlek.</figcaption></figure>
+</div>
+
+<h2 id="fler-tangentbord">Alla kortkommandon</h2>
+<table>
+  <thead><tr><th>Tangent</th><th>Gör detta</th></tr></thead>
+  <tbody>
+    <tr><td><kbd>Pil upp</kbd> / <kbd>Pil ned</kbd>, <kbd>Page Up</kbd> / <kbd>Page Down</kbd></td><td>Föregående eller nästa sida. Håll inne för snabb bläddring.</td></tr>
+    <tr><td><kbd>Home</kbd> / <kbd>End</kbd></td><td>Första eller sista sidan.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + någon av ovanstående</td><td>Samma sak, men dokument för dokument i stället för sida för sida.</td></tr>
+    <tr><td><kbd>+</kbd> / <kbd>-</kbd></td><td>Zooma in eller ut.</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>Rotera sidan.</td></tr>
+    <tr><td><kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd></td><td>I jämförelseläget: byt aktiv sida. Pil vänster när vänster redan är aktiv avslutar jämförelsen.</td></tr>
+    <tr><td><kbd>Shift</kbd> + kommando</td><td>I jämförelseläget: styr den sida som inte är aktiv.</td></tr>
+    <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Dölj sidan / dölj hela dokumentet (urval).</td></tr>
+    <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppna ODV:s utskriftsdialog.</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning.</td></tr>
+  </tbody>
+</table>
+
+<h2 id="fler-verktygsfalt">Verktygsfältet knapp för knapp</h2>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-vanster"><img src="img/verktygsfalt-vanster.png" alt="Vänstra delen av verktygsfältet"></a>
+  <figcaption><strong>Vänster:</strong> skrivare med pil för förval, urval, sidnavigering, zoom ut/in med procentfält, 1:1, anpassa till skärm, anpassa till bredd.</figcaption>
+</figure>
+<figure class="wide">
+  <a href="#lb-verktygsfalt-hoger"><img src="img/verktygsfalt-hoger.png" alt="Högra delen av verktygsfältet"></a>
+  <figcaption><strong>Höger:</strong> 1:X egen storlek med pil, jämförelse, rotera vänster/höger, HQ, ljusstyrka, kontrast, återställ, samt tema, språk och hjälp.</figcaption>
+</figure>
 <ul>
-  <li><strong>Sidmetadata:</strong> visar metadata för en viss sida eller dokumentdel.</li>
-  <li><strong>Metadatamatris:</strong> visar metadata för flera dokument i samma session.</li>
-  <li><strong>Utskriftsmetadata:</strong> vissa metadata kan också användas i sidhuvud och sidfot vid utskrift.</li>
+  <li><strong>Skrivare</strong> öppnar utskriften. Pilen bredvid sätter förvalet <em>Aktiv sida</em> eller <em>Alla sidor</em>.</li>
+  <li><strong>Urval</strong> öppnar urvalsarbetsytan. Röd när ett urval är aktivt.</li>
+  <li><strong>Sidnavigering</strong>: första, föregående, nästa, sista, och ett fält för sidnummer.</li>
+  <li><strong>Zoom</strong>: ut, in, procentfält, 1:1, anpassa till skärm, anpassa till bredd.</li>
+  <li><strong>1:X</strong>: egen storlek. <strong>Jämförelse</strong>: två sidor bredvid varandra. <strong>Rotera</strong>: ett kvarts varv.</li>
+  <li><strong>HQ</strong>: skarpare PDF-sida. <strong>Ljusstyrka</strong>, <strong>kontrast</strong> och <strong>återställ</strong>.</li>
+  <li><strong>Tema</strong>, <strong>språk</strong>, <strong>hjälp</strong>. Lampan på hjälpknappen: grön = allt väl, gul = datorn har lite minne, röd = fel.</li>
 </ul>
-<p>Om ett fält saknas visas det normalt inte i utskriften när mallen är konfigurerad med villkorade fält.</p>
 
-<h2>Urval</h2>
-<p>Om dokumenturval är aktiverat kan du välja vilka dokument eller sidor som ska ingå i arbetsflöden som stödjer urval. Urvalet påverkar exempelvis utskrift av valda sidor.</p>
+<h2 id="fler-tema">Mörkt tema</h2>
+<p>Temamenyn längst till höger har <em>Normal</em>, <em>Ljust</em> och <em>Mörkt</em>. I mörkt tema blir gränssnittet mörkt medan dokumentsidan visas som vanligt.</p>
+<figure class="wide">
+  <a href="#lb-morkt-tema"><img src="img/morkt-tema.png" alt="OpenDocViewer i mörkt tema"></a>
+  <figcaption><strong>Mörkt tema.</strong></figcaption>
+</figure>
+
+<h2 id="fler-support">Supportinformation</h2>
+<p>Vänd dig först till <strong>din lokala support</strong> – de känner till hur ODV är installerat och inställt hos er, och kan föra ärendet vidare till leverantören. Två saker gör det mycket lättare att hjälpa dig: <strong>versionen</strong> och <strong>diagnostikfilen</strong>. Båda finns under hjälpmenyn → <em>Om OpenDocViewer</em>.</p>
+<p>Det här är bra att ta med i ärendet:</p>
 <ul>
-  <li>Kontrollera urvalet innan du skriver ut.</li>
-  <li>Urval kan vara dokumentbaserat eller sidbaserat beroende på installation.</li>
-  <li>Om inget särskilt urval används gäller normalt hela sessionen eller det val som anges i utskriftsdialogen.</li>
+  <li><strong>Version och build-id</strong> från <em>Om OpenDocViewer</em>.</li>
+  <li><strong>Diagnostikfilen</strong> (<em>Ladda ned diagnostik som JSON</em>). Den innehåller tekniska uppgifter om ODV och webbläsaren – inga dokument.</li>
+  <li><strong>När</strong> det hände (datum och klockslag), <strong>vad du gjorde</strong> och vilken <strong>webbläsare</strong> du använde.</li>
+  <li>Texten under <em>Tekniska detaljer</em> om en felruta visades.</li>
 </ul>
+<div class="warning"><p><strong>Skicka inga personuppgifter.</strong> Bifoga inte skärmdumpar eller utskrifter som visar verkliga dokument, namn eller id-nummer, om inte din organisation uttryckligen har bett om det.</p></div>
+<div class="figure-grid">
+  <figure class="wide"><a href="#lb-om-odv"><img src="img/om-odv.png" alt="Om OpenDocViewer"></a><figcaption><strong>Om OpenDocViewer.</strong> Version, build-id och kontaktuppgifter. <em>Ladda om resursfiler</em> hämtar om översättningar och inställningar utan att starta om.</figcaption></figure>
+  <figure class="wide"><a href="#lb-diagnostik"><img src="img/diagnostik.png" alt="Diagnostiksektionen i Om OpenDocViewer"></a><figcaption><strong>Diagnostik.</strong> <em>Ladda ned diagnostik som JSON</em> ger en fil att bifoga ärendet. Den innehåller tekniska uppgifter – inga dokument.</figcaption></figure>
+</div>
+<details>
+  <summary>När sessionen gått ut</summary>
+  <p>Rutan <em>Dokumenten kunde inte visas korrekt</em> har en länk <em>Tekniska detaljer</em>. Fäll ut den så ser du vilka sidor som inte kunde hämtas och varför. Ta med det i ärendet.</p>
+  <div class="figure-grid">
+    <figure class="wide"><a href="#lb-problemnotis"><img src="img/problemnotis.png" alt="ODV med utgången session och sidor som varningstrianglar"></a><figcaption><strong>Utgången session.</strong></figcaption></figure>
+    <figure class="wide"><a href="#lb-problemnotis-detaljer"><img src="img/problemnotis-detaljer.png" alt="Tekniska detaljer utfällda"></a><figcaption><strong>Tekniska detaljer.</strong></figcaption></figure>
+  </div>
+</details>
 
-<h2>Jämförelse</h2>
-<p>Jämförelseläge används för att visa två sidor eller dokumentdelar bredvid varandra. Det kan vara användbart vid manuell kontroll av versioner, kopior eller relaterade dokument.</p>
+<h2 id="fler-nytt">Nytt i version 2.8</h2>
 <ul>
-  <li>Aktivera jämförelse från verktygsfältet om funktionen är tillgänglig.</li>
-  <li>Välj primär sida och jämförelsesida.</li>
-  <li>Utskrift av aktiv jämförelse kan hanteras annorlunda än utskrift av alla sidor.</li>
+  <li><strong>Urvalsarbetsytan</strong> ersätter den gamla urvalsfliken – se guiden <a href="#guide-urval-start">Urval</a>.</li>
+  <li><strong>Utskriftsknappen har en pil</strong> för förvalt omfång, och dialogen har en ny layout.</li>
+  <li><strong>Egen storlek (1:X)</strong> och val av standardzoom.</li>
+  <li><strong>PDF-sidor i utskriftskvalitet</strong>, med <strong>HQ</strong> för ännu skarpare visning.</li>
+  <li><strong>Metadata</strong> från högerklicksmenyn.</li>
+  <li><strong>Sidbyte vid rullning</strong> med mushjulet.</li>
+  <li><strong>Starta om sessionen</strong> när dokumentlänkarna gått ut.</li>
+  <li><kbd>Ctrl</kbd>+<kbd>P</kbd> öppnar ODV:s utskrift. Rotation ligger på <kbd>Ctrl</kbd>+pil vänster/höger.</li>
 </ul>
-
-<h2>Bildjusteringar och aktiv sida</h2>
-<p>Vissa installationer kan tillåta visuell justering av en aktiv sida, till exempel rotation eller annan visningsanpassning. Sådana justeringar hör normalt till aktiv-sida-flödet och bör kontrolleras noggrant före utskrift.</p>
-<p>Utskrift av <strong>aktiv sida</strong> kan därför skilja sig från utskrift av alla sidor, eftersom aktiv sida kan behöva använda den aktuella visuella ytan i stället för originalbilden.</p>
-
-<h2>Utskrift</h2>
-<p>Öppna utskriftsdialogen från verktygsfältets utskriftsknapp. Dialogen kan innehålla fält för utskriftsorsak, mottagare/för vem, vattenstämpel och sidval beroende på installation.</p>
-
-<h3>Sidval</h3>
-<ul>
-  <li><strong>Aktiv sida:</strong> skriver ut sidan som är aktiv i visaren. Detta är bäst när aktuell sida har särskild visuell hantering.</li>
-  <li><strong>Alla sidor:</strong> skriver ut hela sessionen eller hela aktuellt urval.</li>
-  <li><strong>Enkelt intervall:</strong> skriver ut ett sammanhängande sidintervall.</li>
-  <li><strong>Anpassade sidor:</strong> skriver ut en angiven lista, exempelvis <code>1,3,5-8</code>.</li>
+  <!-- EMBED-END manual-avancerat.sv --></details>
+<h3>Kort kontrollista</h3>
+<ul class="checklist">
+  <li>Vänta tills sidräknaren slutat vara randig innan du skriver ut.</li>
+  <li>Kontrollera orsak och omfång i utskriftsdialogen innan du klickar på Skriv ut.</li>
+  <li>Får du rutan om utgången session: klicka <em>Starta om sessionen</em>.</li>
 </ul>
-
-<h3>Direktutskrift via HTML</h3>
-<p><strong>Skriv ut via HTML</strong> använder webbläsarens vanliga utskriftsflöde för OpenDocViewers förberedda utskriftsvy. Webbläsarens val för stående eller liggande format gäller normalt hela utskriften.</p>
-<p>Detta läge är enkelt och direkt, men webbläsarens förhandsgranskning kan vara långsam för många stora bildsidor.</p>
-
-<h3>Utskrift via PDF</h3>
-<p><strong>Skriv ut via PDF</strong> gör att OpenDocViewer först skapar en PDF-fil av utskriftsjobbet och sedan skickar PDF-filen till webbläsarens utskrift. Under PDF-genereringen visas status för hur många sidor som är klara.</p>
-<p>I PDF-läget kan varje sida automatiskt få stående eller liggande format baserat på sidbildens form. Det kan därför skilja sig från direktutskrift där webbläsarens formatval gäller mer generellt.</p>
-
-<h3>Spara PDF</h3>
-<p>Om installationen tillåter det visas knappen <strong>Spara PDF</strong>. Den skapar samma typ av PDF som PDF-utskrift, men laddar ned filen i stället för att öppna utskrift.</p>
-
-<h3>KOPIA-vattenstämpel</h3>
-<p>Om installationen tillåter det kan du markera <strong>Lägg till KOPIA-vattenstämpel</strong>. Då läggs en tydlig men transparent märkning på utskriften. Installationen avgör exakt text, språk och utseende.</p>
-
-<h2>Sidhuvud och sidfot</h2>
-<p>Utskrifter kan ha sidhuvud och sidfot. Dessa kan innehålla datum, tid, utskriftsorsak, användare, sidnummer, dokument-id och metadata. Fält som saknar värde kan döljas automatiskt om mallen är konfigurerad så.</p>
-<p>Sidnumret i utskriftens sidhuvud är normalt sidans position i utskriftsjobbet. Dokumentets egna sidnummer kan visas separat i sidfoten.</p>
-
-<h2>Prestanda och stora dokument</h2>
-<p>OpenDocViewer försöker balansera prestanda och minnesanvändning. På kraftfulla datorer kan fler sidor och miniatyrer förberedas i förväg. På datorer med mindre minne kan visaren bli mer återhållsam.</p>
-<ul>
-  <li>Vänta tills laddningen är klar innan du startar stora utskrifter.</li>
-  <li>PDF-utskrift kan ge tydligare progress vid stora utskrifter.</li>
-  <li>Webbläsarens egen förhandsgranskning kan fortfarande ta tid, särskilt i Edge/Chromium.</li>
-</ul>
-
-<h2>Felsökning</h2>
-<ul>
-  <li><strong>Utskriftsknappen är inaktiv:</strong> vänta tills dokumenten har laddats klart.</li>
-  <li><strong>Förhandsgranskningen är långsam:</strong> prova PDF-utskrift om funktionen finns.</li>
-  <li><strong>Fel sidor skrivs ut:</strong> kontrollera sidval, intervall och urval i dialogen.</li>
-  <li><strong>Metadata saknas i utskrift:</strong> kontrollera att metadata finns i sessionen och att installationens mall använder rätt fält.</li>
-  <li><strong>Manualen saknar lokal information:</strong> installationen kan lägga en egen manualfil under <code>help/site/</code>.</li>
-</ul>
-
-<h2>Lokal anpassning</h2>
-<p>Den här standardmanualen kan ersättas per installation utan att bygga om OpenDocViewer. Lägg en lokal manual under <code>help/site/manual.sv.html</code> och motsvarande engelsk version under <code>help/site/manual.en.html</code>.</p>
+<p class="small">Guiden gäller OpenDocViewer 2.8. Din organisation kan ha ställt in vissa funktioner annorlunda. Uppdaterad 2026-09-26.</p>
+<!-- LB-START -->
+<div class="lb" id="lb-oversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/oversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-laddar"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-laddar.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-redo"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-redo.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-ctrl"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-ctrl.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-vanster"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-vanster.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-hoger"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-hoger.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-ljusstyrka"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/ljusstyrka.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-kontrast"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/kontrast.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-panelkontroller"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/panelkontroller.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-miniatyr-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/miniatyr-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-aktiv-sida"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-aktiv-sida.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-uppgifter"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-uppgifter.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-forbereds"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-forbereds.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-resultat"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-resultat.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskriftsstandard"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskriftsstandard.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-tema"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/tema.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-sprak"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/sprak.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-hjalp"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/hjalp.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-problemnotis-ruta"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/problemnotis-ruta.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-oversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-oversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-verktygsfalt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-markerade"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-markerade.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-borttagna"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-borttagna.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-sida-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/sida-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-forhandsvisning"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-forhandsvisning.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-verktygsfalt-osparat"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-verktygsfalt-osparat.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-urval-lamna-dialog"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/urval-lamna-dialog.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-huvudvy-efter-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/huvudvy-efter-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-utskrift-alla-sidor-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/utskrift-alla-sidor-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-panel-efter-urval"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/panel-efter-urval.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-jamforelse"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-verktygsfalt-shift"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/verktygsfalt-shift.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-jamforelse-hoger-hogerklick"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/jamforelse-hoger-hogerklick.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-metadata"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadata.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-metadataoversikt"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/metadataoversikt.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-boost-fore"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-fore.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-boost-efter"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/boost-efter.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-egen-storlek"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/egen-storlek.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-egen-storlek-avancerat"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/egen-storlek-avancerat.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-morkt-tema"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/morkt-tema.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-om-odv"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/om-odv.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-diagnostik"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/diagnostik.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-problemnotis"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/problemnotis.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<div class="lb" id="lb-problemnotis-detaljer"><a href="#lb-stang" aria-label="Stäng bilden"><img src="img/problemnotis-detaljer.png" alt=""><span>Klicka var som helst för att stänga</span></a></div>
+<!-- LB-END -->
+</div>
+</body>
+</html>
