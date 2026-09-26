@@ -173,7 +173,7 @@ objects can add an optional hook at
 `-ModuleKey`, and `-Configuration`, and should write generated host configs,
 config overlays, widgets, or widget runtime-data zips below `OutputRoot`.
 
-Keep private host profiles in the private installer or DEV repository, not in
+Keep private host profiles in the private installer or companion repository, not in
 public module repositories.
 
 ## Validating Command Wrappers
