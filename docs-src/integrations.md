@@ -66,7 +66,7 @@ window.ODV.start({
         files: [
           {
             id: 'file-1',
-            url: '/ibspackager/manual-review/files/file-1',
+            url: '/example-module/manual-review/files/file-1',
             ext: 'pdf',
             displayName: 'Invoice 4711.pdf'
           }
@@ -97,7 +97,7 @@ For hosted browser integrations, each file entry should provide a browser-reacha
 ```js
 {
   id: 'file-1',
-  url: '/ibspackager/manual-review/files/file-1',
+  url: '/example-module/manual-review/files/file-1',
   ext: 'pdf',
   displayName: 'Invoice 4711.pdf'
 }
@@ -200,7 +200,7 @@ For OpenDocViewer this still looks like a normal file URL:
 ```js
 {
   id: '9f4c4d8e-3b64-4b0f-bce8-b8bd3fd90d83',
-  url: 'https://host/ibspackager/ManualReview/File/9f4c4d8e-3b64-4b0f-bce8-b8bd3fd90d83',
+  url: 'https://host/example-module/ManualReview/File/9f4c4d8e-3b64-4b0f-bce8-b8bd3fd90d83',
   ext: 'pdf',
   displayName: 'invoice-4711.pdf'
 }
