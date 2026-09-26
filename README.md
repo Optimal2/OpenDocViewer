@@ -254,7 +254,7 @@ $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
 .\scripts\local-ci.ps1
 ```
 
-On a machine without any platform checkout, `.\scripts\local-ci.ps1 -AllowUnverifiedSharedScripts` deliberately turns Check 15 back into a "NOT VERIFIED" warning; drift then goes unchecked. `scripts\omp	est-check15-strict.ps1` tests this wiring.
+On a machine without any platform checkout, `.\scripts\local-ci.ps1 -AllowUnverifiedSharedScripts` deliberately turns Check 15 back into a "NOT VERIFIED" warning; drift then goes unchecked. `scripts\omp\test-check15-strict.ps1` tests this wiring.
 
 The push is blocked if the local CI gate fails. Because this is a public repository, also verify that GitHub Actions passed on `main` after pushing:
 
