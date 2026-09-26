@@ -12,7 +12,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | --- | --- | ---: | --- |
 | <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
-| <code>dompurify</code> | <code>^3.4.15</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
+| <code>dompurify</code> | <code>^3.4.16</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
 | <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
@@ -51,10 +51,10 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>globals</code> | <code>^17.12.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>29.1.1</code> | 0 |
-| <code>prettier</code> | <code>^3.9.8</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.9</code> | 0 |
-| <code>vite</code> | <code>^8.3.0</code> | 0 |
-| <code>vitest</code> | <code>^5.0.1</code> | 0 |
+| <code>prettier</code> | <code>^3.9.9</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.11</code> | 0 |
+| <code>vite</code> | <code>^8.3.1</code> | 0 |
+| <code>vitest</code> | <code>^5.0.2</code> | 0 |
 
 ## Imported But Not Declared Directly
 
