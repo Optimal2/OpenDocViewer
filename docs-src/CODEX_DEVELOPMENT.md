@@ -51,6 +51,7 @@ Use the narrowest level that gives real confidence:
 - JSDoc/commented API changes: `npm run doc`
 - Agent map/source-structure/dependency changes: `npm run doc:agent`
 - PowerShell script changes: parse the changed `.ps1` file with `System.Management.Automation.Language.Parser`
+- Pre-push gate: `scripts\local-ci.ps1` (build, tests, component versions, agent docs). Its version step runs strict, so Check 15 (shared-script drift) fails when no OpenModulePlatform checkout is found. In a git worktree without a sibling `OpenModulePlatform` folder, set `OMP_PLATFORM_ROOT` to the platform checkout (or pass `-PlatformRepositoryRoot`). `-AllowUnverifiedSharedScripts` deliberately downgrades Check 15 to a warning; use it only when no platform checkout exists. Wiring test: `scripts\omp	est-check15-strict.ps1`.
 - Documentation-only changes: `git diff --check`
 - Local hosted visibility: build `dist/`, update the hosted directory, then verify the relevant localhost URL
 

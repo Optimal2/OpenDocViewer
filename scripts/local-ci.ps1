@@ -12,6 +12,8 @@
       1. Build the web application: npm run build
       2. Run the Vitest suite: npx vitest run (with a JSON report for the count)
       3. Validate version lockstep: scripts/omp/validate-component-versions.ps1
+         (run with -Strict, so Check 15 - shared-script drift against the
+         OpenModulePlatform checkout - fails when it cannot run)
       4. Verify generated agent documentation is fresh: npm run doc:agent,
          then fail if docs-agent differs from the committed output
 
@@ -21,10 +23,31 @@
     Git ref the version validator diffs against. Defaults to origin/main;
     pass another ref when the default branch is named differently or the
     remote-tracking ref is stale and you want to compare against a fresh one.
+
+.PARAMETER PlatformRepositoryRoot
+    OpenModulePlatform checkout that Check 15 compares the shared scripts
+    against. When empty, the validator resolves $env:OMP_PLATFORM_ROOT, then
+    $env:OpenModulePlatformRoot, then a sibling folder named
+    OpenModulePlatform. Set OMP_PLATFORM_ROOT (or pass this parameter) when
+    running from a git worktree that has no sibling platform checkout.
+
+.PARAMETER AllowUnverifiedSharedScripts
+    Deliberately run Check 15 without -Strict: when no OpenModulePlatform
+    checkout can be found, the shared-script drift guard only warns
+    "NOT VERIFIED" instead of failing the gate. Use it only when no platform
+    checkout is available on the machine; drift then goes unchecked.
+
+.EXAMPLE
+    $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
+    .\scripts\local-ci.ps1
 #>
 [CmdletBinding()]
 param(
-    [string]$BaseCommit = 'origin/main'
+    [string]$BaseCommit = 'origin/main',
+
+    [string]$PlatformRepositoryRoot = '',
+
+    [switch]$AllowUnverifiedSharedScripts
 )
 
 Set-StrictMode -Version Latest
@@ -177,8 +200,14 @@ try {
         # $LASTEXITCODE reflects its verdict rather than that of the last
         # native git call it made internally. Reset it first so a stale value
         # from an earlier step can never be mistaken for a validator result.
+        # Strict by default: a Check 15 that cannot find the platform checkout
+        # must fail the gate, otherwise shared-script drift from a worktree
+        # without a sibling OpenModulePlatform folder passes as green.
+        if ($AllowUnverifiedSharedScripts) {
+            Write-Warning 'Check 15 runs non-strict (-AllowUnverifiedSharedScripts): shared-script drift is not verified when the platform checkout is missing.'
+        }
         $global:LASTEXITCODE = 0
-        & $Validator -BaseCommit $BaseCommit
+        & $Validator -BaseCommit $BaseCommit -Strict:(-not $AllowUnverifiedSharedScripts) -PlatformRepositoryRoot $PlatformRepositoryRoot
         if ($LASTEXITCODE -eq 0) {
             $validatePassed = $true
         }

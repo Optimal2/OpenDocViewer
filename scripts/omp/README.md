@@ -104,6 +104,14 @@ the strip therefore fails loudly instead of being bundled. Run
 with the C# list and that the fail-fast guard and exporter wiring work on both
 Windows PowerShell 5.1 and PowerShell 7+.
 
+`validate-component-versions.ps1` runs Check 15 by calling the canonical
+`validate-shared-scripts.ps1` in the OpenModulePlatform checkout. The platform
+root is resolved from `-PlatformRepositoryRoot`, then `OMP_PLATFORM_ROOT`, then
+`OpenModulePlatformRoot`, then a sibling `OpenModulePlatform` folder, the same
+order as the canonical guard. `-Strict` (passed by `scripts/local-ci.ps1`
+unless `-AllowUnverifiedSharedScripts` is given) turns a missing platform
+checkout into a failure. Run `test-check15-strict.ps1` to verify this wiring.
+
 Use this script when a module repository needs to publish objects for Portal,
 HostAgent import folders, or installer package libraries. Runtime or
 customer-specific configuration should be supplied through command-line

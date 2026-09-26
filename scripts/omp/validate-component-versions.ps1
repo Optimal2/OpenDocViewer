@@ -42,7 +42,15 @@ detection) and exits.
 .PARAMETER Strict
 Treat a guard that could not run as an error. Without it, Check 15 (shared
 script drift) reports "not verified" as a warning when the canonical
-OpenModulePlatform script cannot be found.
+OpenModulePlatform script cannot be found. The local CI gate
+(scripts/local-ci.ps1) passes it by default.
+
+.PARAMETER PlatformRepositoryRoot
+Root of the OpenModulePlatform checkout used by Check 15. Resolution order,
+matching the canonical validate-shared-scripts.ps1: this parameter, then
+$env:OMP_PLATFORM_ROOT, then $env:OpenModulePlatformRoot, then a sibling
+directory named OpenModulePlatform. Set OMP_PLATFORM_ROOT when this checkout
+does not sit beside the platform checkout, for example in a git worktree.
 #>
 [CmdletBinding()]
 param(
@@ -53,7 +61,10 @@ param(
     [switch]$SelfTest,
 
     [Parameter(Mandatory = $false)]
-    [switch]$Strict
+    [switch]$Strict,
+
+    [Parameter(Mandatory = $false)]
+    [string]$PlatformRepositoryRoot = ''
 )
 
 $ErrorActionPreference = 'Stop'
@@ -1314,7 +1325,17 @@ if ($embedScriptsChecked -gt 0) {
 # the OpenModulePlatform repository). The numbers are a shared contract: a
 # given "Check N" means the same thing in every OMP-compatible validator's
 # output.
-$check15OmpRoot = $env:OpenModulePlatformRoot
+# Platform root resolution follows the canonical validate-shared-scripts.ps1:
+# -PlatformRepositoryRoot, OMP_PLATFORM_ROOT, OpenModulePlatformRoot, sibling.
+# The resolved root is always passed on explicitly, so the guard compares
+# against the same checkout this script looked for.
+$check15OmpRoot = $PlatformRepositoryRoot
+if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
+    $check15OmpRoot = $env:OMP_PLATFORM_ROOT
+}
+if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
+    $check15OmpRoot = $env:OpenModulePlatformRoot
+}
 if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
     # Built from separate segments (nested Join-Path, because Windows
     # PowerShell 5.1 has no multi-segment Join-Path) so the fallback resolves
@@ -1339,10 +1360,10 @@ if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
     }
 }
 elseif ($check15Strict) {
-    Add-ValidationError -Errors $errors -Message "Check 15: canonical script not found at '$check15Script'; shared script drift could not be checked. Strict mode treats a guard that could not run as an error."
+    Add-ValidationError -Errors $errors -Message "Check 15: canonical script not found at '$check15Script'; shared script drift could not be checked. Strict mode treats a guard that could not run as an error. Set OMP_PLATFORM_ROOT or pass -PlatformRepositoryRoot to point at an OpenModulePlatform checkout."
 }
 else {
-    Write-Warning "Check 15: NOT VERIFIED - canonical script not found at '$check15Script'."
+    Write-Warning "Check 15: NOT VERIFIED - canonical script not found at '$check15Script'. Set OMP_PLATFORM_ROOT or pass -PlatformRepositoryRoot to verify."
 }
 
 if ($warnings.Count -gt 0) {
