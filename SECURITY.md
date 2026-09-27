@@ -2,22 +2,31 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.8.0** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.9.0** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.7.1 and earlier are superseded by v2.8.0 and are no longer supported for production deployments. v2.8.0 keeps the v2.7 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive - and adds the four resolved Dependabot advisories (browserslist, qs, @humanfs/node, fflate), the refreshed dependency baseline (React 19.3, Vite 8.3, Vitest 5, pdf.js 6.3), memory-capped print-quality PDF rasterization, and visible site-configuration load status so a silently ignored override can no longer hide a weaker policy. Operators should upgrade to v2.8.0 before opening new support or security issues.
+OpenDocViewer v2.8.0 and earlier are superseded by v2.9.0 and are no longer supported for production deployments. v2.9.0 keeps the v2.8 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive, memory-capped PDF rasterization and visible site-configuration load status - and adds subnet-grouped IPv6 rate limiting in the optional log servers, a print path that fails over instead of hanging when the hosting CSP blocks the print frame, a help fallback that no longer serves the application shell as a manual, and a refreshed dependency baseline (jsdom 30, dotenv 18, Babel 8.0.6, DOMPurify 3.4.16) with a raised Node.js floor (`^22.22.2 || >=24.15.0`). `npm audit` reports no advisories. Operators should upgrade to v2.9.0 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.8.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.9.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.8.0   | :x: | Superseded by v2.9.0 rate-limit, print-fallback and dependency fixes; upgrade required |
 | 2.7.1   | :x: | Superseded by v2.8.0 advisory fixes and dependency baseline; upgrade required |
 | 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
 | <= 2.6.6 | :x: | Superseded by v2.7.0 framing, log-token, dependency, and CI/OMP-build hardening; upgrade required |
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.8.0 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.9.0 is supported.
+
+### OpenDocViewer v2.9.0
+Changes since v2.8.0:
+
+- The optional system-log and user-log servers key their rate limiters through `ipKeyGenerator`, so IPv6 clients are grouped by subnet instead of each address getting its own bucket (express-rate-limit 8 rejects the old raw-IP key at startup).
+- Printing no longer hangs when the hosting Content-Security-Policy blocks `blob:` in `frame-src`: the readiness probe on the hidden print frame now sits inside the error handling, so a cross-origin frame falls back to the window path and a blocked fallback reports an error instead of leaving the progress dialog open.
+- The help menu skips a response that is the application shell; with an SPA fallback a missing site manual was answered with `index.html` and status 200. `public/web.config` excludes `help/` from the fallback so missing help files answer 404. A customer-neutral default manual (English and Swedish) ships in `help/default/`; `help/site/` keeps precedence and sample files are never used.
+- Dependency baseline: jsdom 30.1.1, dotenv 18.0.4, Babel 8.0.6, DOMPurify 3.4.16, file-type 22.1.1, Vite 8.3.1, Vitest 5.0.2, raised override floors for path-to-regexp and picomatch; Node.js engines `^22.22.2 || >=24.15.0`, CI on 22.23.3. `npm audit` reports no advisories.
 
 ### OpenDocViewer v2.8.0
 Changes since v2.7.1:
