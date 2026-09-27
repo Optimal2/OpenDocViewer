@@ -5,7 +5,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 [![CI](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
 [![Version](https://img.shields.io/badge/version-2.8.0-purple.svg)](package.json)
-[![Node](https://img.shields.io/badge/node-22.18%2B%20or%2024.11%2B-339933.svg)](package.json)
+[![Node](https://img.shields.io/badge/node-22.22.2%2B%20or%2024.15%2B-339933.svg)](package.json)
 
 ---
 
@@ -199,7 +199,7 @@ Notes:
 
 ## Requirements
 
-- **Node.js** `^22.18.0 || >=24.11.0` (for build, tests, and the optional log servers) — see `engines` in `package.json`
+- **Node.js** `^22.22.2 || >=24.15.0` (for build, tests, and the optional log servers) — see `engines` in `package.json`
 - Primary target browsers: **Microsoft Edge** and **Google Chrome** (Chromium)
 - Firefox may work for basic viewing but is not the primary support target and may differ in diagnostics and HTML input-validation behavior; Safari is not the primary operational target
 - Static hosting for the built frontend; a Node.js runtime only if you run the optional log servers

@@ -12,9 +12,11 @@ Sources reviewed: the [Vitest 5 migration guide](https://vitest.dev/guide/migrat
 and `npm view vitest@5.0.0 engines peerDependencies --json`.
 
 Vitest requires Vite 6.4+ and Node 22.12+. Its published Node range is more
-specific: `^22.12.0 || ^24.0.0 || >=26.0.0`. Use Node 22.18+ in the 22.x line
-or a supported 24.x release for development; Node 25 is excluded even though
-the application's existing engine range allows it. CI uses Node 22.18.0.
+specific: `^22.12.0 || ^24.0.0 || >=26.0.0`. jsdom 30 raises the floor to
+`^22.22.2 || ^24.15.0 || >=26.0.0`, so the application's engine range is
+`^22.22.2 || >=24.15.0`. Use Node 22.22.2+ in the 22.x line or 24.15+ for
+development; Node 25 is excluded by Vitest and jsdom even though the
+application's engine range allows it. CI uses Node 22.23.3.
 The existing Vite 8.2.2 satisfies the peer requirement.
 
 | Breaking change | Repository assessment |
