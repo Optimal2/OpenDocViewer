@@ -32,7 +32,7 @@ import express from 'express';
 import helmet from 'helmet';
 import dotenv from 'dotenv';
 import morgan from 'morgan';
-import rateLimit from 'express-rate-limit';
+import rateLimit, { ipKeyGenerator } from 'express-rate-limit';
 
 dotenv.config();
 
@@ -192,7 +192,7 @@ const printLimiter = rateLimit({
   standardHeaders: 'draft-7',
   legacyHeaders: false,
   message: { error: 'Too many requests' },
-  keyGenerator: (req) => req.ip
+  keyGenerator: (req) => ipKeyGenerator(req.ip)
 });
 
 /**

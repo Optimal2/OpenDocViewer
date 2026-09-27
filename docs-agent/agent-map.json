@@ -1651,7 +1651,8 @@
         {
           "source": "express-rate-limit",
           "specifiers": [
-            "rateLimit"
+            "rateLimit",
+            "ipKeyGenerator"
           ],
           "line": 33,
           "kind": "static"
@@ -1870,7 +1871,8 @@
         {
           "source": "express-rate-limit",
           "specifiers": [
-            "rateLimit"
+            "rateLimit",
+            "ipKeyGenerator"
           ],
           "line": 33,
           "kind": "static"
@@ -1964,7 +1966,8 @@
         {
           "source": "express-rate-limit",
           "specifiers": [
-            "rateLimit"
+            "rateLimit",
+            "ipKeyGenerator"
           ],
           "line": 35,
           "kind": "static"
@@ -2146,7 +2149,8 @@
         {
           "source": "express-rate-limit",
           "specifiers": [
-            "rateLimit"
+            "rateLimit",
+            "ipKeyGenerator"
           ],
           "line": 35,
           "kind": "static"
