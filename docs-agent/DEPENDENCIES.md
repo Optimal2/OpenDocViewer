@@ -13,7 +13,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
 | <code>dompurify</code> | <code>^3.4.16</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
-| <code>dotenv</code> | <code>^17.4.2</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>dotenv</code> | <code>^18.0.4</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.1.1</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
