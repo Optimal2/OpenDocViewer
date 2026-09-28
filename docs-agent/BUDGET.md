@@ -12,14 +12,14 @@ Token counts are rough estimates using one token per four characters. Use this f
 
 - Output files measured: 29 (excluding this budget file)
 - Output lines: 127258
-- Output characters: 3469466
+- Output characters: 3469468
 - Estimated output tokens: 867379
 
 ## Largest Output Files
 
 | File | Lines | Characters | Estimated tokens |
 | --- | ---: | ---: | ---: |
-| `agent-map.json` | 89110 | 2355126 | 588782 |
+| `agent-map.json` | 89110 | 2355127 | 588782 |
 | `symbol-index.json` | 34178 | 781222 | 195306 |
 | `SYMBOL_INDEX.md` | 1354 | 186545 | 46637 |
 | `chunks/src_utils.md` | 692 | 33983 | 8496 |

@@ -6,7 +6,7 @@ Source commit: not embedded
 ## Project
 
 - Package: opendocviewer
-- Version: 2.9.0
+- Version: 2.10.0
 - Description: Fast, lightweight document viewer \(PDF, TIFF, images\) built with React \+ Vite, with a token\-gated log server and runtime configuration.
 
 ## Read Order
