@@ -2,15 +2,16 @@
 
 ## Supported Versions
 
-**OpenDocViewer v2.9.0** is the only currently supported release and the recommended production target.
+**OpenDocViewer v2.10.0** is the only currently supported release and the recommended production target.
 
-OpenDocViewer v2.8.0 and earlier are superseded by v2.9.0 and are no longer supported for production deployments. v2.9.0 keeps the v2.8 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive, memory-capped PDF rasterization and visible site-configuration load status - and adds subnet-grouped IPv6 rate limiting in the optional log servers, a print path that fails over instead of hanging when the hosting CSP blocks the print frame, a help fallback that no longer serves the application shell as a manual, and a refreshed dependency baseline (jsdom 30, dotenv 18, Babel 8.0.6, DOMPurify 3.4.16) with a raised Node.js floor (`^22.22.2 || >=24.15.0`). `npm audit` reports no advisories. Operators should upgrade to v2.9.0 before opening new support or security issues.
+OpenDocViewer v2.9.0 and earlier are superseded by v2.10.0 and are no longer supported for production deployments. v2.10.0 keeps the complete v2.9.0 security baseline - default frame-embedding policy, fail-closed system-log token handling, guarded OMP seed writes, the corrected Content-Security-Policy `connect-src` directive, memory-capped PDF rasterization, visible site-configuration load status, subnet-grouped IPv6 rate limiting in the optional log servers, the print fallback and the help fallback - and adds a search field in the help dialog. The manual HTML is still sanitized with the same DOMPurify configuration; the search is part of the dialog's own code and highlights matches without adding markup to the sanitized manual (CSS Custom Highlight API, with a `<mark>` fallback that is removed again). No dependencies were added. Operators should upgrade to v2.10.0 before opening new support or security issues.
 
 Earlier releases are retained for historical reference only and are **not supported** for current production deployments, even if they were previously marked as safe.
 
 | Version | Security support | Notes |
 | ------- | ---------------- | ----- |
-| 2.9.0   | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.10.0  | :white_check_mark: | Current recommended release and only supported baseline |
+| 2.9.0   | :x: | Superseded by v2.10.0 (help-dialog search on the v2.9.0 baseline); upgrade required |
 | 2.8.0   | :x: | Superseded by v2.9.0 rate-limit, print-fallback and dependency fixes; upgrade required |
 | 2.7.1   | :x: | Superseded by v2.8.0 advisory fixes and dependency baseline; upgrade required |
 | 2.7.0   | :x: | Superseded by v2.7.1 advisory fixes and the CSP `connect-src` correction; upgrade required |
@@ -18,7 +19,12 @@ Earlier releases are retained for historical reference only and are **not suppor
 
 ## Recent release context
 
-The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.9.0 is supported.
+The most recent releases are listed below for operational context. Historical entries are kept to explain upgrade impact, but only v2.10.0 is supported.
+
+### OpenDocViewer v2.10.0
+Changes since v2.9.0:
+
+- The help dialog has a search field in its header: matches in the rendered manual are highlighted, a counter shows "N of M", Enter / Shift+Enter and the previous/next buttons move between matches, Escape clears the search, and collapsed `<details>` sections open when the current match is inside them. Matching is case-insensitive per the UI language. The manual HTML is sanitized exactly as before (same DOMPurify configuration, `script`/`form`/`input`/`button` still forbidden); the search lives in the dialog's React code and never injects markup into the sanitized manual beyond temporary `<mark>` elements in browsers without the CSS Custom Highlight API, which are removed again.
 
 ### OpenDocViewer v2.9.0
 Changes since v2.8.0:
