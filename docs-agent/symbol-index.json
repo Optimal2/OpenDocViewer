@@ -6465,13 +6465,130 @@
     "examples": 0
   },
   {
+    "id": "applyCustomHighlight",
+    "name": "applyCustomHighlight",
+    "longname": "applyCustomHighlight",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 225,
+    "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
+    "params": [
+      {
+        "name": "matches",
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "currentIndex",
+        "type": "number",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "applyMarkFallback",
+    "name": "applyMarkFallback",
+    "longname": "applyMarkFallback",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 272,
+    "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "matches",
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<Element>",
+        "description": "Created mark elements in hit-index order."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "canUseCustomHighlight",
+    "name": "canUseCustomHighlight",
+    "longname": "canUseCustomHighlight",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 208,
+    "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": "True when the CSS Custom Highlight API can be used."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "collectManualTextMatches",
+    "name": "collectManualTextMatches",
+    "longname": "collectManualTextMatches",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 171,
+    "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
+    "params": [
+      {
+        "name": "root",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "query",
+        "type": "string",
+        "optional": false,
+        "description": "Already trimmed search text."
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "BCP-47 language tag used for case folding."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<{node: Text, start: number, end: number}>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module.exports",
     "name": "exports",
     "longname": "module.exports",
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 125,
+    "line": 376,
     "description": "",
     "params": [
       {
@@ -6508,7 +6625,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 145,
+    "line": 439,
     "description": "",
     "params": [
       {
@@ -6547,6 +6664,102 @@
     "examples": 0
   },
   {
+    "id": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "name": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "longname": "MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 138,
+    "description": "Name of the CSS Custom Highlight covering only the current manual search hit.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "name": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "longname": "MANUAL_SEARCH_DEBOUNCE_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 128,
+    "description": "Debounce delay before a typed query is applied to the rendered manual text.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "name": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "longname": "MANUAL_SEARCH_HIGHLIGHT_NAME",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 133,
+    "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "name": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "longname": "MANUAL_SEARCH_MARK_ATTRIBUTE",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 143,
+    "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_MIN_LENGTH",
+    "name": "MANUAL_SEARCH_MIN_LENGTH",
+    "longname": "MANUAL_SEARCH_MIN_LENGTH",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 123,
+    "description": "Minimum query length before the manual search runs.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "normalizeManualSearchText",
+    "name": "normalizeManualSearchText",
+    "longname": "normalizeManualSearchText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 153,
+    "description": "Case-insensitive comparison that stays correct for Swedish characters such as å/ä/ö by lowering through the UI locale instead of raw code units.",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "BCP-47 language tag, e.g. sv ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "removeManualRefreshToken",
     "name": "removeManualRefreshToken",
     "longname": "removeManualRefreshToken",
@@ -6569,6 +6782,70 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "removeMarkFallback",
+    "name": "removeMarkFallback",
+    "longname": "removeMarkFallback",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 324,
+    "description": "Unwrap fallback marks and merge the split text nodes back together.",
+    "params": [
+      {
+        "name": "marks",
+        "type": "Array.<Element>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "revealManualMatch",
+    "name": "revealManualMatch",
+    "longname": "revealManualMatch",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 346,
+    "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "match",
+        "type": "Object|null",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "index",
+        "type": "number",
+        "optional": false,
+        "description": "Hit index to reveal."
+      },
+      {
+        "name": "session",
+        "type": "Object|null",
+        "optional": false,
+        "description": "Active highlight session."
+      }
+    ],
+    "returns": [],
     "examples": 0
   },
   {
@@ -6625,6 +6902,32 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "setCurrentMark",
+    "name": "setCurrentMark",
+    "longname": "setCurrentMark",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 307,
+    "description": "",
+    "params": [
+      {
+        "name": "marks",
+        "type": "Array.<Element>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "index",
+        "type": "number",
+        "optional": false,
+        "description": "Hit index shown as current."
+      }
+    ],
+    "returns": [],
     "examples": 0
   },
   {

@@ -686,6 +686,13 @@
     "refreshManual": "Reload manual from server",
     "manualNotAvailable": "No manual file could be loaded for this language.",
     "manualPathsHint": "Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.",
+    "searchManual": "Search the manual…",
+    "searchManualLabel": "Search the manual",
+    "searchMatchCount": "{current} of {total}",
+    "searchNoMatches": "No matches",
+    "searchPrevious": "Previous match",
+    "searchNext": "Next match",
+    "searchClear": "Clear search",
     "menu": {
       "manual": "Manual",
       "about": "About OpenDocViewer"

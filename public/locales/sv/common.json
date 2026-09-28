@@ -686,6 +686,13 @@
     "refreshManual": "Ladda om manual från servern",
     "manualNotAvailable": "Ingen manualfil kunde laddas för detta språk.",
     "manualPathsHint": "Lägg en lokal HTML-fil under help/site/ eller använd den inbyggda fallback-filen under help/default/.",
+    "searchManual": "Sök i manualen…",
+    "searchManualLabel": "Sök i manualen",
+    "searchMatchCount": "{current} av {total}",
+    "searchNoMatches": "Inga träffar",
+    "searchPrevious": "Föregående träff",
+    "searchNext": "Nästa träff",
+    "searchClear": "Rensa sökning",
     "menu": {
       "manual": "Manual",
       "about": "Om OpenDocViewer"
