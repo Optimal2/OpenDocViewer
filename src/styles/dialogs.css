@@ -1047,6 +1047,15 @@
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color, #2563eb) 25%, transparent 75%);
 }
 
+/* Forced-colors (high contrast) mode does not paint box-shadow, and the input
+   itself suppresses its outline, so draw a real system-color outline instead. */
+@media (forced-colors: active) {
+  .odv-manual-searchbar-field:focus-within {
+    outline: 2px solid Highlight;
+    outline-offset: 2px;
+  }
+}
+
 .odv-manual-searchbar-clear {
   display: inline-flex;
   flex: 0 0 auto;

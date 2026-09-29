@@ -138,30 +138,85 @@ const MANUAL_SEARCH_HIGHLIGHT_NAME = 'odv-manual-search';
 const MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME = 'odv-manual-search-current';
 
 /**
- * Attribute marking fallback `<mark>` wrappers with their hit index.
+ * Attribute marking fallback `<mark>` wrappers with their hit index. Only marks
+ * carrying it belong to the search; `<mark>` elements authored in the manual
+ * itself stay searchable and are never unwrapped.
  */
 const MANUAL_SEARCH_MARK_ATTRIBUTE = 'data-odv-manual-mark';
 
 /**
- * Case-insensitive comparison that stays correct for Swedish characters such
- * as å/ä/ö by lowering through the UI locale instead of raw code units.
+ * Build a case-folding function that lowers one character through the UI
+ * locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw
+ * code units. An invalid language tag falls back to locale-independent
+ * lowering.
  *
- * @param {*} value
  * @param {string} language BCP-47 language tag, e.g. `sv`.
- * @returns {string}
+ * @returns {function(string): string}
  */
-function normalizeManualSearchText(value, language) {
-  const text = String(value ?? '');
+function createManualSearchFolder(language) {
+  let locale = language || undefined;
   try {
-    return text.toLocaleLowerCase(language || undefined);
+    'a'.toLocaleLowerCase(locale);
   } catch {
-    return text.toLowerCase();
+    locale = undefined;
   }
+  const cache = new Map();
+  return (character) => {
+    let folded = cache.get(character);
+    if (folded === undefined) {
+      try {
+        folded = character.toLocaleLowerCase(locale);
+      } catch {
+        folded = character.toLowerCase();
+      }
+      cache.set(character, folded);
+    }
+    return folded;
+  };
+}
+
+/**
+ * Case-fold text one code point at a time and keep, for every folded code
+ * unit, the original code-unit range of the character it came from.
+ *
+ * Lower-casing can change the length (U+0130 "İ" becomes "i" + U+0307), so an
+ * offset found in the folded string is not an offset in the original text.
+ * The index map translates every hit back to the original text node, which is
+ * what ranges and `<mark>` wrappers need. Folding the query the same way keeps
+ * both sides on identical rules, including context-free handling of
+ * characters such as the Greek final sigma.
+ *
+ * @param {string} text
+ * @param {function(string): string} fold
+ * @returns {{folded: string, sourceStart: Array<number>, sourceEnd: Array<number>, foldedStartAt: Array<number>}}
+ *   `sourceStart`/`sourceEnd` are indexed by folded code unit; `foldedStartAt`
+ *   is indexed by original character-start offset (and `text.length`).
+ */
+function foldManualSearchText(text, fold) {
+  let folded = '';
+  const sourceStart = [];
+  const sourceEnd = [];
+  const foldedStartAt = [];
+  let offset = 0;
+  for (const character of text) {
+    const end = offset + character.length;
+    const lowered = fold(character);
+    foldedStartAt[offset] = folded.length;
+    for (let unit = 0; unit < lowered.length; unit += 1) {
+      sourceStart.push(offset);
+      sourceEnd.push(end);
+    }
+    folded += lowered;
+    offset = end;
+  }
+  foldedStartAt[offset] = folded.length;
+  return { folded, sourceStart, sourceEnd, foldedStartAt };
 }
 
 /**
  * Find every non-overlapping occurrence of the query in the rendered manual
- * text. Script/style content and leftover fallback marks never match.
+ * text. Script/style content and the search's own leftover marks never match.
+ * Returned offsets always refer to the original text node value.
  *
  * @param {Element} root Rendered manual container.
  * @param {string} query Already trimmed search text.
@@ -171,8 +226,9 @@ function normalizeManualSearchText(value, language) {
 function collectManualTextMatches(root, query, language) {
   const matches = [];
   if (!root || typeof query !== 'string') return matches;
-  const normalizedQuery = normalizeManualSearchText(query, language);
-  if (!normalizedQuery) return matches;
+  const fold = createManualSearchFolder(language);
+  const foldedQuery = foldManualSearchText(query, fold).folded;
+  if (!foldedQuery) return matches;
   const doc = root.ownerDocument || document;
   const showText = typeof NodeFilter !== 'undefined' ? NodeFilter.SHOW_TEXT : 4;
   const filterAccept = typeof NodeFilter !== 'undefined' ? NodeFilter.FILTER_ACCEPT : 1;
@@ -183,19 +239,24 @@ function collectManualTextMatches(root, query, language) {
       const parent = node.parentElement;
       if (!parent || !root.contains(parent)) return filterReject;
       const tagName = String(parent.tagName || '').toUpperCase();
-      if (tagName === 'SCRIPT' || tagName === 'STYLE' || tagName === 'MARK') return filterReject;
+      if (tagName === 'SCRIPT' || tagName === 'STYLE') return filterReject;
+      if (tagName === 'MARK' && parent.hasAttribute(MANUAL_SEARCH_MARK_ATTRIBUTE)) return filterReject;
       return filterAccept;
     },
   });
   let current = walker.nextNode();
   while (current) {
-    const normalized = normalizeManualSearchText(current.nodeValue, language);
+    const { folded, sourceStart, sourceEnd, foldedStartAt } = foldManualSearchText(current.nodeValue, fold);
     let fromIndex = 0;
     for (;;) {
-      const found = normalized.indexOf(normalizedQuery, fromIndex);
+      const found = folded.indexOf(foldedQuery, fromIndex);
       if (found < 0) break;
-      matches.push({ node: current, start: found, end: found + normalizedQuery.length });
-      fromIndex = found + normalizedQuery.length;
+      const start = sourceStart[found];
+      const end = sourceEnd[found + foldedQuery.length - 1];
+      matches.push({ node: current, start, end });
+      // Continue after the last original character of the hit, so a hit that
+      // ends inside a multi-unit folding never overlaps the next one.
+      fromIndex = foldedStartAt[end];
     }
     current = walker.nextNode();
   }
@@ -218,18 +279,24 @@ function canUseCustomHighlight() {
  * Highlight every match through the CSS Custom Highlight API without touching
  * the manual DOM at all.
  *
+ * Only matches that produced a range are returned, so the caller's counter and
+ * `ranges[index]` always describe the same hit.
+ *
  * @param {Array<{node: Text, start: number, end: number}>} matches
  * @param {number} currentIndex
- * @returns {{setCurrent: function(number): void, cleanup: function(): void}}
+ * @returns {{matches: Array<{node: Text, start: number, end: number}>, setCurrent: function(number): void, cleanup: function(): void}}
  */
 function applyCustomHighlight(matches, currentIndex) {
   const ranges = [];
-  matches.forEach(({ node, start, end }) => {
+  const kept = [];
+  matches.forEach((match) => {
+    const { node, start, end } = match;
     try {
       const range = (node.ownerDocument || document).createRange();
       range.setStart(node, start);
       range.setEnd(node, end);
       ranges.push(range);
+      kept.push(match);
     } catch {
       // Skip matches whose text node changed under us.
     }
@@ -252,6 +319,7 @@ function applyCustomHighlight(matches, currentIndex) {
   }
   setCurrent(currentIndex);
   return {
+    matches: kept,
     setCurrent,
     cleanup() {
       try { CSS.highlights.delete(MANUAL_SEARCH_HIGHLIGHT_NAME); } catch { /* ignore */ }
@@ -262,15 +330,19 @@ function applyCustomHighlight(matches, currentIndex) {
 
 /**
  * Fallback highlighter for browsers without the CSS Custom Highlight API:
- * wrap every match in a `<mark>` carrying its hit index. Callers must pass the
- * returned elements to {@link removeMarkFallback} when the search ends.
+ * wrap every match in a `<mark>` carrying its hit index. Only matches that
+ * were actually wrapped are returned, and the marks are indexed in the same
+ * order, so the counter and the current mark always describe the same hit.
+ * Callers must pass the returned marks to {@link removeMarkFallback} when the
+ * search ends.
  *
  * @param {Element} container Rendered manual container.
  * @param {Array<{node: Text, start: number, end: number}>} matches
- * @returns {Array<Element>} Created mark elements in hit-index order.
+ * @returns {{matches: Array<{node: Text, start: number, end: number}>, marks: Array<Element>}}
  */
 function applyMarkFallback(container, matches) {
   const doc = container.ownerDocument || document;
+  const created = matches.map(() => null);
   const byNode = new Map();
   matches.forEach((match, index) => {
     if (!match || !match.node || !container.contains(match.node)) return;
@@ -288,26 +360,32 @@ function applyMarkFallback(container, matches) {
         range.setEnd(node, end);
         const mark = doc.createElement('mark');
         mark.className = 'odv-manual-mark';
-        mark.setAttribute(MANUAL_SEARCH_MARK_ATTRIBUTE, String(index));
         range.surroundContents(mark);
+        created[index] = mark;
       } catch {
         // Skip matches that no longer slice cleanly after a concurrent DOM change.
       }
     });
   });
-  return matches
-    .map((_, index) => container.querySelector(`mark[${MANUAL_SEARCH_MARK_ATTRIBUTE}="${index}"]`))
-    .filter(Boolean);
+  const kept = [];
+  const marks = [];
+  created.forEach((mark, index) => {
+    if (!mark) return;
+    mark.setAttribute(MANUAL_SEARCH_MARK_ATTRIBUTE, String(marks.length));
+    marks.push(mark);
+    kept.push(matches[index]);
+  });
+  return { matches: kept, marks };
 }
 
 /**
- * @param {Array<Element>} marks
+ * @param {Array<Element>} marks Search marks in hit-index order.
  * @param {number} index Hit index shown as current.
  */
 function setCurrentMark(marks, index) {
-  (marks || []).forEach((mark) => {
+  (marks || []).forEach((mark, markIndex) => {
     if (!mark || !mark.isConnected) return;
-    if (mark.getAttribute(MANUAL_SEARCH_MARK_ATTRIBUTE) === String(index)) {
+    if (markIndex === index) {
       mark.classList.add('is-current');
     } else {
       mark.classList.remove('is-current');
@@ -316,7 +394,9 @@ function setCurrentMark(marks, index) {
 }
 
 /**
- * Unwrap fallback marks and merge the split text nodes back together.
+ * Unwrap fallback marks and merge the split text nodes back together. This
+ * also runs on a subtree React has already detached (the dialog closed), so
+ * it relies on each mark's parent rather than on document connection.
  *
  * @param {Array<Element>} marks
  * @param {Element} container Rendered manual container.
@@ -324,7 +404,7 @@ function setCurrentMark(marks, index) {
 function removeMarkFallback(marks, container) {
   (marks || []).forEach((mark) => {
     try {
-      if (!mark || !mark.isConnected) return;
+      if (!mark) return;
       const parent = mark.parentNode;
       if (!parent) return;
       while (mark.firstChild) parent.insertBefore(mark.firstChild, mark);
@@ -341,13 +421,13 @@ function removeMarkFallback(marks, container) {
  * @param {Element} container Rendered manual container.
  * @param {{node: Text}|null} match
  * @param {number} index Hit index to reveal.
- * @param {{useMarks: boolean}|null} session Active highlight session.
+ * @param {{useMarks: boolean, marks: (Array<Element>|null)}|null} session Active highlight session.
  */
 function revealManualMatch(container, match, index, session) {
   if (!container || !match) return;
   let target = null;
   if (session && session.useMarks) {
-    target = container.querySelector(`mark[${MANUAL_SEARCH_MARK_ATTRIBUTE}="${index}"]`);
+    target = session.marks?.[index] || null;
   }
   if (!target && match.node) target = match.node.parentElement;
   if (!target || !container.contains(target)) return;
@@ -380,7 +460,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   const searchInputRef = useRef(/** @type {(HTMLInputElement|null)} */ (null));
   const searchQueryRef = useRef('');
   const clearSearchRef = useRef(() => {});
-  const searchSessionRef = useRef(/** @type {({matches: Array, useMarks: boolean, setCurrent: function(number): void, cleanup: function(): void}|null)} */ (null));
+  const searchSessionRef = useRef(/** @type {({matches: Array, useMarks: boolean, marks: (Array<Element>|null), setCurrent: function(number): void, cleanup: function(): void}|null)} */ (null));
   const [manualState, setManualState] = useState({ loading: false, error: '', html: '', resolvedUrl: '' });
   const [refreshToken, setRefreshToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -440,13 +520,18 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       if (String(event?.key || '') !== 'Escape') return;
       const target = event?.target;
       if (target && typeof target.closest === 'function'
-        && target.closest('[data-odv-manual-search="input"]') && searchQueryRef.current) {
-        // Escape inside the manual search box clears the query; the dialog
-        // stays open. The native capture listener runs before React handlers,
-        // so stop here to keep the backdrop handler from closing the dialog.
+        && target.closest('[data-odv-manual-search="bar"]') && searchQueryRef.current) {
+        // Escape anywhere in the search row (field, clear or previous/next
+        // button) clears an active query; the dialog stays open and the next
+        // Escape closes it. The native capture listener runs before React
+        // handlers, so stop here to keep the backdrop handler from closing
+        // the dialog.
         event.preventDefault();
         event.stopPropagation();
         clearSearchRef.current();
+        // The clear button unmounts with the query; keep keyboard focus in
+        // the search row instead of dropping it to the document body.
+        if (target !== searchInputRef.current) searchInputRef.current?.focus?.();
         return;
       }
       event.preventDefault();
@@ -538,28 +623,38 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       setCurrentSearchMatch(0);
       return undefined;
     }
-    const matches = collectManualTextMatches(container, debouncedSearchQuery, language);
-    setSearchMatchCount(matches.length);
+    const found = collectManualTextMatches(container, debouncedSearchQuery, language);
     setCurrentSearchMatch(0);
-    if (matches.length === 0) return undefined;
+    if (found.length === 0) {
+      setSearchMatchCount(0);
+      return undefined;
+    }
     let session;
     if (canUseCustomHighlight()) {
-      const applied = applyCustomHighlight(matches, 0);
+      const applied = applyCustomHighlight(found, 0);
       session = {
-        matches, useMarks: false, setCurrent: applied.setCurrent, cleanup: applied.cleanup,
+        matches: applied.matches,
+        useMarks: false,
+        marks: null,
+        setCurrent: applied.setCurrent,
+        cleanup: applied.cleanup,
       };
     } else {
-      const marks = applyMarkFallback(container, matches);
+      const { matches, marks } = applyMarkFallback(container, found);
       setCurrentMark(marks, 0);
       session = {
         matches,
         useMarks: true,
+        marks,
         setCurrent: (index) => setCurrentMark(marks, index),
         cleanup: () => removeMarkFallback(marks, container),
       };
     }
+    // Count only hits that are actually highlighted, so "N of M" never
+    // includes a hit the user cannot see.
+    setSearchMatchCount(session.matches.length);
     searchSessionRef.current = session;
-    revealManualMatch(container, matches[0], 0, session);
+    revealManualMatch(container, session.matches[0], 0, session);
     return () => {
       if (searchSessionRef.current === session) searchSessionRef.current = null;
       session.cleanup();
@@ -656,7 +751,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
         </div>
 
         {manualState.html ? (
-          <div className="odv-manual-searchbar" role="search">
+          <div className="odv-manual-searchbar" role="search" data-odv-manual-search="bar">
             <label className="odv-manual-searchbar-label" htmlFor="odv-manual-search-input">
               {t('help.searchManualLabel', { defaultValue: 'Search the manual' })}
             </label>

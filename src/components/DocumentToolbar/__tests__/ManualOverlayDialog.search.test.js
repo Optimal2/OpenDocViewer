@@ -5,8 +5,11 @@
 // sanitized manual HTML, where DOMPurify strips input/button elements). Search
 // highlights every hit, counts "N of M", moves with previous/next buttons and
 // Enter/Shift+Enter, clears with Escape, opens collapsed <details> holding the
-// current hit, and keeps the manual sanitization unchanged. Plain
-// createElement: the repo's ESLint setup does not parse JSX in test files.
+// current hit, and keeps the manual sanitization unchanged. Most tests run the
+// <mark> fallback because jsdom has no CSS Custom Highlight API; the
+// "CSS Custom Highlight path" block stubs CSS.highlights/Highlight to cover the
+// path modern browsers take. Plain createElement: the repo's ESLint setup does
+// not parse JSX in test files.
 import React from 'react';
 import { act } from 'react';
 import { createRoot } from 'react-dom/client';
@@ -64,6 +67,7 @@ describe('ManualOverlayDialog manual search', () => {
   let container;
   let root;
   let onClose;
+  let manualHtml;
 
   function marks() {
     return Array.from(container.querySelectorAll('.odv-manual-content mark[data-odv-manual-mark]'));
@@ -83,11 +87,11 @@ describe('ManualOverlayDialog manual search', () => {
 
   beforeEach(() => {
     onClose = vi.fn();
-    vi.stubGlobal('fetch', async (url) => ({
-      ok: true,
-      url: String(url),
-      text: async () => MANUAL_HTML,
-    }));
+    manualHtml = MANUAL_HTML;
+    vi.stubGlobal('fetch', async (url) => {
+      const html = manualHtml;
+      return { ok: true, url: String(url), text: async () => html };
+    });
     window.HTMLElement.prototype.scrollIntoView = vi.fn();
     container = document.createElement('div');
     document.body.appendChild(container);
@@ -98,6 +102,7 @@ describe('ManualOverlayDialog manual search', () => {
   });
 
   afterEach(() => {
+    vi.useRealTimers();
     act(() => {
       root.unmount();
     });
@@ -114,6 +119,36 @@ describe('ManualOverlayDialog manual search', () => {
   async function searchFor(value) {
     typeSearch(searchInput(), value);
     await flush(260);
+  }
+
+  function content() {
+    return container.querySelector('.odv-manual-content');
+  }
+
+  function button(label) {
+    return container.querySelector(`button[aria-label="${label}"]`);
+  }
+
+  /** Swap the served manual and reload it through the dialog's refresh button. */
+  async function loadManual(html) {
+    manualHtml = html;
+    act(() => {
+      button('Reload manual from server').click();
+    });
+    await flush(50);
+    expect(searchInput()).not.toBeNull();
+  }
+
+  function stubCustomHighlight() {
+    const registry = new Map();
+    class FakeHighlight {
+      constructor(...ranges) {
+        this.ranges = ranges;
+      }
+    }
+    vi.stubGlobal('CSS', { highlights: registry });
+    vi.stubGlobal('Highlight', FakeHighlight);
+    return registry;
   }
 
   it('shows a search field once the manual is loaded', async () => {
@@ -212,5 +247,214 @@ describe('ManualOverlayDialog manual search', () => {
     // The search box itself is dialog chrome, not manual content.
     expect(searchInput()).not.toBeNull();
     expect(window.__odvManualPwned).toBeUndefined();
+  });
+
+  it('keeps hits aligned with the original text when lower-casing changes its length', async () => {
+    await waitForManual();
+    // U+0130 lower-cases to two code units ("i" + combining dot above).
+    await loadManual('<p>\u0130\u0130 manual \u0130 manual</p>');
+    await searchFor('manual');
+    expect(counter().textContent).toBe('1 of 2');
+    expect(marks()).toHaveLength(2);
+    expect(marks().map((mark) => mark.textContent)).toEqual(['manual', 'manual']);
+    expect(currentMark()?.getAttribute('data-odv-manual-mark')).toBe('0');
+  });
+
+  it('matches a query that itself contains a length-changing capital', async () => {
+    await waitForManual();
+    await loadManual('<p>\u0130stanbul and \u0130STANBUL are the same word.</p>');
+    await searchFor('\u0130stanbul');
+    expect(counter().textContent).toBe('1 of 2');
+    expect(marks().map((mark) => mark.textContent)).toEqual(['\u0130stanbul', '\u0130STANBUL']);
+  });
+
+  it('still folds \u00e5/\u00e4/\u00f6 and \u00df case-insensitively', async () => {
+    await waitForManual();
+    await loadManual('<p>Stra\u00dfe, STRA\u1e9eE och stra\u00dfe. \u00c5\u00c4\u00d6 och \u00e5\u00e4\u00f6.</p>');
+    await searchFor('stra\u00dfe');
+    expect(counter().textContent).toBe('1 of 3');
+    expect(marks()).toHaveLength(3);
+    await searchFor('\u00e5\u00e4\u00f6');
+    expect(counter().textContent).toBe('1 of 2');
+    expect(marks().map((mark) => mark.textContent)).toEqual(['\u00c5\u00c4\u00d6', '\u00e5\u00e4\u00f6']);
+  });
+
+  it('searches text inside the manual\'s own <mark> elements', async () => {
+    await waitForManual();
+    await loadManual('<p>Use the <mark>highlighted term</mark> in the manual.</p>');
+    await searchFor('highlighted');
+    expect(counter().textContent).toBe('1 of 1');
+    expect(marks()).toHaveLength(1);
+    expect(marks()[0].parentElement.tagName).toBe('MARK');
+    act(() => {
+      button('Clear search').click();
+    });
+    await flush(260);
+    expect(marks()).toHaveLength(0);
+    // The manual's own mark is untouched by the cleanup.
+    expect(content().querySelectorAll('mark:not([data-odv-manual-mark])')).toHaveLength(1);
+    expect(content().querySelector('mark').textContent).toBe('highlighted term');
+  });
+
+  it('clears the search with Escape while focus is on a search navigation button', async () => {
+    await waitForManual();
+    await searchFor('manual');
+    const next = button('Next match');
+    next.focus();
+    pressKey(next, 'Escape');
+    await flush(260);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(searchInput().value).toBe('');
+    expect(marks()).toHaveLength(0);
+    expect(document.activeElement).toBe(searchInput());
+    // The next Escape closes the dialog as usual.
+    pressKey(document.activeElement, 'Escape');
+    expect(onClose).toHaveBeenCalledTimes(1);
+  });
+
+  it('clears the search with Escape while focus is on the clear button', async () => {
+    await waitForManual();
+    await searchFor('manual');
+    const clear = button('Clear search');
+    clear.focus();
+    pressKey(clear, 'Escape');
+    await flush(260);
+    expect(onClose).not.toHaveBeenCalled();
+    expect(searchInput().value).toBe('');
+  });
+
+  it('waits 200 ms after the last keystroke before searching', async () => {
+    await waitForManual();
+    vi.useFakeTimers();
+    typeSearch(searchInput(), 'man');
+    act(() => {
+      vi.advanceTimersByTime(150);
+    });
+    typeSearch(searchInput(), 'manual');
+    act(() => {
+      vi.advanceTimersByTime(199);
+    });
+    expect(marks()).toHaveLength(0);
+    expect(counter().textContent).toBe('');
+    act(() => {
+      vi.advanceTimersByTime(1);
+    });
+    expect(marks()).toHaveLength(4);
+    expect(counter().textContent).toBe('1 of 4');
+  });
+
+  it('removes the marks and restores the text nodes when the manual is swapped', async () => {
+    await waitForManual();
+    await searchFor('manual');
+    expect(marks()).toHaveLength(4);
+    await loadManual('<p>Another manual text.</p><p>No hits here.</p>');
+    // The still-active query runs against the new manual only.
+    expect(counter().textContent).toBe('1 of 1');
+    expect(marks()).toHaveLength(1);
+    const [withHit, withoutHit] = content().querySelectorAll('p');
+    expect(withoutHit.childNodes).toHaveLength(1);
+    act(() => {
+      button('Clear search').click();
+    });
+    await flush(260);
+    expect(marks()).toHaveLength(0);
+    expect(withHit.childNodes).toHaveLength(1);
+    expect(withHit.textContent).toBe('Another manual text.');
+  });
+
+  it('removes the marks and restores the text nodes when the dialog closes', async () => {
+    await waitForManual();
+    await searchFor('manual');
+    const manual = content();
+    const paragraph = manual.querySelector('p');
+    expect(paragraph.querySelectorAll('mark[data-odv-manual-mark]')).toHaveLength(2);
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
+    });
+    expect(container.querySelector('.odv-manual-content')).toBeNull();
+    expect(manual.querySelectorAll('mark[data-odv-manual-mark]')).toHaveLength(0);
+    expect(paragraph.childNodes).toHaveLength(1);
+    expect(paragraph.textContent).toBe('The manual explains the viewer. Read this manual page first.');
+  });
+
+  describe('CSS Custom Highlight path', () => {
+    function rangeText(range) {
+      return range ? range.toString() : null;
+    }
+
+    it('highlights through CSS.highlights without touching the manual DOM', async () => {
+      const registry = stubCustomHighlight();
+      await waitForManual();
+      const before = content().innerHTML;
+      await searchFor('manual');
+      expect(marks()).toHaveLength(0);
+      expect(content().innerHTML).toBe(before);
+      expect(counter().textContent).toBe('1 of 4');
+      const all = registry.get('odv-manual-search');
+      expect(all.ranges).toHaveLength(4);
+      expect(all.ranges.map(rangeText)).toEqual(['manual', 'manual', 'manual', 'manual']);
+      const current = () => registry.get('odv-manual-search-current').ranges[0];
+      expect(current()).toBe(all.ranges[0]);
+      act(() => {
+        button('Next match').click();
+      });
+      expect(counter().textContent).toBe('2 of 4');
+      expect(current()).toBe(all.ranges[1]);
+      pressKey(searchInput(), 'Enter', { shiftKey: true });
+      pressKey(searchInput(), 'Enter', { shiftKey: true });
+      expect(counter().textContent).toBe('4 of 4');
+      expect(current()).toBe(all.ranges[3]);
+    });
+
+    it('keeps the current range in step with the counter when lower-casing changes the length', async () => {
+      const registry = stubCustomHighlight();
+      await waitForManual();
+      await loadManual('<p>\u0130\u0130 manual \u0130 manual</p>');
+      await searchFor('manual');
+      expect(counter().textContent).toBe('1 of 2');
+      const all = registry.get('odv-manual-search');
+      expect(all.ranges.map(rangeText)).toEqual(['manual', 'manual']);
+      act(() => {
+        button('Next match').click();
+      });
+      expect(counter().textContent).toBe('2 of 2');
+      const current = registry.get('odv-manual-search-current').ranges[0];
+      expect(current).toBe(all.ranges[1]);
+      expect(current.startOffset).toBe(12);
+    });
+
+    it('removes both highlights when the search is cleared', async () => {
+      const registry = stubCustomHighlight();
+      await waitForManual();
+      await searchFor('manual');
+      expect(registry.size).toBe(2);
+      pressKey(searchInput(), 'Escape');
+      await flush(260);
+      expect(registry.size).toBe(0);
+      expect(onClose).not.toHaveBeenCalled();
+    });
+
+    it('removes both highlights when the dialog closes', async () => {
+      const registry = stubCustomHighlight();
+      await waitForManual();
+      await searchFor('manual');
+      expect(registry.size).toBe(2);
+      act(() => {
+        root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
+      });
+      expect(registry.size).toBe(0);
+    });
+
+    it('replaces the highlights when the manual is swapped', async () => {
+      const registry = stubCustomHighlight();
+      await waitForManual();
+      await searchFor('manual');
+      expect(registry.get('odv-manual-search').ranges).toHaveLength(4);
+      await loadManual('<p>Another manual text.</p>');
+      expect(counter().textContent).toBe('1 of 1');
+      const all = registry.get('odv-manual-search');
+      expect(all.ranges).toHaveLength(1);
+      expect(all.ranges[0].startContainer.isConnected).toBe(true);
+    });
   });
 });
