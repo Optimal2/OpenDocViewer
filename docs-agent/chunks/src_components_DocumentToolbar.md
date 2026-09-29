@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 16. Line count: 7000. JSDoc symbol count: 109.
+File count: 16. Line count: 7095. JSDoc symbol count: 110.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -109,8 +109,8 @@ Symbols:
 - `MANUAL_SEARCH_HIGHLIGHT_NAME` (constant) - Name of the shared CSS Custom Highlight covering every manual search hit.
 - `MANUAL_SEARCH_CURRENT_HIGHLIGHT_NAME` (constant) - Name of the CSS Custom Highlight covering only the current manual search hit.
 - `MANUAL_SEARCH_MARK_ATTRIBUTE` (constant) - Attribute marking fallback &lt;mark&gt; wrappers with their hit index.
-- `normalizeManualSearchText` (function) - Case\-insensitive comparison that stays correct for Swedish characters such as å/ä/ö by lowering through the UI locale instead of raw code units.
-- `collectManualTextMatches` (function) - Find every non\-overlapping occurrence of the query in the rendered manual text.
+- `createManualSearchFolder` (function) - Build a case\-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.
+- `foldManualSearchText` (function) - Case\-fold text one code point at a time and keep, for every folded code unit, the original code\-unit range of the character it came from.
 
 ## src/components/DocumentToolbar/PageNavigationButtons.jsx
 

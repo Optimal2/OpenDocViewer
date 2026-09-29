@@ -6471,7 +6471,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 225,
+    "line": 289,
     "description": "Highlight every match through the CSS Custom Highlight API without touching the manual DOM at all.",
     "params": [
       {
@@ -6502,7 +6502,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 272,
+    "line": 343,
     "description": "Fallback highlighter for browsers without the CSS Custom Highlight API: wrap every match in a &lt;mark&gt; carrying its hit index.",
     "params": [
       {
@@ -6520,8 +6520,8 @@
     ],
     "returns": [
       {
-        "type": "Array.<Element>",
-        "description": "Created mark elements in hit-index order."
+        "type": "Object",
+        "description": ""
       }
     ],
     "examples": 0
@@ -6533,7 +6533,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 208,
+    "line": 269,
     "description": "",
     "params": [],
     "returns": [
@@ -6551,7 +6551,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 171,
+    "line": 226,
     "description": "Find every non-overlapping occurrence of the query in the rendered manual text.",
     "params": [
       {
@@ -6582,13 +6582,38 @@
     "examples": 0
   },
   {
+    "id": "createManualSearchFolder",
+    "name": "createManualSearchFolder",
+    "longname": "createManualSearchFolder",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 156,
+    "description": "Build a case-folding function that lowers one character through the UI locale, so Swedish characters such as å/ä/ö fold correctly instead of by raw code units.",
+    "params": [
+      {
+        "name": "language",
+        "type": "string",
+        "optional": false,
+        "description": "BCP-47 language tag, e.g. sv ."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module.exports",
     "name": "exports",
     "longname": "module.exports",
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 376,
+    "line": 456,
     "description": "",
     "params": [
       {
@@ -6619,13 +6644,44 @@
     "examples": 0
   },
   {
+    "id": "foldManualSearchText",
+    "name": "foldManualSearchText",
+    "longname": "foldManualSearchText",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 195,
+    "description": "Case-fold text one code point at a time and keep, for every folded code unit, the original code-unit range of the character it came from.",
+    "params": [
+      {
+        "name": "text",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "fold",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object",
+        "description": "sourceStart / sourceEnd are indexed by folded code unit; foldedStartAt is indexed by original character-start offset (and text.length )."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "<anonymous>~handleEscape",
     "name": "handleEscape",
     "longname": "<anonymous>~handleEscape",
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 439,
+    "line": 519,
     "description": "",
     "params": [
       {
@@ -6709,7 +6765,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 143,
+    "line": 145,
     "description": "Attribute marking fallback &lt;mark&gt; wrappers with their hit index.",
     "params": [],
     "returns": [],
@@ -6726,37 +6782,6 @@
     "description": "Minimum query length before the manual search runs.",
     "params": [],
     "returns": [],
-    "examples": 0
-  },
-  {
-    "id": "normalizeManualSearchText",
-    "name": "normalizeManualSearchText",
-    "longname": "normalizeManualSearchText",
-    "kind": "function",
-    "scope": "global",
-    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 153,
-    "description": "Case-insensitive comparison that stays correct for Swedish characters such as å/ä/ö by lowering through the UI locale instead of raw code units.",
-    "params": [
-      {
-        "name": "value",
-        "type": "*",
-        "optional": false,
-        "description": ""
-      },
-      {
-        "name": "language",
-        "type": "string",
-        "optional": false,
-        "description": "BCP-47 language tag, e.g. sv ."
-      }
-    ],
-    "returns": [
-      {
-        "type": "string",
-        "description": ""
-      }
-    ],
     "examples": 0
   },
   {
@@ -6791,7 +6816,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 324,
+    "line": 404,
     "description": "Unwrap fallback marks and merge the split text nodes back together.",
     "params": [
       {
@@ -6817,7 +6842,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 346,
+    "line": 426,
     "description": "Open collapsed &lt;details&gt; ancestors of the hit and scroll it into the dialog scroll container.",
     "params": [
       {
@@ -6911,14 +6936,14 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 307,
+    "line": 385,
     "description": "",
     "params": [
       {
         "name": "marks",
         "type": "Array.<Element>",
         "optional": false,
-        "description": ""
+        "description": "Search marks in hit-index order."
       },
       {
         "name": "index",
