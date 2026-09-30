@@ -191,6 +191,10 @@ try {
 
     # --- Step 3: Validate component versions -----------------------------------
     $validatePassed = $false
+    # The exception is scoped to this step: an ambient OMP_ALLOW_MISSING_PLATFORM
+    # from the caller's session is cleared, and the previous value is restored in
+    # finally so it never leaks into later steps of this process.
+    $savedAllowMissingPlatform = $env:OMP_ALLOW_MISSING_PLATFORM
     try {
         Write-Host "[3/4] Validating component version lockstep" -ForegroundColor Cyan
         if (-not (Test-Path $Validator)) {
@@ -209,6 +213,9 @@ try {
             Write-Warning 'Check 15 runs with OMP_ALLOW_MISSING_PLATFORM=1 (-AllowUnverifiedSharedScripts): a missing platform checkout is reported NOT VERIFIED instead of failing the gate.'
             $env:OMP_ALLOW_MISSING_PLATFORM = '1'
         }
+        else {
+            $env:OMP_ALLOW_MISSING_PLATFORM = $null
+        }
         $global:LASTEXITCODE = 0
         & $Validator -BaseCommit $BaseCommit -Strict:(-not $AllowUnverifiedSharedScripts) -PlatformRepositoryRoot $PlatformRepositoryRoot
         if ($LASTEXITCODE -eq 0) {
@@ -218,6 +225,9 @@ try {
     catch {
         Write-Host "Validation step threw an exception: $_" -ForegroundColor Red
         $validatePassed = $false
+    }
+    finally {
+        $env:OMP_ALLOW_MISSING_PLATFORM = $savedAllowMissingPlatform
     }
     Write-StepResult -StepName "Validate component versions" -Passed $validatePassed
     if (-not $validatePassed) { $overallSuccess = $false }
