@@ -7113,13 +7113,50 @@
     "examples": 0
   },
   {
+    "id": "resolvePrintFieldLabel",
+    "name": "resolvePrintFieldLabel",
+    "longname": "resolvePrintFieldLabel",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/printFieldLabels.js",
+    "line": 17,
+    "description": "",
+    "params": [
+      {
+        "name": "t",
+        "type": "function",
+        "optional": false,
+        "description": "i18next translate function"
+      },
+      {
+        "name": "baseKey",
+        "type": "string",
+        "optional": false,
+        "description": "locale key prefix, e.g. 'printDialog.forWhom'"
+      },
+      {
+        "name": "required",
+        "type": "boolean",
+        "optional": false,
+        "description": "whether the site config makes the field required"
+      }
+    ],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "PrintSubmitDetail",
     "name": "PrintSubmitDetail",
     "longname": "PrintSubmitDetail",
     "kind": "typedef",
     "scope": "global",
     "file": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-    "line": 13,
+    "line": 14,
     "description": "Structured payload returned to the caller on submit.",
     "params": [],
     "returns": [],

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentToolbar
 
-File count: 16. Line count: 7095. JSDoc symbol count: 110.
+File count: 17. Line count: 7120. JSDoc symbol count: 111.
 
 ## src/components/DocumentToolbar/AboutOverlayDialog.jsx
 
@@ -124,13 +124,23 @@ Symbols:
 
 - `clampPage` (function) - Page navigation button group.
 
+## src/components/DocumentToolbar/printFieldLabels.js
+
+Visible label for an optional/required print\-dialog field.
+
+Exports: `resolvePrintFieldLabel`
+
+Symbols:
+
+- `resolvePrintFieldLabel` (function) - No description.
+
 ## src/components/DocumentToolbar/PrintRangeDialog.jsx
 
 Unified print dialog with a single print\-method selector and shared print\-details section.
 
 Exports: `PrintRangeDialog`
 
-Local imports: `src/components/DocumentToolbar/usePrintRangeDialog.js`
+Local imports: `src/components/DocumentToolbar/usePrintRangeDialog.js`, `src/components/DocumentToolbar/printFieldLabels.js`
 
 Symbols:
 

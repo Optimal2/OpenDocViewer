@@ -180,7 +180,8 @@
       }
     },
     "forWhom": {
-      "label": "Recipient (optional)",
+      "label": "Recipient",
+      "optionalLabel": "Recipient (optional)",
       "requiredHint": "Required. Max {max} characters.",
       "optionalHint": "Optional. Max {max} characters."
     },

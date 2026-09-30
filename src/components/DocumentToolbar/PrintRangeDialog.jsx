@@ -9,6 +9,7 @@ import React, { useMemo } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { usePrintRangeController } from './usePrintRangeDialog.js';
+import { resolvePrintFieldLabel } from './printFieldLabels.js';
 
 /**
  * Structured payload returned to the caller on submit.
@@ -63,6 +64,8 @@ export default function PrintRangeDialog({
     t,
     i18n,
   });
+
+  const forWhomLabel = resolvePrintFieldLabel(t, 'printDialog.forWhom', !!ctrl.forWhomCfg?.required);
 
   const modeOptions = useMemo(() => {
     const base = [
@@ -460,15 +463,15 @@ export default function PrintRangeDialog({
 
                   {ctrl.showForWhom ? (
                     <label className="odv-prd-labelBlock odv-prd-labelBlock-wide">
-                      <span>{t('printDialog.forWhom.label')} {ctrl.forWhomCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
+                      <span>{forWhomLabel} {ctrl.forWhomCfg?.required ? <span aria-hidden="true">*</span> : null}</span>
                       <input
                         type="text"
                         className="odv-prd-inputWide"
-                        placeholder={ctrl.forWhomPlaceholder || t('printDialog.forWhom.label')}
+                        placeholder={ctrl.forWhomPlaceholder || forWhomLabel}
                         maxLength={ctrl.forWhomMax || undefined}
                         value={ctrl.forWhomText}
                         onChange={(event) => ctrl.setForWhomText(event.target.value)}
-                        aria-label={t('printDialog.forWhom.label')}
+                        aria-label={forWhomLabel}
                       />
                       <span className="odv-prd-hint">
                         {ctrl.forWhomCfg?.required

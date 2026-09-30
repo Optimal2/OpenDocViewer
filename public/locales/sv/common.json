@@ -180,7 +180,8 @@
       }
     },
     "forWhom": {
-      "label": "Mottagare (valfritt)",
+      "label": "Mottagare",
+      "optionalLabel": "Mottagare (valfritt)",
       "requiredHint": "Obligatoriskt. Max {max} tecken.",
       "optionalHint": "Valfritt. Max {max} tecken."
     },

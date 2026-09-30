@@ -82,15 +82,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 117,
-    "sourceLineCount": 50457,
-    "docletCount": 1350,
-    "documentedFileCount": 117,
+    "fileCount": 118,
+    "sourceLineCount": 50482,
+    "docletCount": 1351,
+    "documentedFileCount": 118,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 21,
     "devDependencyCount": 19,
-    "estimatedSourceTokens": 3622
+    "estimatedSourceTokens": 3650
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -1015,9 +1015,9 @@
     },
     {
       "name": "src/components/DocumentToolbar",
-      "fileCount": 16,
-      "lineCount": 7095,
-      "docletCount": 110,
+      "fileCount": 17,
+      "lineCount": 7120,
+      "docletCount": 111,
       "importantFiles": [
         {
           "path": "src/components/DocumentToolbar/printRangeDialogHelpers.js",
@@ -13965,8 +13965,82 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/components/DocumentToolbar/printFieldLabels.js",
+      "lines": 22,
+      "extension": ".js",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Visible label for an optional/required print-dialog field.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "resolvePrintFieldLabel",
+          "kind": "function",
+          "line": 17
+        }
+      ],
+      "declarations": [
+        {
+          "name": "resolvePrintFieldLabel",
+          "kind": "function",
+          "line": 17
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "resolvePrintFieldLabel",
+          "name": "resolvePrintFieldLabel",
+          "longname": "resolvePrintFieldLabel",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentToolbar/printFieldLabels.js",
+          "line": 17,
+          "description": "",
+          "params": [
+            {
+              "name": "t",
+              "type": "function",
+              "optional": false,
+              "description": "i18next translate function"
+            },
+            {
+              "name": "baseKey",
+              "type": "string",
+              "optional": false,
+              "description": "locale key prefix, e.g. 'printDialog.forWhom'"
+            },
+            {
+              "name": "required",
+              "type": "boolean",
+              "optional": false,
+              "description": "whether the site config makes the field required"
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components/DocumentToolbar",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 16,
+      "summary": "Visible label for an optional/required print-dialog field.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
       "path": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-      "lines": 544,
+      "lines": 547,
       "extension": ".jsx",
       "jsdocBlockCount": 2,
       "sourceSummary": "Unified print dialog with a single print-method selector and shared print-details section.",
@@ -14003,20 +14077,28 @@
           ],
           "line": 11,
           "kind": "static"
+        },
+        {
+          "source": "./printFieldLabels.js",
+          "specifiers": [
+            "resolvePrintFieldLabel"
+          ],
+          "line": 12,
+          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "PrintRangeDialog",
           "kind": "default",
-          "line": 33
+          "line": 34
         }
       ],
       "declarations": [
         {
           "name": "PrintRangeDialog",
           "kind": "component",
-          "line": 33
+          "line": 34
         }
       ],
       "parseError": null,
@@ -14032,7 +14114,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-          "line": 13,
+          "line": 14,
           "description": "Structured payload returned to the caller on submit.",
           "params": [],
           "returns": [],
@@ -14049,6 +14131,15 @@
           "line": 11,
           "kind": "static",
           "resolved": "src/components/DocumentToolbar/usePrintRangeDialog.js"
+        },
+        {
+          "source": "./printFieldLabels.js",
+          "specifiers": [
+            "resolvePrintFieldLabel"
+          ],
+          "line": 12,
+          "kind": "static",
+          "resolved": "src/components/DocumentToolbar/printFieldLabels.js"
         }
       ],
       "packageImports": [
@@ -62074,13 +62165,50 @@
       "examples": 0
     },
     {
+      "id": "resolvePrintFieldLabel",
+      "name": "resolvePrintFieldLabel",
+      "longname": "resolvePrintFieldLabel",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentToolbar/printFieldLabels.js",
+      "line": 17,
+      "description": "",
+      "params": [
+        {
+          "name": "t",
+          "type": "function",
+          "optional": false,
+          "description": "i18next translate function"
+        },
+        {
+          "name": "baseKey",
+          "type": "string",
+          "optional": false,
+          "description": "locale key prefix, e.g. 'printDialog.forWhom'"
+        },
+        {
+          "name": "required",
+          "type": "boolean",
+          "optional": false,
+          "description": "whether the site config makes the field required"
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "PrintSubmitDetail",
       "name": "PrintSubmitDetail",
       "longname": "PrintSubmitDetail",
       "kind": "typedef",
       "scope": "global",
       "file": "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-      "line": 13,
+      "line": 14,
       "description": "Structured payload returned to the caller on submit.",
       "params": [],
       "returns": [],
