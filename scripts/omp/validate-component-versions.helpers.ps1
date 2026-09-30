@@ -82,6 +82,82 @@ function Add-ValidationWarning {
 }
 
 # ---------------------------------------------------------------------------
+# Finding the platform checkout for the cross-repository checks (14 and 15).
+# ---------------------------------------------------------------------------
+# A consumer validator calls Checks 14 and 15 from the OpenModulePlatform
+# checkout. Each consumer used to locate that checkout with its own repo-local
+# code, and when nothing was found it warned and exited 0 -- a green run for a
+# check that never ran, unless -Strict happened to be passed. One resolver here,
+# in the shared core, makes "not found" a validation error with the fix in the
+# message. The only way to accept a missing checkout is the explicit, named
+# exception OMP_ALLOW_MISSING_PLATFORM=1 (for example CI that checks out one
+# repository), and even then the check is reported as NOT VERIFIED.
+function Resolve-PlatformCheckScript {
+    <#
+    .SYNOPSIS
+    Returns @{ ScriptPath; PlatformRoot } for a script in the OpenModulePlatform
+    checkout, or $null after recording an error (or, under the explicit
+    OMP_ALLOW_MISSING_PLATFORM=1 exception, a NOT VERIFIED warning).
+
+    .DESCRIPTION
+    Resolution order: -PlatformRepositoryRoot, then $env:OMP_PLATFORM_ROOT, then
+    $env:OpenModulePlatformRoot, then the sibling directory ..\OpenModulePlatform.
+    A relative root is anchored at RepositoryRoot, not the current directory.
+    A root that was NAMED (parameter or environment) but does not hold the
+    script is a configuration error even under the exception.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$ScriptRelativePath,
+        [Parameter(Mandatory = $true)][string]$CheckLabel,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Collections.Generic.List[string]]$Errors,
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyCollection()]
+        [System.Collections.Generic.List[string]]$Warnings,
+        [Parameter(Mandatory = $false)][string]$PlatformRepositoryRoot = ''
+    )
+
+    $source = '-PlatformRepositoryRoot'
+    $root = $PlatformRepositoryRoot
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'OMP_PLATFORM_ROOT'
+        $root = $env:OMP_PLATFORM_ROOT
+    }
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'OpenModulePlatformRoot'
+        $root = $env:OpenModulePlatformRoot
+    }
+    if ([string]::IsNullOrWhiteSpace($root)) {
+        $source = 'sibling of this repository'
+        $root = '..\OpenModulePlatform'
+    }
+
+    $repositoryFullPath = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    $root = [System.IO.Path]::GetFullPath([System.IO.Path]::Combine($repositoryFullPath, $root)).TrimEnd('\', '/')
+    $scriptPath = Join-Path $root ($ScriptRelativePath -replace '/', '\')
+    if (Test-Path -LiteralPath $scriptPath -PathType Leaf) {
+        return [pscustomobject]@{ ScriptPath = $scriptPath; PlatformRoot = $root }
+    }
+
+    $howToFix = "Set OMP_PLATFORM_ROOT to the root of an OpenModulePlatform checkout (for example `$env:OMP_PLATFORM_ROOT = 'C:\src\OpenModulePlatform'), or clone it beside this repository as ..\OpenModulePlatform."
+    if ($source -ne 'sibling of this repository') {
+        Add-ValidationError -Errors $Errors -Message "$($CheckLabel): the platform root '$root' named by $source does not contain '$ScriptRelativePath', so the check could not run. $howToFix"
+        return $null
+    }
+
+    $allowMissing = [string]$env:OMP_ALLOW_MISSING_PLATFORM
+    if ($allowMissing -eq '1' -or $allowMissing -ieq 'true') {
+        Add-ValidationWarning -Warnings $Warnings -Message "$($CheckLabel): NOT VERIFIED - no OpenModulePlatform checkout at '$root', accepted only because OMP_ALLOW_MISSING_PLATFORM is set. $howToFix"
+        return $null
+    }
+
+    Add-ValidationError -Errors $Errors -Message "$($CheckLabel): no OpenModulePlatform checkout was found (tried -PlatformRepositoryRoot, OMP_PLATFORM_ROOT, OpenModulePlatformRoot and the sibling '$root'), so the check could not run. $howToFix Where no checkout can exist, such as CI that checks out one repository, set OMP_ALLOW_MISSING_PLATFORM=1 to accept the check as NOT VERIFIED."
+    return $null
+}
+
+# ---------------------------------------------------------------------------
 # Git readers that cannot fail silently.
 # ---------------------------------------------------------------------------
 # Every diff-based check in this family used to ask git a question, send git's

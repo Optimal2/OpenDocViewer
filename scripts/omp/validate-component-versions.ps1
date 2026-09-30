@@ -40,10 +40,12 @@ that have actually broken this gate: the BOM strip and fail-loud git change
 detection) and exits.
 
 .PARAMETER Strict
-Treat a guard that could not run as an error. Without it, Check 15 (shared
-script drift) reports "not verified" as a warning when the canonical
-OpenModulePlatform script cannot be found. The local CI gate
-(scripts/local-ci.ps1) passes it by default.
+Passed through to the Check 15 shared-script drift guard's own -Strict
+switch. A missing OpenModulePlatform checkout is resolved by the shared
+Resolve-PlatformCheckScript and is an error either way; the only way to
+accept a missing checkout is the explicit OMP_ALLOW_MISSING_PLATFORM=1
+exception, which reports the check NOT VERIFIED. The local CI gate
+(scripts/local-ci.ps1) passes -Strict by default.
 
 .PARAMETER PlatformRepositoryRoot
 Root of the OpenModulePlatform checkout used by Check 15. Resolution order,
@@ -1314,9 +1316,9 @@ if ($embedScriptsChecked -gt 0) {
 # in OpenModulePlatform. Keeping them identical was a manual act twice, and
 # nothing held them that way: a stale copy looks green locally and only surfaces
 # when a bump behaves differently here than in a neighbouring repository -
-# typically mid-incident. Same neighbour resolution and Strict semantics as
-# Check 14; the guard is CALLED from the platform repository rather than copied
-# here, because a copied guard would be subject to the drift it detects.
+# typically mid-incident. Same neighbour resolution as Check 14; the guard is
+# CALLED from the platform repository rather than copied here, because a copied
+# guard would be subject to the drift it detects.
 #
 # Numbering note: this validator intentionally has no Check 14. Check 14 (the
 # cross-repository shared project cascade) runs in consumer repositories that
@@ -1325,45 +1327,29 @@ if ($embedScriptsChecked -gt 0) {
 # the OpenModulePlatform repository). The numbers are a shared contract: a
 # given "Check N" means the same thing in every OMP-compatible validator's
 # output.
-# Platform root resolution follows the canonical validate-shared-scripts.ps1:
-# -PlatformRepositoryRoot, OMP_PLATFORM_ROOT, OpenModulePlatformRoot, sibling.
-# The resolved root is always passed on explicitly, so the guard compares
-# against the same checkout this script looked for.
-$check15OmpRoot = $PlatformRepositoryRoot
-if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
-    $check15OmpRoot = $env:OMP_PLATFORM_ROOT
-}
-if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
-    $check15OmpRoot = $env:OpenModulePlatformRoot
-}
-if ([string]::IsNullOrWhiteSpace($check15OmpRoot)) {
-    # Built from separate segments (nested Join-Path, because Windows
-    # PowerShell 5.1 has no multi-segment Join-Path) so the fallback resolves
-    # under PowerShell Core on Linux/macOS as well as on Windows.
-    $check15OmpRoot = [System.IO.Path]::GetFullPath((Join-Path (Join-Path $repositoryRoot '..') 'OpenModulePlatform'))
-}
-# Strictness comes from this script's own -Strict switch (declared in the
-# param block), never from an ambient variable in the caller's scope.
-$check15Strict = [bool]$Strict
-$check15Script = Join-Path $check15OmpRoot (Join-Path 'scripts' (Join-Path 'omp' 'validate-shared-scripts.ps1'))
-if (Test-Path -LiteralPath $check15Script -PathType Leaf) {
+#
+# The platform checkout is located by the shared Resolve-PlatformCheckScript
+# (in the dot-sourced helpers), so a missing checkout is a validation error
+# rather than a silently skipped check; the only way to accept a missing
+# checkout is the explicit OMP_ALLOW_MISSING_PLATFORM=1 exception, which
+# reports the check NOT VERIFIED.
+$check15Resolution = Resolve-PlatformCheckScript -RepositoryRoot $repositoryRoot `
+    -ScriptRelativePath 'scripts/omp/validate-shared-scripts.ps1' -CheckLabel 'Check 15' `
+    -Errors $errors -Warnings $warnings -PlatformRepositoryRoot $PlatformRepositoryRoot
+if ($null -ne $check15Resolution) {
     # validate-shared-scripts.ps1 ends every path with an explicit exit code,
     # but $LASTEXITCODE is process-wide and the git calls above already wrote
     # to it. Reset it before the call so a stale value can never pass for the
     # guard's verdict, and also honour $? so a guard that terminated without
     # reaching its exit statement counts as a failure rather than a pass.
+    # Strictness comes from this script's own -Strict switch (declared in the
+    # param block), never from an ambient variable in the caller's scope.
     $global:LASTEXITCODE = 0
-    & $check15Script -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15OmpRoot -Strict:$check15Strict
+    & $check15Resolution.ScriptPath -ConsumerRepositoryRoot $repositoryRoot -PlatformRepositoryRoot $check15Resolution.PlatformRoot -Strict:([bool]$Strict)
     $check15Completed = $?
     if (-not $check15Completed -or $LASTEXITCODE -ne 0) {
         Add-ValidationError -Errors $errors -Message 'Check 15 (shared script drift) failed; see the Check 15 lines above.'
     }
-}
-elseif ($check15Strict) {
-    Add-ValidationError -Errors $errors -Message "Check 15: canonical script not found at '$check15Script'; shared script drift could not be checked. Strict mode treats a guard that could not run as an error. Set OMP_PLATFORM_ROOT or pass -PlatformRepositoryRoot to point at an OpenModulePlatform checkout."
-}
-else {
-    Write-Warning "Check 15: NOT VERIFIED - canonical script not found at '$check15Script'. Set OMP_PLATFORM_ROOT or pass -PlatformRepositoryRoot to verify."
 }
 
 if ($warnings.Count -gt 0) {

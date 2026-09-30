@@ -32,10 +32,10 @@
     running from a git worktree that has no sibling platform checkout.
 
 .PARAMETER AllowUnverifiedSharedScripts
-    Deliberately run Check 15 without -Strict: when no OpenModulePlatform
-    checkout can be found, the shared-script drift guard only warns
-    "NOT VERIFIED" instead of failing the gate. Use it only when no platform
-    checkout is available on the machine; drift then goes unchecked.
+    Deliberately set OMP_ALLOW_MISSING_PLATFORM=1 so that, when no
+    OpenModulePlatform checkout can be found, Check 15 reports "NOT VERIFIED"
+    instead of failing the gate. Use it only when no platform checkout is
+    available on the machine; drift then goes unchecked.
 
 .EXAMPLE
     $env:OMP_PLATFORM_ROOT = '<workspace>\OpenModulePlatform'
@@ -201,10 +201,13 @@ try {
         # native git call it made internally. Reset it first so a stale value
         # from an earlier step can never be mistaken for a validator result.
         # Strict by default: a Check 15 that cannot find the platform checkout
-        # must fail the gate, otherwise shared-script drift from a worktree
-        # without a sibling OpenModulePlatform folder passes as green.
+        # must fail the gate (the shared Resolve-PlatformCheckScript records it
+        # as an error), otherwise shared-script drift from a worktree without a
+        # sibling OpenModulePlatform folder passes as green. The only escape
+        # hatch is the explicit OMP_ALLOW_MISSING_PLATFORM=1 exception.
         if ($AllowUnverifiedSharedScripts) {
-            Write-Warning 'Check 15 runs non-strict (-AllowUnverifiedSharedScripts): shared-script drift is not verified when the platform checkout is missing.'
+            Write-Warning 'Check 15 runs with OMP_ALLOW_MISSING_PLATFORM=1 (-AllowUnverifiedSharedScripts): a missing platform checkout is reported NOT VERIFIED instead of failing the gate.'
+            $env:OMP_ALLOW_MISSING_PLATFORM = '1'
         }
         $global:LASTEXITCODE = 0
         & $Validator -BaseCommit $BaseCommit -Strict:(-not $AllowUnverifiedSharedScripts) -PlatformRepositoryRoot $PlatformRepositoryRoot
