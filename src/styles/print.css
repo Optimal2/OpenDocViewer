@@ -4,7 +4,7 @@
 @media print {
   @page { margin: 0; size: A4 portrait; }
   /* Printed pages always use the light path, independent of the screen theme. */
-  html { color-scheme: light; }
+  html { color-scheme: light !important; }
   html, body { margin: 0 !important; padding: 0 !important; }
 
   /* Wrapper used by multi-page printing (All/Range) */

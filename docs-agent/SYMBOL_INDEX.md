@@ -587,8 +587,8 @@
 | <code>sanitizeI18nPathSegment</code> | function | <code>src/i18n.js:161</code> | Keep i18n URL template substitutions constrained to plain path segments. |
 | <code>syncDocumentLanguage</code> | function | <code>src/i18n.js:353</code> | Keep the document language synchronized with the active UI language. |
 | <code>WANT_DIAG</code> | constant | <code>src/i18n.js:82</code> | Diagnostics ON only in dev builds. |
-| <code>container</code> | constant | <code>src/index.jsx:44</code> | Mount the app into #root. |
-| <code>isDev</code> | constant | <code>src/index.jsx:34</code> | Determine environment and set a sensible client-side log level. |
+| <code>container</code> | constant | <code>src/index.jsx:49</code> | Mount the app into #root. |
+| <code>isDev</code> | constant | <code>src/index.jsx:39</code> | Determine environment and set a sensible client-side log level. |
 | <code>BootstrapAny</code> | typedef | <code>src/integrations/bootstrapRuntime.js:44</code> |  |
 | <code>BootstrapDebugInfo</code> | typedef | <code>src/integrations/bootstrapRuntime.js:33</code> | Opaque information about how startup data reached the viewer. |
 | <code>bootstrapDetect</code> | function | <code>src/integrations/bootstrapRuntime.js:243</code> | Detect the best available bootstrap mode. |
@@ -610,14 +610,13 @@
 | <code>PortableMetadataRecord</code> | typedef | <code>src/integrations/normalizePortableBundle.js:38</code> | A normalized raw metadata record attached to a document. |
 | <code>PortableSession</code> | typedef | <code>src/integrations/normalizePortableBundle.js:20</code> | Session info stored on a bundle. |
 | <code>spreadUnknown</code> | function | <code>src/integrations/normalizePortableBundle.js:240</code> | Preserve unknown own enumerable properties from host input while excluding keys that were already normalized explicitly. |
-| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:145</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
-| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:74</code> | Order two revisions. |
-| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:59</code> | Check an event origin against the configured allow-list \(exact match only\). |
-| <code>OMP_THEME_BRIDGE_KIND</code> | constant | <code>src/integrations/ompThemeBridge.js:20</code> | File: src/integrations/ompThemeBridge.js Opt-in cross-origin theme bridge for the shared OMP theme preference. |
-| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:93</code> |  |
-| <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:38</code> | Validate an inbound postMessage payload. |
-| <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:24</code> | Remote theme preference received over the bridge. |
-| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:90</code> | Start listening for theme changes from allowed origins. |
+| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:150</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
+| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:81</code> | Order two revisions by their base-36 creation time, as OMP does. |
+| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:61</code> | Check an event origin against the configured allow-list \(exact match only\). |
+| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:103</code> |  |
+| <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:40</code> | Validate an inbound postMessage payload. |
+| <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:26</code> | Remote theme preference received over the bridge. |
+| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:97</code> | Start listening for theme changes from allowed origins. |
 | <code>b64DecodeUnicode</code> | function | <code>src/integrations/parentBridge.js:88</code> | Decode a base64-encoded Unicode string into text \(handles UTF-8\). |
 | <code>getSameOriginOpener</code> | function | <code>src/integrations/parentBridge.js:52</code> | Try to obtain a same-origin opener window reference. |
 | <code>getSameOriginParent</code> | function | <code>src/integrations/parentBridge.js:30</code> | Try to obtain a same-origin parent window reference. |
@@ -836,26 +835,28 @@
 | <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
 | <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
 | <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
-| <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:270</code> | Apply the resolved theme to the document \(SSR-safe\). |
-| <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:208</code> | Create a unique revision starting with the creation time \(per the contract\). |
-| <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:241</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |
-| <code>getEffectiveOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:310</code> | Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration. |
-| <code>getSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:185</code> | Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins. |
-| <code>isSharedThemeMode</code> | function | <code>src/utils/ompThemePreference.js:68</code> |  |
-| <code>migrateLocalThemeToShared</code> | function | <code>src/utils/ompThemePreference.js:289</code> | Migrate an existing local ODV theme setting into the shared preference. |
-| <code>mirrorSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:167</code> | Persist a shared value to both stores \(each write tolerates denied storage\). |
+| <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
+| <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
+| <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |
+| <code>getEffectiveOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:332</code> | Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration. |
+| <code>getSession</code> | function | <code>src/utils/ompThemePreference.js:69</code> | Keep denied-storage choices scoped to the current browsing context. |
+| <code>getSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:208</code> | Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins. |
+| <code>isSharedThemeMode</code> | function | <code>src/utils/ompThemePreference.js:90</code> |  |
+| <code>migrateLocalThemeToShared</code> | function | <code>src/utils/ompThemePreference.js:310</code> | Migrate an existing local ODV theme setting into the shared preference. |
+| <code>mirrorSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:189</code> | Persist a shared value to both stores \(each write tolerates denied storage\). |
 | <code>OdvThemeMode</code> | typedef | <code>src/utils/ompThemePreference.js:42</code> | ODV theme mode \(the shared modes plus the viewer-specific Normal variant\). |
 | <code>OdvThemeName</code> | typedef | <code>src/utils/ompThemePreference.js:47</code> | Concrete ODV palette. |
-| <code>parseSharedThemeValue</code> | function | <code>src/utils/ompThemePreference.js:79</code> | Parse a raw stored shared-preference value. |
-| <code>readSharedRawFromCookie</code> | function | <code>src/utils/ompThemePreference.js:97</code> | Read the raw shared value from the cookie \(URI-encoded JSON per the contract\). |
-| <code>readSharedRawFromStorage</code> | function | <code>src/utils/ompThemePreference.js:115</code> | Read the raw shared value from the localStorage mirror. |
-| <code>resolveConcreteTheme</code> | function | <code>src/utils/ompThemePreference.js:256</code> | Resolve the concrete ODV palette for an ODV theme mode. |
-| <code>setOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:344</code> | Persist a user theme choice: system/light/dark are written to the shared preference \(new revision\) and mirrored locally; a stale Normal binding is cleared. |
-| <code>setSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:231</code> | Store a new shared choice with a fresh revision in both stores. |
+| <code>parseSharedThemeValue</code> | function | <code>src/utils/ompThemePreference.js:102</code> | Parse a raw stored shared-preference value. |
+| <code>readSharedRawFromCookie</code> | function | <code>src/utils/ompThemePreference.js:119</code> | Read the raw shared value from the cookie \(URI-encoded JSON per the contract\). |
+| <code>readSharedRawFromStorage</code> | function | <code>src/utils/ompThemePreference.js:137</code> | Read the raw shared value from the localStorage mirror. |
+| <code>resolveConcreteTheme</code> | function | <code>src/utils/ompThemePreference.js:277</code> | Resolve the concrete ODV palette for an ODV theme mode. |
+| <code>setOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:366</code> | Persist a user theme choice: system/light/dark are written to the shared preference \(new revision\) and mirrored locally; a stale Normal binding is cleared. |
+| <code>setSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:252</code> | Store a new shared choice with a fresh revision in both stores. |
 | <code>SharedThemeMode</code> | typedef | <code>src/utils/ompThemePreference.js:37</code> | Shared OMP theme mode. |
 | <code>SharedThemePreference</code> | typedef | <code>src/utils/ompThemePreference.js:52</code> | Parsed shared preference value. |
-| <code>writeSharedToCookie</code> | function | <code>src/utils/ompThemePreference.js:128</code> |  |
-| <code>writeSharedToStorage</code> | function | <code>src/utils/ompThemePreference.js:147</code> |  |
+| <code>sharedThemeRevisionTime</code> | function | <code>src/utils/ompThemePreference.js:81</code> | Read the base-36 creation time, matching the OMP preference ordering contract. |
+| <code>writeSharedToCookie</code> | function | <code>src/utils/ompThemePreference.js:150</code> |  |
+| <code>writeSharedToStorage</code> | function | <code>src/utils/ompThemePreference.js:169</code> |  |
 | <code>PageAssetDescriptor</code> | typedef | <code>src/utils/pageAssetRenderer.js:36</code> |  |
 | <code>PageAssetRendererOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:30</code> |  |
 | <code>PageAssetRenderer#renderPageAsset</code> | function | <code>src/utils/pageAssetRenderer.js:669</code> | Render one requested page asset. |

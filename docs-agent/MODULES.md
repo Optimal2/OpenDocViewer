@@ -75,7 +75,7 @@ File count: 10. Line count: 4969. JSDoc symbol count: 117.
 
 ## src/contexts
 
-File count: 4. Line count: 3196. JSDoc symbol count: 83.
+File count: 4. Line count: 3198. JSDoc symbol count: 83.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -105,13 +105,13 @@ File count: 1. Line count: 566. JSDoc symbol count: 21.
 
 ## src/index.jsx
 
-File count: 1. Line count: 59. JSDoc symbol count: 2.
+File count: 1. Line count: 64. JSDoc symbol count: 2.
 
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 
 ## src/integrations
 
-File count: 8. Line count: 2240. JSDoc symbol count: 60.
+File count: 8. Line count: 2245. JSDoc symbol count: 59.
 
 - `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `src/integrations/parentBridge.js` - Same\-origin parent\-window bootstrap adapter.
@@ -149,7 +149,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 39. Line count: 15805. JSDoc symbol count: 634.
+File count: 39. Line count: 15829. JSDoc symbol count: 636.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

@@ -134,9 +134,10 @@ describe('ompThemePreference', () => {
       expect(parseSharedThemeValue(JSON.stringify({ version: 1, mode: 'sepia', revision: 'abc' }))).toBeNull();
     });
 
-    it('ignores malformed JSON and missing revisions', () => {
+    it('ignores malformed JSON and treats missing revisions as oldest like OMP', () => {
       expect(parseSharedThemeValue('not json')).toBeNull();
-      expect(parseSharedThemeValue(JSON.stringify({ version: 1, mode: 'dark' }))).toBeNull();
+      expect(parseSharedThemeValue(JSON.stringify({ version: 1, mode: 'dark' })))
+        .toEqual({ mode: 'dark', revision: '' });
     });
   });
 
@@ -156,6 +157,24 @@ describe('ompThemePreference', () => {
       stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'dark', revision: 'same' });
       stores.storageData[OMP_THEME_STORAGE_KEY] = JSON.stringify({ version: 1, mode: 'light', revision: 'same' });
       expect(getSharedThemePreference()).toEqual({ mode: 'dark', revision: 'same' });
+    });
+
+    it('uses the cookie when timestamps tie, regardless of the random suffix', () => {
+      stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'dark', revision: '100-aaa' });
+      stores.storageData[OMP_THEME_STORAGE_KEY] = JSON.stringify({ version: 1, mode: 'light', revision: '100-zzz' });
+      expect(getSharedThemePreference()?.mode).toBe('dark');
+    });
+
+    it('preserves a shared choice without a revision instead of migrating over it', () => {
+      stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'light' });
+      setViewerPreferences({ themeMode: 'dark' });
+      expect(getEffectiveOdvThemeMode()).toBe('light');
+    });
+
+    it('orders base-36 timestamps numerically across a digit boundary', () => {
+      stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'dark', revision: 'z-old' });
+      stores.storageData[OMP_THEME_STORAGE_KEY] = JSON.stringify({ version: 1, mode: 'light', revision: '10-new' });
+      expect(getSharedThemePreference()?.mode).toBe('light');
     });
 
     it('ignores invalid values instead of crashing', () => {
@@ -194,6 +213,25 @@ describe('ompThemePreference', () => {
   });
 
   describe('ODV mapping and Normal semantics', () => {
+    it.each(['normal', 'dark', 'light', 'system'])('keeps %s for the session when both stores are denied', (mode) => {
+      stores.storageDenied = true;
+      stores.cookieDenied = true;
+      setOdvThemeMode(mode);
+      expect(getEffectiveOdvThemeMode()).toBe(mode);
+    });
+
+    it('keeps legacy Normal after migration and repeated preference reads', () => {
+      stores.storageData.theme = 'normal';
+      expect(getEffectiveOdvThemeMode()).toBe('normal');
+      expect(getEffectiveOdvThemeMode()).toBe('normal');
+    });
+
+    it('lets a later explicit Light choice replace Normal', () => {
+      setOdvThemeMode('normal');
+      setSharedThemePreference('light');
+      expect(getEffectiveOdvThemeMode()).toBe('light');
+    });
+
     it('maps shared system/light/dark to the matching ODV mode', () => {
       setSharedThemePreference('system');
       expect(getEffectiveOdvThemeMode()).toBe('system');

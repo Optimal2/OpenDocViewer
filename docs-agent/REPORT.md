@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 120
-- Source lines: 51164
-- JSDoc symbols: 1383
+- Source lines: 51200
+- JSDoc symbols: 1384
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0

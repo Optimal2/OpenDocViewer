@@ -1,6 +1,6 @@
 # OpenDocViewer / src/integrations
 
-File count: 8. Line count: 2240. JSDoc symbol count: 60.
+File count: 8. Line count: 2245. JSDoc symbol count: 59.
 
 ## src/integrations/bootstrapRuntime.js
 
@@ -51,13 +51,14 @@ Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 
 Exports: `OMP_THEME_BRIDGE_KIND`, `OMP_THEME_BRIDGE_VERSION`, `parseThemeBridgeMessage`, `isThemeBridgeOriginAllowed`, `isRevisionNewer`, `startOmpThemeBridge`, `announceThemeToAllowedOrigins`
 
+Local imports: `src/utils/ompThemePreference.js`
+
 Symbols:
 
-- `OMP_THEME_BRIDGE_KIND` (constant) - File: src/integrations/ompThemeBridge.js Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `RemoteThemePreference` (typedef) - Remote theme preference received over the bridge.
 - `parseThemeBridgeMessage` (function) - Validate an inbound postMessage payload.
 - `isThemeBridgeOriginAllowed` (function) - Check an event origin against the configured allow\-list \(exact match only\).
-- `isRevisionNewer` (function) - Order two revisions.
+- `isRevisionNewer` (function) - Order two revisions by their base\-36 creation time, as OMP does.
 - `startOmpThemeBridge` (function) - Start listening for theme changes from allowed origins.
 - `startOmpThemeBridge~onMessage` (function) - No description.
 - `announceThemeToAllowedOrigins` (function) - Announce a local \(user\-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.

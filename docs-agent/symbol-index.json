@@ -15157,7 +15157,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/index.jsx",
-    "line": 44,
+    "line": 49,
     "description": "Mount the app into #root.",
     "params": [],
     "returns": [],
@@ -15170,7 +15170,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/index.jsx",
-    "line": 34,
+    "line": 39,
     "description": "Determine environment and set a sensible client-side log level.",
     "params": [],
     "returns": [],
@@ -15573,7 +15573,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 145,
+    "line": 150,
     "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
     "params": [
       {
@@ -15616,8 +15616,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 74,
-    "description": "Order two revisions.",
+    "line": 81,
+    "description": "Order two revisions by their base-36 creation time, as OMP does.",
     "params": [
       {
         "name": "candidate",
@@ -15647,7 +15647,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 59,
+    "line": 61,
     "description": "Check an event origin against the configured allow-list (exact match only).",
     "params": [
       {
@@ -15672,26 +15672,13 @@
     "examples": 0
   },
   {
-    "id": "OMP_THEME_BRIDGE_KIND",
-    "name": "OMP_THEME_BRIDGE_KIND",
-    "longname": "OMP_THEME_BRIDGE_KIND",
-    "kind": "constant",
-    "scope": "global",
-    "file": "src/integrations/ompThemeBridge.js",
-    "line": 20,
-    "description": "File: src/integrations/ompThemeBridge.js Opt-in cross-origin theme bridge for the shared OMP theme preference.",
-    "params": [],
-    "returns": [],
-    "examples": 0
-  },
-  {
     "id": "startOmpThemeBridge~onMessage",
     "name": "onMessage",
     "longname": "startOmpThemeBridge~onMessage",
     "kind": "function",
     "scope": "inner",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 93,
+    "line": 103,
     "description": "",
     "params": [
       {
@@ -15711,7 +15698,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 38,
+    "line": 40,
     "description": "Validate an inbound postMessage payload.",
     "params": [
       {
@@ -15736,7 +15723,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 24,
+    "line": 26,
     "description": "Remote theme preference received over the bridge.",
     "params": [],
     "returns": [],
@@ -15749,7 +15736,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 90,
+    "line": 97,
     "description": "Start listening for theme changes from allowed origins.",
     "params": [
       {
@@ -20545,7 +20532,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 270,
+    "line": 291,
     "description": "Apply the resolved theme to the document (SSR-safe).",
     "params": [
       {
@@ -20576,7 +20563,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 208,
+    "line": 228,
     "description": "Create a unique revision starting with the creation time (per the contract).",
     "params": [],
     "returns": [
@@ -20594,7 +20581,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 241,
+    "line": 262,
     "description": "Detect the OS/browser colour scheme (SSR-safe; defaults to light).",
     "params": [],
     "returns": [
@@ -20612,12 +20599,30 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 310,
+    "line": 332,
     "description": "Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration.",
     "params": [],
     "returns": [
       {
         "type": "OdvThemeMode",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getSession",
+    "name": "getSession",
+    "longname": "getSession",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 69,
+    "description": "Keep denied-storage choices scoped to the current browsing context.",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object",
         "description": ""
       }
     ],
@@ -20630,7 +20635,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 185,
+    "line": 208,
     "description": "Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie (or when a revision cannot be read) the cookie wins.",
     "params": [],
     "returns": [
@@ -20648,7 +20653,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 68,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -20673,7 +20678,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 289,
+    "line": 310,
     "description": "Migrate an existing local ODV theme setting into the shared preference.",
     "params": [],
     "returns": [
@@ -20691,7 +20696,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 167,
+    "line": 189,
     "description": "Persist a shared value to both stores (each write tolerates denied storage).",
     "params": [
       {
@@ -20742,7 +20747,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 79,
+    "line": 102,
     "description": "Parse a raw stored shared-preference value.",
     "params": [
       {
@@ -20767,7 +20772,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 97,
+    "line": 119,
     "description": "Read the raw shared value from the cookie (URI-encoded JSON per the contract).",
     "params": [],
     "returns": [
@@ -20785,7 +20790,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 115,
+    "line": 137,
     "description": "Read the raw shared value from the localStorage mirror.",
     "params": [],
     "returns": [
@@ -20803,7 +20808,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 256,
+    "line": 277,
     "description": "Resolve the concrete ODV palette for an ODV theme mode.",
     "params": [
       {
@@ -20828,7 +20833,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 344,
+    "line": 366,
     "description": "Persist a user theme choice: system/light/dark are written to the shared preference (new revision) and mirrored locally; a stale Normal binding is cleared.",
     "params": [
       {
@@ -20853,7 +20858,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 231,
+    "line": 252,
     "description": "Store a new shared choice with a fresh revision in both stores.",
     "params": [
       {
@@ -20898,13 +20903,38 @@
     "examples": 0
   },
   {
+    "id": "sharedThemeRevisionTime",
+    "name": "sharedThemeRevisionTime",
+    "longname": "sharedThemeRevisionTime",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 81,
+    "description": "Read the base-36 creation time, matching the OMP preference ordering contract.",
+    "params": [
+      {
+        "name": "revision",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "number",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "writeSharedToCookie",
     "name": "writeSharedToCookie",
     "longname": "writeSharedToCookie",
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 128,
+    "line": 150,
     "description": "",
     "params": [
       {
@@ -20929,7 +20959,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 147,
+    "line": 169,
     "description": "",
     "params": [
       {

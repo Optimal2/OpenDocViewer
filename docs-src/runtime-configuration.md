@@ -636,9 +636,17 @@ theme: {
 
 Behavior:
 
-- Inbound messages are checked for allowed origin, a non-null source, the versioned
+- Inbound messages are checked for an exact HTTP(S) origin, `event.source === window.parent`, the versioned
   shape `{ kind: 'omp:theme-preference', version: 1, mode, revision }` and a newer revision.
+- Wildcards, opaque origins and URLs with paths are rejected in both directions.
+- Revision ordering uses the base-36 creation timestamp, as in OMP; the cookie wins ties.
+- If persistence is denied, the current page retains its choice through focus and visibility changes.
 - Applying a remote change never announces it back, so changes cannot ping-pong.
+- The embedding host must implement the same message protocol and send its current preference
+  when the viewer loads. OMP's version 1 theme script does not implement this bridge itself.
+- The initial palette is applied before React renders viewer content. A blank-page flash while
+  bootstrap assets load is not covered by this guarantee and still needs browser acceptance.
+
 ## Print progress overlays
 
 The older large-job HTML print notice has been removed from the runtime flow. HTML/browser printing

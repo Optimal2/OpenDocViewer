@@ -14,7 +14,7 @@
  *     - memoized context value for predictable renders
  */
 
-import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
+import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from 'react';
 import logger from '../logging/systemLogger.js';
 import ThemeContext from './themeContext.js';
 import {
@@ -169,7 +169,7 @@ export const ThemeProvider = ({ children }) => {
     setThemeMode(next);
   }, [theme, setThemeMode]);
 
-  useEffect(() => {
+  useLayoutEffect(() => {
     const resolved = resolveThemeForMode(themeMode);
     setTheme((current) => (current === resolved ? current : resolved));
     applyThemeToDocument(resolved, themeMode);
@@ -252,6 +252,7 @@ export const ThemeProvider = ({ children }) => {
         window.addEventListener('storage', onStorage);
         window.addEventListener('focus', onFocus);
         window.addEventListener('pageshow', onPageShow);
+        window.addEventListener('omp:theme-changed', resync);
         if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
       }
     } catch {
@@ -263,6 +264,7 @@ export const ThemeProvider = ({ children }) => {
           window.removeEventListener('storage', onStorage);
           window.removeEventListener('focus', onFocus);
           window.removeEventListener('pageshow', onPageShow);
+          window.removeEventListener('omp:theme-changed', resync);
           if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisibility);
         }
       } catch {

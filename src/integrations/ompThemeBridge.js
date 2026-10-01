@@ -8,7 +8,7 @@
  * a non-empty list of allowed origins (`theme.bridge.allowedOrigins`). Every
  * inbound message is checked for:
  * - an allowed `event.origin` (exact match, never a wildcard),
- * - a non-null `event.source`,
+ * - `event.source` equal to the embedding parent window,
  * - the exact versioned message shape `{ kind, version: 1, mode, revision }`,
  * - a revision newer than the locally stored one.
  *
@@ -16,6 +16,8 @@
  * `*`). Applying a remote change never announces it back, so a change cannot
  * ping-pong between frames.
  */
+
+import { sharedThemeRevisionTime } from '../utils/ompThemePreference.js';
 
 export const OMP_THEME_BRIDGE_KIND = 'omp:theme-preference';
 export const OMP_THEME_BRIDGE_VERSION = 1;
@@ -59,12 +61,17 @@ export function parseThemeBridgeMessage(data) {
 export function isThemeBridgeOriginAllowed(origin, allowedOrigins) {
   if (typeof origin !== 'string' || !origin) return false;
   if (!Array.isArray(allowedOrigins) || allowedOrigins.length === 0) return false;
+  try {
+    const url = new URL(origin);
+    if (!['http:', 'https:'].includes(url.protocol) || url.origin !== origin) return false;
+  } catch {
+    return false;
+  }
   return allowedOrigins.some((entry) => typeof entry === 'string' && entry !== '' && entry === origin);
 }
 
 /**
- * Order two revisions. Revisions start with the creation time, so a plain
- * lexicographic comparison orders them; a missing local revision accepts any
+ * Order two revisions by their base-36 creation time, as OMP does. A missing local revision accepts any
  * well-formed remote revision.
  *
  * @param {string} candidate
@@ -73,7 +80,7 @@ export function isThemeBridgeOriginAllowed(origin, allowedOrigins) {
  */
 export function isRevisionNewer(candidate, current) {
   if (!current) return true;
-  return candidate > current;
+  return sharedThemeRevisionTime(candidate) > sharedThemeRevisionTime(current);
 }
 
 /**
@@ -88,18 +95,16 @@ export function isRevisionNewer(candidate, current) {
  * @returns {function(): void}
  */
 export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCurrentRevision }) {
-  const allowList = Array.isArray(allowedOrigins) ? allowedOrigins : [];
+  const allowList = Array.isArray(allowedOrigins)
+    ? allowedOrigins.filter((origin) => isThemeBridgeOriginAllowed(origin, allowedOrigins))
+    : [];
+  if (allowList.length === 0 || typeof window === 'undefined' || window.parent === window) return () => {};
   /** @param {MessageEvent} event */
   const onMessage = (event) => {
     try {
       if (allowList.length === 0) return;
       if (!isThemeBridgeOriginAllowed(event?.origin, allowList)) return;
-      if (!event?.source) return;
-      try {
-        if (typeof window !== 'undefined' && event.source === window) return;
-      } catch {
-        // ignore; fall through to shape validation
-      }
+      if (!event?.source || event.source !== window.parent) return;
       const parsed = parseThemeBridgeMessage(event.data);
       if (!parsed) return;
       const current = typeof getCurrentRevision === 'function' ? getCurrentRevision() : null;
@@ -145,7 +150,7 @@ export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCur
 export function announceThemeToAllowedOrigins({ mode, revision, allowedOrigins }) {
   try {
     const allowList = Array.isArray(allowedOrigins)
-      ? allowedOrigins.filter((origin) => typeof origin === 'string' && origin)
+      ? allowedOrigins.filter((origin) => isThemeBridgeOriginAllowed(origin, allowedOrigins))
       : [];
     if (allowList.length === 0) return;
     if (typeof window === 'undefined' || !window.parent || window.parent === window) return;

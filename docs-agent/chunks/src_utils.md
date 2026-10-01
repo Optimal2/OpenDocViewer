@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 39. Line count: 15805. JSDoc symbol count: 634.
+File count: 39. Line count: 15829. JSDoc symbol count: 636.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -142,7 +142,7 @@ Symbols:
 
 Shared OMP theme preference adapter \(OMP\_THEME\_PREFERENCE\).
 
-Exports: `OMP_THEME_STORAGE_KEY`, `parseSharedThemeValue`, `mirrorSharedThemePreference`, `getSharedThemePreference`, `createSharedThemeRevision`, `setSharedThemePreference`, `detectSystemTheme`, `resolveConcreteTheme`, `applyOdvThemeToDocument`, `getEffectiveOdvThemeMode`, `setOdvThemeMode`
+Exports: `OMP_THEME_STORAGE_KEY`, `sharedThemeRevisionTime`, `parseSharedThemeValue`, `mirrorSharedThemePreference`, `getSharedThemePreference`, `createSharedThemeRevision`, `setSharedThemePreference`, `detectSystemTheme`, `resolveConcreteTheme`, `applyOdvThemeToDocument`, `getEffectiveOdvThemeMode`, `setOdvThemeMode`
 
 Local imports: `src/utils/viewerPreferences.js`
 
@@ -152,14 +152,14 @@ Symbols:
 - `OdvThemeMode` (typedef) - ODV theme mode \(the shared modes plus the viewer\-specific Normal variant\).
 - `OdvThemeName` (typedef) - Concrete ODV palette.
 - `SharedThemePreference` (typedef) - Parsed shared preference value.
+- `getSession` (function) - Keep denied\-storage choices scoped to the current browsing context.
+- `sharedThemeRevisionTime` (function) - Read the base\-36 creation time, matching the OMP preference ordering contract.
 - `isSharedThemeMode` (function) - No description.
 - `parseSharedThemeValue` (function) - Parse a raw stored shared\-preference value.
 - `readSharedRawFromCookie` (function) - Read the raw shared value from the cookie \(URI\-encoded JSON per the contract\).
 - `readSharedRawFromStorage` (function) - Read the raw shared value from the localStorage mirror.
 - `writeSharedToCookie` (function) - No description.
 - `writeSharedToStorage` (function) - No description.
-- `mirrorSharedThemePreference` (function) - Persist a shared value to both stores \(each write tolerates denied storage\).
-- `getSharedThemePreference` (function) - Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins.
 
 ## src/utils/pageAssetRenderer.js
 

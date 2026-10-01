@@ -30,7 +30,7 @@ function installWindowStub() {
     },
     parent: null,
   };
-  stub.parent = stub;
+  stub.parent = { postMessage: (message, targetOrigin) => posted.push({ message, targetOrigin }) };
   Object.defineProperty(globalThis, 'window', {
     value: stub,
     configurable: true,
@@ -89,6 +89,17 @@ describe('ompThemeBridge', () => {
   });
 
   describe('startOmpThemeBridge', () => {
+    it('rejects unrelated windows even when their origin is allowed', () => {
+      const seen = [];
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        onRemotePreference: (value) => seen.push(value),
+      });
+      harness.emitMessage({ origin: 'https://app.example', source: {}, data: makeMessage('dark', 'r2') });
+      stop();
+      expect(seen).toEqual([]);
+    });
+
     it('applies a newer change from an allowed origin', () => {
       const seen = [];
       const stop = startOmpThemeBridge({
@@ -98,7 +109,7 @@ describe('ompThemeBridge', () => {
       });
       harness.emitMessage({
         origin: 'https://app.example',
-        source: {},
+        source: harness.stub.parent,
         data: makeMessage('dark', 'r2'),
       });
       stop();
@@ -114,7 +125,7 @@ describe('ompThemeBridge', () => {
       });
       harness.emitMessage({
         origin: 'https://app.example',
-        source: {},
+        source: harness.stub.parent,
         data: makeMessage('light', 'r1'),
       });
       stop();
@@ -130,7 +141,7 @@ describe('ompThemeBridge', () => {
       });
       harness.emitMessage({
         origin: 'https://evil.example',
-        source: {},
+        source: harness.stub.parent,
         data: makeMessage('dark', 'r9'),
       });
       stop();
@@ -144,7 +155,7 @@ describe('ompThemeBridge', () => {
         onRemotePreference: (value) => seen.push(value),
         getCurrentRevision: () => null,
       });
-      harness.emitMessage({ origin: 'https://app.example', source: {}, data: { kind: 'other' } });
+      harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: { kind: 'other' } });
       harness.emitMessage({ origin: 'https://app.example', source: null, data: makeMessage('dark', 'r3') });
       stop();
       expect(seen).toEqual([]);
@@ -166,7 +177,7 @@ describe('ompThemeBridge', () => {
       });
       harness.emitMessage({
         origin: 'https://app.example',
-        source: {},
+        source: harness.stub.parent,
         data: makeMessage('dark', 'r4'),
       });
       stop();
@@ -205,6 +216,7 @@ describe('ompThemeBridge', () => {
         postMessage: (message, targetOrigin) => posted.push({ message, targetOrigin }),
       };
       announceThemeToAllowedOrigins({ mode: 'dark', revision: 'r5', allowedOrigins: [] });
+      announceThemeToAllowedOrigins({ mode: 'dark', revision: 'r5', allowedOrigins: ['*', 'null', 'https://app.example/path'] });
       expect(posted).toEqual([]);
     });
   });

@@ -60,6 +60,28 @@ export const OMP_THEME_STORAGE_KEY = 'OMP_THEME_PREFERENCE';
 const OMP_THEME_PREFERENCE_VERSION = 1;
 const OMP_THEME_COOKIE_MAX_AGE_SECONDS = 31557600;
 const SHARED_THEME_MODES = Object.freeze(['system', 'light', 'dark']);
+const sessions = new WeakMap();
+
+/**
+ * Keep denied-storage choices scoped to the current browsing context.
+ * @returns {{ preference: SharedThemePreference|null, normalRevision: string|null }}
+ */
+function getSession() {
+  if (typeof window === 'undefined') return { preference: null, normalRevision: null };
+  if (!sessions.has(window)) sessions.set(window, { preference: null, normalRevision: null });
+  return sessions.get(window);
+}
+
+/**
+ * Read the base-36 creation time, matching the OMP preference ordering contract.
+ * Unreadable revisions count as oldest; random suffixes never break a tie.
+ * @param {string} revision
+ * @returns {number}
+ */
+export function sharedThemeRevisionTime(revision) {
+  const time = parseInt(String(revision || '').split('-')[0], 36);
+  return Number.isFinite(time) ? time : 0;
+}
 
 /**
  * @param {*} value
@@ -71,7 +93,8 @@ function isSharedThemeMode(value) {
 
 /**
  * Parse a raw stored shared-preference value. Unknown versions, unknown modes,
- * missing revisions and malformed JSON are ignored (null).
+ * and malformed JSON are ignored (null). Missing revisions are treated as oldest,
+ * matching OMP's compatibility behavior for stored values.
  *
  * @param {*} raw
  * @returns {(SharedThemePreference|null)}
@@ -82,8 +105,7 @@ export function parseSharedThemeValue(raw) {
     if (!parsed || typeof parsed !== 'object' || Array.isArray(parsed)) return null;
     if (parsed.version !== OMP_THEME_PREFERENCE_VERSION) return null;
     if (!isSharedThemeMode(parsed.mode)) return null;
-    if (typeof parsed.revision !== 'string' || !parsed.revision) return null;
-    return { mode: parsed.mode, revision: parsed.revision };
+    return { mode: parsed.mode, revision: typeof parsed.revision === 'string' ? parsed.revision : '' };
   } catch {
     return null;
   }
@@ -171,6 +193,7 @@ export function mirrorSharedThemePreference(value) {
     revision: value?.revision,
   });
   if (!parsed) return null;
+  getSession().preference = parsed;
   writeSharedToCookie(parsed);
   writeSharedToStorage(parsed);
   return parsed;
@@ -185,18 +208,15 @@ export function mirrorSharedThemePreference(value) {
 export function getSharedThemePreference() {
   const fromCookie = parseSharedThemeValue(readSharedRawFromCookie());
   const fromStorage = parseSharedThemeValue(readSharedRawFromStorage());
-  if (fromCookie && fromStorage) {
-    if (fromStorage.revision === fromCookie.revision) return fromCookie;
-    const winner = fromStorage.revision > fromCookie.revision ? fromStorage : fromCookie;
-    // Mirror the winner so the stores converge without resurrecting stale values.
-    if (winner === fromStorage) writeSharedToCookie(winner);
-    else writeSharedToStorage(winner);
-    return winner;
+  let winner = null;
+  for (const candidate of [fromCookie, fromStorage, getSession().preference]) {
+    if (candidate && (!winner || sharedThemeRevisionTime(candidate.revision) > sharedThemeRevisionTime(winner.revision))) {
+      winner = candidate;
+    }
   }
-  const winner = fromCookie || fromStorage;
   if (!winner) return null;
-  if (winner === fromCookie) writeSharedToStorage(winner);
-  else writeSharedToCookie(winner);
+  if (fromCookie?.revision !== winner.revision || fromCookie?.mode !== winner.mode) writeSharedToCookie(winner);
+  if (fromStorage?.revision !== winner.revision || fromStorage?.mode !== winner.mode) writeSharedToStorage(winner);
   return winner;
 }
 
@@ -206,7 +226,8 @@ export function getSharedThemePreference() {
  * @returns {string}
  */
 export function createSharedThemeRevision() {
-  const time = Date.now().toString(36);
+  const current = getSharedThemePreference();
+  const time = Math.max(Date.now(), sharedThemeRevisionTime(current?.revision) + 1).toString(36);
   let random = '';
   try {
     const bytes = new Uint32Array(2);
@@ -294,7 +315,8 @@ function migrateLocalThemeToShared() {
   const written = setSharedThemePreference(/** @type {SharedThemeMode} */ (sharedMode));
   if (written && localMode === 'normal') {
     // Bind the stored Normal to the shared revision it belongs to.
-    setViewerPreferences({ themeSharedRevision: written.revision });
+    setViewerPreferences({ themeMode: 'normal', themeSharedRevision: written.revision });
+    getSession().normalRevision = written.revision;
   }
   return written;
 }
@@ -319,11 +341,11 @@ export function getEffectiveOdvThemeMode() {
     return 'system';
   }
   const local = getViewerPreferences();
+  const storedNormal = local.themeMode === 'normal'
+    && local.themeSharedRevision === shared.revision;
   if (
-    local.themeMode === 'normal'
-    && typeof local.themeSharedRevision === 'string'
-    && local.themeSharedRevision
-    && local.themeSharedRevision === shared.revision
+    shared.mode === 'light'
+    && (getSession().normalRevision === shared.revision || storedNormal)
   ) {
     return 'normal';
   }
@@ -349,10 +371,12 @@ export function setOdvThemeMode(mode) {
     const shared = setSharedThemePreference('light');
     const next = /** @type {any} */ ({ theme: 'normal', themeMode: 'normal' });
     if (shared) next.themeSharedRevision = shared.revision;
+    getSession().normalRevision = shared?.revision || null;
     setViewerPreferences(next);
     return 'normal';
   }
   setSharedThemePreference(/** @type {SharedThemeMode} */ (normalized));
+  getSession().normalRevision = null;
   setThemeModePreference(/** @type {any} */ (normalized));
   // Drop a stale Normal binding: the explicit shared choice now governs.
   clearThemeSharedRevision();

@@ -25,6 +25,11 @@ import './i18n'; // initialize i18n before rendering
 import logger from './logging/systemLogger.js';
 import AppBootstrap from './app/AppBootstrap.jsx';
 import { ThemeProvider } from './contexts/ThemeProvider.jsx';
+import { getEffectiveOdvThemeMode, resolveConcreteTheme, applyOdvThemeToDocument } from './utils/ompThemePreference.js';
+
+// Apply the shared choice before React renders the viewer's first content.
+const initialThemeMode = getEffectiveOdvThemeMode();
+applyOdvThemeToDocument(resolveConcreteTheme(initialThemeMode), initialThemeMode);
 
 /**
  * Determine environment and set a sensible client-side log level.

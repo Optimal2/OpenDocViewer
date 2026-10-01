@@ -48,7 +48,7 @@
 - `src/contexts/themeContext.js`: 3 incoming local imports
 - `src/utils/documentMetadata.js`: 3 incoming local imports
 - `src/utils/objectUrlRegistry.js`: 3 incoming local imports
+- `src/utils/ompThemePreference.js`: 3 incoming local imports
 - `src/utils/printPdf.js`: 3 incoming local imports
 - `src/utils/printTemplate.js`: 3 incoming local imports
 - `src/utils/supportDiagnostics.js`: 3 incoming local imports
-- `src/components/common/StatusLed.jsx`: 2 incoming local imports

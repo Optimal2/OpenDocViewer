@@ -4,11 +4,23 @@
  * (4.5:1) on the main surfaces (page background, canvas, toolbar) in Light,
  * Dark and Normal, and the dialog restore action must keep white text at 4.5:1.
  *
- * The expected pairs mirror src/styles/theme.css and src/styles/dialogs.css so a
+ * The expected pairs are read from the application CSS so a
  * palette regression fails here before it reaches a browser.
  */
 
 import { describe, it, expect } from 'vitest';
+import { readFileSync } from 'node:fs';
+
+const themeCss = readFileSync(new URL('../theme.css', import.meta.url), 'utf8');
+const dialogCss = readFileSync(new URL('../dialogs.css', import.meta.url), 'utf8');
+const toolbarCss = readFileSync(new URL('../toolbar.css', import.meta.url), 'utf8');
+const printCss = readFileSync(new URL('../print.css', import.meta.url), 'utf8');
+
+function declarations(css, selector) {
+  const rule = css.split('}').find((block) => block.slice(0, block.indexOf('{')).trim().endsWith(selector));
+  expect(rule, `Missing CSS rule: ${selector}`).toBeTruthy();
+  return Object.fromEntries([...rule.matchAll(/([\w-]+)\s*:\s*([^;{}]+);/g)].map((match) => [match[1], match[2].trim()]));
+}
 
 /** Parse a #rrggbb hex colour into linear RGB channels. */
 function parseHex(hex) {
@@ -38,49 +50,45 @@ function contrastRatio(foreground, background) {
   return (lighter + 0.05) / (darker + 0.05);
 }
 
-// Palette values mirrored from src/styles/theme.css.
-const PALETTES = {
-  light: {
-    text: '#1b1f24',
-    background: '#f7f7f7',
-    canvas: '#ffffff',
-    toolbar: '#d6d6d6',
-  },
-  normal: {
-    text: '#17202a',
-    background: '#dde5ee',
-    canvas: '#edf2f7',
-    toolbar: '#bcc8d5',
-  },
-  dark: {
-    text: '#e8edf3',
-    background: '#12161c',
-    canvas: '#171c24',
-    toolbar: '#202734',
-  },
-};
+const PALETTES = Object.fromEntries(['light', 'normal', 'dark'].map((name) => {
+  const css = declarations(themeCss, name === 'light' ? ':root' : `[data-theme='${name}']`);
+  return [name, {
+    text: css['--text-color'],
+    background: css['--background-color'],
+    canvas: css['--canvas-background-color'],
+    toolbar: css['--toolbar-background-color'],
+    surface: css['--odv-surface'],
+    elevated: css['--odv-surface-elevated'],
+  }];
+}));
 
 describe('theme contrast gate (WCAG AA 4.5:1)', () => {
+  it('overrides the inline screen color-scheme in print media', () => {
+    expect(declarations(printCss, 'html')['color-scheme']).toBe('light !important');
+  });
   for (const [name, palette] of Object.entries(PALETTES)) {
     it(`body text passes on background, canvas and toolbar in ${name}`, () => {
-      for (const surface of [palette.background, palette.canvas, palette.toolbar]) {
+      for (const surface of [palette.background, palette.canvas, palette.toolbar, palette.surface, palette.elevated]) {
         expect(contrastRatio(palette.text, surface)).toBeGreaterThanOrEqual(4.5);
       }
     });
   }
 
   it('dialog restore action keeps white text at 4.5:1', () => {
-    // Mirrors .odv-prd-restoreIcon in src/styles/dialogs.css.
-    expect(contrastRatio('#ffffff', '#15803d')).toBeGreaterThanOrEqual(4.5);
-    expect(contrastRatio('#ffffff', '#166534')).toBeGreaterThanOrEqual(4.5);
+    const base = declarations(dialogCss, '.odv-prd-restoreIcon');
+    for (const selector of ['.odv-prd-restoreIcon', '.odv-prd-restoreIcon:hover', '.odv-prd-restoreIcon:focus-visible']) {
+      expect(contrastRatio(base.color, declarations(dialogCss, selector).background)).toBeGreaterThanOrEqual(4.5);
+    }
   });
 
   it('zoom and page inputs keep body text at 4.5:1 on their surface', () => {
-    // Mirrors .zoom-percent-input / .page-number-input in src/styles/toolbar.css,
-    // which use the shared surface and body text tokens.
-    const surfaces = { light: '#ffffff', normal: '#e8eef5', dark: '#1e2631' };
-    for (const [name, palette] of Object.entries(PALETTES)) {
-      expect(contrastRatio(palette.text, surfaces[name])).toBeGreaterThanOrEqual(4.5);
+    for (const selector of ['.zoom-percent-input', '.page-number-input']) {
+      const css = declarations(toolbarCss, selector);
+      expect(css.color).toBe('var(--text-color)');
+      expect(css['background-color']).toBe('var(--odv-surface, #ffffff)');
+    }
+    for (const palette of Object.values(PALETTES)) {
+      expect(contrastRatio(palette.text, palette.surface)).toBeGreaterThanOrEqual(4.5);
     }
   });
 });
