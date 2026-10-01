@@ -70,6 +70,25 @@ describe('theme contrast gate (WCAG AA 4.5:1)', () => {
     expect(declarations(printCss, 'html')['color-scheme']).toBe('light !important');
   });
   for (const [name, palette] of Object.entries(PALETTES)) {
+    it(`print media resets every theme token to light from ${name}`, () => {
+      const dom = new JSDOM(`<html data-theme="${name}" style="color-scheme: dark"><head><style>${themeCss}</style><style>${printCss}</style></head><body></body></html>`);
+      try {
+        // jsdom has no print emulation: activate only the real print media rules.
+        const printRules = [...dom.window.document.styleSheets[1].cssRules]
+          .filter((rule) => rule.media?.mediaText === 'print')
+          .flatMap((rule) => [...rule.cssRules]).map((rule) => rule.cssText).join('\n');
+        expect(printRules).not.toBe('');
+        dom.window.document.querySelectorAll('style')[1].textContent = printRules;
+        const style = dom.window.getComputedStyle(dom.window.document.documentElement);
+        for (const [property, value] of Object.entries(declarations(themeCss, ':root'))) {
+          if (property.startsWith('--')) {
+            expect(style.getPropertyValue(property).replace(/\s/g, ''), property).toBe(value.replace(/\s/g, ''));
+          }
+        }
+      } finally {
+        dom.window.close();
+      }
+    });
     it(`body text passes on background, canvas and toolbar in ${name}`, () => {
       for (const surface of [palette.background, palette.canvas, palette.toolbar, palette.surface, palette.elevated]) {
         expect(contrastRatio(palette.text, surface)).toBeGreaterThanOrEqual(4.5);
@@ -107,12 +126,18 @@ const selectionActions = [
   'primary print-selection-save-action', 'secondary print-selection-leave-action',
 ];
 const selectionCases = [
+  // Generic rules must work without the selection-workspace overrides, including
+  // action classes used alone (otherwise primary/secondary can mask bad pairs).
+  ...['', 'toolbar'].flatMap((parent) => selectionActions.map((action) => [[parent], `print-selection-${action}`])),
+  ...['commit', 'reset-draft', 'cancel', 'reset', 'save'].map((action) => [
+    [''], `print-selection-${action}-action`,
+  ]),
   ...selectionActions.map((action) => [['toolbar toolbar--selection-workspace'], `print-selection-${action}`]),
   ...['print-selection-primary print-selection-save-action', 'print-selection-secondary']
     .map((action) => [['print-selection-unsaved-dialog'], action]),
-  ...['', 'is-active'].map((action) => [
-    ['toolbar toolbar--selection-workspace', 'print-selection-panel-mode-actions'], action,
-  ]),
+  ...['', 'toolbar', 'toolbar toolbar--selection-workspace'].flatMap((parent) => (
+    ['', 'is-active'].map((action) => [[parent, 'print-selection-panel-mode-actions'], action])
+  )),
   [['print-selection-workspace', 'print-selection-panel'], 'print-selection-panel-preview-button'],
   [['print-selection-workspace', 'print-selection-transfer-buttons'], ''],
   ...['print-selection-lightbox-close', 'print-selection-lightbox-step']
@@ -197,6 +222,12 @@ for (const name of Object.keys(PALETTES)) {
             const ancestorStyle = dom.window.getComputedStyle(element);
             expect(Number(ancestorStyle.opacity || 1)).toBe(1);
             backdrop = composite(computedColor(ancestorStyle.backgroundColor), backdrop);
+          }
+          if (action === 'print-selection-panel-preview-button' && states.includes('focus-visible') && !states.includes('disabled')) {
+            expect(style.outlineStyle).toBe('solid');
+            expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
+            expect(parseFloat(style.outlineOffset)).toBeGreaterThanOrEqual(2);
+            expect(contrastRatio(computedColor(style.outlineColor), backdrop)).toBeGreaterThanOrEqual(3);
           }
           let backgrounds = [style.backgroundColor];
           if (style.backgroundImage && style.backgroundImage !== 'none') {

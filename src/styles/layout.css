@@ -125,7 +125,7 @@
 .print-selection-panel-mode-actions > button:hover,
 .print-selection-panel-mode-actions > button:focus-visible {
   background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
-  color: var(--primary-color);
+  color: var(--text-color);
   outline: none;
 }
 
@@ -183,14 +183,14 @@
 .print-selection-reset-action {
   border-color: color-mix(in srgb, var(--primary-color) 62%, var(--border-color) 38%);
   background: color-mix(in srgb, var(--primary-color) 12%, var(--button-background, var(--background-color)) 88%);
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 .print-selection-reset-action:hover,
 .print-selection-reset-action:focus-visible {
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 18%, var(--button-background, var(--background-color)) 82%);
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 .print-selection-toolbar-end-actions {
@@ -204,19 +204,19 @@
   padding-inline: 0;
   border-color: color-mix(in srgb, #f59e0b 76%, var(--border-color) 24%);
   background: #f59e0b;
-  color: #fff;
+  color: #1b1f24;
 }
 
 .print-selection-reset-draft-action:hover,
 .print-selection-reset-draft-action:focus-visible {
   border-color: #d97706;
   background: #d97706;
-  color: #fff;
+  color: #1b1f24;
 }
 
 .print-selection-save-action {
   border-color: #15803d;
-  background: #16a34a;
+  background: #15803d;
   color: #fff;
 }
 
@@ -236,7 +236,7 @@
   margin-left: 10px;
   border-color: color-mix(in srgb, #dc2626 62%, var(--border-color) 38%);
   background: color-mix(in srgb, #dc2626 14%, var(--button-background, var(--background-color)) 86%);
-  color: color-mix(in srgb, #dc2626 78%, var(--text-color) 22%);
+  color: var(--text-color);
 }
 
 .toolbar .print-selection-cancel-action:hover,
@@ -244,14 +244,14 @@
 .print-selection-cancel-action:hover,
 .print-selection-cancel-action:focus-visible {
   border-color: #dc2626;
-  background: color-mix(in srgb, #dc2626 22%, var(--button-background, var(--background-color)) 78%);
-  color: #dc2626;
+  background: #dc2626;
+  color: #fff;
 }
 
 .toolbar .print-selection-commit-action,
 .print-selection-commit-action {
   border-color: #15803d;
-  background: #16a34a;
+  background: #15803d;
   color: #fff;
 }
 
@@ -285,9 +285,9 @@
 
 .toolbar .print-selection-primary,
 .print-selection-primary {
-  border-color: var(--primary-color);
-  background: var(--primary-color);
-  color: var(--primary-contrast-color, #fff);
+  border-color: #4f5d6d;
+  background: #4f5d6d;
+  color: #fff;
 }
 
 .toolbar .print-selection-secondary,
@@ -297,15 +297,19 @@
 }
 
 .toolbar .print-selection-primary:hover,
-.toolbar .print-selection-primary:focus-visible {
-  background: var(--primary-color-hover);
-  color: var(--primary-contrast-color, #fff);
+.toolbar .print-selection-primary:focus-visible,
+.print-selection-primary:hover,
+.print-selection-primary:focus-visible {
+  background: #414d5b;
+  color: #fff;
 }
 
 .toolbar .print-selection-secondary:hover,
-.toolbar .print-selection-secondary:focus-visible {
+.toolbar .print-selection-secondary:focus-visible,
+.print-selection-secondary:hover,
+.print-selection-secondary:focus-visible {
   background: color-mix(in srgb, var(--primary-color) 10%, transparent 90%);
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 .print-selection-primary:disabled,
@@ -412,7 +416,13 @@
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 12%, var(--background-color) 88%);
   color: var(--text-color);
-  outline: none;
+}
+
+.print-selection-panel-preview-button:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--text-color);
+  outline-offset: 2px;
 }
 
 .print-selection-panel-preview-button:disabled {

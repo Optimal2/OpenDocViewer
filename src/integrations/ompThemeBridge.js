@@ -22,6 +22,7 @@ import { sharedThemeRevisionTime } from '../utils/ompThemePreference.js';
 export const OMP_THEME_BRIDGE_KIND = 'omp:theme-preference';
 export const OMP_THEME_BRIDGE_VERSION = 1;
 const SHARED_THEME_MODES = Object.freeze(['system', 'light', 'dark']);
+const MAX_REVISION_CLOCK_SKEW_MS = 5_000;
 
 /**
  * Remote theme preference received over the bridge.
@@ -107,6 +108,12 @@ export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCur
       if (!event?.source || event.source !== window.parent) return;
       const parsed = parseThemeBridgeMessage(event.data);
       if (!parsed) return;
+      // Bound the stored revision too, not just the comparison: a fast or
+      // hostile parent clock must not suppress later changes indefinitely.
+      const latestTime = Date.now() + MAX_REVISION_CLOCK_SKEW_MS;
+      if (sharedThemeRevisionTime(parsed.revision) > latestTime) {
+        parsed.revision = parsed.revision.replace(/^[^-]+/, latestTime.toString(36));
+      }
       const current = typeof getCurrentRevision === 'function' ? getCurrentRevision() : null;
       if (!isRevisionNewer(parsed.revision, current)) return;
       onRemotePreference(parsed);

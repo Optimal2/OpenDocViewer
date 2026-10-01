@@ -15573,7 +15573,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 150,
+    "line": 157,
     "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
     "params": [
       {
@@ -15616,7 +15616,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 81,
+    "line": 82,
     "description": "Order two revisions by their base-36 creation time, as OMP does.",
     "params": [
       {
@@ -15647,7 +15647,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 61,
+    "line": 62,
     "description": "Check an event origin against the configured allow-list (exact match only).",
     "params": [
       {
@@ -15678,7 +15678,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 103,
+    "line": 104,
     "description": "",
     "params": [
       {
@@ -15698,7 +15698,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 40,
+    "line": 41,
     "description": "Validate an inbound postMessage payload.",
     "params": [
       {
@@ -15723,7 +15723,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 26,
+    "line": 27,
     "description": "Remote theme preference received over the bridge.",
     "params": [],
     "returns": [],
@@ -15736,7 +15736,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 97,
+    "line": 98,
     "description": "Start listening for theme changes from allowed origins.",
     "params": [
       {

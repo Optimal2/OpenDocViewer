@@ -5,6 +5,36 @@
   @page { margin: 0; size: A4 portrait; }
   /* Printed pages always use the light path, independent of the screen theme. */
   html { color-scheme: light !important; }
+  /* Reset the screen palette, including an explicit data-theme on any element.
+     Keep these tokens aligned with the light :root palette in theme.css. */
+  :root, [data-theme] {
+    --primary-color: #4a4a4a !important;
+    --primary-color-hover: #333333 !important;
+    --primary-color-active: #151515 !important;
+    --background-color: #f7f7f7 !important;
+    --canvas-background-color: #ffffff !important;
+    --toolbar-background-color: #d6d6d6 !important;
+    --odv-surface: #ffffff !important;
+    --odv-surface-elevated: #f7f9fc !important;
+    --odv-surface-muted: rgba(127, 127, 127, 0.06) !important;
+    --odv-hover-overlay: rgba(0, 0, 0, 0.06) !important;
+    --text-color: #1b1f24 !important;
+    --text-color-strong: #111111 !important;
+    --text-muted-color: rgba(0, 0, 0, 0.68) !important;
+    --text-faint-color: rgba(0, 0, 0, 0.76) !important;
+    --selected-shadow-color: rgba(74, 74, 74, 0.5) !important;
+    --thumbnail-border-color: #bdbdbd !important;
+    --focus-shadow: rgba(74, 74, 74, 0.5) !important;
+    --box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1) !important;
+    --odv-border: #d5dae1 !important;
+    --odv-border-strong: #ccd1d8 !important;
+    --disabled-color: #9e9e9e !important;
+    --warning-color: #f44336 !important;
+    --thumbnail-primary-color: #0b57d0 !important;
+    --thumbnail-compare-color: #b25d00 !important;
+    --thumbnail-dual-color: #7b1fa2 !important;
+    --thumbnail-shell-color: rgba(11, 87, 208, 0.08) !important;
+  }
   html, body { margin: 0 !important; padding: 0 !important; }
 
   /* Wrapper used by multi-page printing (All/Range) */

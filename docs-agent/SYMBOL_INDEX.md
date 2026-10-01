@@ -610,13 +610,13 @@
 | <code>PortableMetadataRecord</code> | typedef | <code>src/integrations/normalizePortableBundle.js:38</code> | A normalized raw metadata record attached to a document. |
 | <code>PortableSession</code> | typedef | <code>src/integrations/normalizePortableBundle.js:20</code> | Session info stored on a bundle. |
 | <code>spreadUnknown</code> | function | <code>src/integrations/normalizePortableBundle.js:240</code> | Preserve unknown own enumerable properties from host input while excluding keys that were already normalized explicitly. |
-| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:150</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
-| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:81</code> | Order two revisions by their base-36 creation time, as OMP does. |
-| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:61</code> | Check an event origin against the configured allow-list \(exact match only\). |
-| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:103</code> |  |
-| <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:40</code> | Validate an inbound postMessage payload. |
-| <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:26</code> | Remote theme preference received over the bridge. |
-| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:97</code> | Start listening for theme changes from allowed origins. |
+| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:157</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
+| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:82</code> | Order two revisions by their base-36 creation time, as OMP does. |
+| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:62</code> | Check an event origin against the configured allow-list \(exact match only\). |
+| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:104</code> |  |
+| <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:41</code> | Validate an inbound postMessage payload. |
+| <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:27</code> | Remote theme preference received over the bridge. |
+| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:98</code> | Start listening for theme changes from allowed origins. |
 | <code>b64DecodeUnicode</code> | function | <code>src/integrations/parentBridge.js:88</code> | Decode a base64-encoded Unicode string into text \(handles UTF-8\). |
 | <code>getSameOriginOpener</code> | function | <code>src/integrations/parentBridge.js:52</code> | Try to obtain a same-origin opener window reference. |
 | <code>getSameOriginParent</code> | function | <code>src/integrations/parentBridge.js:30</code> | Try to obtain a same-origin parent window reference. |

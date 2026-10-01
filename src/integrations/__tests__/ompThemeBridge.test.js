@@ -7,7 +7,8 @@
  * it back (no ping-pong).
  */
 
-import { describe, it, expect, beforeEach, afterEach } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
+import { sharedThemeRevisionTime } from '../../utils/ompThemePreference.js';
 import {
   OMP_THEME_BRIDGE_KIND,
   OMP_THEME_BRIDGE_VERSION,
@@ -60,6 +61,7 @@ describe('ompThemeBridge', () => {
   });
 
   afterEach(() => {
+    vi.restoreAllMocks();
     if (originalWindow) Object.defineProperty(globalThis, 'window', originalWindow);
     else delete globalThis.window;
   });
@@ -89,6 +91,63 @@ describe('ompThemeBridge', () => {
   });
 
   describe('startOmpThemeBridge', () => {
+    it('does not listen or announce in a top-level window, even with allowed origins', () => {
+      harness.stub.parent = harness.stub;
+      const listen = vi.spyOn(harness.stub, 'addEventListener');
+      const remove = vi.spyOn(harness.stub, 'removeEventListener');
+      harness.stub.postMessage = vi.fn();
+      const onRemotePreference = vi.fn();
+      const allowedOrigins = ['https://app.example'];
+      const stop = startOmpThemeBridge({ allowedOrigins, onRemotePreference });
+      harness.emitMessage({ origin: allowedOrigins[0], source: harness.stub, data: makeMessage('dark', 'r2') });
+      announceThemeToAllowedOrigins({ mode: 'dark', revision: 'r2', allowedOrigins });
+      stop();
+      expect(listen).not.toHaveBeenCalled();
+      expect(remove).not.toHaveBeenCalled();
+      expect(onRemotePreference).not.toHaveBeenCalled();
+      expect(harness.stub.postMessage).not.toHaveBeenCalled();
+    });
+
+    it('clamps a far-future revision before applying it so a later real change can win', () => {
+      const now = 1_800_000_000_000;
+      const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+      let current = { mode: 'light', revision: `${(now - 1).toString(36)}-local` };
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        getCurrentRevision: () => current.revision,
+        onRemotePreference: (value) => { current = value; },
+      });
+      const emit = (mode, time) => harness.emitMessage({
+        origin: 'https://app.example', source: harness.stub.parent,
+        data: makeMessage(mode, `${time.toString(36)}-remote`),
+      });
+      emit('dark', now + 100 * 365 * 24 * 60 * 60 * 1000);
+      expect(current.mode).toBe('dark');
+      expect(sharedThemeRevisionTime(current.revision)).toBe(now + 5_000);
+      clock.mockReturnValue(now + 5_001);
+      emit('light', Date.now());
+      expect(current).toEqual({ mode: 'light', revision: `${Date.now().toString(36)}-remote` });
+      expect(harness.posted).toEqual([]);
+      stop();
+    });
+
+    it('preserves revisions within the clock skew and compares after clamping', () => {
+      const now = 1_800_000_000_000;
+      vi.spyOn(Date, 'now').mockReturnValue(now);
+      let current = null;
+      const seen = [];
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        getCurrentRevision: () => current,
+        onRemotePreference: (value) => { current = value.revision; seen.push(value); },
+      });
+      const boundary = `${(now + 5_000).toString(36)}-original`;
+      harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('dark', boundary) });
+      harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('light', `${(now + 60_000).toString(36)}-future`) });
+      expect(seen).toEqual([{ mode: 'dark', revision: boundary }]);
+      stop();
+    });
+
     it('rejects unrelated windows even when their origin is allowed', () => {
       const seen = [];
       const stop = startOmpThemeBridge({

@@ -640,6 +640,10 @@ Behavior:
   shape `{ kind: 'omp:theme-preference', version: 1, mode, revision }` and a newer revision.
 - Wildcards, opaque origins and URLs with paths are rejected in both directions.
 - Revision ordering uses the base-36 creation timestamp, as in OMP; the cookie wins ties.
+- Before comparing or applying an inbound bridge revision, its timestamp is capped at
+  the viewer's current time plus five seconds. This tolerates small clock differences
+  without letting a far-future parent timestamp permanently block subsequent changes.
+- In a top-level window the bridge neither listens nor announces, even with allowed origins.
 - If persistence is denied, the current page retains its choice through focus and visibility changes.
 - Applying a remote change never announces it back, so changes cannot ping-pong.
 - The embedding host must implement the same message protocol and send its current preference
