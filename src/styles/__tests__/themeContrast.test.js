@@ -117,7 +117,7 @@ describe('theme contrast gate (WCAG AA 4.5:1)', () => {
 
 // Let the CSS engine resolve the real cascade; resolve palette colors below.
 // State attributes have the same specificity as the pseudo-classes they replace.
-const selectionCss = [themeCss, layoutCss, toolbarCss].join('\n')
+const selectionCss = [themeCss, layoutCss, toolbarCss, dialogCss].join('\n')
   .replace(/:(hover|focus-visible|focus|active)\b/g, '[data-$1]');
 const selectionActions = [
   'primary', 'secondary', 'secondary print-selection-history-action',
@@ -146,9 +146,14 @@ const selectionCases = [
     ['print-selection-lightbox', 'print-selection-lightbox-actions'],
     `print-selection-lightbox-action print-selection-lightbox-${action}-action${active}`,
   ])),
+  ...['primary', 'secondary'].map((action) => [['odv-prd-dialog', 'odv-prd-footer'], `odv-prd-action ${action}`]),
 ];
+const requiresFocusRing = (parents, action) => action === 'print-selection-panel-preview-button'
+  || parents.includes('print-selection-panel-mode-actions')
+  || parents.includes('print-selection-lightbox') || action.includes('odv-prd-action');
 const selectionStates = [
   [], ['hover'], ['focus'], ['focus', 'focus-visible'], ['active'],
+  ['hover', 'focus', 'focus-visible'], ['active', 'focus', 'focus-visible'],
   ['disabled'], ['disabled', 'hover'], ['disabled', 'focus', 'focus-visible'],
 ];
 
@@ -223,7 +228,7 @@ for (const name of Object.keys(PALETTES)) {
             expect(Number(ancestorStyle.opacity || 1)).toBe(1);
             backdrop = composite(computedColor(ancestorStyle.backgroundColor), backdrop);
           }
-          if (action === 'print-selection-panel-preview-button' && states.includes('focus-visible') && !states.includes('disabled')) {
+          if (requiresFocusRing(parents, action) && states.includes('focus-visible') && !states.includes('disabled')) {
             expect(style.outlineStyle).toBe('solid');
             expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
             expect(parseFloat(style.outlineOffset)).toBeGreaterThanOrEqual(2);
@@ -254,3 +259,42 @@ for (const name of Object.keys(PALETTES)) {
     }
   });
 }
+
+describe('focus indicators in forced colors', () => {
+  it('keeps a system-color outline on mode, lightbox and dialog actions, including active buttons', () => {
+    const dom = new JSDOM(`<style>${selectionCss}</style>`);
+    try {
+      const styleElement = dom.window.document.querySelector('style');
+      const forcedRules = [...styleElement.sheet.cssRules]
+        .filter((rule) => rule.media?.mediaText === '(forced-colors: active)')
+        .flatMap((rule) => [...rule.cssRules]).map((rule) => rule.cssText).join('\n');
+      styleElement.textContent = selectionCss + '\n' + forcedRules;
+      for (const [parents, action] of selectionCases.filter(([parents, action]) => requiresFocusRing(parents, action))) {
+        let container = dom.window.document.body;
+        container.replaceChildren();
+        for (const className of parents) {
+          const parent = dom.window.document.createElement('div');
+          parent.className = className;
+          container.append(parent);
+          container = parent;
+        }
+        const button = dom.window.document.createElement('button');
+        button.className = action;
+        for (const state of ['focus', 'focus-visible', 'hover', 'active']) button.setAttribute(`data-${state}`, '');
+        container.append(button);
+        const style = dom.window.getComputedStyle(button);
+        expect(style.outlineStyle, action).toBe('solid');
+        expect(parseFloat(style.outlineWidth), action).toBeGreaterThanOrEqual(2);
+        const systemRule = [...styleElement.sheet.cssRules].filter((rule) => rule.selectorText
+          && /^(highlight|canvastext)$/i.test(rule.style.outlineColor) && button.matches(rule.selectorText)).at(-1);
+        expect(systemRule, action).toBeTruthy();
+        const probe = dom.window.document.createElement('span');
+        probe.style.outlineColor = systemRule.style.outlineColor;
+        container.append(probe);
+        expect(style.outlineColor, action).toBe(dom.window.getComputedStyle(probe).outlineColor);
+      }
+    } finally {
+      dom.window.close();
+    }
+  });
+});

@@ -111,7 +111,7 @@ File count: 1. Line count: 64. JSDoc symbol count: 2.
 
 ## src/integrations
 
-File count: 8. Line count: 2252. JSDoc symbol count: 59.
+File count: 8. Line count: 2264. JSDoc symbol count: 59.
 
 - `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `src/integrations/parentBridge.js` - Same\-origin parent\-window bootstrap adapter.

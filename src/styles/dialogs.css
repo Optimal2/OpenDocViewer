@@ -1593,7 +1593,6 @@
 
 .odv-prd-closeIcon:focus-visible,
 .odv-prd-restoreIcon:focus-visible,
-.odv-prd-action:focus-visible,
 .odv-help-close-icon:focus-visible,
 .odv-help-close-button:focus-visible,
 .odv-manual-searchbar-clear:focus-visible,
@@ -1604,4 +1603,17 @@
 .odv-prd-splitMenuItem:focus-visible {
   outline: 2px solid var(--primary-color, #2563eb);
   outline-offset: 2px;
+}
+
+.odv-prd-action:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--text-color);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .odv-prd-action:focus-visible {
+    outline-color: Highlight;
+  }
 }

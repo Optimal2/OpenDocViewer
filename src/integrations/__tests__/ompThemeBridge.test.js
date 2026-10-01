@@ -121,17 +121,24 @@ describe('ompThemeBridge', () => {
         origin: 'https://app.example', source: harness.stub.parent,
         data: makeMessage(mode, `${time.toString(36)}-remote`),
       });
-      emit('dark', now + 100 * 365 * 24 * 60 * 60 * 1000);
+      const future = now + 100 * 365 * 24 * 60 * 60 * 1000;
+      emit('dark', future);
       expect(current.mode).toBe('dark');
       expect(sharedThemeRevisionTime(current.revision)).toBe(now + 5_000);
       clock.mockReturnValue(now + 5_001);
-      emit('light', Date.now());
-      expect(current).toEqual({ mode: 'light', revision: `${Date.now().toString(36)}-remote` });
+      // A local choice can supersede the bounded parent revision.
+      current = { mode: 'light', revision: `${Date.now().toString(36)}-local` };
+      emit('dark', future);
+      emit('dark', future - 1);
+      emit('dark', Date.now());
+      expect(current).toEqual({ mode: 'light', revision: `${Date.now().toString(36)}-local` });
+      emit('light', future + 1);
+      expect(current).toEqual({ mode: 'light', revision: `${(Date.now() + 5_000).toString(36)}-remote` });
       expect(harness.posted).toEqual([]);
       stop();
     });
 
-    it('preserves revisions within the clock skew and compares after clamping', () => {
+    it('preserves bounded revisions and orders newer sender times arriving in the same millisecond', () => {
       const now = 1_800_000_000_000;
       vi.spyOn(Date, 'now').mockReturnValue(now);
       let current = null;
@@ -144,7 +151,35 @@ describe('ompThemeBridge', () => {
       const boundary = `${(now + 5_000).toString(36)}-original`;
       harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('dark', boundary) });
       harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('light', `${(now + 60_000).toString(36)}-future`) });
-      expect(seen).toEqual([{ mode: 'dark', revision: boundary }]);
+      harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('dark', `${(now + 60_001).toString(36)}-future`) });
+      expect(seen).toEqual([
+        { mode: 'dark', revision: boundary },
+        { mode: 'light', revision: `${(now + 5_001).toString(36)}-future` },
+        { mode: 'dark', revision: `${(now + 5_002).toString(36)}-future` },
+      ]);
+      stop();
+    });
+
+    it('remembers sender times even when a local revision wins, without promoting stale messages', () => {
+      const now = 1_800_000_000_000;
+      const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+      const seen = [];
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        getCurrentRevision: () => `${(now + 10_000).toString(36)}-local`,
+        onRemotePreference: (value) => seen.push(value),
+      });
+      const emit = (time, suffix) => harness.emitMessage({
+        origin: 'https://app.example', source: harness.stub.parent,
+        data: makeMessage('dark', `${time.toString(36)}-${suffix}`),
+      });
+      emit(now + 60_000, 'first');
+      clock.mockReturnValue(now + 20_000);
+      emit(now + 60_000, 'different-suffix');
+      emit(now + 59_999, 'older');
+      expect(seen).toEqual([]);
+      emit(now + 60_001, 'newer');
+      expect(seen).toEqual([{ mode: 'dark', revision: `${(now + 25_000).toString(36)}-newer` }]);
       stop();
     });
 

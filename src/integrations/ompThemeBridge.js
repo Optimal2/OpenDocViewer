@@ -100,6 +100,9 @@ export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCur
     ? allowedOrigins.filter((origin) => isThemeBridgeOriginAllowed(origin, allowedOrigins))
     : [];
   if (allowList.length === 0 || typeof window === 'undefined' || window.parent === window) return () => {};
+  // Source is restricted to window.parent; keep independent clocks per origin
+  // in case that WindowProxy navigates between allowed senders.
+  const senderClocks = new Map();
   /** @param {MessageEvent} event */
   const onMessage = (event) => {
     try {
@@ -108,14 +111,23 @@ export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCur
       if (!event?.source || event.source !== window.parent) return;
       const parsed = parseThemeBridgeMessage(event.data);
       if (!parsed) return;
-      // Bound the stored revision too, not just the comparison: a fast or
-      // hostile parent clock must not suppress later changes indefinitely.
-      const latestTime = Date.now() + MAX_REVISION_CLOCK_SKEW_MS;
-      if (sharedThemeRevisionTime(parsed.revision) > latestTime) {
-        parsed.revision = parsed.revision.replace(/^[^-]+/, latestTime.toString(36));
+      const senderTime = sharedThemeRevisionTime(parsed.revision);
+      const previous = senderClocks.get(event.origin);
+      if (previous && senderTime <= previous.seen) return;
+      // Record even revisions that lose to a local choice, so replay cannot
+      // acquire a later timestamp merely by arriving again.
+      const clock = { seen: senderTime, accepted: previous?.accepted ?? -1 };
+      senderClocks.set(event.origin, clock);
+      // Bound the stored clock while preserving order for genuinely newer
+      // sender revisions whose arrivals share the same millisecond.
+      const clamped = Math.min(senderTime, Date.now() + MAX_REVISION_CLOCK_SKEW_MS);
+      const acceptedTime = Math.max(clamped, clock.accepted + 1);
+      if (acceptedTime !== senderTime) {
+        parsed.revision = parsed.revision.replace(/^[^-]+/, acceptedTime.toString(36));
       }
       const current = typeof getCurrentRevision === 'function' ? getCurrentRevision() : null;
       if (!isRevisionNewer(parsed.revision, current)) return;
+      clock.accepted = acceptedTime;
       onRemotePreference(parsed);
     } catch {
       // ignore malformed events

@@ -942,6 +942,29 @@
   cursor: not-allowed;
 }
 
+/* Offset the ring onto the surrounding surface, including active buttons. */
+.print-selection-panel-mode-actions > button:focus-visible,
+.toolbar .print-selection-panel-mode-actions > button:focus-visible,
+.print-selection-lightbox-close:focus-visible,
+.print-selection-lightbox-actions > button:focus-visible,
+.print-selection-lightbox-step:focus-visible {
+  outline-width: 2px;
+  outline-style: solid;
+  outline-color: var(--text-color);
+  outline-offset: 2px;
+}
+
+@media (forced-colors: active) {
+  .print-selection-panel-mode-actions > button:focus-visible,
+  .toolbar .print-selection-panel-mode-actions > button:focus-visible,
+  .print-selection-panel-preview-button:focus-visible,
+  .print-selection-lightbox-close:focus-visible,
+  .print-selection-lightbox-actions > button:focus-visible,
+  .print-selection-lightbox-step:focus-visible {
+    outline-color: Highlight;
+  }
+}
+
 .print-selection-lightbox-actions > button:disabled:hover,
 .print-selection-lightbox-actions > button:disabled:focus-visible {
   border-color: var(--border-color);
