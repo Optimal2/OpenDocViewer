@@ -184,6 +184,18 @@ function composite(foreground, background, opacity = 1) {
   )), 1];
 }
 
+function expectUnclippedFocusRing(window, button) {
+  const style = window.getComputedStyle(button);
+  const parent = window.getComputedStyle(button.parentElement);
+  if (parent.overflow !== 'hidden') return;
+  // Mode buttons fill the content box vertically; the first/last buttons also
+  // touch its horizontal edges. Padding must contain the whole outer ring.
+  const outwardExtent = Math.max(0, parseFloat(style.outlineOffset) + parseFloat(style.outlineWidth));
+  for (const side of ['Top', 'Right', 'Bottom', 'Left']) {
+    expect(outwardExtent, `Focus ring clipped at ${side}`).toBeLessThanOrEqual(parseFloat(parent[`padding${side}`]) || 0);
+  }
+}
+
 for (const name of Object.keys(PALETTES)) {
   describe(`print-selection button contrast in ${name}`, () => {
     let dom;
@@ -231,8 +243,13 @@ for (const name of Object.keys(PALETTES)) {
           if (requiresFocusRing(parents, action) && states.includes('focus-visible') && !states.includes('disabled')) {
             expect(style.outlineStyle).toBe('solid');
             expect(parseFloat(style.outlineWidth)).toBeGreaterThanOrEqual(2);
-            expect(parseFloat(style.outlineOffset)).toBeGreaterThanOrEqual(2);
-            expect(contrastRatio(computedColor(style.outlineColor), backdrop)).toBeGreaterThanOrEqual(3);
+            expectUnclippedFocusRing(dom.window, button);
+            if (!parents.includes('print-selection-panel-mode-actions')) {
+              expect(parseFloat(style.outlineOffset)).toBeGreaterThanOrEqual(2);
+            }
+            const ringBackdrop = parseFloat(style.outlineOffset) < 0
+              ? composite(computedColor(style.backgroundColor), backdrop) : backdrop;
+            expect(contrastRatio(computedColor(style.outlineColor), ringBackdrop)).toBeGreaterThanOrEqual(3);
           }
           let backgrounds = [style.backgroundColor];
           if (style.backgroundImage && style.backgroundImage !== 'none') {
@@ -261,8 +278,8 @@ for (const name of Object.keys(PALETTES)) {
 }
 
 describe('focus indicators in forced colors', () => {
-  it('keeps a system-color outline on mode, lightbox and dialog actions, including active buttons', () => {
-    const dom = new JSDOM(`<style>${selectionCss}</style>`);
+  it.each(Object.keys(PALETTES))('keeps unclipped system-color outlines, including active buttons in %s', (name) => {
+    const dom = new JSDOM(`<html data-theme="${name}"><head><style>${selectionCss}</style></head><body></body></html>`);
     try {
       const styleElement = dom.window.document.querySelector('style');
       const forcedRules = [...styleElement.sheet.cssRules]
@@ -285,6 +302,7 @@ describe('focus indicators in forced colors', () => {
         const style = dom.window.getComputedStyle(button);
         expect(style.outlineStyle, action).toBe('solid');
         expect(parseFloat(style.outlineWidth), action).toBeGreaterThanOrEqual(2);
+        expectUnclippedFocusRing(dom.window, button);
         const systemRule = [...styleElement.sheet.cssRules].filter((rule) => rule.selectorText
           && /^(highlight|canvastext)$/i.test(rule.style.outlineColor) && button.matches(rule.selectorText)).at(-1);
         expect(systemRule, action).toBeTruthy();

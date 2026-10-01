@@ -43,7 +43,9 @@
   [data-theme='dark'] .compare-zoom-overlay .odv-btn,
   [data-theme='dark'] .odv-prd-input,
   [data-theme='dark'] .odv-prd-inputWide,
-  [data-theme='dark'] .odv-prd-select {
+  [data-theme='dark'] .odv-prd-select,
+  [data-theme='dark'] .odv-prd-splitMenu,
+  [data-theme='dark'] .odv-prd-splitMenu::after {
     background: var(--odv-surface) !important;
     border-color: var(--odv-border-strong) !important;
     color: var(--text-color) !important;
@@ -61,6 +63,18 @@
   }
   [data-theme='dark'] .odv-prd-splitMenu {
     box-shadow: none !important;
+  }
+  [data-theme='dark'] .odv-prd-splitMenuItem,
+  [data-theme='dark'] .odv-prd-menuItemTitle {
+    color: var(--text-color) !important;
+  }
+  [data-theme='dark'] .odv-prd-splitMenuItem small,
+  [data-theme='dark'] .odv-prd-menuItemTitle .odv-prd-infoIcon {
+    color: var(--text-muted-color) !important;
+  }
+  [data-theme='dark'] .odv-prd-splitMenuItem:hover,
+  [data-theme='dark'] .odv-prd-splitMenuItem:focus-visible {
+    background: var(--odv-surface-elevated) !important;
   }
 
   /* Wrapper used by multi-page printing (All/Range) */

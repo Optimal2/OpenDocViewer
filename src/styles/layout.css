@@ -954,6 +954,13 @@
   outline-offset: 2px;
 }
 
+/* Keep the complete ring inside the clipped, rounded mode-button group. */
+.print-selection-panel-mode-actions > button:focus-visible,
+.toolbar .print-selection-panel-mode-actions > button:focus-visible {
+  outline-offset: -4px;
+  outline-color: currentColor;
+}
+
 @media (forced-colors: active) {
   .print-selection-panel-mode-actions > button:focus-visible,
   .toolbar .print-selection-panel-mode-actions > button:focus-visible,

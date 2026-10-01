@@ -138,7 +138,7 @@ describe('ompThemeBridge', () => {
       stop();
     });
 
-    it('preserves bounded revisions and orders newer sender times arriving in the same millisecond', () => {
+    it('never steps past the skew ceiling for increasing future messages in the same millisecond', () => {
       const now = 1_800_000_000_000;
       vi.spyOn(Date, 'now').mockReturnValue(now);
       let current = null;
@@ -154,8 +154,33 @@ describe('ompThemeBridge', () => {
       harness.emitMessage({ origin: 'https://app.example', source: harness.stub.parent, data: makeMessage('dark', `${(now + 60_001).toString(36)}-future`) });
       expect(seen).toEqual([
         { mode: 'dark', revision: boundary },
-        { mode: 'light', revision: `${(now + 5_001).toString(36)}-future` },
-        { mode: 'dark', revision: `${(now + 5_002).toString(36)}-future` },
+      ]);
+      stop();
+    });
+
+    it('accepts a realistic parent revision after an extreme future clock, but rejects older replays', () => {
+      const now = 1_800_000_000_000;
+      const clock = vi.spyOn(Date, 'now').mockReturnValue(now);
+      let current = null;
+      const seen = [];
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        getCurrentRevision: () => current,
+        onRemotePreference: (value) => { current = value.revision; seen.push(value); },
+      });
+      const emit = (mode, time) => harness.emitMessage({
+        origin: 'https://app.example', source: harness.stub.parent,
+        data: makeMessage(mode, `${time.toString(36)}-remote`),
+      });
+      emit('dark', Number.MAX_SAFE_INTEGER);
+      expect(sharedThemeRevisionTime(current)).toBe(now + 5_000);
+      clock.mockReturnValue(now + 5_001);
+      emit('light', Date.now());
+      emit('dark', now + 5_000);
+      emit('dark', now);
+      expect(seen).toEqual([
+        { mode: 'dark', revision: `${(now + 5_000).toString(36)}-remote` },
+        { mode: 'light', revision: `${(now + 5_001).toString(36)}-remote` },
       ]);
       stop();
     });

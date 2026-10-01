@@ -5,21 +5,10 @@ import { JSDOM } from 'jsdom';
 const stylesRoot = new URL('../', import.meta.url);
 const printCss = readFileSync(new URL('print.css', stylesRoot), 'utf8');
 
-// Fallback colors inside var() are covered by the palette reset. Literal
-// colors outside var(), including mixes, gradients and shadows, are not.
-function withoutVariables(value) {
-  let result = value;
-  for (let start = result.indexOf('var('); start !== -1; start = result.indexOf('var(')) {
-    let depth = 1;
-    let end = start + 4;
-    while (depth && end < result.length) {
-      if (result[end] === '(') depth += 1;
-      if (result[end] === ')') depth -= 1;
-      end += 1;
-    }
-    result = result.slice(0, start) + result.slice(end);
-  }
-  return result;
+// Ignore token names (which can contain color words), but retain every literal
+// fallback, including nested var(), mixes, gradients and shadows.
+function withoutVariableNames(value) {
+  return value.replace(/var\(\s*--[\w-]+\s*(?:,\s*)?/g, '(');
 }
 
 function* printApplicableRules(rules) {
@@ -31,6 +20,14 @@ function* printApplicableRules(rules) {
 }
 
 describe('live-DOM print theme reset', () => {
+  it.each([
+    ['var(--surface, #123456)', '#123456'],
+    ['var(--surface, rgb(1, 2, 3))', 'rgb(1, 2, 3)'],
+    ['var(--surface, var(--other, navy))', 'navy'],
+  ])('preserves hard-coded fallback colors for the theme-rule audit: %s', (value, color) => {
+    expect(withoutVariableNames(value)).toContain(color);
+  });
+
   it('covers every hard-coded theme color with an important print override', () => {
     const dom = new JSDOM(`<style>${printCss}</style><style></style>`);
     try {
@@ -51,7 +48,7 @@ describe('live-DOM print theme reset', () => {
           if (!rule.selectorText.includes('[data-theme')) continue;
           for (const property of Array.from(rule.style)) {
             if (property.startsWith('--')) continue; // Token reset is tested separately.
-            const value = withoutVariables(rule.style.getPropertyValue(property));
+            const value = withoutVariableNames(rule.style.getPropertyValue(property));
             const hasColor = /#[\da-f]+|(?:rgba?|hsla?|oklch|oklab|lab|lch|color)\(/i.test(value)
               || (value.match(/[a-z]+/gi) || []).some((word) => {
                 probe.style.color = '';

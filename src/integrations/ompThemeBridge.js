@@ -114,14 +114,22 @@ export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCur
       const senderTime = sharedThemeRevisionTime(parsed.revision);
       const previous = senderClocks.get(event.origin);
       if (previous && senderTime <= previous.seen) return;
+      const ceiling = Date.now() + MAX_REVISION_CLOCK_SKEW_MS;
+      const clamped = Math.min(senderTime, ceiling);
+      // Remember outlier replays separately, without letting an unbounded
+      // sender clock veto realistic revisions after the skew window expires.
+      if (senderTime > ceiling && senderTime <= (previous?.futureSeen ?? -1)) return;
       // Record even revisions that lose to a local choice, so replay cannot
       // acquire a later timestamp merely by arriving again.
-      const clock = { seen: senderTime, accepted: previous?.accepted ?? -1 };
+      const clock = {
+        seen: clamped,
+        accepted: previous?.accepted ?? -1,
+        futureSeen: senderTime > ceiling ? senderTime : previous?.futureSeen ?? -1,
+      };
       senderClocks.set(event.origin, clock);
       // Bound the stored clock while preserving order for genuinely newer
-      // sender revisions whose arrivals share the same millisecond.
-      const clamped = Math.min(senderTime, Date.now() + MAX_REVISION_CLOCK_SKEW_MS);
-      const acceptedTime = Math.max(clamped, clock.accepted + 1);
+      // sender revisions only while there is room below the skew ceiling.
+      const acceptedTime = Math.min(ceiling, Math.max(clamped, clock.accepted + 1));
       if (acceptedTime !== senderTime) {
         parsed.revision = parsed.revision.replace(/^[^-]+/, acceptedTime.toString(36));
       }

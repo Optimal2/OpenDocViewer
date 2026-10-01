@@ -15573,7 +15573,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 169,
+    "line": 177,
     "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
     "params": [
       {

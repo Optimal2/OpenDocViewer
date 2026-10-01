@@ -83,7 +83,7 @@
   },
   "stats": {
     "fileCount": 120,
-    "sourceLineCount": 51219,
+    "sourceLineCount": 51227,
     "docletCount": 1384,
     "documentedFileCount": 120,
     "lowConfidenceSummaryCount": 0,
@@ -1315,13 +1315,13 @@
     {
       "name": "src/integrations",
       "fileCount": 8,
-      "lineCount": 2264,
+      "lineCount": 2272,
       "docletCount": 59,
       "importantFiles": [
         {
           "path": "src/integrations/ompThemeBridge.js",
           "score": 60,
-          "lines": 191,
+          "lines": 199,
           "incomingLocalImports": 1,
           "doclets": 7,
           "summary": "Opt-in cross-origin theme bridge for the shared OMP theme preference.",
@@ -28528,7 +28528,7 @@
     },
     {
       "path": "src/integrations/ompThemeBridge.js",
-      "lines": 191,
+      "lines": 199,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "Opt-in cross-origin theme bridge for the shared OMP theme preference.",
@@ -28576,7 +28576,7 @@
         {
           "name": "announceThemeToAllowedOrigins",
           "kind": "function",
-          "line": 169
+          "line": 177
         }
       ],
       "declarations": [
@@ -28608,17 +28608,17 @@
         {
           "name": "clock",
           "kind": "object",
-          "line": 119
+          "line": 124
         },
         {
           "name": "announceThemeToAllowedOrigins",
           "kind": "function",
-          "line": 169
+          "line": 177
         },
         {
           "name": "message",
           "kind": "object",
-          "line": 178
+          "line": 186
         }
       ],
       "parseError": null,
@@ -28797,7 +28797,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 169,
+          "line": 177,
           "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
           "params": [
             {
@@ -71825,7 +71825,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 169,
+      "line": 177,
       "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
       "params": [
         {
