@@ -310,8 +310,22 @@
 
 .print-selection-primary:disabled,
 .print-selection-secondary:disabled {
-  opacity: 0.55;
-  cursor: default;
+  background: var(--odv-surface);
+  color: var(--text-color);
+  border-style: dashed;
+  opacity: 1;
+  cursor: not-allowed;
+}
+
+/* The save action is also used outside the toolbar in the unsaved dialog. */
+.print-selection-save-action:not(:disabled) {
+  background: #15803d;
+  color: #fff;
+}
+
+.print-selection-save-action:not(:disabled):hover,
+.print-selection-save-action:not(:disabled):focus-visible {
+  background: #166534;
 }
 
 .print-selection-workspace-body {
@@ -397,12 +411,13 @@
 .print-selection-panel-preview-button:focus-visible {
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 12%, var(--background-color) 88%);
-  color: var(--primary-color);
+  color: var(--text-color);
   outline: none;
 }
 
 .print-selection-panel-preview-button:disabled {
-  opacity: 0.46;
+  opacity: 1;
+  border-style: dashed;
   cursor: not-allowed;
 }
 
@@ -761,12 +776,13 @@
 .print-selection-transfer-buttons > button:hover,
 .print-selection-transfer-buttons > button:focus-visible {
   border-color: var(--primary-color);
-  color: var(--primary-color);
+  color: var(--text-color);
 }
 
 .print-selection-transfer-buttons > button:disabled {
-  opacity: 0.45;
-  cursor: default;
+  opacity: 1;
+  border-style: dashed;
+  cursor: not-allowed;
 }
 
 .print-selection-resize-zone {
@@ -871,20 +887,20 @@
   height: 42px;
 }
 
-.print-selection-lightbox-actions > .print-selection-lightbox-add-action.is-active {
+.print-selection-lightbox-actions > .print-selection-lightbox-add-action.is-active:not(:disabled) {
   border-color: color-mix(in srgb, #16a34a 78%, #fff 22%);
-  background: linear-gradient(180deg, #22c55e 0%, #15803d 100%);
+  background: linear-gradient(180deg, #166534 0%, #14532d 100%);
   color: #fff;
 }
 
-.print-selection-lightbox-actions > .print-selection-lightbox-remove-action.is-active {
+.print-selection-lightbox-actions > .print-selection-lightbox-remove-action.is-active:not(:disabled) {
   border-color: color-mix(in srgb, #dc2626 78%, #fff 22%);
-  background: linear-gradient(180deg, #ef4444 0%, #b91c1c 100%);
+  background: linear-gradient(180deg, #b91c1c 0%, #991b1b 100%);
   color: #fff;
 }
 
-.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:hover,
-.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:focus-visible {
+.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:not(:disabled):hover,
+.print-selection-lightbox-actions > .print-selection-lightbox-action.is-active:not(:disabled):focus-visible {
   color: #fff;
   filter: brightness(1.08);
 }
@@ -906,13 +922,14 @@
 .print-selection-lightbox-step:focus-visible {
   border-color: var(--primary-color);
   background: color-mix(in srgb, var(--primary-color) 16%, var(--background-color) 84%);
-  color: var(--primary-color);
+  color: var(--text-color);
   outline: none;
 }
 
 .print-selection-lightbox-actions > button:disabled {
-  opacity: 0.42;
-  cursor: default;
+  opacity: 1;
+  border-style: dashed;
+  cursor: not-allowed;
 }
 
 .print-selection-lightbox-actions > button:disabled:hover,
@@ -942,8 +959,9 @@
 }
 
 .print-selection-lightbox-step:disabled {
-  opacity: 0.4;
-  cursor: default;
+  opacity: 1;
+  border-style: dashed;
+  cursor: not-allowed;
 }
 
 .print-selection-lightbox-image {
