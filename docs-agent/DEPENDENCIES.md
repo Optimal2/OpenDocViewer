@@ -52,9 +52,9 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>30.1.1</code> | 0 |
 | <code>prettier</code> | <code>^3.9.9</code> | 0 |
-| <code>rolldown</code> | <code>^1.2.11</code> | 0 |
+| <code>rolldown</code> | <code>^1.2.12</code> | 0 |
 | <code>vite</code> | <code>^8.3.1</code> | 0 |
-| <code>vitest</code> | <code>^5.0.2</code> | 0 |
+| <code>vitest</code> | <code>^5.0.3</code> | 0 |
 
 ## Imported But Not Declared Directly
 
