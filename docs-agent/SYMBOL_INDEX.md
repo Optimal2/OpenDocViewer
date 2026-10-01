@@ -273,12 +273,12 @@
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:88</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:80</code> |  |
-| <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:104</code> |  |
-| <code>resolveSelectedMode</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:46</code> |  |
-| <code>resolveThemeModeIcon</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:34</code> |  |
-| <code>resolveThemeModeLabel</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:23</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:91</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:83</code> |  |
+| <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:107</code> |  |
+| <code>resolveSelectedMode</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:47</code> |  |
+| <code>resolveThemeModeIcon</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:35</code> |  |
+| <code>resolveThemeModeLabel</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:24</code> |  |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx:60</code> | Exported ThemeToggleButton component. |
 | <code>createSessionPageNumbers</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:125</code> |  |
 | <code>createVariantDetail</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:78</code> |  |
@@ -451,17 +451,19 @@
 | <code>ThemeContext</code> | constant | <code>src/contexts/themeContext.js:26</code> | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>ThemeContextValue</code> | typedef | <code>src/contexts/themeContext.js:10</code> | Context value shape for the theme. |
 | <code>ThemeMode</code> | typedef | <code>src/contexts/themeContext.js:4</code> | Theme identifier. |
-| <code>applyThemeToDocument</code> | function | <code>src/contexts/ThemeProvider.jsx:69</code> | Apply the resolved theme to the DOM \(SSR-safe\). |
-| <code>detectSystemTheme</code> | function | <code>src/contexts/ThemeProvider.jsx:38</code> | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
-| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:162</code> |  |
-| <code>resolveInitialThemeMode</code> | function | <code>src/contexts/ThemeProvider.jsx:87</code> | Resolve the initial theme mode once during provider initialization. |
-| <code>resolveThemeForMode</code> | function | <code>src/contexts/ThemeProvider.jsx:55</code> | Resolve the concrete theme for a theme mode. |
-| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:139</code> | Apply an explicit concrete theme. |
-| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:119</code> | Persist and apply a theme mode. |
-| <code>ThemeMode</code> | typedef | <code>src/contexts/ThemeProvider.jsx:27</code> | Theme mode identifier. |
-| <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:22</code> | Theme identifier. |
-| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:103</code> | ThemeProvider component to manage and provide theme-related state and functions. |
-| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:149</code> | Toggle between the two highest-contrast explicit themes. |
+| <code>ThemeProvider~applyExternalThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:218</code> | Apply a mode that arrived from outside this component \(another tab, the host page, or the cross-origin bridge\). |
+| <code>applyThemeToDocument</code> | function | <code>src/contexts/ThemeProvider.jsx:79</code> | Apply the resolved theme to the DOM \(SSR-safe\). |
+| <code>detectSystemTheme</code> | function | <code>src/contexts/ThemeProvider.jsx:48</code> | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
+| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:180</code> |  |
+| <code>&lt;anonymous&gt;~onStorage</code> | function | <code>src/contexts/ThemeProvider.jsx:237</code> |  |
+| <code>resolveInitialThemeMode</code> | function | <code>src/contexts/ThemeProvider.jsx:97</code> | Resolve the initial theme mode once during provider initialization. |
+| <code>resolveThemeForMode</code> | function | <code>src/contexts/ThemeProvider.jsx:65</code> | Resolve the concrete theme for a theme mode. |
+| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:157</code> | Apply an explicit concrete theme. |
+| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:125</code> | Persist and apply a theme mode. |
+| <code>ThemeMode</code> | typedef | <code>src/contexts/ThemeProvider.jsx:37</code> | Theme mode identifier. |
+| <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:32</code> | Theme identifier. |
+| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:109</code> | ThemeProvider component to manage and provide theme-related state and functions. |
+| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:167</code> | Toggle between the two highest-contrast explicit themes. |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -608,6 +610,14 @@
 | <code>PortableMetadataRecord</code> | typedef | <code>src/integrations/normalizePortableBundle.js:38</code> | A normalized raw metadata record attached to a document. |
 | <code>PortableSession</code> | typedef | <code>src/integrations/normalizePortableBundle.js:20</code> | Session info stored on a bundle. |
 | <code>spreadUnknown</code> | function | <code>src/integrations/normalizePortableBundle.js:240</code> | Preserve unknown own enumerable properties from host input while excluding keys that were already normalized explicitly. |
+| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:145</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
+| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:74</code> | Order two revisions. |
+| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:59</code> | Check an event origin against the configured allow-list \(exact match only\). |
+| <code>OMP_THEME_BRIDGE_KIND</code> | constant | <code>src/integrations/ompThemeBridge.js:20</code> | File: src/integrations/ompThemeBridge.js Opt-in cross-origin theme bridge for the shared OMP theme preference. |
+| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:93</code> |  |
+| <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:38</code> | Validate an inbound postMessage payload. |
+| <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:24</code> | Remote theme preference received over the bridge. |
+| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:90</code> | Start listening for theme changes from allowed origins. |
 | <code>b64DecodeUnicode</code> | function | <code>src/integrations/parentBridge.js:88</code> | Decode a base64-encoded Unicode string into text \(handles UTF-8\). |
 | <code>getSameOriginOpener</code> | function | <code>src/integrations/parentBridge.js:52</code> | Try to obtain a same-origin opener window reference. |
 | <code>getSameOriginParent</code> | function | <code>src/integrations/parentBridge.js:30</code> | Try to obtain a same-origin parent window reference. |
@@ -826,6 +836,26 @@
 | <code>revokeAllTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:89</code> | Revoke every tracked object URL. |
 | <code>revokeTrackedObjectUrl</code> | function | <code>src/utils/objectUrlRegistry.js:47</code> |  |
 | <code>revokeTrackedObjectUrls</code> | function | <code>src/utils/objectUrlRegistry.js:60</code> |  |
+| <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:270</code> | Apply the resolved theme to the document \(SSR-safe\). |
+| <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:208</code> | Create a unique revision starting with the creation time \(per the contract\). |
+| <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:241</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |
+| <code>getEffectiveOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:310</code> | Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration. |
+| <code>getSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:185</code> | Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins. |
+| <code>isSharedThemeMode</code> | function | <code>src/utils/ompThemePreference.js:68</code> |  |
+| <code>migrateLocalThemeToShared</code> | function | <code>src/utils/ompThemePreference.js:289</code> | Migrate an existing local ODV theme setting into the shared preference. |
+| <code>mirrorSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:167</code> | Persist a shared value to both stores \(each write tolerates denied storage\). |
+| <code>OdvThemeMode</code> | typedef | <code>src/utils/ompThemePreference.js:42</code> | ODV theme mode \(the shared modes plus the viewer-specific Normal variant\). |
+| <code>OdvThemeName</code> | typedef | <code>src/utils/ompThemePreference.js:47</code> | Concrete ODV palette. |
+| <code>parseSharedThemeValue</code> | function | <code>src/utils/ompThemePreference.js:79</code> | Parse a raw stored shared-preference value. |
+| <code>readSharedRawFromCookie</code> | function | <code>src/utils/ompThemePreference.js:97</code> | Read the raw shared value from the cookie \(URI-encoded JSON per the contract\). |
+| <code>readSharedRawFromStorage</code> | function | <code>src/utils/ompThemePreference.js:115</code> | Read the raw shared value from the localStorage mirror. |
+| <code>resolveConcreteTheme</code> | function | <code>src/utils/ompThemePreference.js:256</code> | Resolve the concrete ODV palette for an ODV theme mode. |
+| <code>setOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:344</code> | Persist a user theme choice: system/light/dark are written to the shared preference \(new revision\) and mirrored locally; a stale Normal binding is cleared. |
+| <code>setSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:231</code> | Store a new shared choice with a fresh revision in both stores. |
+| <code>SharedThemeMode</code> | typedef | <code>src/utils/ompThemePreference.js:37</code> | Shared OMP theme mode. |
+| <code>SharedThemePreference</code> | typedef | <code>src/utils/ompThemePreference.js:52</code> | Parsed shared preference value. |
+| <code>writeSharedToCookie</code> | function | <code>src/utils/ompThemePreference.js:128</code> |  |
+| <code>writeSharedToStorage</code> | function | <code>src/utils/ompThemePreference.js:147</code> |  |
 | <code>PageAssetDescriptor</code> | typedef | <code>src/utils/pageAssetRenderer.js:36</code> |  |
 | <code>PageAssetRendererOptions</code> | typedef | <code>src/utils/pageAssetRenderer.js:30</code> |  |
 | <code>PageAssetRenderer#renderPageAsset</code> | function | <code>src/utils/pageAssetRenderer.js:669</code> | Render one requested page asset. |
@@ -1209,6 +1239,7 @@
 | <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:189</code> | Clamp a numeric config value to a safe range. |
 | <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:44</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:136</code> | Resolve the configured Ctrl/Cmd+P behavior. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:544</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
 | <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:441</code> | Resolve the default print page mode used when the user has not stored an override. |
 | <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:466</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:113</code> | Read the merged runtime configuration from the browser environment. |
@@ -1299,39 +1330,40 @@
 | <code>resolveImportMetaEnvValue</code> | function | <code>src/utils/supportDiagnostics.js:39</code> |  |
 | <code>saveLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:275</code> |  |
 | <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
-| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:467</code> |  |
-| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:412</code> |  |
-| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:377</code> |  |
-| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:352</code> |  |
+| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:482</code> |  |
+| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:427</code> |  |
+| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:392</code> |  |
+| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:367</code> |  |
+| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:324</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
 | <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:17</code> |  |
-| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:427</code> |  |
-| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:386</code> |  |
-| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:361</code> |  |
-| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:318</code> |  |
-| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:334</code> |  |
-| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:280</code> |  |
-| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:251</code> |  |
-| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:209</code> |  |
-| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:46</code> |  |
-| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:54</code> |  |
-| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:74</code> |  |
-| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:101</code> |  |
-| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:64</code> | Normalize legacy theme-mode values. |
-| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:144</code> |  |
-| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:156</code> |  |
-| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:173</code> |  |
-| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:241</code> | Persist an already-normalized full preference object. |
-| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:440</code> |  |
-| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:399</code> |  |
-| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:369</code> |  |
-| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:327</code> |  |
-| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:345</code> |  |
-| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:297</code> | Persist the user&#39;s theme mode preference. |
-| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:270</code> |  |
-| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:219</code> |  |
+| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:442</code> |  |
+| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:401</code> |  |
+| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:376</code> |  |
+| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:333</code> |  |
+| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:349</code> |  |
+| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:283</code> |  |
+| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:254</code> |  |
+| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:212</code> |  |
+| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:47</code> |  |
+| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:55</code> |  |
+| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:75</code> |  |
+| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:102</code> |  |
+| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:65</code> | Normalize legacy theme-mode values. |
+| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:147</code> |  |
+| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:159</code> |  |
+| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:176</code> |  |
+| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:244</code> | Persist an already-normalized full preference object. |
+| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:455</code> |  |
+| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:414</code> |  |
+| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:384</code> |  |
+| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:342</code> |  |
+| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:360</code> |  |
+| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:300</code> | Persist the user&#39;s theme mode preference. |
+| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:273</code> |  |
+| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:222</code> |  |
 | <code>ViewerPreferences</code> | typedef | <code>src/utils/viewerPreferences.js:24</code> |  |
-| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:186</code> |  |
-| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:199</code> |  |
+| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:189</code> |  |
+| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:202</code> |  |
 | <code>applyZoom</code> | function | <code>src/utils/zoomUtils.js:140</code> | Set a new zoom value using the provided setter, clamped to \[MIN_ZOOM, MAX_ZOOM\]. |
 | <code>calculateFitToScreenZoom</code> | function | <code>src/utils/zoomUtils.js:160</code> | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | <code>calculateFitToWidthZoom</code> | function | <code>src/utils/zoomUtils.js:200</code> | Calculate and set a zoom that fits the render surface width within the pane viewport. |

@@ -158,6 +158,16 @@
       }
     },
 
+    // ---- THEME --------------------------------------------------------------
+    theme: {
+      bridge: {
+        // Opt-in cross-origin theme bridge (postMessage). Empty (default) disables it.
+        // List exact parent origins to sync the shared OMP theme preference with,
+        // for example: ['https://portal.example']. Entries must match event.origin exactly.
+        allowedOrigins: []
+      }
+    },
+
     // Where the app is mounted (derived above).
     basePath: basePath,
     baseHref: baseHref,

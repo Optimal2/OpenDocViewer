@@ -1,6 +1,6 @@
 # OpenDocViewer / src/contexts
 
-File count: 4. Line count: 3083. JSDoc symbol count: 81.
+File count: 4. Line count: 3196. JSDoc symbol count: 83.
 
 ## src/contexts/themeContext.js
 
@@ -20,7 +20,7 @@ src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) C
 
 Exports: `ThemeProvider`
 
-Local imports: `src/logging/systemLogger.js`, `src/contexts/themeContext.js`, `src/utils/viewerPreferences.js`
+Local imports: `src/logging/systemLogger.js`, `src/contexts/themeContext.js`, `src/utils/ompThemePreference.js`, `src/integrations/ompThemeBridge.js`, `src/utils/runtimeConfig.js`
 
 Symbols:
 
@@ -35,6 +35,7 @@ Symbols:
 - `ThemeProvider~setThemeExplicit` (constant) - Apply an explicit concrete theme.
 - `ThemeProvider~toggleTheme` (constant) - Toggle between the two highest\-contrast explicit themes.
 - `<anonymous>~onChange` (function) - No description.
+- `ThemeProvider~applyExternalThemeMode` (constant) - Apply a mode that arrived from outside this component \(another tab, the host page, or the cross\-origin bridge\).
 
 ## src/contexts/viewerContext.js
 

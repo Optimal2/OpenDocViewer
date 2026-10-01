@@ -489,7 +489,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
                 page: visiblePageNumber,
                 defaultValue: `Page ${visiblePageNumber} failed to load`,
               })}
-              className="thumbnail"
+              className="thumbnail thumbnail-fallback"
               decoding="async"
               draggable={false}
             />

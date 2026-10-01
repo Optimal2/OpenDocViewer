@@ -219,15 +219,10 @@
   padding: 0.12rem 0.32rem;
   border: 1px solid var(--thumbnail-border-color);
   border-radius: var(--border-radius);
-  background-color: #ffffff;
-  color: var(--primary-color-active);
+  background-color: var(--odv-surface, #ffffff);
+  color: var(--text-color);
   outline: 2px solid transparent;
   outline-offset: 2px;
-}
-[data-theme='dark'] .zoom-percent-input {
-  background-color: #222;
-  color: #eee;
-  border-color: #555;
 }
 .zoom-percent-input:focus {
   outline-color: var(--primary-color-active);
@@ -242,15 +237,10 @@
   padding: 0.16rem 0.4rem;
   border: 1px solid var(--thumbnail-border-color);
   border-radius: var(--border-radius);
-  background-color: #ffffff;
-  color: var(--primary-color-active);
+  background-color: var(--odv-surface, #ffffff);
+  color: var(--text-color);
   outline: 2px solid transparent;
   outline-offset: 2px;
-}
-[data-theme='dark'] .page-number-input {
-  background-color: #222;
-  color: #eee;
-  border-color: #555;
 }
 .page-number-input:focus {
   outline-color: var(--primary-color-active);

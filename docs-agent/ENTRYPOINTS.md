@@ -34,7 +34,7 @@
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
-- `src/utils/runtimeConfig.js`: 13 incoming local imports
+- `src/utils/runtimeConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports

@@ -25,6 +25,7 @@ import {
  * @typedef {Object} ViewerPreferences
  * @property {('normal'|'light'|'dark')=} theme
  * @property {('system'|'normal'|'light'|'dark')=} themeMode
+ * @property {string=} themeSharedRevision
  * @property {string=} language
  * @property {('active'|'all')=} printDefaultMode
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
@@ -105,6 +106,8 @@ function normalizePreferences(value) {
   if (isExplicitTheme(source.theme)) next.theme = source.theme;
   const normalizedThemeMode = normalizeThemeModeValue(source.themeMode);
   if (normalizedThemeMode) next.themeMode = normalizedThemeMode;
+  // Binds a stored local Normal choice to the shared OMP revision it belongs to.
+  if (typeof source.themeSharedRevision === 'string' && source.themeSharedRevision) next.themeSharedRevision = source.themeSharedRevision;
   if (typeof source.language === 'string') {
     const trimmedLanguage = source.language.trim();
     if (trimmedLanguage) next.language = trimmedLanguage.toLowerCase();
@@ -310,6 +313,18 @@ export function setThemeModePreference(mode) {
   } catch {}
 
   return persisted;
+}
+
+/**
+ * Clear the stored binding between a local Normal choice and its shared OMP
+ * revision. Used when an explicit shared (system/light/dark) choice takes over.
+ *
+ * @returns {ViewerPreferences}
+ */
+export function clearThemeSharedRevision() {
+  const next = { ...getViewerPreferences() };
+  delete next.themeSharedRevision;
+  return replaceViewerPreferences(next);
 }
 
 /**

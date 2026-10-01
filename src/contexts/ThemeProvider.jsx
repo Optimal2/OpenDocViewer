@@ -17,7 +17,17 @@
 import { useState, useEffect, useMemo, useCallback, useRef } from 'react';
 import logger from '../logging/systemLogger.js';
 import ThemeContext from './themeContext.js';
-import { getThemeModePreference, setThemeModePreference } from '../utils/viewerPreferences.js';
+import {
+  getEffectiveOdvThemeMode,
+  setOdvThemeMode,
+  getSharedThemePreference,
+  mirrorSharedThemePreference,
+} from '../utils/ompThemePreference.js';
+import {
+  startOmpThemeBridge,
+  announceThemeToAllowedOrigins,
+} from '../integrations/ompThemeBridge.js';
+import { getOmpThemeBridgeAllowedOrigins } from '../utils/runtimeConfig.js';
 
 /**
  * Theme identifier.
@@ -85,13 +95,9 @@ function applyThemeToDocument(resolvedTheme, mode) {
  * @returns {ThemeMode}
  */
 function resolveInitialThemeMode() {
-  const saved = getThemeModePreference();
-  if (saved === 'system' || saved === 'normal' || saved === 'light' || saved === 'dark') {
-    logger.info('Theme mode loaded from persisted preferences', { themeMode: saved });
-    return saved;
-  }
-  logger.info('Theme mode defaults to browser/OS-following mode until the user chooses an explicit theme');
-  return 'system';
+  const effective = getEffectiveOdvThemeMode();
+  logger.info('Theme mode loaded from shared and local preferences', { themeMode: effective });
+  return effective;
 }
 
 /**
@@ -123,7 +129,19 @@ export const ThemeProvider = ({ children }) => {
         ? 'light'
         : (nextMode === 'normal' ? 'normal' : 'system'));
     const resolved = resolveThemeForMode(normalized);
-    setThemeModePreference(normalized);
+    setOdvThemeMode(normalized);
+    try {
+      const shared = getSharedThemePreference();
+      if (shared) {
+        announceThemeToAllowedOrigins({
+          mode: shared.mode,
+          revision: shared.revision,
+          allowedOrigins: getOmpThemeBridgeAllowedOrigins(),
+        });
+      }
+    } catch {
+      // theme announcement is best-effort
+    }
     setThemeModeState(normalized);
     setTheme(resolved);
     applyThemeToDocument(resolved, normalized);
@@ -189,6 +207,101 @@ export const ThemeProvider = ({ children }) => {
     };
   }, [themeMode]);
 
+  /**
+   * Apply a mode that arrived from outside this component (another tab, the
+   * host page, or the cross-origin bridge). Silent by design: external
+   * changes are never announced back, so nothing can ping-pong.
+   *
+   * @param {ThemeMode} nextMode
+   * @returns {void}
+   */
+  const applyExternalThemeMode = useCallback((nextMode) => {
+    const resolved = resolveThemeForMode(nextMode);
+    setThemeModeState((current) => (current === nextMode ? current : nextMode));
+    setTheme((current) => (current === resolved ? current : resolved));
+    applyThemeToDocument(resolved, nextMode);
+  }, []);
+
+  useEffect(() => {
+    // Re-read the shared preference when another tab may have changed it:
+    // storage events (same origin), focus/pageshow/visibility (other ports
+    // or apps on the same host sharing the cookie).
+    const resync = () => {
+      try {
+        applyExternalThemeMode(getEffectiveOdvThemeMode());
+      } catch {
+        // ignore; the current theme simply stays active
+      }
+    };
+    /** @param {StorageEvent} event */
+    const onStorage = (event) => {
+      if (event && event.key && event.key !== 'OMP_THEME_PREFERENCE') return;
+      resync();
+    };
+    const onFocus = () => resync();
+    const onPageShow = () => resync();
+    const onVisibility = () => {
+      try {
+        if (typeof document !== 'undefined' && document.visibilityState === 'visible') resync();
+      } catch {
+        // ignore
+      }
+    };
+    try {
+      if (typeof window !== 'undefined') {
+        window.addEventListener('storage', onStorage);
+        window.addEventListener('focus', onFocus);
+        window.addEventListener('pageshow', onPageShow);
+        if (typeof document !== 'undefined') document.addEventListener('visibilitychange', onVisibility);
+      }
+    } catch {
+      // ignore; external sync simply stays inactive
+    }
+    return () => {
+      try {
+        if (typeof window !== 'undefined') {
+          window.removeEventListener('storage', onStorage);
+          window.removeEventListener('focus', onFocus);
+          window.removeEventListener('pageshow', onPageShow);
+          if (typeof document !== 'undefined') document.removeEventListener('visibilitychange', onVisibility);
+        }
+      } catch {
+        // ignore
+      }
+    };
+  }, [applyExternalThemeMode]);
+
+  useEffect(() => {
+    // Opt-in cross-origin bridge. OFF by default: without configured allowed
+    // origins startOmpThemeBridge only returns a no-op stop function.
+    let stop = null;
+    try {
+      stop = startOmpThemeBridge({
+        allowedOrigins: getOmpThemeBridgeAllowedOrigins(),
+        onRemotePreference: (remote) => {
+          mirrorSharedThemePreference(remote);
+          applyExternalThemeMode(getEffectiveOdvThemeMode());
+        },
+        getCurrentRevision: () => {
+          try {
+            const shared = getSharedThemePreference();
+            return shared ? shared.revision : null;
+          } catch {
+            return null;
+          }
+        },
+      });
+    } catch {
+      // ignore; the bridge simply stays inactive
+    }
+    return () => {
+      try {
+        if (typeof stop === 'function') stop();
+      } catch {
+        // ignore
+      }
+    };
+  }, [applyExternalThemeMode]);
   const contextValue = useMemo(() => ({
     theme,
     themeMode,

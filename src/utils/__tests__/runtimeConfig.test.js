@@ -23,6 +23,7 @@ import {
   getPrintSelectionWorkspaceConfig,
   getViewerEdgeScrollPageTurnConfig,
   getViewerProblemNoticeConfig,
+  getOmpThemeBridgeAllowedOrigins,
 } from '../runtimeConfig.js';
 
 describe('runtimeConfig', () => {
@@ -293,6 +294,19 @@ describe('runtimeConfig', () => {
     it('clamps failedPageRatio to 0..1', () => {
       expect(getViewerProblemNoticeConfig({ viewer: { problemNotice: { failedPageRatio: 2 } } }).failedPageRatio).toBe(1);
       expect(getViewerProblemNoticeConfig({ viewer: { problemNotice: { failedPageRatio: -1 } } }).failedPageRatio).toBe(0);
+    });
+  });
+
+  describe('getOmpThemeBridgeAllowedOrigins', () => {
+    it('stays off by default', () => {
+      expect(getOmpThemeBridgeAllowedOrigins({})).toEqual([]);
+      expect(getOmpThemeBridgeAllowedOrigins({ theme: {} })).toEqual([]);
+    });
+
+    it('accepts exact origins and drops blanks and duplicates', () => {
+      expect(getOmpThemeBridgeAllowedOrigins({
+        theme: { bridge: { allowedOrigins: ['https://portal.example', '  ', 'https://portal.example', 7] } },
+      })).toEqual(['https://portal.example']);
     });
   });
 });

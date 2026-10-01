@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 17. Line count: 7120. JSDoc symbol count: 111.
+File count: 17. Line count: 7123. JSDoc symbol count: 111.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -75,12 +75,12 @@ File count: 10. Line count: 4969. JSDoc symbol count: 117.
 
 ## src/contexts
 
-File count: 4. Line count: 3083. JSDoc symbol count: 81.
+File count: 4. Line count: 3196. JSDoc symbol count: 83.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
-- `src/contexts/themeContext.js` - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 - `src/contexts/ThemeProvider.jsx` - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
+- `src/contexts/themeContext.js` - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 
 ## src/ErrorBoundary.jsx
 
@@ -111,8 +111,9 @@ File count: 1. Line count: 59. JSDoc symbol count: 2.
 
 ## src/integrations
 
-File count: 7. Line count: 2073. JSDoc symbol count: 52.
+File count: 8. Line count: 2240. JSDoc symbol count: 60.
 
+- `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `src/integrations/parentBridge.js` - Same\-origin parent\-window bootstrap adapter.
 - `src/integrations/normalizePortableBundle.js` - Normalizes multiple host payload shapes into the project's neutral portable bundle shape.
 - `src/integrations/bootstrapRuntime.js` - Startup mode detection and host\-integration entry point.
@@ -148,12 +149,12 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 38. Line count: 15406. JSDoc symbol count: 612.
+File count: 39. Line count: 15805. JSDoc symbol count: 634.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
-- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.

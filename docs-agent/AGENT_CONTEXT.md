@@ -23,10 +23,10 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 118
-- Source lines: 50482
-- JSDoc symbols: 1351
-- Files with JSDoc: 118
+- Source files: 120
+- Source lines: 51164
+- JSDoc symbols: 1383
+- Files with JSDoc: 120
 - Low-confidence summaries: 0
 - Parse errors: 0
 
@@ -35,8 +35,8 @@ Source commit: not embedded
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/logging/systemLogger.js` - src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller \(ESM\) \- Provide a small, dependency\-light logging facade for the browser app.
-- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.

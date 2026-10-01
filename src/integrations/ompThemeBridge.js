@@ -1,0 +1,166 @@
+// File: src/integrations/ompThemeBridge.js
+/**
+ * File: src/integrations/ompThemeBridge.js
+ *
+ * Opt-in cross-origin theme bridge for the shared OMP theme preference.
+ *
+ * The bridge is OFF by default: it only listens when the runtime config provides
+ * a non-empty list of allowed origins (`theme.bridge.allowedOrigins`). Every
+ * inbound message is checked for:
+ * - an allowed `event.origin` (exact match, never a wildcard),
+ * - a non-null `event.source`,
+ * - the exact versioned message shape `{ kind, version: 1, mode, revision }`,
+ * - a revision newer than the locally stored one.
+ *
+ * Outbound announcements use the exact allowed origin as `targetOrigin` (never
+ * `*`). Applying a remote change never announces it back, so a change cannot
+ * ping-pong between frames.
+ */
+
+export const OMP_THEME_BRIDGE_KIND = 'omp:theme-preference';
+export const OMP_THEME_BRIDGE_VERSION = 1;
+const SHARED_THEME_MODES = Object.freeze(['system', 'light', 'dark']);
+
+/**
+ * Remote theme preference received over the bridge.
+ * @typedef {Object} RemoteThemePreference
+ * @property {('system'|'light'|'dark')} mode
+ * @property {string} revision
+ */
+
+/**
+ * Validate an inbound postMessage payload. Returns the preference, or null when
+ * the shape, version, mode or revision is wrong.
+ *
+ * @param {*} data
+ * @returns {(RemoteThemePreference|null)}
+ */
+export function parseThemeBridgeMessage(data) {
+  try {
+    if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
+    if (data.kind !== OMP_THEME_BRIDGE_KIND) return null;
+    if (data.version !== OMP_THEME_BRIDGE_VERSION) return null;
+    if (!SHARED_THEME_MODES.includes(data.mode)) return null;
+    if (typeof data.revision !== 'string' || !data.revision) return null;
+    return { mode: data.mode, revision: data.revision };
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * Check an event origin against the configured allow-list (exact match only).
+ * An empty or missing list disables the bridge.
+ *
+ * @param {*} origin
+ * @param {*} allowedOrigins
+ * @returns {boolean}
+ */
+export function isThemeBridgeOriginAllowed(origin, allowedOrigins) {
+  if (typeof origin !== 'string' || !origin) return false;
+  if (!Array.isArray(allowedOrigins) || allowedOrigins.length === 0) return false;
+  return allowedOrigins.some((entry) => typeof entry === 'string' && entry !== '' && entry === origin);
+}
+
+/**
+ * Order two revisions. Revisions start with the creation time, so a plain
+ * lexicographic comparison orders them; a missing local revision accepts any
+ * well-formed remote revision.
+ *
+ * @param {string} candidate
+ * @param {(string|null|undefined)} current
+ * @returns {boolean}
+ */
+export function isRevisionNewer(candidate, current) {
+  if (!current) return true;
+  return candidate > current;
+}
+
+/**
+ * Start listening for theme changes from allowed origins. The callback receives
+ * validated, newer remote preferences; it must apply them silently (mirroring
+ * without announcing) so nothing echoes back. Returns a stop function.
+ *
+ * @param {Object} options
+ * @param {Array<string>} options.allowedOrigins
+ * @param {function(RemoteThemePreference): void} options.onRemotePreference
+ * @param {function(): (string|null)} [options.getCurrentRevision]
+ * @returns {function(): void}
+ */
+export function startOmpThemeBridge({ allowedOrigins, onRemotePreference, getCurrentRevision }) {
+  const allowList = Array.isArray(allowedOrigins) ? allowedOrigins : [];
+  /** @param {MessageEvent} event */
+  const onMessage = (event) => {
+    try {
+      if (allowList.length === 0) return;
+      if (!isThemeBridgeOriginAllowed(event?.origin, allowList)) return;
+      if (!event?.source) return;
+      try {
+        if (typeof window !== 'undefined' && event.source === window) return;
+      } catch {
+        // ignore; fall through to shape validation
+      }
+      const parsed = parseThemeBridgeMessage(event.data);
+      if (!parsed) return;
+      const current = typeof getCurrentRevision === 'function' ? getCurrentRevision() : null;
+      if (!isRevisionNewer(parsed.revision, current)) return;
+      onRemotePreference(parsed);
+    } catch {
+      // ignore malformed events
+    }
+  };
+
+  try {
+    if (typeof window !== 'undefined' && typeof window.addEventListener === 'function') {
+      window.addEventListener('message', onMessage);
+    }
+  } catch {
+    // ignore; bridge simply stays inactive
+  }
+
+  return () => {
+    try {
+      if (typeof window !== 'undefined' && typeof window.removeEventListener === 'function') {
+        window.removeEventListener('message', onMessage);
+      }
+    } catch {
+      // ignore
+    }
+  };
+}
+
+/**
+ * Announce a local (user-initiated) theme change to the embedded parent frame,
+ * once per allowed origin with that origin as the exact targetOrigin. No-op when
+ * the bridge is off, when the viewer is top-level, or when storage/event access
+ * is denied. Callers must only invoke this for local changes, never when
+ * applying a remote one.
+ *
+ * @param {Object} options
+ * @param {('system'|'light'|'dark')} options.mode
+ * @param {string} options.revision
+ * @param {Array<string>} options.allowedOrigins
+ * @returns {void}
+ */
+export function announceThemeToAllowedOrigins({ mode, revision, allowedOrigins }) {
+  try {
+    const allowList = Array.isArray(allowedOrigins)
+      ? allowedOrigins.filter((origin) => typeof origin === 'string' && origin)
+      : [];
+    if (allowList.length === 0) return;
+    if (typeof window === 'undefined' || !window.parent || window.parent === window) return;
+    if (!SHARED_THEME_MODES.includes(mode)) return;
+    if (typeof revision !== 'string' || !revision) return;
+    const message = {
+      kind: OMP_THEME_BRIDGE_KIND,
+      version: OMP_THEME_BRIDGE_VERSION,
+      mode,
+      revision,
+    };
+    for (const targetOrigin of allowList) {
+      window.parent.postMessage(message, targetOrigin);
+    }
+  } catch {
+    // ignore; announcement is best-effort
+  }
+}

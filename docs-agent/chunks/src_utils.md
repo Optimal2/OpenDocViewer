@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 38. Line count: 15406. JSDoc symbol count: 612.
+File count: 39. Line count: 15805. JSDoc symbol count: 634.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -137,6 +137,29 @@ Symbols:
 - `isTrackedObjectUrl` (function) - Check whether a blob/object URL is still tracked as live by the viewer.
 - `getTrackedObjectUrlCount` (function) - No description.
 - `revokeAllTrackedObjectUrls` (function) - Revoke every tracked object URL.
+
+## src/utils/ompThemePreference.js
+
+Shared OMP theme preference adapter \(OMP\_THEME\_PREFERENCE\).
+
+Exports: `OMP_THEME_STORAGE_KEY`, `parseSharedThemeValue`, `mirrorSharedThemePreference`, `getSharedThemePreference`, `createSharedThemeRevision`, `setSharedThemePreference`, `detectSystemTheme`, `resolveConcreteTheme`, `applyOdvThemeToDocument`, `getEffectiveOdvThemeMode`, `setOdvThemeMode`
+
+Local imports: `src/utils/viewerPreferences.js`
+
+Symbols:
+
+- `SharedThemeMode` (typedef) - Shared OMP theme mode.
+- `OdvThemeMode` (typedef) - ODV theme mode \(the shared modes plus the viewer\-specific Normal variant\).
+- `OdvThemeName` (typedef) - Concrete ODV palette.
+- `SharedThemePreference` (typedef) - Parsed shared preference value.
+- `isSharedThemeMode` (function) - No description.
+- `parseSharedThemeValue` (function) - Parse a raw stored shared\-preference value.
+- `readSharedRawFromCookie` (function) - Read the raw shared value from the cookie \(URI\-encoded JSON per the contract\).
+- `readSharedRawFromStorage` (function) - Read the raw shared value from the localStorage mirror.
+- `writeSharedToCookie` (function) - No description.
+- `writeSharedToStorage` (function) - No description.
+- `mirrorSharedThemePreference` (function) - Persist a shared value to both stores \(each write tolerates denied storage\).
+- `getSharedThemePreference` (function) - Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins.
 
 ## src/utils/pageAssetRenderer.js
 
@@ -581,7 +604,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`
+Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
@@ -648,7 +671,7 @@ Symbols:
 
 Lightweight persisted viewer preferences.
 
-Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`
+Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `clearThemeSharedRevision`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`
 
 Local imports: `src/utils/runtimeConfig.js`
 

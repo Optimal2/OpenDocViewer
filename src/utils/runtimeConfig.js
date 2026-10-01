@@ -530,3 +530,26 @@ export function getViewerProblemNoticeConfig(cfg = getRuntimeConfig()) {
       : '',
   };
 }
+
+/**
+ * Resolve the allowed origins for the opt-in cross-origin theme bridge.
+ *
+ * Runtime config value: `theme.bridge.allowedOrigins`
+ * A list of exact parent origins (for example 'https://portal.example').
+ * Empty (the default) disables the postMessage bridge entirely.
+ *
+ * @param {Object=} cfg
+ * @returns {Array<string>}
+ */
+export function getOmpThemeBridgeAllowedOrigins(cfg = getRuntimeConfig()) {
+  const raw = cfg?.theme?.bridge?.allowedOrigins;
+  if (!Array.isArray(raw)) return [];
+  const allowed = [];
+  for (const entry of raw) {
+    if (typeof entry !== 'string') continue;
+    const trimmed = entry.trim();
+    if (!trimmed || allowed.includes(trimmed)) continue;
+    allowed.push(trimmed);
+  }
+  return allowed;
+}

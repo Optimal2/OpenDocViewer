@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 118
-- Source lines: 50482
-- JSDoc symbols: 1351
+- Files: 120
+- Source lines: 51164
+- JSDoc symbols: 1383
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -13,7 +13,7 @@
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
-- `src/utils/runtimeConfig.js`: 13 incoming local imports
+- `src/utils/runtimeConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports

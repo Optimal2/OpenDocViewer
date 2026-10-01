@@ -3,7 +3,8 @@
  * Compact theme selector for the toolbar.
  *
  * Modes:
- * - normal -> balanced mid-light theme
+ * - system -> follow the OS/browser preference (shared OMP choice)
+ * - normal -> balanced mid-light theme (ODV-specific, shares light outwards)
  * - light  -> brightest theme
  * - dark   -> darkest theme
  *
@@ -64,10 +65,12 @@ const ThemeMenuButton = ({ className = '' }) => {
   const resolvedTheme = (ctx?.theme === 'normal' || ctx?.theme === 'dark' || ctx?.theme === 'light')
     ? ctx.theme
     : 'light';
-  const selectedMode = resolveSelectedMode(currentMode, resolvedTheme);
+  const selectedMode = currentMode;
+  const previewMode = resolveSelectedMode(currentMode, resolvedTheme);
   const setThemeMode = typeof ctx?.setThemeMode === 'function' ? ctx.setThemeMode : null;
 
   const options = useMemo(() => ([
+    { mode: 'system', icon: resolveThemeModeIcon('system') },
     { mode: 'normal', icon: resolveThemeModeIcon('normal') },
     { mode: 'light', icon: resolveThemeModeIcon('light') },
     { mode: 'dark', icon: resolveThemeModeIcon('dark') },
@@ -100,7 +103,7 @@ const ThemeMenuButton = ({ className = '' }) => {
     };
   }, [open]);
 
-  /** @param {'normal'|'light'|'dark'} mode */
+  /** @param {'system'|'normal'|'light'|'dark'} mode */
   const handleSelect = (mode) => {
     try {
       setThemeMode?.(mode);
@@ -109,11 +112,11 @@ const ThemeMenuButton = ({ className = '' }) => {
     }
   };
 
-  const buttonIcon = resolveThemeModeIcon(currentMode === 'system' ? selectedMode : currentMode);
+  const buttonIcon = resolveThemeModeIcon(currentMode === 'system' ? previewMode : currentMode);
   const currentLabel = currentMode === 'system'
     ? t('toolbar.theme.currentSystem', {
-      theme: resolveThemeModeLabel(selectedMode, t),
-      defaultValue: `System (${resolveThemeModeLabel(selectedMode, t)})`,
+      theme: resolveThemeModeLabel(previewMode, t),
+      defaultValue: `System (${resolveThemeModeLabel(previewMode, t)})`,
     })
     : resolveThemeModeLabel(currentMode, t);
 
@@ -148,7 +151,7 @@ const ThemeMenuButton = ({ className = '' }) => {
                 className={`toolbar-popup-menu-item${selected ? ' is-selected' : ''}`}
                 role="menuitemradio"
                 aria-checked={selected}
-                onClick={() => handleSelect(/** @type {'normal'|'light'|'dark'} */ (mode))}
+                onClick={() => handleSelect(/** @type {'system'|'normal'|'light'|'dark'} */ (mode))}
                 title={t('toolbar.theme.switchToMode', {
                   theme: label,
                   defaultValue: `Switch theme to ${label}`,

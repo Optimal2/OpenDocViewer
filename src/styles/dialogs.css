@@ -84,21 +84,27 @@
   height: 34px;
   border-radius: 10px;
   border: 1px solid color-mix(in srgb, #15803d 70%, transparent 30%);
-  background: #16a34a;
+  background: #15803d;
   color: #ffffff;
   cursor: pointer;
 }
 
-.odv-prd-closeIcon:hover,
+.odv-prd-closeIcon:hover {
+  background: var(--odv-hover-overlay);
+}
 .odv-prd-closeIcon:focus-visible {
   background: var(--odv-hover-overlay);
-  outline: none;
+  outline: 2px solid var(--text-color);
+  outline-offset: 2px;
 }
 
-.odv-prd-restoreIcon:hover,
+.odv-prd-restoreIcon:hover {
+  background: #166534;
+}
 .odv-prd-restoreIcon:focus-visible {
-  background: #15803d;
-  outline: none;
+  background: #166534;
+  outline: 2px solid var(--text-color);
+  outline-offset: 2px;
 }
 
 .odv-prd-introCard,

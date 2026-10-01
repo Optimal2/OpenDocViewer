@@ -611,6 +611,34 @@ Important limitation:
 - This applies to keyboard interception only.
 - Browser menus, toolbar print buttons, and native context-menu print entries cannot be reliably overridden from normal page JavaScript.
 
+## Shared theme preference and cross-origin bridge
+
+OpenDocViewer joins the shared OMP light/dark choice through `OMP_THEME_PREFERENCE`
+(cookie plus localStorage mirror, JSON `{"version":1,"mode":...,"revision":...}`).
+The theme menu offers System, Normal, Light and Dark; ODV keeps its three palettes.
+System/Light/Dark choices are written to the shared preference (new revision) so OMP
+apps on the same host follow. Normal is stored locally together with the shared revision
+it belongs to and shares mode `light` outwards; a later explicit shared choice wins over it.
+An existing local ODV theme setting migrates into the shared preference only when no
+shared preference exists. Printed pages always use the light path.
+
+Configuration surface:
+
+```js
+theme: {
+  bridge: {
+    // Opt-in postMessage bridge for cross-origin frames. Empty (default) disables it.
+    // Entries must match event.origin exactly; use the exact targetOrigin, never '*'.
+    allowedOrigins: [] // for example: ['https://portal.example']
+  }
+}
+```
+
+Behavior:
+
+- Inbound messages are checked for allowed origin, a non-null source, the versioned
+  shape `{ kind: 'omp:theme-preference', version: 1, mode, revision }` and a newer revision.
+- Applying a remote change never announces it back, so changes cannot ping-pong.
 ## Print progress overlays
 
 The older large-job HTML print notice has been removed from the runtime flow. HTML/browser printing

@@ -7446,7 +7446,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 88,
+    "line": 91,
     "description": "",
     "params": [
       {
@@ -7466,7 +7466,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 80,
+    "line": 83,
     "description": "",
     "params": [
       {
@@ -7486,12 +7486,12 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 104,
+    "line": 107,
     "description": "",
     "params": [
       {
         "name": "mode",
-        "type": "'normal'|'light'|'dark'",
+        "type": "'system'|'normal'|'light'|'dark'",
         "optional": false,
         "description": ""
       }
@@ -7506,7 +7506,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 46,
+    "line": 47,
     "description": "",
     "params": [
       {
@@ -7537,7 +7537,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 34,
+    "line": 35,
     "description": "",
     "params": [
       {
@@ -7562,7 +7562,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-    "line": 23,
+    "line": 24,
     "description": "",
     "params": [
       {
@@ -12055,13 +12055,38 @@
     "examples": 0
   },
   {
+    "id": "ThemeProvider~applyExternalThemeMode",
+    "name": "applyExternalThemeMode",
+    "longname": "ThemeProvider~applyExternalThemeMode",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/contexts/ThemeProvider.jsx",
+    "line": 218,
+    "description": "Apply a mode that arrived from outside this component (another tab, the host page, or the cross-origin bridge).",
+    "params": [
+      {
+        "name": "nextMode",
+        "type": "ThemeMode",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "applyThemeToDocument",
     "name": "applyThemeToDocument",
     "longname": "applyThemeToDocument",
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 69,
+    "line": 79,
     "description": "Apply the resolved theme to the DOM (SSR-safe).",
     "params": [
       {
@@ -12092,7 +12117,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 38,
+    "line": 48,
     "description": "Detect system preferred color scheme (SSR-safe; defaults to light).",
     "params": [],
     "returns": [
@@ -12110,12 +12135,32 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 162,
+    "line": 180,
     "description": "",
     "params": [
       {
         "name": "event",
         "type": "MediaQueryListEvent|MediaQueryList",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "<anonymous>~onStorage",
+    "name": "onStorage",
+    "longname": "<anonymous>~onStorage",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/contexts/ThemeProvider.jsx",
+    "line": 237,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "StorageEvent",
         "optional": false,
         "description": ""
       }
@@ -12130,7 +12175,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 87,
+    "line": 97,
     "description": "Resolve the initial theme mode once during provider initialization.",
     "params": [],
     "returns": [
@@ -12148,7 +12193,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 55,
+    "line": 65,
     "description": "Resolve the concrete theme for a theme mode.",
     "params": [
       {
@@ -12173,7 +12218,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 139,
+    "line": 157,
     "description": "Apply an explicit concrete theme.",
     "params": [
       {
@@ -12198,7 +12243,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 119,
+    "line": 125,
     "description": "Persist and apply a theme mode.",
     "params": [
       {
@@ -12223,7 +12268,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 27,
+    "line": 37,
     "description": "Theme mode identifier.",
     "params": [],
     "returns": [],
@@ -12236,7 +12281,7 @@
     "kind": "typedef",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 22,
+    "line": 32,
     "description": "Theme identifier.",
     "params": [],
     "returns": [],
@@ -12249,7 +12294,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 103,
+    "line": 109,
     "description": "ThemeProvider component to manage and provide theme-related state and functions.",
     "params": [
       {
@@ -12274,7 +12319,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 149,
+    "line": 167,
     "description": "Toggle between the two highest-contrast explicit themes.",
     "params": [],
     "returns": [
@@ -15516,6 +15561,225 @@
     "returns": [
       {
         "type": "Object.<string, *>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "announceThemeToAllowedOrigins",
+    "name": "announceThemeToAllowedOrigins",
+    "longname": "announceThemeToAllowedOrigins",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 145,
+    "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.mode",
+        "type": "'system'|'light'|'dark'",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.revision",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.allowedOrigins",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isRevisionNewer",
+    "name": "isRevisionNewer",
+    "longname": "isRevisionNewer",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 74,
+    "description": "Order two revisions.",
+    "params": [
+      {
+        "name": "candidate",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "current",
+        "type": "string|null|undefined",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isThemeBridgeOriginAllowed",
+    "name": "isThemeBridgeOriginAllowed",
+    "longname": "isThemeBridgeOriginAllowed",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 59,
+    "description": "Check an event origin against the configured allow-list (exact match only).",
+    "params": [
+      {
+        "name": "origin",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "allowedOrigins",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OMP_THEME_BRIDGE_KIND",
+    "name": "OMP_THEME_BRIDGE_KIND",
+    "longname": "OMP_THEME_BRIDGE_KIND",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 20,
+    "description": "File: src/integrations/ompThemeBridge.js Opt-in cross-origin theme bridge for the shared OMP theme preference.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "startOmpThemeBridge~onMessage",
+    "name": "onMessage",
+    "longname": "startOmpThemeBridge~onMessage",
+    "kind": "function",
+    "scope": "inner",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 93,
+    "description": "",
+    "params": [
+      {
+        "name": "event",
+        "type": "MessageEvent",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "parseThemeBridgeMessage",
+    "name": "parseThemeBridgeMessage",
+    "longname": "parseThemeBridgeMessage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 38,
+    "description": "Validate an inbound postMessage payload.",
+    "params": [
+      {
+        "name": "data",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "RemoteThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "RemoteThemePreference",
+    "name": "RemoteThemePreference",
+    "longname": "RemoteThemePreference",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 24,
+    "description": "Remote theme preference received over the bridge.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "startOmpThemeBridge",
+    "name": "startOmpThemeBridge",
+    "longname": "startOmpThemeBridge",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/integrations/ompThemeBridge.js",
+    "line": 90,
+    "description": "Start listening for theme changes from allowed origins.",
+    "params": [
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.allowedOrigins",
+        "type": "Array.<string>",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.onRemotePreference",
+        "type": "function",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "options.getCurrentRevision",
+        "type": "function",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
         "description": ""
       }
     ],
@@ -20262,6 +20526,415 @@
       {
         "name": "urls",
         "type": "Iterable.<string>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "applyOdvThemeToDocument",
+    "name": "applyOdvThemeToDocument",
+    "longname": "applyOdvThemeToDocument",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 270,
+    "description": "Apply the resolved theme to the document (SSR-safe).",
+    "params": [
+      {
+        "name": "resolvedTheme",
+        "type": "OdvThemeName",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "mode",
+        "type": "OdvThemeMode",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "createSharedThemeRevision",
+    "name": "createSharedThemeRevision",
+    "longname": "createSharedThemeRevision",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 208,
+    "description": "Create a unique revision starting with the creation time (per the contract).",
+    "params": [],
+    "returns": [
+      {
+        "type": "string",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "detectSystemTheme",
+    "name": "detectSystemTheme",
+    "longname": "detectSystemTheme",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 241,
+    "description": "Detect the OS/browser colour scheme (SSR-safe; defaults to light).",
+    "params": [],
+    "returns": [
+      {
+        "type": "'light'|'dark'",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getEffectiveOdvThemeMode",
+    "name": "getEffectiveOdvThemeMode",
+    "longname": "getEffectiveOdvThemeMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 310,
+    "description": "Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration.",
+    "params": [],
+    "returns": [
+      {
+        "type": "OdvThemeMode",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getSharedThemePreference",
+    "name": "getSharedThemePreference",
+    "longname": "getSharedThemePreference",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 185,
+    "description": "Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie (or when a revision cannot be read) the cookie wins.",
+    "params": [],
+    "returns": [
+      {
+        "type": "SharedThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "isSharedThemeMode",
+    "name": "isSharedThemeMode",
+    "longname": "isSharedThemeMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 68,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "migrateLocalThemeToShared",
+    "name": "migrateLocalThemeToShared",
+    "longname": "migrateLocalThemeToShared",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 289,
+    "description": "Migrate an existing local ODV theme setting into the shared preference.",
+    "params": [],
+    "returns": [
+      {
+        "type": "SharedThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "mirrorSharedThemePreference",
+    "name": "mirrorSharedThemePreference",
+    "longname": "mirrorSharedThemePreference",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 167,
+    "description": "Persist a shared value to both stores (each write tolerates denied storage).",
+    "params": [
+      {
+        "name": "value",
+        "type": "SharedThemePreference",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "SharedThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "OdvThemeMode",
+    "name": "OdvThemeMode",
+    "longname": "OdvThemeMode",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 42,
+    "description": "ODV theme mode (the shared modes plus the viewer-specific Normal variant).",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "OdvThemeName",
+    "name": "OdvThemeName",
+    "longname": "OdvThemeName",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 47,
+    "description": "Concrete ODV palette.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "parseSharedThemeValue",
+    "name": "parseSharedThemeValue",
+    "longname": "parseSharedThemeValue",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 79,
+    "description": "Parse a raw stored shared-preference value.",
+    "params": [
+      {
+        "name": "raw",
+        "type": "*",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "SharedThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "readSharedRawFromCookie",
+    "name": "readSharedRawFromCookie",
+    "longname": "readSharedRawFromCookie",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 97,
+    "description": "Read the raw shared value from the cookie (URI-encoded JSON per the contract).",
+    "params": [],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "readSharedRawFromStorage",
+    "name": "readSharedRawFromStorage",
+    "longname": "readSharedRawFromStorage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 115,
+    "description": "Read the raw shared value from the localStorage mirror.",
+    "params": [],
+    "returns": [
+      {
+        "type": "string|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "resolveConcreteTheme",
+    "name": "resolveConcreteTheme",
+    "longname": "resolveConcreteTheme",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 256,
+    "description": "Resolve the concrete ODV palette for an ODV theme mode.",
+    "params": [
+      {
+        "name": "mode",
+        "type": "OdvThemeMode",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "OdvThemeName",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "setOdvThemeMode",
+    "name": "setOdvThemeMode",
+    "longname": "setOdvThemeMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 344,
+    "description": "Persist a user theme choice: system/light/dark are written to the shared preference (new revision) and mirrored locally; a stale Normal binding is cleared.",
+    "params": [
+      {
+        "name": "mode",
+        "type": "OdvThemeMode",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "OdvThemeMode",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "setSharedThemePreference",
+    "name": "setSharedThemePreference",
+    "longname": "setSharedThemePreference",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 231,
+    "description": "Store a new shared choice with a fresh revision in both stores.",
+    "params": [
+      {
+        "name": "mode",
+        "type": "SharedThemeMode",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "SharedThemePreference|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "SharedThemeMode",
+    "name": "SharedThemeMode",
+    "longname": "SharedThemeMode",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 37,
+    "description": "Shared OMP theme mode.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "SharedThemePreference",
+    "name": "SharedThemePreference",
+    "longname": "SharedThemePreference",
+    "kind": "typedef",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 52,
+    "description": "Parsed shared preference value.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "writeSharedToCookie",
+    "name": "writeSharedToCookie",
+    "longname": "writeSharedToCookie",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 128,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "SharedThemePreference",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "void",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "writeSharedToStorage",
+    "name": "writeSharedToStorage",
+    "longname": "writeSharedToStorage",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/ompThemePreference.js",
+    "line": 147,
+    "description": "",
+    "params": [
+      {
+        "name": "value",
+        "type": "SharedThemePreference",
         "optional": false,
         "description": ""
       }
@@ -30990,6 +31663,31 @@
     "examples": 0
   },
   {
+    "id": "getOmpThemeBridgeAllowedOrigins",
+    "name": "getOmpThemeBridgeAllowedOrigins",
+    "longname": "getOmpThemeBridgeAllowedOrigins",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 544,
+    "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Array.<string>",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "getPrintDefaultMode",
     "name": "getPrintDefaultMode",
     "longname": "getPrintDefaultMode",
@@ -33039,7 +33737,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 467,
+    "line": 482,
     "description": "",
     "params": [],
     "returns": [
@@ -33057,7 +33755,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 412,
+    "line": 427,
     "description": "",
     "params": [],
     "returns": [
@@ -33075,7 +33773,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 377,
+    "line": 392,
     "description": "",
     "params": [],
     "returns": [
@@ -33093,8 +33791,26 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 352,
+    "line": 367,
     "description": "",
+    "params": [],
+    "returns": [
+      {
+        "type": "ViewerPreferences",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "clearThemeSharedRevision",
+    "name": "clearThemeSharedRevision",
+    "longname": "clearThemeSharedRevision",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/viewerPreferences.js",
+    "line": 324,
+    "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
     "params": [],
     "returns": [
       {
@@ -33124,7 +33840,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 427,
+    "line": 442,
     "description": "",
     "params": [],
     "returns": [
@@ -33142,7 +33858,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 386,
+    "line": 401,
     "description": "",
     "params": [],
     "returns": [
@@ -33160,7 +33876,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 361,
+    "line": 376,
     "description": "",
     "params": [],
     "returns": [
@@ -33178,7 +33894,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 318,
+    "line": 333,
     "description": "",
     "params": [],
     "returns": [
@@ -33196,7 +33912,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 334,
+    "line": 349,
     "description": "",
     "params": [],
     "returns": [
@@ -33214,7 +33930,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 280,
+    "line": 283,
     "description": "",
     "params": [],
     "returns": [
@@ -33232,7 +33948,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 251,
+    "line": 254,
     "description": "",
     "params": [],
     "returns": [
@@ -33250,7 +33966,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 209,
+    "line": 212,
     "description": "",
     "params": [],
     "returns": [
@@ -33268,7 +33984,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 46,
+    "line": 47,
     "description": "",
     "params": [
       {
@@ -33293,7 +34009,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 54,
+    "line": 55,
     "description": "",
     "params": [
       {
@@ -33318,7 +34034,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 74,
+    "line": 75,
     "description": "",
     "params": [
       {
@@ -33343,7 +34059,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 101,
+    "line": 102,
     "description": "",
     "params": [
       {
@@ -33368,7 +34084,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 64,
+    "line": 65,
     "description": "Normalize legacy theme-mode values.",
     "params": [
       {
@@ -33393,7 +34109,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 144,
+    "line": 147,
     "description": "",
     "params": [
       {
@@ -33418,7 +34134,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 156,
+    "line": 159,
     "description": "",
     "params": [],
     "returns": [
@@ -33436,7 +34152,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 173,
+    "line": 176,
     "description": "",
     "params": [],
     "returns": [
@@ -33454,7 +34170,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 241,
+    "line": 244,
     "description": "Persist an already-normalized full preference object.",
     "params": [
       {
@@ -33479,7 +34195,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 440,
+    "line": 455,
     "description": "",
     "params": [
       {
@@ -33504,7 +34220,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 399,
+    "line": 414,
     "description": "",
     "params": [
       {
@@ -33529,7 +34245,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 369,
+    "line": 384,
     "description": "",
     "params": [
       {
@@ -33554,7 +34270,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 327,
+    "line": 342,
     "description": "",
     "params": [
       {
@@ -33579,7 +34295,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 345,
+    "line": 360,
     "description": "",
     "params": [
       {
@@ -33604,7 +34320,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 297,
+    "line": 300,
     "description": "Persist the user's theme mode preference.",
     "params": [
       {
@@ -33629,7 +34345,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 270,
+    "line": 273,
     "description": "",
     "params": [
       {
@@ -33654,7 +34370,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 219,
+    "line": 222,
     "description": "",
     "params": [
       {
@@ -33692,7 +34408,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 186,
+    "line": 189,
     "description": "",
     "params": [
       {
@@ -33717,7 +34433,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 199,
+    "line": 202,
     "description": "",
     "params": [
       {

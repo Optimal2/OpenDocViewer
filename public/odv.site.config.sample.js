@@ -67,6 +67,10 @@
     // =========================================================================
     exposeStackTraces: false,
     showPerfOverlay: false,
+    theme: {
+      // Opt-in cross-origin theme bridge (postMessage). Leave empty to keep it disabled.
+      // bridge: { allowedOrigins: ['https://portal.example'] },
+    },
     metadata: {
       // Controls user-facing document metadata overlays and metadata context-menu actions.
       // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
