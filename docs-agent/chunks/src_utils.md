@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 42. Line count: 17123. JSDoc symbol count: 655.
+File count: 42. Line count: 17245. JSDoc symbol count: 656.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -363,7 +363,7 @@ Symbols:
 
 PDF signature collection \- level 1 integrity inspection.
 
-Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `collectPdfSignatures`
+Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `unreadableSignatureReport`, `collectPdfSignatures`
 
 Symbols:
 
@@ -374,6 +374,7 @@ Symbols:
 - `module:utils/pdfSignatures~pdfText` (function) - Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF\-16BE byte\-order mark.
 - `module:utils/pdfSignatures.parsePdfDateString` (function) - Parse a PDF date string \(&quot;D:YYYYMMDDHHmmSS\+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone \- a missing timezone is treated as UTC\).
 - `module:utils/pdfSignatures~discoverSignatures` (function) - Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\).
+- `module:utils/pdfSignatures.unreadableSignatureReport` (function) - Report an inspection failure without claiming that the document is unsigned.
 - `module:utils/pdfSignatures.collectPdfSignatures` (function) - Collect signature information from PDF bytes.
 
 ## src/utils/pdfSignatureStatus.js

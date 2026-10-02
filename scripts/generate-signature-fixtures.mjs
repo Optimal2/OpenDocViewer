@@ -222,9 +222,9 @@ function patchByteRange(fileBytes, sigObjOffset) {
   if (brIdx === -1) throw new Error('fixture bug: /ByteRange placeholder missing');
   const values = [
     0,
-    hexStart,
-    gapEnd,
-    fileBytes.length - gapEnd
+    hexStart - 1,
+    gapEnd + 1,
+    fileBytes.length - gapEnd - 1
   ];
   const digits = values.map((v) => String(v).padStart(BYTE_RANGE_DIGITS, '0')).join(' ');
   const out = fileBytes.slice();
@@ -254,7 +254,7 @@ function patchContents(fileBytes, hexStart, cmsBytes) {
  */
 async function signFile(fileBytes, sigObjOffset, buildCms) {
   const patched = patchByteRange(fileBytes, sigObjOffset);
-  const signedBytes = extractSignedBytes(patched.bytes, patched.hexStart, patched.gapEnd);
+  const signedBytes = extractSignedBytes(patched.bytes, patched.hexStart - 1, patched.gapEnd + 1);
   const cms = await buildCms(signedBytes);
   return patchContents(patched.bytes, patched.hexStart, cms);
 }
@@ -346,7 +346,10 @@ async function buildSignedData({
   eContentType = OID_DATA,
   eContentBytes = null,
   signedOverBytes,
-  wrongKey = null
+  wrongKey = null,
+  omitMessageDigest = false,
+  noSignedAttrs = false,
+  configure = null
 }) {
   const pkiCert = toPkiCertificate(signer.cert);
   const contentForDigest = eContentBytes ?? signedOverBytes;
@@ -361,6 +364,7 @@ async function buildSignedData({
       values: [new asn1js.GeneralizedTime({ valueDate: signingTime })]
     }));
   }
+  if (omitMessageDigest) attributes.splice(1, 1);
   const encapParams = { eContentType };
   if (eContentBytes) encapParams.eContent = new asn1js.OctetString({ valueHex: bufferOf(eContentBytes) });
   const signedData = new pkijs.SignedData({
@@ -376,6 +380,8 @@ async function buildSignedData({
       })
     ]
   });
+  if (noSignedAttrs) delete signedData.signerInfos[0].signedAttrs;
+  if (configure) await configure(signedData, pkiCert);
   await signedData.sign((wrongKey ?? signer.keys).privateKey, 0, hashAlg, signedOverBytes);
   const contentInfo = new pkijs.ContentInfo({ contentType: OID_SIGNED_DATA, content: signedData.toSchema(true) });
   return new Uint8Array(contentInfo.toSchema().toBER(false));
@@ -625,8 +631,7 @@ export async function createSignatureFixtures() {
       sigOptions: { subFilter: 'adbe.pkcs7.detached' }
     });
     const rev1 = builder.serialize({ trailerExtras: '/Info 9 0 R' });
-    const { hexStart } = sigGap(rev1.bytes, rev1.offsets.get(8));
-    const patched = rev1.bytes.slice();
+    const { hexStart, bytes: patched } = patchByteRange(rev1.bytes, rev1.offsets.get(8));
     const garbage = 'deadbeef'.repeat(CONTENTS_CAPACITY_HEX / 8);
     for (let i = 0; i < garbage.length; i += 1) patched[hexStart + i] = garbage.charCodeAt(i);
     fixtures['corrupt-contents.pdf'] = patched;
@@ -696,6 +701,11 @@ export async function createSignatureFixtures() {
 
   return fixtures;
 }
+
+// Reusable test-only primitives for adversarial fixtures, with fresh keys per run.
+export { createFixturePki, buildSignedData, baseSignedPdf, PdfBuilder, signFile,
+  sigDictBody, latin1, latin1Text, concatBytes, digestBytes, patchContents,
+  patchByteRange, findStartxrefOffset, CONTENTS_CAPACITY_HEX };
 
 // ---------------------------------------------------------------------------
 // CLI

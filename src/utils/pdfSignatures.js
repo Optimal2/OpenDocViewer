@@ -9,9 +9,9 @@
  *
  * The module is environment-agnostic: it runs on the main thread, inside a
  * web worker and in Node (tests). Heavy dependencies (pdf-lib, pkijs,
- * asn1js) are loaded through dynamic imports, so unsigned PDFs never pay for
- * the signature stack, and unexpected failures degrade to an empty or
- * per-signature `unreadable` report instead of throwing.
+ * asn1js) are loaded through dynamic imports. Unsigned PDFs skip the CMS
+ * stack; inspection failures produce a document-level or per-signature
+ * `unreadable` report instead of claiming that signatures are absent.
  *
  * @module utils/pdfSignatures
  */
@@ -135,22 +135,6 @@ function toUint8(input) {
   throw new TypeError('pdfBytes must be an ArrayBuffer or Uint8Array');
 }
 
-function indexOfAscii(bytes, ascii, from = 0) {
-  if (bytes.length === 0 || ascii.length === 0) return -1;
-  const first = ascii.charCodeAt(0);
-  for (let i = from; i + ascii.length <= bytes.length; i += 1) {
-    if (bytes[i] !== first) continue;
-    let k = 1;
-    while (k < ascii.length && bytes[i + k] === ascii.charCodeAt(k)) k += 1;
-    if (k === ascii.length) return i;
-  }
-  return -1;
-}
-
-function hasAscii(bytes, ascii) {
-  return indexOfAscii(bytes, ascii) !== -1;
-}
-
 function bytesToHex(a) {
   let out = '';
   for (let i = 0; i < a.length; i += 1) out += a[i].toString(16).padStart(2, '0');
@@ -268,8 +252,8 @@ function signatureDictFields(sigDict, pdfLib) {
     reason: pdfText(sigDict.lookup(pdfLib.PDFName.of('Reason'))),
     location: pdfText(sigDict.lookup(pdfLib.PDFName.of('Location'))),
     hasReference: dictHas(sigDict, pdfLib, 'Reference'),
-    byteRangeRaw: sigDict.lookup(pdfLib.PDFName.of('ByteRange'), pdfLib.PDFArray),
-    contentsRaw: sigDict.lookup(pdfLib.PDFName.of('Contents'))
+    byteRangeRaw: sigDict.lookup(pdfLib.PDFName.of('ByteRange')),
+    contentsRaw: sigDict.get(pdfLib.PDFName.of('Contents'))
   };
 }
 
@@ -279,7 +263,7 @@ function readByteRange(brArray) {
   for (let i = 0; i < 4; i += 1) {
     const num = brArray.lookup(i);
     const value = typeof num?.asNumber === 'function' ? num.asNumber() : Number(num?.value);
-    if (!Number.isFinite(value)) return null;
+    if (!Number.isSafeInteger(value) || value < 0) return null;
     values.push(value);
   }
   return values;
@@ -309,8 +293,19 @@ function contentsToBytes(contents, pdfLib) {
 function discoverSignatures(pdfDoc, pdfLib) {
   const { PDFName } = pdfLib;
   const indirect = [];
-  for (const [ref, obj] of pdfDoc.context.enumerateIndirectObjects()) {
-    indirect.push({ ref: String(ref), obj });
+  const queue = [...pdfDoc.context.enumerateIndirectObjects().map(([, obj]) => obj), ...pdfDoc.parsedDicts];
+  const visited = new Set();
+  for (let i = 0; i < queue.length; i++) {
+    const obj = queue[i];
+    if (!obj || visited.has(obj)) continue;
+    visited.add(obj);
+    if (visited.size > 100000) throw new Error('PDF object inspection limit exceeded');
+    if (obj instanceof pdfLib.PDFDict) {
+      indirect.push({ obj });
+      for (const [, value] of obj.entries()) queue.push(value);
+    } else if (obj instanceof pdfLib.PDFArray) {
+      queue.push(...obj.asArray());
+    }
   }
 
   /** @type {Map<string, {sigDict: any, fieldDict: any|null}>} */
@@ -321,7 +316,7 @@ function discoverSignatures(pdfDoc, pdfLib) {
     if (!isDict(obj)) continue;
     const ft = pdfText(obj.lookup(PDFName.of('FT')));
     if (ft !== 'Sig') continue;
-    const v = obj.lookup(PDFName.of('V'), pdfLib.PDFDict) ?? obj.lookup(PDFName.of('DV'), pdfLib.PDFDict);
+    const v = obj.lookup(PDFName.of('V')) ?? obj.lookup(PDFName.of('DV'));
     if (isDict(v) && (dictHas(v, pdfLib, 'ByteRange') || pdfText(v.lookup(PDFName.of('Type'))) === 'Sig' || dictHas(v, pdfLib, 'SubFilter'))) {
       found.set(objectKey(v), { sigDict: v, fieldDict: obj });
     }
@@ -330,7 +325,8 @@ function discoverSignatures(pdfDoc, pdfLib) {
   for (const { obj } of indirect) {
     if (!isDict(obj)) continue;
     const type = pdfText(obj.lookup(PDFName.of('Type')));
-    if (type === 'Sig' || (dictHas(obj, pdfLib, 'ByteRange') && dictHas(obj, pdfLib, 'Contents'))) {
+    if (type === 'Sig' || type === 'DocTimeStamp' ||
+      ((dictHas(obj, pdfLib, 'ByteRange') || dictHas(obj, pdfLib, 'SubFilter')) && dictHas(obj, pdfLib, 'Contents'))) {
       const k = objectKey(obj);
       if (!found.has(k)) found.set(k, { sigDict: obj, fieldDict: null });
     }
@@ -377,12 +373,13 @@ function qualifiedFieldName(fieldDict, pdfLib) {
 // Base (PDF dictionary level) info for one signature
 // ---------------------------------------------------------------------------
 
-function dictionaryInfo(item, bytes, pdfLib) {
+function dictionaryInfo(item, bytes, pdfLib, sourceSpans) {
   const fields = signatureDictFields(item.sigDict, pdfLib);
   const byteRange = readByteRange(fields.byteRangeRaw);
   const contents = contentsToBytes(fields.contentsRaw, pdfLib);
 
-  const coversWholeFile = byteRange
+  const rangeValid = validByteRange(bytes, byteRange, fields.contentsRaw, sourceSpans);
+  const coversWholeFile = rangeValid
     ? byteRange[0] === 0 && byteRange[2] + byteRange[3] === bytes.length && byteRange[3] >= 0
     : null;
 
@@ -423,8 +420,8 @@ function dictionaryInfo(item, bytes, pdfLib) {
     info.integrityReason = 'signature present, /Contents missing or empty';
     return { info, ctx: { byteRange, contents, mDate, fields } };
   }
-  if (!byteRange) {
-    info.integrityReason = 'signature present, /ByteRange missing or malformed';
+  if (!rangeValid) {
+    info.integrityReason = 'signature present, /ByteRange malformed or gap does not exactly match this /Contents hex string';
     return { info, ctx: { byteRange, contents, mDate, fields } };
   }
   info.integrity = 'intact'; // provisional; replaced by verification result below
@@ -432,15 +429,27 @@ function dictionaryInfo(item, bytes, pdfLib) {
   return { info, ctx: { byteRange, contents, mDate, fields } };
 }
 
+function validByteRange(bytes, br, contents, sourceSpans) {
+  if (!br || br.some((v) => !Number.isSafeInteger(v) || v < 0)) return false;
+  const [a, b, c, d] = br;
+  if (a !== 0 || b >= c || c > bytes.length || d > bytes.length - c) return false;
+  const span = sourceSpans.get(contents);
+  if (!span || span.start !== b || span.end !== c) return false;
+  if (bytes[b] !== 0x3c || bytes[c - 1] !== 0x3e) return false;
+  // pdf-lib accepts some malformed hex strings; only PDF hex/whitespace is legal.
+  for (let i = b + 1; i < c - 1; i++) {
+    const ch = bytes[i];
+    if (!((ch >= 48 && ch <= 57) || (ch >= 65 && ch <= 70) || (ch >= 97 && ch <= 102) ||
+      ch === 0 || ch === 9 || ch === 10 || ch === 12 || ch === 13 || ch === 32)) return false;
+  }
+  return true;
+}
+
 function coveredBytes(bytes, byteRange) {
-  const [a, b, c, d] = byteRange;
-  const from1 = Math.max(0, Math.min(a, bytes.length));
-  const to1 = Math.max(from1, Math.min(a + b, bytes.length));
-  const from2 = Math.max(to1, Math.min(c, bytes.length));
-  const to2 = Math.max(from2, Math.min(c + d, bytes.length));
-  const out = new Uint8Array(to1 - from1 + to2 - from2);
-  out.set(bytes.subarray(from1, to1), 0);
-  out.set(bytes.subarray(from2, to2), to1 - from1);
+  const [, b, c, d] = byteRange;
+  const out = new Uint8Array(b + d);
+  out.set(bytes.subarray(0, b), 0);
+  out.set(bytes.subarray(c, c + d), b);
   return out;
 }
 
@@ -449,9 +458,11 @@ function extensionCoveredByLaterSignature(self, all, fileLength) {
   return all.some(
     (other) =>
       other !== self &&
+      other.info?.integrity === 'intact' &&
+      other.info.integrityReason !== 'pending-verification' &&
       other.byteRange &&
       other.byteRange[0] === 0 &&
-      other.byteRange[2] >= selfEnd &&
+      other.byteRange[1] >= selfEnd &&
       other.byteRange[2] + other.byteRange[3] >= fileLength
   );
 }
@@ -518,17 +529,33 @@ function elementBytesToHex(element) {
   return bytes ? bytesToHex(new Uint8Array(bytes)) : null;
 }
 
-function matchCertificate(signedData, signerInfo) {
+async function matchCertificate(signedData, signerInfo, asn1jsLib) {
   const certs = (signedData.certificates ?? []).filter((c) => c?.serialNumber);
   if (!certs.length) return null;
   const sid = signerInfo.sid;
   const sidSerialHex = sid?.serialNumber ? elementBytesToHex(sid.serialNumber) : null;
   if (sidSerialHex) {
     const want = normalizeSerialHex(new Uint8Array(asn1HexToBytes(sidSerialHex)));
-    const match = certs.find((c) => normalizeSerialHex(new Uint8Array(asn1HexToBytes(elementBytesToHex(c.serialNumber) ?? ''))) === want);
-    if (match) return match;
+    return certs.find((c) => c.issuer.isEqual(sid.issuer) &&
+      normalizeSerialHex(new Uint8Array(asn1HexToBytes(elementBytesToHex(c.serialNumber) ?? ''))) === want) ?? null;
   }
-  return certs[0];
+  // PKIjs decodes subjectKeyIdentifier into a raw OctetString.
+  const want = sid?.idBlock?.isConstructed
+    ? sid.valueBlock?.value?.[0]?.valueBlock?.valueHexView : sid?.valueBlock?.valueHexView;
+  if (!want?.length) return null;
+  for (const cert of certs) {
+    const extension = cert.extensions?.find((e) => e.extnID === '2.5.29.14');
+    let keyId;
+    if (extension) {
+      const parsed = asn1jsLib.fromBER(bufferView(extension.extnValue.valueBlock.valueHexView));
+      if (parsed.offset === -1 || !(parsed.result instanceof asn1jsLib.OctetString)) continue;
+      keyId = parsed.result.valueBlock.valueHexView;
+    } else {
+      keyId = await subtleDigest('SHA-1', cert.subjectPublicKeyInfo.subjectPublicKey.valueBlock.valueHexView);
+    }
+    if (bytesEqual(want, keyId)) return cert;
+  }
+  return null;
 }
 
 function asn1HexToBytes(hex) {
@@ -612,12 +639,17 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   asn1jsRef = asn1jsLib;
 
   const signedBytes = coveredBytes(bytes, ctx.byteRange);
+  if (ctx.contents.length > 1024 * 1024) {
+    info.integrity = 'unreadable';
+    info.integrityReason = 'CMS exceeds the 1 MiB signature inspection limit';
+    return;
+  }
 
   // --- parse CMS -----------------------------------------------------------
   let signedData;
   let contentInfo;
   try {
-    const der = asn1jsLib.fromBER(bufferView(ctx.contents));
+    const der = asn1jsLib.fromBER(bufferView(ctx.contents), { maxDepth: 64, maxNodes: 100000 });
     if (der.offset === -1 || !der.result) {
       info.integrity = 'unreadable';
       info.integrityReason = `signature present, CMS (PKCS#7) data not parseable: ${der.result?.error ?? 'unknown ASN.1 error'}`;
@@ -637,14 +669,19 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   }
 
   const signerInfo = signedData.signerInfos?.[0];
-  if (!signerInfo) {
+  if (!signerInfo || signedData.signerInfos.length !== 1) {
     info.integrity = 'unreadable';
-    info.integrityReason = 'signature present, CMS has no signer information';
+    info.integrityReason = 'signature present, PDF CMS must contain exactly one signer';
     return;
   }
 
   // --- certificate identity -------------------------------------------------
-  const cert = matchCertificate(signedData, signerInfo);
+  const cert = await matchCertificate(signedData, signerInfo, asn1jsLib);
+  if (!cert) {
+    info.integrity = 'unreadable';
+    info.integrityReason = 'CMS contains no certificate matching the signer identifier';
+    return;
+  }
   if (cert) {
     const cn = rdnValue(cert.subject, RDN_CN);
     if (cn) info.signer = cn;
@@ -673,9 +710,40 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   const eContentType = signedData.encapContentInfo?.eContentType;
   const eContentBytes = attrRawBytesOfElement(signedData.encapContentInfo?.eContent);
   let documentDigestOk;
-  let documentDigestMissingSource = null;
+  const encapsulated = isTimestamp || isSha1Embedded;
+  if ((encapsulated && !eContentBytes) || (!encapsulated && signedData.encapContentInfo?.eContent) ||
+    (isTimestamp ? eContentType !== OID_TST_INFO : eContentType !== '1.2.840.113549.1.7.1')) {
+    info.integrity = 'unreadable';
+    info.integrityReason = 'CMS content does not match the PDF SubFilter';
+    return;
+  }
+  const contentToVerify = encapsulated ? eContentBytes : signedBytes;
+  // RFC 5652 section 5.4: signed attributes MUST bind the exact CMS content.
+  if (signerInfo.signedAttrs) {
+    const attrs = signerInfo.signedAttrs.attributes ?? [];
+    const mdAttrs = attrs.filter((attr) => attr.type === OID_ATTR_MESSAGE_DIGEST);
+    const md = mdAttrs[0];
+    if (mdAttrs.length !== 1 || md.values?.length !== 1 || !(md.values[0] instanceof asn1jsLib.OctetString)) {
+      info.integrity = 'unreadable';
+      info.integrityReason = 'CMS signed attributes require exactly one messageDigest value';
+      return;
+    }
+    const actual = await subtleDigest(hashName, contentToVerify);
+    if (!bytesEqual(actual, attrRawBytes(md))) {
+      info.integrity = 'digest-mismatch';
+      info.integrityReason = 'CMS content digest does not match the signed messageDigest';
+      return;
+    }
+    const contentTypes = attrs.filter((attr) => attr.type === '1.2.840.113549.1.9.3');
+    if (contentTypes.length !== 1 || contentTypes[0].values?.length !== 1 ||
+      contentTypes[0].values[0].valueBlock?.toString() !== eContentType) {
+      info.integrity = 'unreadable';
+      info.integrityReason = 'CMS signed contentType does not match the encapsulated content type';
+      return;
+    }
+  }
 
-  if (isTimestamp || eContentType === OID_TST_INFO) {
+  if (isTimestamp) {
     // Document timestamp: the TSTInfo messageImprint must match the file bytes.
     try {
       if (!eContentBytes) throw new Error('no encapsulated content');
@@ -708,7 +776,7 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
     }
   } else if (isSha1Embedded) {
     // adbe.pkcs7.sha1: the CMS embeds the SHA-1 document digest.
-    if (!eContentBytes || eContentBytes.length < 16) {
+    if (!eContentBytes || eContentBytes.length !== 20) {
       info.integrity = 'unreadable';
       info.integrityReason = 'legacy SHA-1 signature without embedded document digest';
       return;
@@ -720,21 +788,6 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
       info.integrityReason = 'document SHA-1 digest does not match the embedded digest in the CMS';
       return;
     }
-  } else {
-    // Detached: the signed messageDigest attribute must match.
-    const mdAttr = findAttribute(signerInfo.signedAttrs, OID_ATTR_MESSAGE_DIGEST);
-    const mdBytes = attrRawBytes(mdAttr);
-    if (!mdBytes) {
-      documentDigestMissingSource = 'CMS signed attributes contain no messageDigest';
-    } else {
-      const actual = await subtleDigest(hashName, signedBytes);
-      documentDigestOk = bytesEqual(actual, mdBytes);
-      if (!documentDigestOk) {
-        info.integrity = 'digest-mismatch';
-        info.integrityReason = 'document digest does not match the signed messageDigest (content changed after signing)';
-        return;
-      }
-    }
   }
 
   // --- signing time from CMS attribute --------------------------------------
@@ -743,23 +796,19 @@ async function verifySignatureEntry(info, ctx, bytes, pkijsLib, asn1jsLib, allCo
   if (signingTimeDate) {
     info.signingTime = isoOrNull(signingTimeDate);
     info.signingTimeSource = 'signed-attribute';
-  } else if (documentDigestMissingSource) {
-    info.integrity = 'unreadable';
-    info.integrityReason = documentDigestMissingSource;
-    return;
   }
 
   // --- signature value over the signed attributes ----------------------------
   const sigAlgOid = signerInfo.signatureAlgorithm?.algorithmId;
   let signedRegion;
-  if (signerInfo.signedAttrs?.attributes?.length && signerInfo.signedAttrs.encodedValue?.byteLength) {
+  if (signerInfo.signedAttrs?.encodedValue?.byteLength) {
     signedRegion = signerInfo.signedAttrs.encodedValue; // pkijs patched tag to SET OF
-  } else if (eContentBytes) {
-    signedRegion = bufferView(eContentBytes);
-  } else if (signerInfo.signedAttrs?.attributes?.length) {
-    signedRegion = signerInfo.signedAttrs.toSchema().toBER(false);
+  } else if (signerInfo.signedAttrs) {
+    info.integrity = 'unreadable';
+    info.integrityReason = 'CMS signed attributes have no encoded signature input';
+    return;
   } else {
-    signedRegion = bufferView(signedBytes);
+    signedRegion = bufferView(contentToVerify);
   }
 
   const signatureBytes = attrRawBytesOfElement(signerInfo.signature);
@@ -932,14 +981,90 @@ function orderSignatures(entries, contexts) {
 // ---------------------------------------------------------------------------
 
 /**
+ * Report an inspection failure without claiming that the document is unsigned.
+ * @param {string} reason Inspection failure reason.
+ * @returns {PdfSignatureReport}
+ */
+export function unreadableSignatureReport(reason) {
+  return { signatures: [{
+    fieldName: null, signer: null, signerOrganization: null, issuer: null,
+    serial: null, notBefore: null, notAfter: null, signingTime: null,
+    signingTimeSource: 'none', reason: null, location: null, subFilter: null,
+    kind: 'approval', integrity: 'unreadable', integrityReason: reason,
+    coversWholeFile: null, trust: 'not-checked'
+  }] };
+}
+
+// Track source positions on a parser INSTANCE, never by patching global prototypes.
+// Identity ties a direct /Contents value to its real source span, including <>.
+// Object-stream contents have no file span and consequently cannot pass ByteRange.
+async function parseWithSourceSpans(bytes, pdfLib) {
+  const parser = pdfLib.PDFParser.forBytesWithOptions(bytes, 100, true);
+  const sourceSpans = new WeakMap();
+  const parsedDicts = [];
+  const assign = parser.context.assign;
+  parser.context.assign = function (ref, object) {
+    parsedDicts.push(object); // Also preserve superseded objects from object streams.
+    return assign.call(this, ref, object);
+  };
+  const parseHex = parser.parseHexString;
+  parser.parseHexString = function () {
+    const start = this.bytes.offset();
+    const value = parseHex.call(this);
+    sourceSpans.set(value, { start, end: this.bytes.offset() });
+    return value;
+  };
+  const parseDict = parser.parseDict;
+  parser.parseDict = function () {
+    const dict = parseDict.call(this);
+    parsedDicts.push(dict); // Preserve signatures superseded in later revisions too.
+    return dict;
+  };
+  let depth = 0;
+  let count = 0;
+  let decodedTotal = 0;
+  const parseObject = parser.parseObject;
+  parser.parseObject = function () {
+    if (++depth > 128 || ++count > 1000000) throw new Error('PDF inspection complexity limit exceeded');
+    try {
+      const object = parseObject.call(this);
+      if (object instanceof pdfLib.PDFRawStream && ['ObjStm', 'XRef'].includes(pdfText(object.dict.lookup(pdfLib.PDFName.of('Type'))))) {
+        // Decode parser-owned streams under a memory budget before pdf-lib's
+        // object/xref stream parsers consume them. Page/image streams stay opaque.
+        const filter = object.dict.lookup(pdfLib.PDFName.of('Filter'));
+        if (filter instanceof pdfLib.PDFArray && filter.size() > 1) throw new Error('Multiple structural stream filters require external inspection');
+        const decoded = pdfLib.decodePDFRawStream(object);
+        const maxDecoded = 8 * 1024 * 1024;
+        const ensureBuffer = decoded.ensureBuffer;
+        if (ensureBuffer) decoded.ensureBuffer = function (size) {
+          if (size > maxDecoded) throw new Error('PDF structural stream exceeds the 8 MiB inspection limit');
+          return ensureBuffer.call(this, size);
+        };
+        const content = decoded.decode();
+        decodedTotal += content.length;
+        if (content.length > maxDecoded || decodedTotal > 32 * 1024 * 1024) throw new Error('PDF structural stream inspection budget exceeded');
+        const dict = object.dict.clone();
+        dict.delete(pdfLib.PDFName.of('Filter'));
+        dict.delete(pdfLib.PDFName.of('DecodeParms'));
+        dict.set(pdfLib.PDFName.of('Length'), pdfLib.PDFNumber.of(content.length));
+        return pdfLib.PDFRawStream.of(dict, content);
+      }
+      return object;
+    } finally { depth--; }
+  };
+  const context = await parser.parseDocument();
+  return { context, sourceSpans, parsedDicts };
+}
+
+/**
  * Collect signature information from PDF bytes. This is the pure parser - it
  * runs on any environment with WebCrypto (main thread, worker, Node). To
  * avoid blocking the main thread, application code should call
  * `getDocumentSignatures` from `utils/pdfSignatureInspector.js` instead,
  * which offloads this function to a worker.
  *
- * Never throws: unexpected failures resolve to an empty report; per-signature
- * problems become `unreadable`/`unsupported` entries.
+ * Never throws: inspection failures resolve to a document-level unreadable
+ * report; per-signature problems become `unreadable`/`unsupported` entries.
  *
  * @param {Uint8Array|ArrayBuffer} pdfBytes Complete PDF document bytes.
  * @returns {Promise<PdfSignatureReport>}
@@ -955,37 +1080,42 @@ export async function collectPdfSignatures(pdfBytes) {
   if (bytes.length < 9 || String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== '%PDF') {
     return empty;
   }
-  // Cheap pre-check: unsigned PDFs stop here without loading anything else.
-  if (!hasAscii(bytes, '/ByteRange') && !hasAscii(bytes, '/SubFilter')) {
-    return empty;
-  }
+  if (bytes.length > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
 
   let pdfLib;
   let pdfDoc;
   try {
     pdfLib = await import('pdf-lib');
-    const { PDFDocument } = pdfLib;
-    pdfDoc = await PDFDocument.load(bytes.slice(), { updateMetadata: false, ignoreEncryption: true });
-  } catch {
-    return empty; // unreadable document structure: nothing we can honestly report
+    pdfDoc = await parseWithSourceSpans(bytes, pdfLib);
+    if (pdfDoc.context.trailerInfo.Encrypt) return unreadableSignatureReport('Encrypted PDF signature inspection is unavailable');
+  } catch (err) {
+    return unreadableSignatureReport(`PDF structure cannot be inspected: ${String(err?.message ?? err)}`);
   }
 
   let discovered;
   try {
     discovered = discoverSignatures(pdfDoc, pdfLib);
-  } catch {
-    return empty;
+  } catch (err) {
+    return unreadableSignatureReport(`PDF signatures cannot be discovered: ${String(err?.message ?? err)}`);
   }
   if (!discovered.length) return empty;
+  if (discovered.length > 256) return unreadableSignatureReport('PDF exceeds the 256 signature inspection limit');
 
   /** @type {PdfSignatureInfo[]} */
   const entries = [];
   /** @type {any[]} */
   const contexts = [];
   for (const item of discovered) {
-    const { info, ctx } = dictionaryInfo(item, bytes, pdfLib);
-    entries.push(info);
-    contexts.push(ctx);
+    try {
+      const { info, ctx } = dictionaryInfo(item, bytes, pdfLib, pdfDoc.sourceSpans);
+      entries.push(info);
+      contexts.push({ ...ctx, info });
+    } catch (err) {
+      const info = unreadableSignatureReport(`Signature dictionary cannot be inspected: ${String(err?.message ?? err)}`).signatures[0];
+      info.fieldName = item.fieldName;
+      entries.push(info);
+      contexts.push({ byteRange: null, contents: null, info });
+    }
   }
 
   // Load the CMS stack only now - the document really has signature fields.
@@ -1003,7 +1133,11 @@ export async function collectPdfSignatures(pdfBytes) {
     return { signatures: orderSignatures(entries, contexts) };
   }
 
-  for (let i = 0; i < contexts.length; i += 1) {
+  // A later signature may authorize an extension only after its own final verdict.
+  const verificationOrder = contexts.map((_, i) => i).sort((a, b) =>
+    ((contexts[b].byteRange?.[2] ?? 0) + (contexts[b].byteRange?.[3] ?? 0)) -
+    ((contexts[a].byteRange?.[2] ?? 0) + (contexts[a].byteRange?.[3] ?? 0)));
+  for (const i of verificationOrder) {
     try {
       await verifySignatureEntry(entries[i], contexts[i], bytes, pkijsLib, asn1jsLib, contexts);
     } catch (err) {

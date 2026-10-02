@@ -60,21 +60,38 @@ Integrity rules, in evaluation order:
 1. `/Contents` missing or the CMS not parseable -> `integrity: 'unreadable'`.
 2. `/SubFilter` outside the handled formats -> `integrity: 'unsupported'` (signature still
    reported, never hidden).
-3. CMS `messageDigest` (or the embedded SHA-1 in `adbe.pkcs7.sha1`, or the TSTInfo
-   `messageImprint` for timestamps) does not match the WebCrypto digest of the signed bytes
-   -> `integrity: 'digest-mismatch'`.
-4. The CMS signer signature does not verify over the signed attributes with the embedded
+3. ByteRange must contain four non-negative safe integers, start at zero, remain inside
+   the file, and exclude exactly the direct `/Contents` hex string including `<` and `>`.
+   Source positions come from the same parser objects as the signature dictionary;
+   another hex string or a value in an object stream cannot stand in for `/Contents`.
+   A malformed range is `unreadable`, with `coversWholeFile: null`.
+4. If CMS signed attributes exist, exactly one `messageDigest` value is mandatory and
+   must match the hash of the CMS content. For detached signatures that content is the
+   ByteRange bytes; for encapsulated signatures it is the eContent bytes. The signed
+   `contentType` must also match. Missing/ambiguous attributes are `unreadable` and a
+   different digest is `digest-mismatch`. Encapsulated SHA-1 / TSTInfo must additionally
+   match the document digest / imprint. These are separate mandatory checks, following
+   [RFC 5652 section 5.4](https://www.rfc-editor.org/rfc/rfc5652#section-5.4).
+5. The CMS signer signature does not verify over the signed attributes with the embedded
    certificate's public key -> `integrity: 'signature-invalid'`.
-5. Everything verifies but the ByteRange does not reach the end of the file: the file was
+   Without signed attributes, verification operates directly on the CMS content.
+   Certificates must match SignerInfo issuer **and** serial, or its subject key identifier
+   (SKI extension, with SHA-1 of the subjectPublicKey bits as fallback only when the
+   extension is absent). An unmatched identifier is `unreadable`; certificate order
+   never determines signer identity.
+6. Everything verifies but the ByteRange does not reach the end of the file: the file was
    extended after this signature was applied.
-   - If the added bytes are themselves covered by a *later signature* in the same document
+   - If the added bytes are themselves covered by a *verified intact later signature* in the same document
      (the normal case for the first signature of a multi-signature document), the content
      this signature protected is still byte-for-byte intact: `integrity: 'intact'` with
      `coversWholeFile: false` and an `integrityReason` saying the file was extended by later
      signature(s).
+     Verification runs from the last revision backwards. The later range must start at
+     zero, its first segment must include the entire earlier revision, and its end must
+     reach EOF. An unreadable or invalid later CMS cannot authorize an extension.
    - If the extension is **not** covered by any later signature, someone changed the file
      without signing the change: `integrity: 'modified-after-signing'`.
-6. Everything verifies and the range reaches EOF -> `integrity: 'intact'`,
+7. Everything verifies and the range reaches EOF -> `integrity: 'intact'`,
    `coversWholeFile: true`.
 
 Signature algorithms are mapped to WebCrypto: RSA PKCS#1 v1.5 (`RSASSA-PKCS1-v1_5`),
@@ -105,11 +122,28 @@ for (const sig of report.signatures) {
 ```
 
 `getDocumentSignatures` offloads to a lazily created singleton worker when the browser
-`Worker` API is available, and falls back to running the parser inline when worker creation
-or execution fails. It never rejects for document reasons: a PDF with no signatures, a
+`Worker` API is available. Worker construction/execution errors and timeouts return a
+document-level `unreadable` entry; they never start inline parsing. A timeout terminates
+the worker and settles all pending requests. Disposal also settles requests and permits
+a fresh worker on the next call. Inline parsing is allowed only without a Worker API
+and for inputs at most 256 KiB. It never rejects for document reasons: a PDF with no signatures, a
 corrupt CMS blob, or an unsupported environment all resolve to a report (an empty
 `signatures` list or per-signature `unreadable`/`unsupported` entries). Callers should fetch
 it once per document and cache the report next to the document state.
+
+Inspection budgets are 64 MiB input (checked before worker cloning or reading a Blob),
+256 signatures, 1 MiB per CMS, ASN.1 depth 64 / 100,000 nodes, and PDF object depth 128.
+Structural streams (ObjStm/XRef) have an 8 MiB decoded limit each and 32 MiB total;
+multiple structural stream filters are conservatively reported unreadable. Page and
+image streams are not decoded by signature inspection. Worker execution has a default
+30-second deadline. Exceeding a budget returns `unreadable`, never an unsigned verdict.
+
+Discovery parses PDF objects rather than relying on raw ASCII name searches: escaped
+names, object streams, nested dictionaries and signatures superseded in later revisions
+remain discoverable. Unsigned documents avoid importing the CMS stack, but still pay
+for PDF structure parsing. If structure/discovery cannot complete, a document-level
+`unreadable` placeholder with null identity fields communicates the incomplete inspection;
+it is not evidence that a particular signature exists.
 
 ## Level-1 user interface
 
@@ -145,7 +179,6 @@ The viewer surfaces the inspection result without ever blocking page rendering:
 - Strings live under the `signatures` key in `public/locales/en/common.json` and
   `public/locales/sv/common.json`; colours use the `--odv-signature-*` theme tokens (light,
   normal, dark, and the print reset).
-
 
 ## Data contract
 
@@ -224,6 +257,22 @@ the public repository stays free of binaries that cannot be diff-reviewed, keys 
 regenerated per run, and the generator CLI (`node
 scripts/generate-signature-fixtures.mjs --out <dir>`) reproduces any fixture on demand for
 manual inspection.
+
+### Adversarial regression proofs
+
+`scripts/signature-security-fixtures.mjs` generates eContent swaps, signed attributes
+without messageDigest, invalid later signatures, widened/foreign gaps, mismatched
+certificate identifiers, SKI signatures, and escaped/compressed dictionaries. The
+Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
+timeouts/errors, bounded fallback and disposal. No binary fixture is committed.
+
+Run `npm test -- pdfSignature` for both positive and hostile inputs. In an isolated
+worktree, `node scripts/test-signature-security-mutations.mjs --baseline` temporarily
+loads the original vulnerable parser/inspector and then breaks each of the eight fixes
+individually. Every selected regression must fail with an assertion (test exit 1),
+and the runner restores the original source in `finally`. Do not run it concurrently
+with editing or validation of these source files. The runner exits 0 only when all
+mutation groups are detected. Run the unmodified suite again afterwards.
 
 ## Third-party components
 

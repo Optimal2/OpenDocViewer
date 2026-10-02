@@ -4,7 +4,7 @@
  * `collectPdfSignatures` (utils/pdfSignatures.js) is CPU-bound (pdf-lib
  * parsing, CMS decoding, WebCrypto verification), so this inspector offloads
  * it to a dedicated ES module worker to keep the main thread free, falling
- * back to inline execution when workers are unavailable or fail. The call
+ * back to size-bounded inline execution only when no Worker API exists. The call
  * never rejects and never throws; documents without signatures resolve to an
  * empty list. See docs-src/pdf-signatures.md for the data contract.
  *
@@ -18,21 +18,29 @@
  */
 
 import PdfSignatureWorkerConstructor from '../workers/pdfSignatureWorker.js?worker';
-import { collectPdfSignatures } from './pdfSignatures.js';
+import { collectPdfSignatures, unreadableSignatureReport } from './pdfSignatures.js';
 
 const EMPTY_REPORT = { signatures: [] };
 
 /**
  * Lazily created worker handle: { worker, broken, pending } where `pending`
- * maps requestId to its resolve/reject callbacks. Null once created;
- * `broken: true` means the worker failed and callers run inline.
+ * maps requestId to its resolve/reject callbacks. Null before creation;
+ * `broken: true` means inspection is unavailable until disposal resets the handle.
  * @type {Object|null}
  */
 let workerHandle = null;
 let requestId = 0;
 
 function canUseWorker() {
-  return typeof Worker !== 'undefined' && typeof document !== 'undefined';
+  return typeof Worker !== 'undefined';
+}
+
+function markBroken(handle, reason) {
+  if (handle.broken) return;
+  handle.broken = true;
+  for (const entry of handle.pending.values()) entry.reject(new Error(reason));
+  handle.pending.clear();
+  try { handle.worker?.terminate(); } catch { /* already stopped */ }
 }
 
 function ensureWorker() {
@@ -49,31 +57,16 @@ function ensureWorker() {
       if (!entry) return;
       handle.pending.delete(data.requestId);
       if (data.ok) {
-        entry.resolve(data.report ?? EMPTY_REPORT);
+        entry.resolve(data.report ?? unreadableSignatureReport('signature worker returned no report'));
       } else {
         entry.reject(new Error(data.error || 'signature worker failure'));
       }
     };
-    const markBroken = () => {
-      handle.broken = true;
-      for (const [, entry] of handle.pending) {
-        try {
-          entry.reject(new Error('signature worker failed'));
-        } catch {
-          /* ignore */
-        }
-      }
-      handle.pending.clear();
-      try {
-        worker.terminate();
-      } catch {
-        /* ignore */
-      }
-    };
     worker.onerror = (event) => {
       event?.preventDefault?.();
-      markBroken();
+      markBroken(handle, 'signature worker failed');
     };
+    worker.onmessageerror = () => markBroken(handle, 'signature worker message could not be decoded');
     return handle;
   } catch {
     workerHandle = { worker: null, broken: true, pending: new Map() };
@@ -88,9 +81,7 @@ function runInWorker(handle, bytes, timeoutMs) {
     let settled = false;
     const timer = setTimeout(() => {
       if (settled) return;
-      settled = true;
-      handle.pending.delete(id);
-      reject(new Error(`signature worker timeout after ${timeoutMs} ms`));
+      markBroken(handle, `signature worker timeout after ${timeoutMs} ms`);
     }, timeoutMs);
     handle.pending.set(id, {
       resolve: (value) => {
@@ -110,10 +101,7 @@ function runInWorker(handle, bytes, timeoutMs) {
       handle.worker.postMessage({ type: 'collectPdfSignatures', requestId: id, bytes });
     } catch (err) {
       if (!settled) {
-        settled = true;
-        clearTimeout(timer);
-        handle.pending.delete(id);
-        reject(err);
+        markBroken(handle, String(err?.message ?? err));
       }
     }
   });
@@ -139,9 +127,11 @@ async function toBytes(source) {
  * @param {Object} [options] Worker options.
  * @param {number} [options.timeoutMs] Worker timeout in ms (default 30000).
  * @returns {Promise} Resolves - never rejects - with a PdfSignatureReport
- * (`{ signatures: [] }` when the document has none or cannot be inspected).
+ * (`{ signatures: [] }` only when the document has no detected signatures).
  */
 export async function getDocumentSignatures(source, options = {}) {
+  const sourceSize = source?.size ?? source?.byteLength;
+  if (sourceSize > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
   let bytes;
   try {
     bytes = await toBytes(source);
@@ -154,15 +144,19 @@ export async function getDocumentSignatures(source, options = {}) {
     if (handle) {
       try {
         return await runInWorker(handle, bytes, timeoutMs);
-      } catch {
-        // Any worker trouble: fall through to inline execution once.
+      } catch (err) {
+        return unreadableSignatureReport(String(err?.message ?? err));
       }
     }
+    return unreadableSignatureReport('signature worker is unavailable');
+  }
+  if (bytes.byteLength > 256 * 1024) {
+    return unreadableSignatureReport('PDF exceeds the 256 KiB inline signature inspection limit; a Worker is required');
   }
   try {
     return await collectPdfSignatures(bytes);
-  } catch {
-    return EMPTY_REPORT;
+  } catch (err) {
+    return unreadableSignatureReport(String(err?.message ?? err));
   }
 }
 
@@ -171,13 +165,7 @@ export async function getDocumentSignatures(source, options = {}) {
  * call transparently creates a new one.
  */
 export function disposePdfSignatureWorker() {
-  if (workerHandle?.worker && !workerHandle.broken) {
-    try {
-      workerHandle.worker.terminate();
-    } catch {
-      /* ignore */
-    }
-  }
+  if (workerHandle) markBroken(workerHandle, 'signature worker disposed');
   workerHandle = null;
 }
 

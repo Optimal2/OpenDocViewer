@@ -150,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 42. Line count: 17123. JSDoc symbol count: 655.
+File count: 42. Line count: 17245. JSDoc symbol count: 656.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

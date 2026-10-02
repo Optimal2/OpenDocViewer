@@ -24646,7 +24646,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 173,
+    "line": 167,
     "description": "Terminate the signature worker (e.g.",
     "params": [],
     "returns": [],
@@ -24659,7 +24659,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 144,
+    "line": 132,
     "description": "Inspect the signatures of one document.",
     "params": [
       {
@@ -24684,7 +24684,7 @@
     "returns": [
       {
         "type": "Promise",
-        "description": "Resolves - never rejects - with a PdfSignatureReport ( { signatures: [] } when the document has none or cannot be inspected)."
+        "description": "Resolves - never rejects - with a PdfSignatureReport ( { signatures: [] } only when the document has no detected signatures)."
       }
     ],
     "examples": 0
@@ -24722,7 +24722,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 947,
+    "line": 1072,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -24747,7 +24747,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 309,
+    "line": 293,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
     "returns": [],
@@ -24760,7 +24760,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 225,
+    "line": 209,
     "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
     "params": [
       {
@@ -24811,7 +24811,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 202,
+    "line": 186,
     "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
     "params": [
       {
@@ -24840,6 +24840,31 @@
     "description": "SubFilters with level-1 handling.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures.unreadableSignatureReport",
+    "name": "unreadableSignatureReport",
+    "longname": "module:utils/pdfSignatures.unreadableSignatureReport",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 988,
+    "description": "Report an inspection failure without claiming that the document is unsigned.",
+    "params": [
+      {
+        "name": "reason",
+        "type": "string",
+        "optional": false,
+        "description": "Inspection failure reason."
+      }
+    ],
+    "returns": [
+      {
+        "type": "PdfSignatureReport",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
