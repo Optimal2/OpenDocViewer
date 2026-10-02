@@ -336,11 +336,17 @@ export function getLanguagePreference() {
 }
 
 /**
+ * Persist a language choice, or clear it when the normalized value is empty.
+ *
  * @param {string} language
  * @returns {ViewerPreferences}
  */
 export function setLanguagePreference(language) {
-  return setViewerPreferences({ language: String(language || '').trim().toLowerCase() });
+  const normalized = String(language || '').trim().toLowerCase();
+  if (normalized) return setViewerPreferences({ language: normalized });
+  const next = { ...getViewerPreferences() };
+  delete next.language;
+  return replaceViewerPreferences(next);
 }
 
 /**

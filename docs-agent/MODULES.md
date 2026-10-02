@@ -111,7 +111,7 @@ File count: 1. Line count: 64. JSDoc symbol count: 2.
 
 ## src/integrations
 
-File count: 8. Line count: 2272. JSDoc symbol count: 59.
+File count: 8. Line count: 2276. JSDoc symbol count: 59.
 
 - `src/integrations/ompThemeBridge.js` - Opt\-in cross\-origin theme bridge for the shared OMP theme preference.
 - `src/integrations/parentBridge.js` - Same\-origin parent\-window bootstrap adapter.
@@ -149,7 +149,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 39. Line count: 15829. JSDoc symbol count: 636.
+File count: 39. Line count: 15835. JSDoc symbol count: 636.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

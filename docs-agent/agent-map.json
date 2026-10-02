@@ -83,7 +83,7 @@
   },
   "stats": {
     "fileCount": 120,
-    "sourceLineCount": 51227,
+    "sourceLineCount": 51237,
     "docletCount": 1384,
     "documentedFileCount": 120,
     "lowConfidenceSummaryCount": 0,
@@ -429,7 +429,7 @@
     {
       "path": "src/utils/viewerPreferences.js",
       "score": 98,
-      "lines": 488,
+      "lines": 494,
       "incomingLocalImports": 5,
       "doclets": 34,
       "summary": "Lightweight persisted viewer preferences.",
@@ -1315,13 +1315,13 @@
     {
       "name": "src/integrations",
       "fileCount": 8,
-      "lineCount": 2272,
+      "lineCount": 2276,
       "docletCount": 59,
       "importantFiles": [
         {
           "path": "src/integrations/ompThemeBridge.js",
           "score": 60,
-          "lines": 199,
+          "lines": 203,
           "incomingLocalImports": 1,
           "doclets": 7,
           "summary": "Opt-in cross-origin theme bridge for the shared OMP theme preference.",
@@ -1472,7 +1472,7 @@
     {
       "name": "src/utils",
       "fileCount": 39,
-      "lineCount": 15829,
+      "lineCount": 15835,
       "docletCount": 636,
       "importantFiles": [
         {
@@ -1496,7 +1496,7 @@
         {
           "path": "src/utils/viewerPreferences.js",
           "score": 98,
-          "lines": 488,
+          "lines": 494,
           "incomingLocalImports": 5,
           "doclets": 34,
           "summary": "Lightweight persisted viewer preferences.",
@@ -28528,7 +28528,7 @@
     },
     {
       "path": "src/integrations/ompThemeBridge.js",
-      "lines": 199,
+      "lines": 203,
       "extension": ".js",
       "jsdocBlockCount": 8,
       "sourceSummary": "Opt-in cross-origin theme bridge for the shared OMP theme preference.",
@@ -28561,22 +28561,22 @@
         {
           "name": "isThemeBridgeOriginAllowed",
           "kind": "function",
-          "line": 62
+          "line": 66
         },
         {
           "name": "isRevisionNewer",
           "kind": "function",
-          "line": 82
+          "line": 86
         },
         {
           "name": "startOmpThemeBridge",
           "kind": "function",
-          "line": 98
+          "line": 102
         },
         {
           "name": "announceThemeToAllowedOrigins",
           "kind": "function",
-          "line": 177
+          "line": 181
         }
       ],
       "declarations": [
@@ -28588,37 +28588,37 @@
         {
           "name": "isThemeBridgeOriginAllowed",
           "kind": "function",
-          "line": 62
+          "line": 66
         },
         {
           "name": "isRevisionNewer",
           "kind": "function",
-          "line": 82
+          "line": 86
         },
         {
           "name": "startOmpThemeBridge",
           "kind": "function",
-          "line": 98
+          "line": 102
         },
         {
           "name": "onMessage",
           "kind": "function",
-          "line": 107
+          "line": 111
         },
         {
           "name": "clock",
           "kind": "object",
-          "line": 124
+          "line": 128
         },
         {
           "name": "announceThemeToAllowedOrigins",
           "kind": "function",
-          "line": 177
+          "line": 181
         },
         {
           "name": "message",
           "kind": "object",
-          "line": 186
+          "line": 190
         }
       ],
       "parseError": null,
@@ -28672,7 +28672,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 62,
+          "line": 66,
           "description": "Check an event origin against the configured allow-list (exact match only).",
           "params": [
             {
@@ -28703,7 +28703,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 82,
+          "line": 86,
           "description": "Order two revisions by their base-36 creation time, as OMP does.",
           "params": [
             {
@@ -28734,7 +28734,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 98,
+          "line": 102,
           "description": "Start listening for theme changes from allowed origins.",
           "params": [
             {
@@ -28777,7 +28777,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 107,
+          "line": 111,
           "description": "",
           "params": [
             {
@@ -28797,7 +28797,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/integrations/ompThemeBridge.js",
-          "line": 177,
+          "line": 181,
           "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
           "params": [
             {
@@ -53960,7 +53960,7 @@
     },
     {
       "path": "src/utils/viewerPreferences.js",
-      "lines": 488,
+      "lines": 494,
       "extension": ".js",
       "jsdocBlockCount": 40,
       "sourceSummary": "Lightweight persisted viewer preferences.",
@@ -54021,67 +54021,67 @@
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 342
+          "line": 344
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 349
+          "line": 355
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 360
+          "line": 366
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 367
+          "line": 373
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 376
+          "line": 382
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 384
+          "line": 390
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 392
+          "line": 398
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 401
+          "line": 407
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 414
+          "line": 420
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 427
+          "line": 433
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 442
+          "line": 448
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 455
+          "line": 461
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 482
+          "line": 488
         }
       ],
       "declarations": [
@@ -54193,97 +54193,102 @@
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 342
+          "line": 344
+        },
+        {
+          "name": "next",
+          "kind": "object",
+          "line": 347
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 349
+          "line": 355
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 360
+          "line": 366
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 367
+          "line": 373
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 368
+          "line": 374
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 376
+          "line": 382
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 384
+          "line": 390
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 392
+          "line": 398
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 393
+          "line": 399
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 401
+          "line": 407
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 414
+          "line": 420
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 427
+          "line": 433
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 428
+          "line": 434
         },
         {
           "name": "limits",
           "kind": "object",
-          "line": 431
+          "line": 437
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 442
+          "line": 448
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 455
+          "line": 461
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 461
+          "line": 467
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 482
+          "line": 488
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 483
+          "line": 489
         }
       ],
       "parseError": null,
@@ -54751,8 +54756,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 342,
-          "description": "",
+          "line": 344,
+          "description": "Persist a language choice, or clear it when the normalized value is empty.",
           "params": [
             {
               "name": "language",
@@ -54776,7 +54781,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 349,
+          "line": 355,
           "description": "",
           "params": [],
           "returns": [
@@ -54794,7 +54799,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 360,
+          "line": 366,
           "description": "",
           "params": [
             {
@@ -54819,7 +54824,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 367,
+          "line": 373,
           "description": "",
           "params": [],
           "returns": [
@@ -54837,7 +54842,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 376,
+          "line": 382,
           "description": "",
           "params": [],
           "returns": [
@@ -54855,7 +54860,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 384,
+          "line": 390,
           "description": "",
           "params": [
             {
@@ -54880,7 +54885,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 392,
+          "line": 398,
           "description": "",
           "params": [],
           "returns": [
@@ -54898,7 +54903,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 401,
+          "line": 407,
           "description": "",
           "params": [],
           "returns": [
@@ -54916,7 +54921,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 414,
+          "line": 420,
           "description": "",
           "params": [
             {
@@ -54941,7 +54946,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 427,
+          "line": 433,
           "description": "",
           "params": [],
           "returns": [
@@ -54959,7 +54964,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 442,
+          "line": 448,
           "description": "",
           "params": [],
           "returns": [
@@ -54977,7 +54982,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 455,
+          "line": 461,
           "description": "",
           "params": [
             {
@@ -55002,7 +55007,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 482,
+          "line": 488,
           "description": "",
           "params": [],
           "returns": [
@@ -71825,7 +71830,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 177,
+      "line": 181,
       "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
       "params": [
         {
@@ -71868,7 +71873,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 82,
+      "line": 86,
       "description": "Order two revisions by their base-36 creation time, as OMP does.",
       "params": [
         {
@@ -71899,7 +71904,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 62,
+      "line": 66,
       "description": "Check an event origin against the configured allow-list (exact match only).",
       "params": [
         {
@@ -71930,7 +71935,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 107,
+      "line": 111,
       "description": "",
       "params": [
         {
@@ -71988,7 +71993,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/integrations/ompThemeBridge.js",
-      "line": 98,
+      "line": 102,
       "description": "Start listening for theme changes from allowed origins.",
       "params": [
         {
@@ -90019,7 +90024,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 482,
+      "line": 488,
       "description": "",
       "params": [],
       "returns": [
@@ -90037,7 +90042,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 427,
+      "line": 433,
       "description": "",
       "params": [],
       "returns": [
@@ -90055,7 +90060,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 392,
+      "line": 398,
       "description": "",
       "params": [],
       "returns": [
@@ -90073,7 +90078,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 367,
+      "line": 373,
       "description": "",
       "params": [],
       "returns": [
@@ -90122,7 +90127,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 442,
+      "line": 448,
       "description": "",
       "params": [],
       "returns": [
@@ -90140,7 +90145,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 401,
+      "line": 407,
       "description": "",
       "params": [],
       "returns": [
@@ -90158,7 +90163,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 376,
+      "line": 382,
       "description": "",
       "params": [],
       "returns": [
@@ -90194,7 +90199,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 349,
+      "line": 355,
       "description": "",
       "params": [],
       "returns": [
@@ -90477,7 +90482,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 455,
+      "line": 461,
       "description": "",
       "params": [
         {
@@ -90502,7 +90507,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 414,
+      "line": 420,
       "description": "",
       "params": [
         {
@@ -90527,7 +90532,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 384,
+      "line": 390,
       "description": "",
       "params": [
         {
@@ -90552,8 +90557,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 342,
-      "description": "",
+      "line": 344,
+      "description": "Persist a language choice, or clear it when the normalized value is empty.",
       "params": [
         {
           "name": "language",
@@ -90577,7 +90582,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 360,
+      "line": 366,
       "description": "",
       "params": [
         {

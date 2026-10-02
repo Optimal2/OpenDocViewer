@@ -79,6 +79,19 @@ describe('ompThemeBridge', () => {
       expect(parseThemeBridgeMessage({ kind: OMP_THEME_BRIDGE_KIND, version: 1, mode: 'sepia', revision: 'r1' })).toBeNull();
       expect(parseThemeBridgeMessage({ kind: OMP_THEME_BRIDGE_KIND, version: 1, mode: 'dark', revision: '' })).toBeNull();
     });
+
+    it.each(['0', 'r2', 'R2', 'r2-random', 'r2-different-suffix'])(
+      'accepts a base-36 timestamp with an optional suffix: %s', (revision) => {
+        expect(parseThemeBridgeMessage(makeMessage('dark', revision)))
+          .toEqual({ mode: 'dark', revision });
+      },
+    );
+
+    it.each([' ', '!', '-r2', 'r2!', 'r2.5', 'r2-', 'r2--suffix', 'r2-!', ' r2', 'r2\n', 'z'.repeat(200)])(
+      'rejects malformed or overflowing revisions: %s', (revision) => {
+        expect(parseThemeBridgeMessage(makeMessage('dark', revision))).toBeNull();
+      },
+    );
   });
 
   describe('isThemeBridgeOriginAllowed', () => {
@@ -91,6 +104,29 @@ describe('ompThemeBridge', () => {
   });
 
   describe('startOmpThemeBridge', () => {
+    it.each([null, 'r1'])('ignores invalid revisions before accepting a valid change (current: %s)', (initial) => {
+      let current = initial;
+      const seen = [];
+      const stop = startOmpThemeBridge({
+        allowedOrigins: ['https://app.example'],
+        getCurrentRevision: () => current,
+        onRemotePreference: (value) => { current = value.revision; seen.push(value); },
+      });
+      const emit = (revision) => harness.emitMessage({
+        origin: 'https://app.example', source: harness.stub.parent,
+        data: makeMessage('dark', revision),
+      });
+      emit('!');
+      emit('r3!');
+      emit('z'.repeat(200));
+      expect(seen).toEqual([]);
+      expect(current).toBe(initial);
+      emit('r2-valid');
+      expect(seen).toEqual([{ mode: 'dark', revision: 'r2-valid' }]);
+      expect(harness.posted).toEqual([]);
+      stop();
+    });
+
     it('does not listen or announce in a top-level window, even with allowed origins', () => {
       harness.stub.parent = harness.stub;
       const listen = vi.spyOn(harness.stub, 'addEventListener');

@@ -610,13 +610,13 @@
 | <code>PortableMetadataRecord</code> | typedef | <code>src/integrations/normalizePortableBundle.js:38</code> | A normalized raw metadata record attached to a document. |
 | <code>PortableSession</code> | typedef | <code>src/integrations/normalizePortableBundle.js:20</code> | Session info stored on a bundle. |
 | <code>spreadUnknown</code> | function | <code>src/integrations/normalizePortableBundle.js:240</code> | Preserve unknown own enumerable properties from host input while excluding keys that were already normalized explicitly. |
-| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:177</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
-| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:82</code> | Order two revisions by their base-36 creation time, as OMP does. |
-| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:62</code> | Check an event origin against the configured allow-list \(exact match only\). |
-| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:107</code> |  |
+| <code>announceThemeToAllowedOrigins</code> | function | <code>src/integrations/ompThemeBridge.js:181</code> | Announce a local \(user-initiated\) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin. |
+| <code>isRevisionNewer</code> | function | <code>src/integrations/ompThemeBridge.js:86</code> | Order two revisions by their base-36 creation time, as OMP does. |
+| <code>isThemeBridgeOriginAllowed</code> | function | <code>src/integrations/ompThemeBridge.js:66</code> | Check an event origin against the configured allow-list \(exact match only\). |
+| <code>startOmpThemeBridge~onMessage</code> | function | <code>src/integrations/ompThemeBridge.js:111</code> |  |
 | <code>parseThemeBridgeMessage</code> | function | <code>src/integrations/ompThemeBridge.js:41</code> | Validate an inbound postMessage payload. |
 | <code>RemoteThemePreference</code> | typedef | <code>src/integrations/ompThemeBridge.js:27</code> | Remote theme preference received over the bridge. |
-| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:98</code> | Start listening for theme changes from allowed origins. |
+| <code>startOmpThemeBridge</code> | function | <code>src/integrations/ompThemeBridge.js:102</code> | Start listening for theme changes from allowed origins. |
 | <code>b64DecodeUnicode</code> | function | <code>src/integrations/parentBridge.js:88</code> | Decode a base64-encoded Unicode string into text \(handles UTF-8\). |
 | <code>getSameOriginOpener</code> | function | <code>src/integrations/parentBridge.js:52</code> | Try to obtain a same-origin opener window reference. |
 | <code>getSameOriginParent</code> | function | <code>src/integrations/parentBridge.js:30</code> | Try to obtain a same-origin parent window reference. |
@@ -1331,17 +1331,17 @@
 | <code>resolveImportMetaEnvValue</code> | function | <code>src/utils/supportDiagnostics.js:39</code> |  |
 | <code>saveLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:275</code> |  |
 | <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
-| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:482</code> |  |
-| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:427</code> |  |
-| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:392</code> |  |
-| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:367</code> |  |
+| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:488</code> |  |
+| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:433</code> |  |
+| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:398</code> |  |
+| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:373</code> |  |
 | <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:324</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
 | <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:17</code> |  |
-| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:442</code> |  |
-| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:401</code> |  |
-| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:376</code> |  |
+| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:448</code> |  |
+| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:407</code> |  |
+| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:382</code> |  |
 | <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:333</code> |  |
-| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:349</code> |  |
+| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:355</code> |  |
 | <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:283</code> |  |
 | <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:254</code> |  |
 | <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:212</code> |  |
@@ -1354,11 +1354,11 @@
 | <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:159</code> |  |
 | <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:176</code> |  |
 | <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:244</code> | Persist an already-normalized full preference object. |
-| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:455</code> |  |
-| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:414</code> |  |
-| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:384</code> |  |
-| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:342</code> |  |
-| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:360</code> |  |
+| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:461</code> |  |
+| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:420</code> |  |
+| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:390</code> |  |
+| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:344</code> | Persist a language choice, or clear it when the normalized value is empty. |
+| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:366</code> |  |
 | <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:300</code> | Persist the user&#39;s theme mode preference. |
 | <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:273</code> |  |
 | <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:222</code> |  |

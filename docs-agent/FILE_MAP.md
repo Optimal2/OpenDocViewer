@@ -71,7 +71,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/index.jsx</code> | 64 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |
 | <code>src/integrations/normalizePortableBundle.js</code> | 833 | 1 | 9 | high | Normalizes multiple host payload shapes into the project&#39;s neutral portable bundle shape. |
-| <code>src/integrations/ompThemeBridge.js</code> | 199 | 1 | 7 | high | Opt-in cross-origin theme bridge for the shared OMP theme preference. |
+| <code>src/integrations/ompThemeBridge.js</code> | 203 | 1 | 7 | high | Opt-in cross-origin theme bridge for the shared OMP theme preference. |
 | <code>src/integrations/parentBridge.js</code> | 182 | 1 | 9 | high | Same-origin parent-window bootstrap adapter. |
 | <code>src/integrations/sessionToken.js</code> | 142 | 1 | 6 | high | OpenDocViewer — Session Token Reader \(Browser-only\) Decode an optional Base64/URL-safe Base64 JSON payload provided via the query string: ?sessiondata=&lt;base64&gt; This enables hosts to pass a compact, self-contained “portab |
 | <code>src/integrations/sessionUrl.js</code> | 157 | 1 | 3 | high | Fetch a host-prepared Portable Document Bundle from a short URL query value. |
@@ -119,7 +119,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/runtimeConfig.js</code> | 556 | 14 | 36 | high | Runtime configuration helpers. |
 | <code>src/utils/sourceTempStore.js</code> | 913 | 1 | 40 | high | OpenDocViewer — Browser-side temporary source storage. |
 | <code>src/utils/supportDiagnostics.js</code> | 375 | 3 | 18 | high | Support diagnostics helpers for opt-in troubleshooting tools. |
-| <code>src/utils/viewerPreferences.js</code> | 488 | 5 | 34 | high | Lightweight persisted viewer preferences. |
+| <code>src/utils/viewerPreferences.js</code> | 494 | 5 | 34 | high | Lightweight persisted viewer preferences. |
 | <code>src/utils/zoomUtils.js</code> | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |
 | <code>src/workers/imageWorker.js</code> | 500 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
 | <code>src/workers/pdfPageWorker.js</code> | 441 | 0 | 1 | high | OpenDocViewer - PDF page image worker. |

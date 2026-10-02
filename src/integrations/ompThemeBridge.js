@@ -44,7 +44,11 @@ export function parseThemeBridgeMessage(data) {
     if (data.kind !== OMP_THEME_BRIDGE_KIND) return null;
     if (data.version !== OMP_THEME_BRIDGE_VERSION) return null;
     if (!SHARED_THEME_MODES.includes(data.mode)) return null;
-    if (typeof data.revision !== 'string' || !data.revision) return null;
+    if (typeof data.revision !== 'string' || data.revision.trim() !== data.revision) return null;
+    if (!/^[a-z0-9]+(?:-[a-z0-9]+)*$/i.test(data.revision)) return null;
+    // The stored-value reader maps invalid/overflowing timestamps to zero for
+    // compatibility; reject them here before they can enter the sender clocks.
+    if (!Number.isFinite(Number.parseInt(data.revision.split('-')[0], 36))) return null;
     return { mode: data.mode, revision: data.revision };
   } catch {
     return null;

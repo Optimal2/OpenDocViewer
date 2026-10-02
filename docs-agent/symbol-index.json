@@ -15573,7 +15573,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 177,
+    "line": 181,
     "description": "Announce a local (user-initiated) theme change to the embedded parent frame, once per allowed origin with that origin as the exact targetOrigin.",
     "params": [
       {
@@ -15616,7 +15616,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 82,
+    "line": 86,
     "description": "Order two revisions by their base-36 creation time, as OMP does.",
     "params": [
       {
@@ -15647,7 +15647,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 62,
+    "line": 66,
     "description": "Check an event origin against the configured allow-list (exact match only).",
     "params": [
       {
@@ -15678,7 +15678,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 107,
+    "line": 111,
     "description": "",
     "params": [
       {
@@ -15736,7 +15736,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/integrations/ompThemeBridge.js",
-    "line": 98,
+    "line": 102,
     "description": "Start listening for theme changes from allowed origins.",
     "params": [
       {
@@ -33767,7 +33767,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 482,
+    "line": 488,
     "description": "",
     "params": [],
     "returns": [
@@ -33785,7 +33785,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 427,
+    "line": 433,
     "description": "",
     "params": [],
     "returns": [
@@ -33803,7 +33803,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 392,
+    "line": 398,
     "description": "",
     "params": [],
     "returns": [
@@ -33821,7 +33821,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 367,
+    "line": 373,
     "description": "",
     "params": [],
     "returns": [
@@ -33870,7 +33870,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 442,
+    "line": 448,
     "description": "",
     "params": [],
     "returns": [
@@ -33888,7 +33888,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 401,
+    "line": 407,
     "description": "",
     "params": [],
     "returns": [
@@ -33906,7 +33906,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 376,
+    "line": 382,
     "description": "",
     "params": [],
     "returns": [
@@ -33942,7 +33942,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 349,
+    "line": 355,
     "description": "",
     "params": [],
     "returns": [
@@ -34225,7 +34225,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 455,
+    "line": 461,
     "description": "",
     "params": [
       {
@@ -34250,7 +34250,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 414,
+    "line": 420,
     "description": "",
     "params": [
       {
@@ -34275,7 +34275,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 384,
+    "line": 390,
     "description": "",
     "params": [
       {
@@ -34300,8 +34300,8 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 342,
-    "description": "",
+    "line": 344,
+    "description": "Persist a language choice, or clear it when the normalized value is empty.",
     "params": [
       {
         "name": "language",
@@ -34325,7 +34325,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/viewerPreferences.js",
-    "line": 360,
+    "line": 366,
     "description": "",
     "params": [
       {
