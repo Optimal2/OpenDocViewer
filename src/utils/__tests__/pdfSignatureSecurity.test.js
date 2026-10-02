@@ -1,6 +1,6 @@
 /** @vitest-environment node */
 import { beforeAll, describe, expect, it } from 'vitest';
-import { PDFDocument } from 'pdf-lib';
+import { PDFDocument, PDFDict, PDFHexString, PDFString, PDFName } from 'pdf-lib';
 import { collectPdfSignatures } from '../pdfSignatures.js';
 import { createSecurityFixtures, swapEncapsulatedDigest, tamper, replaceRange, byteRange } from '../../../scripts/signature-security-fixtures.mjs';
 
@@ -12,6 +12,20 @@ async function first(bytes) {
   return report.signatures[0];
 }
 describe('security regression proofs', () => {
+  it('production minification cannot hide signatures or break PDF type decoding', async () => {
+    const classes = [PDFDict, PDFHexString, PDFString, PDFName];
+    const descriptors = classes.map((type) => Object.getOwnPropertyDescriptor(type, 'name'));
+    try {
+      classes.forEach((type, i) => Object.defineProperty(type, 'name', { value: `minified${i}`, configurable: true }));
+      const sig = await first(f.normal['valid-rsa.pdf']);
+      expect(sig.integrity).toBe('intact');
+      expect(sig.fieldName).toBe('Signature1');
+      expect(sig.subFilter).toBe('adbe.pkcs7.detached');
+      expect(sig.reason).toBe('Approved fixture document');
+    } finally {
+      classes.forEach((type, i) => Object.defineProperty(type, 'name', descriptors[i]));
+    }
+  });
   it.each([['doc-timestamp-rfc3161.pdf', 'SHA-256'], ['pkcs7-sha1.pdf', 'SHA-1']])('F1 eContent swap: %s', async (name, hash) => {
     expect((await first(await swapEncapsulatedDigest(f.normal[name], hash))).integrity).toBe('digest-mismatch');
   });

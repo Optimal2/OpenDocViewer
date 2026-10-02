@@ -105,7 +105,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfResolution.js</code> | 115 | 6 | 6 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 173 | 2 | 4 | high | PDF signature inspection - the single entry point for application code. |
-| <code>src/utils/pdfSignatures.js</code> | 1151 | 2 | 9 | high | PDF signature collection - level 1 integrity inspection. |
+| <code>src/utils/pdfSignatures.js</code> | 1130 | 2 | 9 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfSignatureStatus.js</code> | 86 | 3 | 7 | high | Level-1 signature UI status helpers. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |

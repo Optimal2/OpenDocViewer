@@ -184,19 +184,9 @@ function decodeTextBytes(bytes) {
  * @returns {string|null}
  */
 function pdfText(obj) {
-  if (obj === null || obj === undefined) return null;
-  const name = obj.constructor?.name;
-  if (name === 'PDFHexString') return decodeTextBytes(obj.asBytes());
-  if (name === 'PDFString') {
-    const raw = obj.value ?? obj.toString?.() ?? '';
-    const str = typeof raw === 'string' ? raw : String(raw);
-    return str.charCodeAt(0) === 0xfeff ? str.slice(1) : str;
-  }
-  if (name === 'PDFName') {
-    const str = typeof obj.value === 'string' ? obj.value : String(obj);
-    return str.replace(/^\//, '');
-  }
-  return null;
+  // PDFString, PDFHexString and PDFName expose this API in production too.
+  // Constructor names are minified and must never control discovery/decoding.
+  return typeof obj?.decodeText === 'function' ? obj.decodeText() : null;
 }
 
 /**
@@ -235,8 +225,8 @@ function isoOrNull(date) {
 // Signature discovery with pdf-lib (raw object access)
 // ---------------------------------------------------------------------------
 
-function isDict(obj) {
-  return obj?.constructor?.name === 'PDFDict';
+function isDict(obj, pdfLib) {
+  return obj instanceof pdfLib.PDFDict;
 }
 
 function dictHas(obj, pdfLib, key) {
@@ -270,18 +260,7 @@ function readByteRange(brArray) {
 }
 
 function contentsToBytes(contents, pdfLib) {
-  if (!contents) return null;
-  const name = contents.constructor?.name;
-  if (name === 'PDFHexString') return contents.asBytes();
-  if (name === 'PDFString') {
-    const raw = contents.value ?? '';
-    const out = new Uint8Array(raw.length);
-    for (let i = 0; i < raw.length; i += 1) out[i] = raw.charCodeAt(i) & 0xff;
-    return out;
-  }
-  if (pdfLib.PDFRawStream && contents instanceof pdfLib.PDFRawStream) {
-    return contents.contents();
-  }
+  if (contents instanceof pdfLib.PDFHexString || contents instanceof pdfLib.PDFString) return contents.asBytes();
   return null;
 }
 
@@ -313,17 +292,17 @@ function discoverSignatures(pdfDoc, pdfLib) {
 
   // Fields (/FT /Sig) referencing their /V (or /DV) signature dictionary.
   for (const { obj } of indirect) {
-    if (!isDict(obj)) continue;
+    if (!isDict(obj, pdfLib)) continue;
     const ft = pdfText(obj.lookup(PDFName.of('FT')));
     if (ft !== 'Sig') continue;
     const v = obj.lookup(PDFName.of('V')) ?? obj.lookup(PDFName.of('DV'));
-    if (isDict(v) && (dictHas(v, pdfLib, 'ByteRange') || pdfText(v.lookup(PDFName.of('Type'))) === 'Sig' || dictHas(v, pdfLib, 'SubFilter'))) {
+    if (isDict(v, pdfLib) && (dictHas(v, pdfLib, 'ByteRange') || pdfText(v.lookup(PDFName.of('Type'))) === 'Sig' || dictHas(v, pdfLib, 'SubFilter'))) {
       found.set(objectKey(v), { sigDict: v, fieldDict: obj });
     }
   }
   // Bare signature dictionaries (not referenced by any field).
   for (const { obj } of indirect) {
-    if (!isDict(obj)) continue;
+    if (!isDict(obj, pdfLib)) continue;
     const type = pdfText(obj.lookup(PDFName.of('Type')));
     if (type === 'Sig' || type === 'DocTimeStamp' ||
       ((dictHas(obj, pdfLib, 'ByteRange') || dictHas(obj, pdfLib, 'SubFilter')) && dictHas(obj, pdfLib, 'Contents'))) {
@@ -358,7 +337,7 @@ function qualifiedFieldName(fieldDict, pdfLib) {
   const parts = [];
   let current = fieldDict;
   let guard = 0;
-  while (isDict(current) && guard < 12) {
+  while (isDict(current, pdfLib) && guard < 12) {
     const t = pdfText(current.lookup(PDFName.of('T')));
     if (t) parts.unshift(t);
     const parentRef = current.get(PDFName.of('Parent'));

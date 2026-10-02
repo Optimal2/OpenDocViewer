@@ -16,7 +16,8 @@ const mutations = [
   ['F5', parser, 'const sid = signerInfo.sid;', 'return certs[0];\n  const sid = signerInfo.sid;', tests, 'F5 no certificate fallback: wrongIssuer'],
   ['F6', inspector, 'return unreadableSignatureReport(String(err?.message ?? err));', 'return collectPdfSignatures(bytes);', workerTests, 'F6 timeout'],
   ['F7', parser, 'let pdfLib;', "if (!new TextDecoder().decode(bytes).includes('/ByteRange')) return empty;\n  let pdfLib;", tests, 'F7'],
-  ['F8', inspector, "if (workerHandle) markBroken(workerHandle, 'signature worker disposed');", 'workerHandle?.worker?.terminate();', workerTests, 'F8']
+  ['F8', inspector, "if (workerHandle) markBroken(workerHandle, 'signature worker disposed');", 'workerHandle?.worker?.terminate();', workerTests, 'F8'],
+  ['Minification', parser, 'return obj instanceof pdfLib.PDFDict;', "return obj?.constructor?.name === 'PDFDict';", tests, 'production minification']
 ];
 
 function run(file, name) {
@@ -49,7 +50,7 @@ try {
       run(testFile, name);
     } finally { writeFileSync(file, original); }
   }
-  console.log('All eight mutation groups were killed; original sources restored.');
+  console.log(`All ${mutations.length} mutation groups were killed; original sources restored.`);
 } finally {
   for (const [file, content] of originals) writeFileSync(file, content);
 }

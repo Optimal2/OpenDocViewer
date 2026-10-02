@@ -268,11 +268,18 @@ timeouts/errors, bounded fallback and disposal. No binary fixture is committed.
 
 Run `npm test -- pdfSignature` for both positive and hostile inputs. In an isolated
 worktree, `node scripts/test-signature-security-mutations.mjs --baseline` temporarily
-loads the original vulnerable parser/inspector and then breaks each of the eight fixes
+loads the original vulnerable parser/inspector and then breaks each of the eight review fixes
 individually. Every selected regression must fail with an assertion (test exit 1),
 and the runner restores the original source in `finally`. Do not run it concurrently
 with editing or validation of these source files. The runner exits 0 only when all
 mutation groups are detected. Run the unmodified suite again afterwards.
+
+The mutation runner additionally checks that renamed/minified PDF classes cannot hide
+signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`
+to inspect six generated signed PDFs through the actual minified worker artifact.
+The harness uses a Node worker with a browser message-protocol adapter and verifies
+both successful inspection and rejection outcomes. PDF types are identified by stable
+APIs and `instanceof`, never `constructor.name`.
 
 ## Third-party components
 
