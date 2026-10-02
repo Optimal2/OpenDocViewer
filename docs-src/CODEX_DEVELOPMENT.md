@@ -24,6 +24,7 @@ Use these files as the main map:
 - `docs-src/log-servers.md` - optional logging endpoint contracts and security assumptions.
 - `docs-src/omp-component-manifest.md` - OMP artifact component manifest and version-bump helper usage.
 - `docs-src/printing.md` - print pipeline design and module boundaries.
+- `docs-src/pdf-signatures.md` - level-1 PDF signature inspection: formats, integrity rules, data contract, worker offload, fixtures.
 
 ## Language and Documentation Policy
 

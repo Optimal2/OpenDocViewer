@@ -29,6 +29,7 @@
       "release:major": "npm version major -m \"chore(release): %s\""
     },
     "dependencies": {
+      "asn1js": "^3.0.10",
       "axios": "^1.20.0",
       "cors": "^2.8.6",
       "dompurify": "^3.4.16",
@@ -45,6 +46,7 @@
       "morgan": "^1.12.1",
       "pdf-lib": "^1.17.1",
       "pdfjs-dist": "^6.3.289",
+      "pkijs": "^3.4.1",
       "prop-types": "^15.8.1",
       "react": "^19.3.0",
       "react-dom": "^19.3.0",
@@ -56,6 +58,7 @@
       "@babel/plugin-transform-runtime": "^8.0.6",
       "@babel/runtime": "^8.0.5",
       "@eslint/js": "^10.0.1",
+      "@peculiar/x509": "^1.14.3",
       "@rolldown/plugin-babel": "^0.2.4",
       "@vitejs/plugin-react": "^6.1.1",
       "concurrently": "^10.0.5",
@@ -82,15 +85,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 120,
-    "sourceLineCount": 51237,
-    "docletCount": 1384,
-    "documentedFileCount": 120,
+    "fileCount": 123,
+    "sourceLineCount": 52479,
+    "docletCount": 1397,
+    "documentedFileCount": 123,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
-    "packageDependencyCount": 21,
-    "devDependencyCount": 19,
-    "estimatedSourceTokens": 3699
+    "packageDependencyCount": 23,
+    "devDependencyCount": 20,
+    "estimatedSourceTokens": 3767
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -334,6 +337,23 @@
       ]
     },
     {
+      "packageName": "pdf-lib",
+      "importCount": 2,
+      "dynamicImportCount": 2,
+      "files": [
+        "src/utils/pdfSignatures.js",
+        "src/utils/pdfWorkerDispatcher.js"
+      ]
+    },
+    {
+      "packageName": "asn1js",
+      "importCount": 1,
+      "dynamicImportCount": 1,
+      "files": [
+        "src/utils/pdfSignatures.js"
+      ]
+    },
+    {
       "packageName": "axios",
       "importCount": 1,
       "dynamicImportCount": 0,
@@ -382,11 +402,11 @@
       ]
     },
     {
-      "packageName": "pdf-lib",
+      "packageName": "pkijs",
       "importCount": 1,
       "dynamicImportCount": 1,
       "files": [
-        "src/utils/pdfWorkerDispatcher.js"
+        "src/utils/pdfSignatures.js"
       ]
     },
     {
@@ -732,6 +752,12 @@
             "score": 6,
             "lines": 441,
             "summary": "OpenDocViewer - PDF page image worker."
+          },
+          {
+            "path": "src/workers/pdfSignatureWorker.js",
+            "score": 3,
+            "lines": 40,
+            "summary": "Web worker entry for PDF signature inspection."
           }
         ]
       }
@@ -1471,9 +1497,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 39,
-      "lineCount": 15835,
-      "docletCount": 636,
+      "fileCount": 41,
+      "lineCount": 17037,
+      "docletCount": 648,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1551,9 +1577,9 @@
     },
     {
       "name": "src/workers",
-      "fileCount": 3,
-      "lineCount": 1569,
-      "docletCount": 3,
+      "fileCount": 4,
+      "lineCount": 1609,
+      "docletCount": 4,
       "importantFiles": [
         {
           "path": "src/workers/pdfWorker.js",
@@ -1580,6 +1606,15 @@
           "incomingLocalImports": 0,
           "doclets": 1,
           "summary": "OpenDocViewer - PDF page image worker.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/workers/pdfSignatureWorker.js",
+          "score": 3,
+          "lines": 40,
+          "incomingLocalImports": 0,
+          "doclets": 1,
+          "summary": "Web worker entry for PDF signature inspection.",
           "summaryConfidence": "high"
         }
       ]
@@ -41025,6 +41060,685 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/utils/pdfSignatureInspector.js",
+      "lines": 185,
+      "extension": ".js",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "PDF signature inspection - the single entry point for application code.",
+      "imports": [
+        {
+          "source": "../workers/pdfSignatureWorker.js?worker",
+          "specifiers": [
+            "PdfSignatureWorkerConstructor"
+          ],
+          "line": 20,
+          "kind": "static"
+        },
+        {
+          "source": "./pdfSignatures.js",
+          "specifiers": [
+            "collectPdfSignatures"
+          ],
+          "line": 21,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "getDocumentSignatures",
+          "kind": "function",
+          "line": 144
+        },
+        {
+          "name": "disposePdfSignatureWorker",
+          "kind": "function",
+          "line": 173
+        },
+        {
+          "name": "getDocumentSignatures",
+          "kind": "default",
+          "line": 184
+        }
+      ],
+      "declarations": [
+        {
+          "name": "EMPTY_REPORT",
+          "kind": "object",
+          "line": 23
+        },
+        {
+          "name": "canUseWorker",
+          "kind": "function",
+          "line": 34
+        },
+        {
+          "name": "ensureWorker",
+          "kind": "function",
+          "line": 38
+        },
+        {
+          "name": "handle",
+          "kind": "object",
+          "line": 43
+        },
+        {
+          "name": "markBroken",
+          "kind": "function",
+          "line": 57
+        },
+        {
+          "name": "runInWorker",
+          "kind": "function",
+          "line": 84
+        },
+        {
+          "name": "toBytes",
+          "kind": "function",
+          "line": 122
+        },
+        {
+          "name": "getDocumentSignatures",
+          "kind": "function",
+          "line": 144
+        },
+        {
+          "name": "disposePdfSignatureWorker",
+          "kind": "function",
+          "line": 173
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:utils/pdfSignatureInspector",
+          "name": "utils/pdfSignatureInspector",
+          "longname": "module:utils/pdfSignatureInspector",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/pdfSignatureInspector.js",
+          "line": 1,
+          "description": "PDF signature inspection - the single entry point for application code.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureInspector~workerHandle",
+          "name": "workerHandle",
+          "longname": "module:utils/pdfSignatureInspector~workerHandle",
+          "kind": "member",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureInspector.js",
+          "line": 31,
+          "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureInspector.getDocumentSignatures",
+          "name": "getDocumentSignatures",
+          "longname": "module:utils/pdfSignatureInspector.getDocumentSignatures",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureInspector.js",
+          "line": 144,
+          "description": "Inspect the signatures of one document.",
+          "params": [
+            {
+              "name": "source",
+              "type": "Uint8Array|ArrayBuffer|Blob",
+              "optional": false,
+              "description": "Complete PDF document bytes (or a Blob of them, e.g. the loader's document blob)."
+            },
+            {
+              "name": "options",
+              "type": "Object",
+              "optional": true,
+              "description": "Worker options."
+            },
+            {
+              "name": "options.timeoutMs",
+              "type": "number",
+              "optional": true,
+              "description": "Worker timeout in ms (default 30000)."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise",
+              "description": "Resolves - never rejects - with a PdfSignatureReport ( { signatures: [] } when the document has none or cannot be inspected)."
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
+          "name": "disposePdfSignatureWorker",
+          "longname": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureInspector.js",
+          "line": 173,
+          "description": "Terminate the signature worker (e.g.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [
+        {
+          "source": "../workers/pdfSignatureWorker.js?worker",
+          "specifiers": [
+            "PdfSignatureWorkerConstructor"
+          ],
+          "line": 20,
+          "kind": "static",
+          "resolved": null
+        },
+        {
+          "source": "./pdfSignatures.js",
+          "specifiers": [
+            "collectPdfSignatures"
+          ],
+          "line": 21,
+          "kind": "static",
+          "resolved": "src/utils/pdfSignatures.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 28,
+      "summary": "PDF signature inspection - the single entry point for application code.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
+      "path": "src/utils/pdfSignatures.js",
+      "lines": 1017,
+      "extension": ".js",
+      "jsdocBlockCount": 14,
+      "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
+      "imports": [
+        {
+          "source": "pkijs",
+          "specifiers": [],
+          "line": 116,
+          "kind": "dynamic"
+        },
+        {
+          "source": "asn1js",
+          "specifiers": [],
+          "line": 121,
+          "kind": "dynamic"
+        },
+        {
+          "source": "pdf-lib",
+          "specifiers": [],
+          "line": 966,
+          "kind": "dynamic"
+        }
+      ],
+      "exports": [
+        {
+          "name": "SUPPORTED_SUBFILTERS",
+          "kind": "variable",
+          "line": 62
+        },
+        {
+          "name": "parsePdfDateString",
+          "kind": "function",
+          "line": 225
+        },
+        {
+          "name": "collectPdfSignatures",
+          "kind": "function",
+          "line": 947
+        }
+      ],
+      "declarations": [
+        {
+          "name": "loadPkijs",
+          "kind": "function",
+          "line": 115
+        },
+        {
+          "name": "loadAsn1js",
+          "kind": "function",
+          "line": 120
+        },
+        {
+          "name": "toUint8",
+          "kind": "function",
+          "line": 129
+        },
+        {
+          "name": "indexOfAscii",
+          "kind": "function",
+          "line": 138
+        },
+        {
+          "name": "hasAscii",
+          "kind": "function",
+          "line": 150
+        },
+        {
+          "name": "bytesToHex",
+          "kind": "function",
+          "line": 154
+        },
+        {
+          "name": "colonHex",
+          "kind": "function",
+          "line": 160
+        },
+        {
+          "name": "normalizeSerialHex",
+          "kind": "function",
+          "line": 167
+        },
+        {
+          "name": "subtleDigest",
+          "kind": "function",
+          "line": 171
+        },
+        {
+          "name": "decodeTextBytes",
+          "kind": "function",
+          "line": 182
+        },
+        {
+          "name": "pdfText",
+          "kind": "function",
+          "line": 202
+        },
+        {
+          "name": "parsePdfDateString",
+          "kind": "function",
+          "line": 225
+        },
+        {
+          "name": "isoOrNull",
+          "kind": "function",
+          "line": 246
+        },
+        {
+          "name": "isDict",
+          "kind": "function",
+          "line": 254
+        },
+        {
+          "name": "dictHas",
+          "kind": "function",
+          "line": 258
+        },
+        {
+          "name": "signatureDictFields",
+          "kind": "function",
+          "line": 262
+        },
+        {
+          "name": "readByteRange",
+          "kind": "function",
+          "line": 276
+        },
+        {
+          "name": "contentsToBytes",
+          "kind": "function",
+          "line": 288
+        },
+        {
+          "name": "discoverSignatures",
+          "kind": "function",
+          "line": 309
+        },
+        {
+          "name": "objectKey",
+          "kind": "function",
+          "line": 348
+        },
+        {
+          "name": "qualifiedFieldName",
+          "kind": "function",
+          "line": 359
+        },
+        {
+          "name": "dictionaryInfo",
+          "kind": "function",
+          "line": 380
+        },
+        {
+          "name": "info",
+          "kind": "object",
+          "line": 395
+        },
+        {
+          "name": "coveredBytes",
+          "kind": "function",
+          "line": 435
+        },
+        {
+          "name": "extensionCoveredByLaterSignature",
+          "kind": "function",
+          "line": 447
+        },
+        {
+          "name": "findAttribute",
+          "kind": "function",
+          "line": 463
+        },
+        {
+          "name": "attrRawBytes",
+          "kind": "function",
+          "line": 468
+        },
+        {
+          "name": "attrDate",
+          "kind": "function",
+          "line": 476
+        },
+        {
+          "name": "parseAsn1TimeString",
+          "kind": "function",
+          "line": 493
+        },
+        {
+          "name": "rdnValue",
+          "kind": "function",
+          "line": 502
+        },
+        {
+          "name": "dnToString",
+          "kind": "function",
+          "line": 511
+        },
+        {
+          "name": "elementBytesToHex",
+          "kind": "function",
+          "line": 516
+        },
+        {
+          "name": "matchCertificate",
+          "kind": "function",
+          "line": 521
+        },
+        {
+          "name": "asn1HexToBytes",
+          "kind": "function",
+          "line": 534
+        },
+        {
+          "name": "elementOid",
+          "kind": "function",
+          "line": 540
+        },
+        {
+          "name": "decodeOidBytes",
+          "kind": "function",
+          "line": 548
+        },
+        {
+          "name": "curvePointSize",
+          "kind": "function",
+          "line": 567
+        },
+        {
+          "name": "pssParameters",
+          "kind": "function",
+          "line": 583
+        },
+        {
+          "name": "out",
+          "kind": "object",
+          "line": 585
+        },
+        {
+          "name": "verifySignatureEntry",
+          "kind": "function",
+          "line": 608
+        },
+        {
+          "name": "trimSerial",
+          "kind": "function",
+          "line": 814
+        },
+        {
+          "name": "attrRawBytesOfInteger",
+          "kind": "function",
+          "line": 820
+        },
+        {
+          "name": "attrRawBytesOfElement",
+          "kind": "function",
+          "line": 825
+        },
+        {
+          "name": "asn1jsFromBERCached",
+          "kind": "function",
+          "line": 857
+        },
+        {
+          "name": "bufferView",
+          "kind": "function",
+          "line": 867
+        },
+        {
+          "name": "bytesEqual",
+          "kind": "function",
+          "line": 871
+        },
+        {
+          "name": "verifyCmsSignature",
+          "kind": "function",
+          "line": 877
+        },
+        {
+          "name": "curveNameForPointSize",
+          "kind": "function",
+          "line": 907
+        },
+        {
+          "name": "hashedLength",
+          "kind": "function",
+          "line": 913
+        },
+        {
+          "name": "orderSignatures",
+          "kind": "function",
+          "line": 920
+        },
+        {
+          "name": "collectPdfSignatures",
+          "kind": "function",
+          "line": 947
+        },
+        {
+          "name": "empty",
+          "kind": "object",
+          "line": 948
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:utils/pdfSignatures",
+          "name": "utils/pdfSignatures",
+          "longname": "module:utils/pdfSignatures",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/pdfSignatures.js",
+          "line": 1,
+          "description": "PDF signature collection - level 1 integrity inspection.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures~PdfSignatureInfo",
+          "name": "PdfSignatureInfo",
+          "longname": "module:utils/pdfSignatures~PdfSignatureInfo",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 19,
+          "description": "One inspected PDF signature (level-1 integrity view; trust is never evaluated here - see the trust property).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures~PdfSignatureReport",
+          "name": "PdfSignatureReport",
+          "longname": "module:utils/pdfSignatures~PdfSignatureReport",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 54,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+          "name": "SUPPORTED_SUBFILTERS",
+          "longname": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+          "kind": "constant",
+          "scope": "static",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 62,
+          "description": "SubFilters with level-1 handling.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures~pdfText",
+          "name": "pdfText",
+          "longname": "module:utils/pdfSignatures~pdfText",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 202,
+          "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
+          "params": [
+            {
+              "name": "obj",
+              "type": "any",
+              "optional": false,
+              "description": "pdf-lib object (PDFString/PDFHexString/PDFName) or null."
+            }
+          ],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures.parsePdfDateString",
+          "name": "parsePdfDateString",
+          "longname": "module:utils/pdfSignatures.parsePdfDateString",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 225,
+          "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
+          "params": [
+            {
+              "name": "raw",
+              "type": "string|null|undefined",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Date|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures~discoverSignatures",
+          "name": "discoverSignatures",
+          "longname": "module:utils/pdfSignatures~discoverSignatures",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 309,
+          "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatures.collectPdfSignatures",
+          "name": "collectPdfSignatures",
+          "longname": "module:utils/pdfSignatures.collectPdfSignatures",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 947,
+          "description": "Collect signature information from PDF bytes.",
+          "params": [
+            {
+              "name": "pdfBytes",
+              "type": "Uint8Array|ArrayBuffer",
+              "optional": false,
+              "description": "Complete PDF document bytes."
+            }
+          ],
+          "returns": [
+            {
+              "type": "Promise.<PdfSignatureReport>",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [
+        {
+          "source": "pkijs",
+          "specifiers": [],
+          "line": 116,
+          "kind": "dynamic"
+        },
+        {
+          "source": "asn1js",
+          "specifiers": [],
+          "line": 121,
+          "kind": "dynamic"
+        },
+        {
+          "source": "pdf-lib",
+          "specifiers": [],
+          "line": 966,
+          "kind": "dynamic"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 63,
+      "summary": "PDF signature collection - level 1 integrity inspection.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
       "path": "src/utils/pdfWorkerDispatcher.js",
       "lines": 451,
       "extension": ".js",
@@ -56008,6 +56722,71 @@
       "summary": "OpenDocViewer - PDF page image worker.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/workers/pdfSignatureWorker.js",
+      "lines": 40,
+      "extension": ".js",
+      "jsdocBlockCount": 1,
+      "sourceSummary": "Web worker entry for PDF signature inspection.",
+      "imports": [
+        {
+          "source": "../utils/pdfSignatures.js",
+          "specifiers": [
+            "collectPdfSignatures"
+          ],
+          "line": 17,
+          "kind": "static"
+        }
+      ],
+      "exports": [],
+      "declarations": [
+        {
+          "name": "handleRequest",
+          "kind": "function",
+          "line": 21
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [
+          "worker"
+        ],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:workers/pdfSignatureWorker",
+          "name": "workers/pdfSignatureWorker",
+          "longname": "module:workers/pdfSignatureWorker",
+          "kind": "module",
+          "scope": null,
+          "file": "src/workers/pdfSignatureWorker.js",
+          "line": 1,
+          "description": "Web worker entry for PDF signature inspection.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/workers",
+      "localImports": [
+        {
+          "source": "../utils/pdfSignatures.js",
+          "specifiers": [
+            "collectPdfSignatures"
+          ],
+          "line": 17,
+          "kind": "static",
+          "resolved": "src/utils/pdfSignatures.js"
+        }
+      ],
+      "packageImports": [],
+      "incomingLocalImports": 0,
+      "importanceScore": 3,
+      "summary": "Web worker entry for PDF signature inspection.",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
     },
     {
       "path": "src/workers/pdfWorker.js",
@@ -80466,6 +81245,222 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
+      "name": "disposePdfSignatureWorker",
+      "longname": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureInspector.js",
+      "line": 173,
+      "description": "Terminate the signature worker (e.g.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureInspector.getDocumentSignatures",
+      "name": "getDocumentSignatures",
+      "longname": "module:utils/pdfSignatureInspector.getDocumentSignatures",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureInspector.js",
+      "line": 144,
+      "description": "Inspect the signatures of one document.",
+      "params": [
+        {
+          "name": "source",
+          "type": "Uint8Array|ArrayBuffer|Blob",
+          "optional": false,
+          "description": "Complete PDF document bytes (or a Blob of them, e.g. the loader's document blob)."
+        },
+        {
+          "name": "options",
+          "type": "Object",
+          "optional": true,
+          "description": "Worker options."
+        },
+        {
+          "name": "options.timeoutMs",
+          "type": "number",
+          "optional": true,
+          "description": "Worker timeout in ms (default 30000)."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise",
+          "description": "Resolves - never rejects - with a PdfSignatureReport ( { signatures: [] } when the document has none or cannot be inspected)."
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureInspector",
+      "name": "utils/pdfSignatureInspector",
+      "longname": "module:utils/pdfSignatureInspector",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/pdfSignatureInspector.js",
+      "line": 1,
+      "description": "PDF signature inspection - the single entry point for application code.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureInspector~workerHandle",
+      "name": "workerHandle",
+      "longname": "module:utils/pdfSignatureInspector~workerHandle",
+      "kind": "member",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureInspector.js",
+      "line": 31,
+      "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures.collectPdfSignatures",
+      "name": "collectPdfSignatures",
+      "longname": "module:utils/pdfSignatures.collectPdfSignatures",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 947,
+      "description": "Collect signature information from PDF bytes.",
+      "params": [
+        {
+          "name": "pdfBytes",
+          "type": "Uint8Array|ArrayBuffer",
+          "optional": false,
+          "description": "Complete PDF document bytes."
+        }
+      ],
+      "returns": [
+        {
+          "type": "Promise.<PdfSignatureReport>",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures~discoverSignatures",
+      "name": "discoverSignatures",
+      "longname": "module:utils/pdfSignatures~discoverSignatures",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 309,
+      "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures.parsePdfDateString",
+      "name": "parsePdfDateString",
+      "longname": "module:utils/pdfSignatures.parsePdfDateString",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 225,
+      "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
+      "params": [
+        {
+          "name": "raw",
+          "type": "string|null|undefined",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Date|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures~PdfSignatureInfo",
+      "name": "PdfSignatureInfo",
+      "longname": "module:utils/pdfSignatures~PdfSignatureInfo",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 19,
+      "description": "One inspected PDF signature (level-1 integrity view; trust is never evaluated here - see the trust property).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures~PdfSignatureReport",
+      "name": "PdfSignatureReport",
+      "longname": "module:utils/pdfSignatures~PdfSignatureReport",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 54,
+      "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures~pdfText",
+      "name": "pdfText",
+      "longname": "module:utils/pdfSignatures~pdfText",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 202,
+      "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
+      "params": [
+        {
+          "name": "obj",
+          "type": "any",
+          "optional": false,
+          "description": "pdf-lib object (PDFString/PDFHexString/PDFName) or null."
+        }
+      ],
+      "returns": [
+        {
+          "type": "string|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+      "name": "SUPPORTED_SUBFILTERS",
+      "longname": "module:utils/pdfSignatures.SUPPORTED_SUBFILTERS",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 62,
+      "description": "SubFilters with level-1 handling.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures",
+      "name": "utils/pdfSignatures",
+      "longname": "module:utils/pdfSignatures",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/pdfSignatures.js",
+      "line": 1,
+      "description": "PDF signature collection - level 1 integrity inspection.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "batchProgressUnitsFromEvent",
       "name": "batchProgressUnitsFromEvent",
       "longname": "batchProgressUnitsFromEvent",
@@ -91222,6 +92217,19 @@
       "file": "src/workers/pdfPageWorker.js",
       "line": 21,
       "description": "",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:workers/pdfSignatureWorker",
+      "name": "workers/pdfSignatureWorker",
+      "longname": "module:workers/pdfSignatureWorker",
+      "kind": "module",
+      "scope": null,
+      "file": "src/workers/pdfSignatureWorker.js",
+      "line": 1,
+      "description": "Web worker entry for PDF signature inspection.",
       "params": [],
       "returns": [],
       "examples": 0

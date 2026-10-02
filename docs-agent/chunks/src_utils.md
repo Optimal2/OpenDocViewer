@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 39. Line count: 15835. JSDoc symbol count: 636.
+File count: 41. Line count: 17037. JSDoc symbol count: 648.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -343,6 +343,38 @@ Symbols:
 - `getPdfResolutionInputs` (function) - Capture serializable browser inputs before sending a render request to a window\-less worker.
 - `recordPdfResolution` (function) - Record successful rendering/restoration only; never collect document identifiers.
 - `getPdfResolutionDiagnostics` (function) - Effective PDF display diagnostics, with null scale until a page has been rendered.
+
+## src/utils/pdfSignatureInspector.js
+
+PDF signature inspection \- the single entry point for application code.
+
+Exports: `getDocumentSignatures`, `disposePdfSignatureWorker`, `getDocumentSignatures`
+
+Local imports: `../workers/pdfSignatureWorker.js?worker`, `src/utils/pdfSignatures.js`
+
+Symbols:
+
+- `module:utils/pdfSignatureInspector` (module) - PDF signature inspection \- the single entry point for application code.
+- `module:utils/pdfSignatureInspector~workerHandle` (member) - Lazily created worker handle: \{ worker, broken, pending \} where pending maps requestId to its resolve/reject callbacks.
+- `module:utils/pdfSignatureInspector.getDocumentSignatures` (function) - Inspect the signatures of one document.
+- `module:utils/pdfSignatureInspector.disposePdfSignatureWorker` (function) - Terminate the signature worker \(e.g.
+
+## src/utils/pdfSignatures.js
+
+PDF signature collection \- level 1 integrity inspection.
+
+Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `collectPdfSignatures`
+
+Symbols:
+
+- `module:utils/pdfSignatures` (module) - PDF signature collection \- level 1 integrity inspection.
+- `module:utils/pdfSignatures~PdfSignatureInfo` (typedef) - One inspected PDF signature \(level\-1 integrity view; trust is never evaluated here \- see the trust property\).
+- `module:utils/pdfSignatures~PdfSignatureReport` (typedef) - No description.
+- `module:utils/pdfSignatures.SUPPORTED_SUBFILTERS` (constant) - SubFilters with level\-1 handling.
+- `module:utils/pdfSignatures~pdfText` (function) - Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF\-16BE byte\-order mark.
+- `module:utils/pdfSignatures.parsePdfDateString` (function) - Parse a PDF date string \(&quot;D:YYYYMMDDHHmmSS\+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone \- a missing timezone is treated as UTC\).
+- `module:utils/pdfSignatures~discoverSignatures` (function) - Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\).
+- `module:utils/pdfSignatures.collectPdfSignatures` (function) - Collect signature information from PDF bytes.
 
 ## src/utils/pdfWorkerDispatcher.js
 

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/workers
 
-File count: 3. Line count: 1569. JSDoc symbol count: 3.
+File count: 4. Line count: 1609. JSDoc symbol count: 4.
 
 ## src/workers/imageWorker.js
 
@@ -19,6 +19,16 @@ Local imports: `src/utils/pdfjsDocumentOptions.js`, `src/utils/pdfResolution.js`
 Symbols:
 
 - `PdfCacheEntry` (typedef) - No description.
+
+## src/workers/pdfSignatureWorker.js
+
+Web worker entry for PDF signature inspection.
+
+Local imports: `src/utils/pdfSignatures.js`
+
+Symbols:
+
+- `module:workers/pdfSignatureWorker` (module) - Web worker entry for PDF signature inspection.
 
 ## src/workers/pdfWorker.js
 

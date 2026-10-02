@@ -987,6 +987,18 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
+| <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:173</code> | Terminate the signature worker \(e.g. |
+| <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:144</code> | Inspect the signatures of one document. |
+| <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
+| <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:31</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:947</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:309</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
+| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:225</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
+| <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:19</code> | One inspected PDF signature \(level-1 integrity view; trust is never evaluated here - see the trust property\). |
+| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:54</code> |  |
+| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:202</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
+| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:62</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
 | <code>batchProgressUnitsFromEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:156</code> | Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par... |
 | <code>clampInteger</code> | function | <code>src/utils/pdfWorkerDispatcher.js:41</code> |  |
 | <code>clampNumber</code> | function | <code>src/utils/pdfWorkerDispatcher.js:114</code> |  |
@@ -1385,4 +1397,5 @@
 | <code>ZoomCalcOptions</code> | typedef | <code>src/utils/zoomUtils.js:23</code> | Optional calculation overrides. |
 | <code>createFallbackMainThreadError</code> | function | <code>src/workers/imageWorker.js:44</code> | Creates an error that tells the caller this worker path is unsupported and should be retried on the main thread. |
 | <code>PdfCacheEntry</code> | typedef | <code>src/workers/pdfPageWorker.js:21</code> |  |
+| <code>module:workers/pdfSignatureWorker</code> | module | <code>src/workers/pdfSignatureWorker.js:1</code> | Web worker entry for PDF signature inspection. |
 | <code>workerScope</code> | constant | <code>src/workers/pdfWorker.js:9</code> | OpenDocViewer - generated PDF worker. |

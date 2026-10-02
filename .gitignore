@@ -11,6 +11,11 @@ node_modules/
 # Vite production output
 dist/
 
+# Local scratch space (generated signature fixtures, ad-hoc verification files).
+# Fixtures are generated on demand by scripts/generate-signature-fixtures.mjs and
+# must never be committed.
+tmp/
+
 # Vite/ESBuild caches (harmless if committed, but no reason to)
 .vite/
 .eslintcache

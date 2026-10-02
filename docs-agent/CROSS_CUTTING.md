@@ -35,6 +35,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/workers/pdfWorker.js` (628 lines) - OpenDocViewer \- generated PDF worker.
 - `src/workers/imageWorker.js` (500 lines) - OpenDocViewer — image / TIFF worker.
 - `src/workers/pdfPageWorker.js` (441 lines) - OpenDocViewer \- PDF page image worker.
+- `src/workers/pdfSignatureWorker.js` (40 lines) - Web worker entry for PDF signature inspection.
 
 ## Risky Source Patterns
 

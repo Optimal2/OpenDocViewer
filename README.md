@@ -387,6 +387,7 @@ Use the following files depending on what you are trying to understand:
 - `docs-src/log-servers.md` — logging endpoint contracts, retention, proxy patterns, and security assumptions
 - `docs-src/deploy-ops.md` — IIS hosting, proxy deployment, cache rules, and operational checklists
 - `docs-src/printing.md` — print pipeline design and the responsibilities of the print helper modules
+- `docs-src/pdf-signatures.md` — level-1 PDF signature inspection: handled formats, integrity rules, data contract, fixtures
 - `docs-src/omp-component-manifest.md` — OMP artifact component manifest and version-bump helper usage
 - `docs-src/agent-documentation.md` — how `docs-agent/` is generated
 - `docs-src/customer-performance-profile.md` — rationale for the high-memory, fast-feeling default profile
@@ -425,7 +426,7 @@ OpenDocViewer/
 │  ├─ styles/
 │  ├─ types/
 │  ├─ utils/
-│  └─ workers/      # imageWorker, pdfWorker, pdfPageWorker
+│  └─ workers/      # imageWorker, pdfWorker, pdfPageWorker, pdfSignatureWorker
 ├─ docs-src/        # hand-written maintainer documentation
 ├─ docs-agent/      # generated AI-agent packet (committed)
 ├─ AGENTS.md / CONTRIBUTING.md / SECURITY.md / README.md
@@ -443,4 +444,4 @@ OpenDocViewer/
 
 ## License
 
-MIT — see [LICENSE](LICENSE).
+MIT — see [LICENSE](LICENSE). Bundled and development-only third-party components and their licences are listed in [THIRD-PARTY-NOTICES.md](THIRD-PARTY-NOTICES.md).

@@ -49,6 +49,7 @@
     "release:major": "npm version major -m \"chore(release): %s\""
   },
   "dependencies": {
+    "asn1js": "^3.0.10",
     "axios": "^1.20.0",
     "cors": "^2.8.6",
     "dompurify": "^3.4.16",
@@ -65,6 +66,7 @@
     "morgan": "^1.12.1",
     "pdf-lib": "^1.17.1",
     "pdfjs-dist": "^6.3.289",
+    "pkijs": "^3.4.1",
     "prop-types": "^15.8.1",
     "react": "^19.3.0",
     "react-dom": "^19.3.0",
@@ -76,6 +78,7 @@
     "@babel/plugin-transform-runtime": "^8.0.6",
     "@babel/runtime": "^8.0.5",
     "@eslint/js": "^10.0.1",
+    "@peculiar/x509": "^1.14.3",
     "@rolldown/plugin-babel": "^0.2.4",
     "@vitejs/plugin-react": "^6.1.1",
     "concurrently": "^10.0.5",

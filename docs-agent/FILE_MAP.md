@@ -101,6 +101,8 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfPrintCacheKey.js</code> | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
 | <code>src/utils/pdfResolution.js</code> | 115 | 6 | 6 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
+| <code>src/utils/pdfSignatureInspector.js</code> | 185 | 0 | 4 | high | PDF signature inspection - the single entry point for application code. |
+| <code>src/utils/pdfSignatures.js</code> | 1017 | 2 | 8 | high | PDF signature collection - level 1 integrity inspection. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | <code>src/utils/printCore.js</code> | 588 | 1 | 20 | high | Core print coordinator for the frontend. |
@@ -123,6 +125,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/zoomUtils.js</code> | 268 | 1 | 18 | high | OpenDocViewer — Zoom utilities. |
 | <code>src/workers/imageWorker.js</code> | 500 | 0 | 1 | high | OpenDocViewer — image / TIFF worker. |
 | <code>src/workers/pdfPageWorker.js</code> | 441 | 0 | 1 | high | OpenDocViewer - PDF page image worker. |
+| <code>src/workers/pdfSignatureWorker.js</code> | 40 | 0 | 1 | high | Web worker entry for PDF signature inspection. |
 | <code>src/workers/pdfWorker.js</code> | 628 | 0 | 1 | high | OpenDocViewer - generated PDF worker. |
 
 ## Parse Errors

@@ -10,6 +10,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 
 | Package | Version | Imports | Used In |
 | --- | --- | ---: | --- |
+| <code>asn1js</code> | <code>^3.0.10</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
 | <code>dompurify</code> | <code>^3.4.16</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
@@ -24,8 +25,9 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>jspdf</code> | <code>^4.2.1</code> | 2 (dynamic) | <code>src/utils/printPdf.js</code><br><code>src/workers/pdfWorker.js</code> |
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
 | <code>morgan</code> | <code>^1.12.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
-| <code>pdf-lib</code> | <code>^1.17.1</code> | 1 (dynamic) | <code>src/utils/pdfWorkerDispatcher.js</code> |
+| <code>pdf-lib</code> | <code>^1.17.1</code> | 2 (dynamic) | <code>src/utils/pdfSignatures.js</code><br><code>src/utils/pdfWorkerDispatcher.js</code> |
 | <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
+| <code>pkijs</code> | <code>^3.4.1</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>prop-types</code> | <code>^15.8.1</code> | 32 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+27 more, 32 files total) |
 | <code>react</code> | <code>^19.3.0</code> | 53 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+48 more, 53 files total) |
 | <code>react-dom</code> | <code>^19.3.0</code> | 1 | <code>src/index.jsx</code> |
@@ -40,6 +42,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>@babel/plugin-transform-runtime</code> | <code>^8.0.6</code> | 0 |
 | <code>@babel/runtime</code> | <code>^8.0.5</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
+| <code>@peculiar/x509</code> | <code>^1.14.3</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.4</code> | 0 |
 | <code>@vitejs/plugin-react</code> | <code>^6.1.1</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
