@@ -86,7 +86,7 @@
   },
   "stats": {
     "fileCount": 127,
-    "sourceLineCount": 53397,
+    "sourceLineCount": 53414,
     "docletCount": 1420,
     "documentedFileCount": 127,
     "lowConfidenceSummaryCount": 0,
@@ -573,7 +573,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 77,
-      "lines": 1130,
+      "lines": 1140,
       "incomingLocalImports": 3,
       "doclets": 9,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -1520,7 +1520,7 @@
     {
       "name": "src/utils",
       "fileCount": 42,
-      "lineCount": 17255,
+      "lineCount": 17272,
       "docletCount": 658,
       "importantFiles": [
         {
@@ -41960,7 +41960,7 @@
     },
     {
       "path": "src/utils/pdfSignatureInspector.js",
-      "lines": 175,
+      "lines": 182,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "PDF signature inspection - the single entry point for application code.",
@@ -41987,17 +41987,17 @@
         {
           "name": "getDocumentSignatures",
           "kind": "function",
-          "line": 134
+          "line": 140
         },
         {
           "name": "disposePdfSignatureWorker",
           "kind": "function",
-          "line": 169
+          "line": 175
         },
         {
           "name": "getDocumentSignatures",
           "kind": "default",
-          "line": 174
+          "line": 181
         }
       ],
       "declarations": [
@@ -42009,42 +42009,42 @@
         {
           "name": "canUseWorker",
           "kind": "function",
-          "line": 34
+          "line": 37
         },
         {
           "name": "markBroken",
           "kind": "function",
-          "line": 38
+          "line": 41
         },
         {
           "name": "ensureWorker",
           "kind": "function",
-          "line": 46
+          "line": 49
         },
         {
           "name": "handle",
           "kind": "object",
-          "line": 51
+          "line": 57
         },
         {
           "name": "runInWorker",
           "kind": "function",
-          "line": 77
+          "line": 83
         },
         {
           "name": "toBytes",
           "kind": "function",
-          "line": 110
+          "line": 116
         },
         {
           "name": "getDocumentSignatures",
           "kind": "function",
-          "line": 134
+          "line": 140
         },
         {
           "name": "disposePdfSignatureWorker",
           "kind": "function",
-          "line": 169
+          "line": 175
         }
       ],
       "parseError": null,
@@ -42073,7 +42073,7 @@
           "kind": "member",
           "scope": "inner",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 31,
+          "line": 33,
           "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
           "params": [],
           "returns": [],
@@ -42086,7 +42086,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 134,
+          "line": 140,
           "description": "Inspect the signatures of one document.",
           "params": [
             {
@@ -42129,7 +42129,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureInspector.js",
-          "line": 169,
+          "line": 175,
           "description": "Terminate the signature worker (e.g.",
           "params": [],
           "returns": [],
@@ -42167,7 +42167,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1130,
+      "lines": 1140,
       "extension": ".js",
       "jsdocBlockCount": 15,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -42187,7 +42187,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1067,
+          "line": 1077,
           "kind": "dynamic"
         }
       ],
@@ -42670,7 +42670,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1067,
+          "line": 1077,
           "kind": "dynamic"
         }
       ],
@@ -82878,7 +82878,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 169,
+      "line": 175,
       "description": "Terminate the signature worker (e.g.",
       "params": [],
       "returns": [],
@@ -82891,7 +82891,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 134,
+      "line": 140,
       "description": "Inspect the signatures of one document.",
       "params": [
         {
@@ -82947,7 +82947,7 @@
       "kind": "member",
       "scope": "inner",
       "file": "src/utils/pdfSignatureInspector.js",
-      "line": 31,
+      "line": 33,
       "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
       "params": [],
       "returns": [],

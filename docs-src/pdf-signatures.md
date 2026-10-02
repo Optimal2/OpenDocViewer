@@ -124,8 +124,10 @@ for (const sig of report.signatures) {
 `getDocumentSignatures` offloads to a lazily created singleton worker when the browser
 `Worker` API is available. Worker construction/execution errors and timeouts return a
 document-level `unreadable` entry; they never start inline parsing. A timeout terminates
-the worker and settles all pending requests. Disposal also settles requests and permits
-a fresh worker on the next call. Inline parsing is allowed only without a Worker API
+the worker and settles all pending requests. Later documents may recreate a failed worker
+up to three times per viewer session (including construction failures); successful requests
+do not reset this budget. The failed document remains unreadable. Disposal also settles
+requests and resets the budget for a fresh session. Inline parsing is allowed only without a Worker API
 and for inputs at most 256 KiB. It never rejects for document reasons: a PDF with no signatures, a
 corrupt CMS blob, or an unsupported environment all resolve to a report (an empty
 `signatures` list or per-signature `unreadable`/`unsupported` entries). Callers should fetch
@@ -144,6 +146,10 @@ remain discoverable. Unsigned documents avoid importing the CMS stack, but still
 for PDF structure parsing. If structure/discovery cannot complete, a document-level
 `unreadable` placeholder with null identity fields communicates the incomplete inspection;
 it is not evidence that a particular signature exists.
+
+The header pre-check accepts `%PDF-` starting at any of the first 1024 byte positions.
+Leading junk is never stripped: ByteRange verification uses actual file offsets, so
+prepending bytes after signing cannot hide a signature or make its old offsets verify.
 
 ## Level-1 user interface
 
@@ -273,11 +279,13 @@ manual inspection.
 without messageDigest, invalid later signatures, widened/foreign gaps, mismatched
 certificate identifiers, SKI signatures, and escaped/compressed dictionaries. The
 Vitest security suites also cover nested ASN.1/PDF input, a 50 MiB extension, worker
-timeouts/errors, bounded fallback and disposal. No binary fixture is committed.
+timeouts/errors, bounded worker recreation, bounded fallback and disposal. Parser tests
+also generate junk-prefixed signed/tampered PDFs and verify the unsigned fast path.
+No binary fixture is committed.
 
 Run `npm test -- pdfSignature` for both positive and hostile inputs. In an isolated
 worktree, `node scripts/test-signature-security-mutations.mjs --baseline` temporarily
-loads the original vulnerable parser/inspector and then breaks each of the eight review fixes
+loads the original vulnerable parser/inspector and then breaks each reviewed fix
 individually. Every selected regression must fail with an assertion (test exit 1),
 and the runner restores the original source in `finally`. Do not run it concurrently
 with editing or validation of these source files. The runner exits 0 only when all

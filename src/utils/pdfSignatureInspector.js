@@ -21,14 +21,17 @@ import PdfSignatureWorkerConstructor from '../workers/pdfSignatureWorker.js?work
 import { collectPdfSignatures, unreadableSignatureReport } from './pdfSignatures.js';
 
 const EMPTY_REPORT = { signatures: [] };
+const MAX_WORKER_RECREATIONS = 3;
 
 /**
  * Lazily created worker handle: { worker, broken, pending } where `pending`
  * maps requestId to its resolve/reject callbacks. Null before creation;
- * `broken: true` means inspection is unavailable until disposal resets the handle.
+ * A broken worker may be recreated for a later document, up to three times
+ * per viewer session. Disposal resets the handle and the recreation budget.
  * @type {Object|null}
  */
 let workerHandle = null;
+let workerRecreations = 0;
 let requestId = 0;
 
 function canUseWorker() {
@@ -45,7 +48,10 @@ function markBroken(handle, reason) {
 
 function ensureWorker() {
   if (workerHandle && !workerHandle.broken) return workerHandle;
-  if (workerHandle && workerHandle.broken) return null;
+  if (workerHandle?.broken) {
+    if (workerRecreations >= MAX_WORKER_RECREATIONS) return null;
+    workerRecreations += 1;
+  }
   try {
     const worker = new PdfSignatureWorkerConstructor({ type: 'module', name: 'pdf-signature-worker' });
     const handle = { worker, broken: false, pending: new Map() };
@@ -169,6 +175,7 @@ export async function getDocumentSignatures(source, options = {}) {
 export function disposePdfSignatureWorker() {
   if (workerHandle) markBroken(workerHandle, 'signature worker disposed');
   workerHandle = null;
+  workerRecreations = 0;
 }
 
 export default getDocumentSignatures;

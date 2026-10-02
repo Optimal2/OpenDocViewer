@@ -10,13 +10,18 @@
  */
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
-import { createSignatureFixtures, FIXTURE_SIGNING_TIME, FIXTURE_NOT_BEFORE, FIXTURE_NOT_AFTER } from '../../../scripts/generate-signature-fixtures.mjs';
+import { createSignatureFixtures, createFixturePki, baseSignedPdf, signFile, buildSignedData, FIXTURE_SIGNING_TIME, FIXTURE_NOT_BEFORE, FIXTURE_NOT_AFTER } from '../../../scripts/generate-signature-fixtures.mjs';
 import { collectPdfSignatures, SUPPORTED_SUBFILTERS } from '../pdfSignatures.js';
 
 let fixtures;
 
 beforeAll(async () => {
   fixtures = await createSignatureFixtures();
+  const pki = await createFixturePki();
+  const base = baseSignedPdf({ fieldName: 'Prefixed', visible: false,
+    sigOptions: { subFilter: 'adbe.pkcs7.detached' } }).serialize();
+  fixtures['signed-with-prefix.pdf'] = await signFile(withJunkPrefix(base.bytes, 7),
+    base.offsets.get(8) + 7, (signedOverBytes) => buildSignedData({ signer: pki.rsa, signedOverBytes }));
 }, 120000);
 
 async function one(name) {
@@ -24,6 +29,39 @@ async function one(name) {
   expect(report.signatures).toHaveLength(1);
   return report.signatures[0];
 }
+
+function withJunkPrefix(bytes, length) {
+  const prefixed = new Uint8Array(length + bytes.length);
+  prefixed.fill(0x78, 0, length);
+  prefixed.set(bytes, length);
+  return prefixed;
+}
+
+describe('F10 PDF headers after leading junk', () => {
+  it('verifies a prefix included in the actual signed bytes and detects subsequent tampering', async () => {
+    const valid = await one('signed-with-prefix.pdf');
+    expect(valid.integrity).toBe('intact');
+    const tampered = fixtures['signed-with-prefix.pdf'].slice();
+    tampered[0] ^= 1;
+    const report = await collectPdfSignatures(tampered);
+    expect(report.signatures).toHaveLength(1);
+    expect(report.signatures[0].integrity).toBe('digest-mismatch');
+  });
+  it.each(['valid-rsa.pdf', 'digest-mismatch.pdf'])('%s remains visible with broken byte offsets', async (name) => {
+    for (const length of [7, 1019, 1023]) {
+      const report = await collectPdfSignatures(withJunkPrefix(fixtures[name], length));
+      expect(report.signatures).toHaveLength(1);
+      expect(report.signatures[0].fieldName).toBeTruthy();
+      expect(report.signatures[0].integrity).toBe('unreadable');
+      expect(report.signatures[0].integrityReason).toMatch(/ByteRange/i);
+    }
+  });
+
+  it('does not search beyond the first 1024 header positions', async () => {
+    expect(await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024)))
+      .toEqual({ signatures: [] });
+  });
+});
 
 describe('fast path: unsigned documents', () => {
   it('returns an empty signature list for an unsigned PDF', async () => {
@@ -263,8 +301,10 @@ describe('fast path does not load the CMS stack', () => {
       return actual;
     });
     const mod = await import('../pdfSignatures.js');
-    const report = await mod.collectPdfSignatures(fixtures['unsigned.pdf']);
-    expect(report).toEqual({ signatures: [] });
+    for (const length of [0, 7, 1023]) {
+      const report = await mod.collectPdfSignatures(withJunkPrefix(fixtures['unsigned.pdf'], length));
+      expect(report).toEqual({ signatures: [] });
+    }
     expect(marker.loaded).toBe(false);
     vi.doUnmock('pkijs');
     vi.resetModules();

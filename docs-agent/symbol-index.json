@@ -24608,7 +24608,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 169,
+    "line": 175,
     "description": "Terminate the signature worker (e.g.",
     "params": [],
     "returns": [],
@@ -24621,7 +24621,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 134,
+    "line": 140,
     "description": "Inspect the signatures of one document.",
     "params": [
       {
@@ -24677,7 +24677,7 @@
     "kind": "member",
     "scope": "inner",
     "file": "src/utils/pdfSignatureInspector.js",
-    "line": 31,
+    "line": 33,
     "description": "Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks.",
     "params": [],
     "returns": [],

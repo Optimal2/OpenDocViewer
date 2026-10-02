@@ -1056,7 +1056,17 @@ export async function collectPdfSignatures(pdfBytes) {
   } catch {
     return empty;
   }
-  if (bytes.length < 9 || String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== '%PDF') {
+  // Readers tolerate leading junk. Keep the original bytes so ByteRange and
+  // /Contents positions are verified against the actual file, including its prefix.
+  let hasHeader = false;
+  for (let i = 0; i < Math.min(1024, bytes.length - 4); i++) {
+    if (bytes[i] === 0x25 && bytes[i + 1] === 0x50 && bytes[i + 2] === 0x44 &&
+        bytes[i + 3] === 0x46 && bytes[i + 4] === 0x2d) {
+      hasHeader = true;
+      break;
+    }
+  }
+  if (!hasHeader) {
     return empty;
   }
   if (bytes.length > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
