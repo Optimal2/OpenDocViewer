@@ -884,6 +884,9 @@ try {
 
     # Rather than duplicating the bump logic, the touched definitions are added to the normal
     # selection below, so they go through exactly the same code path as an explicit -ModuleKey.
+    # Accumulate into a List and flatten once afterwards: appending with @(...) + ... rebuilds
+    # the whole selection array on every touched key, which is O(n²) when many definitions change.
+    $touchedSelection = [System.Collections.Generic.List[object]]::new()
     foreach ($moduleKey in $touchedModuleKeys) {
         if ($selectedModuleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey }) {
             continue
@@ -891,8 +894,11 @@ try {
 
         $match = @($moduleDefinitions | Where-Object { $_.moduleKey -eq $moduleKey })
         if ($match.Count -eq 1) {
-            $selectedModuleDefinitions = @($selectedModuleDefinitions) + $match[0]
+            $touchedSelection.Add($match[0])
         }
+    }
+    if ($touchedSelection.Count -gt 0) {
+        $selectedModuleDefinitions = @($selectedModuleDefinitions) + $touchedSelection.ToArray()
     }
 
     # Persist any compatibleArtifacts changes made above.
