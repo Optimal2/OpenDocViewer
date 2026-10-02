@@ -16,6 +16,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import {
   getSignatureCount,
+  getIntegrityLabel,
   getSignatureSeverity,
   getWorstSignatureIntegrity,
   reportHasSignatures,
@@ -42,7 +43,8 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
   if (!reportHasSignatures(report)) return null;
 
   const count = getSignatureCount(report);
-  const severity = getSignatureSeverity(getWorstSignatureIntegrity(report?.signatures));
+  const integrity = getWorstSignatureIntegrity(report?.signatures);
+  const severity = getSignatureSeverity(integrity);
   const label = t('signatures.badge.ariaLabel', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,
@@ -57,7 +59,7 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
       type="button"
       className={`odv-signature-badge odv-signature-badge--${severity} odv-signature-badge--${variant}`}
       aria-label={label}
-      title={tooltip}
+      title={`${tooltip} — ${getIntegrityLabel(t, integrity)}`}
       onClick={(event) => {
         event.stopPropagation();
         onOpen?.(event.currentTarget);

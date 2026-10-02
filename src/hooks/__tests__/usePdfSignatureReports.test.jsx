@@ -8,11 +8,14 @@
  *  - results are cached per document (sourceKey).
  */
 
-import { describe, it, expect, beforeEach, vi } from 'vitest';
+import { describe, it, expect, beforeEach, afterEach, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import usePdfSignatureReports from '../usePdfSignatureReports.js';
 import { getDocumentSignatures } from '../../utils/pdfSignatureInspector.js';
+import SignatureStatusBadge from '../../components/SignatureStatusBadge.jsx';
+
+vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key, options) => options?.defaultValue || key }) }));
 
 vi.mock('../../utils/pdfSignatureInspector.js', () => ({
   getDocumentSignatures: vi.fn(),
@@ -40,11 +43,12 @@ async function renderProbe(props) {
   document.body.appendChild(container);
   const root = createRoot(container);
   const probe = { reports: null };
-  function Probe() {
-    probe.reports = usePdfSignatureReports(props);
-    return null;
+  function Probe(next) {
+    probe.reports = usePdfSignatureReports(next);
+    return createElement(SignatureStatusBadge, { report: probe.reports['src-a'], onOpen: () => {} });
   }
-  await act(() => root.render(createElement(Probe)));
+  await act(() => root.render(createElement(Probe, props)));
+  cleanups.push(() => { root.unmount(); container.remove(); });
   await flushMicrotasks();
   return {
     container,
@@ -56,6 +60,9 @@ async function renderProbe(props) {
     },
   };
 }
+
+const cleanups = [];
+afterEach(async () => { await act(() => { for (const cleanup of cleanups.splice(0)) cleanup(); }); });
 
 describe('usePdfSignatureReports', () => {
   beforeEach(() => {
@@ -136,7 +143,7 @@ describe('usePdfSignatureReports', () => {
     container.remove();
   });
 
-  it('stores an empty report when the source bytes are unavailable', async () => {
+  it('stores an unreadable report when the source bytes are unavailable', async () => {
     const readSourceArrayBuffer = vi.fn().mockResolvedValue(null);
     const { root, container, probe } = await renderProbe({
       allPages: [pdfPage('src-a')],
@@ -145,8 +152,65 @@ describe('usePdfSignatureReports', () => {
     });
     await flushMicrotasks();
     expect(getDocumentSignatures).not.toHaveBeenCalled();
-    expect(probe.reports['src-a']).toEqual({ signatures: [] });
+    expect(probe.reports['src-a'].signatures[0].integrity).toBe('unreadable');
     await act(() => root.unmount());
     container.remove();
+  });
+
+  it('F1 retains a pending result and shows its badge across page list changes', async () => {
+    let resolve;
+    getDocumentSignatures.mockReturnValue(new Promise((done) => { resolve = done; }));
+    const props = { allPages: [pdfPage('src-a')], inspectionReady: true,
+      readSourceArrayBuffer: vi.fn().mockResolvedValue(new ArrayBuffer(8)) };
+    const { container, probe, rerender } = await renderProbe(props);
+    await rerender({ ...props, allPages: [pdfPage('src-a'), pdfPage('src-a'), tiffPage('image')] });
+    await act(async () => { resolve(SIGNED_REPORT); });
+    expect(probe.reports['src-a']).toEqual(SIGNED_REPORT);
+    expect(container.querySelector('.odv-signature-badge')).not.toBeNull();
+    expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
+  });
+
+  it('F2 bounds reads and inspections to one, prioritizing the current document', async () => {
+    const pending = [];
+    getDocumentSignatures.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+    const read = vi.fn().mockImplementation(async () => new ArrayBuffer(8));
+    const props = { allPages: ['a', 'b', 'c', 'd'].map(pdfPage), inspectionReady: true,
+      currentSourceKey: 'b', readSourceArrayBuffer: read };
+    const { rerender } = await renderProbe(props);
+    expect(read.mock.calls.map(([key]) => key)).toEqual(['b']);
+    expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
+    expect(getDocumentSignatures.mock.calls[0][1]).toEqual({ transfer: true });
+    await rerender({ ...props, currentSourceKey: 'd' });
+    await act(async () => { pending.shift()(SIGNED_REPORT); });
+    expect(read.mock.calls.map(([key]) => key)).toEqual(['b', 'd']);
+    await act(async () => { pending.shift()(SIGNED_REPORT); });
+    expect(read.mock.calls.map(([key]) => key)).toEqual(['b', 'd', 'a']);
+    await act(async () => { pending.shift()(SIGNED_REPORT); });
+    expect(read.mock.calls.map(([key]) => key)).toEqual(['b', 'd', 'a', 'c']);
+    await act(async () => { pending.shift()(SIGNED_REPORT); });
+  });
+
+  it('drops removed documents and prevents recycled keys from inheriting pending results', async () => {
+    const pending = [];
+    getDocumentSignatures.mockImplementation(() => new Promise((resolve) => pending.push(resolve)));
+    const props = { allPages: [pdfPage('src-a')], inspectionReady: true,
+      readSourceArrayBuffer: vi.fn().mockImplementation(async () => new ArrayBuffer(8)) };
+    const { probe, rerender } = await renderProbe(props);
+    await rerender({ ...props, allPages: [] });
+    await rerender(props);
+    await act(async () => { pending.shift()(SIGNED_REPORT); });
+    expect(probe.reports['src-a']).toBeUndefined();
+    expect(getDocumentSignatures).toHaveBeenCalledTimes(2);
+    await act(async () => { pending.shift()({ signatures: [] }); });
+    expect(probe.reports['src-a']).toEqual({ signatures: [] });
+  });
+
+  it('does not inspect bytes that finish reading after unmount', async () => {
+    let resolve;
+    const read = vi.fn().mockReturnValue(new Promise((done) => { resolve = done; }));
+    const { root } = await renderProbe({ allPages: [pdfPage('src-a')], inspectionReady: true, readSourceArrayBuffer: read });
+    await act(() => root.unmount());
+    await act(async () => { resolve(new ArrayBuffer(8)); });
+    expect(getDocumentSignatures).not.toHaveBeenCalled();
   });
 });

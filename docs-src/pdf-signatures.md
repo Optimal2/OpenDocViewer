@@ -155,11 +155,20 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   again), and caches one report per document (`sourceKey`) in viewer context state for the
   session. Non-PDF documents are never inspected. `ViewerProvider` calls
   `disposePdfSignatureWorker()` when the viewer unmounts.
+  A serial queue reads one source at a time, prioritizing the current document and
+  then page order. Pending results survive page-list updates; only removal or unmount
+  discards them. Recycled source keys get fresh entries. Read/inspection failures are
+  reported as unreadable rather than unsigned. The disposable source-store copy is
+  transferred to the worker with `{ transfer: true }`; other inspector callers retain
+  their buffers by default. No document bytes are retained in the report cache.
 - `src/utils/pdfSignatureStatus.js` maps the contract to presentation: the badge colour and
   icon follow the *worst* integrity status of a document's signatures (`intact` =
   neutral/positive, `modified-after-signing`/`unsupported` = warning,
   `digest-mismatch`/`signature-invalid`/`unreadable` = error; unknown values fail safe to
   error).
+  Every signature is normalized before selecting the worst status, so mixing an intact
+  signature with a missing or unexpected status still yields unreadable. Tooltip and
+  dialog labels use the same normalization and translation helper.
 - `src/components/SignatureStatusBadge.jsx` is the small signature symbol on the first
   thumbnail of a signed document and in the toolbar for the current document. It is a
   native button with an accessible name (for example "Signed document, 1 signature") and a
@@ -273,6 +282,14 @@ individually. Every selected regression must fail with an assertion (test exit 1
 and the runner restores the original source in `finally`. Do not run it concurrently
 with editing or validation of these source files. The runner exits 0 only when all
 mutation groups are detected. Run the unmodified suite again afterwards.
+
+For UI regression proofs, run `node scripts/test-signature-ui-mutations.mjs`.
+It checks the reviewed hook baseline and individually breaks result retention, queue
+concurrency, buffer transfer, mixed-status handling, worker disposal, and provider
+report/disposal wiring. Each selected test must fail with an assertion (exit 1);
+the runner restores sources and exits 0 only when every mutation is detected.
+The provider integration test uses real React scheduling, ViewerProvider, context and
+badges, with storage/rendering/inspection I/O mocked.
 
 The mutation runner additionally checks that renamed/minified PDF classes cannot hide
 signatures. After `npm run build`, run `node scripts/test-built-signature-worker.mjs`

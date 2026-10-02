@@ -19,32 +19,9 @@
 import React, { useEffect, useRef } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { getIntegrityLabel } from '../utils/pdfSignatureStatus.js';
 
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
-
-/**
- * @param {Function} t
- * @param {(string|null|undefined)} integrity
- * @returns {string}
- */
-function getIntegrityLabel(t, integrity) {
-  switch (String(integrity || '')) {
-    case 'intact':
-      return t('signatures.integrity.intact', { defaultValue: 'Intact' });
-    case 'modified-after-signing':
-      return t('signatures.integrity.modifiedAfterSigning', { defaultValue: 'Modified after signing' });
-    case 'digest-mismatch':
-      return t('signatures.integrity.digestMismatch', { defaultValue: 'Digest mismatch' });
-    case 'signature-invalid':
-      return t('signatures.integrity.signatureInvalid', { defaultValue: 'Signature invalid' });
-    case 'unsupported':
-      return t('signatures.integrity.unsupported', { defaultValue: 'Signature present, format not supported' });
-    case 'unreadable':
-      return t('signatures.integrity.unreadable', { defaultValue: 'Signature unreadable' });
-    default:
-      return t('signatures.integrity.unreadable', { defaultValue: 'Signature unreadable' });
-  }
-}
 
 /**
  * @param {Function} t

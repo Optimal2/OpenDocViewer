@@ -10,6 +10,7 @@ import { describe, it, expect, beforeEach, vi } from 'vitest';
 import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import SignatureStatusBadge from '../SignatureStatusBadge.jsx';
+import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
 
 vi.mock('react-i18next', () => ({
   useTranslation: () => ({
@@ -33,6 +34,18 @@ async function renderBadge(props) {
 describe('SignatureStatusBadge', () => {
   beforeEach(() => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+
+  it.each(['future', undefined, null, 'constructor'])('F3 shares fail-safe status between badge tooltip and dialog for %s', async (integrity) => {
+    const report = { signatures: [sig('intact'), sig(integrity)] };
+    const { container, root } = await renderBadge({ report, onOpen: () => {} });
+    const badge = container.querySelector('button');
+    expect(badge.className).toContain('odv-signature-badge--error');
+    expect(badge.title).toContain('Signature unreadable');
+    await act(() => root.render(createElement(SignatureDetailsDialog, { isOpen: true, report, onClose: () => {} })));
+    expect(container.textContent).toContain('Signature unreadable');
+    await act(() => root.unmount());
+    container.remove();
   });
 
   it('renders nothing without a report or without signatures', async () => {

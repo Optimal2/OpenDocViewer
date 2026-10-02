@@ -15,8 +15,9 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { getDocumentSignatures } from '../utils/pdfSignatureInspector.js';
+import { unreadableSignatureReport } from '../utils/pdfSignatures.js';
 
-const EMPTY_REPORT = { signatures: [] };
+const INSPECTION_CONCURRENCY = 1;
 
 /**
  * @param {*} page
@@ -33,59 +34,84 @@ function isPdfPage(page) {
  * inspection never starts before that so rendering keeps priority.
  * @param {function(string): Promise<(ArrayBuffer|null)>} options.readSourceArrayBuffer
  * Reads the already-loaded source bytes for a sourceKey.
+ * @param {string} [options.currentSourceKey] Visible document, prioritized before queued documents.
  * @returns {Object<string, *>} Map of sourceKey to PdfSignatureReport.
  */
-export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer }) {
+export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey }) {
   const [reports, setReports] = useState(/** @type {Object<string, *>} */ ({}));
-  /** sourceKeys already inspected or in flight: one inspector call per document, ever. */
-  const requestedRef = useRef(/** @type {Set<string>} */ (new Set()));
-  const generationRef = useRef(0);
+  // Entry identity separates removed/reloaded documents even when sourceKeys are reused.
+  const entriesRef = useRef(new Map());
+  const mountedRef = useRef(false);
+  const activeRef = useRef(0);
+  const pumpRef = useRef(() => {});
+
+  useEffect(() => {
+    mountedRef.current = true;
+    const entries = entriesRef.current;
+    return () => {
+      mountedRef.current = false;
+      entries.clear();
+      pumpRef.current = () => {};
+    };
+  }, []);
 
   useEffect(() => {
     const pages = Array.isArray(allPages) ? allPages : [];
-    if (pages.length <= 0) {
-      // Session torn down or not started: drop cached reports so a new
-      // session with recycled sourceKeys cannot inherit stale results.
-      generationRef.current += 1;
-      requestedRef.current = new Set();
-      setReports((previous) => (Object.keys(previous).length > 0 ? {} : previous));
-      return undefined;
-    }
-    if (!inspectionReady || typeof readSourceArrayBuffer !== 'function') return undefined;
-
-    const generation = generationRef.current;
-    let cancelled = false;
-
-    const sourceKeys = [];
+    const sourceKeys = new Set();
     for (const page of pages) {
       if (!isPdfPage(page)) continue;
       const sourceKey = String(page?.sourceKey || '');
-      if (!sourceKey || requestedRef.current.has(sourceKey)) continue;
-      requestedRef.current.add(sourceKey);
-      sourceKeys.push(sourceKey);
+      if (sourceKey) sourceKeys.add(sourceKey);
     }
-
-    for (const sourceKey of sourceKeys) {
-      void (async () => {
-        let report = EMPTY_REPORT;
-        try {
-          const bytes = await readSourceArrayBuffer(sourceKey);
-          if (bytes) {
-            report = await getDocumentSignatures(new Uint8Array(bytes));
+    const entries = entriesRef.current;
+    for (const key of entries.keys()) {
+      if (!sourceKeys.has(key)) entries.delete(key);
+    }
+    setReports((previous) => {
+      const retained = Object.entries(previous).filter(([key]) => sourceKeys.has(key));
+      return retained.length === Object.keys(previous).length ? previous : Object.fromEntries(retained);
+    });
+    for (const key of sourceKeys) {
+      if (!entries.has(key)) entries.set(key, { state: 'requested' });
+    }
+    const orderedKeys = [...sourceKeys];
+    if (sourceKeys.has(currentSourceKey)) {
+      orderedKeys.splice(orderedKeys.indexOf(currentSourceKey), 1);
+      orderedKeys.unshift(currentSourceKey);
+    }
+    pumpRef.current = () => {
+      if (!mountedRef.current || !inspectionReady || typeof readSourceArrayBuffer !== 'function') return;
+      for (const sourceKey of orderedKeys) {
+        if (activeRef.current >= INSPECTION_CONCURRENCY) break;
+        const entry = entries.get(sourceKey);
+        if (entry?.state !== 'requested') continue;
+        entry.state = 'pending';
+        activeRef.current += 1;
+        void (async () => {
+          const isCurrent = () => mountedRef.current && entries.get(sourceKey) === entry;
+          let report;
+          try {
+            const bytes = await readSourceArrayBuffer(sourceKey);
+            if (!isCurrent()) return;
+            if (!bytes) throw new Error('PDF source bytes are unavailable');
+            report = await getDocumentSignatures(new Uint8Array(bytes), { transfer: true });
+            if (!Array.isArray(report?.signatures)) throw new Error('Signature inspection returned no report');
+            entry.state = 'done';
+          } catch (error) {
+            entry.state = 'failed';
+            report = unreadableSignatureReport(String(error?.message || error));
+          } finally {
+            if (isCurrent() && report) {
+              setReports((previous) => ({ ...previous, [sourceKey]: report }));
+            }
+            activeRef.current -= 1;
+            pumpRef.current();
           }
-        } catch {
-          report = EMPTY_REPORT;
-        }
-        if (cancelled || generationRef.current !== generation) return;
-        const finalReport = report && Array.isArray(report.signatures) ? report : EMPTY_REPORT;
-        setReports((previous) => (previous[sourceKey] ? previous : { ...previous, [sourceKey]: finalReport }));
-      })();
-    }
-
-    return () => {
-      cancelled = true;
+        })();
+      }
     };
-  }, [allPages, inspectionReady, readSourceArrayBuffer]);
+    pumpRef.current();
+  }, [allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey]);
 
   return reports;
 }

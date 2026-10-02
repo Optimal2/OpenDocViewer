@@ -329,6 +329,7 @@ function nowMs() {
  */
 export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = false }) => {
   const [allPages, setAllPages] = useState([]);
+  const [signaturePrioritySourceKey, setSignaturePrioritySourceKey] = useState('');
   const [error, setError] = useState(/** @type {(string|null)} */ (null));
   const [workerCount, setWorkerCount] = useState(0);
   const [loadingRunActive, setLoadingRunActive] = useState(false);
@@ -2559,6 +2560,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // main thread, and caches one report per document for the session.
   const signatureReports = usePdfSignatureReports({
     allPages,
+    currentSourceKey: signaturePrioritySourceKey,
     inspectionReady: pageLoadState.readyPages > 0,
     readSourceArrayBuffer,
   });
@@ -2606,6 +2608,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     runtimeDiagnostics,
     pageLoadState,
     signatureReports,
+    setSignaturePrioritySourceKey,
     scheduleSourceWarmup,
   }), [
     bundle,

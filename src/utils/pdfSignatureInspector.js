@@ -74,7 +74,7 @@ function ensureWorker() {
   }
 }
 
-function runInWorker(handle, bytes, timeoutMs) {
+function runInWorker(handle, bytes, timeoutMs, transfer) {
   return new Promise((resolve, reject) => {
     requestId += 1;
     const id = requestId;
@@ -98,7 +98,7 @@ function runInWorker(handle, bytes, timeoutMs) {
       }
     });
     try {
-      handle.worker.postMessage({ type: 'collectPdfSignatures', requestId: id, bytes });
+      handle.worker.postMessage({ type: 'collectPdfSignatures', requestId: id, bytes }, transfer ? [bytes.buffer] : []);
     } catch (err) {
       if (!settled) {
         markBroken(handle, String(err?.message ?? err));
@@ -126,6 +126,8 @@ async function toBytes(source) {
  * (or a Blob of them, e.g. the loader's document blob).
  * @param {Object} [options] Worker options.
  * @param {number} [options.timeoutMs] Worker timeout in ms (default 30000).
+ * @param {boolean} [options.transfer=false] Transfer ownership of the input buffer to the worker.
+ * Only use for disposable copies: all views of the buffer become detached.
  * @returns {Promise} Resolves - never rejects - with a PdfSignatureReport
  * (`{ signatures: [] }` only when the document has no detected signatures).
  */
@@ -143,7 +145,7 @@ export async function getDocumentSignatures(source, options = {}) {
     const handle = ensureWorker();
     if (handle) {
       try {
-        return await runInWorker(handle, bytes, timeoutMs);
+        return await runInWorker(handle, bytes, timeoutMs, options.transfer === true);
       } catch (err) {
         return unreadableSignatureReport(String(err?.message ?? err));
       }

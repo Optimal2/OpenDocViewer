@@ -25,6 +25,22 @@ afterEach(() => { vi.useRealTimers(); vi.unstubAllGlobals(); vi.clearAllMocks();
 async function api() {
   return { ...await import('../pdfSignatureInspector.js'), ...await import('../pdfSignatures.js') };
 }
+it('F2 transfers disposable bytes and preserves buffers by default', async () => {
+  const { getDocumentSignatures } = await api();
+  for (const transfer of [true, false]) {
+    const bytes = new Uint8Array([1, 2, 3]);
+    const promise = getDocumentSignatures(bytes, { transfer });
+    await vi.advanceTimersByTimeAsync(0);
+    const worker = state.workers[0];
+    const [message, transfers] = worker.postMessage.mock.calls.at(-1);
+    expect(transfers).toEqual(transfer ? [bytes.buffer] : []);
+    const received = structuredClone(message, { transfer: transfers });
+    expect(bytes.byteLength).toBe(transfer ? 0 : 3);
+    expect([...received.bytes]).toEqual([1, 2, 3]);
+    worker.onmessage({ data: { type: 'pdfSignaturesResult', requestId: message.requestId, ok: true, report: { signatures: [] } } });
+    await promise;
+  }
+});
 it('F6 timeout terminates the worker, settles all requests, and never parses inline', async () => {
   const { getDocumentSignatures, collectPdfSignatures } = await api();
   const first = getDocumentSignatures(new Uint8Array(8), { timeoutMs: 30 });

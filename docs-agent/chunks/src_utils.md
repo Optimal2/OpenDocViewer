@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 42. Line count: 17224. JSDoc symbol count: 656.
+File count: 42. Line count: 17255. JSDoc symbol count: 658.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -381,7 +381,7 @@ Symbols:
 
 Level\-1 signature UI status helpers.
 
-Exports: `getSignatureSeverity`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
+Exports: `getSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
 
 Symbols:
 
@@ -389,6 +389,8 @@ Symbols:
 - `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity classes used for colours/icons: intact is neutral/positive, modified\-after\-signing and unsupported are warnings, and digest\-mismatch, signature\-invalid and unreadable are...
 - `module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST` (constant) - Integrity statuses ordered worst\-first.
 - `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Map one integrity status to its severity class.
+- `module:utils/pdfSignatureStatus.normalizeSignatureIntegrity` (function) - Fail closed for missing, unexpected and inherited property names.
+- `module:utils/pdfSignatureStatus.getIntegrityLabel` (function) - Shared localized status text for the badge tooltip and details dialog.
 - `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.
 - `module:utils/pdfSignatureStatus.getSignatureCount` (function) - No description.
 - `module:utils/pdfSignatureStatus.reportHasSignatures` (function) - No description.

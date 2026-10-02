@@ -49,7 +49,36 @@ const INTEGRITY_WORST_FIRST = [
  * @returns {'ok'|'warning'|'error'}
  */
 export function getSignatureSeverity(integrity) {
-  return SEVERITY_BY_INTEGRITY[String(integrity || '')] || 'error';
+  return SEVERITY_BY_INTEGRITY[normalizeSignatureIntegrity(integrity)];
+}
+
+/**
+ * Fail closed for missing, unexpected and inherited property names.
+ * @param {*} integrity
+ * @returns {string}
+ */
+export function normalizeSignatureIntegrity(integrity) {
+  return typeof integrity === 'string' && Object.hasOwn(SEVERITY_BY_INTEGRITY, integrity)
+    ? integrity : 'unreadable';
+}
+
+/**
+ * Shared localized status text for the badge tooltip and details dialog.
+ * @param {Function} t
+ * @param {*} integrity
+ * @returns {string}
+ */
+export function getIntegrityLabel(t, integrity) {
+  const labels = {
+    intact: ['intact', 'Intact'],
+    'modified-after-signing': ['modifiedAfterSigning', 'Modified after signing'],
+    'digest-mismatch': ['digestMismatch', 'Digest mismatch'],
+    'signature-invalid': ['signatureInvalid', 'Signature invalid'],
+    unsupported: ['unsupported', 'Signature present, format not supported'],
+    unreadable: ['unreadable', 'Signature unreadable'],
+  };
+  const [key, defaultValue] = labels[normalizeSignatureIntegrity(integrity)];
+  return t(`signatures.integrity.${key}`, { defaultValue });
 }
 
 /**
@@ -60,7 +89,7 @@ export function getSignatureSeverity(integrity) {
  */
 export function getWorstSignatureIntegrity(signatures) {
   if (!Array.isArray(signatures) || signatures.length <= 0) return null;
-  const present = new Set(signatures.map((entry) => String(entry?.integrity || '')));
+  const present = new Set(Array.from(signatures, (entry) => normalizeSignatureIntegrity(entry?.integrity)));
   for (const status of INTEGRITY_WORST_FIRST) {
     if (present.has(status)) return status;
   }

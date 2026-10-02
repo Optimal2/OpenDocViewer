@@ -40,6 +40,14 @@ describe('getSignatureSeverity', () => {
 });
 
 describe('getWorstSignatureIntegrity', () => {
+  it.each(['future-status', undefined, null, '', 'toString', 'constructor', 42, {}])('F3 fails safe for mixed known and unexpected integrity %s', (value) => {
+    for (const known of ['intact', 'unsupported', 'signature-invalid']) {
+      expect(getWorstSignatureIntegrity([sig(known), sig(value)])).toBe('unreadable');
+      expect(getWorstSignatureIntegrity([sig(value), sig(known)])).toBe('unreadable');
+    }
+    expect(getSignatureSeverity(value)).toBe('error');
+  });
+
   it('returns null for empty or invalid input', () => {
     expect(getWorstSignatureIntegrity([])).toBe(null);
     expect(getWorstSignatureIntegrity(null)).toBe(null);

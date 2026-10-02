@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 15. Line count: 7158. JSDoc symbol count: 94.
+File count: 15. Line count: 7137. JSDoc symbol count: 93.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -180,9 +180,10 @@ Signature details dialog \(level 1\).
 
 Exports: `SignatureDetailsDialog`
 
+Local imports: `src/utils/pdfSignatureStatus.js`
+
 Symbols:
 
-- `getIntegrityLabel` (function) - No description.
 - `getKindLabel` (function) - No description.
 - `getSigningTimeSourceLabel` (function) - No description.
 - `getTrustLabel` (function) - Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present.

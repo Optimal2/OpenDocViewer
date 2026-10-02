@@ -53,6 +53,7 @@ const DocumentViewer = () => {
     error,
     pageLoadState,
     signatureReports,
+    setSignaturePrioritySourceKey,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
   const navigationModifierState = useNavigationModifierState();
@@ -255,6 +256,10 @@ const DocumentViewer = () => {
     const report = signatureReports?.[String(currentPage?.sourceKey || '')] || null;
     return reportHasSignatures(report) ? report : null;
   }, [currentPage, signatureReports]);
+
+  useEffect(() => {
+    setSignaturePrioritySourceKey?.(String(currentPage?.sourceKey || ''));
+  }, [currentPage?.sourceKey, setSignaturePrioritySourceKey]);
 
   const openCurrentDocumentSignatures = useCallback((openerElement = null) => {
     const sourceKey = String(currentPage?.sourceKey || '');
