@@ -77,7 +77,7 @@ function Resolve-FullPath {
 function Test-VersionText {
     param([Parameter(Mandatory = $true)][string]$Value)
 
-    if ($Value -notmatch '^\d+\.\d+\.\d+(?:[-+][0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
+    if ($Value -notmatch '^\d+\.\d+\.\d+(?:-[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?(?:\+[0-9A-Za-z-]+(?:\.[0-9A-Za-z-]+)*)?$') {
         throw "Version must use simplified SemVer-compatible text such as 1.2.3, 1.2.3-beta.1, or 1.2.3+build.5."
     }
 }
@@ -85,21 +85,60 @@ function Test-VersionText {
 function ConvertTo-ComparableVersion {
     <#
     .SYNOPSIS
-    The numeric major.minor.patch core of a Test-VersionText-shaped string as [System.Version].
-    Prerelease and build metadata ('1.2.3-beta.1', '1.2.3+build.5') are accepted by
-    Test-VersionText but rejected by System.Version.TryParse, so every ordering comparison
-    in this script goes through here instead. Anything without a numeric core throws:
-    a comparison that silently does not happen is how a regression slips through.
+    Parse the numeric core and prerelease identifiers for SemVer precedence.
+    Build metadata has no precedence. Compare using Compare-VersionPrecedence;
+    comparing only the core would allow a stable release to regress to a prerelease.
     #>
     param([Parameter(Mandatory = $true)][string]$Value)
 
-    $core = ($Value.Trim() -split '[-+]', 2)[0]
+    $text = $Value.Trim()
+    Test-VersionText -Value $text
+    $withoutMetadata = ($text -split '\+', 2)[0]
+    $parts = $withoutMetadata -split '-', 2
+    $core = $parts[0]
     $parsed = $null
     if (-not [System.Version]::TryParse($core, [ref]$parsed)) {
         throw "Version '$Value' has no numeric major.minor.patch core to compare."
     }
 
-    return $parsed
+    return [pscustomobject]@{
+        Core = $parsed
+        Prerelease = @(if ($parts.Count -gt 1) { $parts[1] -split '\.' })
+    }
+}
+
+function Compare-VersionPrecedence {
+    param(
+        [Parameter(Mandatory = $true)][object]$Left,
+        [Parameter(Mandatory = $true)][object]$Right
+    )
+
+    $comparison = $Left.Core.CompareTo($Right.Core)
+    if ($comparison -ne 0) { return $comparison }
+    if ($Left.Prerelease.Count -eq 0 -and $Right.Prerelease.Count -eq 0) { return 0 }
+    if ($Left.Prerelease.Count -eq 0) { return 1 }
+    if ($Right.Prerelease.Count -eq 0) { return -1 }
+
+    for ($index = 0; $index -lt [Math]::Min($Left.Prerelease.Count, $Right.Prerelease.Count); $index++) {
+        $leftIdentifier = [string]$Left.Prerelease[$index]
+        $rightIdentifier = [string]$Right.Prerelease[$index]
+        $leftNumeric = $leftIdentifier -match '^[0-9]+$'
+        $rightNumeric = $rightIdentifier -match '^[0-9]+$'
+        if ($leftNumeric -and $rightNumeric) {
+            # Compare numeric identifiers without a fixed-width integer limit.
+            $leftIdentifier = $leftIdentifier.TrimStart('0')
+            $rightIdentifier = $rightIdentifier.TrimStart('0')
+            $comparison = $leftIdentifier.Length.CompareTo($rightIdentifier.Length)
+            if ($comparison -ne 0) { return $comparison }
+        }
+        elseif ($leftNumeric) { return -1 }
+        elseif ($rightNumeric) { return 1 }
+
+        $comparison = [StringComparer]::Ordinal.Compare($leftIdentifier, $rightIdentifier)
+        if ($comparison -ne 0) { return $comparison }
+    }
+
+    return $Left.Prerelease.Count.CompareTo($Right.Prerelease.Count)
 }
 
 function ConvertTo-VersionPart {
@@ -317,8 +356,8 @@ function Get-JsonFileText {
 
 function Test-JsonFileWouldChange {
     <#
-        True when writing $Value to $Path would produce different bytes than the
-        file already holds. A missing file counts as a change.
+        True when the canonical JSON text differs from the decoded file text.
+        A missing file counts as a change.
 
         This is the measurement the follow-up bump depends on: the persist loop
         used to rewrite EVERY loaded definition unconditionally, so a definition
@@ -336,6 +375,9 @@ function Test-JsonFileWouldChange {
         return $true
     }
 
+    # Encoding-only differences deliberately do not trigger a rewrite: the persist
+    # loop also checks this predicate and skips Save-JsonFile, preserving the original
+    # bytes (including a BOM). Any actual text rewrite selects a definition bump first.
     $current = [IO.File]::ReadAllText($Path)
     return ($current -cne (Get-JsonFileText -Value $Value))
 }
@@ -607,13 +649,16 @@ try {
         $selectedComponents = @($components)
     }
     else {
+        $seenComponentKeys = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $selectedComponents = @(foreach ($key in $ComponentKey) {
             $match = @($components | Where-Object { $_.componentKey -eq $key })
             if ($match.Count -ne 1) {
                 throw "Component '$key' was not found exactly once in $manifestPath."
             }
 
-            $match[0]
+            if ($seenComponentKeys.Add([string]$match[0].componentKey)) {
+                $match[0]
+            }
         })
     }
 
@@ -641,13 +686,16 @@ try {
         $selectedWidgets = @($widgetEntries)
     }
     else {
+        $seenWidgetPaths = [System.Collections.Generic.HashSet[string]]::new([StringComparer]::OrdinalIgnoreCase)
         $selectedWidgets = @(foreach ($path in $WidgetFile) {
             $match = @($widgetEntries | Where-Object { $_.Path -eq $path })
             if ($match.Count -ne 1) {
                 throw "Widget file '$path' was not found exactly once in $manifestPath."
             }
 
-            $match[0]
+            if ($seenWidgetPaths.Add([string]$match[0].Path)) {
+                $match[0]
+            }
         })
     }
 
@@ -721,7 +769,7 @@ try {
         # never be skipped for a prerelease or build-suffixed version. Only a manifest that
         # has no repositoryVersion yet has nothing to regress from.
         if (-not [string]::IsNullOrWhiteSpace($currentRepositoryVersion) -and
-            (ConvertTo-ComparableVersion -Value $nextRepositoryVersion) -lt (ConvertTo-ComparableVersion -Value $currentRepositoryVersion)) {
+            (Compare-VersionPrecedence -Left (ConvertTo-ComparableVersion -Value $nextRepositoryVersion) -Right (ConvertTo-ComparableVersion -Value $currentRepositoryVersion)) -lt 0) {
             throw ("Refusing to regress repositoryVersion from '{0}' to '{1}'. -Version is applied to every " -f $currentRepositoryVersion, $nextRepositoryVersion) +
                   'selected target, including the repository. Pass -SkipRepositoryVersion when setting components ' +
                   'to an explicit version, or bump the repository separately.'
@@ -818,8 +866,7 @@ try {
                 $shouldUpdate = $true
             }
             else {
-                # Same comparable-core rule as the repository guard: a prerelease suffix is
-                # legal version text and must not abort the bump.
+                # Use the same SemVer precedence as the repository regression guard.
                 try {
                     $parsedCurrentMaxVersion = ConvertTo-ComparableVersion -Value $currentMaxVersion
                 }
@@ -834,7 +881,7 @@ try {
                     throw "Component '$($component.componentKey)' was bumped to non-numeric version '$nextVersion'. Cannot compare with compatibleArtifacts.maxVersion '$currentMaxVersion'."
                 }
 
-                if ($parsedNextVersion -gt $parsedCurrentMaxVersion) {
+                if ((Compare-VersionPrecedence -Left $parsedNextVersion -Right $parsedCurrentMaxVersion) -gt 0) {
                     $shouldUpdate = $true
                 }
             }
@@ -901,6 +948,15 @@ try {
         $selectedModuleDefinitions = @($selectedModuleDefinitions) + $touchedSelection.ToArray()
     }
 
+    # Validate the entire selection before the first write, so a missing definition
+    # cannot leave earlier definitions or the manifest partially bumped.
+    foreach ($moduleDefinition in $selectedModuleDefinitions) {
+        $definitionPath = Resolve-FullPath -Path (Join-Path $repositoryRoot ([string]$moduleDefinition.path))
+        if (-not (Test-Path -LiteralPath $definitionPath -PathType Leaf)) {
+            throw "Module definition '$($moduleDefinition.moduleKey)' file was not found: $definitionPath"
+        }
+    }
+
     # Persist any compatibleArtifacts changes made above.
     #
     # Definitions that are in the selection are deliberately NOT written here: the
@@ -924,7 +980,7 @@ try {
             continue
         }
 
-        # Nothing to write: the file already holds exactly these bytes.
+        # Nothing to write: preserve the existing bytes, including their encoding.
         if (-not (Test-JsonFileWouldChange -Path $definitionPath -Value $definitionJson)) {
             continue
         }
