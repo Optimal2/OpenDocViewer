@@ -14,14 +14,24 @@ import { createSignatureFixtures, createFixturePki, baseSignedPdf, signFile, bui
 import { collectPdfSignatures, SUPPORTED_SUBFILTERS } from '../pdfSignatures.js';
 
 let fixtures;
+const prefixLengths = [7, 1024, 4096, 65536];
 
 beforeAll(async () => {
   fixtures = await createSignatureFixtures();
   const pki = await createFixturePki();
   const base = baseSignedPdf({ fieldName: 'Prefixed', visible: false,
     sigOptions: { subFilter: 'adbe.pkcs7.detached' } }).serialize();
-  fixtures['signed-with-prefix.pdf'] = await signFile(withJunkPrefix(base.bytes, 7),
-    base.offsets.get(8) + 7, (signedOverBytes) => buildSignedData({ signer: pki.rsa, signedOverBytes }));
+  for (const length of prefixLengths) {
+    const name = `signed-with-prefix-${length}.pdf`;
+    fixtures[name] = await signFile(withJunkPrefix(base.bytes, length),
+      base.offsets.get(8) + length, (signedOverBytes) => buildSignedData({ signer: pki.rsa, signedOverBytes }));
+    fixtures[`tampered-with-prefix-${length}.pdf`] = fixtures[name].slice();
+    fixtures[`tampered-with-prefix-${length}.pdf`][0] ^= 1;
+  }
+  const headerless = base.bytes.slice();
+  headerless.fill(0x20, 0, 8);
+  fixtures['signed-without-header.pdf'] = await signFile(headerless, base.offsets.get(8),
+    (signedOverBytes) => buildSignedData({ signer: pki.rsa, signedOverBytes }));
 }, 120000);
 
 async function one(name) {
@@ -38,17 +48,15 @@ function withJunkPrefix(bytes, length) {
 }
 
 describe('F10 PDF headers after leading junk', () => {
-  it('verifies a prefix included in the actual signed bytes and detects subsequent tampering', async () => {
-    const valid = await one('signed-with-prefix.pdf');
+  it.each(prefixLengths)('verifies a %i-byte prefix included in signed bytes and detects tampering', async (length) => {
+    const valid = await one(`signed-with-prefix-${length}.pdf`);
     expect(valid.integrity).toBe('intact');
-    const tampered = fixtures['signed-with-prefix.pdf'].slice();
-    tampered[0] ^= 1;
-    const report = await collectPdfSignatures(tampered);
-    expect(report.signatures).toHaveLength(1);
-    expect(report.signatures[0].integrity).toBe('digest-mismatch');
+    expect(valid.coversWholeFile).toBe(true);
+    const tampered = await one(`tampered-with-prefix-${length}.pdf`);
+    expect(tampered.integrity).toBe('digest-mismatch');
   });
   it.each(['valid-rsa.pdf', 'digest-mismatch.pdf'])('%s remains visible with broken byte offsets', async (name) => {
-    for (const length of [7, 1019, 1023]) {
+    for (const length of [7, 1019, 1023, 1024, 4096, 65536]) {
       const report = await collectPdfSignatures(withJunkPrefix(fixtures[name], length));
       expect(report.signatures).toHaveLength(1);
       expect(report.signatures[0].fieldName).toBeTruthy();
@@ -57,9 +65,13 @@ describe('F10 PDF headers after leading junk', () => {
     }
   });
 
-  it('does not search beyond the first 1024 header positions', async () => {
-    expect(await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024)))
-      .toEqual({ signatures: [] });
+  it('discovers signatures without a header and verifies the actual bytes', async () => {
+    expect((await one('signed-without-header.pdf')).integrity).toBe('intact');
+    const tampered = fixtures['valid-rsa.pdf'].slice();
+    tampered.fill(0x20, 0, 8);
+    const report = await collectPdfSignatures(tampered);
+    expect(report.signatures).toHaveLength(1);
+    expect(report.signatures[0].integrity).toBe('digest-mismatch');
   });
 });
 
@@ -301,7 +313,7 @@ describe('fast path does not load the CMS stack', () => {
       return actual;
     });
     const mod = await import('../pdfSignatures.js');
-    for (const length of [0, 7, 1023]) {
+    for (const length of [0, 7, 1023, 1024, 4096, 65536]) {
       const report = await mod.collectPdfSignatures(withJunkPrefix(fixtures['unsigned.pdf'], length));
       expect(report).toEqual({ signatures: [] });
     }

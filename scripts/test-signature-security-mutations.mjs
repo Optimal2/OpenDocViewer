@@ -18,7 +18,7 @@ const mutations = [
   ['F7', parser, 'let pdfLib;', "if (!new TextDecoder().decode(bytes).includes('/ByteRange')) return empty;\n  let pdfLib;", tests, 'F7'],
   ['F8', inspector, "if (workerHandle) markBroken(workerHandle, 'signature worker disposed');", 'workerHandle?.worker?.terminate();', workerTests, 'F8'],
   ['Minification', parser, 'return obj instanceof pdfLib.PDFDict;', "return obj?.constructor?.name === 'PDFDict';", tests, 'production minification'],
-  ['F10', parser, 'if (!hasHeader) {', "if (bytes.length < 9 || String.fromCharCode(bytes[0], bytes[1], bytes[2], bytes[3]) !== '%PDF') {", 'src/utils/__tests__/pdfSignatures.test.js', 'F10'],
+  ['F10b', parser, 'let pdfLib;', "if (!new TextDecoder().decode(bytes.subarray(0, 1028)).includes('%PDF-')) return empty;\n  let pdfLib;", 'src/utils/__tests__/pdfSignatures.test.js', 'F10'],
   ['F12', inspector, 'if (workerRecreations >= MAX_WORKER_RECREATIONS) return null;', 'return null;', workerTests, 'F12']
 ];
 

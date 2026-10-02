@@ -979,6 +979,10 @@ export function unreadableSignatureReport(reason) {
 // Object-stream contents have no file span and consequently cannot pass ByteRange.
 async function parseWithSourceSpans(bytes, pdfLib) {
   const parser = pdfLib.PDFParser.forBytesWithOptions(bytes, 100, true);
+  // The caller already treats this document as PDF. Discover objects from byte
+  // zero even if the header is missing or follows signature dictionaries. The
+  // parser's default version metadata is irrelevant to integrity verification.
+  parser.parseHeader = () => parser.context.header;
   const sourceSpans = new WeakMap();
   const parsedDicts = [];
   const assign = parser.context.assign;
@@ -1056,19 +1060,8 @@ export async function collectPdfSignatures(pdfBytes) {
   } catch {
     return empty;
   }
-  // Readers tolerate leading junk. Keep the original bytes so ByteRange and
-  // /Contents positions are verified against the actual file, including its prefix.
-  let hasHeader = false;
-  for (let i = 0; i < Math.min(1024, bytes.length - 4); i++) {
-    if (bytes[i] === 0x25 && bytes[i + 1] === 0x50 && bytes[i + 2] === 0x44 &&
-        bytes[i + 3] === 0x46 && bytes[i + 4] === 0x2d) {
-      hasHeader = true;
-      break;
-    }
-  }
-  if (!hasHeader) {
-    return empty;
-  }
+  // Never gate discovery on a header or strip leading bytes: ByteRange and
+  // /Contents positions must be verified against the actual file.
   if (bytes.length > 64 * 1024 * 1024) return unreadableSignatureReport('PDF exceeds the 64 MiB signature inspection limit');
 
   let pdfLib;

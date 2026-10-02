@@ -86,7 +86,7 @@
   },
   "stats": {
     "fileCount": 127,
-    "sourceLineCount": 53414,
+    "sourceLineCount": 53407,
     "docletCount": 1420,
     "documentedFileCount": 127,
     "lowConfidenceSummaryCount": 0,
@@ -573,7 +573,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 77,
-      "lines": 1140,
+      "lines": 1133,
       "incomingLocalImports": 3,
       "doclets": 9,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -1520,7 +1520,7 @@
     {
       "name": "src/utils",
       "fileCount": 42,
-      "lineCount": 17272,
+      "lineCount": 17265,
       "docletCount": 658,
       "importantFiles": [
         {
@@ -42167,7 +42167,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1140,
+      "lines": 1133,
       "extension": ".js",
       "jsdocBlockCount": 15,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -42187,7 +42187,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1077,
+          "line": 1070,
           "kind": "dynamic"
         }
       ],
@@ -42210,7 +42210,7 @@
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1051
+          "line": 1055
         }
       ],
       "declarations": [
@@ -42472,12 +42472,12 @@
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1051
+          "line": 1055
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1052
+          "line": 1056
         }
       ],
       "parseError": null,
@@ -42633,7 +42633,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1051,
+          "line": 1055,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -42670,7 +42670,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1077,
+          "line": 1070,
           "kind": "dynamic"
         }
       ],
@@ -82960,7 +82960,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1051,
+      "line": 1055,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {

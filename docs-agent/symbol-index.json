@@ -24690,7 +24690,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1051,
+    "line": 1055,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {

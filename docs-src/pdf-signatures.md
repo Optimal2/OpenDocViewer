@@ -147,9 +147,11 @@ for PDF structure parsing. If structure/discovery cannot complete, a document-le
 `unreadable` placeholder with null identity fields communicates the incomplete inspection;
 it is not evidence that a particular signature exists.
 
-The header pre-check accepts `%PDF-` starting at any of the first 1024 byte positions.
-Leading junk is never stripped: ByteRange verification uses actual file offsets, so
-prepending bytes after signing cannot hide a signature or make its old offsets verify.
+Discovery starts at byte zero regardless of where, or whether, a `%PDF-` header
+exists: rendering can recover PDFs whose headers fall outside an initial search window.
+Leading junk is never stripped. ByteRange verification uses actual file offsets, so a
+prefix added after signing leaves the signature visible but its broken offsets unreadable.
+A prefix included before signing can be intact only when the actual bytes verify.
 
 ## Level-1 user interface
 
