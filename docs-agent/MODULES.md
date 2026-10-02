@@ -17,16 +17,16 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 13. Line count: 6666. JSDoc symbol count: 84.
+File count: 15. Line count: 7158. JSDoc symbol count: 94.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
+- `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(level 1\).
 - `src/components/Resizer.jsx` - OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
 - `src/components/LoadingSpinner.jsx` - OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
+- `src/components/SignatureStatusBadge.jsx` - Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.
 - `src/components/ViewerProblemNotice.jsx` - OpenDocViewer — configurable viewer\-level problem notice.
-- `src/components/DocumentConsumerWrapper.jsx` - OpenDocViewer — Consumer Wrapper for Loader \+ Viewer Orchestrates the document loading pipeline and the main viewer UI: • Pattern mode: \{ folder, extension, endNumber \} • Explicit\-list: \{ sourceList: \[\{ url, ext?, fileIn
-- `src/components/DocumentMetadataMatrixOverlayDialog.jsx` - Session\-wide document metadata matrix overlay.
 
 ## src/components/common
 
@@ -49,7 +49,7 @@ File count: 8. Line count: 4109. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 17. Line count: 7123. JSDoc symbol count: 111.
+File count: 17. Line count: 7138. JSDoc symbol count: 111.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -62,20 +62,20 @@ File count: 17. Line count: 7123. JSDoc symbol count: 111.
 
 ## src/components/DocumentViewer
 
-File count: 10. Line count: 4969. JSDoc symbol count: 117.
+File count: 10. Line count: 5043. JSDoc symbol count: 118.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
 - `src/components/DocumentViewer/DocumentViewerRender.jsx` - OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;.
 - `src/components/DocumentViewer/hooks/useViewerKeyboardNavigation.js` - Global keyboard navigation, zoom, rotation, and selection shortcuts for DocumentViewer.
 - `src/components/DocumentViewer/hooks/useViewerPostZoom.js` - File: src/components/DocumentViewer/hooks/useViewerPostZoom.js Encapsulates per\-pane &quot;post\-zoom&quot; state &amp; handlers used only in compare mode.
-- `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
 - `src/components/DocumentViewer/DocumentViewer.jsx` - OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation \+ selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the
+- `src/components/DocumentViewer/DocumentViewerToolbar.jsx` - Toolbar adapter for the document viewer.
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 
 ## src/contexts
 
-File count: 4. Line count: 3198. JSDoc symbol count: 83.
+File count: 4. Line count: 3212. JSDoc symbol count: 83.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -90,12 +90,13 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 4. Line count: 650. JSDoc symbol count: 23.
+File count: 5. Line count: 742. JSDoc symbol count: 27.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/usePageNavigation.js` - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/hooks/useAcceleratingHoldRepeat.js` - Reusable press\-and\-hold behavior for toolbar buttons.
+- `src/hooks/usePdfSignatureReports.js` - Level\-1 PDF signature wiring.
 
 ## src/i18n.js
 
@@ -149,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 41. Line count: 17037. JSDoc symbol count: 648.
+File count: 42. Line count: 17123. JSDoc symbol count: 655.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

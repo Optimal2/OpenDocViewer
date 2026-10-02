@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 41. Line count: 17037. JSDoc symbol count: 648.
+File count: 42. Line count: 17123. JSDoc symbol count: 655.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -375,6 +375,22 @@ Symbols:
 - `module:utils/pdfSignatures.parsePdfDateString` (function) - Parse a PDF date string \(&quot;D:YYYYMMDDHHmmSS\+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone \- a missing timezone is treated as UTC\).
 - `module:utils/pdfSignatures~discoverSignatures` (function) - Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\).
 - `module:utils/pdfSignatures.collectPdfSignatures` (function) - Collect signature information from PDF bytes.
+
+## src/utils/pdfSignatureStatus.js
+
+Level\-1 signature UI status helpers.
+
+Exports: `getSignatureSeverity`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
+
+Symbols:
+
+- `module:utils/pdfSignatureStatus` (module) - Level\-1 signature UI status helpers.
+- `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity classes used for colours/icons: intact is neutral/positive, modified\-after\-signing and unsupported are warnings, and digest\-mismatch, signature\-invalid and unreadable are...
+- `module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST` (constant) - Integrity statuses ordered worst\-first.
+- `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Map one integrity status to its severity class.
+- `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.
+- `module:utils/pdfSignatureStatus.getSignatureCount` (function) - No description.
+- `module:utils/pdfSignatureStatus.reportHasSignatures` (function) - No description.
 
 ## src/utils/pdfWorkerDispatcher.js
 

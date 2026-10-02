@@ -34,6 +34,9 @@
     --thumbnail-compare-color: #b25d00 !important;
     --thumbnail-dual-color: #7b1fa2 !important;
     --thumbnail-shell-color: rgba(11, 87, 208, 0.08) !important;
+    --odv-signature-ok-color: #1e7e34 !important;
+    --odv-signature-warning-color: #b25d00 !important;
+    --odv-signature-error-color: #c62828 !important;
   }
   html, body { margin: 0 !important; padding: 0 !important; }
 

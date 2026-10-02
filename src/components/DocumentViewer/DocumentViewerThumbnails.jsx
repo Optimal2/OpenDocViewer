@@ -28,6 +28,7 @@ import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
  * @param {function(number): boolean} props.hidePageFromSelection
  * @param {function(number): boolean} props.hideDocumentFromSelection
  * @param {function(number): boolean} [props.onOpenDocumentMetadata]
+ * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures]
  * @param {number} props.minWidth
  * @param {number} props.maxWidth
  * @param {number} props.defaultWidth
@@ -57,6 +58,7 @@ const DocumentViewerThumbnails = ({
   hidePageFromSelection,
   hideDocumentFromSelection,
   onOpenDocumentMetadata,
+  onOpenSignatures,
   minWidth,
   maxWidth,
   defaultWidth,
@@ -174,6 +176,7 @@ const DocumentViewerThumbnails = ({
         onHidePageFromSelection={hidePageFromSelection}
         onHideDocumentFromSelection={hideDocumentFromSelection}
         onOpenDocumentMetadata={onOpenDocumentMetadata}
+        onOpenSignatures={onOpenSignatures}
       />
     </div>
   );
@@ -207,6 +210,7 @@ DocumentViewerThumbnails.propTypes = {
   hidePageFromSelection: PropTypes.func.isRequired,
   hideDocumentFromSelection: PropTypes.func.isRequired,
   onOpenDocumentMetadata: PropTypes.func,
+  onOpenSignatures: PropTypes.func,
   minWidth: PropTypes.number.isRequired,
   maxWidth: PropTypes.number.isRequired,
   defaultWidth: PropTypes.number.isRequired,

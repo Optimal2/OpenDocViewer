@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 123
-- Source lines: 52479
-- JSDoc symbols: 1397
+- Files: 127
+- Source lines: 53252
+- JSDoc symbols: 1419
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -29,13 +29,13 @@
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2637 lines
+- `src/contexts/ViewerProvider.jsx`: 2651 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2297 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2172 lines
-- `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2155 lines
+- `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2170 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1905 lines
-- `src/components/DocumentThumbnailList.jsx`: 1370 lines
+- `src/components/DocumentThumbnailList.jsx`: 1402 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/components/DocumentRender.jsx`: 1135 lines

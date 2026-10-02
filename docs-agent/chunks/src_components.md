@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 13. Line count: 6666. JSDoc symbol count: 84.
+File count: 15. Line count: 7158. JSDoc symbol count: 94.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -87,7 +87,7 @@ OpenDocViewer — Deterministic thumbnail strip.
 
 Exports: `DocumentThumbnailList`
 
-Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`, `src/utils/pdfSignatureStatus.js`, `src/components/SignatureStatusBadge.jsx`
 
 Symbols:
 
@@ -173,6 +173,36 @@ Symbols:
 - `Resizer.propTypes.orientation` (member) - Visual/semantic orientation of the separator.
 - `Resizer.propTypes.ariaLabel` (member) - Accessible name for assistive technologies.
 - `Resizer.propTypes.className` (member) - Extra class names to append to the root element.
+
+## src/components/SignatureDetailsDialog.jsx
+
+Signature details dialog \(level 1\).
+
+Exports: `SignatureDetailsDialog`
+
+Symbols:
+
+- `getIntegrityLabel` (function) - No description.
+- `getKindLabel` (function) - No description.
+- `getSigningTimeSourceLabel` (function) - No description.
+- `getTrustLabel` (function) - Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present.
+- `module.exports` (function) - No description.
+- `<anonymous>~handleEscape` (function) - No description.
+- `SignatureDetailsDialog~handleTabTrap` (function) - Keep Tab navigation inside the dialog while it is open.
+- `SignatureDetailsDialog~orEmpty` (function) - No description.
+
+## src/components/SignatureStatusBadge.jsx
+
+Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.
+
+Exports: `SignatureStatusBadge`
+
+Local imports: `src/utils/pdfSignatureStatus.js`
+
+Symbols:
+
+- `ICON_BY_SEVERITY` (constant) - Material Icons ligature per severity.
+- `module.exports` (function) - No description.
 
 ## src/components/ViewerProblemNotice.jsx
 

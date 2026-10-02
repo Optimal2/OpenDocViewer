@@ -38,6 +38,7 @@ import {
 } from '../../utils/viewerPreferences.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
+import SignatureStatusBadge from '../SignatureStatusBadge.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
 import {
@@ -363,6 +364,8 @@ const DocumentToolbar = ({
   documentNavigationEnabled = false,
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
+  signatureReport = null,
+  onOpenSignatures,
 }) => {
   const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -1847,6 +1850,14 @@ const DocumentToolbar = ({
 
       <div className="toolbar-spacer" />
 
+      {signatureReport ? (
+        <SignatureStatusBadge
+          variant="toolbar"
+          report={signatureReport}
+          onOpen={(element) => onOpenSignatures?.(element)}
+        />
+      ) : null}
+
       <div className="toolbar-end-actions">
         <ThemeMenuButton />
         <LanguageMenuButton />
@@ -2149,6 +2160,10 @@ DocumentToolbar.propTypes = {
   sessionTotalPages: PropTypes.number,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),
+  signatureReport: PropTypes.shape({
+    signatures: PropTypes.arrayOf(PropTypes.object),
+  }),
+  onOpenSignatures: PropTypes.func,
 };
 
 export default React.memo(DocumentToolbar);

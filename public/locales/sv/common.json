@@ -712,6 +712,64 @@
     "alias": "Alias: {alias}",
     "rawValue": "Råvärde: {value}"
   },
+  "signatures": {
+    "badge": {
+      "ariaLabel": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}}",
+      "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer"
+    },
+    "dialog": {
+      "title": "Signaturer",
+      "subtitle": "{count, plural, =1 {1 signatur i detta dokument.} other {# signaturer i detta dokument.}}",
+      "subtitleDocumentPosition": "Dokument {document} av {total}",
+      "close": "Stäng",
+      "trustLine": "Tillit ej kontrollerad – visar vem som signerat och om dokumentet är oförändrat, inte om signaturen är giltig.",
+      "signatureHeading": "Signatur {index}",
+      "notAvailable": "—",
+      "validityRange": "{from} – {to}"
+    },
+    "fields": {
+      "signer": "Undertecknare",
+      "organization": "Organisation",
+      "issuer": "Utfärdare",
+      "signingTime": "Signeringstid",
+      "reason": "Orsak",
+      "location": "Plats",
+      "kind": "Typ",
+      "integrity": "Integritet",
+      "coversWholeFile": "Omfattar hela dokumentet",
+      "certificateValidity": "Certifikatet giltigt",
+      "trust": "Tillit",
+      "format": "Format"
+    },
+    "integrity": {
+      "intact": "Intakt",
+      "modifiedAfterSigning": "Ändrat efter signering",
+      "digestMismatch": "Innehållet matchar inte signaturen",
+      "signatureInvalid": "Signaturen är ogiltig",
+      "unsupported": "Signatur finns, formatet stöds inte",
+      "unreadable": "Signaturen kan inte läsas"
+    },
+    "trust": {
+      "notChecked": "Ej kontrollerad",
+      "valid": "Giltig",
+      "invalid": "Ogiltig",
+      "unknown": "Okänd"
+    },
+    "kind": {
+      "approval": "Godkännande",
+      "certification": "Certifiering",
+      "timestamp": "Tidsstämpel"
+    },
+    "timeSource": {
+      "signedAttribute": "Från de signerade attributen",
+      "pdfM": "Från PDF:ens signaturlexikon (/M)",
+      "none": "Ingen signeringstid registrerad"
+    },
+    "coversWhole": {
+      "yes": "Ja",
+      "no": "Nej"
+    }
+  },
   "about": {
     "title": "Om OpenDocViewer",
     "subtitle": "Versionsinformation, projektlänkar och kontaktuppgifter.",

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/hooks
 
-File count: 4. Line count: 650. JSDoc symbol count: 23.
+File count: 5. Line count: 742. JSDoc symbol count: 27.
 
 ## src/hooks/useAcceleratingHoldRepeat.js
 
@@ -66,3 +66,18 @@ Symbols:
 - `usePageTimer` (function) - Custom hook to handle page change with a timer for continuous navigation.
 - `usePageTimer~startPageTimer` (constant) - Start the timer for continuous page navigation.
 - `usePageTimer~stopPageTimer` (constant) - Stop any active delay or interval timer \(idempotent\).
+
+## src/hooks/usePdfSignatureReports.js
+
+Level\-1 PDF signature wiring.
+
+Exports: `usePdfSignatureReports`
+
+Local imports: `src/utils/pdfSignatureInspector.js`
+
+Symbols:
+
+- `module:hooks/usePdfSignatureReports` (module) - Level\-1 PDF signature wiring.
+- `module:hooks/usePdfSignatureReports~isPdfPage` (function) - No description.
+- `module:hooks/usePdfSignatureReports` (function) - No description.
+- `module:hooks/usePdfSignatureReports~usePdfSignatureReports~requestedRef` (constant) - sourceKeys already inspected or in flight: one inspector call per document, ever.

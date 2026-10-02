@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 4969. JSDoc symbol count: 117.
+File count: 10. Line count: 5043. JSDoc symbol count: 118.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -18,10 +18,11 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`, `src/components/DocumentMetadataMatrixOverlayDialog.jsx`, `src/components/ViewerProblemNotice.jsx`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`, `src/components/DocumentMetadataMatrixOverlayDialog.jsx`, `src/components/SignatureDetailsDialog.jsx`
 
 Symbols:
 
+- `DocumentViewer~openSignatureDialog` (constant) - Open the signature details dialog for a document \(sourceKey\).
 - `<anonymous>~isEditableTarget` (function) - No description.
 - `<anonymous>~hasActiveModalDialog` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.

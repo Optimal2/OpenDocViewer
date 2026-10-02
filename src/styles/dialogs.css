@@ -1617,3 +1617,267 @@
     outline-color: Highlight;
   }
 }
+
+
+/* PDF signature symbol (thumbnail + toolbar) and signature details dialog.
+   The badge is viewer UI only: print and export build their own output
+   documents and never include it. */
+
+.odv-signature-badge {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid var(--odv-border, #d5dae1);
+  border-radius: 8px;
+  background: var(--odv-surface, #ffffff);
+  color: var(--text-color);
+  cursor: pointer;
+  padding: 0;
+}
+
+.odv-signature-badge:hover,
+.odv-signature-badge:focus-visible {
+  background: var(--odv-hover-overlay);
+  outline: none;
+}
+
+.odv-signature-badge:focus-visible {
+  outline: 2px solid var(--focus-shadow, rgba(74, 74, 74, 0.5));
+  outline-offset: 1px;
+}
+
+.odv-signature-badge .material-icons {
+  font-size: 18px;
+}
+
+.odv-signature-badge--ok {
+  color: var(--odv-signature-ok-color, #1e7e34);
+}
+
+.odv-signature-badge--warning {
+  color: var(--odv-signature-warning-color, #b25d00);
+}
+
+.odv-signature-badge--error {
+  color: var(--odv-signature-error-color, #c62828);
+}
+
+.odv-signature-badge--toolbar {
+  width: 34px;
+  height: 34px;
+  margin-left: 8px;
+}
+
+.odv-signature-badge--thumbnail {
+  position: absolute;
+  top: 0;
+  right: 0;
+  z-index: 5;
+  width: 26px;
+  height: 26px;
+  border-radius: 0 0 0 8px;
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.14);
+}
+
+.odv-signature-badge--thumbnail .material-icons {
+  font-size: 16px;
+}
+
+.odv-signature-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(13, 18, 28, 0.48);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px;
+  z-index: 9999;
+}
+
+.odv-signature-dialog {
+  background: var(--odv-surface, #ffffff);
+  color: inherit;
+  border-radius: 18px;
+  width: min(760px, 96vw);
+  max-width: 96vw;
+  max-height: min(92vh, 920px);
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+  box-shadow: 0 20px 56px rgba(0, 0, 0, 0.28);
+  border: 1px solid rgba(0, 0, 0, 0.08);
+}
+
+.odv-signature-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 18px 20px 14px;
+  border-bottom: 1px solid var(--odv-border, #d5dae1);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--odv-surface) 98%, transparent 2%), color-mix(in srgb, var(--odv-surface-elevated) 98%, transparent 2%));
+}
+
+.odv-signature-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 700;
+  letter-spacing: 0.01em;
+}
+
+.odv-signature-subtitle {
+  margin: 4px 0 0 0;
+  color: var(--text-muted-color);
+  font-size: 13px;
+  line-height: 1.45;
+}
+
+.odv-signature-trust-line {
+  margin: 0;
+  padding: 10px 20px;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--text-color);
+  background: var(--odv-surface-muted, rgba(127, 127, 127, 0.06));
+  border-bottom: 1px solid var(--odv-border, #d5dae1);
+}
+
+.odv-signature-body {
+  flex: 1 1 auto;
+  overflow: auto;
+  padding: 12px 20px 12px;
+}
+
+.odv-signature-entry {
+  padding: 10px 0 14px;
+  border-bottom: 1px solid var(--odv-border, #d5dae1);
+}
+
+.odv-signature-entry:last-child {
+  border-bottom: 0;
+}
+
+.odv-signature-entry-title {
+  margin: 0 0 8px 0;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  text-transform: uppercase;
+  color: var(--text-muted-color);
+}
+
+.odv-signature-fields {
+  margin: 0;
+  display: grid;
+  grid-template-columns: minmax(140px, 32%) 1fr;
+  row-gap: 6px;
+  column-gap: 12px;
+}
+
+.odv-signature-field {
+  display: contents;
+}
+
+.odv-signature-field dt {
+  font-weight: 600;
+  line-height: 1.45;
+}
+
+.odv-signature-field dd {
+  margin: 0;
+  line-height: 1.45;
+  word-break: break-word;
+  -webkit-user-select: text;
+  user-select: text;
+}
+
+.odv-signature-secondary {
+  display: block;
+  margin-top: 2px;
+  color: var(--text-muted-color);
+  font-size: 12px;
+  line-height: 1.4;
+  word-break: break-word;
+}
+
+.odv-signature-code {
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  font-size: 12px;
+  white-space: normal;
+  word-break: break-word;
+}
+
+.odv-signature-close-icon,
+.odv-signature-close-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 40px;
+  padding: 0 16px;
+  border-radius: 10px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  background: var(--odv-surface, #ffffff);
+  color: inherit;
+  cursor: pointer;
+}
+
+.odv-signature-close-icon {
+  width: 34px;
+  min-width: 34px;
+  height: 34px;
+  padding: 0;
+}
+
+.odv-signature-close-icon:hover,
+.odv-signature-close-icon:focus-visible,
+.odv-signature-close-button:hover,
+.odv-signature-close-button:focus-visible {
+  background: var(--odv-hover-overlay);
+  outline: none;
+}
+
+.odv-signature-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 16px 20px 20px;
+  border-top: 1px solid var(--odv-border, #d5dae1);
+  background: color-mix(in srgb, var(--odv-surface-elevated) 92%, transparent 8%);
+}
+
+@media (max-width: 720px) {
+  .odv-signature-dialog {
+    width: min(100%, 100vw);
+    max-height: 100vh;
+    border-radius: 0;
+  }
+
+  .odv-signature-backdrop {
+    padding: 0;
+  }
+
+  .odv-signature-fields {
+    grid-template-columns: 1fr;
+  }
+
+  .odv-signature-field dt {
+    margin-top: 6px;
+  }
+}
+
+[data-theme='dark'] .odv-signature-close-icon,
+[data-theme='dark'] .odv-signature-close-button {
+  background: var(--odv-surface-elevated);
+  color: var(--text-color);
+}
+
+@media (forced-colors: active) {
+  .odv-signature-badge--ok,
+  .odv-signature-badge--warning,
+  .odv-signature-badge--error {
+    color: ButtonText;
+  }
+
+  .odv-signature-badge:focus-visible {
+    outline-color: Highlight;
+  }
+}

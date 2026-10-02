@@ -38,6 +38,8 @@ import {
   revokeTrackedObjectUrls,
   getTrackedObjectUrlCount,
 } from '../utils/objectUrlRegistry.js';
+import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
+import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
 
 
 /**
@@ -2552,7 +2554,17 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     return undefined;
   }, [allPages, loadingRunActive, pageLoadState, pumpWarmupQueue]);
 
+  // Level-1 PDF signature inspection: starts only after the first page is
+  // ready (page rendering keeps priority), runs once per PDF source off the
+  // main thread, and caches one report per document for the session.
+  const signatureReports = usePdfSignatureReports({
+    allPages,
+    inspectionReady: pageLoadState.readyPages > 0,
+    readSourceArrayBuffer,
+  });
+
   useEffect(() => () => {
+    disposePdfSignatureWorker();
     resetViewerState().catch((e) => {
       logger.warn('ViewerProvider unmount cleanup failed', { error: String(e?.message || e) });
     });
@@ -2593,6 +2605,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     memoryPressureStage,
     runtimeDiagnostics,
     pageLoadState,
+    signatureReports,
     scheduleSourceWarmup,
   }), [
     bundle,
@@ -2625,6 +2638,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     memoryPressureStage,
     runtimeDiagnostics,
     pageLoadState,
+    signatureReports,
     scheduleSourceWarmup,
   ]);
 

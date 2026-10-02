@@ -40,6 +40,9 @@
   --thumbnail-compare-color: #b25d00;
   --thumbnail-dual-color: #7b1fa2;
   --thumbnail-shell-color: rgba(11, 87, 208, 0.08);
+  --odv-signature-ok-color: #1e7e34;
+  --odv-signature-warning-color: #b25d00;
+  --odv-signature-error-color: #c62828;
 }
 
 [data-theme='normal'] {
@@ -80,6 +83,9 @@
   --thumbnail-compare-color: #9b5600;
   --thumbnail-dual-color: #7438a0;
   --thumbnail-shell-color: rgba(37, 88, 173, 0.12);
+  --odv-signature-ok-color: #2f7d4f;
+  --odv-signature-warning-color: #9b5600;
+  --odv-signature-error-color: #c64242;
 }
 
 [data-theme='dark'] {
@@ -120,6 +126,9 @@
   --thumbnail-compare-color: #f6ad55;
   --thumbnail-dual-color: #d7aefb;
   --thumbnail-shell-color: rgba(138, 180, 248, 0.12);
+  --odv-signature-ok-color: #81c995;
+  --odv-signature-warning-color: #f6ad55;
+  --odv-signature-error-color: #cf6679;
 }
 
 body {

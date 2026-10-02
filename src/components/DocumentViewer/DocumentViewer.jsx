@@ -19,7 +19,7 @@
  *
  * @returns {React.ReactElement}
  */
-import React, { useCallback, useContext, useEffect, useMemo, useState } from 'react';
+import React, { useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
 import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
@@ -32,8 +32,10 @@ import { useDocumentViewer } from './useDocumentViewer.js';
 import useNavigationModifierState from '../../hooks/useNavigationModifierState.js';
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
+import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
 import ViewerProblemNotice from '../ViewerProblemNotice.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
+import { reportHasSignatures } from '../../utils/pdfSignatureStatus.js';
 import {
   getRuntimeConfig,
   getPrintSelectionWorkspaceConfig,
@@ -50,6 +52,7 @@ const DocumentViewer = () => {
     memoryPressureStage,
     error,
     pageLoadState,
+    signatureReports,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
   const navigationModifierState = useNavigationModifierState();
@@ -166,6 +169,8 @@ const DocumentViewer = () => {
 
   const [metadataOverlayState, setMetadataOverlayState] = useState(null);
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
+  const [signatureDialogState, setSignatureDialogState] = useState(null);
+  const signatureOpenerRef = useRef(null);
   const [printSelectionZoomPercent] = useState(120);
   const [printSelectionToolbarState, setPrintSelectionToolbarState] = useState(null);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
@@ -213,6 +218,49 @@ const DocumentViewer = () => {
   const closeMetadataMatrix = useCallback(() => {
     setIsMetadataMatrixOpen(false);
   }, []);
+
+  /**
+   * Open the signature details dialog for a document (sourceKey). The opener
+   * element (the signature symbol) is remembered so focus returns to it.
+   * @param {string} sourceKey
+   * @param {(HTMLElement|null)} [openerElement]
+   * @returns {boolean}
+   */
+  const openSignatureDialog = useCallback((sourceKey, openerElement = null) => {
+    const key = String(sourceKey || '');
+    if (!key) return false;
+    const report = signatureReports?.[key] || null;
+    if (!reportHasSignatures(report)) return false;
+    const sourcePage = (Array.isArray(allPages) ? allPages : []).find((page) => String(page?.sourceKey || '') === key) || null;
+    signatureOpenerRef.current = openerElement || null;
+    setSignatureDialogState({
+      report,
+      documentNumber: Math.max(0, Number(sourcePage?.documentNumber) || 0),
+      totalDocuments: Math.max(0, Number(sourcePage?.totalDocuments) || 0),
+    });
+    return true;
+  }, [allPages, signatureReports]);
+
+  const closeSignatureDialog = useCallback(() => {
+    setSignatureDialogState(null);
+  }, []);
+
+  const currentPage = useMemo(() => {
+    const pages = Array.isArray(allPages) ? allPages : [];
+    const index = Math.max(1, Number(pageNumberDisplay) || 1) - 1;
+    return pages[index] || null;
+  }, [allPages, pageNumberDisplay]);
+
+  const currentSignatureReport = useMemo(() => {
+    const report = signatureReports?.[String(currentPage?.sourceKey || '')] || null;
+    return reportHasSignatures(report) ? report : null;
+  }, [currentPage, signatureReports]);
+
+  const openCurrentDocumentSignatures = useCallback((openerElement = null) => {
+    const sourceKey = String(currentPage?.sourceKey || '');
+    if (!sourceKey || !currentSignatureReport) return false;
+    return openSignatureDialog(sourceKey, openerElement);
+  }, [currentPage, currentSignatureReport, openSignatureDialog]);
 
   useEffect(() => {
     if (!canOpenMetadataMatrix) {
@@ -437,6 +485,8 @@ const DocumentViewer = () => {
         primaryDocumentNavigation={primaryDocumentNavigation}
         compareDocumentNavigation={compareDocumentNavigation}
         navigationModifierState={navigationModifierState}
+        signatureReport={currentSignatureReport}
+        onOpenSignatures={openCurrentDocumentSignatures}
       />
 
       <ViewerProblemNotice
@@ -486,6 +536,7 @@ const DocumentViewer = () => {
                 hidePageFromSelection={hidePageFromSelection}
                 hideDocumentFromSelection={hideDocumentFromSelection}
                 onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
+                onOpenSignatures={openSignatureDialog}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -584,6 +635,15 @@ const DocumentViewer = () => {
         isOpen={metadataUiEnabled && isMetadataMatrixOpen}
         onClose={closeMetadataMatrix}
         matrixView={metadataMatrixView}
+      />
+
+      <SignatureDetailsDialog
+        isOpen={!!signatureDialogState}
+        onClose={closeSignatureDialog}
+        report={signatureDialogState?.report || null}
+        documentNumber={signatureDialogState?.documentNumber ?? null}
+        totalDocuments={signatureDialogState?.totalDocuments ?? null}
+        returnFocusRef={signatureOpenerRef}
       />
     </div>
   );

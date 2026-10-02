@@ -712,6 +712,64 @@
     "alias": "Alias: {alias}",
     "rawValue": "Raw value: {value}"
   },
+  "signatures": {
+    "badge": {
+      "ariaLabel": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}}",
+      "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details"
+    },
+    "dialog": {
+      "title": "Signatures",
+      "subtitle": "{count, plural, =1 {1 signature in this document.} other {# signatures in this document.}}",
+      "subtitleDocumentPosition": "Document {document} of {total}",
+      "close": "Close",
+      "trustLine": "Trust not checked – shows who signed and whether the document is unchanged, not whether the signature is valid.",
+      "signatureHeading": "Signature {index}",
+      "notAvailable": "—",
+      "validityRange": "{from} – {to}"
+    },
+    "fields": {
+      "signer": "Signer",
+      "organization": "Organisation",
+      "issuer": "Issuer",
+      "signingTime": "Signing time",
+      "reason": "Reason",
+      "location": "Location",
+      "kind": "Kind",
+      "integrity": "Integrity",
+      "coversWholeFile": "Covers the whole document",
+      "certificateValidity": "Certificate valid",
+      "trust": "Trust",
+      "format": "Format"
+    },
+    "integrity": {
+      "intact": "Intact",
+      "modifiedAfterSigning": "Modified after signing",
+      "digestMismatch": "Digest mismatch",
+      "signatureInvalid": "Signature invalid",
+      "unsupported": "Signature present, format not supported",
+      "unreadable": "Signature unreadable"
+    },
+    "trust": {
+      "notChecked": "Not checked",
+      "valid": "Valid",
+      "invalid": "Invalid",
+      "unknown": "Unknown"
+    },
+    "kind": {
+      "approval": "Approval",
+      "certification": "Certification",
+      "timestamp": "Timestamp"
+    },
+    "timeSource": {
+      "signedAttribute": "From the signed attributes",
+      "pdfM": "From the PDF signature dictionary (/M)",
+      "none": "No signing time recorded"
+    },
+    "coversWhole": {
+      "yes": "Yes",
+      "no": "No"
+    }
+  },
   "about": {
     "title": "About OpenDocViewer",
     "subtitle": "Version, project links, and support contact.",

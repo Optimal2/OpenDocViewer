@@ -111,6 +111,42 @@ corrupt CMS blob, or an unsupported environment all resolve to a report (an empt
 `signatures` list or per-signature `unreadable`/`unsupported` entries). Callers should fetch
 it once per document and cache the report next to the document state.
 
+## Level-1 user interface
+
+The viewer surfaces the inspection result without ever blocking page rendering:
+
+- `src/hooks/usePdfSignatureReports.js` (driven from `ViewerProvider`) starts the
+  inspection only after the first page is ready, calls `getDocumentSignatures` once per PDF
+  document with the bytes already held in the source temp store (the file is never fetched
+  again), and caches one report per document (`sourceKey`) in viewer context state for the
+  session. Non-PDF documents are never inspected. `ViewerProvider` calls
+  `disposePdfSignatureWorker()` when the viewer unmounts.
+- `src/utils/pdfSignatureStatus.js` maps the contract to presentation: the badge colour and
+  icon follow the *worst* integrity status of a document's signatures (`intact` =
+  neutral/positive, `modified-after-signing`/`unsupported` = warning,
+  `digest-mismatch`/`signature-invalid`/`unreadable` = error; unknown values fail safe to
+  error).
+- `src/components/SignatureStatusBadge.jsx` is the small signature symbol on the first
+  thumbnail of a signed document and in the toolbar for the current document. It is a
+  native button with an accessible name (for example "Signed document, 1 signature") and a
+  tooltip; it exists only in the viewer UI and is never part of printed or exported output
+  (print and PDF export build their own output documents, not the app DOM).
+- `src/components/SignatureDetailsDialog.jsx` opens from the symbol and lists every
+  signature (signer and organisation, issuer, signing time and its source, reason,
+  location, kind, integrity in plain words with `integrityReason`, whole-document coverage,
+  certificate validity period, format). Its accessibility mirrors
+  `DocumentMetadataOverlayDialog`: focus moves into the dialog, Tab is trapped inside,
+  Escape closes, and focus returns to the symbol that opened it. Unsupported formats are
+  shown as "signature present, format not supported", never hidden.
+- Every dialog shows the level-1 trust line ("Trust not checked - shows who signed and
+  whether the document is unchanged, not whether the signature is valid."). The trust field
+  is rendered generically with labels for `not-checked`, `valid`, `invalid` and `unknown`
+  plus an optional `trustReason`, so level 2 only fills the field with no UI rewrite.
+- Strings live under the `signatures` key in `public/locales/en/common.json` and
+  `public/locales/sv/common.json`; colours use the `--odv-signature-*` theme tokens (light,
+  normal, dark, and the print reset).
+
+
 ## Data contract
 
 Defined as JSDoc typedefs in `src/utils/pdfSignatures.js` (`PdfSignatureInfo`,
