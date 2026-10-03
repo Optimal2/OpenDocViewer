@@ -9,6 +9,10 @@
  * - dark   -> darkest theme
  *
  * When no explicit choice has been saved yet, the viewer follows the browser/OS preference.
+ *
+ * Below the themes, a "Larger toolbar buttons" checkbox item switches the toolbar density
+ * (viewer-local preference; default from runtime config `toolbar.largeButtons`). It keeps the menu
+ * open so the new state is visible and announced.
  */
 
 import React, { useContext, useEffect, useId, useMemo, useRef, useState } from 'react';
@@ -68,6 +72,8 @@ const ThemeMenuButton = ({ className = '' }) => {
   const selectedMode = currentMode;
   const previewMode = resolveSelectedMode(currentMode, resolvedTheme);
   const setThemeMode = typeof ctx?.setThemeMode === 'function' ? ctx.setThemeMode : null;
+  const toolbarLargeButtons = ctx?.toolbarLargeButtons !== false;
+  const setToolbarLargeButtons = typeof ctx?.setToolbarLargeButtons === 'function' ? ctx.setToolbarLargeButtons : null;
 
   const options = useMemo(() => ([
     { mode: 'system', icon: resolveThemeModeIcon('system') },
@@ -168,6 +174,20 @@ const ThemeMenuButton = ({ className = '' }) => {
               </button>
             );
           })}
+          <div className="toolbar-popup-menu-separator" role="separator" />
+          <button
+            type="button"
+            className="toolbar-popup-menu-item toolbar-popup-menu-checkbox"
+            role="menuitemcheckbox"
+            aria-checked={toolbarLargeButtons}
+            onClick={() => setToolbarLargeButtons?.(!toolbarLargeButtons)}
+          >
+            <span className="toolbar-popup-menu-check" aria-hidden="true" />
+            <span className="material-icons" aria-hidden="true">
+              {toolbarLargeButtons ? 'check_box' : 'check_box_outline_blank'}
+            </span>
+            <span>{t('toolbar.theme.largeButtons', { defaultValue: 'Larger toolbar buttons' })}</span>
+          </button>
         </div>
       ) : null}
     </div>

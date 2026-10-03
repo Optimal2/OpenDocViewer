@@ -5,6 +5,8 @@
  * Preferences are stored in both localStorage and a same-origin cookie so the viewer can remember
  * language choices across reloads while still degrading gracefully when one storage backend is
  * unavailable. Legacy theme values are still tolerated for backwards compatibility with older builds.
+ *
+ * These preferences are viewer-local: only the theme mode is shared with OMP (ompThemePreference.js).
  */
 
 import {
@@ -12,6 +14,7 @@ import {
   normalizeCustomFitWidthFactorPercent,
   normalizeOptionalCustomFitFactorPercent,
   normalizePrintDefaultMode,
+  getToolbarLargeButtonsDefault,
 } from './runtimeConfig.js';
 
 /**
@@ -31,6 +34,7 @@ import {
  * @property {('FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE')=} defaultZoomMode
  * @property {number=} customFitWidthFactorPercent
  * @property {CustomFitSizeLimitPreference=} customFitSizeLimits
+ * @property {boolean=} toolbarLargeButtons
  */
 
 const STORAGE_KEY = 'ODV_USER_PREFERENCES';
@@ -137,6 +141,7 @@ function normalizePreferences(value) {
       next.customFitSizeLimits.actualSizeFactorPercent = customFitSizeLimits.actualSizeFactorPercent;
     }
   }
+  if (typeof source.toolbarLargeButtons === 'boolean') next.toolbarLargeButtons = source.toolbarLargeButtons;
   return next;
 }
 
@@ -490,4 +495,35 @@ export function clearCustomFitSizeLimitPreference() {
   delete next.customFitWidthFactorPercent;
   delete next.customFitSizeLimits;
   return replaceViewerPreferences(next);
+}
+
+/**
+ * The user's stored "Larger toolbar buttons" choice from the theme menu.
+ *
+ * @returns {(boolean|null)} null when the user has not chosen yet
+ */
+export function getToolbarLargeButtonsPreference() {
+  const value = getViewerPreferences().toolbarLargeButtons;
+  return typeof value === 'boolean' ? value : null;
+}
+
+/**
+ * @param {boolean} largeButtons
+ * @returns {ViewerPreferences}
+ */
+export function setToolbarLargeButtonsPreference(largeButtons) {
+  return setViewerPreferences({ toolbarLargeButtons: largeButtons === true });
+}
+
+/**
+ * Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the
+ * runtime config default `toolbar.largeButtons` (large unless explicitly false).
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function getEffectiveToolbarLargeButtons(cfg) {
+  const stored = getToolbarLargeButtonsPreference();
+  if (stored !== null) return stored;
+  return getToolbarLargeButtonsDefault(cfg);
 }

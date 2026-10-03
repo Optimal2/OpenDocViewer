@@ -1,6 +1,6 @@
 # OpenDocViewer / src/contexts
 
-File count: 4. Line count: 3230. JSDoc symbol count: 83.
+File count: 4. Line count: 3258. JSDoc symbol count: 84.
 
 ## src/contexts/themeContext.js
 
@@ -20,7 +20,7 @@ src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) C
 
 Exports: `ThemeProvider`
 
-Local imports: `src/logging/systemLogger.js`, `src/contexts/themeContext.js`, `src/utils/ompThemePreference.js`, `src/integrations/ompThemeBridge.js`, `src/utils/runtimeConfig.js`
+Local imports: `src/logging/systemLogger.js`, `src/contexts/themeContext.js`, `src/utils/ompThemePreference.js`, `src/integrations/ompThemeBridge.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/toolbarDensity.js`
 
 Symbols:
 
@@ -31,11 +31,11 @@ Symbols:
 - `applyThemeToDocument` (function) - Apply the resolved theme to the DOM \(SSR\-safe\).
 - `resolveInitialThemeMode` (function) - Resolve the initial theme mode once during provider initialization.
 - `ThemeProvider` (constant) - ThemeProvider component to manage and provide theme\-related state and functions.
+- `ThemeProvider~setToolbarLargeButtons` (constant) - Persist and apply the &quot;Larger toolbar buttons&quot; choice.
 - `ThemeProvider~setThemeMode` (constant) - Persist and apply a theme mode.
 - `ThemeProvider~setThemeExplicit` (constant) - Apply an explicit concrete theme.
 - `ThemeProvider~toggleTheme` (constant) - Toggle between the two highest\-contrast explicit themes.
 - `<anonymous>~onChange` (function) - No description.
-- `ThemeProvider~applyExternalThemeMode` (constant) - Apply a mode that arrived from outside this component \(another tab, the host page, or the cross\-origin bridge\).
 
 ## src/contexts/viewerContext.js
 

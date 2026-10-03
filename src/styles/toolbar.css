@@ -1,9 +1,58 @@
 /* File: src/styles/toolbar.css
    Toolbar, grouped “white areas”, percent/page inputs, editing tools, compare/edit active states.
 
-   Density metrics (checked by tests/ui/toolbar-density.spec.mjs): a 40px toolbar, 30px buttons
-   with 18px icons, 4px between controls inside a group and 12px between groups (4px gap +
-   1.5px margin + 1px separator + 1.5px margin + 4px gap). */
+   Toolbar density is a user preference ("Larger toolbar buttons" in the theme menu, default from
+   runtime config `toolbar.largeButtons`). ThemeProvider sets data-toolbar-density="large|compact"
+   on the document root; every size below reads these variables, so no component has per-size logic.
+   - large (default, also without the attribute): a 48px toolbar with 36px buttons.
+   - compact: a 40px toolbar, 30px buttons with 18px icons, 4px between controls inside a group and
+     12px between groups (4px gap + 1.5px margin + 1px separator + 1.5px margin + 4px gap).
+   Both are checked by tests/ui/toolbar-density.spec.mjs. */
+
+:root,
+:root[data-toolbar-density='large'] {
+  --odv-toolbar-min-height: 48px;
+  --odv-toolbar-padding: 4px 10px;
+  --odv-toolbar-gap: 0px;
+  --odv-toolbar-item-margin: 0 0.06rem;
+  --odv-toolbar-button-size: 36px;
+  --odv-toolbar-button-padding: 0.24rem 0.42rem;
+  --odv-toolbar-icon-size: 1.14rem;
+  --odv-toolbar-group-gap: 0.22rem;
+  --odv-toolbar-group-padding: 5px 8px;
+  --odv-toolbar-group-border-width: 4px;
+  --odv-toolbar-group-radius: 12px;
+  --odv-toolbar-group-ring-width: 4px;
+  --odv-toolbar-group-inset-ring-width: 2px;
+  --odv-toolbar-separator-height: 28px;
+  --odv-toolbar-separator-margin: 0 0.28rem;
+  --odv-toolbar-end-gap: 8px;
+  --odv-toolbar-end-group-margin-left: 0.06rem;
+  --odv-toolbar-overview-margin-left: 8px;
+  --odv-toolbar-tools-gap: 0.24rem;
+}
+
+:root[data-toolbar-density='compact'] {
+  --odv-toolbar-min-height: 40px;
+  --odv-toolbar-padding: 3px 8px;
+  --odv-toolbar-gap: 4px;
+  --odv-toolbar-item-margin: 0;
+  --odv-toolbar-button-size: 30px;
+  --odv-toolbar-button-padding: 0 0.3rem;
+  --odv-toolbar-icon-size: 18px;
+  --odv-toolbar-group-gap: 4px;
+  --odv-toolbar-group-padding: 0 4px;
+  --odv-toolbar-group-border-width: 2px;
+  --odv-toolbar-group-radius: 10px;
+  --odv-toolbar-group-ring-width: 2px;
+  --odv-toolbar-group-inset-ring-width: 1px;
+  --odv-toolbar-separator-height: 22px;
+  --odv-toolbar-separator-margin: 0 1.5px;
+  --odv-toolbar-end-gap: 4px;
+  --odv-toolbar-end-group-margin-left: 8px;
+  --odv-toolbar-overview-margin-left: 0px;
+  --odv-toolbar-tools-gap: 4px;
+}
 
 .toolbar {
   position: relative;
@@ -11,25 +60,25 @@
   display: flex;
   justify-content: flex-start;
   align-items: center;
-  gap: 4px;
+  gap: var(--odv-toolbar-gap);
   width: 100%;
-  min-height: 40px;
+  min-height: var(--odv-toolbar-min-height);
   overflow: visible;
   background-color: var(--toolbar-background-color);
   box-shadow: var(--box-shadow);
   border-radius: 8px;
   box-sizing: border-box;
-  padding: 3px 8px;
+  padding: var(--odv-toolbar-padding);
   flex-shrink: 0;
 }
-.toolbar > * { margin: 0; }
+.toolbar > * { margin: var(--odv-toolbar-item-margin); }
 
 .toolbar button,
 .toolbar .toggle-collapse {
   box-sizing: border-box;
-  min-height: 30px;
-  min-width: 30px;
-  padding: 0 0.3rem;
+  min-height: var(--odv-toolbar-button-size);
+  min-width: var(--odv-toolbar-button-size);
+  padding: var(--odv-toolbar-button-padding);
   font-size: 0.98rem;
   cursor: pointer;
   background-color: var(--primary-color);
@@ -53,7 +102,7 @@
 /* Ensure clicks hit the button, not the glyph span */
 .toolbar .material-icons {
   pointer-events: none;
-  font-size: 18px;
+  font-size: var(--odv-toolbar-icon-size);
 }
 
 .sr-only {
@@ -129,14 +178,14 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Group frame for [-] [input] [+] blocks (zoom & page): 30px buttons + 2px border = 34px */
+/* Group frame for [-] [input] [+] blocks (zoom & page); compact: 30px buttons + 2px border = 34px */
 .zoom-fixed-group {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
-  padding: 0 4px;
-  border: 2px solid color-mix(in srgb, var(--thumbnail-border-color) 88%, transparent 12%);
-  border-radius: 10px;
+  gap: var(--odv-toolbar-group-gap);
+  padding: var(--odv-toolbar-group-padding);
+  border: var(--odv-toolbar-group-border-width) solid color-mix(in srgb, var(--thumbnail-border-color) 88%, transparent 12%);
+  border-radius: var(--odv-toolbar-group-radius);
   background-color: color-mix(in srgb, var(--canvas-background-color) 96%, var(--toolbar-background-color) 4%);
   box-shadow: 0 1px 0 rgba(255, 255, 255, 0.55) inset, 0 0 0 2px rgba(0, 0, 0, 0.05);
 }
@@ -144,7 +193,7 @@
 
 .page-navigation-group {
   --page-navigation-accent: var(--thumbnail-primary-color);
-  border-width: 2px;
+  border-width: var(--odv-toolbar-group-border-width);
   border-color: color-mix(in srgb, var(--page-navigation-accent) 56%, var(--thumbnail-border-color) 44%);
   transition: border-color 0.2s ease, box-shadow 0.2s ease, background-color 0.2s ease, border-style 0.2s ease;
 }
@@ -160,23 +209,23 @@
 .page-navigation-group.navigation-scope-page {
   border-style: solid;
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--page-navigation-accent) 24%, transparent 76%),
-    inset 0 0 0 1px color-mix(in srgb, var(--page-navigation-accent) 18%, transparent 82%);
+    0 0 0 var(--odv-toolbar-group-ring-width) color-mix(in srgb, var(--page-navigation-accent) 24%, transparent 76%),
+    inset 0 0 0 var(--odv-toolbar-group-inset-ring-width) color-mix(in srgb, var(--page-navigation-accent) 18%, transparent 82%);
 }
 
 .page-navigation-group.navigation-scope-document {
   border-style: dashed;
   box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--page-navigation-accent) 26%, transparent 74%),
-    inset 0 0 0 1px color-mix(in srgb, var(--page-navigation-accent) 24%, transparent 76%);
+    0 0 0 var(--odv-toolbar-group-ring-width) color-mix(in srgb, var(--page-navigation-accent) 26%, transparent 74%),
+    inset 0 0 0 var(--odv-toolbar-group-inset-ring-width) color-mix(in srgb, var(--page-navigation-accent) 24%, transparent 76%);
 }
 
 .toolbar .separator {
   flex: 0 0 auto;
   width: 1px;
-  height: 22px;
+  height: var(--odv-toolbar-separator-height);
   background-color: color-mix(in srgb, var(--primary-color) 72%, transparent 28%);
-  margin: 0 1.5px;
+  margin: var(--odv-toolbar-separator-margin);
 }
 
 .toolbar-spacer {
@@ -184,19 +233,23 @@
   min-width: 0;
 }
 
-/* Theme, language and help: one tight group. After the signature overview button the toolbar's
-   4px gap plus this 8px margin give the 12px group spacing. */
+/* Theme, language and help: one tight group. Compact: after the signature overview button the
+   toolbar's 4px gap plus the 8px end-group margin give the 12px group spacing. */
 .toolbar-end-actions {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--odv-toolbar-end-gap);
   margin-right: 0;
   padding-right: 0;
   flex-shrink: 0;
 }
 
+.toolbar > .odv-signature-overview-button {
+  margin-left: var(--odv-toolbar-overview-margin-left);
+}
+
 .toolbar > .odv-signature-overview-button + .toolbar-end-actions {
-  margin-left: 8px;
+  margin-left: var(--odv-toolbar-end-group-margin-left);
 }
 
 .toolbar-end-actions .toolbar-menu-shell {
@@ -334,7 +387,7 @@
 .toolbar .editing-tools {
   display: inline-flex;
   align-items: center;
-  gap: 4px;
+  gap: var(--odv-toolbar-tools-gap);
 }
 
 .editing-tools.editing-target-primary {
@@ -603,6 +656,12 @@
 
 .toolbar .toolbar-popup-menu-check.is-selected {
   color: var(--primary-color-active);
+}
+
+.toolbar-popup-menu-separator {
+  height: 1px;
+  margin: 3px 6px;
+  background: color-mix(in srgb, var(--thumbnail-border-color) 80%, transparent 20%);
 }
 
 .toolbar-adjustment-shell {

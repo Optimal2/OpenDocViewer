@@ -163,6 +163,18 @@ export function isSignatureThumbnailPageBadgeEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve the site default for the "Larger toolbar buttons" preference (`toolbar.largeButtons`).
+ * Only an explicit `false` makes the compact toolbar the default; a user's stored choice in the
+ * theme menu still outranks this value (see getEffectiveToolbarLargeButtons in viewerPreferences).
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function getToolbarLargeButtonsDefault(cfg = getRuntimeConfig()) {
+  return cfg?.toolbar?.largeButtons !== false;
+}
+
+/**
  * Normalize a runtime flag to a boolean.
  *
  * Host configs are optional and can contain values from hand-edited JavaScript, so only real

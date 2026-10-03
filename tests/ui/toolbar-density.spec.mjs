@@ -1,8 +1,12 @@
 // File: tests/ui/toolbar-density.spec.mjs
 /**
- * Toolbar density and grouping (src/styles/toolbar.css): 40px toolbar, 30px buttons with 18px
- * icons, 4px between controls inside a group, 12px between groups, the signature overview button
- * on the same metrics, and theme/language/help as one tight end group. Keyboard focus rings stay.
+ * Toolbar density (src/styles/toolbar.css) is a user preference: "Larger toolbar buttons" in the
+ * theme menu, default from runtime config `toolbar.largeButtons` (true when unset).
+ * - large: the pre-compact look, 36px buttons in a toolbar with a 48px minimum height (62px
+ *   rendered, because the framed zoom/page groups are 54px tall), 36px signature overview button.
+ * - compact: 40px toolbar, 30px buttons with 18px icons, 4px between controls inside a group,
+ *   12px between groups, and theme/language/help as one tight end group.
+ * Both densities keep touch targets and a visible keyboard focus ring.
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
@@ -43,13 +47,14 @@ function measureToolbar(page) {
       buttonHeights: [...new Set(buttons.map((button) => Math.round(rect(button).height)))],
       minButtonWidth: Math.min(...buttons.map((button) => Math.round(rect(button).width))),
       iconSizes: [...new Set(Array.from(toolbar.querySelectorAll('button > .material-icons'))
-        .filter((icon) => !icon.closest('.toolbar-split-arrow'))
+        .filter((icon) => !icon.closest('.toolbar-split-arrow, .toolbar-popup-menu'))
         .map((icon) => getComputedStyle(icon).fontSize))],
       gapsInsideGroups: [
         ...Array.from(toolbar.querySelectorAll('.zoom-fixed-group')).flatMap((group) => pairGaps(Array.from(group.children).filter((child) => child.offsetParent !== null && !child.classList.contains('sr-only')))),
         ...groups.filter((group) => group.length > 1).flatMap((group) => pairGaps(group.filter((child) => !child.classList.contains('odv-signature-overview-button') && !child.classList.contains('toolbar-end-actions')))),
       ],
       gapsBetweenGroups: separatedGroups,
+      groupHeights: Array.from(toolbar.querySelectorAll('.zoom-fixed-group')).map((group) => Math.round(rect(group).height)),
       overview: rect(overview),
       overviewToEnd: Math.round((rect(end).left - rect(overview).right) * 10) / 10,
       endGaps: pairGaps(Array.from(end.children)),
@@ -58,46 +63,120 @@ function measureToolbar(page) {
   });
 }
 
-test('toolbar is 40px with 30px buttons, 18px icons, 4px in-group and 12px between-group spacing', async ({ page }) => {
+const COMPACT_SITE_CONFIG = { toolbar: { largeButtons: false } };
+
+const DENSITIES = [
+  { name: 'large', siteConfig: null, toolbarHeight: 62, buttonHeight: 36, groupHeight: 54, iconSize: '18.24px' },
+  { name: 'compact', siteConfig: COMPACT_SITE_CONFIG, toolbarHeight: 40, buttonHeight: 30, groupHeight: 34, iconSize: '18px' },
+];
+
+/** @param {import('@playwright/test').Page} page */
+async function openThemeMenu(page) {
+  await page.getByRole('button', { name: 'Choose theme' }).click();
+  return page.getByRole('menuitemcheckbox', { name: 'Larger toolbar buttons' });
+}
+
+for (const density of DENSITIES) {
+  test.describe(`${density.name} toolbar`, () => {
+    test(`toolbar is ${density.toolbarHeight}px with ${density.buttonHeight}px buttons and ${density.iconSize} icons`, async ({ page }) => {
+      await loadSession(page, { siteConfig: density.siteConfig });
+      await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
+      await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', density.name);
+      const metrics = await measureToolbar(page);
+
+      expect(Math.round(metrics.toolbarHeight)).toBe(density.toolbarHeight);
+      expect(metrics.buttonHeights).toEqual([density.buttonHeight]);
+      expect(metrics.groupHeights).toEqual([density.groupHeight, density.groupHeight, density.groupHeight]);
+      expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(22); // the split-menu arrow; every other button is >= the button size
+      expect(metrics.iconSizes).toEqual([density.iconSize]);
+      expect(Math.round(metrics.overview.height)).toBe(density.buttonHeight);
+      expect(metrics.endButtons).toEqual([density.buttonHeight, density.buttonHeight, density.buttonHeight]);
+
+      if (density.name === 'compact') {
+        // 4px in-group spacing, 12px between groups, then theme/language/help at 4px.
+        expect(metrics.gapsInsideGroups.length).toBeGreaterThanOrEqual(10);
+        for (const gap of metrics.gapsInsideGroups) expect(gap).toBeCloseTo(4, 0);
+        expect(metrics.gapsBetweenGroups.length).toBeGreaterThanOrEqual(4);
+        for (const gap of metrics.gapsBetweenGroups) expect(gap).toBeCloseTo(12, 0);
+        expect(metrics.overviewToEnd).toBeCloseTo(12, 0);
+        expect(metrics.endGaps).toEqual([4, 4]);
+      }
+    });
+
+    test(`toolbar buttons keep at least ${density.buttonHeight}px touch targets and a visible keyboard focus ring`, async ({ page }) => {
+      await loadSession(page, { siteConfig: density.siteConfig });
+      await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
+      const sizes = await page.locator('.toolbar button:visible').evaluateAll((buttons) => buttons
+        .filter((button) => !button.classList.contains('toolbar-split-arrow'))
+        .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
+      expect(Math.min(...sizes)).toBeGreaterThanOrEqual(density.buttonHeight);
+
+      const overview = page.locator('.odv-signature-overview-button');
+      await overview.focus();
+      await page.keyboard.press('Shift');
+      const ring = await overview.evaluate((node) => ({
+        focusVisible: node.matches(':focus-visible'),
+        outlineStyle: getComputedStyle(node).outlineStyle,
+        outlineWidth: getComputedStyle(node).outlineWidth,
+        outlineColor: getComputedStyle(node).outlineColor,
+      }));
+      expect(ring.focusVisible).toBe(true);
+      expect(ring.outlineStyle).not.toBe('none');
+      expect(ring.outlineWidth).toBe('2px');
+      expect(ring.outlineColor).not.toMatch(/rgba\(.*,\s*0\)$/);
+    });
+  });
+}
+
+test('the theme-menu checkbox switches the toolbar density and the choice survives a reload', async ({ page }) => {
   await loadSession(page);
   await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
-  const metrics = await measureToolbar(page);
+  let metrics = await measureToolbar(page);
+  expect(Math.round(metrics.toolbarHeight)).toBe(62);
+  expect(metrics.buttonHeights).toEqual([36]);
 
+  const checkbox = await openThemeMenu(page);
+  await expect(checkbox).toHaveAttribute('aria-checked', 'true');
+  await expect(page.getByRole('menu').getByRole('separator')).toHaveCount(1);
+
+  // Keyboard operable: focus the item and toggle it with Enter; the menu stays open.
+  await checkbox.focus();
+  await page.keyboard.press('Enter');
+  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
+  await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', 'compact');
+  metrics = await measureToolbar(page);
   expect(Math.round(metrics.toolbarHeight)).toBe(40);
   expect(metrics.buttonHeights).toEqual([30]);
-  expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(22); // the split-menu arrow; every other button is >= 30px
-  expect(metrics.iconSizes).toEqual(['18px']);
-  expect(metrics.gapsInsideGroups.length).toBeGreaterThanOrEqual(10);
-  for (const gap of metrics.gapsInsideGroups) expect(gap).toBeCloseTo(4, 0);
-  expect(metrics.gapsBetweenGroups.length).toBeGreaterThanOrEqual(4);
-  for (const gap of metrics.gapsBetweenGroups) expect(gap).toBeCloseTo(12, 0);
 
-  // Signature overview button on the same metrics, then 12px, then theme/language/help at 4px.
-  expect(Math.round(metrics.overview.height)).toBe(30);
-  expect(metrics.overviewToEnd).toBeCloseTo(12, 0);
-  expect(metrics.endGaps).toEqual([4, 4]);
-  expect(metrics.endButtons).toEqual([30, 30, 30]);
+  await page.reload();
+  await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', 'compact');
+  metrics = await measureToolbar(page);
+  expect(Math.round(metrics.toolbarHeight)).toBe(40);
+  expect(metrics.buttonHeights).toEqual([30]);
+
+  // Space toggles back to the large buttons.
+  const reopened = await openThemeMenu(page);
+  await expect(reopened).toHaveAttribute('aria-checked', 'false');
+  await reopened.focus();
+  await page.keyboard.press('Space');
+  await expect(reopened).toHaveAttribute('aria-checked', 'true');
+  metrics = await measureToolbar(page);
+  expect(Math.round(metrics.toolbarHeight)).toBe(62);
+  expect(metrics.buttonHeights).toEqual([36]);
 });
 
-test('toolbar buttons keep at least 30px touch targets and a visible keyboard focus ring', async ({ page }) => {
-  await loadSession(page);
-  await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
-  const sizes = await page.locator('.toolbar button:visible').evaluateAll((buttons) => buttons
-    .filter((button) => !button.classList.contains('toolbar-split-arrow'))
-    .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
-  expect(Math.min(...sizes)).toBeGreaterThanOrEqual(30);
+test('a stored choice outranks the site default toolbar.largeButtons=false', async ({ page }) => {
+  await loadSession(page, { siteConfig: COMPACT_SITE_CONFIG });
+  await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', 'compact');
+  const checkbox = await openThemeMenu(page);
+  await expect(checkbox).toHaveAttribute('aria-checked', 'false');
+  await checkbox.click();
+  await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', 'large');
 
-  const overview = page.locator('.odv-signature-overview-button');
-  await overview.focus();
-  await page.keyboard.press('Shift');
-  const ring = await overview.evaluate((node) => ({
-    focusVisible: node.matches(':focus-visible'),
-    outlineStyle: getComputedStyle(node).outlineStyle,
-    outlineWidth: getComputedStyle(node).outlineWidth,
-    outlineColor: getComputedStyle(node).outlineColor,
-  }));
-  expect(ring.focusVisible).toBe(true);
-  expect(ring.outlineStyle).not.toBe('none');
-  expect(ring.outlineWidth).toBe('2px');
-  expect(ring.outlineColor).not.toMatch(/rgba\(.*,\s*0\)$/);
+  await page.reload();
+  await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
+  await expect(page.locator('html')).toHaveAttribute('data-toolbar-density', 'large');
+  const metrics = await measureToolbar(page);
+  expect(metrics.buttonHeights).toEqual([36]);
 });

@@ -49,7 +49,7 @@ File count: 8. Line count: 4112. JSDoc symbol count: 106.
 
 ## src/components/DocumentToolbar
 
-File count: 17. Line count: 7136. JSDoc symbol count: 111.
+File count: 17. Line count: 7156. JSDoc symbol count: 111.
 
 - `src/components/DocumentToolbar/printRangeDialogHelpers.js` - Pure helpers and shared constants for the print\-range dialog.
 - `src/components/DocumentToolbar/usePrintRangeDialog.js` - Hook \+ helpers for PrintRangeDialog.
@@ -75,7 +75,7 @@ File count: 10. Line count: 5118. JSDoc symbol count: 119.
 
 ## src/contexts
 
-File count: 4. Line count: 3230. JSDoc symbol count: 83.
+File count: 4. Line count: 3258. JSDoc symbol count: 84.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -106,7 +106,7 @@ File count: 1. Line count: 562. JSDoc symbol count: 21.
 
 ## src/index.jsx
 
-File count: 1. Line count: 64. JSDoc symbol count: 2.
+File count: 1. Line count: 67. JSDoc symbol count: 2.
 
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 
@@ -150,12 +150,12 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 45. Line count: 17995. JSDoc symbol count: 692.
+File count: 46. Line count: 18073. JSDoc symbol count: 698.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
-- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
+- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
 - `src/utils/pdfSignatureDocuments.js` - Per\-document aggregation of PDF signature reports.

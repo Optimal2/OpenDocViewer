@@ -215,6 +215,27 @@ Set `pdfSignatures.thumbnailPageBadge` to `false` to hide the per-page symbol. T
 symbol and the toolbar overview stay visible, so signed documents are still discoverable. Only an
 explicit `false` disables the symbol; a missing or non-boolean value keeps the default (`true`).
 
+## Toolbar Button Size
+
+The theme menu has a "Larger toolbar buttons" checkbox (sv: "Större verktygsknappar"). Ticked keeps
+the large toolbar (36px buttons, 48px minimum toolbar height); unticked gives the compact toolbar
+(30px buttons, 40px toolbar). Deployments choose the default:
+
+```js
+toolbar: {
+  largeButtons: true
+}
+```
+
+The packaged default is `true`, so existing installations keep the large toolbar until a user
+unticks the box. Set `toolbar.largeButtons` to `false` to make the compact toolbar the default;
+only an explicit `false` does that. A user's own choice is stored with the other viewer
+preferences (`ODV_USER_PREFERENCES` in `localStorage` and a same-origin cookie) and outranks the
+configured default. The choice is viewer-local: unlike the theme mode it is not shared with OMP.
+
+The viewer sets `data-toolbar-density="large|compact"` on the document root and
+`src/styles/toolbar.css` maps it to CSS variables (toolbar height, button and icon size, gaps).
+
 ## Viewer Default Zoom Mode
 
 Deployments can choose the initial zoom mode used when the first page opens:

@@ -26,10 +26,13 @@ import logger from './logging/systemLogger.js';
 import AppBootstrap from './app/AppBootstrap.jsx';
 import { ThemeProvider } from './contexts/ThemeProvider.jsx';
 import { getEffectiveOdvThemeMode, resolveConcreteTheme, applyOdvThemeToDocument } from './utils/ompThemePreference.js';
+import { getEffectiveToolbarLargeButtons } from './utils/viewerPreferences.js';
+import { applyToolbarDensityToDocument } from './utils/toolbarDensity.js';
 
 // Apply the shared choice before React renders the viewer's first content.
 const initialThemeMode = getEffectiveOdvThemeMode();
 applyOdvThemeToDocument(resolveConcreteTheme(initialThemeMode), initialThemeMode);
+applyToolbarDensityToDocument(getEffectiveToolbarLargeButtons());
 
 /**
  * Determine environment and set a sensible client-side log level.

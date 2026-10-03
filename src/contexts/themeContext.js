@@ -15,6 +15,8 @@ import { createContext } from 'react';
  * @property {function(): void} toggleTheme
  * @property {function(ThemeName): void} setThemeExplicit
  * @property {function(ThemeMode): void} setThemeMode
+ * @property {boolean} toolbarLargeButtons
+ * @property {function(boolean): void} setToolbarLargeButtons
  */
 
 /**
@@ -29,7 +31,9 @@ const ThemeContext = createContext(
     themeMode: 'system',
     toggleTheme: function () {},
     setThemeExplicit: function (_next) {},
-    setThemeMode: function (_next) {}
+    setThemeMode: function (_next) {},
+    toolbarLargeButtons: true,
+    setToolbarLargeButtons: function (_next) {}
   })
 );
 

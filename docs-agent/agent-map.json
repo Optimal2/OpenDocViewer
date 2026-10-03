@@ -87,15 +87,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 133,
-    "sourceLineCount": 54840,
-    "docletCount": 1463,
-    "documentedFileCount": 133,
+    "fileCount": 134,
+    "sourceLineCount": 54969,
+    "docletCount": 1470,
+    "documentedFileCount": 134,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 21,
-    "estimatedSourceTokens": 4086
+    "estimatedSourceTokens": 4103
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -448,10 +448,19 @@
     {
       "path": "src/utils/runtimeConfig.js",
       "score": 118,
-      "lines": 568,
+      "lines": 580,
       "incomingLocalImports": 15,
-      "doclets": 37,
+      "doclets": 38,
       "summary": "Runtime configuration helpers.",
+      "summaryConfidence": "high"
+    },
+    {
+      "path": "src/utils/viewerPreferences.js",
+      "score": 114,
+      "lines": 530,
+      "incomingLocalImports": 7,
+      "doclets": 37,
+      "summary": "Lightweight persisted viewer preferences.",
       "summaryConfidence": "high"
     },
     {
@@ -470,15 +479,6 @@
       "incomingLocalImports": 35,
       "doclets": 31,
       "summary": "src/logging/systemLogger.js OpenDocViewer — Frontend Logging Controller (ESM) - Provide a small, dependency-light logging facade for the browser app.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/viewerPreferences.js",
-      "score": 98,
-      "lines": 494,
-      "incomingLocalImports": 5,
-      "doclets": 34,
-      "summary": "Lightweight persisted viewer preferences.",
       "summaryConfidence": "high"
     },
     {
@@ -529,7 +529,7 @@
     {
       "path": "src/index.jsx",
       "score": 86,
-      "lines": 64,
+      "lines": 67,
       "incomingLocalImports": 0,
       "doclets": 2,
       "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -637,13 +637,13 @@
           {
             "path": "src/contexts/ThemeProvider.jsx",
             "score": 39,
-            "lines": 317,
+            "lines": 341,
             "summary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen"
           },
           {
             "path": "src/contexts/themeContext.js",
             "score": 38,
-            "lines": 37,
+            "lines": 41,
             "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake."
           }
         ]
@@ -1065,7 +1065,7 @@
     {
       "name": "src/components/DocumentToolbar",
       "fileCount": 17,
-      "lineCount": 7136,
+      "lineCount": 7156,
       "docletCount": 111,
       "importantFiles": [
         {
@@ -1116,7 +1116,7 @@
         {
           "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
           "score": 32,
-          "lines": 182,
+          "lines": 202,
           "incomingLocalImports": 1,
           "doclets": 6,
           "summary": "Compact theme selector for the toolbar.",
@@ -1225,8 +1225,8 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3230,
-      "docletCount": 83,
+      "lineCount": 3258,
+      "docletCount": 84,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
@@ -1249,16 +1249,16 @@
         {
           "path": "src/contexts/ThemeProvider.jsx",
           "score": 39,
-          "lines": 317,
+          "lines": 341,
           "incomingLocalImports": 1,
-          "doclets": 13,
+          "doclets": 14,
           "summary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen",
           "summaryConfidence": "high"
         },
         {
           "path": "src/contexts/themeContext.js",
           "score": 38,
-          "lines": 37,
+          "lines": 41,
           "incomingLocalImports": 3,
           "doclets": 3,
           "summary": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.",
@@ -1356,13 +1356,13 @@
     {
       "name": "src/index.jsx",
       "fileCount": 1,
-      "lineCount": 64,
+      "lineCount": 67,
       "docletCount": 2,
       "importantFiles": [
         {
           "path": "src/index.jsx",
           "score": 86,
-          "lines": 64,
+          "lines": 67,
           "incomingLocalImports": 0,
           "doclets": 2,
           "summary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -1529,9 +1529,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 45,
-      "lineCount": 17995,
-      "docletCount": 692,
+      "fileCount": 46,
+      "lineCount": 18073,
+      "docletCount": 698,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1545,10 +1545,19 @@
         {
           "path": "src/utils/runtimeConfig.js",
           "score": 118,
-          "lines": 568,
+          "lines": 580,
           "incomingLocalImports": 15,
-          "doclets": 37,
+          "doclets": 38,
           "summary": "Runtime configuration helpers.",
+          "summaryConfidence": "high"
+        },
+        {
+          "path": "src/utils/viewerPreferences.js",
+          "score": 114,
+          "lines": 530,
+          "incomingLocalImports": 7,
+          "doclets": 37,
+          "summary": "Lightweight persisted viewer preferences.",
           "summaryConfidence": "high"
         },
         {
@@ -1558,15 +1567,6 @@
           "incomingLocalImports": 7,
           "doclets": 22,
           "summary": "Signature UI status helpers for browser integrity and gateway trust.",
-          "summaryConfidence": "high"
-        },
-        {
-          "path": "src/utils/viewerPreferences.js",
-          "score": 98,
-          "lines": 494,
-          "incomingLocalImports": 5,
-          "doclets": 34,
-          "summary": "Lightweight persisted viewer preferences.",
           "summaryConfidence": "high"
         },
         {
@@ -14934,7 +14934,7 @@
     },
     {
       "path": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "lines": 182,
+      "lines": 202,
       "extension": ".jsx",
       "jsdocBlockCount": 9,
       "sourceSummary": "Compact theme selector for the toolbar.",
@@ -14950,7 +14950,7 @@
             "useRef",
             "useState"
           ],
-          "line": 14,
+          "line": 18,
           "kind": "static"
         },
         {
@@ -14958,7 +14958,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 15,
+          "line": 19,
           "kind": "static"
         },
         {
@@ -14966,7 +14966,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 16,
+          "line": 20,
           "kind": "static"
         },
         {
@@ -14974,7 +14974,7 @@
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 17,
+          "line": 21,
           "kind": "static"
         }
       ],
@@ -14982,44 +14982,44 @@
         {
           "name": "ThemeMenuButton",
           "kind": "default",
-          "line": 181
+          "line": 201
         }
       ],
       "declarations": [
         {
           "name": "resolveThemeModeLabel",
           "kind": "function",
-          "line": 24
+          "line": 28
         },
         {
           "name": "resolveThemeModeIcon",
           "kind": "function",
-          "line": 35
+          "line": 39
         },
         {
           "name": "resolveSelectedMode",
           "kind": "function",
-          "line": 47
+          "line": 51
         },
         {
           "name": "ThemeMenuButton",
           "kind": "component",
-          "line": 55
+          "line": 59
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 83
+          "line": 89
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 91
+          "line": 97
         },
         {
           "name": "handleSelect",
           "kind": "function",
-          "line": 107
+          "line": 113
         }
       ],
       "parseError": null,
@@ -15035,7 +15035,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 24,
+          "line": 28,
           "description": "",
           "params": [
             {
@@ -15066,7 +15066,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 35,
+          "line": 39,
           "description": "",
           "params": [
             {
@@ -15091,7 +15091,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 47,
+          "line": 51,
           "description": "",
           "params": [
             {
@@ -15122,7 +15122,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 83,
+          "line": 89,
           "description": "",
           "params": [
             {
@@ -15142,7 +15142,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 91,
+          "line": 97,
           "description": "",
           "params": [
             {
@@ -15162,7 +15162,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-          "line": 107,
+          "line": 113,
           "description": "",
           "params": [
             {
@@ -15183,7 +15183,7 @@
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 17,
+          "line": 21,
           "kind": "static",
           "resolved": "src/contexts/themeContext.js"
         }
@@ -15200,7 +15200,7 @@
             "useRef",
             "useState"
           ],
-          "line": 14,
+          "line": 18,
           "kind": "static"
         },
         {
@@ -15208,7 +15208,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 15,
+          "line": 19,
           "kind": "static"
         },
         {
@@ -15216,7 +15216,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 16,
+          "line": 20,
           "kind": "static"
         }
       ],
@@ -24281,7 +24281,7 @@
     },
     {
       "path": "src/contexts/themeContext.js",
-      "lines": 37,
+      "lines": 41,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": null,
@@ -24299,7 +24299,7 @@
         {
           "name": "ThemeContext",
           "kind": "default",
-          "line": 36
+          "line": 40
         }
       ],
       "declarations": [],
@@ -24344,7 +24344,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/contexts/themeContext.js",
-          "line": 26,
+          "line": 28,
           "description": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.",
           "params": [],
           "returns": [],
@@ -24371,9 +24371,9 @@
     },
     {
       "path": "src/contexts/ThemeProvider.jsx",
-      "lines": 317,
+      "lines": 341,
       "extension": ".jsx",
-      "jsdocBlockCount": 17,
+      "jsdocBlockCount": 18,
       "sourceSummary": "src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context (React) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen",
       "imports": [
         {
@@ -24386,7 +24386,7 @@
             "useCallback",
             "useRef"
           ],
-          "line": 17,
+          "line": 19,
           "kind": "static"
         },
         {
@@ -24394,7 +24394,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 18,
+          "line": 20,
           "kind": "static"
         },
         {
@@ -24402,7 +24402,7 @@
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static"
         },
         {
@@ -24413,7 +24413,7 @@
             "getSharedThemePreference",
             "mirrorSharedThemePreference"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static"
         },
         {
@@ -24422,7 +24422,7 @@
             "startOmpThemeBridge",
             "announceThemeToAllowedOrigins"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -24430,7 +24430,24 @@
           "specifiers": [
             "getOmpThemeBridgeAllowedOrigins"
           ],
-          "line": 30,
+          "line": 32,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/viewerPreferences.js",
+          "specifiers": [
+            "getEffectiveToolbarLargeButtons",
+            "setToolbarLargeButtonsPreference"
+          ],
+          "line": 33,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/toolbarDensity.js",
+          "specifiers": [
+            "applyToolbarDensityToDocument"
+          ],
+          "line": 34,
           "kind": "static"
         }
       ],
@@ -24438,64 +24455,64 @@
         {
           "name": "ThemeProvider",
           "kind": "variable",
-          "line": 109
+          "line": 113
         }
       ],
       "declarations": [
         {
           "name": "detectSystemTheme",
           "kind": "function",
-          "line": 48
+          "line": 52
         },
         {
           "name": "resolveThemeForMode",
           "kind": "function",
-          "line": 65
+          "line": 69
         },
         {
           "name": "applyThemeToDocument",
           "kind": "function",
-          "line": 79
+          "line": 83
         },
         {
           "name": "resolveInitialThemeMode",
           "kind": "function",
-          "line": 97
+          "line": 101
         },
         {
           "name": "ThemeProvider",
           "kind": "component",
-          "line": 109
+          "line": 113
         },
         {
           "name": "onChange",
           "kind": "function",
-          "line": 180
+          "line": 202
         },
         {
           "name": "resync",
           "kind": "function",
-          "line": 229
+          "line": 251
         },
         {
           "name": "onStorage",
           "kind": "function",
-          "line": 237
+          "line": 259
         },
         {
           "name": "onFocus",
           "kind": "function",
-          "line": 241
+          "line": 263
         },
         {
           "name": "onPageShow",
           "kind": "function",
-          "line": 242
+          "line": 264
         },
         {
           "name": "onVisibility",
           "kind": "function",
-          "line": 243
+          "line": 265
         }
       ],
       "parseError": null,
@@ -24513,7 +24530,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 32,
+          "line": 36,
           "description": "Theme identifier.",
           "params": [],
           "returns": [],
@@ -24526,7 +24543,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 37,
+          "line": 41,
           "description": "Theme mode identifier.",
           "params": [],
           "returns": [],
@@ -24539,7 +24556,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 48,
+          "line": 52,
           "description": "Detect system preferred color scheme (SSR-safe; defaults to light).",
           "params": [],
           "returns": [
@@ -24557,7 +24574,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 65,
+          "line": 69,
           "description": "Resolve the concrete theme for a theme mode.",
           "params": [
             {
@@ -24582,7 +24599,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 79,
+          "line": 83,
           "description": "Apply the resolved theme to the DOM (SSR-safe).",
           "params": [
             {
@@ -24613,7 +24630,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 97,
+          "line": 101,
           "description": "Resolve the initial theme mode once during provider initialization.",
           "params": [],
           "returns": [
@@ -24631,7 +24648,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 109,
+          "line": 113,
           "description": "ThemeProvider component to manage and provide theme-related state and functions.",
           "params": [
             {
@@ -24650,13 +24667,38 @@
           "examples": 0
         },
         {
+          "id": "ThemeProvider~setToolbarLargeButtons",
+          "name": "setToolbarLargeButtons",
+          "longname": "ThemeProvider~setToolbarLargeButtons",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/contexts/ThemeProvider.jsx",
+          "line": 134,
+          "description": "Persist and apply the &quot;Larger toolbar buttons&quot; choice.",
+          "params": [
+            {
+              "name": "largeButtons",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "ThemeProvider~setThemeMode",
           "name": "setThemeMode",
           "longname": "ThemeProvider~setThemeMode",
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 125,
+          "line": 147,
           "description": "Persist and apply a theme mode.",
           "params": [
             {
@@ -24681,7 +24723,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 157,
+          "line": 179,
           "description": "Apply an explicit concrete theme.",
           "params": [
             {
@@ -24706,7 +24748,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 167,
+          "line": 189,
           "description": "Toggle between the two highest-contrast explicit themes.",
           "params": [],
           "returns": [
@@ -24724,7 +24766,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 180,
+          "line": 202,
           "description": "",
           "params": [
             {
@@ -24744,7 +24786,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 218,
+          "line": 240,
           "description": "Apply a mode that arrived from outside this component (another tab, the host page, or the cross-origin bridge).",
           "params": [
             {
@@ -24769,7 +24811,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/contexts/ThemeProvider.jsx",
-          "line": 237,
+          "line": 259,
           "description": "",
           "params": [
             {
@@ -24790,7 +24832,7 @@
           "specifiers": [
             "logger"
           ],
-          "line": 18,
+          "line": 20,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -24799,7 +24841,7 @@
           "specifiers": [
             "ThemeContext"
           ],
-          "line": 19,
+          "line": 21,
           "kind": "static",
           "resolved": "src/contexts/themeContext.js"
         },
@@ -24811,7 +24853,7 @@
             "getSharedThemePreference",
             "mirrorSharedThemePreference"
           ],
-          "line": 20,
+          "line": 22,
           "kind": "static",
           "resolved": "src/utils/ompThemePreference.js"
         },
@@ -24821,7 +24863,7 @@
             "startOmpThemeBridge",
             "announceThemeToAllowedOrigins"
           ],
-          "line": 26,
+          "line": 28,
           "kind": "static",
           "resolved": "src/integrations/ompThemeBridge.js"
         },
@@ -24830,9 +24872,28 @@
           "specifiers": [
             "getOmpThemeBridgeAllowedOrigins"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
+          "source": "../utils/viewerPreferences.js",
+          "specifiers": [
+            "getEffectiveToolbarLargeButtons",
+            "setToolbarLargeButtonsPreference"
+          ],
+          "line": 33,
+          "kind": "static",
+          "resolved": "src/utils/viewerPreferences.js"
+        },
+        {
+          "source": "../utils/toolbarDensity.js",
+          "specifiers": [
+            "applyToolbarDensityToDocument"
+          ],
+          "line": 34,
+          "kind": "static",
+          "resolved": "src/utils/toolbarDensity.js"
         }
       ],
       "packageImports": [
@@ -24846,7 +24907,7 @@
             "useCallback",
             "useRef"
           ],
-          "line": 17,
+          "line": 19,
           "kind": "static"
         }
       ],
@@ -29152,7 +29213,7 @@
     },
     {
       "path": "src/index.jsx",
-      "lines": 64,
+      "lines": 67,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "OpenDocViewer — Application Entry - Load global styles (CSS variables + layout).",
@@ -29224,6 +29285,22 @@
           ],
           "line": 28,
           "kind": "static"
+        },
+        {
+          "source": "./utils/viewerPreferences.js",
+          "specifiers": [
+            "getEffectiveToolbarLargeButtons"
+          ],
+          "line": 29,
+          "kind": "static"
+        },
+        {
+          "source": "./utils/toolbarDensity.js",
+          "specifiers": [
+            "applyToolbarDensityToDocument"
+          ],
+          "line": 30,
+          "kind": "static"
         }
       ],
       "exports": [],
@@ -29241,7 +29318,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/index.jsx",
-          "line": 39,
+          "line": 42,
           "description": "Determine environment and set a sensible client-side log level.",
           "params": [],
           "returns": [],
@@ -29254,7 +29331,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/index.jsx",
-          "line": 49,
+          "line": 52,
           "description": "Mount the app into #root.",
           "params": [],
           "returns": [],
@@ -29314,6 +29391,24 @@
           "line": 28,
           "kind": "static",
           "resolved": "src/utils/ompThemePreference.js"
+        },
+        {
+          "source": "./utils/viewerPreferences.js",
+          "specifiers": [
+            "getEffectiveToolbarLargeButtons"
+          ],
+          "line": 29,
+          "kind": "static",
+          "resolved": "src/utils/viewerPreferences.js"
+        },
+        {
+          "source": "./utils/toolbarDensity.js",
+          "specifiers": [
+            "applyToolbarDensityToDocument"
+          ],
+          "line": 30,
+          "kind": "static",
+          "resolved": "src/utils/toolbarDensity.js"
         }
       ],
       "packageImports": [
@@ -55161,9 +55256,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 568,
+      "lines": 580,
       "extension": ".js",
-      "jsdocBlockCount": 38,
+      "jsdocBlockCount": 39,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -55188,64 +55283,69 @@
           "line": 161
         },
         {
+          "name": "getToolbarLargeButtonsDefault",
+          "kind": "function",
+          "line": 173
+        },
+        {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 330
+          "line": 342
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 347
+          "line": 359
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 358
+          "line": 370
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 376
+          "line": 388
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 402
+          "line": 414
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 415
+          "line": 427
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 429
+          "line": 441
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 453
+          "line": 465
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 478
+          "line": 490
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 502
+          "line": 514
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 520
+          "line": 532
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 556
+          "line": 568
         }
       ],
       "declarations": [
@@ -55270,109 +55370,114 @@
           "line": 161
         },
         {
+          "name": "getToolbarLargeButtonsDefault",
+          "kind": "function",
+          "line": 173
+        },
+        {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 179
+          "line": 191
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 201
+          "line": 213
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 226
+          "line": 238
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 247
+          "line": 259
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 264
+          "line": 276
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 276
+          "line": 288
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 290
+          "line": 302
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 301
+          "line": 313
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 315
+          "line": 327
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 330
+          "line": 342
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 347
+          "line": 359
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 358
+          "line": 370
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 376
+          "line": 388
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 402
+          "line": 414
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 415
+          "line": 427
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 429
+          "line": 441
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 453
+          "line": 465
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 478
+          "line": 490
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 502
+          "line": 514
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 520
+          "line": 532
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 556
+          "line": 568
         }
       ],
       "parseError": null,
@@ -55631,13 +55736,38 @@
           "examples": 0
         },
         {
+          "id": "getToolbarLargeButtonsDefault",
+          "name": "getToolbarLargeButtonsDefault",
+          "longname": "getToolbarLargeButtonsDefault",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 173,
+          "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "normalizeBoolean",
           "name": "normalizeBoolean",
           "longname": "normalizeBoolean",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 179,
+          "line": 191,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -55668,7 +55798,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 201,
+          "line": 213,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -55711,7 +55841,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 226,
+          "line": 238,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -55754,7 +55884,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 247,
+          "line": 259,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -55797,7 +55927,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 264,
+          "line": 276,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -55828,7 +55958,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 276,
+          "line": 288,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -55853,7 +55983,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 290,
+          "line": 302,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -55878,7 +56008,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 301,
+          "line": 313,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -55903,7 +56033,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 315,
+          "line": 327,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -55934,7 +56064,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 330,
+          "line": 342,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -55965,7 +56095,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 347,
+          "line": 359,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -55996,7 +56126,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 358,
+          "line": 370,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -56027,7 +56157,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 376,
+          "line": 388,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -56052,7 +56182,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 402,
+          "line": 414,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -56077,7 +56207,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 415,
+          "line": 427,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -56102,7 +56232,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 429,
+          "line": 441,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -56127,7 +56257,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 453,
+          "line": 465,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -56152,7 +56282,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 478,
+          "line": 490,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -56177,7 +56307,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 502,
+          "line": 514,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -56202,7 +56332,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 520,
+          "line": 532,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -56227,7 +56357,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 556,
+          "line": 568,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -57974,10 +58104,107 @@
       "summarySource": "leading-jsdoc"
     },
     {
-      "path": "src/utils/viewerPreferences.js",
-      "lines": 494,
+      "path": "src/utils/toolbarDensity.js",
+      "lines": 30,
       "extension": ".js",
-      "jsdocBlockCount": 40,
+      "jsdocBlockCount": 3,
+      "sourceSummary": "Toolbar density on the document root.",
+      "imports": [],
+      "exports": [
+        {
+          "name": "toolbarDensityFor",
+          "kind": "function",
+          "line": 12
+        },
+        {
+          "name": "applyToolbarDensityToDocument",
+          "kind": "function",
+          "line": 22
+        }
+      ],
+      "declarations": [
+        {
+          "name": "toolbarDensityFor",
+          "kind": "function",
+          "line": 12
+        },
+        {
+          "name": "applyToolbarDensityToDocument",
+          "kind": "function",
+          "line": 22
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "toolbarDensityFor",
+          "name": "toolbarDensityFor",
+          "longname": "toolbarDensityFor",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/toolbarDensity.js",
+          "line": 12,
+          "description": "",
+          "params": [
+            {
+              "name": "largeButtons",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "'large'|'compact'",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "applyToolbarDensityToDocument",
+          "name": "applyToolbarDensityToDocument",
+          "longname": "applyToolbarDensityToDocument",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/toolbarDensity.js",
+          "line": 22,
+          "description": "Apply the toolbar density to the document root (SSR-safe).",
+          "params": [
+            {
+              "name": "largeButtons",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "void",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 2,
+      "importanceScore": 32,
+      "summary": "Toolbar density on the document root.",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/utils/viewerPreferences.js",
+      "lines": 530,
+      "extension": ".js",
+      "jsdocBlockCount": 43,
       "sourceSummary": "Lightweight persisted viewer preferences.",
       "imports": [
         {
@@ -57986,9 +58213,10 @@
             "normalizeCustomFitSizeLimitPreference",
             "normalizeCustomFitWidthFactorPercent",
             "normalizeOptionalCustomFitFactorPercent",
-            "normalizePrintDefaultMode"
+            "normalizePrintDefaultMode",
+            "getToolbarLargeButtonsDefault"
           ],
-          "line": 10,
+          "line": 12,
           "kind": "static"
         }
       ],
@@ -57996,314 +58224,344 @@
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 212
+          "line": 217
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 222
+          "line": 227
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 254
+          "line": 259
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 273
+          "line": 278
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 283
+          "line": 288
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 300
+          "line": 305
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 324
+          "line": 329
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 333
+          "line": 338
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 344
+          "line": 349
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 355
+          "line": 360
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 366
+          "line": 371
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 373
+          "line": 378
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 382
+          "line": 387
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 390
+          "line": 395
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 398
+          "line": 403
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 407
+          "line": 412
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 420
+          "line": 425
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 433
+          "line": 438
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 448
+          "line": 453
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 461
+          "line": 466
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 488
+          "line": 493
+        },
+        {
+          "name": "getToolbarLargeButtonsPreference",
+          "kind": "function",
+          "line": 505
+        },
+        {
+          "name": "setToolbarLargeButtonsPreference",
+          "kind": "function",
+          "line": 514
+        },
+        {
+          "name": "getEffectiveToolbarLargeButtons",
+          "kind": "function",
+          "line": 525
         }
       ],
       "declarations": [
         {
           "name": "isExplicitTheme",
           "kind": "function",
-          "line": 47
+          "line": 51
         },
         {
           "name": "isThemeMode",
           "kind": "function",
-          "line": 55
+          "line": 59
         },
         {
           "name": "normalizeThemeModeValue",
           "kind": "function",
-          "line": 65
+          "line": 69
         },
         {
           "name": "normalizeDefaultZoomModePreference",
           "kind": "function",
-          "line": 75
+          "line": 79
         },
         {
           "name": "normalizePreferences",
           "kind": "function",
-          "line": 102
+          "line": 106
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 105
+          "line": 109
         },
         {
           "name": "parsePreferences",
           "kind": "function",
-          "line": 147
+          "line": 152
         },
         {
           "name": "readPreferencesFromCookie",
           "kind": "function",
-          "line": 159
+          "line": 164
         },
         {
           "name": "readPreferencesFromStorage",
           "kind": "function",
-          "line": 176
+          "line": 181
         },
         {
           "name": "writePreferencesToCookie",
           "kind": "function",
-          "line": 189
+          "line": 194
         },
         {
           "name": "writePreferencesToStorage",
           "kind": "function",
-          "line": 202
+          "line": 207
         },
         {
           "name": "getViewerPreferences",
           "kind": "function",
-          "line": 212
+          "line": 217
         },
         {
           "name": "setViewerPreferences",
           "kind": "function",
-          "line": 222
+          "line": 227
         },
         {
           "name": "replaceViewerPreferences",
           "kind": "function",
-          "line": 244
+          "line": 249
         },
         {
           "name": "getThemePreference",
           "kind": "function",
-          "line": 254
+          "line": 259
         },
         {
           "name": "setThemePreference",
           "kind": "function",
-          "line": 273
+          "line": 278
         },
         {
           "name": "getThemeModePreference",
           "kind": "function",
-          "line": 283
+          "line": 288
         },
         {
           "name": "setThemeModePreference",
           "kind": "function",
-          "line": 300
+          "line": 305
         },
         {
           "name": "clearThemeSharedRevision",
           "kind": "function",
-          "line": 324
+          "line": 329
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 325
+          "line": 330
         },
         {
           "name": "getLanguagePreference",
           "kind": "function",
-          "line": 333
+          "line": 338
         },
         {
           "name": "setLanguagePreference",
           "kind": "function",
-          "line": 344
+          "line": 349
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 347
+          "line": 352
         },
         {
           "name": "getPrintDefaultModePreference",
           "kind": "function",
-          "line": 355
+          "line": 360
         },
         {
           "name": "setPrintDefaultModePreference",
           "kind": "function",
-          "line": 366
+          "line": 371
         },
         {
           "name": "clearPrintDefaultModePreference",
           "kind": "function",
-          "line": 373
+          "line": 378
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 374
+          "line": 379
         },
         {
           "name": "getDefaultZoomModePreference",
           "kind": "function",
-          "line": 382
+          "line": 387
         },
         {
           "name": "setDefaultZoomModePreference",
           "kind": "function",
-          "line": 390
+          "line": 395
         },
         {
           "name": "clearDefaultZoomModePreference",
           "kind": "function",
-          "line": 398
+          "line": 403
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 399
+          "line": 404
         },
         {
           "name": "getCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 407
+          "line": 412
         },
         {
           "name": "setCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 420
+          "line": 425
         },
         {
           "name": "clearCustomFitWidthFactorPreference",
           "kind": "function",
-          "line": 433
+          "line": 438
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 434
+          "line": 439
         },
         {
           "name": "limits",
           "kind": "object",
-          "line": 437
+          "line": 442
         },
         {
           "name": "getCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 448
+          "line": 453
         },
         {
           "name": "setCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 461
+          "line": 466
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 467
+          "line": 472
         },
         {
           "name": "clearCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 488
+          "line": 493
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 489
+          "line": 494
+        },
+        {
+          "name": "getToolbarLargeButtonsPreference",
+          "kind": "function",
+          "line": 505
+        },
+        {
+          "name": "setToolbarLargeButtonsPreference",
+          "kind": "function",
+          "line": 514
+        },
+        {
+          "name": "getEffectiveToolbarLargeButtons",
+          "kind": "function",
+          "line": 525
         }
       ],
       "parseError": null,
@@ -58319,7 +58577,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 17,
+          "line": 20,
           "description": "",
           "params": [],
           "returns": [],
@@ -58332,7 +58590,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 24,
+          "line": 27,
           "description": "",
           "params": [],
           "returns": [],
@@ -58345,7 +58603,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 47,
+          "line": 51,
           "description": "",
           "params": [
             {
@@ -58370,7 +58628,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 55,
+          "line": 59,
           "description": "",
           "params": [
             {
@@ -58395,7 +58653,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 65,
+          "line": 69,
           "description": "Normalize legacy theme-mode values.",
           "params": [
             {
@@ -58420,7 +58678,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 75,
+          "line": 79,
           "description": "",
           "params": [
             {
@@ -58445,7 +58703,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 102,
+          "line": 106,
           "description": "",
           "params": [
             {
@@ -58470,7 +58728,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 147,
+          "line": 152,
           "description": "",
           "params": [
             {
@@ -58495,7 +58753,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 159,
+          "line": 164,
           "description": "",
           "params": [],
           "returns": [
@@ -58513,7 +58771,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 176,
+          "line": 181,
           "description": "",
           "params": [],
           "returns": [
@@ -58531,7 +58789,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 189,
+          "line": 194,
           "description": "",
           "params": [
             {
@@ -58556,7 +58814,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 202,
+          "line": 207,
           "description": "",
           "params": [
             {
@@ -58581,7 +58839,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 212,
+          "line": 217,
           "description": "",
           "params": [],
           "returns": [
@@ -58599,7 +58857,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 222,
+          "line": 227,
           "description": "",
           "params": [
             {
@@ -58624,7 +58882,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 244,
+          "line": 249,
           "description": "Persist an already-normalized full preference object.",
           "params": [
             {
@@ -58649,7 +58907,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 254,
+          "line": 259,
           "description": "",
           "params": [],
           "returns": [
@@ -58667,7 +58925,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 273,
+          "line": 278,
           "description": "",
           "params": [
             {
@@ -58692,7 +58950,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 283,
+          "line": 288,
           "description": "",
           "params": [],
           "returns": [
@@ -58710,7 +58968,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 300,
+          "line": 305,
           "description": "Persist the user's theme mode preference.",
           "params": [
             {
@@ -58735,7 +58993,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 324,
+          "line": 329,
           "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
           "params": [],
           "returns": [
@@ -58753,7 +59011,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 333,
+          "line": 338,
           "description": "",
           "params": [],
           "returns": [
@@ -58771,7 +59029,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 344,
+          "line": 349,
           "description": "Persist a language choice, or clear it when the normalized value is empty.",
           "params": [
             {
@@ -58796,7 +59054,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 355,
+          "line": 360,
           "description": "",
           "params": [],
           "returns": [
@@ -58814,7 +59072,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 366,
+          "line": 371,
           "description": "",
           "params": [
             {
@@ -58839,7 +59097,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 373,
+          "line": 378,
           "description": "",
           "params": [],
           "returns": [
@@ -58857,7 +59115,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 382,
+          "line": 387,
           "description": "",
           "params": [],
           "returns": [
@@ -58875,7 +59133,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 390,
+          "line": 395,
           "description": "",
           "params": [
             {
@@ -58900,7 +59158,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 398,
+          "line": 403,
           "description": "",
           "params": [],
           "returns": [
@@ -58918,7 +59176,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 407,
+          "line": 412,
           "description": "",
           "params": [],
           "returns": [
@@ -58936,7 +59194,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 420,
+          "line": 425,
           "description": "",
           "params": [
             {
@@ -58961,7 +59219,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 433,
+          "line": 438,
           "description": "",
           "params": [],
           "returns": [
@@ -58979,7 +59237,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 448,
+          "line": 453,
           "description": "",
           "params": [],
           "returns": [
@@ -58997,7 +59255,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 461,
+          "line": 466,
           "description": "",
           "params": [
             {
@@ -59022,12 +59280,80 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/viewerPreferences.js",
-          "line": 488,
+          "line": 493,
           "description": "",
           "params": [],
           "returns": [
             {
               "type": "ViewerPreferences",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getToolbarLargeButtonsPreference",
+          "name": "getToolbarLargeButtonsPreference",
+          "longname": "getToolbarLargeButtonsPreference",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/viewerPreferences.js",
+          "line": 505,
+          "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
+          "params": [],
+          "returns": [
+            {
+              "type": "boolean|null",
+              "description": "null when the user has not chosen yet"
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "setToolbarLargeButtonsPreference",
+          "name": "setToolbarLargeButtonsPreference",
+          "longname": "setToolbarLargeButtonsPreference",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/viewerPreferences.js",
+          "line": 514,
+          "description": "",
+          "params": [
+            {
+              "name": "largeButtons",
+              "type": "boolean",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "ViewerPreferences",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getEffectiveToolbarLargeButtons",
+          "name": "getEffectiveToolbarLargeButtons",
+          "longname": "getEffectiveToolbarLargeButtons",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/viewerPreferences.js",
+          "line": 525,
+          "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
               "description": ""
             }
           ],
@@ -59042,16 +59368,17 @@
             "normalizeCustomFitSizeLimitPreference",
             "normalizeCustomFitWidthFactorPercent",
             "normalizeOptionalCustomFitFactorPercent",
-            "normalizePrintDefaultMode"
+            "normalizePrintDefaultMode",
+            "getToolbarLargeButtonsDefault"
           ],
-          "line": 10,
+          "line": 12,
           "kind": "static",
           "resolved": "src/utils/runtimeConfig.js"
         }
       ],
       "packageImports": [],
-      "incomingLocalImports": 5,
-      "importanceScore": 98,
+      "incomingLocalImports": 7,
+      "importanceScore": 114,
       "summary": "Lightweight persisted viewer preferences.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -67875,7 +68202,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 91,
+      "line": 97,
       "description": "",
       "params": [
         {
@@ -67895,7 +68222,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 83,
+      "line": 89,
       "description": "",
       "params": [
         {
@@ -67915,7 +68242,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 107,
+      "line": 113,
       "description": "",
       "params": [
         {
@@ -67935,7 +68262,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 47,
+      "line": 51,
       "description": "",
       "params": [
         {
@@ -67966,7 +68293,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 35,
+      "line": 39,
       "description": "",
       "params": [
         {
@@ -67991,7 +68318,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-      "line": 24,
+      "line": 28,
       "description": "",
       "params": [
         {
@@ -72957,7 +73284,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/contexts/themeContext.js",
-      "line": 26,
+      "line": 28,
       "description": "Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.",
       "params": [],
       "returns": [],
@@ -72996,7 +73323,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 218,
+      "line": 240,
       "description": "Apply a mode that arrived from outside this component (another tab, the host page, or the cross-origin bridge).",
       "params": [
         {
@@ -73021,7 +73348,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 79,
+      "line": 83,
       "description": "Apply the resolved theme to the DOM (SSR-safe).",
       "params": [
         {
@@ -73052,7 +73379,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 48,
+      "line": 52,
       "description": "Detect system preferred color scheme (SSR-safe; defaults to light).",
       "params": [],
       "returns": [
@@ -73070,7 +73397,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 180,
+      "line": 202,
       "description": "",
       "params": [
         {
@@ -73090,7 +73417,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 237,
+      "line": 259,
       "description": "",
       "params": [
         {
@@ -73110,7 +73437,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 97,
+      "line": 101,
       "description": "Resolve the initial theme mode once during provider initialization.",
       "params": [],
       "returns": [
@@ -73128,7 +73455,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 65,
+      "line": 69,
       "description": "Resolve the concrete theme for a theme mode.",
       "params": [
         {
@@ -73153,7 +73480,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 157,
+      "line": 179,
       "description": "Apply an explicit concrete theme.",
       "params": [
         {
@@ -73178,12 +73505,37 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 125,
+      "line": 147,
       "description": "Persist and apply a theme mode.",
       "params": [
         {
           "name": "nextMode",
           "type": "ThemeMode",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "ThemeProvider~setToolbarLargeButtons",
+      "name": "setToolbarLargeButtons",
+      "longname": "ThemeProvider~setToolbarLargeButtons",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/contexts/ThemeProvider.jsx",
+      "line": 134,
+      "description": "Persist and apply the &quot;Larger toolbar buttons&quot; choice.",
+      "params": [
+        {
+          "name": "largeButtons",
+          "type": "boolean",
           "optional": false,
           "description": ""
         }
@@ -73203,7 +73555,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 37,
+      "line": 41,
       "description": "Theme mode identifier.",
       "params": [],
       "returns": [],
@@ -73216,7 +73568,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 32,
+      "line": 36,
       "description": "Theme identifier.",
       "params": [],
       "returns": [],
@@ -73229,7 +73581,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 109,
+      "line": 113,
       "description": "ThemeProvider component to manage and provide theme-related state and functions.",
       "params": [
         {
@@ -73254,7 +73606,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ThemeProvider.jsx",
-      "line": 167,
+      "line": 189,
       "description": "Toggle between the two highest-contrast explicit themes.",
       "params": [],
       "returns": [
@@ -76191,7 +76543,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/index.jsx",
-      "line": 49,
+      "line": 52,
       "description": "Mount the app into #root.",
       "params": [],
       "returns": [],
@@ -76204,7 +76556,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/index.jsx",
-      "line": 39,
+      "line": 42,
       "description": "Determine environment and set a sensible client-side log level.",
       "params": [],
       "returns": [],
@@ -93919,7 +94271,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 201,
+      "line": 213,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -94000,7 +94352,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 556,
+      "line": 568,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -94025,7 +94377,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 453,
+      "line": 465,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -94050,7 +94402,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 478,
+      "line": 490,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -94087,13 +94439,38 @@
       "examples": 0
     },
     {
+      "id": "getToolbarLargeButtonsDefault",
+      "name": "getToolbarLargeButtonsDefault",
+      "longname": "getToolbarLargeButtonsDefault",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 173,
+      "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getViewerCustomFitSizeLimits",
       "name": "getViewerCustomFitSizeLimits",
       "longname": "getViewerCustomFitSizeLimits",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 429,
+      "line": 441,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -94118,7 +94495,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 415,
+      "line": 427,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -94143,7 +94520,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 402,
+      "line": 414,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -94168,7 +94545,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 502,
+      "line": 514,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -94193,7 +94570,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 520,
+      "line": 532,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -94294,7 +94671,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 179,
+      "line": 191,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -94325,7 +94702,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 376,
+      "line": 388,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -94350,7 +94727,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 347,
+      "line": 359,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -94381,7 +94758,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 315,
+      "line": 327,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -94412,7 +94789,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 247,
+      "line": 259,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -94455,7 +94832,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 226,
+      "line": 238,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -94498,7 +94875,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 358,
+      "line": 370,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -94529,7 +94906,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 330,
+      "line": 342,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -94560,7 +94937,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 276,
+      "line": 288,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -94585,7 +94962,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 264,
+      "line": 276,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -94616,7 +94993,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 290,
+      "line": 302,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -94706,7 +95083,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 301,
+      "line": 313,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {
@@ -96087,13 +96464,63 @@
       "examples": 0
     },
     {
+      "id": "applyToolbarDensityToDocument",
+      "name": "applyToolbarDensityToDocument",
+      "longname": "applyToolbarDensityToDocument",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/toolbarDensity.js",
+      "line": 22,
+      "description": "Apply the toolbar density to the document root (SSR-safe).",
+      "params": [
+        {
+          "name": "largeButtons",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "void",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "toolbarDensityFor",
+      "name": "toolbarDensityFor",
+      "longname": "toolbarDensityFor",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/toolbarDensity.js",
+      "line": 12,
+      "description": "",
+      "params": [
+        {
+          "name": "largeButtons",
+          "type": "boolean",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'large'|'compact'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "clearCustomFitSizeLimitPreference",
       "name": "clearCustomFitSizeLimitPreference",
       "longname": "clearCustomFitSizeLimitPreference",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 488,
+      "line": 493,
       "description": "",
       "params": [],
       "returns": [
@@ -96111,7 +96538,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 433,
+      "line": 438,
       "description": "",
       "params": [],
       "returns": [
@@ -96129,7 +96556,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 398,
+      "line": 403,
       "description": "",
       "params": [],
       "returns": [
@@ -96147,7 +96574,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 373,
+      "line": 378,
       "description": "",
       "params": [],
       "returns": [
@@ -96165,7 +96592,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 324,
+      "line": 329,
       "description": "Clear the stored binding between a local Normal choice and its shared OMP revision.",
       "params": [],
       "returns": [
@@ -96183,7 +96610,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 17,
+      "line": 20,
       "description": "",
       "params": [],
       "returns": [],
@@ -96196,7 +96623,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 448,
+      "line": 453,
       "description": "",
       "params": [],
       "returns": [
@@ -96214,7 +96641,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 407,
+      "line": 412,
       "description": "",
       "params": [],
       "returns": [
@@ -96232,12 +96659,37 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 382,
+      "line": 387,
       "description": "",
       "params": [],
       "returns": [
         {
           "type": "'FIT_PAGE'|'FIT_WIDTH'|'FIT_CUSTOM'|'ACTUAL_SIZE'|null",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "getEffectiveToolbarLargeButtons",
+      "name": "getEffectiveToolbarLargeButtons",
+      "longname": "getEffectiveToolbarLargeButtons",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/viewerPreferences.js",
+      "line": 525,
+      "description": "Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons (large unless explicitly false).",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
           "description": ""
         }
       ],
@@ -96250,7 +96702,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 333,
+      "line": 338,
       "description": "",
       "params": [],
       "returns": [
@@ -96268,7 +96720,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 355,
+      "line": 360,
       "description": "",
       "params": [],
       "returns": [
@@ -96286,7 +96738,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 283,
+      "line": 288,
       "description": "",
       "params": [],
       "returns": [
@@ -96304,7 +96756,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 254,
+      "line": 259,
       "description": "",
       "params": [],
       "returns": [
@@ -96316,13 +96768,31 @@
       "examples": 0
     },
     {
+      "id": "getToolbarLargeButtonsPreference",
+      "name": "getToolbarLargeButtonsPreference",
+      "longname": "getToolbarLargeButtonsPreference",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/viewerPreferences.js",
+      "line": 505,
+      "description": "The user's stored &quot;Larger toolbar buttons&quot; choice from the theme menu.",
+      "params": [],
+      "returns": [
+        {
+          "type": "boolean|null",
+          "description": "null when the user has not chosen yet"
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getViewerPreferences",
       "name": "getViewerPreferences",
       "longname": "getViewerPreferences",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 212,
+      "line": 217,
       "description": "",
       "params": [],
       "returns": [
@@ -96340,7 +96810,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 47,
+      "line": 51,
       "description": "",
       "params": [
         {
@@ -96365,7 +96835,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 55,
+      "line": 59,
       "description": "",
       "params": [
         {
@@ -96390,7 +96860,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 75,
+      "line": 79,
       "description": "",
       "params": [
         {
@@ -96415,7 +96885,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 102,
+      "line": 106,
       "description": "",
       "params": [
         {
@@ -96440,7 +96910,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 65,
+      "line": 69,
       "description": "Normalize legacy theme-mode values.",
       "params": [
         {
@@ -96465,7 +96935,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 147,
+      "line": 152,
       "description": "",
       "params": [
         {
@@ -96490,7 +96960,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 159,
+      "line": 164,
       "description": "",
       "params": [],
       "returns": [
@@ -96508,7 +96978,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 176,
+      "line": 181,
       "description": "",
       "params": [],
       "returns": [
@@ -96526,7 +96996,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 244,
+      "line": 249,
       "description": "Persist an already-normalized full preference object.",
       "params": [
         {
@@ -96551,7 +97021,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 461,
+      "line": 466,
       "description": "",
       "params": [
         {
@@ -96576,7 +97046,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 420,
+      "line": 425,
       "description": "",
       "params": [
         {
@@ -96601,7 +97071,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 390,
+      "line": 395,
       "description": "",
       "params": [
         {
@@ -96626,7 +97096,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 344,
+      "line": 349,
       "description": "Persist a language choice, or clear it when the normalized value is empty.",
       "params": [
         {
@@ -96651,7 +97121,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 366,
+      "line": 371,
       "description": "",
       "params": [
         {
@@ -96676,7 +97146,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 300,
+      "line": 305,
       "description": "Persist the user's theme mode preference.",
       "params": [
         {
@@ -96701,12 +97171,37 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 273,
+      "line": 278,
       "description": "",
       "params": [
         {
           "name": "theme",
           "type": "'normal'|'light'|'dark'",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "ViewerPreferences",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "setToolbarLargeButtonsPreference",
+      "name": "setToolbarLargeButtonsPreference",
+      "longname": "setToolbarLargeButtonsPreference",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/viewerPreferences.js",
+      "line": 514,
+      "description": "",
+      "params": [
+        {
+          "name": "largeButtons",
+          "type": "boolean",
           "optional": false,
           "description": ""
         }
@@ -96726,7 +97221,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 222,
+      "line": 227,
       "description": "",
       "params": [
         {
@@ -96751,7 +97246,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 24,
+      "line": 27,
       "description": "",
       "params": [],
       "returns": [],
@@ -96764,7 +97259,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 189,
+      "line": 194,
       "description": "",
       "params": [
         {
@@ -96789,7 +97284,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/viewerPreferences.js",
-      "line": 202,
+      "line": 207,
       "description": "",
       "params": [
         {

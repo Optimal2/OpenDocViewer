@@ -12,6 +12,8 @@
  *     - resilient DOM updates (SSR-safe, try/catch)
  *     - live reaction to `prefers-color-scheme` changes while the mode is `system`
  *     - memoized context value for predictable renders
+ *     - the viewer-local toolbar density preference ("Larger toolbar buttons" in the theme menu),
+ *       applied as data-toolbar-density on the document root; it is not shared with OMP
  */
 
 import { useState, useEffect, useLayoutEffect, useMemo, useCallback, useRef } from 'react';
@@ -28,6 +30,8 @@ import {
   announceThemeToAllowedOrigins,
 } from '../integrations/ompThemeBridge.js';
 import { getOmpThemeBridgeAllowedOrigins } from '../utils/runtimeConfig.js';
+import { getEffectiveToolbarLargeButtons, setToolbarLargeButtonsPreference } from '../utils/viewerPreferences.js';
+import { applyToolbarDensityToDocument } from '../utils/toolbarDensity.js';
 
 /**
  * Theme identifier.
@@ -115,6 +119,24 @@ export const ThemeProvider = ({ children }) => {
 
   const [themeMode, setThemeModeState] = useState/** @type {function(): ThemeMode} */(() => initialStateRef.current.mode);
   const [theme, setTheme] = useState/** @type {function(): ThemeName} */(() => initialStateRef.current.theme);
+  const [toolbarLargeButtons, setToolbarLargeButtonsState] = useState(() => getEffectiveToolbarLargeButtons());
+
+  useLayoutEffect(() => {
+    applyToolbarDensityToDocument(toolbarLargeButtons);
+  }, [toolbarLargeButtons]);
+
+  /**
+   * Persist and apply the "Larger toolbar buttons" choice.
+   *
+   * @param {boolean} largeButtons
+   * @returns {void}
+   */
+  const setToolbarLargeButtons = useCallback((largeButtons) => {
+    const next = largeButtons === true;
+    setToolbarLargeButtonsPreference(next);
+    setToolbarLargeButtonsState(next);
+    logger.info('Toolbar density applied', { toolbarLargeButtons: next });
+  }, []);
 
   /**
    * Persist and apply a theme mode.
@@ -310,7 +332,9 @@ export const ThemeProvider = ({ children }) => {
     toggleTheme,
     setThemeExplicit,
     setThemeMode,
-  }), [theme, themeMode, toggleTheme, setThemeExplicit, setThemeMode]);
+    toolbarLargeButtons,
+    setToolbarLargeButtons,
+  }), [theme, themeMode, toggleTheme, setThemeExplicit, setThemeMode, toolbarLargeButtons, setToolbarLargeButtons]);
 
   return <ThemeContext.Provider value={contextValue}>{children}</ThemeContext.Provider>;
 };

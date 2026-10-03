@@ -140,9 +140,11 @@ The broad state split is:
     selection and print dialog visibility
 - `ThemeContext` (`src/contexts/ThemeProvider.jsx`)
   - theme selection (`system`, `normal`, `light`, `dark`) and theme toggle actions
+  - the viewer-local "Larger toolbar buttons" choice, applied as `data-toolbar-density`
+    (`large`/`compact`) on the document root and mapped to size variables in `src/styles/toolbar.css`
 - `src/utils/viewerPreferences.js`
-  - persisted user choices (theme, language, default print scope, default zoom mode, custom fit
-    factors) stored in both `localStorage` and a same-origin cookie; image adjustments are never
+  - persisted user choices (theme, language, toolbar button size, default print scope, default
+    zoom mode, custom fit factors) stored in both `localStorage` and a same-origin cookie; image adjustments are never
     persisted
 
 ## Print flow

@@ -84,7 +84,8 @@
         "normal": "Normal"
       },
       "currentSystem": "System ({theme})",
-      "system": "System"
+      "system": "System",
+      "largeButtons": "Larger toolbar buttons"
     },
     "focusWarningTitle": "Shortcuts inactive",
     "focusWarningAction": "Focus viewer",

@@ -81,6 +81,12 @@
       // toolbar signature overview remain.
       thumbnailPageBadge: true
     },
+    toolbar: {
+      // Default for the "Larger toolbar buttons" checkbox in the theme menu. true (default) keeps
+      // the large toolbar buttons; false makes the compact toolbar the default. A user's own
+      // choice in the theme menu is remembered per browser and outranks this default.
+      largeButtons: true
+    },
     viewer: {
       // Initial zoom mode when the first page opens.
       // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".

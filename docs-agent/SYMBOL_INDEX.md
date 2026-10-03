@@ -275,12 +275,12 @@
 | <code>module:printRangeDialogHelpers.resolvePrintAction</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:73</code> | Resolve a configurable print dialog action. |
 | <code>module:printRangeDialogHelpers.safeRegex</code> | function | <code>src/components/DocumentToolbar/printRangeDialogHelpers.js:25</code> | Build a safe RegExp from optional pattern/flags. |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/SplitToolbarButton.jsx:127</code> | Exported SplitToolbarButton component. |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:91</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:83</code> |  |
-| <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:107</code> |  |
-| <code>resolveSelectedMode</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:47</code> |  |
-| <code>resolveThemeModeIcon</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:35</code> |  |
-| <code>resolveThemeModeLabel</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:24</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:97</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:89</code> |  |
+| <code>ThemeMenuButton~handleSelect</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:113</code> |  |
+| <code>resolveSelectedMode</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:51</code> |  |
+| <code>resolveThemeModeIcon</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:39</code> |  |
+| <code>resolveThemeModeLabel</code> | function | <code>src/components/DocumentToolbar/ThemeMenuButton.jsx:28</code> |  |
 | <code>module.exports</code> | member | <code>src/components/DocumentToolbar/ThemeToggleButton.jsx:60</code> | Exported ThemeToggleButton component. |
 | <code>createSessionPageNumbers</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:125</code> |  |
 | <code>createVariantDetail</code> | function | <code>src/components/DocumentToolbar/usePdfPrebuildAllPages.js:78</code> |  |
@@ -467,22 +467,23 @@
 | <code>ProblemNoticeTrigger</code> | typedef | <code>src/components/ViewerProblemNotice.jsx:26</code> |  |
 | <code>resolveProblemTrigger</code> | function | <code>src/components/ViewerProblemNotice.jsx:44</code> |  |
 | <code>toCount</code> | function | <code>src/components/ViewerProblemNotice.jsx:21</code> |  |
-| <code>ThemeContext</code> | constant | <code>src/contexts/themeContext.js:26</code> | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
+| <code>ThemeContext</code> | constant | <code>src/contexts/themeContext.js:28</code> | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>ThemeContextValue</code> | typedef | <code>src/contexts/themeContext.js:10</code> | Context value shape for the theme. |
 | <code>ThemeMode</code> | typedef | <code>src/contexts/themeContext.js:4</code> | Theme identifier. |
-| <code>ThemeProvider~applyExternalThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:218</code> | Apply a mode that arrived from outside this component \(another tab, the host page, or the cross-origin bridge\). |
-| <code>applyThemeToDocument</code> | function | <code>src/contexts/ThemeProvider.jsx:79</code> | Apply the resolved theme to the DOM \(SSR-safe\). |
-| <code>detectSystemTheme</code> | function | <code>src/contexts/ThemeProvider.jsx:48</code> | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
-| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:180</code> |  |
-| <code>&lt;anonymous&gt;~onStorage</code> | function | <code>src/contexts/ThemeProvider.jsx:237</code> |  |
-| <code>resolveInitialThemeMode</code> | function | <code>src/contexts/ThemeProvider.jsx:97</code> | Resolve the initial theme mode once during provider initialization. |
-| <code>resolveThemeForMode</code> | function | <code>src/contexts/ThemeProvider.jsx:65</code> | Resolve the concrete theme for a theme mode. |
-| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:157</code> | Apply an explicit concrete theme. |
-| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:125</code> | Persist and apply a theme mode. |
-| <code>ThemeMode</code> | typedef | <code>src/contexts/ThemeProvider.jsx:37</code> | Theme mode identifier. |
-| <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:32</code> | Theme identifier. |
-| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:109</code> | ThemeProvider component to manage and provide theme-related state and functions. |
-| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:167</code> | Toggle between the two highest-contrast explicit themes. |
+| <code>ThemeProvider~applyExternalThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:240</code> | Apply a mode that arrived from outside this component \(another tab, the host page, or the cross-origin bridge\). |
+| <code>applyThemeToDocument</code> | function | <code>src/contexts/ThemeProvider.jsx:83</code> | Apply the resolved theme to the DOM \(SSR-safe\). |
+| <code>detectSystemTheme</code> | function | <code>src/contexts/ThemeProvider.jsx:52</code> | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
+| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:202</code> |  |
+| <code>&lt;anonymous&gt;~onStorage</code> | function | <code>src/contexts/ThemeProvider.jsx:259</code> |  |
+| <code>resolveInitialThemeMode</code> | function | <code>src/contexts/ThemeProvider.jsx:101</code> | Resolve the initial theme mode once during provider initialization. |
+| <code>resolveThemeForMode</code> | function | <code>src/contexts/ThemeProvider.jsx:69</code> | Resolve the concrete theme for a theme mode. |
+| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:179</code> | Apply an explicit concrete theme. |
+| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:147</code> | Persist and apply a theme mode. |
+| <code>ThemeProvider~setToolbarLargeButtons</code> | constant | <code>src/contexts/ThemeProvider.jsx:134</code> | Persist and apply the &amp;quot;Larger toolbar buttons&amp;quot; choice. |
+| <code>ThemeMode</code> | typedef | <code>src/contexts/ThemeProvider.jsx:41</code> | Theme mode identifier. |
+| <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
+| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:113</code> | ThemeProvider component to manage and provide theme-related state and functions. |
+| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:189</code> | Toggle between the two highest-contrast explicit themes. |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -609,8 +610,8 @@
 | <code>sanitizeI18nPathSegment</code> | function | <code>src/i18n.js:155</code> | Keep i18n URL template substitutions constrained to plain path segments. |
 | <code>syncDocumentLanguage</code> | function | <code>src/i18n.js:347</code> | Keep the document language synchronized with the active UI language. |
 | <code>WANT_DIAG</code> | constant | <code>src/i18n.js:85</code> | Diagnostics ON only in dev builds. |
-| <code>container</code> | constant | <code>src/index.jsx:49</code> | Mount the app into #root. |
-| <code>isDev</code> | constant | <code>src/index.jsx:39</code> | Determine environment and set a sensible client-side log level. |
+| <code>container</code> | constant | <code>src/index.jsx:52</code> | Mount the app into #root. |
+| <code>isDev</code> | constant | <code>src/index.jsx:42</code> | Determine environment and set a sensible client-side log level. |
 | <code>BootstrapAny</code> | typedef | <code>src/integrations/bootstrapRuntime.js:44</code> |  |
 | <code>BootstrapDebugInfo</code> | typedef | <code>src/integrations/bootstrapRuntime.js:33</code> | Opaque information about how startup data reached the viewer. |
 | <code>bootstrapDetect</code> | function | <code>src/integrations/bootstrapRuntime.js:243</code> | Detect the best available bootstrap mode. |
@@ -1314,39 +1315,40 @@
 | <code>withTimeout</code> | function | <code>src/utils/renderDecodeBenchmark.js:353</code> |  |
 | <code>clampRenderSurfaceSize</code> | function | <code>src/utils/renderSurfaceBounds.js:25</code> | Clamp a requested raster surface into a conservative browser-safe envelope while preserving its aspect ratio. |
 | <code>MAX_RENDER_SURFACE_DIMENSION</code> | constant | <code>src/utils/renderSurfaceBounds.js:9</code> | OpenDocViewer — conservative raster surface bounds. |
-| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:201</code> | Clamp a numeric config value to a safe range. |
+| <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:213</code> | Clamp a numeric config value to a safe range. |
 | <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:44</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:136</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:556</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
-| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:453</code> | Resolve the default print page mode used when the user has not stored an override. |
-| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:478</code> | Resolve the print-selection workspace configuration. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:568</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
+| <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:465</code> | Resolve the default print page mode used when the user has not stored an override. |
+| <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:490</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:113</code> | Read the merged runtime configuration from the browser environment. |
-| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:429</code> | Resolve the configured custom-size limits. |
-| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:415</code> | Resolve the custom-size width factor percentage. |
-| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:402</code> | Resolve the initial page zoom mode. |
-| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:502</code> | Resolve the optional scroll-at-edge page turn gesture. |
-| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:520</code> | Resolve the configurable viewer-level problem notice. |
+| <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:173</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
+| <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:441</code> | Resolve the configured custom-size limits. |
+| <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:427</code> | Resolve the custom-size width factor percentage. |
+| <code>getViewerDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:414</code> | Resolve the initial page zoom mode. |
+| <code>getViewerEdgeScrollPageTurnConfig</code> | function | <code>src/utils/runtimeConfig.js:514</code> | Resolve the optional scroll-at-edge page turn gesture. |
+| <code>getViewerProblemNoticeConfig</code> | function | <code>src/utils/runtimeConfig.js:532</code> | Resolve the configurable viewer-level problem notice. |
 | <code>isDocumentMetadataUiEnabled</code> | function | <code>src/utils/runtimeConfig.js:149</code> | Resolve whether document metadata UI affordances should be available. |
 | <code>isSignatureThumbnailPageBadgeEnabled</code> | function | <code>src/utils/runtimeConfig.js:161</code> | Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol. |
 | <code>KEYBOARD_PRINT_SHORTCUT_BEHAVIORS</code> | constant | <code>src/utils/runtimeConfig.js:30</code> | Runtime validation values for KeyboardPrintShortcutBehavior; the typedef documents the public contract. |
 | <code>KeyboardPrintShortcutBehavior</code> | typedef | <code>src/utils/runtimeConfig.js:9</code> |  |
-| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:179</code> | Normalize a runtime flag to a boolean. |
-| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:376</code> | Normalize the optional user custom-size limits. |
-| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:347</code> | Normalize a custom fit-width factor. |
-| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:315</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
-| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:247</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
-| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:226</code> | Normalize an integer config value and clamp it to the supplied range. |
-| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:358</code> | Normalize an optional custom-size limit percentage. |
-| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:330</code> | Normalize a user-facing print default mode. |
-| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:276</code> | Resolve the configured reset-session fallback target. |
-| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:264</code> | Normalize the runtime session-reset target. |
-| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:290</code> | Normalize a user-facing zoom mode string before alias lookup. |
+| <code>normalizeBoolean</code> | function | <code>src/utils/runtimeConfig.js:191</code> | Normalize a runtime flag to a boolean. |
+| <code>normalizeCustomFitSizeLimitPreference</code> | function | <code>src/utils/runtimeConfig.js:388</code> | Normalize the optional user custom-size limits. |
+| <code>normalizeCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:359</code> | Normalize a custom fit-width factor. |
+| <code>normalizeDefaultZoomMode</code> | function | <code>src/utils/runtimeConfig.js:327</code> | Normalize a runtime default zoom mode to the internal DocumentViewer mode. |
+| <code>normalizeFloat</code> | function | <code>src/utils/runtimeConfig.js:259</code> | Normalize a floating-point runtime config value and clamp it to the supplied range. |
+| <code>normalizeInteger</code> | function | <code>src/utils/runtimeConfig.js:238</code> | Normalize an integer config value and clamp it to the supplied range. |
+| <code>normalizeOptionalCustomFitFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:370</code> | Normalize an optional custom-size limit percentage. |
+| <code>normalizePrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:342</code> | Normalize a user-facing print default mode. |
+| <code>normalizeResetSessionFallbackTarget</code> | function | <code>src/utils/runtimeConfig.js:288</code> | Resolve the configured reset-session fallback target. |
+| <code>normalizeResetSessionTarget</code> | function | <code>src/utils/runtimeConfig.js:276</code> | Normalize the runtime session-reset target. |
+| <code>normalizeZoomModeText</code> | function | <code>src/utils/runtimeConfig.js:302</code> | Normalize a user-facing zoom mode string before alias lookup. |
 | <code>PRINT_DEFAULT_MODE_ALIASES</code> | constant | <code>src/utils/runtimeConfig.js:34</code> | User-facing print default mode aliases mapped to persisted PrintDefaultMode values. |
 | <code>PrintDefaultMode</code> | typedef | <code>src/utils/runtimeConfig.js:11</code> |  |
 | <code>PrintSelectionWorkspaceConfig</code> | typedef | <code>src/utils/runtimeConfig.js:72</code> |  |
 | <code>RESET_SESSION_TARGETS</code> | constant | <code>src/utils/runtimeConfig.js:32</code> | Runtime validation values for ResetSessionTarget; the typedef documents the public contract. |
 | <code>ResetSessionTarget</code> | typedef | <code>src/utils/runtimeConfig.js:12</code> | Session-reset target for the support/problem notice. |
-| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:301</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
+| <code>resolveDefaultZoomModeAlias</code> | function | <code>src/utils/runtimeConfig.js:313</code> | Resolve a normalized zoom-mode alias to the internal viewer mode. |
 | <code>ViewerCustomFitSizeLimits</code> | typedef | <code>src/utils/runtimeConfig.js:65</code> |  |
 | <code>ViewerDefaultZoomMode</code> | typedef | <code>src/utils/runtimeConfig.js:10</code> |  |
 | <code>ViewerEdgeScrollPageTurnConfig</code> | typedef | <code>src/utils/runtimeConfig.js:79</code> |  |
@@ -1409,40 +1411,45 @@
 | <code>resolveImportMetaEnvValue</code> | function | <code>src/utils/supportDiagnostics.js:39</code> |  |
 | <code>saveLatestPdfBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:275</code> |  |
 | <code>saveLatestRenderDecodeBenchmarkResult</code> | function | <code>src/utils/supportDiagnostics.js:295</code> |  |
-| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:488</code> |  |
-| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:433</code> |  |
-| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:398</code> |  |
-| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:373</code> |  |
-| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:324</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
-| <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:17</code> |  |
-| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:448</code> |  |
-| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:407</code> |  |
-| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:382</code> |  |
-| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:333</code> |  |
-| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:355</code> |  |
-| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:283</code> |  |
-| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:254</code> |  |
-| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:212</code> |  |
-| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:47</code> |  |
-| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:55</code> |  |
-| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:75</code> |  |
-| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:102</code> |  |
-| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:65</code> | Normalize legacy theme-mode values. |
-| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:147</code> |  |
-| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:159</code> |  |
-| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:176</code> |  |
-| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:244</code> | Persist an already-normalized full preference object. |
-| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:461</code> |  |
-| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:420</code> |  |
-| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:390</code> |  |
-| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:344</code> | Persist a language choice, or clear it when the normalized value is empty. |
-| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:366</code> |  |
-| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:300</code> | Persist the user&#39;s theme mode preference. |
-| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:273</code> |  |
-| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:222</code> |  |
-| <code>ViewerPreferences</code> | typedef | <code>src/utils/viewerPreferences.js:24</code> |  |
-| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:189</code> |  |
-| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:202</code> |  |
+| <code>applyToolbarDensityToDocument</code> | function | <code>src/utils/toolbarDensity.js:22</code> | Apply the toolbar density to the document root \(SSR-safe\). |
+| <code>toolbarDensityFor</code> | function | <code>src/utils/toolbarDensity.js:12</code> |  |
+| <code>clearCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:493</code> |  |
+| <code>clearCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:438</code> |  |
+| <code>clearDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:403</code> |  |
+| <code>clearPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:378</code> |  |
+| <code>clearThemeSharedRevision</code> | function | <code>src/utils/viewerPreferences.js:329</code> | Clear the stored binding between a local Normal choice and its shared OMP revision. |
+| <code>CustomFitSizeLimitPreference</code> | typedef | <code>src/utils/viewerPreferences.js:20</code> |  |
+| <code>getCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:453</code> |  |
+| <code>getCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:412</code> |  |
+| <code>getDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:387</code> |  |
+| <code>getEffectiveToolbarLargeButtons</code> | function | <code>src/utils/viewerPreferences.js:525</code> | Resolve whether the toolbar uses large buttons: a stored user choice wins, otherwise the runtime config default toolbar.largeButtons \(large unless explicitly false\). |
+| <code>getLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:338</code> |  |
+| <code>getPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:360</code> |  |
+| <code>getThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:288</code> |  |
+| <code>getThemePreference</code> | function | <code>src/utils/viewerPreferences.js:259</code> |  |
+| <code>getToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:505</code> | The user&#39;s stored &amp;quot;Larger toolbar buttons&amp;quot; choice from the theme menu. |
+| <code>getViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:217</code> |  |
+| <code>isExplicitTheme</code> | function | <code>src/utils/viewerPreferences.js:51</code> |  |
+| <code>isThemeMode</code> | function | <code>src/utils/viewerPreferences.js:59</code> |  |
+| <code>normalizeDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:79</code> |  |
+| <code>normalizePreferences</code> | function | <code>src/utils/viewerPreferences.js:106</code> |  |
+| <code>normalizeThemeModeValue</code> | function | <code>src/utils/viewerPreferences.js:69</code> | Normalize legacy theme-mode values. |
+| <code>parsePreferences</code> | function | <code>src/utils/viewerPreferences.js:152</code> |  |
+| <code>readPreferencesFromCookie</code> | function | <code>src/utils/viewerPreferences.js:164</code> |  |
+| <code>readPreferencesFromStorage</code> | function | <code>src/utils/viewerPreferences.js:181</code> |  |
+| <code>replaceViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:249</code> | Persist an already-normalized full preference object. |
+| <code>setCustomFitSizeLimitPreference</code> | function | <code>src/utils/viewerPreferences.js:466</code> |  |
+| <code>setCustomFitWidthFactorPreference</code> | function | <code>src/utils/viewerPreferences.js:425</code> |  |
+| <code>setDefaultZoomModePreference</code> | function | <code>src/utils/viewerPreferences.js:395</code> |  |
+| <code>setLanguagePreference</code> | function | <code>src/utils/viewerPreferences.js:349</code> | Persist a language choice, or clear it when the normalized value is empty. |
+| <code>setPrintDefaultModePreference</code> | function | <code>src/utils/viewerPreferences.js:371</code> |  |
+| <code>setThemeModePreference</code> | function | <code>src/utils/viewerPreferences.js:305</code> | Persist the user&#39;s theme mode preference. |
+| <code>setThemePreference</code> | function | <code>src/utils/viewerPreferences.js:278</code> |  |
+| <code>setToolbarLargeButtonsPreference</code> | function | <code>src/utils/viewerPreferences.js:514</code> |  |
+| <code>setViewerPreferences</code> | function | <code>src/utils/viewerPreferences.js:227</code> |  |
+| <code>ViewerPreferences</code> | typedef | <code>src/utils/viewerPreferences.js:27</code> |  |
+| <code>writePreferencesToCookie</code> | function | <code>src/utils/viewerPreferences.js:194</code> |  |
+| <code>writePreferencesToStorage</code> | function | <code>src/utils/viewerPreferences.js:207</code> |  |
 | <code>applyZoom</code> | function | <code>src/utils/zoomUtils.js:140</code> | Set a new zoom value using the provided setter, clamped to \[MIN_ZOOM, MAX_ZOOM\]. |
 | <code>calculateFitToScreenZoom</code> | function | <code>src/utils/zoomUtils.js:160</code> | Calculate and set a zoom that fits the render surface within both viewport axes. |
 | <code>calculateFitToWidthZoom</code> | function | <code>src/utils/zoomUtils.js:200</code> | Calculate and set a zoom that fits the render surface width within the pane viewport. |

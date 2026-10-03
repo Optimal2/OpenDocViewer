@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 45. Line count: 17995. JSDoc symbol count: 692.
+File count: 46. Line count: 18073. JSDoc symbol count: 698.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -709,7 +709,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isSignatureThumbnailPageBadgeEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isSignatureThumbnailPageBadgeEnabled`, `getToolbarLargeButtonsDefault`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 
@@ -772,11 +772,22 @@ Symbols:
 - `collectConfigDiagnostics` (function) - No description.
 - `loadLatestBenchmarkResult` (function) - No description.
 
+## src/utils/toolbarDensity.js
+
+Toolbar density on the document root.
+
+Exports: `toolbarDensityFor`, `applyToolbarDensityToDocument`
+
+Symbols:
+
+- `toolbarDensityFor` (function) - No description.
+- `applyToolbarDensityToDocument` (function) - Apply the toolbar density to the document root \(SSR\-safe\).
+
 ## src/utils/viewerPreferences.js
 
 Lightweight persisted viewer preferences.
 
-Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `clearThemeSharedRevision`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`
+Exports: `getViewerPreferences`, `setViewerPreferences`, `getThemePreference`, `setThemePreference`, `getThemeModePreference`, `setThemeModePreference`, `clearThemeSharedRevision`, `getLanguagePreference`, `setLanguagePreference`, `getPrintDefaultModePreference`, `setPrintDefaultModePreference`, `clearPrintDefaultModePreference`, `getDefaultZoomModePreference`, `setDefaultZoomModePreference`, `clearDefaultZoomModePreference`, `getCustomFitWidthFactorPreference`, `setCustomFitWidthFactorPreference`, `clearCustomFitWidthFactorPreference`, `getCustomFitSizeLimitPreference`, `setCustomFitSizeLimitPreference`, `clearCustomFitSizeLimitPreference`, `getToolbarLargeButtonsPreference`, `setToolbarLargeButtonsPreference`, `getEffectiveToolbarLargeButtons`
 
 Local imports: `src/utils/runtimeConfig.js`
 

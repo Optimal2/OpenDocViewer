@@ -1,12 +1,12 @@
 # OpenDocViewer / src/index.jsx
 
-File count: 1. Line count: 64. JSDoc symbol count: 2.
+File count: 1. Line count: 67. JSDoc symbol count: 2.
 
 ## src/index.jsx
 
 OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 
-Local imports: `./styles.css`, `src/i18n.js`, `src/logging/systemLogger.js`, `src/app/AppBootstrap.jsx`, `src/contexts/ThemeProvider.jsx`, `src/utils/ompThemePreference.js`
+Local imports: `./styles.css`, `src/i18n.js`, `src/logging/systemLogger.js`, `src/app/AppBootstrap.jsx`, `src/contexts/ThemeProvider.jsx`, `src/utils/ompThemePreference.js`, `src/utils/viewerPreferences.js`, `src/utils/toolbarDensity.js`
 
 Symbols:
 
