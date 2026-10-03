@@ -86,7 +86,7 @@
   },
   "stats": {
     "fileCount": 128,
-    "sourceLineCount": 53588,
+    "sourceLineCount": 53607,
     "docletCount": 1425,
     "documentedFileCount": 128,
     "lowConfidenceSummaryCount": 0,
@@ -492,7 +492,7 @@
     {
       "path": "src/contexts/viewerContext.js",
       "score": 90,
-      "lines": 207,
+      "lines": 208,
       "incomingLocalImports": 10,
       "doclets": 9,
       "summary": "Exports ViewerContext.",
@@ -615,13 +615,13 @@
           {
             "path": "src/contexts/viewerContext.js",
             "score": 90,
-            "lines": 207,
+            "lines": 208,
             "summary": "Exports ViewerContext."
           },
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2657,
+            "lines": 2660,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -710,7 +710,7 @@
           {
             "path": "src/hooks/usePdfSignatureReports.js",
             "score": 23,
-            "lines": 126,
+            "lines": 127,
             "summary": "Browser PDF signature inspection and optional gateway trust enrichment."
           },
           {
@@ -975,7 +975,7 @@
     {
       "name": "src/components/DocumentLoader",
       "fileCount": 8,
-      "lineCount": 4109,
+      "lineCount": 4112,
       "docletCount": 106,
       "importantFiles": [
         {
@@ -990,7 +990,7 @@
         {
           "path": "src/components/DocumentLoader/DocumentLoader.js",
           "score": 63,
-          "lines": 2172,
+          "lines": 2175,
           "incomingLocalImports": 2,
           "doclets": 58,
           "summary": "OpenDocViewer — Document loader orchestrator.",
@@ -1215,13 +1215,13 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3218,
+      "lineCount": 3222,
       "docletCount": 83,
       "importantFiles": [
         {
           "path": "src/contexts/viewerContext.js",
           "score": 90,
-          "lines": 207,
+          "lines": 208,
           "incomingLocalImports": 10,
           "doclets": 9,
           "summary": "Exports ViewerContext.",
@@ -1230,7 +1230,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2657,
+          "lines": 2660,
           "incomingLocalImports": 1,
           "doclets": 58,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1276,7 +1276,7 @@
     {
       "name": "src/hooks",
       "fileCount": 5,
-      "lineCount": 776,
+      "lineCount": 777,
       "docletCount": 26,
       "importantFiles": [
         {
@@ -1318,7 +1318,7 @@
         {
           "path": "src/hooks/usePdfSignatureReports.js",
           "score": 23,
-          "lines": 126,
+          "lines": 127,
           "incomingLocalImports": 1,
           "doclets": 3,
           "summary": "Browser PDF signature inspection and optional gateway trust enrichment.",
@@ -1520,7 +1520,7 @@
     {
       "name": "src/utils",
       "fileCount": 43,
-      "lineCount": 17419,
+      "lineCount": 17430,
       "docletCount": 663,
       "importantFiles": [
         {
@@ -4023,7 +4023,7 @@
     },
     {
       "path": "src/components/DocumentLoader/DocumentLoader.js",
-      "lines": 2172,
+      "lines": 2175,
       "extension": ".js",
       "jsdocBlockCount": 60,
       "sourceSummary": "OpenDocViewer — Document loader orchestrator.",
@@ -4123,324 +4123,324 @@
         {
           "name": "DocumentLoader",
           "kind": "default",
-          "line": 2171
+          "line": 2174
         }
       ],
       "declarations": [
         {
           "name": "createLimiter",
           "kind": "function",
-          "line": 161
+          "line": 162
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 167
+          "line": 168
         },
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 193
+          "line": 194
         },
         {
           "name": "inferUrlExtension",
           "kind": "function",
-          "line": 206
+          "line": 207
         },
         {
           "name": "normalizeExtension",
           "kind": "function",
-          "line": 215
+          "line": 216
         },
         {
           "name": "isSupportedSourceExtension",
           "kind": "function",
-          "line": 238
+          "line": 239
         },
         {
           "name": "isTextLikeSourceMime",
           "kind": "function",
-          "line": 246
+          "line": 247
         },
         {
           "name": "asciiHead",
           "kind": "function",
-          "line": 254
+          "line": 255
         },
         {
           "name": "looksLikeTextPayload",
           "kind": "function",
-          "line": 269
+          "line": 270
         },
         {
           "name": "startsWithAscii",
           "kind": "function",
-          "line": 284
+          "line": 285
         },
         {
           "name": "matchesKnownSourceSignature",
           "kind": "function",
-          "line": 298
+          "line": 299
         },
         {
           "name": "readBlobHeadBytes",
           "kind": "function",
-          "line": 335
+          "line": 336
         },
         {
           "name": "resolveFetchedSourcePayload",
           "kind": "function",
-          "line": 353
+          "line": 354
         },
         {
           "name": "resolveTrustedSourcePackPayload",
           "kind": "function",
-          "line": 418
+          "line": 419
         },
         {
           "name": "needsPageCountAnalysis",
           "kind": "function",
-          "line": 452
+          "line": 453
         },
         {
           "name": "resolveTrustedEntryPageCountHint",
           "kind": "function",
-          "line": 462
+          "line": 463
         },
         {
           "name": "resolveExactPlannedPageCount",
           "kind": "function",
-          "line": 477
+          "line": 478
         },
         {
           "name": "shouldDeferSourceWarmup",
           "kind": "function",
-          "line": 499
+          "line": 500
         },
         {
           "name": "resolvePrefetchedPageCountHint",
           "kind": "function",
-          "line": 517
+          "line": 518
         },
         {
           "name": "redactUrlForLog",
           "kind": "function",
-          "line": 548
+          "line": 549
         },
         {
           "name": "mimeToExtension",
           "kind": "function",
-          "line": 566
+          "line": 567
         },
         {
           "name": "isReloadCacheEnabled",
           "kind": "function",
-          "line": 582
+          "line": 583
         },
         {
           "name": "getInitialTempStoreMode",
           "kind": "function",
-          "line": 591
+          "line": 592
         },
         {
           "name": "getEstimatedEntryExtension",
           "kind": "function",
-          "line": 604
+          "line": 605
         },
         {
           "name": "updatePageEstimateStats",
           "kind": "function",
-          "line": 619
+          "line": 620
         },
         {
           "name": "estimateTotalPagesConservatively",
           "kind": "function",
-          "line": 645
+          "line": 646
         },
         {
           "name": "sleep",
           "kind": "function",
-          "line": 667
+          "line": 668
         },
         {
           "name": "createPrefetchHttpError",
           "kind": "function",
-          "line": 682
+          "line": 683
         },
         {
           "name": "isSourceUnavailableError",
           "kind": "function",
-          "line": 697
+          "line": 698
         },
         {
           "name": "createSourceUnavailableSessionError",
           "kind": "function",
-          "line": 710
+          "line": 711
         },
         {
           "name": "createPrefetchTimeoutError",
           "kind": "function",
-          "line": 726
+          "line": 727
         },
         {
           "name": "createInvalidSourcePayloadError",
           "kind": "function",
-          "line": 742
+          "line": 743
         },
         {
           "name": "validateFetchedSourceBlob",
           "kind": "function",
-          "line": 764
+          "line": 765
         },
         {
           "name": "details",
           "kind": "object",
-          "line": 774
+          "line": 775
         },
         {
           "name": "isTransientPrefetchError",
           "kind": "function",
-          "line": 819
+          "line": 820
         },
         {
           "name": "buildInlineSourceBlob",
           "kind": "function",
-          "line": 847
+          "line": 848
         },
         {
           "name": "getSourcePackUrl",
           "kind": "function",
-          "line": 878
+          "line": 879
         },
         {
           "name": "readUint32LittleEndian",
           "kind": "function",
-          "line": 888
+          "line": 889
         },
         {
           "name": "readExactStreamBytes",
           "kind": "function",
-          "line": 893
+          "line": 894
         },
         {
           "name": "mimeForExtension",
           "kind": "function",
-          "line": 923
+          "line": 924
         },
         {
           "name": "toPositiveIntOrUndefined",
           "kind": "function",
-          "line": 940
+          "line": 941
         },
         {
           "name": "resolveDocumentSourceContext",
           "kind": "function",
-          "line": 951
+          "line": 952
         },
         {
           "name": "getDocumentProgressKey",
           "kind": "function",
-          "line": 977
+          "line": 978
         },
         {
           "name": "finalizeDocumentPages",
           "kind": "function",
-          "line": 993
+          "line": 994
         },
         {
           "name": "createPagePlaceholders",
           "kind": "function",
-          "line": 1017
+          "line": 1018
         },
         {
           "name": "createFailedPlaceholder",
           "kind": "function",
-          "line": 1059
+          "line": 1060
         },
         {
           "name": "resolveEntries",
           "kind": "function",
-          "line": 1101
+          "line": 1102
         },
         {
           "name": "safeMessage",
           "kind": "function",
-          "line": 1161
+          "line": 1162
         },
         {
           "name": "DocumentLoader",
           "kind": "component",
-          "line": 1169
+          "line": 1170
         },
         {
           "name": "abortAllFetches",
           "kind": "function",
-          "line": 1263
+          "line": 1264
         },
         {
           "name": "shouldStopRun",
           "kind": "function",
-          "line": 1277
+          "line": 1278
         },
         {
           "name": "maybePrompt",
           "kind": "function",
-          "line": 1283
+          "line": 1284
         },
         {
           "name": "prefetchSource",
           "kind": "function",
-          "line": 1304
+          "line": 1305
         },
         {
           "name": "createSourcePackPrefetchTasks",
           "kind": "function",
-          "line": 1581
+          "line": 1582
         },
         {
           "name": "resolve",
           "kind": "function",
-          "line": 1584
+          "line": 1585
         },
         {
           "name": "settle",
           "kind": "function",
-          "line": 1589
+          "line": 1590
         },
         {
           "name": "settleMissing",
           "kind": "function",
-          "line": 1596
+          "line": 1597
         },
         {
           "name": "processSourcePackFrame",
           "kind": "function",
-          "line": 1611
+          "line": 1612
         },
         {
           "name": "queueSourcePackFrame",
           "kind": "function",
-          "line": 1701
+          "line": 1703
         },
         {
           "name": "waitForSourcePackProcessing",
           "kind": "function",
-          "line": 1710
+          "line": 1712
         },
         {
           "name": "runSourcePack",
           "kind": "function",
-          "line": 1716
+          "line": 1718
         },
         {
           "name": "state",
           "kind": "object",
-          "line": 1733
+          "line": 1735
         },
         {
           "name": "run",
           "kind": "function",
-          "line": 1808
+          "line": 1810
         }
       ],
       "parseError": null,
@@ -4560,7 +4560,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 161,
+          "line": 162,
           "description": "",
           "params": [
             {
@@ -4585,7 +4585,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 206,
+          "line": 207,
           "description": "",
           "params": [
             {
@@ -4610,7 +4610,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 215,
+          "line": 216,
           "description": "",
           "params": [
             {
@@ -4635,7 +4635,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 238,
+          "line": 239,
           "description": "",
           "params": [
             {
@@ -4660,7 +4660,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 246,
+          "line": 247,
           "description": "",
           "params": [
             {
@@ -4685,7 +4685,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 254,
+          "line": 255,
           "description": "",
           "params": [
             {
@@ -4710,7 +4710,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 269,
+          "line": 270,
           "description": "",
           "params": [
             {
@@ -4735,7 +4735,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 284,
+          "line": 285,
           "description": "",
           "params": [
             {
@@ -4766,7 +4766,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 298,
+          "line": 299,
           "description": "",
           "params": [
             {
@@ -4797,7 +4797,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 335,
+          "line": 336,
           "description": "",
           "params": [
             {
@@ -4822,7 +4822,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 353,
+          "line": 354,
           "description": "Resolve source type information with a cheap signature-first path.",
           "params": [
             {
@@ -4865,7 +4865,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 418,
+          "line": 419,
           "description": "Gateway source packs already carry trusted file metadata from the prepared server-side session.",
           "params": [
             {
@@ -4914,7 +4914,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 452,
+          "line": 453,
           "description": "",
           "params": [
             {
@@ -4939,7 +4939,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 462,
+          "line": 463,
           "description": "",
           "params": [
             {
@@ -4970,7 +4970,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 477,
+          "line": 478,
           "description": "",
           "params": [
             {
@@ -4995,7 +4995,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 499,
+          "line": 500,
           "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
           "params": [
             {
@@ -5038,7 +5038,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 517,
+          "line": 518,
           "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
           "params": [
             {
@@ -5093,7 +5093,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 548,
+          "line": 549,
           "description": "",
           "params": [
             {
@@ -5118,7 +5118,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 566,
+          "line": 567,
           "description": "",
           "params": [
             {
@@ -5143,7 +5143,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 582,
+          "line": 583,
           "description": "",
           "params": [
             {
@@ -5168,7 +5168,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 591,
+          "line": 592,
           "description": "",
           "params": [
             {
@@ -5193,7 +5193,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 604,
+          "line": 605,
           "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
           "params": [
             {
@@ -5218,7 +5218,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 619,
+          "line": 620,
           "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
           "params": [
             {
@@ -5255,7 +5255,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 645,
+          "line": 646,
           "description": "Estimate the final page count conservatively.",
           "params": [
             {
@@ -5298,7 +5298,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 667,
+          "line": 668,
           "description": "",
           "params": [
             {
@@ -5323,7 +5323,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 682,
+          "line": 683,
           "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
           "params": [
             {
@@ -5354,7 +5354,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 697,
+          "line": 698,
           "description": "Host integrations often expose short-lived file tickets.",
           "params": [
             {
@@ -5379,7 +5379,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 710,
+          "line": 711,
           "description": "",
           "params": [
             {
@@ -5416,7 +5416,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 726,
+          "line": 727,
           "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
           "params": [
             {
@@ -5447,7 +5447,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 742,
+          "line": 743,
           "description": "Build a source-validation error.",
           "params": [
             {
@@ -5478,7 +5478,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 764,
+          "line": 765,
           "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
           "params": [
             {
@@ -5539,7 +5539,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 819,
+          "line": 820,
           "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
           "params": [
             {
@@ -5564,7 +5564,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 847,
+          "line": 848,
           "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
           "params": [
             {
@@ -5589,7 +5589,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 888,
+          "line": 889,
           "description": "",
           "params": [
             {
@@ -5614,7 +5614,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 923,
+          "line": 924,
           "description": "",
           "params": [
             {
@@ -5639,7 +5639,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 940,
+          "line": 941,
           "description": "",
           "params": [
             {
@@ -5664,7 +5664,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 951,
+          "line": 952,
           "description": "Extract multi-document source context from an entry or placeholder input.",
           "params": [
             {
@@ -5689,7 +5689,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 977,
+          "line": 978,
           "description": "",
           "params": [
             {
@@ -5714,7 +5714,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 993,
+          "line": 994,
           "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
           "params": [
             {
@@ -5757,7 +5757,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1017,
+          "line": 1018,
           "description": "",
           "params": [
             {
@@ -5782,7 +5782,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1059,
+          "line": 1060,
           "description": "",
           "params": [
             {
@@ -5807,7 +5807,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1101,
+          "line": 1102,
           "description": "",
           "params": [
             {
@@ -5874,7 +5874,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1161,
+          "line": 1162,
           "description": "",
           "params": [
             {
@@ -5899,7 +5899,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1169,
+          "line": 1170,
           "description": "",
           "params": [
             {
@@ -5924,7 +5924,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1213,
+          "line": 1214,
           "description": "",
           "params": [
             {
@@ -5949,7 +5949,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1222,
+          "line": 1223,
           "description": "",
           "params": [
             {
@@ -5974,7 +5974,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1277,
+          "line": 1278,
           "description": "Whether this load run is no longer allowed to mutate React state.",
           "params": [],
           "returns": [
@@ -5992,7 +5992,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1283,
+          "line": 1284,
           "description": "",
           "params": [
             {
@@ -6017,7 +6017,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1304,
+          "line": 1305,
           "description": "Fetch and persist one source blob with conservative retry behavior.",
           "params": [
             {
@@ -6048,7 +6048,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentLoader/DocumentLoader.js",
-          "line": 1584,
+          "line": 1585,
           "description": "",
           "params": [],
           "returns": [],
@@ -24106,7 +24106,7 @@
     },
     {
       "path": "src/contexts/viewerContext.js",
-      "lines": 207,
+      "lines": 208,
       "extension": ".js",
       "jsdocBlockCount": 10,
       "sourceSummary": null,
@@ -24124,7 +24124,7 @@
         {
           "name": "ViewerContext",
           "kind": "default",
-          "line": 206
+          "line": 207
         }
       ],
       "declarations": [],
@@ -24221,7 +24221,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 78,
+          "line": 79,
           "description": "",
           "params": [],
           "returns": [],
@@ -24234,7 +24234,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 155,
+          "line": 156,
           "description": "",
           "params": [],
           "returns": [],
@@ -24247,7 +24247,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/viewerContext.js",
-          "line": 165,
+          "line": 166,
           "description": "",
           "params": [],
           "returns": [],
@@ -24274,7 +24274,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2657,
+      "lines": 2660,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -24527,42 +24527,42 @@
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1645
+          "line": 1646
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2052
+          "line": 2053
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2066
+          "line": 2067
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2080
+          "line": 2081
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2113
+          "line": 2114
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2283
+          "line": 2284
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2374
+          "line": 2375
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2376
+          "line": 2377
         }
       ],
       "parseError": null,
@@ -25451,7 +25451,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1214,
+          "line": 1215,
           "description": "",
           "params": [
             {
@@ -25476,7 +25476,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1238,
+          "line": 1239,
           "description": "",
           "params": [
             {
@@ -25501,7 +25501,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1247,
+          "line": 1248,
           "description": "",
           "params": [
             {
@@ -25526,7 +25526,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1255,
+          "line": 1256,
           "description": "",
           "params": [],
           "returns": [
@@ -25544,7 +25544,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1267,
+          "line": 1268,
           "description": "",
           "params": [
             {
@@ -25569,7 +25569,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1314,
+          "line": 1315,
           "description": "",
           "params": [
             {
@@ -25606,7 +25606,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1383,
+          "line": 1384,
           "description": "",
           "params": [
             {
@@ -25631,7 +25631,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1392,
+          "line": 1393,
           "description": "",
           "params": [
             {
@@ -25662,7 +25662,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1405,
+          "line": 1406,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -25699,7 +25699,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1457,
+          "line": 1458,
           "description": "",
           "params": [
             {
@@ -25730,7 +25730,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1468,
+          "line": 1469,
           "description": "",
           "params": [
             {
@@ -25761,7 +25761,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1479,
+          "line": 1480,
           "description": "",
           "params": [
             {
@@ -25786,7 +25786,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1503,
+          "line": 1504,
           "description": "",
           "params": [
             {
@@ -25811,7 +25811,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1548,
+          "line": 1549,
           "description": "",
           "params": [
             {
@@ -25836,7 +25836,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1561,
+          "line": 1562,
           "description": "",
           "params": [
             {
@@ -25873,7 +25873,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1633,
+          "line": 1634,
           "description": "",
           "params": [
             {
@@ -25910,7 +25910,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1725,
+          "line": 1726,
           "description": "",
           "params": [
             {
@@ -25947,7 +25947,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1910,
+          "line": 1911,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -25972,7 +25972,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1992,
+          "line": 1993,
           "description": "",
           "params": [
             {
@@ -26003,7 +26003,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2014,
+          "line": 2015,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -26028,7 +26028,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2173,
+          "line": 2174,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -26046,7 +26046,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2264,
+          "line": 2265,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -26077,7 +26077,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2307,
+          "line": 2308,
           "description": "",
           "params": [
             {
@@ -27499,7 +27499,7 @@
     },
     {
       "path": "src/hooks/usePdfSignatureReports.js",
-      "lines": 126,
+      "lines": 127,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "Browser PDF signature inspection and optional gateway trust enrichment.",
@@ -27543,7 +27543,7 @@
         {
           "name": "usePdfSignatureReports",
           "kind": "default",
-          "line": 42
+          "line": 43
         }
       ],
       "declarations": [
@@ -27555,12 +27555,12 @@
         {
           "name": "usePdfSignatureReports",
           "kind": "function",
-          "line": 42
+          "line": 43
         },
         {
           "name": "isCurrent",
           "kind": "function",
-          "line": 95
+          "line": 96
         }
       ],
       "parseError": null,
@@ -27616,7 +27616,7 @@
           "kind": "function",
           "scope": null,
           "file": "src/hooks/usePdfSignatureReports.js",
-          "line": 42,
+          "line": 43,
           "description": "",
           "params": [
             {
@@ -27654,6 +27654,12 @@
               "type": "function",
               "optional": true,
               "description": "Registered document source URL."
+            },
+            {
+              "name": "options.getSourcePack",
+              "type": "function",
+              "optional": true,
+              "description": "Registered received pack frame identity."
             }
           ],
           "returns": [
@@ -41983,7 +41989,7 @@
     },
     {
       "path": "src/utils/pdfSignatureGateway.js",
-      "lines": 136,
+      "lines": 147,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "Optional gateway trust enrichment.",
@@ -42002,54 +42008,54 @@
         {
           "name": "getGatewaySignatureContext",
           "kind": "function",
-          "line": 19
+          "line": 20
         },
         {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 54
+          "line": 65
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 98
+          "line": 109
         }
       ],
       "declarations": [
         {
           "name": "getGatewaySignatureContext",
           "kind": "function",
-          "line": 19
+          "line": 20
         },
         {
           "name": "isTime",
           "kind": "function",
-          "line": 35
+          "line": 46
         },
         {
           "name": "unchecked",
           "kind": "function",
-          "line": 39
+          "line": 50
         },
         {
           "name": "unavailable",
           "kind": "function",
-          "line": 43
+          "line": 54
         },
         {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 54
+          "line": 65
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 98
+          "line": 109
         },
         {
           "name": "request",
           "kind": "function",
-          "line": 108
+          "line": 119
         }
       ],
       "parseError": null,
@@ -42078,7 +42084,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 19,
+          "line": 20,
           "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
           "params": [
             {
@@ -42092,6 +42098,12 @@
               "type": "string",
               "optional": true,
               "description": "Browser base for relative source URLs."
+            },
+            {
+              "name": "sourcePack",
+              "type": "Object",
+              "optional": true,
+              "description": "Actual received pack frame identity."
             }
           ],
           "returns": [
@@ -42109,7 +42121,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 54,
+          "line": 65,
           "description": "Accept only unambiguous server entries.",
           "params": [
             {
@@ -42140,7 +42152,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 98,
+          "line": 109,
           "description": "Create viewer-local state for disabled gateway sessions.",
           "params": [],
           "returns": [
@@ -59452,7 +59464,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 254,
+      "line": 255,
       "description": "",
       "params": [
         {
@@ -59477,7 +59489,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 847,
+      "line": 848,
       "description": "Decode host-provided Base64 source bytes without routing through fetch(data:...) .",
       "params": [
         {
@@ -59502,7 +59514,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1059,
+      "line": 1060,
       "description": "",
       "params": [
         {
@@ -59527,7 +59539,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 742,
+      "line": 743,
       "description": "Build a source-validation error.",
       "params": [
         {
@@ -59558,7 +59570,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 161,
+      "line": 162,
       "description": "",
       "params": [
         {
@@ -59583,7 +59595,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1017,
+      "line": 1018,
       "description": "",
       "params": [
         {
@@ -59608,7 +59620,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 682,
+      "line": 683,
       "description": "Build a consistent HTTP error so the retry classifier can inspect the status code.",
       "params": [
         {
@@ -59639,7 +59651,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 726,
+      "line": 727,
       "description": "Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die.",
       "params": [
         {
@@ -59670,7 +59682,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 710,
+      "line": 711,
       "description": "",
       "params": [
         {
@@ -59707,7 +59719,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1169,
+      "line": 1170,
       "description": "",
       "params": [
         {
@@ -59758,7 +59770,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 645,
+      "line": 646,
       "description": "Estimate the final page count conservatively.",
       "params": [
         {
@@ -59814,7 +59826,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 993,
+      "line": 994,
       "description": "Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends.",
       "params": [
         {
@@ -59857,7 +59869,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 977,
+      "line": 978,
       "description": "",
       "params": [
         {
@@ -59882,7 +59894,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 604,
+      "line": 605,
       "description": "Resolve the best-effort extension we can use for page-count estimation before every source has been fetched.",
       "params": [
         {
@@ -59907,7 +59919,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 591,
+      "line": 592,
       "description": "",
       "params": [
         {
@@ -59932,7 +59944,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 206,
+      "line": 207,
       "description": "",
       "params": [
         {
@@ -59957,7 +59969,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 582,
+      "line": 583,
       "description": "",
       "params": [
         {
@@ -59982,7 +59994,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 697,
+      "line": 698,
       "description": "Host integrations often expose short-lived file tickets.",
       "params": [
         {
@@ -60007,7 +60019,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 238,
+      "line": 239,
       "description": "",
       "params": [
         {
@@ -60032,7 +60044,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 246,
+      "line": 247,
       "description": "",
       "params": [
         {
@@ -60057,7 +60069,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 819,
+      "line": 820,
       "description": "Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses.",
       "params": [
         {
@@ -60095,7 +60107,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 269,
+      "line": 270,
       "description": "",
       "params": [
         {
@@ -60120,7 +60132,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 298,
+      "line": 299,
       "description": "",
       "params": [
         {
@@ -60151,7 +60163,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1283,
+      "line": 1284,
       "description": "",
       "params": [
         {
@@ -60176,7 +60188,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 923,
+      "line": 924,
       "description": "",
       "params": [
         {
@@ -60201,7 +60213,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 566,
+      "line": 567,
       "description": "",
       "params": [
         {
@@ -60226,7 +60238,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 452,
+      "line": 453,
       "description": "",
       "params": [
         {
@@ -60251,7 +60263,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 215,
+      "line": 216,
       "description": "",
       "params": [
         {
@@ -60315,7 +60327,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1304,
+      "line": 1305,
       "description": "Fetch and persist one source blob with conservative retry behavior.",
       "params": [
         {
@@ -60346,7 +60358,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1213,
+      "line": 1214,
       "description": "",
       "params": [
         {
@@ -60371,7 +60383,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 335,
+      "line": 336,
       "description": "",
       "params": [
         {
@@ -60396,7 +60408,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 888,
+      "line": 889,
       "description": "",
       "params": [
         {
@@ -60421,7 +60433,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 548,
+      "line": 549,
       "description": "",
       "params": [
         {
@@ -60446,7 +60458,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1584,
+      "line": 1585,
       "description": "",
       "params": [],
       "returns": [],
@@ -60472,7 +60484,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 951,
+      "line": 952,
       "description": "Extract multi-document source context from an entry or placeholder input.",
       "params": [
         {
@@ -60497,7 +60509,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1101,
+      "line": 1102,
       "description": "",
       "params": [
         {
@@ -60564,7 +60576,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 477,
+      "line": 478,
       "description": "",
       "params": [
         {
@@ -60589,7 +60601,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 353,
+      "line": 354,
       "description": "Resolve source type information with a cheap signature-first path.",
       "params": [
         {
@@ -60632,7 +60644,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 517,
+      "line": 518,
       "description": "Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe...",
       "params": [
         {
@@ -60687,7 +60699,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1222,
+      "line": 1223,
       "description": "",
       "params": [
         {
@@ -60712,7 +60724,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 462,
+      "line": 463,
       "description": "",
       "params": [
         {
@@ -60743,7 +60755,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 418,
+      "line": 419,
       "description": "Gateway source packs already carry trusted file metadata from the prepared server-side session.",
       "params": [
         {
@@ -60792,7 +60804,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1161,
+      "line": 1162,
       "description": "",
       "params": [
         {
@@ -60817,7 +60829,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 499,
+      "line": 500,
       "description": "Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources.",
       "params": [
         {
@@ -60860,7 +60872,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 1277,
+      "line": 1278,
       "description": "Whether this load run is no longer allowed to mutate React state.",
       "params": [],
       "returns": [
@@ -60878,7 +60890,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 667,
+      "line": 668,
       "description": "",
       "params": [
         {
@@ -60903,7 +60915,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 284,
+      "line": 285,
       "description": "",
       "params": [
         {
@@ -60934,7 +60946,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 940,
+      "line": 941,
       "description": "",
       "params": [
         {
@@ -60959,7 +60971,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 619,
+      "line": 620,
       "description": "Update per-extension page-count statistics used by the conservative warning estimator.",
       "params": [
         {
@@ -60996,7 +61008,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentLoader/DocumentLoader.js",
-      "line": 764,
+      "line": 765,
       "description": "Validate that a fetched source looks like a renderable document before it is saved to ODV's session temp store.",
       "params": [
         {
@@ -71220,7 +71232,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 165,
+      "line": 166,
       "description": "",
       "params": [],
       "returns": [],
@@ -71246,7 +71258,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 155,
+      "line": 156,
       "description": "",
       "params": [],
       "returns": [],
@@ -71259,7 +71271,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/viewerContext.js",
-      "line": 78,
+      "line": 79,
       "description": "",
       "params": [],
       "returns": [],
@@ -71310,7 +71322,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1255,
+      "line": 1256,
       "description": "",
       "params": [],
       "returns": [
@@ -71365,7 +71377,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1405,
+      "line": 1406,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -71514,7 +71526,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1503,
+      "line": 1504,
       "description": "",
       "params": [
         {
@@ -71539,7 +71551,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1910,
+      "line": 1911,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -71564,7 +71576,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1725,
+      "line": 1726,
       "description": "",
       "params": [
         {
@@ -71645,7 +71657,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2307,
+      "line": 2308,
       "description": "",
       "params": [
         {
@@ -71670,7 +71682,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1383,
+      "line": 1384,
       "description": "",
       "params": [
         {
@@ -71695,7 +71707,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1479,
+      "line": 1480,
       "description": "",
       "params": [
         {
@@ -72068,7 +72080,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1267,
+      "line": 1268,
       "description": "",
       "params": [
         {
@@ -72199,7 +72211,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1314,
+      "line": 1315,
       "description": "",
       "params": [
         {
@@ -72236,7 +72248,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1457,
+      "line": 1458,
       "description": "",
       "params": [
         {
@@ -72267,7 +72279,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2173,
+      "line": 2174,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -72285,7 +72297,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1238,
+      "line": 1239,
       "description": "",
       "params": [
         {
@@ -72310,7 +72322,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1247,
+      "line": 1248,
       "description": "",
       "params": [
         {
@@ -72335,7 +72347,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1992,
+      "line": 1993,
       "description": "",
       "params": [
         {
@@ -72391,7 +72403,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1633,
+      "line": 1634,
       "description": "",
       "params": [
         {
@@ -72477,7 +72489,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1561,
+      "line": 1562,
       "description": "",
       "params": [
         {
@@ -72532,7 +72544,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2264,
+      "line": 2265,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -72563,7 +72575,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1548,
+      "line": 1549,
       "description": "",
       "params": [
         {
@@ -72588,7 +72600,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1214,
+      "line": 1215,
       "description": "",
       "params": [
         {
@@ -72657,7 +72669,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1392,
+      "line": 1393,
       "description": "",
       "params": [
         {
@@ -72688,7 +72700,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2014,
+      "line": 2015,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -72713,7 +72725,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1468,
+      "line": 1469,
       "description": "",
       "params": [
         {
@@ -73584,7 +73596,7 @@
       "kind": "function",
       "scope": null,
       "file": "src/hooks/usePdfSignatureReports.js",
-      "line": 42,
+      "line": 43,
       "description": "",
       "params": [
         {
@@ -73622,6 +73634,12 @@
           "type": "function",
           "optional": true,
           "description": "Registered document source URL."
+        },
+        {
+          "name": "options.getSourcePack",
+          "type": "function",
+          "optional": true,
+          "description": "Registered received pack frame identity."
         }
       ],
       "returns": [
@@ -83139,7 +83157,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 98,
+      "line": 109,
       "description": "Create viewer-local state for disabled gateway sessions.",
       "params": [],
       "returns": [
@@ -83157,7 +83175,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 19,
+      "line": 20,
       "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
       "params": [
         {
@@ -83171,6 +83189,12 @@
           "type": "string",
           "optional": true,
           "description": "Browser base for relative source URLs."
+        },
+        {
+          "name": "sourcePack",
+          "type": "Object",
+          "optional": true,
+          "description": "Actual received pack frame identity."
         }
       ],
       "returns": [
@@ -83188,7 +83212,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 54,
+      "line": 65,
       "description": "Accept only unambiguous server entries.",
       "params": [
         {

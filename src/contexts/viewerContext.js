@@ -70,6 +70,7 @@ import { createContext } from 'react';
  * @property {number} pageCount
  * @property {string=} mimeType
  * @property {string=} sourceUrl
+ * @property {{url: string, fileIndex: number}=} sourcePack Received pack frame identity, independent of display order.
  * @property {number=} sizeBytes
  * @property {('document-version'|'document-url-fallback'|'url')=} cacheKeyMode
  */

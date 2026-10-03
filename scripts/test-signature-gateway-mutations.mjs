@@ -18,8 +18,14 @@ const mutations = [
     '[tooltip, getIntegrityLabel(t, integrity)]', uiTests, 'G19'],
   ['client marker', dialog, 'signature?.serverValidationUnavailable === true',
     "rawTrustReason === 'server validation unavailable'", uiTests, 'G20'],
-  ['source index', gateway, '${session}/${match[3]}', '${session}/0', hookTests, 'G1'],
-  ['non-gateway detection', gateway, "return { endpoint: `${session}/${match[3]}`, session };",
+  ['pack provider wiring', provider, 'getSourcePack: getSignatureSourcePack,', 'getSourcePack: undefined,',
+    'src/contexts/ViewerProvider.signatures.test.jsx', 'G21'],
+  ['pack loader wiring', 'src/components/DocumentLoader/DocumentLoader.js', 'sourcePack: result.sourcePack,',
+    'sourcePack: undefined,', 'src/components/__tests__/pdfSignatureGatewayPack.test.jsx', 'G23'],
+  ['pack index guessing', gateway, 'sourcePack !== undefined ? sourcePack.fileIndex : Number(match[3])',
+    'sourcePack !== undefined ? 0 : Number(match[3])', unitTests, 'G22'],
+  ['source index', gateway, '${session}/${fileIndex}', '${session}/0', hookTests, 'G1'],
+  ['non-gateway detection', gateway, "return { endpoint: `${session}/${fileIndex}`, session };",
     'return null;', hookTests, 'G1'],
   ['unsigned guard', gateway, 'report.signatures.length === 0', 'false', hookTests, 'G2'],
   ['cache', hook, 'if (!entries.has(key))', "if (entries.get(key)?.state !== 'pending')", hookTests, 'G1'],
@@ -45,7 +51,8 @@ const mutations = [
   ['malformed trust', gateway, '!TRUST_VALUES.includes(signature.trust)', 'false', unitTests, 'G16'],
   ['invalid trust severity', status, "trust === 'invalid'", 'false', unitTests, 'G17'],
   ['unknown trust severity', status, "trust === 'unknown'", 'false', unitTests, 'G17'],
-].filter((mutation) => !process.argv.includes('--review-fixes') || ['G18', 'G19', 'G20'].includes(mutation[5]));
+].filter((mutation) => (!process.argv.includes('--review-fixes') || ['G18', 'G19', 'G20'].includes(mutation[5]))
+  && (!process.argv.includes('--source-pack') || ['G21', 'G23', 'G22'].includes(mutation[5])));
 const originals = new Map([...new Set(mutations.map(([, file]) => file))].map((file) => [file, readFileSync(file, 'utf8')]));
 try {
   for (const [name, file, from, to, testFile, testName] of mutations) {

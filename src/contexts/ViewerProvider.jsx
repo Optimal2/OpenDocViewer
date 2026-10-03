@@ -1202,6 +1202,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
       pageCount: Math.max(1, Number(descriptor?.pageCount) || 1),
       mimeType: String(descriptor?.mimeType || ''),
       sourceUrl: String(descriptor?.sourceUrl || ''),
+      sourcePack: descriptor?.sourcePack,
       sizeBytes: Number(descriptor?.sizeBytes || 0),
       cacheKeyMode: String(descriptor?.cacheKeyMode || ''),
     });
@@ -2556,6 +2557,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   }, [allPages, loadingRunActive, pageLoadState, pumpWarmupQueue]);
 
   const getSignatureSourceUrl = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl, []);
+  const getSignatureSourcePack = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourcePack, []);
 
   // PDF signature inspection and optional gateway trust: starts only after the first page is
   // ready (page rendering keeps priority), runs once per PDF source off the
@@ -2566,6 +2568,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     inspectionReady: pageLoadState.readyPages > 0,
     readSourceArrayBuffer,
     getSourceUrl: getSignatureSourceUrl,
+    getSourcePack: getSignatureSourcePack,
   });
 
   useEffect(() => () => {

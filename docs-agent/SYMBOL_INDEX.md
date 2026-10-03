@@ -41,64 +41,64 @@
 | <code>WorkerJob</code> | typedef | <code>src/components/DocumentLoader/batchHandler.js:31</code> | A single decoding/rendering unit handed to a worker. |
 | <code>WorkerMessageHandler</code> | typedef | <code>src/components/DocumentLoader/batchHandler.js:59</code> | Handle a worker&#39;s message and insert results. |
 | <code>module.exports</code> | function | <code>src/components/DocumentLoader/DemoControls.jsx:35</code> | DemoControls — wraps DocumentLoader with demo-mode props and a small control UI. |
-| <code>asciiHead</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:254</code> |  |
-| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:847</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
-| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1059</code> |  |
-| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:742</code> | Build a source-validation error. |
-| <code>createLimiter</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:161</code> |  |
-| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1017</code> |  |
-| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:682</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
-| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:726</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
-| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:710</code> |  |
-| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1169</code> |  |
+| <code>asciiHead</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:255</code> |  |
+| <code>buildInlineSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:848</code> | Decode host-provided Base64 source bytes without routing through fetch\(data:...\) . |
+| <code>createFailedPlaceholder</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1060</code> |  |
+| <code>createInvalidSourcePayloadError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:743</code> | Build a source-validation error. |
+| <code>createLimiter</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:162</code> |  |
+| <code>createPagePlaceholders</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1018</code> |  |
+| <code>createPrefetchHttpError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:683</code> | Build a consistent HTTP error so the retry classifier can inspect the status code. |
+| <code>createPrefetchTimeoutError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:727</code> | Build a timeout-flavoured prefetch error so the loader can fail fast without waiting for the browser/network stack to decide when a stuck request should finally die. |
+| <code>createSourceUnavailableSessionError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:711</code> |  |
+| <code>DocumentLoader</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1170</code> |  |
 | <code>DocumentLoaderProps</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:58</code> |  |
 | <code>DocumentSourceItem</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:35</code> |  |
-| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:645</code> | Estimate the final page count conservatively. |
+| <code>estimateTotalPagesConservatively</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:646</code> | Estimate the final page count conservatively. |
 | <code>FailedPlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:91</code> |  |
-| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:993</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
-| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:977</code> |  |
-| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:604</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
-| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:591</code> |  |
-| <code>inferUrlExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:206</code> |  |
-| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:582</code> |  |
-| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:697</code> | Host integrations often expose short-lived file tickets. |
-| <code>isSupportedSourceExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:238</code> |  |
-| <code>isTextLikeSourceMime</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:246</code> |  |
-| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:819</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
+| <code>finalizeDocumentPages</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:994</code> | Patch the final page-count and boundary flags onto every page in a document once the loader knows where that document ends. |
+| <code>getDocumentProgressKey</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:978</code> |  |
+| <code>getEstimatedEntryExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:605</code> | Resolve the best-effort extension we can use for page-count estimation before every source has been fetched. |
+| <code>getInitialTempStoreMode</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:592</code> |  |
+| <code>inferUrlExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:207</code> |  |
+| <code>isReloadCacheEnabled</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:583</code> |  |
+| <code>isSourceUnavailableError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:698</code> | Host integrations often expose short-lived file tickets. |
+| <code>isSupportedSourceExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:239</code> |  |
+| <code>isTextLikeSourceMime</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:247</code> |  |
+| <code>isTransientPrefetchError</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:820</code> | Retry only errors that are likely to be transient in real deployments: browser/network fetch failures and gateway-style HTTP responses. |
 | <code>LoadPressureSummary</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:121</code> |  |
-| <code>looksLikeTextPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:269</code> |  |
-| <code>matchesKnownSourceSignature</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:298</code> |  |
-| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1283</code> |  |
-| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:923</code> |  |
-| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:566</code> |  |
-| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:452</code> |  |
-| <code>normalizeExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:215</code> |  |
+| <code>looksLikeTextPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:270</code> |  |
+| <code>matchesKnownSourceSignature</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:299</code> |  |
+| <code>&lt;anonymous&gt;~maybePrompt</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1284</code> |  |
+| <code>mimeForExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:924</code> |  |
+| <code>mimeToExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:567</code> |  |
+| <code>needsPageCountAnalysis</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:453</code> |  |
+| <code>normalizeExtension</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:216</code> |  |
 | <code>PageEstimateStats</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:134</code> |  |
 | <code>PagePlaceholderInput</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:73</code> |  |
 | <code>PrefetchResult</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:140</code> |  |
-| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1304</code> | Fetch and persist one source blob with conservative retry behavior. |
-| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1213</code> |  |
-| <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:335</code> |  |
-| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:888</code> |  |
-| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:548</code> |  |
-| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1584</code> |  |
+| <code>&lt;anonymous&gt;~prefetchSource</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1305</code> | Fetch and persist one source blob with conservative retry behavior. |
+| <code>DocumentLoader~promptForPressure</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1214</code> |  |
+| <code>readBlobHeadBytes</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:336</code> |  |
+| <code>readUint32LittleEndian</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:889</code> |  |
+| <code>redactUrlForLog</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:549</code> |  |
+| <code>&lt;anonymous&gt;~resolve</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1585</code> |  |
 | <code>ResolvedEntry</code> | typedef | <code>src/components/DocumentLoader/DocumentLoader.js:102</code> |  |
-| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:951</code> | Extract multi-document source context from an entry or placeholder input. |
-| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1101</code> |  |
-| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:477</code> |  |
-| <code>resolveFetchedSourcePayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:353</code> | Resolve source type information with a cheap signature-first path. |
-| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:517</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
-| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1222</code> |  |
-| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:462</code> |  |
-| <code>resolveTrustedSourcePackPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:418</code> | Gateway source packs already carry trusted file metadata from the prepared server-side session. |
-| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1161</code> |  |
-| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:499</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
-| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1277</code> | Whether this load run is no longer allowed to mutate React state. |
-| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:667</code> |  |
-| <code>startsWithAscii</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:284</code> |  |
-| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:940</code> |  |
-| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:619</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
-| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:764</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
+| <code>resolveDocumentSourceContext</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:952</code> | Extract multi-document source context from an entry or placeholder input. |
+| <code>resolveEntries</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1102</code> |  |
+| <code>resolveExactPlannedPageCount</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:478</code> |  |
+| <code>resolveFetchedSourcePayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:354</code> | Resolve source type information with a cheap signature-first path. |
+| <code>resolvePrefetchedPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:518</code> | Resolve multi-page source page counts inside the prefetch worker queue so many small PDF/TIFF files do not create a second sequential analysis phase after all sources have been fe... |
+| <code>DocumentLoader~resolvePressurePrompt</code> | constant | <code>src/components/DocumentLoader/DocumentLoader.js:1223</code> |  |
+| <code>resolveTrustedEntryPageCountHint</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:463</code> |  |
+| <code>resolveTrustedSourcePackPayload</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:419</code> | Gateway source packs already carry trusted file metadata from the prepared server-side session. |
+| <code>safeMessage</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1162</code> |  |
+| <code>shouldDeferSourceWarmup</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:500</code> | Large multi-page PDFs should not start their background render warm-up while the loader is still discovering more sources. |
+| <code>&lt;anonymous&gt;~shouldStopRun</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:1278</code> | Whether this load run is no longer allowed to mutate React state. |
+| <code>sleep</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:668</code> |  |
+| <code>startsWithAscii</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:285</code> |  |
+| <code>toPositiveIntOrUndefined</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:941</code> |  |
+| <code>updatePageEstimateStats</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:620</code> | Update per-extension page-count statistics used by the conservative warning estimator. |
+| <code>validateFetchedSourceBlob</code> | function | <code>src/components/DocumentLoader/DocumentLoader.js:765</code> | Validate that a fetched source looks like a renderable document before it is saved to ODV&#39;s session temp store. |
 | <code>fetchAndArrayBuffer</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:170</code> | Fetch a resource and return its ArrayBuffer. |
 | <code>FetchOptions</code> | typedef | <code>src/components/DocumentLoader/documentLoaderUtils.js:105</code> | Options for fetchAndArrayBuffer. |
 | <code>generateDemoList</code> | constant | <code>src/components/DocumentLoader/documentLoaderUtils.js:80</code> | Generate a list of demo document URLs by repeating or mixing sample files. |
@@ -478,29 +478,29 @@
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/viewerContext.js:45</code> |  |
-| <code>ViewerContextValue</code> | typedef | <code>src/contexts/viewerContext.js:165</code> |  |
+| <code>ViewerContextValue</code> | typedef | <code>src/contexts/viewerContext.js:166</code> |  |
 | <code>ViewerPageEntry</code> | typedef | <code>src/contexts/viewerContext.js:4</code> |  |
-| <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:155</code> |  |
-| <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:78</code> |  |
+| <code>ViewerPageLoadState</code> | typedef | <code>src/contexts/viewerContext.js:156</code> |  |
+| <code>ViewerRuntimeDiagnostics</code> | typedef | <code>src/contexts/viewerContext.js:79</code> |  |
 | <code>ViewerSourceDescriptor</code> | typedef | <code>src/contexts/viewerContext.js:65</code> |  |
 | <code>ViewerProvider~addMessage</code> | constant | <code>src/contexts/ViewerProvider.jsx:929</code> |  |
-| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1255</code> |  |
+| <code>ViewerProvider~announceIndexedDbAssetMode</code> | constant | <code>src/contexts/ViewerProvider.jsx:1256</code> |  |
 | <code>ViewerProvider~applySessionConfig</code> | constant | <code>src/contexts/ViewerProvider.jsx:944</code> |  |
-| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1405</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
+| <code>ViewerProvider~clearPageAssetReference</code> | constant | <code>src/contexts/ViewerProvider.jsx:1406</code> | Drop a page&#39;s current object URL reference from React state and the in-memory cache. |
 | <code>ViewerProvider~clearWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:971</code> |  |
 | <code>ViewerProvider~collectRuntimeDiagnostics</code> | constant | <code>src/contexts/ViewerProvider.jsx:529</code> | Collect a stable snapshot of runtime counters for the optional diagnostics overlay. |
 | <code>createLimiter</code> | function | <code>src/contexts/ViewerProvider.jsx:209</code> |  |
 | <code>ViewerProvider~disposeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:1043</code> |  |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:51</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:45</code> |  |
-| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1503</code> |  |
-| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1910</code> | Render one PDF page again at twice its effective PDF scale. |
-| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1725</code> |  |
+| <code>ViewerProvider~enforceCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1504</code> |  |
+| <code>ViewerProvider~enhancePdfPageResolution</code> | constant | <code>src/contexts/ViewerProvider.jsx:1911</code> | Render one PDF page again at twice its effective PDF scale. |
+| <code>ViewerProvider~ensurePageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1726</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/ViewerProvider.jsx:66</code> |  |
 | <code>getPageAt</code> | function | <code>src/contexts/ViewerProvider.jsx:141</code> |  |
-| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2307</code> |  |
-| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1383</code> |  |
-| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1479</code> |  |
+| <code>ViewerProvider~getPrintablePageUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:2308</code> |  |
+| <code>ViewerProvider~getVariantCache</code> | constant | <code>src/contexts/ViewerProvider.jsx:1384</code> |  |
+| <code>ViewerProvider~getVariantCacheLimit</code> | constant | <code>src/contexts/ViewerProvider.jsx:1480</code> |  |
 | <code>ViewerProvider~initializeDocumentSession</code> | constant | <code>src/contexts/ViewerProvider.jsx:980</code> |  |
 | <code>ViewerProvider~insertPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:843</code> |  |
 | <code>ViewerProvider~insertPagesAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:860</code> |  |
@@ -513,31 +513,31 @@
 | <code>makePdfResolutionPageKey</code> | function | <code>src/contexts/ViewerProvider.jsx:102</code> |  |
 | <code>makePendingAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:91</code> |  |
 | <code>makePersistedAssetKey</code> | function | <code>src/contexts/ViewerProvider.jsx:123</code> |  |
-| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1267</code> |  |
+| <code>ViewerProvider~maybeReleaseSinglePageRasterSource</code> | constant | <code>src/contexts/ViewerProvider.jsx:1268</code> |  |
 | <code>createLimiter~normalizePriority</code> | function | <code>src/contexts/ViewerProvider.jsx:220</code> |  |
 | <code>ViewerProvider~noteFullAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:506</code> | Record that a page now has a reusable full-size asset available. |
 | <code>ViewerProvider~noteThumbnailAssetReady</code> | constant | <code>src/contexts/ViewerProvider.jsx:516</code> | Record that a page now has a reusable thumbnail asset available. |
 | <code>ViewerProvider~patchPageAtIndex</code> | constant | <code>src/contexts/ViewerProvider.jsx:881</code> |  |
-| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1314</code> |  |
-| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1457</code> |  |
-| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2173</code> | Drain background eager-render work without blocking the UI thread. |
-| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1238</code> |  |
-| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1247</code> |  |
-| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1992</code> |  |
+| <code>ViewerProvider~persistRenderedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1315</code> |  |
+| <code>ViewerProvider~pinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1458</code> |  |
+| <code>ViewerProvider~pumpWarmupQueue</code> | constant | <code>src/contexts/ViewerProvider.jsx:2174</code> | Drain background eager-render work without blocking the UI thread. |
+| <code>ViewerProvider~readSourceArrayBuffer</code> | constant | <code>src/contexts/ViewerProvider.jsx:1239</code> |  |
+| <code>ViewerProvider~readSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1248</code> |  |
+| <code>ViewerProvider~recordLoaderPhaseTiming</code> | constant | <code>src/contexts/ViewerProvider.jsx:1993</code> |  |
 | <code>ViewerProvider~registerSourceDescriptor</code> | constant | <code>src/contexts/ViewerProvider.jsx:1195</code> |  |
-| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1633</code> |  |
+| <code>ViewerProvider~renderPageBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1634</code> |  |
 | <code>ViewerProvider~resetViewerState</code> | constant | <code>src/contexts/ViewerProvider.jsx:682</code> |  |
 | <code>resolvePatch</code> | function | <code>src/contexts/ViewerProvider.jsx:151</code> |  |
-| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1561</code> |  |
+| <code>ViewerProvider~restorePersistedAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1562</code> |  |
 | <code>ViewerProvider~revokeSessionUrls</code> | constant | <code>src/contexts/ViewerProvider.jsx:660</code> |  |
-| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2264</code> | Enqueue eager page rendering for a newly discovered source range. |
-| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1548</code> |  |
-| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1214</code> |  |
+| <code>ViewerProvider~scheduleSourceWarmup</code> | constant | <code>src/contexts/ViewerProvider.jsx:2265</code> | Enqueue eager page rendering for a newly discovered source range. |
+| <code>ViewerProvider~shouldReuseFullAssetForThumbnail</code> | constant | <code>src/contexts/ViewerProvider.jsx:1549</code> |  |
+| <code>ViewerProvider~storeSourceBlob</code> | constant | <code>src/contexts/ViewerProvider.jsx:1215</code> |  |
 | <code>StoreSourceBlobInput</code> | typedef | <code>src/contexts/ViewerProvider.jsx:56</code> |  |
 | <code>touchCacheEntry</code> | function | <code>src/contexts/ViewerProvider.jsx:164</code> |  |
-| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1392</code> |  |
-| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2014</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
-| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1468</code> |  |
+| <code>ViewerProvider~touchPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1393</code> |  |
+| <code>ViewerProvider~tryRenderPdfWarmupBatch</code> | constant | <code>src/contexts/ViewerProvider.jsx:2015</code> | Try to render a full-page PDF warm-up batch through the partitioned worker path. |
+| <code>ViewerProvider~unpinPageAsset</code> | constant | <code>src/contexts/ViewerProvider.jsx:1469</code> |  |
 | <code>ViewerProvider~updateAllPages</code> | constant | <code>src/contexts/ViewerProvider.jsx:482</code> |  |
 | <code>ViewerProvider</code> | constant | <code>src/contexts/ViewerProvider.jsx:330</code> |  |
 | <code>ViewerProviderProps</code> | typedef | <code>src/contexts/ViewerProvider.jsx:319</code> |  |
@@ -578,7 +578,7 @@
 | <code>usePageTimer</code> | function | <code>src/hooks/usePageTimer.js:60</code> | Custom hook to handle page change with a timer for continuous navigation. |
 | <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection and optional gateway trust enrichment. |
 | <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:27</code> |  |
-| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:42</code> |  |
+| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:43</code> |  |
 | <code>appendQuery</code> | function | <code>src/i18n.js:140</code> | Helper: append query params safely to a URL. |
 | <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:90</code> | Fallback cache-busting token for bundled locale resources. |
 | <code>computeBaseHref</code> | function | <code>src/i18n.js:372</code> | Compute a normalized base href. |
@@ -1000,9 +1000,9 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
-| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:98</code> | Create viewer-local state for disabled gateway sessions. |
-| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:19</code> | Resolve only HTTP source routes on the viewer&#39;s own origin, preserving the path base. |
-| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:54</code> | Accept only unambiguous server entries. |
+| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:109</code> | Create viewer-local state for disabled gateway sessions. |
+| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:20</code> | Resolve only HTTP source routes on the viewer&#39;s own origin, preserving the path base. |
+| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:65</code> | Accept only unambiguous server entries. |
 | <code>module:utils/pdfSignatureGateway</code> | module | <code>src/utils/pdfSignatureGateway.js:1</code> | Optional gateway trust enrichment. |
 | <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:175</code> | Terminate the signature worker \(e.g. |
 | <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:140</code> | Inspect the signatures of one document. |

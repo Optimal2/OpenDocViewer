@@ -139,6 +139,7 @@ import {
 
 /**
  * @typedef {Object} PrefetchResult
+ * @property {{url: string, fileIndex: number}=} sourcePack Actual transport and raw frame index; never a display index.
  * @property {boolean} ok
  * @property {string=} sourceKey
  * @property {string=} fileExtension
@@ -1687,6 +1688,7 @@ const DocumentLoader = ({
             stats: stored?.stats || null,
             analysisBlob: blob,
             pageCountHint,
+            sourcePack: { url: sourcePackUrl, fileIndex: header?.fileIndex },
           });
         } catch (error) {
           settle(fileIndex, {
@@ -2009,6 +2011,7 @@ const DocumentLoader = ({
           pageCount,
           mimeType: result.mimeType,
           sourceUrl: result.url,
+          sourcePack: result.sourcePack,
           sizeBytes: result.sizeBytes,
           cacheKeyMode: result.cacheKeyMode,
         });

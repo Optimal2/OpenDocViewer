@@ -1,5 +1,5 @@
 /**
- * Optional gateway trust enrichment. The source route is the transport contract;
+ * Optional gateway trust enrichment. Source routes and received pack frames identify files;
  * viewer ordering, bootstrap mode and host metadata never determine file identity.
  * @module utils/pdfSignatureGateway
  */
@@ -14,21 +14,32 @@ const TRUST_VALUES = ['valid', 'invalid', 'unknown'];
  * Resolve only HTTP source routes on the viewer's own origin, preserving the path base.
  * @param {string} sourceUrl The URL already used by DocumentLoader.
  * @param {string} [baseUrl] Browser base for relative source URLs.
+ * @param {{url: string, fileIndex: number}} [sourcePack] Actual received pack frame identity.
  * @returns {{endpoint: string, session: string}|null}
  */
-export function getGatewaySignatureContext(sourceUrl, baseUrl = globalThis.document?.baseURI) {
+export function getGatewaySignatureContext(sourceUrl, baseUrl = globalThis.document?.baseURI, sourcePack) {
   try {
+    if (sourcePack !== undefined) {
+      // Never fall back to a display index or unrelated source URL for pack bytes.
+      if (!Number.isInteger(sourcePack?.fileIndex) || sourcePack.fileIndex < 0
+          || sourcePack.fileIndex > 2147483647) return null;
+      sourceUrl = sourcePack.url;
+    }
     if (typeof sourceUrl !== 'string' || !sourceUrl) return null;
     const url = new URL(sourceUrl, baseUrl);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
     // The document URL and HTML base URI are not trust anchors.
     if (url.origin !== new URL(globalThis.location?.href).origin) return null;
-    const match = url.pathname.match(/^(.*)\/source\/([^/]+)\/(0|[1-9]\d*)$/);
-    if (!match || Number(match[3]) > 2147483647) return null;
+    const match = sourcePack !== undefined
+      ? url.pathname.match(/^(.*)\/source-pack\/([^/]+)$/)
+      : url.pathname.match(/^(.*)\/source\/([^/]+)\/(0|[1-9]\d*)$/);
+    if (!match) return null;
+    const fileIndex = sourcePack !== undefined ? sourcePack.fileIndex : Number(match[3]);
+    if (fileIndex > 2147483647) return null;
     const sessionKey = decodeURIComponent(match[2]);
     if (!/^[A-Za-z0-9_-]+$/.test(sessionKey)) return null;
     const session = `${url.origin}${match[1]}/signatures/${encodeURIComponent(sessionKey)}`;
-    return { endpoint: `${session}/${match[3]}`, session };
+    return { endpoint: `${session}/${fileIndex}`, session };
   } catch { return null; }
 }
 
@@ -93,13 +104,13 @@ export function mergeGatewaySignatureReport(report, server) {
 /**
  * Create viewer-local state for disabled gateway sessions. Calls run in the
  * existing serial inspection queue; this client never fetches document bytes.
- * @returns {{enrich: function(*, string): Promise<*>}}
+ * @returns {{enrich: function(*, string, Object=): Promise<*>}}
  */
 export function createGatewaySignatureClient() {
   const disabledSessions = new Set();
   return {
-    async enrich(report, sourceUrl) {
-      const context = getGatewaySignatureContext(sourceUrl);
+    async enrich(report, sourceUrl, sourcePack) {
+      const context = getGatewaySignatureContext(sourceUrl, undefined, sourcePack);
       if (!context || report.signatures.length === 0
           || disabledSessions.has(context.session)) return report;
       const controller = new AbortController();

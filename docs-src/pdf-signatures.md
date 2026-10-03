@@ -199,22 +199,30 @@ The viewer surfaces the inspection result without ever blocking page rendering:
 
 ## Level 2 (gateway validation)
 
-When a document comes from the gateway's `/source/{sessionKey}/{fileIndex}` route,
-the viewer optionally enriches its browser report with server trust. `DocumentLoader`
-already registers the actual source URL in the source descriptor; `ViewerProvider`
-passes a lookup for that URL to `usePdfSignatureReports`. The gateway bundle can
+When a document comes from the gateway's `/source/{sessionKey}/{fileIndex}` route
+or a `/source-pack/{sessionKey}` stream, the viewer optionally enriches its browser
+report with server trust. `DocumentLoader` registers the actual source URL and, for
+successfully received pack files, the pack URL and raw frame `fileIndex` in the source
+descriptor. `ViewerProvider` passes those lookups to `usePdfSignatureReports`. The gateway bundle can
 arrive through the existing `bundleUrl` / `sessionurl` bootstrap path (which takes
 precedence over parent-page data), or another supported bundle transport. Bootstrap
 mode alone is not evidence that any particular document uses a gateway.
 
-`src/utils/pdfSignatureGateway.js` recognizes the source route per document and
+`src/utils/pdfSignatureGateway.js` recognizes the source or source-pack route per document and
 derives `GET /signatures/{sessionKey}/{fileIndex}` only on the viewer page's own
 origin, preserving the source path base. A matching path on another origin makes
 no request and stays at level 1. The document URL and HTML base URI cannot nominate
 a trusted origin; no gateway base URL runtime setting currently exists.
-It uses the index in the URL, never the viewer's file order, document ID, or source
-cache key. Relative URLs use the browser document base. Unsupported schemes,
-ambiguous paths, or missing source URLs leave level 1 unchanged; standalone file,
+Per-file delivery uses the index in the source URL. Pack delivery uses the session key
+in the bundle's `integration.sourcePackUrl` actually fetched by the loader, together
+with the received frame's integer `fileIndex`. That index identifies the session's
+source file in the flattened bundle/pack order; frame arrival order, page/display
+order, document ID and source cache key never determine it. The association stays
+with the loaded bytes even when the viewer reorders pages. Merely having pack
+configuration, a session ID, or a pack-shaped document URL is insufficient.
+Missing, malformed or out-of-range frame indexes make no signature request and do
+not fall back to an unrelated per-file URL. Relative URLs use the browser document
+base. Unsupported schemes, ambiguous paths, or missing transport identity leave level 1 unchanged; standalone file,
 demo, and ordinary HTTP PDF sources need no gateway configuration.
 
 After level 1 finds signatures, its report is published immediately. The existing
@@ -263,6 +271,10 @@ exit 0 after restoring every source). Run the unmodified tests afterwards. No li
 gateway or external trust service is required for these tests.
 Use `node scripts/test-signature-gateway-mutations.mjs --review-fixes` to prove the
 origin restriction, trust tooltip and client-only failure marker independently.
+Use `node scripts/test-signature-gateway-mutations.mjs --source-pack` to prove the
+pack loader/provider wiring and file-index preservation. The pack transport tests
+cover single/multiple files, reversed frame arrival and display order, and missing
+mapping without contacting a gateway.
 
 ## Data contract
 

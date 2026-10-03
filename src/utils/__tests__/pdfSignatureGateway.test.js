@@ -11,6 +11,22 @@ const merge = (signatures, server = [remote]) => mergeGatewaySignatureReport({ s
 beforeEach(() => vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' }));
 afterEach(() => vi.unstubAllGlobals());
 
+it('G22 resolves source-pack transport identity and never guesses missing or malformed indexes', () => {
+  const base = 'https://example.test/gateway/viewer/';
+  const pack = { url: '../source-pack/session-pack', fileIndex: 2 };
+  expect(getGatewaySignatureContext('/files/document.pdf', base, pack)?.endpoint)
+    .toBe('https://example.test/gateway/signatures/session-pack/2');
+  for (const fileIndex of [undefined, null, '', '0', -1, 1.5, NaN, 2147483648]) {
+    expect(getGatewaySignatureContext('/source/other/0', base, { ...pack, fileIndex })).toBeNull();
+  }
+  for (const url of ['', '/source-pack/a%2Fb', '/source-pack/%', '/source-pack/session/extra',
+    'https://foreign.test/source-pack/session', 'http://example.test/source-pack/session',
+    'https://example.test:444/source-pack/session', 'https://user:pass@example.test/source-pack/session']) {
+    expect(getGatewaySignatureContext('/source/other/0', base, { ...pack, url })).toBeNull();
+  }
+  expect(getGatewaySignatureContext('/source-pack/session-pack', base)).toBeNull();
+});
+
 it('G11 detects only a gateway source route, including relative URLs and virtual directories', () => {
   expect(getGatewaySignatureContext('../source/session-one/42', 'https://example.test/gateway/viewer/')).toEqual({
     endpoint: 'https://example.test/gateway/signatures/session-one/42', session: 'https://example.test/gateway/signatures/session-one',

@@ -36,7 +36,7 @@ File count: 1. Line count: 36. JSDoc symbol count: 1.
 
 ## src/components/DocumentLoader
 
-File count: 8. Line count: 4109. JSDoc symbol count: 106.
+File count: 8. Line count: 4112. JSDoc symbol count: 106.
 
 - `src/components/DocumentLoader/documentLoaderUtils.js` - OpenDocViewer — Loader Utilities Helper utilities used by the DocumentLoader pipeline: • Build document URL lists \(pattern mode and demo mode\) • Fetch as ArrayBuffer \(with optional AbortSignal\) • Page counting \(PDF / TIF
 - `src/components/DocumentLoader/DocumentLoader.js` - OpenDocViewer — Document loader orchestrator.
@@ -75,7 +75,7 @@ File count: 10. Line count: 5048. JSDoc symbol count: 118.
 
 ## src/contexts
 
-File count: 4. Line count: 3218. JSDoc symbol count: 83.
+File count: 4. Line count: 3222. JSDoc symbol count: 83.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -90,7 +90,7 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 5. Line count: 776. JSDoc symbol count: 26.
+File count: 5. Line count: 777. JSDoc symbol count: 26.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
@@ -150,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 43. Line count: 17419. JSDoc symbol count: 663.
+File count: 43. Line count: 17430. JSDoc symbol count: 663.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

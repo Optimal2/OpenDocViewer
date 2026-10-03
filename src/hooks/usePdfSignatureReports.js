@@ -37,9 +37,10 @@ function isPdfPage(page) {
  * Reads the already-loaded source bytes for a sourceKey.
  * @param {string} [options.currentSourceKey] Visible document, prioritized before queued documents.
  * @param {function(string): string} [options.getSourceUrl] Registered document source URL.
+ * @param {function(string): Object} [options.getSourcePack] Registered received pack frame identity.
  * @returns {Object<string, *>} Map of sourceKey to PdfSignatureReport.
  */
-export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl }) {
+export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl, getSourcePack }) {
   const [reports, setReports] = useState(/** @type {Object<string, *>} */ ({}));
   // Entry identity separates removed/reloaded documents even when sourceKeys are reused.
   const entriesRef = useRef(new Map());
@@ -103,7 +104,7 @@ export default function usePdfSignatureReports({ allPages, inspectionReady, read
             if (!isCurrent()) return;
             // Publish browser integrity before waiting for optional server trust.
             setReports((previous) => ({ ...previous, [sourceKey]: report }));
-            report = await gatewayRef.current.enrich(report, getSourceUrl?.(sourceKey));
+            report = await gatewayRef.current.enrich(report, getSourceUrl?.(sourceKey), getSourcePack?.(sourceKey));
             entry.state = 'done';
           } catch (error) {
             entry.state = 'failed';
@@ -119,7 +120,7 @@ export default function usePdfSignatureReports({ allPages, inspectionReady, read
       }
     };
     pumpRef.current();
-  }, [allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl]);
+  }, [allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl, getSourcePack]);
 
   return reports;
 }

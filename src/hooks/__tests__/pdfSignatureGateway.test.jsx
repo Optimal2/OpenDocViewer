@@ -135,3 +135,32 @@ it('G7 does not publish a server result for a removed document', async () => {
   await act(async () => { resolve(response()); });
   expect(reports.a).toBeUndefined();
 });
+
+it.each([undefined, null, '0', -1, 1.5])('G24 unknown pack index %s makes no call, even with a per-file fallback URL', async (fileIndex) => {
+  await render({ getSourcePack: () => ({ url: 'https://example.test/gateway/source-pack/session-one', fileIndex }) });
+  expect(fetch).not.toHaveBeenCalled();
+  expect(reports.a).toEqual(browserReport);
+});
+
+it('G25 pack validation shares disabled-session suppression with per-file delivery', async () => {
+  fetch.mockResolvedValueOnce(response({ error: 'Signature validation is not enabled on this gateway.' }, 404));
+  await render({ allPages: [page('a'), page('b')], getSourcePack: (key) => key === 'a'
+    ? { url: 'https://example.test/gateway/source-pack/session-one', fileIndex: 0 } : undefined });
+  expect(fetch).toHaveBeenCalledTimes(1);
+  expect(fetch.mock.calls[0][0]).toBe('https://example.test/gateway/signatures/session-one/0');
+  expect(reports.a).toEqual(browserReport);
+  expect(reports.b).toEqual(browserReport);
+});
+
+it('G26 pack errors stay unchecked and release the serial queue', async () => {
+  fetch.mockRejectedValueOnce(new Error('network'));
+  await render({ allPages: [page('b'), page('a')], getSourcePack: (key) => ({
+    url: 'https://example.test/gateway/source-pack/session-one', fileIndex: key === 'a' ? 0 : 1,
+  }) });
+  expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+    'https://example.test/gateway/signatures/session-one/1',
+    'https://example.test/gateway/signatures/session-one/0',
+  ]);
+  expect(reports.b.signatures[0].trust).toBe('not-checked');
+  expect(reports.a.signatures[0].trust).toBe('valid');
+});

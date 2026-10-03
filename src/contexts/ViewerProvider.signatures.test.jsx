@@ -84,3 +84,36 @@ it('G10 provider passes the registered source URL, never the viewer file index',
   expect(fetch).toHaveBeenCalledWith('https://example.test/gateway/signatures/session-one/17', expect.any(Object));
   expect(api.signatureReports.signed.signatures[0].trust).toBe('invalid');
 });
+
+it('G21 source-pack identity survives display reordering and is checked once per document', async () => {
+  vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
+  const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
+  getDocumentSignatures.mockResolvedValue({ signatures: [signature] });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({
+    signatures: [{ ...signature, trust: 'unknown', trustReason: 'timestamp-responder-not-trusted',
+      validationTime: '2026-10-01T12:00:00Z' }],
+  }) }));
+  let api;
+  function Consumer() { api = useContext(ViewerContext); return null; }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  const page = (sourceKey) => ({ sourceKey, fileExtension: 'pdf', pageIndex: 0,
+    fullSizeStatus: 1, fullSizeUrl: 'blob:ready' });
+  await act(async () => {
+    ['first', 'second'].forEach((sourceKey, fileIndex) => api.registerSourceDescriptor({
+      sourceKey, fileExtension: 'pdf', fileIndex: 99 - fileIndex,
+      sourceUrl: `https://example.test/files/${sourceKey}.pdf`,
+      sourcePack: { url: 'https://example.test/gateway/source-pack/session-pack', fileIndex },
+    }));
+    api.insertPagesAtIndex([page('second'), page('first'), page('second')], 0);
+  });
+  await act(async () => { api.patchPageAtIndex(0, { thumbnailStatus: 1 }); });
+  expect(fetch.mock.calls.map(([url]) => url)).toEqual([
+    'https://example.test/gateway/signatures/session-pack/1',
+    'https://example.test/gateway/signatures/session-pack/0',
+  ]);
+  expect(storage.read.mock.calls.map(([key]) => key)).toEqual(['second', 'first']);
+  for (const key of ['first', 'second']) expect(api.signatureReports[key].signatures[0]).toMatchObject({
+    integrity: 'intact', trust: 'unknown', trustReason: 'timestamp-responder-not-trusted',
+  });
+});
