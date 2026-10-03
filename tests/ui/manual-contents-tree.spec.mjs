@@ -142,6 +142,89 @@ test('narrow dialog: column hidden, Swedish toggle opens the list, selection and
   await expect(page.locator('.odv-manual-dialog')).toHaveCount(0);
 });
 
+test('narrow dialog: English toggle labelled "Contents" opens the list and selection closes it', async ({ page }) => {
+  await page.setViewportSize({ width: 820, height: 900 });
+  await openManual(page, 'en');
+
+  const nav = contentsNav(page);
+  const toggle = page.locator('.odv-manual-toc-toggle');
+  await expect(nav).toBeHidden();
+  await expect(toggle).toBeVisible();
+  await expect(toggle).toHaveText(/^\s*toc\s*Contents\s*$/);
+  await toggle.click();
+  await expect(toggle).toHaveAttribute('aria-expanded', 'true');
+  await expect(page.getByRole('navigation', { name: 'Contents of this page' })).toBeVisible();
+  const entry = nav.locator('a[href="#section-7"]');
+  await entry.click();
+  await expect(nav).toBeHidden();
+  await expect(entry).toHaveAttribute('aria-current', 'true');
+  await expect(page.locator('#section-7')).toBeFocused();
+  expect(await page.locator('.odv-manual-scroll').evaluate((node) => node.scrollTop)).toBeGreaterThan(0);
+});
+
+// The bundled manuals open their screenshots in a script-free lightbox: a thumbnail links to
+// "#lb-<name>", `.lb` is display:none until it is the URL fragment target (`.lb:target`), and the
+// lightbox links to "#lb-stang" (no such element) to close. The viewer keeps no state in the URL
+// fragment, so the manual may set it; the dialog puts the original URL back when it closes.
+test('bundled Swedish manual: image lightbox opens and closes through the URL fragment', async ({ page }) => {
+  await page.setViewportSize({ width: 1400, height: 900 });
+  await loadSession(page, { query: 'lng=sv' });
+  const urlBefore = new URL(page.url());
+  await page.locator('button.help-button').click();
+  await page.getByRole('menuitem', { name: 'Manual' }).click();
+  const nav = contentsNav(page);
+  await expect(nav).toBeVisible();
+  await expect(page.locator('.odv-manual-content a[href="#lb-verktygsfalt-redo"] img')).toBeVisible();
+
+  // Go to section 2 through the tree; its two thumbnails are then in view.
+  await nav.locator('a[href="#laddning"]').click();
+  const current = nav.locator('a[aria-current="true"]');
+  await expect(current).toHaveAttribute('href', '#laddning');
+  expect(new URL(page.url()).hash).toBe('');
+
+  const pane = page.locator('.odv-manual-scroll');
+  const lightbox = page.locator('#lb-verktygsfalt-redo');
+  await expect(lightbox).toBeHidden();
+  const thumbnail = page.locator('.odv-manual-content a[href="#lb-verktygsfalt-redo"]');
+  await expect(thumbnail).toBeInViewport();
+  const scrollBefore = await pane.evaluate((node) => node.scrollTop);
+  const pageScroll = () => page.evaluate(() => [window.scrollX, window.scrollY, document.scrollingElement.scrollTop]);
+  const pageScrollBefore = await pageScroll();
+
+  await thumbnail.click();
+  await expect(lightbox).toBeVisible();
+  expect(await lightbox.evaluate((node) => node.matches(':target'))).toBe(true);
+  // The fragment is replaced in place: same path and query, no extra history entry.
+  const opened = new URL(page.url());
+  expect(opened.hash).toBe('#lb-verktygsfalt-redo');
+  expect(opened.pathname + opened.search).toBe(urlBefore.pathname + urlBefore.search);
+  expect(await pane.evaluate((node) => node.scrollTop)).toBe(scrollBefore);
+  expect(await pageScroll()).toEqual(pageScrollBefore);
+  await expect(current).toHaveAttribute('href', '#laddning');
+
+  // A click anywhere in the lightbox follows its "#lb-stang" link and closes it.
+  await lightbox.locator(':scope > a').click();
+  await expect(lightbox).toBeHidden();
+  expect(new URL(page.url()).hash).toBe('#lb-stang');
+  expect(await pane.evaluate((node) => node.scrollTop)).toBe(scrollBefore);
+  expect(await pageScroll()).toEqual(pageScrollBefore);
+  await expect(current).toHaveAttribute('href', '#laddning');
+
+  // A tree link still scrolls only the content pane and puts the viewer's own URL back.
+  await nav.locator('a[href="#utskrift"]').click();
+  await expect(current).toHaveAttribute('href', '#utskrift');
+  expect(await pane.evaluate((node) => node.scrollTop)).toBeGreaterThan(scrollBefore);
+  expect(page.url()).toBe(urlBefore.toString());
+
+  // Closing with a lightbox open restores the URL, and focus goes back to the help button.
+  await page.locator('.odv-manual-content a[href="#lb-utskrift-aktiv-sida"]').click();
+  await expect(page.locator('#lb-utskrift-aktiv-sida')).toBeVisible();
+  await page.keyboard.press('Escape');
+  await expect(page.locator('.odv-manual-dialog')).toHaveCount(0);
+  expect(page.url()).toBe(urlBefore.toString());
+  await expect(page.locator('button.help-button')).toBeFocused();
+});
+
 test('search hits are counted per section in the tree', async ({ page }) => {
   await page.setViewportSize({ width: 1400, height: 900 });
   await openManual(page, 'en');

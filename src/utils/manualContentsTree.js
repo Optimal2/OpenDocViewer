@@ -62,10 +62,20 @@ export function slugifyManualHeading(text) {
  * One `querySelectorAll` pass, no layout reads, so manuals with hundreds of headings stay cheap.
  * Running it again on the same DOM keeps the ids from the first pass.
  *
+ * Every id authored in the manual is collected first, including ids on headings that are not
+ * listed (empty ones), and an authored id is never renamed, so the manual's own "#id" links keep
+ * their targets. Generated ids avoid every authored id, every `reservedIds` entry and every id
+ * elsewhere in the page. Two exceptions get a generated id instead: a heading repeating an id an
+ * earlier element already owns (its links resolve to that earlier element anyway), and a heading
+ * carrying one of `reservedIds` (the dialog around the manual owns those).
+ *
  * @param {(Element|null|undefined)} root Rendered manual container.
+ * @param {Object} [options]
+ * @param {Iterable<string>} [options.reservedIds] Ids the surrounding UI uses, also when it has not
+ *   rendered them yet.
  * @returns {{entries: Array<ManualContentsEntry>, groups: Array<ManualContentsGroup>}}
  */
-export function buildManualContentsTree(root) {
+export function buildManualContentsTree(root, options = {}) {
   /** @type {Array<ManualContentsEntry>} */
   const entries = [];
   /** @type {Array<ManualContentsGroup>} */
@@ -76,13 +86,13 @@ export function buildManualContentsTree(root) {
   if (headings.length === 0) return { entries, groups };
 
   const doc = root.ownerDocument || null;
-  const headingSet = new Set(headings);
-  // Ids carried by anything in the manual except the headings we are about to list, so a heading
-  // keeps its own id but never takes one used by another element.
-  const used = new Set();
+  const reserved = new Set(Array.from(options?.reservedIds || []).filter(Boolean));
+  // Authored id -> the first element carrying it, which is where the manual's "#id" links resolve.
+  const owners = new Map();
   root.querySelectorAll('[id]').forEach((node) => {
-    if (!headingSet.has(node) && node.id) used.add(node.id);
+    if (node.id && !owners.has(node.id)) owners.set(node.id, node);
   });
+  const used = new Set([...owners.keys(), ...reserved]);
   const isTaken = (candidate) => {
     if (used.has(candidate)) return true;
     // Ids elsewhere in the page (the viewer itself) must not be shadowed either.
@@ -103,8 +113,9 @@ export function buildManualContentsTree(root) {
   headings.forEach((element) => {
     const text = collapseWhitespace(element.textContent);
     if (!text) return;
-    const own = String(element.getAttribute('id') || '').trim();
-    const id = claim(own || slugifyManualHeading(text));
+    const own = element.id || '';
+    const keepsOwn = !!own && owners.get(own) === element && !reserved.has(own);
+    const id = keepsOwn ? own : claim(own.trim() || slugifyManualHeading(text));
     if (id !== own) element.setAttribute('id', id);
     const level = String(element.tagName || '').toUpperCase() === 'H3' ? 2 : 1;
     const entry = { id, text, level, element };

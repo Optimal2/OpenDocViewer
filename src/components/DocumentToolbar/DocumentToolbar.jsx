@@ -387,6 +387,8 @@ const DocumentToolbar = ({
   const contrastButtonRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
   const brightnessMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const contrastMenuRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  // Help button that opened the manual; focus returns to it when the manual closes.
+  const manualOpenerRef = useRef(/** @type {(HTMLElement|null)} */ (null));
   const isShiftPressed = navigationModifierState.shift;
   const isCtrlPressed = navigationModifierState.ctrl;
   const compareTargetAvailable = typeof setComparePageNumber === 'function' && totalPages > 0;
@@ -1533,6 +1535,7 @@ const DocumentToolbar = ({
         <ManualOverlayDialog
           isOpen={isManualDialogOpen}
           onClose={() => setIsManualDialogOpen(false)}
+          returnFocusRef={manualOpenerRef}
         />
 
         <AboutOverlayDialog
@@ -1858,7 +1861,10 @@ const DocumentToolbar = ({
         <ThemeMenuButton />
         <LanguageMenuButton />
         <HelpMenuButton
-          onOpenManual={() => setIsManualDialogOpen(true)}
+          onOpenManual={(opener) => {
+            manualOpenerRef.current = opener || null;
+            setIsManualDialogOpen(true);
+          }}
           onOpenAbout={() => setIsAboutDialogOpen(true)}
           statusLedState={runtimeStatusLedState}
           statusLedTitle={runtimeStatusLedTitle}
@@ -1888,6 +1894,7 @@ const DocumentToolbar = ({
       <ManualOverlayDialog
         isOpen={isManualDialogOpen}
         onClose={() => setIsManualDialogOpen(false)}
+        returnFocusRef={manualOpenerRef}
       />
 
       <AboutOverlayDialog

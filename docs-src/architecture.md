@@ -185,7 +185,13 @@ the archived page image without adjustments.
   from the sanitised manual's h2/h3 headings (`src/utils/manualContentsTree.js`); headings without
   an id get one derived from their text, so the manual files themselves never carry the tree.
   The tree and the manual text scroll independently; below about 900 px dialog width a
-  "Contents" toggle in the search row opens the tree as an overlay list instead
+  "Contents" toggle in the search row opens the tree as an overlay list instead. Authored ids are
+  never renamed; generated ids avoid every authored id and the dialog's own ids. In-text "#id"
+  links to a rendered element scroll the content pane; links to a target hidden until it is the
+  URL fragment target (the bundled manuals' `.lb:target` image lightbox), or to no element at
+  all, replace the URL fragment in place so `:target` applies. The viewer keeps no state in the
+  fragment, and the dialog puts the original URL back on close. Closing returns focus to the help
+  button
 - `AboutOverlayDialog.jsx` shows version and build id and offers the support diagnostics download
   (`src/utils/supportDiagnostics.js`); the benchmark tools are separate opt-in flags
 - `ViewerProblemNotice.jsx` shows configurable problem notices and can request a session reset

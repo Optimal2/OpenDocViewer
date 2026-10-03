@@ -5573,7 +5573,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1127,
+    "line": 1129,
     "description": "Execute the actual print helper after the dialog has resolved the user's choices.",
     "params": [
       {
@@ -5692,7 +5692,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 687,
+    "line": 689,
     "description": "Handle brightness slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5717,7 +5717,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 701,
+    "line": 703,
     "description": "Handle contrast slider changes with neutral snapping at 100.",
     "params": [
       {
@@ -5742,7 +5742,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 723,
+    "line": 725,
     "description": "",
     "params": [
       {
@@ -5767,7 +5767,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 410,
+    "line": 412,
     "description": "",
     "params": [
       {
@@ -5787,7 +5787,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 402,
+    "line": 404,
     "description": "",
     "params": [
       {
@@ -5807,7 +5807,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 1295,
+    "line": 1297,
     "description": "Handle the dialog submit event and dispatch the correct print action.",
     "params": [
       {
@@ -5832,7 +5832,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 736,
+    "line": 738,
     "description": "",
     "params": [
       {
@@ -5857,7 +5857,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 715,
+    "line": 717,
     "description": "",
     "params": [
       {
@@ -5976,7 +5976,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 866,
+    "line": 868,
     "description": "",
     "params": [
       {
@@ -6089,7 +6089,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 816,
+    "line": 818,
     "description": "Resolve page metadata objects aligned with the printed page sequence.",
     "params": [
       {
@@ -6114,7 +6114,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 794,
+    "line": 796,
     "description": "Estimate the number of pages the user is about to print.",
     "params": [
       {
@@ -6139,7 +6139,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 830,
+    "line": 832,
     "description": "",
     "params": [
       {
@@ -6177,7 +6177,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 894,
+    "line": 896,
     "description": "Fire-and-forget user print log.",
     "params": [
       {
@@ -6202,7 +6202,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 745,
+    "line": 747,
     "description": "",
     "params": [
       {
@@ -6227,7 +6227,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/DocumentToolbar.jsx",
-    "line": 774,
+    "line": 776,
     "description": "Build a compact &quot;pages&quot; descriptor for logging.",
     "params": [
       {
@@ -6637,6 +6637,31 @@
     "examples": 0
   },
   {
+    "id": "captureScrollPositions",
+    "name": "captureScrollPositions",
+    "longname": "captureScrollPositions",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 555,
+    "description": "Record the scroll positions of the page and of every ancestor of from , so a fragment navigation (which the browser may scroll for) can be undone.",
+    "params": [
+      {
+        "name": "from",
+        "type": "Element|null",
+        "optional": false,
+        "description": "Innermost element whose scroll containers are recorded."
+      }
+    ],
+    "returns": [
+      {
+        "type": "function",
+        "description": "Restores the recorded positions."
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "collectManualTextMatches",
     "name": "collectManualTextMatches",
     "longname": "collectManualTextMatches",
@@ -6705,7 +6730,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 499,
+    "line": 600,
     "description": "",
     "params": [
       {
@@ -6725,12 +6750,49 @@
         "type": "function",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "props.returnFocusRef",
+        "type": "Object",
+        "optional": true,
+        "description": "Toolbar button that gets focus back when the dialog closes."
       }
     ],
     "returns": [
       {
         "type": "React.ReactElement|null",
         "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "findManualElementById",
+    "name": "findManualElementById",
+    "longname": "findManualElementById",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 514,
+    "description": "",
+    "params": [
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      },
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "Element|null",
+        "description": "Element in the manual with that id. Scoped to the manual, so an id the viewer page also uses still resolves to the manual's own element."
       }
     ],
     "examples": 0
@@ -6773,7 +6835,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 639,
+    "line": 801,
     "description": "",
     "params": [
       {
@@ -6784,6 +6846,37 @@
       }
     ],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "isHiddenInManual",
+    "name": "isHiddenInManual",
+    "longname": "isHiddenInManual",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 537,
+    "description": "True when the element or one of its ancestors inside the manual is not rendered ( display: none ).",
+    "params": [
+      {
+        "name": "target",
+        "type": "Element",
+        "optional": false,
+        "description": ""
+      },
+      {
+        "name": "container",
+        "type": "Element",
+        "optional": false,
+        "description": "Rendered manual container."
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {
@@ -6809,6 +6902,32 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_CONTENTS_ID",
+    "name": "MANUAL_CONTENTS_ID",
+    "longname": "MANUAL_CONTENTS_ID",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 494,
+    "description": "Id of the contents tree; the narrow-window toggle points at it with aria-controls.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_DIALOG_IDS",
+    "name": "MANUAL_DIALOG_IDS",
+    "longname": "MANUAL_DIALOG_IDS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 506,
+    "description": "Ids the dialog renders around the manual.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -6846,6 +6965,19 @@
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
     "line": 138,
     "description": "Name of the shared CSS Custom Highlight covering every manual search hit.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "MANUAL_SEARCH_INPUT_ID",
+    "name": "MANUAL_SEARCH_INPUT_ID",
+    "longname": "MANUAL_SEARCH_INPUT_ID",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 497,
+    "description": "Id of the manual search field.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -6903,13 +7035,26 @@
     "examples": 0
   },
   {
+    "id": "MANUAL_TITLE_ID",
+    "name": "MANUAL_TITLE_ID",
+    "longname": "MANUAL_TITLE_ID",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 500,
+    "description": "Id of the dialog title.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "ManualOverlayDialog~navigateToManualTarget",
     "name": "navigateToManualTarget",
     "longname": "ManualOverlayDialog~navigateToManualTarget",
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 567,
+    "line": 704,
     "description": "Scroll the content pane (never the tree) to an element in the manual and focus it.",
     "params": [
       {
@@ -6955,7 +7100,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 554,
+    "line": 658,
     "description": "Make the section holding target current and keep it current until the reader scrolls.",
     "params": [
       {
@@ -7026,7 +7171,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-    "line": 901,
+    "line": 1065,
     "description": "",
     "params": [
       {
@@ -7048,6 +7193,39 @@
         "description": ""
       }
     ],
+    "examples": 0
+  },
+  {
+    "id": "replaceUrlFragment",
+    "name": "replaceUrlFragment",
+    "longname": "replaceUrlFragment",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 583,
+    "description": "Replace the URL fragment without adding a history entry.",
+    "params": [
+      {
+        "name": "fragment",
+        "type": "string",
+        "optional": false,
+        "description": "Fragment without # ; empty leaves a bare # ."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualOverlayDialog~restoreViewerFragment",
+    "name": "restoreViewerFragment",
+    "longname": "ManualOverlayDialog~restoreViewerFragment",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 683,
+    "description": "Put back the URL fragment the viewer had before the manual set one.",
+    "params": [],
+    "returns": [],
     "examples": 0
   },
   {
@@ -7191,6 +7369,26 @@
         "type": "number",
         "optional": false,
         "description": "Hit index shown as current."
+      }
+    ],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "ManualOverlayDialog~setManualFragment",
+    "name": "setManualFragment",
+    "longname": "ManualOverlayDialog~setManualFragment",
+    "kind": "constant",
+    "scope": "inner",
+    "file": "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+    "line": 672,
+    "description": "Set the URL fragment for a manual link whose target is styled through :target (the bundled manuals' image lightbox), without moving the content pane, the dialog or the page behind...",
+    "params": [
+      {
+        "name": "id",
+        "type": "string",
+        "optional": false,
+        "description": ""
       }
     ],
     "returns": [],
@@ -20956,7 +21154,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualContentsTree.js",
-    "line": 68,
+    "line": 78,
     "description": "Build the contents tree from the rendered manual and give every listed heading a unique id.",
     "params": [
       {
@@ -20964,6 +21162,18 @@
         "type": "Element|null|undefined",
         "optional": false,
         "description": "Rendered manual container."
+      },
+      {
+        "name": "options",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      },
+      {
+        "name": "options.reservedIds",
+        "type": "Iterable.<string>",
+        "optional": true,
+        "description": "Ids the surrounding UI uses, also when it has not rendered them yet."
       }
     ],
     "returns": [
@@ -21006,7 +21216,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualContentsTree.js",
-    "line": 167,
+    "line": 178,
     "description": "Count search hits per section in a single merge pass.",
     "params": [
       {
@@ -21050,7 +21260,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualContentsTree.js",
-    "line": 142,
+    "line": 153,
     "description": "Id of the section that contains the node: the last listed heading at or before it in document order, or '' when the node comes before the first heading.",
     "params": [
       {
@@ -21081,7 +21291,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/manualContentsTree.js",
-    "line": 128,
+    "line": 139,
     "description": "",
     "params": [
       {

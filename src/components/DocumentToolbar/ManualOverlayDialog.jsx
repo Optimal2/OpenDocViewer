@@ -490,13 +490,114 @@ function scrollPaneToTarget(pane, target) {
   pane.scrollTop = Math.max(0, pane.scrollTop + offset - MANUAL_SECTION_SCROLL_GAP);
 }
 
+/** Id of the contents tree; the narrow-window toggle points at it with aria-controls. */
+const MANUAL_CONTENTS_ID = 'odv-manual-contents';
+
+/** Id of the manual search field. */
+const MANUAL_SEARCH_INPUT_ID = 'odv-manual-search-input';
+
+/** Id of the dialog title. */
+const MANUAL_TITLE_ID = 'odv-help-title';
+
+/**
+ * Ids the dialog renders around the manual. The contents tree is built before the tree itself is
+ * rendered, so the heading ids it generates must avoid these explicitly.
+ */
+const MANUAL_DIALOG_IDS = [MANUAL_CONTENTS_ID, MANUAL_SEARCH_INPUT_ID, MANUAL_TITLE_ID];
+
+/**
+ * @param {Element} container Rendered manual container.
+ * @param {string} id
+ * @returns {(Element|null)} Element in the manual with that id. Scoped to the manual, so an id the
+ *   viewer page also uses still resolves to the manual's own element.
+ */
+function findManualElementById(container, id) {
+  if (!container || !id) return null;
+  try {
+    const escaped = typeof CSS !== 'undefined' && typeof CSS.escape === 'function'
+      ? CSS.escape(id)
+      : id.replace(/["\\]/g, '\\$&');
+    return container.querySelector(`[id="${escaped}"]`);
+  } catch {
+    return null;
+  }
+}
+
+/**
+ * True when the element or one of its ancestors inside the manual is not rendered
+ * (`display: none`). The bundled manuals use that for a script-free image lightbox: `.lb` is hidden
+ * until it is the URL fragment target (`.lb:target { display: block }`), so links to it must set
+ * the fragment instead of scrolling. Collapsed `<details>` content keeps its own display value and
+ * is not counted as hidden; navigation opens it instead.
+ *
+ * @param {Element} target
+ * @param {Element} container Rendered manual container.
+ * @returns {boolean}
+ */
+function isHiddenInManual(target, container) {
+  const view = target?.ownerDocument?.defaultView;
+  if (!view || typeof view.getComputedStyle !== 'function') return false;
+  let node = target;
+  while (node && node !== container) {
+    if (view.getComputedStyle(node).display === 'none') return true;
+    node = node.parentElement;
+  }
+  return false;
+}
+
+/**
+ * Record the scroll positions of the page and of every ancestor of `from`, so a fragment
+ * navigation (which the browser may scroll for) can be undone.
+ *
+ * @param {(Element|null)} from Innermost element whose scroll containers are recorded.
+ * @returns {function(): void} Restores the recorded positions.
+ */
+function captureScrollPositions(from) {
+  const saved = [];
+  let node = from;
+  while (node) {
+    saved.push([node, node.scrollLeft, node.scrollTop]);
+    node = node.parentElement;
+  }
+  const view = from?.ownerDocument?.defaultView || (typeof window !== 'undefined' ? window : null);
+  const pageX = view?.scrollX || 0;
+  const pageY = view?.scrollY || 0;
+  return () => {
+    saved.forEach(([element, left, top]) => {
+      if (element.scrollLeft !== left) element.scrollLeft = left;
+      if (element.scrollTop !== top) element.scrollTop = top;
+    });
+    if (view && typeof view.scrollTo === 'function' && (view.scrollX !== pageX || view.scrollY !== pageY)) {
+      try { view.scrollTo(pageX, pageY); } catch { /* ignore */ }
+    }
+  };
+}
+
+/**
+ * Replace the URL fragment without adding a history entry. A fragment-only `location.replace` is a
+ * same-document navigation, so `:target` follows it (`history.replaceState` would not update
+ * `:target`). The viewer keeps no state of its own in the URL fragment.
+ *
+ * @param {string} fragment Fragment without `#`; empty leaves a bare `#`.
+ */
+function replaceUrlFragment(fragment) {
+  try {
+    const base = String(window.location.href).split('#')[0];
+    window.location.replace(`${base}#${fragment ? encodeURIComponent(fragment) : ''}`);
+  } catch {
+    // Leave the URL as it is; the lightbox simply does not open.
+  }
+}
+
 /**
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
+ * @param {{ current:(HTMLElement|null) }} [props.returnFocusRef] Toolbar button that gets focus back
+ *   when the dialog closes.
  * @returns {(React.ReactElement|null)}
  */
-export default function ManualOverlayDialog({ isOpen, onClose }) {
+export default function ManualOverlayDialog({ isOpen, onClose, returnFocusRef = undefined }) {
   const { t, i18n } = useTranslation('common');
   const dialogRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
   const contentRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
@@ -513,6 +614,9 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   const pinnedSectionRef = useRef(/** @type {({id: string, scrollTop: number}|null)} */ (null));
   const contentsOpenRef = useRef(false);
   const closeContentsRef = useRef(() => {});
+  // URL fragment from before the manual set one for a :target lightbox; null while untouched.
+  const viewerFragmentRef = useRef(/** @type {(string|null)} */ (null));
+  const wasOpenRef = useRef(false);
   const [manualState, setManualState] = useState({ loading: false, error: '', html: '', resolvedUrl: '' });
   const [refreshToken, setRefreshToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
@@ -561,6 +665,39 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   }, []);
 
   /**
+   * Set the URL fragment for a manual link whose target is styled through `:target` (the bundled
+   * manuals' image lightbox), without moving the content pane, the dialog or the page behind it.
+   * @param {string} id
+   */
+  const setManualFragment = useCallback((id) => {
+    if (typeof window === 'undefined') return;
+    const restoreScroll = captureScrollPositions(scrollPaneRef.current);
+    if (viewerFragmentRef.current === null) {
+      viewerFragmentRef.current = String(window.location.hash || '').replace(/^#/, '');
+    }
+    replaceUrlFragment(id);
+    restoreScroll();
+  }, []);
+
+  /** Put back the URL fragment the viewer had before the manual set one. */
+  const restoreViewerFragment = useCallback(() => {
+    const original = viewerFragmentRef.current;
+    if (original === null || typeof window === 'undefined') return;
+    viewerFragmentRef.current = null;
+    const restoreScroll = captureScrollPositions(scrollPaneRef.current);
+    let fragment = original;
+    try { fragment = decodeURIComponent(original); } catch { /* keep the raw fragment */ }
+    replaceUrlFragment(fragment);
+    restoreScroll();
+    if (!original) {
+      // Drop the bare "#" the fragment navigation left behind; :target is already cleared.
+      try {
+        window.history.replaceState(window.history.state, '', String(window.location.href).split('#')[0]);
+      } catch { /* keep the bare "#" */ }
+    }
+  }, []);
+
+  /**
    * Scroll the content pane (never the tree) to an element in the manual and focus it.
    * @param {string} id
    */
@@ -568,9 +705,10 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     const container = contentRef.current;
     const pane = scrollPaneRef.current;
     if (!container || !pane || !id) return;
-    const doc = container.ownerDocument || document;
-    const target = doc.getElementById(id);
-    if (!target || !container.contains(target)) return;
+    const target = findManualElementById(container, id);
+    if (!target) return;
+    // An open lightbox would otherwise stay on top of the section the reader asked for.
+    restoreViewerFragment();
     openDetailsAncestors(target, container);
     scrollPaneToTarget(pane, target);
     pinSectionFor(target);
@@ -581,24 +719,33 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     } catch {
       try { target.focus(); } catch { /* ignore */ }
     }
-  }, [pinSectionFor]);
+  }, [pinSectionFor, restoreViewerFragment]);
 
   const handleContentsLinkClick = useCallback((event, id) => {
     event.preventDefault();
     navigateToManualTarget(id);
   }, [navigateToManualTarget]);
 
-  // In-text links to "#id" scroll the content pane instead of changing the viewer's URL hash.
+  // In-text links to "#id": a rendered target (a heading, a paragraph) is scrolled to inside the
+  // content pane. A target hidden until it is the URL fragment target, or no target at all (the
+  // lightbox's "#lb-stang" close link), sets the fragment so the manual's :target CSS applies.
   const handleManualContentClick = useCallback((event) => {
+    const container = contentRef.current;
     const link = event?.target?.closest?.('a[href]');
-    if (!link || !contentRef.current?.contains(link)) return;
+    if (!link || !container?.contains(link)) return;
     const href = String(link.getAttribute('href') || '').trim();
     if (!href.startsWith('#')) return;
     event.preventDefault();
     let id = href.slice(1);
     try { id = decodeURIComponent(id); } catch { /* keep the raw fragment */ }
+    if (!id) return;
+    const target = findManualElementById(container, id);
+    if (!target || isHiddenInManual(target, container)) {
+      setManualFragment(id);
+      return;
+    }
     navigateToManualTarget(id);
-  }, [navigateToManualTarget]);
+  }, [navigateToManualTarget, setManualFragment]);
 
   const goToSearchMatch = useCallback((delta) => {
     setCurrentSearchMatch((previous) => {
@@ -628,9 +775,24 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   // Focus the dialog once per opening. A separate effect: the Escape listener below re-registers
   // whenever the parent passes a new onClose, and that must not pull focus away from the search
   // field or a manual heading the reader just navigated to.
+  // On close the fragment a lightbox link set is put back and focus returns to the opener.
   useEffect(() => {
-    if (isOpen) dialogRef.current?.focus?.();
-  }, [isOpen]);
+    if (isOpen) {
+      wasOpenRef.current = true;
+      dialogRef.current?.focus?.();
+      return;
+    }
+    if (!wasOpenRef.current) return;
+    wasOpenRef.current = false;
+    restoreViewerFragment();
+    const opener = returnFocusRef?.current;
+    if (opener && typeof opener.focus === 'function' && opener.isConnected !== false) {
+      opener.focus();
+    }
+  }, [isOpen, restoreViewerFragment, returnFocusRef]);
+
+  // Unmounting while open must not leave a lightbox fragment in the URL either.
+  useEffect(() => () => restoreViewerFragment(), [restoreViewerFragment]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -733,7 +895,9 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   // Build the contents tree from the mounted, sanitised manual before the browser paints, so the
   // column appears together with the text. A manual without h2/h3 gets no column at all.
   useLayoutEffect(() => {
-    const tree = isOpen && manualState.html ? buildManualContentsTree(contentRef.current) : { entries: [], groups: [] };
+    const tree = isOpen && manualState.html
+      ? buildManualContentsTree(contentRef.current, { reservedIds: MANUAL_DIALOG_IDS })
+      : { entries: [], groups: [] };
     contentsEntriesRef.current = tree.entries;
     pinnedSectionRef.current = null;
     setContentsGroups(tree.groups);
@@ -930,7 +1094,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       className="odv-help-backdrop odv-help-backdrop--manual"
       role="dialog"
       aria-modal="true"
-      aria-labelledby="odv-help-title"
+      aria-labelledby={MANUAL_TITLE_ID}
       data-odv-shortcuts="off"
       onKeyDownCapture={(event) => {
         if (String(event?.key || '') !== 'Escape') return;
@@ -952,7 +1116,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
       >
         <div className="odv-help-header">
           <div>
-            <h2 id="odv-help-title" className="odv-help-title">
+            <h2 id={MANUAL_TITLE_ID} className="odv-help-title">
               {t('help.menu.manual', { defaultValue: 'Manual' })}
             </h2>
             <p className="odv-help-subtitle">
@@ -997,21 +1161,21 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
                 type="button"
                 className="odv-manual-toc-toggle"
                 aria-expanded={contentsOpen}
-                aria-controls="odv-manual-contents"
+                aria-controls={MANUAL_CONTENTS_ID}
                 onClick={() => setContentsOpen((current) => !current)}
               >
                 <span className="material-icons" aria-hidden="true">toc</span>
                 <span>{t('help.contentsToggle', { defaultValue: 'Contents' })}</span>
               </button>
             ) : null}
-            <label className="odv-manual-searchbar-label" htmlFor="odv-manual-search-input">
+            <label className="odv-manual-searchbar-label" htmlFor={MANUAL_SEARCH_INPUT_ID}>
               {t('help.searchManualLabel', { defaultValue: 'Search the manual' })}
             </label>
             <div className="odv-manual-searchbar-field">
               <span className="material-icons" aria-hidden="true">search</span>
               <input
                 ref={searchInputRef}
-                id="odv-manual-search-input"
+                id={MANUAL_SEARCH_INPUT_ID}
                 data-odv-manual-search="input"
                 type="search"
                 autoComplete="off"
@@ -1071,7 +1235,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
           {hasContents ? (
             <nav
               ref={contentsNavRef}
-              id="odv-manual-contents"
+              id={MANUAL_CONTENTS_ID}
               className={`odv-manual-toc${contentsOpen ? ' is-open' : ''}`}
               aria-label={t('help.contentsLabel', { defaultValue: 'Contents of this page' })}
             >
@@ -1131,4 +1295,5 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
 ManualOverlayDialog.propTypes = {
   isOpen: PropTypes.bool.isRequired,
   onClose: PropTypes.func.isRequired,
+  returnFocusRef: PropTypes.shape({ current: PropTypes.any }),
 };

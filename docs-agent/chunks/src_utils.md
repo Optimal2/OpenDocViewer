@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 47. Line count: 18256. JSDoc symbol count: 708.
+File count: 47. Line count: 18267. JSDoc symbol count: 708.
 
 ## src/utils/documentLoadingConfig.js
 

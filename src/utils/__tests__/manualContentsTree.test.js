@@ -85,6 +85,32 @@ describe('buildManualContentsTree', () => {
     outside.remove();
   });
 
+  it('never generates an id an empty (unlisted) heading already carries', () => {
+    const root = mount('<h2 id="tips"> </h2><h2>Tips</h2>');
+    const ids = buildManualContentsTree(root).entries.map((entry) => entry.id);
+    expect(ids).toEqual(['tips-2']);
+    expect(root.querySelectorAll('#tips')).toHaveLength(1);
+    root.remove();
+  });
+
+  it('never lets an earlier generated id take a later heading\'s authored id', () => {
+    const root = mount('<p><a href="#tips">link</a></p><h2>Tips</h2><h2 id="tips">Mina tips</h2>');
+    const tree = buildManualContentsTree(root);
+    expect(tree.entries.map((entry) => entry.id)).toEqual(['tips-2', 'tips']);
+    // The manual's own "#tips" link still resolves to the heading that authored it.
+    expect(root.querySelector('#tips').textContent).toBe('Mina tips');
+    expect(root.querySelectorAll('#tips')).toHaveLength(1);
+    root.remove();
+  });
+
+  it('keeps reserved dialog ids free even before the dialog has rendered them', () => {
+    const root = mount('<h2 id="odv-manual-contents">Innehåll</h2><h2>ODV manual contents</h2>');
+    const tree = buildManualContentsTree(root, { reservedIds: ['odv-manual-contents'] });
+    expect(tree.entries.map((entry) => entry.id)).toEqual(['odv-manual-contents-2', 'odv-manual-contents-3']);
+    expect(root.querySelector('#odv-manual-contents')).toBeNull();
+    root.remove();
+  });
+
   it('puts an h3 before the first h2 on the top level and skips empty headings', () => {
     const root = mount('<h3>Inledning</h3><h2>   </h2><h2>Del <em>ett</em></h2><h3>Sub</h3>');
     const tree = buildManualContentsTree(root);

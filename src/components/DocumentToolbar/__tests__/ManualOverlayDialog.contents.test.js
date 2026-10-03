@@ -207,6 +207,79 @@ describe('ManualOverlayDialog contents tree', () => {
     expect(window.location.hash).toBe(hashBefore);
   });
 
+  // The bundled manuals open images in a script-free lightbox: the thumbnail links to "#lb-x",
+  // `.lb` is display:none until it is the fragment target, and "#lb-stang" (no element) closes it.
+  const LIGHTBOX_HTML = [
+    '<p>Intro</p><style>.lb { display: none; } .lb:target { display: block; }</style>',
+    '<h2 id="start">1. Kom igång</h2><p><a href="#lb-bild"><img alt="thumb"></a></p>',
+    '<h2>2. Skriva ut</h2><p>text</p>',
+    '<div class="lb" id="lb-bild"><a href="#lb-stang"><img alt=""></a></div>',
+  ].join('');
+
+  it('lets lightbox links set the URL fragment so :target applies, without scrolling the pane', async () => {
+    window.history.replaceState(null, '', '/viewer?bundle=1');
+    await openManual(LIGHTBOX_HTML);
+    fakeLayout();
+    pane().scrollTop = 120;
+    const lightbox = content().querySelector('#lb-bild');
+    expect(window.getComputedStyle(lightbox).display).toBe('none');
+
+    act(() => { content().querySelector('a[href="#lb-bild"]').click(); });
+    expect(window.location.hash).toBe('#lb-bild');
+    expect(window.location.search).toBe('?bundle=1');
+    // jsdom does not recompute styles for :target; the Playwright spec checks the real rendering.
+    expect(lightbox.matches(':target')).toBe(true);
+    expect(pane().scrollTop).toBe(120);
+    expect(current().map((node) => node.getAttribute('href'))).toEqual(['#start']);
+
+    act(() => { content().querySelector('a[href="#lb-stang"]').click(); });
+    expect(window.location.hash).toBe('#lb-stang');
+    expect(lightbox.matches(':target')).toBe(false);
+    expect(pane().scrollTop).toBe(120);
+    expect(current().map((node) => node.getAttribute('href'))).toEqual(['#start']);
+
+    // A heading link still scrolls only the pane and puts the viewer's URL back.
+    act(() => { linkByHref('#skriva-ut').click(); });
+    expect(pane().scrollTop).toBe(800 - 8);
+    expect(window.location.hash).toBe('');
+    expect(window.location.href.endsWith('/viewer?bundle=1')).toBe(true);
+  });
+
+  it('puts the viewer URL back when the dialog closes with a lightbox open', async () => {
+    window.history.replaceState(null, '', '/viewer#keep');
+    await openManual(LIGHTBOX_HTML);
+    act(() => { content().querySelector('a[href="#lb-bild"]').click(); });
+    expect(window.location.hash).toBe('#lb-bild');
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: false, onClose }));
+    });
+    expect(window.location.hash).toBe('#keep');
+    window.history.replaceState(null, '', '/');
+  });
+
+  it('returns focus to the opener when the dialog closes', async () => {
+    const opener = document.createElement('button');
+    document.body.appendChild(opener);
+    const returnFocusRef = { current: opener };
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: true, onClose, returnFocusRef }));
+    });
+    await flush(50);
+    expect(document.activeElement).not.toBe(opener);
+    act(() => {
+      root.render(h(ManualOverlayDialog, { isOpen: false, onClose, returnFocusRef }));
+    });
+    expect(document.activeElement).toBe(opener);
+    opener.remove();
+  });
+
+  it('never gives a manual heading one of the dialog\'s own ids', async () => {
+    await openManual('<h2 id="odv-manual-contents">Innehåll</h2><h2>Mer</h2>');
+    expect(document.querySelectorAll('#odv-manual-contents')).toHaveLength(1);
+    expect(nav().id).toBe('odv-manual-contents');
+    expect(toggle().getAttribute('aria-controls')).toBe('odv-manual-contents');
+  });
+
   it('shows hit counts per section and follows search hit navigation', async () => {
     await openManual();
     const input = container.querySelector('[data-odv-manual-search="input"]');

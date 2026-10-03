@@ -44,7 +44,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 React raw HTML rendering.
 
-- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 1115 - Manual overlay that loads simple external HTML fragments from the public help folder.
+- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 1279 - Manual overlay that loads simple external HTML fragments from the public help folder.
 
 ### innerHTML
 

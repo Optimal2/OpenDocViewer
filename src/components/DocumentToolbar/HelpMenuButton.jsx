@@ -44,7 +44,8 @@ const HelpMenuButton = ({ onOpenManual, onOpenAbout, className = '', statusLedSt
 
   const handleOpenManual = () => {
     setOpen(false);
-    onOpenManual?.();
+    // The button, not the menu item: the menu unmounts, the button gets focus back on close.
+    onOpenManual?.(buttonRef.current);
   };
 
   const handleOpenAbout = () => {
