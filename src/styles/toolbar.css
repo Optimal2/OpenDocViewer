@@ -4,23 +4,27 @@
    Toolbar density is a user preference ("Larger toolbar buttons" in the theme menu, default from
    runtime config `toolbar.largeButtons`). ThemeProvider sets data-toolbar-density="large|compact"
    on the document root; every size below reads these variables, so no component has per-size logic.
-   - large (default, also without the attribute): a 48px toolbar with 36px buttons.
-   - compact: a 40px toolbar, 30px buttons with 18px icons, 4px between controls inside a group and
+   - large (default, also without the attribute): a 62px toolbar with 32px buttons and 18px icons.
+   - compact: a 40px toolbar, 26px buttons with 16px icons, 4px between controls inside a group and
      12px between groups (4px gap + 1.5px margin + 1px separator + 1.5px margin + 4px gap).
+   In both densities a group frame has 2px inner padding on every side, so there is visible air
+   between the frame border and its buttons. Buttons outside a frame get the same outer height as a
+   framed group (--odv-toolbar-frame-inset above and below), so the row stays aligned.
    Both are checked by tests/ui/toolbar-density.spec.mjs. */
 
 :root,
 :root[data-toolbar-density='large'] {
-  --odv-toolbar-min-height: 48px;
+  --odv-toolbar-min-height: 62px;
   --odv-toolbar-padding: 4px 10px;
   --odv-toolbar-gap: 0px;
   --odv-toolbar-item-margin: 0 0.06rem;
-  --odv-toolbar-button-size: 36px;
+  --odv-toolbar-button-size: 32px;
   --odv-toolbar-button-padding: 0.24rem 0.42rem;
-  --odv-toolbar-icon-size: 1.14rem;
+  --odv-toolbar-icon-size: 18px;
   --odv-toolbar-group-gap: 0.22rem;
-  --odv-toolbar-group-padding: 5px 8px;
+  --odv-toolbar-group-padding: 2px;
   --odv-toolbar-group-border-width: 4px;
+  --odv-toolbar-frame-inset: 6px; /* group padding + group border */
   --odv-toolbar-group-radius: 12px;
   --odv-toolbar-group-ring-width: 4px;
   --odv-toolbar-group-inset-ring-width: 2px;
@@ -37,12 +41,13 @@
   --odv-toolbar-padding: 3px 8px;
   --odv-toolbar-gap: 4px;
   --odv-toolbar-item-margin: 0;
-  --odv-toolbar-button-size: 30px;
+  --odv-toolbar-button-size: 26px;
   --odv-toolbar-button-padding: 0 0.3rem;
-  --odv-toolbar-icon-size: 18px;
+  --odv-toolbar-icon-size: 16px;
   --odv-toolbar-group-gap: 4px;
-  --odv-toolbar-group-padding: 0 4px;
+  --odv-toolbar-group-padding: 2px;
   --odv-toolbar-group-border-width: 2px;
+  --odv-toolbar-frame-inset: 4px; /* group padding + group border */
   --odv-toolbar-group-radius: 10px;
   --odv-toolbar-group-ring-width: 2px;
   --odv-toolbar-group-inset-ring-width: 1px;
@@ -72,6 +77,12 @@
   flex-shrink: 0;
 }
 .toolbar > * { margin: var(--odv-toolbar-item-margin); }
+/* Unframed buttons and button shells take the outer height of a framed group. */
+.toolbar > button,
+.toolbar > .toolbar-menu-shell,
+.toolbar .toolbar-end-actions > .toolbar-menu-shell {
+  margin-block: var(--odv-toolbar-frame-inset);
+}
 
 .toolbar button,
 .toolbar .toggle-collapse {
@@ -178,7 +189,8 @@
   border-color: rgba(255, 255, 255, 0.2);
 }
 
-/* Group frame for [-] [input] [+] blocks (zoom & page); compact: 30px buttons + 2px border = 34px */
+/* Group frame for the page, zoom and image-adjustment groups: border, 2px padding, button.
+   Compact: 2 + 2 + 26 + 2 + 2 = 34px; large: 4 + 2 + 32 + 2 + 4 = 44px. */
 .zoom-fixed-group {
   display: inline-flex;
   align-items: center;
@@ -444,7 +456,7 @@
   border-bottom-right-radius: 0;
 }
 
-/* The split-menu arrow is a full touch target in both densities (30px compact, 36px large). */
+/* The split-menu arrow is a full touch target in both densities (26px compact, 32px large). */
 .toolbar .toolbar-split-arrow {
   min-width: var(--odv-toolbar-button-size);
   width: var(--odv-toolbar-button-size);

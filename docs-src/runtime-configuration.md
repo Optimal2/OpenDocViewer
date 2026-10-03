@@ -218,8 +218,8 @@ explicit `false` disables the symbol; a missing or non-boolean value keeps the d
 ## Toolbar Button Size
 
 The theme menu has a "Larger toolbar buttons" checkbox (sv: "Större verktygsknappar"). Ticked keeps
-the large toolbar (36px buttons, 48px minimum toolbar height); unticked gives the compact toolbar
-(30px buttons, 40px toolbar). Deployments choose the default:
+the large toolbar (32px buttons, 62px toolbar); unticked gives the compact toolbar (26px buttons,
+40px toolbar). In both, framed button groups keep 2px of space between the frame and its buttons. Deployments choose the default:
 
 ```js
 toolbar: {

@@ -1710,7 +1710,7 @@
   font-size: 14px;
 }
 
-/* Same 30px metrics as the other toolbar buttons (toolbar.css). */
+/* Same metrics as the other toolbar buttons (toolbar.css). */
 .odv-signature-overview-button {
   display: inline-flex;
   align-items: center;
