@@ -62,7 +62,7 @@ File count: 17. Line count: 7156. JSDoc symbol count: 111.
 
 ## src/components/DocumentViewer
 
-File count: 10. Line count: 5118. JSDoc symbol count: 119.
+File count: 10. Line count: 5245. JSDoc symbol count: 121.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.

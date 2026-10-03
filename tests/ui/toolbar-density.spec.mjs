@@ -10,13 +10,23 @@
  * In both densities there is at least 2px of air between a group frame and its buttons, buttons
  * outside a frame take the frame's outer height, and the toolbar neither overflows nor wraps.
  * Both densities keep touch targets, 4.5:1 button contrast and a visible keyboard focus ring.
+ * Every button in a toolbar group (the run between two separators) has the same outer width as the
+ * icon buttons, the text buttons "1:1" and "1:X" included; WIDTH_EXCEPTIONS lists the documented
+ * exceptions. The print selection workspace toolbar keeps its own height (52px large, 50px compact):
+ * the 62px minimum belongs to the main toolbar only.
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
 
+/**
+ * Buttons allowed to differ from their group's width: the split-menu arrow (a secondary half of a
+ * split button) and the signature overview button (a status badge with a count, after the spacer).
+ */
+const WIDTH_EXCEPTIONS = ['.toolbar-split-arrow', '.odv-signature-overview-button'];
+
 /** @param {import('@playwright/test').Page} page */
 function measureToolbar(page) {
-  return page.evaluate(() => {
+  return page.evaluate((widthExceptions) => {
     const toolbar = document.querySelector('.toolbar');
     const rect = (element) => {
       const box = element.getBoundingClientRect();
@@ -67,6 +77,25 @@ function measureToolbar(page) {
       ...children.filter((child) => child.tagName === 'BUTTON' || child.classList.contains('toolbar-menu-shell')),
       ...Array.from(toolbar.querySelectorAll('.toolbar-end-actions > .toolbar-menu-shell')),
     ];
+    // Button widths per group: runs of toolbar children between separators (and the spacer).
+    const groupWidths = [];
+    let run = [];
+    for (const child of [...children, null]) {
+      if (!child || child.classList.contains('separator') || child.classList.contains('toolbar-spacer')) {
+        const runButtons = run.flatMap((node) => (node.tagName === 'BUTTON' ? [node] : Array.from(node.querySelectorAll('button'))))
+          .filter((button) => button.offsetParent !== null && !button.closest('.toolbar-popup-menu, .toolbar-adjustment-menu'))
+          .filter((button) => !widthExceptions.some((selector) => button.matches(selector)));
+        if (runButtons.length) {
+          groupWidths.push(runButtons.map((button) => ({
+            label: button.getAttribute('aria-label') || button.textContent.trim(),
+            width: Math.round(rect(button).width * 10) / 10,
+          })));
+        }
+        run = [];
+      } else {
+        run.push(child);
+      }
+    }
     const end = toolbar.querySelector('.toolbar-end-actions');
     const overview = toolbar.querySelector('.odv-signature-overview-button');
     return {
@@ -91,16 +120,22 @@ function measureToolbar(page) {
       overviewToEnd: Math.round((rect(end).left - rect(overview).right) * 10) / 10,
       endGaps: pairGaps(Array.from(end.children)),
       endButtons: Array.from(end.querySelectorAll(':scope > .toolbar-menu-shell > button')).map((button) => Math.round(rect(button).height)),
+      groupWidths,
+      // Horizontal room left around the "1:1"/"1:X" labels inside their buttons.
+      ratioLabelRoom: Array.from(toolbar.querySelectorAll('.toolbar-ratio-mark')).map((mark) => {
+        const button = mark.closest('button');
+        return Math.min(rect(mark).left - rect(button).left, rect(button).right - rect(mark).right);
+      }),
     };
-  });
+  }, WIDTH_EXCEPTIONS);
 }
 
 const COMPACT_SITE_CONFIG = { toolbar: { largeButtons: false } };
 
 const DENSITIES = [
   // The toolbar heights are those measured before the frame padding (large: 62px on af306bf).
-  { name: 'large', siteConfig: null, toolbarHeight: 62, buttonHeight: 32, groupHeight: 44, iconSize: '18px' },
-  { name: 'compact', siteConfig: COMPACT_SITE_CONFIG, toolbarHeight: 40, buttonHeight: 26, groupHeight: 34, iconSize: '16px' },
+  { name: 'large', siteConfig: null, toolbarHeight: 62, buttonHeight: 32, groupHeight: 44, iconSize: '18px', workspaceHeight: 52 },
+  { name: 'compact', siteConfig: COMPACT_SITE_CONFIG, toolbarHeight: 40, buttonHeight: 26, groupHeight: 34, iconSize: '16px', workspaceHeight: 50 },
 ];
 
 /** @param {import('@playwright/test').Page} page */
@@ -135,6 +170,16 @@ for (const density of DENSITIES) {
       expect(metrics.rowCenters).toHaveLength(1);
       expect(metrics.overflow).toBeLessThanOrEqual(0);
 
+      // Every button in a group is as wide as the icon buttons (1px tolerance), "1:1" and "1:X" too.
+      expect(metrics.groupWidths.length).toBeGreaterThanOrEqual(5);
+      const zoomGroup = metrics.groupWidths.find((group) => group.some(({ label }) => /actual size/i.test(label)));
+      expect(zoomGroup.map(({ label }) => label)).toEqual(expect.arrayContaining(['Actual size (1:1)', 'Custom size']));
+      for (const group of metrics.groupWidths) {
+        for (const { label, width } of group) expect(Math.abs(width - density.buttonHeight), label).toBeLessThanOrEqual(1);
+      }
+      expect(metrics.ratioLabelRoom).toHaveLength(2);
+      for (const room of metrics.ratioLabelRoom) expect(room).toBeGreaterThanOrEqual(1);
+
       if (density.name === 'compact') {
         // 4px in-group spacing, 12px between groups, then theme/language/help at 4px.
         expect(metrics.gapsInsideGroups.length).toBeGreaterThanOrEqual(10);
@@ -144,6 +189,17 @@ for (const density of DENSITIES) {
         expect(metrics.overviewToEnd).toBeCloseTo(12, 0);
         expect(metrics.endGaps).toEqual([4, 4]);
       }
+    });
+
+    test(`print selection workspace toolbar keeps its ${density.workspaceHeight}px height`, async ({ page }) => {
+      await loadSession(page, { siteConfig: density.siteConfig });
+      await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
+      expect(Math.round(await page.locator('.toolbar').first().evaluate((node) => node.getBoundingClientRect().height))).toBe(density.toolbarHeight);
+      await page.getByRole('button', { name: /selection manag/i }).click();
+      const workspace = page.locator('.toolbar--selection-workspace');
+      await expect(workspace).toBeVisible();
+      // Its height before the 62px main-toolbar minimum (measured on 3bc862a): no 44px frames here.
+      expect(Math.round(await workspace.evaluate((node) => node.getBoundingClientRect().height))).toBe(density.workspaceHeight);
     });
 
     test(`toolbar buttons keep at least ${density.buttonHeight}px touch targets, 4.5:1 contrast and a visible keyboard focus ring`, async ({ page }) => {

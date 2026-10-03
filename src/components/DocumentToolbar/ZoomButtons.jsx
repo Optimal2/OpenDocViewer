@@ -424,7 +424,7 @@ const ZoomButtons = ({
           onClick={onActualSize}
           aria-label={t('toolbar.zoomActual')}
           title={t('toolbar.zoomActual')}
-          className={`odv-btn ${isOneToOneActive ? 'is-active' : ''}`}
+          className={`odv-btn toolbar-ratio-button ${isOneToOneActive ? 'is-active' : ''}`}
           disabled={disableOneToOne}
         >
           <span className="toolbar-ratio-mark" aria-hidden="true">1:1</span>
@@ -462,7 +462,7 @@ const ZoomButtons = ({
         title={t('toolbar.fitCustomWidthTitle', { defaultValue: 'Custom size' })}
         menuLabel={t('toolbar.fitCustomWidthMenu', { defaultValue: 'Custom size settings' })}
         className={fitCustomActive ? 'is-active' : ''}
-        mainClassName={fitCustomActive ? 'is-active' : ''}
+        mainClassName={fitCustomActive ? 'toolbar-ratio-button is-active' : 'toolbar-ratio-button'}
         disabled={disableFitCustom}
         menuChildren={({ closeMenu }) => {
           const renderCustomSizeField = (field) => (

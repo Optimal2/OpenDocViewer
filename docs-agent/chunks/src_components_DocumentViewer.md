@@ -1,16 +1,18 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 5118. JSDoc symbol count: 119.
+File count: 10. Line count: 5245. JSDoc symbol count: 121.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
-Per\-pane “post\-zoom” controls shown in comparison mode.
+Per\-pane “post\-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top\-left of each pane.
 
 Exports: `CompareZoomOverlay`
 
 Symbols:
 
-- `CompareZoomOverlay` (function) - CompareZoomOverlay Presentational\-only \(no state\).
+- `COLLAPSE_DELAY_MS` (constant) - Delay before the zone collapses after the pointer/focus has left, so it does not flicker.
+- `isKeyboardFocus` (function) - No description.
+- `CompareZoomOverlay` (function) - CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state.
 
 ## src/components/DocumentViewer/DocumentViewer.jsx
 

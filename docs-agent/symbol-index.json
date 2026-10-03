@@ -8418,16 +8418,54 @@
     "examples": 0
   },
   {
+    "id": "COLLAPSE_DELAY_MS",
+    "name": "COLLAPSE_DELAY_MS",
+    "longname": "COLLAPSE_DELAY_MS",
+    "kind": "constant",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+    "line": 38,
+    "description": "Delay before the zone collapses after the pointer/focus has left, so it does not flicker.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "CompareZoomOverlay",
     "name": "CompareZoomOverlay",
     "longname": "CompareZoomOverlay",
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-    "line": 28,
-    "description": "CompareZoomOverlay Presentational-only (no state).",
+    "line": 56,
+    "description": "CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state.",
     "params": [],
     "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "isKeyboardFocus",
+    "name": "isKeyboardFocus",
+    "longname": "isKeyboardFocus",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+    "line": 44,
+    "description": "",
+    "params": [
+      {
+        "name": "target",
+        "type": "EventTarget|null",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "boolean",
+        "description": ""
+      }
+    ],
     "examples": 0
   },
   {

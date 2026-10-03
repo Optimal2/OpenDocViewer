@@ -42,8 +42,6 @@
 
   /* Theme-specific literals bypass the token reset in the live-DOM fallback.
      Use paper surfaces and suppress screen loading textures and shadows. */
-  [data-theme='dark'] .compare-zoom-overlay,
-  [data-theme='dark'] .compare-zoom-overlay .odv-btn,
   [data-theme='dark'] .odv-prd-input,
   [data-theme='dark'] .odv-prd-inputWide,
   [data-theme='dark'] .odv-prd-select,

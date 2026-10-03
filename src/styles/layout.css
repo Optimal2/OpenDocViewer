@@ -1163,10 +1163,11 @@
 
 .odv-pane-selector {
   --odv-pane-selector-accent: var(--thumbnail-primary-color);
-  position: absolute;
-  top: 12px;
-  left: 12px;
-  z-index: 12;
+  /* Positioned by its compare zone (.compare-zoom-zone), in front of the tucked zoom controls. */
+  position: relative;
+  z-index: 2;
+  flex: none;
+  box-sizing: border-box;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -1187,10 +1188,16 @@
   --odv-pane-selector-accent: var(--thumbnail-compare-color);
 }
 
-.odv-pane-selector:hover,
-.odv-pane-selector:focus-visible,
+/* At rest the ring stays semi-transparent, the target pane's ring a little stronger; the expanded
+   zone (hover, keyboard focus, tap) makes it fully opaque. */
 .odv-pane-selector.is-active,
 .odv-pane-selector.is-effective {
+  opacity: 0.88;
+}
+
+.odv-pane-selector:hover,
+.odv-pane-selector:focus-visible,
+.compare-zoom-zone.is-expanded .odv-pane-selector {
   opacity: 1;
 }
 
@@ -1269,15 +1276,6 @@ canvas {
   background-color: var(--canvas-background-color);
 }
 
-/* Floating per-pane zoom controls (Compare mode)
-   Sticky holder pins overlay to top of scrollable pane. */
-.compare-zoom-sticky {
-  position: sticky;
-  top: 0;
-  z-index: 9;
-  height: 0;
-}
-
 .odv-edge-scroll-page-turn {
   position: absolute;
   left: 50%;
@@ -1287,11 +1285,11 @@ canvas {
   pointer-events: none;
 }
 
-/* Compare panes: keep the centred page-turn indicator clear of the top-right zoom controls and
-   the top-left pane selector (both about 136px wide including margins). */
+/* Compare panes: keep the centred page-turn indicator clear of the top-left compare zone (pane
+   marker ring and its tucked zoom controls, 12px + 36px + 8px of air) and the scrollbar. */
 .document-pane-frame.is-primary-pane .odv-edge-scroll-page-turn,
 .document-pane-frame.is-compare-pane .odv-edge-scroll-page-turn {
-  width: max(48px, min(240px, 46%, calc(100% - 2 * (136px + var(--odv-pane-scrollbar-width, 0px)))));
+  width: max(48px, min(240px, 46%, calc(100% - 2 * (56px + var(--odv-pane-scrollbar-width, 0px)))));
 }
 
 .odv-edge-scroll-page-turn.is-previous {
@@ -1321,90 +1319,148 @@ canvas {
   transition: transform 90ms linear;
 }
 
-/* Overlay anchored to the top-right of the pane inside the sticky holder, so it sits over the
-   page corner instead of the pane centre when the page is narrower than the pane. The pane frame
-   sets --odv-pane-scrollbar-width so the controls stay clear of the page viewport's scrollbar. */
+/* Compare mode: per-pane zone at the top-left of each pane. The pane marker ring (.odv-pane-selector)
+   sits on top; the zoom controls (.compare-zoom-overlay) are tucked behind it, like a card under a
+   card, with only a faded tail showing below the ring. Hover, keyboard focus or a tap expands the
+   zone downwards into a vertical pill: ring, zoom in, factor, zoom out (CompareZoomOverlay.jsx).
+   The zone's box is the ring at rest and ring + pill when expanded; the tail and the hidden pill
+   take no pointer events, so the page around it stays clickable. */
+.compare-zoom-zone {
+  --odv-pane-accent: var(--thumbnail-primary-color);
+  position: absolute;
+  top: 12px;
+  left: 12px;
+  z-index: 12;
+  display: flex;
+  flex-direction: column;
+  width: 36px;
+}
+
+.compare-zoom-zone.is-compare {
+  --odv-pane-accent: var(--thumbnail-compare-color);
+}
+
+.compare-zoom-tail {
+  position: absolute;
+  top: 18px;
+  left: 50%;
+  z-index: 1;
+  width: 24px;
+  height: 40px; /* 22px below the ring */
+  transform: translateX(-50%);
+  border-radius: 0 0 12px 12px;
+  background: linear-gradient(
+    to bottom,
+    color-mix(in srgb, var(--odv-pane-accent) 46%, transparent) 0%,
+    color-mix(in srgb, var(--odv-pane-accent) 22%, transparent) 55%,
+    transparent 100%
+  );
+  pointer-events: none;
+  transition: opacity 140ms ease;
+}
+
+.compare-zoom-zone.is-expanded .compare-zoom-tail {
+  opacity: 0;
+}
+
 .compare-zoom-overlay {
   position: absolute;
-  top: 8px;
-  right: calc(8px + var(--odv-pane-scrollbar-width, 0px));
-  /* Clamped to the pane like the page-turn indicator: in a very narrow pane the controls are
-     clipped instead of reaching into the neighbouring pane. */
+  top: 0;
+  left: 0;
+  z-index: 1;
   box-sizing: border-box;
-  max-width: calc(100% - 16px - var(--odv-pane-scrollbar-width, 0px));
-  overflow: hidden;
-  display: inline-flex;
+  display: flex;
+  flex-direction: column;
   align-items: center;
-  gap: 6px;
-  padding: 4px 8px;
-  border-radius: 8px;
-  background: rgba(15, 23, 42, 0.82);
-  border: 1px solid rgba(255, 255, 255, 0.16);
-  color: #fff;
-  z-index: 10;
-  pointer-events: none;
-  opacity: 0.9;
-  box-shadow: 0 10px 24px rgba(0, 0, 0, 0.28);
-  -webkit-backdrop-filter: blur(6px);
-  backdrop-filter: blur(6px);
+  gap: 2px;
+  width: 36px;
+  padding: 40px 0 3px;
+  border: 2px solid color-mix(in srgb, var(--odv-pane-accent) 72%, transparent 28%);
+  border-radius: 18px;
+  background: var(--canvas-background-color);
+  color: var(--text-color);
+  box-shadow: 0 8px 20px rgba(15, 23, 42, 0.18);
   -webkit-user-select: none;
   user-select: none;
+  /* Collapsed: hidden (not focusable, not in the accessibility tree) and folded up behind the ring. */
+  visibility: hidden;
+  opacity: 0;
+  pointer-events: none;
+  transform: translateY(-10px) scaleY(0.6);
+  transform-origin: top center;
+  transition: opacity 140ms ease, transform 160ms ease, visibility 0s linear 160ms;
 }
-[data-theme='dark'] .compare-zoom-overlay {
-  background: rgba(2, 6, 23, 0.86);
-  border-color: rgba(255, 255, 255, 0.12);
-  color: #f8fafc;
-}
-.compare-zoom-overlay:hover,
-.compare-zoom-overlay:focus-within { opacity: 1; }
-.compare-zoom-overlay .odv-btn {
+
+.compare-zoom-zone.is-expanded .compare-zoom-overlay {
+  visibility: visible;
+  opacity: 1;
   pointer-events: auto;
-  padding: 0 6px;
-  height: 24px;
-  min-width: 28px;
-  line-height: 1;
-  font-size: 0.95rem;
-  border-radius: 4px;
-  background: rgba(255, 255, 255, 0.12);
+  transform: none;
+  transition: opacity 140ms ease, transform 160ms ease, visibility 0s;
+}
+
+.compare-zoom-overlay .odv-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-sizing: border-box;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--odv-pane-accent) 40%, transparent 60%);
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--canvas-background-color) 92%, var(--odv-pane-accent) 8%);
   color: inherit;
-  border: 1px solid rgba(255, 255, 255, 0.78);
-  cursor: pointer;
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.35);
-}
-.compare-zoom-overlay .odv-btn.icon {
   line-height: 0;
-  min-width: 26px;
-  height: 24px;
-  padding: 0 4px;
+  cursor: pointer;
 }
+
 .compare-zoom-overlay .material-icons {
   font-size: 18px;
-  vertical-align: middle;
   color: currentColor;
 }
+
 .compare-zoom-overlay .odv-btn:hover,
 .compare-zoom-overlay .odv-btn:focus-visible {
-  background: rgba(255, 255, 255, 0.2);
-  outline: none;
+  background: color-mix(in srgb, var(--canvas-background-color) 78%, var(--odv-pane-accent) 22%);
 }
-.compare-zoom-overlay .odv-btn:focus-visible {
-  box-shadow:
-    0 0 0 2px color-mix(in srgb, var(--focus-shadow) 70%, transparent 30%),
-    0 1px 2px rgba(0, 0, 0, 0.35);
+
+.compare-zoom-overlay .odv-btn:focus-visible,
+.compare-zoom-overlay .factor:focus-visible {
+  outline: 2px solid color-mix(in srgb, var(--odv-pane-accent) 78%, var(--text-color) 22%);
+  outline-offset: 1px;
 }
-.compare-zoom-overlay .odv-btn:disabled { opacity: 0.5; cursor: default; }
-[data-theme='dark'] .compare-zoom-overlay .odv-btn {
-  background: rgba(255, 255, 255, 0.14);
-  border-color: rgba(255, 255, 255, 0.8);
+
+.compare-zoom-overlay .odv-btn:disabled {
+  color: color-mix(in srgb, var(--text-color) 55%, transparent 45%);
+  cursor: default;
 }
+
 .compare-zoom-overlay .factor {
-  pointer-events: none;
-  min-width: 34px;
+  display: block;
+  min-width: 28px;
+  padding: 2px 0;
+  border-radius: 4px;
+  font-size: 11px;
+  font-weight: 700;
+  line-height: 14px;
   text-align: center;
   font-variant-numeric: tabular-nums;
-  font-weight: 600;
   color: inherit;
-  text-shadow: 0 1px 2px rgba(0, 0, 0, 0.45);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .odv-pane-selector,
+  .compare-zoom-tail,
+  .compare-zoom-overlay,
+  .compare-zoom-zone.is-expanded .compare-zoom-overlay {
+    transition: none;
+  }
+
+  .odv-pane-selector:hover,
+  .odv-pane-selector:focus-visible {
+    transform: none;
+  }
 }
 
 /* Thumbnails */

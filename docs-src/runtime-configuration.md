@@ -235,6 +235,21 @@ configured default. The choice is viewer-local: unlike the theme mode it is not 
 
 The viewer sets `data-toolbar-density="large|compact"` on the document root and
 `src/styles/toolbar.css` maps it to CSS variables (toolbar height, button and icon size, gaps).
+The 62px/40px minimum height belongs to the main toolbar; the print selection workspace toolbar has
+no group frames and keeps its own lower minimum (48px/40px, content height 52px/50px). Every button
+in a toolbar group is as wide as the icon buttons, including the "1:1" and "1:X" text buttons, whose
+labels are slightly condensed to fit. Documented exceptions: the split-menu arrow and the signature
+overview button (a status badge with a count, outside the groups).
+
+### Touch-target policy
+
+- Compact toolbar: every button is at least 26 x 26 px. Large toolbar: at least 32 x 32 px.
+- Both are above the WCAG 2.2 AA minimum target size of 24 x 24 px (success criterion 2.5.8), which
+  is the floor for any new toolbar control; do not add exceptions below it.
+- Text on buttons keeps at least 4.5:1 contrast against the button colour in both densities.
+- Compare-mode zoom controls (tucked behind each pane's marker ring) use 28 x 28 px buttons.
+- `tests/ui/toolbar-density.spec.mjs` asserts the button minimums, equal widths within a group,
+  contrast, the visible keyboard focus ring and both toolbar heights.
 
 ## Viewer Default Zoom Mode
 

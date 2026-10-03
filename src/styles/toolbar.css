@@ -10,11 +10,16 @@
    In both densities a group frame has 2px inner padding on every side, so there is visible air
    between the frame border and its buttons. Buttons outside a frame get the same outer height as a
    framed group (--odv-toolbar-frame-inset above and below), so the row stays aligned.
+   The minimum height is for the main toolbar only: the print selection workspace toolbar has no
+   group frames and keeps its own, lower minimum (--odv-toolbar-workspace-min-height).
+   Every button in a group has the icon buttons' outer width; the "1:1" and "1:X" text buttons use a
+   condensed label to fit (.toolbar-ratio-mark). Touch-target policy: docs-src/runtime-configuration.md.
    Both are checked by tests/ui/toolbar-density.spec.mjs. */
 
 :root,
 :root[data-toolbar-density='large'] {
   --odv-toolbar-min-height: 62px;
+  --odv-toolbar-workspace-min-height: 48px;
   --odv-toolbar-padding: 4px 10px;
   --odv-toolbar-gap: 0px;
   --odv-toolbar-item-margin: 0 0.06rem;
@@ -38,6 +43,7 @@
 
 :root[data-toolbar-density='compact'] {
   --odv-toolbar-min-height: 40px;
+  --odv-toolbar-workspace-min-height: 40px;
   --odv-toolbar-padding: 3px 8px;
   --odv-toolbar-gap: 4px;
   --odv-toolbar-item-margin: 0;
@@ -76,6 +82,7 @@
   padding: var(--odv-toolbar-padding);
   flex-shrink: 0;
 }
+.toolbar.toolbar--selection-workspace { min-height: var(--odv-toolbar-workspace-min-height); }
 .toolbar > * { margin: var(--odv-toolbar-item-margin); }
 /* Unframed buttons and button shells take the outer height of a framed group. */
 .toolbar > button,
@@ -616,15 +623,22 @@
   padding-block: 3px;
 }
 
+/* "1:1" and "1:X" are exactly as wide as the icon buttons beside them (26px compact, 32px large):
+   no side padding and a slightly condensed label, still white on the button colour (4.5:1). */
+.toolbar .toolbar-ratio-button {
+  width: var(--odv-toolbar-button-size);
+  padding-inline: 0;
+}
+
 .toolbar-ratio-mark {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  min-width: 1.65rem;
-  font-size: 0.76rem;
+  font-size: 0.72rem;
   font-weight: 800;
-  letter-spacing: 0;
+  letter-spacing: -0.02em;
   line-height: 1;
+  white-space: nowrap;
   user-select: none;
 }
 

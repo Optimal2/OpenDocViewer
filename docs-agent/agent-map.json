@@ -88,14 +88,14 @@
   },
   "stats": {
     "fileCount": 134,
-    "sourceLineCount": 54993,
-    "docletCount": 1470,
+    "sourceLineCount": 55120,
+    "docletCount": 1472,
     "documentedFileCount": 134,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 21,
-    "estimatedSourceTokens": 4103
+    "estimatedSourceTokens": 4119
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -1145,8 +1145,8 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 10,
-      "lineCount": 5118,
-      "docletCount": 119,
+      "lineCount": 5245,
+      "docletCount": 121,
       "importantFiles": [
         {
           "path": "src/components/DocumentViewer/hooks/useViewerEffects.js",
@@ -1169,7 +1169,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
           "score": 45,
-          "lines": 1074,
+          "lines": 1072,
           "incomingLocalImports": 1,
           "doclets": 17,
           "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -16680,17 +16680,21 @@
     },
     {
       "path": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-      "lines": 100,
+      "lines": 229,
       "extension": ".jsx",
-      "jsdocBlockCount": 2,
-      "sourceSummary": "Per-pane “post-zoom” controls shown in comparison mode.",
+      "jsdocBlockCount": 8,
+      "sourceSummary": "Per-pane “post-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top-left of each pane.",
       "imports": [
         {
           "source": "react",
           "specifiers": [
-            "React"
+            "React",
+            "useCallback",
+            "useEffect",
+            "useRef",
+            "useState"
           ],
-          "line": 20,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -16698,7 +16702,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -16706,7 +16710,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22,
+          "line": 35,
           "kind": "static"
         }
       ],
@@ -16714,19 +16718,54 @@
         {
           "name": "CompareZoomOverlay",
           "kind": "default",
-          "line": 99
+          "line": 228
         }
       ],
       "declarations": [
         {
+          "name": "isKeyboardFocus",
+          "kind": "function",
+          "line": 44
+        },
+        {
           "name": "CompareZoomOverlay",
           "kind": "component",
-          "line": 28
+          "line": 56
+        },
+        {
+          "name": "onPointerDown",
+          "kind": "function",
+          "line": 96
+        },
+        {
+          "name": "handlePointerEnter",
+          "kind": "function",
+          "line": 105
+        },
+        {
+          "name": "handlePointerLeave",
+          "kind": "function",
+          "line": 111
+        },
+        {
+          "name": "handleFocus",
+          "kind": "function",
+          "line": 117
+        },
+        {
+          "name": "handleBlur",
+          "kind": "function",
+          "line": 123
+        },
+        {
+          "name": "handleKeyDown",
+          "kind": "function",
+          "line": 130
         },
         {
           "name": "preventSelect",
           "kind": "function",
-          "line": 37
+          "line": 147
         }
       ],
       "parseError": null,
@@ -16736,14 +16775,52 @@
       },
       "doclets": [
         {
+          "id": "COLLAPSE_DELAY_MS",
+          "name": "COLLAPSE_DELAY_MS",
+          "longname": "COLLAPSE_DELAY_MS",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+          "line": 38,
+          "description": "Delay before the zone collapses after the pointer/focus has left, so it does not flicker.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "isKeyboardFocus",
+          "name": "isKeyboardFocus",
+          "longname": "isKeyboardFocus",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+          "line": 44,
+          "description": "",
+          "params": [
+            {
+              "name": "target",
+              "type": "EventTarget|null",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "CompareZoomOverlay",
           "name": "CompareZoomOverlay",
           "longname": "CompareZoomOverlay",
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-          "line": 28,
-          "description": "CompareZoomOverlay Presentational-only (no state).",
+          "line": 56,
+          "description": "CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -16755,9 +16832,13 @@
         {
           "source": "react",
           "specifiers": [
-            "React"
+            "React",
+            "useCallback",
+            "useEffect",
+            "useRef",
+            "useState"
           ],
-          "line": 20,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -16765,7 +16846,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 21,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -16773,13 +16854,13 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 22,
+          "line": 35,
           "kind": "static"
         }
       ],
       "incomingLocalImports": 1,
-      "importanceScore": 16,
-      "summary": "Per-pane “post-zoom” controls shown in comparison mode.",
+      "importanceScore": 23,
+      "summary": "Per-pane “post-zoom” controls shown in comparison mode, tucked behind the pane marker ring at the top-left of each pane.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -17319,7 +17400,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "lines": 1074,
+      "lines": 1072,
       "extension": ".jsx",
       "jsdocBlockCount": 28,
       "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -17390,7 +17471,7 @@
         {
           "name": "DocumentViewerRender",
           "kind": "default",
-          "line": 1073
+          "line": 1071
         }
       ],
       "declarations": [
@@ -69082,16 +69163,54 @@
       "examples": 0
     },
     {
+      "id": "COLLAPSE_DELAY_MS",
+      "name": "COLLAPSE_DELAY_MS",
+      "longname": "COLLAPSE_DELAY_MS",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+      "line": 38,
+      "description": "Delay before the zone collapses after the pointer/focus has left, so it does not flicker.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "CompareZoomOverlay",
       "name": "CompareZoomOverlay",
       "longname": "CompareZoomOverlay",
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-      "line": 28,
-      "description": "CompareZoomOverlay Presentational-only (no state).",
+      "line": 56,
+      "description": "CompareZoomOverlay Parent owns the factor and clamping; this component only owns the expanded/collapsed state.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "isKeyboardFocus",
+      "name": "isKeyboardFocus",
+      "longname": "isKeyboardFocus",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+      "line": 44,
+      "description": "",
+      "params": [
+        {
+          "name": "target",
+          "type": "EventTarget|null",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {

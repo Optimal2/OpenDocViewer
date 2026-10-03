@@ -75,7 +75,7 @@ const PAN_POINTER_MOVE_THRESHOLD_PX = 3;
 function isPaneInteractiveTarget(target) {
   if (!(target instanceof Element)) return false;
   return !!target.closest(
-    '.compare-zoom-overlay, .odv-pane-selector, button, input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"], [data-odv-allow-native-contextmenu="true"]'
+    '.compare-zoom-zone, .odv-pane-selector, button, output, input, textarea, select, [contenteditable="true"], [data-odv-shortcuts="off"], [data-odv-allow-native-contextmenu="true"]'
   );
 }
 
@@ -403,7 +403,7 @@ const DocumentViewerRender = ({
   const handlePaneWheelCapture = useCallback((event, pane) => {
     if (edgeScrollPageTurnConfig?.enabled !== true) return;
     if (event?.ctrlKey || event?.metaKey || event?.altKey) return;
-    if (event?.target?.closest?.('.compare-zoom-overlay, button, input, textarea, select, [contenteditable="true"]')) return;
+    if (event?.target?.closest?.('.compare-zoom-zone, button, input, textarea, select, [contenteditable="true"]')) return;
 
     const paneElement = getPaneElement(pane);
     const viewport = getPaneViewport(pane);
@@ -479,8 +479,8 @@ const DocumentViewerRender = ({
     handlePaneWheelCaptureRef.current = handlePaneWheelCapture;
   }, [handlePaneWheelCapture]);
 
-  // Compare panes: expose the page viewport's scrollbar width so the top-right zoom controls
-  // stay clear of the scrollbar (layout.css, .compare-zoom-overlay).
+  // Compare panes: expose the page viewport's scrollbar width so the centred page-turn indicator
+  // stays clear of the scrollbar (layout.css, .odv-edge-scroll-page-turn).
   useEffect(() => {
     if (!isComparing || typeof ResizeObserver !== 'function') return undefined;
     const frames = [primaryPaneRef.current, comparePaneRef.current].filter((frame) => frame instanceof HTMLElement);
@@ -853,17 +853,16 @@ const DocumentViewerRender = ({
             onPointerCancelCapture={(event) => finishPanePan(event, 'primary')}
             onLostPointerCapture={(event) => finishPanePan(event, 'primary')}
           >
-            {isComparing ? renderPaneSelector('primary') : null}
-            {renderEdgeScrollIndicator('primary')}
             {isComparing && (
-              <div className="compare-zoom-sticky">
-                <CompareZoomOverlay
-                  value={postZoomLeft}
-                  onInc={() => bumpPostZoomLeft?.(1)}
-                  onDec={() => bumpPostZoomLeft?.(-1)}
-                />
-              </div>
+              <CompareZoomOverlay
+                pane="primary"
+                marker={renderPaneSelector('primary')}
+                value={postZoomLeft}
+                onInc={() => bumpPostZoomLeft?.(1)}
+                onDec={() => bumpPostZoomLeft?.(-1)}
+              />
             )}
+            {renderEdgeScrollIndicator('primary')}
 
             <DocumentRender
               ref={documentRenderRef}
@@ -902,15 +901,14 @@ const DocumentViewerRender = ({
               onPointerCancelCapture={(event) => finishPanePan(event, 'compare')}
               onLostPointerCapture={(event) => finishPanePan(event, 'compare')}
             >
-              {renderPaneSelector('compare')}
+              <CompareZoomOverlay
+                pane="compare"
+                marker={renderPaneSelector('compare')}
+                value={postZoomRight}
+                onInc={() => bumpPostZoomRight?.(1)}
+                onDec={() => bumpPostZoomRight?.(-1)}
+              />
               {renderEdgeScrollIndicator('compare')}
-              <div className="compare-zoom-sticky">
-                <CompareZoomOverlay
-                  value={postZoomRight}
-                  onInc={() => bumpPostZoomRight?.(1)}
-                  onDec={() => bumpPostZoomRight?.(-1)}
-                />
-              </div>
 
               <DocumentRender
                 ref={compareRef}
