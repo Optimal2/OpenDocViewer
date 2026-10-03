@@ -5106,7 +5106,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1184,
+    "line": 1208,
     "description": "",
     "params": [
       {
@@ -5137,7 +5137,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1277,
+    "line": 1301,
     "description": "",
     "params": [
       {
@@ -5168,7 +5168,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1210,
+    "line": 1234,
     "description": "",
     "params": [
       {
@@ -5224,7 +5224,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1223,
+    "line": 1247,
     "description": "",
     "params": [
       {

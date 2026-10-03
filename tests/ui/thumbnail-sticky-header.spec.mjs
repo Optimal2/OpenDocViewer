@@ -92,3 +92,57 @@ test('sticky document header appears only after the inline header scrolled out a
   await expect.poll(() => visibleFirstDocumentHeaders(page)).toEqual([{ sticky: false, ariaHidden: null }]);
   await expect(page.locator('.thumbnail-sticky-document-header')).toHaveCount(0);
 });
+
+test('sticky document header still appears when off-screen rows skip rendering (viewport strategy)', async ({ page }) => {
+  // 'viewport' thumbnail loading gives every row shell content-visibility:auto, so the first
+  // document's inline header is skipped once it is far out of view. Chromium force-lays-out
+  // skipped content when it is measured; engines that skip it report an empty rect instead.
+  // Emulate the latter for inline headers in off-screen rows, so the sticky header must not
+  // depend on measuring content that may be skipped.
+  await page.addInitScript(() => {
+    const original = Element.prototype.getBoundingClientRect;
+    Element.prototype.getBoundingClientRect = function getBoundingClientRect() {
+      const shell = this.classList?.contains('thumbnail-document-boundary') && !this.classList.contains('is-sticky')
+        ? this.closest('.thumbnail-row-shell')
+        : null;
+      const strip = shell?.closest('.thumbnails-container');
+      if (shell && strip && getComputedStyle(shell).contentVisibility === 'auto') {
+        const row = original.call(shell);
+        const view = original.call(strip);
+        if (row.bottom <= view.top || row.top >= view.bottom) return new DOMRect(0, 0, 0, 0);
+      }
+      return original.call(this);
+    };
+  });
+  await page.setViewportSize({ width: 1400, height: 520 });
+  const longDocument = Array.from({ length: 14 }, () => '/ui-fixtures/unsigned.pdf');
+  await loadSession(page, {
+    siteConfig: { documentLoading: { mode: 'memory', render: { thumbnailLoadingStrategy: 'viewport' } } },
+    session: {
+      session: { id: 'ui-sticky-viewport' },
+      documents: [
+        { documentId: 'doc-long', files: longDocument },
+        { documentId: 'doc-tail', files: ['/ui-fixtures/unsigned.pdf'] },
+      ],
+    },
+  });
+  const strip = page.locator('.thumbnails-container');
+  await expect(page.locator('.thumbnails-static-list .thumbnail-row-shell')).toHaveCount(15);
+  expect(await page.locator('.thumbnails-static-list .thumbnail-row-shell').first()
+    .evaluate((node) => getComputedStyle(node).contentVisibility)).toBe('auto');
+
+  // Jump deep into DOK 1, far enough that its first row (and inline header) is skipped.
+  const rowHeight = await page.locator('.thumbnails-static-list .thumbnail-row-shell').first()
+    .evaluate((node) => node.getBoundingClientRect().height);
+  await strip.evaluate((node, top) => { node.scrollTop = top; }, Math.round(rowHeight * 9));
+  const sticky = page.locator('.thumbnail-sticky-document-header .thumbnail-document-boundary.is-sticky');
+  await expect(sticky).toHaveAttribute('data-document-number', '1');
+
+  // Small scroll steps inside DOK 1 keep it sticky.
+  await strip.evaluate((node, top) => { node.scrollTop = top; }, Math.round(rowHeight * 9.5));
+  await expect(sticky).toHaveAttribute('data-document-number', '1');
+
+  // Back at the top the sticky header disappears again.
+  await strip.evaluate((node) => { node.scrollTop = 0; });
+  await expect(page.locator('.thumbnail-sticky-document-header')).toHaveCount(0);
+});

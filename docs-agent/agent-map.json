@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 134,
-    "sourceLineCount": 54969,
+    "sourceLineCount": 54993,
     "docletCount": 1470,
     "documentedFileCount": 134,
     "lowConfidenceSummaryCount": 0,
@@ -888,13 +888,13 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 7749,
+      "lineCount": 7773,
       "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
           "score": 57,
-          "lines": 1535,
+          "lines": 1559,
           "incomingLocalImports": 2,
           "doclets": 27,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
@@ -9594,7 +9594,7 @@
     },
     {
       "path": "src/components/DocumentThumbnailList.jsx",
-      "lines": 1535,
+      "lines": 1559,
       "extension": ".jsx",
       "jsdocBlockCount": 31,
       "sourceSummary": "OpenDocViewer — Deterministic thumbnail strip.",
@@ -9716,7 +9716,7 @@
         {
           "name": "DocumentThumbnailList",
           "kind": "default",
-          "line": 1534
+          "line": 1558
         }
       ],
       "declarations": [
@@ -10668,7 +10668,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1184,
+          "line": 1208,
           "description": "",
           "params": [
             {
@@ -10699,7 +10699,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1210,
+          "line": 1234,
           "description": "",
           "params": [
             {
@@ -10730,7 +10730,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1223,
+          "line": 1247,
           "description": "",
           "params": [
             {
@@ -10767,7 +10767,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1277,
+          "line": 1301,
           "description": "",
           "params": [
             {
@@ -65770,7 +65770,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1184,
+      "line": 1208,
       "description": "",
       "params": [
         {
@@ -65801,7 +65801,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1277,
+      "line": 1301,
       "description": "",
       "params": [
         {
@@ -65832,7 +65832,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1210,
+      "line": 1234,
       "description": "",
       "params": [
         {
@@ -65888,7 +65888,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1223,
+      "line": 1247,
       "description": "",
       "params": [
         {

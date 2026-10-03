@@ -5,7 +5,7 @@ Token counts are rough estimates using one token per four characters. Use this f
 ## Source Estimate
 
 - Source files: 134
-- Source lines: 54969
+- Source lines: 54993
 - Estimated source-map tokens: 4103
 
 ## Generated Output Estimate

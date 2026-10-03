@@ -444,9 +444,10 @@
   border-bottom-right-radius: 0;
 }
 
+/* The split-menu arrow is a full touch target in both densities (30px compact, 36px large). */
 .toolbar .toolbar-split-arrow {
-  min-width: 22px;
-  width: 22px;
+  min-width: var(--odv-toolbar-button-size);
+  width: var(--odv-toolbar-button-size);
   padding-inline: 0;
   border-top-left-radius: 0;
   border-bottom-left-radius: 0;

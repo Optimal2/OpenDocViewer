@@ -686,8 +686,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     }
     return starts;
   }, [allPages, totalCount]);
-  // Inline header geometry, measured after render: list offset in the strip and the header's
-  // bottom edge inside its row. The defaults match the stylesheet.
+  // Inline header geometry: list offset in the strip and the header's bottom edge inside its row,
+  // measured only from rendered on-screen rows. The defaults match the stylesheet.
   const headerMetricsRef = useRef({ listOffset: 6, headerBottom: 24 });
   const [stickyHeaderRowIndex, setStickyHeaderRowIndex] = useState(-1);
   /**
@@ -1158,23 +1158,47 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     });
   }, [closeContextMenu, layout.rowHeight, resolveStickyHeaderRowIndex, viewportHeight]);
 
-  // Measure the inline header once rows exist (and after layout changes), then re-resolve the
-  // sticky header for the current scroll position.
+  // Measure the inline header (after layout changes), then re-resolve the sticky header for the
+  // current scroll position. Row shells may use content-visibility:auto, so only a header in a
+  // row that the row geometry places on screen is measured; skipped rows are never touched and
+  // the last good measurement (or the stylesheet default) is kept when no such header exists.
   useLayoutEffect(() => {
     const node = containerRef.current;
-    if (node && documentGroupingActive) {
-      const header = node.querySelector('.thumbnails-static-list .thumbnail-document-boundary.start');
-      const list = node.querySelector('.thumbnails-static-list');
-      const shell = header?.parentElement || null;
-      if (header && list && shell) {
-        headerMetricsRef.current = {
-          listOffset: list.offsetTop,
-          headerBottom: (header.getBoundingClientRect().bottom - shell.getBoundingClientRect().top),
-        };
+    const list = node?.querySelector('.thumbnails-static-list') || null;
+    if (node && list && documentGroupingActive) {
+      const listOffset = list.offsetTop;
+      const rowHeight = Math.max(1, Number(layout.rowHeight) || 1);
+      const viewTop = lastKnownScrollTopRef.current;
+      const viewBottom = viewTop + node.clientHeight;
+      let headerBottom = headerMetricsRef.current.headerBottom;
+      for (let index = visibleRange.start; index <= visibleRange.end; index += 1) {
+        if (documentStartIndexes[index] !== index) continue;
+        const rowTop = listOffset + (index * rowHeight);
+        if (rowTop + rowHeight <= viewTop || rowTop >= viewBottom) continue;
+        const wrapper = node.querySelector(`#thumbnail-${index + 1}`);
+        const header = wrapper?.previousElementSibling || null;
+        const shell = wrapper?.parentElement || null;
+        if (!header || !shell || !header.classList.contains('thumbnail-document-boundary')) continue;
+        const headerBox = header.getBoundingClientRect();
+        const measured = headerBox.bottom - shell.getBoundingClientRect().top;
+        if (headerBox.height > 0 && measured > 0 && measured <= rowHeight) {
+          headerBottom = measured;
+          break;
+        }
       }
+      headerMetricsRef.current = { listOffset, headerBottom };
     }
     setStickyHeaderRowIndex(resolveStickyHeaderRowIndex(lastKnownScrollTopRef.current));
-  }, [documentGroupingActive, layout.rowHeight, resolveStickyHeaderRowIndex, scrollTop, totalCount]);
+  }, [
+    documentGroupingActive,
+    documentStartIndexes,
+    layout.rowHeight,
+    resolveStickyHeaderRowIndex,
+    scrollTop,
+    totalCount,
+    visibleRange.end,
+    visibleRange.start,
+  ]);
 
   /**
    * @param {number} nextPageNumber

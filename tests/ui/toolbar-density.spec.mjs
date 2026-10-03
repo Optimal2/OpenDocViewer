@@ -87,7 +87,7 @@ for (const density of DENSITIES) {
       expect(Math.round(metrics.toolbarHeight)).toBe(density.toolbarHeight);
       expect(metrics.buttonHeights).toEqual([density.buttonHeight]);
       expect(metrics.groupHeights).toEqual([density.groupHeight, density.groupHeight, density.groupHeight]);
-      expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(22); // the split-menu arrow; every other button is >= the button size
+      expect(metrics.minButtonWidth).toBeGreaterThanOrEqual(density.buttonHeight); // split-menu arrows included
       expect(metrics.iconSizes).toEqual([density.iconSize]);
       expect(Math.round(metrics.overview.height)).toBe(density.buttonHeight);
       expect(metrics.endButtons).toEqual([density.buttonHeight, density.buttonHeight, density.buttonHeight]);
@@ -107,7 +107,6 @@ for (const density of DENSITIES) {
       await loadSession(page, { siteConfig: density.siteConfig });
       await expect(page.locator('.odv-signature-overview-button')).toBeVisible();
       const sizes = await page.locator('.toolbar button:visible').evaluateAll((buttons) => buttons
-        .filter((button) => !button.classList.contains('toolbar-split-arrow'))
         .map((button) => { const box = button.getBoundingClientRect(); return Math.min(box.width, box.height); }));
       expect(Math.min(...sizes)).toBeGreaterThanOrEqual(density.buttonHeight);
 

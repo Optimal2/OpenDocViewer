@@ -1328,6 +1328,11 @@ canvas {
   position: absolute;
   top: 8px;
   right: calc(8px + var(--odv-pane-scrollbar-width, 0px));
+  /* Clamped to the pane like the page-turn indicator: in a very narrow pane the controls are
+     clipped instead of reaching into the neighbouring pane. */
+  box-sizing: border-box;
+  max-width: calc(100% - 16px - var(--odv-pane-scrollbar-width, 0px));
+  overflow: hidden;
   display: inline-flex;
   align-items: center;
   gap: 6px;
