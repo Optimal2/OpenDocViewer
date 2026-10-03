@@ -196,6 +196,7 @@ Notes:
 - `help/site/*.sample.html` files are templates and are never candidates (`manualSources.js`).
 - Static hosts with an SPA fallback answer a missing file with `index.html` and status 200; the `data-odv-bootstrap` marker on the app shell's script tag is used to detect and skip those responses.
 - The manual overlay has a search box above the manual text (two or more characters, case-insensitive). Every hit is highlighted, the counter shows the current hit out of the total, and Enter / Shift+Enter (or the arrow buttons) jumps between hits while Escape clears the search. Collapsed sections holding the current hit are opened automatically. The search box is part of the dialog itself; the manual HTML stays DOMPurify-sanitized.
+- The manual overlay uses almost the whole viewport. A contents tree on the left is built at runtime from the loaded manual's h2/h3 headings (`src/utils/manualContentsTree.js`), so site manuals need no changes: headings without an id get one derived from their text (section number dropped, å/ä/ö as a/a/o). The tree stays put while the manual text scrolls, highlights the section being read, and shows the number of search hits per section. In a dialog narrower than about 900 px the tree is hidden behind a **Contents** button in the search row.
 - The About dialog shows the application version and build id and offers the support diagnostics download (`src/utils/supportDiagnostics.js`).
 
 ## Requirements

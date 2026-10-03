@@ -5,12 +5,17 @@
  * This keeps customer-specific manual text and linked assets out of the compiled React bundle.
  */
 
-import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import React, { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import DOMPurify from 'dompurify';
 import { useTranslation } from 'react-i18next';
 import { getRuntimeConfig } from '../../utils/runtimeConfig.js';
 import { buildManualCandidates, resolveManualSource } from '../../utils/manualSources.js';
+import {
+  buildManualContentsTree,
+  countManualMatchesPerSection,
+  findManualSectionId,
+} from '../../utils/manualContentsTree.js';
 
 const MANUAL_REFRESH_QUERY_KEY = 'odvManualRefresh';
 
@@ -448,6 +453,44 @@ function revealManualMatch(container, match, index, session) {
 }
 
 /**
+ * Share of the content pane height, measured from its top, inside which a heading counts as the
+ * start of the section being read.
+ */
+const MANUAL_SECTION_ACTIVE_LINE = 0.25;
+
+/** Gap in pixels kept above a heading when the content pane scrolls to it. */
+const MANUAL_SECTION_SCROLL_GAP = 8;
+
+/**
+ * Open collapsed `<details>` ancestors so a target inside them can be shown.
+ *
+ * @param {Element} target
+ * @param {Element} container Rendered manual container.
+ */
+function openDetailsAncestors(target, container) {
+  let ancestor = target?.parentElement || null;
+  while (ancestor && ancestor !== container) {
+    if (String(ancestor.tagName || '').toUpperCase() === 'DETAILS' && ancestor.open === false) {
+      try { ancestor.open = true; } catch { /* ignore */ }
+    }
+    ancestor = ancestor.parentElement;
+  }
+}
+
+/**
+ * Scroll only the given pane so the target sits at its top. Unlike `scrollIntoView` this never
+ * moves any other scroll container (the contents tree, the dialog or the page).
+ *
+ * @param {HTMLElement} pane
+ * @param {Element} target
+ */
+function scrollPaneToTarget(pane, target) {
+  if (!pane || !target || typeof target.getBoundingClientRect !== 'function') return;
+  const offset = target.getBoundingClientRect().top - pane.getBoundingClientRect().top;
+  pane.scrollTop = Math.max(0, pane.scrollTop + offset - MANUAL_SECTION_SCROLL_GAP);
+}
+
+/**
  * @param {Object} props
  * @param {boolean} props.isOpen
  * @param {function(): void} props.onClose
@@ -461,12 +504,25 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   const searchQueryRef = useRef('');
   const clearSearchRef = useRef(() => {});
   const searchSessionRef = useRef(/** @type {({matches: Array, useMarks: boolean, marks: (Array<Element>|null), setCurrent: function(number): void, cleanup: function(): void}|null)} */ (null));
+  const scrollPaneRef = useRef(/** @type {(HTMLDivElement|null)} */ (null));
+  const contentsNavRef = useRef(/** @type {(HTMLElement|null)} */ (null));
+  const contentsToggleRef = useRef(/** @type {(HTMLButtonElement|null)} */ (null));
+  const contentsEntriesRef = useRef(/** @type {Array<{id: string, text: string, level: number, element: Element}>} */ ([]));
+  const contentsLinksRef = useRef(/** @type {Map<string, HTMLAnchorElement>} */ (new Map()));
+  // Section set by a click or a search jump; it stays current until the reader scrolls the pane.
+  const pinnedSectionRef = useRef(/** @type {({id: string, scrollTop: number}|null)} */ (null));
+  const contentsOpenRef = useRef(false);
+  const closeContentsRef = useRef(() => {});
   const [manualState, setManualState] = useState({ loading: false, error: '', html: '', resolvedUrl: '' });
   const [refreshToken, setRefreshToken] = useState(0);
   const [searchQuery, setSearchQuery] = useState('');
   const [debouncedSearchQuery, setDebouncedSearchQuery] = useState('');
   const [searchMatchCount, setSearchMatchCount] = useState(0);
   const [currentSearchMatch, setCurrentSearchMatch] = useState(0);
+  const [contentsGroups, setContentsGroups] = useState(/** @type {Array<{id: string, text: string, element: Element, children: Array<Object>}>} */ ([]));
+  const [activeSectionId, setActiveSectionId] = useState('');
+  const [sectionHitCounts, setSectionHitCounts] = useState(/** @type {Map<string, number>} */ (new Map()));
+  const [contentsOpen, setContentsOpen] = useState(false);
 
   const language = useMemo(() => {
     const raw = String(i18n?.resolvedLanguage || i18n?.language || 'en').toLowerCase();
@@ -485,6 +541,64 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
   // per dialog opening and must see the latest search state.
   searchQueryRef.current = searchQuery;
   clearSearchRef.current = clearManualSearch;
+  contentsOpenRef.current = contentsOpen;
+  closeContentsRef.current = () => {
+    setContentsOpen(false);
+    contentsToggleRef.current?.focus?.();
+  };
+
+  /**
+   * Make the section holding `target` current and keep it current until the reader scrolls.
+   * @param {(Node|null|undefined)} target
+   */
+  const pinSectionFor = useCallback((target) => {
+    const pane = scrollPaneRef.current;
+    const entries = contentsEntriesRef.current;
+    if (!pane || !target || entries.length === 0) return;
+    const id = findManualSectionId(entries, target) || entries[0].id;
+    pinnedSectionRef.current = { id, scrollTop: pane.scrollTop };
+    setActiveSectionId(id);
+  }, []);
+
+  /**
+   * Scroll the content pane (never the tree) to an element in the manual and focus it.
+   * @param {string} id
+   */
+  const navigateToManualTarget = useCallback((id) => {
+    const container = contentRef.current;
+    const pane = scrollPaneRef.current;
+    if (!container || !pane || !id) return;
+    const doc = container.ownerDocument || document;
+    const target = doc.getElementById(id);
+    if (!target || !container.contains(target)) return;
+    openDetailsAncestors(target, container);
+    scrollPaneToTarget(pane, target);
+    pinSectionFor(target);
+    setContentsOpen(false);
+    if (!target.hasAttribute('tabindex')) target.setAttribute('tabindex', '-1');
+    try {
+      target.focus({ preventScroll: true });
+    } catch {
+      try { target.focus(); } catch { /* ignore */ }
+    }
+  }, [pinSectionFor]);
+
+  const handleContentsLinkClick = useCallback((event, id) => {
+    event.preventDefault();
+    navigateToManualTarget(id);
+  }, [navigateToManualTarget]);
+
+  // In-text links to "#id" scroll the content pane instead of changing the viewer's URL hash.
+  const handleManualContentClick = useCallback((event) => {
+    const link = event?.target?.closest?.('a[href]');
+    if (!link || !contentRef.current?.contains(link)) return;
+    const href = String(link.getAttribute('href') || '').trim();
+    if (!href.startsWith('#')) return;
+    event.preventDefault();
+    let id = href.slice(1);
+    try { id = decodeURIComponent(id); } catch { /* keep the raw fragment */ }
+    navigateToManualTarget(id);
+  }, [navigateToManualTarget]);
 
   const goToSearchMatch = useCallback((delta) => {
     setCurrentSearchMatch((previous) => {
@@ -511,14 +625,27 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     }
   }, [goToSearchMatch]);
 
+  // Focus the dialog once per opening. A separate effect: the Escape listener below re-registers
+  // whenever the parent passes a new onClose, and that must not pull focus away from the search
+  // field or a manual heading the reader just navigated to.
+  useEffect(() => {
+    if (isOpen) dialogRef.current?.focus?.();
+  }, [isOpen]);
+
   useEffect(() => {
     if (!isOpen) return undefined;
-    dialogRef.current?.focus?.();
 
     /** @param {KeyboardEvent} event */
     const handleEscape = (event) => {
       if (String(event?.key || '') !== 'Escape') return;
       const target = event?.target;
+      if (contentsOpenRef.current) {
+        // Escape closes the narrow-window contents list first; the next Escape closes the dialog.
+        event.preventDefault();
+        event.stopPropagation();
+        closeContentsRef.current();
+        return;
+      }
       if (target && typeof target.closest === 'function'
         && target.closest('[data-odv-manual-search="bar"]') && searchQueryRef.current) {
         // Escape anywhere in the search row (field, clear or previous/next
@@ -599,8 +726,82 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     setDebouncedSearchQuery('');
     setSearchMatchCount(0);
     setCurrentSearchMatch(0);
+    setContentsOpen(false);
     return undefined;
   }, [isOpen]);
+
+  // Build the contents tree from the mounted, sanitised manual before the browser paints, so the
+  // column appears together with the text. A manual without h2/h3 gets no column at all.
+  useLayoutEffect(() => {
+    const tree = isOpen && manualState.html ? buildManualContentsTree(contentRef.current) : { entries: [], groups: [] };
+    contentsEntriesRef.current = tree.entries;
+    pinnedSectionRef.current = null;
+    setContentsGroups(tree.groups);
+    setActiveSectionId(tree.entries[0]?.id || '');
+    if (tree.entries.length === 0) setContentsOpen(false);
+  }, [manualState.html, isOpen]);
+
+  // Track the section being read: the last heading above the active line of the content pane.
+  // The observer only signals that a heading crossed that line; the position check reads layout
+  // once per animation frame and never writes to it.
+  useEffect(() => {
+    const pane = scrollPaneRef.current;
+    const entries = contentsEntriesRef.current;
+    if (!isOpen || !pane || entries.length === 0 || typeof IntersectionObserver === 'undefined') return undefined;
+    let frame = 0;
+    const update = () => {
+      frame = 0;
+      const pinned = pinnedSectionRef.current;
+      if (pinned && Math.abs(pane.scrollTop - pinned.scrollTop) < 2) {
+        setActiveSectionId(pinned.id);
+        return;
+      }
+      pinnedSectionRef.current = null;
+      const paneBox = pane.getBoundingClientRect();
+      const line = paneBox.top + pane.clientHeight * MANUAL_SECTION_ACTIVE_LINE;
+      let active = entries[0].id;
+      for (const entry of entries) {
+        const box = entry.element.getBoundingClientRect();
+        // Headings inside a collapsed <details> have no box; skip them.
+        if (box.width === 0 && box.height === 0) continue;
+        if (box.top > line) break;
+        active = entry.id;
+      }
+      setActiveSectionId(active);
+    };
+    const schedule = () => {
+      if (frame) return;
+      frame = typeof requestAnimationFrame === 'function' ? requestAnimationFrame(update) : setTimeout(update, 16);
+    };
+    const bottomMargin = Math.round((1 - MANUAL_SECTION_ACTIVE_LINE) * 100);
+    const observer = new IntersectionObserver(schedule, {
+      root: pane,
+      rootMargin: `0px 0px -${bottomMargin}% 0px`,
+      threshold: [0, 1],
+    });
+    entries.forEach((entry) => observer.observe(entry.element));
+    return () => {
+      observer.disconnect();
+      if (frame) {
+        if (typeof cancelAnimationFrame === 'function') cancelAnimationFrame(frame);
+        clearTimeout(frame);
+      }
+    };
+  }, [contentsGroups, isOpen]);
+
+  // Keep the current entry visible inside the tree without moving the content pane.
+  useEffect(() => {
+    const nav = contentsNavRef.current;
+    const link = contentsLinksRef.current.get(activeSectionId);
+    if (!nav || !link || nav.scrollHeight <= nav.clientHeight) return;
+    const navBox = nav.getBoundingClientRect();
+    const linkBox = link.getBoundingClientRect();
+    if (linkBox.top < navBox.top) {
+      nav.scrollTop -= navBox.top - linkBox.top + MANUAL_SECTION_SCROLL_GAP;
+    } else if (linkBox.bottom > navBox.bottom) {
+      nav.scrollTop += linkBox.bottom - navBox.bottom + MANUAL_SECTION_SCROLL_GAP;
+    }
+  }, [activeSectionId]);
 
   useEffect(() => {
     if (!isOpen) return undefined;
@@ -627,6 +828,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     setCurrentSearchMatch(0);
     if (found.length === 0) {
       setSearchMatchCount(0);
+      setSectionHitCounts(new Map());
       return undefined;
     }
     let session;
@@ -653,13 +855,16 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     // Count only hits that are actually highlighted, so "N of M" never
     // includes a hit the user cannot see.
     setSearchMatchCount(session.matches.length);
+    setSectionHitCounts(countManualMatchesPerSection(contentsEntriesRef.current, session.matches));
     searchSessionRef.current = session;
     revealManualMatch(container, session.matches[0], 0, session);
+    pinSectionFor(session.matches[0]?.node);
     return () => {
       if (searchSessionRef.current === session) searchSessionRef.current = null;
       session.cleanup();
+      setSectionHitCounts(new Map());
     };
-  }, [debouncedSearchQuery, manualState.html, language, isOpen]);
+  }, [debouncedSearchQuery, manualState.html, language, isOpen, pinSectionFor]);
 
   useEffect(() => {
     const session = searchSessionRef.current;
@@ -669,7 +874,8 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     const clamped = ((currentSearchMatch % total) + total) % total;
     session.setCurrent(clamped);
     revealManualMatch(container, session.matches[clamped], clamped, session);
-  }, [currentSearchMatch, isOpen]);
+    pinSectionFor(session.matches[clamped]?.node);
+  }, [currentSearchMatch, isOpen, pinSectionFor]);
 
   const searchStatusText = useMemo(() => {
     if (debouncedSearchQuery.length < MANUAL_SEARCH_MIN_LENGTH) return '';
@@ -686,9 +892,42 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
 
   if (!isOpen) return null;
 
+  const hasContents = contentsGroups.length > 0;
+  /**
+   * @param {{id: string, text: string}} entry
+   * @param {number} level
+   * @returns {React.ReactElement}
+   */
+  const renderContentsLink = (entry, level) => {
+    const isActive = entry.id === activeSectionId;
+    const hits = sectionHitCounts.get(entry.id) || 0;
+    return (
+      <a
+        href={`#${entry.id}`}
+        ref={(node) => {
+          if (node) contentsLinksRef.current.set(entry.id, node);
+          else contentsLinksRef.current.delete(entry.id);
+        }}
+        className={`odv-manual-toc-link odv-manual-toc-link--level-${level}${isActive ? ' is-active' : ''}`}
+        aria-current={isActive ? 'true' : undefined}
+        onClick={(event) => handleContentsLinkClick(event, entry.id)}
+      >
+        <span className="odv-manual-toc-text">{entry.text}</span>
+        {hits > 0 ? (
+          <span className="odv-manual-toc-hits">
+            <span aria-hidden="true">{hits}</span>
+            <span className="sr-only">
+              {t('help.contentsHits', { count: hits, defaultValue: `, ${hits} matches` })}
+            </span>
+          </span>
+        ) : null}
+      </a>
+    );
+  };
+
   return (
     <div
-      className="odv-help-backdrop"
+      className="odv-help-backdrop odv-help-backdrop--manual"
       role="dialog"
       aria-modal="true"
       aria-labelledby="odv-help-title"
@@ -706,7 +945,7 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
     >
       <div
         ref={dialogRef}
-        className="odv-help-dialog"
+        className="odv-help-dialog odv-manual-dialog"
         tabIndex={-1}
         data-odv-shortcuts="off"
         onMouseDown={(event) => event.stopPropagation()}
@@ -752,6 +991,19 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
 
         {manualState.html ? (
           <div className="odv-manual-searchbar" role="search" data-odv-manual-search="bar">
+            {hasContents ? (
+              <button
+                ref={contentsToggleRef}
+                type="button"
+                className="odv-manual-toc-toggle"
+                aria-expanded={contentsOpen}
+                aria-controls="odv-manual-contents"
+                onClick={() => setContentsOpen((current) => !current)}
+              >
+                <span className="material-icons" aria-hidden="true">toc</span>
+                <span>{t('help.contentsToggle', { defaultValue: 'Contents' })}</span>
+              </button>
+            ) : null}
             <label className="odv-manual-searchbar-label" htmlFor="odv-manual-search-input">
               {t('help.searchManualLabel', { defaultValue: 'Search the manual' })}
             </label>
@@ -815,21 +1067,55 @@ export default function ManualOverlayDialog({ isOpen, onClose }) {
           </div>
         ) : null}
 
-        <div className="odv-help-body odv-help-body-manual">
-          {manualState.loading ? (
-            <p className="odv-help-placeholder">
-              {t('help.loading', { defaultValue: 'Loading manual…' })}
-            </p>
-          ) : manualState.error ? (
-            <div className="odv-help-placeholder is-error">
-              <p>{manualState.error}</p>
-              <p>{t('help.manualPathsHint', {
-                defaultValue: 'Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.',
-              })}</p>
-            </div>
-          ) : (
-            <div ref={contentRef} className="odv-manual-content" dangerouslySetInnerHTML={{ __html: manualState.html }} />
-          )}
+        <div className={`odv-help-body odv-help-body-manual${hasContents ? ' has-contents' : ''}`}>
+          {hasContents ? (
+            <nav
+              ref={contentsNavRef}
+              id="odv-manual-contents"
+              className={`odv-manual-toc${contentsOpen ? ' is-open' : ''}`}
+              aria-label={t('help.contentsLabel', { defaultValue: 'Contents of this page' })}
+            >
+              <ol className="odv-manual-toc-list">
+                {contentsGroups.map((group) => (
+                  <li key={group.id}>
+                    {renderContentsLink(group, 1)}
+                    {group.children.length > 0 ? (
+                      <ol>
+                        {group.children.map((child) => (
+                          <li key={child.id}>{renderContentsLink(child, 2)}</li>
+                        ))}
+                      </ol>
+                    ) : null}
+                  </li>
+                ))}
+              </ol>
+            </nav>
+          ) : null}
+          <div
+            ref={scrollPaneRef}
+            className="odv-manual-scroll"
+            onMouseDown={() => { if (contentsOpenRef.current) setContentsOpen(false); }}
+          >
+            {manualState.loading ? (
+              <p className="odv-help-placeholder">
+                {t('help.loading', { defaultValue: 'Loading manual…' })}
+              </p>
+            ) : manualState.error ? (
+              <div className="odv-help-placeholder is-error">
+                <p>{manualState.error}</p>
+                <p>{t('help.manualPathsHint', {
+                  defaultValue: 'Place a site-local HTML file under help/site/ or rely on the bundled fallback under help/default/.',
+                })}</p>
+              </div>
+            ) : (
+              <div
+                ref={contentRef}
+                className="odv-manual-content"
+                onClick={handleManualContentClick}
+                dangerouslySetInnerHTML={{ __html: manualState.html }}
+              />
+            )}
+          </div>
         </div>
 
         <div className="odv-help-footer">

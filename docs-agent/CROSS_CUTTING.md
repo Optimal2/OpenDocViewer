@@ -44,11 +44,11 @@ This index groups files by source-derived roles and risky source patterns. Treat
 
 React raw HTML rendering.
 
-- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 831 - Manual overlay that loads simple external HTML fragments from the public help folder.
+- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 1115 - Manual overlay that loads simple external HTML fragments from the public help folder.
 
 ### innerHTML
 
 Direct DOM HTML assignment or access.
 
-- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 80, 81, 82 - Manual overlay that loads simple external HTML fragments from the public help folder.
+- `src/components/DocumentToolbar/ManualOverlayDialog.jsx` lines 85, 86, 87 - Manual overlay that loads simple external HTML fragments from the public help folder.
 - `src/utils/printDom.js` lines 264 - OpenDocViewer — Print DOM Builder Safely construct the print iframe’s DOM using DOM APIs \(no doc.write\), wait until images reach a terminal state, then trigger window.print\(\).

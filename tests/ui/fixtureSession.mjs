@@ -36,9 +36,10 @@ export const DEFAULT_SESSION = {
 /**
  * Serve the session and fixtures from memory and open the viewer.
  * @param {import('@playwright/test').Page} page
- * @param {{ siteConfig?:Object, session?:Object }} [options]
+ * @param {{ siteConfig?:Object, session?:Object, query?:string }} [options] `query` is appended
+ *   to the viewer URL, e.g. `lng=sv`.
  */
-export async function loadSession(page, { siteConfig = null, session = DEFAULT_SESSION } = {}) {
+export async function loadSession(page, { siteConfig = null, session = DEFAULT_SESSION, query = '' } = {}) {
   const fixtures = await getFixtures();
   if (siteConfig) {
     // Served like a deployment's odv.site.config.js; bootConfig only keeps overrides from that file.
@@ -61,7 +62,7 @@ export async function loadSession(page, { siteConfig = null, session = DEFAULT_S
     }
     await route.fulfill({ status: 200, contentType: 'application/pdf', body: Buffer.from(bytes) });
   });
-  await page.goto('/?sessionurl=/ui-fixtures/session.json');
+  await page.goto(`/?sessionurl=/ui-fixtures/session.json${query ? `&${query}` : ''}`);
 }
 
 /** @param {{x:number,y:number,width:number,height:number}} a @param {{x:number,y:number,width:number,height:number}} b */

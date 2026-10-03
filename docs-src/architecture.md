@@ -181,6 +181,11 @@ the archived page image without adjustments.
   `cache: 'no-store'` and sanitizes it with DOMPurify before insertion; the candidate order
   (`help/site/` before `help/default/`, skipping an SPA-fallback app shell) lives in
   `src/utils/manualSources.js`
+- the manual overlay fills almost the whole viewport and shows a contents tree built at runtime
+  from the sanitised manual's h2/h3 headings (`src/utils/manualContentsTree.js`); headings without
+  an id get one derived from their text, so the manual files themselves never carry the tree.
+  The tree and the manual text scroll independently; below about 900 px dialog width a
+  "Contents" toggle in the search row opens the tree as an overlay list instead
 - `AboutOverlayDialog.jsx` shows version and build id and offers the support diagnostics download
   (`src/utils/supportDiagnostics.js`); the benchmark tools are separate opt-in flags
 - `ViewerProblemNotice.jsx` shows configurable problem notices and can request a session reset

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 46. Line count: 18073. JSDoc symbol count: 698.
+File count: 47. Line count: 18256. JSDoc symbol count: 708.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -86,6 +86,25 @@ Symbols:
 - `OptionLike` (typedef) - Option\-like shape used by the print reason selector.
 - `resolveLocalizedValue` (function) - Return the best string for the active language.
 - `resolveOptionLabel` (function) - Resolve a label for a reason option.
+
+## src/utils/manualContentsTree.js
+
+Runtime contents tree for the manual overlay.
+
+Exports: `slugifyManualHeading`, `buildManualContentsTree`, `findManualSectionId`, `countManualMatchesPerSection`
+
+Symbols:
+
+- `ManualContentsEntry` (typedef) - No description.
+- `ManualContentsGroup` (typedef) - No description.
+- `FALLBACK_SLUG` (constant) - Slug used when a heading text has no ASCII letters or digits left.
+- `POSITION_FOLLOWING` (constant) - Node.compareDocumentPosition flags \(numeric so this also runs without a global Node\).
+- `collapseWhitespace` (function) - No description.
+- `slugifyManualHeading` (function) - Derive a heading id from its text.
+- `buildManualContentsTree` (function) - Build the contents tree from the rendered manual and give every listed heading a unique id.
+- `headingStartsAtOrBefore` (function) - No description.
+- `findManualSectionId` (function) - Id of the section that contains the node: the last listed heading at or before it in document order, or '' when the node comes before the first heading.
+- `countManualMatchesPerSection` (function) - Count search hits per section in a single merge pass.
 
 ## src/utils/manualSources.js
 

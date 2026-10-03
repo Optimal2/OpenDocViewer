@@ -695,6 +695,9 @@
     "searchPrevious": "Previous match",
     "searchNext": "Next match",
     "searchClear": "Clear search",
+    "contentsLabel": "Contents of this page",
+    "contentsToggle": "Contents",
+    "contentsHits": ", matches in this section: {count}",
     "menu": {
       "manual": "Manual",
       "about": "About OpenDocViewer"

@@ -695,6 +695,9 @@
     "searchPrevious": "Föregående träff",
     "searchNext": "Nästa träff",
     "searchClear": "Rensa sökning",
+    "contentsLabel": "Innehåll på sidan",
+    "contentsToggle": "Innehåll",
+    "contentsHits": ", träffar i avsnittet: {count}",
     "menu": {
       "manual": "Manual",
       "about": "Om OpenDocViewer"

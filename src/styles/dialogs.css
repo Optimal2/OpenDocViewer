@@ -946,8 +946,163 @@
   min-width: 180px;
 }
 
+/* Manual overlay: near full-viewport dialog with a contents tree on the left. The tree and the
+   manual text are two independent scroll panes, so the tree stays put while the text scrolls.
+   The dialog is a size container; below about 900 px dialog width the column is hidden and the
+   "Contents" toggle in the search row opens the tree as an overlay list instead. */
+.odv-help-backdrop--manual {
+  padding: 2vh 2vw;
+}
+
+.odv-help-dialog.odv-manual-dialog {
+  width: min(96vw, 1680px);
+  max-width: 96vw;
+  height: min(94vh, 1400px);
+  max-height: 94vh;
+  container: odv-manual / inline-size;
+}
+
 .odv-help-body-manual {
-  padding-top: 12px;
+  position: relative;
+  display: flex;
+  flex: 1 1 auto;
+  min-height: 0;
+  padding: 0;
+  overflow: hidden;
+}
+
+.odv-manual-scroll {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow: auto;
+  padding: 12px 22px 10px;
+}
+
+.odv-manual-toc {
+  flex: 0 0 280px;
+  box-sizing: border-box;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  padding: 12px 10px 16px 14px;
+  border-right: 1px solid var(--odv-border, #d5dae1);
+  background: color-mix(in srgb, var(--odv-surface-elevated) 94%, transparent 6%);
+  font-size: 13.5px;
+  line-height: 1.4;
+}
+
+.odv-manual-toc ol {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+}
+
+.odv-manual-toc li {
+  margin: 0;
+}
+
+.odv-manual-toc ol ol {
+  margin: 2px 0 6px 10px;
+  padding-left: 8px;
+  border-left: 1px solid var(--odv-border, #d5dae1);
+}
+
+.odv-manual-toc-link {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  padding: 4px 8px;
+  border-radius: 6px;
+  color: var(--text-color);
+  text-decoration: none;
+}
+
+.odv-manual-toc-link--level-1 {
+  font-weight: 600;
+}
+
+.odv-manual-toc-text {
+  flex: 1 1 auto;
+  min-width: 0;
+  overflow-wrap: anywhere;
+}
+
+.odv-manual-toc-link:hover {
+  background: var(--odv-hover-overlay);
+}
+
+.odv-manual-toc-link.is-active {
+  color: var(--primary-color, #2563eb);
+  background: color-mix(in srgb, var(--primary-color, #2563eb) 12%, transparent 88%);
+  box-shadow: inset 3px 0 0 var(--primary-color, #2563eb);
+}
+
+.odv-manual-toc-hits {
+  flex: 0 0 auto;
+  min-width: 20px;
+  padding: 0 6px;
+  border-radius: 999px;
+  background: #fde68a;
+  color: #1f2937;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 18px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
+.odv-manual-toc-toggle {
+  display: none;
+  flex: 0 0 auto;
+  align-items: center;
+  gap: 6px;
+  min-height: 38px;
+  padding: 0 12px 0 10px;
+  border: 1px solid var(--odv-border, #d5dae1);
+  border-radius: 10px;
+  background: var(--odv-surface, #ffffff);
+  color: inherit;
+  font: inherit;
+  font-size: 14px;
+  cursor: pointer;
+}
+
+.odv-manual-toc-toggle .material-icons {
+  font-size: 20px;
+  line-height: 1;
+}
+
+.odv-manual-toc-toggle:hover,
+.odv-manual-toc-toggle[aria-expanded='true'] {
+  background: var(--odv-hover-overlay);
+}
+
+@container odv-manual (max-width: 899px) {
+  .odv-manual-toc-toggle {
+    display: inline-flex;
+  }
+
+  .odv-manual-toc {
+    display: none;
+  }
+
+  .odv-manual-toc.is-open {
+    display: block;
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    left: 0;
+    z-index: 2;
+    width: min(320px, 85%);
+    background: var(--odv-surface, #ffffff);
+    box-shadow: 8px 0 24px rgba(0, 0, 0, 0.22);
+  }
+}
+
+@media (forced-colors: active) {
+  .odv-manual-toc-link.is-active {
+    outline: 2px solid Highlight;
+    outline-offset: -2px;
+  }
 }
 
 .odv-help-placeholder {
@@ -1596,6 +1751,8 @@
 .odv-help-close-icon:focus-visible,
 .odv-help-close-button:focus-visible,
 .odv-manual-searchbar-clear:focus-visible,
+.odv-manual-toc-toggle:focus-visible,
+.odv-manual-toc-link:focus-visible,
 .odv-print-preparing-close:focus-visible,
 .odv-metadata-close-icon:focus-visible,
 .odv-metadata-close-button:focus-visible,
