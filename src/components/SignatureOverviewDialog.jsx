@@ -20,6 +20,7 @@ import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
 import { getIntegrityLabel, getTrustLabel } from '../utils/pdfSignatureStatus.js';
 import { getSignatureFileHeading } from '../utils/pdfSignatureDocuments.js';
+import SignatureTime from './SignatureTime.jsx';
 
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -197,7 +198,6 @@ export default function SignatureOverviewDialog({
                 .join(', ');
               const statusText = `${getIntegrityLabel(t, doc.worstIntegrity)} · ${t('signatures.fields.trust', { defaultValue: 'Trust' })}: ${getTrustLabel(t, doc.worstTrust)}`;
               const signer = String(doc.newestSignature?.signer || '').trim() || emptyValue;
-              const signingTime = String(doc.newestSignature?.signingTime || '').trim() || emptyValue;
               const countText = t('signatures.overview.signatureCount', {
                 count: doc.signatureCount,
                 defaultValue: `${doc.signatureCount} ${doc.signatureCount === 1 ? 'signature' : 'signatures'}`,
@@ -235,7 +235,10 @@ export default function SignatureOverviewDialog({
                       </span>
                       <span className="odv-signature-overview-files">{fileNames}</span>
                       <span className="odv-signature-overview-meta">{`${countText} · ${statusText}`}</span>
-                      <span className="odv-signature-overview-signer">{`${signer} · ${signingTime}`}</span>
+                      <span className="odv-signature-overview-signer">
+                        {`${signer} · `}
+                        <SignatureTime value={doc.newestSignature?.signingTime} fallback={emptyValue} />
+                      </span>
                     </span>
                   </button>
                   <button

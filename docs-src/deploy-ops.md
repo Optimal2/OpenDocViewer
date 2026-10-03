@@ -61,6 +61,7 @@ If a deployment must be validated formally, test Edge and Chrome first. Treat Fi
 - `odv.config.js`: `no-store, no-cache, must-revalidate`
 - `odv.site.config.js`: `no-store, no-cache, must-revalidate`
 - `help/` (site-managed manual fragments and their assets): `no-cache, must-revalidate`
+- `locales/` (translation files): `no-cache, must-revalidate`
 - everything else, including hashed assets: `public, max-age=31536000, immutable`
 
 The SPA fallback rewrite (missing file → `index.html`) excludes `help/`: a missing
@@ -71,7 +72,18 @@ That split is important:
 
 - the shell HTML and runtime config must reflect the newest deployment immediately
 - site-managed help content is replaced in place without a new build, so browsers must revalidate it
-- hashed JS/CSS assets are safe to long-cache; locale files carry `?v=<build id>` and are therefore safe too
+- hashed JS/CSS assets are safe to long-cache
+- locale files keep their names between builds; the viewer requests them with
+  `?v=<build id>.<locale hash>` (see "Locale version token" in `runtime-configuration.md`), and the
+  revalidation rule makes sure a pinned or stale token can never keep serving old translations
+  after an upgrade. Unchanged files answer `304`, so the cost is one conditional request per
+  language.
+
+Other hosts (an OMP portal, a reverse proxy or a CDN in front of the viewer) must apply the same
+rule: send `Cache-Control: no-cache, must-revalidate` (or a short `max-age`) for
+`locales/*/*.json`, never `immutable`. Symptom of a violation: after an upgrade the UI shows
+English fallback texts (for example "Signed documents", "Details") although the deployed
+`sv/common.json` contains the keys.
 
 ### CSP and runtime-config trust
 

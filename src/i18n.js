@@ -12,13 +12,15 @@
  * - Diagnostics: **dev-only**. No browser console output in production (IIS build).
  *
  * CACHING:
- *   A resilient cache-busting version token is supported. The version is read,
- *   in priority order, from:
+ *   A resilient cache-busting version token is supported (utils/i18nVersion.js). The
+ *   version is read, in priority order, from:
  *     1) URL query ?i18nV=...
- *     2) localStorage key 'ODV_I18N_VERSION'
- *     3) window.__ODV_CONFIG__.i18n.version (unless set to "auto")
- *     4) import.meta.env.ODV_BUILD_ID (unique per build)
+ *     2) window.__ODV_CONFIG__.i18n.version when pinned (anything but "auto")
+ *     3) the build's locale token: import.meta.env.ODV_BUILD_ID plus
+ *        import.meta.env.ODV_I18N_RESOURCE_HASH (changes whenever a locale file changes)
+ *     4) localStorage key 'ODV_I18N_VERSION' (only without a build token)
  *     5) window.__APP_VERSION__ or import.meta.env.VITE_APP_VERSION / APP_VERSION
+ *   A persisted localStorage value therefore never freezes the locale URL across builds.
  *   If the configured template doesn't contain {{ver}}/{{version}}, a ?v=<token>
  *   parameter will be appended automatically.
  *
@@ -31,6 +33,7 @@ import { initReactI18next } from 'react-i18next';
 import ICU from 'i18next-icu';
 import HttpBackend from 'i18next-http-backend';
 import { getLanguagePreference, setLanguagePreference } from './utils/viewerPreferences.js';
+import { resolveI18nVersion } from './utils/i18nVersion.js';
 
 /**
  * Return browser window safely in browser, SSR, test, and documentation contexts.
@@ -98,42 +101,33 @@ const BUNDLED_I18N_RESOURCE_REVISION = '20260613-02';
  */
 const DIAGNOSTIC_RELOAD_DELAY_MS = 25;
 
-/** Normalize optional version tokens from runtime config or globals. */
-function normalizeVersionToken(value) {
-  if (value == null) return '';
-  const normalized = String(value).trim();
-  if (!normalized || normalized.toLowerCase() === 'auto') return '';
-  return normalized;
+/** Read the persisted diagnostic version token, if storage is available. */
+function readStoredI18nVersion() {
+  try {
+    return localStorage.getItem('ODV_I18N_VERSION');
+  } catch {
+    return null;
+  }
 }
 
-
-/** Return cache-busting version token (see header). */
+/** Return cache-busting version token (see header and utils/i18nVersion.js). */
 function getI18nVersion() {
   try {
-    const q = readQuery('i18nV');
-    if (q) return q;
-
-    try {
-      const v = localStorage.getItem('ODV_I18N_VERSION');
-      if (v) return v;
-    } catch {}
-
     const w = getSafeWindow();
     const cfg = (w.__ODV_CONFIG__ && w.__ODV_CONFIG__.i18n) || {};
-    const cfgVersion = normalizeVersionToken(cfg.version);
-    if (cfgVersion) return cfgVersion;
-
-    const globalVer =
-      IMPORT_META_ENV.ODV_BUILD_ID ||
-      IMPORT_META_ENV.VITE_APP_VERSION ||
-      IMPORT_META_ENV.APP_VERSION ||
-      w.__APP_VERSION__ ||
-      w.__ODV_APP_VERSION__;
-
-    const normalizedGlobalVer = normalizeVersionToken(globalVer);
-    if (normalizedGlobalVer) return normalizedGlobalVer;
-  } catch {}
-  return BUNDLED_I18N_RESOURCE_REVISION;
+    return resolveI18nVersion({
+      query: readQuery('i18nV'),
+      configVersion: cfg.version,
+      buildId: IMPORT_META_ENV.ODV_BUILD_ID,
+      resourceHash: IMPORT_META_ENV.ODV_I18N_RESOURCE_HASH,
+      storedVersion: readStoredI18nVersion(),
+      appVersion: IMPORT_META_ENV.VITE_APP_VERSION || IMPORT_META_ENV.APP_VERSION
+        || w.__APP_VERSION__ || w.__ODV_APP_VERSION__,
+      fallback: BUNDLED_I18N_RESOURCE_REVISION,
+    });
+  } catch {
+    return BUNDLED_I18N_RESOURCE_REVISION;
+  }
 }
 
 /** Helper: append query params safely to a URL. */
@@ -484,6 +478,8 @@ if (WANT_DIAG) {
         },
         loadPathNow: (lng = i18next.language || 'en', ns = 'common') => resolveLoadPath(lng, ns),
         getVer: () => getI18nVersion(),
+        // Persisted values rank below the build token (utils/i18nVersion.js); use ?i18nV= to
+        // force a token for one page load. Development requests bypass the cache anyway.
         setVer: (v) => {
           try {
             localStorage.setItem('ODV_I18N_VERSION', String(v));

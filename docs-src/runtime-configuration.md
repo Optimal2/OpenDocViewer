@@ -155,6 +155,34 @@ Poor runtime-config candidates:
 - secrets that should not be visible to the browser
 - values that need strong server-side enforcement
 
+## Locale version token
+
+Translation files are fetched from `i18n.loadPath` (default
+`locales/{{lng}}/{{ns}}.json?v={{ver}}`). `{{ver}}` is resolved by `src/utils/i18nVersion.js`; the
+first non-empty value wins:
+
+1. `?i18nV=<token>` in the viewer URL - a one-page-load override for support diagnostics.
+2. `i18n.version` in runtime config when the operator pins a value. `'auto'` (the shipped default)
+   means "not pinned".
+3. The build's locale token, `<ODV_BUILD_ID>.<locale hash>`. The build id is deterministic by
+   default (`<package version>-stable`, overridable with `ODV_BUILD_ID` / `ODV_BUILD_STAMP` /
+   `SOURCE_DATE_EPOCH`); the locale hash (`scripts/locale-resource-hash.mjs`, injected by
+   `vite.config.js` as `ODV_I18N_RESOURCE_HASH`) is a SHA-256 over all `public/locales` files
+   with normalized line endings. Any change to a locale file therefore gives a new URL, while
+   rebuilding the same commit keeps the same URL.
+4. localStorage `ODV_I18N_VERSION` (written only by the development diagnostics helper
+   `window.__I18N_DIAG__.setVer()` / `bump()`), used only when the bundle carries no build token.
+5. The application version, then the bundled resource revision.
+
+Before 2026-10 the persisted localStorage value ranked above runtime config and the build id, and
+the build id alone stayed `<version>-stable` between OMP module builds of the same package version.
+After a module upgrade with new strings the locale URL could stay the same, and because `locales/`
+inherited the one-year `immutable` cache policy the browser kept the old file (English fallbacks
+such as "Signed documents" or "Details" in a Swedish UI). Both causes are fixed: the build token
+outranks persisted values, and `public/web.config` makes `locales/` revalidate (see
+`deploy-ops.md`, "Cache rules"). Only pin `i18n.version` when a site really needs a fixed token,
+and change it whenever the locale files change.
+
 ## Document Metadata UI
 
 Document metadata can be preserved in the normalized bundle even when the site does not want users

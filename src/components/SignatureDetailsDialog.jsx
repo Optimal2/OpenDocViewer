@@ -6,13 +6,16 @@
  * signer and organisation, issuer, signing time and its source, reason,
  * location, kind (approval/certification/timestamp), the integrity status in
  * plain words with its integrityReason, whether the signature covers the
- * whole document, and the certificate validity period. Unchecked signatures
- * show the level-1 trust explanation. Gateway verdicts include the trust
- * reason and validation time; verified timestamps label their time source.
+ * whole document, and the certificate validity period. Each signature starts
+ * with a state-specific trust explanation (no gateway, validation disabled,
+ * gateway failure, or the gateway verdict with its reason in plain language and
+ * the raw code for support). Times are local ("2022-04-27 19:55") with the UTC
+ * value in the title; verified timestamps label their time source.
  *
  * The dialog works per document: when a document consists of several files
- * with signatures, a file selector (tabs) sits above the groups and each file
- * gets a heading followed by its own signatures. A document with one signed
+ * with signatures, a file selector (tabs) sits above the groups and the
+ * selected file gets a heading ("File k of m: name") and its page range inside
+ * the document, followed by its own signatures. A document with one signed
  * file looks like a plain signature list.
  *
  * Accessibility mirrors DocumentMetadataOverlayDialog: modal dialog semantics,
@@ -23,8 +26,9 @@
 import React, { useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
-import { getIntegrityLabel, getTrustLabel } from '../utils/pdfSignatureStatus.js';
-import { getSignatureFileHeading } from '../utils/pdfSignatureDocuments.js';
+import { getIntegrityLabel, getTrustExplanation, getTrustLabel } from '../utils/pdfSignatureStatus.js';
+import { getSignatureFileHeading, getSignatureFilePages } from '../utils/pdfSignatureDocuments.js';
+import SignatureTime from './SignatureTime.jsx';
 
 const FOCUSABLE_SELECTOR = 'button, [href], input, select, textarea, [tabindex]:not([tabindex="-1"])';
 
@@ -273,7 +277,10 @@ export default function SignatureDetailsDialog({
                     onClick={() => setSelectedSourceKey(file.sourceKey)}
                     onKeyDown={handleTabKeyDown}
                   >
-                    {file.fileName || getSignatureFileHeading(t, file)}
+                    <span className="odv-signature-file-tab-label">{file.fileName || getSignatureFileHeading(t, file)}</span>
+                    {getSignatureFilePages(t, file) ? (
+                      <span className="odv-signature-file-tab-pages">{getSignatureFilePages(t, file)}</span>
+                    ) : null}
                   </button>
                 );
               })}
@@ -288,15 +295,18 @@ export default function SignatureDetailsDialog({
             } : {})}
           >
             {showFileTabs && selectedFile ? (
-              <h3 className="odv-signature-file-heading">{getSignatureFileHeading(t, selectedFile)}</h3>
+              <div className="odv-signature-file-header">
+                <h3 className="odv-signature-file-heading">{getSignatureFileHeading(t, selectedFile)}</h3>
+                {getSignatureFilePages(t, selectedFile) ? (
+                  <p className="odv-signature-file-pages">{getSignatureFilePages(t, selectedFile)}</p>
+                ) : null}
+              </div>
             ) : null}
             {listedSignatures.map((signature, index) => {
               const integrityLabel = getIntegrityLabel(t, signature?.integrity);
               const trustLabel = getTrustLabel(t, signature?.trust);
-              const rawTrustReason = String(signature?.trustReason ?? '').trim();
-              const trustReason = signature?.serverValidationUnavailable === true
-                ? t('signatures.trust.unavailable', { defaultValue: 'Server validation unavailable' }) : rawTrustReason;
-              const trustChecked = ['valid', 'invalid', 'unknown'].includes(signature?.trust);
+              const trust = getTrustExplanation(t, signature);
+              const trustChecked = ['valid', 'invalid', 'unknown'].includes(trust.state);
               return (
                 <section
                   className="odv-signature-entry"
@@ -312,13 +322,13 @@ export default function SignatureDetailsDialog({
                       defaultValue: `Signature ${index + 1}`,
                     })}
                   </EntryHeading>
-                  {!trustChecked ? (
-                    <p className="odv-signature-trust-line" role="note">
-                      {t('signatures.dialog.trustLine', {
-                        defaultValue: 'Trust not checked – shows who signed and whether the document is unchanged, not whether the signature is valid.',
-                      })}
-                    </p>
-                  ) : null}
+                  <div className={`odv-signature-trust odv-signature-trust--${trust.state}`} role="note">
+                    <p className="odv-signature-trust-title">{trust.title}</p>
+                    {trust.reason ? <p className="odv-signature-trust-reason">{trust.reason}</p> : null}
+                    {trust.notMeaning ? <p className="odv-signature-trust-detail">{trust.notMeaning}</p> : null}
+                    {trust.hint ? <p className="odv-signature-trust-detail">{trust.hint}</p> : null}
+                    {trust.codeLine ? <p className="odv-signature-trust-code">{trust.codeLine}</p> : null}
+                  </div>
                   <dl className="odv-signature-fields">
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.signer', { defaultValue: 'Signer' })}</dt>
@@ -335,7 +345,7 @@ export default function SignatureDetailsDialog({
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.signingTime', { defaultValue: 'Signing time' })}</dt>
                       <dd>
-                        {orEmpty(signature?.signingTime)}
+                        <SignatureTime value={signature?.signingTime} fallback={emptyValue} />
                         <span className="odv-signature-secondary">
                           {getSigningTimeSourceLabel(t, signature?.signingTimeSource)}
                         </span>
@@ -375,28 +385,23 @@ export default function SignatureDetailsDialog({
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.certificateValidity', { defaultValue: 'Certificate valid' })}</dt>
                       <dd>
-                        {signature?.notBefore || signature?.notAfter
-                          ? t('signatures.dialog.validityRange', {
-                              from: orEmpty(signature?.notBefore),
-                              to: orEmpty(signature?.notAfter),
-                              defaultValue: `${orEmpty(signature?.notBefore)} – ${orEmpty(signature?.notAfter)}`,
-                            })
-                          : emptyValue}
+                        {signature?.notBefore || signature?.notAfter ? (
+                          <>
+                            <SignatureTime value={signature?.notBefore} fallback={emptyValue} />
+                            {' – '}
+                            <SignatureTime value={signature?.notAfter} fallback={emptyValue} />
+                          </>
+                        ) : emptyValue}
                       </dd>
                     </div>
                     <div className="odv-signature-field">
                       <dt>{t('signatures.fields.trust', { defaultValue: 'Trust' })}</dt>
-                      <dd>
-                        {trustLabel}
-                        {trustReason ? (
-                          <span className="odv-signature-secondary">{trustReason}</span>
-                        ) : null}
-                      </dd>
+                      <dd>{trustLabel}</dd>
                     </div>
                     {trustChecked && signature?.validationTime ? (
                       <div className="odv-signature-field">
                         <dt>{t('signatures.fields.validationTime', { defaultValue: 'Validation time' })}</dt>
-                        <dd>{orEmpty(signature.validationTime)}</dd>
+                        <dd><SignatureTime value={signature.validationTime} fallback={emptyValue} /></dd>
                       </div>
                     ) : null}
                     {String(signature?.subFilter || '').trim() ? (

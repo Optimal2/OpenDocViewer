@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 5095. JSDoc symbol count: 119.
+File count: 10. Line count: 5118. JSDoc symbol count: 119.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 

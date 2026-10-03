@@ -87,15 +87,15 @@
     "sourceDirty": null
   },
   "stats": {
-    "fileCount": 131,
-    "sourceLineCount": 54396,
-    "docletCount": 1446,
-    "documentedFileCount": 131,
+    "fileCount": 133,
+    "sourceLineCount": 54840,
+    "docletCount": 1463,
+    "documentedFileCount": 133,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
     "packageDependencyCount": 23,
     "devDependencyCount": 21,
-    "estimatedSourceTokens": 3993
+    "estimatedSourceTokens": 4086
   },
   "recommendations": [
     "Use AGENT_CONTEXT.md first, then SYMBOL_INDEX.md by file path to avoid loading the whole symbol JSON."
@@ -103,7 +103,7 @@
   "packageUsage": [
     {
       "packageName": "react",
-      "importCount": 58,
+      "importCount": 59,
       "dynamicImportCount": 0,
       "files": [
         "src/ErrorBoundary.jsx",
@@ -152,6 +152,7 @@
         "src/components/SignatureOverviewButton.jsx",
         "src/components/SignatureOverviewDialog.jsx",
         "src/components/SignatureStatusBadge.jsx",
+        "src/components/SignatureTime.jsx",
         "src/components/ViewerProblemNotice.jsx",
         "src/components/common/StatusLed.jsx",
         "src/contexts/ThemeProvider.jsx",
@@ -164,6 +165,50 @@
         "src/hooks/usePageTimer.js",
         "src/hooks/usePdfSignatureReports.js",
         "src/index.jsx"
+      ]
+    },
+    {
+      "packageName": "prop-types",
+      "importCount": 37,
+      "dynamicImportCount": 0,
+      "files": [
+        "src/PerformanceMonitor.jsx",
+        "src/app/OpenDocViewer.jsx",
+        "src/components/CanvasRenderer.jsx",
+        "src/components/DocumentConsumerWrapper.jsx",
+        "src/components/DocumentLoader/LoadPressureDialog.jsx",
+        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
+        "src/components/DocumentMetadataOverlayDialog.jsx",
+        "src/components/DocumentSelectionPanel.jsx",
+        "src/components/DocumentThumbnailList.jsx",
+        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
+        "src/components/DocumentToolbar/DocumentToolbar.jsx",
+        "src/components/DocumentToolbar/HelpMenuButton.jsx",
+        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
+        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
+        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
+        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
+        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
+        "src/components/DocumentToolbar/SplitToolbarButton.jsx",
+        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
+        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
+        "src/components/DocumentToolbar/ZoomButtons.jsx",
+        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
+        "src/components/DocumentViewer/DocumentViewerRender.jsx",
+        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
+        "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
+        "src/components/ImageRenderer.jsx",
+        "src/components/LoadingMessage.jsx",
+        "src/components/LoadingSpinner.jsx",
+        "src/components/PrintSelectionWorkspace.jsx",
+        "src/components/Resizer.jsx",
+        "src/components/SignatureDetailsDialog.jsx",
+        "src/components/SignatureOverviewButton.jsx",
+        "src/components/SignatureOverviewDialog.jsx",
+        "src/components/SignatureStatusBadge.jsx",
+        "src/components/SignatureTime.jsx",
+        "src/components/ViewerProblemNotice.jsx",
+        "src/components/common/StatusLed.jsx"
       ]
     },
     {
@@ -208,49 +253,6 @@
         "src/components/SignatureStatusBadge.jsx",
         "src/components/ViewerProblemNotice.jsx",
         "src/i18n.js"
-      ]
-    },
-    {
-      "packageName": "prop-types",
-      "importCount": 36,
-      "dynamicImportCount": 0,
-      "files": [
-        "src/PerformanceMonitor.jsx",
-        "src/app/OpenDocViewer.jsx",
-        "src/components/CanvasRenderer.jsx",
-        "src/components/DocumentConsumerWrapper.jsx",
-        "src/components/DocumentLoader/LoadPressureDialog.jsx",
-        "src/components/DocumentMetadataMatrixOverlayDialog.jsx",
-        "src/components/DocumentMetadataOverlayDialog.jsx",
-        "src/components/DocumentSelectionPanel.jsx",
-        "src/components/DocumentThumbnailList.jsx",
-        "src/components/DocumentToolbar/AboutOverlayDialog.jsx",
-        "src/components/DocumentToolbar/DocumentToolbar.jsx",
-        "src/components/DocumentToolbar/HelpMenuButton.jsx",
-        "src/components/DocumentToolbar/HelpOverlayDialog.jsx",
-        "src/components/DocumentToolbar/LanguageMenuButton.jsx",
-        "src/components/DocumentToolbar/ManualOverlayDialog.jsx",
-        "src/components/DocumentToolbar/PageNavigationButtons.jsx",
-        "src/components/DocumentToolbar/PrintRangeDialog.jsx",
-        "src/components/DocumentToolbar/SplitToolbarButton.jsx",
-        "src/components/DocumentToolbar/ThemeMenuButton.jsx",
-        "src/components/DocumentToolbar/ThemeToggleButton.jsx",
-        "src/components/DocumentToolbar/ZoomButtons.jsx",
-        "src/components/DocumentViewer/CompareZoomOverlay.jsx",
-        "src/components/DocumentViewer/DocumentViewerRender.jsx",
-        "src/components/DocumentViewer/DocumentViewerThumbnails.jsx",
-        "src/components/DocumentViewer/DocumentViewerToolbar.jsx",
-        "src/components/ImageRenderer.jsx",
-        "src/components/LoadingMessage.jsx",
-        "src/components/LoadingSpinner.jsx",
-        "src/components/PrintSelectionWorkspace.jsx",
-        "src/components/Resizer.jsx",
-        "src/components/SignatureDetailsDialog.jsx",
-        "src/components/SignatureOverviewButton.jsx",
-        "src/components/SignatureOverviewDialog.jsx",
-        "src/components/SignatureStatusBadge.jsx",
-        "src/components/ViewerProblemNotice.jsx",
-        "src/components/common/StatusLed.jsx"
       ]
     },
     {
@@ -454,10 +456,10 @@
     },
     {
       "path": "src/utils/pdfSignatureStatus.js",
-      "score": 103,
-      "lines": 177,
-      "incomingLocalImports": 6,
-      "doclets": 14,
+      "score": 112,
+      "lines": 348,
+      "incomingLocalImports": 7,
+      "doclets": 22,
       "summary": "Signature UI status helpers for browser integrity and gateway trust.",
       "summaryConfidence": "high"
     },
@@ -499,10 +501,10 @@
     },
     {
       "path": "src/utils/pdfSignatureDocuments.js",
-      "score": 95,
-      "lines": 221,
+      "score": 96,
+      "lines": 254,
       "incomingLocalImports": 5,
-      "doclets": 10,
+      "doclets": 11,
       "summary": "Per-document aggregation of PDF signature reports.",
       "summaryConfidence": "high"
     },
@@ -885,16 +887,16 @@
     },
     {
       "name": "src/components",
-      "fileCount": 17,
-      "lineCount": 7608,
-      "docletCount": 98,
+      "fileCount": 18,
+      "lineCount": 7749,
+      "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
-          "score": 56,
-          "lines": 1435,
+          "score": 57,
+          "lines": 1535,
           "incomingLocalImports": 2,
-          "doclets": 25,
+          "doclets": 27,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
           "summaryConfidence": "high"
         },
@@ -928,7 +930,7 @@
         {
           "path": "src/components/SignatureDetailsDialog.jsx",
           "score": 37,
-          "lines": 442,
+          "lines": 447,
           "incomingLocalImports": 1,
           "doclets": 7,
           "summary": "Signature details dialog (browser integrity and optional gateway trust).",
@@ -955,7 +957,7 @@
         {
           "path": "src/components/SignatureOverviewDialog.jsx",
           "score": 24,
-          "lines": 279,
+          "lines": 282,
           "incomingLocalImports": 1,
           "doclets": 3,
           "summary": "Signature overview dialog, opened from the toolbar overview button.",
@@ -1143,7 +1145,7 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 10,
-      "lineCount": 5095,
+      "lineCount": 5118,
       "docletCount": 119,
       "importantFiles": [
         {
@@ -1167,7 +1169,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
           "score": 45,
-          "lines": 1051,
+          "lines": 1074,
           "incomingLocalImports": 1,
           "doclets": 17,
           "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -1337,13 +1339,13 @@
     {
       "name": "src/i18n.js",
       "fileCount": 1,
-      "lineCount": 566,
+      "lineCount": 562,
       "docletCount": 21,
       "importantFiles": [
         {
           "path": "src/i18n.js",
           "score": 49,
-          "lines": 566,
+          "lines": 562,
           "incomingLocalImports": 2,
           "doclets": 21,
           "summary": "i18n bootstrap for OpenDocViewer.",
@@ -1527,9 +1529,9 @@
     },
     {
       "name": "src/utils",
-      "fileCount": 44,
-      "lineCount": 17711,
-      "docletCount": 678,
+      "fileCount": 45,
+      "lineCount": 17995,
+      "docletCount": 692,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1551,10 +1553,10 @@
         },
         {
           "path": "src/utils/pdfSignatureStatus.js",
-          "score": 103,
-          "lines": 177,
-          "incomingLocalImports": 6,
-          "doclets": 14,
+          "score": 112,
+          "lines": 348,
+          "incomingLocalImports": 7,
+          "doclets": 22,
           "summary": "Signature UI status helpers for browser integrity and gateway trust.",
           "summaryConfidence": "high"
         },
@@ -1587,10 +1589,10 @@
         },
         {
           "path": "src/utils/pdfSignatureDocuments.js",
-          "score": 95,
-          "lines": 221,
+          "score": 96,
+          "lines": 254,
           "incomingLocalImports": 5,
-          "doclets": 10,
+          "doclets": 11,
           "summary": "Per-document aggregation of PDF signature reports.",
           "summaryConfidence": "high"
         },
@@ -9592,9 +9594,9 @@
     },
     {
       "path": "src/components/DocumentThumbnailList.jsx",
-      "lines": 1435,
+      "lines": 1535,
       "extension": ".jsx",
-      "jsdocBlockCount": 29,
+      "jsdocBlockCount": 31,
       "sourceSummary": "OpenDocViewer — Deterministic thumbnail strip.",
       "imports": [
         {
@@ -9714,129 +9716,134 @@
         {
           "name": "DocumentThumbnailList",
           "kind": "default",
-          "line": 1434
+          "line": 1534
         }
       ],
       "declarations": [
         {
           "name": "clamp",
           "kind": "function",
-          "line": 72
+          "line": 74
         },
         {
           "name": "shouldWarmAllThumbnails",
           "kind": "function",
-          "line": 81
+          "line": 83
         },
         {
           "name": "getThumbnailLayout",
           "kind": "function",
-          "line": 95
+          "line": 97
         },
         {
           "name": "formatMetricFraction",
           "kind": "function",
-          "line": 116
+          "line": 118
         },
         {
           "name": "formatMetricValue",
           "kind": "function",
-          "line": 126
+          "line": 128
         },
         {
           "name": "getSessionPageIndex",
           "kind": "function",
-          "line": 135
+          "line": 137
         },
         {
           "name": "isIndexInRange",
           "kind": "function",
-          "line": 146
+          "line": 148
         },
         {
           "name": "buildCenterOutQueue",
           "kind": "function",
-          "line": 159
+          "line": 161
         },
         {
           "name": "getPageDocumentKey",
           "kind": "function",
-          "line": 180
+          "line": 182
         },
         {
           "name": "getPageDocumentContext",
           "kind": "function",
-          "line": 193
+          "line": 195
         },
         {
           "name": "getMetricTitles",
           "kind": "function",
-          "line": 221
+          "line": 223
         },
         {
           "name": "getMetricBadges",
           "kind": "function",
-          "line": 270
+          "line": 272
         },
         {
           "name": "getDocumentBoundaryLabel",
           "kind": "function",
-          "line": 324
+          "line": 326
         },
         {
           "name": "getDocumentBoundaryTitle",
           "kind": "function",
-          "line": 338
+          "line": 340
+        },
+        {
+          "name": "DocumentBoundaryHeader",
+          "kind": "component",
+          "line": 363
         },
         {
           "name": "ThumbnailRow",
           "kind": "component",
-          "line": 351
+          "line": 408
         },
         {
           "name": "DocumentThumbnailList",
           "kind": "component",
-          "line": 567
+          "line": 613
         },
         {
           "name": "updateMeasurements",
           "kind": "function",
-          "line": 766
+          "line": 840
         },
         {
           "name": "ranks",
           "kind": "object",
-          "line": 837
+          "line": 911
         },
         {
           "name": "isThumbnailReady",
           "kind": "function",
-          "line": 838
+          "line": 912
         },
         {
           "name": "pushIndex",
           "kind": "function",
-          "line": 841
+          "line": 915
         },
         {
           "name": "touchVisibleIndex",
           "kind": "function",
-          "line": 859
+          "line": 933
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 977
+          "line": 1051
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 986
+          "line": 1060
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 1024
+          "line": 1098
         }
       ],
       "parseError": null,
@@ -9865,7 +9872,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 72,
+          "line": 74,
           "description": "",
           "params": [
             {
@@ -9902,7 +9909,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 81,
+          "line": 83,
           "description": "",
           "params": [
             {
@@ -9933,7 +9940,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 95,
+          "line": 97,
           "description": "",
           "params": [
             {
@@ -9970,7 +9977,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 116,
+          "line": 118,
           "description": "",
           "params": [
             {
@@ -10001,7 +10008,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 126,
+          "line": 128,
           "description": "",
           "params": [
             {
@@ -10026,7 +10033,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 135,
+          "line": 137,
           "description": "",
           "params": [
             {
@@ -10057,7 +10064,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 146,
+          "line": 148,
           "description": "",
           "params": [
             {
@@ -10088,7 +10095,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 159,
+          "line": 161,
           "description": "Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.",
           "params": [
             {
@@ -10125,7 +10132,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 180,
+          "line": 182,
           "description": "",
           "params": [
             {
@@ -10150,7 +10157,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 193,
+          "line": 195,
           "description": "",
           "params": [
             {
@@ -10187,7 +10194,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 221,
+          "line": 223,
           "description": "",
           "params": [
             {
@@ -10230,7 +10237,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 270,
+          "line": 272,
           "description": "",
           "params": [
             {
@@ -10273,7 +10280,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 324,
+          "line": 326,
           "description": "",
           "params": [
             {
@@ -10304,7 +10311,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 338,
+          "line": 340,
           "description": "",
           "params": [
             {
@@ -10329,13 +10336,68 @@
           "examples": 0
         },
         {
+          "id": "DocumentBoundaryHeader",
+          "name": "DocumentBoundaryHeader",
+          "longname": "DocumentBoundaryHeader",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/components/DocumentThumbnailList.jsx",
+          "line": 363,
+          "description": "The &quot;DOK n&quot; document header with the document signature symbol.",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.documentContext",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.documentSignatures",
+              "type": "*|null",
+              "optional": true,
+              "description": "Signed-document entry; shows the symbol when set."
+            },
+            {
+              "name": "props.onOpenSignatures",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.sticky",
+              "type": "boolean",
+              "optional": true,
+              "description": "Rendered in the sticky band at the top of the strip."
+            },
+            {
+              "name": "props.hidden",
+              "type": "boolean",
+              "optional": true,
+              "description": "Removes the header from the accessibility tree and the tab order (the inline header while its sticky twin is shown), so the symbol is never..."
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "ThumbnailRow",
           "name": "ThumbnailRow",
           "longname": "ThumbnailRow",
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 351,
+          "line": 408,
           "description": "",
           "params": [
             {
@@ -10360,7 +10422,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 567,
+          "line": 613,
           "description": "",
           "params": [
             {
@@ -10475,13 +10537,38 @@
           "examples": 0
         },
         {
+          "id": "<anonymous>~resolveStickyHeaderRowIndex",
+          "name": "resolveStickyHeaderRowIndex",
+          "longname": "<anonymous>~resolveStickyHeaderRowIndex",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/components/DocumentThumbnailList.jsx",
+          "line": 700,
+          "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
+          "params": [
+            {
+              "name": "top",
+              "type": "number",
+              "optional": false,
+              "description": "Current scrollTop of the strip."
+            }
+          ],
+          "returns": [
+            {
+              "type": "number",
+              "description": "Row index of the document start whose header is sticky, or -1."
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "<anonymous>~setContainerRef",
           "name": "setContainerRef",
           "longname": "<anonymous>~setContainerRef",
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 748,
+          "line": 822,
           "description": "",
           "params": [
             {
@@ -10506,7 +10593,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 977,
+          "line": 1051,
           "description": "",
           "params": [
             {
@@ -10531,7 +10618,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 986,
+          "line": 1060,
           "description": "",
           "params": [
             {
@@ -10556,7 +10643,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1064,
+          "line": 1138,
           "description": "",
           "params": [
             {
@@ -10581,7 +10668,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1091,
+          "line": 1184,
           "description": "",
           "params": [
             {
@@ -10612,7 +10699,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1117,
+          "line": 1210,
           "description": "",
           "params": [
             {
@@ -10643,7 +10730,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1130,
+          "line": 1223,
           "description": "",
           "params": [
             {
@@ -10680,7 +10767,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1184,
+          "line": 1277,
           "description": "",
           "params": [
             {
@@ -10833,7 +10920,7 @@
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 56,
+      "importanceScore": 57,
       "summary": "OpenDocViewer — Deterministic thumbnail strip.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -17232,7 +17319,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "lines": 1051,
+      "lines": 1074,
       "extension": ".jsx",
       "jsdocBlockCount": 28,
       "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -17303,7 +17390,7 @@
         {
           "name": "DocumentViewerRender",
           "kind": "default",
-          "line": 1050
+          "line": 1073
         }
       ],
       "declarations": [
@@ -17363,44 +17450,49 @@
           "line": 363
         },
         {
+          "name": "update",
+          "kind": "function",
+          "line": 487
+        },
+        {
           "name": "listenerOptions",
           "kind": "object",
-          "line": 485
+          "line": 508
         },
         {
           "name": "removeOptions",
           "kind": "object",
-          "line": 486
+          "line": 509
         },
         {
           "name": "listener",
           "kind": "function",
-          "line": 496
+          "line": 519
         },
         {
           "name": "handleResize",
           "kind": "function",
-          "line": 533
+          "line": 556
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 639
+          "line": 662
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 645
+          "line": 668
         },
         {
           "name": "renderEdgeScrollIndicator",
           "kind": "component",
-          "line": 746
+          "line": 769
         },
         {
           "name": "renderPaneSelector",
           "kind": "component",
-          "line": 769
+          "line": 792
         }
       ],
       "parseError": null,
@@ -17908,7 +18000,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 639,
+          "line": 662,
           "description": "",
           "params": [
             {
@@ -17928,7 +18020,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 645,
+          "line": 668,
           "description": "",
           "params": [
             {
@@ -17948,7 +18040,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 671,
+          "line": 694,
           "description": "",
           "params": [
             {
@@ -17985,7 +18077,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 746,
+          "line": 769,
           "description": "",
           "params": [
             {
@@ -18010,7 +18102,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 769,
+          "line": 792,
           "description": "",
           "params": [
             {
@@ -22783,7 +22875,7 @@
     },
     {
       "path": "src/components/SignatureDetailsDialog.jsx",
-      "lines": 442,
+      "lines": 447,
       "extension": ".jsx",
       "jsdocBlockCount": 10,
       "sourceSummary": "Signature details dialog (browser integrity and optional gateway trust).",
@@ -22796,7 +22888,7 @@
             "useRef",
             "useState"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -22804,7 +22896,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -22812,24 +22904,34 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static"
         },
         {
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
             "getIntegrityLabel",
+            "getTrustExplanation",
             "getTrustLabel"
           ],
-          "line": 26,
+          "line": 29,
           "kind": "static"
         },
         {
           "source": "../utils/pdfSignatureDocuments.js",
           "specifiers": [
-            "getSignatureFileHeading"
+            "getSignatureFileHeading",
+            "getSignatureFilePages"
           ],
-          "line": 27,
+          "line": 30,
+          "kind": "static"
+        },
+        {
+          "source": "./SignatureTime.jsx",
+          "specifiers": [
+            "SignatureTime"
+          ],
+          "line": 31,
           "kind": "static"
         }
       ],
@@ -22837,44 +22939,44 @@
         {
           "name": "SignatureDetailsDialog",
           "kind": "default",
-          "line": 81
+          "line": 85
         }
       ],
       "declarations": [
         {
           "name": "getKindLabel",
           "kind": "function",
-          "line": 36
+          "line": 40
         },
         {
           "name": "getSigningTimeSourceLabel",
           "kind": "function",
-          "line": 53
+          "line": 57
         },
         {
           "name": "SignatureDetailsDialog",
           "kind": "component",
-          "line": 81
+          "line": 85
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 121
+          "line": 125
         },
         {
           "name": "handleTabKeyDown",
           "kind": "function",
-          "line": 147
+          "line": 151
         },
         {
           "name": "handleTabTrap",
           "kind": "function",
-          "line": 163
+          "line": 167
         },
         {
           "name": "orEmpty",
           "kind": "function",
-          "line": 203
+          "line": 207
         }
       ],
       "parseError": null,
@@ -22890,7 +22992,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 36,
+          "line": 40,
           "description": "",
           "params": [
             {
@@ -22921,7 +23023,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 53,
+          "line": 57,
           "description": "",
           "params": [
             {
@@ -22952,7 +23054,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 81,
+          "line": 85,
           "description": "",
           "params": [
             {
@@ -23025,7 +23127,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 121,
+          "line": 125,
           "description": "",
           "params": [
             {
@@ -23045,7 +23147,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 147,
+          "line": 151,
           "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
           "params": [],
           "returns": [],
@@ -23058,7 +23160,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 163,
+          "line": 167,
           "description": "Keep Tab navigation inside the dialog while it is open.",
           "params": [],
           "returns": [],
@@ -23071,7 +23173,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureDetailsDialog.jsx",
-          "line": 203,
+          "line": 207,
           "description": "",
           "params": [
             {
@@ -23091,20 +23193,31 @@
           "source": "../utils/pdfSignatureStatus.js",
           "specifiers": [
             "getIntegrityLabel",
+            "getTrustExplanation",
             "getTrustLabel"
           ],
-          "line": 26,
+          "line": 29,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureStatus.js"
         },
         {
           "source": "../utils/pdfSignatureDocuments.js",
           "specifiers": [
-            "getSignatureFileHeading"
+            "getSignatureFileHeading",
+            "getSignatureFilePages"
           ],
-          "line": 27,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
+        },
+        {
+          "source": "./SignatureTime.jsx",
+          "specifiers": [
+            "SignatureTime"
+          ],
+          "line": 31,
+          "kind": "static",
+          "resolved": "src/components/SignatureTime.jsx"
         }
       ],
       "packageImports": [
@@ -23116,7 +23229,7 @@
             "useRef",
             "useState"
           ],
-          "line": 23,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -23124,7 +23237,7 @@
           "specifiers": [
             "PropTypes"
           ],
-          "line": 24,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -23132,7 +23245,7 @@
           "specifiers": [
             "useTranslation"
           ],
-          "line": 25,
+          "line": 28,
           "kind": "static"
         }
       ],
@@ -23286,7 +23399,7 @@
     },
     {
       "path": "src/components/SignatureOverviewDialog.jsx",
-      "lines": 279,
+      "lines": 282,
       "extension": ".jsx",
       "jsdocBlockCount": 6,
       "sourceSummary": "Signature overview dialog, opened from the toolbar overview button.",
@@ -23333,35 +23446,43 @@
           ],
           "line": 22,
           "kind": "static"
+        },
+        {
+          "source": "./SignatureTime.jsx",
+          "specifiers": [
+            "SignatureTime"
+          ],
+          "line": 23,
+          "kind": "static"
         }
       ],
       "exports": [
         {
           "name": "SignatureOverviewDialog",
           "kind": "default",
-          "line": 46
+          "line": 47
         }
       ],
       "declarations": [
         {
           "name": "ICON_BY_SEVERITY",
           "kind": "object",
-          "line": 27
+          "line": 28
         },
         {
           "name": "SignatureOverviewDialog",
           "kind": "component",
-          "line": 46
+          "line": 47
         },
         {
           "name": "handleEscape",
           "kind": "function",
-          "line": 87
+          "line": 88
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 101
+          "line": 102
         }
       ],
       "parseError": null,
@@ -23377,7 +23498,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/components/SignatureOverviewDialog.jsx",
-          "line": 46,
+          "line": 47,
           "description": "",
           "params": [
             {
@@ -23450,7 +23571,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureOverviewDialog.jsx",
-          "line": 87,
+          "line": 88,
           "description": "",
           "params": [
             {
@@ -23470,7 +23591,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/SignatureOverviewDialog.jsx",
-          "line": 101,
+          "line": 102,
           "description": "Keep Tab navigation inside the dialog while it is open.",
           "params": [],
           "returns": [],
@@ -23497,6 +23618,15 @@
           "line": 22,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
+        },
+        {
+          "source": "./SignatureTime.jsx",
+          "specifiers": [
+            "SignatureTime"
+          ],
+          "line": 23,
+          "kind": "static",
+          "resolved": "src/components/SignatureTime.jsx"
         }
       ],
       "packageImports": [
@@ -23704,6 +23834,132 @@
       "incomingLocalImports": 1,
       "importanceScore": 19,
       "summary": "Small signature symbol shown next to a document's \"DOK n\" label (variant `document`, aggregated over all files of the document) and on every page thumbnail of a signed file (variant `thumbnail`).",
+      "summaryConfidence": "high",
+      "summarySource": "leading-jsdoc"
+    },
+    {
+      "path": "src/components/SignatureTime.jsx",
+      "lines": 33,
+      "extension": ".jsx",
+      "jsdocBlockCount": 2,
+      "sourceSummary": "Local-time rendering of a signature-related ISO time (signing, validation, certificate validity) for the signature dialogs: \"2022-04-27 19:55\" as text, the exact UTC ISO value in the title attribute and `dateTime`.",
+      "imports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ],
+          "line": 8,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 9,
+          "kind": "static"
+        },
+        {
+          "source": "../utils/pdfSignatureStatus.js",
+          "specifiers": [
+            "formatSignatureTime"
+          ],
+          "line": 10,
+          "kind": "static"
+        }
+      ],
+      "exports": [
+        {
+          "name": "SignatureTime",
+          "kind": "default",
+          "line": 18
+        }
+      ],
+      "declarations": [
+        {
+          "name": "SignatureTime",
+          "kind": "component",
+          "line": 18
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module.exports",
+          "name": "exports",
+          "longname": "module.exports",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/components/SignatureTime.jsx",
+          "line": 18,
+          "description": "",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.value",
+              "type": "*",
+              "optional": false,
+              "description": "ISO 8601 time, or empty."
+            },
+            {
+              "name": "props.fallback",
+              "type": "string",
+              "optional": true,
+              "description": "Text shown when there is no value."
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/components",
+      "localImports": [
+        {
+          "source": "../utils/pdfSignatureStatus.js",
+          "specifiers": [
+            "formatSignatureTime"
+          ],
+          "line": 10,
+          "kind": "static",
+          "resolved": "src/utils/pdfSignatureStatus.js"
+        }
+      ],
+      "packageImports": [
+        {
+          "source": "react",
+          "specifiers": [
+            "React"
+          ],
+          "line": 8,
+          "kind": "static"
+        },
+        {
+          "source": "prop-types",
+          "specifiers": [
+            "PropTypes"
+          ],
+          "line": 9,
+          "kind": "static"
+        }
+      ],
+      "incomingLocalImports": 2,
+      "importanceScore": 24,
+      "summary": "Local-time rendering of a signature-related ISO time (signing, validation, certificate validity) for the signature dialogs: \"2022-04-27 19:55\" as text, the exact UTC ISO value in the title attribute and `dateTime`.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
     },
@@ -28234,7 +28490,7 @@
     },
     {
       "path": "src/i18n.js",
-      "lines": 566,
+      "lines": 562,
       "extension": ".js",
       "jsdocBlockCount": 22,
       "sourceSummary": "i18n bootstrap for OpenDocViewer.",
@@ -28244,7 +28500,7 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -28252,7 +28508,7 @@
           "specifiers": [
             "initReactI18next"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -28260,7 +28516,7 @@
           "specifiers": [
             "ICU"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -28268,7 +28524,7 @@
           "specifiers": [
             "HttpBackend"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         },
         {
@@ -28277,7 +28533,15 @@
             "getLanguagePreference",
             "setLanguagePreference"
           ],
-          "line": 33,
+          "line": 35,
+          "kind": "static"
+        },
+        {
+          "source": "./utils/i18nVersion.js",
+          "specifiers": [
+            "resolveI18nVersion"
+          ],
+          "line": 36,
           "kind": "static"
         }
       ],
@@ -28285,94 +28549,94 @@
         {
           "name": "i18next",
           "kind": "default",
-          "line": 565
+          "line": 561
         }
       ],
       "declarations": [
         {
           "name": "getSafeWindow",
           "kind": "function",
-          "line": 40
+          "line": 43
         },
         {
           "name": "getImportMetaEnv",
           "kind": "function",
-          "line": 57
+          "line": 60
         },
         {
           "name": "readQuery",
           "kind": "function",
-          "line": 73
+          "line": 76
         },
         {
-          "name": "normalizeVersionToken",
+          "name": "readStoredI18nVersion",
           "kind": "function",
-          "line": 102
+          "line": 105
         },
         {
           "name": "getI18nVersion",
           "kind": "function",
-          "line": 111
+          "line": 114
         },
         {
           "name": "appendQuery",
           "kind": "function",
-          "line": 140
+          "line": 134
         },
         {
           "name": "sanitizeI18nPathSegment",
           "kind": "function",
-          "line": 161
+          "line": 155
         },
         {
           "name": "getUnsupportedVersionPlaceholders",
           "kind": "function",
-          "line": 173
+          "line": 167
         },
         {
           "name": "reloadAfterDiagnosticStorageWrite",
           "kind": "function",
-          "line": 196
+          "line": 190
         },
         {
           "name": "getStaticI18nDefaults",
           "kind": "function",
-          "line": 217
+          "line": 211
         },
         {
           "name": "getBaseLanguageCode",
           "kind": "function",
-          "line": 243
+          "line": 237
         },
         {
           "name": "getNormalizedSupportedLanguages",
           "kind": "function",
-          "line": 257
+          "line": 251
         },
         {
           "name": "normalizeSupportedLanguage",
           "kind": "function",
-          "line": 272
+          "line": 266
         },
         {
           "name": "resolveInitialLanguage",
           "kind": "function",
-          "line": 302
+          "line": 296
         },
         {
           "name": "syncDocumentLanguage",
           "kind": "function",
-          "line": 353
+          "line": 347
         },
         {
           "name": "computeBaseHref",
           "kind": "function",
-          "line": 372
+          "line": 366
         },
         {
           "name": "resolveLoadPath",
           "kind": "function",
-          "line": 390
+          "line": 384
         }
       ],
       "parseError": null,
@@ -28388,7 +28652,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 40,
+          "line": 43,
           "description": "Return browser window safely in browser, SSR, test, and documentation contexts.",
           "params": [],
           "returns": [
@@ -28406,7 +28670,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 57,
+          "line": 60,
           "description": "Return Vite import.meta.env safely.",
           "params": [],
           "returns": [
@@ -28424,7 +28688,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 68,
+          "line": 71,
           "description": "Dev-mode detector (Vite + Node envs).",
           "params": [],
           "returns": [],
@@ -28437,7 +28701,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 73,
+          "line": 76,
           "description": "Read a query parameter by name (no deps).",
           "params": [],
           "returns": [],
@@ -28450,7 +28714,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 82,
+          "line": 85,
           "description": "Diagnostics ON only in dev builds.",
           "params": [],
           "returns": [],
@@ -28463,7 +28727,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 90,
+          "line": 93,
           "description": "Fallback cache-busting token for bundled locale resources.",
           "params": [],
           "returns": [],
@@ -28476,21 +28740,21 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 99,
+          "line": 102,
           "description": "Dev-only reload delay after diagnostic localStorage writes.",
           "params": [],
           "returns": [],
           "examples": 0
         },
         {
-          "id": "normalizeVersionToken",
-          "name": "normalizeVersionToken",
-          "longname": "normalizeVersionToken",
+          "id": "readStoredI18nVersion",
+          "name": "readStoredI18nVersion",
+          "longname": "readStoredI18nVersion",
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 102,
-          "description": "Normalize optional version tokens from runtime config or globals.",
+          "line": 105,
+          "description": "Read the persisted diagnostic version token, if storage is available.",
           "params": [],
           "returns": [],
           "examples": 0
@@ -28502,8 +28766,8 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 111,
-          "description": "Return cache-busting version token (see header).",
+          "line": 114,
+          "description": "Return cache-busting version token (see header and utils/i18nVersion.js).",
           "params": [],
           "returns": [],
           "examples": 0
@@ -28515,7 +28779,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 140,
+          "line": 134,
           "description": "Helper: append query params safely to a URL.",
           "params": [],
           "returns": [],
@@ -28528,7 +28792,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 161,
+          "line": 155,
           "description": "Keep i18n URL template substitutions constrained to plain path segments.",
           "params": [
             {
@@ -28559,7 +28823,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 173,
+          "line": 167,
           "description": "Find malformed version-like placeholders in loadPath without extra array passes.",
           "params": [
             {
@@ -28584,7 +28848,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 196,
+          "line": 190,
           "description": "Refresh i18n resources after a diagnostic localStorage write.",
           "params": [],
           "returns": [
@@ -28602,7 +28866,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 217,
+          "line": 211,
           "description": "Compute app config &amp; defaults safely.",
           "params": [],
           "returns": [
@@ -28620,7 +28884,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 243,
+          "line": 237,
           "description": "Extract the lowercase base language code from a locale candidate.",
           "params": [
             {
@@ -28645,7 +28909,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 257,
+          "line": 251,
           "description": "Normalize configured supported languages to non-empty base language codes.",
           "params": [
             {
@@ -28670,7 +28934,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 272,
+          "line": 266,
           "description": "Normalize an arbitrary language candidate to a supported base language.",
           "params": [
             {
@@ -28701,7 +28965,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 302,
+          "line": 296,
           "description": "Resolve the initial UI language without relying on persisted i18next cache state.",
           "params": [
             {
@@ -28744,7 +29008,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 353,
+          "line": 347,
           "description": "Keep the document language synchronized with the active UI language.",
           "params": [
             {
@@ -28781,7 +29045,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 372,
+          "line": 366,
           "description": "Compute a normalized base href.",
           "params": [],
           "returns": [
@@ -28799,7 +29063,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/i18n.js",
-          "line": 390,
+          "line": 384,
           "description": "Resolve the final translation URL at request time (with cache buster).",
           "params": [
             {
@@ -28832,9 +29096,18 @@
             "getLanguagePreference",
             "setLanguagePreference"
           ],
-          "line": 33,
+          "line": 35,
           "kind": "static",
           "resolved": "src/utils/viewerPreferences.js"
+        },
+        {
+          "source": "./utils/i18nVersion.js",
+          "specifiers": [
+            "resolveI18nVersion"
+          ],
+          "line": 36,
+          "kind": "static",
+          "resolved": "src/utils/i18nVersion.js"
         }
       ],
       "packageImports": [
@@ -28843,7 +29116,7 @@
           "specifiers": [
             "i18next"
           ],
-          "line": 29,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -28851,7 +29124,7 @@
           "specifiers": [
             "initReactI18next"
           ],
-          "line": 30,
+          "line": 32,
           "kind": "static"
         },
         {
@@ -28859,7 +29132,7 @@
           "specifiers": [
             "ICU"
           ],
-          "line": 31,
+          "line": 33,
           "kind": "static"
         },
         {
@@ -28867,7 +29140,7 @@
           "specifiers": [
             "HttpBackend"
           ],
-          "line": 32,
+          "line": 34,
           "kind": "static"
         }
       ],
@@ -35803,6 +36076,199 @@
       "summarySource": "leading-jsdoc"
     },
     {
+      "path": "src/utils/i18nVersion.js",
+      "lines": 69,
+      "extension": ".js",
+      "jsdocBlockCount": 4,
+      "sourceSummary": "Cache-busting version token for the locale files (`locales/<lng>/common.json?v=<token>`).",
+      "imports": [],
+      "exports": [
+        {
+          "name": "normalizeVersionToken",
+          "kind": "function",
+          "line": 25
+        },
+        {
+          "name": "getBuildLocaleToken",
+          "kind": "function",
+          "line": 38
+        },
+        {
+          "name": "resolveI18nVersion",
+          "kind": "function",
+          "line": 53
+        }
+      ],
+      "declarations": [
+        {
+          "name": "normalizeVersionToken",
+          "kind": "function",
+          "line": 25
+        },
+        {
+          "name": "getBuildLocaleToken",
+          "kind": "function",
+          "line": 38
+        },
+        {
+          "name": "resolveI18nVersion",
+          "kind": "function",
+          "line": 53
+        }
+      ],
+      "parseError": null,
+      "signals": {
+        "roles": [],
+        "riskPatterns": []
+      },
+      "doclets": [
+        {
+          "id": "module:utils/i18nVersion",
+          "name": "utils/i18nVersion",
+          "longname": "module:utils/i18nVersion",
+          "kind": "module",
+          "scope": null,
+          "file": "src/utils/i18nVersion.js",
+          "line": 2,
+          "description": "Cache-busting version token for the locale files ( locales/&lt;lng&gt;/common.json?v=&lt;token&gt; ).",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/i18nVersion.normalizeVersionToken",
+          "name": "normalizeVersionToken",
+          "longname": "module:utils/i18nVersion.normalizeVersionToken",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/i18nVersion.js",
+          "line": 25,
+          "description": "Normalize optional version tokens; &quot;auto&quot; and blank values mean &quot;not set&quot;.",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/i18nVersion.getBuildLocaleToken",
+          "name": "getBuildLocaleToken",
+          "longname": "module:utils/i18nVersion.getBuildLocaleToken",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/i18nVersion.js",
+          "line": 38,
+          "description": "Join the build id and the locale content hash into one token.",
+          "params": [
+            {
+              "name": "buildId",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "resourceHash",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/i18nVersion.resolveI18nVersion",
+          "name": "resolveI18nVersion",
+          "longname": "module:utils/i18nVersion.resolveI18nVersion",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/i18nVersion.js",
+          "line": 53,
+          "description": "",
+          "params": [
+            {
+              "name": "sources",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "sources.query",
+              "type": "*",
+              "optional": true,
+              "description": "?i18nV value."
+            },
+            {
+              "name": "sources.configVersion",
+              "type": "*",
+              "optional": true,
+              "description": "__ODV_CONFIG__.i18n.version ."
+            },
+            {
+              "name": "sources.buildId",
+              "type": "*",
+              "optional": true,
+              "description": "Vite ODV_BUILD_ID ."
+            },
+            {
+              "name": "sources.resourceHash",
+              "type": "*",
+              "optional": true,
+              "description": "Vite ODV_I18N_RESOURCE_HASH (locale content hash)."
+            },
+            {
+              "name": "sources.storedVersion",
+              "type": "*",
+              "optional": true,
+              "description": "localStorage ODV_I18N_VERSION ."
+            },
+            {
+              "name": "sources.appVersion",
+              "type": "*",
+              "optional": true,
+              "description": "Application version."
+            },
+            {
+              "name": "sources.fallback",
+              "type": "string",
+              "optional": false,
+              "description": "Bundled resource revision."
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        }
+      ],
+      "moduleKey": "src/utils",
+      "localImports": [],
+      "packageImports": [],
+      "incomingLocalImports": 1,
+      "importanceScore": 35,
+      "summary": "Cache-busting version token for the locale files ( locales/&lt;lng&gt;/common.json?v=&lt;token&gt; ).",
+      "summaryConfidence": "high",
+      "summarySource": "module-doclet"
+    },
+    {
       "path": "src/utils/idUtils.js",
       "lines": 64,
       "extension": ".js",
@@ -42502,9 +42968,9 @@
     },
     {
       "path": "src/utils/pdfSignatureDocuments.js",
-      "lines": 221,
+      "lines": 254,
       "extension": ".js",
-      "jsdocBlockCount": 11,
+      "jsdocBlockCount": 13,
       "sourceSummary": "Per-document aggregation of PDF signature reports.",
       "imports": [
         {
@@ -42523,69 +42989,79 @@
         {
           "name": "getPageSignatureDocumentKey",
           "kind": "function",
-          "line": 54
+          "line": 57
         },
         {
           "name": "getSourceFileNameFromUrl",
           "kind": "function",
-          "line": 70
+          "line": 73
         },
         {
           "name": "buildSignatureDocuments",
           "kind": "function",
-          "line": 116
+          "line": 119
         },
         {
           "name": "summarizeSignatureDocuments",
           "kind": "function",
-          "line": 185
+          "line": 202
         },
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 200
+          "line": 217
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 213
+          "line": 230
+        },
+        {
+          "name": "getSignatureFilePages",
+          "kind": "function",
+          "line": 245
         }
       ],
       "declarations": [
         {
           "name": "getPageSignatureDocumentKey",
           "kind": "function",
-          "line": 54
+          "line": 57
         },
         {
           "name": "getSourceFileNameFromUrl",
           "kind": "function",
-          "line": 70
+          "line": 73
         },
         {
           "name": "pickNewestSignature",
           "kind": "function",
-          "line": 94
+          "line": 97
         },
         {
           "name": "buildSignatureDocuments",
           "kind": "function",
-          "line": 116
+          "line": 119
         },
         {
           "name": "summarizeSignatureDocuments",
           "kind": "function",
-          "line": 185
+          "line": 202
         },
         {
           "name": "findSignatureDocumentBySourceKey",
           "kind": "function",
-          "line": 200
+          "line": 217
         },
         {
           "name": "getSignatureFileHeading",
           "kind": "function",
-          "line": 213
+          "line": 230
+        },
+        {
+          "name": "getSignatureFilePages",
+          "kind": "function",
+          "line": 245
         }
       ],
       "parseError": null,
@@ -42627,7 +43103,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 32,
+          "line": 35,
           "description": "",
           "params": [],
           "returns": [],
@@ -42640,7 +43116,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 54,
+          "line": 57,
           "description": "Document key of a page.",
           "params": [
             {
@@ -42665,7 +43141,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 70,
+          "line": 73,
           "description": "Display file name from a source URL: the last path segment, only when it looks like a file name (has an extension).",
           "params": [
             {
@@ -42690,7 +43166,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 94,
+          "line": 97,
           "description": "",
           "params": [
             {
@@ -42715,7 +43191,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 116,
+          "line": 119,
           "description": "Fold per-file signature reports into per-document entries.",
           "params": [
             {
@@ -42752,7 +43228,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 185,
+          "line": 202,
           "description": "Totals for the toolbar overview button, or null when nothing is signed (the button is then not rendered).",
           "params": [
             {
@@ -42777,7 +43253,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 200,
+          "line": 217,
           "description": "",
           "params": [
             {
@@ -42808,8 +43284,39 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureDocuments.js",
-          "line": 213,
-          "description": "Heading for one file of a multi-file document: &quot;File k of m – name&quot;, or &quot;File k of m&quot; when no file name is available.",
+          "line": 230,
+          "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
+          "params": [
+            {
+              "name": "t",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "file",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureDocuments.getSignatureFilePages",
+          "name": "getSignatureFilePages",
+          "longname": "module:utils/pdfSignatureDocuments.getSignatureFilePages",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureDocuments.js",
+          "line": 245,
+          "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
           "params": [
             {
               "name": "t",
@@ -42850,16 +43357,16 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 5,
-      "importanceScore": 95,
+      "importanceScore": 96,
       "summary": "Per-document aggregation of PDF signature reports.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
     },
     {
       "path": "src/utils/pdfSignatureGateway.js",
-      "lines": 147,
+      "lines": 158,
       "extension": ".js",
-      "jsdocBlockCount": 4,
+      "jsdocBlockCount": 5,
       "sourceSummary": "Optional gateway trust enrichment.",
       "imports": [
         {
@@ -42881,12 +43388,12 @@
         {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 65
+          "line": 75
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 109
+          "line": 120
         }
       ],
       "declarations": [
@@ -42911,19 +43418,24 @@
           "line": 54
         },
         {
+          "name": "validationDisabled",
+          "kind": "function",
+          "line": 64
+        },
+        {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 65
+          "line": 75
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 109
+          "line": 120
         },
         {
           "name": "request",
           "kind": "function",
-          "line": 119
+          "line": 130
         }
       ],
       "parseError": null,
@@ -42983,13 +43495,38 @@
           "examples": 0
         },
         {
+          "id": "module:utils/pdfSignatureGateway~validationDisabled",
+          "name": "validationDisabled",
+          "longname": "module:utils/pdfSignatureGateway~validationDisabled",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureGateway.js",
+          "line": 64,
+          "description": "The gateway answered that server validation is switched off.",
+          "params": [
+            {
+              "name": "report",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "*",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
           "name": "mergeGatewaySignatureReport",
           "longname": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 65,
+          "line": 75,
           "description": "Accept only unambiguous server entries.",
           "params": [
             {
@@ -43020,7 +43557,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 109,
+          "line": 120,
           "description": "Create viewer-local state for disabled gateway sessions.",
           "params": [],
           "returns": [
@@ -43047,7 +43584,7 @@
       ],
       "packageImports": [],
       "incomingLocalImports": 1,
-      "importanceScore": 36,
+      "importanceScore": 39,
       "summary": "Optional gateway trust enrichment.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -43776,9 +44313,9 @@
     },
     {
       "path": "src/utils/pdfSignatureStatus.js",
-      "lines": 177,
+      "lines": 348,
       "extension": ".js",
-      "jsdocBlockCount": 14,
+      "jsdocBlockCount": 24,
       "sourceSummary": "Signature UI status helpers for browser integrity and gateway trust.",
       "imports": [],
       "exports": [
@@ -43831,6 +44368,31 @@
           "name": "getTrustLabel",
           "kind": "function",
           "line": 164
+        },
+        {
+          "name": "TRUST_REASON_CODES",
+          "kind": "variable",
+          "line": 215
+        },
+        {
+          "name": "getTrustReasonText",
+          "kind": "function",
+          "line": 223
+        },
+        {
+          "name": "getSignatureTrustState",
+          "kind": "function",
+          "line": 238
+        },
+        {
+          "name": "getTrustExplanation",
+          "kind": "function",
+          "line": 263
+        },
+        {
+          "name": "formatSignatureTime",
+          "kind": "function",
+          "line": 337
         }
       ],
       "declarations": [
@@ -43893,6 +44455,46 @@
           "name": "getTrustLabel",
           "kind": "function",
           "line": 164
+        },
+        {
+          "name": "TRUST_REASON_DEFAULTS",
+          "kind": "object",
+          "line": 185
+        },
+        {
+          "name": "getTrustReasonText",
+          "kind": "function",
+          "line": 223
+        },
+        {
+          "name": "getSignatureTrustState",
+          "kind": "function",
+          "line": 238
+        },
+        {
+          "name": "getTrustExplanation",
+          "kind": "function",
+          "line": 263
+        },
+        {
+          "name": "result",
+          "kind": "object",
+          "line": 266
+        },
+        {
+          "name": "addReason",
+          "kind": "function",
+          "line": 268
+        },
+        {
+          "name": "pad2",
+          "kind": "function",
+          "line": 326
+        },
+        {
+          "name": "formatSignatureTime",
+          "kind": "function",
+          "line": 337
         }
       ],
       "parseError": null,
@@ -44220,13 +44822,184 @@
             }
           ],
           "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
+          "name": "TRUST_REASON_DEFAULTS",
+          "longname": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
+          "kind": "constant",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 185,
+          "description": "Plain-language English default per gateway trustReason code.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
+          "name": "TRUST_REASON_CODES",
+          "longname": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
+          "kind": "constant",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 215,
+          "description": "Every trustReason code the gateway can emit.",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus.getTrustReasonText",
+          "name": "getTrustReasonText",
+          "longname": "module:utils/pdfSignatureStatus.getTrustReasonText",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 223,
+          "description": "Localized plain-language reason for a gateway trustReason code, or null for an unknown code.",
+          "params": [
+            {
+              "name": "t",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "code",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "string|null",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus.getSignatureTrustState",
+          "name": "getSignatureTrustState",
+          "longname": "module:utils/pdfSignatureStatus.getSignatureTrustState",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 238,
+          "description": "Which trust situation a signature is in: unavailable : no gateway answered for this document (viewer opened without ODVGateway); not-checked : the gateway has server validation di...",
+          "params": [
+            {
+              "name": "signature",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "'unavailable'|'not-checked'|'server-error'|'valid'|'invalid'|'unknown'",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus~TrustExplanation",
+          "name": "TrustExplanation",
+          "longname": "module:utils/pdfSignatureStatus~TrustExplanation",
+          "kind": "typedef",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 246,
+          "description": "",
+          "params": [],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus.getTrustExplanation",
+          "name": "getTrustExplanation",
+          "longname": "module:utils/pdfSignatureStatus.getTrustExplanation",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 263,
+          "description": "State-specific trust text for the details dialog.",
+          "params": [
+            {
+              "name": "t",
+              "type": "function",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "signature",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "TrustExplanation",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus~pad2",
+          "name": "pad2",
+          "longname": "module:utils/pdfSignatureStatus~pad2",
+          "kind": "function",
+          "scope": "inner",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 326,
+          "description": "",
+          "params": [
+            {
+              "name": "value",
+              "type": "number",
+              "optional": false,
+              "description": "@returns {string}"
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
+          "id": "module:utils/pdfSignatureStatus.formatSignatureTime",
+          "name": "formatSignatureTime",
+          "longname": "module:utils/pdfSignatureStatus.formatSignatureTime",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatureStatus.js",
+          "line": 337,
+          "description": "Format a signature-related ISO time (signing, validation, certificate validity) as local time, &quot;2022-04-27 19:55&quot;, in both supported languages.",
+          "params": [
+            {
+              "name": "value",
+              "type": "*",
+              "optional": false,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "Object|null",
+              "description": "Null when there is no value."
+            }
+          ],
+          "examples": 0
         }
       ],
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 6,
-      "importanceScore": 103,
+      "incomingLocalImports": 7,
+      "importanceScore": 112,
       "summary": "Signature UI status helpers for browser integrity and gateway trust.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -64086,7 +64859,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 159,
+      "line": 161,
       "description": "Build a center-out thumbnail warm-up order so the pane feels responsive around the user's current scroll target instead of always starting from page 1.",
       "params": [
         {
@@ -64123,7 +64896,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 72,
+      "line": 74,
       "description": "",
       "params": [
         {
@@ -64154,13 +64927,68 @@
       "examples": 0
     },
     {
+      "id": "DocumentBoundaryHeader",
+      "name": "DocumentBoundaryHeader",
+      "longname": "DocumentBoundaryHeader",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentThumbnailList.jsx",
+      "line": 363,
+      "description": "The &quot;DOK n&quot; document header with the document signature symbol.",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.documentContext",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.documentSignatures",
+          "type": "*|null",
+          "optional": true,
+          "description": "Signed-document entry; shows the symbol when set."
+        },
+        {
+          "name": "props.onOpenSignatures",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.sticky",
+          "type": "boolean",
+          "optional": true,
+          "description": "Rendered in the sticky band at the top of the strip."
+        },
+        {
+          "name": "props.hidden",
+          "type": "boolean",
+          "optional": true,
+          "description": "Removes the header from the accessibility tree and the tab order (the inline header while its sticky twin is shown), so the symbol is never..."
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "DocumentThumbnailList",
       "name": "DocumentThumbnailList",
       "longname": "DocumentThumbnailList",
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 567,
+      "line": 613,
       "description": "",
       "params": [
         {
@@ -64281,7 +65109,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 116,
+      "line": 118,
       "description": "",
       "params": [
         {
@@ -64312,7 +65140,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 126,
+      "line": 128,
       "description": "",
       "params": [
         {
@@ -64337,7 +65165,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 324,
+      "line": 326,
       "description": "",
       "params": [
         {
@@ -64368,7 +65196,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 338,
+      "line": 340,
       "description": "",
       "params": [
         {
@@ -64399,7 +65227,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 270,
+      "line": 272,
       "description": "",
       "params": [
         {
@@ -64442,7 +65270,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 221,
+      "line": 223,
       "description": "",
       "params": [
         {
@@ -64485,7 +65313,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 193,
+      "line": 195,
       "description": "",
       "params": [
         {
@@ -64522,7 +65350,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 180,
+      "line": 182,
       "description": "",
       "params": [
         {
@@ -64547,7 +65375,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 135,
+      "line": 137,
       "description": "",
       "params": [
         {
@@ -64578,7 +65406,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 95,
+      "line": 97,
       "description": "",
       "params": [
         {
@@ -64615,7 +65443,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1091,
+      "line": 1184,
       "description": "",
       "params": [
         {
@@ -64646,7 +65474,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1184,
+      "line": 1277,
       "description": "",
       "params": [
         {
@@ -64677,7 +65505,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1117,
+      "line": 1210,
       "description": "",
       "params": [
         {
@@ -64708,7 +65536,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 986,
+      "line": 1060,
       "description": "",
       "params": [
         {
@@ -64733,7 +65561,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1130,
+      "line": 1223,
       "description": "",
       "params": [
         {
@@ -64770,7 +65598,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 977,
+      "line": 1051,
       "description": "",
       "params": [
         {
@@ -64795,7 +65623,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1064,
+      "line": 1138,
       "description": "",
       "params": [
         {
@@ -64820,7 +65648,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 146,
+      "line": 148,
       "description": "",
       "params": [
         {
@@ -64845,13 +65673,38 @@
       "examples": 0
     },
     {
+      "id": "<anonymous>~resolveStickyHeaderRowIndex",
+      "name": "resolveStickyHeaderRowIndex",
+      "longname": "<anonymous>~resolveStickyHeaderRowIndex",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/components/DocumentThumbnailList.jsx",
+      "line": 700,
+      "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
+      "params": [
+        {
+          "name": "top",
+          "type": "number",
+          "optional": false,
+          "description": "Current scrollTop of the strip."
+        }
+      ],
+      "returns": [
+        {
+          "type": "number",
+          "description": "Row index of the document start whose header is sticky, or -1."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~setContainerRef",
       "name": "setContainerRef",
       "longname": "<anonymous>~setContainerRef",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 748,
+      "line": 822,
       "description": "",
       "params": [
         {
@@ -64876,7 +65729,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 81,
+      "line": 83,
       "description": "",
       "params": [
         {
@@ -64907,7 +65760,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 351,
+      "line": 408,
       "description": "",
       "params": [
         {
@@ -68327,7 +69180,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 645,
+      "line": 668,
       "description": "",
       "params": [
         {
@@ -68347,7 +69200,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 671,
+      "line": 694,
       "description": "",
       "params": [
         {
@@ -68415,7 +69268,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 639,
+      "line": 662,
       "description": "",
       "params": [
         {
@@ -68591,7 +69444,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 746,
+      "line": 769,
       "description": "",
       "params": [
         {
@@ -68616,7 +69469,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 769,
+      "line": 792,
       "description": "",
       "params": [
         {
@@ -71518,7 +72371,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 81,
+      "line": 85,
       "description": "",
       "params": [
         {
@@ -71591,7 +72444,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 36,
+      "line": 40,
       "description": "",
       "params": [
         {
@@ -71622,7 +72475,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 53,
+      "line": 57,
       "description": "",
       "params": [
         {
@@ -71653,7 +72506,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 121,
+      "line": 125,
       "description": "",
       "params": [
         {
@@ -71673,7 +72526,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 147,
+      "line": 151,
       "description": "Arrow keys, Home and End move between file tabs (automatic activation).",
       "params": [],
       "returns": [],
@@ -71686,7 +72539,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 163,
+      "line": 167,
       "description": "Keep Tab navigation inside the dialog while it is open.",
       "params": [],
       "returns": [],
@@ -71699,7 +72552,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureDetailsDialog.jsx",
-      "line": 203,
+      "line": 207,
       "description": "",
       "params": [
         {
@@ -71769,7 +72622,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/components/SignatureOverviewDialog.jsx",
-      "line": 46,
+      "line": 47,
       "description": "",
       "params": [
         {
@@ -71842,7 +72695,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureOverviewDialog.jsx",
-      "line": 87,
+      "line": 88,
       "description": "",
       "params": [
         {
@@ -71862,7 +72715,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/SignatureOverviewDialog.jsx",
-      "line": 101,
+      "line": 102,
       "description": "Keep Tab navigation inside the dialog while it is open.",
       "params": [],
       "returns": [],
@@ -71922,6 +72775,43 @@
       "description": "Material Icons ligature per severity.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module.exports",
+      "name": "exports",
+      "longname": "module.exports",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/components/SignatureTime.jsx",
+      "line": 18,
+      "description": "",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.value",
+          "type": "*",
+          "optional": false,
+          "description": "ISO 8601 time, or empty."
+        },
+        {
+          "name": "props.fallback",
+          "type": "string",
+          "optional": true,
+          "description": "Text shown when there is no value."
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -74859,7 +75749,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 140,
+      "line": 134,
       "description": "Helper: append query params safely to a URL.",
       "params": [],
       "returns": [],
@@ -74872,7 +75762,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 90,
+      "line": 93,
       "description": "Fallback cache-busting token for bundled locale resources.",
       "params": [],
       "returns": [],
@@ -74885,7 +75775,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 372,
+      "line": 366,
       "description": "Compute a normalized base href.",
       "params": [],
       "returns": [
@@ -74903,7 +75793,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 99,
+      "line": 102,
       "description": "Dev-only reload delay after diagnostic localStorage writes.",
       "params": [],
       "returns": [],
@@ -74916,7 +75806,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 243,
+      "line": 237,
       "description": "Extract the lowercase base language code from a locale candidate.",
       "params": [
         {
@@ -74941,8 +75831,8 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 111,
-      "description": "Return cache-busting version token (see header).",
+      "line": 114,
+      "description": "Return cache-busting version token (see header and utils/i18nVersion.js).",
       "params": [],
       "returns": [],
       "examples": 0
@@ -74954,7 +75844,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 57,
+      "line": 60,
       "description": "Return Vite import.meta.env safely.",
       "params": [],
       "returns": [
@@ -74972,7 +75862,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 257,
+      "line": 251,
       "description": "Normalize configured supported languages to non-empty base language codes.",
       "params": [
         {
@@ -74997,7 +75887,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 40,
+      "line": 43,
       "description": "Return browser window safely in browser, SSR, test, and documentation contexts.",
       "params": [],
       "returns": [
@@ -75015,7 +75905,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 217,
+      "line": 211,
       "description": "Compute app config &amp; defaults safely.",
       "params": [],
       "returns": [
@@ -75033,7 +75923,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 173,
+      "line": 167,
       "description": "Find malformed version-like placeholders in loadPath without extra array passes.",
       "params": [
         {
@@ -75058,7 +75948,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 68,
+      "line": 71,
       "description": "Dev-mode detector (Vite + Node envs).",
       "params": [],
       "returns": [],
@@ -75071,7 +75961,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 272,
+      "line": 266,
       "description": "Normalize an arbitrary language candidate to a supported base language.",
       "params": [
         {
@@ -75096,27 +75986,27 @@
       "examples": 0
     },
     {
-      "id": "normalizeVersionToken",
-      "name": "normalizeVersionToken",
-      "longname": "normalizeVersionToken",
-      "kind": "function",
-      "scope": "global",
-      "file": "src/i18n.js",
-      "line": 102,
-      "description": "Normalize optional version tokens from runtime config or globals.",
-      "params": [],
-      "returns": [],
-      "examples": 0
-    },
-    {
       "id": "readQuery",
       "name": "readQuery",
       "longname": "readQuery",
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 73,
+      "line": 76,
       "description": "Read a query parameter by name (no deps).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "readStoredI18nVersion",
+      "name": "readStoredI18nVersion",
+      "longname": "readStoredI18nVersion",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/i18n.js",
+      "line": 105,
+      "description": "Read the persisted diagnostic version token, if storage is available.",
       "params": [],
       "returns": [],
       "examples": 0
@@ -75128,7 +76018,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 196,
+      "line": 190,
       "description": "Refresh i18n resources after a diagnostic localStorage write.",
       "params": [],
       "returns": [
@@ -75146,7 +76036,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 302,
+      "line": 296,
       "description": "Resolve the initial UI language without relying on persisted i18next cache state.",
       "params": [
         {
@@ -75189,7 +76079,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 390,
+      "line": 384,
       "description": "Resolve the final translation URL at request time (with cache buster).",
       "params": [
         {
@@ -75220,7 +76110,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 161,
+      "line": 155,
       "description": "Keep i18n URL template substitutions constrained to plain path segments.",
       "params": [
         {
@@ -75251,7 +76141,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 353,
+      "line": 347,
       "description": "Keep the document language synchronized with the active UI language.",
       "params": [
         {
@@ -75288,7 +76178,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/i18n.js",
-      "line": 82,
+      "line": 85,
       "description": "Diagnostics ON only in dev builds.",
       "params": [],
       "returns": [],
@@ -79835,6 +80725,142 @@
       "examples": 0
     },
     {
+      "id": "module:utils/i18nVersion.getBuildLocaleToken",
+      "name": "getBuildLocaleToken",
+      "longname": "module:utils/i18nVersion.getBuildLocaleToken",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/i18nVersion.js",
+      "line": 38,
+      "description": "Join the build id and the locale content hash into one token.",
+      "params": [
+        {
+          "name": "buildId",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "resourceHash",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/i18nVersion.normalizeVersionToken",
+      "name": "normalizeVersionToken",
+      "longname": "module:utils/i18nVersion.normalizeVersionToken",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/i18nVersion.js",
+      "line": 25,
+      "description": "Normalize optional version tokens; &quot;auto&quot; and blank values mean &quot;not set&quot;.",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/i18nVersion.resolveI18nVersion",
+      "name": "resolveI18nVersion",
+      "longname": "module:utils/i18nVersion.resolveI18nVersion",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/i18nVersion.js",
+      "line": 53,
+      "description": "",
+      "params": [
+        {
+          "name": "sources",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "sources.query",
+          "type": "*",
+          "optional": true,
+          "description": "?i18nV value."
+        },
+        {
+          "name": "sources.configVersion",
+          "type": "*",
+          "optional": true,
+          "description": "__ODV_CONFIG__.i18n.version ."
+        },
+        {
+          "name": "sources.buildId",
+          "type": "*",
+          "optional": true,
+          "description": "Vite ODV_BUILD_ID ."
+        },
+        {
+          "name": "sources.resourceHash",
+          "type": "*",
+          "optional": true,
+          "description": "Vite ODV_I18N_RESOURCE_HASH (locale content hash)."
+        },
+        {
+          "name": "sources.storedVersion",
+          "type": "*",
+          "optional": true,
+          "description": "localStorage ODV_I18N_VERSION ."
+        },
+        {
+          "name": "sources.appVersion",
+          "type": "*",
+          "optional": true,
+          "description": "Application version."
+        },
+        {
+          "name": "sources.fallback",
+          "type": "string",
+          "optional": false,
+          "description": "Bundled resource revision."
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/i18nVersion",
+      "name": "utils/i18nVersion",
+      "longname": "module:utils/i18nVersion",
+      "kind": "module",
+      "scope": null,
+      "file": "src/utils/i18nVersion.js",
+      "line": 2,
+      "description": "Cache-busting version token for the locale files ( locales/&lt;lng&gt;/common.json?v=&lt;token&gt; ).",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "bytesToHex",
       "name": "bytesToHex",
       "longname": "bytesToHex",
@@ -84359,7 +85385,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 116,
+      "line": 119,
       "description": "Fold per-file signature reports into per-document entries.",
       "params": [
         {
@@ -84396,7 +85422,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 200,
+      "line": 217,
       "description": "",
       "params": [
         {
@@ -84427,7 +85453,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 54,
+      "line": 57,
       "description": "Document key of a page.",
       "params": [
         {
@@ -84452,8 +85478,39 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 213,
-      "description": "Heading for one file of a multi-file document: &quot;File k of m – name&quot;, or &quot;File k of m&quot; when no file name is available.",
+      "line": 230,
+      "description": "Heading for one file of a multi-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.",
+      "params": [
+        {
+          "name": "t",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "file",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureDocuments.getSignatureFilePages",
+      "name": "getSignatureFilePages",
+      "longname": "module:utils/pdfSignatureDocuments.getSignatureFilePages",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureDocuments.js",
+      "line": 245,
+      "description": "Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.",
       "params": [
         {
           "name": "t",
@@ -84483,7 +85540,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 70,
+      "line": 73,
       "description": "Display file name from a source URL: the last path segment, only when it looks like a file name (has an extension).",
       "params": [
         {
@@ -84508,7 +85565,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 94,
+      "line": 97,
       "description": "",
       "params": [
         {
@@ -84533,7 +85590,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 32,
+      "line": 35,
       "description": "",
       "params": [],
       "returns": [],
@@ -84559,7 +85616,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureDocuments.js",
-      "line": 185,
+      "line": 202,
       "description": "Totals for the toolbar overview button, or null when nothing is signed (the button is then not rendered).",
       "params": [
         {
@@ -84597,7 +85654,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 109,
+      "line": 120,
       "description": "Create viewer-local state for disabled gateway sessions.",
       "params": [],
       "returns": [
@@ -84652,7 +85709,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 65,
+      "line": 75,
       "description": "Accept only unambiguous server entries.",
       "params": [
         {
@@ -84687,6 +85744,31 @@
       "description": "Optional gateway trust enrichment.",
       "params": [],
       "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureGateway~validationDisabled",
+      "name": "validationDisabled",
+      "longname": "module:utils/pdfSignatureGateway~validationDisabled",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureGateway.js",
+      "line": 64,
+      "description": "The gateway answered that server validation is switched off.",
+      "params": [
+        {
+          "name": "report",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "*",
+          "description": ""
+        }
+      ],
       "examples": 0
     },
     {
@@ -84937,6 +86019,31 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureStatus.formatSignatureTime",
+      "name": "formatSignatureTime",
+      "longname": "module:utils/pdfSignatureStatus.formatSignatureTime",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 337,
+      "description": "Format a signature-related ISO time (signing, validation, certificate validity) as local time, &quot;2022-04-27 19:55&quot;, in both supported languages.",
+      "params": [
+        {
+          "name": "value",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object|null",
+          "description": "Null when there is no value."
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureStatus.getIntegrityLabel",
       "name": "getIntegrityLabel",
       "longname": "module:utils/pdfSignatureStatus.getIntegrityLabel",
@@ -85049,6 +86156,62 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureStatus.getSignatureTrustState",
+      "name": "getSignatureTrustState",
+      "longname": "module:utils/pdfSignatureStatus.getSignatureTrustState",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 238,
+      "description": "Which trust situation a signature is in: unavailable : no gateway answered for this document (viewer opened without ODVGateway); not-checked : the gateway has server validation di...",
+      "params": [
+        {
+          "name": "signature",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'unavailable'|'not-checked'|'server-error'|'valid'|'invalid'|'unknown'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureStatus.getTrustExplanation",
+      "name": "getTrustExplanation",
+      "longname": "module:utils/pdfSignatureStatus.getTrustExplanation",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 263,
+      "description": "State-specific trust text for the details dialog.",
+      "params": [
+        {
+          "name": "t",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "signature",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "TrustExplanation",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureStatus.getTrustLabel",
       "name": "getTrustLabel",
       "longname": "module:utils/pdfSignatureStatus.getTrustLabel",
@@ -85074,6 +86237,37 @@
       "returns": [
         {
           "type": "string",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureStatus.getTrustReasonText",
+      "name": "getTrustReasonText",
+      "longname": "module:utils/pdfSignatureStatus.getTrustReasonText",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 223,
+      "description": "Localized plain-language reason for a gateway trustReason code, or null for an unknown code.",
+      "params": [
+        {
+          "name": "t",
+          "type": "function",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "code",
+          "type": "*",
+          "optional": false,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "string|null",
           "description": ""
         }
       ],
@@ -85193,6 +86387,26 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureStatus~pad2",
+      "name": "pad2",
+      "longname": "module:utils/pdfSignatureStatus~pad2",
+      "kind": "function",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 326,
+      "description": "",
+      "params": [
+        {
+          "name": "value",
+          "type": "number",
+          "optional": false,
+          "description": "@returns {string}"
+        }
+      ],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureStatus.reportHasSignatures",
       "name": "reportHasSignatures",
       "longname": "module:utils/pdfSignatureStatus.reportHasSignatures",
@@ -85231,6 +86445,32 @@
       "examples": 0
     },
     {
+      "id": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
+      "name": "TRUST_REASON_CODES",
+      "longname": "module:utils/pdfSignatureStatus.TRUST_REASON_CODES",
+      "kind": "constant",
+      "scope": "static",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 215,
+      "description": "Every trustReason code the gateway can emit.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
+      "name": "TRUST_REASON_DEFAULTS",
+      "longname": "module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS",
+      "kind": "constant",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 185,
+      "description": "Plain-language English default per gateway trustReason code.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
       "id": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
       "name": "TRUST_WORST_FIRST",
       "longname": "module:utils/pdfSignatureStatus~TRUST_WORST_FIRST",
@@ -85239,6 +86479,19 @@
       "file": "src/utils/pdfSignatureStatus.js",
       "line": 136,
       "description": "Trust verdicts ordered worst-first.",
+      "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatureStatus~TrustExplanation",
+      "name": "TrustExplanation",
+      "longname": "module:utils/pdfSignatureStatus~TrustExplanation",
+      "kind": "typedef",
+      "scope": "inner",
+      "file": "src/utils/pdfSignatureStatus.js",
+      "line": 246,
+      "description": "",
       "params": [],
       "returns": [],
       "examples": 0

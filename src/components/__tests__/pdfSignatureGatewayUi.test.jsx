@@ -45,8 +45,8 @@ it.each([
   expect(container.querySelector('button').title).toContain(invalid);
 });
 
-it.each([['en', 'Server validation unavailable'], ['sv', 'Servervalidering är inte tillgänglig']])(
-  'G20 only client failures use the localized unavailable label in %s', async (language, unavailable) => {
+it.each([['en', 'The server could not check the signature this time'], ['sv', 'Servern kunde inte kontrollera signaturen den här gången']])(
+  'G20 only client failures use the localized unavailable explanation in %s', async (language, unavailable) => {
     await i18n.changeLanguage(language);
     const browser = { signatures: [{ fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' }] };
     const failure = mergeGatewaySignatureReport(browser, null);
@@ -63,8 +63,8 @@ it.each([['en', 'Server validation unavailable'], ['sv', 'Servervalidering är i
     expect(container.textContent).toContain('server validation unavailable');
     expect(container.textContent).not.toContain(unavailable);
   });
-it.each([['en', ['Valid', 'Invalid', 'Unknown'], 'Trust not checked', 'Validation time', 'Verified timestamp'],
-  ['sv', ['Giltig', 'Ogiltig', 'Okänd'], 'Tillit ej kontrollerad', 'Valideringstid', 'Verifierad tidsstämpel']])(
+it.each([['en', ['Valid', 'Invalid', 'Unknown'], 'can only be checked when the document is opened through ODVGateway', 'Validation time', 'Verified timestamp'],
+  ['sv', ['Giltig', 'Ogiltig', 'Okänd'], 'kan bara kontrolleras när dokumentet öppnas via ODVGateway', 'Valideringstid', 'Verifierad tidsstämpel']])(
   'G9 localized dialog in %s shows per-signature trust, timestamp and validation time', async (language, labels, unchecked, timeLabel, timestampLabel) => {
     await i18n.changeLanguage(language);
     for (const [index, trust] of ['valid', 'invalid', 'unknown'].entries()) {
@@ -73,7 +73,9 @@ it.each([['en', ['Valid', 'Invalid', 'Unknown'], 'Trust not checked', 'Validatio
       await render(SignatureDetailsDialog, [signature]);
       expect(container.textContent).toContain(labels[index]);
       expect(container.textContent).toContain(timeLabel);
-      expect(container.textContent).toContain(signature.validationTime);
+      // Local time in the text, the exact UTC instant in the title.
+      expect(container.querySelector('time[datetime="2026-10-01T12:00:00.000Z"]').title).toBe('2026-10-01T12:00:00.000Z');
+      expect(container.textContent).not.toContain(signature.validationTime);
       expect(container.textContent).toContain(timestampLabel);
       expect(container.textContent).toContain(signature.trustReason);
       expect(container.textContent).not.toContain(unchecked);

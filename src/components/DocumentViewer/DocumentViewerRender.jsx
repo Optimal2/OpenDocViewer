@@ -479,6 +479,29 @@ const DocumentViewerRender = ({
     handlePaneWheelCaptureRef.current = handlePaneWheelCapture;
   }, [handlePaneWheelCapture]);
 
+  // Compare panes: expose the page viewport's scrollbar width so the top-right zoom controls
+  // stay clear of the scrollbar (layout.css, .compare-zoom-overlay).
+  useEffect(() => {
+    if (!isComparing || typeof ResizeObserver !== 'function') return undefined;
+    const frames = [primaryPaneRef.current, comparePaneRef.current].filter((frame) => frame instanceof HTMLElement);
+    const update = () => {
+      frames.forEach((frame) => {
+        const viewport = frame.querySelector('.document-render-viewport');
+        const width = viewport ? Math.max(0, viewport.offsetWidth - viewport.clientWidth) : 0;
+        frame.style.setProperty('--odv-pane-scrollbar-width', `${width}px`);
+      });
+    };
+    update();
+    const observer = new ResizeObserver(update);
+    frames.forEach((frame) => {
+      const viewport = frame.querySelector('.document-render-viewport');
+      if (!viewport) return;
+      observer.observe(viewport);
+      Array.from(viewport.children).forEach((child) => observer.observe(child));
+    });
+    return () => observer.disconnect();
+  }, [comparePageNumber, isComparing, pageNumber]);
+
   useEffect(() => {
     if (typeof window === 'undefined') return undefined;
 

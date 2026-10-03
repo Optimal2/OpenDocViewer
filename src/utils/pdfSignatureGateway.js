@@ -56,6 +56,16 @@ function unavailable(report) {
 }
 
 /**
+ * The gateway answered that server validation is switched off. Trust stays unchecked; the
+ * client-only marker lets the dialog explain that configuration (never accepted from the server).
+ * @param {*} report
+ * @returns {*}
+ */
+function validationDisabled(report) {
+  return { ...report, signatures: report.signatures.map((signature) => ({ ...signature, serverValidationDisabled: true })) };
+}
+
+/**
  * Accept only unambiguous server entries. Missing/duplicate field identities
  * cannot establish trust. The browser's integrity can only stay equal or worsen.
  * @param {*} report Browser report.
@@ -93,6 +103,7 @@ export function mergeGatewaySignatureReport(report, server) {
         trust: remote.trust,
         trustReason: remote.trustReason ?? null,
         serverValidationUnavailable: false,
+        serverValidationDisabled: false,
         validationTime: remote.validationTime,
         ...(remote.signingTimeSource === 'timestamp'
           ? { signingTime: remote.signingTime, signingTimeSource: 'timestamp' } : {}),
@@ -111,8 +122,8 @@ export function createGatewaySignatureClient() {
   return {
     async enrich(report, sourceUrl, sourcePack) {
       const context = getGatewaySignatureContext(sourceUrl, undefined, sourcePack);
-      if (!context || report.signatures.length === 0
-          || disabledSessions.has(context.session)) return report;
+      if (!context || report.signatures.length === 0) return report;
+      if (disabledSessions.has(context.session)) return validationDisabled(report);
       const controller = new AbortController();
       let timer;
       try {
@@ -132,7 +143,7 @@ export function createGatewaySignatureClient() {
         ]);
         if (response.status === 404 && body?.error === DISABLED) {
           disabledSessions.add(context.session);
-          return report;
+          return validationDisabled(report);
         }
         if (!response.ok) return unavailable(report);
         return mergeGatewaySignatureReport(report, body);

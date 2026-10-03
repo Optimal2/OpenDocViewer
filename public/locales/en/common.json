@@ -724,12 +724,13 @@
       "subtitle": "{count, plural, =1 {1 signature in this document.} other {# signatures in this document.}}",
       "subtitleDocumentPosition": "Document {document} of {total}",
       "close": "Close",
-      "trustLine": "Trust not checked – shows who signed and whether the document is unchanged, not whether the signature is valid.",
       "signatureHeading": "Signature {index}",
       "notAvailable": "—",
       "validityRange": "{from} – {to}",
       "filePosition": "File {file} of {total}",
-      "fileTabsLabel": "Files with signatures"
+      "fileTabsLabel": "Files with signatures",
+      "filePage": "Page {page}",
+      "filePages": "Pages {start}–{end}"
     },
     "fields": {
       "signer": "Signer",
@@ -788,6 +789,46 @@
       "details": "Details",
       "detailsAria": "Show signature details for document {document}",
       "detailsTitle": "Show signature details"
+    },
+    "trustExplanation": {
+      "unavailable": "The validity of the signature can only be checked when the document is opened through ODVGateway. Shown here: who signed and whether the document is unchanged since signing.",
+      "notChecked": "The server does not check the certificate chain and revocation status in this installation (ODVGateway signatures.enabled is off). Shown: who signed and whether the document is unchanged.",
+      "notCheckedHint": "An administrator can enable the check in the ODVGateway configuration.",
+      "serverError": "The server could not check the signature this time (ODVGateway did not answer or sent an unusable answer). Shown: who signed and whether the document is unchanged.",
+      "valid": "The signature is valid: the server checked the certificate chain and revocation status.",
+      "invalid": "The signature is not valid",
+      "unknown": "Could not determine whether the signature is valid",
+      "unknownNotMeaning": "This does not mean that the signature is invalid or that the document was changed – see Integrity for whether the content is unchanged since signing.",
+      "unknownReason": "Unknown reason",
+      "code": "Code: {code}"
+    },
+    "trustReason": {
+      "byte-range-malformed": "The signature's byte range is malformed",
+      "byte-range-missing": "The signature has no byte range",
+      "contents-missing": "The signature data is missing from the document",
+      "contents-too-large": "The signature data is too large to check on the server",
+      "subfilter-unsupported": "The signature format is not supported by the server",
+      "cms-unreadable": "The signature data could not be read",
+      "digest-algorithm-unsupported": "The signature's hash algorithm is not supported",
+      "message-digest-attribute-missing": "The signature has no checksum of the signed content",
+      "digest-mismatch": "The content does not match the signature – the document was changed after signing",
+      "signature-invalid": "The cryptographic signature does not verify",
+      "bytes-appended-after-signed-range": "The document was extended after signing without a new signature",
+      "signer-certificate-missing": "The signer's certificate is missing from the signature",
+      "chain-not-anchored": "The certificate chain does not lead to a trusted root",
+      "certificate-not-valid-at-validation-time": "The certificate was not valid at the validation time",
+      "revoked": "The certificate has been revoked",
+      "revocation-unavailable": "The revocation list could not be retrieved",
+      "revocation-not-checked": "Revocation status is not checked on the server",
+      "weak-signature": "The signature uses an algorithm or key that is too weak",
+      "chain-policy-violation": "The certificate chain does not meet the server's policy",
+      "modified-after-certification": "The document was changed in a way the certification does not allow",
+      "timestamp-not-verifiable": "The timestamp could not be verified",
+      "timestamp-responder-not-anchored": "The timestamp issuer does not lead to a trusted root",
+      "timestamp-responder-not-trusted": "The timestamp issuer is not trusted on the server",
+      "key-usage-not-signing": "The certificate is not intended for signing",
+      "validation-error": "An error occurred while the server checked the signature",
+      "validation-timeout": "The server check took too long"
     }
   },
   "about": {

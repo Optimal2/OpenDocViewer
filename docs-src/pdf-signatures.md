@@ -193,6 +193,13 @@ The viewer surfaces the inspection result without ever blocking page rendering:
     severity, total count shown next to the icon) and opens the details dialog for the
     document with the first signed file preselected. The header is not collapsible, so the
     symbol stays visible; the click stops propagation and never selects or toggles pages.
+    The inline header and the sticky header shown while scrolling the strip are one component
+    (`DocumentBoundaryHeader` in `DocumentThumbnailList.jsx`), so both have the same typography,
+    size, spacing and clickable symbol. The sticky header appears only once the current
+    document's inline header has scrolled out of view, so the two are never visible together;
+    while it is shown, the scrolled-out inline header is `aria-hidden` and `inert`, so the
+    symbol is announced and tab-reachable once. Verified by
+    `tests/ui/thumbnail-sticky-header.spec.mjs`.
   - **Page symbol** on every page thumbnail that belongs to a signed file: an 18 px glyph in a
     22 px pill centred on the top edge of the thumbnail image, so the top-right corner stays
     free for the compare-mode L/R pane markers. At rest it is discreet (opacity 0.55, no
@@ -216,26 +223,56 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   (print and PDF export build their own output documents, not the app DOM).
 - `src/components/SignatureDetailsDialog.jsx` opens per document. When the document has more
   than one file with signatures, a file selector (tabs, arrow-key navigable) sits above the
-  groups, the requested file is preselected, and the selected file gets a heading ("File k of
-  m – name") followed by its signatures. With one signed file it is a plain list. Each
-  signature lists signer and organisation, issuer, signing time and its source, reason,
-  location, kind, integrity in plain words with `integrityReason`, whole-document coverage,
-  certificate validity period and format. Its accessibility mirrors
+  groups and the requested file is preselected (a page symbol preselects its own file). The
+  tabs look like tabs on a rail: the active tab is filled with inverted text/surface colours,
+  and every tab shows the file's page range inside the document. The selected file is repeated
+  in the group heading ("File k of m: name", or "File k of m" without a name) with its page
+  range ("Pages 19–24", the thumbnail "S" numbers), followed by its signatures. With one signed
+  file it is a plain list. Each signature lists signer and organisation, issuer, signing time
+  and its source, reason, location, kind, integrity in plain words with `integrityReason`,
+  whole-document coverage, certificate validity period and format.
+  All times in the dialog and the overview (signing time, validation time, certificate
+  validity) are shown as local time, "2022-04-27 19:55", in both languages, with the exact UTC
+  ISO value in the `title` attribute and `<time dateTime>` (`formatSignatureTime()` in
+  `pdfSignatureStatus.js`, rendered by `SignatureTime.jsx`). Its accessibility mirrors
   `DocumentMetadataOverlayDialog`: focus moves into the dialog, Tab is trapped inside,
   Escape closes, and focus returns to the symbol that opened it. Unsupported formats are
   shown as "signature present, format not supported", never hidden.
-- Each unchecked signature shows the level-1 trust line ("Trust not checked - shows who signed and
-  whether the document is unchanged, not whether the signature is valid."). The trust field
-  is rendered generically with labels for `not-checked`, `valid`, `invalid` and `unknown`
-  plus an optional `trustReason`, so level 2 only fills the field with no UI rewrite.
+- Each signature starts with a trust explanation (`getTrustExplanation()` in
+  `pdfSignatureStatus.js`) that says why the trust is what it is and what that means. The
+  state comes from `getSignatureTrustState()`:
+
+  | State | When | Text (sv) |
+  | --- | --- | --- |
+  | `unavailable` | no gateway answered for the document (viewer opened without ODVGateway) | "Signaturens giltighet kan bara kontrolleras när dokumentet öppnas via ODVGateway. Här visas vem som signerat och om dokumentet är oförändrat sedan signeringen." |
+  | `not-checked` | the gateway answered that signature validation is disabled (`serverValidationDisabled`) | "Servern kontrollerar inte certifikatkedja och spärrstatus i den här installationen (ODVGateway signatures.enabled är av). Visas: vem som signerat och om dokumentet är oförändrat." plus "En administratör kan aktivera kontrollen i ODVGateways konfiguration." |
+  | `server-error` | the gateway request failed or was unusable (`serverValidationUnavailable`) | "Servern kunde inte kontrollera signaturen den här gången (…)" |
+  | `valid` | gateway verdict | "Signaturen är giltig: servern har kontrollerat certifikatkedja och spärrstatus." |
+  | `invalid` | gateway verdict | "Signaturen är inte giltig" + the reason in plain language |
+  | `unknown` | gateway verdict | "Kunde inte avgöra om signaturen är giltig" + the reason in plain language + what it does not mean (the signature is not necessarily invalid and the document may be unchanged; see Integrity) |
+
+  Every gateway `trustReason` code (ODVGateway `SignatureValidationReasons`, 26 codes such as
+  `timestamp-responder-not-trusted` → "Tidsstämpelns utfärdare är inte betrodd på servern",
+  `revocation-unavailable` → "Spärrlistan kunde inte hämtas", `chain-not-anchored` →
+  "Certifikatkedjan leder inte till en betrodd rot") has a translation under
+  `signatures.trustReason.<code>` in English and Swedish. The raw code stays visible on a
+  smaller secondary line for support ("Kod: timestamp-responder-not-trusted"). An unknown code
+  shows "Okänd orsak" plus the code; reason text that is not a code (older gateways) is shown as
+  given. `src/utils/__tests__/pdfSignatureTrustText.test.js` lists the gateway codes: a code
+  without a translation in the mapping or either locale file fails the test, so new gateway
+  codes cannot reach users untranslated. The Trust field itself keeps the short label
+  (`not-checked`, `valid`, `invalid`, `unknown`).
 - Strings live under the `signatures` key (including `signatures.overview`) in
   `public/locales/en/common.json` and `public/locales/sv/common.json`; colours use the
   `--odv-signature-*` theme tokens (light, normal, dark, and the print reset).
-- Verification: `src/utils/__tests__/pdfSignatureDocuments.test.js` (aggregation),
+- Verification: `src/utils/__tests__/pdfSignatureDocuments.test.js` (aggregation, page ranges),
+  `src/utils/__tests__/pdfSignatureTrustText.test.js` (trust states and reason codes),
+  `src/components/__tests__/signatureDetailsDialog.test.jsx` (trust notes, local times),
   `src/components/__tests__/signatureOverview.test.jsx` (button and file tabs), and the
-  Playwright browser suite `tests/ui/signature-symbols.spec.mjs` (`npm run test:ui`: page symbol
-  placement clear of the compare markers, rest/hover opacity, document dialog, overview
-  navigation, and the runtime flag) using the synthetic fixtures from
+  Playwright browser suite `tests/ui/*.spec.mjs` (`npm run test:ui`: page symbol placement clear
+  of the compare markers, rest/hover opacity, document dialog and page-symbol preselection,
+  overview navigation, the runtime flag, the sticky document header, compare-mode zoom controls
+  and toolbar density) using the synthetic fixtures from
   `scripts/generate-signature-fixtures.mjs`. The first run needs the Playwright Chromium build
   (`npx playwright install chromium`).
 
@@ -287,22 +324,24 @@ an equal or better result preserves the browser explanation.
 
 A 404 with the exact JSON `error` message
 `Signature validation is not enabled on this gateway.` suppresses further requests
-for that gateway session and leaves trust unchecked. Other 404 responses, HTTP
+for that gateway session and leaves trust unchecked; the signatures of that session get the
+client-only marker `serverValidationDisabled: true`, which selects the "validation disabled"
+explanation. Server fields cannot set it; a matched verdict clears it. Other 404 responses, HTTP
 errors (including 413/415/422/500), network errors, timeouts and malformed reports
 leave `trust: 'not-checked'` and set `trustReason: 'server validation unavailable'`.
 The separate client-only `serverValidationUnavailable: true` field selects the
-localized failure label. Server fields cannot set this marker; a matched verdict
-clears it and displays the server's `trustReason` verbatim, even if it matches the
-legacy failure text.
+localized failure explanation. Server fields cannot set this marker; a matched verdict
+clears it and displays the server's `trustReason` (translated when it is a known code,
+otherwise as given), even if it matches the legacy failure text.
 They never grant valid trust or disable other documents' checks. This state is local
 to the viewer instance and keyed by gateway base and session, not just session text.
 
 Badge severity combines the worst integrity and trust: invalid trust is an error,
 unknown trust is a warning, and valid trust is OK only when integrity is intact.
 The tooltip includes localized invalid/unknown trust warnings alongside integrity.
-The dialog renders localized trust labels, a plain-text reason and validation time.
-The unchecked explanation is per signature and disappears only for an answered
-signature; partially matched documents still explain their unchecked signatures.
+The dialog renders localized trust labels, the trust explanation with the translated reason
+and raw code, and the validation time. The explanation is per signature, so partially matched
+documents still explain their unchecked signatures.
 The unavailable reason and timestamp source label are localized in English and Swedish.
 
 Run `npm test -- pdfSignatureGateway ViewerProvider.signatures` for mocked network,
@@ -355,6 +394,7 @@ interface PdfSignatureInfo {
   trust: 'not-checked' | 'valid' | 'invalid' | 'unknown';
   trustReason?: string | null;          // optional server explanation / unavailable reason
   serverValidationUnavailable?: boolean; // client-only failure marker, never accepted from the server
+  serverValidationDisabled?: boolean;    // client-only marker: the gateway has validation disabled
   validationTime?: string | null;       // ISO 8601 server validation time
 }
 ```

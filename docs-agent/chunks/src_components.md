@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 17. Line count: 7608. JSDoc symbol count: 98.
+File count: 18. Line count: 7749. JSDoc symbol count: 101.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -180,7 +180,7 @@ Signature details dialog \(browser integrity and optional gateway trust\).
 
 Exports: `SignatureDetailsDialog`
 
-Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`
+Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`, `src/components/SignatureTime.jsx`
 
 Symbols:
 
@@ -209,7 +209,7 @@ Signature overview dialog, opened from the toolbar overview button.
 
 Exports: `SignatureOverviewDialog`
 
-Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`
+Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`, `src/components/SignatureTime.jsx`
 
 Symbols:
 
@@ -228,6 +228,18 @@ Local imports: `src/utils/pdfSignatureStatus.js`
 Symbols:
 
 - `ICON_BY_SEVERITY` (constant) - Material Icons ligature per severity.
+- `module.exports` (function) - No description.
+
+## src/components/SignatureTime.jsx
+
+Local\-time rendering of a signature\-related ISO time \(signing, validation, certificate validity\) for the signature dialogs: "2022\-04\-27 19:55" as text, the exact UTC ISO value in the title attribute and \`dateTime\`.
+
+Exports: `SignatureTime`
+
+Local imports: `src/utils/pdfSignatureStatus.js`
+
+Symbols:
+
 - `module.exports` (function) - No description.
 
 ## src/components/ViewerProblemNotice.jsx

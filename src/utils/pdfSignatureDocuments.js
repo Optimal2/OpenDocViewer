@@ -24,6 +24,9 @@ import {
  * @property {number} fileNumber 1-based position of the file inside its document.
  * @property {number} fileCount Number of files in the document.
  * @property {string} fileName Display file name, or '' when not available.
+ * @property {number} firstPage First page of the file inside its document (the thumbnail "S" number;
+ * the page's position within its document when pages carry no document page number).
+ * @property {number} lastPage Last page of the file inside its document.
  * @property {(*|null)} report PdfSignatureReport, or null when the file has none yet.
  * @property {number} signatureCount
  * @property {('ok'|'warning'|'error'|null)} severity Null when the file has no signatures.
@@ -118,8 +121,10 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
   const reportMap = reports && typeof reports === 'object' ? reports : {};
   const getFileName = typeof options?.getFileName === 'function' ? options.getFileName : null;
 
-  /** @type {Map<string, { key:string, documentNumber:number, totalDocuments:number, firstPageNumber:number, sourceKeys:Array<string> }>} */
+  /** @type {Map<string, { key:string, documentNumber:number, totalDocuments:number, firstPageNumber:number, sourceKeys:Array<string>, pageCount:number }>} */
   const groups = new Map();
+  /** @type {Map<string, { first:number, last:number }>} */
+  const pageRanges = new Map();
   list.forEach((page, index) => {
     const key = getPageSignatureDocumentKey(page);
     const sourceKey = String(page?.sourceKey || '');
@@ -133,10 +138,20 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
         totalDocuments: Math.max(0, Number(page?.totalDocuments) || 0),
         firstPageNumber: (Number.isFinite(rawIndex) && rawIndex >= 0 ? Math.floor(rawIndex) : index) + 1,
         sourceKeys: [],
+        pageCount: 0,
       };
       groups.set(key, group);
     }
     if (!group.sourceKeys.includes(sourceKey)) group.sourceKeys.push(sourceKey);
+    const documentPage = Math.max(0, Math.floor(Number(page?.documentPageNumber) || 0));
+    group.pageCount += 1;
+    const pageNumber = documentPage > 0 ? documentPage : group.pageCount;
+    const range = pageRanges.get(sourceKey);
+    if (!range) pageRanges.set(sourceKey, { first: pageNumber, last: pageNumber });
+    else {
+      range.first = Math.min(range.first, pageNumber);
+      range.last = Math.max(range.last, pageNumber);
+    }
   });
 
   const documents = [];
@@ -150,6 +165,8 @@ export function buildSignatureDocuments(pages, reports, options = {}) {
         fileNumber: fileIndex + 1,
         fileCount,
         fileName: String((getFileName && getFileName(sourceKey)) || ''),
+        firstPage: pageRanges.get(sourceKey)?.first || 0,
+        lastPage: pageRanges.get(sourceKey)?.last || 0,
         report,
         signatureCount: signed ? report.signatures.length : 0,
         severity: signed ? getReportSignatureSeverity(report.signatures) : null,
@@ -204,7 +221,7 @@ export function findSignatureDocumentBySourceKey(documents, sourceKey) {
 }
 
 /**
- * Heading for one file of a multi-file document: "File k of m – name", or
+ * Heading for one file of a multi-file document: "File k of m: name", or
  * "File k of m" when no file name is available.
  * @param {Function} t
  * @param {{ fileNumber:number, fileCount:number, fileName:string }} file
@@ -216,5 +233,21 @@ export function getSignatureFileHeading(t, file) {
     total: file.fileCount,
     defaultValue: `File ${file.fileNumber} of ${file.fileCount}`,
   });
-  return file.fileName ? `${position} – ${file.fileName}` : position;
+  return file.fileName ? `${position}: ${file.fileName}` : position;
+}
+
+/**
+ * Page range of a file inside its document, "Pages 19–24" or "Page 3"; '' when unknown.
+ * @param {Function} t
+ * @param {{ firstPage:(number|undefined), lastPage:(number|undefined) }} file
+ * @returns {string}
+ */
+export function getSignatureFilePages(t, file) {
+  const first = Math.max(0, Number(file?.firstPage) || 0);
+  const last = Math.max(first, Number(file?.lastPage) || 0);
+  if (first <= 0) return '';
+  if (last === first) {
+    return t('signatures.dialog.filePage', { page: first, defaultValue: `Page ${first}` });
+  }
+  return t('signatures.dialog.filePages', { start: first, end: last, defaultValue: `Pages ${first}–${last}` });
 }

@@ -25,11 +25,15 @@ import { resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 import react from '@vitejs/plugin-react';
 import { configDefaults } from 'vitest/config';
+import { computeLocaleResourceHash } from './scripts/locale-resource-hash.mjs';
 
 const PKG = JSON.parse(readFileSync(new URL('./package.json', import.meta.url), 'utf8'));
 const APP_VERSION = String(PKG.version || '0.0.0');
 const BUILD_STAMP = String(process.env.ODV_BUILD_STAMP || process.env.SOURCE_DATE_EPOCH || 'stable');
 const ODV_BUILD_ID = String(process.env.ODV_BUILD_ID || `${APP_VERSION}-${BUILD_STAMP}`);
+// The build id stays deterministic; the locale content hash makes the locale URL token change
+// whenever a locale file changes (src/utils/i18nVersion.js).
+const ODV_I18N_RESOURCE_HASH = computeLocaleResourceHash(new URL('./', import.meta.url));
 const PDFJS_WASM_PUBLIC_PREFIX = '/pdfjs/wasm/';
 const PDFJS_WASM_OUTPUT_PREFIX = 'pdfjs/wasm/';
 const PDFJS_WASM_DIR = new URL('./node_modules/pdfjs-dist/wasm/', import.meta.url);
@@ -216,6 +220,7 @@ export default defineConfig(({ mode }) => {
       'import.meta.env.APP_VERSION': JSON.stringify(APP_VERSION),
       'import.meta.env.VITE_APP_VERSION': JSON.stringify(APP_VERSION),
       'import.meta.env.ODV_BUILD_ID': JSON.stringify(ODV_BUILD_ID),
+      'import.meta.env.ODV_I18N_RESOURCE_HASH': JSON.stringify(ODV_I18N_RESOURCE_HASH),
     },
   };
 });

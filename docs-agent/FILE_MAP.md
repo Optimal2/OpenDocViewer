@@ -24,7 +24,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
 | <code>src/components/DocumentRender.jsx</code> | 1135 | 1 | 25 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
-| <code>src/components/DocumentThumbnailList.jsx</code> | 1435 | 2 | 25 | high | OpenDocViewer — Deterministic thumbnail strip. |
+| <code>src/components/DocumentThumbnailList.jsx</code> | 1535 | 2 | 27 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
 | <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2168 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 109 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
@@ -44,7 +44,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentToolbar/ZoomButtons.jsx</code> | 566 | 1 | 3 | high | Zoom control cluster: \[ - \] \[ % editable \] \[ + \] \| \[ 1:1 \] \[ Fit Page \] \[ Fit Width \] \[ Custom Fit \] - When the field is NOT focused, it renders like “100%”. |
 | <code>src/components/DocumentViewer/CompareZoomOverlay.jsx</code> | 100 | 1 | 1 | high | Per-pane “post-zoom” controls shown in comparison mode. |
 | <code>src/components/DocumentViewer/DocumentViewer.jsx</code> | 699 | 1 | 6 | high | OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(actions, zoom, adjustments\) • Thumbnails \(navigation + selection reset\) • Main renderer \(canvas/img\) This component wires ViewerContext state into the |
-| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1051 | 1 | 17 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
+| <code>src/components/DocumentViewer/DocumentViewerRender.jsx</code> | 1074 | 1 | 17 | high | OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane \(and optional comparison pane\) by delegating all heavy lifting to &lt;DocumentRender /&gt;. |
 | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx</code> | 230 | 1 | 1 | high | OpenDocViewer — Document Viewer Thumbnails \(Wrapper\) Provides the deterministic thumbnail list and local width controls for the viewer shell. |
 | <code>src/components/DocumentViewer/DocumentViewerToolbar.jsx</code> | 430 | 1 | 5 | high | Toolbar adapter for the document viewer. |
 | <code>src/components/DocumentViewer/hooks/useViewerEffects.js</code> | 123 | 1 | 8 | high | File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross-cutting viewer effects. |
@@ -57,10 +57,11 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/LoadingSpinner.jsx</code> | 91 | 1 | 5 | high | OpenDocViewer — Loading Spinner Minimal, accessible loading indicator. |
 | <code>src/components/PrintSelectionWorkspace.jsx</code> | 2504 | 1 | 5 | high | Full-window print-selection workspace. |
 | <code>src/components/Resizer.jsx</code> | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
-| <code>src/components/SignatureDetailsDialog.jsx</code> | 442 | 1 | 7 | high | Signature details dialog \(browser integrity and optional gateway trust\). |
+| <code>src/components/SignatureDetailsDialog.jsx</code> | 447 | 1 | 7 | high | Signature details dialog \(browser integrity and optional gateway trust\). |
 | <code>src/components/SignatureOverviewButton.jsx</code> | 64 | 1 | 2 | high | Toolbar signature overview button. |
-| <code>src/components/SignatureOverviewDialog.jsx</code> | 279 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
+| <code>src/components/SignatureOverviewDialog.jsx</code> | 282 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
 | <code>src/components/SignatureStatusBadge.jsx</code> | 92 | 1 | 2 | high | Small signature symbol shown next to a document&#39;s &quot;DOK n&quot; label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\). |
+| <code>src/components/SignatureTime.jsx</code> | 33 | 2 | 1 | high | Local-time rendering of a signature-related ISO time \(signing, validation, certificate validity\) for the signature dialogs: &quot;2022-04-27 19:55&quot; as text, the exact UTC ISO value in the title attribute and \`dateTime\`. |
 | <code>src/components/ViewerProblemNotice.jsx</code> | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |
 | <code>src/contexts/themeContext.js</code> | 37 | 3 | 3 | high | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>src/contexts/ThemeProvider.jsx</code> | 317 | 1 | 13 | high | src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: - explicit themes: normal / light / dark - an implicit system-following startup mode when the user has not chosen |
@@ -72,7 +73,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/hooks/usePageNavigation.js</code> | 182 | 0 | 8 | high | OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press-and-hold UI \(e.g., mousedown\). |
 | <code>src/hooks/usePageTimer.js</code> | 149 | 2 | 6 | high | OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press-and-hold page navigation: - Invokes a caller-supplied callback immediately \(leading edge\) and then repeatedly after an initia |
 | <code>src/hooks/usePdfSignatureReports.js</code> | 127 | 1 | 3 | high | Browser PDF signature inspection and optional gateway trust enrichment. |
-| <code>src/i18n.js</code> | 566 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
+| <code>src/i18n.js</code> | 562 | 2 | 21 | high | i18n bootstrap for OpenDocViewer. |
 | <code>src/index.jsx</code> | 64 | 0 | 2 | high | OpenDocViewer — Application Entry - Load global styles \(CSS variables + layout\). |
 | <code>src/integrations/bootstrapRuntime.js</code> | 457 | 1 | 12 | high | Startup mode detection and host-integration entry point. |
 | <code>src/integrations/normalizePortableBundle.js</code> | 833 | 1 | 9 | high | Normalizes multiple host payload shapes into the project&#39;s neutral portable bundle shape. |
@@ -89,6 +90,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/types/jsdoc-types.js</code> | 101 | 0 | 13 | high | Centralized JSDoc-only type and callback definitions. |
 | <code>src/utils/documentLoadingConfig.js</code> | 1099 | 14 | 34 | high | OpenDocViewer — runtime helpers for fetch/render/memory policies. |
 | <code>src/utils/documentMetadata.js</code> | 404 | 3 | 18 | high | Helpers for resolving document-level metadata from the normalized portable bundle. |
+| <code>src/utils/i18nVersion.js</code> | 69 | 1 | 4 | high | Cache-busting version token for the locale files \( locales/&amp;lt;lng&amp;gt;/common.json?v=&amp;lt;token&amp;gt; \). |
 | <code>src/utils/idUtils.js</code> | 64 | 1 | 4 | high | OpenDocViewer — small opaque identifier helpers. |
 | <code>src/utils/localizedValue.js</code> | 113 | 8 | 6 | high | Localized string resolver for admin-supplied config values. |
 | <code>src/utils/manualSources.js</code> | 108 | 1 | 7 | high | Resolves which manual HTML file the help dialog shows. |
@@ -106,11 +108,11 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/utils/pdfPrintCacheKey.js</code> | 117 | 4 | 8 | high | Generated-PDF cache key helpers. |
 | <code>src/utils/pdfResolution.js</code> | 115 | 6 | 6 | high | Pure, per-page PDF display resolution policy shared by browser and worker renderers. |
 | <code>src/utils/pdfResolutionRuntime.js</code> | 51 | 6 | 4 | high | Browser measurements and diagnostic state kept outside the pure PDF resolution policy. |
-| <code>src/utils/pdfSignatureDocuments.js</code> | 221 | 5 | 10 | high | Per-document aggregation of PDF signature reports. |
-| <code>src/utils/pdfSignatureGateway.js</code> | 147 | 1 | 4 | high | Optional gateway trust enrichment. |
+| <code>src/utils/pdfSignatureDocuments.js</code> | 254 | 5 | 11 | high | Per-document aggregation of PDF signature reports. |
+| <code>src/utils/pdfSignatureGateway.js</code> | 158 | 1 | 5 | high | Optional gateway trust enrichment. |
 | <code>src/utils/pdfSignatureInspector.js</code> | 182 | 2 | 4 | high | PDF signature inspection - the single entry point for application code. |
 | <code>src/utils/pdfSignatures.js</code> | 1137 | 3 | 9 | high | PDF signature collection - level 1 integrity inspection. |
-| <code>src/utils/pdfSignatureStatus.js</code> | 177 | 6 | 14 | high | Signature UI status helpers for browser integrity and gateway trust. |
+| <code>src/utils/pdfSignatureStatus.js</code> | 348 | 7 | 22 | high | Signature UI status helpers for browser integrity and gateway trust. |
 | <code>src/utils/pdfWorkerDispatcher.js</code> | 451 | 2 | 18 | high | OpenDocViewer - generated PDF worker dispatcher. |
 | <code>src/utils/performanceOverlayFlag.js</code> | 86 | 2 | 3 | high | Shared runtime toggle helpers for optional diagnostics UI. |
 | <code>src/utils/printCore.js</code> | 588 | 1 | 20 | high | Core print coordinator for the frontend. |

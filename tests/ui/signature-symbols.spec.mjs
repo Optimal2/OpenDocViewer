@@ -147,8 +147,9 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   const tabs = dialog.getByRole('tab');
   await expect(tabs).toHaveCount(2);
   await expect(tabs.nth(0)).toHaveAttribute('aria-selected', 'true');
-  await expect(tabs.nth(0)).toHaveText('valid-rsa.pdf');
-  await expect(dialog.locator('.odv-signature-file-heading')).toHaveText(/File 1 of 2 – valid-rsa\.pdf/);
+  await expect(tabs.nth(0).locator('.odv-signature-file-tab-label')).toHaveText('valid-rsa.pdf');
+  await expect(dialog.locator('.odv-signature-file-heading')).toHaveText('File 1 of 2: valid-rsa.pdf');
+  await expect(dialog.locator('.odv-signature-file-pages')).toHaveText('Page 1');
   await tabs.nth(0).press('ArrowRight');
   await expect(tabs.nth(1)).toHaveAttribute('aria-selected', 'true');
   await expect(dialog.locator('.odv-signature-entry')).toHaveCount(2);
@@ -158,9 +159,23 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
   // The symbol did not steal the click that selects a page.
   expect(await page.locator('#thumbnail-1').getAttribute('aria-selected')).toBe(selectedBefore);
 
-  // A page symbol opens the same document dialog with its own file preselected.
+  // A page symbol opens the same document dialog with its own file preselected, named in the
+  // group heading with its page range inside the document.
   await page.locator('#thumbnail-2 .odv-signature-badge--thumbnail').click();
-  await expect(page.getByRole('dialog').getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
+  const fromPage = page.getByRole('dialog');
+  await expect(fromPage.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
+  await expect(fromPage.getByRole('tab').nth(0)).toHaveAttribute('aria-selected', 'false');
+  await expect(fromPage.locator('.odv-signature-file-heading')).toHaveText('File 2 of 2: two-signatures.pdf');
+  await expect(fromPage.locator('.odv-signature-file-pages')).toHaveText('Page 2');
+  // The active tab is filled (inverted colours), the inactive one is not.
+  const fills = await fromPage.getByRole('tab').evaluateAll((tabs) => tabs.map((tab) => getComputedStyle(tab).backgroundColor));
+  expect(fills[1]).not.toBe(fills[0]);
+  // Signing times are local "YYYY-MM-DD HH:MM" with the UTC ISO value in the title.
+  const time = fromPage.locator('.odv-signature-entry time').first();
+  await expect(time).toHaveText(/^\d{4}-\d{2}-\d{2} \d{2}:\d{2}$/);
+  await expect(time).toHaveAttribute('title', /^\d{4}-\d{2}-\d{2}T\d{2}:\d{2}:\d{2}\.\d{3}Z$/);
+  // Without ODVGateway the trust note explains why validity is not checked.
+  await expect(fromPage.locator('.odv-signature-trust--unavailable').first()).toContainText('opened through ODVGateway');
 });
 
 test('D3 toolbar overview lists signed documents and navigates without closing', async ({ page }) => {

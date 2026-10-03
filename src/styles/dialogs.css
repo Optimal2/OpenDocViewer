@@ -1665,9 +1665,8 @@
 }
 
 .odv-signature-badge--toolbar {
-  width: 34px;
-  height: 34px;
-  margin-left: 8px;
+  width: 30px;
+  height: 30px;
 }
 
 /* Page symbol: a discreet 22px pill centred on the top edge of the thumbnail image, leaving the
@@ -1711,9 +1710,12 @@
   font-size: 14px;
 }
 
+/* Same 30px metrics as the other toolbar buttons (toolbar.css). */
 .odv-signature-overview-button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
   gap: 2px;
-  margin-left: 8px;
 }
 
 .odv-signature-overview-count {
@@ -1823,20 +1825,55 @@
 .odv-signature-file-tabs {
   display: flex;
   flex-wrap: wrap;
-  gap: 6px;
+  gap: 0;
   margin-bottom: 12px;
+  border-bottom: 2px solid var(--text-color);
 }
 
-.odv-signature-file-tab.is-selected {
-  border-color: var(--primary-color, #3366cc);
-  box-shadow: inset 0 -3px 0 var(--primary-color, #3366cc);
+/* Tabs read as tabs: square bottom edge on the tab rail, the active tab filled with inverted
+   text/surface colours (the same pair the contrast gate checks for body text). */
+.odv-signature-file-tab {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 1px;
+  margin-right: 4px;
+  border-bottom: 0;
+  border-radius: 8px 8px 0 0;
+  text-align: left;
+}
+
+.odv-signature-file-tab-pages {
+  font-size: 0.78rem;
+  font-weight: 400;
+}
+
+.odv-signature-file-tab:hover:not(.is-selected) {
+  background: var(--odv-hover-overlay);
+}
+
+.odv-signature-file-tab.is-selected,
+[data-theme='dark'] .odv-signature-file-tab.is-selected {
+  background: var(--text-color);
+  color: var(--odv-surface);
+  border-color: var(--text-color);
   font-weight: 700;
 }
 
-.odv-signature-file-heading {
+.odv-signature-file-header {
   margin: 0 0 8px;
+}
+
+.odv-signature-file-heading {
+  margin: 0;
   font-size: 1rem;
   overflow-wrap: anywhere;
+}
+
+.odv-signature-file-pages {
+  margin: 2px 0 0;
+  color: var(--text-muted-color);
+  font-size: 13px;
 }
 
 .odv-signature-backdrop {
@@ -1888,14 +1925,48 @@
   line-height: 1.45;
 }
 
-.odv-signature-trust-line {
-  margin: 0;
-  padding: 10px 20px;
+.odv-signature-trust {
+  margin: 0 0 10px;
+  padding: 8px 12px;
+  border-left: 4px solid var(--odv-border, #d5dae1);
+  border-radius: 6px;
+  background: var(--odv-surface-muted, rgba(127, 127, 127, 0.06));
   font-size: 13px;
   line-height: 1.5;
   color: var(--text-color);
-  background: var(--odv-surface-muted, rgba(127, 127, 127, 0.06));
-  border-bottom: 1px solid var(--odv-border, #d5dae1);
+}
+
+.odv-signature-trust p {
+  margin: 0;
+}
+
+.odv-signature-trust p + p {
+  margin-top: 4px;
+}
+
+.odv-signature-trust-title {
+  font-weight: 600;
+}
+
+.odv-signature-trust--valid {
+  border-left-color: var(--odv-signature-ok-color, #1e7e34);
+}
+
+.odv-signature-trust--invalid {
+  border-left-color: var(--odv-signature-error-color, #c62828);
+}
+
+.odv-signature-trust--unknown,
+.odv-signature-trust--server-error {
+  border-left-color: var(--odv-signature-warning-color, #b25d00);
+}
+
+.odv-signature-trust-code {
+  color: var(--text-muted-color);
+  font-size: 12px;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, 'Liberation Mono', 'Courier New', monospace;
+  -webkit-user-select: text;
+  user-select: text;
 }
 
 .odv-signature-body {

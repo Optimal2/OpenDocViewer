@@ -17,7 +17,7 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 17. Line count: 7608. JSDoc symbol count: 98.
+File count: 18. Line count: 7749. JSDoc symbol count: 101.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
@@ -62,7 +62,7 @@ File count: 17. Line count: 7136. JSDoc symbol count: 111.
 
 ## src/components/DocumentViewer
 
-File count: 10. Line count: 5095. JSDoc symbol count: 119.
+File count: 10. Line count: 5118. JSDoc symbol count: 119.
 
 - `src/components/DocumentViewer/hooks/useViewerEffects.js` - File: src/components/DocumentViewer/hooks/useViewerEffects.js Cross\-cutting viewer effects.
 - `src/components/DocumentViewer/useDocumentViewer.js` - Primary viewer\-state hook.
@@ -100,7 +100,7 @@ File count: 5. Line count: 777. JSDoc symbol count: 26.
 
 ## src/i18n.js
 
-File count: 1. Line count: 566. JSDoc symbol count: 21.
+File count: 1. Line count: 562. JSDoc symbol count: 21.
 
 - `src/i18n.js` - i18n bootstrap for OpenDocViewer.
 
@@ -150,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 44. Line count: 17711. JSDoc symbol count: 678.
+File count: 45. Line count: 17995. JSDoc symbol count: 692.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

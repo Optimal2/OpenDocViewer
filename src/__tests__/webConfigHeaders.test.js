@@ -32,6 +32,14 @@ describe('public/web.config security headers', () => {
     expect(helpLocation).not.toMatch(/immutable/);
   });
 
+  it('makes locale files revalidate instead of inheriting the immutable cache policy', () => {
+    // Locale file names are not content-hashed; a stale ?v= token must not pin old translations.
+    const localesLocationMatch = config.match(/<location path="locales">[\s\S]*?<\/location>/);
+    const localesLocation = localesLocationMatch ? localesLocationMatch[0] : '';
+    expect(localesLocation).toMatch(/<add\s+name="Cache-Control"\s+value="no-cache, must-revalidate"\s*\/>/);
+    expect(localesLocation).not.toMatch(/immutable/);
+  });
+
   it('keeps missing help files out of the SPA fallback so the manual can fall back to help/default/', () => {
     // A missing help/site/manual.<lng>.html must answer 404, not index.html with 200; otherwise the
     // manual dialog shows the application shell instead of the bundled default manual.

@@ -83,9 +83,12 @@ describe('SignatureDetailsDialog per document', () => {
       isOpen: true, onClose: () => {}, document: doc, initialSourceKey: 'a2',
     }));
     const tabs = Array.from(container.querySelectorAll('[role="tab"]'));
-    expect(tabs.map((tab) => tab.textContent)).toEqual(['File 1 of 2', 'appendix.pdf']);
+    expect(tabs.map((tab) => tab.querySelector('.odv-signature-file-tab-label').textContent)).toEqual(['File 1 of 2', 'appendix.pdf']);
+    expect(tabs.map((tab) => tab.querySelector('.odv-signature-file-tab-pages').textContent)).toEqual(['Page 1', 'Page 2']);
     expect(tabs[1].getAttribute('aria-selected')).toBe('true');
-    expect(container.querySelector('.odv-signature-file-heading').textContent).toBe('File 2 of 2 – appendix.pdf');
+    // The active file is repeated in the group heading with its page range inside the document.
+    expect(container.querySelector('.odv-signature-file-heading').textContent).toBe('File 2 of 2: appendix.pdf');
+    expect(container.querySelector('.odv-signature-file-pages').textContent).toBe('Page 2');
     expect(container.querySelectorAll('.odv-signature-entry')).toHaveLength(2);
     expect(container.textContent).toContain('Second Signer');
     expect(container.textContent).toContain('Document 1 of 2');

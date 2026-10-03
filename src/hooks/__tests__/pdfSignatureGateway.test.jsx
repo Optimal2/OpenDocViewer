@@ -79,8 +79,10 @@ it('G4 disabled 404 suppresses the session but not a different session', async (
   fetch.mockResolvedValueOnce(response({ error: 'Signature validation is not enabled on this gateway.' }, 404));
   await render({ allPages: [page('a'), page('b')] });
   expect(fetch).toHaveBeenCalledTimes(1);
-  expect(reports.a).toEqual(browserReport);
-  expect(reports.b).toEqual(browserReport);
+  // Trust stays unchecked; only the client-only marker records that validation is switched off.
+  const disabledReport = { signatures: [{ ...signature, serverValidationDisabled: true }] };
+  expect(reports.a).toEqual(disabledReport);
+  expect(reports.b).toEqual(disabledReport);
   await render({ allPages: [page('c')], getSourceUrl: () => 'https://example.test/gateway/source/session-two/0' });
   expect(fetch).toHaveBeenCalledTimes(2);
   expect(reports.c.signatures[0].trust).toBe('valid');
@@ -148,8 +150,10 @@ it('G25 pack validation shares disabled-session suppression with per-file delive
     ? { url: 'https://example.test/gateway/source-pack/session-one', fileIndex: 0 } : undefined });
   expect(fetch).toHaveBeenCalledTimes(1);
   expect(fetch.mock.calls[0][0]).toBe('https://example.test/gateway/signatures/session-one/0');
-  expect(reports.a).toEqual(browserReport);
-  expect(reports.b).toEqual(browserReport);
+  // Trust stays unchecked; only the client-only marker records that validation is switched off.
+  const disabledReport = { signatures: [{ ...signature, serverValidationDisabled: true }] };
+  expect(reports.a).toEqual(disabledReport);
+  expect(reports.b).toEqual(disabledReport);
 });
 
 it('G26 pack errors stay unchecked and release the serial queue', async () => {

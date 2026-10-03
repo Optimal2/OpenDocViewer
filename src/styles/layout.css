@@ -1287,6 +1287,13 @@ canvas {
   pointer-events: none;
 }
 
+/* Compare panes: keep the centred page-turn indicator clear of the top-right zoom controls and
+   the top-left pane selector (both about 136px wide including margins). */
+.document-pane-frame.is-primary-pane .odv-edge-scroll-page-turn,
+.document-pane-frame.is-compare-pane .odv-edge-scroll-page-turn {
+  width: max(48px, min(240px, 46%, calc(100% - 2 * (136px + var(--odv-pane-scrollbar-width, 0px)))));
+}
+
 .odv-edge-scroll-page-turn.is-previous {
   top: 14px;
 }
@@ -1314,12 +1321,13 @@ canvas {
   transition: transform 90ms linear;
 }
 
-/* Overlay positioned within the sticky holder (centered at very top) */
+/* Overlay anchored to the top-right of the pane inside the sticky holder, so it sits over the
+   page corner instead of the pane centre when the page is narrower than the pane. The pane frame
+   sets --odv-pane-scrollbar-width so the controls stay clear of the page viewport's scrollbar. */
 .compare-zoom-overlay {
   position: absolute;
-  top: 0;
-  left: 50%;
-  transform: translateX(-50%);
+  top: 8px;
+  right: calc(8px + var(--odv-pane-scrollbar-width, 0px));
   display: inline-flex;
   align-items: center;
   gap: 6px;
@@ -1659,24 +1667,18 @@ canvas {
   top: 0;
   z-index: 5;
   height: 0;
-  display: flex;
-  justify-content: center;
-  pointer-events: none;
 }
 
-.thumbnail-sticky-document-header::before {
-  content: '';
+/* Opaque band holding the sticky "DOK n" header. It mirrors the row shell's horizontal padding
+   and renders the same DocumentBoundaryHeader as the inline header, so both look identical. */
+.thumbnail-sticky-document-header-band {
   position: absolute;
-  top: -8px;
+  top: 0;
   left: 0;
   right: 0;
-  height: 30px;
-  background: linear-gradient(
-    180deg,
-    color-mix(in srgb, var(--background-color) 96%, transparent 4%) 0%,
-    color-mix(in srgb, var(--background-color) 82%, transparent 18%) 68%,
-    transparent 100%
-  );
+  padding: 4px 5px;
+  background: var(--background-color);
+  box-shadow: 0 6px 8px -6px rgba(0, 0, 0, 0.28);
 }
 
 .thumbnails-static-list {
@@ -1845,6 +1847,7 @@ canvas {
 
 .thumbnail-document-boundary {
   display: flex;
+  flex: 0 0 auto;
   align-items: center;
   gap: 8px;
   min-height: 14px;
@@ -1883,13 +1886,6 @@ canvas {
   border: 1px solid color-mix(in srgb, var(--thumbnail-primary-color) 25%, var(--thumbnail-border-color) 75%);
   color: var(--primary-color-active);
   white-space: nowrap;
-}
-
-.thumbnail-document-boundary-label.sticky-label {
-  position: relative;
-  z-index: 1;
-  margin-top: 2px;
-  box-shadow: var(--box-shadow);
 }
 
 .thumbnail-document-boundary-label.end-label {

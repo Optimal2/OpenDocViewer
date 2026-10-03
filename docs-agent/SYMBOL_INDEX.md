@@ -170,30 +170,32 @@
 | <code>&lt;anonymous&gt;~resolveCustomFitOptions</code> | constant | <code>src/components/DocumentRender.jsx:257</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentSelectionPanel.jsx:89</code> |  |
 | <code>SelectionCheckboxRow</code> | function | <code>src/components/DocumentSelectionPanel.jsx:30</code> |  |
-| <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:159</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
-| <code>clamp</code> | function | <code>src/components/DocumentThumbnailList.jsx:72</code> |  |
-| <code>DocumentThumbnailList</code> | constant | <code>src/components/DocumentThumbnailList.jsx:567</code> |  |
-| <code>formatMetricFraction</code> | function | <code>src/components/DocumentThumbnailList.jsx:116</code> |  |
-| <code>formatMetricValue</code> | function | <code>src/components/DocumentThumbnailList.jsx:126</code> |  |
-| <code>getDocumentBoundaryLabel</code> | function | <code>src/components/DocumentThumbnailList.jsx:324</code> |  |
-| <code>getDocumentBoundaryTitle</code> | function | <code>src/components/DocumentThumbnailList.jsx:338</code> |  |
-| <code>getMetricBadges</code> | function | <code>src/components/DocumentThumbnailList.jsx:270</code> |  |
-| <code>getMetricTitles</code> | function | <code>src/components/DocumentThumbnailList.jsx:221</code> |  |
-| <code>getPageDocumentContext</code> | function | <code>src/components/DocumentThumbnailList.jsx:193</code> |  |
-| <code>getPageDocumentKey</code> | function | <code>src/components/DocumentThumbnailList.jsx:180</code> |  |
-| <code>getSessionPageIndex</code> | function | <code>src/components/DocumentThumbnailList.jsx:135</code> |  |
-| <code>getThumbnailLayout</code> | function | <code>src/components/DocumentThumbnailList.jsx:95</code> |  |
-| <code>&lt;anonymous&gt;~handleActivate</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1091</code> |  |
-| <code>&lt;anonymous&gt;~handleImageLoad</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1184</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyActivate</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1117</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:986</code> |  |
-| <code>&lt;anonymous&gt;~handleOpenContextMenu</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1130</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:977</code> |  |
-| <code>&lt;anonymous&gt;~handleScroll</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1064</code> |  |
-| <code>isIndexInRange</code> | function | <code>src/components/DocumentThumbnailList.jsx:146</code> |  |
-| <code>&lt;anonymous&gt;~setContainerRef</code> | constant | <code>src/components/DocumentThumbnailList.jsx:748</code> |  |
-| <code>shouldWarmAllThumbnails</code> | function | <code>src/components/DocumentThumbnailList.jsx:81</code> |  |
-| <code>ThumbnailRow</code> | constant | <code>src/components/DocumentThumbnailList.jsx:351</code> |  |
+| <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:161</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
+| <code>clamp</code> | function | <code>src/components/DocumentThumbnailList.jsx:74</code> |  |
+| <code>DocumentBoundaryHeader</code> | function | <code>src/components/DocumentThumbnailList.jsx:363</code> | The &amp;quot;DOK n&amp;quot; document header with the document signature symbol. |
+| <code>DocumentThumbnailList</code> | constant | <code>src/components/DocumentThumbnailList.jsx:613</code> |  |
+| <code>formatMetricFraction</code> | function | <code>src/components/DocumentThumbnailList.jsx:118</code> |  |
+| <code>formatMetricValue</code> | function | <code>src/components/DocumentThumbnailList.jsx:128</code> |  |
+| <code>getDocumentBoundaryLabel</code> | function | <code>src/components/DocumentThumbnailList.jsx:326</code> |  |
+| <code>getDocumentBoundaryTitle</code> | function | <code>src/components/DocumentThumbnailList.jsx:340</code> |  |
+| <code>getMetricBadges</code> | function | <code>src/components/DocumentThumbnailList.jsx:272</code> |  |
+| <code>getMetricTitles</code> | function | <code>src/components/DocumentThumbnailList.jsx:223</code> |  |
+| <code>getPageDocumentContext</code> | function | <code>src/components/DocumentThumbnailList.jsx:195</code> |  |
+| <code>getPageDocumentKey</code> | function | <code>src/components/DocumentThumbnailList.jsx:182</code> |  |
+| <code>getSessionPageIndex</code> | function | <code>src/components/DocumentThumbnailList.jsx:137</code> |  |
+| <code>getThumbnailLayout</code> | function | <code>src/components/DocumentThumbnailList.jsx:97</code> |  |
+| <code>&lt;anonymous&gt;~handleActivate</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1184</code> |  |
+| <code>&lt;anonymous&gt;~handleImageLoad</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1277</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyActivate</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1210</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:1060</code> |  |
+| <code>&lt;anonymous&gt;~handleOpenContextMenu</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1223</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:1051</code> |  |
+| <code>&lt;anonymous&gt;~handleScroll</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1138</code> |  |
+| <code>isIndexInRange</code> | function | <code>src/components/DocumentThumbnailList.jsx:148</code> |  |
+| <code>&lt;anonymous&gt;~resolveStickyHeaderRowIndex</code> | constant | <code>src/components/DocumentThumbnailList.jsx:700</code> | The sticky header shows the current document only once that document&#39;s inline header has scrolled out of view, so the two are never visible together. |
+| <code>&lt;anonymous&gt;~setContainerRef</code> | constant | <code>src/components/DocumentThumbnailList.jsx:822</code> |  |
+| <code>shouldWarmAllThumbnails</code> | function | <code>src/components/DocumentThumbnailList.jsx:83</code> |  |
+| <code>ThumbnailRow</code> | constant | <code>src/components/DocumentThumbnailList.jsx:408</code> |  |
 | <code>ThumbnailRowProps</code> | typedef | <code>src/components/DocumentThumbnailList.jsx:39</code> |  |
 | <code>module.exports</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:46</code> |  |
 | <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx:70</code> |  |
@@ -316,18 +318,18 @@
 | <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:200</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:54</code> |  |
 | <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:124</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:645</code> |  |
-| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:671</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:668</code> |  |
+| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:694</code> |  |
 | <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:403</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:639</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:662</code> |  |
 | <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:144</code> |  |
 | <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:136</code> |  |
 | <code>isPaneInteractiveTarget</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:75</code> |  |
 | <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:86</code> |  |
 | <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:97</code> |  |
 | <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:155</code> |  |
-| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:746</code> |  |
-| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:769</code> |  |
+| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:769</code> |  |
+| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:792</code> |  |
 | <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:38</code> |  |
 | <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:34</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
@@ -446,20 +448,21 @@
 | <code>Resizer</code> | constant | <code>src/components/Resizer.jsx:61</code> | Resizer component. |
 | <code>ResizerProps</code> | typedef | <code>src/components/Resizer.jsx:43</code> | Props for . |
 | <code>ResizeStartHandler</code> | typedef | <code>src/components/Resizer.jsx:36</code> | Handler invoked when a resize interaction is initiated. |
-| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:81</code> |  |
-| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:36</code> |  |
-| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:53</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:121</code> |  |
-| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:147</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
-| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:163</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:203</code> |  |
+| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:85</code> |  |
+| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:40</code> |  |
+| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:57</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:125</code> |  |
+| <code>SignatureDetailsDialog~handleTabKeyDown</code> | function | <code>src/components/SignatureDetailsDialog.jsx:151</code> | Arrow keys, Home and End move between file tabs \(automatic activation\). |
+| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:167</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:207</code> |  |
 | <code>module.exports</code> | function | <code>src/components/SignatureOverviewButton.jsx:32</code> |  |
 | <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureOverviewButton.jsx:19</code> | Material Icons ligature per severity \(same as SignatureStatusBadge\). |
-| <code>module.exports</code> | function | <code>src/components/SignatureOverviewDialog.jsx:46</code> |  |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureOverviewDialog.jsx:87</code> |  |
-| <code>SignatureOverviewDialog~handleKeyDown</code> | function | <code>src/components/SignatureOverviewDialog.jsx:101</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>module.exports</code> | function | <code>src/components/SignatureOverviewDialog.jsx:47</code> |  |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureOverviewDialog.jsx:88</code> |  |
+| <code>SignatureOverviewDialog~handleKeyDown</code> | function | <code>src/components/SignatureOverviewDialog.jsx:102</code> | Keep Tab navigation inside the dialog while it is open. |
 | <code>module.exports</code> | function | <code>src/components/SignatureStatusBadge.jsx:44</code> |  |
 | <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureStatusBadge.jsx:29</code> | Material Icons ligature per severity. |
+| <code>module.exports</code> | function | <code>src/components/SignatureTime.jsx:18</code> |  |
 | <code>module.exports</code> | function | <code>src/components/ViewerProblemNotice.jsx:197</code> |  |
 | <code>ProblemNoticeTrigger</code> | typedef | <code>src/components/ViewerProblemNotice.jsx:26</code> |  |
 | <code>resolveProblemTrigger</code> | function | <code>src/components/ViewerProblemNotice.jsx:44</code> |  |
@@ -585,27 +588,27 @@
 | <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection and optional gateway trust enrichment. |
 | <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:27</code> |  |
 | <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:43</code> |  |
-| <code>appendQuery</code> | function | <code>src/i18n.js:140</code> | Helper: append query params safely to a URL. |
-| <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:90</code> | Fallback cache-busting token for bundled locale resources. |
-| <code>computeBaseHref</code> | function | <code>src/i18n.js:372</code> | Compute a normalized base href. |
-| <code>DIAGNOSTIC_RELOAD_DELAY_MS</code> | constant | <code>src/i18n.js:99</code> | Dev-only reload delay after diagnostic localStorage writes. |
-| <code>getBaseLanguageCode</code> | function | <code>src/i18n.js:243</code> | Extract the lowercase base language code from a locale candidate. |
-| <code>getI18nVersion</code> | function | <code>src/i18n.js:111</code> | Return cache-busting version token \(see header\). |
-| <code>getImportMetaEnv</code> | function | <code>src/i18n.js:57</code> | Return Vite import.meta.env safely. |
-| <code>getNormalizedSupportedLanguages</code> | function | <code>src/i18n.js:257</code> | Normalize configured supported languages to non-empty base language codes. |
-| <code>getSafeWindow</code> | function | <code>src/i18n.js:40</code> | Return browser window safely in browser, SSR, test, and documentation contexts. |
-| <code>getStaticI18nDefaults</code> | function | <code>src/i18n.js:217</code> | Compute app config &amp;amp; defaults safely. |
-| <code>getUnsupportedVersionPlaceholders</code> | function | <code>src/i18n.js:173</code> | Find malformed version-like placeholders in loadPath without extra array passes. |
-| <code>IS_DEV</code> | constant | <code>src/i18n.js:68</code> | Dev-mode detector \(Vite + Node envs\). |
-| <code>normalizeSupportedLanguage</code> | function | <code>src/i18n.js:272</code> | Normalize an arbitrary language candidate to a supported base language. |
-| <code>normalizeVersionToken</code> | function | <code>src/i18n.js:102</code> | Normalize optional version tokens from runtime config or globals. |
-| <code>readQuery</code> | function | <code>src/i18n.js:73</code> | Read a query parameter by name \(no deps\). |
-| <code>reloadAfterDiagnosticStorageWrite</code> | function | <code>src/i18n.js:196</code> | Refresh i18n resources after a diagnostic localStorage write. |
-| <code>resolveInitialLanguage</code> | function | <code>src/i18n.js:302</code> | Resolve the initial UI language without relying on persisted i18next cache state. |
-| <code>resolveLoadPath</code> | function | <code>src/i18n.js:390</code> | Resolve the final translation URL at request time \(with cache buster\). |
-| <code>sanitizeI18nPathSegment</code> | function | <code>src/i18n.js:161</code> | Keep i18n URL template substitutions constrained to plain path segments. |
-| <code>syncDocumentLanguage</code> | function | <code>src/i18n.js:353</code> | Keep the document language synchronized with the active UI language. |
-| <code>WANT_DIAG</code> | constant | <code>src/i18n.js:82</code> | Diagnostics ON only in dev builds. |
+| <code>appendQuery</code> | function | <code>src/i18n.js:134</code> | Helper: append query params safely to a URL. |
+| <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:93</code> | Fallback cache-busting token for bundled locale resources. |
+| <code>computeBaseHref</code> | function | <code>src/i18n.js:366</code> | Compute a normalized base href. |
+| <code>DIAGNOSTIC_RELOAD_DELAY_MS</code> | constant | <code>src/i18n.js:102</code> | Dev-only reload delay after diagnostic localStorage writes. |
+| <code>getBaseLanguageCode</code> | function | <code>src/i18n.js:237</code> | Extract the lowercase base language code from a locale candidate. |
+| <code>getI18nVersion</code> | function | <code>src/i18n.js:114</code> | Return cache-busting version token \(see header and utils/i18nVersion.js\). |
+| <code>getImportMetaEnv</code> | function | <code>src/i18n.js:60</code> | Return Vite import.meta.env safely. |
+| <code>getNormalizedSupportedLanguages</code> | function | <code>src/i18n.js:251</code> | Normalize configured supported languages to non-empty base language codes. |
+| <code>getSafeWindow</code> | function | <code>src/i18n.js:43</code> | Return browser window safely in browser, SSR, test, and documentation contexts. |
+| <code>getStaticI18nDefaults</code> | function | <code>src/i18n.js:211</code> | Compute app config &amp;amp; defaults safely. |
+| <code>getUnsupportedVersionPlaceholders</code> | function | <code>src/i18n.js:167</code> | Find malformed version-like placeholders in loadPath without extra array passes. |
+| <code>IS_DEV</code> | constant | <code>src/i18n.js:71</code> | Dev-mode detector \(Vite + Node envs\). |
+| <code>normalizeSupportedLanguage</code> | function | <code>src/i18n.js:266</code> | Normalize an arbitrary language candidate to a supported base language. |
+| <code>readQuery</code> | function | <code>src/i18n.js:76</code> | Read a query parameter by name \(no deps\). |
+| <code>readStoredI18nVersion</code> | function | <code>src/i18n.js:105</code> | Read the persisted diagnostic version token, if storage is available. |
+| <code>reloadAfterDiagnosticStorageWrite</code> | function | <code>src/i18n.js:190</code> | Refresh i18n resources after a diagnostic localStorage write. |
+| <code>resolveInitialLanguage</code> | function | <code>src/i18n.js:296</code> | Resolve the initial UI language without relying on persisted i18next cache state. |
+| <code>resolveLoadPath</code> | function | <code>src/i18n.js:384</code> | Resolve the final translation URL at request time \(with cache buster\). |
+| <code>sanitizeI18nPathSegment</code> | function | <code>src/i18n.js:155</code> | Keep i18n URL template substitutions constrained to plain path segments. |
+| <code>syncDocumentLanguage</code> | function | <code>src/i18n.js:347</code> | Keep the document language synchronized with the active UI language. |
+| <code>WANT_DIAG</code> | constant | <code>src/i18n.js:85</code> | Diagnostics ON only in dev builds. |
 | <code>container</code> | constant | <code>src/index.jsx:49</code> | Mount the app into #root. |
 | <code>isDev</code> | constant | <code>src/index.jsx:39</code> | Determine environment and set a sensible client-side log level. |
 | <code>BootstrapAny</code> | typedef | <code>src/integrations/bootstrapRuntime.js:44</code> |  |
@@ -818,6 +821,10 @@
 | <code>resolveMetadataLabel</code> | function | <code>src/utils/documentMetadata.js:129</code> | Resolve the label shown for one metadata row. |
 | <code>resolveMetadataValue</code> | function | <code>src/utils/documentMetadata.js:161</code> |  |
 | <code>toOptionalText</code> | function | <code>src/utils/documentMetadata.js:22</code> |  |
+| <code>module:utils/i18nVersion.getBuildLocaleToken</code> | function | <code>src/utils/i18nVersion.js:38</code> | Join the build id and the locale content hash into one token. |
+| <code>module:utils/i18nVersion.normalizeVersionToken</code> | function | <code>src/utils/i18nVersion.js:25</code> | Normalize optional version tokens; &amp;quot;auto&amp;quot; and blank values mean &amp;quot;not set&amp;quot;. |
+| <code>module:utils/i18nVersion.resolveI18nVersion</code> | function | <code>src/utils/i18nVersion.js:53</code> |  |
+| <code>module:utils/i18nVersion</code> | module | <code>src/utils/i18nVersion.js:2</code> | Cache-busting version token for the locale files \( locales/&amp;lt;lng&amp;gt;/common.json?v=&amp;lt;token&amp;gt; \). |
 | <code>bytesToHex</code> | function | <code>src/utils/idUtils.js:17</code> |  |
 | <code>createOpaqueId</code> | function | <code>src/utils/idUtils.js:56</code> | Create a prefixed opaque identifier. |
 | <code>createOpaqueIdFragment</code> | function | <code>src/utils/idUtils.js:27</code> | Create an opaque identifier fragment suitable for synthetic keys and document ids. |
@@ -1006,20 +1013,22 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
-| <code>module:utils/pdfSignatureDocuments.buildSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:116</code> | Fold per-file signature reports into per-document entries. |
-| <code>module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:200</code> |  |
-| <code>module:utils/pdfSignatureDocuments.getPageSignatureDocumentKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:54</code> | Document key of a page. |
-| <code>module:utils/pdfSignatureDocuments.getSignatureFileHeading</code> | function | <code>src/utils/pdfSignatureDocuments.js:213</code> | Heading for one file of a multi-file document: &amp;quot;File k of m – name&amp;quot;, or &amp;quot;File k of m&amp;quot; when no file name is available. |
-| <code>module:utils/pdfSignatureDocuments.getSourceFileNameFromUrl</code> | function | <code>src/utils/pdfSignatureDocuments.js:70</code> | Display file name from a source URL: the last path segment, only when it looks like a file name \(has an extension\). |
-| <code>module:utils/pdfSignatureDocuments~pickNewestSignature</code> | function | <code>src/utils/pdfSignatureDocuments.js:94</code> |  |
-| <code>module:utils/pdfSignatureDocuments~SignatureDocumentEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:32</code> |  |
+| <code>module:utils/pdfSignatureDocuments.buildSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:119</code> | Fold per-file signature reports into per-document entries. |
+| <code>module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:217</code> |  |
+| <code>module:utils/pdfSignatureDocuments.getPageSignatureDocumentKey</code> | function | <code>src/utils/pdfSignatureDocuments.js:57</code> | Document key of a page. |
+| <code>module:utils/pdfSignatureDocuments.getSignatureFileHeading</code> | function | <code>src/utils/pdfSignatureDocuments.js:230</code> | Heading for one file of a multi-file document: &amp;quot;File k of m: name&amp;quot;, or &amp;quot;File k of m&amp;quot; when no file name is available. |
+| <code>module:utils/pdfSignatureDocuments.getSignatureFilePages</code> | function | <code>src/utils/pdfSignatureDocuments.js:245</code> | Page range of a file inside its document, &amp;quot;Pages 19–24&amp;quot; or &amp;quot;Page 3&amp;quot;; &#39;&#39; when unknown. |
+| <code>module:utils/pdfSignatureDocuments.getSourceFileNameFromUrl</code> | function | <code>src/utils/pdfSignatureDocuments.js:73</code> | Display file name from a source URL: the last path segment, only when it looks like a file name \(has an extension\). |
+| <code>module:utils/pdfSignatureDocuments~pickNewestSignature</code> | function | <code>src/utils/pdfSignatureDocuments.js:97</code> |  |
+| <code>module:utils/pdfSignatureDocuments~SignatureDocumentEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:35</code> |  |
 | <code>module:utils/pdfSignatureDocuments~SignatureFileEntry</code> | typedef | <code>src/utils/pdfSignatureDocuments.js:21</code> |  |
-| <code>module:utils/pdfSignatureDocuments.summarizeSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:185</code> | Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\). |
+| <code>module:utils/pdfSignatureDocuments.summarizeSignatureDocuments</code> | function | <code>src/utils/pdfSignatureDocuments.js:202</code> | Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\). |
 | <code>module:utils/pdfSignatureDocuments</code> | module | <code>src/utils/pdfSignatureDocuments.js:2</code> | Per-document aggregation of PDF signature reports. |
-| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:109</code> | Create viewer-local state for disabled gateway sessions. |
+| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:120</code> | Create viewer-local state for disabled gateway sessions. |
 | <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:20</code> | Resolve only HTTP source routes on the viewer&#39;s own origin, preserving the path base. |
-| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:65</code> | Accept only unambiguous server entries. |
+| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:75</code> | Accept only unambiguous server entries. |
 | <code>module:utils/pdfSignatureGateway</code> | module | <code>src/utils/pdfSignatureGateway.js:1</code> | Optional gateway trust enrichment. |
+| <code>module:utils/pdfSignatureGateway~validationDisabled</code> | function | <code>src/utils/pdfSignatureGateway.js:64</code> | The gateway answered that server validation is switched off. |
 | <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:175</code> | Terminate the signature worker \(e.g. |
 | <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:140</code> | Inspect the signatures of one document. |
 | <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
@@ -1033,19 +1042,27 @@
 | <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:66</code> | SubFilters with level-1 handling. |
 | <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:971</code> | Report an inspection failure without claiming that the document is unsigned. |
 | <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
+| <code>module:utils/pdfSignatureStatus.formatSignatureTime</code> | function | <code>src/utils/pdfSignatureStatus.js:337</code> | Format a signature-related ISO time \(signing, validation, certificate validity\) as local time, &amp;quot;2022-04-27 19:55&amp;quot;, in both supported languages. |
 | <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:85</code> | Shared localized status text for the badge tooltip and details dialog. |
 | <code>module:utils/pdfSignatureStatus.getReportSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:64</code> | Worst severity across integrity and trust for all signatures. |
 | <code>module:utils/pdfSignatureStatus.getSignatureCount</code> | function | <code>src/utils/pdfSignatureStatus.js:118</code> |  |
 | <code>module:utils/pdfSignatureStatus.getSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:52</code> | Map one integrity status to its severity class. |
+| <code>module:utils/pdfSignatureStatus.getSignatureTrustState</code> | function | <code>src/utils/pdfSignatureStatus.js:238</code> | Which trust situation a signature is in: unavailable : no gateway answered for this document \(viewer opened without ODVGateway\); not-checked : the gateway has server validation di... |
+| <code>module:utils/pdfSignatureStatus.getTrustExplanation</code> | function | <code>src/utils/pdfSignatureStatus.js:263</code> | State-specific trust text for the details dialog. |
 | <code>module:utils/pdfSignatureStatus.getTrustLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:164</code> | Shared localized trust text for the details dialog and the overview. |
+| <code>module:utils/pdfSignatureStatus.getTrustReasonText</code> | function | <code>src/utils/pdfSignatureStatus.js:223</code> | Localized plain-language reason for a gateway trustReason code, or null for an unknown code. |
 | <code>module:utils/pdfSignatureStatus.getWorstSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:104</code> | The worst integrity status among a document&#39;s signatures, or null when there are none. |
 | <code>module:utils/pdfSignatureStatus.getWorstSignatureTrust</code> | function | <code>src/utils/pdfSignatureStatus.js:151</code> | The worst trust verdict among signatures, or null when there are none. |
 | <code>module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:37</code> | Integrity statuses ordered worst-first. |
 | <code>module:utils/pdfSignatureStatus.normalizeSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:74</code> | Fail closed for missing, unexpected and inherited property names. |
 | <code>module:utils/pdfSignatureStatus.normalizeSignatureTrust</code> | function | <code>src/utils/pdfSignatureStatus.js:142</code> |  |
+| <code>module:utils/pdfSignatureStatus~pad2</code> | function | <code>src/utils/pdfSignatureStatus.js:326</code> |  |
 | <code>module:utils/pdfSignatureStatus.reportHasSignatures</code> | function | <code>src/utils/pdfSignatureStatus.js:126</code> |  |
 | <code>module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY</code> | constant | <code>src/utils/pdfSignatureStatus.js:21</code> | Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are... |
+| <code>module:utils/pdfSignatureStatus.TRUST_REASON_CODES</code> | constant | <code>src/utils/pdfSignatureStatus.js:215</code> | Every trustReason code the gateway can emit. |
+| <code>module:utils/pdfSignatureStatus~TRUST_REASON_DEFAULTS</code> | constant | <code>src/utils/pdfSignatureStatus.js:185</code> | Plain-language English default per gateway trustReason code. |
 | <code>module:utils/pdfSignatureStatus~TRUST_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:136</code> | Trust verdicts ordered worst-first. |
+| <code>module:utils/pdfSignatureStatus~TrustExplanation</code> | typedef | <code>src/utils/pdfSignatureStatus.js:246</code> |  |
 | <code>module:utils/pdfSignatureStatus</code> | module | <code>src/utils/pdfSignatureStatus.js:2</code> | Signature UI status helpers for browser integrity and gateway trust. |
 | <code>batchProgressUnitsFromEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:156</code> | Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par... |
 | <code>clampInteger</code> | function | <code>src/utils/pdfWorkerDispatcher.js:41</code> |  |

@@ -724,12 +724,13 @@
       "subtitle": "{count, plural, =1 {1 signatur i detta dokument.} other {# signaturer i detta dokument.}}",
       "subtitleDocumentPosition": "Dokument {document} av {total}",
       "close": "Stäng",
-      "trustLine": "Tillit ej kontrollerad – visar vem som signerat och om dokumentet är oförändrat, inte om signaturen är giltig.",
       "signatureHeading": "Signatur {index}",
       "notAvailable": "—",
       "validityRange": "{from} – {to}",
       "filePosition": "Fil {file} av {total}",
-      "fileTabsLabel": "Filer med signaturer"
+      "fileTabsLabel": "Filer med signaturer",
+      "filePage": "Sida {page}",
+      "filePages": "Sidor {start}–{end}"
     },
     "fields": {
       "signer": "Undertecknare",
@@ -788,6 +789,46 @@
       "details": "Detaljer",
       "detailsAria": "Visa signaturdetaljer för dokument {document}",
       "detailsTitle": "Visa signaturdetaljer"
+    },
+    "trustExplanation": {
+      "unavailable": "Signaturens giltighet kan bara kontrolleras när dokumentet öppnas via ODVGateway. Här visas vem som signerat och om dokumentet är oförändrat sedan signeringen.",
+      "notChecked": "Servern kontrollerar inte certifikatkedja och spärrstatus i den här installationen (ODVGateway signatures.enabled är av). Visas: vem som signerat och om dokumentet är oförändrat.",
+      "notCheckedHint": "En administratör kan aktivera kontrollen i ODVGateways konfiguration.",
+      "serverError": "Servern kunde inte kontrollera signaturen den här gången (ODVGateway svarade inte eller gav ett oanvändbart svar). Visas: vem som signerat och om dokumentet är oförändrat.",
+      "valid": "Signaturen är giltig: servern har kontrollerat certifikatkedja och spärrstatus.",
+      "invalid": "Signaturen är inte giltig",
+      "unknown": "Kunde inte avgöra om signaturen är giltig",
+      "unknownNotMeaning": "Det betyder inte att signaturen är ogiltig eller att dokumentet har ändrats – se Integritet för om innehållet är oförändrat sedan signeringen.",
+      "unknownReason": "Okänd orsak",
+      "code": "Kod: {code}"
+    },
+    "trustReason": {
+      "byte-range-malformed": "Signaturens byteintervall är felaktigt",
+      "byte-range-missing": "Signaturen saknar byteintervall",
+      "contents-missing": "Signaturdata saknas i dokumentet",
+      "contents-too-large": "Signaturdata är för stort för att kontrolleras på servern",
+      "subfilter-unsupported": "Signaturformatet stöds inte av servern",
+      "cms-unreadable": "Signaturdata kunde inte läsas",
+      "digest-algorithm-unsupported": "Signaturens hashalgoritm stöds inte",
+      "message-digest-attribute-missing": "Signaturen saknar kontrollsumma för det signerade innehållet",
+      "digest-mismatch": "Innehållet matchar inte signaturen – dokumentet har ändrats efter signeringen",
+      "signature-invalid": "Den kryptografiska signaturen stämmer inte",
+      "bytes-appended-after-signed-range": "Dokumentet har utökats efter signeringen utan ny signatur",
+      "signer-certificate-missing": "Undertecknarens certifikat saknas i signaturen",
+      "chain-not-anchored": "Certifikatkedjan leder inte till en betrodd rot",
+      "certificate-not-valid-at-validation-time": "Certifikatet var inte giltigt vid kontrolltidpunkten",
+      "revoked": "Certifikatet är spärrat",
+      "revocation-unavailable": "Spärrlistan kunde inte hämtas",
+      "revocation-not-checked": "Spärrstatus kontrolleras inte på servern",
+      "weak-signature": "Signaturen använder en för svag algoritm eller nyckel",
+      "chain-policy-violation": "Certifikatkedjan uppfyller inte serverns policy",
+      "modified-after-certification": "Dokumentet har ändrats på ett sätt som certifieringen inte tillåter",
+      "timestamp-not-verifiable": "Tidsstämpeln kunde inte verifieras",
+      "timestamp-responder-not-anchored": "Tidsstämpelns utfärdare leder inte till en betrodd rot",
+      "timestamp-responder-not-trusted": "Tidsstämpelns utfärdare är inte betrodd på servern",
+      "key-usage-not-signing": "Certifikatet är inte avsett för signering",
+      "validation-error": "Ett fel uppstod när servern kontrollerade signaturen",
+      "validation-timeout": "Kontrollen på servern tog för lång tid"
     }
   },
   "about": {

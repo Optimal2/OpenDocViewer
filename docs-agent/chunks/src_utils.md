@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 44. Line count: 17711. JSDoc symbol count: 678.
+File count: 45. Line count: 17995. JSDoc symbol count: 692.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -45,6 +45,19 @@ Symbols:
 - `resolveMetadataValue` (function) - No description.
 - `buildAliasDetailRow` (function) - No description.
 - `buildAliasLabelsByFieldId` (function) - No description.
+
+## src/utils/i18nVersion.js
+
+Cache\-busting version token for the locale files \( locales/&lt;lng&gt;/common.json?v\=&lt;token&gt; \).
+
+Exports: `normalizeVersionToken`, `getBuildLocaleToken`, `resolveI18nVersion`
+
+Symbols:
+
+- `module:utils/i18nVersion` (module) - Cache\-busting version token for the locale files \( locales/&lt;lng&gt;/common.json?v\=&lt;token&gt; \).
+- `module:utils/i18nVersion.normalizeVersionToken` (function) - Normalize optional version tokens; &quot;auto&quot; and blank values mean &quot;not set&quot;.
+- `module:utils/i18nVersion.getBuildLocaleToken` (function) - Join the build id and the locale content hash into one token.
+- `module:utils/i18nVersion.resolveI18nVersion` (function) - No description.
 
 ## src/utils/idUtils.js
 
@@ -348,7 +361,7 @@ Symbols:
 
 Per\-document aggregation of PDF signature reports.
 
-Exports: `getPageSignatureDocumentKey`, `getSourceFileNameFromUrl`, `buildSignatureDocuments`, `summarizeSignatureDocuments`, `findSignatureDocumentBySourceKey`, `getSignatureFileHeading`
+Exports: `getPageSignatureDocumentKey`, `getSourceFileNameFromUrl`, `buildSignatureDocuments`, `summarizeSignatureDocuments`, `findSignatureDocumentBySourceKey`, `getSignatureFileHeading`, `getSignatureFilePages`
 
 Local imports: `src/utils/pdfSignatureStatus.js`
 
@@ -363,7 +376,8 @@ Symbols:
 - `module:utils/pdfSignatureDocuments.buildSignatureDocuments` (function) - Fold per\-file signature reports into per\-document entries.
 - `module:utils/pdfSignatureDocuments.summarizeSignatureDocuments` (function) - Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\).
 - `module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey` (function) - No description.
-- `module:utils/pdfSignatureDocuments.getSignatureFileHeading` (function) - Heading for one file of a multi\-file document: &quot;File k of m – name&quot;, or &quot;File k of m&quot; when no file name is available.
+- `module:utils/pdfSignatureDocuments.getSignatureFileHeading` (function) - Heading for one file of a multi\-file document: &quot;File k of m: name&quot;, or &quot;File k of m&quot; when no file name is available.
+- `module:utils/pdfSignatureDocuments.getSignatureFilePages` (function) - Page range of a file inside its document, &quot;Pages 19–24&quot; or &quot;Page 3&quot;; '' when unknown.
 
 ## src/utils/pdfSignatureGateway.js
 
@@ -377,6 +391,7 @@ Symbols:
 
 - `module:utils/pdfSignatureGateway` (module) - Optional gateway trust enrichment.
 - `module:utils/pdfSignatureGateway.getGatewaySignatureContext` (function) - Resolve only HTTP source routes on the viewer's own origin, preserving the path base.
+- `module:utils/pdfSignatureGateway~validationDisabled` (function) - The gateway answered that server validation is switched off.
 - `module:utils/pdfSignatureGateway.mergeGatewaySignatureReport` (function) - Accept only unambiguous server entries.
 - `module:utils/pdfSignatureGateway.createGatewaySignatureClient` (function) - Create viewer\-local state for disabled gateway sessions.
 
@@ -417,7 +432,7 @@ Symbols:
 
 Signature UI status helpers for browser integrity and gateway trust.
 
-Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `normalizeSignatureTrust`, `getWorstSignatureTrust`, `getTrustLabel`
+Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `normalizeSignatureTrust`, `getWorstSignatureTrust`, `getTrustLabel`, `TRUST_REASON_CODES`, `getTrustReasonText`, `getSignatureTrustState`, `getTrustExplanation`, `formatSignatureTime`
 
 Symbols:
 

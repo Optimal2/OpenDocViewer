@@ -10,6 +10,8 @@ import {
   buildSignatureDocuments,
   findSignatureDocumentBySourceKey,
   getPageSignatureDocumentKey,
+  getSignatureFileHeading,
+  getSignatureFilePages,
   getSourceFileNameFromUrl,
   summarizeSignatureDocuments,
 } from '../pdfSignatureDocuments.js';
@@ -139,5 +141,28 @@ describe('lookup helpers', () => {
     expect(getSourceFileNameFromUrl('blob:https://host.example/123')).toBe('');
     expect(getSourceFileNameFromUrl('https://host.example/api/document/42')).toBe('');
     expect(getSourceFileNameFromUrl('')).toBe('');
+  });
+
+  it('records the page range of each file inside its document for the dialog', () => {
+    const [doc] = buildSignatureDocuments(PAGES, { a1: report({ integrity: 'intact' }), a2: report({ integrity: 'intact' }) });
+    expect(doc.files.map((file) => [file.firstPage, file.lastPage])).toEqual([[1, 2], [3, 3]]);
+    // The thumbnail "S" number (documentPageNumber) wins when pages carry it.
+    const numbered = [
+      { ...page('x1', 0, 1, 2, 'X'), documentPageNumber: 18 },
+      { ...page('x2', 1, 1, 2, 'X'), documentPageNumber: 19 },
+      { ...page('x2', 2, 1, 2, 'X'), documentPageNumber: 24 },
+    ];
+    const [numberedDoc] = buildSignatureDocuments(numbered, { x2: report({ integrity: 'intact' }) });
+    expect([numberedDoc.files[1].firstPage, numberedDoc.files[1].lastPage]).toEqual([19, 24]);
+    const t = (key, options) => String(options.defaultValue);
+    expect(getSignatureFilePages(t, numberedDoc.files[1])).toBe('Pages 19–24');
+    expect(getSignatureFilePages(t, { firstPage: 3, lastPage: 3 })).toBe('Page 3');
+    expect(getSignatureFilePages(t, {})).toBe('');
+  });
+
+  it('names the active file as "File k of m: name", or "File k of m" without a name', () => {
+    const t = (key, options) => String(options.defaultValue);
+    expect(getSignatureFileHeading(t, { fileNumber: 2, fileCount: 2, fileName: 'appendix.pdf' })).toBe('File 2 of 2: appendix.pdf');
+    expect(getSignatureFileHeading(t, { fileNumber: 2, fileCount: 2, fileName: '' })).toBe('File 2 of 2');
   });
 });

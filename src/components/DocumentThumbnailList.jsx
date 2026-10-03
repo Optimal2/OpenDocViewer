@@ -61,6 +61,8 @@ import SignatureStatusBadge from './SignatureStatusBadge.jsx';
  * @property {(*|null)} documentSignatures - Signed-document entry of this row's document; drives the
  * document symbol next to the "DOK n" label on the document's first row.
  * @property {(function(string, HTMLElement=): boolean|undefined)} [onOpenSignatures]
+ * @property {boolean} [documentHeaderHidden] Hide this row's inline document header from assistive
+ * technology and the tab order while the sticky header shows the same document.
  */
 
 /**
@@ -345,6 +347,61 @@ function getDocumentBoundaryTitle(t, documentContext) {
 }
 
 /**
+ * The "DOK n" document header with the document signature symbol. The inline header at the
+ * start of each document and the sticky header shown while scrolling render through this one
+ * component, so they share typography, size, spacing and the symbol's behaviour.
+ *
+ * @param {Object} props
+ * @param {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number }} props.documentContext
+ * @param {(*|null)} [props.documentSignatures] Signed-document entry; shows the symbol when set.
+ * @param {(function(string, HTMLElement=): (boolean|undefined))} [props.onOpenSignatures]
+ * @param {boolean} [props.sticky] Rendered in the sticky band at the top of the strip.
+ * @param {boolean} [props.hidden] Removes the header from the accessibility tree and the tab
+ * order (the inline header while its sticky twin is shown), so the symbol is never announced twice.
+ * @returns {React.ReactElement}
+ */
+function DocumentBoundaryHeader({ documentContext, documentSignatures = null, onOpenSignatures, sticky = false, hidden = false }) {
+  const { t } = useTranslation('common');
+  return (
+    <div
+      className={`thumbnail-document-boundary start${sticky ? ' is-sticky' : ''}`}
+      data-document-number={documentContext.documentNumber}
+      aria-hidden={hidden ? 'true' : undefined}
+      inert={hidden ? true : undefined}
+    >
+      <span className="thumbnail-document-boundary-line" aria-hidden="true" />
+      <span
+        className="thumbnail-document-boundary-label"
+        title={getDocumentBoundaryTitle(t, documentContext)}
+        aria-hidden="true"
+      >
+        {getDocumentBoundaryLabel(t, documentContext)}
+      </span>
+      {documentSignatures && typeof onOpenSignatures === 'function' ? (
+        <SignatureStatusBadge
+          variant="document"
+          report={documentSignatures}
+          onOpen={(element) => onOpenSignatures(String(documentSignatures.signedFiles?.[0]?.sourceKey || ''), element)}
+        />
+      ) : null}
+      <span className="thumbnail-document-boundary-line" aria-hidden="true" />
+    </div>
+  );
+}
+
+DocumentBoundaryHeader.propTypes = {
+  documentContext: PropTypes.shape({
+    hasMultipleDocuments: PropTypes.bool,
+    documentNumber: PropTypes.number,
+    totalDocuments: PropTypes.number,
+  }).isRequired,
+  documentSignatures: PropTypes.object,
+  onOpenSignatures: PropTypes.func,
+  sticky: PropTypes.bool,
+  hidden: PropTypes.bool,
+};
+
+/**
  * @param {ThumbnailRowProps} props
  * @returns {React.ReactElement}
  */
@@ -371,6 +428,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   showSignatureBadge = false,
   documentSignatures = null,
   onOpenSignatures,
+  documentHeaderHidden = false,
 }) {
   const { t } = useTranslation('common');
   const visiblePageNumber = index + 1;
@@ -435,24 +493,12 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       }}
     >
       {documentGroupingActive && documentContext.isDocumentStart ? (
-        <div className="thumbnail-document-boundary start">
-          <span className="thumbnail-document-boundary-line" aria-hidden="true" />
-          <span
-            className="thumbnail-document-boundary-label"
-            title={getDocumentBoundaryTitle(t, documentContext)}
-            aria-hidden="true"
-          >
-            {getDocumentBoundaryLabel(t, documentContext)}
-          </span>
-          {documentSignatures && typeof onOpenSignatures === 'function' ? (
-            <SignatureStatusBadge
-              variant="document"
-              report={documentSignatures}
-              onOpen={(element) => onOpenSignatures(String(documentSignatures.signedFiles?.[0]?.sourceKey || ''), element)}
-            />
-          ) : null}
-          <span className="thumbnail-document-boundary-line" aria-hidden="true" />
-        </div>
+        <DocumentBoundaryHeader
+          documentContext={documentContext}
+          documentSignatures={documentSignatures}
+          onOpenSignatures={onOpenSignatures}
+          hidden={documentHeaderHidden}
+        />
       ) : null}
 
       <div
@@ -628,16 +674,44 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     [containerWidth, documentGroupingActive, renderConfig, width]
   );
   const totalHeight = totalCount * layout.rowHeight;
-  const stickyDocumentContext = useMemo(() => {
-    if (!documentGroupingActive || totalCount <= 0) return null;
-    const topIndex = clamp(
-      Math.floor(Math.max(0, Number(scrollTop) || 0) / Math.max(1, layout.rowHeight)),
-      0,
-      Math.max(0, totalCount - 1)
-    );
-    return getPageDocumentContext(allPages[topIndex] || null, allPages[topIndex - 1] || null, allPages[topIndex + 1] || null);
-  }, [allPages, documentGroupingActive, layout.rowHeight, scrollTop, totalCount]);
-  const showStickyDocumentHeader = !!stickyDocumentContext?.hasMultipleDocuments && scrollTop > 8;
+  // First row index of the document each row belongs to (drives the sticky document header).
+  const documentStartIndexes = useMemo(() => {
+    const starts = new Array(totalCount);
+    let start = 0;
+    for (let index = 0; index < totalCount; index += 1) {
+      if (index > 0 && getPageDocumentKey(allPages[index - 1] || null) !== getPageDocumentKey(allPages[index] || null)) {
+        start = index;
+      }
+      starts[index] = start;
+    }
+    return starts;
+  }, [allPages, totalCount]);
+  // Inline header geometry, measured after render: list offset in the strip and the header's
+  // bottom edge inside its row. The defaults match the stylesheet.
+  const headerMetricsRef = useRef({ listOffset: 6, headerBottom: 24 });
+  const [stickyHeaderRowIndex, setStickyHeaderRowIndex] = useState(-1);
+  /**
+   * The sticky header shows the current document only once that document's inline header has
+   * scrolled out of view, so the two are never visible together. The current document is the
+   * one under the sticky band, which hands over cleanly when the next document arrives.
+   * @param {number} top Current scrollTop of the strip.
+   * @returns {number} Row index of the document start whose header is sticky, or -1.
+   */
+  const resolveStickyHeaderRowIndex = useCallback((top) => {
+    if (!documentGroupingActive || totalCount <= 0) return -1;
+    const { listOffset, headerBottom } = headerMetricsRef.current;
+    const rowHeight = Math.max(1, Number(layout.rowHeight) || 1);
+    const scroll = Math.max(0, Number(top) || 0);
+    const probeIndex = clamp(Math.floor((scroll + headerBottom - listOffset) / rowHeight), 0, totalCount - 1);
+    const startIndex = documentStartIndexes[probeIndex] ?? probeIndex;
+    const startContext = getPageDocumentContext(allPages[startIndex] || null, allPages[startIndex - 1] || null, allPages[startIndex + 1] || null);
+    if (!startContext.hasMultipleDocuments) return -1;
+    return scroll >= listOffset + (startIndex * rowHeight) + headerBottom ? startIndex : -1;
+  }, [allPages, documentGroupingActive, documentStartIndexes, layout.rowHeight, totalCount]);
+  const stickyDocumentContext = stickyHeaderRowIndex >= 0
+    ? getPageDocumentContext(allPages[stickyHeaderRowIndex] || null, allPages[stickyHeaderRowIndex - 1] || null, allPages[stickyHeaderRowIndex + 1] || null)
+    : null;
+  const showStickyDocumentHeader = !!stickyDocumentContext?.hasMultipleDocuments;
   const warmAllThumbnails = useMemo(
     () => shouldWarmAllThumbnails(renderConfig, totalCount),
     [renderConfig, totalCount]
@@ -1064,6 +1138,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   const handleScroll = useCallback((event) => {
     const next = Number(event?.currentTarget?.scrollTop || 0);
     lastKnownScrollTopRef.current = next;
+    setStickyHeaderRowIndex(resolveStickyHeaderRowIndex(next));
     closeContextMenu();
     if (programmaticScrollRef.current) return;
     if (scrollSyncRafRef.current) window.cancelAnimationFrame(scrollSyncRafRef.current);
@@ -1081,7 +1156,25 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         return Math.abs(current - next) >= 1 ? next : current;
       });
     });
-  }, [closeContextMenu, layout.rowHeight, viewportHeight]);
+  }, [closeContextMenu, layout.rowHeight, resolveStickyHeaderRowIndex, viewportHeight]);
+
+  // Measure the inline header once rows exist (and after layout changes), then re-resolve the
+  // sticky header for the current scroll position.
+  useLayoutEffect(() => {
+    const node = containerRef.current;
+    if (node && documentGroupingActive) {
+      const header = node.querySelector('.thumbnails-static-list .thumbnail-document-boundary.start');
+      const list = node.querySelector('.thumbnails-static-list');
+      const shell = header?.parentElement || null;
+      if (header && list && shell) {
+        headerMetricsRef.current = {
+          listOffset: list.offsetTop,
+          headerBottom: (header.getBoundingClientRect().bottom - shell.getBoundingClientRect().top),
+        };
+      }
+    }
+    setStickyHeaderRowIndex(resolveStickyHeaderRowIndex(lastKnownScrollTopRef.current));
+  }, [documentGroupingActive, layout.rowHeight, resolveStickyHeaderRowIndex, scrollTop, totalCount]);
 
   /**
    * @param {number} nextPageNumber
@@ -1222,6 +1315,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         showSignatureBadge={pageSignatureBadgeEnabled}
         documentSignatures={rowDocumentSignatures}
         onOpenSignatures={onOpenSignatures}
+        documentHeaderHidden={index === stickyHeaderRowIndex}
       />
     );
   }
@@ -1255,10 +1349,15 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
       }}
     >
       {showStickyDocumentHeader ? (
-        <div className="thumbnail-sticky-document-header" aria-hidden="true">
-          <span className="thumbnail-document-boundary-label sticky-label">
-            {getDocumentBoundaryLabel(t, stickyDocumentContext)}
-          </span>
+        <div className="thumbnail-sticky-document-header">
+          <div className="thumbnail-sticky-document-header-band">
+            <DocumentBoundaryHeader
+              documentContext={stickyDocumentContext}
+              documentSignatures={signatureDocumentsByKey.get(getPageSignatureDocumentKey(allPages[stickyHeaderRowIndex])) || null}
+              onOpenSignatures={onOpenSignatures}
+              sticky
+            />
+          </div>
         </div>
       ) : null}
 
@@ -1405,6 +1504,7 @@ ThumbnailRow.propTypes = {
     signedFiles: PropTypes.arrayOf(PropTypes.object),
   }),
   onOpenSignatures: PropTypes.func,
+  documentHeaderHidden: PropTypes.bool,
 };
 
 DocumentThumbnailList.propTypes = {
