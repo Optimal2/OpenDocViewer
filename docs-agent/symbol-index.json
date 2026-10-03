@@ -11929,7 +11929,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 92,
+    "line": 93,
     "description": "",
     "params": [
       {
@@ -11990,7 +11990,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 31,
+    "line": 30,
     "description": "",
     "params": [
       {
@@ -12021,7 +12021,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 48,
+    "line": 47,
     "description": "",
     "params": [
       {
@@ -12052,7 +12052,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 67,
+    "line": 68,
     "description": "Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present.",
     "params": [
       {
@@ -12083,7 +12083,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 119,
+    "line": 120,
     "description": "",
     "params": [
       {
@@ -12103,7 +12103,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 138,
+    "line": 139,
     "description": "Keep Tab navigation inside the dialog while it is open.",
     "params": [],
     "returns": [],
@@ -12116,7 +12116,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureDetailsDialog.jsx",
-    "line": 176,
+    "line": 177,
     "description": "",
     "params": [
       {
@@ -12136,7 +12136,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureStatusBadge.jsx",
-    "line": 41,
+    "line": 42,
     "description": "",
     "params": [
       {
@@ -12179,7 +12179,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/SignatureStatusBadge.jsx",
-    "line": 27,
+    "line": 28,
     "description": "Material Icons ligature per severity.",
     "params": [],
     "returns": [],
@@ -15022,7 +15022,7 @@
     "scope": null,
     "file": "src/hooks/usePdfSignatureReports.js",
     "line": 2,
-    "description": "Level-1 PDF signature wiring.",
+    "description": "Browser PDF signature inspection and optional gateway trust enrichment.",
     "params": [],
     "returns": [],
     "examples": 0
@@ -15034,7 +15034,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/hooks/usePdfSignatureReports.js",
-    "line": 26,
+    "line": 27,
     "description": "",
     "params": [
       {
@@ -15059,7 +15059,7 @@
     "kind": "function",
     "scope": null,
     "file": "src/hooks/usePdfSignatureReports.js",
-    "line": 40,
+    "line": 42,
     "description": "",
     "params": [
       {
@@ -15091,6 +15091,12 @@
         "type": "string",
         "optional": true,
         "description": "Visible document, prioritized before queued documents."
+      },
+      {
+        "name": "options.getSourceUrl",
+        "type": "function",
+        "optional": true,
+        "description": "Registered document source URL."
       }
     ],
     "returns": [
@@ -24602,6 +24608,99 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
+    "name": "createGatewaySignatureClient",
+    "longname": "module:utils/pdfSignatureGateway.createGatewaySignatureClient",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureGateway.js",
+    "line": 95,
+    "description": "Create viewer-local state for disabled gateway sessions.",
+    "params": [],
+    "returns": [
+      {
+        "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
+    "name": "getGatewaySignatureContext",
+    "longname": "module:utils/pdfSignatureGateway.getGatewaySignatureContext",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureGateway.js",
+    "line": 19,
+    "description": "Resolve only HTTP source routes, preserving the gateway origin and path base.",
+    "params": [
+      {
+        "name": "sourceUrl",
+        "type": "string",
+        "optional": false,
+        "description": "The URL already used by DocumentLoader."
+      },
+      {
+        "name": "baseUrl",
+        "type": "string",
+        "optional": true,
+        "description": "Browser base for relative source URLs."
+      }
+    ],
+    "returns": [
+      {
+        "type": "Object|null",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
+    "name": "mergeGatewaySignatureReport",
+    "longname": "module:utils/pdfSignatureGateway.mergeGatewaySignatureReport",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureGateway.js",
+    "line": 52,
+    "description": "Accept only unambiguous server entries.",
+    "params": [
+      {
+        "name": "report",
+        "type": "*",
+        "optional": false,
+        "description": "Browser report."
+      },
+      {
+        "name": "server",
+        "type": "*",
+        "optional": false,
+        "description": "Gateway JSON report."
+      }
+    ],
+    "returns": [
+      {
+        "type": "*",
+        "description": "Enriched report, or unchecked signatures for malformed data."
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatureGateway",
+    "name": "utils/pdfSignatureGateway",
+    "longname": "module:utils/pdfSignatureGateway",
+    "kind": "module",
+    "scope": null,
+    "file": "src/utils/pdfSignatureGateway.js",
+    "line": 1,
+    "description": "Optional gateway trust enrichment.",
+    "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
     "name": "disposePdfSignatureWorker",
     "longname": "module:utils/pdfSignatureInspector.disposePdfSignatureWorker",
@@ -24690,7 +24789,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1055,
+    "line": 1058,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -24715,7 +24814,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 272,
+    "line": 275,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
     "returns": [],
@@ -24728,7 +24827,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 199,
+    "line": 202,
     "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
     "params": [
       {
@@ -24766,7 +24865,7 @@
     "kind": "typedef",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 54,
+    "line": 56,
     "description": "",
     "params": [],
     "returns": [],
@@ -24779,7 +24878,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 186,
+    "line": 189,
     "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
     "params": [
       {
@@ -24804,7 +24903,7 @@
     "kind": "constant",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 62,
+    "line": 65,
     "description": "SubFilters with level-1 handling.",
     "params": [],
     "returns": [],
@@ -24817,7 +24916,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 967,
+    "line": 970,
     "description": "Report an inspection failure without claiming that the document is unsigned.",
     "params": [
       {
@@ -24855,7 +24954,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 71,
+    "line": 85,
     "description": "Shared localized status text for the badge tooltip and details dialog.",
     "params": [
       {
@@ -24880,13 +24979,38 @@
     "examples": 0
   },
   {
+    "id": "module:utils/pdfSignatureStatus.getReportSignatureSeverity",
+    "name": "getReportSignatureSeverity",
+    "longname": "module:utils/pdfSignatureStatus.getReportSignatureSeverity",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatureStatus.js",
+    "line": 64,
+    "description": "Worst severity across integrity and trust for all signatures.",
+    "params": [
+      {
+        "name": "signatures",
+        "type": "Array.<*>",
+        "optional": false,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "'ok'|'warning'|'error'",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
     "id": "module:utils/pdfSignatureStatus.getSignatureCount",
     "name": "getSignatureCount",
     "longname": "module:utils/pdfSignatureStatus.getSignatureCount",
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 104,
+    "line": 118,
     "description": "",
     "params": [
       {
@@ -24911,7 +25035,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 51,
+    "line": 52,
     "description": "Map one integrity status to its severity class.",
     "params": [
       {
@@ -24919,6 +25043,12 @@
         "type": "string|null|undefined",
         "optional": false,
         "description": ""
+      },
+      {
+        "name": "trust",
+        "type": "string",
+        "optional": true,
+        "description": "Optional gateway trust verdict."
       }
     ],
     "returns": [
@@ -24936,7 +25066,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 90,
+    "line": 104,
     "description": "The worst integrity status among a document's signatures, or null when there are none.",
     "params": [
       {
@@ -24974,7 +25104,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 60,
+    "line": 74,
     "description": "Fail closed for missing, unexpected and inherited property names.",
     "params": [
       {
@@ -24999,7 +25129,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureStatus.js",
-    "line": 112,
+    "line": 126,
     "description": "",
     "params": [
       {
@@ -25038,7 +25168,7 @@
     "scope": null,
     "file": "src/utils/pdfSignatureStatus.js",
     "line": 2,
-    "description": "Level-1 signature UI status helpers.",
+    "description": "Signature UI status helpers for browser integrity and gateway trust.",
     "params": [],
     "returns": [],
     "examples": 0

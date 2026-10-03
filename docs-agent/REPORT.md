@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 127
-- Source lines: 53407
-- JSDoc symbols: 1420
+- Files: 128
+- Source lines: 53580
+- JSDoc symbols: 1425
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -19,17 +19,17 @@
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
+- `src/utils/pdfSignatureStatus.js`: 5 incoming local imports
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
-- `src/utils/pdfSignatureStatus.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
 - `src/contexts/themeContext.js`: 3 incoming local imports
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2654 lines
+- `src/contexts/ViewerProvider.jsx`: 2657 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2297 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2172 lines
@@ -38,8 +38,8 @@
 - `src/components/DocumentThumbnailList.jsx`: 1402 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
+- `src/utils/pdfSignatures.js`: 1136 lines
 - `src/components/DocumentRender.jsx`: 1135 lines
-- `src/utils/pdfSignatures.js`: 1133 lines
 - `src/utils/documentLoadingConfig.js`: 1099 lines
 - `src/components/DocumentViewer/DocumentViewerRender.jsx`: 1051 lines
 - `src/utils/pdfBenchmark.js`: 965 lines

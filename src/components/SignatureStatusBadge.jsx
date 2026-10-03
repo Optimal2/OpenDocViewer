@@ -2,10 +2,11 @@
 /**
  * Small signature symbol shown on a document's thumbnail and in the toolbar
  * when the document has at least one signature. Colour and icon follow the
- * worst integrity status of the document's signatures (see
+ * worst integrity or trust status of the document's signatures (see
  * utils/pdfSignatureStatus.js): intact = neutral/positive,
  * modified-after-signing/unsupported = warning, digest-mismatch/
- * signature-invalid/unreadable = error. The badge is a native button, so
+ * signature-invalid/unreadable or invalid trust = error; unknown trust = warning.
+ * The badge is a native button, so
  * Enter/Space activate it; it opens the signature details dialog. It lives in
  * the viewer UI only and is never part of printed or exported output (print
  * and export build their own output documents, not the app DOM).
@@ -17,7 +18,7 @@ import { useTranslation } from 'react-i18next';
 import {
   getSignatureCount,
   getIntegrityLabel,
-  getSignatureSeverity,
+  getReportSignatureSeverity,
   getWorstSignatureIntegrity,
   reportHasSignatures,
 } from '../utils/pdfSignatureStatus.js';
@@ -44,7 +45,7 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
 
   const count = getSignatureCount(report);
   const integrity = getWorstSignatureIntegrity(report?.signatures);
-  const severity = getSignatureSeverity(integrity);
+  const severity = getReportSignatureSeverity(report.signatures);
   const label = t('signatures.badge.ariaLabel', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,

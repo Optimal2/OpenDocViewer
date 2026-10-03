@@ -63,3 +63,23 @@ it('F5 provider publishes signed and unsigned reports to badges across page load
   await act(async () => { root.unmount(); });
   expect(disposePdfSignatureWorker).toHaveBeenCalledTimes(1);
 });
+
+it('G10 provider passes the registered source URL, never the viewer file index', async () => {
+  const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
+  getDocumentSignatures.mockResolvedValue({ signatures: [signature] });
+  vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({
+    signatures: [{ ...signature, trust: 'invalid', trustReason: 'Certificate revoked', validationTime: '2026-10-01T12:00:00Z' }],
+  }) }));
+  let api;
+  function Consumer() { api = useContext(ViewerContext); return null; }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  await act(async () => {
+    api.registerSourceDescriptor({ sourceKey: 'signed', fileExtension: 'pdf', fileIndex: 0,
+      sourceUrl: 'https://example.test/gateway/source/session-one/17' });
+    api.insertPagesAtIndex([{ sourceKey: 'signed', fileExtension: 'pdf', pageIndex: 0,
+      fullSizeStatus: 1, fullSizeUrl: 'blob:ready' }], 0);
+  });
+  expect(fetch).toHaveBeenCalledWith('https://example.test/gateway/signatures/session-one/17', expect.any(Object));
+  expect(api.signatureReports.signed.signatures[0].trust).toBe('invalid');
+});

@@ -1,11 +1,11 @@
 // File: src/utils/pdfSignatureStatus.js
 /**
- * Level-1 signature UI status helpers.
+ * Signature UI status helpers for browser integrity and gateway trust.
  *
  * Pure mapping between the phase 1 data contract (utils/pdfSignatures.js) and
  * the presentation concerns of the signature badge/dialog: which integrity
- * status is the "worst" of a document's signatures (drives the badge colour
- * and icon) and which severity class a status belongs to. See
+ * status is the "worst" of a document's signatures, and how integrity and
+ * trust combine into the badge severity class. See
  * docs-src/pdf-signatures.md for the contract.
  *
  * @module utils/pdfSignatureStatus
@@ -46,10 +46,24 @@ const INTEGRITY_WORST_FIRST = [
 /**
  * Map one integrity status to its severity class.
  * @param {(string|null|undefined)} integrity
+ * @param {string} [trust] Optional gateway trust verdict.
  * @returns {'ok'|'warning'|'error'}
  */
-export function getSignatureSeverity(integrity) {
-  return SEVERITY_BY_INTEGRITY[normalizeSignatureIntegrity(integrity)];
+export function getSignatureSeverity(integrity, trust = 'not-checked') {
+  const severity = SEVERITY_BY_INTEGRITY[normalizeSignatureIntegrity(integrity)];
+  if (severity === 'error' || trust === 'invalid') return 'error';
+  if (severity === 'warning' || trust === 'unknown') return 'warning';
+  return severity;
+}
+
+/**
+ * Worst severity across integrity and trust for all signatures.
+ * @param {Array<*>} signatures
+ * @returns {'ok'|'warning'|'error'}
+ */
+export function getReportSignatureSeverity(signatures) {
+  const severities = signatures.map((signature) => getSignatureSeverity(signature?.integrity, signature?.trust));
+  return severities.includes('error') ? 'error' : severities.includes('warning') ? 'warning' : 'ok';
 }
 
 /**

@@ -2555,7 +2555,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     return undefined;
   }, [allPages, loadingRunActive, pageLoadState, pumpWarmupQueue]);
 
-  // Level-1 PDF signature inspection: starts only after the first page is
+  const getSignatureSourceUrl = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl, []);
+
+  // PDF signature inspection and optional gateway trust: starts only after the first page is
   // ready (page rendering keeps priority), runs once per PDF source off the
   // main thread, and caches one report per document for the session.
   const signatureReports = usePdfSignatureReports({
@@ -2563,6 +2565,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     currentSourceKey: signaturePrioritySourceKey,
     inspectionReady: pageLoadState.readyPages > 0,
     readSourceArrayBuffer,
+    getSourceUrl: getSignatureSourceUrl,
   });
 
   useEffect(() => () => {

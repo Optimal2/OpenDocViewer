@@ -7,7 +7,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 ### React Contexts
 
 - `src/contexts/viewerContext.js` (207 lines) - Exports ViewerContext.
-- `src/contexts/ViewerProvider.jsx` (2654 lines) - OpenDocViewer — Viewer state provider.
+- `src/contexts/ViewerProvider.jsx` (2657 lines) - OpenDocViewer — Viewer state provider.
 - `src/contexts/ThemeProvider.jsx` (317 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 - `src/contexts/themeContext.js` (37 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 
@@ -24,7 +24,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 - `src/hooks/usePageNavigation.js` (182 lines) - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/components/DocumentViewer/hooks/useViewerZoomEffects.js` (160 lines) - Zoom, resize, wheel, print\-shortcut, and initial\-fit effects for DocumentViewer.
 - `src/hooks/useAcceleratingHoldRepeat.js` (210 lines) - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/usePdfSignatureReports.js` (118 lines) - Level\-1 PDF signature wiring.
+- `src/hooks/usePdfSignatureReports.js` (126 lines) - Browser PDF signature inspection and optional gateway trust enrichment.
 - `src/components/DocumentToolbar/hooks/usePrintRangeConfig.js` (160 lines) - Runtime\-configuration derivation for PrintRangeDialog.
 
 ### Workers

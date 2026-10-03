@@ -5,7 +5,7 @@
  * data contract (see docs-src/pdf-signatures.md). Level 1 answers exactly one
  * question per signature: is the content that the signature covered
  * byte-for-byte intact? Certificate chain building, revocation and trust are
- * level 2 (server-side) and will only fill the `trust` field later.
+ * level 2 (server-side), optionally merged by pdfSignatureGateway.js.
  *
  * The module is environment-agnostic: it runs on the main thread, inside a
  * web worker and in Node (tests). Heavy dependencies (pdf-lib, pkijs,
@@ -30,10 +30,10 @@
  * @property {string|null} notBefore Certificate validity start, ISO 8601.
  * @property {string|null} notAfter Certificate validity end, ISO 8601.
  * @property {string|null} signingTime Signing time, ISO 8601 (see signingTimeSource).
- * @property {'signed-attribute'|'pdf-M'|'none'} signingTimeSource Where
+ * @property {'signed-attribute'|'pdf-M'|'none'|'timestamp'} signingTimeSource Where
  * `signingTime` came from: the CMS signingTime signed attribute (for document
  * timestamps: the TSTInfo genTime), the PDF signature dictionary /M date, or
- * nowhere.
+ * nowhere. Gateway enrichment can supply a verified timestamp.
  * @property {string|null} reason Signature dictionary /Reason text.
  * @property {string|null} location Signature dictionary /Location text.
  * @property {string|null} subFilter Raw /SubFilter value (without slash).
@@ -47,8 +47,10 @@
  * @property {boolean|null} coversWholeFile Whether the ByteRange reaches the
  * end of the file (false = the file was extended after this signature;
  * null = the ByteRange could not be read).
- * @property {'not-checked'} trust Always 'not-checked' at level 1; the field
- * is reserved for future server-side trust validation (level 2).
+ * @property {'not-checked'|'valid'|'invalid'|'unknown'} trust Always 'not-checked'
+ * from this parser; optional gateway enrichment supplies level-2 trust.
+ * @property {string|null} [trustReason] Plain-language server trust explanation.
+ * @property {string|null} [validationTime] ISO 8601 server validation time.
  */
 
 /**
@@ -56,6 +58,7 @@
  * @property {PdfSignatureInfo[]} signatures Signatures ordered by signing
  * chronology (ByteRange end position). Empty array when the document has no
  * signature fields.
+ * @property {string} [validatedAt] ISO 8601 gateway report validation time.
  */
 
 /** SubFilters with level-1 handling. Anything else is reported, never hidden. */

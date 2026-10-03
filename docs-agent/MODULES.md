@@ -17,13 +17,13 @@ File count: 3. Line count: 782. JSDoc symbol count: 20.
 
 ## src/components
 
-File count: 15. Line count: 7137. JSDoc symbol count: 93.
+File count: 15. Line count: 7149. JSDoc symbol count: 93.
 
 - `src/components/DocumentThumbnailList.jsx` - OpenDocViewer — Deterministic thumbnail strip.
 - `src/components/PrintSelectionWorkspace.jsx` - Full\-window print\-selection workspace.
 - `src/components/DocumentRender.jsx` - OpenDocViewer — Active page renderer.
 - `src/components/Resizer.jsx` - OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction.
-- `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(level 1\).
+- `src/components/SignatureDetailsDialog.jsx` - Signature details dialog \(browser integrity and optional gateway trust\).
 - `src/components/LoadingSpinner.jsx` - OpenDocViewer — Loading Spinner Minimal, accessible loading indicator.
 - `src/components/SignatureStatusBadge.jsx` - Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.
 - `src/components/ViewerProblemNotice.jsx` - OpenDocViewer — configurable viewer\-level problem notice.
@@ -75,7 +75,7 @@ File count: 10. Line count: 5048. JSDoc symbol count: 118.
 
 ## src/contexts
 
-File count: 4. Line count: 3215. JSDoc symbol count: 83.
+File count: 4. Line count: 3218. JSDoc symbol count: 83.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -90,13 +90,13 @@ File count: 1. Line count: 297. JSDoc symbol count: 12.
 
 ## src/hooks
 
-File count: 5. Line count: 768. JSDoc symbol count: 26.
+File count: 5. Line count: 776. JSDoc symbol count: 26.
 
 - `src/hooks/useNavigationModifierState.js` - Shared modifier\-key state for navigation and compare\-aware viewer actions.
 - `src/hooks/usePageTimer.js` - OpenDocViewer — Continuous Page Navigation Timer \(React hook\) Provide a tiny utility for press\-and\-hold page navigation: \- Invokes a caller\-supplied callback immediately \(leading edge\) and then repeatedly after an initia
 - `src/hooks/usePageNavigation.js` - OpenDocViewer — Page Navigation Hook \(React\) Provide memoized handlers for page navigation \(first/prev/next/last\) and continuous navigation timers suitable for press\-and\-hold UI \(e.g., mousedown\).
 - `src/hooks/useAcceleratingHoldRepeat.js` - Reusable press\-and\-hold behavior for toolbar buttons.
-- `src/hooks/usePdfSignatureReports.js` - Level\-1 PDF signature wiring.
+- `src/hooks/usePdfSignatureReports.js` - Browser PDF signature inspection and optional gateway trust enrichment.
 
 ## src/i18n.js
 
@@ -150,16 +150,16 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 42. Line count: 17265. JSDoc symbol count: 658.
+File count: 43. Line count: 17415. JSDoc symbol count: 663.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
+- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
-- `src/utils/pdfSignatureStatus.js` - Level\-1 signature UI status helpers.
 
 ## src/workers
 

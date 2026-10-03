@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 42. Line count: 17265. JSDoc symbol count: 658.
+File count: 43. Line count: 17415. JSDoc symbol count: 663.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -344,6 +344,21 @@ Symbols:
 - `recordPdfResolution` (function) - Record successful rendering/restoration only; never collect document identifiers.
 - `getPdfResolutionDiagnostics` (function) - Effective PDF display diagnostics, with null scale until a page has been rendered.
 
+## src/utils/pdfSignatureGateway.js
+
+Optional gateway trust enrichment.
+
+Exports: `getGatewaySignatureContext`, `mergeGatewaySignatureReport`, `createGatewaySignatureClient`
+
+Local imports: `src/utils/pdfSignatureStatus.js`
+
+Symbols:
+
+- `module:utils/pdfSignatureGateway` (module) - Optional gateway trust enrichment.
+- `module:utils/pdfSignatureGateway.getGatewaySignatureContext` (function) - Resolve only HTTP source routes, preserving the gateway origin and path base.
+- `module:utils/pdfSignatureGateway.mergeGatewaySignatureReport` (function) - Accept only unambiguous server entries.
+- `module:utils/pdfSignatureGateway.createGatewaySignatureClient` (function) - Create viewer\-local state for disabled gateway sessions.
+
 ## src/utils/pdfSignatureInspector.js
 
 PDF signature inspection \- the single entry point for application code.
@@ -379,16 +394,17 @@ Symbols:
 
 ## src/utils/pdfSignatureStatus.js
 
-Level\-1 signature UI status helpers.
+Signature UI status helpers for browser integrity and gateway trust.
 
-Exports: `getSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
+Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
 
 Symbols:
 
-- `module:utils/pdfSignatureStatus` (module) - Level\-1 signature UI status helpers.
+- `module:utils/pdfSignatureStatus` (module) - Signature UI status helpers for browser integrity and gateway trust.
 - `module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY` (constant) - Severity classes used for colours/icons: intact is neutral/positive, modified\-after\-signing and unsupported are warnings, and digest\-mismatch, signature\-invalid and unreadable are...
 - `module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST` (constant) - Integrity statuses ordered worst\-first.
 - `module:utils/pdfSignatureStatus.getSignatureSeverity` (function) - Map one integrity status to its severity class.
+- `module:utils/pdfSignatureStatus.getReportSignatureSeverity` (function) - Worst severity across integrity and trust for all signatures.
 - `module:utils/pdfSignatureStatus.normalizeSignatureIntegrity` (function) - Fail closed for missing, unexpected and inherited property names.
 - `module:utils/pdfSignatureStatus.getIntegrityLabel` (function) - Shared localized status text for the badge tooltip and details dialog.
 - `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.

@@ -23,10 +23,10 @@ Source commit: not embedded
 
 ## Stats
 
-- Source files: 127
-- Source lines: 53407
-- JSDoc symbols: 1420
-- Files with JSDoc: 127
+- Source files: 128
+- Source lines: 53580
+- JSDoc symbols: 1425
+- Files with JSDoc: 128
 - Low-confidence summaries: 0
 - Parse errors: 0
 
@@ -38,11 +38,11 @@ Source commit: not embedded
 - `src/utils/viewerPreferences.js` - Lightweight persisted viewer preferences.
 - `src/utils/printPdf.js` - OpenDocViewer — Generated PDF print backend.
 - `src/utils/pdfResolution.js` - Pure, per\-page PDF display resolution policy shared by browser and worker renderers.
+- `src/utils/pdfSignatureStatus.js` - Signature UI status helpers for browser integrity and gateway trust.
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/utils/localizedValue.js` - Localized string resolver for admin\-supplied config values.
 - `src/index.jsx` - OpenDocViewer — Application Entry \- Load global styles \(CSS variables \+ layout\).
 - `src/utils/pdfPrintCacheKey.js` - Generated\-PDF cache key helpers.
-- `src/utils/pdfSignatureStatus.js` - Level\-1 signature UI status helpers.
 - `src/utils/printTemplate.js` - OpenDocViewer — Print Templating & Tokens Provide token context generation and safe token substitution where values are HTML\-escaped before insertion into admin\-authored print header/footer templates.
 
 ## Agent Notes

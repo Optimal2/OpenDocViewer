@@ -189,13 +189,70 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   `DocumentMetadataOverlayDialog`: focus moves into the dialog, Tab is trapped inside,
   Escape closes, and focus returns to the symbol that opened it. Unsupported formats are
   shown as "signature present, format not supported", never hidden.
-- Every dialog shows the level-1 trust line ("Trust not checked - shows who signed and
+- Each unchecked signature shows the level-1 trust line ("Trust not checked - shows who signed and
   whether the document is unchanged, not whether the signature is valid."). The trust field
   is rendered generically with labels for `not-checked`, `valid`, `invalid` and `unknown`
   plus an optional `trustReason`, so level 2 only fills the field with no UI rewrite.
 - Strings live under the `signatures` key in `public/locales/en/common.json` and
   `public/locales/sv/common.json`; colours use the `--odv-signature-*` theme tokens (light,
   normal, dark, and the print reset).
+
+## Level 2 (gateway validation)
+
+When a document comes from the gateway's `/source/{sessionKey}/{fileIndex}` route,
+the viewer optionally enriches its browser report with server trust. `DocumentLoader`
+already registers the actual source URL in the source descriptor; `ViewerProvider`
+passes a lookup for that URL to `usePdfSignatureReports`. The gateway bundle can
+arrive through the existing `bundleUrl` / `sessionurl` bootstrap path (which takes
+precedence over parent-page data), or another supported bundle transport. Bootstrap
+mode alone is not evidence that any particular document uses a gateway.
+
+`src/utils/pdfSignatureGateway.js` recognizes the source route per document and
+derives `GET /signatures/{sessionKey}/{fileIndex}` on the same origin and path base.
+It uses the index in the URL, never the viewer's file order, document ID, or source
+cache key. Relative URLs use the browser document base. Unsupported schemes,
+ambiguous paths, or missing source URLs leave level 1 unchanged; standalone file,
+demo, and ordinary HTTP PDF sources need no gateway configuration.
+
+After level 1 finds signatures, its report is published immediately. The existing
+serial queue then makes one JSON request for that document, without fetching PDF
+bytes again or blocking rendering. The per-source cache covers both levels. Requests
+use `cache: 'no-store'` and the same `credentials: 'same-origin'` policy as bundle
+loading. A 20-second deadline covers fetch and JSON body reading and aborts the
+request; failure releases the queue. Removed documents cannot receive late results.
+
+The merge uses unique, nonempty `fieldName` values, never array positions. Missing,
+unnamed, or duplicate field identities cannot establish trust. For each matched
+signature it accepts `trust` (`valid`, `invalid`, `unknown`), optional plain-text
+`trustReason`, and an ISO `validationTime`. `validatedAt` is retained when present.
+Signing time changes only for a server `signingTimeSource: 'timestamp'` with a valid
+time. Browser identity, certificate information and coverage remain unchanged.
+Integrity can only worsen, using the existing worst-first order:
+`unreadable`, `signature-invalid`, `digest-mismatch`, `modified-after-signing`,
+`unsupported`, `intact`. A worse server integrity also supplies its explanation;
+an equal or better result preserves the browser explanation.
+
+A 404 with the exact JSON `error` message
+`Signature validation is not enabled on this gateway.` suppresses further requests
+for that gateway session and leaves trust unchecked. Other 404 responses, HTTP
+errors (including 413/415/422/500), network errors, timeouts and malformed reports
+leave `trust: 'not-checked'` and set `trustReason: 'server validation unavailable'`.
+They never grant valid trust or disable other documents' checks. This state is local
+to the viewer instance and keyed by gateway base and session, not just session text.
+
+Badge severity combines the worst integrity and trust: invalid trust is an error,
+unknown trust is a warning, and valid trust is OK only when integrity is intact.
+The dialog renders localized trust labels, a plain-text reason and validation time.
+The unchecked explanation is per signature and disappears only for an answered
+signature; partially matched documents still explain their unchecked signatures.
+The unavailable reason and timestamp source label are localized in English and Swedish.
+
+Run `npm test -- pdfSignatureGateway ViewerProvider.signatures` for mocked network,
+merge, queue, provider, badge and localized dialog coverage. Run
+`node scripts/test-signature-gateway-mutations.mjs` in an isolated worktree for
+temporary sabotage proofs (exit 1 with an assertion for each broken rule; runner
+exit 0 after restoring every source). Run the unmodified tests afterwards. No live
+gateway or external trust service is required for these tests.
 
 ## Data contract
 
@@ -205,6 +262,7 @@ Defined as JSDoc typedefs in `src/utils/pdfSignatures.js` (`PdfSignatureInfo`,
 ```ts
 interface PdfSignatureReport {
   signatures: PdfSignatureInfo[]; // [] when the document has no signature fields
+  validatedAt?: string;          // ISO 8601 gateway report validation time
 }
 
 interface PdfSignatureInfo {
@@ -216,7 +274,7 @@ interface PdfSignatureInfo {
   notBefore: string | null;              // ISO 8601, certificate validity start
   notAfter: string | null;               // ISO 8601, certificate validity end
   signingTime: string | null;            // ISO 8601 signing time (see signingTimeSource)
-  signingTimeSource: 'signed-attribute' | 'pdf-M' | 'none';
+  signingTimeSource: 'signed-attribute' | 'pdf-M' | 'none' | 'timestamp';
   reason: string | null;                 // signature dictionary /Reason
   location: string | null;               // signature dictionary /Location
   subFilter: string | null;              // raw /SubFilter value, e.g. "adbe.pkcs7.detached"
@@ -230,7 +288,9 @@ interface PdfSignatureInfo {
     | 'unreadable';
   integrityReason: string | null;        // short human-readable explanation; null when there is nothing to explain
   coversWholeFile: boolean | null;       // false = file extended after signing
-  trust: 'not-checked';                  // reserved for level 2 (server-side chain/trust)
+  trust: 'not-checked' | 'valid' | 'invalid' | 'unknown';
+  trustReason?: string | null;          // optional server explanation / unavailable reason
+  validationTime?: string | null;       // ISO 8601 server validation time
 }
 ```
 
@@ -316,8 +376,9 @@ signature fields. The certificate helper `@peculiar/x509` (MIT) is a devDependen
 by the fixture generator and tests, never shipped. Licences are recorded in
 [THIRD-PARTY-NOTICES.md](../THIRD-PARTY-NOTICES.md).
 
-## Out of scope (level 2)
+## Server responsibilities
 
 Certificate chain building to a trust anchor, revocation status (OCSP/CRL), trust-list
-evaluation, and any statement stronger than integrity. Those need server-side validation
-and a trust store; the `trust` field is the only hook they will fill.
+evaluation, and any statement stronger than integrity remain server responsibilities.
+The viewer consumes the gateway verdict; it does not build trust chains, query
+revocation services or maintain a trust store in the browser.

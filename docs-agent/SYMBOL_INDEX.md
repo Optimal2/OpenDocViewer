@@ -445,15 +445,15 @@
 | <code>Resizer</code> | constant | <code>src/components/Resizer.jsx:61</code> | Resizer component. |
 | <code>ResizerProps</code> | typedef | <code>src/components/Resizer.jsx:43</code> | Props for . |
 | <code>ResizeStartHandler</code> | typedef | <code>src/components/Resizer.jsx:36</code> | Handler invoked when a resize interaction is initiated. |
-| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:92</code> |  |
-| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:31</code> |  |
-| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:48</code> |  |
-| <code>getTrustLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:67</code> | Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present. |
-| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:119</code> |  |
-| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:138</code> | Keep Tab navigation inside the dialog while it is open. |
-| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:176</code> |  |
-| <code>module.exports</code> | function | <code>src/components/SignatureStatusBadge.jsx:41</code> |  |
-| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureStatusBadge.jsx:27</code> | Material Icons ligature per severity. |
+| <code>module.exports</code> | function | <code>src/components/SignatureDetailsDialog.jsx:93</code> |  |
+| <code>getKindLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:30</code> |  |
+| <code>getSigningTimeSourceLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:47</code> |  |
+| <code>getTrustLabel</code> | function | <code>src/components/SignatureDetailsDialog.jsx:68</code> | Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present. |
+| <code>&lt;anonymous&gt;~handleEscape</code> | function | <code>src/components/SignatureDetailsDialog.jsx:120</code> |  |
+| <code>SignatureDetailsDialog~handleTabTrap</code> | function | <code>src/components/SignatureDetailsDialog.jsx:139</code> | Keep Tab navigation inside the dialog while it is open. |
+| <code>SignatureDetailsDialog~orEmpty</code> | function | <code>src/components/SignatureDetailsDialog.jsx:177</code> |  |
+| <code>module.exports</code> | function | <code>src/components/SignatureStatusBadge.jsx:42</code> |  |
+| <code>ICON_BY_SEVERITY</code> | constant | <code>src/components/SignatureStatusBadge.jsx:28</code> | Material Icons ligature per severity. |
 | <code>module.exports</code> | function | <code>src/components/ViewerProblemNotice.jsx:197</code> |  |
 | <code>ProblemNoticeTrigger</code> | typedef | <code>src/components/ViewerProblemNotice.jsx:26</code> |  |
 | <code>resolveProblemTrigger</code> | function | <code>src/components/ViewerProblemNotice.jsx:44</code> |  |
@@ -576,9 +576,9 @@
 | <code>usePageTimer~startPageTimer</code> | constant | <code>src/hooks/usePageTimer.js:75</code> | Start the timer for continuous page navigation. |
 | <code>usePageTimer~stopPageTimer</code> | constant | <code>src/hooks/usePageTimer.js:123</code> | Stop any active delay or interval timer \(idempotent\). |
 | <code>usePageTimer</code> | function | <code>src/hooks/usePageTimer.js:60</code> | Custom hook to handle page change with a timer for continuous navigation. |
-| <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Level-1 PDF signature wiring. |
-| <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:26</code> |  |
-| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:40</code> |  |
+| <code>module:hooks/usePdfSignatureReports</code> | module | <code>src/hooks/usePdfSignatureReports.js:2</code> | Browser PDF signature inspection and optional gateway trust enrichment. |
+| <code>module:hooks/usePdfSignatureReports~isPdfPage</code> | function | <code>src/hooks/usePdfSignatureReports.js:27</code> |  |
+| <code>module:hooks/usePdfSignatureReports</code> | function | <code>src/hooks/usePdfSignatureReports.js:42</code> |  |
 | <code>appendQuery</code> | function | <code>src/i18n.js:140</code> | Helper: append query params safely to a URL. |
 | <code>BUNDLED_I18N_RESOURCE_REVISION</code> | constant | <code>src/i18n.js:90</code> | Fallback cache-busting token for bundled locale resources. |
 | <code>computeBaseHref</code> | function | <code>src/i18n.js:372</code> | Compute a normalized base href. |
@@ -1000,28 +1000,33 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
+| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:95</code> | Create viewer-local state for disabled gateway sessions. |
+| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:19</code> | Resolve only HTTP source routes, preserving the gateway origin and path base. |
+| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:52</code> | Accept only unambiguous server entries. |
+| <code>module:utils/pdfSignatureGateway</code> | module | <code>src/utils/pdfSignatureGateway.js:1</code> | Optional gateway trust enrichment. |
 | <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:175</code> | Terminate the signature worker \(e.g. |
 | <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:140</code> | Inspect the signatures of one document. |
 | <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
 | <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:33</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
-| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1055</code> | Collect signature information from PDF bytes. |
-| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:272</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
-| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:199</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1058</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:275</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
+| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:202</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
 | <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:19</code> | One inspected PDF signature \(level-1 integrity view; trust is never evaluated here - see the trust property\). |
-| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:54</code> |  |
-| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:186</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
-| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:62</code> | SubFilters with level-1 handling. |
-| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:967</code> | Report an inspection failure without claiming that the document is unsigned. |
+| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:56</code> |  |
+| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:189</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
+| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:65</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:970</code> | Report an inspection failure without claiming that the document is unsigned. |
 | <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
-| <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:71</code> | Shared localized status text for the badge tooltip and details dialog. |
-| <code>module:utils/pdfSignatureStatus.getSignatureCount</code> | function | <code>src/utils/pdfSignatureStatus.js:104</code> |  |
-| <code>module:utils/pdfSignatureStatus.getSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:51</code> | Map one integrity status to its severity class. |
-| <code>module:utils/pdfSignatureStatus.getWorstSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:90</code> | The worst integrity status among a document&#39;s signatures, or null when there are none. |
+| <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:85</code> | Shared localized status text for the badge tooltip and details dialog. |
+| <code>module:utils/pdfSignatureStatus.getReportSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:64</code> | Worst severity across integrity and trust for all signatures. |
+| <code>module:utils/pdfSignatureStatus.getSignatureCount</code> | function | <code>src/utils/pdfSignatureStatus.js:118</code> |  |
+| <code>module:utils/pdfSignatureStatus.getSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:52</code> | Map one integrity status to its severity class. |
+| <code>module:utils/pdfSignatureStatus.getWorstSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:104</code> | The worst integrity status among a document&#39;s signatures, or null when there are none. |
 | <code>module:utils/pdfSignatureStatus~INTEGRITY_WORST_FIRST</code> | constant | <code>src/utils/pdfSignatureStatus.js:37</code> | Integrity statuses ordered worst-first. |
-| <code>module:utils/pdfSignatureStatus.normalizeSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:60</code> | Fail closed for missing, unexpected and inherited property names. |
-| <code>module:utils/pdfSignatureStatus.reportHasSignatures</code> | function | <code>src/utils/pdfSignatureStatus.js:112</code> |  |
+| <code>module:utils/pdfSignatureStatus.normalizeSignatureIntegrity</code> | function | <code>src/utils/pdfSignatureStatus.js:74</code> | Fail closed for missing, unexpected and inherited property names. |
+| <code>module:utils/pdfSignatureStatus.reportHasSignatures</code> | function | <code>src/utils/pdfSignatureStatus.js:126</code> |  |
 | <code>module:utils/pdfSignatureStatus~SEVERITY_BY_INTEGRITY</code> | constant | <code>src/utils/pdfSignatureStatus.js:21</code> | Severity classes used for colours/icons: intact is neutral/positive, modified-after-signing and unsupported are warnings, and digest-mismatch, signature-invalid and unreadable are... |
-| <code>module:utils/pdfSignatureStatus</code> | module | <code>src/utils/pdfSignatureStatus.js:2</code> | Level-1 signature UI status helpers. |
+| <code>module:utils/pdfSignatureStatus</code> | module | <code>src/utils/pdfSignatureStatus.js:2</code> | Signature UI status helpers for browser integrity and gateway trust. |
 | <code>batchProgressUnitsFromEvent</code> | function | <code>src/utils/pdfWorkerDispatcher.js:156</code> | Convert worker phases to deterministic job units: 1 unit for loading the PDF engine per batch 1 unit per loaded page image 1 unit per generated page 1 unit for finalizing each par... |
 | <code>clampInteger</code> | function | <code>src/utils/pdfWorkerDispatcher.js:41</code> |  |
 | <code>clampNumber</code> | function | <code>src/utils/pdfWorkerDispatcher.js:114</code> |  |

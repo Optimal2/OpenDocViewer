@@ -1,6 +1,6 @@
 // File: src/hooks/usePdfSignatureReports.js
 /**
- * Level-1 PDF signature wiring.
+ * Browser PDF signature inspection and optional gateway trust enrichment.
  *
  * Watches the viewer's pages and, once the first page is ready (so page
  * rendering is never blocked or delayed), inspects every loaded PDF document
@@ -16,6 +16,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { getDocumentSignatures } from '../utils/pdfSignatureInspector.js';
 import { unreadableSignatureReport } from '../utils/pdfSignatures.js';
+import { createGatewaySignatureClient } from '../utils/pdfSignatureGateway.js';
 
 const INSPECTION_CONCURRENCY = 1;
 
@@ -35,18 +36,21 @@ function isPdfPage(page) {
  * @param {function(string): Promise<(ArrayBuffer|null)>} options.readSourceArrayBuffer
  * Reads the already-loaded source bytes for a sourceKey.
  * @param {string} [options.currentSourceKey] Visible document, prioritized before queued documents.
+ * @param {function(string): string} [options.getSourceUrl] Registered document source URL.
  * @returns {Object<string, *>} Map of sourceKey to PdfSignatureReport.
  */
-export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey }) {
+export default function usePdfSignatureReports({ allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl }) {
   const [reports, setReports] = useState(/** @type {Object<string, *>} */ ({}));
   // Entry identity separates removed/reloaded documents even when sourceKeys are reused.
   const entriesRef = useRef(new Map());
   const mountedRef = useRef(false);
   const activeRef = useRef(0);
   const pumpRef = useRef(() => {});
+  const gatewayRef = useRef(null);
 
   useEffect(() => {
     mountedRef.current = true;
+    gatewayRef.current = createGatewaySignatureClient();
     const entries = entriesRef.current;
     return () => {
       mountedRef.current = false;
@@ -96,6 +100,10 @@ export default function usePdfSignatureReports({ allPages, inspectionReady, read
             if (!bytes) throw new Error('PDF source bytes are unavailable');
             report = await getDocumentSignatures(new Uint8Array(bytes), { transfer: true });
             if (!Array.isArray(report?.signatures)) throw new Error('Signature inspection returned no report');
+            if (!isCurrent()) return;
+            // Publish browser integrity before waiting for optional server trust.
+            setReports((previous) => ({ ...previous, [sourceKey]: report }));
+            report = await gatewayRef.current.enrich(report, getSourceUrl?.(sourceKey));
             entry.state = 'done';
           } catch (error) {
             entry.state = 'failed';
@@ -111,7 +119,7 @@ export default function usePdfSignatureReports({ allPages, inspectionReady, read
       }
     };
     pumpRef.current();
-  }, [allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey]);
+  }, [allPages, inspectionReady, readSourceArrayBuffer, currentSourceKey, getSourceUrl]);
 
   return reports;
 }
