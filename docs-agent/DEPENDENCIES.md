@@ -49,15 +49,15 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |
 | <code>cross-env</code> | <code>^10.1.0</code> | 0 |
 | <code>docdash</code> | <code>^2.0.2</code> | 0 |
-| <code>eslint</code> | <code>^10.11.0</code> | 0 |
+| <code>eslint</code> | <code>^10.12.0</code> | 0 |
 | <code>eslint-plugin-react-hooks</code> | <code>^7.1.1</code> | 0 |
 | <code>eslint-plugin-react-refresh</code> | <code>^0.5.7</code> | 0 |
-| <code>globals</code> | <code>^17.12.0</code> | 0 |
+| <code>globals</code> | <code>^17.13.0</code> | 0 |
 | <code>jsdoc</code> | <code>^4.0.5</code> | 0 |
 | <code>jsdom</code> | <code>30.1.1</code> | 0 |
 | <code>prettier</code> | <code>^3.9.9</code> | 0 |
 | <code>rolldown</code> | <code>^1.2.12</code> | 0 |
-| <code>vite</code> | <code>^8.3.1</code> | 0 |
+| <code>vite</code> | <code>^8.3.2</code> | 0 |
 | <code>vitest</code> | <code>^5.0.3</code> | 0 |
 
 ## Imported But Not Declared Directly

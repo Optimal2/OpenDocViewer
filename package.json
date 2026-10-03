@@ -86,15 +86,15 @@
     "concurrently": "^10.0.5",
     "cross-env": "^10.1.0",
     "docdash": "^2.0.2",
-    "eslint": "^10.11.0",
+    "eslint": "^10.12.0",
     "eslint-plugin-react-hooks": "^7.1.1",
     "eslint-plugin-react-refresh": "^0.5.7",
-    "globals": "^17.12.0",
+    "globals": "^17.13.0",
     "jsdoc": "^4.0.5",
     "jsdom": "30.1.1",
     "prettier": "^3.9.9",
     "rolldown": "^1.2.12",
-    "vite": "^8.3.1",
+    "vite": "^8.3.2",
     "vitest": "^5.0.3"
   },
   "overrides": {
