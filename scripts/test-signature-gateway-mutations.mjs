@@ -12,6 +12,12 @@ const hookTests = 'src/hooks/__tests__/pdfSignatureGateway.test.jsx';
 const unitTests = 'src/utils/__tests__/pdfSignatureGateway.test.js';
 const uiTests = 'src/components/__tests__/pdfSignatureGatewayUi.test.jsx';
 const mutations = [
+  ['origin restriction', gateway, 'if (url.origin !== new URL(globalThis.location?.href).origin) return null;',
+    '// Origin restriction removed.', hookTests, 'G18'],
+  ['trust tooltip', badge, '[tooltip, getIntegrityLabel(t, integrity), trustWarning]',
+    '[tooltip, getIntegrityLabel(t, integrity)]', uiTests, 'G19'],
+  ['client marker', dialog, 'signature?.serverValidationUnavailable === true',
+    "rawTrustReason === 'server validation unavailable'", uiTests, 'G20'],
   ['source index', gateway, '${session}/${match[3]}', '${session}/0', hookTests, 'G1'],
   ['non-gateway detection', gateway, "return { endpoint: `${session}/${match[3]}`, session };",
     'return null;', hookTests, 'G1'],
@@ -39,7 +45,7 @@ const mutations = [
   ['malformed trust', gateway, '!TRUST_VALUES.includes(signature.trust)', 'false', unitTests, 'G16'],
   ['invalid trust severity', status, "trust === 'invalid'", 'false', unitTests, 'G17'],
   ['unknown trust severity', status, "trust === 'unknown'", 'false', unitTests, 'G17'],
-];
+].filter((mutation) => !process.argv.includes('--review-fixes') || ['G18', 'G19', 'G20'].includes(mutation[5]));
 const originals = new Map([...new Set(mutations.map(([, file]) => file))].map((file) => [file, readFileSync(file, 'utf8')]));
 try {
   for (const [name, file, from, to, testFile, testName] of mutations) {

@@ -46,6 +46,10 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
   const count = getSignatureCount(report);
   const integrity = getWorstSignatureIntegrity(report?.signatures);
   const severity = getReportSignatureSeverity(report.signatures);
+  const trustWarning = report.signatures.some((signature) => signature?.trust === 'invalid')
+    ? t('signatures.badge.invalidTrust', { defaultValue: 'Invalid signature' })
+    : report.signatures.some((signature) => signature?.trust === 'unknown')
+      ? t('signatures.badge.unknownTrust', { defaultValue: 'Signature trust unknown' }) : null;
   const label = t('signatures.badge.ariaLabel', {
     count,
     defaultValue: `Signed document, ${count} ${count === 1 ? 'signature' : 'signatures'}`,
@@ -60,7 +64,7 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
       type="button"
       className={`odv-signature-badge odv-signature-badge--${severity} odv-signature-badge--${variant}`}
       aria-label={label}
-      title={`${tooltip} — ${getIntegrityLabel(t, integrity)}`}
+      title={[tooltip, getIntegrityLabel(t, integrity), trustWarning].filter(Boolean).join(' — ')}
       onClick={(event) => {
         event.stopPropagation();
         onOpen?.(event.currentTarget);

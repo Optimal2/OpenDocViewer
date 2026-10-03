@@ -1000,22 +1000,22 @@
 | <code>getPdfResolutionInputs</code> | function | <code>src/utils/pdfResolutionRuntime.js:15</code> | Capture serializable browser inputs before sending a render request to a window-less worker. |
 | <code>recordPdfResolution</code> | function | <code>src/utils/pdfResolutionRuntime.js:34</code> | Record successful rendering/restoration only; never collect document identifiers. |
 | <code>registerPdfViewerWidth</code> | function | <code>src/utils/pdfResolutionRuntime.js:9</code> | Register a live content-width measurement without triggering renders on resize. |
-| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:95</code> | Create viewer-local state for disabled gateway sessions. |
-| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:19</code> | Resolve only HTTP source routes, preserving the gateway origin and path base. |
-| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:52</code> | Accept only unambiguous server entries. |
+| <code>module:utils/pdfSignatureGateway.createGatewaySignatureClient</code> | function | <code>src/utils/pdfSignatureGateway.js:98</code> | Create viewer-local state for disabled gateway sessions. |
+| <code>module:utils/pdfSignatureGateway.getGatewaySignatureContext</code> | function | <code>src/utils/pdfSignatureGateway.js:19</code> | Resolve only HTTP source routes on the viewer&#39;s own origin, preserving the path base. |
+| <code>module:utils/pdfSignatureGateway.mergeGatewaySignatureReport</code> | function | <code>src/utils/pdfSignatureGateway.js:54</code> | Accept only unambiguous server entries. |
 | <code>module:utils/pdfSignatureGateway</code> | module | <code>src/utils/pdfSignatureGateway.js:1</code> | Optional gateway trust enrichment. |
 | <code>module:utils/pdfSignatureInspector.disposePdfSignatureWorker</code> | function | <code>src/utils/pdfSignatureInspector.js:175</code> | Terminate the signature worker \(e.g. |
 | <code>module:utils/pdfSignatureInspector.getDocumentSignatures</code> | function | <code>src/utils/pdfSignatureInspector.js:140</code> | Inspect the signatures of one document. |
 | <code>module:utils/pdfSignatureInspector</code> | module | <code>src/utils/pdfSignatureInspector.js:1</code> | PDF signature inspection - the single entry point for application code. |
 | <code>module:utils/pdfSignatureInspector~workerHandle</code> | member | <code>src/utils/pdfSignatureInspector.js:33</code> | Lazily created worker handle: { worker, broken, pending } where pending maps requestId to its resolve/reject callbacks. |
-| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1058</code> | Collect signature information from PDF bytes. |
-| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:275</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
-| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:202</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
+| <code>module:utils/pdfSignatures.collectPdfSignatures</code> | function | <code>src/utils/pdfSignatures.js:1059</code> | Collect signature information from PDF bytes. |
+| <code>module:utils/pdfSignatures~discoverSignatures</code> | function | <code>src/utils/pdfSignatures.js:276</code> | Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\). |
+| <code>module:utils/pdfSignatures.parsePdfDateString</code> | function | <code>src/utils/pdfSignatures.js:203</code> | Parse a PDF date string \(&amp;quot;D:YYYYMMDDHHmmSS+02&#39;30&#39;&amp;quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC\). |
 | <code>module:utils/pdfSignatures~PdfSignatureInfo</code> | typedef | <code>src/utils/pdfSignatures.js:19</code> | One inspected PDF signature \(level-1 integrity view; trust is never evaluated here - see the trust property\). |
-| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:56</code> |  |
-| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:189</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
-| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:65</code> | SubFilters with level-1 handling. |
-| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:970</code> | Report an inspection failure without claiming that the document is unsigned. |
+| <code>module:utils/pdfSignatures~PdfSignatureReport</code> | typedef | <code>src/utils/pdfSignatures.js:57</code> |  |
+| <code>module:utils/pdfSignatures~pdfText</code> | function | <code>src/utils/pdfSignatures.js:190</code> | Decode a PDF text string object \(literal string or hex string\) to a JS string, honouring the UTF-16BE byte-order mark. |
+| <code>module:utils/pdfSignatures.SUPPORTED_SUBFILTERS</code> | constant | <code>src/utils/pdfSignatures.js:66</code> | SubFilters with level-1 handling. |
+| <code>module:utils/pdfSignatures.unreadableSignatureReport</code> | function | <code>src/utils/pdfSignatures.js:971</code> | Report an inspection failure without claiming that the document is unsigned. |
 | <code>module:utils/pdfSignatures</code> | module | <code>src/utils/pdfSignatures.js:1</code> | PDF signature collection - level 1 integrity inspection. |
 | <code>module:utils/pdfSignatureStatus.getIntegrityLabel</code> | function | <code>src/utils/pdfSignatureStatus.js:85</code> | Shared localized status text for the badge tooltip and details dialog. |
 | <code>module:utils/pdfSignatureStatus.getReportSignatureSeverity</code> | function | <code>src/utils/pdfSignatureStatus.js:64</code> | Worst severity across integrity and trust for all signatures. |

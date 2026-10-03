@@ -1,4 +1,4 @@
-import { describe, expect, it } from 'vitest';
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest';
 import { getGatewaySignatureContext, mergeGatewaySignatureReport } from '../pdfSignatureGateway.js';
 import { getSignatureSeverity } from '../pdfSignatureStatus.js';
 
@@ -7,6 +7,9 @@ const local = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked'
   signer: 'Browser signer', integrityReason: 'Browser reason', signingTime: '2026-09-01T12:00:00Z', signingTimeSource: 'pdf-M' };
 const remote = { ...local, trust: 'valid', trustReason: 'Certificate chain verified', validationTime: time };
 const merge = (signatures, server = [remote]) => mergeGatewaySignatureReport({ signatures }, { signatures: server, validatedAt: time });
+
+beforeEach(() => vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' }));
+afterEach(() => vi.unstubAllGlobals());
 
 it('G11 detects only a gateway source route, including relative URLs and virtual directories', () => {
   expect(getGatewaySignatureContext('../source/session-one/42', 'https://example.test/gateway/viewer/')).toEqual({
@@ -30,6 +33,17 @@ it('G12 merges by fieldName instead of position and preserves browser identity',
     validationTime: time, integrityReason: local.integrityReason });
   expect(result.validatedAt).toBe(time);
   expect(local.trust).toBe('not-checked');
+});
+
+it('G11 rejects non-HTTP sources even when the viewer shares their origin', () => {
+  vi.stubGlobal('location', { href: 'file:///viewer/index.html' });
+  expect(getGatewaySignatureContext('file:///source/session/0')).toBeNull();
+});
+
+it('G18 never uses the HTML base or an absent viewer location as a trust anchor', () => {
+  expect(getGatewaySignatureContext('/source/session/0', 'https://foreign.test/')).toBeNull();
+  vi.stubGlobal('location', undefined);
+  expect(getGatewaySignatureContext('https://example.test/source/session/0')).toBeNull();
 });
 
 describe('G13 never improves browser integrity and accepts worse server integrity', () => {

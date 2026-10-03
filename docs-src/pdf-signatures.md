@@ -208,7 +208,10 @@ precedence over parent-page data), or another supported bundle transport. Bootst
 mode alone is not evidence that any particular document uses a gateway.
 
 `src/utils/pdfSignatureGateway.js` recognizes the source route per document and
-derives `GET /signatures/{sessionKey}/{fileIndex}` on the same origin and path base.
+derives `GET /signatures/{sessionKey}/{fileIndex}` only on the viewer page's own
+origin, preserving the source path base. A matching path on another origin makes
+no request and stays at level 1. The document URL and HTML base URI cannot nominate
+a trusted origin; no gateway base URL runtime setting currently exists.
 It uses the index in the URL, never the viewer's file order, document ID, or source
 cache key. Relative URLs use the browser document base. Unsupported schemes,
 ambiguous paths, or missing source URLs leave level 1 unchanged; standalone file,
@@ -237,11 +240,16 @@ A 404 with the exact JSON `error` message
 for that gateway session and leaves trust unchecked. Other 404 responses, HTTP
 errors (including 413/415/422/500), network errors, timeouts and malformed reports
 leave `trust: 'not-checked'` and set `trustReason: 'server validation unavailable'`.
+The separate client-only `serverValidationUnavailable: true` field selects the
+localized failure label. Server fields cannot set this marker; a matched verdict
+clears it and displays the server's `trustReason` verbatim, even if it matches the
+legacy failure text.
 They never grant valid trust or disable other documents' checks. This state is local
 to the viewer instance and keyed by gateway base and session, not just session text.
 
 Badge severity combines the worst integrity and trust: invalid trust is an error,
 unknown trust is a warning, and valid trust is OK only when integrity is intact.
+The tooltip includes localized invalid/unknown trust warnings alongside integrity.
 The dialog renders localized trust labels, a plain-text reason and validation time.
 The unchecked explanation is per signature and disappears only for an answered
 signature; partially matched documents still explain their unchecked signatures.
@@ -253,6 +261,8 @@ merge, queue, provider, badge and localized dialog coverage. Run
 temporary sabotage proofs (exit 1 with an assertion for each broken rule; runner
 exit 0 after restoring every source). Run the unmodified tests afterwards. No live
 gateway or external trust service is required for these tests.
+Use `node scripts/test-signature-gateway-mutations.mjs --review-fixes` to prove the
+origin restriction, trust tooltip and client-only failure marker independently.
 
 ## Data contract
 
@@ -290,6 +300,7 @@ interface PdfSignatureInfo {
   coversWholeFile: boolean | null;       // false = file extended after signing
   trust: 'not-checked' | 'valid' | 'invalid' | 'unknown';
   trustReason?: string | null;          // optional server explanation / unavailable reason
+  serverValidationUnavailable?: boolean; // client-only failure marker, never accepted from the server
   validationTime?: string | null;       // ISO 8601 server validation time
 }
 ```

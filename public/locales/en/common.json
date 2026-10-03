@@ -715,7 +715,9 @@
   "signatures": {
     "badge": {
       "ariaLabel": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}}",
-      "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details"
+      "tooltip": "{count, plural, =1 {Signed document, 1 signature} other {Signed document, # signatures}} – show signature details",
+      "invalidTrust": "Invalid signature",
+      "unknownTrust": "Signature trust unknown"
     },
     "dialog": {
       "title": "Signatures",

@@ -50,6 +50,7 @@
  * @property {'not-checked'|'valid'|'invalid'|'unknown'} trust Always 'not-checked'
  * from this parser; optional gateway enrichment supplies level-2 trust.
  * @property {string|null} [trustReason] Plain-language server trust explanation.
+ * @property {boolean} [serverValidationUnavailable] Client-only failure marker; never accepted from server JSON.
  * @property {string|null} [validationTime] ISO 8601 server validation time.
  */
 

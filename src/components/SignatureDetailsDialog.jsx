@@ -228,7 +228,7 @@ export default function SignatureDetailsDialog({
             const integrityLabel = getIntegrityLabel(t, signature?.integrity);
             const trustLabel = getTrustLabel(t, signature?.trust);
             const rawTrustReason = String(signature?.trustReason ?? '').trim();
-            const trustReason = rawTrustReason === 'server validation unavailable'
+            const trustReason = signature?.serverValidationUnavailable === true
               ? t('signatures.trust.unavailable', { defaultValue: 'Server validation unavailable' }) : rawTrustReason;
             const trustChecked = ['valid', 'invalid', 'unknown'].includes(signature?.trust);
             return (

@@ -65,6 +65,7 @@ it('F5 provider publishes signed and unsigned reports to badges across page load
 });
 
 it('G10 provider passes the registered source URL, never the viewer file index', async () => {
+  vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
   const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };
   getDocumentSignatures.mockResolvedValue({ signatures: [signature] });
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue({ ok: true, status: 200, json: async () => ({

@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 43. Line count: 17415. JSDoc symbol count: 663.
+File count: 43. Line count: 17419. JSDoc symbol count: 663.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -355,7 +355,7 @@ Local imports: `src/utils/pdfSignatureStatus.js`
 Symbols:
 
 - `module:utils/pdfSignatureGateway` (module) - Optional gateway trust enrichment.
-- `module:utils/pdfSignatureGateway.getGatewaySignatureContext` (function) - Resolve only HTTP source routes, preserving the gateway origin and path base.
+- `module:utils/pdfSignatureGateway.getGatewaySignatureContext` (function) - Resolve only HTTP source routes on the viewer's own origin, preserving the path base.
 - `module:utils/pdfSignatureGateway.mergeGatewaySignatureReport` (function) - Accept only unambiguous server entries.
 - `module:utils/pdfSignatureGateway.createGatewaySignatureClient` (function) - Create viewer\-local state for disabled gateway sessions.
 

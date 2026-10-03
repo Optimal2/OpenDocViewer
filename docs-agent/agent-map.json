@@ -86,7 +86,7 @@
   },
   "stats": {
     "fileCount": 128,
-    "sourceLineCount": 53580,
+    "sourceLineCount": 53588,
     "docletCount": 1425,
     "documentedFileCount": 128,
     "lowConfidenceSummaryCount": 0,
@@ -573,7 +573,7 @@
     {
       "path": "src/utils/pdfSignatures.js",
       "score": 77,
-      "lines": 1136,
+      "lines": 1137,
       "incomingLocalImports": 3,
       "doclets": 9,
       "summary": "PDF signature collection - level 1 integrity inspection.",
@@ -878,7 +878,7 @@
     {
       "name": "src/components",
       "fileCount": 15,
-      "lineCount": 7149,
+      "lineCount": 7153,
       "docletCount": 93,
       "importantFiles": [
         {
@@ -938,7 +938,7 @@
         {
           "path": "src/components/SignatureStatusBadge.jsx",
           "score": 27,
-          "lines": 83,
+          "lines": 87,
           "incomingLocalImports": 2,
           "doclets": 2,
           "summary": "Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.",
@@ -1520,7 +1520,7 @@
     {
       "name": "src/utils",
       "fileCount": 43,
-      "lineCount": 17415,
+      "lineCount": 17419,
       "docletCount": 663,
       "importantFiles": [
         {
@@ -23039,7 +23039,7 @@
     },
     {
       "path": "src/components/SignatureStatusBadge.jsx",
-      "lines": 83,
+      "lines": 87,
       "extension": ".jsx",
       "jsdocBlockCount": 3,
       "sourceSummary": "Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.",
@@ -41983,7 +41983,7 @@
     },
     {
       "path": "src/utils/pdfSignatureGateway.js",
-      "lines": 133,
+      "lines": 136,
       "extension": ".js",
       "jsdocBlockCount": 4,
       "sourceSummary": "Optional gateway trust enrichment.",
@@ -42007,12 +42007,12 @@
         {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 52
+          "line": 54
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 95
+          "line": 98
         }
       ],
       "declarations": [
@@ -42024,32 +42024,32 @@
         {
           "name": "isTime",
           "kind": "function",
-          "line": 33
+          "line": 35
         },
         {
           "name": "unchecked",
           "kind": "function",
-          "line": 37
+          "line": 39
         },
         {
           "name": "unavailable",
           "kind": "function",
-          "line": 41
+          "line": 43
         },
         {
           "name": "mergeGatewaySignatureReport",
           "kind": "function",
-          "line": 52
+          "line": 54
         },
         {
           "name": "createGatewaySignatureClient",
           "kind": "function",
-          "line": 95
+          "line": 98
         },
         {
           "name": "request",
           "kind": "function",
-          "line": 105
+          "line": 108
         }
       ],
       "parseError": null,
@@ -42079,7 +42079,7 @@
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
           "line": 19,
-          "description": "Resolve only HTTP source routes, preserving the gateway origin and path base.",
+          "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
           "params": [
             {
               "name": "sourceUrl",
@@ -42109,7 +42109,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 52,
+          "line": 54,
           "description": "Accept only unambiguous server entries.",
           "params": [
             {
@@ -42140,7 +42140,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatureGateway.js",
-          "line": 95,
+          "line": 98,
           "description": "Create viewer-local state for disabled gateway sessions.",
           "params": [],
           "returns": [
@@ -42381,7 +42381,7 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1136,
+      "lines": 1137,
       "extension": ".js",
       "jsdocBlockCount": 15,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
@@ -42389,19 +42389,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 119,
+          "line": 120,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 124,
+          "line": 125,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1073,
+          "line": 1074,
           "kind": "dynamic"
         }
       ],
@@ -42409,289 +42409,289 @@
         {
           "name": "SUPPORTED_SUBFILTERS",
           "kind": "variable",
-          "line": 65
+          "line": 66
         },
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 202
+          "line": 203
         },
         {
           "name": "unreadableSignatureReport",
           "kind": "function",
-          "line": 970
+          "line": 971
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1058
+          "line": 1059
         }
       ],
       "declarations": [
         {
           "name": "loadPkijs",
           "kind": "function",
-          "line": 118
+          "line": 119
         },
         {
           "name": "loadAsn1js",
           "kind": "function",
-          "line": 123
+          "line": 124
         },
         {
           "name": "toUint8",
           "kind": "function",
-          "line": 132
+          "line": 133
         },
         {
           "name": "bytesToHex",
           "kind": "function",
-          "line": 141
+          "line": 142
         },
         {
           "name": "colonHex",
           "kind": "function",
-          "line": 147
+          "line": 148
         },
         {
           "name": "normalizeSerialHex",
           "kind": "function",
-          "line": 154
+          "line": 155
         },
         {
           "name": "subtleDigest",
           "kind": "function",
-          "line": 158
+          "line": 159
         },
         {
           "name": "decodeTextBytes",
           "kind": "function",
-          "line": 169
+          "line": 170
         },
         {
           "name": "pdfText",
           "kind": "function",
-          "line": 189
+          "line": 190
         },
         {
           "name": "parsePdfDateString",
           "kind": "function",
-          "line": 202
+          "line": 203
         },
         {
           "name": "isoOrNull",
           "kind": "function",
-          "line": 223
+          "line": 224
         },
         {
           "name": "isDict",
           "kind": "function",
-          "line": 231
+          "line": 232
         },
         {
           "name": "dictHas",
           "kind": "function",
-          "line": 235
+          "line": 236
         },
         {
           "name": "signatureDictFields",
           "kind": "function",
-          "line": 239
+          "line": 240
         },
         {
           "name": "readByteRange",
           "kind": "function",
-          "line": 253
+          "line": 254
         },
         {
           "name": "contentsToBytes",
           "kind": "function",
-          "line": 265
+          "line": 266
         },
         {
           "name": "discoverSignatures",
           "kind": "function",
-          "line": 275
+          "line": 276
         },
         {
           "name": "objectKey",
           "kind": "function",
-          "line": 326
+          "line": 327
         },
         {
           "name": "qualifiedFieldName",
           "kind": "function",
-          "line": 337
+          "line": 338
         },
         {
           "name": "dictionaryInfo",
           "kind": "function",
-          "line": 358
+          "line": 359
         },
         {
           "name": "info",
           "kind": "object",
-          "line": 374
+          "line": 375
         },
         {
           "name": "validByteRange",
           "kind": "function",
-          "line": 414
+          "line": 415
         },
         {
           "name": "coveredBytes",
           "kind": "function",
-          "line": 430
+          "line": 431
         },
         {
           "name": "extensionCoveredByLaterSignature",
           "kind": "function",
-          "line": 438
+          "line": 439
         },
         {
           "name": "findAttribute",
           "kind": "function",
-          "line": 456
+          "line": 457
         },
         {
           "name": "attrRawBytes",
           "kind": "function",
-          "line": 461
+          "line": 462
         },
         {
           "name": "attrDate",
           "kind": "function",
-          "line": 469
+          "line": 470
         },
         {
           "name": "parseAsn1TimeString",
           "kind": "function",
-          "line": 486
+          "line": 487
         },
         {
           "name": "rdnValue",
           "kind": "function",
-          "line": 495
+          "line": 496
         },
         {
           "name": "dnToString",
           "kind": "function",
-          "line": 504
+          "line": 505
         },
         {
           "name": "elementBytesToHex",
           "kind": "function",
-          "line": 509
+          "line": 510
         },
         {
           "name": "matchCertificate",
           "kind": "function",
-          "line": 514
+          "line": 515
         },
         {
           "name": "asn1HexToBytes",
           "kind": "function",
-          "line": 543
+          "line": 544
         },
         {
           "name": "elementOid",
           "kind": "function",
-          "line": 549
+          "line": 550
         },
         {
           "name": "decodeOidBytes",
           "kind": "function",
-          "line": 557
+          "line": 558
         },
         {
           "name": "curvePointSize",
           "kind": "function",
-          "line": 576
+          "line": 577
         },
         {
           "name": "pssParameters",
           "kind": "function",
-          "line": 592
+          "line": 593
         },
         {
           "name": "out",
           "kind": "object",
-          "line": 594
+          "line": 595
         },
         {
           "name": "verifySignatureEntry",
           "kind": "function",
-          "line": 617
+          "line": 618
         },
         {
           "name": "trimSerial",
           "kind": "function",
-          "line": 845
+          "line": 846
         },
         {
           "name": "attrRawBytesOfInteger",
           "kind": "function",
-          "line": 851
+          "line": 852
         },
         {
           "name": "attrRawBytesOfElement",
           "kind": "function",
-          "line": 856
+          "line": 857
         },
         {
           "name": "asn1jsFromBERCached",
           "kind": "function",
-          "line": 888
+          "line": 889
         },
         {
           "name": "bufferView",
           "kind": "function",
-          "line": 898
+          "line": 899
         },
         {
           "name": "bytesEqual",
           "kind": "function",
-          "line": 902
+          "line": 903
         },
         {
           "name": "verifyCmsSignature",
           "kind": "function",
-          "line": 908
+          "line": 909
         },
         {
           "name": "curveNameForPointSize",
           "kind": "function",
-          "line": 938
+          "line": 939
         },
         {
           "name": "hashedLength",
           "kind": "function",
-          "line": 944
+          "line": 945
         },
         {
           "name": "orderSignatures",
           "kind": "function",
-          "line": 951
+          "line": 952
         },
         {
           "name": "unreadableSignatureReport",
           "kind": "function",
-          "line": 970
+          "line": 971
         },
         {
           "name": "parseWithSourceSpans",
           "kind": "function",
-          "line": 983
+          "line": 984
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1058
+          "line": 1059
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1059
+          "line": 1060
         }
       ],
       "parseError": null,
@@ -42733,7 +42733,7 @@
           "kind": "typedef",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 56,
+          "line": 57,
           "description": "",
           "params": [],
           "returns": [],
@@ -42746,7 +42746,7 @@
           "kind": "constant",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 65,
+          "line": 66,
           "description": "SubFilters with level-1 handling.",
           "params": [],
           "returns": [],
@@ -42759,7 +42759,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 189,
+          "line": 190,
           "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
           "params": [
             {
@@ -42784,7 +42784,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 202,
+          "line": 203,
           "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
           "params": [
             {
@@ -42809,7 +42809,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/utils/pdfSignatures.js",
-          "line": 275,
+          "line": 276,
           "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
           "params": [],
           "returns": [],
@@ -42822,7 +42822,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 970,
+          "line": 971,
           "description": "Report an inspection failure without claiming that the document is unsigned.",
           "params": [
             {
@@ -42847,7 +42847,7 @@
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1058,
+          "line": 1059,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -42872,19 +42872,19 @@
         {
           "source": "pkijs",
           "specifiers": [],
-          "line": 119,
+          "line": 120,
           "kind": "dynamic"
         },
         {
           "source": "asn1js",
           "specifiers": [],
-          "line": 124,
+          "line": 125,
           "kind": "dynamic"
         },
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1073,
+          "line": 1074,
           "kind": "dynamic"
         }
       ],
@@ -83139,7 +83139,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 95,
+      "line": 98,
       "description": "Create viewer-local state for disabled gateway sessions.",
       "params": [],
       "returns": [
@@ -83158,7 +83158,7 @@
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
       "line": 19,
-      "description": "Resolve only HTTP source routes, preserving the gateway origin and path base.",
+      "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
       "params": [
         {
           "name": "sourceUrl",
@@ -83188,7 +83188,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatureGateway.js",
-      "line": 52,
+      "line": 54,
       "description": "Accept only unambiguous server entries.",
       "params": [
         {
@@ -83314,7 +83314,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1058,
+      "line": 1059,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -83339,7 +83339,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 275,
+      "line": 276,
       "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
       "params": [],
       "returns": [],
@@ -83352,7 +83352,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 202,
+      "line": 203,
       "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
       "params": [
         {
@@ -83390,7 +83390,7 @@
       "kind": "typedef",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 56,
+      "line": 57,
       "description": "",
       "params": [],
       "returns": [],
@@ -83403,7 +83403,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/utils/pdfSignatures.js",
-      "line": 189,
+      "line": 190,
       "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
       "params": [
         {
@@ -83428,7 +83428,7 @@
       "kind": "constant",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 65,
+      "line": 66,
       "description": "SubFilters with level-1 handling.",
       "params": [],
       "returns": [],
@@ -83441,7 +83441,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 970,
+      "line": 971,
       "description": "Report an inspection failure without claiming that the document is unsigned.",
       "params": [
         {

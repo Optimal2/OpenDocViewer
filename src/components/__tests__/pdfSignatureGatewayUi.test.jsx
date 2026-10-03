@@ -8,6 +8,7 @@ import en from '../../../public/locales/en/common.json';
 import sv from '../../../public/locales/sv/common.json';
 import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
 import SignatureStatusBadge from '../SignatureStatusBadge.jsx';
+import { mergeGatewaySignatureReport } from '../../utils/pdfSignatureGateway.js';
 
 let root, container, i18n;
 beforeEach(async () => {
@@ -29,6 +30,39 @@ it.each([['invalid', 'error'], ['unknown', 'warning'], ['valid', 'ok']])('G8 bad
   await render(SignatureStatusBadge, [{ integrity: 'digest-mismatch', trust }]);
   expect(container.querySelector('button').className).toContain('--error');
 });
+it.each([
+  ['en', 'Invalid signature', 'Signature trust unknown'],
+  ['sv', 'Ogiltig signatur', 'Signaturens tillit är okänd'],
+])('G19 tooltip explains invalid and unknown trust in %s', async (language, invalid, unknown) => {
+  await i18n.changeLanguage(language);
+  for (const [trust, label] of [['invalid', invalid], ['unknown', unknown]]) {
+    await render(SignatureStatusBadge, [{ integrity: 'intact', trust }]);
+    expect(container.querySelector('button').title).toContain(label);
+  }
+  await render(SignatureStatusBadge, [
+    { integrity: 'intact', trust: 'unknown' }, { integrity: 'intact', trust: 'invalid' },
+  ]);
+  expect(container.querySelector('button').title).toContain(invalid);
+});
+
+it.each([['en', 'Server validation unavailable'], ['sv', 'Servervalidering är inte tillgänglig']])(
+  'G20 only client failures use the localized unavailable label in %s', async (language, unavailable) => {
+    await i18n.changeLanguage(language);
+    const browser = { signatures: [{ fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' }] };
+    const failure = mergeGatewaySignatureReport(browser, null);
+    expect(failure.signatures[0].serverValidationUnavailable).toBe(true);
+    await render(SignatureDetailsDialog, failure.signatures);
+    expect(container.textContent).toContain(unavailable);
+    const server = { signatures: [{ ...browser.signatures[0], trust: 'unknown',
+      trustReason: 'server validation unavailable', serverValidationUnavailable: true,
+      validationTime: '2026-10-01T12:00:00Z' }] };
+    // A later successful response also clears any earlier client failure marker.
+    const result = mergeGatewaySignatureReport(failure, server);
+    expect(result.signatures[0].serverValidationUnavailable).toBe(false);
+    await render(SignatureDetailsDialog, result.signatures);
+    expect(container.textContent).toContain('server validation unavailable');
+    expect(container.textContent).not.toContain(unavailable);
+  });
 it.each([['en', ['Valid', 'Invalid', 'Unknown'], 'Trust not checked', 'Validation time', 'Verified timestamp'],
   ['sv', ['Giltig', 'Ogiltig', 'Okänd'], 'Tillit ej kontrollerad', 'Valideringstid', 'Verifierad tidsstämpel']])(
   'G9 localized dialog in %s shows per-signature trust, timestamp and validation time', async (language, labels, unchecked, timeLabel, timestampLabel) => {

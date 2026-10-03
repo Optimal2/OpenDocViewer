@@ -11,7 +11,7 @@ const TIMEOUT_MS = 20000;
 const TRUST_VALUES = ['valid', 'invalid', 'unknown'];
 
 /**
- * Resolve only HTTP source routes, preserving the gateway origin and path base.
+ * Resolve only HTTP source routes on the viewer's own origin, preserving the path base.
  * @param {string} sourceUrl The URL already used by DocumentLoader.
  * @param {string} [baseUrl] Browser base for relative source URLs.
  * @returns {{endpoint: string, session: string}|null}
@@ -21,6 +21,8 @@ export function getGatewaySignatureContext(sourceUrl, baseUrl = globalThis.docum
     if (typeof sourceUrl !== 'string' || !sourceUrl) return null;
     const url = new URL(sourceUrl, baseUrl);
     if (!['http:', 'https:'].includes(url.protocol) || url.username || url.password) return null;
+    // The document URL and HTML base URI are not trust anchors.
+    if (url.origin !== new URL(globalThis.location?.href).origin) return null;
     const match = url.pathname.match(/^(.*)\/source\/([^/]+)\/(0|[1-9]\d*)$/);
     if (!match || Number(match[3]) > 2147483647) return null;
     const sessionKey = decodeURIComponent(match[2]);
@@ -35,7 +37,7 @@ function isTime(value) {
 }
 
 function unchecked(signature) {
-  return { ...signature, trust: 'not-checked', trustReason: UNAVAILABLE };
+  return { ...signature, trust: 'not-checked', trustReason: UNAVAILABLE, serverValidationUnavailable: true };
 }
 
 function unavailable(report) {
@@ -79,6 +81,7 @@ export function mergeGatewaySignatureReport(report, server) {
         ...(integrity !== signature.integrity ? { integrityReason: remote.integrityReason ?? null } : {}),
         trust: remote.trust,
         trustReason: remote.trustReason ?? null,
+        serverValidationUnavailable: false,
         validationTime: remote.validationTime,
         ...(remote.signingTimeSource === 'timestamp'
           ? { signingTime: remote.signingTime, signingTimeSource: 'timestamp' } : {}),

@@ -715,7 +715,9 @@
   "signatures": {
     "badge": {
       "ariaLabel": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}}",
-      "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer"
+      "tooltip": "{count, plural, =1 {Signerat dokument, 1 signatur} other {Signerat dokument, # signaturer}} – visa signaturdetaljer",
+      "invalidTrust": "Ogiltig signatur",
+      "unknownTrust": "Signaturens tillit är okänd"
     },
     "dialog": {
       "title": "Signaturer",

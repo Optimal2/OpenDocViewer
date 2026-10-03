@@ -23,6 +23,7 @@ async function render(extra = {}) {
   return props;
 }
 beforeEach(() => {
+  vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
   vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   vi.stubGlobal('fetch', vi.fn().mockResolvedValue(response()));
   getDocumentSignatures.mockReset().mockResolvedValue(browserReport);
@@ -52,6 +53,14 @@ it('G2 leaves non-gateway and unsigned documents at level one without fetch', as
   expect(fetch).not.toHaveBeenCalled();
   expect(reports.b.signatures).toEqual([]);
 });
+
+it.each(['https://foreign.test', 'http://example.test', 'https://example.test:444'])(
+  'G18 rejects a foreign origin %s with a gateway-shaped path', async (origin) => {
+    await render({ getSourceUrl: () => `${origin}/gateway/source/session-one/17` });
+    expect(fetch).not.toHaveBeenCalled();
+    expect(reports.a).toEqual(browserReport);
+    expect(reports.a.signatures[0].trust).toBe('not-checked');
+  });
 
 it('G3 publishes level one while the server is pending and serializes the existing queue', async () => {
   let resolve;

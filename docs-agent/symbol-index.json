@@ -24614,7 +24614,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureGateway.js",
-    "line": 95,
+    "line": 98,
     "description": "Create viewer-local state for disabled gateway sessions.",
     "params": [],
     "returns": [
@@ -24633,7 +24633,7 @@
     "scope": "static",
     "file": "src/utils/pdfSignatureGateway.js",
     "line": 19,
-    "description": "Resolve only HTTP source routes, preserving the gateway origin and path base.",
+    "description": "Resolve only HTTP source routes on the viewer's own origin, preserving the path base.",
     "params": [
       {
         "name": "sourceUrl",
@@ -24663,7 +24663,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatureGateway.js",
-    "line": 52,
+    "line": 54,
     "description": "Accept only unambiguous server entries.",
     "params": [
       {
@@ -24789,7 +24789,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1058,
+    "line": 1059,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -24814,7 +24814,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 275,
+    "line": 276,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
     "returns": [],
@@ -24827,7 +24827,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 202,
+    "line": 203,
     "description": "Parse a PDF date string (&quot;D:YYYYMMDDHHmmSS+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone - a missing timezone is treated as UTC).",
     "params": [
       {
@@ -24865,7 +24865,7 @@
     "kind": "typedef",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 56,
+    "line": 57,
     "description": "",
     "params": [],
     "returns": [],
@@ -24878,7 +24878,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/utils/pdfSignatures.js",
-    "line": 189,
+    "line": 190,
     "description": "Decode a PDF text string object (literal string or hex string) to a JS string, honouring the UTF-16BE byte-order mark.",
     "params": [
       {
@@ -24903,7 +24903,7 @@
     "kind": "constant",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 65,
+    "line": 66,
     "description": "SubFilters with level-1 handling.",
     "params": [],
     "returns": [],
@@ -24916,7 +24916,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 970,
+    "line": 971,
     "description": "Report an inspection failure without claiming that the document is unsigned.",
     "params": [
       {
