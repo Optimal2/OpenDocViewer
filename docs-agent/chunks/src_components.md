@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 15. Line count: 7153. JSDoc symbol count: 93.
+File count: 17. Line count: 7608. JSDoc symbol count: 98.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -87,7 +87,7 @@ OpenDocViewer — Deterministic thumbnail strip.
 
 Exports: `DocumentThumbnailList`
 
-Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`, `src/utils/pdfSignatureStatus.js`, `src/components/SignatureStatusBadge.jsx`
+Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`, `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`, `src/utils/runtimeConfig.js`, `src/components/SignatureStatusBadge.jsx`
 
 Symbols:
 
@@ -180,21 +180,46 @@ Signature details dialog \(browser integrity and optional gateway trust\).
 
 Exports: `SignatureDetailsDialog`
 
-Local imports: `src/utils/pdfSignatureStatus.js`
+Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`
 
 Symbols:
 
 - `getKindLabel` (function) - No description.
 - `getSigningTimeSourceLabel` (function) - No description.
-- `getTrustLabel` (function) - Generic trust renderer, ready for level 2: all four values have labels and an optional trustReason is shown when present.
 - `module.exports` (function) - No description.
 - `<anonymous>~handleEscape` (function) - No description.
+- `SignatureDetailsDialog~handleTabKeyDown` (function) - Arrow keys, Home and End move between file tabs \(automatic activation\).
 - `SignatureDetailsDialog~handleTabTrap` (function) - Keep Tab navigation inside the dialog while it is open.
 - `SignatureDetailsDialog~orEmpty` (function) - No description.
 
+## src/components/SignatureOverviewButton.jsx
+
+Toolbar signature overview button.
+
+Exports: `SignatureOverviewButton`
+
+Symbols:
+
+- `ICON_BY_SEVERITY` (constant) - Material Icons ligature per severity \(same as SignatureStatusBadge\).
+- `module.exports` (function) - No description.
+
+## src/components/SignatureOverviewDialog.jsx
+
+Signature overview dialog, opened from the toolbar overview button.
+
+Exports: `SignatureOverviewDialog`
+
+Local imports: `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`
+
+Symbols:
+
+- `module.exports` (function) - No description.
+- `<anonymous>~handleEscape` (function) - No description.
+- `SignatureOverviewDialog~handleKeyDown` (function) - Keep Tab navigation inside the dialog while it is open.
+
 ## src/components/SignatureStatusBadge.jsx
 
-Small signature symbol shown on a document's thumbnail and in the toolbar when the document has at least one signature.
+Small signature symbol shown next to a document's "DOK n" label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\).
 
 Exports: `SignatureStatusBadge`
 

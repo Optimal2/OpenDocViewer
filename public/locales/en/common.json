@@ -727,7 +727,9 @@
       "trustLine": "Trust not checked – shows who signed and whether the document is unchanged, not whether the signature is valid.",
       "signatureHeading": "Signature {index}",
       "notAvailable": "—",
-      "validityRange": "{from} – {to}"
+      "validityRange": "{from} – {to}",
+      "filePosition": "File {file} of {total}",
+      "fileTabsLabel": "Files with signatures"
     },
     "fields": {
       "signer": "Signer",
@@ -773,6 +775,19 @@
     "coversWhole": {
       "yes": "Yes",
       "no": "No"
+    },
+    "overview": {
+      "title": "Signatures",
+      "subtitle": "{count, plural, =1 {1 signed document} other {# signed documents}}",
+      "buttonAriaLabel": "{count, plural, =1 {Signatures: 1 signed document} other {Signatures: # signed documents}} – show overview",
+      "listLabel": "Signed documents",
+      "signatureCount": "{count, plural, =1 {1 signature} other {# signatures}}",
+      "goToDocument": "Go to document",
+      "goToDocumentAria": "{count, plural, =1 {Go to document {document}, 1 signature} other {Go to document {document}, # signatures}}",
+      "activeDocument": "current document",
+      "details": "Details",
+      "detailsAria": "Show signature details for document {document}",
+      "detailsTitle": "Show signature details"
     }
   },
   "about": {

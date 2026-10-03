@@ -29,6 +29,7 @@ import DocumentThumbnailList from '../DocumentThumbnailList.jsx';
  * @param {function(number): boolean} props.hideDocumentFromSelection
  * @param {function(number): boolean} [props.onOpenDocumentMetadata]
  * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures]
+ * @param {Array<Object>} [props.signatureDocuments] Signed documents from utils/pdfSignatureDocuments.js.
  * @param {number} props.minWidth
  * @param {number} props.maxWidth
  * @param {number} props.defaultWidth
@@ -59,6 +60,7 @@ const DocumentViewerThumbnails = ({
   hideDocumentFromSelection,
   onOpenDocumentMetadata,
   onOpenSignatures,
+  signatureDocuments,
   minWidth,
   maxWidth,
   defaultWidth,
@@ -177,6 +179,7 @@ const DocumentViewerThumbnails = ({
         onHideDocumentFromSelection={hideDocumentFromSelection}
         onOpenDocumentMetadata={onOpenDocumentMetadata}
         onOpenSignatures={onOpenSignatures}
+        signatureDocuments={signatureDocuments}
       />
     </div>
   );
@@ -211,6 +214,7 @@ DocumentViewerThumbnails.propTypes = {
   hideDocumentFromSelection: PropTypes.func.isRequired,
   onOpenDocumentMetadata: PropTypes.func,
   onOpenSignatures: PropTypes.func,
+  signatureDocuments: PropTypes.arrayOf(PropTypes.object),
   minWidth: PropTypes.number.isRequired,
   maxWidth: PropTypes.number.isRequired,
   defaultWidth: PropTypes.number.isRequired,

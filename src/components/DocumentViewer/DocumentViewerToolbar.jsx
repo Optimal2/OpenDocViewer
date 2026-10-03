@@ -117,8 +117,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} nextPageDisabled
  * @property {boolean} firstPageDisabled
  * @property {boolean} lastPageDisabled
- * @property {(Object|null)=} signatureReport - Level-1 signature report of the current document (null when unsigned or pending).
- * @property {function(HTMLElement=): void=} onOpenSignatures - Opens the signature details dialog; receives the clicked symbol for focus return.
+ * @property {(Object|null)=} signatureSummary - Signed-document totals for the toolbar overview button (null when nothing loaded is signed).
+ * @property {function(HTMLElement=): void=} onOpenSignatureOverview - Opens the signature overview dialog; receives the button for focus return.
  */
 
 /**
@@ -208,8 +208,8 @@ const DocumentViewerToolbar = ({
   nextPageDisabled,
   firstPageDisabled,
   lastPageDisabled,
-  signatureReport = null,
-  onOpenSignatures,
+  signatureSummary = null,
+  onOpenSignatureOverview,
 }) => {
   return (
     <DocumentToolbar
@@ -294,8 +294,8 @@ const DocumentViewerToolbar = ({
       firstPageDisabled={firstPageDisabled}
       lastPageDisabled={lastPageDisabled}
       compareRef={compareRef}
-      signatureReport={signatureReport}
-      onOpenSignatures={onOpenSignatures}
+      signatureSummary={signatureSummary}
+      onOpenSignatureOverview={onOpenSignatureOverview}
     />
   );
 };
@@ -418,10 +418,12 @@ DocumentViewerToolbar.propTypes = {
   nextPageDisabled: PropTypes.bool.isRequired,
   firstPageDisabled: PropTypes.bool.isRequired,
   lastPageDisabled: PropTypes.bool.isRequired,
-  signatureReport: PropTypes.shape({
-    signatures: PropTypes.arrayOf(PropTypes.object),
+  signatureSummary: PropTypes.shape({
+    documentCount: PropTypes.number,
+    signatureCount: PropTypes.number,
+    severity: PropTypes.oneOf(['ok', 'warning', 'error']),
   }),
-  onOpenSignatures: PropTypes.func,
+  onOpenSignatureOverview: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerToolbar);

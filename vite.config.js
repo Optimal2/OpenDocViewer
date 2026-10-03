@@ -145,8 +145,9 @@ export default defineConfig(({ mode }) => {
     // tool's tests, which fail in CI (`spawnSync node ENOENT`) and broke the v2.7.0 release publish.
     // Keep `_tools/**` out of the ODV test scan. See AGENTS.md ("Release workflow — do not change the trigger").
     test: {
-      // `dist/**` is build output and must never be scanned for tests.
-      exclude: [...configDefaults.exclude, '_tools/**', 'dist/**'],
+      // `dist/**` is build output and must never be scanned for tests. `tests/ui/**` holds the
+      // Playwright browser specs (`npm run test:ui`), which vitest cannot run.
+      exclude: [...configDefaults.exclude, '_tools/**', 'dist/**', 'tests/ui/**'],
     },
 
     plugins: [

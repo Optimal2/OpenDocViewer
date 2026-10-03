@@ -151,6 +151,18 @@ export function isDocumentMetadataUiEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether every page thumbnail of a signed PDF file shows the small signature symbol.
+ * Only an explicit `false` hides it; the document-level symbol and the toolbar signature
+ * overview are not affected by this flag.
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isSignatureThumbnailPageBadgeEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.pdfSignatures?.thumbnailPageBadge !== false;
+}
+
+/**
  * Normalize a runtime flag to a boolean.
  *
  * Host configs are optional and can contain values from hand-edited JavaScript, so only real

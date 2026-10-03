@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 10. Line count: 5048. JSDoc symbol count: 118.
+File count: 10. Line count: 5095. JSDoc symbol count: 119.
 
 ## src/components/DocumentViewer/CompareZoomOverlay.jsx
 
@@ -22,7 +22,8 @@ Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/c
 
 Symbols:
 
-- `DocumentViewer~openSignatureDialog` (constant) - Open the signature details dialog for a document \(sourceKey\).
+- `DocumentViewer~openSignatureDialog` (constant) - Open the signature details dialog for the document that contains a file \(sourceKey\), with that file's tab preselected.
+- `DocumentViewer~navigateToSignatureDocument` (constant) - Overview row activation: show the document's first page and keep the overview open.
 - `<anonymous>~isEditableTarget` (function) - No description.
 - `<anonymous>~hasActiveModalDialog` (function) - No description.
 - `<anonymous>~onKeyDown` (function) - No description.

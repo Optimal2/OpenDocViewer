@@ -126,3 +126,51 @@ export function getSignatureCount(report) {
 export function reportHasSignatures(report) {
   return getSignatureCount(report) > 0;
 }
+
+/**
+ * Trust verdicts ordered worst-first. A signature nobody checked is worse
+ * than one the gateway validated; missing or unexpected values count as
+ * not-checked.
+ * @type {Array<string>}
+ */
+const TRUST_WORST_FIRST = ['invalid', 'unknown', 'not-checked', 'valid'];
+
+/**
+ * @param {*} trust
+ * @returns {string}
+ */
+export function normalizeSignatureTrust(trust) {
+  return typeof trust === 'string' && TRUST_WORST_FIRST.includes(trust) ? trust : 'not-checked';
+}
+
+/**
+ * The worst trust verdict among signatures, or null when there are none.
+ * @param {(Array<*>|null|undefined)} signatures
+ * @returns {(string|null)}
+ */
+export function getWorstSignatureTrust(signatures) {
+  if (!Array.isArray(signatures) || signatures.length <= 0) return null;
+  const present = new Set(signatures.map((entry) => normalizeSignatureTrust(entry?.trust)));
+  return TRUST_WORST_FIRST.find((status) => present.has(status)) || 'not-checked';
+}
+
+/**
+ * Shared localized trust text for the details dialog and the overview. All
+ * four contract values have labels, so level 2 only fills the field.
+ * @param {Function} t
+ * @param {*} trust
+ * @returns {string}
+ */
+export function getTrustLabel(t, trust) {
+  switch (normalizeSignatureTrust(trust)) {
+    case 'valid':
+      return t('signatures.trust.valid', { defaultValue: 'Valid' });
+    case 'invalid':
+      return t('signatures.trust.invalid', { defaultValue: 'Invalid' });
+    case 'unknown':
+      return t('signatures.trust.unknown', { defaultValue: 'Unknown' });
+    case 'not-checked':
+    default:
+      return t('signatures.trust.notChecked', { defaultValue: 'Not checked' });
+  }
+}

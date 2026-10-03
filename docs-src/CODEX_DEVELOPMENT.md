@@ -49,6 +49,7 @@ Use the narrowest level that gives real confidence:
 
 - JavaScript or React changes: `npm run lint`
 - Bundling/runtime import changes: `npm run build`
+- Viewer UI behaviour that needs real layout or CSS (placement, hover, focus): `npm run test:ui` (Playwright, `tests/ui/`; the first run needs `npx playwright install chromium`). CI runs it after the build.
 - JSDoc/commented API changes: `npm run doc`
 - Agent map/source-structure/dependency changes: `npm run doc:agent`
 - PowerShell script changes: parse the changed `.ps1` file with `System.Management.Automation.Language.Parser`

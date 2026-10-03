@@ -111,6 +111,12 @@
       // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
       enabled: true
     },
+    pdfSignatures: {
+      // Show the small signature symbol on every page thumbnail of a signed PDF file. The
+      // document-level symbol next to "DOK n" and the toolbar signature overview stay visible
+      // when this is false.
+      thumbnailPageBadge: true
+    },
     viewer: {
       // Initial zoom mode when the first page opens.
       // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".

@@ -92,3 +92,7 @@ private-configs/
 
 # Claude Code local tool config — never tracked, must not block dep maintenance
 .claude/
+
+# Playwright browser UI test output (npm run test:ui)
+test-results/
+playwright-report/

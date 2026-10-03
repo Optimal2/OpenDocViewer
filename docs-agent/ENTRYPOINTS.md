@@ -10,6 +10,7 @@
 - `format`: `prettier --write "src/**/*.{js,jsx,css,scss,md}"`
 - `test`: `vitest run`
 - `test:watch`: `vitest`
+- `test:ui`: `playwright test`
 - `doc`: `jsdoc -c jsdoc.json`
 - `doc:agent`: `node scripts/generate-agent-docs.mjs`
 - `start:system-log`: `node server/system-log-server.js`
@@ -33,14 +34,15 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
+- `src/utils/runtimeConfig.js`: 15 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
-- `src/utils/runtimeConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
+- `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
-- `src/utils/pdfSignatureStatus.js`: 5 incoming local imports
+- `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
@@ -51,4 +53,3 @@
 - `src/utils/objectUrlRegistry.js`: 3 incoming local imports
 - `src/utils/ompThemePreference.js`: 3 incoming local imports
 - `src/utils/pdfSignatures.js`: 3 incoming local imports
-- `src/utils/printPdf.js`: 3 incoming local imports

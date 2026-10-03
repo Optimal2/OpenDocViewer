@@ -76,6 +76,11 @@
       // Metadata may still be preserved internally for print templates, sorting, diagnostics, etc.
       enabled: true
     },
+    pdfSignatures: {
+      // false hides the per-page signature symbol on thumbnails; the document symbol and the
+      // toolbar signature overview remain.
+      thumbnailPageBadge: true
+    },
     viewer: {
       // Initial zoom mode when the first page opens.
       // Supported values: "fit-page", "fit-width" (default), "custom-fit-width", "actual-size".

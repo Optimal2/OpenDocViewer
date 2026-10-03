@@ -33,9 +33,15 @@ import useNavigationModifierState from '../../hooks/useNavigationModifierState.j
 import DocumentMetadataOverlayDialog from '../DocumentMetadataOverlayDialog.jsx';
 import DocumentMetadataMatrixOverlayDialog from '../DocumentMetadataMatrixOverlayDialog.jsx';
 import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
+import SignatureOverviewDialog from '../SignatureOverviewDialog.jsx';
 import ViewerProblemNotice from '../ViewerProblemNotice.jsx';
 import { buildDocumentMetadataMatrixView, buildDocumentMetadataView } from '../../utils/documentMetadata.js';
-import { reportHasSignatures } from '../../utils/pdfSignatureStatus.js';
+import {
+  buildSignatureDocuments,
+  findSignatureDocumentBySourceKey,
+  getPageSignatureDocumentKey,
+  summarizeSignatureDocuments,
+} from '../../utils/pdfSignatureDocuments.js';
 import {
   getRuntimeConfig,
   getPrintSelectionWorkspaceConfig,
@@ -54,6 +60,7 @@ const DocumentViewer = () => {
     pageLoadState,
     signatureReports,
     setSignaturePrioritySourceKey,
+    getSignatureSourceFileName,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
   const navigationModifierState = useNavigationModifierState();
@@ -172,6 +179,8 @@ const DocumentViewer = () => {
   const [isMetadataMatrixOpen, setIsMetadataMatrixOpen] = useState(false);
   const [signatureDialogState, setSignatureDialogState] = useState(null);
   const signatureOpenerRef = useRef(null);
+  const [isSignatureOverviewOpen, setIsSignatureOverviewOpen] = useState(false);
+  const signatureOverviewOpenerRef = useRef(null);
   const [printSelectionZoomPercent] = useState(120);
   const [printSelectionToolbarState, setPrintSelectionToolbarState] = useState(null);
   const metadataUiEnabled = useMemo(() => isDocumentMetadataUiEnabled(getRuntimeConfig()), []);
@@ -220,27 +229,30 @@ const DocumentViewer = () => {
     setIsMetadataMatrixOpen(false);
   }, []);
 
+  // Signature reports are cached per file; the strip, the dialogs and the toolbar overview work
+  // per document (one document can consist of several files).
+  const signatureDocuments = useMemo(
+    () => buildSignatureDocuments(allPages, signatureReports, { getFileName: getSignatureSourceFileName }),
+    [allPages, getSignatureSourceFileName, signatureReports]
+  );
+  const signatureSummary = useMemo(() => summarizeSignatureDocuments(signatureDocuments), [signatureDocuments]);
+
   /**
-   * Open the signature details dialog for a document (sourceKey). The opener
-   * element (the signature symbol) is remembered so focus returns to it.
+   * Open the signature details dialog for the document that contains a file (sourceKey), with
+   * that file's tab preselected. The opener element (the signature symbol or the overview's
+   * "Details" button) is remembered so focus returns to it.
    * @param {string} sourceKey
    * @param {(HTMLElement|null)} [openerElement]
    * @returns {boolean}
    */
   const openSignatureDialog = useCallback((sourceKey, openerElement = null) => {
     const key = String(sourceKey || '');
-    if (!key) return false;
-    const report = signatureReports?.[key] || null;
-    if (!reportHasSignatures(report)) return false;
-    const sourcePage = (Array.isArray(allPages) ? allPages : []).find((page) => String(page?.sourceKey || '') === key) || null;
+    const signatureDocument = findSignatureDocumentBySourceKey(signatureDocuments, key);
+    if (!signatureDocument) return false;
     signatureOpenerRef.current = openerElement || null;
-    setSignatureDialogState({
-      report,
-      documentNumber: Math.max(0, Number(sourcePage?.documentNumber) || 0),
-      totalDocuments: Math.max(0, Number(sourcePage?.totalDocuments) || 0),
-    });
+    setSignatureDialogState({ documentKey: signatureDocument.key, sourceKey: key });
     return true;
-  }, [allPages, signatureReports]);
+  }, [signatureDocuments]);
 
   const closeSignatureDialog = useCallback(() => {
     setSignatureDialogState(null);
@@ -252,20 +264,38 @@ const DocumentViewer = () => {
     return pages[index] || null;
   }, [allPages, pageNumberDisplay]);
 
-  const currentSignatureReport = useMemo(() => {
-    const report = signatureReports?.[String(currentPage?.sourceKey || '')] || null;
-    return reportHasSignatures(report) ? report : null;
-  }, [currentPage, signatureReports]);
+  const signatureDialogDocument = useMemo(
+    () => (signatureDialogState
+      ? signatureDocuments.find((doc) => doc.key === signatureDialogState.documentKey) || null
+      : null),
+    [signatureDialogState, signatureDocuments]
+  );
 
   useEffect(() => {
     setSignaturePrioritySourceKey?.(String(currentPage?.sourceKey || ''));
   }, [currentPage?.sourceKey, setSignaturePrioritySourceKey]);
 
-  const openCurrentDocumentSignatures = useCallback((openerElement = null) => {
-    const sourceKey = String(currentPage?.sourceKey || '');
-    if (!sourceKey || !currentSignatureReport) return false;
+  const openSignatureOverview = useCallback((openerElement = null) => {
+    if (!signatureSummary) return false;
+    signatureOverviewOpenerRef.current = openerElement || null;
+    setIsSignatureOverviewOpen(true);
+    return true;
+  }, [signatureSummary]);
+
+  const closeSignatureOverview = useCallback(() => {
+    setIsSignatureOverviewOpen(false);
+  }, []);
+
+  /** Overview row activation: show the document's first page and keep the overview open. */
+  const navigateToSignatureDocument = useCallback((signatureDocument) => {
+    const firstPageNumber = Math.max(1, Number(signatureDocument?.firstPageNumber) || 1);
+    setPageNumber(firstPageNumber);
+  }, [setPageNumber]);
+
+  const openSignatureDocumentDetails = useCallback((signatureDocument, openerElement = null) => {
+    const sourceKey = String(signatureDocument?.signedFiles?.[0]?.sourceKey || '');
     return openSignatureDialog(sourceKey, openerElement);
-  }, [currentPage, currentSignatureReport, openSignatureDialog]);
+  }, [openSignatureDialog]);
 
   useEffect(() => {
     if (!canOpenMetadataMatrix) {
@@ -490,8 +520,8 @@ const DocumentViewer = () => {
         primaryDocumentNavigation={primaryDocumentNavigation}
         compareDocumentNavigation={compareDocumentNavigation}
         navigationModifierState={navigationModifierState}
-        signatureReport={currentSignatureReport}
-        onOpenSignatures={openCurrentDocumentSignatures}
+        signatureSummary={signatureSummary}
+        onOpenSignatureOverview={openSignatureOverview}
       />
 
       <ViewerProblemNotice
@@ -542,6 +572,7 @@ const DocumentViewer = () => {
                 hideDocumentFromSelection={hideDocumentFromSelection}
                 onOpenDocumentMetadata={metadataUiEnabled ? openDocumentMetadataForOriginalIndex : undefined}
                 onOpenSignatures={openSignatureDialog}
+                signatureDocuments={signatureDocuments}
                 minWidth={thumbnailWidthMin}
                 maxWidth={thumbnailWidthMax}
                 defaultWidth={thumbnailWidthDefault}
@@ -642,12 +673,22 @@ const DocumentViewer = () => {
         matrixView={metadataMatrixView}
       />
 
+      <SignatureOverviewDialog
+        isOpen={isSignatureOverviewOpen && !!signatureSummary}
+        onClose={closeSignatureOverview}
+        documents={signatureDocuments}
+        activeDocumentKey={getPageSignatureDocumentKey(currentPage)}
+        onNavigate={navigateToSignatureDocument}
+        onOpenDetails={openSignatureDocumentDetails}
+        suspended={!!signatureDialogDocument}
+        returnFocusRef={signatureOverviewOpenerRef}
+      />
+
       <SignatureDetailsDialog
-        isOpen={!!signatureDialogState}
+        isOpen={!!signatureDialogDocument}
         onClose={closeSignatureDialog}
-        report={signatureDialogState?.report || null}
-        documentNumber={signatureDialogState?.documentNumber ?? null}
-        totalDocuments={signatureDialogState?.totalDocuments ?? null}
+        document={signatureDialogDocument}
+        initialSourceKey={signatureDialogState?.sourceKey || ''}
         returnFocusRef={signatureOpenerRef}
       />
     </div>

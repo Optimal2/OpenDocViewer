@@ -38,7 +38,7 @@ import {
 } from '../../utils/viewerPreferences.js';
 import ViewerContext from '../../contexts/viewerContext.js';
 import StatusLed from '../common/StatusLed.jsx';
-import SignatureStatusBadge from '../SignatureStatusBadge.jsx';
+import SignatureOverviewButton from '../SignatureOverviewButton.jsx';
 import { isPdfBenchmarkEnabled, runPdfGenerationBenchmark } from '../../utils/pdfBenchmark.js';
 import { isRenderDecodeBenchmarkEnabled, runRenderDecodeBenchmark } from '../../utils/renderDecodeBenchmark.js';
 import {
@@ -364,8 +364,8 @@ const DocumentToolbar = ({
   documentNavigationEnabled = false,
   primaryDocumentNavigation = undefined,
   compareDocumentNavigation = undefined,
-  signatureReport = null,
-  onOpenSignatures,
+  signatureSummary = null,
+  onOpenSignatureOverview,
 }) => {
   const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -1850,12 +1850,8 @@ const DocumentToolbar = ({
 
       <div className="toolbar-spacer" />
 
-      {signatureReport ? (
-        <SignatureStatusBadge
-          variant="toolbar"
-          report={signatureReport}
-          onOpen={(element) => onOpenSignatures?.(element)}
-        />
+      {signatureSummary && typeof onOpenSignatureOverview === 'function' ? (
+        <SignatureOverviewButton summary={signatureSummary} onOpen={onOpenSignatureOverview} />
       ) : null}
 
       <div className="toolbar-end-actions">
@@ -2160,10 +2156,12 @@ DocumentToolbar.propTypes = {
   sessionTotalPages: PropTypes.number,
   bundle: PropTypes.object,
   allPages: PropTypes.arrayOf(PropTypes.any),
-  signatureReport: PropTypes.shape({
-    signatures: PropTypes.arrayOf(PropTypes.object),
+  signatureSummary: PropTypes.shape({
+    documentCount: PropTypes.number,
+    signatureCount: PropTypes.number,
+    severity: PropTypes.oneOf(['ok', 'warning', 'error']),
   }),
-  onOpenSignatures: PropTypes.func,
+  onOpenSignatureOverview: PropTypes.func,
 };
 
 export default React.memo(DocumentToolbar);

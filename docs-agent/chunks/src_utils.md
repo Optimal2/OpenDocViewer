@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 43. Line count: 17430. JSDoc symbol count: 663.
+File count: 44. Line count: 17711. JSDoc symbol count: 678.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -344,6 +344,27 @@ Symbols:
 - `recordPdfResolution` (function) - Record successful rendering/restoration only; never collect document identifiers.
 - `getPdfResolutionDiagnostics` (function) - Effective PDF display diagnostics, with null scale until a page has been rendered.
 
+## src/utils/pdfSignatureDocuments.js
+
+Per\-document aggregation of PDF signature reports.
+
+Exports: `getPageSignatureDocumentKey`, `getSourceFileNameFromUrl`, `buildSignatureDocuments`, `summarizeSignatureDocuments`, `findSignatureDocumentBySourceKey`, `getSignatureFileHeading`
+
+Local imports: `src/utils/pdfSignatureStatus.js`
+
+Symbols:
+
+- `module:utils/pdfSignatureDocuments` (module) - Per\-document aggregation of PDF signature reports.
+- `module:utils/pdfSignatureDocuments~SignatureFileEntry` (typedef) - No description.
+- `module:utils/pdfSignatureDocuments~SignatureDocumentEntry` (typedef) - No description.
+- `module:utils/pdfSignatureDocuments.getPageSignatureDocumentKey` (function) - Document key of a page.
+- `module:utils/pdfSignatureDocuments.getSourceFileNameFromUrl` (function) - Display file name from a source URL: the last path segment, only when it looks like a file name \(has an extension\).
+- `module:utils/pdfSignatureDocuments~pickNewestSignature` (function) - No description.
+- `module:utils/pdfSignatureDocuments.buildSignatureDocuments` (function) - Fold per\-file signature reports into per\-document entries.
+- `module:utils/pdfSignatureDocuments.summarizeSignatureDocuments` (function) - Totals for the toolbar overview button, or null when nothing is signed \(the button is then not rendered\).
+- `module:utils/pdfSignatureDocuments.findSignatureDocumentBySourceKey` (function) - No description.
+- `module:utils/pdfSignatureDocuments.getSignatureFileHeading` (function) - Heading for one file of a multi\-file document: &quot;File k of m – name&quot;, or &quot;File k of m&quot; when no file name is available.
+
 ## src/utils/pdfSignatureGateway.js
 
 Optional gateway trust enrichment.
@@ -396,7 +417,7 @@ Symbols:
 
 Signature UI status helpers for browser integrity and gateway trust.
 
-Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`
+Exports: `getSignatureSeverity`, `getReportSignatureSeverity`, `normalizeSignatureIntegrity`, `getIntegrityLabel`, `getWorstSignatureIntegrity`, `getSignatureCount`, `reportHasSignatures`, `normalizeSignatureTrust`, `getWorstSignatureTrust`, `getTrustLabel`
 
 Symbols:
 
@@ -410,6 +431,8 @@ Symbols:
 - `module:utils/pdfSignatureStatus.getWorstSignatureIntegrity` (function) - The worst integrity status among a document's signatures, or null when there are none.
 - `module:utils/pdfSignatureStatus.getSignatureCount` (function) - No description.
 - `module:utils/pdfSignatureStatus.reportHasSignatures` (function) - No description.
+- `module:utils/pdfSignatureStatus~TRUST_WORST_FIRST` (constant) - Trust verdicts ordered worst\-first.
+- `module:utils/pdfSignatureStatus.normalizeSignatureTrust` (function) - No description.
 
 ## src/utils/pdfWorkerDispatcher.js
 
@@ -671,7 +694,7 @@ Symbols:
 
 Runtime configuration helpers.
 
-Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getOmpThemeBridgeAllowedOrigins`
+Exports: `getRuntimeConfig`, `getKeyboardPrintShortcutBehavior`, `isDocumentMetadataUiEnabled`, `isSignatureThumbnailPageBadgeEnabled`, `normalizePrintDefaultMode`, `normalizeCustomFitWidthFactorPercent`, `normalizeOptionalCustomFitFactorPercent`, `normalizeCustomFitSizeLimitPreference`, `getViewerDefaultZoomMode`, `getViewerCustomFitWidthFactorPercent`, `getViewerCustomFitSizeLimits`, `getPrintDefaultMode`, `getPrintSelectionWorkspaceConfig`, `getViewerEdgeScrollPageTurnConfig`, `getViewerProblemNoticeConfig`, `getOmpThemeBridgeAllowedOrigins`
 
 Symbols:
 

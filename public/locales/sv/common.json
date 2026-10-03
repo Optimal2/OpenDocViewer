@@ -727,7 +727,9 @@
       "trustLine": "Tillit ej kontrollerad – visar vem som signerat och om dokumentet är oförändrat, inte om signaturen är giltig.",
       "signatureHeading": "Signatur {index}",
       "notAvailable": "—",
-      "validityRange": "{from} – {to}"
+      "validityRange": "{from} – {to}",
+      "filePosition": "Fil {file} av {total}",
+      "fileTabsLabel": "Filer med signaturer"
     },
     "fields": {
       "signer": "Undertecknare",
@@ -773,6 +775,19 @@
     "coversWhole": {
       "yes": "Ja",
       "no": "Nej"
+    },
+    "overview": {
+      "title": "Signaturer",
+      "subtitle": "{count, plural, =1 {1 signerat dokument} other {# signerade dokument}}",
+      "buttonAriaLabel": "{count, plural, =1 {Signaturer: 1 signerat dokument} other {Signaturer: # signerade dokument}} – visa översikt",
+      "listLabel": "Signerade dokument",
+      "signatureCount": "{count, plural, =1 {1 signatur} other {# signaturer}}",
+      "goToDocument": "Gå till dokument",
+      "goToDocumentAria": "{count, plural, =1 {Gå till dokument {document}, 1 signatur} other {Gå till dokument {document}, # signaturer}}",
+      "activeDocument": "aktuellt dokument",
+      "details": "Detaljer",
+      "detailsAria": "Visa signaturdetaljer för dokument {document}",
+      "detailsTitle": "Visa signaturdetaljer"
     }
   },
   "about": {

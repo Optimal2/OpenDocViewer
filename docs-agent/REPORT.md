@@ -2,9 +2,9 @@
 
 ## Coverage
 
-- Files: 128
-- Source lines: 53607
-- JSDoc symbols: 1425
+- Files: 131
+- Source lines: 54396
+- JSDoc symbols: 1446
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -12,30 +12,30 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
+- `src/utils/runtimeConfig.js`: 15 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
-- `src/utils/runtimeConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
+- `src/utils/pdfSignatureStatus.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
-- `src/utils/pdfSignatureStatus.js`: 5 incoming local imports
+- `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/viewerPreferences.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports
 - `src/utils/printSanitize.js`: 4 incoming local imports
 - `src/components/DocumentLoader/documentLoaderUtils.js`: 3 incoming local imports
-- `src/contexts/themeContext.js`: 3 incoming local imports
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2660 lines
+- `src/contexts/ViewerProvider.jsx`: 2668 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2297 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2175 lines
-- `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2170 lines
+- `src/components/DocumentToolbar/DocumentToolbar.jsx`: 2168 lines
 - `src/components/DocumentViewer/useDocumentViewer.js`: 1905 lines
-- `src/components/DocumentThumbnailList.jsx`: 1402 lines
+- `src/components/DocumentThumbnailList.jsx`: 1435 lines
 - `src/PerformanceMonitor.jsx`: 1346 lines
 - `src/utils/renderDecodeBenchmark.js`: 1212 lines
 - `src/utils/pdfSignatures.js`: 1137 lines

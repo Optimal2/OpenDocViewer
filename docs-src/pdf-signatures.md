@@ -177,15 +177,50 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   Every signature is normalized before selecting the worst status, so mixing an intact
   signature with a missing or unexpected status still yields unreadable. Tooltip and
   dialog labels use the same normalization and translation helper.
-- `src/components/SignatureStatusBadge.jsx` is the small signature symbol on the first
-  thumbnail of a signed document and in the toolbar for the current document. It is a
-  native button with an accessible name (for example "Signed document, 1 signature") and a
-  tooltip; it exists only in the viewer UI and is never part of printed or exported output
+- `src/utils/pdfSignatureDocuments.js` folds the per-file reports into per-document entries.
+  Reports are keyed per file (`sourceKey`), while the thumbnail strip groups pages into
+  documents ("DOK n") and one document can consist of several files. A document entry carries
+  every file ("File k of m", plus a display file name taken from the last URL path segment when
+  it looks like a file name), the signed files, the total signature count, the worst severity,
+  integrity and trust across all its files, and the newest signature. Pages without document
+  context form one document per file. No signatures means no entry, no symbol and no toolbar
+  button.
+- `src/components/SignatureStatusBadge.jsx` is the signature symbol, a native button with an
+  accessible name that includes the count (for example "Signed document, 3 signatures") and a
+  tooltip. It is shown in two places in the thumbnail strip:
+  - **Document symbol** next to the "DOK n" label in the document boundary header (shown when
+    the session has several documents). It aggregates all files of the document (worst
+    severity, total count shown next to the icon) and opens the details dialog for the
+    document with the first signed file preselected. The header is not collapsible, so the
+    symbol stays visible; the click stops propagation and never selects or toggles pages.
+  - **Page symbol** on every page thumbnail that belongs to a signed file: an 18 px glyph in a
+    22 px pill centred on the top edge of the thumbnail image, so the top-right corner stays
+    free for the compare-mode L/R pane markers. At rest it is discreet (opacity 0.55, no
+    translucent overlay); hover and keyboard focus make it fully opaque with a shadow and a
+    focus ring, never more transparent than at rest. It opens the same document dialog with
+    its own file preselected. Runtime config `pdfSignatures.thumbnailPageBadge: false` hides
+    the page symbol and keeps the document symbol (see `docs-src/runtime-configuration.md`).
+- `src/components/SignatureOverviewButton.jsx` replaces the former active-document toolbar
+  badge with one overview button for the whole loaded set: the signature icon in the worst
+  severity colour across all loaded files plus the number of signed documents. It is rendered
+  only when at least one loaded file has signatures, so unsigned sets see no change.
+- `src/components/SignatureOverviewDialog.jsx` lists every signed document: "DOK n", file
+  name(s), signature count, worst integrity and trust text (the shared status helpers), and
+  signer and signing time of the newest signature. The active document's row is marked
+  (`aria-current`). Rows are keyboard navigable (ArrowUp/ArrowDown/Home/End); activating a row
+  navigates the viewer to the document's first page through the normal page navigation and
+  keeps the dialog open. The secondary "Details" action opens the document's details dialog
+  on top; Escape then closes only the top dialog. Closing the overview returns focus to the
+  toolbar button.
+- All symbols exist in the viewer UI only and are never part of printed or exported output
   (print and PDF export build their own output documents, not the app DOM).
-- `src/components/SignatureDetailsDialog.jsx` opens from the symbol and lists every
-  signature (signer and organisation, issuer, signing time and its source, reason,
+- `src/components/SignatureDetailsDialog.jsx` opens per document. When the document has more
+  than one file with signatures, a file selector (tabs, arrow-key navigable) sits above the
+  groups, the requested file is preselected, and the selected file gets a heading ("File k of
+  m – name") followed by its signatures. With one signed file it is a plain list. Each
+  signature lists signer and organisation, issuer, signing time and its source, reason,
   location, kind, integrity in plain words with `integrityReason`, whole-document coverage,
-  certificate validity period, format). Its accessibility mirrors
+  certificate validity period and format. Its accessibility mirrors
   `DocumentMetadataOverlayDialog`: focus moves into the dialog, Tab is trapped inside,
   Escape closes, and focus returns to the symbol that opened it. Unsupported formats are
   shown as "signature present, format not supported", never hidden.
@@ -193,9 +228,16 @@ The viewer surfaces the inspection result without ever blocking page rendering:
   whether the document is unchanged, not whether the signature is valid."). The trust field
   is rendered generically with labels for `not-checked`, `valid`, `invalid` and `unknown`
   plus an optional `trustReason`, so level 2 only fills the field with no UI rewrite.
-- Strings live under the `signatures` key in `public/locales/en/common.json` and
-  `public/locales/sv/common.json`; colours use the `--odv-signature-*` theme tokens (light,
-  normal, dark, and the print reset).
+- Strings live under the `signatures` key (including `signatures.overview`) in
+  `public/locales/en/common.json` and `public/locales/sv/common.json`; colours use the
+  `--odv-signature-*` theme tokens (light, normal, dark, and the print reset).
+- Verification: `src/utils/__tests__/pdfSignatureDocuments.test.js` (aggregation),
+  `src/components/__tests__/signatureOverview.test.jsx` (button and file tabs), and the
+  Playwright browser suite `tests/ui/signature-symbols.spec.mjs` (`npm run test:ui`: page symbol
+  placement clear of the compare markers, rest/hover opacity, document dialog, overview
+  navigation, and the runtime flag) using the synthetic fixtures from
+  `scripts/generate-signature-fixtures.mjs`. The first run needs the Playwright Chromium build
+  (`npx playwright install chromium`).
 
 ## Level 2 (gateway validation)
 

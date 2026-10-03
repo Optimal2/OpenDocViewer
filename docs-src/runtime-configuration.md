@@ -171,6 +171,22 @@ Set `metadata.enabled` to `false` for deployments where metadata may still be us
 print templates, sorting, or diagnostics, but should not be exposed as a document metadata dialog or
 overview table.
 
+## PDF Signature Symbols
+
+Signed PDF files show a signature symbol next to the document label ("DOK n") in the thumbnail
+strip, a small symbol on every page thumbnail of a signed file, and one signature overview button
+in the toolbar (see `docs-src/pdf-signatures.md`). The per-page thumbnail symbol can be turned off:
+
+```js
+pdfSignatures: {
+  thumbnailPageBadge: true
+}
+```
+
+Set `pdfSignatures.thumbnailPageBadge` to `false` to hide the per-page symbol. The document-level
+symbol and the toolbar overview stay visible, so signed documents are still discoverable. Only an
+explicit `false` disables the symbol; a missing or non-boolean value keeps the default (`true`).
+
 ## Viewer Default Zoom Mode
 
 Deployments can choose the initial zoom mode used when the first page opens:

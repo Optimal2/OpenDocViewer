@@ -1,7 +1,8 @@
 // File: src/components/SignatureStatusBadge.jsx
 /**
- * Small signature symbol shown on a document's thumbnail and in the toolbar
- * when the document has at least one signature. Colour and icon follow the
+ * Small signature symbol shown next to a document's "DOK n" label (variant
+ * `document`, aggregated over all files of the document) and on every page
+ * thumbnail of a signed file (variant `thumbnail`). Colour and icon follow the
  * worst integrity or trust status of the document's signatures (see
  * utils/pdfSignatureStatus.js): intact = neutral/positive,
  * modified-after-signing/unsupported = warning, digest-mismatch/
@@ -33,10 +34,11 @@ const ICON_BY_SEVERITY = {
 
 /**
  * @param {Object} props
- * @param {*} props.report PdfSignatureReport for the document (or null while pending).
+ * @param {*} props.report PdfSignatureReport (or any `{ signatures }` aggregate) to show;
+ * null while pending.
  * @param {function(HTMLElement): void} props.onOpen Called with the badge element so the
  * dialog can return focus to it.
- * @param {'thumbnail'|'toolbar'} [props.variant]
+ * @param {'thumbnail'|'document'|'toolbar'} [props.variant] `document` also shows the count.
  * @returns {(React.ReactElement|null)}
  */
 export default function SignatureStatusBadge({ report, onOpen, variant = 'toolbar' }) {
@@ -73,6 +75,9 @@ export default function SignatureStatusBadge({ report, onOpen, variant = 'toolba
       onKeyDown={(event) => event.stopPropagation()}
     >
       <span className="material-icons" aria-hidden="true">{ICON_BY_SEVERITY[severity]}</span>
+      {variant === 'document' ? (
+        <span className="odv-signature-badge-count" aria-hidden="true">{count}</span>
+      ) : null}
     </button>
   );
 }
@@ -82,5 +87,5 @@ SignatureStatusBadge.propTypes = {
     signatures: PropTypes.arrayOf(PropTypes.object),
   }),
   onOpen: PropTypes.func.isRequired,
-  variant: PropTypes.oneOf(['thumbnail', 'toolbar']),
+  variant: PropTypes.oneOf(['thumbnail', 'document', 'toolbar']),
 };

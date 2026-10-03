@@ -40,6 +40,7 @@ import {
 } from '../utils/objectUrlRegistry.js';
 import usePdfSignatureReports from '../hooks/usePdfSignatureReports.js';
 import { disposePdfSignatureWorker } from '../utils/pdfSignatureInspector.js';
+import { getSourceFileNameFromUrl } from '../utils/pdfSignatureDocuments.js';
 
 
 /**
@@ -2558,6 +2559,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
 
   const getSignatureSourceUrl = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl, []);
   const getSignatureSourcePack = useCallback((sourceKey) => sourceDescriptorsRef.current.get(sourceKey)?.sourcePack, []);
+  // Display-only file name for the signature dialogs ("File k of m – name"); '' for opaque URLs.
+  const getSignatureSourceFileName = useCallback(
+    (sourceKey) => getSourceFileNameFromUrl(sourceDescriptorsRef.current.get(sourceKey)?.sourceUrl),
+    []
+  );
 
   // PDF signature inspection and optional gateway trust: starts only after the first page is
   // ready (page rendering keeps priority), runs once per PDF source off the
@@ -2615,6 +2621,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     pageLoadState,
     signatureReports,
     setSignaturePrioritySourceKey,
+    getSignatureSourceFileName,
     scheduleSourceWarmup,
   }), [
     bundle,
@@ -2648,6 +2655,7 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     runtimeDiagnostics,
     pageLoadState,
     signatureReports,
+    getSignatureSourceFileName,
     scheduleSourceWarmup,
   ]);
 

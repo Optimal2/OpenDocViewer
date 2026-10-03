@@ -28,10 +28,10 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 2 (dynamic) | <code>src/utils/pdfSignatures.js</code><br><code>src/utils/pdfWorkerDispatcher.js</code> |
 | <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>pkijs</code> | <code>^3.4.1</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
-| <code>prop-types</code> | <code>^15.8.1</code> | 34 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+29 more, 34 files total) |
-| <code>react</code> | <code>^19.3.0</code> | 56 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+51 more, 56 files total) |
+| <code>prop-types</code> | <code>^15.8.1</code> | 36 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+31 more, 36 files total) |
+| <code>react</code> | <code>^19.3.0</code> | 58 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+53 more, 58 files total) |
 | <code>react-dom</code> | <code>^19.3.0</code> | 1 | <code>src/index.jsx</code> |
-| <code>react-i18next</code> | <code>^17.0.15</code> | 35 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+30 more, 35 files total) |
+| <code>react-i18next</code> | <code>^17.0.15</code> | 37 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/DemoControls.jsx</code><br><code>src/components/DocumentLoader/DocumentLoader.js</code><br>... (+32 more, 37 files total) |
 | <code>utif2</code> | <code>^4.1.0</code> | 4 (1 dynamic) | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/imageWorker.js</code> |
 
 ## Development Dependencies
@@ -43,6 +43,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>@babel/runtime</code> | <code>^8.0.5</code> | 0 |
 | <code>@eslint/js</code> | <code>^10.0.1</code> | 0 |
 | <code>@peculiar/x509</code> | <code>^1.14.3</code> | 0 |
+| <code>@playwright/test</code> | <code>1.63.0</code> | 0 |
 | <code>@rolldown/plugin-babel</code> | <code>^0.2.4</code> | 0 |
 | <code>@vitejs/plugin-react</code> | <code>^6.1.1</code> | 0 |
 | <code>concurrently</code> | <code>^10.0.5</code> | 0 |

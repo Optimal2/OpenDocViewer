@@ -32,6 +32,8 @@ import {
 import { getPublicAssetUrl } from '../utils/publicAssetUrl.js';
 import { bundleDocumentHasMetadata } from '../utils/documentMetadata.js';
 import { reportHasSignatures } from '../utils/pdfSignatureStatus.js';
+import { getPageSignatureDocumentKey } from '../utils/pdfSignatureDocuments.js';
+import { isSignatureThumbnailPageBadgeEnabled } from '../utils/runtimeConfig.js';
 import SignatureStatusBadge from './SignatureStatusBadge.jsx';
 
 /**
@@ -54,8 +56,10 @@ import SignatureStatusBadge from './SignatureStatusBadge.jsx';
  * @property {function(*, number, *): void} onOpenContextMenu
  * @property {function(number, ('full'|'thumbnail')): void} onImageLoad
  * @property {boolean} fullyRenderOffscreenRows
- * @property {(*|null)} signatureReport - Level-1 signature report for this row's document, when signed.
- * @property {boolean} showSignatureBadge - True on the first row of the row's document.
+ * @property {(*|null)} signatureReport - Signature report of this row's file; drives the page symbol.
+ * @property {boolean} showSignatureBadge - True when the per-page symbol is enabled (runtime config).
+ * @property {(*|null)} documentSignatures - Signed-document entry of this row's document; drives the
+ * document symbol next to the "DOK n" label on the document's first row.
  * @property {(function(string, HTMLElement=): boolean|undefined)} [onOpenSignatures]
  */
 
@@ -365,6 +369,7 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
   fullyRenderOffscreenRows,
   signatureReport = null,
   showSignatureBadge = false,
+  documentSignatures = null,
   onOpenSignatures,
 }) {
   const { t } = useTranslation('common');
@@ -430,15 +435,23 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
       }}
     >
       {documentGroupingActive && documentContext.isDocumentStart ? (
-        <div className="thumbnail-document-boundary start" aria-hidden="true">
-          <span className="thumbnail-document-boundary-line" />
+        <div className="thumbnail-document-boundary start">
+          <span className="thumbnail-document-boundary-line" aria-hidden="true" />
           <span
             className="thumbnail-document-boundary-label"
             title={getDocumentBoundaryTitle(t, documentContext)}
+            aria-hidden="true"
           >
             {getDocumentBoundaryLabel(t, documentContext)}
           </span>
-          <span className="thumbnail-document-boundary-line" />
+          {documentSignatures && typeof onOpenSignatures === 'function' ? (
+            <SignatureStatusBadge
+              variant="document"
+              report={documentSignatures}
+              onOpen={(element) => onOpenSignatures(String(documentSignatures.signedFiles?.[0]?.sourceKey || ''), element)}
+            />
+          ) : null}
+          <span className="thumbnail-document-boundary-line" aria-hidden="true" />
         </div>
       ) : null}
 
@@ -546,7 +559,9 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {function(number): boolean} [props.onHidePageFromSelection]
  * @param {function(number): boolean} [props.onHideDocumentFromSelection]
  * @param {function(number): boolean} [props.onOpenDocumentMetadata]
- * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures]
+ * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures] Opens the per-document
+ * signature dialog with the given file (sourceKey) preselected.
+ * @param {Array<Object>} [props.signatureDocuments] Signed documents (utils/pdfSignatureDocuments.js).
  * @returns {React.ReactElement}
  */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
@@ -565,6 +580,7 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   onHideDocumentFromSelection,
   onOpenDocumentMetadata,
   onOpenSignatures,
+  signatureDocuments = [],
 }) {
   const { t } = useTranslation('common');
   const isShiftPressed = !!navigationModifierState.shift;
@@ -582,6 +598,11 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
     signatureReports,
   } = useContext(ViewerContext);
   const fallbackConfig = useMemo(() => getDocumentLoadingConfig(), []);
+  const pageSignatureBadgeEnabled = useMemo(() => isSignatureThumbnailPageBadgeEnabled(), []);
+  const signatureDocumentsByKey = useMemo(
+    () => new Map((Array.isArray(signatureDocuments) ? signatureDocuments : []).map((doc) => [doc.key, doc])),
+    [signatureDocuments]
+  );
   const activeConfig = documentLoadingConfig || fallbackConfig;
   const renderConfig = activeConfig.render;
   const overscan = Math.max(0, Number(renderConfig.visibleThumbnailOverscan) || 0);
@@ -1168,9 +1189,14 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   for (let index = 0; index < totalCount; index += 1) {
     const originalPageNumber = getSessionPageIndex(allPages[index], index) + 1;
     const rowSourceKey = String(allPages[index]?.sourceKey || '');
-    const rowSignatureReport = rowSourceKey ? (signatureReports?.[rowSourceKey] || null) : null;
+    const rowSignatureReport = rowSourceKey && reportHasSignatures(signatureReports?.[rowSourceKey])
+      ? signatureReports[rowSourceKey]
+      : null;
     const isFirstRowOfDocument = index === 0
       || getPageDocumentKey(allPages[index - 1] || null) !== getPageDocumentKey(allPages[index]);
+    const rowDocumentSignatures = isFirstRowOfDocument
+      ? (signatureDocumentsByKey.get(getPageSignatureDocumentKey(allPages[index])) || null)
+      : null;
     rows.push(
       <ThumbnailRow
         key={String(allPages[index]?.sourceKey || index)}
@@ -1193,7 +1219,8 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         onImageLoad={handleImageLoad}
         fullyRenderOffscreenRows={fullyRenderOffscreenRows}
         signatureReport={rowSignatureReport}
-        showSignatureBadge={isFirstRowOfDocument}
+        showSignatureBadge={pageSignatureBadgeEnabled}
+        documentSignatures={rowDocumentSignatures}
         onOpenSignatures={onOpenSignatures}
       />
     );
@@ -1372,6 +1399,11 @@ ThumbnailRow.propTypes = {
     signatures: PropTypes.arrayOf(PropTypes.object),
   }),
   showSignatureBadge: PropTypes.bool,
+  documentSignatures: PropTypes.shape({
+    key: PropTypes.string,
+    signatures: PropTypes.arrayOf(PropTypes.object),
+    signedFiles: PropTypes.arrayOf(PropTypes.object),
+  }),
   onOpenSignatures: PropTypes.func,
 };
 
@@ -1396,6 +1428,7 @@ DocumentThumbnailList.propTypes = {
   onHideDocumentFromSelection: PropTypes.func,
   onOpenDocumentMetadata: PropTypes.func,
   onOpenSignatures: PropTypes.func,
+  signatureDocuments: PropTypes.arrayOf(PropTypes.object),
 };
 
 export default DocumentThumbnailList;
