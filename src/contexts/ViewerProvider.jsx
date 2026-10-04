@@ -2573,10 +2573,13 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // it off entirely: no bytes reach the worker and no symbols appear.
   const signatureInspectionReady = useMemo(() => {
     if (!isPdfSignatureInspectionEnabled()) return false;
-    return getPdfSignatureInspectionStart() === 'allPages'
-      ? pageLoadState.allPagesReady
-      : pageLoadState.readyPages > 0;
-  }, [pageLoadState.allPagesReady, pageLoadState.readyPages]);
+    if (getPdfSignatureInspectionStart() !== 'allPages') return pageLoadState.readyPages > 0;
+    // 'allPages': the whole run is ready — or the run has ended (completed or aborted) with
+    // nothing left pending, so an aborted run with a planned page count above the discovered
+    // pages still lets inspection start instead of waiting forever.
+    if (pageLoadState.allPagesReady) return true;
+    return !loadingRunActive && pageLoadState.pendingPages === 0 && pageLoadState.readyPages > 0;
+  }, [loadingRunActive, pageLoadState.allPagesReady, pageLoadState.pendingPages, pageLoadState.readyPages]);
   const signatureReports = usePdfSignatureReports({
     allPages,
     currentSourceKey: signaturePrioritySourceKey,

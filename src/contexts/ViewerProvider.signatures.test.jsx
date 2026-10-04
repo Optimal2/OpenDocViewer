@@ -16,6 +16,8 @@ vi.mock('../utils/pageAssetStore.js', () => ({ createPageAssetStore: () => ({
 }) }));
 vi.mock('../utils/pageAssetRenderer.js', () => ({ createPageAssetRenderer: () => ({
   updateConfig() {}, dispose: async () => {},
+  // A page that is still loading never resolves here, so it stays pending for the tests below.
+  resolvePdfPageResolution: () => new Promise(() => {}),
 }) }));
 vi.mock('../utils/pdfSignatureInspector.js', () => ({ getDocumentSignatures: vi.fn(), disposePdfSignatureWorker: vi.fn() }));
 vi.mock('react-i18next', () => ({ useTranslation: () => ({ t: (key, options) => options?.defaultValue || key }) }));
@@ -62,6 +64,36 @@ it('F5 provider publishes signed and unsigned reports to badges across page load
   expect(disposePdfSignatureWorker).not.toHaveBeenCalled();
   await act(async () => { root.unmount(); });
   expect(disposePdfSignatureWorker).toHaveBeenCalledTimes(1);
+});
+
+it('pdfSignatures.enabled:false never hands bytes to the inspector', async () => {
+  vi.stubGlobal('__ODV_CONFIG__', { pdfSignatures: { enabled: false } });
+  getDocumentSignatures.mockResolvedValue({ signatures: [{ integrity: 'intact' }] });
+  let api;
+  function Consumer() { api = useContext(ViewerContext); return null; }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  const page = { sourceKey: 'signed', fileExtension: 'pdf', pageIndex: 0, fullSizeStatus: 1, fullSizeUrl: 'blob:ready' };
+  await act(async () => { api.insertPagesAtIndex([page], 0); });
+  await act(async () => { api.patchPageAtIndex(0, { thumbnailStatus: 1 }); });
+  expect(getDocumentSignatures).not.toHaveBeenCalled();
+  expect(storage.read).not.toHaveBeenCalled();
+  expect(api.signatureReports).toEqual({});
+});
+
+it("pdfSignatures.inspectAfter:'allPages' waits until no page is pending", async () => {
+  vi.stubGlobal('__ODV_CONFIG__', { pdfSignatures: { inspectAfter: 'allPages' } });
+  getDocumentSignatures.mockResolvedValue({ signatures: [] });
+  let api;
+  function Consumer() { api = useContext(ViewerContext); return null; }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  const ready = { sourceKey: 'a', fileExtension: 'pdf', pageIndex: 0, fullSizeStatus: 1, fullSizeUrl: 'blob:ready' };
+  const pending = { sourceKey: 'a', fileExtension: 'pdf', pageIndex: 1, fullSizeStatus: 0, fullSizeUrl: 'blob:loading' };
+  await act(async () => { api.insertPagesAtIndex([ready, pending], 0); });
+  expect(getDocumentSignatures).not.toHaveBeenCalled();
+  await act(async () => { api.patchPageAtIndex(1, { fullSizeStatus: 1, fullSizeUrl: 'blob:ready' }); });
+  expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
 });
 
 it('G10 provider passes the registered source URL, never the viewer file index', async () => {

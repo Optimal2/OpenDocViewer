@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 135,
-    "sourceLineCount": 55810,
+    "sourceLineCount": 55813,
     "docletCount": 1501,
     "documentedFileCount": 135,
     "lowConfidenceSummaryCount": 0,
@@ -631,7 +631,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2677,
+            "lines": 2680,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1225,7 +1225,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3267,
+      "lineCount": 3270,
       "docletCount": 84,
       "importantFiles": [
         {
@@ -1240,7 +1240,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2677,
+          "lines": 2680,
           "incomingLocalImports": 1,
           "doclets": 58,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -25583,7 +25583,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2677,
+      "lines": 2680,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
