@@ -4,7 +4,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 
 [![CI](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml/badge.svg)](https://github.com/Optimal2/OpenDocViewer/actions/workflows/ci.yml)
 [![License: MIT](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-2.8.0-purple.svg)](package.json)
+[![Version](https://img.shields.io/github/package-json/v/Optimal2/OpenDocViewer)](package.json)
 [![Node](https://img.shields.io/badge/node-22.22.2%2B%20or%2024.15%2B-339933.svg)](package.json)
 
 ---

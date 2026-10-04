@@ -6,6 +6,7 @@ import fs from 'node:fs';
 import path from 'node:path';
 import { spawnSync } from 'node:child_process';
 import { fileURLToPath } from 'node:url';
+import { resolveAgentDocMapRoot as resolveAgentDocMapRootFromDisk } from './resolve-agentdocmap-root.mjs';
 
 const scriptDir = path.dirname(fileURLToPath(import.meta.url));
 const repoRoot = path.resolve(scriptDir, '..');
@@ -57,7 +58,9 @@ Usage:
   npm run doc:agent -- [--agentdocmap-root <path>] [--out <path>]
 
 Options:
-  --agentdocmap-root <path>  AgentDocMap repository root.
+  --agentdocmap-root <path>  AgentDocMap repository root. Falls back to AGENTDOCMAP_ROOT,
+                             then ../AgentDocMap, then AgentDocMap next to the main
+                             checkout (for linked git worktrees).
   --target <path>           Target repository root. Defaults to this repository.
   --out <path>              Output directory. Defaults to docs-agent.
   --project-name <name>     Project name used in generated docs.
@@ -67,22 +70,7 @@ Options:
 }
 
 function resolveAgentDocMapRoot(value) {
-  const candidates = [
-    value,
-    process.env.AGENTDOCMAP_ROOT,
-    path.resolve(repoRoot, '..', 'AgentDocMap'),
-  ].filter(Boolean);
-
-  for (const candidate of candidates) {
-    const absolute = path.resolve(candidate);
-    if (fs.existsSync(path.join(absolute, 'src', 'cli.js'))) {
-      return absolute;
-    }
-  }
-
-  throw new Error(
-    'AgentDocMap was not found. Use --agentdocmap-root, set AGENTDOCMAP_ROOT, or clone AgentDocMap next to OpenDocViewer.',
-  );
+  return resolveAgentDocMapRootFromDisk(value, { repoRoot });
 }
 
 function main() {
