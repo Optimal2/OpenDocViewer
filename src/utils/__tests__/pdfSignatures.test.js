@@ -54,7 +54,7 @@ describe('F10 PDF headers after leading junk', () => {
     expect(valid.coversWholeFile).toBe(true);
     const tampered = await one(`tampered-with-prefix-${length}.pdf`);
     expect(tampered.integrity).toBe('digest-mismatch');
-  });
+  }, 30000); // the 64 KiB prefix case takes ~4 s alone and exceeds 5 s under full-suite load
   it.each(['valid-rsa.pdf', 'digest-mismatch.pdf'])('%s remains visible with broken byte offsets', async (name) => {
     for (const length of [7, 1019, 1023, 1024, 4096, 65536]) {
       const report = await collectPdfSignatures(withJunkPrefix(fixtures[name], length));
