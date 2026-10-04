@@ -30,6 +30,7 @@ export const FIXTURE_NAMES = [
   'cades-ecdsa-invisible.pdf',
   'pss-rsa-no-signing-time-attr.pdf',
   'two-signatures.pdf',
+  'two-signatures-generation-bumped.pdf',
   'extended-after-signing.pdf',
   'digest-mismatch.pdf',
   'signature-invalid.pdf',
@@ -436,6 +437,57 @@ function unsignedPdfBytes() {
   return builder.serialize({ trailerExtras: '/Info 5 0 R' }).bytes;
 }
 
+/**
+ * Two signatures: sig1 over revision 1, sig2 appended via an incremental update
+ * that rewrites the page (3) and AcroForm (5) and covers the whole file.
+ *
+ * Per ISO 32000-1 7.5.6 a rewritten object keeps its object AND generation
+ * number (the generation only increases when a freed number is reused), so the
+ * update writes `3 0 obj` / `5 0 obj` with `00000 n` xref entries, matching the
+ * `3 0 R` / `5 0 R` references. `bumpRewrittenGeneration: true` reproduces the
+ * out-of-spec shape some writers emit (`3 1 obj`, `00001 n`, references still
+ * `0 R`); it only feeds the negative fixture `two-signatures-generation-bumped.pdf`.
+ */
+async function twoSignaturesPdf(pki, { bumpRewrittenGeneration = false } = {}) {
+  const builder = baseSignedPdf({
+    fieldName: 'Signature1',
+    visible: true,
+    sigOptions: {
+      subFilter: 'adbe.pkcs7.detached',
+      nameLiteral: 'ODV Fixture Signer',
+      m: pdfDateString(FIXTURE_SIGNING_TIME),
+      reason: 'First signature',
+      location: 'Test'
+    }
+  });
+  const rev1 = builder.serialize({ trailerExtras: '/Info 9 0 R' });
+  const file1 = await signFile(rev1.bytes, rev1.offsets.get(8), (signedBytes) =>
+    buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes: signedBytes })
+  );
+
+  const rewrittenGen = bumpRewrittenGeneration ? 1 : 0;
+  const upd = new PdfBuilder();
+  upd.set(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R /Annots [7 0 R 10 0 R] >>', rewrittenGen);
+  upd.set(5, '<< /Fields [7 0 R 10 0 R] /SigFlags 3 >>', rewrittenGen);
+  upd.set(10, '<< /Type /Annot /Subtype /Widget /FT /Sig /T (ApprovalTwo) /V 11 0 R /P 3 0 R /Rect [340 640 560 700] >>');
+  upd.set(11, sigDictBody({
+    subFilter: 'adbe.pkcs7.detached',
+    nameLiteral: 'ODV Fixture Approver',
+    m: pdfDateString(FIXTURE_SIGNING_TIME),
+    reason: 'Second approval',
+    location: 'Test'
+  }));
+  const rev2 = upd.serialize({
+    trailerExtras: '/Info 9 0 R',
+    only: [3, 5, 10, 11],
+    prevStartxref: { offset: findStartxrefOffset(file1), fileLength: file1.length }
+  });
+  const file2 = concatBytes(file1, rev2.bytes);
+  return signFile(file2, rev2.offsets.get(11), (signedBytes) =>
+    buildSignedData({ signer: pki.rsa2, certificates: [pki.ca.cert], signedOverBytes: signedBytes })
+  );
+}
+
 export async function createSignatureFixtures() {
   const pki = await createFixturePki();
   const fixtures = {};
@@ -492,45 +544,12 @@ export async function createSignatureFixtures() {
 
   // 4. Two signatures: sig1 over revision 1, sig2 appended via incremental
   //    update and covering the whole file including sig1's CMS.
-  {
-    const builder = baseSignedPdf({
-      fieldName: 'Signature1',
-      visible: true,
-      sigOptions: {
-        subFilter: 'adbe.pkcs7.detached',
-        nameLiteral: 'ODV Fixture Signer',
-        m: pdfDateString(FIXTURE_SIGNING_TIME),
-        reason: 'First signature',
-        location: 'Test'
-      }
-    });
-    const rev1 = builder.serialize({ trailerExtras: '/Info 9 0 R' });
-    const file1 = await signFile(rev1.bytes, rev1.offsets.get(8), (signedBytes) =>
-      buildSignedData({ signer: pki.rsa, certificates: [pki.ca.cert], signedOverBytes: signedBytes })
-    );
+  fixtures['two-signatures.pdf'] = await twoSignaturesPdf(pki);
 
-    const upd = new PdfBuilder();
-    upd.set(3, '<< /Type /Page /Parent 2 0 R /MediaBox [0 0 595 842] /Resources << /Font << /F1 4 0 R >> >> /Contents 6 0 R /Annots [7 0 R 10 0 R] >>', 1);
-    upd.set(5, '<< /Fields [7 0 R 10 0 R] /SigFlags 3 >>', 1);
-    upd.set(10, '<< /Type /Annot /Subtype /Widget /FT /Sig /T (ApprovalTwo) /V 11 0 R /P 3 0 R /Rect [340 640 560 700] >>');
-    upd.set(11, sigDictBody({
-      subFilter: 'adbe.pkcs7.detached',
-      nameLiteral: 'ODV Fixture Approver',
-      m: pdfDateString(FIXTURE_SIGNING_TIME),
-      reason: 'Second approval',
-      location: 'Test'
-    }));
-    const rev2 = upd.serialize({
-      trailerExtras: '/Info 9 0 R',
-      only: [3, 5, 10, 11],
-      prevStartxref: { offset: findStartxrefOffset(file1), fileLength: file1.length }
-    });
-    const file2 = concatBytes(file1, rev2.bytes);
-    const finalBytes = await signFile(file2, rev2.offsets.get(11), (signedBytes) =>
-      buildSignedData({ signer: pki.rsa2, certificates: [pki.ca.cert], signedOverBytes: signedBytes })
-    );
-    fixtures['two-signatures.pdf'] = finalBytes;
-  }
+  // 4b. NEGATIVE fixture: same document, but the incremental update bumps the
+  //     generation of the rewritten objects (out of spec, see twoSignaturesPdf).
+  //     Keeps the parser's tolerance for such writers under test.
+  fixtures['two-signatures-generation-bumped.pdf'] = await twoSignaturesPdf(pki, { bumpRewrittenGeneration: true });
 
   // 5. Plain incremental update appended after signing, not covered by any
   //    later signature: modified-after-signing.

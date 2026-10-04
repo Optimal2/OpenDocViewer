@@ -427,7 +427,8 @@ integrity status and format branch:
 | `pss-rsa-no-signing-time-attr.pdf` | RSA-PSS signature without a `signingTime` attribute (falls back to `/M`) |
 | `digest-mismatch.pdf` | content byte changed inside the signed range after signing |
 | `extended-after-signing.pdf` | plain incremental update appended after signing (no second signature) |
-| `two-signatures.pdf` | approval signature followed by a second signature in an incremental update |
+| `two-signatures.pdf` | approval signature followed by a second signature in an incremental update (rewritten objects keep generation 0, ISO 32000-1 7.5.6) |
+| `two-signatures-generation-bumped.pdf` | negative fixture: the same document written out of spec, with the rewritten page and AcroForm bumped to generation 1 while references still say `0 R`; keeps the parser's tolerance for such writers under test |
 | `certified-docmdp.pdf` | certification signature (`/Reference` DocMDP) |
 | `doc-timestamp-rfc3161.pdf` | `ETSI.RFC3161` document timestamp token |
 | `pkcs7-sha1.pdf` | legacy `adbe.pkcs7.sha1` embedded digest |

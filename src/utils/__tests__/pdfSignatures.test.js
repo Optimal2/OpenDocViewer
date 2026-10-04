@@ -322,3 +322,66 @@ describe('fast path does not load the CMS stack', () => {
     vi.resetModules();
   });
 });
+
+function latin1Of(bytes) {
+  let text = '';
+  for (let i = 0; i < bytes.length; i += 1) text += String.fromCharCode(bytes[i]);
+  return text;
+}
+
+/** Split a classic-xref PDF into revisions at each %%EOF marker. */
+function revisionsOf(bytes) {
+  return latin1Of(bytes).split(/%%EOF\r?\n?/).filter((part) => part.trim());
+}
+
+/** Map object number -> generation from every in-use entry of a revision's xref table. */
+function xrefGenerations(revision) {
+  const table = revision.slice(revision.lastIndexOf('\nxref\n') + 6, revision.indexOf('trailer'));
+  const lines = table.split('\n').filter((line) => line.trim());
+  const generations = new Map();
+  for (let i = 0; i < lines.length;) {
+    const [first, count] = lines[i].trim().split(/\s+/).map(Number);
+    for (let k = 0; k < count; k += 1) {
+      const [, gen, type] = lines[i + 1 + k].trim().split(/\s+/);
+      if (type === 'n') generations.set(first + k, Number(gen));
+    }
+    i += 1 + count;
+  }
+  return generations;
+}
+
+describe('incremental-update fixture shape (ISO 32000 7.5.6)', () => {
+  it('two-signatures.pdf rewrites objects 3 and 5 with their original generation 0', () => {
+    const revisions = revisionsOf(fixtures['two-signatures.pdf']);
+    expect(revisions).toHaveLength(2);
+    const second = revisions[1];
+    expect(second).toMatch(/(^|\n)3 0 obj\n/);
+    expect(second).toMatch(/(^|\n)5 0 obj\n/);
+    expect(second).not.toMatch(/(^|\n)\d+ [1-9]\d* obj\n/);
+    const generations = xrefGenerations(second);
+    expect(generations.get(3)).toBe(0);
+    expect(generations.get(5)).toBe(0);
+    expect([...generations.values()].every((gen) => gen === 0)).toBe(true);
+  });
+
+  it('every incremental update in the spec-conforming fixtures keeps generation 0', () => {
+    for (const name of ['two-signatures.pdf', 'extended-after-signing.pdf', 'certified-docmdp.pdf', 'doc-timestamp-rfc3161.pdf']) {
+      for (const revision of revisionsOf(fixtures[name])) {
+        expect(revision, name).not.toMatch(/(^|\n)\d+ [1-9]\d* obj\n/);
+        expect([...xrefGenerations(revision).values()].every((gen) => gen === 0), name).toBe(true);
+      }
+    }
+  });
+
+  it('two-signatures-generation-bumped.pdf is the deliberate out-of-spec negative fixture', async () => {
+    const revisions = revisionsOf(fixtures['two-signatures-generation-bumped.pdf']);
+    expect(revisions[1]).toMatch(/(^|\n)3 1 obj\n/);
+    expect(revisions[1]).toMatch(/(^|\n)5 1 obj\n/);
+    expect(xrefGenerations(revisions[1]).get(3)).toBe(1);
+    // The parser tolerates such writers: both signatures are still found and intact.
+    const report = await collectPdfSignatures(fixtures['two-signatures-generation-bumped.pdf']);
+    expect(report.signatures.map((sig) => [sig.fieldName, sig.integrity])).toEqual([
+      ['Signature1', 'intact'], ['ApprovalTwo', 'intact']
+    ]);
+  });
+});
