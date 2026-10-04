@@ -11,7 +11,7 @@
 
 import { describe, it, expect, beforeAll, vi } from 'vitest';
 import { createSignatureFixtures, createFixturePki, baseSignedPdf, signFile, buildSignedData, FIXTURE_SIGNING_TIME, FIXTURE_NOT_BEFORE, FIXTURE_NOT_AFTER } from '../../../scripts/generate-signature-fixtures.mjs';
-import { collectPdfSignatures, SUPPORTED_SUBFILTERS } from '../pdfSignatures.js';
+import { collectPdfSignatures, installIndirectObjectHeaderProbe, SUPPORTED_SUBFILTERS } from '../pdfSignatures.js';
 
 let fixtures;
 const prefixLengths = [7, 1024, 4096, 65536];
@@ -54,7 +54,31 @@ describe('F10 PDF headers after leading junk', () => {
     expect(valid.coversWholeFile).toBe(true);
     const tampered = await one(`tampered-with-prefix-${length}.pdf`);
     expect(tampered.integrity).toBe('digest-mismatch');
-  }, 30000); // the 64 KiB prefix case takes ~4 s alone and exceeds 5 s under full-suite load
+  });
+  it('skips a 1 MiB junk prefix in linear time', async () => {
+    const started = performance.now();
+    const report = await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024 * 1024));
+    expect(report.signatures).toHaveLength(1);
+    // pdf-lib alone throws one Error per junk byte here: ~17 s per MiB.
+    expect(performance.now() - started).toBeLessThan(2000);
+  });
+  it('probes indirect object headers exactly like pdf-lib', async () => {
+    const { PDFParser } = await import('pdf-lib');
+    const sample = [
+      'xx 12 0 obj', '  \t\r\n 7 0 obj', '%c 1 0 obj\n 3 1 obj', '1 0 ob', '1 x obj', '12', ' 0 0 obj',
+      `${'9'.repeat(320)} 0 obj`, `${'0'.repeat(320)}5 0 obj`, `5 ${'9'.repeat(400)} obj`, '%%\r% 4 0 obj', '\0\f8 0obj', '  '
+    ].join(' junk ');
+    const bytes = new TextEncoder().encode(sample);
+    const original = PDFParser.forBytesWithOptions(bytes);
+    const probed = PDFParser.forBytesWithOptions(bytes);
+    installIndirectObjectHeaderProbe(probed, bytes);
+    for (let i = 0; i <= bytes.length; i++) {
+      original.bytes.moveTo(i);
+      probed.bytes.moveTo(i);
+      expect([probed.matchIndirectObjectHeader(), probed.bytes.offset()])
+        .toEqual([original.matchIndirectObjectHeader(), original.bytes.offset()]);
+    }
+  });
   it.each(['valid-rsa.pdf', 'digest-mismatch.pdf'])('%s remains visible with broken byte offsets', async (name) => {
     for (const length of [7, 1019, 1023, 1024, 4096, 65536]) {
       const report = await collectPdfSignatures(withJunkPrefix(fixtures[name], length));

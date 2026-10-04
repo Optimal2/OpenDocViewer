@@ -1,6 +1,6 @@
 # OpenDocViewer / src/utils
 
-File count: 47. Line count: 18295. JSDoc symbol count: 710.
+File count: 47. Line count: 18360. JSDoc symbol count: 711.
 
 ## src/utils/documentLoadingConfig.js
 
@@ -433,7 +433,7 @@ Symbols:
 
 PDF signature collection \- level 1 integrity inspection.
 
-Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `unreadableSignatureReport`, `collectPdfSignatures`
+Exports: `SUPPORTED_SUBFILTERS`, `parsePdfDateString`, `unreadableSignatureReport`, `installIndirectObjectHeaderProbe`, `collectPdfSignatures`
 
 Symbols:
 
@@ -445,6 +445,7 @@ Symbols:
 - `module:utils/pdfSignatures.parsePdfDateString` (function) - Parse a PDF date string \(&quot;D:YYYYMMDDHHmmSS\+02'30'&quot;, also without the D: prefix, with partial fields, or without a timezone \- a missing timezone is treated as UTC\).
 - `module:utils/pdfSignatures~discoverSignatures` (function) - Walk every indirect object; collect signature dictionaries together with the field dictionary that references them \(for /T\).
 - `module:utils/pdfSignatures.unreadableSignatureReport` (function) - Report an inspection failure without claiming that the document is unsigned.
+- `module:utils/pdfSignatures.installIndirectObjectHeaderProbe` (function) - pdf\-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws \(building an Error\) on each miss: \~17 us per byte, so a 64 KiB prefix cost a...
 - `module:utils/pdfSignatures.collectPdfSignatures` (function) - Collect signature information from PDF bytes.
 
 ## src/utils/pdfSignatureStatus.js

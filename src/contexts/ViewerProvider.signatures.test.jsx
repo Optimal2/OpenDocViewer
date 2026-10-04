@@ -96,6 +96,23 @@ it("pdfSignatures.inspectAfter:'allPages' waits until no page is pending", async
   expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
 });
 
+it("pdfSignatures.inspectAfter:'allPages' starts after an aborted run planned with more pages than discovered", async () => {
+  vi.stubGlobal('__ODV_CONFIG__', { pdfSignatures: { inspectAfter: 'allPages' } });
+  getDocumentSignatures.mockResolvedValue({ signatures: [] });
+  let api;
+  function Consumer() { api = useContext(ViewerContext); return null; }
+  await act(async () => { root.render(createElement(ViewerProvider, null, createElement(Consumer))); });
+  await act(async () => { await api.initializeDocumentSession(); });
+  await act(async () => { api.setLoadingRunActive(true); api.setPlannedPageCount(5); });
+  const ready = (pageIndex) => ({ sourceKey: 'a', fileExtension: 'pdf', pageIndex, fullSizeStatus: 1, fullSizeUrl: 'blob:ready' });
+  await act(async () => { api.insertPagesAtIndex([ready(0), ready(1)], 0); });
+  expect(getDocumentSignatures).not.toHaveBeenCalled();
+  // The run aborts after two of five planned pages: never "all pages ready", nothing pending.
+  await act(async () => { api.setLoadingRunActive(false); });
+  expect(api.pageLoadState).toMatchObject({ discoveredPages: 2, expectedPages: 5, pendingPages: 0, allPagesReady: false });
+  expect(getDocumentSignatures).toHaveBeenCalledTimes(1);
+});
+
 it('G10 provider passes the registered source URL, never the viewer file index', async () => {
   vi.stubGlobal('location', { href: 'https://example.test/gateway/viewer/' });
   const signature = { fieldName: 'Approval', integrity: 'intact', trust: 'not-checked' };

@@ -978,6 +978,70 @@ export function unreadableSignatureReport(reason) {
   }] };
 }
 
+const isPdfWhitespace = (b) => b === 0 || b === 9 || b === 10 || b === 12 || b === 13 || b === 32;
+const isDigit = (b) => b >= 48 && b <= 57;
+
+/**
+ * pdf-lib's skipJibberish probes every byte of leading junk with
+ * matchIndirectObjectHeader, which throws (building an Error) on each miss:
+ * ~17 us per byte, so a 64 KiB prefix cost about one second. This instance
+ * override answers the same `ws* int ws* int ws* obj` grammar without throwing,
+ * memoizing the current whitespace run and digit run so probing stays linear.
+ * Only a confirmed header reaches pdf-lib's own matcher, so offsets and results
+ * are identical. Exported for the differential test only.
+ *
+ * @param {any} parser pdf-lib PDFParser instance reading `bytes`.
+ * @param {Uint8Array} bytes The parser's byte buffer.
+ */
+export function installIndirectObjectHeaderProbe(parser, bytes) {
+  const len = bytes.length;
+  const match = parser.matchIndirectObjectHeader;
+  let ws = { from: -1, end: -1, to: -1 }; // every byte in [from, end) is whitespace and skips to `to`
+  let run = { from: -1, end: -1, ok: false, finiteFrom: 0 }; // header verdict for digit run [from, end)
+  // Mirrors BaseParser.skipWhitespaceAndComments.
+  const skip = (i) => {
+    while (i < len) {
+      while (i < len && isPdfWhitespace(bytes[i])) i++;
+      if (bytes[i] !== 37) break;
+      while (i < len && bytes[i] !== 10 && bytes[i] !== 13) i++;
+    }
+    return i;
+  };
+  const digitsEnd = (i) => { while (i < len && isDigit(bytes[i])) i++; return i; };
+  // Smallest start in [s, e) whose digit suffix Number() parses as finite; a
+  // double holds at most 309 integer digits, and leading zeros are free.
+  const finiteFrom = (s, e) => {
+    const k = e - 309;
+    if (k < s) return s;
+    if (!Number.isFinite(Number(String.fromCharCode(...bytes.subarray(k, e))))) return k + 1;
+    let f = k;
+    while (f > s && bytes[f - 1] === 48) f--;
+    return f;
+  };
+  parser.matchIndirectObjectHeader = function () {
+    const i = this.bytes.offset();
+    let p = i;
+    if (i >= ws.from && i < ws.end) p = ws.to;
+    else if (isPdfWhitespace(bytes[i]) || bytes[i] === 37) {
+      p = skip(i);
+      let end = i;
+      while (end < p && isPdfWhitespace(bytes[end])) end++;
+      ws = { from: i, end, to: p };
+    }
+    if (!isDigit(bytes[p])) return false;
+    if (p < run.from || p >= run.end) {
+      const end = digitsEnd(p);
+      const q = skip(end);
+      const qEnd = digitsEnd(q);
+      const r = skip(qEnd);
+      const ok = qEnd > q && finiteFrom(q, qEnd) === q &&
+        bytes[r] === 111 && bytes[r + 1] === 98 && bytes[r + 2] === 106; // "obj"
+      run = { from: p, end, ok, finiteFrom: finiteFrom(p, end) };
+    }
+    return run.ok && p >= run.finiteFrom ? match.call(this) : false;
+  };
+}
+
 // Track source positions on a parser INSTANCE, never by patching global prototypes.
 // Identity ties a direct /Contents value to its real source span, including <>.
 // Object-stream contents have no file span and consequently cannot pass ByteRange.
@@ -987,6 +1051,7 @@ async function parseWithSourceSpans(bytes, pdfLib) {
   // zero even if the header is missing or follows signature dictionaries. The
   // parser's default version metadata is irrelevant to integrity verification.
   parser.parseHeader = () => parser.context.header;
+  installIndirectObjectHeaderProbe(parser, bytes);
   const sourceSpans = new WeakMap();
   const parsedDicts = [];
   const assign = parser.context.assign;

@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 135,
-    "sourceLineCount": 55813,
-    "docletCount": 1501,
+    "sourceLineCount": 55878,
+    "docletCount": 1502,
     "documentedFileCount": 135,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -554,6 +554,15 @@
       "summaryConfidence": "high"
     },
     {
+      "path": "src/utils/pdfSignatures.js",
+      "score": 83,
+      "lines": 1202,
+      "incomingLocalImports": 3,
+      "doclets": 10,
+      "summary": "PDF signature collection - level 1 integrity inspection.",
+      "summaryConfidence": "high"
+    },
+    {
       "path": "src/components/DocumentLoader/documentLoaderUtils.js",
       "score": 81,
       "lines": 389,
@@ -587,15 +596,6 @@
       "incomingLocalImports": 6,
       "doclets": 4,
       "summary": "Browser measurements and diagnostic state kept outside the pure PDF resolution policy.",
-      "summaryConfidence": "high"
-    },
-    {
-      "path": "src/utils/pdfSignatures.js",
-      "score": 77,
-      "lines": 1137,
-      "incomingLocalImports": 3,
-      "doclets": 9,
-      "summary": "PDF signature collection - level 1 integrity inspection.",
       "summaryConfidence": "high"
     },
     {
@@ -1530,8 +1530,8 @@
     {
       "name": "src/utils",
       "fileCount": 47,
-      "lineCount": 18295,
-      "docletCount": 710,
+      "lineCount": 18360,
+      "docletCount": 711,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -44732,9 +44732,9 @@
     },
     {
       "path": "src/utils/pdfSignatures.js",
-      "lines": 1137,
+      "lines": 1202,
       "extension": ".js",
-      "jsdocBlockCount": 15,
+      "jsdocBlockCount": 16,
       "sourceSummary": "PDF signature collection - level 1 integrity inspection.",
       "imports": [
         {
@@ -44752,7 +44752,7 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1074,
+          "line": 1139,
           "kind": "dynamic"
         }
       ],
@@ -44773,9 +44773,14 @@
           "line": 971
         },
         {
+          "name": "installIndirectObjectHeaderProbe",
+          "kind": "function",
+          "line": 996
+        },
+        {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1059
+          "line": 1124
         }
       ],
       "declarations": [
@@ -45030,19 +45035,59 @@
           "line": 971
         },
         {
+          "name": "isPdfWhitespace",
+          "kind": "function",
+          "line": 981
+        },
+        {
+          "name": "isDigit",
+          "kind": "function",
+          "line": 982
+        },
+        {
+          "name": "installIndirectObjectHeaderProbe",
+          "kind": "function",
+          "line": 996
+        },
+        {
+          "name": "ws",
+          "kind": "object",
+          "line": 999
+        },
+        {
+          "name": "run",
+          "kind": "object",
+          "line": 1000
+        },
+        {
+          "name": "skip",
+          "kind": "function",
+          "line": 1002
+        },
+        {
+          "name": "digitsEnd",
+          "kind": "function",
+          "line": 1010
+        },
+        {
+          "name": "finiteFrom",
+          "kind": "function",
+          "line": 1013
+        },
+        {
           "name": "parseWithSourceSpans",
           "kind": "function",
-          "line": 984
+          "line": 1048
         },
         {
           "name": "collectPdfSignatures",
           "kind": "function",
-          "line": 1059
+          "line": 1124
         },
         {
           "name": "empty",
           "kind": "object",
-          "line": 1060
+          "line": 1125
         }
       ],
       "parseError": null,
@@ -45192,13 +45237,39 @@
           "examples": 0
         },
         {
+          "id": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+          "name": "installIndirectObjectHeaderProbe",
+          "longname": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+          "kind": "function",
+          "scope": "static",
+          "file": "src/utils/pdfSignatures.js",
+          "line": 996,
+          "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
+          "params": [
+            {
+              "name": "parser",
+              "type": "any",
+              "optional": false,
+              "description": "pdf-lib PDFParser instance reading bytes ."
+            },
+            {
+              "name": "bytes",
+              "type": "Uint8Array",
+              "optional": false,
+              "description": "The parser's byte buffer."
+            }
+          ],
+          "returns": [],
+          "examples": 0
+        },
+        {
           "id": "module:utils/pdfSignatures.collectPdfSignatures",
           "name": "collectPdfSignatures",
           "longname": "module:utils/pdfSignatures.collectPdfSignatures",
           "kind": "function",
           "scope": "static",
           "file": "src/utils/pdfSignatures.js",
-          "line": 1059,
+          "line": 1124,
           "description": "Collect signature information from PDF bytes.",
           "params": [
             {
@@ -45235,12 +45306,12 @@
         {
           "source": "pdf-lib",
           "specifiers": [],
-          "line": 1074,
+          "line": 1139,
           "kind": "dynamic"
         }
       ],
       "incomingLocalImports": 3,
-      "importanceScore": 77,
+      "importanceScore": 83,
       "summary": "PDF signature collection - level 1 integrity inspection.",
       "summaryConfidence": "high",
       "summarySource": "module-doclet"
@@ -87738,7 +87809,7 @@
       "kind": "function",
       "scope": "static",
       "file": "src/utils/pdfSignatures.js",
-      "line": 1059,
+      "line": 1124,
       "description": "Collect signature information from PDF bytes.",
       "params": [
         {
@@ -87766,6 +87837,32 @@
       "line": 276,
       "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
       "params": [],
+      "returns": [],
+      "examples": 0
+    },
+    {
+      "id": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+      "name": "installIndirectObjectHeaderProbe",
+      "longname": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+      "kind": "function",
+      "scope": "static",
+      "file": "src/utils/pdfSignatures.js",
+      "line": 996,
+      "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
+      "params": [
+        {
+          "name": "parser",
+          "type": "any",
+          "optional": false,
+          "description": "pdf-lib PDFParser instance reading bytes ."
+        },
+        {
+          "name": "bytes",
+          "type": "Uint8Array",
+          "optional": false,
+          "description": "The parser's byte buffer."
+        }
+      ],
       "returns": [],
       "examples": 0
     },

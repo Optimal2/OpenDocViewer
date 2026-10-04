@@ -26165,7 +26165,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1059,
+    "line": 1124,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -26193,6 +26193,32 @@
     "line": 276,
     "description": "Walk every indirect object; collect signature dictionaries together with the field dictionary that references them (for /T).",
     "params": [],
+    "returns": [],
+    "examples": 0
+  },
+  {
+    "id": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+    "name": "installIndirectObjectHeaderProbe",
+    "longname": "module:utils/pdfSignatures.installIndirectObjectHeaderProbe",
+    "kind": "function",
+    "scope": "static",
+    "file": "src/utils/pdfSignatures.js",
+    "line": 996,
+    "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
+    "params": [
+      {
+        "name": "parser",
+        "type": "any",
+        "optional": false,
+        "description": "pdf-lib PDFParser instance reading bytes ."
+      },
+      {
+        "name": "bytes",
+        "type": "Uint8Array",
+        "optional": false,
+        "description": "The parser's byte buffer."
+      }
+    ],
     "returns": [],
     "examples": 0
   },
