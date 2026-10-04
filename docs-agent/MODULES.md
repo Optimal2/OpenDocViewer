@@ -75,7 +75,7 @@ File count: 10. Line count: 5245. JSDoc symbol count: 121.
 
 ## src/contexts
 
-File count: 4. Line count: 3258. JSDoc symbol count: 84.
+File count: 4. Line count: 3267. JSDoc symbol count: 84.
 
 - `src/contexts/viewerContext.js` - Exports ViewerContext.
 - `src/contexts/ViewerProvider.jsx` - OpenDocViewer — Viewer state provider.
@@ -150,7 +150,7 @@ File count: 1. Line count: 101. JSDoc symbol count: 13.
 
 ## src/utils
 
-File count: 47. Line count: 18267. JSDoc symbol count: 708.
+File count: 47. Line count: 18295. JSDoc symbol count: 710.
 
 - `src/utils/documentLoadingConfig.js` - OpenDocViewer — runtime helpers for fetch/render/memory policies.
 - `src/utils/runtimeConfig.js` - Runtime configuration helpers.

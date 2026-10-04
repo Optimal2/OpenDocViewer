@@ -88,8 +88,8 @@
   },
   "stats": {
     "fileCount": 135,
-    "sourceLineCount": 55773,
-    "docletCount": 1499,
+    "sourceLineCount": 55810,
+    "docletCount": 1501,
     "documentedFileCount": 135,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -447,10 +447,10 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "score": 118,
-      "lines": 580,
-      "incomingLocalImports": 15,
-      "doclets": 38,
+      "score": 119,
+      "lines": 608,
+      "incomingLocalImports": 16,
+      "doclets": 40,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high"
     },
@@ -631,7 +631,7 @@
           {
             "path": "src/contexts/ViewerProvider.jsx",
             "score": 57,
-            "lines": 2668,
+            "lines": 2677,
             "summary": "OpenDocViewer — Viewer state provider."
           },
           {
@@ -1225,7 +1225,7 @@
     {
       "name": "src/contexts",
       "fileCount": 4,
-      "lineCount": 3258,
+      "lineCount": 3267,
       "docletCount": 84,
       "importantFiles": [
         {
@@ -1240,7 +1240,7 @@
         {
           "path": "src/contexts/ViewerProvider.jsx",
           "score": 57,
-          "lines": 2668,
+          "lines": 2677,
           "incomingLocalImports": 1,
           "doclets": 58,
           "summary": "OpenDocViewer — Viewer state provider.",
@@ -1530,8 +1530,8 @@
     {
       "name": "src/utils",
       "fileCount": 47,
-      "lineCount": 18267,
-      "docletCount": 708,
+      "lineCount": 18295,
+      "docletCount": 710,
       "importantFiles": [
         {
           "path": "src/utils/documentLoadingConfig.js",
@@ -1544,10 +1544,10 @@
         },
         {
           "path": "src/utils/runtimeConfig.js",
-          "score": 118,
-          "lines": 580,
-          "incomingLocalImports": 15,
-          "doclets": 38,
+          "score": 119,
+          "lines": 608,
+          "incomingLocalImports": 16,
+          "doclets": 40,
           "summary": "Runtime configuration helpers.",
           "summaryConfidence": "high"
         },
@@ -25583,7 +25583,7 @@
     },
     {
       "path": "src/contexts/ViewerProvider.jsx",
-      "lines": 2668,
+      "lines": 2677,
       "extension": ".jsx",
       "jsdocBlockCount": 63,
       "sourceSummary": "OpenDocViewer — Viewer state provider.",
@@ -25601,11 +25601,20 @@
           "kind": "static"
         },
         {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "isPdfSignatureInspectionEnabled",
+            "getPdfSignatureInspectionStart"
+          ],
+          "line": 13,
+          "kind": "static"
+        },
+        {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static"
         },
         {
@@ -25613,7 +25622,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static"
         },
         {
@@ -25628,7 +25637,7 @@
             "shouldKeepAllFullImageAssets",
             "shouldUseFullImagesForThumbnails"
           ],
-          "line": 15,
+          "line": 16,
           "kind": "static"
         },
         {
@@ -25636,7 +25645,7 @@
           "specifiers": [
             "createSourceTempStore"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static"
         },
         {
@@ -25644,7 +25653,7 @@
           "specifiers": [
             "createPageAssetStore"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static"
         },
         {
@@ -25652,7 +25661,7 @@
           "specifiers": [
             "createPageAssetRenderer"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static"
         },
         {
@@ -25660,7 +25669,7 @@
           "specifiers": [
             "resolvePdfResolutionBoost"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static"
         },
         {
@@ -25669,7 +25678,7 @@
             "getPdfResolutionInputs",
             "recordPdfResolution"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static"
         },
         {
@@ -25678,7 +25687,7 @@
             "createPersistedPageAssetKey",
             "createRenderAssetSignature"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static"
         },
         {
@@ -25690,7 +25699,7 @@
             "revokeTrackedObjectUrls",
             "getTrackedObjectUrlCount"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static"
         },
         {
@@ -25698,7 +25707,7 @@
           "specifiers": [
             "usePdfSignatureReports"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static"
         },
         {
@@ -25706,7 +25715,7 @@
           "specifiers": [
             "disposePdfSignatureWorker"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static"
         },
         {
@@ -25714,7 +25723,7 @@
           "specifiers": [
             "getSourceFileNameFromUrl"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static"
         }
       ],
@@ -25722,164 +25731,164 @@
         {
           "name": "ViewerProvider",
           "kind": "variable",
-          "line": 331
+          "line": 332
         }
       ],
       "declarations": [
         {
           "name": "makeAssetKey",
           "kind": "function",
-          "line": 82
+          "line": 83
         },
         {
           "name": "makePendingAssetKey",
           "kind": "function",
-          "line": 92
+          "line": 93
         },
         {
           "name": "makePdfResolutionPageKey",
           "kind": "function",
-          "line": 103
+          "line": 104
         },
         {
           "name": "isPdfPageEntry",
           "kind": "function",
-          "line": 113
+          "line": 114
         },
         {
           "name": "makePersistedAssetKey",
           "kind": "function",
-          "line": 124
+          "line": 125
         },
         {
           "name": "getPageAt",
           "kind": "function",
-          "line": 142
+          "line": 143
         },
         {
           "name": "resolvePatch",
           "kind": "function",
-          "line": 152
+          "line": 153
         },
         {
           "name": "touchCacheEntry",
           "kind": "function",
-          "line": 165
+          "line": 166
         },
         {
           "name": "isBlobObjectUrl",
           "kind": "function",
-          "line": 176
+          "line": 177
         },
         {
           "name": "isReusableAssetUrl",
           "kind": "function",
-          "line": 184
+          "line": 185
         },
         {
           "name": "isPageReadyForSession",
           "kind": "function",
-          "line": 194
+          "line": 195
         },
         {
           "name": "isPageFailedForSession",
           "kind": "function",
-          "line": 202
+          "line": 203
         },
         {
           "name": "createLimiter",
           "kind": "function",
-          "line": 210
+          "line": 211
         },
         {
           "name": "normalizePriority",
           "kind": "function",
-          "line": 221
+          "line": 222
         },
         {
           "name": "nextQueueIndex",
           "kind": "function",
-          "line": 231
+          "line": 232
         },
         {
           "name": "schedulePump",
           "kind": "function",
-          "line": 248
+          "line": 249
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 256
+          "line": 257
         },
         {
           "name": "createAssetPipelineStats",
           "kind": "function",
-          "line": 278
+          "line": 279
         },
         {
           "name": "createLoaderPhaseStats",
           "kind": "function",
-          "line": 302
+          "line": 303
         },
         {
           "name": "nowMs",
           "kind": "function",
-          "line": 312
+          "line": 313
         },
         {
           "name": "ViewerProvider",
           "kind": "component",
-          "line": 331
+          "line": 332
         },
         {
           "name": "next",
           "kind": "object",
-          "line": 571
+          "line": 572
         },
         {
           "name": "nextPage",
           "kind": "object",
-          "line": 899
+          "line": 900
         },
         {
           "name": "renderTask",
           "kind": "function",
-          "line": 1647
+          "line": 1648
         },
         {
           "name": "markBatchPending",
           "kind": "function",
-          "line": 2054
+          "line": 2055
         },
         {
           "name": "resolveBatchPending",
           "kind": "function",
-          "line": 2068
+          "line": 2069
         },
         {
           "name": "recordBatchItem",
           "kind": "function",
-          "line": 2082
+          "line": 2083
         },
         {
           "name": "rendered",
           "kind": "object",
-          "line": 2115
+          "line": 2116
         },
         {
           "name": "addTask",
           "kind": "function",
-          "line": 2285
+          "line": 2286
         },
         {
           "name": "rankOf",
           "kind": "function",
-          "line": 2376
+          "line": 2377
         },
         {
           "name": "evaluate",
           "kind": "function",
-          "line": 2378
+          "line": 2379
         }
       ],
       "parseError": null,
@@ -25897,7 +25906,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 46,
+          "line": 47,
           "description": "",
           "params": [],
           "returns": [],
@@ -25910,7 +25919,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 52,
+          "line": 53,
           "description": "",
           "params": [],
           "returns": [],
@@ -25923,7 +25932,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 57,
+          "line": 58,
           "description": "",
           "params": [],
           "returns": [],
@@ -25936,7 +25945,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 67,
+          "line": 68,
           "description": "",
           "params": [],
           "returns": [],
@@ -25949,7 +25958,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 82,
+          "line": 83,
           "description": "",
           "params": [
             {
@@ -25980,7 +25989,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 92,
+          "line": 93,
           "description": "",
           "params": [
             {
@@ -26017,7 +26026,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 103,
+          "line": 104,
           "description": "",
           "params": [
             {
@@ -26042,7 +26051,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 113,
+          "line": 114,
           "description": "",
           "params": [
             {
@@ -26067,7 +26076,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 124,
+          "line": 125,
           "description": "",
           "params": [
             {
@@ -26110,7 +26119,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 142,
+          "line": 143,
           "description": "",
           "params": [
             {
@@ -26141,7 +26150,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 152,
+          "line": 153,
           "description": "",
           "params": [
             {
@@ -26172,7 +26181,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 165,
+          "line": 166,
           "description": "",
           "params": [
             {
@@ -26203,7 +26212,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 176,
+          "line": 177,
           "description": "",
           "params": [
             {
@@ -26228,7 +26237,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 184,
+          "line": 185,
           "description": "",
           "params": [
             {
@@ -26253,7 +26262,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 194,
+          "line": 195,
           "description": "",
           "params": [
             {
@@ -26278,7 +26287,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 202,
+          "line": 203,
           "description": "",
           "params": [
             {
@@ -26303,7 +26312,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 210,
+          "line": 211,
           "description": "",
           "params": [
             {
@@ -26328,7 +26337,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 221,
+          "line": 222,
           "description": "",
           "params": [
             {
@@ -26353,7 +26362,7 @@
           "kind": "typedef",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 320,
+          "line": 321,
           "description": "",
           "params": [],
           "returns": [],
@@ -26366,7 +26375,7 @@
           "kind": "constant",
           "scope": "global",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 331,
+          "line": 332,
           "description": "",
           "params": [
             {
@@ -26391,7 +26400,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 483,
+          "line": 484,
           "description": "",
           "params": [
             {
@@ -26416,7 +26425,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 507,
+          "line": 508,
           "description": "Record that a page now has a reusable full-size asset available.",
           "params": [
             {
@@ -26441,7 +26450,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 517,
+          "line": 518,
           "description": "Record that a page now has a reusable thumbnail asset available.",
           "params": [
             {
@@ -26466,7 +26475,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 530,
+          "line": 531,
           "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
           "params": [],
           "returns": [
@@ -26484,7 +26493,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 661,
+          "line": 662,
           "description": "",
           "params": [],
           "returns": [
@@ -26502,7 +26511,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 683,
+          "line": 684,
           "description": "",
           "params": [],
           "returns": [
@@ -26520,7 +26529,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 844,
+          "line": 845,
           "description": "",
           "params": [
             {
@@ -26551,7 +26560,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 861,
+          "line": 862,
           "description": "",
           "params": [
             {
@@ -26582,7 +26591,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 882,
+          "line": 883,
           "description": "",
           "params": [
             {
@@ -26613,7 +26622,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 930,
+          "line": 931,
           "description": "",
           "params": [
             {
@@ -26638,7 +26647,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 945,
+          "line": 946,
           "description": "",
           "params": [
             {
@@ -26675,7 +26684,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 972,
+          "line": 973,
           "description": "",
           "params": [],
           "returns": [
@@ -26693,7 +26702,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 981,
+          "line": 982,
           "description": "",
           "params": [
             {
@@ -26718,7 +26727,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1044,
+          "line": 1045,
           "description": "",
           "params": [
             {
@@ -26743,7 +26752,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1196,
+          "line": 1197,
           "description": "",
           "params": [
             {
@@ -26768,7 +26777,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1216,
+          "line": 1217,
           "description": "",
           "params": [
             {
@@ -26793,7 +26802,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1240,
+          "line": 1241,
           "description": "",
           "params": [
             {
@@ -26818,7 +26827,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1249,
+          "line": 1250,
           "description": "",
           "params": [
             {
@@ -26843,7 +26852,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1257,
+          "line": 1258,
           "description": "",
           "params": [],
           "returns": [
@@ -26861,7 +26870,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1269,
+          "line": 1270,
           "description": "",
           "params": [
             {
@@ -26886,7 +26895,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1316,
+          "line": 1317,
           "description": "",
           "params": [
             {
@@ -26923,7 +26932,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1385,
+          "line": 1386,
           "description": "",
           "params": [
             {
@@ -26948,7 +26957,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1394,
+          "line": 1395,
           "description": "",
           "params": [
             {
@@ -26979,7 +26988,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1407,
+          "line": 1408,
           "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
           "params": [
             {
@@ -27016,7 +27025,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1459,
+          "line": 1460,
           "description": "",
           "params": [
             {
@@ -27047,7 +27056,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1470,
+          "line": 1471,
           "description": "",
           "params": [
             {
@@ -27078,7 +27087,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1481,
+          "line": 1482,
           "description": "",
           "params": [
             {
@@ -27103,7 +27112,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1505,
+          "line": 1506,
           "description": "",
           "params": [
             {
@@ -27128,7 +27137,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1550,
+          "line": 1551,
           "description": "",
           "params": [
             {
@@ -27153,7 +27162,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1563,
+          "line": 1564,
           "description": "",
           "params": [
             {
@@ -27190,7 +27199,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1635,
+          "line": 1636,
           "description": "",
           "params": [
             {
@@ -27227,7 +27236,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1727,
+          "line": 1728,
           "description": "",
           "params": [
             {
@@ -27264,7 +27273,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1912,
+          "line": 1913,
           "description": "Render one PDF page again at twice its effective PDF scale.",
           "params": [
             {
@@ -27289,7 +27298,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 1994,
+          "line": 1995,
           "description": "",
           "params": [
             {
@@ -27320,7 +27329,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2016,
+          "line": 2017,
           "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
           "params": [
             {
@@ -27345,7 +27354,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2175,
+          "line": 2176,
           "description": "Drain background eager-render work without blocking the UI thread.",
           "params": [],
           "returns": [
@@ -27363,7 +27372,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2266,
+          "line": 2267,
           "description": "Enqueue eager page rendering for a newly discovered source range.",
           "params": [
             {
@@ -27394,7 +27403,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/contexts/ViewerProvider.jsx",
-          "line": 2309,
+          "line": 2310,
           "description": "",
           "params": [
             {
@@ -27416,11 +27425,21 @@
       "moduleKey": "src/contexts",
       "localImports": [
         {
+          "source": "../utils/runtimeConfig.js",
+          "specifiers": [
+            "isPdfSignatureInspectionEnabled",
+            "getPdfSignatureInspectionStart"
+          ],
+          "line": 13,
+          "kind": "static",
+          "resolved": "src/utils/runtimeConfig.js"
+        },
+        {
           "source": "../logging/systemLogger.js",
           "specifiers": [
             "logger"
           ],
-          "line": 13,
+          "line": 14,
           "kind": "static",
           "resolved": "src/logging/systemLogger.js"
         },
@@ -27429,7 +27448,7 @@
           "specifiers": [
             "ViewerContext"
           ],
-          "line": 14,
+          "line": 15,
           "kind": "static",
           "resolved": "src/contexts/viewerContext.js"
         },
@@ -27445,7 +27464,7 @@
             "shouldKeepAllFullImageAssets",
             "shouldUseFullImagesForThumbnails"
           ],
-          "line": 15,
+          "line": 16,
           "kind": "static",
           "resolved": "src/utils/documentLoadingConfig.js"
         },
@@ -27454,7 +27473,7 @@
           "specifiers": [
             "createSourceTempStore"
           ],
-          "line": 25,
+          "line": 26,
           "kind": "static",
           "resolved": "src/utils/sourceTempStore.js"
         },
@@ -27463,7 +27482,7 @@
           "specifiers": [
             "createPageAssetStore"
           ],
-          "line": 26,
+          "line": 27,
           "kind": "static",
           "resolved": "src/utils/pageAssetStore.js"
         },
@@ -27472,7 +27491,7 @@
           "specifiers": [
             "createPageAssetRenderer"
           ],
-          "line": 27,
+          "line": 28,
           "kind": "static",
           "resolved": "src/utils/pageAssetRenderer.js"
         },
@@ -27481,7 +27500,7 @@
           "specifiers": [
             "resolvePdfResolutionBoost"
           ],
-          "line": 28,
+          "line": 29,
           "kind": "static",
           "resolved": "src/utils/pdfResolution.js"
         },
@@ -27491,7 +27510,7 @@
             "getPdfResolutionInputs",
             "recordPdfResolution"
           ],
-          "line": 29,
+          "line": 30,
           "kind": "static",
           "resolved": "src/utils/pdfResolutionRuntime.js"
         },
@@ -27501,7 +27520,7 @@
             "createPersistedPageAssetKey",
             "createRenderAssetSignature"
           ],
-          "line": 30,
+          "line": 31,
           "kind": "static",
           "resolved": "src/utils/reloadCacheIdentity.js"
         },
@@ -27514,7 +27533,7 @@
             "revokeTrackedObjectUrls",
             "getTrackedObjectUrlCount"
           ],
-          "line": 34,
+          "line": 35,
           "kind": "static",
           "resolved": "src/utils/objectUrlRegistry.js"
         },
@@ -27523,7 +27542,7 @@
           "specifiers": [
             "usePdfSignatureReports"
           ],
-          "line": 41,
+          "line": 42,
           "kind": "static",
           "resolved": "src/hooks/usePdfSignatureReports.js"
         },
@@ -27532,7 +27551,7 @@
           "specifiers": [
             "disposePdfSignatureWorker"
           ],
-          "line": 42,
+          "line": 43,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureInspector.js"
         },
@@ -27541,7 +27560,7 @@
           "specifiers": [
             "getSourceFileNameFromUrl"
           ],
-          "line": 43,
+          "line": 44,
           "kind": "static",
           "resolved": "src/utils/pdfSignatureDocuments.js"
         }
@@ -56076,9 +56095,9 @@
     },
     {
       "path": "src/utils/runtimeConfig.js",
-      "lines": 580,
+      "lines": 608,
       "extension": ".js",
-      "jsdocBlockCount": 39,
+      "jsdocBlockCount": 41,
       "sourceSummary": "Runtime configuration helpers.",
       "imports": [],
       "exports": [
@@ -56103,69 +56122,79 @@
           "line": 161
         },
         {
+          "name": "isPdfSignatureInspectionEnabled",
+          "kind": "function",
+          "line": 175
+        },
+        {
+          "name": "getPdfSignatureInspectionStart",
+          "kind": "function",
+          "line": 188
+        },
+        {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 173
+          "line": 201
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 342
+          "line": 370
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 359
+          "line": 387
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 370
+          "line": 398
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 388
+          "line": 416
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 414
+          "line": 442
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 427
+          "line": 455
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 441
+          "line": 469
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 465
+          "line": 493
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 490
+          "line": 518
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 514
+          "line": 542
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 532
+          "line": 560
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 568
+          "line": 596
         }
       ],
       "declarations": [
@@ -56190,114 +56219,124 @@
           "line": 161
         },
         {
+          "name": "isPdfSignatureInspectionEnabled",
+          "kind": "function",
+          "line": 175
+        },
+        {
+          "name": "getPdfSignatureInspectionStart",
+          "kind": "function",
+          "line": 188
+        },
+        {
           "name": "getToolbarLargeButtonsDefault",
           "kind": "function",
-          "line": 173
+          "line": 201
         },
         {
           "name": "normalizeBoolean",
           "kind": "function",
-          "line": 191
+          "line": 219
         },
         {
           "name": "clampNumber",
           "kind": "function",
-          "line": 213
+          "line": 241
         },
         {
           "name": "normalizeInteger",
           "kind": "function",
-          "line": 238
+          "line": 266
         },
         {
           "name": "normalizeFloat",
           "kind": "function",
-          "line": 259
+          "line": 287
         },
         {
           "name": "normalizeResetSessionTarget",
           "kind": "function",
-          "line": 276
+          "line": 304
         },
         {
           "name": "normalizeResetSessionFallbackTarget",
           "kind": "function",
-          "line": 288
+          "line": 316
         },
         {
           "name": "normalizeZoomModeText",
           "kind": "function",
-          "line": 302
+          "line": 330
         },
         {
           "name": "resolveDefaultZoomModeAlias",
           "kind": "function",
-          "line": 313
+          "line": 341
         },
         {
           "name": "normalizeDefaultZoomMode",
           "kind": "function",
-          "line": 327
+          "line": 355
         },
         {
           "name": "normalizePrintDefaultMode",
           "kind": "function",
-          "line": 342
+          "line": 370
         },
         {
           "name": "normalizeCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 359
+          "line": 387
         },
         {
           "name": "normalizeOptionalCustomFitFactorPercent",
           "kind": "function",
-          "line": 370
+          "line": 398
         },
         {
           "name": "normalizeCustomFitSizeLimitPreference",
           "kind": "function",
-          "line": 388
+          "line": 416
         },
         {
           "name": "getViewerDefaultZoomMode",
           "kind": "function",
-          "line": 414
+          "line": 442
         },
         {
           "name": "getViewerCustomFitWidthFactorPercent",
           "kind": "function",
-          "line": 427
+          "line": 455
         },
         {
           "name": "getViewerCustomFitSizeLimits",
           "kind": "function",
-          "line": 441
+          "line": 469
         },
         {
           "name": "getPrintDefaultMode",
           "kind": "function",
-          "line": 465
+          "line": 493
         },
         {
           "name": "getPrintSelectionWorkspaceConfig",
           "kind": "function",
-          "line": 490
+          "line": 518
         },
         {
           "name": "getViewerEdgeScrollPageTurnConfig",
           "kind": "function",
-          "line": 514
+          "line": 542
         },
         {
           "name": "getViewerProblemNoticeConfig",
           "kind": "function",
-          "line": 532
+          "line": 560
         },
         {
           "name": "getOmpThemeBridgeAllowedOrigins",
           "kind": "function",
-          "line": 568
+          "line": 596
         }
       ],
       "parseError": null,
@@ -56556,13 +56595,63 @@
           "examples": 0
         },
         {
+          "id": "isPdfSignatureInspectionEnabled",
+          "name": "isPdfSignatureInspectionEnabled",
+          "longname": "isPdfSignatureInspectionEnabled",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 175,
+          "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "boolean",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "getPdfSignatureInspectionStart",
+          "name": "getPdfSignatureInspectionStart",
+          "longname": "getPdfSignatureInspectionStart",
+          "kind": "function",
+          "scope": "global",
+          "file": "src/utils/runtimeConfig.js",
+          "line": 188,
+          "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
+          "params": [
+            {
+              "name": "cfg",
+              "type": "Object",
+              "optional": true,
+              "description": ""
+            }
+          ],
+          "returns": [
+            {
+              "type": "'firstPage'|'allPages'",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
           "id": "getToolbarLargeButtonsDefault",
           "name": "getToolbarLargeButtonsDefault",
           "longname": "getToolbarLargeButtonsDefault",
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 173,
+          "line": 201,
           "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
           "params": [
             {
@@ -56587,7 +56676,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 191,
+          "line": 219,
           "description": "Normalize a runtime flag to a boolean.",
           "params": [
             {
@@ -56618,7 +56707,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 213,
+          "line": 241,
           "description": "Clamp a numeric config value to a safe range.",
           "params": [
             {
@@ -56661,7 +56750,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 238,
+          "line": 266,
           "description": "Normalize an integer config value and clamp it to the supplied range.",
           "params": [
             {
@@ -56704,7 +56793,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 259,
+          "line": 287,
           "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
           "params": [
             {
@@ -56747,7 +56836,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 276,
+          "line": 304,
           "description": "Normalize the runtime session-reset target.",
           "params": [
             {
@@ -56778,7 +56867,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 288,
+          "line": 316,
           "description": "Resolve the configured reset-session fallback target.",
           "params": [
             {
@@ -56803,7 +56892,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 302,
+          "line": 330,
           "description": "Normalize a user-facing zoom mode string before alias lookup.",
           "params": [
             {
@@ -56828,7 +56917,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 313,
+          "line": 341,
           "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
           "params": [
             {
@@ -56853,7 +56942,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 327,
+          "line": 355,
           "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
           "params": [
             {
@@ -56884,7 +56973,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 342,
+          "line": 370,
           "description": "Normalize a user-facing print default mode.",
           "params": [
             {
@@ -56915,7 +57004,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 359,
+          "line": 387,
           "description": "Normalize a custom fit-width factor.",
           "params": [
             {
@@ -56946,7 +57035,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 370,
+          "line": 398,
           "description": "Normalize an optional custom-size limit percentage.",
           "params": [
             {
@@ -56977,7 +57066,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 388,
+          "line": 416,
           "description": "Normalize the optional user custom-size limits.",
           "params": [
             {
@@ -57002,7 +57091,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 414,
+          "line": 442,
           "description": "Resolve the initial page zoom mode.",
           "params": [
             {
@@ -57027,7 +57116,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 427,
+          "line": 455,
           "description": "Resolve the custom-size width factor percentage.",
           "params": [
             {
@@ -57052,7 +57141,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 441,
+          "line": 469,
           "description": "Resolve the configured custom-size limits.",
           "params": [
             {
@@ -57077,7 +57166,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 465,
+          "line": 493,
           "description": "Resolve the default print page mode used when the user has not stored an override.",
           "params": [
             {
@@ -57102,7 +57191,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 490,
+          "line": 518,
           "description": "Resolve the print-selection workspace configuration.",
           "params": [
             {
@@ -57127,7 +57216,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 514,
+          "line": 542,
           "description": "Resolve the optional scroll-at-edge page turn gesture.",
           "params": [
             {
@@ -57152,7 +57241,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 532,
+          "line": 560,
           "description": "Resolve the configurable viewer-level problem notice.",
           "params": [
             {
@@ -57177,7 +57266,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/utils/runtimeConfig.js",
-          "line": 568,
+          "line": 596,
           "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
           "params": [
             {
@@ -57199,8 +57288,8 @@
       "moduleKey": "src/utils",
       "localImports": [],
       "packageImports": [],
-      "incomingLocalImports": 15,
-      "importanceScore": 118,
+      "incomingLocalImports": 16,
+      "importanceScore": 119,
       "summary": "Runtime configuration helpers.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -74946,7 +75035,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 930,
+      "line": 931,
       "description": "",
       "params": [
         {
@@ -74971,7 +75060,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1257,
+      "line": 1258,
       "description": "",
       "params": [],
       "returns": [
@@ -74989,7 +75078,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 945,
+      "line": 946,
       "description": "",
       "params": [
         {
@@ -75026,7 +75115,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1407,
+      "line": 1408,
       "description": "Drop a page's current object URL reference from React state and the in-memory cache.",
       "params": [
         {
@@ -75063,7 +75152,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 972,
+      "line": 973,
       "description": "",
       "params": [],
       "returns": [
@@ -75081,7 +75170,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 530,
+      "line": 531,
       "description": "Collect a stable snapshot of runtime counters for the optional diagnostics overlay.",
       "params": [],
       "returns": [
@@ -75099,7 +75188,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 210,
+      "line": 211,
       "description": "",
       "params": [
         {
@@ -75124,7 +75213,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1044,
+      "line": 1045,
       "description": "",
       "params": [
         {
@@ -75149,7 +75238,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 52,
+      "line": 53,
       "description": "",
       "params": [],
       "returns": [],
@@ -75162,7 +75251,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 46,
+      "line": 47,
       "description": "",
       "params": [],
       "returns": [],
@@ -75175,7 +75264,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1505,
+      "line": 1506,
       "description": "",
       "params": [
         {
@@ -75200,7 +75289,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1912,
+      "line": 1913,
       "description": "Render one PDF page again at twice its effective PDF scale.",
       "params": [
         {
@@ -75225,7 +75314,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1727,
+      "line": 1728,
       "description": "",
       "params": [
         {
@@ -75262,7 +75351,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 67,
+      "line": 68,
       "description": "",
       "params": [],
       "returns": [],
@@ -75275,7 +75364,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 142,
+      "line": 143,
       "description": "",
       "params": [
         {
@@ -75306,7 +75395,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2309,
+      "line": 2310,
       "description": "",
       "params": [
         {
@@ -75331,7 +75420,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1385,
+      "line": 1386,
       "description": "",
       "params": [
         {
@@ -75356,7 +75445,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1481,
+      "line": 1482,
       "description": "",
       "params": [
         {
@@ -75381,7 +75470,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 981,
+      "line": 982,
       "description": "",
       "params": [
         {
@@ -75406,7 +75495,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 844,
+      "line": 845,
       "description": "",
       "params": [
         {
@@ -75437,7 +75526,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 861,
+      "line": 862,
       "description": "",
       "params": [
         {
@@ -75468,7 +75557,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 176,
+      "line": 177,
       "description": "",
       "params": [
         {
@@ -75493,7 +75582,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 202,
+      "line": 203,
       "description": "",
       "params": [
         {
@@ -75518,7 +75607,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 194,
+      "line": 195,
       "description": "",
       "params": [
         {
@@ -75543,7 +75632,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 113,
+      "line": 114,
       "description": "",
       "params": [
         {
@@ -75568,7 +75657,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 184,
+      "line": 185,
       "description": "",
       "params": [
         {
@@ -75593,7 +75682,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 82,
+      "line": 83,
       "description": "",
       "params": [
         {
@@ -75624,7 +75713,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 103,
+      "line": 104,
       "description": "",
       "params": [
         {
@@ -75649,7 +75738,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 92,
+      "line": 93,
       "description": "",
       "params": [
         {
@@ -75686,7 +75775,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 124,
+      "line": 125,
       "description": "",
       "params": [
         {
@@ -75729,7 +75818,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1269,
+      "line": 1270,
       "description": "",
       "params": [
         {
@@ -75754,7 +75843,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 221,
+      "line": 222,
       "description": "",
       "params": [
         {
@@ -75779,7 +75868,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 507,
+      "line": 508,
       "description": "Record that a page now has a reusable full-size asset available.",
       "params": [
         {
@@ -75804,7 +75893,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 517,
+      "line": 518,
       "description": "Record that a page now has a reusable thumbnail asset available.",
       "params": [
         {
@@ -75829,7 +75918,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 882,
+      "line": 883,
       "description": "",
       "params": [
         {
@@ -75860,7 +75949,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1316,
+      "line": 1317,
       "description": "",
       "params": [
         {
@@ -75897,7 +75986,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1459,
+      "line": 1460,
       "description": "",
       "params": [
         {
@@ -75928,7 +76017,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2175,
+      "line": 2176,
       "description": "Drain background eager-render work without blocking the UI thread.",
       "params": [],
       "returns": [
@@ -75946,7 +76035,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1240,
+      "line": 1241,
       "description": "",
       "params": [
         {
@@ -75971,7 +76060,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1249,
+      "line": 1250,
       "description": "",
       "params": [
         {
@@ -75996,7 +76085,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1994,
+      "line": 1995,
       "description": "",
       "params": [
         {
@@ -76027,7 +76116,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1196,
+      "line": 1197,
       "description": "",
       "params": [
         {
@@ -76052,7 +76141,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1635,
+      "line": 1636,
       "description": "",
       "params": [
         {
@@ -76089,7 +76178,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 683,
+      "line": 684,
       "description": "",
       "params": [],
       "returns": [
@@ -76107,7 +76196,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 152,
+      "line": 153,
       "description": "",
       "params": [
         {
@@ -76138,7 +76227,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1563,
+      "line": 1564,
       "description": "",
       "params": [
         {
@@ -76175,7 +76264,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 661,
+      "line": 662,
       "description": "",
       "params": [],
       "returns": [
@@ -76193,7 +76282,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2266,
+      "line": 2267,
       "description": "Enqueue eager page rendering for a newly discovered source range.",
       "params": [
         {
@@ -76224,7 +76313,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1550,
+      "line": 1551,
       "description": "",
       "params": [
         {
@@ -76249,7 +76338,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1216,
+      "line": 1217,
       "description": "",
       "params": [
         {
@@ -76274,7 +76363,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 57,
+      "line": 58,
       "description": "",
       "params": [],
       "returns": [],
@@ -76287,7 +76376,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 165,
+      "line": 166,
       "description": "",
       "params": [
         {
@@ -76318,7 +76407,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1394,
+      "line": 1395,
       "description": "",
       "params": [
         {
@@ -76349,7 +76438,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 2016,
+      "line": 2017,
       "description": "Try to render a full-page PDF warm-up batch through the partitioned worker path.",
       "params": [
         {
@@ -76374,7 +76463,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 1470,
+      "line": 1471,
       "description": "",
       "params": [
         {
@@ -76405,7 +76494,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 483,
+      "line": 484,
       "description": "",
       "params": [
         {
@@ -76430,7 +76519,7 @@
       "kind": "constant",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 331,
+      "line": 332,
       "description": "",
       "params": [
         {
@@ -76455,7 +76544,7 @@
       "kind": "typedef",
       "scope": "global",
       "file": "src/contexts/ViewerProvider.jsx",
-      "line": 320,
+      "line": 321,
       "description": "",
       "params": [],
       "returns": [],
@@ -95708,7 +95797,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 213,
+      "line": 241,
       "description": "Clamp a numeric config value to a safe range.",
       "params": [
         {
@@ -95789,7 +95878,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 568,
+      "line": 596,
       "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
       "params": [
         {
@@ -95808,13 +95897,38 @@
       "examples": 0
     },
     {
+      "id": "getPdfSignatureInspectionStart",
+      "name": "getPdfSignatureInspectionStart",
+      "longname": "getPdfSignatureInspectionStart",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 188,
+      "description": "Resolve when PDF signature inspection may start ( pdfSignatures.inspectAfter ): 'firstPage' (default) starts once the first page is shown, 'allPages' waits until every page of the...",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "'firstPage'|'allPages'",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "getPrintDefaultMode",
       "name": "getPrintDefaultMode",
       "longname": "getPrintDefaultMode",
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 465,
+      "line": 493,
       "description": "Resolve the default print page mode used when the user has not stored an override.",
       "params": [
         {
@@ -95839,7 +95953,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 490,
+      "line": 518,
       "description": "Resolve the print-selection workspace configuration.",
       "params": [
         {
@@ -95882,7 +95996,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 173,
+      "line": 201,
       "description": "Resolve the site default for the &quot;Larger toolbar buttons&quot; preference ( toolbar.largeButtons ).",
       "params": [
         {
@@ -95907,7 +96021,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 441,
+      "line": 469,
       "description": "Resolve the configured custom-size limits.",
       "params": [
         {
@@ -95932,7 +96046,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 427,
+      "line": 455,
       "description": "Resolve the custom-size width factor percentage.",
       "params": [
         {
@@ -95957,7 +96071,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 414,
+      "line": 442,
       "description": "Resolve the initial page zoom mode.",
       "params": [
         {
@@ -95982,7 +96096,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 514,
+      "line": 542,
       "description": "Resolve the optional scroll-at-edge page turn gesture.",
       "params": [
         {
@@ -96007,7 +96121,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 532,
+      "line": 560,
       "description": "Resolve the configurable viewer-level problem notice.",
       "params": [
         {
@@ -96034,6 +96148,31 @@
       "file": "src/utils/runtimeConfig.js",
       "line": 149,
       "description": "Resolve whether document metadata UI affordances should be available.",
+      "params": [
+        {
+          "name": "cfg",
+          "type": "Object",
+          "optional": true,
+          "description": ""
+        }
+      ],
+      "returns": [
+        {
+          "type": "boolean",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
+      "id": "isPdfSignatureInspectionEnabled",
+      "name": "isPdfSignatureInspectionEnabled",
+      "longname": "isPdfSignatureInspectionEnabled",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/utils/runtimeConfig.js",
+      "line": 175,
+      "description": "Resolve whether PDF signature inspection runs at all ( pdfSignatures.enabled ).",
       "params": [
         {
           "name": "cfg",
@@ -96108,7 +96247,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 191,
+      "line": 219,
       "description": "Normalize a runtime flag to a boolean.",
       "params": [
         {
@@ -96139,7 +96278,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 388,
+      "line": 416,
       "description": "Normalize the optional user custom-size limits.",
       "params": [
         {
@@ -96164,7 +96303,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 359,
+      "line": 387,
       "description": "Normalize a custom fit-width factor.",
       "params": [
         {
@@ -96195,7 +96334,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 327,
+      "line": 355,
       "description": "Normalize a runtime default zoom mode to the internal DocumentViewer mode.",
       "params": [
         {
@@ -96226,7 +96365,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 259,
+      "line": 287,
       "description": "Normalize a floating-point runtime config value and clamp it to the supplied range.",
       "params": [
         {
@@ -96269,7 +96408,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 238,
+      "line": 266,
       "description": "Normalize an integer config value and clamp it to the supplied range.",
       "params": [
         {
@@ -96312,7 +96451,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 370,
+      "line": 398,
       "description": "Normalize an optional custom-size limit percentage.",
       "params": [
         {
@@ -96343,7 +96482,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 342,
+      "line": 370,
       "description": "Normalize a user-facing print default mode.",
       "params": [
         {
@@ -96374,7 +96513,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 288,
+      "line": 316,
       "description": "Resolve the configured reset-session fallback target.",
       "params": [
         {
@@ -96399,7 +96538,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 276,
+      "line": 304,
       "description": "Normalize the runtime session-reset target.",
       "params": [
         {
@@ -96430,7 +96569,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 302,
+      "line": 330,
       "description": "Normalize a user-facing zoom mode string before alias lookup.",
       "params": [
         {
@@ -96520,7 +96659,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/utils/runtimeConfig.js",
-      "line": 313,
+      "line": 341,
       "description": "Resolve a normalized zoom-mode alias to the internal viewer mode.",
       "params": [
         {

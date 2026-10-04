@@ -12,6 +12,8 @@ import {
   getRuntimeConfig,
   getKeyboardPrintShortcutBehavior,
   isDocumentMetadataUiEnabled,
+  isPdfSignatureInspectionEnabled,
+  getPdfSignatureInspectionStart,
   normalizePrintDefaultMode,
   normalizeCustomFitWidthFactorPercent,
   normalizeOptionalCustomFitFactorPercent,
@@ -87,6 +89,30 @@ describe('runtimeConfig', () => {
 
     it('respects explicit false', () => {
       expect(isDocumentMetadataUiEnabled({ metadata: { enabled: false } })).toBe(false);
+    });
+  });
+
+  describe('isPdfSignatureInspectionEnabled', () => {
+    it('defaults to true when the section is missing or non-boolean', () => {
+      expect(isPdfSignatureInspectionEnabled({})).toBe(true);
+      expect(isPdfSignatureInspectionEnabled({ pdfSignatures: {} })).toBe(true);
+      expect(isPdfSignatureInspectionEnabled({ pdfSignatures: { enabled: 'no' } })).toBe(true);
+    });
+
+    it('turns inspection off only on explicit false', () => {
+      expect(isPdfSignatureInspectionEnabled({ pdfSignatures: { enabled: false } })).toBe(false);
+    });
+  });
+
+  describe('getPdfSignatureInspectionStart', () => {
+    it('defaults to firstPage', () => {
+      expect(getPdfSignatureInspectionStart({})).toBe('firstPage');
+      expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: 'later' } })).toBe('firstPage');
+    });
+
+    it('accepts allPages case-insensitively', () => {
+      expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: 'allPages' } })).toBe('allPages');
+      expect(getPdfSignatureInspectionStart({ pdfSignatures: { inspectAfter: ' ALLPAGES ' } })).toBe('allPages');
     });
   });
 

@@ -7,7 +7,7 @@ This index groups files by source-derived roles and risky source patterns. Treat
 ### React Contexts
 
 - `src/contexts/viewerContext.js` (208 lines) - Exports ViewerContext.
-- `src/contexts/ViewerProvider.jsx` (2668 lines) - OpenDocViewer — Viewer state provider.
+- `src/contexts/ViewerProvider.jsx` (2677 lines) - OpenDocViewer — Viewer state provider.
 - `src/contexts/ThemeProvider.jsx` (341 lines) - src/contexts/ThemeProvider.jsx OpenDocViewer — Theme state context \(React\) Centralize theme handling with: \- explicit themes: normal / light / dark \- an implicit system\-following startup mode when the user has not chosen
 - `src/contexts/themeContext.js` (41 lines) - Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake.
 

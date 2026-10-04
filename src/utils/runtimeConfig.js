@@ -163,6 +163,34 @@ export function isSignatureThumbnailPageBadgeEnabled(cfg = getRuntimeConfig()) {
 }
 
 /**
+ * Resolve whether PDF signature inspection runs at all (`pdfSignatures.enabled`).
+ * Only an explicit `false` turns it off; then no PDF bytes are handed to the signature worker,
+ * no gateway trust request is made and no signature symbols or overview button appear.
+ * Loading and rendering are never affected either way — inspection always waits for pages first
+ * (see getPdfSignatureInspectionStart).
+ *
+ * @param {Object=} cfg
+ * @returns {boolean}
+ */
+export function isPdfSignatureInspectionEnabled(cfg = getRuntimeConfig()) {
+  return cfg?.pdfSignatures?.enabled !== false;
+}
+
+/**
+ * Resolve when PDF signature inspection may start (`pdfSignatures.inspectAfter`):
+ * `'firstPage'` (default) starts once the first page is shown, `'allPages'` waits until every
+ * page of the loading run is ready, so a site that puts total load time first can keep the
+ * worker idle until the viewer is fully loaded. Unknown values fall back to `'firstPage'`.
+ *
+ * @param {Object=} cfg
+ * @returns {'firstPage'|'allPages'}
+ */
+export function getPdfSignatureInspectionStart(cfg = getRuntimeConfig()) {
+  const raw = String(cfg?.pdfSignatures?.inspectAfter || '').trim().toLowerCase();
+  return raw === 'allpages' ? 'allPages' : 'firstPage';
+}
+
+/**
  * Resolve the site default for the "Larger toolbar buttons" preference (`toolbar.largeButtons`).
  * Only an explicit `false` makes the compact toolbar the default; a user's stored choice in the
  * theme menu still outranks this value (see getEffectiveToolbarLargeButtons in viewerPreferences).

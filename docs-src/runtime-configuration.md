@@ -215,6 +215,26 @@ Set `pdfSignatures.thumbnailPageBadge` to `false` to hide the per-page symbol. T
 symbol and the toolbar overview stay visible, so signed documents are still discoverable. Only an
 explicit `false` disables the symbol; a missing or non-boolean value keeps the default (`true`).
 
+### Inspection on/off and start time
+
+Signature inspection never delays page loading: it waits for pages first and then runs inside the
+signature worker, one PDF at a time, on bytes the viewer already holds. Two keys let a site that
+puts total load time first keep it out of the way entirely:
+
+```js
+pdfSignatures: {
+  enabled: true,            // false: no inspection, no gateway trust request, no symbols
+  inspectAfter: 'firstPage' // 'allPages': start only when every page of the load is ready
+}
+```
+
+- `pdfSignatures.enabled: false` turns signature reading off. No PDF bytes are handed to the
+  signature worker, the gateway `/signatures` endpoint is never called, and the document symbol,
+  page symbols and toolbar overview button do not appear. Only an explicit `false` disables it.
+- `pdfSignatures.inspectAfter` chooses when inspection may start: `'firstPage'` (default) as soon
+  as the first page is shown, `'allPages'` only after the whole loading run is complete. Unknown
+  values fall back to `'firstPage'`.
+
 ## Toolbar Button Size
 
 The theme menu has a "Larger toolbar buttons" checkbox (sv: "Större verktygsknappar"). Ticked keeps

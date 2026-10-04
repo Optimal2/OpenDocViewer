@@ -3,8 +3,8 @@
 ## Coverage
 
 - Files: 135
-- Source lines: 55773
-- JSDoc symbols: 1499
+- Source lines: 55810
+- JSDoc symbols: 1501
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0
@@ -12,7 +12,7 @@
 ## Import Hubs
 
 - `src/logging/systemLogger.js`: 35 incoming local imports
-- `src/utils/runtimeConfig.js`: 15 incoming local imports
+- `src/utils/runtimeConfig.js`: 16 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
 - `src/contexts/viewerContext.js`: 10 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
@@ -29,7 +29,7 @@
 
 ## Largest Files
 
-- `src/contexts/ViewerProvider.jsx`: 2668 lines
+- `src/contexts/ViewerProvider.jsx`: 2677 lines
 - `src/components/PrintSelectionWorkspace.jsx`: 2504 lines
 - `src/utils/printPdf.js`: 2297 lines
 - `src/components/DocumentLoader/DocumentLoader.js`: 2175 lines

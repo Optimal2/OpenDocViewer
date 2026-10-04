@@ -158,7 +158,9 @@ A prefix included before signing can be intact only when the actual bytes verify
 The viewer surfaces the inspection result without ever blocking page rendering:
 
 - `src/hooks/usePdfSignatureReports.js` (driven from `ViewerProvider`) starts the
-  inspection only after the first page is ready, calls `getDocumentSignatures` once per PDF
+  inspection only after the first page is ready (or after every page with runtime config
+  `pdfSignatures.inspectAfter: 'allPages'`; `pdfSignatures.enabled: false` never starts it —
+  see `docs-src/runtime-configuration.md`), calls `getDocumentSignatures` once per PDF
   document with the bytes already held in the source temp store (the file is never fetched
   again), and caches one report per document (`sourceKey`) in viewer context state for the
   session. Non-PDF documents are never inspected. `ViewerProvider` calls

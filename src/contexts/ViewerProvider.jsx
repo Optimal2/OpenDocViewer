@@ -10,6 +10,7 @@
  */
 
 import { useState, useCallback, useMemo, useRef, useEffect } from 'react';
+import { isPdfSignatureInspectionEnabled, getPdfSignatureInspectionStart } from '../utils/runtimeConfig.js';
 import logger from '../logging/systemLogger.js';
 import ViewerContext from './viewerContext.js';
 import {
@@ -2566,12 +2567,20 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   );
 
   // PDF signature inspection and optional gateway trust: starts only after the first page is
-  // ready (page rendering keeps priority), runs once per PDF source off the
-  // main thread, and caches one report per document for the session.
+  // ready (page rendering keeps priority) — or after every page when the site configures
+  // `pdfSignatures.inspectAfter: 'allPages'` — runs once per PDF source off the main thread,
+  // and caches one report per document for the session. `pdfSignatures.enabled: false` keeps
+  // it off entirely: no bytes reach the worker and no symbols appear.
+  const signatureInspectionReady = useMemo(() => {
+    if (!isPdfSignatureInspectionEnabled()) return false;
+    return getPdfSignatureInspectionStart() === 'allPages'
+      ? pageLoadState.allPagesReady
+      : pageLoadState.readyPages > 0;
+  }, [pageLoadState.allPagesReady, pageLoadState.readyPages]);
   const signatureReports = usePdfSignatureReports({
     allPages,
     currentSourceKey: signaturePrioritySourceKey,
-    inspectionReady: pageLoadState.readyPages > 0,
+    inspectionReady: signatureInspectionReady,
     readSourceArrayBuffer,
     getSourceUrl: getSignatureSourceUrl,
     getSourcePack: getSignatureSourcePack,
