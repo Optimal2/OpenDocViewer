@@ -40,6 +40,44 @@ async function one(name) {
   return report.signatures[0];
 }
 
+// Builds a `%aaa<EOL>` comment run: 4000 lines exercise comment skipping
+// for every line ending shape.
+function commentRunBytes(lines, ...eol) {
+  const period = 4 + eol.length; // '%aaa' + EOL
+  const bytes = new Uint8Array(lines * period);
+  for (let k = 0; k < lines; k++) {
+    const o = k * period;
+    bytes[o] = 0x25; // '%'
+    bytes[o + 1] = 0x61; bytes[o + 2] = 0x61; bytes[o + 3] = 0x61; // 'aaa'
+    for (let e = 0; e < eol.length; e++) bytes[o + 4 + e] = eol[e];
+  }
+  return bytes;
+}
+
+function flatFillBytes(length, fill) {
+  const bytes = new Uint8Array(length);
+  if (typeof fill === 'function') { for (let i = 0; i < length; i++) bytes[i] = fill(i); }
+  else bytes.fill(fill);
+  return bytes;
+}
+
+// Drives the installed probe over every position, the same sweep pdf-lib's
+// skipJibberish performs, and returns the probe's byte-visit count. Pure
+// junk buffers must never report a header.
+async function sweepProbeVisits(bytes) {
+  const { PDFParser } = await import('pdf-lib');
+  const parser = PDFParser.forBytesWithOptions(bytes);
+  const stats = {};
+  installIndirectObjectHeaderProbe(parser, bytes, stats);
+  let hits = 0;
+  for (let i = 0; i <= bytes.length; i++) {
+    parser.bytes.moveTo(i);
+    if (parser.matchIndirectObjectHeader()) hits++;
+  }
+  expect(hits).toBe(0);
+  return stats.visits;
+}
+
 function withJunkPrefix(bytes, length, fill = 0x78) {
   const prefixed = new Uint8Array(length + bytes.length);
   if (typeof fill === 'function') { for (let i = 0; i < length; i++) prefixed[i] = fill(i); } else prefixed.fill(fill, 0, length);
@@ -55,22 +93,30 @@ describe('F10 PDF headers after leading junk', () => {
     const tampered = await one(`tampered-with-prefix-${length}.pdf`);
     expect(tampered.integrity).toBe('digest-mismatch');
   });
-  it('skips a 1 MiB junk prefix in linear time', async () => {
-    const started = performance.now();
-    const report = await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024 * 1024));
-    expect(report.signatures).toHaveLength(1);
-    // pdf-lib alone throws one Error per junk byte here: ~17 s per MiB.
-    expect(performance.now() - started).toBeLessThan(2000);
-  });
+  // Linearity oracles are deterministic byte-visit bounds, not wall-clock
+  // timings (pdf-lib alone throws one Error per junk byte here: ~17 s per
+  // MiB, which made the old sub-2000 ms assertions flaky by construction).
+  // A generous per-test timeout remains only as a hang safety net.
   it.each([
-    ['percent', 0x25],
-    ['alternating x/%', (i) => (i % 2 === 0 ? 0x78 : 0x25)],
-  ])('skips a 1 MiB %s junk prefix in linear time', async (_label, fill) => {
-    const started = performance.now();
-    const report = await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024 * 1024, fill));
+    ['LF comment lines', () => commentRunBytes(4000, 0x0a)],
+    ['CR comment lines', () => commentRunBytes(4000, 0x0d)],
+    ['CRLF comment lines', () => commentRunBytes(4000, 0x0d, 0x0a)],
+    ['EOL-free percent fill', () => flatFillBytes(1024 * 1024, 0x25)],
+    ['x fill', () => flatFillBytes(1024 * 1024, 0x78)],
+    ['alternating x/% fill', () => flatFillBytes(1024 * 1024, (i) => (i % 2 === 0 ? 0x78 : 0x25))],
+  ])('probes %s junk in linear visits', async (_label, makeBytes) => {
+    const bytes = makeBytes();
+    expect(await sweepProbeVisits(bytes)).toBeLessThanOrEqual(8 * bytes.length);
+  }, 30000);
+  it('discovers a signature after a 4000-line LF comment prefix', async () => {
+    const prefix = commentRunBytes(4000, 0x0a);
+    const pdf = fixtures['valid-rsa.pdf'];
+    const bytes = new Uint8Array(prefix.length + pdf.length);
+    bytes.set(prefix, 0);
+    bytes.set(pdf, prefix.length);
+    const report = await collectPdfSignatures(bytes);
     expect(report.signatures).toHaveLength(1);
-    expect(performance.now() - started).toBeLessThan(2000);
-  });
+  }, 30000);
   it('leaves the probe uninstalled when the parser has no header matcher', () => {
     for (const parser of [{}, { matchIndirectObjectHeader: 42 }]) {
       expect(() => installIndirectObjectHeaderProbe(parser, new Uint8Array(8))).not.toThrow();
@@ -81,7 +127,8 @@ describe('F10 PDF headers after leading junk', () => {
     const { PDFParser } = await import('pdf-lib');
     const sample = [
       'xx 12 0 obj', '  \t\r\n 7 0 obj', '%c 1 0 obj\n 3 1 obj', '1 0 ob', '1 x obj', '12', ' 0 0 obj',
-      `${'9'.repeat(320)} 0 obj`, `${'0'.repeat(320)}5 0 obj`, `5 ${'9'.repeat(400)} obj`, '%%\r% 4 0 obj', '\0\f8 0obj', '  '
+      `${'9'.repeat(320)} 0 obj`, `${'0'.repeat(320)}5 0 obj`, `5 ${'9'.repeat(400)} obj`, '%%\r% 4 0 obj', '\0\f8 0obj',
+      '  %x\n6 0 obj', '  %tail comment with no EOL'
     ].join(' junk ');
     const bytes = new TextEncoder().encode(sample);
     const original = PDFParser.forBytesWithOptions(bytes);
@@ -93,6 +140,19 @@ describe('F10 PDF headers after leading junk', () => {
       expect([probed.matchIndirectObjectHeader(), probed.bytes.offset()])
         .toEqual([original.matchIndirectObjectHeader(), original.bytes.offset()]);
     }
+  });
+  it('finds a header immediately after a comment terminator', async () => {
+    const { PDFParser } = await import('pdf-lib');
+    const bytes = new TextEncoder().encode('%x\n1 0 obj');
+    const original = PDFParser.forBytesWithOptions(bytes);
+    const probed = PDFParser.forBytesWithOptions(bytes);
+    installIndirectObjectHeaderProbe(probed, bytes);
+    original.bytes.moveTo(0);
+    probed.bytes.moveTo(0);
+    const expected = original.matchIndirectObjectHeader();
+    expect(probed.matchIndirectObjectHeader()).toBe(expected);
+    expect(probed.bytes.offset()).toBe(original.bytes.offset());
+    expect(expected).toBe(true);
   });
   it.each(['valid-rsa.pdf', 'digest-mismatch.pdf'])('%s remains visible with broken byte offsets', async (name) => {
     for (const length of [7, 1019, 1023, 1024, 4096, 65536]) {

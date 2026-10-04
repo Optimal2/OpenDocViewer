@@ -26165,7 +26165,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 1136,
+    "line": 1163,
     "description": "Collect signature information from PDF bytes.",
     "params": [
       {
@@ -26203,7 +26203,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/utils/pdfSignatures.js",
-    "line": 999,
+    "line": 1008,
     "description": "pdf-lib's skipJibberish probes every byte of leading junk with matchIndirectObjectHeader, which throws (building an Error) on each miss: ~17 us per byte, so a 64 KiB prefix cost a...",
     "params": [
       {
@@ -26217,6 +26217,12 @@
         "type": "Uint8Array",
         "optional": false,
         "description": "The parser's byte buffer."
+      },
+      {
+        "name": "stats",
+        "type": "object",
+        "optional": true,
+        "description": "Test-only byte-visit counter: stats.visits is reset to zero and incremented once per probed byte read (the bounded digit-window conversion..."
       }
     ],
     "returns": [],

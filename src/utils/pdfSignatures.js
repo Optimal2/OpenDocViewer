@@ -993,33 +993,60 @@ const isDigit = (b) => b >= 48 && b <= 57;
  * Only a confirmed header reaches pdf-lib's own matcher, so offsets and results
  * are identical. Exported for the differential test only.
  *
+ * A comment scan records the whole run of consecutive comment lines (each
+ * `%..EOL` segment plus the EOL whitespace up to the next `%`), so one cache
+ * entry linearizes `%`-heavy prefixes for LF, CR, CRLF, and unterminated
+ * trailing comments alike. The run lookup applies only to `%` bytes, leaving
+ * whitespace inside comment bodies on the historical step-over path.
+ *
  * @param {any} parser pdf-lib PDFParser instance reading `bytes`.
  * @param {Uint8Array} bytes The parser's byte buffer.
+ * @param {object} [stats] Test-only byte-visit counter: `stats.visits` is
+ * reset to zero and incremented once per probed byte read (the bounded
+ * digit-window conversion in `finiteFrom` is excluded). Omit in production.
  */
-export function installIndirectObjectHeaderProbe(parser, bytes) {
+export function installIndirectObjectHeaderProbe(parser, bytes, stats) {
   const len = bytes.length;
   if (typeof parser.matchIndirectObjectHeader !== 'function') return;
   const match = parser.matchIndirectObjectHeader;
+  // Test-only visit counter. Production callers omit `stats`, in which case
+  // peek is a plain byte read.
+  const peek = stats
+    ? (j) => { if (j < len) stats.visits++; return bytes[j]; }
+    : (j) => bytes[j];
+  if (stats) stats.visits = 0;
   let ws = { from: -1, end: -1, to: -1 }; // every byte in [from, end) is whitespace and skips to `to`
   let run = { from: -1, end: -1, ok: false, finiteFrom: 0 }; // header verdict for digit run [from, end)
-  let cmt = { from: -1, end: -1 }; // '%' at `from` starts a comment run ending at `end` (EOL position or len)
+  let cmt = { from: -1, runEnd: -1 }; // '%' at `from` starts a comment run ending at `runEnd`
   // Mirrors BaseParser.skipWhitespaceAndComments. A memoized comment run jumps
-  // straight to its known EOL: every '%' inside [from, end) shares that EOL
-  // (no EOL byte occurs inside a comment), so rescanning is never needed.
+  // straight past the whole run of consecutive comment lines: every '%' in
+  // [from, runEnd) continues down the same run to runEnd, so each comment line
+  // is scanned once no matter how lines break (LF, CR, CRLF, or no EOL at
+  // all). The lookup applies only to '%' bytes, so whitespace inside a comment
+  // body keeps the historical step-over behaviour byte for byte.
   const skip = (i) => {
     while (i < len) {
-      while (i < len && isPdfWhitespace(bytes[i])) i++;
-      if (bytes[i] !== 37) break;
-      if (i >= cmt.from && i < cmt.end) i = cmt.end;
+      while (i < len && isPdfWhitespace(peek(i))) i++;
+      if (peek(i) !== 37) break;
+      if (i >= cmt.from && i < cmt.runEnd) i = cmt.runEnd;
       else {
         const cs = i;
-        while (i < len && bytes[i] !== 10 && bytes[i] !== 13) i++;
-        cmt = { from: cs, end: i };
+        while (i < len && peek(i) !== 10 && peek(i) !== 13) i++;
+        let r = i;
+        for (;;) {
+          let w = r;
+          while (w < len && isPdfWhitespace(peek(w))) w++;
+          if (peek(w) !== 37) break;
+          r = w + 1;
+          while (r < len && peek(r) !== 10 && peek(r) !== 13) r++;
+        }
+        cmt = { from: cs, runEnd: r };
+        i = r;
       }
     }
     return i;
   };
-  const digitsEnd = (i) => { while (i < len && isDigit(bytes[i])) i++; return i; };
+  const digitsEnd = (i) => { while (i < len && isDigit(peek(i))) i++; return i; };
   // Smallest start in [s, e) whose digit suffix Number() parses as finite; a
   // double holds at most 309 integer digits, and leading zeros are free.
   const finiteFrom = (s, e) => {
@@ -1034,20 +1061,20 @@ export function installIndirectObjectHeaderProbe(parser, bytes) {
     const i = this.bytes.offset();
     let p = i;
     if (i >= ws.from && i < ws.end) p = ws.to;
-    else if (isPdfWhitespace(bytes[i]) || bytes[i] === 37) {
+    else if (isPdfWhitespace(peek(i)) || peek(i) === 37) {
       p = skip(i);
       let end = i;
-      while (end < p && isPdfWhitespace(bytes[end])) end++;
+      while (end < p && isPdfWhitespace(peek(end))) end++;
       ws = { from: i, end, to: p };
     }
-    if (!isDigit(bytes[p])) return false;
+    if (!isDigit(peek(p))) return false;
     if (p < run.from || p >= run.end) {
       const end = digitsEnd(p);
       const q = skip(end);
       const qEnd = digitsEnd(q);
       const r = skip(qEnd);
       const ok = qEnd > q && finiteFrom(q, qEnd) === q &&
-        bytes[r] === 111 && bytes[r + 1] === 98 && bytes[r + 2] === 106; // "obj"
+        peek(r) === 111 && peek(r + 1) === 98 && peek(r + 2) === 106; // "obj"
       run = { from: p, end, ok, finiteFrom: finiteFrom(p, end) };
     }
     return run.ok && p >= run.finiteFrom ? match.call(this) : false;
