@@ -40,9 +40,9 @@ async function one(name) {
   return report.signatures[0];
 }
 
-function withJunkPrefix(bytes, length) {
+function withJunkPrefix(bytes, length, fill = 0x78) {
   const prefixed = new Uint8Array(length + bytes.length);
-  prefixed.fill(0x78, 0, length);
+  if (typeof fill === 'function') { for (let i = 0; i < length; i++) prefixed[i] = fill(i); } else prefixed.fill(fill, 0, length);
   prefixed.set(bytes, length);
   return prefixed;
 }
@@ -61,6 +61,21 @@ describe('F10 PDF headers after leading junk', () => {
     expect(report.signatures).toHaveLength(1);
     // pdf-lib alone throws one Error per junk byte here: ~17 s per MiB.
     expect(performance.now() - started).toBeLessThan(2000);
+  });
+  it.each([
+    ['percent', 0x25],
+    ['alternating x/%', (i) => (i % 2 === 0 ? 0x78 : 0x25)],
+  ])('skips a 1 MiB %s junk prefix in linear time', async (_label, fill) => {
+    const started = performance.now();
+    const report = await collectPdfSignatures(withJunkPrefix(fixtures['valid-rsa.pdf'], 1024 * 1024, fill));
+    expect(report.signatures).toHaveLength(1);
+    expect(performance.now() - started).toBeLessThan(2000);
+  });
+  it('leaves the probe uninstalled when the parser has no header matcher', () => {
+    for (const parser of [{}, { matchIndirectObjectHeader: 42 }]) {
+      expect(() => installIndirectObjectHeaderProbe(parser, new Uint8Array(8))).not.toThrow();
+      expect(typeof parser.matchIndirectObjectHeader).not.toBe('function');
+    }
   });
   it('probes indirect object headers exactly like pdf-lib', async () => {
     const { PDFParser } = await import('pdf-lib');

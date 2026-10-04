@@ -986,7 +986,10 @@ const isDigit = (b) => b >= 48 && b <= 57;
  * matchIndirectObjectHeader, which throws (building an Error) on each miss:
  * ~17 us per byte, so a 64 KiB prefix cost about one second. This instance
  * override answers the same `ws* int ws* int ws* obj` grammar without throwing,
- * memoizing the current whitespace run and digit run so probing stays linear.
+ * memoizing the current whitespace run, comment run, and digit run so probing
+ * stays linear. When the parser has no `matchIndirectObjectHeader` function
+ * (unexpected pdf-lib shape) the probe is left uninstalled, falling back to
+ * pdf-lib's own path instead of throwing.
  * Only a confirmed header reaches pdf-lib's own matcher, so offsets and results
  * are identical. Exported for the differential test only.
  *
@@ -995,15 +998,24 @@ const isDigit = (b) => b >= 48 && b <= 57;
  */
 export function installIndirectObjectHeaderProbe(parser, bytes) {
   const len = bytes.length;
+  if (typeof parser.matchIndirectObjectHeader !== 'function') return;
   const match = parser.matchIndirectObjectHeader;
   let ws = { from: -1, end: -1, to: -1 }; // every byte in [from, end) is whitespace and skips to `to`
   let run = { from: -1, end: -1, ok: false, finiteFrom: 0 }; // header verdict for digit run [from, end)
-  // Mirrors BaseParser.skipWhitespaceAndComments.
+  let cmt = { from: -1, end: -1 }; // '%' at `from` starts a comment run ending at `end` (EOL position or len)
+  // Mirrors BaseParser.skipWhitespaceAndComments. A memoized comment run jumps
+  // straight to its known EOL: every '%' inside [from, end) shares that EOL
+  // (no EOL byte occurs inside a comment), so rescanning is never needed.
   const skip = (i) => {
     while (i < len) {
       while (i < len && isPdfWhitespace(bytes[i])) i++;
       if (bytes[i] !== 37) break;
-      while (i < len && bytes[i] !== 10 && bytes[i] !== 13) i++;
+      if (i >= cmt.from && i < cmt.end) i = cmt.end;
+      else {
+        const cs = i;
+        while (i < len && bytes[i] !== 10 && bytes[i] !== 13) i++;
+        cmt = { from: cs, end: i };
+      }
     }
     return i;
   };
