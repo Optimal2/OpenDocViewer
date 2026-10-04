@@ -14,7 +14,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>axios</code> | <code>^1.20.0</code> | 1 | <code>src/logging/systemLogger.js</code> |
 | <code>cors</code> | <code>^2.8.6</code> | 1 | <code>server/system-log-server.js</code> |
 | <code>dompurify</code> | <code>^3.4.16</code> | 3 | <code>src/components/DocumentToolbar/ManualOverlayDialog.jsx</code><br><code>src/utils/printDom.js</code><br><code>src/utils/printPdf.js</code> |
-| <code>dotenv</code> | <code>^18.0.4</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
+| <code>dotenv</code> | <code>^18.0.5</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express</code> | <code>^5.2.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>express-rate-limit</code> | <code>^8.7.0</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>file-type</code> | <code>^22.1.1</code> | 1 | <code>src/components/DocumentLoader/DocumentLoader.js</code> |
@@ -26,7 +26,7 @@ the Used In column lists at most 5 files and states the file total whenever it c
 | <code>material-icons</code> | <code>^1.13.14</code> | 1 | <code>src/index.jsx</code> |
 | <code>morgan</code> | <code>^1.12.1</code> | 2 | <code>server/system-log-server.js</code><br><code>server/user-log-server.js</code> |
 | <code>pdf-lib</code> | <code>^1.17.1</code> | 2 (dynamic) | <code>src/utils/pdfSignatures.js</code><br><code>src/utils/pdfWorkerDispatcher.js</code> |
-| <code>pdfjs-dist</code> | <code>^6.3.289</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
+| <code>pdfjs-dist</code> | <code>^6.4.299</code> | 8 | <code>src/components/DocumentLoader/documentLoaderUtils.js</code><br><code>src/components/DocumentLoader/mainThreadRenderer.js</code><br><code>src/utils/pageAssetRenderer.js</code><br><code>src/workers/pdfPageWorker.js</code><br>(4 files total) |
 | <code>pkijs</code> | <code>^3.4.1</code> | 1 (dynamic) | <code>src/utils/pdfSignatures.js</code> |
 | <code>prop-types</code> | <code>^15.8.1</code> | 37 | <code>src/PerformanceMonitor.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br><code>src/components/DocumentConsumerWrapper.jsx</code><br><code>src/components/DocumentLoader/LoadPressureDialog.jsx</code><br>... (+32 more, 37 files total) |
 | <code>react</code> | <code>^19.3.0</code> | 59 | <code>src/ErrorBoundary.jsx</code><br><code>src/PerformanceMonitor.jsx</code><br><code>src/app/AppBootstrap.jsx</code><br><code>src/app/OpenDocViewer.jsx</code><br><code>src/components/CanvasRenderer.jsx</code><br>... (+54 more, 59 files total) |
