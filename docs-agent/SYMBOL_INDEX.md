@@ -489,20 +489,20 @@
 | <code>ThemeContext</code> | constant | <code>src/contexts/themeContext.js:28</code> | Create the Theme context with a safe default to avoid undefined access if a consumer is mounted outside the provider by mistake. |
 | <code>ThemeContextValue</code> | typedef | <code>src/contexts/themeContext.js:10</code> | Context value shape for the theme. |
 | <code>ThemeMode</code> | typedef | <code>src/contexts/themeContext.js:4</code> | Theme identifier. |
-| <code>ThemeProvider~applyExternalThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:240</code> | Apply a mode that arrived from outside this component \(another tab, the host page, or the cross-origin bridge\). |
+| <code>ThemeProvider~applyExternalThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:242</code> | Apply a mode that arrived from outside this component \(another tab, the host page, or the cross-origin bridge\). |
 | <code>applyThemeToDocument</code> | function | <code>src/contexts/ThemeProvider.jsx:83</code> | Apply the resolved theme to the DOM \(SSR-safe\). |
 | <code>detectSystemTheme</code> | function | <code>src/contexts/ThemeProvider.jsx:52</code> | Detect system preferred color scheme \(SSR-safe; defaults to light\). |
-| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:202</code> |  |
-| <code>&lt;anonymous&gt;~onStorage</code> | function | <code>src/contexts/ThemeProvider.jsx:259</code> |  |
+| <code>&lt;anonymous&gt;~onChange</code> | function | <code>src/contexts/ThemeProvider.jsx:204</code> |  |
+| <code>&lt;anonymous&gt;~onStorage</code> | function | <code>src/contexts/ThemeProvider.jsx:261</code> |  |
 | <code>resolveInitialThemeMode</code> | function | <code>src/contexts/ThemeProvider.jsx:101</code> | Resolve the initial theme mode once during provider initialization. |
 | <code>resolveThemeForMode</code> | function | <code>src/contexts/ThemeProvider.jsx:69</code> | Resolve the concrete theme for a theme mode. |
-| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:179</code> | Apply an explicit concrete theme. |
-| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:147</code> | Persist and apply a theme mode. |
-| <code>ThemeProvider~setToolbarLargeButtons</code> | constant | <code>src/contexts/ThemeProvider.jsx:134</code> | Persist and apply the &amp;quot;Larger toolbar buttons&amp;quot; choice. |
+| <code>ThemeProvider~setThemeExplicit</code> | constant | <code>src/contexts/ThemeProvider.jsx:181</code> | Apply an explicit concrete theme. |
+| <code>ThemeProvider~setThemeMode</code> | constant | <code>src/contexts/ThemeProvider.jsx:149</code> | Persist and apply a theme mode. |
+| <code>ThemeProvider~setToolbarLargeButtons</code> | constant | <code>src/contexts/ThemeProvider.jsx:136</code> | Persist and apply the &amp;quot;Larger toolbar buttons&amp;quot; choice. |
 | <code>ThemeMode</code> | typedef | <code>src/contexts/ThemeProvider.jsx:41</code> | Theme mode identifier. |
 | <code>ThemeName</code> | typedef | <code>src/contexts/ThemeProvider.jsx:36</code> | Theme identifier. |
-| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:113</code> | ThemeProvider component to manage and provide theme-related state and functions. |
-| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:189</code> | Toggle between the two highest-contrast explicit themes. |
+| <code>ThemeProvider</code> | constant | <code>src/contexts/ThemeProvider.jsx:115</code> | ThemeProvider component to manage and provide theme-related state and functions. |
+| <code>ThemeProvider~toggleTheme</code> | constant | <code>src/contexts/ThemeProvider.jsx:191</code> | Toggle between the two highest-contrast explicit themes. |
 | <code>DisposeDocumentSessionOptions</code> | typedef | <code>src/contexts/viewerContext.js:40</code> |  |
 | <code>DocumentSessionInitOptions</code> | typedef | <code>src/contexts/viewerContext.js:32</code> |  |
 | <code>EnsurePageAssetOptions</code> | typedef | <code>src/contexts/viewerContext.js:55</code> |  |
@@ -894,7 +894,7 @@
 | <code>applyOdvThemeToDocument</code> | function | <code>src/utils/ompThemePreference.js:291</code> | Apply the resolved theme to the document \(SSR-safe\). |
 | <code>createSharedThemeRevision</code> | function | <code>src/utils/ompThemePreference.js:228</code> | Create a unique revision starting with the creation time \(per the contract\). |
 | <code>detectSystemTheme</code> | function | <code>src/utils/ompThemePreference.js:262</code> | Detect the OS/browser colour scheme \(SSR-safe; defaults to light\). |
-| <code>getEffectiveOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:332</code> | Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration. |
+| <code>getEffectiveOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:337</code> | Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration. |
 | <code>getSession</code> | function | <code>src/utils/ompThemePreference.js:69</code> | Keep denied-storage choices scoped to the current browsing context. |
 | <code>getSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:208</code> | Read the winning shared preference: newest revision wins and is mirrored to the other store; on a tie \(or when a revision cannot be read\) the cookie wins. |
 | <code>isSharedThemeMode</code> | function | <code>src/utils/ompThemePreference.js:90</code> |  |
@@ -906,7 +906,7 @@
 | <code>readSharedRawFromCookie</code> | function | <code>src/utils/ompThemePreference.js:119</code> | Read the raw shared value from the cookie \(URI-encoded JSON per the contract\). |
 | <code>readSharedRawFromStorage</code> | function | <code>src/utils/ompThemePreference.js:137</code> | Read the raw shared value from the localStorage mirror. |
 | <code>resolveConcreteTheme</code> | function | <code>src/utils/ompThemePreference.js:277</code> | Resolve the concrete ODV palette for an ODV theme mode. |
-| <code>setOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:366</code> | Persist a user theme choice: system/light/dark are written to the shared preference \(new revision\) and mirrored locally; a stale Normal binding is cleared. |
+| <code>setOdvThemeMode</code> | function | <code>src/utils/ompThemePreference.js:371</code> | Persist a user theme choice: system/light/dark are written to the shared preference \(new revision\) and mirrored locally; a stale Normal binding is cleared. |
 | <code>setSharedThemePreference</code> | function | <code>src/utils/ompThemePreference.js:252</code> | Store a new shared choice with a fresh revision in both stores. |
 | <code>SharedThemeMode</code> | typedef | <code>src/utils/ompThemePreference.js:37</code> | Shared OMP theme mode. |
 | <code>SharedThemePreference</code> | typedef | <code>src/utils/ompThemePreference.js:52</code> | Parsed shared preference value. |
@@ -1348,11 +1348,12 @@
 | <code>clampNumber</code> | function | <code>src/utils/runtimeConfig.js:241</code> | Clamp a numeric config value to a safe range. |
 | <code>DEFAULT_ZOOM_MODE_ALIAS_ENTRIES</code> | constant | <code>src/utils/runtimeConfig.js:44</code> | User-facing zoom-mode aliases mapped to ViewerDefaultZoomMode values. |
 | <code>getKeyboardPrintShortcutBehavior</code> | function | <code>src/utils/runtimeConfig.js:136</code> | Resolve the configured Ctrl/Cmd+P behavior. |
-| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:596</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
+| <code>getOmpThemeBridgeAllowedOrigins</code> | function | <code>src/utils/runtimeConfig.js:618</code> | Resolve the allowed origins for the opt-in cross-origin theme bridge. |
 | <code>getPdfSignatureInspectionStart</code> | function | <code>src/utils/runtimeConfig.js:188</code> | Resolve when PDF signature inspection may start \( pdfSignatures.inspectAfter \): &#39;firstPage&#39; \(default\) starts once the first page is shown, &#39;allPages&#39; waits until every page of the... |
 | <code>getPrintDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:493</code> | Resolve the default print page mode used when the user has not stored an override. |
 | <code>getPrintSelectionWorkspaceConfig</code> | function | <code>src/utils/runtimeConfig.js:518</code> | Resolve the print-selection workspace configuration. |
 | <code>getRuntimeConfig</code> | function | <code>src/utils/runtimeConfig.js:113</code> | Read the merged runtime configuration from the browser environment. |
+| <code>getThemeDefaultMode</code> | function | <code>src/utils/runtimeConfig.js:601</code> | Resolve the site&#39;s default theme mode — the mode used ONLY while the browser has no stored theme choice \(no shared OMP_THEME_PREFERENCE and no legacy local ODV setting\). |
 | <code>getToolbarLargeButtonsDefault</code> | function | <code>src/utils/runtimeConfig.js:201</code> | Resolve the site default for the &amp;quot;Larger toolbar buttons&amp;quot; preference \( toolbar.largeButtons \). |
 | <code>getViewerCustomFitSizeLimits</code> | function | <code>src/utils/runtimeConfig.js:469</code> | Resolve the configured custom-size limits. |
 | <code>getViewerCustomFitWidthFactorPercent</code> | function | <code>src/utils/runtimeConfig.js:455</code> | Resolve the custom-size width factor percentage. |

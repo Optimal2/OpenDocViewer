@@ -583,6 +583,28 @@ export function getViewerProblemNoticeConfig(cfg = getRuntimeConfig()) {
   };
 }
 
+/** @type {ReadonlyArray<'system'|'normal'|'light'|'dark'>} */
+const THEME_DEFAULT_MODES = Object.freeze(['system', 'normal', 'light', 'dark']);
+
+/**
+ * Resolve the site's default theme mode — the mode used ONLY while the browser has no stored
+ * theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting). A user's own
+ * choice in the theme menu is remembered per browser and always outranks this default.
+ *
+ * Runtime config value: `theme.defaultMode`
+ * Supported values (case-insensitive): "system" (default; follows the OS light/dark setting),
+ * "light", "dark", "normal". Unknown or missing values fall back to "system".
+ *
+ * @param {Object=} cfg
+ * @returns {'system'|'normal'|'light'|'dark'}
+ */
+export function getThemeDefaultMode(cfg = getRuntimeConfig()) {
+  const raw = cfg?.theme?.defaultMode;
+  if (typeof raw !== 'string') return 'system';
+  const mode = raw.trim().toLowerCase();
+  return THEME_DEFAULT_MODES.includes(mode) ? /** @type {any} */ (mode) : 'system';
+}
+
 /**
  * Resolve the allowed origins for the opt-in cross-origin theme bridge.
  *

@@ -722,10 +722,20 @@ it belongs to and shares mode `light` outwards; a later explicit shared choice w
 An existing local ODV theme setting migrates into the shared preference only when no
 shared preference exists. Printed pages always use the light path.
 
+Default theme per installation: `theme.defaultMode` sets the mode used while the browser has
+no stored theme choice at all (no shared `OMP_THEME_PREFERENCE` and no legacy local ODV
+setting). Supported values are `"system"` (default, follows the OS light/dark setting),
+`"light"`, `"dark"` and `"normal"`; unknown values fall back to `"system"`. A user's own
+choice in the theme menu — including an explicit System — is remembered per browser
+profile and always outranks this default, so the setting only decides the first impression
+on a fresh browser.
+
 Configuration surface:
 
 ```js
 theme: {
+  // Mode used while nothing is stored in the browser: "system" | "light" | "dark" | "normal".
+  defaultMode: 'system',
   bridge: {
     // Opt-in postMessage bridge for cross-origin frames. Empty (default) disables it.
     // Entries must match event.origin exactly; use the exact targetOrigin, never '*'.

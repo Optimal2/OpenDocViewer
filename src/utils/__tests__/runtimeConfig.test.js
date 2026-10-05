@@ -26,6 +26,7 @@ import {
   getViewerEdgeScrollPageTurnConfig,
   getViewerProblemNoticeConfig,
   getOmpThemeBridgeAllowedOrigins,
+  getThemeDefaultMode,
 } from '../runtimeConfig.js';
 
 describe('runtimeConfig', () => {
@@ -64,6 +65,25 @@ describe('runtimeConfig', () => {
         },
       };
       expect(getRuntimeConfig()).toEqual({});
+    });
+  });
+
+  describe('getThemeDefaultMode', () => {
+    it('defaults to system', () => {
+      expect(getThemeDefaultMode({})).toBe('system');
+      expect(getThemeDefaultMode({ theme: {} })).toBe('system');
+      expect(getThemeDefaultMode({ theme: { defaultMode: 42 } })).toBe('system');
+    });
+
+    it('accepts light, dark, normal and system case-insensitively', () => {
+      expect(getThemeDefaultMode({ theme: { defaultMode: 'Light' } })).toBe('light');
+      expect(getThemeDefaultMode({ theme: { defaultMode: ' DARK ' } })).toBe('dark');
+      expect(getThemeDefaultMode({ theme: { defaultMode: 'normal' } })).toBe('normal');
+      expect(getThemeDefaultMode({ theme: { defaultMode: 'system' } })).toBe('system');
+    });
+
+    it('falls back to system for unknown values', () => {
+      expect(getThemeDefaultMode({ theme: { defaultMode: 'sepia' } })).toBe('system');
     });
   });
 

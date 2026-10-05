@@ -29,7 +29,7 @@ import {
   startOmpThemeBridge,
   announceThemeToAllowedOrigins,
 } from '../integrations/ompThemeBridge.js';
-import { getOmpThemeBridgeAllowedOrigins } from '../utils/runtimeConfig.js';
+import { getOmpThemeBridgeAllowedOrigins, getThemeDefaultMode } from '../utils/runtimeConfig.js';
 import { getEffectiveToolbarLargeButtons, setToolbarLargeButtonsPreference } from '../utils/viewerPreferences.js';
 import { applyToolbarDensityToDocument } from '../utils/toolbarDensity.js';
 
@@ -99,8 +99,10 @@ function applyThemeToDocument(resolvedTheme, mode) {
  * @returns {ThemeMode}
  */
 function resolveInitialThemeMode() {
-  const effective = getEffectiveOdvThemeMode();
-  logger.info('Theme mode loaded from shared and local preferences', { themeMode: effective });
+  // The site's theme.defaultMode applies only while no choice is stored in this browser.
+  const siteDefault = getThemeDefaultMode();
+  const effective = getEffectiveOdvThemeMode(siteDefault);
+  logger.info('Theme mode loaded from shared and local preferences', { themeMode: effective, siteDefault });
   return effective;
 }
 

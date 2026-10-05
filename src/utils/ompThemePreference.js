@@ -327,9 +327,14 @@ function migrateLocalThemeToShared() {
  * shared revision still matches; any later explicit shared choice (newer
  * revision) wins over it.
  *
+ * `defaultMode` is used ONLY when nothing is stored at all (no shared preference
+ * and nothing to migrate): it is the site's configured `theme.defaultMode`.
+ * A stored choice — including an explicit "system" — always wins over it.
+ *
+ * @param {OdvThemeMode=} defaultMode
  * @returns {OdvThemeMode}
  */
-export function getEffectiveOdvThemeMode() {
+export function getEffectiveOdvThemeMode(defaultMode = 'system') {
   let shared = getSharedThemePreference();
   if (!shared) {
     const migrated = migrateLocalThemeToShared();
@@ -338,7 +343,7 @@ export function getEffectiveOdvThemeMode() {
       if (localMode === 'normal') return 'normal';
       return migrated.mode;
     }
-    return 'system';
+    return ['system', 'normal', 'light', 'dark'].includes(defaultMode) ? defaultMode : 'system';
   }
   const local = getViewerPreferences();
   const storedNormal = local.themeMode === 'normal'

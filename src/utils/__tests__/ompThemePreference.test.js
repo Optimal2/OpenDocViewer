@@ -171,6 +171,25 @@ describe('ompThemePreference', () => {
       expect(getEffectiveOdvThemeMode()).toBe('light');
     });
 
+    it('uses the site default mode only when nothing is stored', () => {
+      expect(getEffectiveOdvThemeMode('dark')).toBe('dark');
+      expect(getEffectiveOdvThemeMode('normal')).toBe('normal');
+      expect(getEffectiveOdvThemeMode()).toBe('system');
+      expect(getEffectiveOdvThemeMode(/** @type {any} */ ('sepia'))).toBe('system');
+    });
+
+    it('lets any stored choice win over the site default', () => {
+      stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'system', revision: 'a' });
+      expect(getEffectiveOdvThemeMode('dark')).toBe('system');
+      stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'light', revision: 'b' });
+      expect(getEffectiveOdvThemeMode('dark')).toBe('light');
+    });
+
+    it('lets a migrated legacy local setting win over the site default', () => {
+      setViewerPreferences({ themeMode: 'light' });
+      expect(getEffectiveOdvThemeMode('dark')).toBe('light');
+    });
+
     it('orders base-36 timestamps numerically across a digit boundary', () => {
       stores.cookieData[OMP_THEME_STORAGE_KEY] = encodeShared({ version: 1, mode: 'dark', revision: 'z-old' });
       stores.storageData[OMP_THEME_STORAGE_KEY] = JSON.stringify({ version: 1, mode: 'light', revision: '10-new' });

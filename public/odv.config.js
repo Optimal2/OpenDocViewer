@@ -172,6 +172,11 @@
 
     // ---- THEME --------------------------------------------------------------
     theme: {
+      // Theme used while the browser has NO stored theme choice. "system" (default) follows the
+      // OS light/dark setting; "light", "dark" or "normal" start the viewer in that theme.
+      // A user's own choice in the theme menu is remembered per browser (shared OMP cookie +
+      // localStorage mirror) and always outranks this default.
+      defaultMode: 'system',
       bridge: {
         // Opt-in cross-origin theme bridge (postMessage). Empty (default) disables it.
         // List exact parent origins to sync the shared OMP theme preference with,

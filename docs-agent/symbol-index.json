@@ -13044,7 +13044,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 240,
+    "line": 242,
     "description": "Apply a mode that arrived from outside this component (another tab, the host page, or the cross-origin bridge).",
     "params": [
       {
@@ -13118,7 +13118,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 202,
+    "line": 204,
     "description": "",
     "params": [
       {
@@ -13138,7 +13138,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 259,
+    "line": 261,
     "description": "",
     "params": [
       {
@@ -13201,7 +13201,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 179,
+    "line": 181,
     "description": "Apply an explicit concrete theme.",
     "params": [
       {
@@ -13226,7 +13226,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 147,
+    "line": 149,
     "description": "Persist and apply a theme mode.",
     "params": [
       {
@@ -13251,7 +13251,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 134,
+    "line": 136,
     "description": "Persist and apply the &quot;Larger toolbar buttons&quot; choice.",
     "params": [
       {
@@ -13302,7 +13302,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 113,
+    "line": 115,
     "description": "ThemeProvider component to manage and provide theme-related state and functions.",
     "params": [
       {
@@ -13327,7 +13327,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/contexts/ThemeProvider.jsx",
-    "line": 189,
+    "line": 191,
     "description": "Toggle between the two highest-contrast explicit themes.",
     "params": [],
     "returns": [
@@ -22074,9 +22074,16 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 332,
+    "line": 337,
     "description": "Resolve the effective ODV theme mode from the shared preference, the local ODV setting and migration.",
-    "params": [],
+    "params": [
+      {
+        "name": "defaultMode",
+        "type": "OdvThemeMode",
+        "optional": true,
+        "description": ""
+      }
+    ],
     "returns": [
       {
         "type": "OdvThemeMode",
@@ -22308,7 +22315,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/ompThemePreference.js",
-    "line": 366,
+    "line": 371,
     "description": "Persist a user theme choice: system/light/dark are written to the shared preference (new revision) and mirrored locally; a stale Normal binding is cleared.",
     "params": [
       {
@@ -34337,7 +34344,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/utils/runtimeConfig.js",
-    "line": 596,
+    "line": 618,
     "description": "Resolve the allowed origins for the opt-in cross-origin theme bridge.",
     "params": [
       {
@@ -34443,6 +34450,31 @@
     "returns": [
       {
         "type": "Object",
+        "description": ""
+      }
+    ],
+    "examples": 0
+  },
+  {
+    "id": "getThemeDefaultMode",
+    "name": "getThemeDefaultMode",
+    "longname": "getThemeDefaultMode",
+    "kind": "function",
+    "scope": "global",
+    "file": "src/utils/runtimeConfig.js",
+    "line": 601,
+    "description": "Resolve the site's default theme mode — the mode used ONLY while the browser has no stored theme choice (no shared OMP_THEME_PREFERENCE and no legacy local ODV setting).",
+    "params": [
+      {
+        "name": "cfg",
+        "type": "Object",
+        "optional": true,
+        "description": ""
+      }
+    ],
+    "returns": [
+      {
+        "type": "'system'|'normal'|'light'|'dark'",
         "description": ""
       }
     ],

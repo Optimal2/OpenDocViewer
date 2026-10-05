@@ -68,6 +68,9 @@
     exposeStackTraces: false,
     showPerfOverlay: false,
     theme: {
+      // Theme used while the browser has no stored theme choice: "system" (default, follows the
+      // OS), "light", "dark" or "normal". A user's own choice always outranks this default.
+      // defaultMode: 'light',
       // Opt-in cross-origin theme bridge (postMessage). Leave empty to keep it disabled.
       // bridge: { allowedOrigins: ['https://portal.example'] },
     },
