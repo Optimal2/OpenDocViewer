@@ -621,6 +621,28 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
  * @param {Array<Object>} [props.signatureDocuments] Signed documents (utils/pdfSignatureDocuments.js).
  * @returns {React.ReactElement}
  */
+/**
+ * Locate a row's inline document-boundary header and its row shell for the sticky-header
+ * measurement. The option (`#thumbnail-N`) sits inside `.thumbnail-option-frame` (3d3a8ec);
+ * the header is the frame's previous sibling and the shell is the frame's parent. Rows without
+ * the frame (legacy DOM) resolve from the option itself. Returns nulls when the row has no
+ * boundary header.
+ *
+ * @param {Element|null|undefined} listNode
+ * @param {number} pageIndex zero-based
+ * @returns {{ header: Element|null, shell: Element|null }}
+ */
+export function resolveRowHeaderAndShell(listNode, pageIndex) {
+  const wrapper = listNode?.querySelector?.(`#thumbnail-${pageIndex + 1}`) || null;
+  const frame = wrapper?.closest?.('.thumbnail-option-frame') || wrapper;
+  const header = frame?.previousElementSibling || null;
+  const shell = frame?.parentElement || null;
+  if (!header || !shell || !header.classList?.contains('thumbnail-document-boundary')) {
+    return { header: null, shell: null };
+  }
+  return { header, shell };
+}
+
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   allPages,
   pageNumber,
@@ -1186,10 +1208,10 @@ const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
         if (documentStartIndexes[index] !== index) continue;
         const rowTop = listOffset + (index * rowHeight);
         if (rowTop + rowHeight <= viewTop || rowTop >= viewBottom) continue;
-        const wrapper = node.querySelector(`#thumbnail-${index + 1}`);
-        const header = wrapper?.previousElementSibling || null;
-        const shell = wrapper?.parentElement || null;
-        if (!header || !shell || !header.classList.contains('thumbnail-document-boundary')) continue;
+        // Measured through the frame-aware lookup; measuring from the option itself found
+        // nothing after 3d3a8ec and left headerBottom at its 24px default (review 2026-10-05).
+        const { header, shell } = resolveRowHeaderAndShell(node, index);
+        if (!header || !shell) continue;
         const headerBox = header.getBoundingClientRect();
         const measured = headerBox.bottom - shell.getBoundingClientRect().top;
         if (headerBox.height > 0 && measured > 0 && measured <= rowHeight) {

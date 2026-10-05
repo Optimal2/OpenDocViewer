@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 135,
-    "sourceLineCount": 55961,
+    "sourceLineCount": 55983,
     "docletCount": 1503,
     "documentedFileCount": 135,
     "lowConfidenceSummaryCount": 0,
@@ -888,13 +888,13 @@
     {
       "name": "src/components",
       "fileCount": 18,
-      "lineCount": 7788,
+      "lineCount": 7810,
       "docletCount": 101,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
-          "score": 58,
-          "lines": 1570,
+          "score": 63,
+          "lines": 1592,
           "incomingLocalImports": 2,
           "doclets": 27,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
@@ -9594,9 +9594,9 @@
     },
     {
       "path": "src/components/DocumentThumbnailList.jsx",
-      "lines": 1570,
+      "lines": 1592,
       "extension": ".jsx",
-      "jsdocBlockCount": 31,
+      "jsdocBlockCount": 32,
       "sourceSummary": "OpenDocViewer — Deterministic thumbnail strip.",
       "imports": [
         {
@@ -9714,9 +9714,14 @@
       ],
       "exports": [
         {
+          "name": "resolveRowHeaderAndShell",
+          "kind": "function",
+          "line": 635
+        },
+        {
           "name": "DocumentThumbnailList",
           "kind": "default",
-          "line": 1569
+          "line": 1591
         }
       ],
       "declarations": [
@@ -9801,49 +9806,54 @@
           "line": 414
         },
         {
+          "name": "resolveRowHeaderAndShell",
+          "kind": "function",
+          "line": 635
+        },
+        {
           "name": "DocumentThumbnailList",
           "kind": "component",
-          "line": 624
+          "line": 646
         },
         {
           "name": "updateMeasurements",
           "kind": "function",
-          "line": 851
+          "line": 873
         },
         {
           "name": "ranks",
           "kind": "object",
-          "line": 922
+          "line": 944
         },
         {
           "name": "isThumbnailReady",
           "kind": "function",
-          "line": 923
+          "line": 945
         },
         {
           "name": "pushIndex",
           "kind": "function",
-          "line": 926
+          "line": 948
         },
         {
           "name": "touchVisibleIndex",
           "kind": "function",
-          "line": 944
+          "line": 966
         },
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 1062
+          "line": 1084
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 1071
+          "line": 1093
         },
         {
           "name": "pump",
           "kind": "function",
-          "line": 1109
+          "line": 1131
         }
       ],
       "parseError": null,
@@ -10416,121 +10426,31 @@
           "examples": 0
         },
         {
-          "id": "DocumentThumbnailList",
-          "name": "DocumentThumbnailList",
-          "longname": "DocumentThumbnailList",
-          "kind": "constant",
+          "id": "resolveRowHeaderAndShell",
+          "name": "resolveRowHeaderAndShell",
+          "longname": "resolveRowHeaderAndShell",
+          "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 624,
-          "description": "",
+          "line": 635,
+          "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
           "params": [
             {
-              "name": "props",
-              "type": "Object",
+              "name": "listNode",
+              "type": "Element|null|undefined",
               "optional": false,
               "description": ""
             },
             {
-              "name": "props.allPages",
-              "type": "Array.<any>",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "props.pageNumber",
+              "name": "pageIndex",
               "type": "number",
               "optional": false,
-              "description": "Original 1-based selected page number in the session."
-            },
-            {
-              "name": "props.setPageNumber",
-              "type": "function",
-              "optional": false,
-              "description": "Accepts an original 1-based page number."
-            },
-            {
-              "name": "props.thumbnailsContainerRef",
-              "type": "Object",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "props.width",
-              "type": "number",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "props.selectForCompare",
-              "type": "function",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.isComparing",
-              "type": "boolean",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.comparePageNumber",
-              "type": "number|null",
-              "optional": true,
-              "description": "Original 1-based compare page number."
-            },
-            {
-              "name": "props.activePane",
-              "type": "'primary'|'compare'",
-              "optional": false,
-              "description": ""
-            },
-            {
-              "name": "props.navigationModifierState",
-              "type": "Object",
-              "optional": true,
-              "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
-            },
-            {
-              "name": "props.selectionPanelEnabled",
-              "type": "boolean",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.onHidePageFromSelection",
-              "type": "function",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.onHideDocumentFromSelection",
-              "type": "function",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.onOpenDocumentMetadata",
-              "type": "function",
-              "optional": true,
-              "description": ""
-            },
-            {
-              "name": "props.onOpenSignatures",
-              "type": "function",
-              "optional": true,
-              "description": "Opens the per-document signature dialog with the given file (sourceKey) preselected."
-            },
-            {
-              "name": "props.signatureDocuments",
-              "type": "Array.<Object>",
-              "optional": true,
-              "description": "Signed documents (utils/pdfSignatureDocuments.js)."
+              "description": "zero-based"
             }
           ],
           "returns": [
             {
-              "type": "React.ReactElement",
+              "type": "Object",
               "description": ""
             }
           ],
@@ -10543,7 +10463,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 711,
+          "line": 733,
           "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
           "params": [
             {
@@ -10568,7 +10488,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 833,
+          "line": 855,
           "description": "",
           "params": [
             {
@@ -10593,7 +10513,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1062,
+          "line": 1084,
           "description": "",
           "params": [
             {
@@ -10618,7 +10538,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1071,
+          "line": 1093,
           "description": "",
           "params": [
             {
@@ -10643,7 +10563,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1149,
+          "line": 1171,
           "description": "",
           "params": [
             {
@@ -10668,7 +10588,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1219,
+          "line": 1241,
           "description": "",
           "params": [
             {
@@ -10699,7 +10619,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1245,
+          "line": 1267,
           "description": "",
           "params": [
             {
@@ -10730,7 +10650,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1258,
+          "line": 1280,
           "description": "",
           "params": [
             {
@@ -10767,7 +10687,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 1312,
+          "line": 1334,
           "description": "",
           "params": [
             {
@@ -10920,7 +10840,7 @@
         }
       ],
       "incomingLocalImports": 2,
-      "importanceScore": 58,
+      "importanceScore": 63,
       "summary": "OpenDocViewer — Deterministic thumbnail strip.",
       "summaryConfidence": "high",
       "summarySource": "leading-jsdoc"
@@ -66344,127 +66264,6 @@
       "examples": 0
     },
     {
-      "id": "DocumentThumbnailList",
-      "name": "DocumentThumbnailList",
-      "longname": "DocumentThumbnailList",
-      "kind": "constant",
-      "scope": "global",
-      "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 624,
-      "description": "",
-      "params": [
-        {
-          "name": "props",
-          "type": "Object",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "props.allPages",
-          "type": "Array.<any>",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "props.pageNumber",
-          "type": "number",
-          "optional": false,
-          "description": "Original 1-based selected page number in the session."
-        },
-        {
-          "name": "props.setPageNumber",
-          "type": "function",
-          "optional": false,
-          "description": "Accepts an original 1-based page number."
-        },
-        {
-          "name": "props.thumbnailsContainerRef",
-          "type": "Object",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "props.width",
-          "type": "number",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "props.selectForCompare",
-          "type": "function",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.isComparing",
-          "type": "boolean",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.comparePageNumber",
-          "type": "number|null",
-          "optional": true,
-          "description": "Original 1-based compare page number."
-        },
-        {
-          "name": "props.activePane",
-          "type": "'primary'|'compare'",
-          "optional": false,
-          "description": ""
-        },
-        {
-          "name": "props.navigationModifierState",
-          "type": "Object",
-          "optional": true,
-          "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
-        },
-        {
-          "name": "props.selectionPanelEnabled",
-          "type": "boolean",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.onHidePageFromSelection",
-          "type": "function",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.onHideDocumentFromSelection",
-          "type": "function",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.onOpenDocumentMetadata",
-          "type": "function",
-          "optional": true,
-          "description": ""
-        },
-        {
-          "name": "props.onOpenSignatures",
-          "type": "function",
-          "optional": true,
-          "description": "Opens the per-document signature dialog with the given file (sourceKey) preselected."
-        },
-        {
-          "name": "props.signatureDocuments",
-          "type": "Array.<Object>",
-          "optional": true,
-          "description": "Signed documents (utils/pdfSignatureDocuments.js)."
-        }
-      ],
-      "returns": [
-        {
-          "type": "React.ReactElement",
-          "description": ""
-        }
-      ],
-      "examples": 0
-    },
-    {
       "id": "formatMetricFraction",
       "name": "formatMetricFraction",
       "longname": "formatMetricFraction",
@@ -66805,7 +66604,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1219,
+      "line": 1241,
       "description": "",
       "params": [
         {
@@ -66836,7 +66635,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1312,
+      "line": 1334,
       "description": "",
       "params": [
         {
@@ -66867,7 +66666,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1245,
+      "line": 1267,
       "description": "",
       "params": [
         {
@@ -66898,7 +66697,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1071,
+      "line": 1093,
       "description": "",
       "params": [
         {
@@ -66923,7 +66722,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1258,
+      "line": 1280,
       "description": "",
       "params": [
         {
@@ -66960,7 +66759,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1062,
+      "line": 1084,
       "description": "",
       "params": [
         {
@@ -66985,7 +66784,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 1149,
+      "line": 1171,
       "description": "",
       "params": [
         {
@@ -67035,13 +66834,44 @@
       "examples": 0
     },
     {
+      "id": "resolveRowHeaderAndShell",
+      "name": "resolveRowHeaderAndShell",
+      "longname": "resolveRowHeaderAndShell",
+      "kind": "function",
+      "scope": "global",
+      "file": "src/components/DocumentThumbnailList.jsx",
+      "line": 635,
+      "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
+      "params": [
+        {
+          "name": "listNode",
+          "type": "Element|null|undefined",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "pageIndex",
+          "type": "number",
+          "optional": false,
+          "description": "zero-based"
+        }
+      ],
+      "returns": [
+        {
+          "type": "Object",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "<anonymous>~resolveStickyHeaderRowIndex",
       "name": "resolveStickyHeaderRowIndex",
       "longname": "<anonymous>~resolveStickyHeaderRowIndex",
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 711,
+      "line": 733,
       "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
       "params": [
         {
@@ -67066,7 +66896,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 833,
+      "line": 855,
       "description": "",
       "params": [
         {

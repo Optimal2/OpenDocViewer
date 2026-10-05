@@ -1,6 +1,6 @@
 # OpenDocViewer / src/components
 
-File count: 18. Line count: 7788. JSDoc symbol count: 101.
+File count: 18. Line count: 7810. JSDoc symbol count: 101.
 
 ## src/components/CanvasRenderer.jsx
 
@@ -85,7 +85,7 @@ Symbols:
 
 OpenDocViewer — Deterministic thumbnail strip.
 
-Exports: `DocumentThumbnailList`
+Exports: `resolveRowHeaderAndShell`, `DocumentThumbnailList`
 
 Local imports: `src/contexts/viewerContext.js`, `src/logging/systemLogger.js`, `src/components/LoadingSpinner.jsx`, `src/utils/documentLoadingConfig.js`, `src/utils/publicAssetUrl.js`, `src/utils/documentMetadata.js`, `src/utils/pdfSignatureStatus.js`, `src/utils/pdfSignatureDocuments.js`, `src/utils/runtimeConfig.js`, `src/components/SignatureStatusBadge.jsx`
 
