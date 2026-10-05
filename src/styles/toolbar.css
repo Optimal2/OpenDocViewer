@@ -964,7 +964,7 @@
 .toolbar .print-selection-panel-mode-actions > button:disabled {
   background-color: var(--odv-surface);
   color: var(--text-color);
-  border: 1px dashed var(--text-color);
+  border: 1px solid color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   cursor: not-allowed;
 }
 
@@ -1036,7 +1036,7 @@
   background-color: var(--odv-surface);
   color: var(--text-color);
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   opacity: 1;
   cursor: not-allowed;
 }

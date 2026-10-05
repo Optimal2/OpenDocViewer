@@ -601,27 +601,6 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
 });
 
 /**
- * @param {Object} props
- * @param {Array<any>} props.allPages
- * @param {number} props.pageNumber - Original 1-based selected page number in the session.
- * @param {function(number): void} props.setPageNumber - Accepts an original 1-based page number.
- * @param {{ current:(HTMLElement|null) }} props.thumbnailsContainerRef
- * @param {number} props.width
- * @param {function(number, Object=): void} [props.selectForCompare]
- * @param {boolean=} props.isComparing
- * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
- * @param {'primary'|'compare'=} props.activePane
- * @param {{ shift:boolean, ctrl:boolean }=} props.navigationModifierState - Omitted in the compact thumbnail-only view; defaults to no modifier pressed.
- * @param {boolean=} props.selectionPanelEnabled
- * @param {function(number): boolean} [props.onHidePageFromSelection]
- * @param {function(number): boolean} [props.onHideDocumentFromSelection]
- * @param {function(number): boolean} [props.onOpenDocumentMetadata]
- * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures] Opens the per-document
- * signature dialog with the given file (sourceKey) preselected.
- * @param {Array<Object>} [props.signatureDocuments] Signed documents (utils/pdfSignatureDocuments.js).
- * @returns {React.ReactElement}
- */
-/**
  * Locate a row's inline document-boundary header and its row shell for the sticky-header
  * measurement. The option (`#thumbnail-N`) sits inside `.thumbnail-option-frame` (3d3a8ec);
  * the header is the frame's previous sibling and the shell is the frame's parent. Rows without
@@ -643,6 +622,27 @@ export function resolveRowHeaderAndShell(listNode, pageIndex) {
   return { header, shell };
 }
 
+/**
+ * @param {Object} props
+ * @param {Array<any>} props.allPages
+ * @param {number} props.pageNumber - Original 1-based selected page number in the session.
+ * @param {function(number): void} props.setPageNumber - Accepts an original 1-based page number.
+ * @param {{ current:(HTMLElement|null) }} props.thumbnailsContainerRef
+ * @param {number} props.width
+ * @param {function(number, Object=): void} [props.selectForCompare]
+ * @param {boolean=} props.isComparing
+ * @param {(number|null)=} props.comparePageNumber - Original 1-based compare page number.
+ * @param {'primary'|'compare'=} props.activePane
+ * @param {{ shift:boolean, ctrl:boolean }=} props.navigationModifierState - Omitted in the compact thumbnail-only view; defaults to no modifier pressed.
+ * @param {boolean=} props.selectionPanelEnabled
+ * @param {function(number): boolean} [props.onHidePageFromSelection]
+ * @param {function(number): boolean} [props.onHideDocumentFromSelection]
+ * @param {function(number): boolean} [props.onOpenDocumentMetadata]
+ * @param {function(string, HTMLElement=): boolean} [props.onOpenSignatures] Opens the per-document
+ * signature dialog with the given file (sourceKey) preselected.
+ * @param {Array<Object>} [props.signatureDocuments] Signed documents (utils/pdfSignatureDocuments.js).
+ * @returns {React.ReactElement}
+ */
 const DocumentThumbnailList = React.memo(function DocumentThumbnailList({
   allPages,
   pageNumber,

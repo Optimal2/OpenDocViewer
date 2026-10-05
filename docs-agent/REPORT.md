@@ -4,7 +4,7 @@
 
 - Files: 135
 - Source lines: 55983
-- JSDoc symbols: 1503
+- JSDoc symbols: 1504
 - Files without JSDoc doclets: 0
 - Low-confidence summaries: 0
 - Parse errors: 0

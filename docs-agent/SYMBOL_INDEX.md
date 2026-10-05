@@ -173,6 +173,7 @@
 | <code>buildCenterOutQueue</code> | function | <code>src/components/DocumentThumbnailList.jsx:161</code> | Build a center-out thumbnail warm-up order so the pane feels responsive around the user&#39;s current scroll target instead of always starting from page 1. |
 | <code>clamp</code> | function | <code>src/components/DocumentThumbnailList.jsx:74</code> |  |
 | <code>DocumentBoundaryHeader</code> | function | <code>src/components/DocumentThumbnailList.jsx:367</code> | The &amp;quot;DOK n&amp;quot; document header with the document signature symbol. |
+| <code>DocumentThumbnailList</code> | constant | <code>src/components/DocumentThumbnailList.jsx:646</code> |  |
 | <code>formatMetricFraction</code> | function | <code>src/components/DocumentThumbnailList.jsx:118</code> |  |
 | <code>formatMetricValue</code> | function | <code>src/components/DocumentThumbnailList.jsx:128</code> |  |
 | <code>getDocumentBoundaryLabel</code> | function | <code>src/components/DocumentThumbnailList.jsx:326</code> |  |
@@ -191,7 +192,7 @@
 | <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentThumbnailList.jsx:1084</code> |  |
 | <code>&lt;anonymous&gt;~handleScroll</code> | constant | <code>src/components/DocumentThumbnailList.jsx:1171</code> |  |
 | <code>isIndexInRange</code> | function | <code>src/components/DocumentThumbnailList.jsx:148</code> |  |
-| <code>resolveRowHeaderAndShell</code> | function | <code>src/components/DocumentThumbnailList.jsx:635</code> | Locate a row&#39;s inline document-boundary header and its row shell for the sticky-header measurement. |
+| <code>resolveRowHeaderAndShell</code> | function | <code>src/components/DocumentThumbnailList.jsx:614</code> | Locate a row&#39;s inline document-boundary header and its row shell for the sticky-header measurement. |
 | <code>&lt;anonymous&gt;~resolveStickyHeaderRowIndex</code> | constant | <code>src/components/DocumentThumbnailList.jsx:733</code> | The sticky header shows the current document only once that document&#39;s inline header has scrolled out of view, so the two are never visible together. |
 | <code>&lt;anonymous&gt;~setContainerRef</code> | constant | <code>src/components/DocumentThumbnailList.jsx:855</code> |  |
 | <code>shouldWarmAllThumbnails</code> | function | <code>src/components/DocumentThumbnailList.jsx:83</code> |  |

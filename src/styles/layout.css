@@ -317,7 +317,7 @@
   background: var(--odv-surface);
   color: var(--text-color);
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   opacity: 1;
   cursor: not-allowed;
 }
@@ -429,14 +429,14 @@
 .print-selection-panel-preview-button:disabled {
   opacity: 1;
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   color: var(--text-color);
   cursor: not-allowed;
 }
 
 .print-selection-panel-preview-button:disabled:hover,
 .print-selection-panel-preview-button:disabled:focus-visible {
-  border-color: var(--border-color);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   background: var(--button-background, var(--background-color));
   color: var(--text-color);
 }
@@ -795,7 +795,7 @@
 .print-selection-transfer-buttons > button:disabled {
   opacity: 1;
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   color: var(--text-color);
   cursor: not-allowed;
 }
@@ -944,7 +944,7 @@
 .print-selection-lightbox-actions > button:disabled {
   opacity: 1;
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   color: var(--text-color);
   cursor: not-allowed;
 }
@@ -981,7 +981,7 @@
 
 .print-selection-lightbox-actions > button:disabled:hover,
 .print-selection-lightbox-actions > button:disabled:focus-visible {
-  border-color: var(--border-color);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   background: color-mix(in srgb, var(--background-color) 88%, transparent 12%);
   color: var(--text-color);
   filter: none;
@@ -1008,7 +1008,7 @@
 .print-selection-lightbox-step:disabled {
   opacity: 1;
   border-style: solid;
-  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  border-color: color-mix(in srgb, var(--odv-border) 55%, transparent 45%);
   color: var(--text-color);
   cursor: not-allowed;
 }

@@ -89,7 +89,7 @@
   "stats": {
     "fileCount": 135,
     "sourceLineCount": 55983,
-    "docletCount": 1503,
+    "docletCount": 1504,
     "documentedFileCount": 135,
     "lowConfidenceSummaryCount": 0,
     "parseErrorCount": 0,
@@ -889,14 +889,14 @@
       "name": "src/components",
       "fileCount": 18,
       "lineCount": 7810,
-      "docletCount": 101,
+      "docletCount": 102,
       "importantFiles": [
         {
           "path": "src/components/DocumentThumbnailList.jsx",
           "score": 63,
           "lines": 1592,
           "incomingLocalImports": 2,
-          "doclets": 27,
+          "doclets": 28,
           "summary": "OpenDocViewer — Deterministic thumbnail strip.",
           "summaryConfidence": "high"
         },
@@ -9716,7 +9716,7 @@
         {
           "name": "resolveRowHeaderAndShell",
           "kind": "function",
-          "line": 635
+          "line": 614
         },
         {
           "name": "DocumentThumbnailList",
@@ -9808,7 +9808,7 @@
         {
           "name": "resolveRowHeaderAndShell",
           "kind": "function",
-          "line": 635
+          "line": 614
         },
         {
           "name": "DocumentThumbnailList",
@@ -10432,7 +10432,7 @@
           "kind": "function",
           "scope": "global",
           "file": "src/components/DocumentThumbnailList.jsx",
-          "line": 635,
+          "line": 614,
           "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
           "params": [
             {
@@ -10451,6 +10451,127 @@
           "returns": [
             {
               "type": "Object",
+              "description": ""
+            }
+          ],
+          "examples": 0
+        },
+        {
+          "id": "DocumentThumbnailList",
+          "name": "DocumentThumbnailList",
+          "longname": "DocumentThumbnailList",
+          "kind": "constant",
+          "scope": "global",
+          "file": "src/components/DocumentThumbnailList.jsx",
+          "line": 646,
+          "description": "",
+          "params": [
+            {
+              "name": "props",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.allPages",
+              "type": "Array.<any>",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.pageNumber",
+              "type": "number",
+              "optional": false,
+              "description": "Original 1-based selected page number in the session."
+            },
+            {
+              "name": "props.setPageNumber",
+              "type": "function",
+              "optional": false,
+              "description": "Accepts an original 1-based page number."
+            },
+            {
+              "name": "props.thumbnailsContainerRef",
+              "type": "Object",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.width",
+              "type": "number",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.selectForCompare",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.isComparing",
+              "type": "boolean",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.comparePageNumber",
+              "type": "number|null",
+              "optional": true,
+              "description": "Original 1-based compare page number."
+            },
+            {
+              "name": "props.activePane",
+              "type": "'primary'|'compare'",
+              "optional": false,
+              "description": ""
+            },
+            {
+              "name": "props.navigationModifierState",
+              "type": "Object",
+              "optional": true,
+              "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
+            },
+            {
+              "name": "props.selectionPanelEnabled",
+              "type": "boolean",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.onHidePageFromSelection",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.onHideDocumentFromSelection",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.onOpenDocumentMetadata",
+              "type": "function",
+              "optional": true,
+              "description": ""
+            },
+            {
+              "name": "props.onOpenSignatures",
+              "type": "function",
+              "optional": true,
+              "description": "Opens the per-document signature dialog with the given file (sourceKey) preselected."
+            },
+            {
+              "name": "props.signatureDocuments",
+              "type": "Array.<Object>",
+              "optional": true,
+              "description": "Signed documents (utils/pdfSignatureDocuments.js)."
+            }
+          ],
+          "returns": [
+            {
+              "type": "React.ReactElement",
               "description": ""
             }
           ],
@@ -66264,6 +66385,127 @@
       "examples": 0
     },
     {
+      "id": "DocumentThumbnailList",
+      "name": "DocumentThumbnailList",
+      "longname": "DocumentThumbnailList",
+      "kind": "constant",
+      "scope": "global",
+      "file": "src/components/DocumentThumbnailList.jsx",
+      "line": 646,
+      "description": "",
+      "params": [
+        {
+          "name": "props",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.allPages",
+          "type": "Array.<any>",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.pageNumber",
+          "type": "number",
+          "optional": false,
+          "description": "Original 1-based selected page number in the session."
+        },
+        {
+          "name": "props.setPageNumber",
+          "type": "function",
+          "optional": false,
+          "description": "Accepts an original 1-based page number."
+        },
+        {
+          "name": "props.thumbnailsContainerRef",
+          "type": "Object",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.width",
+          "type": "number",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.selectForCompare",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.isComparing",
+          "type": "boolean",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.comparePageNumber",
+          "type": "number|null",
+          "optional": true,
+          "description": "Original 1-based compare page number."
+        },
+        {
+          "name": "props.activePane",
+          "type": "'primary'|'compare'",
+          "optional": false,
+          "description": ""
+        },
+        {
+          "name": "props.navigationModifierState",
+          "type": "Object",
+          "optional": true,
+          "description": "Omitted in the compact thumbnail-only view; defaults to no modifier pressed."
+        },
+        {
+          "name": "props.selectionPanelEnabled",
+          "type": "boolean",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.onHidePageFromSelection",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.onHideDocumentFromSelection",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.onOpenDocumentMetadata",
+          "type": "function",
+          "optional": true,
+          "description": ""
+        },
+        {
+          "name": "props.onOpenSignatures",
+          "type": "function",
+          "optional": true,
+          "description": "Opens the per-document signature dialog with the given file (sourceKey) preselected."
+        },
+        {
+          "name": "props.signatureDocuments",
+          "type": "Array.<Object>",
+          "optional": true,
+          "description": "Signed documents (utils/pdfSignatureDocuments.js)."
+        }
+      ],
+      "returns": [
+        {
+          "type": "React.ReactElement",
+          "description": ""
+        }
+      ],
+      "examples": 0
+    },
+    {
       "id": "formatMetricFraction",
       "name": "formatMetricFraction",
       "longname": "formatMetricFraction",
@@ -66840,7 +67082,7 @@
       "kind": "function",
       "scope": "global",
       "file": "src/components/DocumentThumbnailList.jsx",
-      "line": 635,
+      "line": 614,
       "description": "Locate a row's inline document-boundary header and its row shell for the sticky-header measurement.",
       "params": [
         {
