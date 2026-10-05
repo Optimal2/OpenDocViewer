@@ -1121,6 +1121,27 @@
 .odv-manual-content {
   color: inherit;
   line-height: 1.6;
+  /* The manual HTML (ODV-HELP) reads these aliases with light-theme hex fallbacks; ODV's
+     theme tokens have other names, so without the aliases a dark theme showed dark text on a
+     dark surface (2026-10-05). Map them to the live theme here, never in the manual files. */
+  --odv-text: var(--text-color);
+  --odv-text-strong: var(--text-color-strong);
+  --odv-muted-text: var(--text-muted-color);
+}
+
+/* Fixed light backgrounds inside the manual (tips, warnings, kbd) become theme-aware tints. */
+.odv-manual-content .odv-manual .tip {
+  background: color-mix(in srgb, #15803d 14%, var(--odv-surface) 86%);
+}
+
+.odv-manual-content .odv-manual .warning {
+  background: color-mix(in srgb, #b25d00 16%, var(--odv-surface) 84%);
+}
+
+.odv-manual-content .odv-manual kbd {
+  background: var(--odv-surface-elevated);
+  border-color: var(--odv-border);
+  color: var(--text-color-strong);
 }
 
 .odv-manual-content :first-child {
@@ -1197,6 +1218,15 @@
   font: inherit;
   font-size: 14px;
   padding: 8px 0;
+}
+
+/* The browser's own clear control for type="search" doubled ODV's clear button (two crosses,
+   one only on hover/focus — 2026-10-05). ODV's .odv-manual-searchbar-clear is the only one. */
+.odv-manual-searchbar-input::-webkit-search-cancel-button,
+.odv-manual-searchbar-input::-webkit-search-decoration {
+  -webkit-appearance: none;
+  appearance: none;
+  display: none;
 }
 
 .odv-manual-searchbar-input:focus {

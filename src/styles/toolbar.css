@@ -1035,7 +1035,8 @@
 .toolbar .print-selection-secondary:disabled {
   background-color: var(--odv-surface);
   color: var(--text-color);
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
   opacity: 1;
   cursor: not-allowed;
 }

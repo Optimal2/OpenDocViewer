@@ -316,7 +316,8 @@
 .print-selection-secondary:disabled {
   background: var(--odv-surface);
   color: var(--text-color);
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
   opacity: 1;
   cursor: not-allowed;
 }
@@ -427,7 +428,9 @@
 
 .print-selection-panel-preview-button:disabled {
   opacity: 1;
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  color: var(--text-color);
   cursor: not-allowed;
 }
 
@@ -791,7 +794,9 @@
 
 .print-selection-transfer-buttons > button:disabled {
   opacity: 1;
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  color: var(--text-color);
   cursor: not-allowed;
 }
 
@@ -938,7 +943,9 @@
 
 .print-selection-lightbox-actions > button:disabled {
   opacity: 1;
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  color: var(--text-color);
   cursor: not-allowed;
 }
 
@@ -1000,7 +1007,9 @@
 
 .print-selection-lightbox-step:disabled {
   opacity: 1;
-  border-style: dashed;
+  border-style: solid;
+  border-color: color-mix(in srgb, var(--border-color) 55%, transparent 45%);
+  color: var(--text-color);
   cursor: not-allowed;
 }
 

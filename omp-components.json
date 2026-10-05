@@ -1,7 +1,7 @@
 {
   "manifestVersion": 1,
   "repositoryKey": "opendocviewer",
-  "repositoryVersion": "2.4.151",
+  "repositoryVersion": "2.4.152",
   "moduleDefinitions": [
     {
       "moduleKey": "opendocviewer",
