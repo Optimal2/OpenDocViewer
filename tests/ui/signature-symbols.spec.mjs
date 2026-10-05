@@ -69,7 +69,7 @@ async function loadSession(page, siteConfig = null) {
  */
 async function openSession(page) {
   await loadSession(page);
-  await expect(page.locator('#thumbnail-4 .odv-signature-badge--thumbnail')).toBeVisible();
+  await expect(page.locator('[data-thumbnail-row="thumbnail-4"] .odv-signature-badge--thumbnail')).toBeVisible();
 }
 
 /** @param {{x:number,y:number,width:number,height:number}} a @param {{x:number,y:number,width:number,height:number}} b */
@@ -79,8 +79,8 @@ function intersects(a, b) {
 
 test('D2 page symbol is on every signed page, centred at the top and clear of the compare markers', async ({ page }) => {
   await openSession(page);
-  await expect(page.locator('#thumbnail-1 .odv-signature-badge--thumbnail')).toBeVisible();
-  await expect(page.locator('#thumbnail-2 .odv-signature-badge--thumbnail')).toBeVisible();
+  await expect(page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail')).toBeVisible();
+  await expect(page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail')).toBeVisible();
   await expect(page.locator('#thumbnail-3 .odv-signature-badge')).toHaveCount(0);
 
   // Compare mode with BOTH markers (L and R) on the signed page 1.
@@ -90,7 +90,7 @@ test('D2 page symbol is on every signed page, centred at the top and clear of th
   await expect(markers.locator('.thumbnail-selection-badge.primary')).toBeVisible();
   await expect(markers.locator('.thumbnail-selection-badge.compare')).toBeVisible();
 
-  const badge = page.locator('#thumbnail-1 .odv-signature-badge--thumbnail');
+  const badge = page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail');
   const badgeBox = await badge.boundingBox();
   const markerBox = await markers.boundingBox();
   const stageBox = await page.locator('#thumbnail-1 .thumbnail-image-stage').boundingBox();
@@ -107,7 +107,7 @@ test('D2 page symbol is on every signed page, centred at the top and clear of th
 
 test('D2 page symbol is discreet at rest and fully opaque on hover and keyboard focus', async ({ page }) => {
   await openSession(page);
-  const badge = page.locator('#thumbnail-2 .odv-signature-badge--thumbnail');
+  const badge = page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail');
   const opacity = () => badge.evaluate((node) => Number(getComputedStyle(node).opacity));
   const rest = await opacity();
   expect(rest).toBeGreaterThan(0.4);
@@ -161,7 +161,7 @@ test('D1 document symbol aggregates the files and opens the dialog with file tab
 
   // A page symbol opens the same document dialog with its own file preselected, named in the
   // group heading with its page range inside the document.
-  await page.locator('#thumbnail-2 .odv-signature-badge--thumbnail').click();
+  await page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail').click();
   const fromPage = page.getByRole('dialog');
   await expect(fromPage.getByRole('tab').nth(1)).toHaveAttribute('aria-selected', 'true');
   await expect(fromPage.getByRole('tab').nth(0)).toHaveAttribute('aria-selected', 'false');
@@ -204,10 +204,18 @@ test('D3 toolbar overview lists signed documents and navigates without closing',
   await expect(rows.nth(1)).toHaveAttribute('aria-current', 'true');
 
   // "Details" opens the per-document dialog on top; Escape closes only that one.
+  // While stacked, the underlying overview stays mounted but goes inert and
+  // aria-hidden, so assistive technology only ever sees one modal dialog.
   await rows.nth(1).locator('.odv-signature-overview-details').click();
-  await expect(page.getByRole('dialog')).toHaveCount(2);
+  await expect(page.getByRole('dialog')).toHaveCount(1);
+  const overviewBackdrop = page.locator('.odv-signature-backdrop').first();
+  await expect(overviewBackdrop).toHaveAttribute('aria-hidden', 'true');
+  await expect(overviewBackdrop).toHaveAttribute('inert', '');
+  await expect(page.locator('.odv-signature-backdrop')).toHaveCount(2);
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(1);
+  await expect(overviewBackdrop).not.toHaveAttribute('aria-hidden', 'true');
+  await expect(overviewBackdrop).not.toHaveAttribute('inert', '');
   await expect(rows.nth(1).locator('.odv-signature-overview-details')).toBeFocused();
 
   await page.keyboard.press('Escape');
@@ -220,4 +228,20 @@ test('pdfSignatures.thumbnailPageBadge=false hides only the page symbols', async
   await expect(page.locator('.odv-signature-badge--document')).toHaveCount(2);
   await expect(page.locator('.odv-signature-overview-button')).toHaveCount(1);
   await expect(page.locator('.odv-signature-badge--thumbnail')).toHaveCount(0);
+});
+
+test('A11y: the focusable signature symbols are not nested inside role="option"', async ({ page }) => {
+  await openSession(page);
+  // ARIA makes the children of an option presentational, so a focusable button
+  // inside it may vanish from screen-reader browse mode (review finding F1,
+  // 2026-10-03). The page symbol must be a sibling of the option.
+  await expect(page.locator('#thumbnail-1[role="option"] .odv-signature-badge')).toHaveCount(0);
+  await expect(page.locator('#thumbnail-2[role="option"] .odv-signature-badge')).toHaveCount(0);
+  await expect(page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail')).toBeVisible();
+  // The document header sits between the options inside the listbox, so it is a
+  // labelled group: a legal listbox descendant that keeps its symbol reachable.
+  const header = page.locator('.thumbnails-static-list .thumbnail-document-boundary.start').first();
+  await expect(header).toHaveAttribute('role', 'group');
+  await expect(header).toHaveAttribute('aria-label', /Document 1/);
+  await expect(header.locator('.odv-signature-badge--document')).toBeVisible();
 });

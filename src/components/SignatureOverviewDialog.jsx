@@ -12,7 +12,9 @@
  * Accessibility mirrors SignatureDetailsDialog: modal dialog semantics, focus
  * moves into the dialog (the active or first row), Tab is trapped inside,
  * ArrowUp/ArrowDown/Home/End move between rows, Escape closes, and focus
- * returns to the toolbar button.
+ * returns to the toolbar button. While the details dialog is open on top
+ * (`suspended`), the overview keeps rendering but is inert and aria-hidden, so
+ * assistive technology only ever sees one modal dialog at a time.
  */
 
 import React, { useEffect, useRef } from 'react';
@@ -144,6 +146,8 @@ export default function SignatureOverviewDialog({
       role="dialog"
       aria-modal="true"
       aria-labelledby="odv-signature-overview-title"
+      aria-hidden={suspended ? 'true' : undefined}
+      inert={suspended ? true : undefined}
       data-odv-shortcuts="off"
       onMouseDown={(event) => {
         if (event.target !== event.currentTarget || suspendedRef.current) return;

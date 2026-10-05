@@ -38,7 +38,9 @@ export const FIXTURE_NAMES = [
   'corrupt-contents.pdf',
   'certified-docmdp.pdf',
   'doc-timestamp-rfc3161.pdf',
-  'pkcs7-sha1.pdf'
+  'pkcs7-sha1.pdf',
+  'visible-appearance.pdf',
+  'invisible-appearance.pdf'
 ];
 
 const OID_DATA = '1.2.840.113549.1.7.1';
@@ -189,7 +191,18 @@ function sigDictBody({ subFilter, nameHex, nameLiteral, m, reason, location, ext
 
 const SAMPLE_CONTENT_STREAM = 'BT /F1 20 Tf 60 780 Td (ODV SIGNATURE FIXTURE SAMPLE TEXT 0123456789) Tj ET';
 
-function baseSignedPdf({ fieldName, visible, sigOptions }) {
+/**
+ * Appearance stream (/AP /N) for the visible-signature fixture: a solid blue
+ * banner with white text, sized to match the widget rect [60 640 320 700]
+ * (260x60 user units). The colour is deliberately distinct so rendering tests
+ * can count "signature blue" pixels in the rasterized page.
+ */
+export const SIGNATURE_APPEARANCE_STREAM = '0.12 0.31 0.85 rg\n0 0 260 60 re f\n1 1 1 rg\nBT /F1 16 Tf 12 24 Td (Signed by ODV Fixture Signer) Tj ET';
+
+/** Widget rect shared by the appearance fixtures, in PDF user units. */
+export const SIGNATURE_APPEARANCE_RECT = [60, 640, 320, 700];
+
+function baseSignedPdf({ fieldName, visible, appearance = false, sigOptions }) {
   const builder = new PdfBuilder();
   builder.set(1, '<< /Type /Catalog /Pages 2 0 R /AcroForm 5 0 R >>');
   builder.set(2, '<< /Type /Pages /Kids [3 0 R] /Count 1 >>');
@@ -197,10 +210,14 @@ function baseSignedPdf({ fieldName, visible, sigOptions }) {
   builder.set(4, '<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>');
   builder.set(5, '<< /Fields [7 0 R] /SigFlags 3 >>');
   builder.set(6, `<< /Length ${SAMPLE_CONTENT_STREAM.length} >>\nstream\n${SAMPLE_CONTENT_STREAM}\nendstream`);
-  const rect = visible ? '[60 640 320 700]' : '[0 0 0 0]';
+  const rect = visible ? `[${SIGNATURE_APPEARANCE_RECT.join(' ')}]` : '[0 0 0 0]';
   const flags = visible ? '' : ' /F 128';
-  builder.set(7, `<< /Type /Annot /Subtype /Widget /FT /Sig /T (${escapePdfLiteral(fieldName)}) /V 8 0 R /P 3 0 R /Rect ${rect}${flags} >>`);
+  const appearanceRef = appearance ? ' /AP << /N 10 0 R >>' : '';
+  builder.set(7, `<< /Type /Annot /Subtype /Widget /FT /Sig /T (${escapePdfLiteral(fieldName)}) /V 8 0 R /P 3 0 R /Rect ${rect}${flags}${appearanceRef} >>`);
   builder.set(8, sigDictBody(sigOptions));
+  if (appearance) {
+    builder.set(10, `<< /Type /XObject /Subtype /Form /BBox [0 0 ${SIGNATURE_APPEARANCE_RECT[2] - SIGNATURE_APPEARANCE_RECT[0]} ${SIGNATURE_APPEARANCE_RECT[3] - SIGNATURE_APPEARANCE_RECT[1]}] /Matrix [1 0 0 1 0 0] /Resources << /Font << /F1 4 0 R >> >> /Length ${SIGNATURE_APPEARANCE_STREAM.length} >>\nstream\n${SIGNATURE_APPEARANCE_STREAM}\nendstream`);
+  }
   builder.set(9, `<< /Producer (ODV signature fixtures) /CreationDate (${pdfDateString(FIXTURE_SIGNING_TIME)}) >>`);
   return builder;
 }
@@ -717,6 +734,45 @@ export async function createSignatureFixtures() {
     });
     fixtures['pkcs7-sha1.pdf'] = signed;
   }
+
+  // 13. Visible signature appearance: the widget carries an /AP form XObject
+  //     (blue banner, SIGNATURE_APPEARANCE_STREAM) inside the signed revision.
+  //     The display layer must paint it when rendering with pdfjs' default
+  //     annotation mode; rendering tests count the blue pixels.
+  fixtures['visible-appearance.pdf'] = await signBasePdf(pki, {
+    cmsSigner: pki.rsa,
+    sigOptions: {
+      fieldName: 'VisibleSig',
+      visible: true,
+      appearance: true,
+      sigOptions: {
+        subFilter: 'adbe.pkcs7.detached',
+        nameLiteral: 'ODV Fixture Signer',
+        m: pdfDateString(FIXTURE_SIGNING_TIME),
+        reason: 'Visible appearance fixture',
+        location: 'Test'
+      }
+    }
+  });
+
+  // 14. Invisible signature: the widget has a non-zero rect (same rect as the
+  //     visible fixture) but NO /AP appearance stream, so the display layer
+  //     must paint nothing in the rect. Complements cades-ecdsa-invisible.pdf,
+  //     which covers the classic zero-rect + hidden-flag shape.
+  fixtures['invisible-appearance.pdf'] = await signBasePdf(pki, {
+    cmsSigner: pki.rsa,
+    sigOptions: {
+      fieldName: 'InvisibleSig',
+      visible: true,
+      sigOptions: {
+        subFilter: 'adbe.pkcs7.detached',
+        nameLiteral: 'ODV Fixture Signer',
+        m: pdfDateString(FIXTURE_SIGNING_TIME),
+        reason: 'Invisible signature fixture (no appearance)',
+        location: 'Test'
+      }
+    }
+  });
 
   return fixtures;
 }

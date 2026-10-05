@@ -351,6 +351,10 @@ function getDocumentBoundaryTitle(t, documentContext) {
  * start of each document and the sticky header shown while scrolling render through this one
  * component, so they share typography, size, spacing and the symbol's behaviour.
  *
+ * The header sits inside the thumbnail strip's role="listbox" container, so it carries
+ * role="group" with an accessible name: a listbox may only own options and groups, and the
+ * document signature symbol is a tab stop that must not float bare between the options.
+ *
  * @param {Object} props
  * @param {{ hasMultipleDocuments:boolean, documentNumber:number, totalDocuments:number }} props.documentContext
  * @param {(*|null)} [props.documentSignatures] Signed-document entry; shows the symbol when set.
@@ -366,6 +370,8 @@ function DocumentBoundaryHeader({ documentContext, documentSignatures = null, on
     <div
       className={`thumbnail-document-boundary start${sticky ? ' is-sticky' : ''}`}
       data-document-number={documentContext.documentNumber}
+      role="group"
+      aria-label={getDocumentBoundaryTitle(t, documentContext) || undefined}
       aria-hidden={hidden ? 'true' : undefined}
       inert={hidden ? true : undefined}
     >
@@ -501,88 +507,93 @@ const ThumbnailRow = React.memo(function ThumbnailRow({
         />
       ) : null}
 
-      <div
-        id={rowId}
-        className={wrapperClassName}
-        onClick={(event) => onActivate(originalPageNumber, event)}
-        onKeyDown={(event) => onKeyActivate(event, originalPageNumber)}
-        onContextMenu={(event) => onOpenContextMenu(event, originalPageNumber, page)}
-        role="option"
-        tabIndex={isFocusedSelected ? 0 : -1}
-        aria-label={rowTitle}
-        aria-selected={isFocusedSelected}
-      >
+      <div className="thumbnail-option-frame" data-thumbnail-row={rowId}>
         <div
-          className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
-          style={{ height: `${imageStageHeight}px` }}
+          id={rowId}
+          className={wrapperClassName}
+          onClick={(event) => onActivate(originalPageNumber, event)}
+          onKeyDown={(event) => onKeyActivate(event, originalPageNumber)}
+          onContextMenu={(event) => onOpenContextMenu(event, originalPageNumber, page)}
+          role="option"
+          tabIndex={isFocusedSelected ? 0 : -1}
+          aria-label={rowTitle}
+          aria-selected={isFocusedSelected}
         >
-          {metricBadges.map((metric) => (
-            <span
-              key={metric.key}
-              className={`thumbnail-overlay-badge metric-${metric.key} position-${metric.position}`}
-              title={metric.title}
-            >
-              <span className="thumbnail-overlay-badge-prefix">{metric.prefix}</span>
-              <span className="thumbnail-overlay-badge-value">{metric.value}</span>
-            </span>
-          ))}
+          <div
+            className={`thumbnail-image-stage ${thumbnailStatus === 0 ? 'is-loading' : ''}`}
+            style={{ height: `${imageStageHeight}px` }}
+          >
+            {metricBadges.map((metric) => (
+              <span
+                key={metric.key}
+                className={`thumbnail-overlay-badge metric-${metric.key} position-${metric.position}`}
+                title={metric.title}
+              >
+                <span className="thumbnail-overlay-badge-prefix">{metric.prefix}</span>
+                <span className="thumbnail-overlay-badge-value">{metric.value}</span>
+              </span>
+            ))}
 
-          {showSignatureBadge && reportHasSignatures(signatureReport) && typeof onOpenSignatures === 'function' ? (
-            <SignatureStatusBadge
-              variant="thumbnail"
-              report={signatureReport}
-              onOpen={(element) => onOpenSignatures(String(page?.sourceKey || ''), element)}
-            />
-          ) : null}
+            {isCompareMode && (isPrimarySelected || isCompareSelected) ? (
+              <div className="thumbnail-selection-badges overlay-corner" aria-hidden="true">
+                {isPrimarySelected ? (
+                  <span
+                    className="thumbnail-selection-badge primary"
+                    title={t('thumbnails.leftPaneBadgeTooltip', { defaultValue: 'Left pane in compare view' })}
+                  >
+                    {t('thumbnails.leftPaneBadgeShort', { defaultValue: 'L' })}
+                  </span>
+                ) : null}
+                {isCompareSelected ? (
+                  <span
+                    className="thumbnail-selection-badge compare"
+                    title={t('thumbnails.rightPaneBadgeTooltip', { defaultValue: 'Right pane in compare view' })}
+                  >
+                    {t('thumbnails.rightPaneBadgeShort', { defaultValue: 'R' })}
+                  </span>
+                ) : null}
+              </div>
+            ) : null}
 
-          {isCompareMode && (isPrimarySelected || isCompareSelected) ? (
-            <div className="thumbnail-selection-badges overlay-corner" aria-hidden="true">
-              {isPrimarySelected ? (
-                <span
-                  className="thumbnail-selection-badge primary"
-                  title={t('thumbnails.leftPaneBadgeTooltip', { defaultValue: 'Left pane in compare view' })}
-                >
-                  {t('thumbnails.leftPaneBadgeShort', { defaultValue: 'L' })}
-                </span>
-              ) : null}
-              {isCompareSelected ? (
-                <span
-                  className="thumbnail-selection-badge compare"
-                  title={t('thumbnails.rightPaneBadgeTooltip', { defaultValue: 'Right pane in compare view' })}
-                >
-                  {t('thumbnails.rightPaneBadgeShort', { defaultValue: 'R' })}
-                </span>
-              ) : null}
-            </div>
-          ) : null}
-
-          {thumbnailStatus === 0 && <LoadingSpinner />}
-          {thumbnailStatus === -1 && (
-            <img
-              src={getPublicAssetUrl('lost.png')}
-              alt={t('thumbnails.pageFailedAlt', {
-                page: visiblePageNumber,
-                defaultValue: `Page ${visiblePageNumber} failed to load`,
-              })}
-              className="thumbnail thumbnail-fallback"
-              decoding="async"
-              draggable={false}
-            />
-          )}
-          {thumbnailStatus === 1 && thumbnailUrl && (
-            <img
-              src={thumbnailUrl}
-              alt={t('viewer.pageAlt', {
-                page: visiblePageNumber,
-                defaultValue: `Page ${visiblePageNumber}`,
-              })}
-              className="thumbnail"
-              decoding="async"
-              draggable={false}
-              onLoad={() => onImageLoad(getSessionPageIndex(page, index), usesFullAsset ? 'full' : 'thumbnail')}
-            />
-          )}
+            {thumbnailStatus === 0 && <LoadingSpinner />}
+            {thumbnailStatus === -1 && (
+              <img
+                src={getPublicAssetUrl('lost.png')}
+                alt={t('thumbnails.pageFailedAlt', {
+                  page: visiblePageNumber,
+                  defaultValue: `Page ${visiblePageNumber} failed to load`,
+                })}
+                className="thumbnail thumbnail-fallback"
+                decoding="async"
+                draggable={false}
+              />
+            )}
+            {thumbnailStatus === 1 && thumbnailUrl && (
+              <img
+                src={thumbnailUrl}
+                alt={t('viewer.pageAlt', {
+                  page: visiblePageNumber,
+                  defaultValue: `Page ${visiblePageNumber}`,
+                })}
+                className="thumbnail"
+                decoding="async"
+                draggable={false}
+                onLoad={() => onImageLoad(getSessionPageIndex(page, index), usesFullAsset ? 'full' : 'thumbnail')}
+              />
+            )}
+          </div>
         </div>
+
+        {/* The page signature symbol is a tab stop of its own, so it must NOT live
+            inside role="option" (ARIA treats option children as presentational).
+            It is absolutely positioned over the image stage by dialogs.css. */}
+        {showSignatureBadge && reportHasSignatures(signatureReport) && typeof onOpenSignatures === 'function' ? (
+          <SignatureStatusBadge
+            variant="thumbnail"
+            report={signatureReport}
+            onOpen={(element) => onOpenSignatures(String(page?.sourceKey || ''), element)}
+          />
+        ) : null}
       </div>
 
     </div>

@@ -1752,6 +1752,16 @@ canvas {
   padding: 4px 5px 6px;
 }
 
+/* Positioned box spanning the whole option row. Interactive per-row controls that
+   must not live inside role="option" (the page signature symbol) are siblings of
+   the option inside this frame and anchor against it. Mirrors the wrapper's own
+   sizing so the wrapper keeps filling the row in both block and flex shells. */
+.thumbnail-option-frame {
+  position: relative;
+  width: 100%;
+  height: 100%;
+}
+
 .thumbnail-wrapper {
   width: 100%;
   height: 100%;

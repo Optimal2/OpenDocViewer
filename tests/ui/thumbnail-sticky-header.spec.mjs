@@ -50,7 +50,7 @@ function headerMetrics(header) {
 test('sticky document header appears only after the inline header scrolled out and has a working symbol', async ({ page }) => {
   await page.setViewportSize({ width: 1400, height: 520 });
   await loadSession(page);
-  await expect(page.locator('#thumbnail-4 .odv-signature-badge--thumbnail')).toBeVisible();
+  await expect(page.locator('[data-thumbnail-row="thumbnail-4"] .odv-signature-badge--thumbnail')).toBeVisible();
   const strip = page.locator('.thumbnails-container');
 
   // scrollTop 0: exactly one DOK 1 header, the inline one; no sticky header at all.

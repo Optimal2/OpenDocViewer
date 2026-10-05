@@ -24,7 +24,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/DocumentMetadataOverlayDialog.jsx</code> | 191 | 1 | 2 | high | Document metadata overlay shown from viewer-owned context menus. |
 | <code>src/components/DocumentRender.jsx</code> | 1135 | 1 | 25 | high | OpenDocViewer — Active page renderer. |
 | <code>src/components/DocumentSelectionPanel.jsx</code> | 335 | 0 | 2 | high | Hierarchical page-selection editor shown inside the thumbnail pane. |
-| <code>src/components/DocumentThumbnailList.jsx</code> | 1559 | 2 | 27 | high | OpenDocViewer — Deterministic thumbnail strip. |
+| <code>src/components/DocumentThumbnailList.jsx</code> | 1570 | 2 | 27 | high | OpenDocViewer — Deterministic thumbnail strip. |
 | <code>src/components/DocumentToolbar/AboutOverlayDialog.jsx</code> | 463 | 1 | 3 | high | Small About dialog for version/build/support information. |
 | <code>src/components/DocumentToolbar/DocumentToolbar.jsx</code> | 2175 | 1 | 31 | high | Main toolbar UI for page navigation, zoom, comparison, image adjustments, help, language, and print entry. |
 | <code>src/components/DocumentToolbar/HelpMenuButton.jsx</code> | 110 | 1 | 2 | high | Toolbar help menu with entries for the manual and About dialog. |
@@ -59,7 +59,7 @@ Files are sorted by path. Incoming imports and doclet counts are useful signals 
 | <code>src/components/Resizer.jsx</code> | 111 | 1 | 8 | high | OpenDocViewer — Resizer Small, focusable separator used to let users resize adjacent panels \(e.g., sidebar/content\) via mouse drag or keyboard interaction. |
 | <code>src/components/SignatureDetailsDialog.jsx</code> | 447 | 1 | 7 | high | Signature details dialog \(browser integrity and optional gateway trust\). |
 | <code>src/components/SignatureOverviewButton.jsx</code> | 64 | 1 | 2 | high | Toolbar signature overview button. |
-| <code>src/components/SignatureOverviewDialog.jsx</code> | 282 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
+| <code>src/components/SignatureOverviewDialog.jsx</code> | 286 | 1 | 3 | high | Signature overview dialog, opened from the toolbar overview button. |
 | <code>src/components/SignatureStatusBadge.jsx</code> | 92 | 1 | 2 | high | Small signature symbol shown next to a document&#39;s &quot;DOK n&quot; label \(variant \`document\`, aggregated over all files of the document\) and on every page thumbnail of a signed file \(variant \`thumbnail\`\). |
 | <code>src/components/SignatureTime.jsx</code> | 33 | 2 | 1 | high | Local-time rendering of a signature-related ISO time \(signing, validation, certificate validity\) for the signature dialogs: &quot;2022-04-27 19:55&quot; as text, the exact UTC ISO value in the title attribute and \`dateTime\`. |
 | <code>src/components/ViewerProblemNotice.jsx</code> | 285 | 1 | 4 | high | OpenDocViewer — configurable viewer-level problem notice. |

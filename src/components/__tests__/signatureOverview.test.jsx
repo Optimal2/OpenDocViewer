@@ -3,7 +3,8 @@
 /**
  * Toolbar overview button and per-document details dialog: no button for
  * unsigned sets, counts in accessible names, file tabs only for documents with
- * several signed files, and the requested file preselected.
+ * several signed files, the requested file preselected, and the overview
+ * dialog inert/aria-hidden while the details dialog is open on top.
  */
 
 import { describe, it, expect, beforeEach, vi } from 'vitest';
@@ -11,6 +12,7 @@ import { act, createElement } from 'react';
 import { createRoot } from 'react-dom/client';
 import SignatureOverviewButton from '../SignatureOverviewButton.jsx';
 import SignatureDetailsDialog from '../SignatureDetailsDialog.jsx';
+import SignatureOverviewDialog from '../SignatureOverviewDialog.jsx';
 import { buildSignatureDocuments, summarizeSignatureDocuments } from '../../utils/pdfSignatureDocuments.js';
 
 vi.mock('react-i18next', () => ({
@@ -33,6 +35,7 @@ async function render(element) {
   await act(() => root.render(element));
   return {
     container,
+    root,
     cleanup: async () => {
       await act(() => root.unmount());
       container.remove();
@@ -106,6 +109,34 @@ describe('SignatureDetailsDialog per document', () => {
     expect(container.querySelector('[role="tablist"]')).toBe(null);
     expect(container.querySelector('.odv-signature-file-heading')).toBe(null);
     expect(container.querySelectorAll('.odv-signature-entry')).toHaveLength(1);
+    await cleanup();
+  });
+});
+
+describe('SignatureOverviewDialog while the details dialog is on top', () => {
+  beforeEach(() => {
+    vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
+  });
+
+  it('is inert and aria-hidden while suspended, and exposed again when resumed', async () => {
+    const documents = buildSignatureDocuments(PAGES, { a1: { signatures: [{ integrity: 'intact' }] } });
+    const props = {
+      isOpen: true, onClose: () => {}, documents, onNavigate: () => {}, onOpenDetails: () => {},
+    };
+    const { container, root, cleanup } = await render(createElement(SignatureOverviewDialog, props));
+    const backdrop = container.querySelector('.odv-signature-backdrop');
+    expect(backdrop.hasAttribute('inert')).toBe(false);
+    expect(backdrop.getAttribute('aria-hidden')).toBe(null);
+
+    // With the details dialog open on top, AT must only see one modal: the
+    // overview stays mounted (navigation state is kept) but goes inert.
+    await act(() => root.render(createElement(SignatureOverviewDialog, { ...props, suspended: true })));
+    expect(backdrop.hasAttribute('inert')).toBe(true);
+    expect(backdrop.getAttribute('aria-hidden')).toBe('true');
+
+    await act(() => root.render(createElement(SignatureOverviewDialog, props)));
+    expect(backdrop.hasAttribute('inert')).toBe(false);
+    expect(backdrop.getAttribute('aria-hidden')).toBe(null);
     await cleanup();
   });
 });

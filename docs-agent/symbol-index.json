@@ -4596,7 +4596,7 @@
     "kind": "function",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 363,
+    "line": 367,
     "description": "The &quot;DOK n&quot; document header with the document signature symbol.",
     "params": [
       {
@@ -4651,7 +4651,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 613,
+    "line": 624,
     "description": "",
     "params": [
       {
@@ -5106,7 +5106,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1208,
+    "line": 1219,
     "description": "",
     "params": [
       {
@@ -5137,7 +5137,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1301,
+    "line": 1312,
     "description": "",
     "params": [
       {
@@ -5168,7 +5168,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1234,
+    "line": 1245,
     "description": "",
     "params": [
       {
@@ -5199,7 +5199,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1060,
+    "line": 1071,
     "description": "",
     "params": [
       {
@@ -5224,7 +5224,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1247,
+    "line": 1258,
     "description": "",
     "params": [
       {
@@ -5261,7 +5261,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1051,
+    "line": 1062,
     "description": "",
     "params": [
       {
@@ -5286,7 +5286,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 1138,
+    "line": 1149,
     "description": "",
     "params": [
       {
@@ -5342,7 +5342,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 700,
+    "line": 711,
     "description": "The sticky header shows the current document only once that document's inline header has scrolled out of view, so the two are never visible together.",
     "params": [
       {
@@ -5367,7 +5367,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 822,
+    "line": 833,
     "description": "",
     "params": [
       {
@@ -5423,7 +5423,7 @@
     "kind": "constant",
     "scope": "global",
     "file": "src/components/DocumentThumbnailList.jsx",
-    "line": 408,
+    "line": 414,
     "description": "",
     "params": [
       {
@@ -12670,7 +12670,7 @@
     "kind": "function",
     "scope": "static",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 47,
+    "line": 49,
     "description": "",
     "params": [
       {
@@ -12743,7 +12743,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 88,
+    "line": 90,
     "description": "",
     "params": [
       {
@@ -12763,7 +12763,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/SignatureOverviewDialog.jsx",
-    "line": 102,
+    "line": 104,
     "description": "Keep Tab navigation inside the dialog while it is open.",
     "params": [],
     "returns": [],
