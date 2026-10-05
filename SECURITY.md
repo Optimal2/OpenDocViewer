@@ -28,6 +28,8 @@ Changes since v2.10.0:
 - PDF signatures are read in a worker from bytes the viewer already holds and shown as a document symbol, discreet page symbols and a toolbar overview; integrity (digest and signature over the ByteRange bytes, strict coverage of appended bytes, certification signatures) is verified in the browser and the optional ODVGateway v0.1.44 trust verdict is accepted only from the viewer's origin with validated source-pack documents. Inspection never delays page loading (starts after the first page, one PDF at a time, bounded queue and worker recovery) and can be turned off with `pdfSignatures.enabled: false` or deferred with `pdfSignatures.inspectAfter: 'allPages'`. New runtime dependencies pkijs and asn1js (BSD-3-Clause) are recorded in the third-party notices.
 - The OMP light/dark theme is shared with the host through an origin-restricted iframe bridge with validated revisions; focus visibility, print surfaces and selection contrast are preserved across themes. Localization files carry a content hash and are served `no-cache`.
 
+- pdfjs-dist is on 6.4.299 with annotation and signature rendering locked by browser-level regression tests; the signature overview is accessible (no nested interactive controls, inert background); a site default theme (`theme.defaultMode`) applies only while no choice is stored; `npm audit` reports no advisories.
+
 ### OpenDocViewer v2.10.0
 Changes since v2.9.0:
 
