@@ -483,6 +483,95 @@ function ConvertTo-LfLineEndings {
     return $Text -replace "`r`n", "`n"
 }
 
+function Get-GitDeclaredLineEnding {
+    <#
+    .SYNOPSIS
+    Returns the line-ending form .gitattributes declares for a repository path:
+    'CRLF', 'LF', or '' when git leaves the bytes alone (the text attribute is
+    unset, no eol attribute applies, the path is outside a git work tree, or
+    git could not answer). Embed and freshness logic must treat '' as "keep
+    the bytes exactly as they are", never as a license to normalize.
+
+    .DESCRIPTION
+    The embed tool (scripts/dev/embed-module-definition-sql.ps1) used to embed
+    whichever line-ending form the SQL file happened to have on disk, so the
+    same module definition held LF bytes on one machine and CRLF bytes on
+    another, and a file rewritten by a Git Bash text tool (sed -i writes LF)
+    produced an embedding that failed validation on every normal checkout.
+    Reading the declared form from git check-attr makes the embedded bytes a
+    function of the repository contract, not of the local working tree.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [Parameter(Mandatory = $true)][string]$RelativePath
+    )
+
+    $gitPath = $RelativePath -replace '\\', '/'
+    $output = $null
+    $exitCode = 0
+    $previousErrorActionPreference = $ErrorActionPreference
+    $ErrorActionPreference = 'Continue'
+    try {
+        $output = & git -C $RepositoryRoot check-attr text eol -- $gitPath 2>$null
+        $exitCode = $LASTEXITCODE
+    }
+    catch {
+        return ''
+    }
+    finally {
+        $ErrorActionPreference = $previousErrorActionPreference
+    }
+
+    if ($exitCode -ne 0 -or $null -eq $output) {
+        return ''
+    }
+
+    $textAttribute = ''
+    $eolAttribute = ''
+    foreach ($attributeLine in @($output)) {
+        if ($attributeLine -match ': text: (\S+)\s*$') {
+            $textAttribute = $Matches[1]
+        }
+        elseif ($attributeLine -match ': eol: (\S+)\s*$') {
+            $eolAttribute = $Matches[1]
+        }
+    }
+
+    # -text (text: unset) means git stores the file byte for byte; no eol applies.
+    if ($textAttribute -eq 'unset') {
+        return ''
+    }
+
+    switch ($eolAttribute) {
+        'crlf' { return 'CRLF' }
+        'lf' { return 'LF' }
+        default { return '' }
+    }
+}
+
+function ConvertTo-DeclaredLineEndings {
+    <#
+    .SYNOPSIS
+    Normalizes every line ending in $Text to the declared form ('CRLF' or
+    'LF'). Any other declaration -- including '' for "git leaves the bytes
+    alone" -- returns the text unchanged.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text,
+        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Declared
+    )
+
+    if ($Declared -eq 'CRLF') {
+        return ($Text -replace "`r`n", "`n") -replace "`n", "`r`n"
+    }
+
+    if ($Declared -eq 'LF') {
+        return $Text -replace "`r`n", "`n"
+    }
+
+    return $Text
+}
+
 function Compare-WebSharedBinaryIdentity {
     <#
     .SYNOPSIS
