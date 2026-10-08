@@ -1,4 +1,4 @@
-<#
+﻿<#
 .SYNOPSIS
 Validates component version metadata in omp-components.json for the OpenDocViewer repository.
 
@@ -596,7 +596,7 @@ else {
         $definitionText = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8
         $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
 
-        foreach ($sqlScript in @($definition.sqlScripts)) {
+        foreach ($sqlScript in @(Get-OptionalPropertyValue -Object $definition -Name 'sqlScripts')) {
             if ($null -eq $sqlScript) {
                 continue
             }
@@ -1136,7 +1136,7 @@ foreach ($manifestDefinition in @($manifest.moduleDefinitions)) {
     $definitionText = Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8
     $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
 
-    foreach ($sqlScript in @($definition.sqlScripts)) {
+    foreach ($sqlScript in @(Get-OptionalPropertyValue -Object $definition -Name 'sqlScripts')) {
         if ($null -eq $sqlScript) {
             continue
         }
@@ -1259,6 +1259,123 @@ Write-Host '  This script validates the manifest, not the assembly versions.'
 Write-Host ''
 
 # ---------------------------------------------------------------------------
+# Check 20: Embedded sqlScripts line endings match .gitattributes.
+# Check 16 proves the embedded bytes are fresh; this check proves they carry
+# the line-ending form the repository declares for the SQL path. An embed run
+# over a file whose line endings were accidentally rewritten (a Git Bash
+# 'sed -i' writes LF regardless of .gitattributes) otherwise sailed through
+# every gate on the machine that produced it -- the local embed and the local
+# freshness check both saw the same wrong bytes -- and failed
+# validate-module-definitions on every normal checkout, stopping deploys.
+# Only the manifest's module definitions are checked (never build-output
+# copies); where git declares no form for the SQL path (text unset, no eol
+# attribute) any line-ending form is accepted. A lookup that cannot run at
+# all is an error, like every other unreadable git answer in this family.
+# ---------------------------------------------------------------------------
+$embeddedEolChecked = 0
+$embeddedEolDeclared = 0
+$embeddedEolErrorCount = 0
+
+foreach ($manifestDefinition in @($manifest.moduleDefinitions)) {
+    if ($null -eq $manifestDefinition) {
+        continue
+    }
+
+    $moduleKey = [string](Get-OptionalPropertyValue -Object $manifestDefinition -Name 'moduleKey')
+    $relativeDefinitionPath = [string](Get-OptionalPropertyValue -Object $manifestDefinition -Name 'path')
+    if ([string]::IsNullOrWhiteSpace($relativeDefinitionPath)) {
+        continue
+    }
+
+    $definitionPath = Resolve-RepositoryPath -Path $relativeDefinitionPath -BasePath $repositoryRoot
+    if (-not (Test-Path -LiteralPath $definitionPath -PathType Leaf)) {
+        continue
+    }
+
+    $definitionText = Remove-Utf8Bom -Text (Get-Content -LiteralPath $definitionPath -Raw -Encoding UTF8)
+    $definition = ConvertFrom-JsonDocument -Json $definitionText -Depth $jsonDepth
+
+    # runtimeMaintenance.steps embed SQL in the same fields as sqlScripts.
+    $embeddedEolEntries = @(Get-OptionalPropertyValue -Object $definition -Name 'sqlScripts')
+    $runtimeMaintenance = Get-OptionalPropertyValue -Object $definition -Name 'runtimeMaintenance'
+    if ($null -ne $runtimeMaintenance) {
+        $embeddedEolEntries += @(Get-OptionalPropertyValue -Object $runtimeMaintenance -Name 'steps')
+    }
+
+    foreach ($script in $embeddedEolEntries) {
+        if ($null -eq $script) {
+            continue
+        }
+
+        $contentEncoding = [string](Get-OptionalPropertyValue -Object $script -Name 'contentEncoding')
+        if (-not [string]::Equals($contentEncoding, 'base64-utf8', [StringComparison]::Ordinal)) {
+            continue
+        }
+
+        $embeddedContent = [string](Get-OptionalPropertyValue -Object $script -Name 'content')
+        $sqlPath = [string](Get-OptionalPropertyValue -Object $script -Name 'path')
+        if ([string]::IsNullOrWhiteSpace($embeddedContent) -or [string]::IsNullOrWhiteSpace($sqlPath)) {
+            continue
+        }
+
+        $declaredEol = Get-GitDeclaredLineEnding -RepositoryRoot $repositoryRoot -RelativePath $sqlPath
+        if ($null -eq $declaredEol) {
+            # git could not answer the declaration question, so 'any form is
+            # accepted' would be an unmeasured check reading as a passing one.
+            Add-ValidationError -Errors $errors -Message "Check 20 could not determine the line-ending form .gitattributes declares for '$sqlPath' (module '$moduleKey'): 'git check-attr text eol' did not answer (is '$repositoryRoot' a git work tree?). An unreadable declaration is an error, not 'bytes untouched'."
+            $embeddedEolErrorCount++
+            continue
+        }
+        if ($declaredEol -eq '') {
+            # git leaves these bytes alone; there is no declared form to violate.
+            continue
+        }
+
+        $embeddedEolChecked++
+
+        $scriptKey = [string](Get-OptionalPropertyValue -Object $script -Name 'key')
+        if ([string]::IsNullOrWhiteSpace($scriptKey)) {
+            $scriptKey = '<no-key>'
+        }
+
+        $embeddedBytes = $null
+        try {
+            $embeddedBytes = [Convert]::FromBase64String($embeddedContent)
+        }
+        catch {
+            # Undecodable content is already a Check 16 freshness error.
+            continue
+        }
+
+        $embeddedSqlText = [System.Text.Encoding]::UTF8.GetString($embeddedBytes)
+        $crlfCount = ([regex]::Matches($embeddedSqlText, "`r`n")).Count
+        $loneLfCount = ([regex]::Matches($embeddedSqlText, "(?<!`r)`n")).Count
+
+        $declaredEolLower = $declaredEol.ToLowerInvariant()
+        $matchesDeclaration = ($declaredEol -eq 'CRLF' -and $loneLfCount -eq 0) -or ($declaredEol -eq 'LF' -and $crlfCount -eq 0)
+        if (-not $matchesDeclaration) {
+            Add-ValidationError -Errors $errors -Message "Embedded SQL for script '$scriptKey' ($sqlPath, module '$moduleKey') has the wrong line endings: the embedded content carries $crlfCount CRLF and $loneLfCount lone-LF line ending(s), but .gitattributes declares eol=$declaredEolLower for that path. Re-embed with the embed tool in the OpenModulePlatform repository: scripts/dev/embed-module-definition-sql.ps1 -RepositoryRoot '<path to this repository>'."
+            $embeddedEolErrorCount++
+            continue
+        }
+
+        $embeddedEolDeclared++
+    }
+}
+
+
+if ($embeddedEolChecked -gt 0 -or $embeddedEolErrorCount -gt 0) {
+    # Same contract as Check 16: the check mark belongs to a clean run only.
+    # The line used to print unconditionally, so a failed Check 20 still read
+    # as green in the summary (second opinion, 2026-10-08).
+    if ($embeddedEolErrorCount -eq 0) {
+        Write-Host "$checkMark $embeddedEolDeclared of $embeddedEolChecked embedded SQL script(s) carry the line endings .gitattributes declares"
+    }
+    else {
+        Write-Host "$crossMark $embeddedEolDeclared of $embeddedEolChecked embedded SQL script(s) carry the line endings .gitattributes declares ($embeddedEolErrorCount error(s))"
+    }
+}
+
 # Summaries.
 # ---------------------------------------------------------------------------
 $componentCount = 0

@@ -487,10 +487,10 @@ function Get-GitDeclaredLineEnding {
     <#
     .SYNOPSIS
     Returns the line-ending form .gitattributes declares for a repository path:
-    'CRLF', 'LF', or '' when git leaves the bytes alone (the text attribute is
-    unset, no eol attribute applies, the path is outside a git work tree, or
-    git could not answer). Embed and freshness logic must treat '' as "keep
-    the bytes exactly as they are", never as a license to normalize.
+    'CRLF', 'LF', '' when git leaves the bytes alone (the text attribute is
+    unset or no eol attribute applies), or $null when GIT COULD NOT ANSWER
+    (git missing, non-zero exit, no output -- for example a repository root
+    that is not a git work tree).
 
     .DESCRIPTION
     The embed tool (scripts/dev/embed-module-definition-sql.ps1) used to embed
@@ -500,6 +500,13 @@ function Get-GitDeclaredLineEnding {
     produced an embedding that failed validation on every normal checkout.
     Reading the declared form from git check-attr makes the embedded bytes a
     function of the repository contract, not of the local working tree.
+
+    '' and $null are different answers. '' is a declaration: git stores the
+    bytes exactly, so embed and freshness logic must keep them exactly as they
+    are -- never a license to normalize. $null is NO answer: every caller must
+    treat it as an error (fail validation / abort the embed), because silently
+    falling back to "bytes untouched" re-embeds the local accident the
+    declared-form read exists to prevent.
     #>
     param(
         [Parameter(Mandatory = $true)][string]$RepositoryRoot,
@@ -516,14 +523,14 @@ function Get-GitDeclaredLineEnding {
         $exitCode = $LASTEXITCODE
     }
     catch {
-        return ''
+        return $null
     }
     finally {
         $ErrorActionPreference = $previousErrorActionPreference
     }
 
     if ($exitCode -ne 0 -or $null -eq $output) {
-        return ''
+        return $null
     }
 
     $textAttribute = ''
@@ -554,11 +561,15 @@ function ConvertTo-DeclaredLineEndings {
     .SYNOPSIS
     Normalizes every line ending in $Text to the declared form ('CRLF' or
     'LF'). Any other declaration -- including '' for "git leaves the bytes
-    alone" -- returns the text unchanged.
+    alone" -- returns the text unchanged. $null is NOT a declaration (it is
+    the unreadable-git-answer sentinel) and is rejected by [ValidateNotNull()].
+    The parameter is deliberately UNTYPED: a [string]-typed parameter coerces
+    $null to '' BEFORE the validation attributes run (measured on Windows
+    PowerShell 5.1), which silently turned NO answer into "bytes untouched".
     #>
     param(
         [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Text,
-        [Parameter(Mandatory = $true)][AllowEmptyString()][string]$Declared
+        [Parameter(Mandatory = $true)][AllowEmptyString()][ValidateNotNull()]$Declared
     )
 
     if ($Declared -eq 'CRLF') {
@@ -570,6 +581,537 @@ function ConvertTo-DeclaredLineEndings {
     }
 
     return $Text
+}
+
+# ---------------------------------------------------------------------------
+# Check 21 support: finding direct TimeZoneInfo platform calls in C# source.
+# ---------------------------------------------------------------------------
+
+function Remove-CSharpCommentsAndStringLiterals {
+    <#
+    .SYNOPSIS
+    Masks comments and string/char literals in C# source with spaces so pattern
+    matching never fires on prose or literal text (validator Check 21). Code
+    outside comments/literals is returned untouched and newlines are preserved,
+    so the result has the same length and line layout as the input.
+
+    Handles // and block comments, regular and interpolated "..." / $"...",
+    verbatim @"..." / $@"..." / @$"..." (with the "" escape), '...' char
+    literals, and C# 11 raw string literals (a quote run of three or more,
+    with optional $ prefixes -- never with @, so a verbatim string holding a
+    single quote, @"""", is never misread as a raw string). Verbatim and raw
+    strings span line breaks; a regular string or char literal that reaches a
+    line break unclosed stops masking there and scanning resumes after the
+    break.
+
+    Interpolation holes are scanned as CODE, not masked with their string: a
+    platform call inside $"{...}" is just as direct as one outside a string.
+    A hole is code until its matching closing brace run (a single '}' for a
+    $-prefixed string, a run of N braces for a raw string carrying N '$'
+    prefixes), and nested strings/comments inside the hole are masked by the
+    same machinery -- string contexts form a stack for exactly this reason. A
+    doubled brace in literal text is the escaped literal brace, never a hole.
+
+    An unterminated literal masks to the end of the line (regular string or
+    char literal) or the end of the file (block comment, verbatim and raw
+    strings), which fails loud rather than blind.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$Text
+    )
+
+    $chars = $Text.ToCharArray()
+    $length = $chars.Length
+    $apostrophe = [char]39
+    $i = 0
+
+    # String contexts form a stack because an interpolation hole is code that
+    # can itself contain strings (with holes of their own); the base mode --
+    # an empty stack -- is ordinary code. Context fields:
+    #   Quote     closing quote character (" or ')
+    #   Verbatim  true for @"..." (the "" escape, content may span lines)
+    #   RawRun    opening quote-run length for a C# 11 raw string, 0 otherwise
+    #   Dollars   number of $ prefixes: the brace run that opens and closes an
+    #             interpolation hole (0 = not interpolated)
+    #   HoleDepth brace depth inside a hole; 0 = scanning literal text
+    $contexts = [System.Collections.Generic.Stack[hashtable]]::new()
+
+    while ($i -lt $length) {
+        $c = $chars[$i]
+        $inHole = ($contexts.Count -gt 0 -and $contexts.Peek().HoleDepth -gt 0)
+
+        if ($contexts.Count -eq 0 -or $inHole) {
+            # ----- Code, either top level or inside an interpolation hole. -----
+
+            # Line comment.
+            if ($c -eq '/' -and $i + 1 -lt $length -and $chars[$i + 1] -eq '/') {
+                $chars[$i] = ' '
+                $chars[$i + 1] = ' '
+                $i += 2
+                while ($i -lt $length -and $chars[$i] -ne "`n") {
+                    if ($chars[$i] -ne "`r") { $chars[$i] = ' ' }
+                    $i++
+                }
+                continue
+            }
+
+            # Block comment.
+            if ($c -eq '/' -and $i + 1 -lt $length -and $chars[$i + 1] -eq '*') {
+                $chars[$i] = ' '
+                $chars[$i + 1] = ' '
+                $i += 2
+                while ($i -lt $length) {
+                    if ($chars[$i] -eq '*' -and $i + 1 -lt $length -and $chars[$i + 1] -eq '/') {
+                        $chars[$i] = ' '
+                        $chars[$i + 1] = ' '
+                        $i += 2
+                        break
+                    }
+                    if ($chars[$i] -ne "`n" -and $chars[$i] -ne "`r") { $chars[$i] = ' ' }
+                    $i++
+                }
+                continue
+            }
+
+            # Literal start: zero or more '$', an optional '@' (either order),
+            # then a quote. Anything else is ordinary code and left untouched.
+            $j = $i
+            $dollars = 0
+            while ($j -lt $length -and $chars[$j] -eq '$') { $j++; $dollars++ }
+            $verbatim = $false
+            if ($j -lt $length -and $chars[$j] -eq '@') {
+                $verbatim = $true
+                $j++
+                while ($j -lt $length -and $chars[$j] -eq '$') { $j++; $dollars++ }
+            }
+
+            if ($j -lt $length -and ($chars[$j] -eq '"' -or $chars[$j] -eq $apostrophe)) {
+                $quote = $chars[$j]
+
+                # C# 11 raw string literal: a run of at least three double
+                # quotes. A verbatim string is never raw ('@' cannot combine
+                # with a quote run of three or more), so @"""" is the verbatim
+                # string holding one quote, never a raw string.
+                $quoteRun = 0
+                if ($quote -eq '"') {
+                    while ($j + $quoteRun -lt $length -and $chars[$j + $quoteRun] -eq '"') { $quoteRun++ }
+                }
+                $rawRun = 0
+                if (-not $verbatim -and $quoteRun -ge 3) {
+                    $rawRun = $quoteRun
+                }
+                if ($quote -eq $apostrophe) {
+                    # '$' and '@' carry no meaning on a char literal.
+                    $verbatim = $false
+                    $dollars = 0
+                }
+
+                for ($k = $i; $k -lt $j; $k++) { $chars[$k] = ' ' }
+                $openRun = 1
+                if ($rawRun -gt 0) { $openRun = $rawRun }
+                for ($k = 0; $k -lt $openRun; $k++) { $chars[$j + $k] = ' ' }
+
+                $contexts.Push(@{
+                    Quote = $quote
+                    Verbatim = $verbatim
+                    RawRun = $rawRun
+                    Dollars = $dollars
+                    HoleDepth = 0
+                })
+                $i = $j + $openRun
+                continue
+            }
+
+            if ($inHole -and ($c -eq '{' -or $c -eq '}')) {
+                # Nested C# braces always count individually, even inside a
+                # raw string. Only the outer hole delimiter consumes N braces
+                # at once (N dollars for raw strings, one otherwise).
+                $context = $contexts.Peek()
+                if ($c -eq '{') {
+                    $context.HoleDepth++
+                    $i++
+                }
+                elseif ($context.HoleDepth -gt 1) {
+                    $context.HoleDepth--
+                    $i++
+                }
+                else {
+                    $delimiterLength = 1
+                    if ($context.RawRun -gt 0) { $delimiterLength = $context.Dollars }
+                    $braceRun = 0
+                    while ($i + $braceRun -lt $length -and $chars[$i + $braceRun] -eq '}') { $braceRun++ }
+                    if ($braceRun -ge $delimiterLength) {
+                        $context.HoleDepth = 0
+                        $i += $delimiterLength
+                    }
+                    else { $i++ }
+                }
+                continue
+            }
+
+            $i++
+            continue
+        }
+
+        # ----- Literal text of the innermost string. -----
+        $context = $contexts.Peek()
+
+        if ($context.RawRun -gt 0) {
+            # Raw string: no escapes; it ends at a quote run of at least the
+            # opening run. With N '$' prefixes a brace run of N opens a hole.
+            if ($c -eq '"') {
+                $quoteRun = 0
+                while ($i + $quoteRun -lt $length -and $chars[$i + $quoteRun] -eq '"') { $quoteRun++ }
+                for ($k = 0; $k -lt $quoteRun; $k++) { $chars[$i + $k] = ' ' }
+                $i += $quoteRun
+                if ($quoteRun -ge $context.RawRun) {
+                    $null = $contexts.Pop()
+                }
+                continue
+            }
+            if ($context.Dollars -gt 0 -and ($c -eq '{' -or $c -eq '}')) {
+                $braceRun = 0
+                while ($i + $braceRun -lt $length -and $chars[$i + $braceRun] -eq $c) { $braceRun++ }
+                for ($k = 0; $k -lt $braceRun; $k++) { $chars[$i + $k] = ' ' }
+                $i += $braceRun
+                if ($c -eq '{' -and $braceRun -ge $context.Dollars) {
+                    $context.HoleDepth = 1
+                }
+                continue
+            }
+            if ($c -ne "`n" -and $c -ne "`r") { $chars[$i] = ' ' }
+            $i++
+            continue
+        }
+
+        if (-not $context.Verbatim -and $c -eq '\') {
+            # Escape sequence: mask the backslash and the next character.
+            $chars[$i] = ' '
+            if ($i + 1 -lt $length) {
+                if ($chars[$i + 1] -ne "`n" -and $chars[$i + 1] -ne "`r") { $chars[$i + 1] = ' ' }
+                $i += 2
+            }
+            else {
+                $i++
+            }
+            continue
+        }
+
+        if ($c -eq $context.Quote) {
+            if ($context.Verbatim -and $i + 1 -lt $length -and $chars[$i + 1] -eq '"') {
+                # Verbatim "" escape: mask both quotes and keep going.
+                $chars[$i] = ' '
+                $chars[$i + 1] = ' '
+                $i += 2
+                continue
+            }
+            $chars[$i] = ' '
+            $i++
+            $null = $contexts.Pop()
+            continue
+        }
+
+        if ($context.Dollars -gt 0 -and ($c -eq '{' -or $c -eq '}')) {
+            if ($i + 1 -lt $length -and $chars[$i + 1] -eq $c) {
+                # A doubled brace in literal text is the escaped literal brace.
+                $chars[$i] = ' '
+                $chars[$i + 1] = ' '
+                $i += 2
+                continue
+            }
+            $chars[$i] = ' '
+            $i++
+            if ($c -eq '{') {
+                # A single opening brace starts an interpolation hole, which
+                # is scanned as code until its matching closing brace.
+                $context.HoleDepth = 1
+            }
+            continue
+        }
+
+        if ($c -eq "`n" -or $c -eq "`r") {
+            if ($context.Verbatim) {
+                # Verbatim strings span line breaks: keep masking.
+                $i++
+                continue
+            }
+            # A regular string or char literal cannot span lines: the literal
+            # was never closed (or was never a literal). Stop masking and
+            # resume scanning after the line break.
+            $null = $contexts.Pop()
+            $i++
+            continue
+        }
+
+        $chars[$i] = ' '
+        $i++
+    }
+
+    return [string]::new($chars)
+}
+
+function Test-DirectTimeZonePlatformCall {
+    <#
+    .SYNOPSIS
+    True when C# source already masked by Remove-CSharpCommentsAndStringLiterals
+    uses TimeZoneInfo.FindSystemTimeZoneById, TryFindSystemTimeZoneById or
+    TryConvertIanaIdToWindowsId directly (validator Check 21).
+
+    Matching is case-sensitive, like the C# compiler. Method-group use without
+    a call parenthesis counts: the call is just as direct when the method is
+    passed as a delegate. Recognized forms: TimeZoneInfo.X, System.TimeZoneInfo.X
+    and global::System.TimeZoneInfo.X with any whitespace/newlines around the
+    dot; a using-alias qualifier (using X = [global::][System.]TimeZoneInfo;);
+    and the bare method name when the file has using static System.TimeZoneInfo;
+    (a member access like lookup.FindSystemTimeZoneById stays clean, as does
+    OmpTimeZoneLookup's own member name, because the bare match requires that
+    no '.' or identifier character precedes). 'global using' directives in the
+    file count like plain ones, and the repo-wide ones come in through
+    -GlobalUsingStatic/-GlobalAliases because a global using applies to every
+    file in the compilation, wherever it is declared.
+
+    nameof(...) never matches: nameof(TimeZoneInfo.FindSystemTimeZoneById) is
+    a name lookup, not a call.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$MaskedText,
+
+        # Repo-wide 'global using static [global::][System.]TimeZoneInfo;' seen
+        # in any scanned file: the bare method name counts in every file.
+        [Parameter(Mandatory = $false)]
+        [switch]$GlobalUsingStatic,
+
+        # Repo-wide 'global using X = [global::][System.]TimeZoneInfo;' aliases
+        # seen in any scanned file.
+        [Parameter(Mandatory = $false)]
+        [string[]]$GlobalAliases = @()
+    )
+
+    $methods = '(?:FindSystemTimeZoneById|TryFindSystemTimeZoneById|TryConvertIanaIdToWindowsId)'
+    # Only the keyword shields a name lookup; xnameof(...) is a real call.
+    $nameofGuard = '(?<!(?<!\w)nameof\s*\(\s*)'
+
+    $qualifiedPattern = $nameofGuard + '(?<![\w.:])(?:global::)?(?:System\.)?TimeZoneInfo\s*\.\s*' + $methods + '\b'
+    if ([regex]::IsMatch($MaskedText, $qualifiedPattern)) {
+        return $true
+    }
+
+    $fileHasUsingStatic = $GlobalUsingStatic -or
+        [regex]::IsMatch($MaskedText, '(?m)^\s*(?:global\s+)?using\s+static\s+(?:global::)?(?:System\.)?TimeZoneInfo\s*;')
+    if ($fileHasUsingStatic) {
+        if ([regex]::IsMatch($MaskedText, $nameofGuard + '(?<![\w.])' + $methods + '\b')) {
+            return $true
+        }
+    }
+
+    $aliases = [System.Collections.Generic.List[string]]::new()
+    foreach ($aliasMatch in [regex]::Matches($MaskedText, '(?m)^\s*(?:global\s+)?using\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:global::)?(?:System\.)?TimeZoneInfo\s*;')) {
+        if (-not $aliases.Contains($aliasMatch.Groups[1].Value)) {
+            $aliases.Add($aliasMatch.Groups[1].Value)
+        }
+    }
+    foreach ($globalAlias in @($GlobalAliases)) {
+        if (-not $aliases.Contains($globalAlias)) {
+            $aliases.Add($globalAlias)
+        }
+    }
+    foreach ($alias in $aliases) {
+        $aliasPattern = $nameofGuard + '(?<![\w.])' + [regex]::Escape($alias) + '\s*\.\s*' + $methods + '\b'
+        if ([regex]::IsMatch($MaskedText, $aliasPattern)) {
+            return $true
+        }
+    }
+
+    return $false
+}
+
+function Get-CSharpGlobalTimeZoneDirectives {
+    <#
+    .SYNOPSIS
+    Returns the 'global using' directives that make direct TimeZoneInfo
+    platform calls visible in every file of the compilation (validator
+    Check 21): 'global using static [global::][System.]TimeZoneInfo;' and the
+    aliases of 'global using X = [global::][System.]TimeZoneInfo;'. The caller
+    aggregates the result across the repository's scanned files and passes it
+    to Test-DirectTimeZonePlatformCall, because a global using applies
+    wherever it is declared. Matching runs on text already masked by
+    Remove-CSharpCommentsAndStringLiterals, so a directive mentioned in a
+    comment or a string literal does not count.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$MaskedText
+    )
+
+    $usingStatic = [regex]::IsMatch($MaskedText, '(?m)^\s*global\s+using\s+static\s+(?:global::)?(?:System\.)?TimeZoneInfo\s*;')
+    $aliases = [System.Collections.Generic.List[string]]::new()
+    foreach ($aliasMatch in [regex]::Matches($MaskedText, '(?m)^\s*global\s+using\s+([A-Za-z_][A-Za-z0-9_]*)\s*=\s*(?:global::)?(?:System\.)?TimeZoneInfo\s*;')) {
+        if (-not $aliases.Contains($aliasMatch.Groups[1].Value)) {
+            $aliases.Add($aliasMatch.Groups[1].Value)
+        }
+    }
+
+    return [pscustomobject]@{
+        UsingStatic = $usingStatic
+        Aliases = $aliases
+    }
+}
+
+function Get-MSBuildGlobalTimeZoneDirectives {
+    <#
+    .SYNOPSIS
+    Collects literal MSBuild Using items that generate global TimeZoneInfo
+    static imports or aliases. Test-project trees and generated output are
+    excluded. This is a conservative source scan, like the C# directive pass:
+    conditional items count without evaluating MSBuild properties/imports.
+    #>
+    param(
+        [Parameter(Mandatory = $true)][string]$RepositoryRoot,
+        [string[]]$TestProjectDirectories = @()
+    )
+
+    $usingStatic = $false
+    $aliases = [System.Collections.Generic.List[string]]::new()
+    $pending = [System.Collections.Generic.Stack[string]]::new()
+    $pending.Push([IO.Path]::GetFullPath($RepositoryRoot))
+    while ($pending.Count -gt 0) {
+        $directory = $pending.Pop()
+        if ($TestProjectDirectories -contains $directory) { continue }
+        foreach ($file in [IO.Directory]::GetFiles($directory)) {
+            if ([IO.Path]::GetExtension($file) -notin @('.csproj', '.props', '.targets')) { continue }
+            $text = [IO.File]::ReadAllText($file)
+            if ($text -notmatch 'TimeZoneInfo') { continue }
+            $document = [xml]$text
+            foreach ($item in $document.SelectNodes('//*[local-name()="ItemGroup"]/*[local-name()="Using"]')) {
+                if ($item.GetAttribute('Include') -cnotmatch '^(?:global::)?System\.TimeZoneInfo$') { continue }
+                $staticValue = $item.GetAttribute('Static')
+                $aliasValue = $item.GetAttribute('Alias')
+                foreach ($metadata in $item.ChildNodes) {
+                    if ($metadata.LocalName -eq 'Static') { $staticValue = $metadata.InnerText }
+                    if ($metadata.LocalName -eq 'Alias') { $aliasValue = $metadata.InnerText }
+                }
+                if ($staticValue -ieq 'true') { $usingStatic = $true }
+                if ($aliasValue -cmatch '^[A-Za-z_][A-Za-z0-9_]*$' -and -not $aliases.Contains($aliasValue)) {
+                    $aliases.Add($aliasValue)
+                }
+            }
+        }
+        foreach ($child in [IO.Directory]::GetDirectories($directory)) {
+            $name = [IO.Path]::GetFileName($child)
+            if ($name -match '^(?i:\.git|\.vs|bin|obj|node_modules|artifacts|TestResults|tests?)$' -or $name -match '(?i)\.tests?$') { continue }
+            $pending.Push($child)
+        }
+    }
+    return [pscustomobject]@{ UsingStatic = $usingStatic; Aliases = $aliases }
+}
+
+function Test-TimeZoneLookupSourceFile {
+    <#
+    .SYNOPSIS
+    The Check 21 exemption: a file is the sanctioned home for direct platform
+    time-zone calls only when its name ends in 'TimeZoneLookup.cs' AND the file
+    declares a type named exactly like the file (OmpTimeZoneLookup.cs declares
+    'class OmpTimeZoneLookup'). The declaration requirement closes the loophole
+    where a file merely carrying the substring in its name
+    (NotATimeZoneLookup.cs holding an unrelated class) was exempt without being
+    a lookup at all. The declaration is matched case-sensitively against text
+    masked by Remove-CSharpCommentsAndStringLiterals, so a comment or a string
+    literal cannot satisfy it.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$FileName,
+
+        [Parameter(Mandatory = $true)]
+        [AllowEmptyString()]
+        [string]$MaskedText
+    )
+
+    if ($FileName -notmatch '^[A-Za-z0-9_]*TimeZoneLookup\.cs$') {
+        return $false
+    }
+
+    $typeName = [System.IO.Path]::GetFileNameWithoutExtension($FileName)
+    $declarationPattern = '\b(?:class|record|struct|interface)\s+' + [regex]::Escape($typeName) + '\b'
+    return [regex]::IsMatch($MaskedText, $declarationPattern)
+}
+
+function Get-CSharpTestProjectDirectory {
+    <#
+    .SYNOPSIS
+    Absolute paths of directories whose .csproj is a test project, for the
+    Check 21 exclusion: the project name ends in '.Test'/'.Tests', or the
+    project references Microsoft.NET.Test.Sdk or sets
+    <IsTestProject>true</IsTestProject>. Build output, dependency and VCS
+    directories are not descended into. This replaces the old 'tests?$' segment
+    rule, which also excluded production directories like 'Latest', 'Contest'
+    and 'Greatest'.
+
+    Unreadable input is an honest error, never a silent empty answer: a
+    missing repository root, a directory that cannot be enumerated and a
+    project file that cannot be read all throw, naming the path. An
+    unreadable directory that read as "no test projects" would scan the test
+    suite as production code -- or worse, skip it silently the other way.
+    #>
+    param(
+        [Parameter(Mandatory = $true)]
+        [string]$RepositoryRoot
+    )
+
+    $fullRoot = [System.IO.Path]::GetFullPath($RepositoryRoot)
+    if (-not [System.IO.Directory]::Exists($fullRoot)) {
+        throw "Get-CSharpTestProjectDirectory: repository root '$RepositoryRoot' does not exist or is not a directory; the Check 21 test-project exclusion cannot be computed."
+    }
+
+    $skipDirectories = @('.git', '.vs', 'bin', 'obj', 'node_modules', 'artifacts', 'TestResults')
+    $testProjectDirectories = [System.Collections.Generic.List[string]]::new()
+    $pendingDirectories = [System.Collections.Generic.Stack[string]]::new()
+    $pendingDirectories.Push($fullRoot)
+
+    while ($pendingDirectories.Count -gt 0) {
+        $directory = $pendingDirectories.Pop()
+        try {
+            $projectPaths = [System.IO.Directory]::GetFiles($directory, '*.csproj')
+        }
+        catch {
+            throw "Get-CSharpTestProjectDirectory: cannot list project files in '$directory': $($_.Exception.Message)"
+        }
+        foreach ($projectPath in $projectPaths) {
+            $projectName = [System.IO.Path]::GetFileNameWithoutExtension($projectPath)
+            $isTestProject = $projectName -match '(?i)\.tests?$'
+            if (-not $isTestProject) {
+                try {
+                    $projectContent = [System.IO.File]::ReadAllText($projectPath)
+                }
+                catch {
+                    throw "Get-CSharpTestProjectDirectory: cannot read project file '$projectPath': $($_.Exception.Message)"
+                }
+                $isTestProject = ($projectContent -match 'Microsoft\.NET\.Test\.Sdk') -or
+                    ($projectContent -match '(?i)<IsTestProject>\s*true\s*</IsTestProject>')
+            }
+            if ($isTestProject) {
+                $testProjectDirectories.Add($directory)
+            }
+        }
+        try {
+            $childDirectories = [System.IO.Directory]::GetDirectories($directory)
+        }
+        catch {
+            throw "Get-CSharpTestProjectDirectory: cannot list subdirectories of '$directory': $($_.Exception.Message)"
+        }
+        foreach ($childDirectory in $childDirectories) {
+            if ($skipDirectories -notcontains [System.IO.Path]::GetFileName($childDirectory)) {
+                $pendingDirectories.Push($childDirectory)
+            }
+        }
+    }
+
+    return $testProjectDirectories
 }
 
 function Compare-WebSharedBinaryIdentity {
