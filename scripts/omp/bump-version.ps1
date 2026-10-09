@@ -351,7 +351,9 @@ function Get-JsonFileText {
     param([Parameter(Mandatory = $true)][object]$Value)
 
     $json = $Value | ConvertTo-Json -Depth 50 -Compress
-    return (Format-JsonText -Json $json) + [Environment]::NewLine
+    # Portable definitions are also published as content. Match the repository's
+    # LF JSON convention immediately, not only after the next git checkout.
+    return ((Format-JsonText -Json $json) + "`n").Replace("`r`n", "`n")
 }
 
 function Test-JsonFileWouldChange {
