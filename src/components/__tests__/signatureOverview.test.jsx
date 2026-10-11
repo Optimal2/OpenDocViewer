@@ -118,6 +118,27 @@ describe('SignatureOverviewDialog while the details dialog is on top', () => {
     vi.stubGlobal('IS_REACT_ACT_ENVIRONMENT', true);
   });
 
+  it('uses list items with independent navigation and details buttons, not listbox options', async () => {
+    const documents = buildSignatureDocuments(PAGES, { a1: { signatures: [{ integrity: 'intact' }] } });
+    const onNavigate = vi.fn();
+    const onOpenDetails = vi.fn();
+    const { container, cleanup } = await render(createElement(SignatureOverviewDialog, {
+      isOpen: true, onClose: () => {}, documents, onNavigate, onOpenDetails,
+    }));
+    expect(container.querySelector('[role="listbox"], [role="option"], button button')).toBe(null);
+    const row = container.querySelector('ul.odv-signature-overview-list > li');
+    expect(row).not.toBe(null);
+    const buttons = row.querySelectorAll('button');
+    expect(buttons).toHaveLength(2);
+    await act(() => buttons[0].click());
+    expect(onNavigate).toHaveBeenCalledWith(documents[0]);
+    expect(onOpenDetails).not.toHaveBeenCalled();
+    await act(() => buttons[1].click());
+    expect(onOpenDetails).toHaveBeenCalledWith(documents[0], buttons[1]);
+    expect(onNavigate).toHaveBeenCalledTimes(1);
+    await cleanup();
+  });
+
   it('is inert and aria-hidden while suspended, and exposed again when resumed', async () => {
     const documents = buildSignatureDocuments(PAGES, { a1: { signatures: [{ integrity: 'intact' }] } });
     const props = {

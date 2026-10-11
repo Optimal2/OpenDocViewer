@@ -16,7 +16,8 @@
  *      true so the renderer paints it;
  *   3. the contract for a signature widget WITHOUT an appearance stream
  *      (invisible signature) — hasAppearance false, so nothing is painted;
- *   4. the zero-rect + hidden-flag invisible signature shape.
+ *   4. the zero-rect + Locked-flag invisible signature shape;
+ *   5. text/checkbox widgets, ordinary annotations and Hidden/NoView filtering.
  *
  * Pixel-level proof that the painted raster actually contains (or omits) the
  * appearance lives in tests/ui/signature-appearance.spec.mjs (Playwright,
@@ -27,6 +28,7 @@
 
 import { beforeAll, describe, expect, it } from 'vitest';
 import { createSignatureFixtures, SIGNATURE_APPEARANCE_RECT } from '../../../scripts/generate-signature-fixtures.mjs';
+import { createAnnotationFixture } from '../../../scripts/generate-annotation-fixtures.mjs';
 
 let pdfjs;
 let fixtures;
@@ -38,7 +40,7 @@ beforeAll(async () => {
 
 /** @param {Uint8Array} bytes @returns {Promise<Array<*>>} */
 async function getDisplayAnnotations(bytes) {
-  const task = pdfjs.getDocument({ data: bytes, isEvalSupported: false });
+  const task = pdfjs.getDocument({ data: bytes.slice(), isEvalSupported: false });
   try {
     const doc = await task.promise;
     const page = await doc.getPage(1);
@@ -49,11 +51,11 @@ async function getDisplayAnnotations(bytes) {
 }
 
 describe('pdfjs 6.4 annotation contract', () => {
-  it('runs against the pdfjs 6.4 line the campaign locks (package.json ^6.4.299)', () => {
-    expect(pdfjs.version).toMatch(/^6\.4\./);
+  it('runs against the locked pdfjs 6.4.299 build', () => {
+    expect(pdfjs.version).toBe('6.4.299');
   });
 
-  it('exposes AnnotationMode with ENABLE as the render default the viewer relies on', () => {
+  it('exposes the annotation modes used by the rendering contract', () => {
     expect(pdfjs.AnnotationMode).toMatchObject({ DISABLE: 0, ENABLE: 1 });
   });
 
@@ -65,7 +67,7 @@ describe('pdfjs 6.4 annotation contract', () => {
     expect(widget.rect).toEqual(SIGNATURE_APPEARANCE_RECT);
     expect(widget.hasAppearance).toBe(true);
     expect(widget.hidden).toBe(false);
-    expect(widget.annotationFlags & 128).toBe(0); // not the hidden flag
+    expect(widget.annotationFlags & 2).toBe(0); // Hidden
   });
 
   it('marks the appearance-less signature widget as having nothing to paint', async () => {
@@ -77,13 +79,54 @@ describe('pdfjs 6.4 annotation contract', () => {
     expect(widget.hasAppearance).toBe(false);
   });
 
-  it('keeps the zero-rect hidden-flag invisible signature shape stable', async () => {
+  it('keeps the zero-rect locked invisible signature shape stable', async () => {
     const annotations = await getDisplayAnnotations(fixtures['cades-ecdsa-invisible.pdf']);
     const widget = annotations.find((annotation) => annotation.subtype === 'Widget');
     expect(widget).toBeTruthy();
     expect(widget.fieldType).toBe('Sig');
     expect(widget.rect).toEqual([0, 0, 0, 0]);
     expect(widget.hasAppearance).toBe(false);
-    expect(widget.annotationFlags & 128).toBe(128); // hidden flag survives parsing
+    expect(widget.annotationFlags & 128).toBe(128); // Locked, not Hidden
+    expect(widget.annotationFlags & 2).toBe(0);
+  });
+
+  it.each([
+    ['visible-appearance.pdf', 1],
+    ['invisible-appearance.pdf', 0],
+    ['cades-ecdsa-invisible.pdf', 0],
+  ])('%s emits the expected signature appearance operators (%i)', async (name, expectedCount) => {
+    const task = pdfjs.getDocument({ data: fixtures[name].slice(), isEvalSupported: false });
+    try {
+      const doc = await task.promise;
+      const page = await doc.getPage(1);
+      const ops = await page.getOperatorList();
+      expect(ops.fnArray.filter((fn) => fn === pdfjs.OPS.beginAnnotation)).toHaveLength(expectedCount);
+    } finally {
+      await task.destroy();
+    }
+  });
+
+  it('parses text, checkbox state and ordinary annotation appearances', async () => {
+    const annotations = await getDisplayAnnotations(createAnnotationFixture());
+    expect(annotations).toEqual(expect.arrayContaining([
+      expect.objectContaining({ fieldName: 'text', fieldType: 'Tx', hasAppearance: true }),
+      expect.objectContaining({ fieldName: 'checkbox', fieldType: 'Btn', checkBox: true, fieldValue: 'Yes', hasAppearance: true }),
+      expect.objectContaining({ subtype: 'Square', hasAppearance: true }),
+    ]));
+  });
+
+  it('emits only visible appearances by default and removes them when annotations are disabled', async () => {
+    const task = pdfjs.getDocument({ data: createAnnotationFixture(), isEvalSupported: false });
+    try {
+      const doc = await task.promise;
+      const page = await doc.getPage(1);
+      const annotationIds = (ops) => ops.fnArray.flatMap((fn, index) => (
+        fn === pdfjs.OPS.beginAnnotation ? [ops.argsArray[index][0]] : []
+      ));
+      expect(annotationIds(await page.getOperatorList()).sort()).toEqual(['10R', '11R', '14R']);
+      expect(annotationIds(await page.getOperatorList({ annotationMode: pdfjs.AnnotationMode.DISABLE }))).toEqual([]);
+    } finally {
+      await task.destroy();
+    }
   });
 });

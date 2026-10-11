@@ -5,6 +5,7 @@
  * nothing written to disk) and opens the viewer with `?sessionurl=`.
  */
 import { createSignatureFixtures } from '../../scripts/generate-signature-fixtures.mjs';
+import { createAnnotationFixture } from '../../scripts/generate-annotation-fixtures.mjs';
 
 /** @type {(Map<string, Uint8Array>|null)} */
 let cachedFixtures = null;
@@ -14,6 +15,7 @@ export async function getFixtures() {
   if (!cachedFixtures) {
     const generated = await createSignatureFixtures();
     cachedFixtures = generated instanceof Map ? generated : new Map(Object.entries(generated));
+    cachedFixtures.set('annotation-widgets.pdf', createAnnotationFixture());
   }
   return cachedFixtures;
 }

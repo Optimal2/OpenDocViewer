@@ -758,7 +758,7 @@ export async function createSignatureFixtures() {
   // 14. Invisible signature: the widget has a non-zero rect (same rect as the
   //     visible fixture) but NO /AP appearance stream, so the display layer
   //     must paint nothing in the rect. Complements cades-ecdsa-invisible.pdf,
-  //     which covers the classic zero-rect + hidden-flag shape.
+  //     which covers the zero-rect + Locked-flag shape (/F 128 is not Hidden).
   fixtures['invisible-appearance.pdf'] = await signBasePdf(pki, {
     cmsSigner: pki.rsa,
     sigOptions: {

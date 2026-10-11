@@ -423,7 +423,7 @@ integrity status and format branch:
 | Fixture | Covers |
 | --- | --- |
 | `valid-rsa.pdf` | `adbe.pkcs7.detached`, RSA PKCS#1 v1.5 SHA-256, visible widget, `intact` |
-| `cades-ecdsa-invisible.pdf` | `ETSI.CAdES.detached`, ECDSA P-256, invisible widget (`/F 128`), `intact` |
+| `cades-ecdsa-invisible.pdf` | `ETSI.CAdES.detached`, ECDSA P-256, zero-rectangle invisible widget (`/F 128` means Locked, not Hidden), `intact` |
 | `pss-rsa-no-signing-time-attr.pdf` | RSA-PSS signature without a `signingTime` attribute (falls back to `/M`) |
 | `digest-mismatch.pdf` | content byte changed inside the signed range after signing |
 | `extended-after-signing.pdf` | plain incremental update appended after signing (no second signature) |
@@ -436,12 +436,52 @@ integrity status and format branch:
 | `corrupt-contents.pdf` | invalid CMS bytes (`deadbeef`) -> `unreadable` |
 | `signature-invalid.pdf` | CMS signed with a foreign key, correct digests -> `signature-invalid` |
 | `unsigned.pdf` | no signature fields -> empty list fast path |
+| `visible-appearance.pdf` | signed widget with a blue `/AP /N` appearance stream |
+| `invisible-appearance.pdf` | signed widget with a non-zero rectangle but no appearance stream |
 
 The fixtures are generated in the vitest setup instead of being committed as binary files:
 the public repository stays free of binaries that cannot be diff-reviewed, keys are
 regenerated per run, and the generator CLI (`node
 scripts/generate-signature-fixtures.mjs --out <dir>`) reproduces any fixture on demand for
 manual inspection.
+
+### PDF.js 6.4 rendering regression checks
+
+Campaign `opendocviewer-pdfjs-6-4-renderingsregression` checks the installed,
+lockfile-resolved PDF.js **6.4.299**; it does not upgrade the dependency again.
+`src/utils/__tests__/pdfjsAnnotationRendering.test.js` uses the real PDF.js parser
+and operator lists, including signature appearances, text widgets, checked checkbox
+appearance selection, ordinary square annotations, and Hidden/NoView filtering.
+`scripts/generate-annotation-fixtures.mjs` supplies a synthetic, font-independent
+annotation matrix with a page-content anchor. Hidden (`2`), NoView (`32`) and
+Locked (`128`) are distinct flags.
+
+`tests/ui/signature-appearance.spec.mjs` checks pixels in the real viewer with both
+`main-thread` and `worker` PDF rendering configurations: main pages, thumbnails,
+and the compare pane for the widget matrix. Negative checks require white regions
+and positive page content, so blank rasters or unexpected non-blue marks cannot
+pass. These checks concern display appearances, not certificate trust validation.
+
+The overview accessibility watch items were already fixed in the campaign's base
+commit `bf2bf446`: `SignatureOverviewDialog` renders `ul/li` with sibling action
+buttons, and its suspended backdrop has `inert` plus `aria-hidden`. The unit suite
+`signatureOverview.test.jsx` and browser suite `signature-symbols.spec.mjs` lock
+those semantics, stacked-dialog keyboard focus, Escape and focus restoration.
+
+Run `node scripts/test-pdfjs-rendering-mutations.mjs` in an isolated worktree to
+prove the checks fail when either renderer disables annotations, the overview
+regresses to a listbox, or the suspended overview loses `inert`. The runner expects
+assertion failures and restores each source file in `finally`. Do not run it
+concurrently with source edits or other tests; run `npm test`, `npm run test:ui`
+and `npm run lint` on restored sources afterwards. CI runs the unit and browser
+suites automatically; mutation proofs are a local verification command.
+
+For an operator's manual check in a separately managed environment, open a PDF
+with a visible signature and one with an invisible signature; compare the page
+and thumbnail appearances, then open Signed documents → Details, use Tab and
+Escape, and verify that focus returns to Details and then the overview button.
+Use a form PDF to check text/checkbox appearances and confirm hidden fields remain
+absent. Automated fixtures do not establish compatibility with every external PDF.
 
 ### Adversarial regression proofs
 

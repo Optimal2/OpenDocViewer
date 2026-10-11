@@ -11,7 +11,7 @@
  *   - a signature widget WITH an /AP appearance stream (visible signature) is
  *     painted into the main page image and into the thumbnail, and
  *   - a signature widget WITHOUT an appearance stream (invisible signature)
- *     paints nothing, in both the non-zero-rect and the zero-rect/hidden-flag
+ *     paints nothing, in both the non-zero-rect and the zero-rect/Locked-flag
  *     shapes.
  *
  * The fixtures come from scripts/generate-signature-fixtures.mjs; the visible
@@ -20,6 +20,7 @@
  */
 import { test, expect } from '@playwright/test';
 import { loadSession } from './fixtureSession.mjs';
+import { ANNOTATION_CASES } from '../../scripts/generate-annotation-fixtures.mjs';
 
 const SESSION = {
   session: { id: 'ui-signature-appearance' },
@@ -43,11 +44,11 @@ const SIGNATURE_REGION = {
 
 /**
  * Draw the rendered page image into a canvas and count "signature blue"
- * pixels inside the widget region. Returns { blue, total } for the region.
+ * pixels inside the widget region, plus non-white/black pixel counts.
  * @param {import('@playwright/test').Locator} image
- * @returns {Promise<{ blue:number, total:number }>}
+ * @returns {Promise<{ blue:number, nonWhite:number, black:number, total:number }>}
  */
-async function countSignatureBlue(image, region = SIGNATURE_REGION) {
+async function countPixels(image, region = SIGNATURE_REGION) {
   return image.evaluate((node, rect) => {
     const canvas = document.createElement('canvas');
     canvas.width = node.naturalWidth;
@@ -60,13 +61,17 @@ async function countSignatureBlue(image, region = SIGNATURE_REGION) {
     const y1 = Math.ceil(canvas.height * rect.y1);
     const { data } = ctx.getImageData(x0, y0, x1 - x0, y1 - y0);
     let blue = 0;
+    let nonWhite = 0;
+    let black = 0;
     for (let i = 0; i < data.length; i += 4) {
       const r = data[i];
       const g = data[i + 1];
       const b = data[i + 2];
       if (b > 120 && b > r + 80 && b > g + 60) blue += 1;
+      if (r < 245 || g < 245 || b < 245) nonWhite += 1;
+      if (r < 40 && g < 40 && b < 40) black += 1;
     }
-    return { blue, total: data.length / 4 };
+    return { blue, nonWhite, black, total: data.length / 4 };
   }, region);
 }
 
@@ -77,9 +82,9 @@ async function countSignatureBlue(image, region = SIGNATURE_REGION) {
  */
 async function waitForRaster(image) {
   await expect(image).toBeVisible();
-  await expect.poll(async () => image.evaluate(
-    (node) => (node.complete && node.naturalWidth > 0 ? node.naturalWidth : 0)
-  )).toBeGreaterThan(0);
+  await expect
+    .poll(async () => image.evaluate((node) => (node.complete && node.naturalWidth > 0 ? node.naturalWidth : 0)))
+    .toBeGreaterThan(0);
   return image;
 }
 
@@ -88,50 +93,95 @@ function mainPageImage(page, pageNumber) {
   return page.locator(`.document-render-container img[data-page-number="${pageNumber}"]`).first();
 }
 
-test('visible signature appearance is painted into the main page and the thumbnail', async ({ page }) => {
-  await loadSession(page, { session: SESSION });
+for (const mode of ['main-thread', 'worker']) {
+  test.describe(`PDF annotation rendering (${mode})`, () => {
+    const load = (page, session = SESSION) =>
+      loadSession(page, {
+        session,
+        siteConfig: { documentLoading: { render: { pdfToImageMode: mode, pdfWorkerMaxCount: 1 } } },
+      });
 
-  // Main page image (session page 1 = visible-appearance.pdf).
-  const main = await waitForRaster(mainPageImage(page, 1));
-  const mainCount = await countSignatureBlue(main);
-  expect(mainCount.blue).toBeGreaterThan(mainCount.total * 0.5);
+    test('visible signature appearance is painted into the main page and the thumbnail', async ({ page }) => {
+      await load(page);
 
-  // Thumbnail of the same page goes through the same pdfjs render call.
-  const thumbnail = await waitForRaster(page.locator('#thumbnail-1 img.thumbnail').first());
-  const thumbCount = await countSignatureBlue(thumbnail);
-  expect(thumbCount.blue).toBeGreaterThan(thumbCount.total * 0.5);
-});
+      // Main page image (session page 1 = visible-appearance.pdf).
+      const main = await waitForRaster(mainPageImage(page, 1));
+      const mainCount = await countPixels(main);
+      expect(mainCount.blue).toBeGreaterThan(mainCount.total * 0.5);
 
-test('invisible signatures paint nothing, in both invisible shapes', async ({ page }) => {
-  await loadSession(page, { session: SESSION });
+      // Thumbnail of the same page goes through the same pdfjs render call.
+      const thumbnail = await waitForRaster(page.locator('#thumbnail-1 img.thumbnail').first());
+      const thumbCount = await countPixels(thumbnail);
+      expect(thumbCount.blue).toBeGreaterThan(thumbCount.total * 0.5);
+    });
 
-  // Page 2: non-zero widget rect but no /AP appearance stream.
-  await page.locator('#thumbnail-2').click();
-  const main2 = await waitForRaster(mainPageImage(page, 2));
-  const count2 = await countSignatureBlue(main2);
-  expect(count2.blue).toBe(0);
+    test('invisible signatures paint nothing, in both invisible shapes', async ({ page }) => {
+      await load(page);
 
-  // Page 3: zero-rect widget with the hidden flag (cades-ecdsa-invisible.pdf).
-  await page.locator('#thumbnail-3').click();
-  const main3 = await waitForRaster(mainPageImage(page, 3));
-  const count3 = await countSignatureBlue(main3);
-  expect(count3.blue).toBe(0);
+      // Page 2: non-zero widget rect but no /AP appearance stream.
+      await page.locator('#thumbnail-2').click();
+      const main2 = await waitForRaster(mainPageImage(page, 2));
+      const count2 = await countPixels(main2);
+      expect(count2.nonWhite).toBe(0);
+      const heading = { x0: 60 / 595, x1: 320 / 595, y0: 42 / 842, y1: 65 / 842 };
+      expect((await countPixels(main2, heading)).nonWhite).toBeGreaterThan(10);
 
-  // The thumbnails of the invisible pages stay free of the banner as well.
-  const thumb2 = await waitForRaster(page.locator('#thumbnail-2 img.thumbnail').first());
-  expect((await countSignatureBlue(thumb2)).blue).toBe(0);
-  const thumb3 = await waitForRaster(page.locator('#thumbnail-3 img.thumbnail').first());
-  expect((await countSignatureBlue(thumb3)).blue).toBe(0);
-});
+      // Page 3: zero-rect widget with the Locked flag (cades-ecdsa-invisible.pdf).
+      await page.locator('#thumbnail-3').click();
+      const main3 = await waitForRaster(mainPageImage(page, 3));
+      const count3 = await countPixels(main3);
+      expect(count3.nonWhite).toBe(0);
 
-test('the signature pipeline still detects both appearance shapes', async ({ page }) => {
-  await loadSession(page, { session: SESSION });
+      // The thumbnails of the invisible pages stay free of the banner as well.
+      const thumb2 = await waitForRaster(page.locator('#thumbnail-2 img.thumbnail').first());
+      expect((await countPixels(thumb2)).nonWhite).toBe(0);
+      const thumb3 = await waitForRaster(page.locator('#thumbnail-3 img.thumbnail').first());
+      expect((await countPixels(thumb3)).nonWhite).toBe(0);
+      // Both pages must contain actual page content, not an empty white raster.
+      for (const raster of [main3, thumb2, thumb3]) {
+        expect((await countPixels(raster, heading)).nonWhite).toBeGreaterThan(10);
+      }
+    });
 
-  // Level-1 badges rely on the byte-level parser, not on the painted
-  // appearance: both the visible and the invisible pages get a page symbol,
-  // and the overview button reports all three signed documents.
-  await expect(page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail')).toBeVisible();
-  await expect(page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail')).toBeVisible();
-  await expect(page.locator('[data-thumbnail-row="thumbnail-3"] .odv-signature-badge--thumbnail')).toBeVisible();
-  await expect(page.locator('.odv-signature-overview-button')).toHaveAttribute('aria-label', /3 signed documents/);
-});
+    test('the signature pipeline still detects both appearance shapes', async ({ page }) => {
+      await load(page);
+
+      // Level-1 badges rely on the byte-level parser, not on the painted
+      // appearance: both the visible and the invisible pages get a page symbol,
+      // and the overview button reports all three signed documents.
+      await expect(page.locator('[data-thumbnail-row="thumbnail-1"] .odv-signature-badge--thumbnail')).toBeVisible();
+      await expect(page.locator('[data-thumbnail-row="thumbnail-2"] .odv-signature-badge--thumbnail')).toBeVisible();
+      await expect(page.locator('[data-thumbnail-row="thumbnail-3"] .odv-signature-badge--thumbnail')).toBeVisible();
+      await expect(page.locator('.odv-signature-overview-button')).toHaveAttribute('aria-label', /3 signed documents/);
+    });
+
+    test('widget states and visibility survive page, thumbnail and compare rendering', async ({ page }) => {
+      await load(page, {
+        session: { id: 'ui-annotation-widgets' },
+        documents: [{ documentId: 'widgets', files: ['/ui-fixtures/annotation-widgets.pdf'] }],
+      });
+      const checkRaster = async (image) => {
+        await waitForRaster(image);
+        const anchor = await countPixels(image, { x0: 410 / 595, x1: 470 / 595, y0: 72 / 842, y1: 92 / 842 });
+        expect(anchor.black).toBeGreaterThan(anchor.total * 0.9);
+        for (const item of ANNOTATION_CASES) {
+          const [x0, y0, x1, y1] = item.rect;
+          // Inset to avoid edge antialiasing across raster sizes.
+          const pixels = await countPixels(image, {
+            x0: (x0 + 5) / 595,
+            x1: (x1 - 5) / 595,
+            y0: (842 - y1 + 5) / 842,
+            y1: (842 - y0 - 5) / 842,
+          });
+          if (item.paints) expect(pixels.blue, item.name).toBeGreaterThan(pixels.total * 0.9);
+          else expect(pixels.nonWhite, item.name).toBe(0);
+        }
+      };
+      await checkRaster(mainPageImage(page, 1));
+      await checkRaster(page.locator('#thumbnail-1 img.thumbnail').first());
+      await page.locator('#thumbnail-1').click({ button: 'right' });
+      await page.locator('.odv-context-menu-item', { hasText: /show to right/i }).click();
+      await checkRaster(page.locator('.document-pane-frame.is-compare-pane img[data-page-number="1"]').first());
+    });
+  });
+}

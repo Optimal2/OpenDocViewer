@@ -188,6 +188,9 @@ test('D3 toolbar overview lists signed documents and navigates without closing',
   await button.click();
   const dialog = page.getByRole('dialog');
   const rows = dialog.locator('.odv-signature-overview-row');
+  await expect(dialog.getByRole('list')).toHaveCount(1);
+  await expect(dialog.getByRole('listitem')).toHaveCount(2);
+  await expect(dialog.locator('[role="listbox"], [role="option"], button button')).toHaveCount(0);
   await expect(rows).toHaveCount(2);
   await expect(rows.nth(0)).toHaveAttribute('aria-current', 'true');
   await expect(rows.nth(0)).toContainText('valid-rsa.pdf');
@@ -212,6 +215,17 @@ test('D3 toolbar overview lists signed documents and navigates without closing',
   await expect(overviewBackdrop).toHaveAttribute('aria-hidden', 'true');
   await expect(overviewBackdrop).toHaveAttribute('inert', '');
   await expect(page.locator('.odv-signature-backdrop')).toHaveCount(2);
+  // Native inert must prevent both programmatic focus and keyboard escape
+  // into the suspended overview, not merely hide it from role queries.
+  const suspendedDetails = overviewBackdrop.locator('.odv-signature-overview-details').nth(1);
+  await suspendedDetails.evaluate((node) => node.focus());
+  await expect(suspendedDetails).not.toBeFocused();
+  const topDialog = page.getByRole('dialog');
+  await topDialog.locator('.odv-signature-close-button').focus();
+  await page.keyboard.press('Tab');
+  await expect(topDialog.locator('.odv-signature-close-icon')).toBeFocused();
+  await page.keyboard.press('Shift+Tab');
+  await expect(topDialog.locator('.odv-signature-close-button')).toBeFocused();
   await page.keyboard.press('Escape');
   await expect(page.getByRole('dialog')).toHaveCount(1);
   await expect(overviewBackdrop).not.toHaveAttribute('aria-hidden', 'true');
