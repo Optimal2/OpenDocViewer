@@ -212,6 +212,8 @@ function getPdfProgressPercent(progress) {
  * @property {boolean=} documentNavigationEnabled
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} primaryDocumentNavigation
  * @property {{ canGoPrevious:boolean, canGoNext:boolean, canGoFirst:boolean, canGoLast:boolean }=} compareDocumentNavigation
+ * @property {boolean=} canOpenCompareOverlay True in compare mode with two pages shown.
+ * @property {function(): void=} openCompareOverlay Opens the overlay view of the two compared pages.
  */
 
 /** Range (±) around 100% where sliders snap back to the neutral value. */
@@ -366,6 +368,8 @@ const DocumentToolbar = ({
   compareDocumentNavigation = undefined,
   signatureSummary = null,
   onOpenSignatureOverview,
+  canOpenCompareOverlay = false,
+  openCompareOverlay,
 }) => {
   const { t, i18n } = useTranslation('common');
   const viewerContext = useContext(ViewerContext);
@@ -1676,6 +1680,19 @@ const DocumentToolbar = ({
         <span className="material-icons" aria-hidden="true">compare</span>
       </button>
 
+      {/* Overlay view: only in compare mode with two pages shown */}
+      {canOpenCompareOverlay && typeof openCompareOverlay === 'function' ? (
+        <button
+          type="button"
+          onClick={() => openCompareOverlay()}
+          aria-label={t('toolbar.compareOverlay.open', { defaultValue: 'Overlay the two pages (transparency)' })}
+          title={t('toolbar.compareOverlay.open', { defaultValue: 'Overlay the two pages (transparency)' })}
+          className="odv-btn compare-overlay-button"
+        >
+          <span className="material-icons" aria-hidden="true">layers</span>
+        </button>
+      ) : null}
+
       <div className="separator" />
 
       {/* Editing controls are always visible. Canvas rendering activates only when a non-neutral adjustment exists. */}
@@ -2169,6 +2186,8 @@ DocumentToolbar.propTypes = {
     severity: PropTypes.oneOf(['ok', 'warning', 'error']),
   }),
   onOpenSignatureOverview: PropTypes.func,
+  canOpenCompareOverlay: PropTypes.bool,
+  openCompareOverlay: PropTypes.func,
 };
 
 export default React.memo(DocumentToolbar);

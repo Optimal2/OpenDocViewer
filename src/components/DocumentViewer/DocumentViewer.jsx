@@ -24,6 +24,7 @@ import { useTranslation } from 'react-i18next';
 import DocumentViewerToolbar from './DocumentViewerToolbar.jsx';
 import DocumentViewerThumbnails from './DocumentViewerThumbnails.jsx';
 import DocumentViewerRender from './DocumentViewerRender.jsx';
+import CompareOverlayView from './CompareOverlayView.jsx';
 import PrintSelectionWorkspace from '../PrintSelectionWorkspace.jsx';
 import Resizer from '../Resizer.jsx';
 import logger from '../../logging/systemLogger.js';
@@ -61,6 +62,9 @@ const DocumentViewer = () => {
     signatureReports,
     setSignaturePrioritySourceKey,
     getSignatureSourceFileName,
+    compareTransforms,
+    compareOverlay,
+    dispatchCompareOverlay,
   } = useContext(ViewerContext);
   const { t } = useTranslation('common');
   const navigationModifierState = useNavigationModifierState();
@@ -155,6 +159,11 @@ const DocumentViewer = () => {
     primaryTransform,
     compareTransform,
     dispatchCompareTransform,
+    compareOverlayOpen,
+    compareOverlaySnapshot,
+    openCompareOverlay,
+    closeCompareOverlay,
+    resetCompareOverlayCalibration,
     viewerPages,
     totalPages,
     totalPagesDisplay,
@@ -324,7 +333,7 @@ const DocumentViewer = () => {
 
     /** @param {KeyboardEvent} event */
     const onKeyDown = (event) => {
-      if (printSelectionWorkspaceOpen) return;
+      if (printSelectionWorkspaceOpen || compareOverlayOpen) return;
       if (!canOpenMetadataMatrix) return;
       if (event.defaultPrevented || event.isComposing) return;
       const key = String(event.key || '').toLowerCase();
@@ -338,7 +347,7 @@ const DocumentViewer = () => {
 
     window.addEventListener('keydown', onKeyDown, true);
     return () => window.removeEventListener('keydown', onKeyDown, true);
-  }, [canOpenMetadataMatrix, openMetadataMatrix, printSelectionWorkspaceOpen]);
+  }, [canOpenMetadataMatrix, compareOverlayOpen, openMetadataMatrix, printSelectionWorkspaceOpen]);
 
   const viewerRuntimeStatus = useMemo(() => {
     if (error) {
@@ -436,6 +445,28 @@ const DocumentViewer = () => {
       role="region"
       aria-label={t('viewer.aria.containerRegion')}
     >
+      {compareOverlayOpen ? (
+        <CompareOverlayView
+          pageNumberA={renderPageNumber}
+          pageNumberB={renderComparePageNumber}
+          allPages={allPages}
+          zoom={zoom}
+          setZoom={setZoom}
+          zoomMode={zoomState?.mode}
+          customFitSizeLimits={customFitSizeLimits}
+          imagePropertiesA={primaryImageProperties}
+          imagePropertiesB={compareImageProperties}
+          transforms={compareTransforms}
+          onTransformAction={dispatchCompareTransform}
+          overlay={compareOverlay}
+          onOverlayAction={dispatchCompareOverlay}
+          canResetToCompare={!!compareOverlaySnapshot}
+          onResetToCompare={resetCompareOverlayCalibration}
+          onClose={closeCompareOverlay}
+        />
+      ) : null}
+
+      {compareOverlayOpen ? null : (
       <DocumentViewerToolbar
         runtimeStatusLedState={viewerRuntimeStatus.ledState}
         runtimeStatusLedTitle={viewerRuntimeStatus.title}
@@ -525,7 +556,10 @@ const DocumentViewer = () => {
         navigationModifierState={navigationModifierState}
         signatureSummary={signatureSummary}
         onOpenSignatureOverview={openSignatureOverview}
+        canOpenCompareOverlay={isComparing && renderComparePageNumber != null}
+        openCompareOverlay={openCompareOverlay}
       />
+      )}
 
       <ViewerProblemNotice
         error={error}
@@ -533,7 +567,7 @@ const DocumentViewer = () => {
         loadingRunActive={loadingRunActive}
       />
 
-      {printSelectionWorkspaceOpen ? (
+      {compareOverlayOpen ? null : printSelectionWorkspaceOpen ? (
         <PrintSelectionWorkspace
           allPages={allPages || []}
           bundle={bundle || null}

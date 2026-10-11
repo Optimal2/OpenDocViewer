@@ -23,8 +23,8 @@
  * @param {number} props.value              Current post-zoom factor (e.g., 1.0)
  * @param {function():void} props.onInc     Increment handler (e.g., +0.1, clamped upstream)
  * @param {function():void} props.onDec     Decrement handler (e.g., -0.1, clamped upstream)
- * @param {number} [props.min=0.1]          Optional: lower clamp (for disabling "−" at boundary)
- * @param {number} [props.max=4.0]          Optional: upper clamp (for disabling "+" at boundary)
+ * @param {number} [props.min]  Lower clamp for disabling "−"; defaults to the transform's minScale (0.1).
+ * @param {number} [props.max]  Upper clamp for disabling "+"; defaults to the transform's maxScale (8).
  * @param {('primary'|'compare')} [props.pane='primary']  Pane tone: blue (primary) or orange (compare).
  * @param {React.ReactNode} [props.marker=null]  The pane marker ring (first focusable element).
  * @returns {JSX.Element}
@@ -33,6 +33,7 @@
 import React, { useCallback, useEffect, useRef, useState } from 'react';
 import PropTypes from 'prop-types';
 import { useTranslation } from 'react-i18next';
+import { COMPARE_TRANSFORM_LIMITS } from '../../utils/compareTransform.js';
 
 /** Delay before the zone collapses after the pointer/focus has left, so it does not flicker. */
 const COLLAPSE_DELAY_MS = 180;
@@ -53,7 +54,15 @@ function isKeyboardFocus(target) {
  * CompareZoomOverlay
  * Parent owns the factor and clamping; this component only owns the expanded/collapsed state.
  */
-const CompareZoomOverlay = ({ value, onInc, onDec, min = 0.1, max = 4.0, pane = 'primary', marker = null }) => {
+const CompareZoomOverlay = ({
+  value,
+  onInc,
+  onDec,
+  min = COMPARE_TRANSFORM_LIMITS.minScale,
+  max = COMPARE_TRANSFORM_LIMITS.maxScale,
+  pane = 'primary',
+  marker = null,
+}) => {
   const { t } = useTranslation('common');
   const v = Number.isFinite(value) ? value : 1.0;
   const display = `×${v.toFixed(1)}`;

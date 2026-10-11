@@ -119,6 +119,8 @@ import DocumentToolbar from '../DocumentToolbar/DocumentToolbar.jsx';
  * @property {boolean} lastPageDisabled
  * @property {(Object|null)=} signatureSummary - Signed-document totals for the toolbar overview button (null when nothing loaded is signed).
  * @property {function(HTMLElement=): void=} onOpenSignatureOverview - Opens the signature overview dialog; receives the button for focus return.
+ * @property {boolean=} canOpenCompareOverlay - True in compare mode with two pages shown.
+ * @property {function(): void=} openCompareOverlay - Opens the overlay view of the two compared pages.
  */
 
 /**
@@ -210,6 +212,8 @@ const DocumentViewerToolbar = ({
   lastPageDisabled,
   signatureSummary = null,
   onOpenSignatureOverview,
+  canOpenCompareOverlay = false,
+  openCompareOverlay,
 }) => {
   return (
     <DocumentToolbar
@@ -296,6 +300,8 @@ const DocumentViewerToolbar = ({
       compareRef={compareRef}
       signatureSummary={signatureSummary}
       onOpenSignatureOverview={onOpenSignatureOverview}
+      canOpenCompareOverlay={canOpenCompareOverlay}
+      openCompareOverlay={openCompareOverlay}
     />
   );
 };
@@ -424,6 +430,8 @@ DocumentViewerToolbar.propTypes = {
     severity: PropTypes.oneOf(['ok', 'warning', 'error']),
   }),
   onOpenSignatureOverview: PropTypes.func,
+  canOpenCompareOverlay: PropTypes.bool,
+  openCompareOverlay: PropTypes.func,
 };
 
 export default React.memo(DocumentViewerToolbar);

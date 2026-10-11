@@ -140,6 +140,28 @@
   </figure>
 </details>
 
+<h3 id="jamforelse-finjustera">Finjustera zoom, läge och rotation</h3>
+<p>I jämförelseläget har varje sida en rad <strong>Finjustera</strong> ovanför sig. Stängd visar raden en sammanfattning, till exempel <em>100,0 % · 0,0°</em>. Klicka på den för att visa kontrollerna för sidan:</p>
+<ul>
+  <li><strong>Zoom</strong> i procent med en decimal. Knapparna − och + ändrar 0,1 % (med <kbd>Shift</kbd>: 1 %). Zoomknapparna i sidans överkant stegar fortfarande 10 % och behåller finjusteringen.</li>
+  <li><strong>Läge</strong>: X och Y i pixlar. Dra sidan med musen, eller markera flyttknappen (fyra pilar) och använd piltangenterna: 1 px per tryck, 10 px med <kbd>Shift</kbd>.</li>
+  <li><strong>Rotation</strong> i grader med en decimal. Knapparna ↺ och ↻ vrider 0,1° (med <kbd>Shift</kbd>: 1°). En liten vridning moturs visas som ett negativt tal, till exempel −0,3. Knapparna för 90° i verktygsfältet fungerar som förut och behåller finjusteringen.</li>
+  <li><strong>Återställ</strong> (rund pil) sätter tillbaka sidan till 100 %, läge 0 och rotation 0.</li>
+</ul>
+<p>I fälten kan du skriva med decimalkomma eller decimalpunkt – 12,5 och 12.5 fungerar båda. <kbd>Enter</kbd>, eller att du lämnar fältet, använder värdet. <kbd>Esc</kbd> ångrar det du skrivit, och <kbd>Pil upp</kbd> / <kbd>Pil ned</kbd> stegar värdet (med <kbd>Shift</kbd>: tio steg). Medan raden är öppen flyttar du sidan genom att dra i den i stället för att rulla, och <kbd>Ctrl</kbd> + mushjulet över sidan zoomar bara den sidan, 1 % per hack. Stäng raden för att rulla och zooma som vanligt igen.</p>
+
+<h3 id="jamforelse-overlagring">Lägg sidorna på varandra (överlagring)</h3>
+<p>Små skillnader syns lättast när sidorna ligger på varandra. Klicka på <strong>överlagringsknappen</strong> (staplade lager) bredvid jämförelseknappen – den finns bara när två sidor jämförs. Överlagringsvyn fyller fönstret och har ett eget verktygsfält. Sida A (vänster sida, blå) ligger underst och sida B (höger sida, orange) överst. Båda behåller den zoom, det läge och den rotation du ställt in i jämförelsevyn.</p>
+<ul>
+  <li><strong>Opacitet</strong>: reglaget styr hur synlig den översta sidan är, från 0 % (osynlig) till 100 % (helt täckande). Det börjar på 50 %. När reglaget är markerat ändrar <kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd> värdet 1 %, med <kbd>Shift</kbd> 10 %, och <kbd>Home</kbd> / <kbd>End</kbd> går till 0 % och 100 %.</li>
+  <li><strong>Byt plats</strong> (pilar upp och ned) lägger den andra sidan överst. Reglaget styr alltid den sida som ligger överst.</li>
+  <li><strong>Kalibrera</strong>: samma rader för finjustering som i jämförelsevyn, märkta A och B, finns ovanför sidorna. Drar du i sidorna flyttas den översta sidan, och <kbd>Ctrl</kbd> + mushjulet zoomar den översta sidan.</li>
+  <li><strong>Knuffläge</strong> (flyttknappen): när det är på flyttar piltangenterna den översta sidan 1 px (med <kbd>Shift</kbd>: 10 px). Klicka först på sidorna så att tangenterna går dit.</li>
+  <li><strong>Återställ till jämförelsen</strong> (klocka med pil) sätter tillbaka den zoom, det läge och den rotation sidorna hade när du öppnade överlagringsvyn.</li>
+  <li><strong>Kopiera kalibreringen</strong> kopierar båda sidornas inställningar som text (JSON), så att du kan klistra in dem i ett supportärende.</li>
+  <li><strong>Stäng</strong> – eller <kbd>Esc</kbd> – tar dig tillbaka till jämförelsevyn. Kalibreringen sparas: sidorna behåller sina justeringar, och nästa gång du öppnar överlagringsvyn är opaciteten och den översta sidan som du lämnade dem.</li>
+</ul>
+
 <h2 id="metadata">Dokumentets metadata</h2>
 <p>Högerklicka på en miniatyr eller på sidan och välj <strong>Visa metadata</strong>. Du ser de uppgifter som systemet som öppnade ODV skickade med dokumentet – till exempel id, namn, avdelning, datum, antal sidor och dokument-id. Vilka fält som finns beror på det systemet. Uppgifterna är bara för visning och kan inte ändras i ODV.</p>
 <figure class="wide">
@@ -183,7 +205,9 @@
     <tr><td><kbd>Shift</kbd> + kommando</td><td>I jämförelseläget: styr den sida som inte är aktiv.</td></tr>
     <tr><td><kbd>Delete</kbd> / <kbd>Ctrl</kbd> + <kbd>Delete</kbd></td><td>Dölj sidan / dölj hela dokumentet (urval).</td></tr>
     <tr><td><kbd>Ctrl</kbd> + <kbd>P</kbd></td><td>Öppna ODV:s utskriftsdialog.</td></tr>
-    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning.</td></tr>
+    <tr><td><kbd>Pil vänster</kbd> / <kbd>Pil höger</kbd> på opacitetsreglaget</td><td>I överlagringsvyn: ändra opaciteten 1 % (med Shift: 10 %).</td></tr>
+    <tr><td>Piltangenterna i knuffläge</td><td>I överlagringsvyn: flytta den översta sidan 1 px (med Shift: 10 px).</td></tr>
+    <tr><td><kbd>Esc</kbd></td><td>Stäng menyer, dialoger och förhandsvisning. Stänger också överlagringsvyn.</td></tr>
   </tbody>
 </table>
 
@@ -201,7 +225,7 @@
   <li><strong>Urval</strong> öppnar urvalsarbetsytan. Röd när ett urval är aktivt.</li>
   <li><strong>Sidnavigering</strong>: första, föregående, nästa, sista, och ett fält för sidnummer.</li>
   <li><strong>Zoom</strong>: ut, in, procentfält, 1:1, anpassa till skärm, anpassa till bredd.</li>
-  <li><strong>1:X</strong>: egen storlek. <strong>Jämförelse</strong>: två sidor bredvid varandra. <strong>Rotera</strong>: ett kvarts varv.</li>
+  <li><strong>1:X</strong>: egen storlek. <strong>Jämförelse</strong>: två sidor bredvid varandra. <strong>Överlagring</strong>: bara i jämförelseläget – lägger sidorna på varandra. <strong>Rotera</strong>: ett kvarts varv.</li>
   <li><strong>HQ</strong>: skarpare PDF-sida. <strong>Ljusstyrka</strong>, <strong>kontrast</strong> och <strong>återställ</strong>.</li>
   <li><strong>Tema</strong>, <strong>språk</strong>, <strong>hjälp</strong>. Lampan på hjälpknappen: grön = allt väl, gul = datorn har lite minne, röd = fel.</li>
 </ul>

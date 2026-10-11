@@ -53,6 +53,9 @@
       "disable": "Inaktivera jämför-läge",
       "shiftHint": "Shift styr tillfälligt motsatt jämförelsevy."
     },
+    "compareOverlay": {
+      "open": "Lägg sidorna på varandra (transparens)"
+    },
     "editing": {
       "enable": "Aktivera redigeringsverktyg",
       "disable": "Inaktivera redigeringsverktyg"
@@ -596,6 +599,24 @@
     "rotateCw": "Rotera 0,1° medurs (Shift: 1°)",
     "reset": "Återställ zoom, läge och rotation för sidan",
     "invalidNumber": "Ange ett tal, till exempel 12,5 eller 12.5"
+  },
+  "compareOverlay": {
+    "region": "Överlagringsvy: sida B över sida A",
+    "toolbar": "Kontroller för överlagringsvyn",
+    "title": "Överlagring",
+    "pageA": "Sida A (vänster)",
+    "pageB": "Sida B (höger)",
+    "opacityShort": "Opacitet",
+    "opacity": "Opacitet för den översta sidan: {page}",
+    "swap": "Byt vilken sida som ligger överst",
+    "nudge": "Knuffläge: piltangenterna flyttar den översta sidan (Shift: 10 px)",
+    "resetToCompare": "Återställ till justeringen från jämförelsevyn",
+    "copy": "Kopiera kalibreringen som JSON (för support)",
+    "copied": "Kalibreringen är kopierad",
+    "copyFailed": "Det gick inte att kopiera kalibreringen",
+    "close": "Stäng överlagringsvyn och gå tillbaka till jämförelsevyn",
+    "closeShort": "Stäng",
+    "stage": "Sidorna lagda på varandra. Dra för att flytta den översta sidan; Ctrl+hjul zoomar den."
   },
   "generic": {
     "loading": "Laddar"

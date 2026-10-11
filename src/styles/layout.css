@@ -1256,6 +1256,125 @@
   border-color: #c62828;
 }
 
+/* Overlay view of the compare mode (CompareOverlayView.jsx): full surface, own toolbar. */
+.compare-overlay-view {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
+  gap: 8px;
+  min-height: 0;
+  width: 100%;
+  height: 100vh;
+  box-sizing: border-box;
+  padding-bottom: 8px;
+  background: var(--background-color);
+  color: var(--text-color);
+  overflow: hidden;
+}
+
+.compare-overlay-toolbar {
+  flex: none;
+  flex-wrap: wrap;
+}
+
+.compare-overlay-title,
+.compare-overlay-opacity-group,
+.compare-overlay-close {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.compare-overlay-title {
+  font-weight: 600;
+}
+
+.compare-overlay-opacity {
+  width: 180px;
+  accent-color: var(--thumbnail-compare-color);
+}
+
+.compare-overlay-opacity-value {
+  min-width: 3.5em;
+  font-variant-numeric: tabular-nums;
+  text-align: right;
+}
+
+.compare-overlay-nudge.is-active {
+  box-shadow: inset 0 0 0 2px var(--thumbnail-compare-color);
+}
+
+.compare-overlay-status {
+  min-width: 0;
+  font-size: 0.85rem;
+}
+
+.compare-overlay-close {
+  margin-left: auto;
+  padding: 0 10px;
+}
+
+.compare-overlay-calibration {
+  display: flex;
+  flex: none;
+  flex-wrap: wrap;
+  gap: 6px 24px;
+  padding: 0 15px;
+}
+
+.compare-overlay-calibration-page {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  min-width: 0;
+}
+
+.compare-overlay-page-tag {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  color: #fff;
+  font-size: 0.8rem;
+  font-weight: 700;
+  background: var(--thumbnail-primary-color);
+}
+
+.compare-overlay-calibration-page.is-compare .compare-overlay-page-tag {
+  background: var(--thumbnail-compare-color);
+}
+
+.compare-overlay-stage {
+  position: relative;
+  flex: 1 1 auto;
+  min-height: 0;
+  margin: 0 15px;
+  overflow: hidden;
+  cursor: move;
+  touch-action: none;
+  -webkit-user-select: none;
+  user-select: none;
+}
+
+.compare-overlay-stage:focus-visible {
+  outline: 2px solid var(--thumbnail-compare-color);
+  outline-offset: 2px;
+}
+
+/* Both layers share one coordinate space; pan and zoom only through the page transforms. */
+.compare-overlay-layer {
+  position: absolute;
+  inset: 0;
+  pointer-events: none;
+}
+
+.compare-overlay-layer .document-render-viewport {
+  overflow: hidden;
+  scrollbar-gutter: auto;
+}
+
 .document-pane-frame.is-transform-active .document-render-viewport {
   cursor: move;
 }

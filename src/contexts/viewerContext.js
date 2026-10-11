@@ -205,6 +205,9 @@ import { createContext } from 'react';
  * @property {function(('primary'|'compare')): CompareTransform} getCompareTransform
  * @property {function(('primary'|'compare'), (Object|function(CompareTransform): Object)): void} setCompareTransform
  * @property {function(Object): void} dispatchCompareTransform compareTransformReducer action.
+ * @property {CompareOverlayState} compareOverlay
+ *   Overlay view settings of the compare mode: top page and its opacity (utils/compareOverlay.js).
+ * @property {function(Object): void} dispatchCompareOverlay compareOverlayReducer action.
  */
 
 /**
@@ -215,6 +218,12 @@ import { createContext } from 'react';
  * @property {number} dx
  * @property {number} dy
  * @property {number} rotation
+ */
+
+/**
+ * @typedef {Object} CompareOverlayState
+ * @property {number} opacity Opacity of the top page in percent (0–100).
+ * @property {('primary'|'compare')} top The page drawn on top.
  */
 
 /**

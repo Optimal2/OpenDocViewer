@@ -214,7 +214,8 @@ function mapBoth(state, map) {
  * Reducer for the per-page transform state. Actions:
  * - `{ type: 'set', target, transform }` merge a partial transform (or `current => partial`).
  * - `{ type: 'nudge', target, field, delta }` add `delta` to `scale`, `dx`, `dy` or `rotation`.
- * - `{ type: 'zoomStep', target, sign }` the per-pane ±0.1 zoom preset, snapped to the 0.1 grid.
+ * - `{ type: 'zoomStep', target, sign }` the per-pane ±0.1 zoom preset; a calibrated fraction is kept.
+ * - `{ type: 'restore', state }` replace both pages with a saved state (overlay "reset to compare").
  * - `{ type: 'rotate', target, delta }` the 90 degree preset (keeps the fine residual).
  * - `{ type: 'reset', target }`, `{ type: 'resetAll' }` back to identity.
  * - `{ type: 'resetScale' }` scale 1 on both pages (fit/actual-size presets).
@@ -241,10 +242,18 @@ export function compareTransformReducer(state, action) {
       return withTarget(current, target, normalizeCompareTransform({ ...page, [action.field]: page[action.field] + delta }));
     }
     case 'zoomStep': {
+      // A plain ±0.1 step: a calibrated fraction (e.g. 1.005) is kept, so + then − returns to it.
       const step = finiteOr(action.sign, 1) >= 0 ? 0.1 : -0.1;
-      const { minScale, maxScale } = COMPARE_TRANSFORM_LIMITS;
-      const scale = roundTo(Math.max(minScale, Math.min(maxScale, page.scale + step)), 10);
-      return withTarget(current, target, normalizeCompareTransform({ ...page, scale }));
+      return withTarget(current, target, normalizeCompareTransform({ ...page, scale: page.scale + step }));
+    }
+    case 'restore': {
+      const saved = action.state;
+      if (!saved || typeof saved !== 'object') return current;
+      return withTarget(
+        withTarget(current, 'primary', normalizeCompareTransform(saved.primary)),
+        'compare',
+        normalizeCompareTransform(saved.compare)
+      );
     }
     case 'rotate':
       return withTarget(current, target, normalizeCompareTransform({ ...page, rotation: page.rotation + finiteOr(action.delta, 0) }));

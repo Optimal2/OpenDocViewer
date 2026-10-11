@@ -25,7 +25,7 @@ Use these files as the main map:
 - `docs-src/omp-component-manifest.md` - OMP artifact component manifest and version-bump helper usage.
 - `docs-src/printing.md` - print pipeline design and module boundaries.
 - `docs-src/pdf-signatures.md` - level-1 PDF signature inspection: formats, integrity rules, data contract, worker offload, fixtures.
-- `docs-src/compare-transform.md` - compare view per-page transform (stepless zoom, free pan, 0.1° rotation): state shape, context API, rendering.
+- `docs-src/compare-transform.md` - compare view per-page transform (stepless zoom, free pan, 0.1° rotation): state shape, context API, rendering; overlay view (stacked pages, opacity, calibration).
 
 ## Language and Documentation Policy
 

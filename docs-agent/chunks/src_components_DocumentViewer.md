@@ -1,6 +1,24 @@
 # OpenDocViewer / src/components/DocumentViewer
 
-File count: 11. Line count: 5792. JSDoc symbol count: 123.
+File count: 13. Line count: 6429. JSDoc symbol count: 132.
+
+## src/components/DocumentViewer/CompareOverlayView.jsx
+
+Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A \(left/primary\) below and page B \(right/compare\) above, so differences show through.
+
+Exports: `CompareOverlayView`
+
+Local imports: `src/components/DocumentRender.jsx`, `src/components/DocumentViewer/CompareTransformControls.jsx`, `src/utils/compareTransform.js`, `src/utils/compareOverlay.js`
+
+Symbols:
+
+- `OverlayTarget` (typedef) - No description.
+- `isOwnKeyTarget` (function) - Keys typed into fields \(and controls that handle their own arrows\) must not nudge the page.
+- `hasActiveModalDialog` (function) - No description.
+- `needsCanvas` (function) - No description.
+- `CompareOverlayView` (function) - No description.
+- `<anonymous>~onKeyDown` (function) - No description.
+- `<anonymous>~onWheel` (function) - No description.
 
 ## src/components/DocumentViewer/CompareTransformControls.jsx
 
@@ -22,6 +40,8 @@ Per\-pane “post\-zoom” controls shown in comparison mode, tucked behind the 
 
 Exports: `CompareZoomOverlay`
 
+Local imports: `src/utils/compareTransform.js`
+
 Symbols:
 
 - `COLLAPSE_DELAY_MS` (constant) - Delay before the zone collapses after the pointer/focus has left, so it does not flicker.
@@ -34,7 +54,7 @@ OpenDocViewer — Document Viewer \(Container\) Tie together: • Toolbar \(acti
 
 Exports: `DocumentViewer`
 
-Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`, `src/components/DocumentMetadataMatrixOverlayDialog.jsx`, `src/components/SignatureDetailsDialog.jsx`
+Local imports: `src/components/DocumentViewer/DocumentViewerToolbar.jsx`, `src/components/DocumentViewer/DocumentViewerThumbnails.jsx`, `src/components/DocumentViewer/DocumentViewerRender.jsx`, `src/components/DocumentViewer/CompareOverlayView.jsx`, `src/components/PrintSelectionWorkspace.jsx`, `src/components/Resizer.jsx`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/components/DocumentViewer/useDocumentViewer.js`, `src/hooks/useNavigationModifierState.js`, `src/components/DocumentMetadataOverlayDialog.jsx`, `src/components/DocumentMetadataMatrixOverlayDialog.jsx`
 
 Symbols:
 
@@ -95,6 +115,19 @@ Symbols:
 - `PageNumberSetter` (typedef) - React\-like numeric/original page setter used by the toolbar adapter.
 - `DocumentViewerToolbarProps` (typedef) - Props consumed by DocumentViewerToolbar.
 - `DocumentViewerToolbar` (function) - Renders the toolbar for the document viewer by delegating to .
+
+## src/components/DocumentViewer/hooks/useCompareOverlay.js
+
+File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
+
+Exports: `useCompareOverlay`
+
+Local imports: `src/contexts/viewerContext.js`, `src/utils/compareTransform.js`
+
+Symbols:
+
+- `module:useCompareOverlay` (module) - File: src/components/DocumentViewer/hooks/useCompareOverlay.js Open/close state of the compare overlay view \(CompareOverlayView.jsx\).
+- `module:useCompareOverlay.useCompareOverlay` (function) - No description.
 
 ## src/components/DocumentViewer/hooks/useCompareTransforms.js
 
@@ -173,7 +206,7 @@ Primary viewer\-state hook.
 
 Exports: `useDocumentViewer`
 
-Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
+Local imports: `src/utils/pdfResolutionRuntime.js`, `src/logging/systemLogger.js`, `src/contexts/viewerContext.js`, `src/utils/runtimeConfig.js`, `src/utils/viewerPreferences.js`, `src/utils/compareTransform.js`, `src/components/DocumentViewer/hooks/useCompareTransforms.js`, `src/components/DocumentViewer/hooks/useCompareOverlay.js`, `src/components/DocumentViewer/hooks/useViewerEffects.js`
 
 Symbols:
 

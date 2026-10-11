@@ -36,14 +36,14 @@
 - `src/logging/systemLogger.js`: 35 incoming local imports
 - `src/utils/runtimeConfig.js`: 16 incoming local imports
 - `src/utils/documentLoadingConfig.js`: 14 incoming local imports
-- `src/contexts/viewerContext.js`: 11 incoming local imports
+- `src/contexts/viewerContext.js`: 12 incoming local imports
+- `src/utils/compareTransform.js`: 9 incoming local imports
 - `src/utils/localizedValue.js`: 8 incoming local imports
 - `src/utils/pdfSignatureStatus.js`: 7 incoming local imports
 - `src/utils/viewerPreferences.js`: 7 incoming local imports
 - `src/utils/pdfResolution.js`: 6 incoming local imports
 - `src/utils/pdfResolutionRuntime.js`: 6 incoming local imports
 - `src/utils/publicAssetUrl.js`: 6 incoming local imports
-- `src/utils/compareTransform.js`: 5 incoming local imports
 - `src/utils/pdfSignatureDocuments.js`: 5 incoming local imports
 - `src/utils/pdfjsDocumentOptions.js`: 4 incoming local imports
 - `src/utils/pdfPrintCacheKey.js`: 4 incoming local imports

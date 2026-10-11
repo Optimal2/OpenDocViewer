@@ -1,6 +1,26 @@
 # OpenDocViewer / src/utils
 
-File count: 48. Line count: 18770. JSDoc symbol count: 736.
+File count: 49. Line count: 18925. JSDoc symbol count: 745.
+
+## src/utils/compareOverlay.js
+
+File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi\-transparent.
+
+Exports: `COMPARE_OVERLAY_OPACITY`, `INITIAL_COMPARE_OVERLAY_STATE`, `clampOverlayOpacity`, `getOverlayBottomTarget`, `compareOverlayReducer`, `resolveOverlayOpacityKeyAction`, `resolveOverlayNudgeKeyAction`, `serializeCompareCalibration`
+
+Local imports: `src/utils/compareTransform.js`
+
+Symbols:
+
+- `module:compareOverlay` (module) - File: src/utils/compareOverlay.js Overlay view of the compare mode: the two compared pages stacked in one coordinate space, the top page drawn semi\-transparent.
+- `module:compareOverlay~CompareOverlayState` (typedef) - No description.
+- `module:compareOverlay.COMPARE_OVERLAY_OPACITY` (constant) - Opacity range and steps of the overlay slider \(percent\).
+- `module:compareOverlay.clampOverlayOpacity` (function) - Clamp an opacity to whole percents in \[0, 100\]; non\-numbers fall back to the default.
+- `module:compareOverlay.getOverlayBottomTarget` (function) - The page under the top page.
+- `module:compareOverlay.compareOverlayReducer` (function) - Reducer for the overlay settings.
+- `module:compareOverlay.resolveOverlayOpacityKeyAction` (function) - Map a key press on the opacity slider to a reducer action: Left/Down −1 %, Right/Up \+1 %, Shift ×10, Home 0 %, End 100 %.
+- `module:compareOverlay.resolveOverlayNudgeKeyAction` (function) - Nudge mode: arrow keys move the top page only \(1 px, Shift 10 px\), as on the move control.
+- `module:compareOverlay.serializeCompareCalibration` (function) - The calibration as JSON for support cases: \{ &quot;A&quot;: transform, &quot;B&quot;: transform \} , where A is the primary \(left\) page and B the compare \(right\) page.
 
 ## src/utils/compareTransform.js
 

@@ -53,6 +53,9 @@
       "disable": "Disable compare mode",
       "shiftHint": "Shift temporarily targets the opposite compare pane."
     },
+    "compareOverlay": {
+      "open": "Overlay the two pages (transparency)"
+    },
     "editing": {
       "enable": "Enable canvas tools",
       "disable": "Disable canvas tools"
@@ -596,6 +599,24 @@
     "rotateCw": "Rotate 0.1° clockwise (Shift: 1°)",
     "reset": "Reset zoom, position and rotation for this page",
     "invalidNumber": "Enter a number, for example 12.5 or 12,5"
+  },
+  "compareOverlay": {
+    "region": "Overlay view: page B over page A",
+    "toolbar": "Overlay view controls",
+    "title": "Overlay",
+    "pageA": "Page A (left)",
+    "pageB": "Page B (right)",
+    "opacityShort": "Opacity",
+    "opacity": "Opacity of the top page: {page}",
+    "swap": "Swap which page is on top",
+    "nudge": "Nudge mode: arrow keys move the top page (Shift: 10 px)",
+    "resetToCompare": "Reset to the alignment from the compare view",
+    "copy": "Copy the calibration as JSON (for support)",
+    "copied": "Calibration copied",
+    "copyFailed": "Could not copy the calibration",
+    "close": "Close the overlay view and return to the compare view",
+    "closeShort": "Close",
+    "stage": "Overlaid pages. Drag to move the top page; Ctrl+wheel zooms it."
   },
   "generic": {
     "loading": "Loading"

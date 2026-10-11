@@ -1,6 +1,6 @@
 # OpenDocViewer / src/contexts
 
-File count: 4. Line count: 3329. JSDoc symbol count: 89.
+File count: 4. Line count: 3351. JSDoc symbol count: 91.
 
 ## src/contexts/themeContext.js
 
@@ -55,6 +55,7 @@ Symbols:
 - `ViewerPageLoadState` (typedef) - No description.
 - `ViewerContextValue` (typedef) - No description.
 - `CompareTransform` (typedef) - Per\-page compare transform \(utils/compareTransform.js\): scale multiplies the base zoom \(1 \= 100 %\), dx / dy are CSS px at transform scale 1, rotation is degrees in \[0, 360\).
+- `CompareOverlayState` (typedef) - No description.
 - `CompareTransformState` (typedef) - No description.
 
 ## src/contexts/ViewerProvider.jsx

@@ -36,6 +36,7 @@ import {
 } from '../../utils/viewerPreferences.js';
 import { splitTransformRotation } from '../../utils/compareTransform.js';
 import { useCompareTransforms } from './hooks/useCompareTransforms.js';
+import { useCompareOverlay } from './hooks/useCompareOverlay.js';
 import { useViewerEffects } from './hooks/useViewerEffects.js';
 
 /**
@@ -867,6 +868,15 @@ export function useDocumentViewer() {
     bumpPostZoomRight,
     resetPostZoom,
   } = useCompareTransforms(isComparing);
+
+  // --- Overlay view of the compare mode (both pages stacked, top page semi-transparent) -------
+  const {
+    compareOverlayOpen,
+    compareOverlaySnapshot,
+    openCompareOverlay,
+    closeCompareOverlay,
+    resetCompareOverlayCalibration,
+  } = useCompareOverlay(isComparing && compareOriginalPageNumber != null);
 
   const primaryQuarterTurn = splitTransformRotation(primaryTransform.rotation).quarterTurn;
   const compareQuarterTurn = splitTransformRotation(compareTransform.rotation).quarterTurn;
@@ -1789,7 +1799,7 @@ export function useDocumentViewer() {
     onOpenPrintDialog: openPrintDialog,
     keyboardPrintShortcutBehavior,
     printEnabled: printEnabled && !printSelectionWorkspaceOpen,
-    interactionSuspended: printSelectionWorkspaceOpen,
+    interactionSuspended: printSelectionWorkspaceOpen || compareOverlayOpen,
   });
 
   // --- Public API ---------------------------------------------------------------
@@ -1806,6 +1816,11 @@ export function useDocumentViewer() {
     setVisibleComparePageNumber,
     comparePageNumber: isComparing && totalPages > 0 ? compareVisiblePageNumber : null,
     renderComparePageNumber: isComparing ? compareOriginalPageNumber : null,
+    compareOverlayOpen,
+    compareOverlaySnapshot,
+    openCompareOverlay,
+    closeCompareOverlay,
+    resetCompareOverlayCalibration,
 
     thumbnailSelectionPageNumber,
     compareThumbnailPageNumber,

@@ -94,13 +94,37 @@ describe('compareTransformReducer', () => {
       .toBe(COMPARE_TRANSFORM_LIMITS.minScale);
   });
 
-  it('the zoom-step preset keeps the old ±0.1 grid on top of a free scale', () => {
-    const fine = run([{ type: 'set', target: 'compare', transform: { scale: 1.234 } }]);
-    expect(run([{ type: 'zoomStep', target: 'compare', sign: 1 }], fine).compare.scale).toBe(1.3);
-    expect(run([{ type: 'zoomStep', target: 'compare', sign: -1 }], fine).compare.scale).toBe(1.1);
+  it('the zoom-step preset adds ±0.1 and keeps a calibrated fraction', () => {
+    const fine = run([{ type: 'set', target: 'compare', transform: { scale: 1.005 } }]);
+    expect(run([{ type: 'zoomStep', target: 'compare', sign: 1 }], fine).compare.scale).toBe(1.105);
+    expect(run([{ type: 'zoomStep', target: 'compare', sign: -1 }], fine).compare.scale).toBe(0.905);
+    // +0.1 then −0.1 returns to the calibrated value instead of a snapped one.
+    expect(run([
+      { type: 'zoomStep', target: 'compare', sign: 1 },
+      { type: 'zoomStep', target: 'compare', sign: -1 },
+    ], fine).compare.scale).toBe(1.005);
     expect(run([{ type: 'zoomStep', target: 'compare', sign: -1 }]).compare.scale).toBe(0.9);
-    const low = run([{ type: 'set', target: 'compare', transform: { scale: 0.1 } }]);
-    expect(run([{ type: 'zoomStep', target: 'compare', sign: -1 }], low).compare.scale).toBe(0.1);
+    const low = run([{ type: 'set', target: 'compare', transform: { scale: 0.15 } }]);
+    expect(run([{ type: 'zoomStep', target: 'compare', sign: -1 }], low).compare.scale).toBe(COMPARE_TRANSFORM_LIMITS.minScale);
+    const high = run([{ type: 'set', target: 'compare', transform: { scale: 7.95 } }]);
+    expect(run([{ type: 'zoomStep', target: 'compare', sign: 1 }], high).compare.scale).toBe(COMPARE_TRANSFORM_LIMITS.maxScale);
+  });
+
+  it('restore replaces both pages with a saved, normalized state (overlay "reset to compare")', () => {
+    const saved = run([
+      { type: 'set', target: 'primary', transform: { scale: 1.2, dx: 4 } },
+      { type: 'set', target: 'compare', transform: { rotation: 0.5 } },
+    ]);
+    const changed = run([
+      { type: 'nudge', target: 'compare', field: 'dx', delta: 30 },
+      { type: 'nudge', target: 'primary', field: 'scale', delta: 0.5 },
+    ], saved);
+    expect(run([{ type: 'restore', state: saved }], changed)).toEqual(saved);
+    expect(run([{ type: 'restore', state: { primary: { scale: 99 }, compare: null } }], changed)).toEqual({
+      primary: { scale: COMPARE_TRANSFORM_LIMITS.maxScale, dx: 0, dy: 0, rotation: 0 },
+      compare: IDENTITY_COMPARE_TRANSFORM,
+    });
+    expect(run([{ type: 'restore' }], changed)).toBe(changed);
   });
 
   it('the 90 degree presets add quarter turns and keep the fine residual', () => {

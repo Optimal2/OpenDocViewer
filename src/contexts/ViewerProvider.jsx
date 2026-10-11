@@ -47,6 +47,7 @@ import {
   compareTransformReducer,
   selectCompareTransform,
 } from '../utils/compareTransform.js';
+import { INITIAL_COMPARE_OVERLAY_STATE, compareOverlayReducer } from '../utils/compareOverlay.js';
 
 
 /**
@@ -348,6 +349,9 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
   // Free per-page transform of the compare view (utils/compareTransform.js). Plain data, so later
   // compare views can read and write it here instead of owning their own alignment state.
   const [compareTransforms, setCompareTransforms] = useState(INITIAL_COMPARE_TRANSFORM_STATE);
+  // Overlay view settings (utils/compareOverlay.js): top page and its opacity. Kept here, next to
+  // the transforms, so closing and reopening the view keeps the whole calibration.
+  const [compareOverlay, setCompareOverlay] = useState(INITIAL_COMPARE_OVERLAY_STATE);
   const [runtimeDiagnostics, setRuntimeDiagnostics] = useState({
     sessionStartedAtMs: 0,
     loadRunStartedAtMs: 0,
@@ -2618,6 +2622,11 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     dispatchCompareTransform({ type: 'set', target, transform });
   }, [dispatchCompareTransform]);
 
+  /** @param {Object} action compareOverlayReducer action */
+  const dispatchCompareOverlay = useCallback((action) => {
+    setCompareOverlay((current) => compareOverlayReducer(current, action));
+  }, []);
+
   /** @param {('primary'|'compare')} target */
   const getCompareTransform = useCallback(
     (target) => selectCompareTransform(compareTransforms, target),
@@ -2667,6 +2676,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     getCompareTransform,
     setCompareTransform,
     dispatchCompareTransform,
+    compareOverlay,
+    dispatchCompareOverlay,
   }), [
     bundle,
     allPages,
@@ -2705,6 +2716,8 @@ export const ViewerProvider = ({ children, bundle = null, diagnosticsEnabled = f
     getCompareTransform,
     setCompareTransform,
     dispatchCompareTransform,
+    compareOverlay,
+    dispatchCompareOverlay,
   ]);
 
   return (

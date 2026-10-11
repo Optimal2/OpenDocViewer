@@ -2,7 +2,7 @@
 
 The compare view shows two pages side by side. To compare two pages exactly — for example as a
 semi-transparent overlay or with a draggable "curtain" border — the two pages must first be aligned.
-This note describes the transform model that makes that possible. It adds no new view.
+This note describes the transform model that makes that possible, and the overlay view built on it.
 
 ## Where the state lived before
 
@@ -38,12 +38,15 @@ The state is plain JSON. A later view reads and writes it through the context:
 - `getCompareTransform(target)` — selector for `'primary'` or `'compare'`.
 - `setCompareTransform(target, partialOrUpdater)` — merge and normalize.
 - `dispatchCompareTransform(action)` — reducer actions: `set`, `nudge`, `zoomStep`, `rotate`,
-  `reset`, `resetAll`, `resetScale`, `resetAlignment` (see the JSDoc in `compareTransform.js`).
+  `reset`, `resetAll`, `resetScale`, `resetAlignment`, `restore` (see the JSDoc in
+  `compareTransform.js`).
 
 ## Presets write the same state
 
-- The per-pane ±0.1 zoom buttons (`CompareZoomOverlay`) dispatch `zoomStep`, which snaps to the
-  old 0.1 grid. Fit and actual-size modes dispatch `resetScale`, as the old pane zoom reset did.
+- The per-pane ±0.1 zoom buttons (`CompareZoomOverlay`) dispatch `zoomStep`, a plain ±0.1 step.
+  A calibrated fraction is kept (100.5 % → 110.5 %), so + then − returns to the calibrated value.
+  The buttons disable at the transform limits (`COMPARE_TRANSFORM_LIMITS`, 10 %–800 %). Fit and
+  actual-size modes dispatch `resetScale`, as the old pane zoom reset did.
 - The 90° toolbar buttons and Ctrl+Arrow shortcuts dispatch `rotate` (±90). A fine residual is kept.
 - Changing the page resets its rotation, as before; scale and offset persist like the old pane zoom.
   Entering or leaving compare mode keeps only the nearest quarter turn (`resetAlignment`).
@@ -83,6 +86,36 @@ revert on Escape, and step with ArrowUp/ArrowDown (Shift ×10). The move control
 expanded, drag and Ctrl+wheel over that page change the transform instead of scrolling or changing
 the shared zoom. During a drag the stage style is updated directly and the offset is committed to the
 context on release, so a drag does not re-render the viewer for every pointer move.
+
+## Overlay view
+
+`CompareOverlayView.jsx` stacks the two compared pages in one coordinate space: page A
+(`primary`, left) below, page B (`compare`, right) above. It is opened from a toolbar button
+(`toolbar.compareOverlay.open`) that only exists in compare mode with two pages shown, and it
+replaces the main toolbar and the viewer surface while open, like the print selection workspace.
+Close or Escape returns to the compare view; leaving compare mode closes it.
+
+- Each layer is a `DocumentRender` with the page's own transform (`buildCompareTransformCss`) and
+  the shared base zoom. The layer viewports do not scroll; pan and zoom go through the transforms,
+  so both pages stay in the same coordinate space. In fit modes page A fits the overlay surface.
+- The overlay settings are a second piece of context state, `compareOverlay`
+  (`src/utils/compareOverlay.js`): `{ opacity: 0–100 (default 50), top: 'compare' | 'primary' }`,
+  changed through `dispatchCompareOverlay` (`setOpacity`, `stepOpacity`, `swap`, `reset`). The
+  slider sets the opacity of the page on top; swap changes which page that is.
+- Calibration uses the same `CompareTransformControls` as the compare view, one per page. Dragging
+  the stage moves the top page and Ctrl+wheel zooms it; nudge mode maps the arrow keys to the top
+  page (1 px, Shift 10 px). Slider keys: Left/Right 1 %, Shift 10 %, Home/End to the bounds.
+- Persistence: the transforms and the overlay settings live in the viewer context, so closing and
+  reopening the view (or a later curtain view) keeps them. `hooks/useCompareOverlay.js` only holds
+  the open flag and a snapshot of `compareTransforms` taken when the view opens; "reset to compare"
+  dispatches `{ type: 'restore', state: snapshot }`.
+- "Copy calibration" writes `serializeCompareCalibration(compareTransforms)` to the clipboard:
+  `{ "A": transform, "B": transform }` with normalized values, for support cases.
+- While the view is open, the viewer's keyboard navigation is suspended (`interactionSuspended`)
+  so arrow keys never change pages behind it.
+
+Tests: `src/utils/__tests__/compareOverlay.test.js`, `src/components/__tests__/compareOverlayView.test.jsx`,
+`src/components/__tests__/useCompareOverlay.test.jsx`, `tests/ui/compare-overlay.spec.mjs`.
 
 ## Measurement
 
