@@ -37,7 +37,7 @@ OpenDocViewer is a browser-based document viewer for **PDF**, **TIFF**, and comm
 **What it is**
 
 - A static single-page application: build it once (`npm run build`), host `dist/` on any static server (IIS, Nginx, Apache, S3/CloudFront).
-- A viewer for PDF (via `pdfjs-dist` 6.3), TIFF (via `utif2` 4.1), and raster images (JPG/PNG).
+- A viewer for PDF (via `pdfjs-dist` pinned to 6.4.299), TIFF (via `utif2` 4.1), and raster images (JPG/PNG).
 - Embeddable: a host application (or an optional backend such as ODVGateway) can hand over documents as a **Portable Document Bundle v1** JSON payload through several documented startup modes.
 - Localized in English and Swedish (`public/locales/`, ICU messages via `i18next-icu`).
 - Shipped with an optional pair of Node/Express log servers for operational tracing and print auditing.
