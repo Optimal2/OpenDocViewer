@@ -762,6 +762,12 @@ const DocumentViewerRender = ({
     }
   }, [updatePanePannability]);
 
+  // A native drag-and-drop started under the pointer (e.g. the loading indicator image) makes Chromium send
+  // pointercancel, which would end a pan or fine-tuning drag after its first step.
+  const handlePaneDragStart = useCallback((event) => {
+    if (transformDragRef.current || panStateRef.current) event.preventDefault();
+  }, []);
+
   useEffect(() => {
     const pending = edgeScrollPendingResetRef.current.primary;
     if (!pending) return undefined;
@@ -989,6 +995,7 @@ const DocumentViewerRender = ({
             onContextMenu={(event) => handlePaneContextMenu(event, pageNumber, 'primary')}
             onPointerEnter={() => updatePanePannability('primary')}
             onPointerDownCapture={(event) => handlePanePointerDown(event, 'primary')}
+            onDragStart={handlePaneDragStart}
             onPointerMoveCapture={(event) => handlePanePointerMove(event, 'primary')}
             onPointerUpCapture={(event) => finishPanePan(event, 'primary')}
             onPointerCancelCapture={(event) => finishPanePan(event, 'primary')}
@@ -1049,6 +1056,7 @@ const DocumentViewerRender = ({
               onContextMenu={(event) => handlePaneContextMenu(event, comparePageNumber, 'compare')}
               onPointerEnter={() => updatePanePannability('compare')}
               onPointerDownCapture={(event) => handlePanePointerDown(event, 'compare')}
+              onDragStart={handlePaneDragStart}
               onPointerMoveCapture={(event) => handlePanePointerMove(event, 'compare')}
               onPointerUpCapture={(event) => finishPanePan(event, 'compare')}
               onPointerCancelCapture={(event) => finishPanePan(event, 'compare')}

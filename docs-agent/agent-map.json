@@ -88,7 +88,7 @@
   },
   "stats": {
     "fileCount": 140,
-    "sourceLineCount": 57777,
+    "sourceLineCount": 57787,
     "docletCount": 1555,
     "documentedFileCount": 140,
     "lowConfidenceSummaryCount": 0,
@@ -1158,7 +1158,7 @@
     {
       "name": "src/components/DocumentViewer",
       "fileCount": 13,
-      "lineCount": 6429,
+      "lineCount": 6439,
       "docletCount": 132,
       "importantFiles": [
         {
@@ -1182,7 +1182,7 @@
         {
           "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
           "score": 47,
-          "lines": 1239,
+          "lines": 1247,
           "incomingLocalImports": 1,
           "doclets": 18,
           "summary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -1200,7 +1200,7 @@
         {
           "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
           "score": 38,
-          "lines": 497,
+          "lines": 499,
           "incomingLocalImports": 1,
           "doclets": 7,
           "summary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
@@ -17155,7 +17155,7 @@
     },
     {
       "path": "src/components/DocumentViewer/CompareOverlayView.jsx",
-      "lines": 497,
+      "lines": 499,
       "extension": ".jsx",
       "jsdocBlockCount": 15,
       "sourceSummary": "Overlay view of the compare mode: the two compared pages stacked in one coordinate space, page A (left/primary) below and page B (right/compare) above, so differences show through.",
@@ -17231,7 +17231,7 @@
         {
           "name": "CompareOverlayView",
           "kind": "default",
-          "line": 496
+          "line": 498
         }
       ],
       "declarations": [
@@ -18721,7 +18721,7 @@
     },
     {
       "path": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "lines": 1239,
+      "lines": 1247,
       "extension": ".jsx",
       "jsdocBlockCount": 31,
       "sourceSummary": "OpenDocViewer — Main Viewer Rendering Wrapper Render the primary document pane (and optional comparison pane) by delegating all heavy lifting to <DocumentRender />.",
@@ -18809,7 +18809,7 @@
         {
           "name": "DocumentViewerRender",
           "kind": "default",
-          "line": 1238
+          "line": 1246
         }
       ],
       "declarations": [
@@ -18896,22 +18896,22 @@
         {
           "name": "handlePointerDown",
           "kind": "function",
-          "line": 789
+          "line": 795
         },
         {
           "name": "handleKeyDown",
           "kind": "function",
-          "line": 795
+          "line": 801
         },
         {
           "name": "renderEdgeScrollIndicator",
           "kind": "component",
-          "line": 899
+          "line": 905
         },
         {
           "name": "renderPaneSelector",
           "kind": "component",
-          "line": 922
+          "line": 928
         }
       ],
       "parseError": null,
@@ -19450,7 +19450,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 789,
+          "line": 795,
           "description": "",
           "params": [
             {
@@ -19470,7 +19470,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 795,
+          "line": 801,
           "description": "",
           "params": [
             {
@@ -19490,7 +19490,7 @@
           "kind": "constant",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 821,
+          "line": 827,
           "description": "",
           "params": [
             {
@@ -19527,7 +19527,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 899,
+          "line": 905,
           "description": "",
           "params": [
             {
@@ -19552,7 +19552,7 @@
           "kind": "function",
           "scope": "inner",
           "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-          "line": 922,
+          "line": 928,
           "description": "",
           "params": [
             {
@@ -73762,7 +73762,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 795,
+      "line": 801,
       "description": "",
       "params": [
         {
@@ -73782,7 +73782,7 @@
       "kind": "constant",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 821,
+      "line": 827,
       "description": "",
       "params": [
         {
@@ -73850,7 +73850,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 789,
+      "line": 795,
       "description": "",
       "params": [
         {
@@ -74057,7 +74057,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 899,
+      "line": 905,
       "description": "",
       "params": [
         {
@@ -74082,7 +74082,7 @@
       "kind": "function",
       "scope": "inner",
       "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-      "line": 922,
+      "line": 928,
       "description": "",
       "params": [
         {

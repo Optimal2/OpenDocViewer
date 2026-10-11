@@ -447,6 +447,8 @@ const CompareOverlayView = ({
           defaultValue: 'Overlaid pages. Drag to move the top page; Ctrl+wheel zooms it.',
         })}
         onPointerDown={handlePointerDown}
+        // A native drag-and-drop would send pointercancel and end the drag after its first step.
+        onDragStart={(event) => { if (dragRef.current) event.preventDefault(); }}
         onPointerMove={handlePointerMove}
         onPointerUp={finishDrag}
         onPointerCancel={finishDrag}

@@ -9684,7 +9684,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 795,
+    "line": 801,
     "description": "",
     "params": [
       {
@@ -9704,7 +9704,7 @@
     "kind": "constant",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 821,
+    "line": 827,
     "description": "",
     "params": [
       {
@@ -9772,7 +9772,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 789,
+    "line": 795,
     "description": "",
     "params": [
       {
@@ -9979,7 +9979,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 899,
+    "line": 905,
     "description": "",
     "params": [
       {
@@ -10004,7 +10004,7 @@
     "kind": "function",
     "scope": "inner",
     "file": "src/components/DocumentViewer/DocumentViewerRender.jsx",
-    "line": 922,
+    "line": 928,
     "description": "",
     "params": [
       {

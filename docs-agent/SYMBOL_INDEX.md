@@ -348,10 +348,10 @@
 | <code>DocumentViewerRender</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:204</code> | DocumentViewerRender Renders the main document pane and, if enabled, a comparison pane. |
 | <code>getPageSelectionContext</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:58</code> |  |
 | <code>getWheelDeltaYPx</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:128</code> |  |
-| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:795</code> |  |
-| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:821</code> |  |
+| <code>&lt;anonymous&gt;~handleKeyDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:801</code> |  |
+| <code>DocumentViewerRender~handlePaneContextMenu</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:827</code> |  |
 | <code>DocumentViewerRender~handlePaneWheelCapture</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:462</code> |  |
-| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:789</code> |  |
+| <code>&lt;anonymous&gt;~handlePointerDown</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:795</code> |  |
 | <code>DocumentViewerRender~handleTransformWheel</code> | constant | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:313</code> | Ctrl/Cmd+wheel over a pane whose fine-tuning bar is expanded: ±1 % page scale per notch. |
 | <code>isAtScrollBottom</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:148</code> |  |
 | <code>isAtScrollTop</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:140</code> |  |
@@ -359,8 +359,8 @@
 | <code>isPannableViewport</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:90</code> |  |
 | <code>isPointerOnViewportScrollbar</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:101</code> |  |
 | <code>preventDefaultIfCancelable</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:159</code> |  |
-| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:899</code> |  |
-| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:922</code> |  |
+| <code>DocumentViewerRender~renderEdgeScrollIndicator</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:905</code> |  |
+| <code>DocumentViewerRender~renderPaneSelector</code> | function | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:928</code> |  |
 | <code>ViewerContextMenuState</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:42</code> |  |
 | <code>ViewerPaneKey</code> | typedef | <code>src/components/DocumentViewer/DocumentViewerRender.jsx:38</code> |  |
 | <code>DocumentViewerThumbnails</code> | function | <code>src/components/DocumentViewer/DocumentViewerThumbnails.jsx:44</code> |  |
